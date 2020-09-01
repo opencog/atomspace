@@ -862,7 +862,217 @@ Parsing
 \end_layout
 
 \begin_layout Standard
-Per
+The presentation of a connectionist approach to query above may seem to
+ have employed a bit of sleight-of-hand or mis-direction.
+ After all, the inital discussion starts with conventional SQL queries,
+ and yet is somehow invokes parsing as a prop or defense for the claims.
+ Surely this is absurd?
+\end_layout
+
+\begin_layout Standard
+Consider the following pattern-matching/query/search problem: 
+\begin_inset Quotes eld
+\end_inset
+
+Here is a block of text, find all of the nouns in it.
+\begin_inset Quotes erd
+\end_inset
+
+ You have to parse it, to find the nouns.
+ Oh, but wait, you say, you can just POS-tag it! Of course you can: the
+ POS-tagger has a built in list of nouns; if 
+\begin_inset Quotes eld
+\end_inset
+
+flooglebarf
+\begin_inset Quotes erd
+\end_inset
+
+ is not in the dictionary (and it isn't), it will not be tagged as a noun.
+ This is not SQL, where you have a table called 
+\begin_inset Quotes eld
+\end_inset
+
+wordtags
+\begin_inset Quotes erd
+\end_inset
+
+, with one column called 
+\begin_inset Quotes eld
+\end_inset
+
+words
+\begin_inset Quotes erd
+\end_inset
+
+ and another called 
+\begin_inset Quotes eld
+\end_inset
+
+pos
+\begin_inset Quotes erd
+\end_inset
+
+ and you issue the search 
+\shape slanted
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+SELECT word FROM wordtags WHERE pos = 'noun';
+\family default
+\shape default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Parsing is a different kind of activity, which can be used to generates
+ tags from a set of relationship-rules.
+ The tags are initially unknown, they are inferred.
+\end_layout
+
+\begin_layout Standard
+This example may still appear to be silly, so let's rephrase it in terms
+ of deep-learning, artificial neural nets (ANN), and images.
+ The pattern-matching/query/search problem is now: 
+\begin_inset Quotes eld
+\end_inset
+
+Here is an image, find all of the animals in it
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If the ANN doesn't know about antelopes, then the antelope in the image
+ will be invisible to the ANN.
+ It cannot be found.
+ To do better, you have to parse the image, literally, to look for appropriate
+ things: not-too-big, not-too-small, four-legged with a head, upright and
+ not sideways, on the ground, not in the sky, center-of-mass appears balanced
+ over legs...etc.
+ Those constraints -- "is on the ground" -- those are "relationships" and
+ we are performing a query to find all things satisfying a collection of
+ relationships.
+ If you see something blurry in the image, you try to figure out it's relationsh
+ip to everything else.
+ At the end of the process, not at the beginning, can you say "ah hah, that
+ thing is of type 
+\family typewriter
+T
+\family default
+".
+\end_layout
+
+\begin_layout Subsection*
+Conclusions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Oh,
+\begin_inset Quotes erd
+\end_inset
+
+ you might say 
+\begin_inset Quotes eld
+\end_inset
+
+ANN's are smarter than that
+\begin_inset Quotes erd
+\end_inset
+
+.
+ And perhaps they are: it is not entirely clear if they are lookup engines,
+ or whether they perform analytical (parsing-like) processes under the hood
+ - they are a bit of a black box, as to what is actually happening there.
+ The text in this series hope to (eventually) elucidate this question, and
+ determine more precisely what it is that ANN's acutally do.
+\end_layout
+
+\begin_layout Standard
+The goal of this text was to lay the foundational underpinnings, to clarify
+ the distinction between lookup and inference/deduction.
+ Lookup is just 
+\begin_inset Quotes eld
+\end_inset
+
+tabular lookup
+\begin_inset Quotes erd
+\end_inset
+
+, which has been painted here to seem a bit trite.
+ Of course, vast tracts of quite advanced, sophisticated and complex theory
+ has been devloted to relational algebras as the formalization of SQL (and
+ it's categorical dual, noSQL).
+ Much of this formalization can be teleported onto GraphQL.
+ The primary point here is that, to use SQL, you must first construct a
+ table: one must have columns, one must populate those columns with consistent
+ types.
+ This happens 
+\emph on
+ab initio
+\emph default
+, outisde of SQL itself.
+ Some other, earlier process generated the knowledge; SQL just queries it
+ for you.
+\end_layout
+
+\begin_layout Standard
+This is in contrast to parsing.
+ It is an equally mechanical, algorithmic process: parsing also has a large
+ deep and arcane literature behind it.
+ The inputs to parsing are different: the inputs are unstructured, the relations
+hips are unknown.
+ Rules are applied to determine relationships, but the rules are applied
+ not one-at-a-time, but together.
+ One obtains a valid parse only if multiple rules can be joined, connected
+ together, so that they fit the data.
+ So, yes, of course: a parser recognzes a sentence drawn from a language
+ if that sentence obeys the syntactic, grammatical rules.
+ But that is not the point: the point is that it is an assemblage of those
+ rules that accomplished the recognition task.
+ The conclusion of the assemblage is that the unformed, unstructured input
+ is now tagged with syntactic information.
+\end_layout
+
+\begin_layout Standard
+By looking at search/query in terms of a connectionist viewpoint, the lookup
+ of query languages can be unified with the parsing of 
+\begin_inset Quotes eld
+\end_inset
+
+rule engines
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It offers a simpler, easier foundation than the lambda-caclulus-style beta-redu
+ction of plug-a-value-into-a-variable appreach.
+\end_layout
+
+\begin_layout Standard
+Lest the reader object that this is all absurdly abstract pie-in-the-sky
+ daydreaming, the author would like to remind the reader that a proof-of-concept
+ of such a system already exists, and it is smsall, fast and efficient.
+ Specifically, the Link Grammar parser.
+ It is explicitly built on these connectionist principles.
+ It is fast: parsing hundreds of sentences per second, and it is accurate:
+ it appers to be the most accurate parser of the English language currently
+ in existence.
+\end_layout
+
+\begin_layout Standard
+Again, the goal of these texts is to elucidate these principles well enough
+ that they can be clearly applied to AGI in a full general setting.
+ This includes not only unstructured visual and audio inputs, but the full
+ process of observation and deduction from observation.
 \end_layout
 
 \end_body
