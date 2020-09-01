@@ -1,5 +1,5 @@
 ;
-; distributed-sql.scm -- Network-via-SQL Distributed AtomSpace.
+; distributed.scm -- Distributed AtomSpace via SQL networking.
 ;
 ; The AtomSpace is an in-RAM database, with several backends that allow
 ; data storage and network communications.  This particular demo shows
@@ -13,11 +13,15 @@
 ;
 ; Besides SQL, there is also a direct AtomSpace-to-AtomSpace network
 ; client/server interface at https://github.com/opencog/atomspace-cog/
-; It has its own examples, although the example below should also work
-; with that system. (Actually, the "cog" backend is maybe 2x or 3x
-; faster than the Postgres backend; data serialization represents the
-; majority of the total CPU usage; the direct AtomSpace-to-AtomSpace
-; communications avoids much or most of this overhead.)
+; It has its own examples, although the example below also works with
+; that system. (Actually, it "works better" -- the "cog" backend is
+; maybe 2x or 3x faster than the Postgres backend. The reason for this
+; is that Postgres pays a heavy price for data serialization: it has
+; to convert from the native AtomSpace format into SQL, and then send
+; the SQL over the net, then unpack the network packets at the server,
+; and finally do something with them! Phew! That process uses the vast
+; majority of the total CPU usage. The direct AtomSpace-to-AtomSpace
+; communications avoids most of this overhead.)
 ;
 ; -------------------------------------
 ; Architecture
@@ -55,11 +59,14 @@
 ; peer-to-peer communication between AtomSpaces (e.g. with the
 ; previously mentioned https://github.com/opencog/atomspace-cog/)
 ; and provide persistence with a fast, simple file-backed single-user
-; key-value DB. e.g. RocksDB or LevelDB.
+; key-value DB. e.g. RocksDB.
 ;
 ; (The other point is that none of the whizzy bells-n-whistles of the
 ; whizzy database XYZ are needed. Those whizzy data analytics tools
-; are useless on AtomSpace data...)
+; are useless on AtomSpace data... why? The Atomspace stores natural
+; language and logic and robot control info and computational biology
+; info. The data analytics tools have no clue about any of this. They
+; can't analyze it because they don't know what it means.)
 ;
 ;-------------------------------------------------------------
 ; Some blogs about scaling PostgreSQL:
@@ -68,7 +75,7 @@
 ; https://www.enterprisedb.com/blog/horizontal-scalability-postgresql-96
 ; https://www.cybertec-postgresql.com/en/services/administration/postgresql-performance-and-scalability/
 ;
-; This demo is a minor variant of the demo in `persistence-sql.scm`. It
+; This demo is a minor variant of the demo in `persistence.scm`. It
 ; uses two AtomSpaces, running on different machines, connecting to the
 ; same PostgreSQL backend. This assumes that you have correctly
 ; configured PostgreSQL for network operation. This is not easy.
