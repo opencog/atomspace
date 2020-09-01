@@ -64,7 +64,7 @@
        `cog-open` to open a connection.
 ")
 
-(set-procedure-property! fetch-atom 'documentation
+(define (fetch-atom ATOM)
 "
  fetch-atom ATOM
 
@@ -75,9 +75,11 @@
     See also:
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
-")
+"
+	(dflt-fetch-atom ATOM)
+)
 
-(set-procedure-property! fetch-value 'documentation
+(define (fetch-value ATOM KEY)
 "
  fetch-value ATOM KEY
 
@@ -88,9 +90,11 @@
     See also:
        `fetch-atom` to get all Values.
        `store-value` to store only one Value.
-")
+"
+	(dflt-fetch-value ATOM KEY)
+)
 
-(set-procedure-property! fetch-incoming-set 'documentation
+(define (fetch-incoming-set ATOM)
 "
  fetch-incoming-set ATOM
 
@@ -101,9 +105,11 @@
       `load-referers` to get every graph that contains an Atom.
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
-")
+"
+	(dflt-fetch-incoming-set ATOM)
+)
 
-(set-procedure-property! fetch-incoming-by-type 'documentation
+(define (fetch-incoming-by-type ATOM TYPE)
 "
  fetch-incoming-by-type ATOM TYPE
 
@@ -115,9 +121,11 @@
       `load-referers` to get every graph that contains an Atom.
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
-")
+"
+	(dflt-fetch-incoming-by-type ATOM TYPE)
+)
 
-(set-procedure-property! store-atom 'documentation
+(define (store-atom ATOM)
 "
  store-atom ATOM
 
@@ -128,9 +136,11 @@
     See also:
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
-")
+"
+	(dflt-store-atom ATOM)
+)
 
-(set-procedure-property! store-value 'documentation
+(define (store-value ATOM KEY)
 "
  store-value ATOM KEY
 
@@ -141,17 +151,21 @@
     See also:
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
-")
+"
+	(dflt-store-value ATOM KEY)
+)
 
-(set-procedure-property! load-atoms-of-type 'documentation
+(define (load-atoms-of-type TYPE)
 "
  load-atoms-of-type TYPE
 
     Fetch atoms of the given TYPE from storage. This fetches the
     atoms, and all the associated values attached to them.
-")
+"
+	(dflt-load-atoms-of-type TYPE)
+)
 
-(set-procedure-property! barrier 'documentation
+(define (barrier)
 "
  barrier
 
@@ -160,9 +174,11 @@
     does not mean that the data was actually written to disk. It merely
     means that the atomspace, as a client of the storage server, has
     given them to the server.
-")
+"
+	(dflt-barrier)
+)
 
-(set-procedure-property! load-atomspace 'documentation
+(define (load-atomspace)
 "
  load-atomspace - load all atoms from storage.
 
@@ -179,9 +195,11 @@
     fetch-query QUERY -- get all Atoms for a given QUERY.
     load-referers ATOM -- get every graph that contains ATOM
     load-atoms-of-type TYPE -- load only atoms of type TYPE
-")
+"
+	(dflt-load-atomspace)
+)
 
-(set-procedure-property! store-atomspace 'documentation
+(define (store-atomspace)
 "
  store-atomspace - Store all atoms in the AtomSpace to storage.
 
@@ -194,7 +212,9 @@
     See also:
     store-atom ATOM -- store one ATOM and all of the values on it.
     store-referers ATOM -- store all graphs that contain ATOM
-")
+"
+	(dflt-store-atomspace)
+)
 
 ;
 ; --------------------------------------------------------------------
