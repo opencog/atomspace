@@ -267,6 +267,8 @@ Handle AtomTable::add(const Handle& orig, bool force)
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
     }
+    else
+        atom->unsetRemovalFlag();
 
     if (atom != orig) atom->copyValues(orig);
     atom->setAtomSpace(_as);
