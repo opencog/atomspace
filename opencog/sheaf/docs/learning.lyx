@@ -315,8 +315,8 @@ X must be a given name
 \end_layout
 
 \begin_layout Standard
-Consider now, the case of structured data.
- Suppose the database contains structure, for example:
+Consider now the case of relational data.
+ Suppose the database indicates relationships; for example:
 \begin_inset listings
 inline false
 status open
@@ -351,11 +351,11 @@ This is a gragh, indicating syntactic relationships:
 \family typewriter
 S
 \family default
- is a subject-relationship, 
+ is a subject-verb relationship, 
 \family typewriter
 O
 \family default
- is an object relationship, 
+ is an object-verb relationship, 
 \family typewriter
 D
 \family default
@@ -472,6 +472,32 @@ flooglebarf
 
  had not been previously tagged as a noun, the search will fail to find
  this candidate answer.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Caution, do not be confused.
+ The query was 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+X throw a ball where X is of type noun
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Of course, one may attempt untyped-variable searches.
+ The discussion here is trying to pry apart the subtle distinctions between
+ variables and relationships, and the role of typing in each.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -647,6 +673,196 @@ T
 S
 \family default
 .
+ This would then be followed by a claim that the two forms are isomprphic
+ and can transmuted into one another.
+ In some abstract sense, this is correct.
+ In practice, the type of 
+\family typewriter
+T
+\family default
+ is much weaker than that of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+noun
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+given name
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Observing a relationship predates assignment of a type.
+ Say, you are on a hike, and someone asks "
+\emph on
+See that thing, next to the tree? What is that?
+\emph default
+" The typing applied here is quite weak: the type
+\family typewriter
+ T
+\family default
+ is the type "things you can see with your eyes".
+ Of course, it's that, but that is almost a universal type; it is much weaker
+ than identifying the thing itself.
+\end_layout
+
+\begin_layout Standard
+Suppose the thing is an antelope -- no one ever asks "
+\emph on
+See that thing of type antelope next to the tree? What is it?
+\emph default
+" Such a question presumes knowledge of the answer; the type of "things
+ that can be seen" is weaker/broader than the type of all antelopes.
+ The lesson here is that the relationship-based query is one of type induction:
+ a narrowing of types from broad to fine, a movement from a low-knowlege
+ state to a high-knowledge state.
+\end_layout
+
+\begin_layout Standard
+A more concrete example might be looking at how the Link-Grammar (LG) parser
+ deals with unkown words.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+It is the software that produced the diagram above
+\end_layout
+
+\end_inset
+
+ Consider the sentence "
+\emph on
+flooglebarf threw a ball.
+\emph default
+" The LG parser will parse it just fine.
+ Now, "
+\emph on
+flooglebarf
+\emph default
+" is not in the dictionary of known words, so some guesses are made.
+ The obvious first guess is that "flooglebarf" is a word 
+\emph on
+i.e
+\emph default
+.
+ it has type 
+\family typewriter
+T
+\family default
+=
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph on
+word
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But this is kind of silly, because words are all that there are, for LG.
+ Yes, it's a type, but it's the universal type.
+\end_layout
+
+\begin_layout Standard
+The LG guessing rules include descriptions of generic nouns, generic verbs,
+ generic adverbs, 
+\emph on
+etc.
+
+\emph default
+ and each of these are tried in turn.
+ Eventually, a valid parse is found.
+ Only 
+\emph on
+after
+\emph default
+ a valid parse is found, can one conclude that "oh, ah-hah, 
+\emph on
+flooglebarf
+\emph default
+ is of type noun, because nouns can participate in relationship 
+\family typewriter
+S
+\family default
+".
+ Before parsing, the true type of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ was unknown.
+\end_layout
+
+\begin_layout Standard
+To summarize, the claim that "
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) has some type 
+\family typewriter
+T
+\family default
+ that is able to participate in a relationship of type 
+\family typewriter
+S
+\family default
+ is tautological; its vacuously true.
+ In practice, one doesn't know what 
+\family typewriter
+T
+\family default
+ is, until *after* the relationship was observed! This is the "chicken and
+ egg problem" of typed-variable searches.
+\end_layout
+
+\begin_layout Subsection*
+Parsing
+\end_layout
+
+\begin_layout Standard
+Per
 \end_layout
 
 \end_body
