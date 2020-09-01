@@ -164,6 +164,208 @@ connecting two things together
 \end_layout
 
 \begin_layout Standard
+This text is part of a series of related texts, exploring and articulating
+ a connectionist viewpoint of knowledge representation and knowledge discovery.
+ One of the central distinctions is that between 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+beta reduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metaphor for 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ is the jigsaw-puzzle piece: a shaped item with connector tabs that cna
+ be joined together, only if they mate.
+ The different shapes of the connectors are 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+, in the formal sense of 
+\begin_inset Quotes eld
+\end_inset
+
+type theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is contrasted to 
+\begin_inset Quotes eld
+\end_inset
+
+beta-reduction
+\begin_inset Quotes erd
+\end_inset
+
+, which is a technical term arising from lambda calculus.
+ The metaphore there is to take a function, say 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+, and plug in a value, say 
+\begin_inset Formula $42$
+\end_inset
+
+, substituting it for 
+\begin_inset Formula $x$
+\end_inset
+
+ to obtain 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+.
+ The plugging-in, as described here, also feels very connectionist.
+ It is even typed: one might say that if 
+\begin_inset Formula $x$
+\end_inset
+
+ is of type 
+\begin_inset Quotes eld
+\end_inset
+
+integer
+\begin_inset Quotes erd
+\end_inset
+
+, then only integers can be plugged in.
+\end_layout
+
+\begin_layout Standard
+The primary difference between plugging-in and connecting is how the type-mating
+ is acheived.
+ In beta-reduction, the type of 
+\begin_inset Quotes eld
+\end_inset
+
+integers
+\begin_inset Quotes erd
+\end_inset
+
+ can be interpreted to be the set of all integers; of these, 42 is merely
+ an exemplar: it is but one.
+ By contrast, in the connectionist approach, the types are peers, rather
+ than one being above or below the other.
+ The peer relationship is more appropriate for many situations.
+ The simplest examples may come from biochemistry: when one has some protein,
+ and it binds to some structure on a cell wall, or say, some antibody bnding
+ to some antigen, the binding is jigsaw-puzzle-piece-like: it is possible
+ because the physical shape of proteins fit together.
+ One can ascribe types to these shapes; what one cannot do is to say that
+ one is the super-class and the other is merely an exemplar, in the way
+ one had a super-class of all integers, and specific exemplar of 42.
+ The biochemical binding process is 
+\begin_inset Quotes eld
+\end_inset
+
+symmetric
+\begin_inset Quotes erd
+\end_inset
+
+, in this sense.
+\end_layout
+
+\begin_layout Standard
+Conventional notions of database query have the general flavor of beta-reduction.
+ One has some query, for example: 
+\family typewriter
+(match x [(list a b c) #:when (= 6 (+ a b c))])
+\family default
+\size small
+.
+ 
+\size default
+This example is taken from Racket, a scheme dialect.
+ The intent here is hopefully obvious: when 
+\family typewriter
+x
+\family default
+ is of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+list
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and, specifically, is of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+list-of-length-three
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, then accept the match if the arithmetic sum of the elements of the list
+ total up to six.
+ The search proceeds by process of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+: we find things, plug them in, and either they fit or they don't.
+ This is conventional pattern matching in it's most basic form.
+\end_layout
+
+\begin_layout Standard
+The distinction between 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ is quite subtle, and one can easily get lost in technicalities.
+ The goal here is to tackle the technicalities head-on, and draw in clear
+ and vivid contrast how these two differ, in theory and in practice.
+\end_layout
+
+\begin_layout Section*
+Querying
+\end_layout
+
+\begin_layout Standard
 The 
 \begin_inset Quotes eld
 \end_inset
@@ -645,7 +847,7 @@ people
 ).
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Learning
 \end_layout
 
@@ -857,7 +1059,7 @@ T
  egg problem" of typed-variable searches.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Parsing
 \end_layout
 
@@ -968,7 +1170,7 @@ T
 ".
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Conclusions
 \end_layout
 
