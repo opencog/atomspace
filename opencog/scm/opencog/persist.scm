@@ -64,7 +64,7 @@
        `cog-open` to open a connection.
 ")
 
-(define (fetch-atom ATOM #:optional (STORAGE #f))
+(define*-public (fetch-atom ATOM #:optional (STORAGE #f))
 "
  fetch-atom ATOM [STORAGE]
 
@@ -82,7 +82,7 @@
 	(if STORAGE (sn-fetch-atom ATOM STORAGE) (dflt-fetch-atom ATOM))
 )
 
-(define (fetch-value ATOM KEY #:optional (STORAGE #f))
+(define*-public (fetch-value ATOM KEY #:optional (STORAGE #f))
 "
  fetch-value ATOM KEY [STORAGE]
 
@@ -100,7 +100,7 @@
 	(if STORAGE (sn-fetch-value ATOM KEY STORAGE) (dflt-fetch-value ATOM KEY))
 )
 
-(define (fetch-incoming-set ATOM #:optional (STORAGE #f))
+(define*-public (fetch-incoming-set ATOM #:optional (STORAGE #f))
 "
  fetch-incoming-set ATOM [STORAGE]
 
@@ -119,7 +119,7 @@
 		(dflt-fetch-incoming-set ATOM))
 )
 
-(define (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE #f))
+(define*-public (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE #f))
 "
  fetch-incoming-by-type ATOM TYPE [STORAGE]
 
@@ -139,7 +139,7 @@
 		(dflt-fetch-incoming-by-type ATOM TYPE))
 )
 
-(define (store-atom ATOM #:optional (STORAGE #f))
+(define*-public (store-atom ATOM #:optional (STORAGE #f))
 "
  store-atom ATOM [STORAGE]
 
@@ -157,7 +157,7 @@
 	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
 )
 
-(define (store-value ATOM KEY #:optional (STORAGE #f))
+(define*-public (store-value ATOM KEY #:optional (STORAGE #f))
 "
  store-value ATOM KEY [STORAGE]
 
@@ -175,7 +175,7 @@
 	(if STORAGE (sn-store-value ATOM KEY STORAGE) (dflt-store-value ATOM KEY))
 )
 
-(define (load-atoms-of-type TYPE #:optional (STORAGE #f))
+(define*-public (load-atoms-of-type TYPE #:optional (STORAGE #f))
 "
  load-atoms-of-type TYPE [STORAGE]
 
@@ -185,11 +185,11 @@
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
 "
-	(if STORAGE (sn-load-atoms-of-type ATOM KEY STORAGE)
+	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
 		(dflt-load-atoms-of-type TYPE))
 )
 
-(define (barrier #:optional (STORAGE #f))
+(define*-public (barrier #:optional (STORAGE #f))
 "
  barrier [STORAGE]
 
@@ -205,7 +205,7 @@
 	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
 )
 
-(define (load-atomspace #:optional (STORAGE #f))
+(define*-public (load-atomspace #:optional (STORAGE #f))
 "
  load-atomspace [STORAGE] - load all atoms from storage.
 
@@ -229,7 +229,7 @@
 	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
 )
 
-(define (store-atomspace #:optional (STORAGE #f))
+(define*-public (store-atomspace #:optional (STORAGE #f))
 "
  store-atomspace [STORAGE] - Store all atoms in the AtomSpace to storage.
 
@@ -254,7 +254,7 @@
 (define*-public (fetch-query QUERY KEY
 	#:optional (METADATA '()) (FRESH #f) (STORAGE #f))
 "
- fetch-query QUERY KEY [METADATA [FRESH]]
+ fetch-query QUERY KEY [METADATA [FRESH]] [STORAGE]
 
    Perform the QUERY at the storage server, and load the results into
    the AtomSpace. The results will be returned directly and also cached
@@ -290,24 +290,27 @@
      `load-referers` to fetch all graphs containing an Atom.
 "
 	(if (nil? METADATA)
-		(fetch-query-2args QUERY KEY)
+		(dflt-fetch-query-2args QUERY KEY)
 		(fetch-query-4args QUERY KEY METADATA FRESH))
 )
 
 ; --------------------------------------------------------------------
-(define-public (store-referers ATOM #:optional (STORAGE #f))
+(define*-public (store-referers ATOM #:optional (STORAGE #f))
 "
- store-referers ATOM -- Store all hypergraphs that contain ATOM
+ store-referers ATOM [STORAGE] -- Store all hypergraphs that contain ATOM
 
-   This stores all hypergraphs that the ATOM participates in.
-   It does this by recursively exploring the incoming set of the atom.
+    This stores all hypergraphs that the ATOM participates in.
+    It does this by recursively exploring the incoming set of the atom.
 
-   See also `load-referers`.
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also `load-referers`.
 "
 	(define (do-store atom)
 		(let ((iset (cog-incoming-set atom)))
 			(if (null? iset)
-				(store-atom atom)
+				(store-atom atom STORAGE)
 				(for-each do-store iset)
 			)
 		)
@@ -316,12 +319,15 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (load-referers ATOM #:optional (STORAGE #f))
+(define*-public (load-referers ATOM #:optional (STORAGE #f))
 "
- load-referers ATOM -- Load (from storage) all graphs that contain ATOM.
+ load-referers ATOM [STORAGE] -- Load all graphs that contain ATOM.
 
    This loads all hypergraphs that the given ATOM participates in.
    It does this by recursively exploring the incoming set of the atom.
+
+   If the optional STORAGE argument is provided, then it will be
+   used as the source of the load. It must be a StorageNode.
 
    See also:
      `fetch-incoming-set` to fetch only the first level above an Atom.
@@ -334,10 +340,12 @@
 		; We do an extra recursion here, in case we were passed a list.
 		(begin
 			(if (pair? ATOM)
-				(for-each load-referers ATOM)
-				(fetch-incoming-set ATOM)
+				(for-each load-referers ATOM STORAGE)
+				(fetch-incoming-set ATOM STORAGE)
 			)
-			(for-each load-referers (cog-incoming-set ATOM))
+			(for-each
+				(lambda (atm) (load-referers atm STORAGE))
+				(cog-incoming-set ATOM))
 		)
 	)
 )
