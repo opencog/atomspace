@@ -142,17 +142,181 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Consider the following search (a search, in the sense of traditional query-langu
-age database searches):
+The concepts of querying, parsing and learning are normally considered to
+ be quite distinct.
+ This text unifies these concepts by replacing the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in a value into a variable
+\begin_inset Quotes erd
+\end_inset
+
+ by the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+connecting two things together
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-Atomspace contains "Mike threw a ball.
+The 
+\begin_inset Quotes eld
+\end_inset
+
+query
+\begin_inset Quotes erd
+\end_inset
+
+ here refers to the conventional idea of database queries; the query of
+ SQL or GraphQL.
+ Such queries are generally formulated as a generalized 
+\begin_inset Quotes eld
+\end_inset
+
+pattern matching
+\begin_inset Quotes erd
+\end_inset
+
+: one specifies a fixed part of a pattern, and a variable part, to be filled
+ out.
+ A textbook example of an SQL query might be 
+\begin_inset Quotes eld
+\end_inset
+
+find all employees in sales
+\begin_inset Quotes erd
+\end_inset
+
+, which is understood to be the directive to look at the 
+\begin_inset Quotes eld
+\end_inset
+
+employees
+\begin_inset Quotes erd
+\end_inset
+
+ table, and which contains two columns: the name of the employee, and the
+ department they work in.
+ The fixed part of the query is that the department must be 
+\begin_inset Quotes eld
+\end_inset
+
+sales
+\begin_inset Quotes erd
+\end_inset
+
+; the variable is the 
+\begin_inset Quotes eld
+\end_inset
+
+employees
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The actual syntax for such search, in SQL is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\shape slanted
+\emph on
+SELECT name FROM employees WHERE department='sales';
+\family default
+\shape default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Graph query languages, and the subgraph isomorphism problem are similar
+ in nature: one specifies a collection of vertexes and edges (which may
+ be labelled or unlaballed, directed or undirected), taken to be 
+\begin_inset Quotes eld
+\end_inset
+
+fixed
+\begin_inset Quotes erd
+\end_inset
+
+, and another region, variable, and then asks for all matching graphs that
+ contain the fixed part.
+ The variables are always named (unless there is only one, and then it can
+ be anonymous): variables are X,Y,Z, ...
+ and are generally typed (in SQL, the employee name is a string, the salary
+ is a number.)
+\end_layout
+
+\begin_layout Standard
+Consider then, the following query/pattern match.
+ The database contains "
+\emph on
+Mike threw a ball.
  Joe threw a ball.
  Ben ate a pizza.
- The engine threw a crankshaft." and the query pattern is "X threw a ball".
- Specify a type: "X must be a noun" or perhaps "X must be a given name".
- The query will work.
+ The engine threw a crankshaft.
+\emph default
+", however that may be represented; for brevity, we skip the precise representat
+ion.
+ Consider the query pattern 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+____ threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+X threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ which 
+\emph on
+X
+\emph default
+ a named variable.
+ This is a basic fill-in-the-blanks search.
+ The variable 
+\emph on
+X
+\emph default
+ may be typed: "
+\emph on
+X must be a noun
+\emph default
+" or perhaps "
+\emph on
+X must be a given name
+\emph default
+".
+ Typing helps narrow the search, and make if more precise.
+ In practical applications, typing often provides a huge performance boost,
+ and avoids paradoxes and ambiguity.
+ Anyway: this search is straight-forward, and yeilds the expected results.
+\end_layout
+
+\begin_layout Standard
+Consider now, the case of structured data.
+ 
 \end_layout
 
 \end_body
