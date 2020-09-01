@@ -64,129 +64,159 @@
        `cog-open` to open a connection.
 ")
 
-(define (fetch-atom ATOM)
+(define (fetch-atom ATOM #:optional (STORAGE #f))
 "
- fetch-atom ATOM
+ fetch-atom ATOM [STORAGE]
 
     Fetch all of the Values on the indicated ATOM from storage.
     This updates (clobbers) all of the values in the atomspace,
     and replaces them with the ones fetched from storage.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
+
     See also:
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
 "
-	(dflt-fetch-atom ATOM)
+	(if STORAGE (sn-fetch-atom ATOM STORAGE) (dflt-fetch-atom ATOM))
 )
 
-(define (fetch-value ATOM KEY)
+(define (fetch-value ATOM KEY #:optional (STORAGE #f))
 "
- fetch-value ATOM KEY
+ fetch-value ATOM KEY [STORAGE]
 
     Fetch from storage the Value located at KEY on ATOM.
     This updates (clobbers) any current Value stored at KEY,
     replacing it with the one fetched from storage.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
+
     See also:
        `fetch-atom` to get all Values.
        `store-value` to store only one Value.
 "
-	(dflt-fetch-value ATOM KEY)
+	(if STORAGE (sn-fetch-value ATOM KEY STORAGE) (dflt-fetch-value ATOM KEY))
 )
 
-(define (fetch-incoming-set ATOM)
+(define (fetch-incoming-set ATOM #:optional (STORAGE #f))
 "
- fetch-incoming-set ATOM
+ fetch-incoming-set ATOM [STORAGE]
 
     Fetch the incoming set of the ATOM from storage. The fetch is
     NOT recursive.  See `load-referers` for a recursive fetch.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
 
     See also:
       `load-referers` to get every graph that contains an Atom.
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(dflt-fetch-incoming-set ATOM)
+	(if STORAGE (sn-fetch-incoming-set ATOM STORAGE)
+		(dflt-fetch-incoming-set ATOM))
 )
 
-(define (fetch-incoming-by-type ATOM TYPE)
+(define (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE #f))
 "
- fetch-incoming-by-type ATOM TYPE
+ fetch-incoming-by-type ATOM TYPE [STORAGE]
 
     Fetch those links of the incoming set of ATOM that are of type TYPE.
     This is a more limited fetch than the one done by `fetch-incoming-set`
     and can be useful when the incoming set is large.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
 
     See also:
       `load-referers` to get every graph that contains an Atom.
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
-	(dflt-fetch-incoming-by-type ATOM TYPE)
+	(if STORAGE (sn-fetch-incoming-by-type TYPE STORAGE)
+		(dflt-fetch-incoming-by-type ATOM TYPE))
 )
 
-(define (store-atom ATOM)
+(define (store-atom ATOM #:optional (STORAGE #f))
 "
- store-atom ATOM
+ store-atom ATOM [STORAGE]
 
     Store indicated ATOM, and all of its associated keys and values,
     to storage. This updates (clobbers) the values previously held
     in storage, replacing them by the values in the atomspace.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
     See also:
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
 "
-	(dflt-store-atom ATOM)
+	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
 )
 
-(define (store-value ATOM KEY)
+(define (store-value ATOM KEY #:optional (STORAGE #f))
 "
- store-value ATOM KEY
+ store-value ATOM KEY [STORAGE]
 
     Store the Value located at KEY on ATOM. This updates (clobbers)
     the Value previously held in storage, replacing it by the Value
     in the atomspace.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
     See also:
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
-	(dflt-store-value ATOM KEY)
+	(if STORAGE (sn-store-value ATOM KEY STORAGE) (dflt-store-value ATOM KEY))
 )
 
-(define (load-atoms-of-type TYPE)
+(define (load-atoms-of-type TYPE #:optional (STORAGE #f))
 "
- load-atoms-of-type TYPE
+ load-atoms-of-type TYPE [STORAGE]
 
     Fetch atoms of the given TYPE from storage. This fetches the
     atoms, and all the associated values attached to them.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
 "
-	(dflt-load-atoms-of-type TYPE)
+	(if STORAGE (sn-load-atoms-of-type ATOM KEY STORAGE)
+		(dflt-load-atoms-of-type TYPE))
 )
 
-(define (barrier)
+(define (barrier #:optional (STORAGE #f))
 "
- barrier
+ barrier [STORAGE]
 
     Block (do not return to the caller) until the storage write queues
     are empty. Just because the atomspace write queues are empty, it
     does not mean that the data was actually written to disk. It merely
     means that the atomspace, as a client of the storage server, has
     given them to the server.
+
+    If the optional STORAGE argument is provided, then the barrier will
+    be applied to it. It must be a StorageNode.
 "
-	(dflt-barrier)
+	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
 )
 
-(define (load-atomspace)
+(define (load-atomspace #:optional (STORAGE #f))
 "
- load-atomspace - load all atoms from storage.
+ load-atomspace [STORAGE] - load all atoms from storage.
 
     This will cause ALL of the atoms in the open storage server to be
     loaded into the current AtomSpace. This can be a very time-consuming
     operation.  In normal operation, it is rarely necessary to load all
     atoms; there are several ways to fetch subsets of atoms, or even one
     at a time, when needed.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
 
     See also:
     fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
@@ -196,12 +226,12 @@
     load-referers ATOM -- get every graph that contains ATOM
     load-atoms-of-type TYPE -- load only atoms of type TYPE
 "
-	(dflt-load-atomspace)
+	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
 )
 
-(define (store-atomspace)
+(define (store-atomspace #:optional (STORAGE #f))
 "
- store-atomspace - Store all atoms in the AtomSpace to storage.
+ store-atomspace [STORAGE] - Store all atoms in the AtomSpace to storage.
 
     This will dump the ENTIRE contents of the current AtomSpace to the
     the currently-open storage.  Depending on the size of the AtomSpace,
@@ -209,17 +239,20 @@
     is rarely required, as individual atoms can always be stored, one
     at a time.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
     See also:
     store-atom ATOM -- store one ATOM and all of the values on it.
     store-referers ATOM -- store all graphs that contain ATOM
 "
-	(dflt-store-atomspace)
+	(if STORAGE (sn-store-atomspace STORAGE) (dflt-store-atomspace))
 )
 
 ;
 ; --------------------------------------------------------------------
 (define*-public (fetch-query QUERY KEY
-	#:optional (METADATA '()) (FRESH #f))
+	#:optional (METADATA '()) (FRESH #f) (STORAGE #f))
 "
  fetch-query QUERY KEY [METADATA [FRESH]]
 
@@ -262,7 +295,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (store-referers ATOM)
+(define-public (store-referers ATOM #:optional (STORAGE #f))
 "
  store-referers ATOM -- Store all hypergraphs that contain ATOM
 
@@ -283,7 +316,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (load-referers ATOM)
+(define-public (load-referers ATOM #:optional (STORAGE #f))
 "
  load-referers ATOM -- Load (from storage) all graphs that contain ATOM.
 
