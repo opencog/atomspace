@@ -291,7 +291,11 @@
 "
 	(if (nil? METADATA)
 		(dflt-fetch-query-2args QUERY KEY)
-		(fetch-query-4args QUERY KEY METADATA FRESH))
+		(if (cog-subtype? METADATA 'StorageNode)
+			(sn-fetch-query-2args QUERY KEY METADATA)
+			(if STORAGE
+				(sn-fetch-query-4args QUERY KEY METADATA FRESH STORAGE)
+				(dflt-fetch-query-4args QUERY KEY METADATA FRESH))))
 )
 
 ; --------------------------------------------------------------------
