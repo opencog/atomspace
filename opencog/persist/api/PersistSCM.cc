@@ -106,7 +106,7 @@ void PersistSCM::init(void)
  \
 	/* The cast will fail, if the dynamic library that defines the type */ \
 	/* isn't loaded. This is the user's job. They can do it by saying */ \
-	/* (use-modules (opencog persist-foo), Handle hsn) */ \
+	/* (use-modules (opencog persist-foo) */ \
 	if (nullptr == stnp) \
 		throw RuntimeException(TRACE_INFO, \
 			"Not opened; please load module that defines %s\n" \
