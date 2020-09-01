@@ -120,7 +120,7 @@
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
 
 ; The cogserver requires no configuration. Just use it.
-(define csn (CogserverStorageNode "cog://localhost:17001"))
+(define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Lets use postgres, for now.
 (cog-open psn)
