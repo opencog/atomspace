@@ -316,7 +316,337 @@ X must be a given name
 
 \begin_layout Standard
 Consider now, the case of structured data.
+ Suppose the database contains structure, for example:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     +------>WV------>+-----Os----+
+\end_layout
+
+\begin_layout Plain Layout
+
+     +-->Wd---+--Ss---+     +-Ds--+
+\end_layout
+
+\begin_layout Plain Layout
+
+     |        |       |     |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+ LEFT-WALL  Mike    threw   a   ball
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a gragh, indicating syntactic relationships: 
+\family typewriter
+S
+\family default
+ is a subject-relationship, 
+\family typewriter
+O
+\family default
+ is an object relationship, 
+\family typewriter
+D
+\family default
+ is a determiner, and so on.
+ Consider the query 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+connector-S threw a ball
+\emph default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ This is a relational query; we are asking for all things that have a relation
  
+\family typewriter
+S
+\family default
+ to the fixed part of the query.
+ For the same dataset, this query returns the same results.
+ Yet the flavor of the query is different.
+\end_layout
+
+\begin_layout Standard
+Perhaps this second form seems arcane, or the doorway to some sneaky cheat.
+ In this case, a simpler way of posing the example would be the query 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+(things that have the property of being to the left of) threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+things that have the property of being to the left of
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is a relationship.
+ Let's call this relationship 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+S
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ for short.
+\end_layout
+
+\begin_layout Standard
+Relational queries are fundamentally different than variable queries.
+ For the first query form, "
+\emph on
+noun
+\emph default
+" and "
+\emph on
+given name
+\emph default
+" have to be known, tagged properties of "
+\emph on
+John
+\emph default
+", "
+\emph on
+Mike
+\emph default
+".
+ Somehow, through some magic pre-processing, these nodes had been tagged
+ with these properties, so that they are known before the search is started.
+ Failure-to-tag means failure-of-search.
+ If the database contains 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Flooglebarf threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ had not been previously tagged as a noun, the search will fail to find
+ this candidate answer.
+\end_layout
+
+\begin_layout Standard
+For the second search form, the properties of "
+\emph on
+Mike
+\emph default
+" (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) are unknown, not yet worked out or tagged.
+ We just know that "
+\emph on
+Mike
+\emph default
+" participates in a network of relationships, in this case an 
+\family typewriter
+S
+\family default
+-type relationship.
+ Oh wait, but 
+\family typewriter
+S
+\family default
+ is a type! ...
+ but that does not mean that "
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is of type 
+\family typewriter
+S
+\family default
+, only that "
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ participates in a relationship of type 
+\family typewriter
+S
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+This allows one to find things, without knowing what they are in advance.
+ One may have observed a network of relationships, but not the properties
+ of the thing-itself.
+ Perhaps later, you are able to deduce that "
+\emph on
+Mike
+\emph default
+" is a noun, perhaps that it is a given name, and maybe even that "
+\emph on
+Mike
+\emph default
+" is a specific individual at some given point in space and time.
+ There was no need to know this, before starting the search for ball-throwers.
+ 
+\end_layout
+
+\begin_layout Standard
+The first form has a chicken-and-egg problem: how can I know "
+\emph on
+Mike
+\emph default
+" is a person? Because I saw Mike do the kind of things that people do.
+ But how can I see Mike? If I can only see things of type "people", and
+ if I don't already know that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) is of type "
+\emph on
+people
+\emph default
+", then search result fails; or rather, it fails to return these as obvious
+ candidates.
+\end_layout
+
+\begin_layout Standard
+The second form does not have the chicken-and-egg problem.
+ One may observe things participating in some relationship; after a while
+ one may deduce that those things are 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+people
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (have type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+people
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsection*
+Learning
+\end_layout
+
+\begin_layout Standard
+The distinctions above may seem to be subtle, if not outright gratuitous
+ or even confused and delusional.
+ One may be tempted to make the claim that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is of type 
+\family typewriter
+T
+\family default
+ that is able to participate in relationship 
+\family typewriter
+S
+\family default
+.
 \end_layout
 
 \end_body
