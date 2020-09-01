@@ -5,7 +5,7 @@
 ; one database (or remote server). This demo shows how to work with
 ; multiple databases/servers at the same time.
 ;
-: This demo will copy atoms between the Postgres backend and the
+; This demo will copy atoms between the Postgres backend and the
 ; RocksDB backend, although any set of backends can be used. This
 ; demo requires Postgres to be configured, and the RocksDB backend
 ; to be installed. If you want to skip Postgres, then just try the
@@ -53,7 +53,7 @@
 ; Open all of them.
 (cog-open psn)
 (cog-open rsn)
-(cog-open csn)
+; (cog-open csn)
 
 ; Load everything from Postgres (Attention: this might load garbage
 ; from the unit tests, since we're using the unit-test db for this
@@ -66,7 +66,7 @@
 ; Close all of them.
 (cog-close psn)
 (cog-close rsn)
-(cog-close csn)
+; (cog-close csn)
 
 ; Delete this atom (again).
 (cog-extract! (Concept "asdf"))
@@ -88,9 +88,30 @@
 (cog-open psn)
 (cog-open rsn)
 
+; Fetch the same atom from each backend. Note how the TV toggles
+; between what has bee stored in each.
 (fetch-atom (Concept "asdf") psn)
 (fetch-atom (Concept "asdf") rsn)
 
+(fetch-atom (Concept "asdf") psn)
+(fetch-atom (Concept "asdf") rsn)
+
+(fetch-atom (Concept "asdf") psn)
+(fetch-atom (Concept "asdf") rsn)
+
+; Just like the above, all fetch/store directives can take an optional
+; StorageNode argument, to indicate where they should be applied.
+
+(cog-set-tv! (Concept "asdf") (stv 0.1 0.8))
+(store-atom (Concept "asdf") psn)
+
+(fetch-atom (Concept "asdf") rsn)
+(fetch-atom (Concept "asdf") psn)
+
+(fetch-atom (Concept "asdf") rsn)
+(fetch-atom (Concept "asdf") psn)
+
+; We're done.
 (cog-close psn)
 (cog-close rsn)
 
