@@ -36,7 +36,7 @@
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
 
 ; The cogserver requires no configuration. Just use it.
-(define csn (CogserverStorageNode "cog://localhost:17001"))
+(define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Open postgres, store one atom, and close it.
 ; Since only one backend is open, it will be used as the default
