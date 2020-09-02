@@ -255,7 +255,7 @@ integer
 
 \begin_layout Standard
 The primary difference between plugging-in and connecting is how the type-mating
- is acheived.
+ is achieved.
  In beta–reduction, the type of 
 \begin_inset Quotes eld
 \end_inset
@@ -442,7 +442,7 @@ SELECT name FROM employees WHERE department='sales';
 .
  Graph query languages, and the subgraph isomorphism problem are similar
  in nature: one specifies a collection of vertexes and edges (which may
- be labelled or unlaballed, directed or undirected), taken to be 
+ be labeled or unlabeled, directed or undirected), taken to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -944,7 +944,7 @@ See that thing of type antelope next to the tree? What is it?
 " Such a question presumes knowledge of the answer; the type of "things
  that can be seen" is weaker/broader than the type of all antelopes.
  The lesson here is that the relationship-based query is one of type induction:
- a narrowing of types from broad to fine, a movement from a low-knowlege
+ a narrowing of types from broad to fine, a movement from a low-knowledge
  state to a high-knowledge state.
 \end_layout
 
@@ -1090,7 +1090,7 @@ Parsing
 \begin_layout Standard
 The presentation of a connectionist approach to query above may seem to
  have employed a bit of switcheroo or mis-direction.
- After all, the inital discussion starts with conventional SQL queries,
+ After all, the initial discussion starts with conventional SQL queries,
  and yet it somehow invokes parsing as a prop or defense for the claims.
  Surely this is absurd?
 \end_layout
@@ -1245,9 +1245,9 @@ tabular lookup
 
 , which has been painted here to seem a bit trite.
  Of course, vast tracts of quite advanced, sophisticated and complex theory
- has been devloted to this: the relational algebras as the formalization
+ has been devoted to this: the relational algebras as the formalization
  of SQL (as well as it's categorical dual, noSQL).
- Much of this formalization can be teleported onto GraphQL andrelated query
+ Much of this formalization can be teleported onto GraphQL and related query
  systems.
  The primary point here is that, to use SQL, you must first construct a
  table: one must have columns, one must populate those columns with consistent
@@ -1256,7 +1256,7 @@ tabular lookup
 \emph on
 ab initio
 \emph default
-, outisde of SQL itself.
+, outside of SQL itself.
  Some other, earlier process generated the knowledge; SQL just queries it
  for you.
 \end_layout
@@ -1290,18 +1290,18 @@ rule engines
 \end_inset
 
 .
- It offers a simpler, easier foundation than the lambda-caclulus-style beta-redu
+ It offers a simpler, easier foundation than the lambda-calculus-style beta-redu
 ction of plug-a-value-into-a-variable approach.
 \end_layout
 
 \begin_layout Standard
 Lest the reader object that this is all absurdly abstract pie-in-the-sky
  daydreaming, the author would like to remind the reader that a proof-of-concept
- of such a system already exists, and it is smsall, fast and efficient.
+ of such a system already exists, and it is small, fast and efficient.
  Specifically, the Link Grammar parser.
  It is explicitly built on these connectionist principles.
  It is fast: parsing hundreds of sentences per second, and it is accurate:
- it appers to be the most accurate parser of the English language currently
+ it appears to be the most accurate parser of the English language currently
  in existence.
 \end_layout
 
