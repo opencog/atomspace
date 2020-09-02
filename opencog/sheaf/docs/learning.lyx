@@ -521,7 +521,27 @@ X must be a given name
 \begin_layout Standard
 Consider now the case of relational data.
  Suppose the database indicates relationships; for example:
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
 \begin_inset listings
+lstparams "basicstyle={\ttfamily}"
 inline false
 status open
 
@@ -543,6 +563,11 @@ status open
 \begin_layout Plain Layout
 
  LEFT-WALL  Mike    threw   a   ball
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset

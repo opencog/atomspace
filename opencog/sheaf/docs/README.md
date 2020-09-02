@@ -22,3 +22,12 @@ There are several files here:
    object. It is meant to formalize earlier statements, while still being
    readable and approachable.
 
+** [learning.pdf](learning.pdf) examines what happens if one takes
+   conventional querying or pattern-matching, and replaces it with a
+   connectionist approach. The result is a natural generalization of
+   querying, which can be appropriately termed "learning".
+
+** [sheaf-axioms.pdf](sheaf-axioms.pdf) formally defines what a topology
+   is, and what a (pre-)sheaf is, and demonstrates how the jigsaw-puzzle
+   piece analogy formally meets the criteria for these mathematical
+   objects.
