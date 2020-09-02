@@ -678,6 +678,10 @@ the boundary
  the edges connecting them.)
 \end_layout
 
+\begin_layout Subsubsection*
+Non-topological concerns
+\end_layout
+
 \begin_layout Standard
 Of course, the mesh is a fair bit richer than the set: the edges are meant
  to be typed, whereas in set theory, all sets have the same type: set theory
@@ -690,6 +694,83 @@ simply typed
 \end_inset
 
 , there is only one type, and that is the type of the set.
+\end_layout
+
+\begin_layout Standard
+Sets, as commonly presented in textbooks on general topology, are all about
+ uncountable collections of 
+\begin_inset Quotes eld
+\end_inset
+
+points
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The imposition of uncountablility leads to a wide variety of careful distinctio
+ns, e.g.
+ between Hausdorf spaces, which behave in a generally intuitive fashion,
+ and other spaces, which often do not.
+ In the current texts, the number of connectors is meant to be finite, or
+ at least always countable.
+ The size of the graph is meant to be finite, or at most recursively infinite.
+ Expanding beyond this would, of course, lead to a wild bestiary of strange
+ things.
+\end_layout
+
+\begin_layout Standard
+Another, more arcance distinction is that between Boolean algebras and Heyting
+ algebras, which is foundational for the category of Frames and Locales,
+ which in turn form the basic examples for Topoi.
+\end_layout
+
+\begin_layout Standard
+If one cuts up a graph into disjoint, unconnected parts, by cutting a collection
+ of edges, then by naive reasoning, the cut edges belong to neither the
+ one nor the other subgraph.
+ Thus, applying naive notions about cutting result in an algebra of graphs
+ that is not a Boolean algebra: the cut edges are neither in the set, nor
+ in its complement.
+ The sophisticated way of tackling this is with the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+Subobject Classifier
+\begin_inset Quotes erd
+\end_inset
+
+, which, for Boolean algebras, just boils down to the ordinary membership
+ predicates: functions that take a value in 
+\begin_inset Formula $2=\left\{ 0,1\right\} =\left\{ F,T\right\} $
+\end_inset
+
+.
+ Either something belongs or doesn't.
+ It is, or it ain't.
+ The subobject classifer is conceptually heavyweight, though.
+ The whole point of having half-edges is that it is conceptually simple.
+ A jigsaw-puzzle piece with unconnected tabs is a 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+, and there is no particular problem of asking whether the unconnected tabs
+ belong to it, or to it's set-complelement.
+\end_layout
+
+\begin_layout Standard
+TODO: Refining the discussion of Frames and Locales, as it applies to the
+ jigsaw-puzzle metaphor, is arguably an important pre-requiste for the discussio
+n of pre-sheaves and sheaves.
+ However, this is held off until later, as the level of abstraction is more
+ demanding.
+\end_layout
+
+\begin_layout Subsubsection*
+Topological conclusions
 \end_layout
 
 \begin_layout Standard
@@ -885,6 +966,11 @@ e.g.
 \begin_layout Standard
 To recap these two different models of meaning ...
  (is this wise here or does this belong in a different chapter?)
+\end_layout
+
+\begin_layout Standard
+TODO this section is obviously, wildly incomplete.
+ This needs to be started with a realistic non-abstract example.
 \end_layout
 
 \begin_layout Standard
