@@ -1391,6 +1391,40 @@ TODO: talk about quark wave function here and the different types of the
 \end_layout
 
 \begin_layout Section*
+Sheaf Axioms
+\end_layout
+
+\begin_layout Standard
+It obeys the sheaf axioms.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf-axioms.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
+\end_layout
+
+\begin_layout Section*
+Learning
+\end_layout
+
+\begin_layout Standard
+Searching, parsing and learning are closely related.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+learning.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
+\end_layout
+
+\begin_layout Section*
 Applications
 \end_layout
 
@@ -1406,23 +1440,6 @@ Why, link-grammar, of course.
  Pre-group grammar.
  Stay and Baez rosetta stone.
  And
-\end_layout
-
-\begin_layout Subsubsection*
-Sheaf Axioms:
-\end_layout
-
-\begin_layout Standard
-It obeys the sheaf axioms.
- See 
-\begin_inset Quotes eld
-\end_inset
-
-sheaf-axioms.pdf
-\begin_inset Quotes erd
-\end_inset
-
- in this directory.
 \end_layout
 
 \begin_layout Subsubsection*

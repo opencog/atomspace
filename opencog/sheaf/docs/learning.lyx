@@ -1,0 +1,1341 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Learning, Searching, Querying, Parsing
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+31 August 2020
+\end_layout
+
+\begin_layout Abstract
+Shifting from a viewpoint of 
+\begin_inset Quotes eld
+\end_inset
+
+variables and values
+\begin_inset Quotes erd
+\end_inset
+
+ to a viewpoint of 
+\begin_inset Quotes eld
+\end_inset
+
+connectors that connect
+\begin_inset Quotes erd
+\end_inset
+
+ unites the theories of search (query and query languages) with the theories
+ of parsing (deducing structure from input lacking structure).
+ This provides a new and yet very natural theory of learning.
+ Most notably, it solves the chicken-and-egg problem of 
+\begin_inset Quotes eld
+\end_inset
+
+how do you search for something when you don't know what you are searching
+ for?
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It then recasts learning as a process that begins with a search for unknown
+ things, and then categorizing the new discoveries based on observed relationshi
+ps.
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+The concepts of querying, parsing and learning are normally considered to
+ be quite distinct.
+ This text unifies these concepts by replacing the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in a value into a variable
+\begin_inset Quotes erd
+\end_inset
+
+ by the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+connecting two things together
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This text is part of a series of related texts, exploring and articulating
+ a connectionist viewpoint of knowledge representation and knowledge discovery.
+\end_layout
+
+\begin_layout Standard
+One of the central distinctions is that between 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+beta–reduction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metaphor for 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ is the jigsaw-puzzle piece: a shaped item with connector tabs that can
+ be joined together, only if they mate.
+ The different shapes of the connectors are 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+, in the formal sense of 
+\begin_inset Quotes eld
+\end_inset
+
+type theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is contrasted to 
+\begin_inset Quotes eld
+\end_inset
+
+beta–reduction
+\begin_inset Quotes erd
+\end_inset
+
+, which is a technical term arising from lambda calculus.
+ The metaphor there is that of taking a function, say 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+, and plugging in a value, say 
+\begin_inset Formula $42$
+\end_inset
+
+, substituting it for 
+\begin_inset Formula $x$
+\end_inset
+
+ to obtain 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+.
+ The plugging-in, as described here, also feels very connectionist.
+ It is even typed: one might say that if 
+\begin_inset Formula $x$
+\end_inset
+
+ is of type 
+\begin_inset Quotes eld
+\end_inset
+
+integer
+\begin_inset Quotes erd
+\end_inset
+
+, then only integers can be plugged in.
+\end_layout
+
+\begin_layout Standard
+The primary difference between plugging-in and connecting is how the type-mating
+ is achieved.
+ In beta–reduction, the type of 
+\begin_inset Quotes eld
+\end_inset
+
+integers
+\begin_inset Quotes erd
+\end_inset
+
+ can be interpreted to be the set of all integers; of these, 42 is merely
+ an exemplar: it is but one.
+ By contrast, in the connectionist approach, the types are peers, rather
+ than being above or below one-another.
+ The peer relationship is more appropriate for many situations.
+ The simplest examples may come from biochemistry: when one has some protein,
+ and it binds to some structure on a cell wall, or say, some antibody binding
+ to some antigen, the binding is jigsaw-puzzle-piece-like: it is possible
+ because the physical shape of proteins fit together.
+ One can ascribe types to these shapes.
+ What one cannot do is to say that one is the super-class and the other
+ is merely an exemplar, in the way one had a super-class of all integers,
+ and specific exemplar of 42.
+ The biochemical binding process is 
+\begin_inset Quotes eld
+\end_inset
+
+symmetric
+\begin_inset Quotes erd
+\end_inset
+
+, in this sense.
+\end_layout
+
+\begin_layout Standard
+Conventional notions of database query have the general flavor of beta–reduction.
+ One has some query, for example: 
+\family typewriter
+(match x [(list a b c) #:when (= 6 (+ a b c))])
+\family default
+\size small
+.
+ 
+\size default
+This example is taken from Racket, a scheme dialect.
+ The intent here is hopefully obvious: when 
+\family typewriter
+x
+\family default
+ is of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+list
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and, specifically, is of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+list-of-length-three
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, then accept the match if the arithmetic sum of the elements of the list
+ total up to six.
+ The search proceeds by process of 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+: we find things, plug them in, and either they fit or they don't.
+ This is conventional pattern matching in it's most basic form.
+\end_layout
+
+\begin_layout Standard
+The distinction between 
+\begin_inset Quotes eld
+\end_inset
+
+plugging in
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ is quite subtle, and one can easily get lost in technicalities.
+ The goal here is to tackle the technicalities head-on, and draw in clear
+ and vivid contrast how these two differ, in theory and in practice.
+\end_layout
+
+\begin_layout Section*
+Querying
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes eld
+\end_inset
+
+query
+\begin_inset Quotes erd
+\end_inset
+
+ here refers to the conventional idea of database queries; the query of
+ SQL or GraphQL.
+ Such queries are generally formulated as a generalized 
+\begin_inset Quotes eld
+\end_inset
+
+pattern matching
+\begin_inset Quotes erd
+\end_inset
+
+: one specifies a fixed part of a pattern, and a variable part, to be filled
+ out.
+ A textbook example of an SQL query might be 
+\begin_inset Quotes eld
+\end_inset
+
+find all employees in sales
+\begin_inset Quotes erd
+\end_inset
+
+, which is understood to be the directive to look at the 
+\begin_inset Quotes eld
+\end_inset
+
+employees
+\begin_inset Quotes erd
+\end_inset
+
+ table, which contains two columns: the name of the employee, and the department
+ they work in.
+ The fixed part of the query is that the department must be 
+\begin_inset Quotes eld
+\end_inset
+
+sales
+\begin_inset Quotes erd
+\end_inset
+
+; the variable is the 
+\begin_inset Quotes eld
+\end_inset
+
+employees
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The actual syntax for such search, in SQL, is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+\shape slanted
+\emph on
+SELECT name FROM employees WHERE department='sales';
+\family default
+\shape default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Graph query languages, and the subgraph isomorphism problem are similar
+ in nature: one specifies a collection of vertexes and edges (which may
+ be labeled or unlabeled, directed or undirected), taken to be 
+\begin_inset Quotes eld
+\end_inset
+
+fixed
+\begin_inset Quotes erd
+\end_inset
+
+, and another region, variable, and then asks for all matching graphs that
+ contain the fixed part.
+ The variables are always named (unless there is only one, and then it can
+ be anonymous): variables are X,Y,Z, ...
+ and are generally typed (in SQL, the employee name is a string, the salary
+ is a number.)
+\end_layout
+
+\begin_layout Standard
+Consider then, the following query/pattern match.
+ The database contains "
+\emph on
+Mike threw a ball.
+ Joe threw a ball.
+ Ben ate a pizza.
+ The engine threw a crankshaft.
+\emph default
+", however that may be represented; for brevity, we skip the precise representat
+ion.
+ Consider the query pattern 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+____ threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+X threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ in which 
+\emph on
+X
+\emph default
+ is a named variable.
+ This is a basic fill-in-the-blanks search.
+ The variable 
+\emph on
+X
+\emph default
+ may be typed: "
+\emph on
+X must be a noun
+\emph default
+" or perhaps "
+\emph on
+X must be a given name
+\emph default
+".
+ Typing helps narrow the search, and make it more precise.
+ In practical applications, typing often provides a huge performance boost,
+ and avoids paradoxes and ambiguity.
+ Anyway: this search is straight-forward, and yields the expected results.
+\end_layout
+
+\begin_layout Standard
+Consider now the case of relational data.
+ Suppose the database indicates relationships; for example:
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\ttfamily}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     +------>WV------>+-----Os----+
+\end_layout
+
+\begin_layout Plain Layout
+
+     +-->Wd---+--Ss---+     +-Ds--+
+\end_layout
+
+\begin_layout Plain Layout
+
+     |        |       |     |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+ LEFT-WALL  Mike    threw   a   ball
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a graph, indicating syntactic relationships: 
+\family typewriter
+S
+\family default
+ is a subject-verb relationship, 
+\family typewriter
+O
+\family default
+ is an object-verb relationship, 
+\family typewriter
+D
+\family default
+ is a determiner, and so on.
+ Consider the query 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+connector-S threw a ball
+\emph default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ This is a relational query; we are asking for all things that have a relation
+ 
+\family typewriter
+S
+\family default
+ to the fixed part of the query.
+ For the same dataset, this query returns the same results.
+ Yet the flavor of the query is different.
+\end_layout
+
+\begin_layout Standard
+Perhaps this second form seems arcane, or the doorway to some sneaky cheat.
+ In this case, a simpler way of posing the example would be the query 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+(things that have the property of being to the left of) threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+things that have the property of being to the left of
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is a relationship.
+ Let's call this relationship 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+S
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ for short.
+ It is not a property of the thing itself (there is no 
+\begin_inset Quotes eld
+\end_inset
+
+left-sided-ness
+\begin_inset Quotes erd
+\end_inset
+
+); it is a property of the relation.
+\end_layout
+
+\begin_layout Standard
+Relational queries are fundamentally different than variable queries.
+ For the first query form, "
+\emph on
+noun
+\emph default
+" and "
+\emph on
+given name
+\emph default
+" have to be known, tagged properties of "
+\emph on
+John
+\emph default
+", "
+\emph on
+Mike
+\emph default
+".
+ Somehow, through some magic pre-processing, these nodes had been tagged
+ with these properties, so that they are known before the search is started.
+ Failure-to-tag means failure-of-search.
+ If the database contains 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Flooglebarf threw a ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ had not been previously tagged as a noun, the search will fail to find
+ this candidate answer.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Caution, do not be confused.
+ The query was 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+X throw a ball where X is of type noun
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Of course, one may attempt untyped-variable searches.
+ The discussion here is trying to pry apart the subtle distinctions between
+ variables and relationships, and the role of typing in each.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the second search form, the properties of "
+\emph on
+Mike
+\emph default
+" (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) are unknown, not yet worked out or tagged.
+ We just know that "
+\emph on
+Mike
+\emph default
+" participates in a network of relationships, in this case an 
+\family typewriter
+S
+\family default
+-type relationship.
+ Oh wait, but 
+\family typewriter
+S
+\family default
+ is a type! ...
+ but that does not mean that "
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is of type 
+\family typewriter
+S
+\family default
+, only that "
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ participates in a relationship of type 
+\family typewriter
+S
+\family default
+.
+\end_layout
+
+\begin_layout Standard
+This allows one to find things, without knowing what they are in advance.
+ One may have observed a network of relationships, but not know (yet) the
+ properties of the thing-itself.
+ Perhaps later, you are able to deduce that "
+\emph on
+Mike
+\emph default
+" is a noun, perhaps that it is a given name, and maybe even that "
+\emph on
+Mike
+\emph default
+" is a specific individual at some given point in space and time.
+ There was no need to know any of this, before starting the search for ball-thro
+wers.
+ 
+\end_layout
+
+\begin_layout Standard
+The first form has a chicken-and-egg problem: how can I know "
+\emph on
+Mike
+\emph default
+" is a person? Because I saw Mike do the kind of things that people do.
+ But how can I see Mike? If I can only see things of type "people", and
+ if I don't already know that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) is of type "
+\emph on
+people
+\emph default
+", then search result fails; or rather, it fails to return these as answers
+ to the question.
+\end_layout
+
+\begin_layout Standard
+The second form does not have the chicken-and-egg problem.
+ One may observe things participating in some relationship; after a while
+ one may deduce that those things are 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+people
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (have type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+people
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Section*
+Learning
+\end_layout
+
+\begin_layout Standard
+The distinctions above may seem to be subtle, if not outright gratuitous
+ or even confused and delusional.
+ One may be tempted to make the claim that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is of type 
+\family typewriter
+T
+\family default
+ that is able to participate in a relationship 
+\family typewriter
+S
+\family default
+.
+ This would then be followed by a claim that the two forms are isomorphic
+ and can transmuted into one another.
+ In some abstract sense, this is correct.
+ In practice, however, the type of 
+\family typewriter
+T
+\family default
+ is much weaker than that of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+noun
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+given name
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Observing a relationship predates assignment of a type.
+ Say, you are on a hike, and someone asks "
+\emph on
+See that thing, next to the tree? What is that?
+\emph default
+" The typing applied here is quite weak: the type
+\family typewriter
+ T
+\family default
+ is the type "things you can see with your eyes".
+ Of course, it's that, but that is almost a universal type; it is much weaker
+ than identifying the thing itself.
+\end_layout
+
+\begin_layout Standard
+Suppose the thing is an antelope -- no one ever asks "
+\emph on
+See that thing of type antelope next to the tree? What is it?
+\emph default
+" Such a question presumes knowledge of the answer; the type of "things
+ that can be seen" is weaker/broader than the type of all antelopes.
+ The lesson here is that the relationship-based query is one of type induction:
+ a narrowing of types from broad to fine, a movement from a low-knowledge
+ state to a high-knowledge state.
+\end_layout
+
+\begin_layout Standard
+A more concrete example might be looking at how the Link-Grammar (LG) parser
+ deals with unknown words.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+It is the software that produced the diagram above.
+\end_layout
+
+\end_inset
+
+ Consider the sentence "
+\emph on
+flooglebarf threw a ball.
+\emph default
+" The LG parser will parse it just fine.
+ Now, "
+\emph on
+flooglebarf
+\emph default
+" is not in the dictionary of known words, so some guesses are made.
+ The obvious first guess is that "flooglebarf" is a word 
+\emph on
+i.e
+\emph default
+.
+ it has type 
+\family typewriter
+T
+\family default
+=
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph on
+word
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But this is kind of silly, because words are all that there are, for LG.
+ Yes, it's a type, but it's the universal type.
+\end_layout
+
+\begin_layout Standard
+The LG guessing rules include descriptions of generic nouns, generic verbs,
+ generic adverbs, 
+\emph on
+etc.
+
+\emph default
+ and each of these are tried in turn.
+ Eventually, a valid parse is found.
+ Only 
+\emph on
+after
+\emph default
+ a valid parse is found, can one conclude that "oh, ah-hah, 
+\emph on
+flooglebarf
+\emph default
+ is of type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+noun
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, because nouns can participate in relationship 
+\family typewriter
+S
+\family default
+".
+ Before parsing, the true type of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ was unknown.
+\end_layout
+
+\begin_layout Standard
+To summarize, the claim that "
+\emph on
+flooglebarf
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Mike
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+) has some type 
+\family typewriter
+T
+\family default
+ that is able to participate in a relationship of type 
+\family typewriter
+S
+\family default
+ is tautological; its vacuously true.
+ In practice, one doesn't know what 
+\family typewriter
+T
+\family default
+ is, until *after* the relationship was observed! This is the "chicken and
+ egg problem" of typed-variable searches.
+\end_layout
+
+\begin_layout Section*
+Parsing
+\end_layout
+
+\begin_layout Standard
+The presentation of a connectionist approach to query above may seem to
+ have employed a bit of switcheroo or mis-direction.
+ After all, the initial discussion starts with conventional SQL queries,
+ and yet it somehow invokes parsing as a prop or defense for the claims.
+ Surely this is absurd?
+\end_layout
+
+\begin_layout Standard
+Consider the following pattern-matching/query/search problem: 
+\begin_inset Quotes eld
+\end_inset
+
+Here is a block of text, find all of the nouns in it.
+\begin_inset Quotes erd
+\end_inset
+
+ You have to parse it, to find the nouns.
+ Oh, but wait, you say, you can just POS-tag it!
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Part Of Speech, or POS, for short.
+\end_layout
+
+\end_inset
+
+ Of course you can: the POS-tagger has a built in list of nouns; if 
+\begin_inset Quotes eld
+\end_inset
+
+flooglebarf
+\begin_inset Quotes erd
+\end_inset
+
+ is not in the dictionary (and it isn't), it will not be tagged as a noun.
+ This is not SQL, where you have a table called 
+\begin_inset Quotes eld
+\end_inset
+
+wordtags
+\begin_inset Quotes erd
+\end_inset
+
+, with one column called 
+\begin_inset Quotes eld
+\end_inset
+
+words
+\begin_inset Quotes erd
+\end_inset
+
+ and another called 
+\begin_inset Quotes eld
+\end_inset
+
+pos
+\begin_inset Quotes erd
+\end_inset
+
+ and you issue the search 
+\shape slanted
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+SELECT word FROM wordtags WHERE pos = 'noun';
+\family default
+\shape default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Parsing is a different kind of activity, which can be used to generate
+ tags from a set of relationship-rules.
+ The tags are initially unknown, they are inferred.
+\end_layout
+
+\begin_layout Standard
+This example may still appear to be silly, so let's rephrase it in terms
+ of deep-learning, artificial neural nets (ANN), and images.
+ The pattern-matching/query/search problem is now: 
+\begin_inset Quotes eld
+\end_inset
+
+Here is an image, find all of the animals in it
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If the ANN doesn't know about antelopes, then the antelope in the image
+ will be invisible to the ANN.
+ It cannot be found.
+ To do better, you have to parse the image, literally, to look for appropriate
+ things: not-too-big, not-too-small, four-legged with a head, upright and
+ not sideways, on the ground, not in the sky, center-of-mass appears balanced
+ over legs...etc.
+ Those constraints -- "is on the ground" -- those are "relationships" and
+ we are performing a query to find all things satisfying a collection of
+ relationships.
+ If you see something blurry in the image, you try to figure out it's relationsh
+ip to everything else.
+ At the end of the process, not at the beginning, can you say "ah hah, that
+ thing is of type 
+\family typewriter
+T
+\family default
+".
+\end_layout
+
+\begin_layout Section*
+Conclusions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Oh,
+\begin_inset Quotes erd
+\end_inset
+
+ you might say 
+\begin_inset Quotes eld
+\end_inset
+
+ANN's are smarter than that
+\begin_inset Quotes erd
+\end_inset
+
+.
+ And perhaps they are: it is not entirely clear if they are lookup engines,
+ or whether they perform analytical (parsing-like) processes under the hood
+ - they are a bit of a black box, as to what is actually happening in there.
+ The texts in this series hope to (eventually) elucidate this question,
+ and determine more precisely what it is that ANN's actually do, and how
+ they compare to conventional symbolic AI.
+\end_layout
+
+\begin_layout Standard
+The goal of this text was to lay the foundational underpinnings, to clarify
+ the distinction between lookup and inference/deduction.
+ Lookup is just 
+\begin_inset Quotes eld
+\end_inset
+
+tabular lookup
+\begin_inset Quotes erd
+\end_inset
+
+, which has been painted here to seem a bit trite.
+ Of course, vast tracts of quite advanced, sophisticated and complex theory
+ has been devoted to this: the relational algebras as the formalization
+ of SQL (as well as it's categorical dual, noSQL).
+ Much of this formalization can be teleported onto GraphQL and related query
+ systems.
+ The primary point here is that, to use SQL, you must first construct a
+ table: one must have columns, one must populate those columns with consistent
+ types.
+ This happens 
+\emph on
+ab initio
+\emph default
+, outside of SQL itself.
+ Some other, earlier process generated the knowledge; SQL just queries it
+ for you.
+\end_layout
+
+\begin_layout Standard
+This is in contrast to parsing.
+ It is an equally mechanical, algorithmic process; parsing also has a large
+ deep and arcane literature behind it.
+ The inputs to parsing are different: the inputs are unstructured, the relations
+hips are unknown.
+ Rules are applied to determine relationships, but the rules are applied
+ not one-at-a-time, but together.
+ One obtains a valid parse only if multiple rules can be joined, connected
+ together, so that they fit the data.
+ So, yes, of course: a parser recognizes a sentence drawn from a language
+ if that sentence obeys the syntactic, grammatical rules.
+ But that is not the point: the point is that it is an assemblage of those
+ rules that accomplished the recognition task.
+ The conclusion of the assemblage is that the unformed, unstructured input
+ is now tagged with syntactic information.
+\end_layout
+
+\begin_layout Standard
+By looking at search/query in terms of a connectionist viewpoint, the lookup
+ of query languages can be unified with the parsing of 
+\begin_inset Quotes eld
+\end_inset
+
+rule engines
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It offers a simpler, easier foundation than the lambda-calculus-style beta-redu
+ction of plug-a-value-into-a-variable approach.
+\end_layout
+
+\begin_layout Standard
+Lest the reader object that this is all absurdly abstract pie-in-the-sky
+ daydreaming, the author would like to remind the reader that a proof-of-concept
+ of such a system already exists, and it is small, fast and efficient.
+ Specifically, the Link Grammar parser.
+ It is explicitly built on these connectionist principles.
+ It is fast: parsing hundreds of sentences per second, and it is accurate:
+ it appears to be the most accurate parser of the English language currently
+ in existence.
+\end_layout
+
+\begin_layout Standard
+Again, the goal of these texts is to elucidate these principles well enough
+ that they can be clearly applied to AGI in a full general setting.
+ This includes not only unstructured visual and audio inputs, but the full
+ process of observation and deduction from observation.
+\end_layout
+
+\end_body
+\end_document
