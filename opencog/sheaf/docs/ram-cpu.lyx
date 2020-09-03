@@ -881,6 +881,55 @@ Hypergraphs
 \end_layout
 
 \begin_layout Standard
+A hypergraph is much like a graph, except that the edges, now called 
+\begin_inset Quotes eld
+\end_inset
+
+hyperedges
+\begin_inset Quotes erd
+\end_inset
+
+ can contain more than two vertexes.
+ That is, the hyperedge, rather than being an ordered pair of vertexes,
+ is an ordered list of vertexes.
+ The metagraph takes the hyperggraph concept one step further: the hyperedge
+ may also contain other hyperedges.
+ A change of terminology is useful: the basic objects are now called 
+\begin_inset Quotes eld
+\end_inset
+
+nodes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+links
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+vertexes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+edges
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 Formally, a hypergraph is:
 \end_layout
 
@@ -931,10 +980,198 @@ A set of links
 \end_inset
 
  is an ordered list of nodes, or other links.
+ It is conventient to call these 
+\begin_inset Quotes eld
+\end_inset
+
+atoms
+\begin_inset Quotes erd
+\end_inset
+
+: an atom can be either a node, or a link.
+ Links are thus sets of atoms.
 \end_layout
 
 \begin_layout Standard
-polytree
+The naive representation for the hypergraph is a straight-forward extension
+ of the edge table:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+edge id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex-list
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+json-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+77
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(1,2)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(2,3)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(2,4)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The vertex list may be empty, may hold one, or more vertexes.
+ It is necessarily ordered (and thus not a set) and may contain repeated
+ entries (a veretex may appear more than once).
+ In other respects, it is much the same.
+\end_layout
+
+\begin_layout Standard
+As before, the ability to traverse the hypergraph is a hard requirement.
+ This requires modification to the vertex table.
+ 
+\end_layout
+
+\begin_layout Standard
+The polytree
 \end_layout
 
 \begin_layout Section*
@@ -951,52 +1188,6 @@ metagraph
 \end_inset
 
  database.
- A hypergraph is much like a graph, except that the edges, now called 
-\begin_inset Quotes eld
-\end_inset
-
-hyperedges
-\begin_inset Quotes erd
-\end_inset
-
- can contain more than two vertexes.
- That is, the hyperedge, rather than being an ordered pair of vertexes,
- is an ordered list of vertexes.
- The metagraph takes the hyperggraph concept one step further: the hyperedge
- may also contain other hyperedges.
- A change of terminology is useful: the basic objects are now called 
-\begin_inset Quotes eld
-\end_inset
-
-nodes
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-links
-\begin_inset Quotes erd
-\end_inset
-
- instead of 
-\begin_inset Quotes eld
-\end_inset
-
-vertexes
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-edges
-\begin_inset Quotes erd
-\end_inset
-
-.
 \end_layout
 
 \end_body
