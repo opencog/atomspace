@@ -992,6 +992,10 @@ atoms
  Links are thus sets of atoms.
 \end_layout
 
+\begin_layout Subsection*
+Hypergraph representations
+\end_layout
+
 \begin_layout Standard
 The naive representation for the hypergraph is a straight-forward extension
  of the edge table.
@@ -1783,13 +1787,319 @@ The boxes denote the fact that the hyperedges are ordered lists.
 \end_layout
 
 \begin_layout Standard
+One might wish to conclude: 
+\begin_inset Quotes eld
+\end_inset
+
+Oh, but a bipartite graph is just a graph, so a graph database is sufficient
+ for all my needs.
+\begin_inset Quotes erd
+\end_inset
+
+ At some abstract level, this is parhaps true; at the CPU and RAM-consumption
+ level, it is not.
+ So, in this figure, attributed (the json-data) are attached only to the
+ 
+\begin_inset Formula $v_{k}$
+\end_inset
+
+ and 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ in the diagram; there is no attribute data attached to the lines in this
+ figure.
+ What's more, the lines in this figure are not directly recorded in any
+ tables; they are implicit only by the structure of the vertex and hyperedge
+ tables.
+\end_layout
+
+\begin_layout Standard
+Counting the memory usage is instructive.
+ Lets assume that the size of the vertex-id and the edge-id are the same
+ – they are pointers or 64-bit ints – so each id requires 1 unit of RAM.
+ Assume that lists are either null-terminated or record a length, so that
+ a list of 
+\begin_inset Formula $n$
+\end_inset
+
+ items requires 
+\begin_inset Formula $n+1$
+\end_inset
+
+ units of storage.
+ Lets encode sets as lists, to make counting easy; let 
+\begin_inset Formula $J$
+\end_inset
+
+ is the average size of the attribute collection.
+ The hyperedges shown in the figure then require 2+3+3+4=12 units of storage,
+ plus 5 more for the hyperedge table itself, and 4J of attribute storage.
+ The vertexes require 4+3+3+2 units of storage, plus 5 for the vertex-table
+ itself, plus 4J more of attributes.
+ Summing this, one obtains 34+8J total RAM consumption.
+ For the general case, one has
+\begin_inset Formula 
+\[
+N_{V}\left(1+\left\langle J\right\rangle +\left\langle N_{I}\right\rangle \right)+N_{E}\left(1+\left\langle J\right\rangle +\left\langle N_{O}\right\rangle \right)
+\]
+
+\end_inset
+
+ where
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N_{V}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of vertexes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N_{E}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of hyperedges
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle J\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of attributes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of the incoming set
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle N_{O}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of the vertex list
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The average size of the incoming set is equal to the average size of the
+ vertex list, so we can approximate 
+\begin_inset Formula $\left\langle N_{I}\right\rangle =\left\langle N_{O}\right\rangle $
+\end_inset
+
+; the only reason to track these separately is that one may use hash tables
+ or trees for sets, whereas lists rquire arrays.
+\end_layout
+
+\begin_layout Standard
+The equivalent representation as a graph requires
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(N_{V}+N_{E}\right)\left(1+\left\langle J\right\rangle \right)+N_{V}\left\langle N_{I}\right\rangle +N_{E}\left\langle N_{O}\right\rangle  & \quad\mbox{ for the vertex table}\\
+N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right) & \quad\mbox{ for the edge table}
+\end{align*}
+
+\end_inset
+
+Comparing the two expressions, we see that the vertex table is the same
+ size as the complete hypertable.
+ The ordinary graph representation also requires the overhead of the edge
+ table; here the 
+\begin_inset Formula $\left\langle J_{nil}\right\rangle $
+\end_inset
+
+ is the cost of storing an empty attribute list, and the factor of 3 comes
+ from storing an ordinary edge-id and it's two endpoints.
+\end_layout
+
+\begin_layout Standard
+If the only thing that one is storing are hypergraphs, then having a custom
+ hypergraph representation really is smaller than the equivalent bipartite
+ graph: it dispenses with the need for an explicit ordinary-edge table.
+ Does this mean that there's some magic, here? No, not really.
+ Every ordinary graph is a special case of a hypergraph, where the hyper-edge
+ always has arity two.
+ To store a single edge as an ordinary edge, we need 
+\begin_inset Formula $3+\left\langle J\right\rangle $
+\end_inset
+
+ units of storage: the edge-label, and the two vertexes in the edge.
+ To store a single edge as a hyperedge, we need 
+\begin_inset Formula $4+\left\langle J\right\rangle $
+\end_inset
+
+ units of storage: the edge-label, the list of vertexes, and the list terminator.
+ Thus, storing an ordinary graph as a hypergraph requires 
+\begin_inset Formula $N_{E}$
+\end_inset
+
+ more units of storage.
+ This seems tolerable: for a million-edge graph, and 64-bit pointers, this
+ requires 8MBytes of additional storage.
+ On modern machines, the extra 8MBytes seems not all that large; there's
+ a bit of a penalty in moving from graph storage to hypergraph storage,
+ but it's not that much.
+\end_layout
+
+\begin_layout Standard
+Moving in the opposite direction was much worse: we paid a penalty of 
+\begin_inset Formula $N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right)$
+\end_inset
+
+.
+ Assuming that 
+\begin_inset Formula $\left\langle J_{nil}\right\rangle =1$
+\end_inset
+
+, then a million-vertex graph requires 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ times 32MBytes of storage.
+ For uniformly-distributed graphs, one might have 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ of 3 to 10; for scale-free graphs of this size, 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ might be around 1000; for square-root-Zipfian graphs (such as Wikipedia
+ connectivity, or biological datasets: genome, proteome, reactome datasets)
+ the 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ would be around 50, so we are looking at overheads in the gagbyte range.
+ There is a huge cost of jamming a hypergraph into an ordinary graph store.
+\end_layout
+
+\begin_layout Subsection*
+Metagraph representations
+\end_layout
+
+\begin_layout Standard
 The metagraph differs from the hypergraph in that now a hyperedge (link)
  may contain eitther another vertex (node) or another link.
  Visually, this is no longer a bipartite graph, but a polytree, shown below.
 \end_layout
 
 \begin_layout Standard
-The polytree
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph.eps
+	lyxscale 60
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The polytree is more-or-less a directed acyclic graph (DAG), the primary
+ difference being that the links are ordered lists, represented as boxes
+ in this diagram.
 \end_layout
 
 \begin_layout Section*
