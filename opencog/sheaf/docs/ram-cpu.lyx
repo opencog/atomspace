@@ -1,0 +1,343 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Graphs, Sheaves, RAM, CPU
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+2 Sept 2020
+\end_layout
+
+\begin_layout Abstract
+Using connectors-and-sheaves for knowledge representation has distinct implicati
+ons for RAM usage and CPU cycles.
+ This text sketches and compares memory and CPU usage for three types of
+ systems: a naive graph database, the current OpenCog AtomSpace, which is
+ an in-RAM metagraph database, and a hypothetical connector-based database.
+ The design constraints are such that several different kinds of typical
+ knowledge-repesentation tasks must be efficient and performant; these include
+ graph traversal (patten matching), graph rewriting, and parsing (rule applicati
+on).
+\end_layout
+
+\begin_layout Abstract
+This is a work in progress ...
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Currently, graph databases are popular, and they have a rather distinct
+ performance profile, differing from SQL and noSQL databases.
+ The connectors-and-sheaves concepts sketched in this series of texts provide
+ a different way of representing graphs, and working with them.
+ This representation is not just abstract nonsense, but has actual implications
+ for RAM and CPU consumption.
+ The current prototype experiments with sheaves are layered on top of the
+ OpenCog AtomSpace, which is an in-RAM database for storing generalized
+ hypergraphs or 
+\begin_inset Quotes eld
+\end_inset
+
+metagraphs
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It has it's own distinct representation, with certain implications for
+ CPU and RAM utilization.
+\end_layout
+
+\begin_layout Standard
+The goal of this text is to look at these three systems, and compare how
+ they use RAM and CPU resources.
+ Describing the AtomSpace is the easiest, because the current implementation
+ has a specific form.
+ Describing a graph database is a bit harder, as we assume a generic, naive
+ design, which actual implementatins may or may not follow.
+ Describing the connectionist database presents similar trouble: without
+ a specific implementation and the experience from using it, statements
+ have to be generalized.
+\end_layout
+
+\begin_layout Standard
+Each of these is described in turn, followed by a discussion of algorithms.
+\end_layout
+
+\begin_layout Section*
+The AtomSpace
+\end_layout
+
+\begin_layout Standard
+The AtomSpace is an in-RAM generalized hypergraph or 
+\begin_inset Quotes eld
+\end_inset
+
+metagraph
+\begin_inset Quotes erd
+\end_inset
+
+ database.
+ A hypergraph is much like a graph, except that the edges, now called 
+\begin_inset Quotes eld
+\end_inset
+
+hyperedges
+\begin_inset Quotes erd
+\end_inset
+
+ can contain more than two vertexes.
+ That is, the hyperedge, rather than being an ordered pair of vertexes,
+ is an ordered list of vertexes.
+ The metagraph takes the hyperggraph concept one step further: the hyperedge
+ may also contain other hyperedges.
+ A change of terminology is useful: the basic objects are now called 
+\begin_inset Quotes eld
+\end_inset
+
+nodes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+links
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+vertexes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+edges
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Formally, a graph is
+\end_layout
+
+\begin_layout Itemize
+A set of vertexes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of edges 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each edge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered pair of vertexes drawn from the set 
+\begin_inset Formula $V$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Because edges are ordered pairs, it is conventional to denote them with
+ arrows, having a head and tail.
+ These can be joined together in arbitrary ways.
+ Bewlow is a 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ graph:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/directed-graph.png
+	lyxscale 40
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A
+\end_layout
+
+\begin_layout Standard
+Formally, a hypergraph is:
+\end_layout
+
+\begin_layout Itemize
+A set of vertexes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of hyperedges 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each hyperedge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered list of vertexes drawn from the set 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ This list may be empty, or have one, or two, or more members.
+\end_layout
+
+\begin_layout Standard
+A metagraph is very nearly the same:
+\end_layout
+
+\begin_layout Itemize
+A set of nodes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of links 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each hyperedge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered list of nodes, or other links.
+\end_layout
+
+\begin_layout Standard
+polytree
+\end_layout
+
+\end_body
+\end_document
