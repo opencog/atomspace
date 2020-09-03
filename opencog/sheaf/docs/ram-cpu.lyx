@@ -100,7 +100,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-2 Sept 2020
+2 Sept 2020 draft version 0.2
 \end_layout
 
 \begin_layout Abstract
@@ -2073,9 +2073,9 @@ Moving in the opposite direction is much worse: the penalty is
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
- might be around 14; for square-root-Zipfian graphs (such as Wikipedia topic
- connectivity, or biological datasets: genome, proteome, reactome datasets)
- the 
+ might be around 14; for square-root-Zipfian graphs (such as Wikipedia page
+ views, or biological datasets: genome, proteome, reactome datasets) the
+ 
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
@@ -2116,17 +2116,34 @@ where
 while for a square-root-Zipfian, one has 
 \begin_inset Formula 
 \[
-\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{N_{V}}{\sqrt{v}}dv=2\sqrt{N_{V}}
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{AN_{V}}{\sqrt{v}}dv=2A\sqrt{N_{V}}
 \]
 
 \end_inset
 
-This last has particularly dramatic implications for graph stores.
+The scale factor 
+\begin_inset Formula $A$
+\end_inset
+
+ is data-dependent.
+ For wikipedia page views, 
+\begin_inset Formula $A\approx20$
+\end_inset
+
+, see https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf%27s
+_law%3F for graphs and discussion.
+ For genomics, see https://github.com/linas/biome-distribution/blob/master/paper/
+biome-distributions.pdf where 
+\begin_inset Formula $A$
+\end_inset
+
+ is in the range of 0.1 to 0.3, depending on the dataset.
+ These considerations have quite dramatic implications for graph stores.
 \end_layout
 
 \end_inset
 
-, so we are looking at overheads in the (multi-)gigabyte range.
+, so we are looking at overheads in the gigabyte range.
  There is a huge cost of jamming a hypergraph into an ordinary graph store.
 \end_layout
 
