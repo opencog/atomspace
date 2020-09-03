@@ -110,9 +110,9 @@ ons for RAM usage and CPU cycles.
  systems: a naive graph database, the current OpenCog AtomSpace, which is
  an in-RAM metagraph database, and a hypothetical connector-based database.
  The design constraints are such that several different kinds of typical
- knowledge-repesentation tasks must be efficient and performant; these include
- graph traversal (patten matching), graph rewriting, and parsing (rule applicati
-on).
+ knowledge-representation tasks must be efficient and performant; these
+ include graph traversal (pattern matching), graph rewriting, and parsing
+ (rule application).
 \end_layout
 
 \begin_layout Abstract
@@ -151,7 +151,7 @@ The goal of this text is to look at these three systems, and compare how
  Describing the AtomSpace is the easiest, because the current implementation
  has a specific form.
  Describing a graph database is a bit harder, as we assume a generic, naive
- design, which actual implementatins may or may not follow.
+ design, which actual implementations may or may not follow.
  Describing the connectionist database presents similar trouble: without
  a specific implementation and the experience from using it, statements
  have to be generalized.
@@ -197,7 +197,7 @@ A set of edges
 Because edges are ordered pairs, it is conventional to denote them with
  arrows, having a head and tail.
  These can be joined together in arbitrary ways.
- Bewlow is a 
+ Below is a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -205,7 +205,7 @@ typical
 \begin_inset Quotes erd
 \end_inset
 
- graph:
+ directed graph:
 \end_layout
 
 \begin_layout Standard
@@ -225,7 +225,7 @@ In practice, one wishes to associate a label to each vertex, and also some
  additional attribute data; likewise for the edges.
  At this time, the JSON format is a very powerful and flexible way of encoding
  attribute data: it can encode variable format structured data consisting
- of strings, numbers, arrays and othre kinds of data.
+ of strings, numbers, arrays and other kinds of data.
  Thus, for the remainder of this text, it is assumed that attributes are
  encoded in a JSON format.
  There are a variety of ways of encoding JSON; this alone is a substantial
@@ -238,7 +238,7 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  do not concern us.
  One reason for this is that a variety of disk management systems exist,
  and work quite well at abstracting details.
- The earliest such is perhaps the Berkley DBM, and the Gnu gdbm.
+ The earliest such is perhaps the Berkeley DBM, and the Gnu gdbm.
  These have been followed by Google's LevelDB and Facebook's extensions
  RocksDB.
  It is usually not too hard to take an in-RAM database, and layer it on
@@ -369,7 +369,7 @@ The goal of having a vertex id (which is necessarily a
 \begin_inset Quotes eld
 \end_inset
 
-universaly unique id
+universally unique id
 \begin_inset Quotes erd
 \end_inset
 
@@ -827,8 +827,8 @@ multisets
 \begin_layout Standard
 A conventional requirement for graph databases is to locate all nodes and
  vertexes having some particular attribute.
- This opens a pandoras box of indexing schemes.
- The opening of this box is defered to a later section, but we can take
+ This opens a Pandora's box of indexing schemes.
+ The opening of this box is deferred to a later section, but we can take
  a quick peak: suppose one wants to find all vertexes where the json-data
  has a field called 
 \begin_inset Quotes eld
@@ -892,7 +892,7 @@ hyperedges
  can contain more than two vertexes.
  That is, the hyperedge, rather than being an ordered pair of vertexes,
  is an ordered list of vertexes.
- The metagraph takes the hyperggraph concept one step further: the hyperedge
+ The metagraph takes the hypergraph concept one step further: the hyperedge
  may also contain other hyperedges.
  A change of terminology is useful: the basic objects are now called 
 \begin_inset Quotes eld
@@ -980,7 +980,7 @@ A set of links
 \end_inset
 
  is an ordered list of nodes, or other links.
- It is conventient to call these 
+ It is convenient to call these 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1189,7 +1189,7 @@ json-data
 \begin_layout Standard
 The vertex list may be empty, may hold one, or more vertexes.
  It is necessarily ordered (and thus not a set) and may contain repeated
- entries (a veretex may appear more than once).
+ entries (a vertex may appear more than once).
  In other respects, it is much the same.
 \end_layout
 
@@ -1786,6 +1786,10 @@ The boxes denote the fact that the hyperedges are ordered lists.
  ellipses are the hyperedge and vertex tables.
 \end_layout
 
+\begin_layout Subsubsection*
+RAM Utilization
+\end_layout
+
 \begin_layout Standard
 One might wish to conclude: 
 \begin_inset Quotes eld
@@ -1796,7 +1800,7 @@ Oh, but a bipartite graph is just a graph, so a graph database is sufficient
 \begin_inset Quotes erd
 \end_inset
 
- At some abstract level, this is parhaps true; at the CPU and RAM-consumption
+ At some abstract level, this is perhaps true; at the CPU and RAM-consumption
  level, it is not.
  So, in this figure, attributed (the json-data) are attached only to the
  
@@ -1985,7 +1989,7 @@ The average size of the incoming set is equal to the average size of the
 \end_inset
 
 ; the only reason to track these separately is that one may use hash tables
- or trees for sets, whereas lists rquire arrays.
+ or trees for sets, whereas lists require arrays.
 \end_layout
 
 \begin_layout Standard
@@ -2010,6 +2014,10 @@ Comparing the two expressions, we see that the vertex table is the same
 
  is the cost of storing an empty attribute list, and the factor of 3 comes
  from storing an ordinary edge-id and it's two endpoints.
+\end_layout
+
+\begin_layout Subsubsection*
+Storing hypergraphs in graphs
 \end_layout
 
 \begin_layout Standard
@@ -2039,14 +2047,15 @@ If the only thing that one is storing are hypergraphs, then having a custom
  On modern machines, the extra 8MBytes seems not all that large; there's
  a bit of a penalty in moving from graph storage to hypergraph storage,
  but it's not that much.
+ Modern cellphones have 8GBytes of RAM...
 \end_layout
 
 \begin_layout Standard
-Moving in the opposite direction was much worse: we paid a penalty of 
+Moving in the opposite direction is much worse: the penalty is 
 \begin_inset Formula $N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right)$
 \end_inset
 
-.
+ which is surprisingly large.
  Assuming that 
 \begin_inset Formula $\left\langle J_{nil}\right\rangle =1$
 \end_inset
@@ -2055,7 +2064,7 @@ Moving in the opposite direction was much worse: we paid a penalty of
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
- times 32MBytes of storage.
+ times 32MBytes of additional storage.
  For uniformly-distributed graphs, one might have 
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
@@ -2064,13 +2073,60 @@ Moving in the opposite direction was much worse: we paid a penalty of
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
- might be around 1000; for square-root-Zipfian graphs (such as Wikipedia
+ might be around 14; for square-root-Zipfian graphs (such as Wikipedia topic
  connectivity, or biological datasets: genome, proteome, reactome datasets)
  the 
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
- would be around 50, so we are looking at overheads in the gagbyte range.
+ would be around 2000
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The average size of the incoming set is 
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}n\left(v\right)dv
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $n\left(v\right)$
+\end_inset
+
+ is the number of connections to vertex 
+\begin_inset Formula $v$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{V}$
+\end_inset
+
+ is the total number of vertexes.
+ For a Zipfian distribution, this is
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{N_{V}}{v}dv=\log N_{V}
+\]
+
+\end_inset
+
+while for a square-root-Zipfian, one has 
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{N_{V}}{\sqrt{v}}dv=2\sqrt{N_{V}}
+\]
+
+\end_inset
+
+This last has particularly dramatic implications for graph stores.
+\end_layout
+
+\end_inset
+
+, so we are looking at overheads in the (multi-)gigabyte range.
  There is a huge cost of jamming a hypergraph into an ordinary graph store.
 \end_layout
 
@@ -2080,7 +2136,7 @@ Metagraph representations
 
 \begin_layout Standard
 The metagraph differs from the hypergraph in that now a hyperedge (link)
- may contain eitther another vertex (node) or another link.
+ may contain either another vertex (node) or another link.
  Visually, this is no longer a bipartite graph, but a polytree, shown below.
 \end_layout
 
@@ -2089,7 +2145,7 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \begin_inset Graphics
 	filename graphics/metagraph.eps
 	lyxscale 60
-	width 30col%
+	width 20col%
 
 \end_inset
 
