@@ -162,69 +162,7 @@ Each of these is described in turn, followed by a discussion of algorithms.
 \end_layout
 
 \begin_layout Section*
-The AtomSpace
-\end_layout
-
-\begin_layout Standard
-The AtomSpace is an in-RAM generalized hypergraph or 
-\begin_inset Quotes eld
-\end_inset
-
-metagraph
-\begin_inset Quotes erd
-\end_inset
-
- database.
- A hypergraph is much like a graph, except that the edges, now called 
-\begin_inset Quotes eld
-\end_inset
-
-hyperedges
-\begin_inset Quotes erd
-\end_inset
-
- can contain more than two vertexes.
- That is, the hyperedge, rather than being an ordered pair of vertexes,
- is an ordered list of vertexes.
- The metagraph takes the hyperggraph concept one step further: the hyperedge
- may also contain other hyperedges.
- A change of terminology is useful: the basic objects are now called 
-\begin_inset Quotes eld
-\end_inset
-
-nodes
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-links
-\begin_inset Quotes erd
-\end_inset
-
- instead of 
-\begin_inset Quotes eld
-\end_inset
-
-vertexes
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-edges
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Subsection*
-Graph representations
+Graph Representations
 \end_layout
 
 \begin_layout Standard
@@ -285,294 +223,31 @@ typical
 \begin_layout Standard
 In practice, one wishes to associate a label to each vertex, and also some
  additional attribute data; likewise for the edges.
- Thus, a naive representation for a graph consists of three tables: an attribute
- table, a vertex table, and an edge table.
+ At this time, the JSON format is a very powerful and flexible way of encoding
+ attribute data: it can encode variable format structured data consisting
+ of strings, numbers, arrays and othre kinds of data.
+ Thus, for the remainder of this text, it is assumed that attributes are
+ encoded in a JSON format.
+ There are a variety of ways of encoding JSON; this alone is a substantial
+ task, and detailed discussions of this are mostly avoided, except as may
+ be relevant.
 \end_layout
 
 \begin_layout Standard
-Attributes are typically typed: they may be strings, integers, floats, dates,
- image or audio blobs, etc.
- In order for a vertex or an edge to reference an attribute, it must have
- a key.
- This key may be a unique ID (uid) or simpley a RAM address: so a 32-bit
- or a 64-bit number.
- The type (string, int, float) can be representedd by a number (8-bit or
- 16-bit might be enough, depending...) followed by the data.
- Attributes conventionally have a name (as they would in a json file) so
- here we assume that as well.
- Thus a naive representation for attributes is in the form of a table:
+In what follows, all data is assumed to live in-RAM; the on-disk representations
+ do not concern us.
+ One reason for this is that a variety of disk management systems exist,
+ and work quite well at abstracting details.
+ The earliest such is perhaps the Berkley DBM, and the Gnu gdbm.
+ These have been followed by Google's LevelDB and Facebook's extensions
+ RocksDB.
+ It is usually not too hard to take an in-RAM database, and layer it on
+ top of one of these systems to obtain a disk-backed database.
+ Of course, there are numerous ifs-ands-buts, here, these are glossed over.
 \end_layout
 
 \begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="4">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-attr key
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-type
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-name
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-data
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-string
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Quotes eld
-\end_inset
-
-song title
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Quotes eld
-\end_inset
-
-grand wazoo
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-int
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Quotes eld
-\end_inset
-
-user rating
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-mp3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Quotes eld
-\end_inset
-
-audio stream
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The key assumption of the table above is that multiple edges or vertexes
- might want to reference a given attribute; thus, the attributes are stored
- seperately from the edges/vertexes.
- If this is not the case, then the attributes can be stroed directly with
- the vertex or edge tables, without having to be split out (except, as always,
- binary large objects, or 
-\begin_inset Quotes eld
-\end_inset
-
-blobs
-\begin_inset Quotes erd
-\end_inset
-
-, have to be kept elsewhere.) If attributes are shared, then the 
-\begin_inset Quotes eld
-\end_inset
-
-attr key
-\begin_inset Quotes erd
-\end_inset
-
- is a 
-\begin_inset Quotes eld
-\end_inset
-
-primary key
-\begin_inset Quotes erd
-\end_inset
-
-; the attribute lists on a vertex or an edge must reference it.
-\end_layout
-
-\begin_layout Standard
-The rest is straight-forward.
- The vertex table might then have the form
+The vertex table is straight-forward:
 \end_layout
 
 \begin_layout Standard
@@ -596,7 +271,7 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
-attr-list
+json-data
 \end_layout
 
 \end_inset
@@ -607,7 +282,7 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-4
+1
 \end_layout
 
 \end_inset
@@ -616,7 +291,7 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-(1,2,3)
+...
 \end_layout
 
 \end_inset
@@ -627,7 +302,7 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-5
+2
 \end_layout
 
 \end_inset
@@ -636,7 +311,7 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-..
+...
 \end_layout
 
 \end_inset
@@ -647,7 +322,7 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+3
 \end_layout
 
 \end_inset
@@ -690,25 +365,16 @@ attr-list
 \end_layout
 
 \begin_layout Standard
-where the 
+The goal of having a vertex id (which is necessarily a 
 \begin_inset Quotes eld
 \end_inset
 
-attr-list
+universaly unique id
 \begin_inset Quotes erd
 \end_inset
 
- is a variable-length list of some form.
- The vertex id (which is a uid) might be adequate for a label; but storing
- an explicit string label in a distinct column
-\end_layout
-
-\begin_layout Standard
-column for an explicit label
-\end_layout
-
-\begin_layout Standard
-Likewise, the edge table has the form
+ or uid) is that it is required by the edge table.
+ The edge table might have the form
 \end_layout
 
 \begin_layout Standard
@@ -752,7 +418,7 @@ tail-vertex
 \begin_inset Text
 
 \begin_layout Plain Layout
-attr-list
+json-data
 \end_layout
 
 \end_inset
@@ -763,7 +429,92 @@ attr-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-7
+77
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
 \end_layout
 
 \end_inset
@@ -777,96 +528,11 @@ attr-list
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5
-\end_layout
-
-\end_inset
-</cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(1,2)
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-8
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-6
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(3)
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-9
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 ...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-()
 \end_layout
 
 \end_inset
@@ -918,10 +584,299 @@ attr-list
 \end_layout
 
 \begin_layout Standard
-The point of
+This representation is perhaps too naive.
+ To perform a graph traversal, i.e.
+ to walk from vertex to vertex, following only connecting edges, one needs
+ to know which edges come in, and which edges go out.
+ Of course, these can be found in the edge table, but searching the edge
+ table is absurd: for an edge table of 
+\begin_inset Formula $N$
+\end_inset
+
+ edges, such a search takes 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ time.
+ Thus, we incorporate a special index for edges into the vertex table:
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+incoming
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+outgoing
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+json-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{77}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{77}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88,99}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the incoming and outgoing columns hold sets: any given vertex
+ may appear in more than one edge.
+ They are sets, not lists, as the order is not particularly important.
+ They are not 
+\begin_inset Quotes eld
+\end_inset
+
+multisets
+\begin_inset Quotes erd
+\end_inset
+
+: any given edge appears at most once in the incoming/outgoing sets.
+ Suitable representations for sets include hash-tables and trees, each with
+ it's own distinct RAM and access-time profile.
+\end_layout
+
+\begin_layout Standard
+A conventional requirement for graph databases is to locate all nodes and
+ vertexes having some particular attribute.
+ This opens a pandoras box of indexing schemes.
+ The opening of this box is defered to a later section, but we can take
+ a quick peak: suppose one wants to find all vertexes where the json-data
+ has a field called 
+\begin_inset Quotes eld
+\end_inset
+
+favorite song
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Vertexes representing buildings and automobiles won't have a 
+\begin_inset Quotes eld
+\end_inset
+
+favorite song
+\begin_inset Quotes erd
+\end_inset
+
+, vertexes representing people might, but not necessarily.
+ Thus, we need to create an index: a set of all vertexes that have this
+ tag.
+ Every time a vertex is added or removed, this index might have to be updated.
+ Thus, adding indexes in this way incurs a CPU overhead.
+ If there are 
+\begin_inset Formula $J$
+\end_inset
+
+ indexes, then there is an 
+\begin_inset Formula $O\left(J\right)$
+\end_inset
+
+ CPU overhead for vertex insertion/removal.
+ There is also RAM consumption: an index containing 
+\begin_inset Formula $K$
+\end_inset
+
+ items requires at least 
+\begin_inset Formula $O\left(K\right)$
+\end_inset
+
+ storage, and possibly 
+\begin_inset Formula $O\left(K\log K\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
 Hypergraphs
 \end_layout
 
@@ -980,6 +935,68 @@ A set of links
 
 \begin_layout Standard
 polytree
+\end_layout
+
+\begin_layout Section*
+The AtomSpace
+\end_layout
+
+\begin_layout Standard
+The AtomSpace is an in-RAM generalized hypergraph or 
+\begin_inset Quotes eld
+\end_inset
+
+metagraph
+\begin_inset Quotes erd
+\end_inset
+
+ database.
+ A hypergraph is much like a graph, except that the edges, now called 
+\begin_inset Quotes eld
+\end_inset
+
+hyperedges
+\begin_inset Quotes erd
+\end_inset
+
+ can contain more than two vertexes.
+ That is, the hyperedge, rather than being an ordered pair of vertexes,
+ is an ordered list of vertexes.
+ The metagraph takes the hyperggraph concept one step further: the hyperedge
+ may also contain other hyperedges.
+ A change of terminology is useful: the basic objects are now called 
+\begin_inset Quotes eld
+\end_inset
+
+nodes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+links
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+vertexes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+edges
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \end_body
