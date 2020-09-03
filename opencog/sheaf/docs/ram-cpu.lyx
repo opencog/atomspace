@@ -994,7 +994,8 @@ atoms
 
 \begin_layout Standard
 The naive representation for the hypergraph is a straight-forward extension
- of the edge table:
+ of the edge table.
+ The example encoded in this table is shown in the figure below.
 \end_layout
 
 \begin_layout Standard
@@ -1039,7 +1040,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-77
+\begin_inset Formula $e_{1}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1048,7 +1052,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-(1,2)
+\begin_inset Formula $\left(v_{1}\right)$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1068,7 +1075,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-88
+\begin_inset Formula $e_{2}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1077,7 +1087,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-(2,3)
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1097,7 +1110,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-99
+\begin_inset Formula $e_{3}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1106,7 +1122,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-(2,4)
+\begin_inset Formula $\left(v_{3},v_{4}\right)$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1126,6 +1145,9 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+\begin_inset Formula $e_{4}$
+\end_inset
+
 
 \end_layout
 
@@ -1135,6 +1157,9 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+\begin_inset Formula $\left(v_{3},v_{2},v_{1}\right)$
+\end_inset
+
 
 \end_layout
 
@@ -1243,7 +1268,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-1
+\begin_inset Formula $v_{1}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1252,7 +1280,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{}
+\begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1261,7 +1292,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{77}
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1270,63 +1304,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{}
-\end_layout
-
+\begin_inset Formula $\left\{ e_{4}\right\} $
 \end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
 
-\begin_layout Plain Layout
 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-{77}
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-{88,99}
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-{}
 \end_layout
 
 \end_inset
@@ -1355,24 +1336,9 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-3
-\end_layout
-
+\begin_inset Formula $v_{2}$
 \end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
 
-\begin_layout Plain Layout
-{88}
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -1382,6 +1348,101 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
 
 \end_layout
 
@@ -1411,24 +1472,9 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-4
-\end_layout
-
+\begin_inset Formula $v_{4}$
 \end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
 
-\begin_layout Plain Layout
-{88}
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -1438,6 +1484,33 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
 
 \end_layout
 
@@ -1523,7 +1596,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-1
+\begin_inset Formula $v_{1}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1532,7 +1608,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{77}
+\begin_inset Formula $\left\{ e_{1},e_{2},e_{4}\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1552,7 +1631,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-2
+\begin_inset Formula $v_{2}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1561,7 +1643,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{77,88,99}
+\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1581,7 +1666,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-3
+\begin_inset Formula $v_{3}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1590,7 +1678,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{88}
+\begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1610,7 +1701,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-4
+\begin_inset Formula $v_{4}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1619,7 +1713,10 @@ json-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-{88}
+\begin_inset Formula $\left\{ e_{2}\right\} $
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1663,9 +1760,9 @@ almost
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/Simple-bipartite-graph.svg
-	lyxscale 30
-	width 30col%
+	filename graphics/hypergraph.eps
+	lyxscale 40
+	width 40col%
 
 \end_inset
 
@@ -1673,16 +1770,22 @@ almost
 \end_layout
 
 \begin_layout Standard
-Only one 
-\begin_inset Quotes eld
+The boxes denote the fact that the hyperedges are ordered lists.
+ The 
+\begin_inset Formula $E$
 \end_inset
 
-minor
-\begin_inset Quotes erd
+ and 
+\begin_inset Formula $V$
 \end_inset
 
- thing is wrong with this picture: the hyperedges are ordered lists; this
- drawing doe not 
+ ellipses are the hyperedge and vertex tables.
+\end_layout
+
+\begin_layout Standard
+The metagraph differs from the hypergraph in that now a hyperedge (link)
+ may contain eitther another vertex (node) or another link.
+ Visually, this is no longer a bipartite graph, but a polytree, shown below.
 \end_layout
 
 \begin_layout Standard
