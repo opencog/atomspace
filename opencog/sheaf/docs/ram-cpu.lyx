@@ -2624,6 +2624,27 @@ The whole point of using a graph database, as opposed to an SQL or noSQL
  database, is that the graph structure encodes something important about
  the problem, something that cannot be easily achieved by doing table joins
  or key-value lookups.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In the following, only SQL databases will be discussed.
+ The noSQL databases are effectively identical, from our perspective, as
+ they are categorical opposites: that is, all arrows reversed.
+ This was explicitly articulated in a famous paper by Meijer and Bierman.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+ Thus, in the discussions below, if you are more familiar with noSQL, then
+ simply reverse the directions of all arrows to obtain the equivalent discussion.
+\end_layout
+
+\end_inset
+
  However, just as with table-based databases, there are certain types of
  queries that are used a lot, and speeding these up through indexing is
  a key ability.
@@ -2631,7 +2652,7 @@ The whole point of using a graph database, as opposed to an SQL or noSQL
  they might work.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Single attribute queries
 \end_layout
 
@@ -2770,6 +2791,10 @@ sales
 \begin_inset Formula $v_{6},v_{7},v_{8}$
 \end_inset
 
+ and edges 
+\begin_inset Formula $e_{1},e_{2},e_{3},e_{4},e_{5}$
+\end_inset
+
  simply did not exist.
 \end_layout
 
@@ -2826,12 +2851,103 @@ CREATE INDEX ON employees(department) WHERE department=sales;
 
  and this is not a big deal, so, here, at least, graphs do not offer any
  particular advantage.
- (Under the covers, the SQL databases effectively has more-or-less the same
+ Under the covers, the SQL databases effectively has more-or-less the same
  format, although thier graph-based nature is 
 \emph on
 ad hoc
 \emph default
-, as there are no explicit graph-walking directives in SQL.)
+, as there are no explicit graph-walking directives in SQL.
+\end_layout
+
+\begin_layout Standard
+The key point here is that, in a properly-designed graph database, there
+ is no generic need for 
+\begin_inset Quotes eld
+\end_inset
+
+indexes
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\emph on
+per se
+\emph default
+, they can be conjured into being as they are ultimately graphical in nature.
+ In the graph database, the graph structure of the index is explicit, and
+ can be walked.
+\end_layout
+
+\begin_layout Subsection*
+Space and Time
+\end_layout
+
+\begin_layout Standard
+Comparing RAM-usage, at first glance, there is no particular difference.
+ Naively, both require 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N$
+\end_inset
+
+ employees, plus 
+\begin_inset Formula $O\left(M\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $M$
+\end_inset
+
+ different departments.
+ Looking more carefully, there are also the edges 
+\begin_inset Formula $e_{1},e_{2},e_{3},e_{4},e_{5}$
+\end_inset
+
+.
+ In the SQL case, these edges were implicit in the index: after all, the
+ index was a collection of ordered pairs 
+\begin_inset Formula $\left(D,\left\{ R\right\} \right)$
+\end_inset
+
+: the edges run from 
+\begin_inset Formula $D$
+\end_inset
+
+ to 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+.
+ In the graph representation, these edges become explicit: that is, they
+ appear in an explicit table, with attached attributes, even if the attributes
+ are null.
+ Shades of hypergraphs! Why, this was exactly the 
+\emph on
+same
+\emph default
+ situation as with the hypergraph! Squinting more carefully, the indexed
+ employee table is nothing other than a bipartite graph! Thus, one can effective
+ly say: the indexes in an SQL database are 
+\emph on
+de facto
+\emph default
+ hypergraphs under the covers, even though no one ever explicitly says so.
+ The bipartite nature of the graph makes this explicit.
+ Surprise!
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
