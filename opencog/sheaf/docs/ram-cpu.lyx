@@ -3146,6 +3146,73 @@ ept AND orgchart.division='marketing & sales';
 \end_layout
 
 \begin_layout Standard
+The key message here is that metagraphs retain the key benefits of table
+ normalization, while making the graphical nature of indexing explicit.
+ This is an actual improvment over graph stores: by discarding the edge
+ table, and the associated edge attributes, one gets representational compactnes
+s of indexes, without paying a high price for them.
+\end_layout
+
+\begin_layout Section*
+Queries and pattern matching
+\end_layout
+
+\begin_layout Standard
+Key points:
+\end_layout
+
+\begin_layout Itemize
+polytrees can be thought of as either s-expressions or as json.
+\end_layout
+
+\begin_layout Itemize
+Walks are explicit: one moves up or down the trees e.g.
+ the car, cdr of lisp, but also the tinkerpop/gremlin primitives for graph-walki
+ng.
+\end_layout
+
+\begin_layout Itemize
+Tree walks are a prime example of a recursive algorithm, requiring a stack
+ machine to execute, and describable by a context-free grammar.
+\end_layout
+
+\begin_layout Itemize
+This means tree walks can be automated.
+ Rather than designing a search query where the user explicitly states the
+ walk/path to be performed (tinkerpop/gremlin), a context-free grammar can
+ be used to describe the search, which is then executed by the stack machine.
+ This is what 
+\begin_inset Quotes eld
+\end_inset
+
+pattern matching
+\begin_inset Quotes erd
+\end_inset
+
+ actually is.
+\end_layout
+
+\begin_layout Section*
+Connectors and Sheaves
+\end_layout
+
+\begin_layout Standard
+Only now do we get to the main act...
+\end_layout
+
+\begin_layout Itemize
+Specifying (context-free) grammars in a natural way.
+\end_layout
+
+\begin_layout Itemize
+Parsing as jigsaw-puzzle assembly
+\end_layout
+
+\begin_layout Itemize
+RAM and CPU costs of storing jigsaw pieces
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
