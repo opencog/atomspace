@@ -100,7 +100,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-2 Sept 2020 draft version 0.2
+2 Sept 2020 draft version 0.3
 \end_layout
 
 \begin_layout Abstract
@@ -220,17 +220,45 @@ typical
 
 \end_layout
 
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
 \begin_layout Standard
 In practice, one wishes to associate a label to each vertex, and also some
  additional attribute data; likewise for the edges.
- At this time, the JSON format is a very powerful and flexible way of encoding
- attribute data: it can encode variable format structured data consisting
- of strings, numbers, arrays and other kinds of data.
- Thus, for the remainder of this text, it is assumed that attributes are
- encoded in a JSON format.
- There are a variety of ways of encoding JSON; this alone is a substantial
- task, and detailed discussions of this are mostly avoided, except as may
- be relevant.
+ There are two fundamental choices available for storing attributes: merged
+ schema+data, and disjoint schema-data.
+ An example of the first is JSON.
+ Each bit of data to be stored is preceeded by it's name.
+ Additional markup, such as quotes and square brackets, indicate if the
+ data is a string or an array.
+ An example of the second are tables.
+ The name and data type appears only in the column heading; individual rows
+ in the table do not need to repeat the schema.
+ Clearly, the tabular format offers a huge advantage in terms of RAM usage.
+ Conversely, it is highly inflexible when new columns or new schema need
+ to be added.
+ There is no sensible way to take one row of a table, and have it use a
+ different schema than the other rows.
+ It doesn't even make sense to talk about rows with a different schema.
+\end_layout
+
+\begin_layout Standard
+Thus, in a graph store, one has these two choices for storing attributes,
+ both for vertexes and for edges.
+ One might even contemplate a mixture of both; after all, a JSON blob is
+ isomorphic to a table with only a single row.
+ The remainder of this text will make little or no assumptions about the
+ storage format of the attributes.
+ The details of attribute handling has little or no impact on the primary
+ topics here, with possibly one exception: indexing.
+ This is reviewed in a distinct section later on.
+\end_layout
+
+\begin_layout Subsubsection*
+RAM vs.
+ Disk
 \end_layout
 
 \begin_layout Standard
@@ -243,7 +271,22 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  RocksDB.
  It is usually not too hard to take an in-RAM database, and layer it on
  top of one of these systems to obtain a disk-backed database.
- Of course, there are numerous ifs-and-buts, here, these are glossed over.
+ Of course, there are numerous ifs-and-buts; these will be ignored in this
+ text.
+\end_layout
+
+\begin_layout Subsubsection*
+Representing graphs in RAM
+\end_layout
+
+\begin_layout Standard
+Storing a set of vertexes in RAM is straight-forward.
+ Since it is a set, one can use either a hash-table, a b-tree, or even an
+ array or list.
+ For the discussion here, the precise format used is not directly relevant,
+ and so a tabular format will be used to illustrate the ideas.
+ Again, the table rows might actually reside in hash-tables, b-trees, or
+ wherever.
 \end_layout
 
 \begin_layout Standard
@@ -271,7 +314,7 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -418,7 +461,7 @@ tail-vertex
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -642,7 +685,7 @@ outgoing
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -822,6 +865,10 @@ multisets
 : any given edge appears at most once in the incoming/outgoing sets.
  Suitable representations for sets include hash-tables and trees, each with
  it's own distinct RAM and access-time profile.
+\end_layout
+
+\begin_layout Subsubsection*
+Prelude to indexing
 \end_layout
 
 \begin_layout Standard
@@ -3162,7 +3209,7 @@ Key points:
 \end_layout
 
 \begin_layout Itemize
-polytrees can be thought of as either s-expressions or as json.
+Polytrees can be thought of as either s-expressions or as json.
 \end_layout
 
 \begin_layout Itemize
