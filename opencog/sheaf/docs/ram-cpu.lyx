@@ -2615,24 +2615,223 @@ Clearly, the metagraph, having the general shape of a DAG, can be wedged
  one has for index representation.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Indexing
 \end_layout
 
-\begin_layout Section*
-The AtomSpace
+\begin_layout Standard
+The whole point of using a graph database, as opposed to an SQL or noSQL
+ database, is that the graph structure encodes something important about
+ the problem, something that cannot be easily achieved by doing table joins
+ or key-value lookups.
+ However, just as with table-based databases, there are certain types of
+ queries that are used a lot, and speeding these up through indexing is
+ a key ability.
+ How might this work, in practice? Let's examine some queries, and see how
+ they might work.
+\end_layout
+
+\begin_layout Subsubsection*
+Single attribute queries
 \end_layout
 
 \begin_layout Standard
-The AtomSpace is an in-RAM generalized hypergraph or 
+Suppose one wishes to find all nodes with some specific attribute.
+ Naively, this requires walking over all nodes, and then axamining the attached
+ attribute structure (presumed to be JSON-like in form) and then extracting
+ a named field from the attributes, and examining the value of that field.
+ This is a task that SQL databases excel at - for example, 
 \begin_inset Quotes eld
 \end_inset
 
-metagraph
+
+\family sans
+\emph on
+SELECT name,salary FROM employees WHERE department='sales';
+\family default
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
- database.
+.
+ A graph database is not needed for this task.
+ Nonetheless, this is a plausible task.
+ The traditional solution would be 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+CREATE INDEX ON employees(department);
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ which results in the creation of ordered pairs 
+\begin_inset Formula $\left(D,\left\{ R\right\} \right)$
+\end_inset
+
+ with 
+\begin_inset Formula $D$
+\end_inset
+
+ the name of the department, and 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+ the set of all records having that value.
+ The 
+\family typewriter
+\emph on
+SELECT
+\family default
+\emph default
+ is then straight-forward: it need only return 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+.
+ Note that the size of this index is 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of employees.
+ This is necessarily so: one cannot build an index smaller than the number
+ of employees: every employee must be in some department, as, convetionally,
+ table-driven databases don't have null entries in rows.
+ (Well, in practice, they often do; but now imagine the task of finding
+ all records with a null value in some column...) Table-based information also
+ has some representational difficulties: imagine the case of an employee
+ with dashed-line reporting to multiple departments.
+\end_layout
+
+\begin_layout Standard
+How might one accomplish indexing like this in a graph database? The simplest,
+ most naive answer is to create new, 
+\begin_inset Quotes eld
+\end_inset
+
+privileged
+\begin_inset Quotes erd
+\end_inset
+
+ vertexes, one vertex per department.
+ They are 
+\begin_inset Quotes eld
+\end_inset
+
+privileged
+\begin_inset Quotes erd
+\end_inset
+
+, in that the associated attributes record one and only one value: the name
+ of the department.
+ Basically, the vertexes are labelled, thus escaping the overhead of crawling
+ through a collection of attributes to find one in particular.
+ One also created an unlabelled, attribute-free edge, from the department
+ name back to the full employee record.
+ Finding all employees in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is now trivial: one can trivially find the vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and trace all edges to the full record.
+ The contents of the graph database, after indexing, is illustrated below.
+ Before indexing, the vertexes 
+\begin_inset Formula $v_{6},v_{7},v_{8}$
+\end_inset
+
+ simply did not exist.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/partial-index.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The size of this structure is again 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N$
+\end_inset
+
+ employees, assuming every employee is indexed.
+ It has some rather unusual properties: not every employee has to be indexed!
+ It is possible to create only one vertex, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and hook up edges to only that one.
+ Effectively, one has a partial-index, with correspondingly less RAM usage!
+ Of course, with some cleverness, an experienced DBA can acheive the same
+ effect: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+CREATE INDEX ON employees(department) WHERE department=sales;
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and this is not a big deal, so, here, at least, graphs do not offer any
+ particular advantage.
+ (Under the covers, the SQL databases effectively has more-or-less the same
+ format, although thier graph-based nature is 
+\emph on
+ad hoc
+\emph default
+, as there are no explicit graph-walking directives in SQL.)
 \end_layout
 
 \end_body
