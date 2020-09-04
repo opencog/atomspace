@@ -243,7 +243,7 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  RocksDB.
  It is usually not too hard to take an in-RAM database, and layer it on
  top of one of these systems to obtain a disk-backed database.
- Of course, there are numerous ifs-ands-buts, here, these are glossed over.
+ Of course, there are numerous ifs-and-buts, here, these are glossed over.
 \end_layout
 
 \begin_layout Standard
@@ -1548,7 +1548,7 @@ json-data
 
 \begin_layout Standard
 This requires a data-structure that is a list-of-sets, which can be a bit
- overcomplex and challenging to use.
+ over-complex and challenging to use.
  It is easier to just mash all of these into one set; this is all that is
  needed for hypergraph traversal.
  If the positional location is needed, then it can always be looked up per-edge.
@@ -2126,7 +2126,7 @@ The scale factor
 \end_inset
 
  is data-dependent.
- For wikipedia page views, 
+ For Wikipedia page views, 
 \begin_inset Formula $A\approx20$
 \end_inset
 
@@ -2598,7 +2598,7 @@ sets
 ; the outgoing-set, however, is not a set but an ordered list.
  In terms of designing storage, the naive graph tables, the hypergraph tables,
  and the metagraph tables seem to have much in common.
- This is, however, perhaps a bit deceptive, as performance considrations
+ This is, however, perhaps a bit deceptive, as performance considerations
  dictate the finer aspects of the design.
 \end_layout
 
@@ -2607,7 +2607,7 @@ Clearly, the metagraph, having the general shape of a DAG, can be wedged
  into an ordinary graph store.
  Conversely, an ordinary graph is merely a metagraph that never goes more
  than one-level deep, and whose links always have arity-two.
- Eithr format is adequate for representing the other.
+ Either format is adequate for representing the other.
  The metagraph, much like the hypergraph, has no need to explicitly declare
  the arrows in the tree; they are not stored, nor do they have attributes.
  The RAM-usage considerations are much like those for the hypergraph.
@@ -2623,7 +2623,7 @@ Indexing
 The whole point of using a graph database, as opposed to an SQL or noSQL
  database, is that the graph structure encodes something important about
  the problem, something that cannot be easily achieved by doing table joins
- or key-value lookups.
+ or key-value look-ups.
 \begin_inset Foot
 status collapsed
 
@@ -2658,7 +2658,7 @@ Single attribute queries
 
 \begin_layout Standard
 Suppose one wishes to find all nodes with some specific attribute.
- Naively, this requires walking over all nodes, and then axamining the attached
+ Naively, this requires walking over all nodes, and then examining the attached
  attribute structure (presumed to be JSON-like in form) and then extracting
  a named field from the attributes, and examining the value of that field.
  This is a task that SQL databases excel at - for example, 
@@ -2724,7 +2724,7 @@ SELECT
 
  is the number of employees.
  This is necessarily so: one cannot build an index smaller than the number
- of employees: every employee must be in some department, as, convetionally,
+ of employees: every employee must be in some department, as, conventionally,
  table-driven databases don't have null entries in rows.
  (Well, in practice, they often do; but now imagine the task of finding
  all records with a null value in some column...) Table-based information also
@@ -2753,9 +2753,9 @@ privileged
 
 , in that the associated attributes record one and only one value: the name
  of the department.
- Basically, the vertexes are labelled, thus escaping the overhead of crawling
+ Basically, the vertexes are labeled, thus escaping the overhead of crawling
  through a collection of attributes to find one in particular.
- One also created an unlabelled, attribute-free edge, from the department
+ One also created an unlabeled, attribute-free edge, from the department
  name back to the full employee record.
  Finding all employees in 
 \begin_inset Quotes eld
@@ -2836,7 +2836,7 @@ sales
 
 , and hook up edges to only that one.
  Effectively, one has a partial-index, with correspondingly less RAM usage!
- Of course, with some cleverness, an experienced DBA can acheive the same
+ Of course, with some cleverness, an experienced DBA can achieve the same
  effect: 
 \begin_inset Quotes eld
 \end_inset
@@ -2852,7 +2852,7 @@ CREATE INDEX ON employees(department) WHERE department=sales;
  and this is not a big deal, so, here, at least, graphs do not offer any
  particular advantage.
  Under the covers, the SQL databases effectively has more-or-less the same
- format, although thier graph-based nature is 
+ format, although their graph-based nature is 
 \emph on
 ad hoc
 \emph default
@@ -2939,11 +2939,11 @@ de facto
 \end_layout
 
 \begin_layout Standard
-CPU usage considerations are harder to disect.
+CPU usage considerations are harder to dissect.
  To avoid discussions of network overhead in client-server architectures,
  its easier, here, to limit discussions to databases that run in the same
  address space as the application.
- Thus, for SQL benchmarking, one might look at SQLite, which runs embedded,
+ Thus, for SQL bench-marking, one might look at SQLite, which runs embedded,
  rather than Postgres, which requires network interfaces.
  Queries usually begin life as strings, for example, 
 \begin_inset Quotes eld
@@ -3014,7 +3014,7 @@ sales
 \begin_inset Formula $\left\{ R\right\} $
 \end_inset
 
- of emplyees in 
+ of employees in 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3040,10 +3040,10 @@ Partial indexes
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
  when one considers mapping an organizational chart onto the above example.
- Conventionally, corporations, poltical and military organziations are organized
- hierarchically, with divisions reporting to executives, departments rolling
- up into divisions, and so on.
- This in the form of a DAG, and, incomplex organizations, the DAG has the
+ Conventionally, corporations, political and military organizations are
+ organized hierarchically, with divisions reporting to executives, departments
+ rolling up into divisions, and so on.
+ This in the form of a DAG, and, in complex organizations, the DAG has the
  form of a polytree, as illustrated for the metagraph data structure.
 \end_layout
 
@@ -3093,7 +3093,7 @@ database normalization
 \begin_inset Formula $N$
 \end_inset
 
- emplyees, this requires 
+ employees, this requires 
 \begin_inset Formula $O\left(5N\right)$
 \end_inset
 
@@ -3112,8 +3112,8 @@ normalizes
 
  in size, and the remainder of the org chart in a table, also of two columns,
  showing the reporting structure.
- This offrs a huge space savings.
- Lookups proceed through table joins: to find all employees in a division,
+ This offers a huge space savings.
+ Look-ups proceed through table joins: to find all employees in a division,
  one looks up what 2nd lines report to the division, what departments report
  to the second line, and what employees report to the departments.
  The indexing proceeds just as described above, and the table joins are
@@ -3130,8 +3130,8 @@ ad hoc
 
 \family sans
 \emph on
-SELECT emplyees.name FROM employees, orgchart WHERE employees.department=orgchart.d
-ept AND orgchart.division='marketing & sales';
+SELECT employees.name FROM employees, orgchart WHERE employees.department=orgchart.
+dept AND orgchart.division='marketing & sales';
 \family default
 \emph default
 
@@ -3141,14 +3141,14 @@ ept AND orgchart.division='marketing & sales';
 .
  To be correct, this example is oversimplified by quite a bit, but it does
  convey the general spirit of the thing.
- It is attemptig to specify a graph-walk without explicitly acknowledging
+ It is attempting to specify a graph-walk without explicitly acknowledging
  that there is a graph hidden under the covers.
 \end_layout
 
 \begin_layout Standard
 The key message here is that metagraphs retain the key benefits of table
  normalization, while making the graphical nature of indexing explicit.
- This is an actual improvment over graph stores: by discarding the edge
+ This is an actual improvement over graph stores: by discarding the edge
  table, and the associated edge attributes, one gets representational compactnes
 s of indexes, without paying a high price for them.
 \end_layout
