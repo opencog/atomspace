@@ -1765,7 +1765,7 @@ almost
 \align center
 \begin_inset Graphics
 	filename graphics/hypergraph.eps
-	lyxscale 40
+	lyxscale 60
 	width 40col%
 
 \end_inset
@@ -2936,6 +2936,213 @@ de facto
  hypergraphs under the covers, even though no one ever explicitly says so.
  The bipartite nature of the graph makes this explicit.
  Surprise!
+\end_layout
+
+\begin_layout Standard
+CPU usage considerations are harder to disect.
+ To avoid discussions of network overhead in client-server architectures,
+ its easier, here, to limit discussions to databases that run in the same
+ address space as the application.
+ Thus, for SQL benchmarking, one might look at SQLite, which runs embedded,
+ rather than Postgres, which requires network interfaces.
+ Queries usually begin life as strings, for example, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT name,salary FROM employees WHERE department='sales';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ was a string that had to be parsed to figure out 
+\begin_inset Quotes eld
+\end_inset
+
+what to do
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Let's assume that this cost has been amortized, and that there is a way
+ to get a handle to a query that has already been analyzed.
+ Query run-time execution is then a matter of finding the vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, tracing the edges to each of the employees, and completing the work by
+ analyzing each employee.
+ If vertexes themselves are indexed (as they should be), then locating the
+ vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is either 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ for hash tables, or 
+\begin_inset Formula $O\left(\log V\right)$
+\end_inset
+
+ for trees.
+ In the hypergraph representation, finding the set 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+ of emplyees in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ comes for free.
+ The dominant cost is almost surely the analysis needed to extract the desired
+ information from the record attributes.
+\end_layout
+
+\begin_layout Subsection*
+Partial indexes
+\end_layout
+
+\begin_layout Standard
+The power of partial indexes together with metagraphs begins to reveal itself
+ when one considers mapping an organizational chart onto the above example.
+ Conventionally, corporations, poltical and military organziations are organized
+ hierarchically, with divisions reporting to executives, departments rolling
+ up into divisions, and so on.
+ This in the form of a DAG, and, incomplex organizations, the DAG has the
+ form of a polytree, as illustrated for the metagraph data structure.
+\end_layout
+
+\begin_layout Standard
+The conceptual jump here is then: rather than stopping with a single-level
+ hypergraph, where there are 
+\begin_inset Quotes eld
+\end_inset
+
+tables
+\begin_inset Quotes erd
+\end_inset
+
+, and then there are 
+\begin_inset Quotes eld
+\end_inset
+
+indexes
+\begin_inset Quotes erd
+\end_inset
+
+ that are 
+\begin_inset Quotes eld
+\end_inset
+
+on top of tables
+\begin_inset Quotes erd
+\end_inset
+
+, one can go further: indexes of indexes: namely the polytree or metagraph.
+\end_layout
+
+\begin_layout Standard
+The implication for storage is similar to that of 
+\begin_inset Quotes eld
+\end_inset
+
+database normalization
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In a naive table format, one might store, for each employee, the employee
+ name, the department, the 2nd line, the division and the name of the company,
+ the latter being needed if one was handling multiple companies.
+ This is a bit silly in terms of storage: 5 columns are needed; for 
+\begin_inset Formula $N$
+\end_inset
+
+ emplyees, this requires 
+\begin_inset Formula $O\left(5N\right)$
+\end_inset
+
+ storage.
+ One 
+\begin_inset Quotes eld
+\end_inset
+
+normalizes
+\begin_inset Quotes erd
+\end_inset
+
+ by storing only the employee-department relationship with a table of 
+\begin_inset Formula $O\left(2N\right)$
+\end_inset
+
+ in size, and the remainder of the org chart in a table, also of two columns,
+ showing the reporting structure.
+ This offrs a huge space savings.
+ Lookups proceed through table joins: to find all employees in a division,
+ one looks up what 2nd lines report to the division, what departments report
+ to the second line, and what employees report to the departments.
+ The indexing proceeds just as described above, and the table joins are
+ an 
+\emph on
+ad hoc
+\emph default
+ graph walk.
+ The SQL for this is a bit nasty, but still effectively human-readable:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT emplyees.name FROM employees, orgchart WHERE employees.department=orgchart.d
+ept AND orgchart.division='marketing & sales';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ To be correct, this example is oversimplified by quite a bit, but it does
+ convey the general spirit of the thing.
+ It is attemptig to specify a graph-walk without explicitly acknowledging
+ that there is a graph hidden under the covers.
 \end_layout
 
 \begin_layout Standard
