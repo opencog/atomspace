@@ -2814,7 +2814,7 @@ The author would like to apologize for this seemingly non-sexy example.
 \end_inset
 
  A graph database is not needed for this task.
- Nonetheless, this is a plausible task.
+ Nonetheless, this is a plausible task, even for a graph database.
  The traditional solution would be 
 \begin_inset Quotes eld
 \end_inset
@@ -2846,7 +2846,11 @@ CREATE INDEX ON employees(department);
 SELECT
 \family default
 \emph default
- is then straight-forward: it need only return 
+ is then straight-forward: given 
+\begin_inset Formula $D$
+\end_inset
+
+, it need only return 
 \begin_inset Formula $\left\{ R\right\} $
 \end_inset
 
@@ -2933,6 +2937,7 @@ sales
 \end_inset
 
  simply did not exist.
+ The act of indexing creates these vertexes and edges.
 \end_layout
 
 \begin_layout Standard
@@ -2956,8 +2961,20 @@ The size of this structure is again
 \end_inset
 
  employees, assuming every employee is indexed.
- It has some rather unusual properties: not every employee has to be indexed!
- It is possible to create only one vertex, 
+ More precisely, it is 
+\begin_inset Formula $O\left(N\right)+O\left(N_{D}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ is the number of departments.
+\end_layout
+
+\begin_layout Standard
+This diagram exposes some unusual possibilities: not every employee has
+ to be indexed! It is possible to create only one vertex, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2987,8 +3004,8 @@ CREATE INDEX ON employees(department) WHERE department=sales;
 \end_inset
 
  and this is not a big deal, so, here, at least, graphs do not offer any
- particular advantage.
- Under the covers, the SQL databases effectively has more-or-less the same
+ particular advantage, other than perhaps some conceptual clarity.
+ Under the covers, the SQL databases effectively have more-or-less the same
  format, although their graph-based nature is 
 \emph on
 ad hoc
@@ -3010,9 +3027,10 @@ indexes
 \emph on
 per se
 \emph default
-, they can be conjured into being as they are ultimately graphical in nature.
- In the graph database, the graph structure of the index is explicit, and
- can be walked.
+, they can be conjured into being at any time, as they are ultimately graphical
+ in nature.
+ There's even a bit of an advantage: in the graph database, the graph structure
+ of the index is explicit, and can be walked.
 \end_layout
 
 \begin_layout Subsection*
@@ -3020,7 +3038,8 @@ Space and Time
 \end_layout
 
 \begin_layout Standard
-Comparing RAM-usage, at first glance, there is no particular difference.
+Comparing RAM-usage, at first glance, there is no particular difference
+ between the SQL and the graph database.
  Naively, both require 
 \begin_inset Formula $O\left(N\right)$
 \end_inset
@@ -3030,11 +3049,11 @@ Comparing RAM-usage, at first glance, there is no particular difference.
 \end_inset
 
  employees, plus 
-\begin_inset Formula $O\left(M\right)$
+\begin_inset Formula $O\left(N_{D}\right)$
 \end_inset
 
  for 
-\begin_inset Formula $M$
+\begin_inset Formula $N_{D}$
 \end_inset
 
  different departments.
@@ -3076,13 +3095,56 @@ de facto
 \end_layout
 
 \begin_layout Standard
+The explicit hypergraph representation does cost more than SQL.
+ An SQL index can be a b-tree or hash table; the only thing that the b-tree/hash
+ table needs to store is the row ID.
+ For a hypergraph, we have imposed the additional requirement that hypergraphs
+ must be rapidly traversible.
+ This forces the storage of the incoming set in addition to the outgoing
+ set.
+ Hypergraph stores necessarily use more RAM than equivalent SQL tables.
+ But recall why we did this: rapid graph traversal.
+ Graph traversal in SQL is easy for trivial graphs, but becomes profoundly
+ challenging for anything more complex.
+ Mashing up 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT INTO
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ with 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+JOIN
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is tough.
+\end_layout
+
+\begin_layout Standard
 CPU usage considerations are harder to dissect.
  To avoid discussions of network overhead in client-server architectures,
  its easier, here, to limit discussions to databases that run in the same
  address space as the application.
  Thus, for SQL bench-marking, one might look at SQLite, which runs embedded,
  rather than Postgres, which requires network interfaces.
- Queries usually begin life as strings, for example, 
+ Queries usually begin life as text-strings, for example, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3096,7 +3158,7 @@ SELECT name,salary FROM employees WHERE department='sales';
 \begin_inset Quotes erd
 \end_inset
 
- was a string that had to be parsed to figure out 
+ was a text-string that had to be parsed to figure out 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3122,7 +3184,7 @@ sales
 \end_inset
 
 , tracing the edges to each of the employees, and completing the work by
- analyzing each employee.
+ extracting fields for each employee.
  If vertexes themselves are indexed (as they should be), then locating the
  vertex 
 \begin_inset Quotes eld
@@ -3143,7 +3205,7 @@ sales
 \end_inset
 
  for hash tables, or 
-\begin_inset Formula $O\left(\log V\right)$
+\begin_inset Formula $O\left(\log N_{D}\right)$
 \end_inset
 
  for trees.
@@ -3176,9 +3238,14 @@ Partial indexes
 
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
- when one considers several examples.
- Sticking with the management example from above, one extend and look at
- organizational structures (org charts).
+ when one considers query and search query optimization.
+ This text is long enough, so this will be defered to a later chapter.
+\end_layout
+
+\begin_layout Standard
+Partial indexes reveal thier utility in another way.
+ Sticking with the management example from above, consider extending and
+ looking at organizational structures (org charts).
 \end_layout
 
 \begin_layout Standard
@@ -3186,13 +3253,13 @@ Conventionally, corporations, political and military organizations are organized
  hierarchically, with divisions reporting to executives, departments rolling
  up into divisions, and so on.
  This is precisely the structure of a metatree.
- It is tempting to gloss this, and see the org chart is a tree, or perhaps
- a DAG.
+ It is tempting to gloss this, and say that the org chart is a tree, or
+ perhaps a DAG.
  It is not! It is a metatree, and confusion arises because a metatree can
  be collapsed to a DAG in several different ways.
- So, consider a division chief who manages a line.
- One can draw the org-chart several ways: by drawing a line from a manager
- to each (named) employee that they manage, or from a manager to functional
+ So, consider a division chief who manages a line item.
+ One can draw the org-chart several ways: by drawing an edge from a manager
+ to each (named) employee that they manage, or from the manager to a functional
  box labelled with the function.
  Employees are then grouped inside these functional boxes.
  This is shown below.
@@ -3243,7 +3310,7 @@ just a tree
 
 \begin_layout Standard
 The conceptual jump here is then: rather than stopping with a single-level
- hypergraph, where there are 
+ hypergraph, which had 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3251,7 +3318,7 @@ tables
 \begin_inset Quotes erd
 \end_inset
 
-, and then there are 
+ and 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3259,7 +3326,7 @@ indexes
 \begin_inset Quotes erd
 \end_inset
 
- that are 
+ that were 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3280,8 +3347,9 @@ database normalization
 \end_inset
 
 .
- In a naive table format, one might store, for each employee, the employee
- name, the department, the 2nd line, the division and the name of the company.
+ In a naive, un-normalized table format, one might store, for each employee,
+ the employee name, the department, the 2nd line, the division and the name
+ of the company.
  This is a bit silly in terms of storage: 5 columns are needed; for 
 \begin_inset Formula $N$
 \end_inset
@@ -3306,10 +3374,27 @@ normalizes
  in size, and the remainder of the org chart in a separate table, also of
  two columns, encoding the directed tree reporting structure.
  This offers a huge space savings.
- Look-ups proceed through table joins: to find all employees in a division,
- one looks up what 2nd lines report to the division, what departments report
- to the second line, and what employees report to the departments.
- The indexing proceeds just as described in the previous section.
+ For 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ departments/divisions, this second table is 
+\begin_inset Formula $O\left(2N_{D}\right)$
+\end_inset
+
+ and clearly, 
+\begin_inset Formula $O\left(5N\right)\gg O\left(2N\right)+O\left(2N_{D}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Look-ups in a normalized database proceed through table joins.
+ To find all employees in a division, one looks up what 2nd lines report
+ to the division, what departments report to the second line, and what employees
+ report to the departments.
+ The indexing proceeds just as described before.
  The table joins are an 
 \emph on
 ad hoc
@@ -3332,6 +3417,25 @@ dept AND orgchart.division='marketing & sales';
 \end_inset
 
 .
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Its nasty, because we have to 
+\begin_inset Quotes eld
+\end_inset
+
+join
+\begin_inset Quotes erd
+\end_inset
+
+ different rows in the org chart table.
+ SQL does not offer any basic primitives for joining different rows together;
+ this requires a good bit of creativity on the part of the DBA.
+\end_layout
+
+\end_inset
+
  This SQL snippet is oversimplified by quite a bit, but it does convey the
  general spirit of the thing.
  It is attempting to specify a graph-walk without explicitly acknowledging
@@ -3342,8 +3446,63 @@ dept AND orgchart.division='marketing & sales';
 The key message here is that metagraphs retain the key benefits of table
  normalization, while making the graphical nature of indexing explicit.
  This is an actual improvement over graph stores: by discarding the edge
- table, and the associated edge attributes, one gets the representational
- compactness of indexes, without paying a high price for them.
+ table (that the graph store demands), and the associated edge attributes,
+ one gets the representational compactness of indexes, without paying a
+ high price for them.
+ The price one does pay (the incoming set) enables something quite dramatic:
+ an easy graph walk, which is anything-but-easy in a traditional SQL database.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+OK, sure, it becomes 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+ if you are willing to write PL/SQL, or, if your database supports it, then
+ embeded Python.
+ Otherwise, you have to descend into C/C++ (or your other favorite programming
+ language of choice), and once you are 
+\begin_inset Quotes eld
+\end_inset
+
+programming
+\begin_inset Quotes erd
+\end_inset
+
+, it is no longer 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A properly designed graph query system makes graph walks 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ And, to take one quick pot-shot: GraphQL is not properly designed.
+ It is effectively a query anti-pattern.
+ It took what is nice about SQL, but then utterly failed to take into account
+ anything and everything that this text is trying to explain.
+ It is not for nothing that the OpenCog AtomSpace differs so dramatically
+ from everything else out there.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
