@@ -1,0 +1,211 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Pattern matching
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+5 Sept 2020
+\end_layout
+
+\begin_layout Abstract
+A discussion of pattern matching and also sheaves and the ram and CPU usage.
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+The connectors-and-sheaves concepts sketched in this series of texts provide
+ a different way of representing graphs, and working with them.
+ This representation is not just abstract nonsense, but has actual implications
+ for RAM and CPU consumption.
+ The current prototype experiments with sheaves are layered on top of the
+ OpenCog AtomSpace, which is an in-RAM database for storing generalized
+ hypergraphs or 
+\begin_inset Quotes eld
+\end_inset
+
+metagraphs
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It has it's own distinct representation, with certain implications for
+ CPU and RAM utilization.
+\end_layout
+
+\begin_layout Standard
+The goal of this text is to look at these three systems, and compare how
+ they use RAM and CPU resources.
+ Describing the AtomSpace is the easiest, because the current implementation
+ has a specific form.
+ Describing a graph database is a bit harder, as we assume a generic, naive
+ design, which actual implementations may or may not follow.
+ Describing the connectionist database presents similar trouble: without
+ a specific implementation and the experience from using it, statements
+ have to be generalized.
+\end_layout
+
+\begin_layout Standard
+Each of these is described in turn, followed by a discussion of algorithms.
+\end_layout
+
+\begin_layout Subsubsection*
+Summary
+\end_layout
+
+\begin_layout Standard
+Key points:
+\end_layout
+
+\begin_layout Itemize
+Metatrees can be thought of as either s-expressions or as json.
+ But with a cactch...
+\end_layout
+
+\begin_layout Itemize
+Walks are explicit: one moves up or down the trees e.g.
+ the car, cdr of lisp, but also the tinkerpop/gremlin primitives for graph-walki
+ng.
+\end_layout
+
+\begin_layout Itemize
+Tree walks are a prime example of a recursive algorithm, requiring a stack
+ machine to execute, and describable by a context-free grammar.
+\end_layout
+
+\begin_layout Itemize
+This means tree walks can be automated.
+ Rather than designing a search query where the user explicitly states the
+ walk/path to be performed (tinkerpop/gremlin), a context-free grammar can
+ be used to describe the search, which is then executed by the stack machine.
+ This is what 
+\begin_inset Quotes eld
+\end_inset
+
+pattern matching
+\begin_inset Quotes erd
+\end_inset
+
+ actually is.
+\end_layout
+
+\begin_layout Section*
+Connectors and Sheaves
+\end_layout
+
+\begin_layout Standard
+Only now do we get to the main act...
+\end_layout
+
+\begin_layout Itemize
+Specifying (context-free) grammars in a natural way.
+\end_layout
+
+\begin_layout Itemize
+Parsing as jigsaw-puzzle assembly
+\end_layout
+
+\begin_layout Itemize
+RAM and CPU costs of storing jigsaw pieces
+\end_layout
+
+\end_body
+\end_document

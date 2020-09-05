@@ -92,7 +92,7 @@ figs-within-sections
 \begin_body
 
 \begin_layout Title
-Graphs, Sheaves, RAM, CPU
+Graphs, Metagraphs, RAM, CPU
 \end_layout
 
 \begin_layout Author
@@ -100,23 +100,32 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-2 Sept 2020 draft version 0.3
+2 Sept 2020 Version 1.0
 \end_layout
 
 \begin_layout Abstract
-Using connectors-and-sheaves for knowledge representation has distinct implicati
-ons for RAM usage and CPU cycles.
- This text sketches and compares memory and CPU usage for three types of
- systems: a naive graph database, the current OpenCog AtomSpace, which is
- an in-RAM metagraph database, and a hypothetical connector-based database.
- The design constraints are such that several different kinds of typical
- knowledge-representation tasks must be efficient and performant; these
- include graph traversal (pattern matching), graph rewriting, and parsing
- (rule application).
+This text reviews the concepts of a graph store, starting from the fundamental
+ question of how to efficiently represent a graph in RAM (that is, in storage).
+ Starting with a naive conception of a graph database, it arrives at hypergraphs
+ and metagraphs as simpler and more efficient representations for graphical
+ data.
 \end_layout
 
 \begin_layout Abstract
-This is a work in progress ...
+Once one arrives at the concept of a metagraph (and arrives at it quite
+ naturally, through minor modifications of an ordinary graph store), there
+ is then a rather remarkable and easy slide down-hill that culminates at
+ the OpenCog AtomSpace and Atomese as a (near-)optimal design point.
+ The metagraph representation is remarkably flexible and powerful tool for
+ representing data (representing knowledge) and working with (manipulating,
+ rewriting) that data.
+\end_layout
+
+\begin_layout Abstract
+This is part of a sequence of texts on sheaves, although it does not explicitly
+ mention these.
+ It is a manditory pre-requisite for understanding the further efficiencies
+ and flexibility that sheaves provide.
 \end_layout
 
 \begin_layout Section*
@@ -4098,66 +4107,6 @@ Of course, what happens inside a compiler is very narrow, and veery carefully
  a huge representational efficiency over plain graphs or SQL/noSQL tables.
  The efficiency is both computational (RAM usage, CPU cycles) and expressive:
  writing inferences in prolog really is a lot easier than writing SQL statements.
-\end_layout
-
-\begin_layout Subsubsection*
-Summary
-\end_layout
-
-\begin_layout Standard
-Key points:
-\end_layout
-
-\begin_layout Itemize
-Metatrees can be thought of as either s-expressions or as json.
- But with a cactch...
-\end_layout
-
-\begin_layout Itemize
-Walks are explicit: one moves up or down the trees e.g.
- the car, cdr of lisp, but also the tinkerpop/gremlin primitives for graph-walki
-ng.
-\end_layout
-
-\begin_layout Itemize
-Tree walks are a prime example of a recursive algorithm, requiring a stack
- machine to execute, and describable by a context-free grammar.
-\end_layout
-
-\begin_layout Itemize
-This means tree walks can be automated.
- Rather than designing a search query where the user explicitly states the
- walk/path to be performed (tinkerpop/gremlin), a context-free grammar can
- be used to describe the search, which is then executed by the stack machine.
- This is what 
-\begin_inset Quotes eld
-\end_inset
-
-pattern matching
-\begin_inset Quotes erd
-\end_inset
-
- actually is.
-\end_layout
-
-\begin_layout Section*
-Connectors and Sheaves
-\end_layout
-
-\begin_layout Standard
-Only now do we get to the main act...
-\end_layout
-
-\begin_layout Itemize
-Specifying (context-free) grammars in a natural way.
-\end_layout
-
-\begin_layout Itemize
-Parsing as jigsaw-puzzle assembly
-\end_layout
-
-\begin_layout Itemize
-RAM and CPU costs of storing jigsaw pieces
 \end_layout
 
 \begin_layout Standard
