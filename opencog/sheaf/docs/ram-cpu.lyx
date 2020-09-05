@@ -3145,7 +3145,7 @@ Conventionally, corporations, political and military organizations are organized
 \begin_inset Graphics
 	filename graphics/org-chart.eps
 	lyxscale 70
-	width 30col%
+	width 25col%
 
 \end_inset
 
@@ -3213,7 +3213,7 @@ on top of tables
 \end_layout
 
 \begin_layout Standard
-The implication for storage is similar to that of 
+The implication for RAM usage is similar to that of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3223,8 +3223,7 @@ database normalization
 
 .
  In a naive table format, one might store, for each employee, the employee
- name, the department, the 2nd line, the division and the name of the company,
- the latter being needed if one was handling multiple companies.
+ name, the department, the 2nd line, the division and the name of the company.
  This is a bit silly in terms of storage: 5 columns are needed; for 
 \begin_inset Formula $N$
 \end_inset
@@ -3246,14 +3245,14 @@ normalizes
 \begin_inset Formula $O\left(2N\right)$
 \end_inset
 
- in size, and the remainder of the org chart in a table, also of two columns,
- showing the reporting structure.
+ in size, and the remainder of the org chart in a separate table, also of
+ two columns, encoding the directed tree reporting structure.
  This offers a huge space savings.
  Look-ups proceed through table joins: to find all employees in a division,
  one looks up what 2nd lines report to the division, what departments report
  to the second line, and what employees report to the departments.
- The indexing proceeds just as described above, and the table joins are
- an 
+ The indexing proceeds just as described in the previous section.
+ The table joins are an 
 \emph on
 ad hoc
 \emph default
@@ -3275,8 +3274,8 @@ dept AND orgchart.division='marketing & sales';
 \end_inset
 
 .
- To be correct, this example is oversimplified by quite a bit, but it does
- convey the general spirit of the thing.
+ This SQL snippet is oversimplified by quite a bit, but it does convey the
+ general spirit of the thing.
  It is attempting to specify a graph-walk without explicitly acknowledging
  that there is a graph hidden under the covers.
 \end_layout
@@ -3285,8 +3284,8 @@ dept AND orgchart.division='marketing & sales';
 The key message here is that metagraphs retain the key benefits of table
  normalization, while making the graphical nature of indexing explicit.
  This is an actual improvement over graph stores: by discarding the edge
- table, and the associated edge attributes, one gets representational compactnes
-s of indexes, without paying a high price for them.
+ table, and the associated edge attributes, one gets the representational
+ compactness of indexes, without paying a high price for them.
 \end_layout
 
 \begin_layout Section*
@@ -3298,8 +3297,339 @@ Query/pattern-matching algorithms on graphs are necessarily recursive.
  This is because every graph can be decomposed into a collection of trees,
  and tree-walks are recursive.
  The metagraph makes this decomposition trivial: it is alrready in the form
- of a collection of trees, or, more properly, a latttice,  and so has natural
- starting, ending and turn-around points.
+ of a collection of trees (metatrees), and so has natural starting, ending
+ and turn-around points.
+\end_layout
+
+\begin_layout Subsection*
+Metatrees, s-expressions and JSON
+\end_layout
+
+\begin_layout Standard
+The propery way of representing a meta-tree as a string can be mildly confusing
+ to the beginer.
+ Consider again the generic example:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph.eps
+	lyxscale 60
+	width 20col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be written as 
+\begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
+\end_inset
+
+ or perhaps, with indentation, but without parenthesis (python-style aka
+ 
+\begin_inset Quotes eld
+\end_inset
+
+significant whitespace
+\begin_inset Quotes erd
+\end_inset
+
+) to improve readability: 
+\begin_inset Formula 
+\[
+\begin{array}{cccc}
+e_{4}: & e_{3}: & e_{1}: & n_{1}\\
+ &  &  & n_{2}\\
+ &  & e_{2}: & n_{2}\\
+ &  &  & n_{3}\\
+ &  & n_{1}\\
+ &  & e_{2}: & n_{2}\\
+ &  &  & n_{3}\\
+ & n_{3}
+\end{array}
+\]
+
+\end_inset
+
+To understant this last, indentation matters.
+ A strange thing has happened here: the nodes 
+\begin_inset Formula $n_{1},n_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ appear in multiple places, yet they are supposed to be 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise for 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+, which appears twice, but is meant to be the same 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ both times.
+\end_layout
+
+\begin_layout Standard
+This presents a difficulty for JSON.
+ Ordinary JSON does not support object references; there is no way to say
+ the 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ and the 
+\begin_inset Formula $n_{k}$
+\end_inset
+
+'s are 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There is an IETF draft standard for references, but it is not widely used.
+ Thus, although metatrees can be represented with JSON, some care must be
+ taken when parsing them: one must find all repeated objects and understand
+ them to be universally unique.
+ That is, one must replace all repeated objects by universally unique references.
+\end_layout
+
+\begin_layout Standard
+It is very tempting, at this point, to write 
+\begin_inset Quotes eld
+\end_inset
+
+just use universally unique identifiers
+\begin_inset Quotes erd
+\end_inset
+
+ (UUID's).
+ This is good enough for local address spaces; if nothing else, then an
+ ordinary C/C++ pointer is a UUID to the object.
+ However, UUID's cause major, fundamental problems when considering network-dist
+ributed storage; this is the problem of UUID collision.
+ One solution is to have a single centralized atomic issuer of ID's that
+ can gauranteee uniqueness.
+ This introduces a single centralized bottleneck.
+ Another solution is to use cryptographic hashes.
+ Each meta-tree string can be hashed down to a number.
+ To avoid collisions due to the birthday paradox, the hashes have to be
+ quite large.
+ For 1 million distinct atoms, a 64-bit hash and crossed fingers should
+ be enough; uncrossing the fingers requires at least a 96-bit hash.
+ For a trillion atoms, a 128-bit hash is just barely enough and a 192-bit
+ hash is preferred.
+ These eat up RAM (as compared to pointers) and the computation of cryptographic
+ hashes requires significant CPU overhead.
+\end_layout
+
+\begin_layout Standard
+Merely adding references to JSON is not enough to solve the problem, either.
+ There may be millions or billions of meta-trees; forcing the user correctly
+ employ references across all of them, without error is unreasonable.
+ Worse: new meta-trees could be added weeks or months apart.
+ Using references would force the user to maintain a table of references
+ over long time periods.
+ How? Where shall this table be stored? How much RAM will it require? References
+ can be convenient, but they don't solve the fundamental representational
+ problem for metatrees.
+\end_layout
+
+\begin_layout Standard
+When a metatree is added to a metagraph, a scan must be made to determine
+ if the tree, or any subtree already occurs in the metagraph.
+ This does require indexing on the metagraph.
+ Using indexes as described in the previous section introduces a bit of
+ a checken-and-egg problem.
+ Thus, at the meta-graph store level, a naked b-tree or hash table is required.
+ Here, (non-cryptographic) hashes are useful, as they can be made small,
+ and the hash table itself resolves any collisions.
+ This disambiguation adds to the cost of insertion and eletion into a metagraph
+ store.
+\end_layout
+
+\begin_layout Standard
+This can be contrasted with relational (SQL) stores.
+ In SQL, tables have primary keys; these are the primary indexes for each
+ row.
+ They are always made explicit; a table schema is declared with one of the
+ columns designated as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+PRIMARY KEY
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In a metagraph, each distinct node and link is ...
+ distinct, and unique.
+ No explicit declaration is needed; uniqueness is implicit in the defintion.
+\end_layout
+
+\begin_layout Standard
+Since nodes and links (atoms) are unique, the subscripts on the hyperedges
+ are not required.
+ Nor is the use of the colon.
+ The above is representable with the S-expression
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two))
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Node 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+The same considerations about repeated objects apply.
 \end_layout
 
 \begin_layout Subsubsection*
