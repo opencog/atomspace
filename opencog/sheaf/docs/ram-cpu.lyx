@@ -3302,7 +3302,7 @@ Query/pattern-matching algorithms on graphs are necessarily recursive.
 \end_layout
 
 \begin_layout Subsection*
-Metatrees, s-expressions and JSON
+Metatrees, JSON and s-expressions
 \end_layout
 
 \begin_layout Standard
@@ -3632,6 +3632,474 @@ three
 The same considerations about repeated objects apply.
 \end_layout
 
+\begin_layout Subsection*
+Types and Atomese
+\end_layout
+
+\begin_layout Standard
+Perhaps the most interesting aspect of the s-expression format is the first
+ explicit appearance of types.
+ Here, there are just two types: the nodes, and the links.
+ The nodes have to be given a a name, so as to disambiguate them from one-anothe
+r.
+ The links do not: the metatree structure is enough to disambiguate one
+ link from another.
+ Again: nodes and links are naturally universally unique (or conversely,
+ every node having the same name, every link having the same structure is
+ indistinguishable.)
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is eerily similar to atomic physics.
+ All electrons are indistinguishable.
+ All protons are indistinguishable.
+ When combined into atoms, however, this changes.
+ An element of one type (say, carbon) is clearly different than another
+ (say, oxygen), but all carbon atoms are indistinugishable...
+ unless they appear in an organic molecule.
+ That is, it is the relationship of elementary particles to one-another
+ that gives structure to the universe.
+ It is not the particles themselves.
+\end_layout
+
+\end_inset
+
+ When written in this form, the doubly-typed nature of the metatree is calling
+ out for generalization.
+\end_layout
+
+\begin_layout Standard
+Multiple types are not stricly needed for storage: indeed, the two tables,
+ one for nodes, and one for links, is sufficient to tell apart which is
+ which.
+ Storing a new, distinguished tag: the node or link type, with each node
+ or link does require additional storage.
+ In practice, types are incredibly useful, and if not given explicit, distinguis
+hed treatment, would have appeared in the attribute section.
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+ it is meant both the types of computer science, and of type theory.
+ In ordinary programming, ints, floats and strings are types (these are
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+primitive types
+\begin_inset Quotes erd
+\end_inset
+
+), and so are object-oriented classes (these are the 
+\begin_inset Quotes eld
+\end_inset
+
+compound types
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+product types
+\begin_inset Quotes erd
+\end_inset
+
+).
+ Function calls have a type signature too, and ML, CaML, Haskell and F#
+ are all about programming with types.
+ For the case of metagraphs, there is no particular need to limit oneself
+ to a proscribed set of primitive types, one can have as many dfferrent
+ primitive types as desired.
+\end_layout
+
+\begin_layout Standard
+Metagraphs fit well with type theory: it is easy, effectively trivial to
+ represent product types, sum types and signatures with metagraphs.
+ This in turn opens the door to a very unusual propertype of metagraphs:
+ each type can be backed by executable code.
+ To illustrate, consider the case of an abstract syntax tree.
+ Conventionally, one says that an expression, such as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+if (a > b) return a+b;
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ can be represented by an abstract syntax tree.
+ For the case of metatrees, the representation is 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(IfLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(GreaterThanLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(PlusLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This not only represents the expression 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+if (a > b) return a+b;
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ but it can also be made active: when supplied with values for the variables,
+ the comparison and the addition can be explicitly performed.
+\end_layout
+
+\begin_layout Standard
+This is a key property that (typed) metatrees have, and that ordinary (typed
+ or untyped) graphs do not.
+ Ordinary graphs are not, in general, DAGs: they can contain cycles.
+ Erecting an abstract syntax tree structure on an ordinary graph store is
+ not natural.
+ Now, of course, one could limit onself to using only DAG's, but the designer
+ of any graph store would strenously object to adding this as a fundamental
+ property of the graph store itself.
+ The executation of expressions is 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal
+\begin_inset Quotes erd
+\end_inset
+
+ to the storage of graphs.
+ The tasks have 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal concerns
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+non-overlaping concerns
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Strangely, metatrees erase that orthogonality.
+\end_layout
+
+\begin_layout Standard
+This is most easily seen by looking at something like ProLog.
+ It's a programming language, of course.
+ It makes abstract syntax trees fairly explicit: it is hard to understand
+ how prology works, unless one learns to think in terms of trees.
+ Certainly, the 
+\begin_inset Quotes eld
+\end_inset
+
+cut operator
+\begin_inset Quotes erd
+\end_inset
+
+ in prolog is one of the early stumbling blocks for programmers learning
+ prolog.
+ It's hard to see what it does, until one realizes that it is literally
+ cutting branches off of a tree.
+ At the same time, chapter one, the very first chapter of any book on prolog
+ programming is rife with examples of knowledge representation.
+ One will find something like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		father_child(tom, erica).
+\end_layout
+
+\begin_layout Plain Layout
+
+		father_child(mike, tom).
+\end_layout
+
+\begin_layout Plain Layout
+
+		sibling(X, Y)      :- parent_child(Z, X), parent_child(Z, Y).
+\end_layout
+
+\end_inset
+
+The first two statements are assertions of fact, the third is a inference
+ rule.
+ They have a very obvious represention as trees, and, more precisely as
+ meta-trees.
+ Yet, strangely, the prolog program is encoded in a text file, and 
+\emph on
+not
+\emph default
+ as a collection of entries in a graph database!
+\end_layout
+
+\begin_layout Standard
+This last observation becomes truly bizarre, if one imagines keeping census
+ data in prolog.
+ Maintaining a text file with dozens of lines of code for millions of people
+ is abusrd.
+ Applying transformations is impossible for text files.
+ Consider the inference 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sibiling
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ above.
+ It can be taken as a run-time directive, but it can also be taken as a
+ graph rewrite rule: find all graphs having two terms, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+parent_child(Z, X)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+parent_child(Z, Y)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and crate a new term 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sibling(X, Y)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Such a rewrite is not all that hard in a database; in SQL, some appropriate
+ combination of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT INTO
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+JOIN
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, the only stumbling block being the need to reference the 
+\begin_inset Quotes eld
+\end_inset
+
+parents
+\begin_inset Quotes erd
+\end_inset
+
+ table twice during the join.
+\end_layout
+
+\begin_layout Standard
+So, yes, superficially, databases and execution are orthogonal concerns.
+ But if one begins to lok at what people do, in practice, with SQL, and
+ how, in practice, they design code for object-relational databases, that
+ orthogonality gets a bit fuzzy.
+ It's downright cloudy by the time one is writing PL/SQL statements.
+ Coming from the opposite direction, as prolog does, makes the case even
+ cloudier.
+\end_layout
+
+\begin_layout Standard
+These aren't even the only examples.
+ Inside of compilers, one finds 
+\begin_inset Quotes eld
+\end_inset
+
+intermediate languages
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For Micorosft, this is the CIL or Common Intermediate Language.
+ For Gnu GCC, it is gimple.
+ These are somewhat like assembly code, but abstract, and not specific to
+ CPU hardware.
+ They encode abstract syntax trees, and thus sit above the bytecode layer.
+ Looking carefully, one will observe that 
+\begin_inset Quotes eld
+\end_inset
+
+compiler optimization
+\begin_inset Quotes erd
+\end_inset
+
+ is actually a vary small database of the currrently active, non-retired
+ abstract syntax trees, and that optimization is a collection of re-write
+ rules (in the sense of the prolog rewrite rule, above) being applied to
+ the trees in the active database.
+\end_layout
+
+\begin_layout Standard
+Of course, what happens inside a compiler is very narrow, and veery carefully
+ crafted to suite the needs of the compiler, and nothing more.
+ Intermediate languages are almost never written to disk, except as text
+ strings.
+ Yet the lessons can be taken as generic: creating graphs, and then transforming
+ them, is a generically useful operation.
+ Representing graphs as trees, and specifically, as type meta-trees, offers
+ a huge representational efficiency over plain graphs or SQL/noSQL tables.
+ The efficiency is both computational (RAM usage, CPU cycles) and expressive:
+ writing inferences in prolog really is a lot easier than writing SQL statements.
+\end_layout
+
 \begin_layout Subsubsection*
 Summary
 \end_layout
@@ -3641,7 +4109,7 @@ Key points:
 \end_layout
 
 \begin_layout Itemize
-Lattices can be thought of as either s-expressions or as json.
+Metatrees can be thought of as either s-expressions or as json.
  But with a cactch...
 \end_layout
 
