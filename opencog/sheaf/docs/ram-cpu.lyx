@@ -135,39 +135,60 @@ Introduction
 \begin_layout Standard
 Currently, graph databases are popular, and they have a rather distinct
  performance profile, differing from SQL and noSQL databases.
- The connectors-and-sheaves concepts sketched in this series of texts provide
- a different way of representing graphs, and working with them.
- This representation is not just abstract nonsense, but has actual implications
- for RAM and CPU consumption.
- The current prototype experiments with sheaves are layered on top of the
- OpenCog AtomSpace, which is an in-RAM database for storing generalized
- hypergraphs or 
+ At a simplistic level, the OpenCog AtomSpace is a kind of a graph database.
+ More correctly, it is a generalized-hypergraph or 
 \begin_inset Quotes eld
 \end_inset
 
-metagraphs
+metagraph
 \begin_inset Quotes erd
 \end_inset
 
-.
- It has it's own distinct representation, with certain implications for
- CPU and RAM utilization.
+ database.
+ This design has certain implications for RAM and CPU usage.
+ This text argues that it has superior properties to ordinary graph databases.
+ It arrives at this conclusion by starting with the most basic, foundational
+ description of graph databases, and then defines hypergraphs and metagraphs
+ as minor variants on the underlying data structures.
 \end_layout
 
 \begin_layout Standard
-The goal of this text is to look at these three systems, and compare how
- they use RAM and CPU resources.
- Describing the AtomSpace is the easiest, because the current implementation
- has a specific form.
- Describing a graph database is a bit harder, as we assume a generic, naive
- design, which actual implementations may or may not follow.
- Describing the connectionist database presents similar trouble: without
- a specific implementation and the experience from using it, statements
- have to be generalized.
+This text is organized into several parts:
 \end_layout
 
-\begin_layout Standard
-Each of these is described in turn, followed by a discussion of algorithms.
+\begin_layout Itemize
+A discription of graphs, and how they can be represented in memory,
+\end_layout
+
+\begin_layout Itemize
+Modifications to the representation that result in hypergraphs and metagraphs,
+ including a quick analysis for memory usage
+\end_layout
+
+\begin_layout Itemize
+A discussion of the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+indexing
+\begin_inset Quotes erd
+\end_inset
+
+, especially in how it contrasts with the concept as generally understood
+ in SQL/noSQL databases,
+\end_layout
+
+\begin_layout Itemize
+A quick introduction to partial indexes (a full discussion is impossible
+ without first tackling pattern matching 
+\emph on
+aka
+\emph default
+ querying, done in a later text).
+\end_layout
+
+\begin_layout Itemize
+A short review of how meta-trees are used to represent knowledge.
 \end_layout
 
 \begin_layout Section*
@@ -237,20 +258,22 @@ Attributes
 In practice, one wishes to associate a label to each vertex, and also some
  additional attribute data; likewise for the edges.
  There are two fundamental choices available for storing attributes: merged
- schema+data, and disjoint schema-data.
+ schema+data, and disjoint schema–data.
  An example of the first is JSON.
- Each bit of data to be stored is preceeded by it's name.
- Additional markup, such as quotes and square brackets, indicate if the
- data is a string or an array.
- An example of the second are tables.
+ Each block of data to be stored is preceeded by its name.
+ Additional markup, such as quotes and square brackets, indicate sturucture
+ such as text-strings and arrays.
+ An example of disjoint schema–data are tables.
  The name and data type appears only in the column heading; individual rows
  in the table do not need to repeat the schema.
- Clearly, the tabular format offers a huge advantage in terms of RAM usage.
- Conversely, it is highly inflexible when new columns or new schema need
- to be added.
+ Clearly, the tabular format offers a huge advantage in terms of memory
+ usage.
+ Conversely, tables are highly inflexible when new columns or new schema
+ need to be added.
  There is no sensible way to take one row of a table, and have it use a
  different schema than the other rows.
- It doesn't even make sense to talk about rows with a different schema.
+ It doesn't even make sense to talk about rows in this way; they aren't
+ rows any more.
 \end_layout
 
 \begin_layout Standard
@@ -280,8 +303,8 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  RocksDB.
  It is usually not too hard to take an in-RAM database, and layer it on
  top of one of these systems to obtain a disk-backed database.
- Of course, there are numerous ifs-and-buts; these will be ignored in this
- text.
+ Of course, there are numerous ifs-and-buts, which provide motivations to
+ roll-your-own; these will be ignored in this text.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -292,8 +315,8 @@ Representing graphs in RAM
 Storing a set of vertexes in RAM is straight-forward.
  Since it is a set, one can use either a hash-table, a b-tree, or even an
  array or list.
- For the discussion here, the precise format used is not directly relevant,
- and so a tabular format will be used to illustrate the ideas.
+ For the discussion here, the precise format is not directly relevant, and
+ so a tabular format will be used to illustrate the ideas.
  Again, the table rows might actually reside in hash-tables, b-trees, or
  wherever.
 \end_layout
@@ -425,7 +448,7 @@ universally unique id
 \begin_inset Quotes erd
 \end_inset
 
- or uid) is that it is required by the edge table.
+ or uuid) is that it is required by the edge table.
  The edge table might have the form
 \end_layout
 
@@ -650,7 +673,8 @@ This representation is perhaps too naive.
 \end_inset
 
  time.
- Thus, we incorporate a special index for edges into the vertex table:
+ Thus, it is natural to incorporate a special index for edges into the vertex
+ table:
 \end_layout
 
 \begin_layout Standard
@@ -885,7 +909,7 @@ A conventional requirement for graph databases is to locate all nodes and
  vertexes having some particular attribute.
  This opens a Pandora's box of indexing schemes.
  The opening of this box is deferred to a later section, but we can take
- a quick peak: suppose one wants to find all vertexes where the json-data
+ a quick peak: suppose one wants to find all vertexes where the attr-data
  has a field called 
 \begin_inset Quotes eld
 \end_inset
@@ -904,7 +928,7 @@ favorite song
 \end_inset
 
 , vertexes representing people might, but not necessarily.
- Thus, we need to create an index: a set of all vertexes that have this
+ Thus, there is a need for an index: a set of all vertexes that have this
  tag.
  Every time a vertex is added or removed, this index might have to be updated.
  Thus, adding indexes in this way incurs a CPU overhead.
@@ -1035,8 +1059,12 @@ A set of links
 \begin_inset Formula $e_{k}$
 \end_inset
 
- is an ordered list of nodes, or other links.
- It is convenient to call these 
+ is an ordered list of nodes, or other links, or a mixture.
+ They are arranged to be acyclic (to form a diercted acyclic graph).
+\end_layout
+
+\begin_layout Standard
+It is convenient to give the name 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1044,7 +1072,7 @@ atoms
 \begin_inset Quotes erd
 \end_inset
 
-: an atom can be either a node, or a link.
+ to something that is either a node or a link.
  Links are thus sets of atoms.
 \end_layout
 
@@ -1055,7 +1083,7 @@ Hypergraph representations
 \begin_layout Standard
 The naive representation for the hypergraph is a straight-forward extension
  of the edge table.
- The example encoded in this table is shown in the figure below.
+ The table below provides an example that is shown in the following figure.
 \end_layout
 
 \begin_layout Standard
@@ -1071,7 +1099,7 @@ The naive representation for the hypergraph is a straight-forward extension
 \begin_inset Text
 
 \begin_layout Plain Layout
-edge id
+hyper-edge id
 \end_layout
 
 \end_inset
@@ -1245,8 +1273,9 @@ attr-data
 \begin_layout Standard
 The vertex list may be empty, may hold one, or more vertexes.
  It is necessarily ordered (and thus not a set) and may contain repeated
- entries (a vertex may appear more than once).
- In other respects, it is much the same.
+ entries (a vertex may appear more than once in the list).
+ In other respects, this edge table is quite similar to the edge table for
+ ordinary graphs.
 \end_layout
 
 \begin_layout Standard
@@ -1607,9 +1636,10 @@ This requires a data-structure that is a list-of-sets, which can be a bit
  over-complex and challenging to use.
  It is easier to just mash all of these into one set; this is all that is
  needed for hypergraph traversal.
- If the positional location is needed, then it can always be looked up per-edge.
+ If the positional location is needed, then it can always be looked up per-hyper
+edge.
  This is neither technically challenging nor CPU-intensive: the arity of
- hyperedges is typically small, based on real-world mappings to interesting
+ hyperedges is typically small, based on real-world mappings with interesting
  datasets.
  Thus, the vertex table can look like
 \end_layout
@@ -1811,7 +1841,7 @@ almost
 \end_inset
 
  a bipartite graph, having the form below, with the set 
-\begin_inset Formula $U$
+\begin_inset Formula $E$
 \end_inset
 
  on the left being the set of hyperedges.
@@ -1858,7 +1888,7 @@ Oh, but a bipartite graph is just a graph, so a graph database is sufficient
 
  At some abstract level, this is perhaps true; at the CPU and RAM-consumption
  level, it is not.
- So, in this figure, attributed (the json-data) are attached only to the
+ So, in this figure, attributes (the attr-data) are attached only to the
  
 \begin_inset Formula $v_{k}$
 \end_inset
@@ -1870,7 +1900,7 @@ Oh, but a bipartite graph is just a graph, so a graph database is sufficient
  in the diagram; there is no attribute data attached to the lines in this
  figure.
  What's more, the lines in this figure are not directly recorded in any
- tables; they are implicit only by the structure of the vertex and hyperedge
+ tables; they are implicit only in the structure of the vertex and hyperedge
  tables.
 \end_layout
 
@@ -1889,15 +1919,27 @@ Counting the memory usage is instructive.
 
  units of storage.
  Lets encode sets as lists, to make counting easy; let 
-\begin_inset Formula $J$
+\begin_inset Formula $\left\langle J\right\rangle $
 \end_inset
 
- is the average size of the attribute collection.
+ be the average size of the attribute collection.
  The hyperedges shown in the figure then require 2+3+3+4=12 units of storage,
- plus 5 more for the hyperedge table itself, and 4J of attribute storage.
+ plus 5 more for the hyperedge table itself, and 
+\begin_inset Formula $4\left\langle J\right\rangle $
+\end_inset
+
+ of attribute storage.
  The vertexes require 4+3+3+2 units of storage, plus 5 for the vertex-table
- itself, plus 4J more of attributes.
- Summing this, one obtains 34+8J total RAM consumption.
+ itself, plus 
+\begin_inset Formula $4\left\langle J\right\rangle $
+\end_inset
+
+ more of attributes.
+ Summing this, one obtains 
+\begin_inset Formula $34+8\left\langle J\right\rangle $
+\end_inset
+
+ total RAM consumption.
  For the general case, one has
 \begin_inset Formula 
 \[
@@ -2046,6 +2088,7 @@ The average size of the incoming set is equal to the average size of the
 
 ; the only reason to track these separately is that one may use hash tables
  or trees for sets, whereas lists require arrays.
+ This makes the RAM usage slightly different for the two.
 \end_layout
 
 \begin_layout Standard
@@ -2061,8 +2104,8 @@ N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \
 
 \end_inset
 
-Comparing the two expressions, we see that the vertex table is the same
- size as the complete hypertable.
+Comparing the this to the expression for the hypertable, we see that the
+ vertex table is the same size as the entire hypertable.
  The ordinary graph representation also requires the overhead of the edge
  table; here the 
 \begin_inset Formula $\left\langle J_{nil}\right\rangle $
@@ -2070,6 +2113,8 @@ Comparing the two expressions, we see that the vertex table is the same
 
  is the cost of storing an empty attribute list, and the factor of 3 comes
  from storing an ordinary edge-id and it's two endpoints.
+ Graph databases can store hypergraphs, but incurr a RAM penalty for doing
+ so.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2083,12 +2128,12 @@ If the only thing that one is storing are hypergraphs, then having a custom
  Does this mean that there's some magic, here? No, not really.
  Every ordinary graph is a special case of a hypergraph, where the hyper-edge
  always has arity two.
- To store a single edge as an ordinary edge, we need 
+ To use an ordinary graph store to record a single edge, we need 
 \begin_inset Formula $3+\left\langle J\right\rangle $
 \end_inset
 
  units of storage: the edge-label, and the two vertexes in the edge.
- To store a single edge as a hyperedge, we need 
+ To use a hyperedge store to record a single (ordinary) edge, we need 
 \begin_inset Formula $4+\left\langle J\right\rangle $
 \end_inset
 
@@ -2100,8 +2145,8 @@ If the only thing that one is storing are hypergraphs, then having a custom
  more units of storage.
  This seems tolerable: for a million-edge graph, and 64-bit pointers, this
  requires 8MBytes of additional storage.
- On modern machines, the extra 8MBytes seems not all that large; there's
- a bit of a penalty in moving from graph storage to hypergraph storage,
+ On modern machines, the extra 8MBytes seems not all that large.
+ There's a bit of a penalty in moving from graph storage to hypergraph storage,
  but it's not that much.
  Modern cellphones have 8GBytes of RAM...
 \end_layout
@@ -2411,7 +2456,7 @@ attr-data
 
 \begin_layout Standard
 The link table now requires both an outgoing-atom list, and an incoming-link
- list.
+ set.
 \end_layout
 
 \begin_layout Standard
@@ -2682,8 +2727,9 @@ Clearly, the metagraph, having the general shape of a DAG, can be wedged
  The metagraph, much like the hypergraph, has no need to explicitly declare
  the arrows in the tree; they are not stored, nor do they have attributes.
  The RAM-usage considerations are much like those for the hypergraph.
- More interesting is the structure of indexes, or rather, the alternatives
- one has for index representation.
+ We can conclude that it is quite efficient to store a graph in a metagraph,
+ but that storing a metagraph in an ordinary graph database pays a large
+ penalty.
 \end_layout
 
 \begin_layout Section*
@@ -2691,7 +2737,9 @@ Indexing
 \end_layout
 
 \begin_layout Standard
-The whole point of using a graph database, as opposed to an SQL or noSQL
+More interesting is the structure of indexes, or rather, the alternatives
+ one has for index representation.
+ The whole point of using a graph database, as opposed to an SQL or key-value
  database, is that the graph structure encodes something important about
  the problem, something that cannot be easily achieved by doing table joins
  or key-value look-ups.
@@ -2710,15 +2758,16 @@ literal "false"
 
 \end_inset
 
- Thus, in the discussions below, if you are more familiar with noSQL, then
- simply reverse the directions of all arrows to obtain the equivalent discussion.
+ Thus, in the discussions below, if you are more familiar with key-value
+ databases, then simply reverse the directions of all arrows to obtain the
+ equivalent discussion.
 \end_layout
 
 \end_inset
 
- However, just as with table-based databases, there are certain types of
- queries that are used a lot, and speeding these up through indexing is
- a key ability.
+ However, just as with table-based databases, there will be certain types
+ of queries that are used a lot, and speeding these up through indexing
+ is a key ability.
  How might this work, in practice? Let's examine some queries, and see how
  they might work.
 \end_layout
