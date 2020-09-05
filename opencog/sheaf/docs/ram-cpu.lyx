@@ -1080,7 +1080,7 @@ vertex-list
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -1308,7 +1308,7 @@ edge-set-2
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -1636,7 +1636,7 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -2211,8 +2211,8 @@ Metagraph representations
 \begin_layout Standard
 The metagraph differs from the hypergraph in that now a hyperedge (link)
  may contain either another vertex (node) or another link.
- Visually, this is no longer a bipartite graph, but a polytree, such as
- the one shown below.
+ Visually, this is no longer a bipartite graph, but has the shape of a directed
+ acyclic graph (DAG), such as the one shown below.
 \end_layout
 
 \begin_layout Standard
@@ -2228,10 +2228,25 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \end_layout
 
 \begin_layout Standard
-The polytree is more-or-less a directed acyclic graph (DAG), the primary
- difference being that the links are ordered lists, represented as boxes
- in this diagram.
- The node table is effectively the same as the vertex table for the hypergraph,
+The primary difference between the above, and a DAG is that the links are
+ ordered lists, represented as boxes in this diagram.
+ For lack of a better name, this can be called a 
+\begin_inset Quotes eld
+\end_inset
+
+metatree
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metatree can be converted to a DAG in two different ways.
+ One way is to collapse the boxes to single points.
+ The other way is to dissolve the boxes entirely, and replace a single arrow
+ from point-to-box by many arrows, from point to each of the box elements.
+\end_layout
+
+\begin_layout Standard
+The node table is effectively the same as the vertex table for the hypergraph,
  before.
  For this graph, it is
 \end_layout
@@ -2267,7 +2282,7 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -2431,7 +2446,7 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
-json-data
+attr-data
 \end_layout
 
 \end_inset
@@ -2705,9 +2720,9 @@ Single attribute queries
 
 \begin_layout Standard
 Suppose one wishes to find all nodes with some specific attribute.
- Naively, this requires walking over all nodes, and then examining the attached
- attribute structure (presumed to be JSON-like in form) and then extracting
- a named field from the attributes, and examining the value of that field.
+ Naively, this requires walking over all nodes, examining the attached attribute
+ structure, extracting a named field from the attributes, and examining
+ the value of that field.
  This is a task that SQL databases excel at - for example, 
 \begin_inset Quotes eld
 \end_inset
@@ -2723,6 +2738,23 @@ SELECT name,salary FROM employees WHERE department='sales';
 \end_inset
 
 .
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The author would like to apologize for this seemingly non-sexy example.
+ It is the stereotypical example from database textbooks, and harks back
+ to the 1960's, when working out the fine details of management science
+ actually was a sexy research topic, and helped power the economic ascent
+ of the Western world.
+ It's importance should not be under-estimated: Ancient Rome was an agrarian
+ civilization built on concepts of hierarchical organization; organizational
+ hierarchies will continue to describe reality, including AGI.
+ Org-charts are boring but important.
+\end_layout
+
+\end_inset
+
  A graph database is not needed for this task.
  Nonetheless, this is a plausible task.
  The traditional solution would be 
@@ -3086,12 +3118,69 @@ Partial indexes
 
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
- when one considers mapping an organizational chart onto the above example.
- Conventionally, corporations, political and military organizations are
- organized hierarchically, with divisions reporting to executives, departments
- rolling up into divisions, and so on.
- This in the form of a DAG, and, in complex organizations, the DAG has the
- form of a polytree, as illustrated for the metagraph data structure.
+ when one considers several examples.
+ Sticking with the management example from above, one extend and look at
+ organizational structures (org charts).
+\end_layout
+
+\begin_layout Standard
+Conventionally, corporations, political and military organizations are organized
+ hierarchically, with divisions reporting to executives, departments rolling
+ up into divisions, and so on.
+ This is precisely the structure of a metatree.
+ It is tempting to gloss this, and see the org chart is a tree, or perhaps
+ a DAG.
+ It is not! It is a metatree, and confusion arises because a metatree can
+ be collapsed to a DAG in several different ways.
+ So, consider a division chief who manages a line.
+ One can draw the org-chart several ways: by drawing a line from a manager
+ to each (named) employee that they manage, or from a manager to functional
+ box labelled with the function.
+ Employees are then grouped inside these functional boxes.
+ This is shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/org-chart.eps
+	lyxscale 70
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is manifestly in the shape of a metatree.
+ It can be collapsed down to an ordinary directed tree in several ways,
+ left to the imagination of the reader.
+ The point is that the natural structure of an org chart is not a naive
+ tree; it contains a bit more complexity than that, and is far more readily
+ represented with a metatree.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is hardly the only way to represent an org-chart with a meta-tree.
+ One could put the department titles into boxes of thier own, as well as
+ perhaps the names of the actual people, adding even some dashed-line cross-func
+tional reporting structures.
+ The point here is that it is not 
+\begin_inset Quotes eld
+\end_inset
+
+just a tree
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3120,7 +3209,7 @@ on top of tables
 \begin_inset Quotes erd
 \end_inset
 
-, one can go further: indexes of indexes: namely the polytree or metagraph.
+, one can go further: indexes of indexes: namely, the metagraph.
 \end_layout
 
 \begin_layout Standard
@@ -3205,11 +3294,25 @@ Queries and pattern matching
 \end_layout
 
 \begin_layout Standard
+Query/pattern-matching algorithms on graphs are necessarily recursive.
+ This is because every graph can be decomposed into a collection of trees,
+ and tree-walks are recursive.
+ The metagraph makes this decomposition trivial: it is alrready in the form
+ of a collection of trees, or, more properly, a latttice,  and so has natural
+ starting, ending and turn-around points.
+\end_layout
+
+\begin_layout Subsubsection*
+Summary
+\end_layout
+
+\begin_layout Standard
 Key points:
 \end_layout
 
 \begin_layout Itemize
-Polytrees can be thought of as either s-expressions or as json.
+Lattices can be thought of as either s-expressions or as json.
+ But with a cactch...
 \end_layout
 
 \begin_layout Itemize
