@@ -31,3 +31,10 @@ There are several files here:
    is, and what a (pre-)sheaf is, and demonstrates how the jigsaw-puzzle
    piece analogy formally meets the criteria for these mathematical
    objects.
+
+** [ram-cpu.pdf](ram-cpu.pdf) gives a precise mathematical defintion for
+   a graph, a hypergraph and a metagraph, and, very importantly, explains
+   how metagraphs are more efficient, more flexible and more powerful for
+   storing graphs, than graph databases are. The representational
+   differences are minor, but the side effects are major. This is a
+   pre-req for understanding sheaf stores.
