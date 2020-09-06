@@ -115,8 +115,8 @@ This text reviews the concepts of a graph store, starting from the fundamental
 Even stronger claims are made: metagraph databases are easier to use than
  graph databases.
  The structure and contents of a metagraph database is easier to understand.
- Algorithms that act on a metgraph database are simpler, more compact, and
- easier to write, than corresponding algorithms for graph databases.
+ Algorithms that act on a metagraph database are simpler, more compact,
+ and easier to write, than corresponding algorithms for graph databases.
  This is really quite remarkable, and seems to come 
 \begin_inset Quotes eld
 \end_inset
@@ -141,7 +141,7 @@ Once one arrives at the concept of a metagraph (and arrives at it quite
 \begin_layout Abstract
 This is part of a sequence of texts on sheaves, although it does not explicitly
  mention these.
- It is a manditory pre-requisite for understanding the further efficiencies
+ It is a mandatory pre-requisite for understanding the further efficiencies
  and flexibility that sheaves provide.
 \end_layout
 
@@ -174,7 +174,7 @@ This text is organized into several parts:
 \end_layout
 
 \begin_layout Itemize
-A discription of graphs, and how they can be represented in memory,
+A description of graphs, and how they can be represented in memory,
 \end_layout
 
 \begin_layout Itemize
@@ -277,8 +277,8 @@ In practice, one wishes to associate a label to each vertex, and also some
  There are two fundamental choices available for storing attributes: merged
  schema+data, and disjoint schema–data.
  An example of the first is JSON.
- Each block of data to be stored is preceeded by its name.
- Additional markup, such as quotes and square brackets, indicate sturucture
+ Each block of data to be stored is preceded by its name.
+ Additional markup, such as quotes and square brackets, indicate structure
  such as text-strings and arrays.
  An example of disjoint schema–data are tables.
  The name and data type appears only in the column heading; individual rows
@@ -1077,7 +1077,7 @@ A set of links
 \end_inset
 
  is an ordered list of nodes, or other links, or a mixture.
- They are arranged to be acyclic (to form a diercted acyclic graph).
+ They are arranged to be acyclic (to form a directed acyclic graph).
 \end_layout
 
 \begin_layout Standard
@@ -2130,7 +2130,7 @@ Comparing the this to the expression for the hypertable, we see that the
 
  is the cost of storing an empty attribute list, and the factor of 3 comes
  from storing an ordinary edge-id and it's two endpoints.
- Graph databases can store hypergraphs, but incurr a RAM penalty for doing
+ Graph databases can store hypergraphs, but incur a RAM penalty for doing
  so.
 \end_layout
 
@@ -3256,11 +3256,11 @@ Partial indexes and metagraphs
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
  when one considers query and search query optimization.
- This text is long enough, so this will be defered to a later chapter.
+ This text is long enough, so this will be deferred to a later chapter.
 \end_layout
 
 \begin_layout Standard
-Partial indexes reveal thier utility in another way.
+Partial indexes reveal their utility in another way.
  Sticking with the management example from above, consider extending and
  looking at organizational structures (org charts).
 \end_layout
@@ -3277,7 +3277,7 @@ Conventionally, corporations, political and military organizations are organized
  So, consider a division chief who manages a line item.
  One can draw the org-chart several ways: by drawing an edge from a manager
  to each (named) employee that they manage, or from the manager to a functional
- box labelled with the function.
+ box labeled with the function.
  Employees are then grouped inside these functional boxes.
  This is shown below.
 \end_layout
@@ -3306,7 +3306,7 @@ status collapsed
 
 \begin_layout Plain Layout
 This is hardly the only way to represent an org-chart with a meta-tree.
- One could put the department titles into boxes of thier own, as well as
+ One could put the department titles into boxes of their own, as well as
  perhaps the names of the actual people, adding even some dashed-line cross-func
 tional reporting structures.
  The point here is that it is not 
@@ -3511,7 +3511,7 @@ easy
 \end_inset
 
  if you are willing to write PL/SQL, or, if your database supports it, then
- embeded Python.
+ embedded Python.
  Otherwise, you have to descend into C/C++ (or your other favorite programming
  language of choice), and once you are 
 \begin_inset Quotes eld
@@ -3692,7 +3692,7 @@ just use universally unique identifiers
  cause major, fundamental problems when considering network-distributed
  storage; this is the problem of UUID collision.
  One solution to avoid UUID collision is to have a single centralized atomic
- issuer of ID's that can gauranteee uniqueness.
+ issuer of ID's that can guarantee uniqueness.
  This introduces a single, centralized bottleneck.
  Another solution is to use cryptographic hashes.
  Each meta-tree string can be hashed down to a number.
@@ -3728,7 +3728,7 @@ When a metatree is added to a metagraph, a scan must be made to determine
  How might we know this? By looking it up! This does require indexing on
  the metagraph.
  Using indexes as described in the previous section introduces a bit of
- a checken-and-egg problem.
+ a chicken-and-egg problem.
  Thus, at the meta-graph store level, a naked b-tree or hash table is required.
  Here, (non-cryptographic) hashes are useful, as they can be made small,
  and can be used to speed up compares in a b-tree, or used in a hash table,
@@ -3758,7 +3758,7 @@ PRIMARY KEY
 .
  In a metagraph, each distinct node and link is ...
  distinct, and unique.
- No explicit declaration is needed; uniqueness is implicit in the defintion.
+ No explicit declaration is needed; uniqueness is implicit in the definition.
  This is kind-of nice; why mess with primary keys, if one doesn't have to?
  One less thing to think about, and not unrelated to the 
 \begin_inset Quotes eld
@@ -3784,8 +3784,8 @@ this vertex is the same as that vertex
 \end_inset
 
  in a graph store? This is non-trivial; it requires either references or
- some other technique; if one is not careful, one finds onself performing
- queries while inputing data.
+ some other technique; if one is not careful, one finds oneself performing
+ queries while inputting data.
  Again, we seem to have discovered, quite accidentally, with no explicit
  intent, that hypergraphs offer an elegant property that graph databases
  lack.
@@ -3966,7 +3966,7 @@ This is eerily similar to atomic physics.
  All protons are indistinguishable.
  When combined into atoms, however, this changes.
  An element of one type (say, carbon) is clearly different than another
- (say, oxygen), but all carbon atoms are indistinugishable...
+ (say, oxygen), but all carbon atoms are indistinguishable...
  unless they appear in an organic molecule.
  That is, it is the relationship of elementary particles to one-another
  that gives structure to the universe.
@@ -4152,7 +4152,7 @@ s and
 PartOfLink
 \family default
 \emph default
-s, together with some reasonable verbs might be able to acheive the same
+s, together with some reasonable verbs might be able to achieve the same
  goals
 \emph on
  
@@ -4178,7 +4178,7 @@ Atomese
 \begin_layout Standard
 Metagraphs fit well with type theory: it is easy, effectively trivial to
  represent product types, sum types and function signatures with metagraphs.
- This in turn opens the door to a very unusual propertype of metagraphs:
+ This, in turn, opens the door to a very unusual property of metagraphs:
  they can be interpreted as programs.
  To illustrate, consider the case of an abstract syntax tree.
  Conventionally, one says that an expression, such as 
@@ -4316,10 +4316,10 @@ This is a key property that (typed) metatrees have, and that ordinary (typed
  Ordinary graphs are not, in general, DAGs: they can contain cycles.
  Erecting an abstract syntax tree structure on an ordinary graph store is
  not natural; one must impose some representational constraints.
- Now, of course, one could limit onself to using only DAG's, but any sane,
- normal designer of any graph store would strenously object to adding executable
- graphs as a fundamental property of the graph store itself.
- The executation of expressions is 
+ Now, of course, one could limit oneself to using only DAG's, but any sane,
+ normal designer of any graph store would strenuously object to adding executabl
+e graphs as a fundamental property of the graph store itself.
+ The execution of expressions is 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4340,7 +4340,7 @@ orthogonal concerns
 \begin_inset Quotes eld
 \end_inset
 
-non-overlaping concerns
+non-overlapping concerns
 \begin_inset Quotes erd
 \end_inset
 
@@ -4349,7 +4349,7 @@ non-overlaping concerns
 \end_layout
 
 \begin_layout Subsubsection*
-Prolog
+ProLog
 \end_layout
 
 \begin_layout Standard
@@ -4400,7 +4400,7 @@ status open
 
 The first two statements are assertions of fact, the third is a inference
  rule.
- They have a very obvious represention as trees, and, more precisely as
+ They have a very obvious representation as trees, and, more precisely as
  meta-trees.
  Yet, strangely, prolog programs are encoded in text files, and 
 \emph on
@@ -4411,7 +4411,7 @@ not
 
 \begin_layout Standard
 This last observation becomes truly bizarre, if one imagines some non-trivial
- knowledge representtion problem.
+ knowledge representation problem.
  Imagine keeping census data in prolog.
  Maintaining a text file with dozens of lines of code for millions of people
  is absurd.
@@ -4423,7 +4423,7 @@ This last observation becomes truly bizarre, if one imagines some non-trivial
 
 \family sans
 \emph on
-sibiling
+sibling
 \family default
 \emph default
 
@@ -4569,7 +4569,7 @@ intermediate languages
 \end_inset
 
 .
- For Micorosft, this is the CIL or Common Intermediate Language.
+ For Microsoft, this is the CIL or Common Intermediate Language.
  For Gnu GCC, it is GIMPLE.
  These are somewhat like assembly code, but abstract, and not specific to
  CPU hardware.
@@ -4641,7 +4641,7 @@ any kind at all
  create your own language.
  This is vaguely comparable to lex and yacc: these are just some basic tools
  that allow competent users to design custom, user-defined languages.
- Likewise here: metatress offer the toolset needed to design a custom knowledge
+ Likewise here: metatrees offer the toolset needed to design a custom knowledge
  representation system.
  Perhaps offering a built-in 
 \family sans
@@ -4676,10 +4676,10 @@ VariableNode
 
 \begin_layout Standard
 The OpenCog AtomSpace almost does this, but it also tacks on more than 100
- different pre-defined Atom types.
- This is effectively a historical accident, havig to do with how it evolved.
+ different predefined Atom types.
+ This is effectively a historical accident, having to do with how it evolved.
  A strong case could be made for splitting out this vast assortment of predefine
-d types into thier own module.
+d types into their own module.
  This is easier said than done; the AtomSpace continues to be a research
  platform for the concepts described here.
 \end_layout
@@ -4698,12 +4698,12 @@ Metagraphs are a simple and relatively minor generalization of graphs.
 \end_layout
 
 \begin_layout Itemize
-Metagraphs are more representionally compact than graphs.
+Metagraphs are more representationally compact than graphs.
  They are more efficient at representing data.
 \end_layout
 
 \begin_layout Itemize
-Table normaliztion, normally an intellectually demanding task for relational
+Table normalization, normally an intellectually demanding task for relational
  database design, comes 
 \begin_inset Quotes eld
 \end_inset
@@ -4725,7 +4725,7 @@ Typed metatrees can be abstract syntax trees; ordinary graphs cannot.
 \end_layout
 
 \begin_layout Itemize
-Typed metagraphs provide a powerful undergirding for symbolic computing,
+Typed metagraphs provide a powerful under-girding for symbolic computing,
  not just for representing knowledge, but also carrying out the computations
  themselves.
 \end_layout
@@ -4744,7 +4744,7 @@ This text started out as an attempt to describe the RAM and CPU usage properties
 tional properties (including CPU and RAM usage).
  Understanding metagraphs is a key gateway to the sheaves project.
  Fortunately, the metagraph approach, taken by the current AtomSpace is
- fairly mature, having more than a decade of implementation and use experiennce
+ fairly mature, having more than a decade of implementation and use experience
  behind it.
  This text gives a flavor of where it has arrived.
 \end_layout
