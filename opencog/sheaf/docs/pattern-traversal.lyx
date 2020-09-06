@@ -147,6 +147,19 @@ The goal of this text is to look at these three systems, and compare how
 Each of these is described in turn, followed by a discussion of algorithms.
 \end_layout
 
+\begin_layout Section*
+Queries and pattern matching
+\end_layout
+
+\begin_layout Standard
+Query/pattern-matching algorithms on graphs are necessarily recursive.
+ This is because every graph can be decomposed into a collection of trees,
+ and tree-walks are recursive.
+ The metagraph makes this decomposition trivial: it is alrready in the form
+ of a collection of trees (metatrees), and so has natural starting, ending
+ and turn-around points.
+\end_layout
+
 \begin_layout Subsubsection*
 Summary
 \end_layout
