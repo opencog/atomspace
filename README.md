@@ -6,9 +6,13 @@ OpenCog AtomSpace
 The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
 database, an associated query engine and graph-re-writing system,
 and a rule-driven inferencing engine that can apply and manipulate
-sequences of rules to perform reasoning. It is a layer that sits
-on top of ordinary distributed (graph) databases, providing a large
-variety of advanced features not otherwise available.
+sequences of rules to perform reasoning. It is a kind of in-RAM
+generalized hypergraph (metagraph) database. Metagraphs offer more
+efficient, more flexible and more powerful ways of representing
+graphs: [a metagraph store is literally just-plain better than a
+graph store.](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+On top of this, the Atomspace provides a large variety of advanced
+features not available anywhere else.
 
 The AtomSpace is a platform for building Artificial General Intelligence
 (AGI) systems. It provides the central knowledge representation component
@@ -16,8 +20,8 @@ for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
 
-Data as Graphs
-==============
+Data as MetaGraphs
+==================
 It is now commonplace to represent data as graphs; there are more graph
 databases than you can shake a stick at. What makes the AtomSpace
 different? A dozen features that no other graph DB does, or has even
@@ -34,7 +38,14 @@ But, first: five things everyone else does:
 * Trigger execution of user callbacks... or of executable graphs (as
   explained below).
 
-Things that no one else does:
+A key difference: the AtomSpace is a metagraph store, not a graph store.
+Metagraphs can efficiently represent graphs, but not the other way around.
+This is carefully explained
+[here,](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+which also gives a precise definition of what a metagraph is, and how it
+is related to a graph.  As a side-effect, metagraphs open up many
+possibilities not available to ordinary graph databasases. These are
+listed below.  Things are things that no one else does:
 * **Search queries are graphs.**
   (The API to the [pattern engine](https://wiki.opencog.org/w/Pattern_engine)
   is a graph.) That is, every query, every search is also a graph. That
