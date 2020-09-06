@@ -4765,6 +4765,7 @@ intermediate languages
 .
  For Microsoft, this is the CIL or Common Intermediate Language.
  For Gnu GCC, it is GIMPLE.
+ For LLVM, it is the LLVM IR.
  These are somewhat like assembly code, but abstract, and not specific to
  CPU hardware.
  They encode abstract syntax trees, and thus sit above the bytecode layer.
@@ -4790,7 +4791,7 @@ Of course, what happens inside a compiler is very narrow, and very carefully
  strings.
  Yet the lessons they teach can be taken as generic: creating graphs, and
  then transforming them, via graph re-writing, is a generically useful operation.
- Representing knowledge as trees, and specifically, as type meta-trees,
+ Representing knowledge as trees, and specifically, as typed meta-trees,
  offers a huge representational efficiency over plain graphs or SQL tables
  or key-value stores.
  The efficiency is both computational (RAM usage, CPU cycles) and expressive:
@@ -4869,8 +4870,8 @@ VariableNode
 \end_layout
 
 \begin_layout Standard
-The OpenCog AtomSpace almost does this, but it also tacks on more than 100
- different predefined Atom types.
+The OpenCog AtomSpace does this, but it also tacks on more than 100 different
+ predefined Atom types.
  This is effectively a historical accident, having to do with how it evolved.
  A strong case could be made for splitting out this vast assortment of predefine
 d types into their own module.
