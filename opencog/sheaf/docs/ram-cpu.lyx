@@ -4348,6 +4348,10 @@ non-overlaping concerns
  Strangely, metatrees erase that orthogonality.
 \end_layout
 
+\begin_layout Subsubsection*
+Prolog
+\end_layout
+
 \begin_layout Standard
 Perhaps this seems dubious.
  The core issue is most easily exposed by looking at something like ProLog.
@@ -4550,6 +4554,10 @@ separation of concerns
  even cloudier.
 \end_layout
 
+\begin_layout Subsubsection*
+Intermediate Languages
+\end_layout
+
 \begin_layout Standard
 These aren't even the only examples.
  Inside of compilers, one finds 
@@ -4595,28 +4603,150 @@ Of course, what happens inside a compiler is very narrow, and very carefully
  writing inferences in prolog really is a lot easier than writing SQL statements.
 \end_layout
 
+\begin_layout Subsubsection*
+Atomese
+\end_layout
+
+\begin_layout Standard
+The above seems to be saying 
+\begin_inset Quotes eld
+\end_inset
+
+typed metatrees are a programming language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is true, and in the OpenCog AtomSpace, it actually is a language,
+ called 
+\begin_inset Quotes eld
+\end_inset
+
+Atomese
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But what kind of language is it? Well, if one abstains from providing some
+ large collection of Link and Node types, then the answer is 
+\begin_inset Quotes eld
+\end_inset
+
+any kind at all
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metatrees provide just enough structure, just enough groundwork, to
+ create your own language.
+ This is vaguely comparable to lex and yacc: these are just some basic tools
+ that allow competent users to design custom, user-defined languages.
+ Likewise here: metatress offer the toolset needed to design a custom knowledge
+ representation system.
+ Perhaps offering a built-in 
+\family sans
+\emph on
+IfLink
+\family default
+\emph default
+, 
+\family sans
+\emph on
+GreaterThanLink
+\family default
+\emph default
+, 
+\family sans
+\emph on
+PlusLink
+\family default
+\emph default
+ and 
+\family sans
+\emph on
+VariableNode
+\family default
+\emph default
+ is a good idea, and perhaps not.
+ Nothing compels a metagraph database system to offer these; at the same
+ time, it makes it easy to offer these.
+ To some large degree, it is sufficient to offer a typed metagraph storage
+ system, and nothing more.
+\end_layout
+
+\begin_layout Standard
+The OpenCog AtomSpace almost does this, but it also tacks on more than 100
+ different pre-defined Atom types.
+ This is effectively a historical accident, havig to do with how it evolved.
+ A strong case could be made for splitting out this vast assortment of predefine
+d types into thier own module.
+ This is easier said than done; the AtomSpace continues to be a research
+ platform for the concepts described here.
+\end_layout
+
 \begin_layout Section*
 Conclusion
 \end_layout
 
 \begin_layout Standard
-Key points:
+Several important claims were made here about metagraphs and metagraph stores.
+ These are:
 \end_layout
 
 \begin_layout Itemize
-Hypergraphs are more representtionally compact than graphs
+Metagraphs are a simple and relatively minor generalization of graphs.
 \end_layout
 
 \begin_layout Itemize
-Normaliztion for free
+Metagraphs are more representionally compact than graphs.
+ They are more efficient at representing data.
 \end_layout
 
 \begin_layout Itemize
-Specifying hypergraphs as text strings is easier than graphs.
+Table normaliztion, normally an intellectually demanding task for relational
+ database design, comes 
+\begin_inset Quotes eld
+\end_inset
+
+for free
+\begin_inset Quotes erd
+\end_inset
+
+, when one works with metagraphs.
 \end_layout
 
 \begin_layout Itemize
-Typed metatree can be abstract syntax trees; ordinary graphs cannot.
+Specifying metagraphs as text strings is easier than specifying graphs as
+ strings.
+\end_layout
+
+\begin_layout Itemize
+Typed metatrees can be abstract syntax trees; ordinary graphs cannot.
+\end_layout
+
+\begin_layout Itemize
+Typed metagraphs provide a powerful undergirding for symbolic computing,
+ not just for representing knowledge, but also carrying out the computations
+ themselves.
+\end_layout
+
+\begin_layout Standard
+This text started out as an attempt to describe the RAM and CPU usage properties
+ of metagraphs, and unwittingly turned into a strong statement about the
+ general utility of metagraphs as a foundational system.
+ As such, it provides a strong statement about many of the design decisions
+ that went into the OpenCog AtomSpace, which is the primary research vehicle
+ for these ideas.
+ Even so, it is not the culmination of the journey.
+ The series of chapters in this directory are about sheaves.
+ These provide a general connectionist approach to data representation,
+ and the sheaf approach is different from metagraphs, having distinct representa
+tional properties (including CPU and RAM usage).
+ Understanding metagraphs is a key gateway to the sheaves project.
+ Fortunately, the metagraph approach, taken by the current AtomSpace is
+ fairly mature, having more than a decade of implementation and use experiennce
+ behind it.
+ This text gives a flavor of where it has arrived.
 \end_layout
 
 \begin_layout Standard
