@@ -14,25 +14,25 @@ There are several files here:
   length, it is split into bite-sized chapters. The chapters are currently,
   in serial order:
 
- ** [mereology.pdf](mereology.pdf) discusses the relationship of the
+    ** [mereology.pdf](mereology.pdf) discusses the relationship of the
    connector-and-sheaf viewpoint to the philosophical notions of mereology
    and postmodernism.
 
- ** [tensors.pdf](tensors.pdf) defines a generalized tensor as an algebraic
+    ** [tensors.pdf](tensors.pdf) defines a generalized tensor as an algebraic
    object. It is meant to formalize earlier statements, while still being
    readable and approachable.
 
- ** [learning.pdf](learning.pdf) examines what happens if one takes
+    ** [learning.pdf](learning.pdf) examines what happens if one takes
    conventional querying or pattern-matching, and replaces it with a
    connectionist approach. The result is a natural generalization of
    querying, which can be appropriately termed "learning".
 
- ** [sheaf-axioms.pdf](sheaf-axioms.pdf) formally defines what a topology
+    ** [sheaf-axioms.pdf](sheaf-axioms.pdf) formally defines what a topology
    is, and what a (pre-)sheaf is, and demonstrates how the jigsaw-puzzle
    piece analogy formally meets the criteria for these mathematical
    objects.
 
- ** [ram-cpu.pdf](ram-cpu.pdf) gives a precise mathematical defintion for
+    ** [ram-cpu.pdf](ram-cpu.pdf) gives a precise mathematical defintion for
    a graph, a hypergraph and a metagraph, and, very importantly, explains
    how metagraphs are more efficient, more flexible and more powerful for
    storing graphs, than graph databases are. The representational
