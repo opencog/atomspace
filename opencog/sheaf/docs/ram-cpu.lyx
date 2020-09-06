@@ -1,0 +1,4959 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Graphs, Metagraphs, RAM, CPU
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+2 Sept 2020 Version 1.0
+\end_layout
+
+\begin_layout Abstract
+This text reviews the concepts of a graph store, starting from the fundamental
+ question of how to efficiently represent a graph in RAM (that is, in storage).
+ Starting with a naive conception of a graph database, it arrives at hypergraphs
+ and metagraphs as simpler and more efficient representations for graphical
+ data.
+\end_layout
+
+\begin_layout Abstract
+Even stronger claims are made: metagraph databases are easier to use than
+ graph databases.
+ The structure and contents of a metagraph database is easier to understand.
+ Algorithms that act on a metagraph database are simpler, more compact,
+ and easier to write, than corresponding algorithms for graph databases.
+ This is really quite remarkable, and seems to come 
+\begin_inset Quotes eld
+\end_inset
+
+for free
+\begin_inset Quotes erd
+\end_inset
+
+ with just a minor change in perspective.
+\end_layout
+
+\begin_layout Abstract
+Once one arrives at the concept of a metagraph (and arrives at it quite
+ naturally, through minor modifications of an ordinary graph store), there
+ is then a rather remarkable and easy slide down-hill that culminates at
+ the OpenCog AtomSpace and Atomese as a (near-)optimal design point.
+ The metagraph representation is remarkably flexible and powerful tool for
+ representing data (representing knowledge) and working with (manipulating,
+ rewriting) that data.
+\end_layout
+
+\begin_layout Abstract
+This is part of a sequence of texts on sheaves, although it does not explicitly
+ mention these.
+ It is a mandatory pre-requisite for understanding the further efficiencies
+ and flexibility that sheaves provide.
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Currently, graph databases are popular, and they have a rather distinct
+ performance profile, differing from SQL and noSQL databases.
+ At a simplistic level, the OpenCog AtomSpace is a kind of a graph database.
+ More correctly, it is a generalized-hypergraph or 
+\begin_inset Quotes eld
+\end_inset
+
+metagraph
+\begin_inset Quotes erd
+\end_inset
+
+ database.
+ This design has certain implications for RAM and CPU usage.
+ This text argues that it has superior properties to ordinary graph databases.
+ It arrives at this conclusion by starting with the most basic, foundational
+ description of graph databases, and then defines hypergraphs and metagraphs
+ as minor variants on the underlying data structures.
+\end_layout
+
+\begin_layout Standard
+This text is organized into several parts:
+\end_layout
+
+\begin_layout Itemize
+A description of graphs, and how they can be represented in memory,
+\end_layout
+
+\begin_layout Itemize
+Modifications to the representation that result in hypergraphs and metagraphs,
+ including a quick analysis for memory usage
+\end_layout
+
+\begin_layout Itemize
+A discussion of the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+indexing
+\begin_inset Quotes erd
+\end_inset
+
+, especially in how it contrasts with the concept as generally understood
+ in SQL/noSQL databases,
+\end_layout
+
+\begin_layout Itemize
+A quick introduction to partial indexes (a full discussion is impossible
+ without first tackling pattern matching 
+\emph on
+aka
+\emph default
+ querying, done in a later text).
+\end_layout
+
+\begin_layout Itemize
+A short review of how meta-trees are used to represent knowledge.
+\end_layout
+
+\begin_layout Section*
+Graph Representations
+\end_layout
+
+\begin_layout Standard
+Formally, a graph is
+\end_layout
+
+\begin_layout Itemize
+A set of vertexes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of edges 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each edge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered pair of vertexes drawn from the set 
+\begin_inset Formula $V$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Because edges are ordered pairs, it is conventional to denote them with
+ arrows, having a head and tail.
+ These can be joined together in arbitrary ways.
+ Below is a 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ directed graph:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/directed-graph.png
+	lyxscale 40
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+In practice, one wishes to associate a label to each vertex, and also some
+ additional attribute data; likewise for the edges.
+ There are two fundamental choices available for storing attributes: merged
+ schema+data, and disjoint schema–data.
+ An example of the first is JSON.
+ Each block of data to be stored is preceded by its name.
+ Additional markup, such as quotes and square brackets, indicate structure
+ such as text-strings and arrays.
+ An example of disjoint schema–data are tables.
+ The name and data type appears only in the column heading; individual rows
+ in the table do not need to repeat the schema.
+ Clearly, the tabular format offers a huge advantage in terms of memory
+ usage.
+ Conversely, tables are highly inflexible when new columns or new schema
+ need to be added.
+ There is no sensible way to take one row of a table, and have it use a
+ different schema than the other rows.
+ It doesn't even make sense to talk about rows in this way; they aren't
+ rows any more.
+\end_layout
+
+\begin_layout Standard
+Thus, in a graph store, one has these two choices for storing attributes,
+ both for vertexes and for edges.
+ One might even contemplate a mixture of both; after all, a JSON blob is
+ isomorphic to a table with only a single row.
+ The remainder of this text will make little or no assumptions about the
+ storage format of the attributes.
+ The details of attribute handling has little or no impact on the primary
+ topics here, with possibly one exception: indexing.
+ This is reviewed in a distinct section later on.
+\end_layout
+
+\begin_layout Subsubsection*
+RAM vs.
+ Disk
+\end_layout
+
+\begin_layout Standard
+In what follows, all data is assumed to live in-RAM; the on-disk representations
+ do not concern us.
+ One reason for this is that a variety of disk management systems exist,
+ and work quite well at abstracting details.
+ The earliest such is perhaps the Berkeley DBM, and the Gnu gdbm.
+ These have been followed by Google's LevelDB and Facebook's extensions
+ RocksDB.
+ It is usually not too hard to take an in-RAM database, and layer it on
+ top of one of these systems to obtain a disk-backed database.
+ Of course, there are numerous ifs-and-buts, which provide motivations to
+ roll-your-own; these will be ignored in this text.
+\end_layout
+
+\begin_layout Subsubsection*
+Representing graphs in RAM
+\end_layout
+
+\begin_layout Standard
+Storing a set of vertexes in RAM is straight-forward.
+ Since it is a set, one can use either a hash-table, a b-tree, or even an
+ array or list.
+ For the discussion here, the precise format is not directly relevant, and
+ so a tabular format will be used to illustrate the ideas.
+ Again, the table rows might actually reside in hash-tables, b-trees, or
+ wherever.
+\end_layout
+
+\begin_layout Standard
+The vertex table is straight-forward:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The goal of having a vertex id (which is necessarily a 
+\begin_inset Quotes eld
+\end_inset
+
+universally unique id
+\begin_inset Quotes erd
+\end_inset
+
+ or uuid) is that it is required by the edge table.
+ The edge table might have the form
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+edge id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+head-vertex
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tail-vertex
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+77
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This representation is perhaps too naive.
+ To perform a graph traversal, i.e.
+ to walk from vertex to vertex, following only connecting edges, one needs
+ to know which edges come in, and which edges go out.
+ Of course, these can be found in the edge table, but searching the edge
+ table is absurd: for an edge table of 
+\begin_inset Formula $N$
+\end_inset
+
+ edges, such a search takes 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ time.
+ Thus, it is natural to incorporate a special index for edges into the vertex
+ table:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+incoming
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+outgoing
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{77}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{77}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88,99}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+{88}
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the incoming and outgoing columns hold sets: any given vertex
+ may appear in more than one edge.
+ They are sets, not lists, as the order is not particularly important.
+ They are not 
+\begin_inset Quotes eld
+\end_inset
+
+multisets
+\begin_inset Quotes erd
+\end_inset
+
+: any given edge appears at most once in the incoming/outgoing sets.
+ Suitable representations for sets include hash-tables and trees, each with
+ it's own distinct RAM and access-time profile.
+\end_layout
+
+\begin_layout Subsubsection*
+Prelude to indexing
+\end_layout
+
+\begin_layout Standard
+A conventional requirement for graph databases is to locate all nodes and
+ vertexes having some particular attribute.
+ This opens a Pandora's box of indexing schemes.
+ The opening of this box is deferred to a later section, but we can take
+ a quick peak: suppose one wants to find all vertexes where the attr-data
+ has a field called 
+\begin_inset Quotes eld
+\end_inset
+
+favorite song
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Vertexes representing buildings and automobiles won't have a 
+\begin_inset Quotes eld
+\end_inset
+
+favorite song
+\begin_inset Quotes erd
+\end_inset
+
+, vertexes representing people might, but not necessarily.
+ Thus, there is a need for an index: a set of all vertexes that have this
+ tag.
+ Every time a vertex is added or removed, this index might have to be updated.
+ Thus, adding indexes in this way incurs a CPU overhead.
+ If there are 
+\begin_inset Formula $J$
+\end_inset
+
+ indexes, then there is an 
+\begin_inset Formula $O\left(J\right)$
+\end_inset
+
+ CPU overhead for vertex insertion/removal.
+ There is also RAM consumption: an index containing 
+\begin_inset Formula $K$
+\end_inset
+
+ items requires at least 
+\begin_inset Formula $O\left(K\right)$
+\end_inset
+
+ storage, and possibly 
+\begin_inset Formula $O\left(K\log K\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Hypergraphs
+\end_layout
+
+\begin_layout Standard
+A hypergraph is much like a graph, except that the edges, now called 
+\begin_inset Quotes eld
+\end_inset
+
+hyperedges
+\begin_inset Quotes erd
+\end_inset
+
+ can contain more than two vertexes.
+ That is, the hyperedge, rather than being an ordered pair of vertexes,
+ is an ordered list of vertexes.
+ The metagraph takes the hypergraph concept one step further: the hyperedge
+ may also contain other hyperedges.
+ A change of terminology is useful: the basic objects are now called 
+\begin_inset Quotes eld
+\end_inset
+
+nodes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+links
+\begin_inset Quotes erd
+\end_inset
+
+ instead of 
+\begin_inset Quotes eld
+\end_inset
+
+vertexes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+edges
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Formally, a hypergraph is:
+\end_layout
+
+\begin_layout Itemize
+A set of vertexes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of hyperedges 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each hyperedge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered list of vertexes drawn from the set 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ This list may be empty, or have one, or two, or more members.
+\end_layout
+
+\begin_layout Standard
+A metagraph is very nearly the same:
+\end_layout
+
+\begin_layout Itemize
+A set of nodes 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{M}\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set of links 
+\begin_inset Formula $E=\left\{ e_{1},e_{2},\cdots,e_{N}\right\} $
+\end_inset
+
+ where each hyperedge 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ is an ordered list of nodes, or other links, or a mixture.
+ They are arranged to be acyclic (to form a directed acyclic graph).
+\end_layout
+
+\begin_layout Standard
+It is convenient to give the name 
+\begin_inset Quotes eld
+\end_inset
+
+atoms
+\begin_inset Quotes erd
+\end_inset
+
+ to something that is either a node or a link.
+ Links are thus sets of atoms.
+\end_layout
+
+\begin_layout Subsection*
+Hypergraph representations
+\end_layout
+
+\begin_layout Standard
+The naive representation for the hypergraph is a straight-forward extension
+ of the edge table.
+ The table below provides an example that is shown in the following figure.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+hyper-edge id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex-list
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(v_{1}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(v_{3},v_{4}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(v_{3},v_{2},v_{1}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The vertex list may be empty, may hold one, or more vertexes.
+ It is necessarily ordered (and thus not a set) and may contain repeated
+ entries (a vertex may appear more than once in the list).
+ In other respects, this edge table is quite similar to the edge table for
+ ordinary graphs.
+\end_layout
+
+\begin_layout Standard
+As before, the ability to traverse the hypergraph is a hard requirement.
+ This requires modification to the vertex table.
+ Several choices are possible.
+ One is to add a new column for each positional location:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="6">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+edge-set-0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+edge-set-1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+edge-set-2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This requires a data-structure that is a list-of-sets, which can be a bit
+ over-complex and challenging to use.
+ It is easier to just mash all of these into one set; this is all that is
+ needed for hypergraph traversal.
+ If the positional location is needed, then it can always be looked up per-hyper
+edge.
+ This is neither technically challenging nor CPU-intensive: the arity of
+ hyperedges is typically small, based on real-world mappings with interesting
+ datasets.
+ Thus, the vertex table can look like
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+vertex id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+incoming-set
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{1},e_{2},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the vertex table looks a lot like the edge table, the only difference
+ being that the vertex-list is an ordered list, while the incoming-set (the
+ edge-set) really is a set.
+ Effectively, this is because a hypergraph is 
+\begin_inset Quotes eld
+\end_inset
+
+almost
+\begin_inset Quotes erd
+\end_inset
+
+ a bipartite graph, having the form below, with the set 
+\begin_inset Formula $E$
+\end_inset
+
+ on the left being the set of hyperedges.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/hypergraph.eps
+	lyxscale 60
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The boxes denote the fact that the hyperedges are ordered lists.
+ The 
+\begin_inset Formula $E$
+\end_inset
+
+ and 
+\begin_inset Formula $V$
+\end_inset
+
+ ellipses are the hyperedge and vertex tables.
+\end_layout
+
+\begin_layout Subsubsection*
+RAM Utilization
+\end_layout
+
+\begin_layout Standard
+One might wish to conclude: 
+\begin_inset Quotes eld
+\end_inset
+
+Oh, but a bipartite graph is just a graph, so a graph database is sufficient
+ for all my needs.
+\begin_inset Quotes erd
+\end_inset
+
+ At some abstract level, this is perhaps true; at the CPU and RAM-consumption
+ level, it is not.
+ So, in this figure, attributes (the attr-data) are attached only to the
+ 
+\begin_inset Formula $v_{k}$
+\end_inset
+
+ and 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ in the diagram; there is no attribute data attached to the lines in this
+ figure.
+ What's more, the lines in this figure are not directly recorded in any
+ tables; they are implicit only in the structure of the vertex and hyperedge
+ tables.
+\end_layout
+
+\begin_layout Standard
+Counting the memory usage is instructive.
+ Lets assume that the size of the vertex-id and the edge-id are the same
+ – they are pointers or 64-bit ints – so each id requires 1 unit of RAM.
+ Assume that lists are either null-terminated or record a length, so that
+ a list of 
+\begin_inset Formula $n$
+\end_inset
+
+ items requires 
+\begin_inset Formula $n+1$
+\end_inset
+
+ units of storage.
+ Lets encode sets as lists, to make counting easy; let 
+\begin_inset Formula $\left\langle J\right\rangle $
+\end_inset
+
+ be the average size of the attribute collection.
+ The hyperedges shown in the figure then require 2+3+3+4=12 units of storage,
+ plus 5 more for the hyperedge table itself, and 
+\begin_inset Formula $4\left\langle J\right\rangle $
+\end_inset
+
+ of attribute storage.
+ The vertexes require 4+3+3+2 units of storage, plus 5 for the vertex-table
+ itself, plus 
+\begin_inset Formula $4\left\langle J\right\rangle $
+\end_inset
+
+ more of attributes.
+ Summing this, one obtains 
+\begin_inset Formula $34+8\left\langle J\right\rangle $
+\end_inset
+
+ total RAM consumption.
+ For the general case, one has
+\begin_inset Formula 
+\[
+N_{V}\left(1+\left\langle J\right\rangle +\left\langle N_{I}\right\rangle \right)+N_{E}\left(1+\left\langle J\right\rangle +\left\langle N_{O}\right\rangle \right)
+\]
+
+\end_inset
+
+ where
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N_{V}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of vertexes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N_{E}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Number of hyperedges
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle J\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of attributes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of the incoming set
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\langle N_{O}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Average size of the vertex list
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The average size of the incoming set is equal to the average size of the
+ vertex list, so we can approximate 
+\begin_inset Formula $\left\langle N_{I}\right\rangle =\left\langle N_{O}\right\rangle $
+\end_inset
+
+; the only reason to track these separately is that one may use hash tables
+ or trees for sets, whereas lists require arrays.
+ This makes the RAM usage slightly different for the two.
+\end_layout
+
+\begin_layout Standard
+The equivalent representation as a graph requires
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\left(N_{V}+N_{E}\right)\left(1+\left\langle J\right\rangle \right)+N_{V}\left\langle N_{I}\right\rangle +N_{E}\left\langle N_{O}\right\rangle  & \quad\mbox{ for the vertex table}\\
+N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right) & \quad\mbox{ for the edge table}
+\end{align*}
+
+\end_inset
+
+Comparing the this to the expression for the hypertable, we see that the
+ vertex table is the same size as the entire hypertable.
+ The ordinary graph representation also requires the overhead of the edge
+ table; here the 
+\begin_inset Formula $\left\langle J_{nil}\right\rangle $
+\end_inset
+
+ is the cost of storing an empty attribute list, and the factor of 3 comes
+ from storing an ordinary edge-id and it's two endpoints.
+ Graph databases can store hypergraphs, but incur a RAM penalty for doing
+ so.
+\end_layout
+
+\begin_layout Subsubsection*
+Storing hypergraphs in graphs, and vice-versa
+\end_layout
+
+\begin_layout Standard
+If the only thing that one is storing are hypergraphs, then having a custom
+ hypergraph representation really is smaller than the equivalent bipartite
+ graph: it dispenses with the need for an explicit ordinary-edge table.
+ Does this mean that there's some magic, here? No, not really.
+ Every ordinary graph is a special case of a hypergraph, where the hyper-edge
+ always has arity two.
+ To use an ordinary graph store to record a single edge, we need 
+\begin_inset Formula $3+\left\langle J\right\rangle $
+\end_inset
+
+ units of storage: the edge-label, and the two vertexes in the edge.
+ To use a hyperedge store to record a single (ordinary) edge, we need 
+\begin_inset Formula $4+\left\langle J\right\rangle $
+\end_inset
+
+ units of storage: the edge-label, the list of vertexes, and the list terminator.
+ Thus, storing an ordinary graph as a hypergraph requires 
+\begin_inset Formula $N_{E}$
+\end_inset
+
+ more units of storage.
+ This seems tolerable: for a million-edge graph, and 64-bit pointers, this
+ requires 8MBytes of additional storage.
+ On modern machines, the extra 8MBytes seems not all that large.
+ There's a bit of a penalty in moving from graph storage to hypergraph storage,
+ but it's not that much.
+ Modern cellphones have 8GBytes of RAM...
+\end_layout
+
+\begin_layout Standard
+Moving in the opposite direction is much worse: the penalty is 
+\begin_inset Formula $N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right)$
+\end_inset
+
+ which is surprisingly large.
+ Assuming that 
+\begin_inset Formula $\left\langle J_{nil}\right\rangle =1$
+\end_inset
+
+, then a million-vertex graph requires 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ times 32MBytes of additional storage.
+ For uniformly-distributed graphs, one might have 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ of 3 to 10; for scale-free graphs of this size, 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ might be around 14; for square-root-Zipfian graphs (such as Wikipedia page
+ views, or biological datasets: genome, proteome, reactome datasets) the
+ 
+\begin_inset Formula $\left\langle N_{I}\right\rangle $
+\end_inset
+
+ would be around 200
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The average size of the incoming set is 
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}n\left(v\right)dv
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $n\left(v\right)$
+\end_inset
+
+ is the number of connections to vertex 
+\begin_inset Formula $v$
+\end_inset
+
+ and 
+\begin_inset Formula $N_{V}$
+\end_inset
+
+ is the total number of vertexes.
+ For a Zipfian distribution, this is
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{N_{V}}{v}dv=\log N_{V}
+\]
+
+\end_inset
+
+while for a square-root-Zipfian, one has 
+\begin_inset Formula 
+\[
+\left\langle N_{I}\right\rangle =\frac{1}{N_{V}}\int_{1}^{N_{V}}\frac{AN_{V}}{\sqrt{v}}dv=2A\sqrt{N_{V}}
+\]
+
+\end_inset
+
+The scale factor 
+\begin_inset Formula $A$
+\end_inset
+
+ is data-dependent.
+ For Wikipedia page views, 
+\begin_inset Formula $A\approx20$
+\end_inset
+
+, see https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf%27s
+_law%3F for graphs and discussion.
+ For genomics, see https://github.com/linas/biome-distribution/blob/master/paper/
+biome-distributions.pdf where 
+\begin_inset Formula $A$
+\end_inset
+
+ is in the range of 0.1 to 0.3, depending on the dataset.
+ These last estimates are a bit glib, as the specifics of the datasets are
+ quite subtle.
+ Still, one may conclude that these considerations have quite dramatic implicati
+ons for graph stores.
+\end_layout
+
+\end_inset
+
+, so we are looking at overheads in the gigabyte range.
+ There is a huge cost of jamming a hypergraph into an ordinary graph store.
+\end_layout
+
+\begin_layout Standard
+XXX TODO This is making some rather strong claims about RAM usage, and really
+ needs to be quadruple-checked and strengthened.
+ It's a bit breezy and casual, as written.
+ XXX TODO.
+\end_layout
+
+\begin_layout Subsection*
+Metagraph representations
+\end_layout
+
+\begin_layout Standard
+The metagraph differs from the hypergraph in that now a hyperedge (link)
+ may contain either another vertex (node) or another link.
+ Visually, this is no longer a bipartite graph, but has the shape of a directed
+ acyclic graph (DAG), such as the one shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph.eps
+	lyxscale 60
+	width 20col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The primary difference between the above, and a DAG is that the links are
+ ordered lists, represented as boxes in this diagram.
+ For lack of a better name, this can be called a 
+\begin_inset Quotes eld
+\end_inset
+
+metatree
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metatree can be converted to a DAG in two different ways.
+ One way is to collapse the boxes to single points.
+ The other way is to dissolve the boxes entirely, and replace a single arrow
+ from point-to-box by many arrows, from point to each of the box elements.
+\end_layout
+
+\begin_layout Standard
+The node table is effectively the same as the vertex table for the hypergraph,
+ before.
+ For this graph, it is
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+node id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+incoming-set
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{1},e_{3}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The link table now requires both an outgoing-atom list, and an incoming-link
+ set.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+link id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+outgoing-list
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+incoming-set
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(n_{1},n_{2}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{3}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(n_{1},n_{3}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{3}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(e_{1},e_{2},n_{1},e_{2}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ e_{4}\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left(e_{3},n_{3}\right)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left\{ \cdot\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice how this link-table resembles the vertex-table of an ordinary graph
+ store: it has columns for both incoming and outgoing 
+\begin_inset Quotes eld
+\end_inset
+
+sets
+\begin_inset Quotes erd
+\end_inset
+
+; the outgoing-set, however, is not a set but an ordered list.
+ In terms of designing storage, the naive graph tables, the hypergraph tables,
+ and the metagraph tables seem to have much in common.
+ This is, however, perhaps a bit deceptive, as performance considerations
+ dictate the finer aspects of the design.
+\end_layout
+
+\begin_layout Standard
+Clearly, the metagraph, having the general shape of a DAG, can be wedged
+ into an ordinary graph store.
+ Conversely, an ordinary graph is merely a metagraph that never goes more
+ than one-level deep, and whose links always have arity-two.
+ Either format is adequate for representing the other.
+ The metagraph, much like the hypergraph, has no need to explicitly declare
+ the arrows in the tree; they are not stored, nor do they have attributes.
+ The RAM-usage considerations are much like those for the hypergraph.
+ We can conclude that it is quite efficient to store a graph in a metagraph,
+ but that storing a metagraph in an ordinary graph database pays a large
+ penalty.
+\end_layout
+
+\begin_layout Section*
+Indexing
+\end_layout
+
+\begin_layout Standard
+More interesting is the structure of indexes, or rather, the alternatives
+ one has for index representation.
+ The whole point of using a graph database, as opposed to an SQL or key-value
+ database, is that the graph structure encodes something important about
+ the problem, something that cannot be easily achieved by doing table joins
+ or key-value look-ups.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In the following, only SQL databases will be discussed.
+ The noSQL databases are effectively identical, from our perspective, as
+ they are categorical opposites: that is, all arrows reversed.
+ This was explicitly articulated in a famous paper by Meijer and Bierman.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+ Thus, in the discussions below, if you are more familiar with key-value
+ databases, then simply reverse the directions of all arrows to obtain the
+ equivalent discussion.
+\end_layout
+
+\end_inset
+
+ However, just as with table-based databases, there will be certain types
+ of queries that are used a lot, and speeding these up through indexing
+ is a key ability.
+ How might this work, in practice? Let's examine some queries, and see how
+ they might work.
+\end_layout
+
+\begin_layout Subsection*
+Single attribute queries
+\end_layout
+
+\begin_layout Standard
+Suppose one wishes to find all nodes with some specific attribute.
+ Naively, this requires walking over all nodes, examining the attached attribute
+ structure, extracting a named field from the attributes, and examining
+ the value of that field.
+ This is a task that SQL databases excel at - for example, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT name,salary FROM employees WHERE department='sales';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The author would like to apologize for this seemingly non-sexy example.
+ It is the stereotypical example from database textbooks, and harks back
+ to the 1960's, when working out the fine details of management science
+ actually was a sexy research topic, and helped power the economic ascent
+ of the Western world.
+ It's importance should not be under-estimated: Ancient Rome was an agrarian
+ civilization built on concepts of hierarchical organization; organizational
+ hierarchies will continue to describe reality, including AGI.
+ Org-charts are boring but important.
+\end_layout
+
+\end_inset
+
+ A graph database is not needed for this task.
+ Nonetheless, this is a plausible task, even for a graph database.
+ The traditional solution would be 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+CREATE INDEX ON employees(department);
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ which results in the creation of ordered pairs 
+\begin_inset Formula $\left(D,\left\{ R\right\} \right)$
+\end_inset
+
+ with 
+\begin_inset Formula $D$
+\end_inset
+
+ the name of the department, and 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+ the set of all records having that value.
+ The 
+\family typewriter
+\emph on
+SELECT
+\family default
+\emph default
+ is then straight-forward: given 
+\begin_inset Formula $D$
+\end_inset
+
+, it need only return 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+.
+ Note that the size of this index is 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $N$
+\end_inset
+
+ is the number of employees.
+ This is necessarily so: one cannot build an index smaller than the number
+ of employees: every employee must be in some department, as, conventionally,
+ table-driven databases don't have null entries in rows.
+ (Well, in practice, they often do; but now imagine the task of finding
+ all records with a null value in some column...) Table-based information also
+ has some representational difficulties: imagine the case of an employee
+ with dashed-line reporting to multiple departments.
+\end_layout
+
+\begin_layout Standard
+How might one accomplish indexing like this in a graph database? The simplest,
+ most naive answer is to create new, 
+\begin_inset Quotes eld
+\end_inset
+
+privileged
+\begin_inset Quotes erd
+\end_inset
+
+ vertexes, one vertex per department.
+ They are 
+\begin_inset Quotes eld
+\end_inset
+
+privileged
+\begin_inset Quotes erd
+\end_inset
+
+, in that the associated attributes record one and only one value: the name
+ of the department.
+ Basically, the vertexes are labeled, thus escaping the overhead of crawling
+ through a collection of attributes to find one in particular.
+ One also created an unlabeled, attribute-free edge, from the department
+ name back to the full employee record.
+ Finding all employees in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is now trivial: one can trivially find the vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and trace all edges to the full record.
+ The contents of the graph database, after indexing, is illustrated below.
+ Before indexing, the vertexes 
+\begin_inset Formula $v_{6},v_{7},v_{8}$
+\end_inset
+
+ and edges 
+\begin_inset Formula $e_{1},e_{2},e_{3},e_{4},e_{5}$
+\end_inset
+
+ simply did not exist.
+ The act of indexing creates these vertexes and edges.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/partial-index.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The size of this structure is again 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N$
+\end_inset
+
+ employees, assuming every employee is indexed.
+ More precisely, it is 
+\begin_inset Formula $O\left(N\right)+O\left(N_{D}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ is the number of departments.
+\end_layout
+
+\begin_layout Standard
+This diagram exposes some unusual possibilities: not every employee has
+ to be indexed! It is possible to create only one vertex, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and hook up edges to only that one.
+ Effectively, one has a partial-index, with correspondingly less RAM usage!
+ Of course, with some cleverness, an experienced DBA can achieve the same
+ effect: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+CREATE INDEX ON employees(department) WHERE department=sales;
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and this is not a big deal, so, here, at least, graphs do not offer any
+ particular advantage, other than perhaps some conceptual clarity.
+ Under the covers, the SQL databases effectively have more-or-less the same
+ format, although their graph-based nature is 
+\emph on
+ad hoc
+\emph default
+, as there are no explicit graph-walking directives in SQL.
+\end_layout
+
+\begin_layout Standard
+The key point here is that, in a properly-designed graph database, there
+ is no generic need for 
+\begin_inset Quotes eld
+\end_inset
+
+indexes
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\emph on
+per se
+\emph default
+, they can be conjured into being at any time, as they are ultimately graphical
+ in nature.
+ There's even a bit of an advantage: in the graph database, the graph structure
+ of the index is explicit, and can be walked.
+\end_layout
+
+\begin_layout Subsection*
+Space and Time
+\end_layout
+
+\begin_layout Standard
+Comparing RAM-usage, at first glance, there is no particular difference
+ between the SQL and the graph database.
+ Naively, both require 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N$
+\end_inset
+
+ employees, plus 
+\begin_inset Formula $O\left(N_{D}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ different departments.
+ Looking more carefully, there are also the edges 
+\begin_inset Formula $e_{1},e_{2},e_{3},e_{4},e_{5}$
+\end_inset
+
+.
+ In the SQL case, these edges were implicit in the index: after all, the
+ index was a collection of ordered pairs 
+\begin_inset Formula $\left(D,\left\{ R\right\} \right)$
+\end_inset
+
+: the edges run from 
+\begin_inset Formula $D$
+\end_inset
+
+ to 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+.
+ In the graph representation, these edges become explicit: that is, they
+ appear in an explicit table, with attached attributes, even if the attributes
+ are null.
+ Shades of hypergraphs! Why, this was exactly the 
+\emph on
+same
+\emph default
+ situation as with the hypergraph! Squinting more carefully, the indexed
+ employee table is nothing other than a bipartite graph! Thus, one can effective
+ly say: the indexes in an SQL database are 
+\emph on
+de facto
+\emph default
+ hypergraphs under the covers, even though no one ever explicitly says so.
+ The bipartite nature of the graph makes this explicit.
+ Surprise!
+\end_layout
+
+\begin_layout Standard
+The explicit hypergraph representation does cost more than SQL.
+ An SQL index can be a b-tree or hash table; the only thing that the b-tree/hash
+ table needs to store is the row ID.
+ For a hypergraph, we have imposed the additional requirement that hypergraphs
+ must be rapidly traversible.
+ This forces the storage of the incoming set in addition to the outgoing
+ set.
+ Hypergraph stores necessarily use more RAM than equivalent SQL tables.
+ But recall why we did this: rapid graph traversal.
+ Graph traversal in SQL is easy for trivial graphs, but becomes profoundly
+ challenging for anything more complex.
+ Mashing up 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT INTO
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ with 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+JOIN
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is tough.
+\end_layout
+
+\begin_layout Standard
+CPU usage considerations are harder to dissect.
+ To avoid discussions of network overhead in client-server architectures,
+ its easier, here, to limit discussions to databases that run in the same
+ address space as the application.
+ Thus, for SQL bench-marking, one might look at SQLite, which runs embedded,
+ rather than Postgres, which requires network interfaces.
+ Queries usually begin life as text-strings, for example, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT name,salary FROM employees WHERE department='sales';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ was a text-string that had to be parsed to figure out 
+\begin_inset Quotes eld
+\end_inset
+
+what to do
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Let's assume that this cost has been amortized, and that there is a way
+ to get a handle to a query that has already been analyzed.
+ Query run-time execution is then a matter of finding the vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, tracing the edges to each of the employees, and completing the work by
+ extracting fields for each employee.
+ If vertexes themselves are indexed (as they should be), then locating the
+ vertex 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is either 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ for hash tables, or 
+\begin_inset Formula $O\left(\log N_{D}\right)$
+\end_inset
+
+ for trees.
+ In the hypergraph representation, finding the set 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+ of employees in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ comes for free.
+ The dominant cost is almost surely the analysis needed to extract the desired
+ information from the record attributes.
+\end_layout
+
+\begin_layout Subsection*
+Partial indexes and metagraphs
+\end_layout
+
+\begin_layout Standard
+The power of partial indexes together with metagraphs begins to reveal itself
+ when one considers query and search query optimization.
+ This text is long enough, so this will be deferred to a later chapter.
+\end_layout
+
+\begin_layout Standard
+Partial indexes reveal their utility in another way.
+ Sticking with the management example from above, consider extending and
+ looking at organizational structures (org charts).
+\end_layout
+
+\begin_layout Standard
+Conventionally, corporations, political and military organizations are organized
+ hierarchically, with divisions reporting to executives, departments rolling
+ up into divisions, and so on.
+ This is precisely the structure of a metatree.
+ It is tempting to gloss this, and say that the org chart is a tree, or
+ perhaps a DAG.
+ It is not! It is a metatree, and confusion arises because a metatree can
+ be collapsed to a DAG in several different ways.
+ So, consider a division chief who manages a line item.
+ One can draw the org-chart several ways: by drawing an edge from a manager
+ to each (named) employee that they manage, or from the manager to a functional
+ box labeled with the function.
+ Employees are then grouped inside these functional boxes.
+ This is shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/org-chart.eps
+	lyxscale 70
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is manifestly in the shape of a metatree.
+ It can be collapsed down to an ordinary directed tree in several ways,
+ left to the imagination of the reader.
+ The point is that the natural structure of an org chart is not a naive
+ tree; it contains a bit more complexity than that, and is far more readily
+ represented with a metatree.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is hardly the only way to represent an org-chart with a meta-tree.
+ One could put the department titles into boxes of their own, as well as
+ perhaps the names of the actual people, adding even some dashed-line cross-func
+tional reporting structures.
+ The point here is that it is not 
+\begin_inset Quotes eld
+\end_inset
+
+just a tree
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The conceptual jump here is then: rather than stopping with a single-level
+ hypergraph, which had 
+\begin_inset Quotes eld
+\end_inset
+
+tables
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+indexes
+\begin_inset Quotes erd
+\end_inset
+
+ that were 
+\begin_inset Quotes eld
+\end_inset
+
+on top of tables
+\begin_inset Quotes erd
+\end_inset
+
+, one can go further: indexes of indexes: namely, the metagraph.
+\end_layout
+
+\begin_layout Subsection*
+Normalization
+\end_layout
+
+\begin_layout Standard
+The implication for RAM usage is similar to that of 
+\begin_inset Quotes eld
+\end_inset
+
+database normalization
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In a naive, un-normalized table format, one might store, for each employee,
+ the employee name, the department, the 2nd line, the division and the name
+ of the company.
+ This is a bit silly in terms of storage: 5 columns are needed; for 
+\begin_inset Formula $N$
+\end_inset
+
+ employees, this requires 
+\begin_inset Formula $O\left(5N\right)$
+\end_inset
+
+ storage.
+ One 
+\begin_inset Quotes eld
+\end_inset
+
+normalizes
+\begin_inset Quotes erd
+\end_inset
+
+ by storing only the employee-department relationship with a table of 
+\begin_inset Formula $O\left(2N\right)$
+\end_inset
+
+ in size, and the remainder of the org chart in a separate table, also of
+ two columns, encoding the directed tree reporting structure.
+ This offers a huge space savings.
+ For 
+\begin_inset Formula $N_{D}$
+\end_inset
+
+ departments/divisions, this second table is 
+\begin_inset Formula $O\left(2N_{D}\right)$
+\end_inset
+
+ and clearly, 
+\begin_inset Formula $O\left(5N\right)\gg O\left(2N\right)+O\left(2N_{D}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Look-ups in a normalized database proceed through table joins.
+ To find all employees in a division, one looks up what 2nd lines report
+ to the division, what departments report to the second line, and what employees
+ report to the departments.
+ The indexing proceeds just as described before.
+ The table joins are an 
+\emph on
+ad hoc
+\emph default
+ graph walk.
+ The SQL for this is a bit nasty, but still effectively human-readable:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT employees.name FROM employees, orgchart WHERE employees.department
+ = orgchart.dept AND orgchart.division = 'marketing & sales';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Its nasty, because we have to 
+\begin_inset Quotes eld
+\end_inset
+
+join
+\begin_inset Quotes erd
+\end_inset
+
+ different rows in the org chart table.
+ SQL does not offer any basic primitives for joining different rows together;
+ this requires a good bit of creativity on the part of the DBA.
+\end_layout
+
+\end_inset
+
+ This SQL snippet is oversimplified by quite a bit, but it does convey the
+ general spirit of the thing.
+ It is attempting to specify a graph-walk without explicitly acknowledging
+ that there is a graph hidden under the covers.
+\end_layout
+
+\begin_layout Standard
+The key message here is that metagraphs retain the key benefits of table
+ normalization, while making the graphical nature of indexing explicit.
+ They do even more: they effectively 
+\begin_inset Quotes eld
+\end_inset
+
+automate
+\begin_inset Quotes erd
+\end_inset
+
+ table normalization.
+ To some fairly large degree, you no longer have to explicitly think about
+ table normalization.
+ It 
+\begin_inset Quotes eld
+\end_inset
+
+just happens naturally
+\begin_inset Quotes erd
+\end_inset
+
+, under the covers.
+ This is not because there is some super-clever algo running under the covers,
+ performing magic normalization.
+ It is instead purely a byproduct of changing ones perspective about data.
+\end_layout
+
+\begin_layout Standard
+Comparing metagraphs to graph stores, one sees a different improvement.
+ By discarding the edge table (that the graph store demands), and the associated
+ edge attributes, one gets the representational compactness of indexes,
+ without paying a high price for them.
+ The price one does pay (the incoming set) enables something quite dramatic:
+ an easy graph walk, which is anything-but-easy in a traditional SQL database.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+OK, sure, it becomes 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+ if you are willing to write PL/SQL, or, if your database supports it, then
+ embedded Python.
+ Otherwise, you have to descend into C/C++ (or your other favorite programming
+ language of choice), and once you are 
+\begin_inset Quotes eld
+\end_inset
+
+programming
+\begin_inset Quotes erd
+\end_inset
+
+, it is no longer 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A properly designed graph query system makes graph walks 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ And, to take one quick pot-shot: GraphQL is not properly designed.
+ It is effectively a query anti-pattern.
+ It took what is nice about SQL, but then utterly failed to take into account
+ anything and everything that this text is trying to explain.
+ It is not for nothing that the OpenCog AtomSpace differs so dramatically
+ from everything else out there.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Metatrees and String Representations
+\end_layout
+
+\begin_layout Standard
+The proper way of representing a meta-tree as a text string can be mildly
+ confusing.
+ Articulating this carefully is rewarding.
+ Consider again the generic example:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph.eps
+	lyxscale 60
+	width 20col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be written as 
+\begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
+\end_inset
+
+ or perhaps, with indentation, but without parenthesis, so as to improve
+ readability (so, Python-style, 
+\emph on
+i.e.
+
+\emph default
+ with 
+\begin_inset Quotes eld
+\end_inset
+
+significant whitespace
+\begin_inset Quotes erd
+\end_inset
+
+): 
+\begin_inset Formula 
+\[
+\begin{array}{cccc}
+e_{4}: & e_{3}: & e_{1}: & n_{1}\\
+ &  &  & n_{2}\\
+ &  & e_{2}: & n_{2}\\
+ &  &  & n_{3}\\
+ &  & n_{1}\\
+ &  & e_{2}: & n_{2}\\
+ &  &  & n_{3}\\
+ & n_{3}
+\end{array}
+\]
+
+\end_inset
+
+To understand this last, indentation matters.
+ Yuck.
+ This is still hard to read.
+ Perhaps JSON will do:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	{
+\end_layout
+
+\begin_layout Plain Layout
+
+		Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+			Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						},
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						},
+\end_layout
+
+\begin_layout Plain Layout
+
+					Node: 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						}
+\end_layout
+
+\begin_layout Plain Layout
+
+				},
+\end_layout
+
+\begin_layout Plain Layout
+
+			Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+	}
+\end_layout
+
+\end_inset
+
+Much better, but still a bit awkward.
+ Perhaps all the links can be replaced with square brackets, so an array
+ of arrays? Doing this will convert the JSON into funny-looking s-expression.
+ This will be presented shortly, below; in the meantime, it is left to the
+ reader's imagination.
+\end_layout
+
+\begin_layout Standard
+A strange thing has happened here: the nodes 
+\begin_inset Formula $n_{1},n_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ appear in multiple places, yet they are supposed to be 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise for 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+, which appears twice, but is meant to be the same 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ both times.
+\end_layout
+
+\begin_layout Standard
+Consider representing the metatree with JSON (or something similar, 
+\emph on
+e.g.
+
+\emph default
+ YAML) The duplication presents a difficulty for JSON.
+ Ordinary JSON does not support object references; there is no way to say
+ the multiple 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+'s and the 
+\begin_inset Formula $n_{k}$
+\end_inset
+
+'s are 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There is an IETF draft standard for references, but it is not widely used.
+ Thus, although metatrees can be represented with JSON, some care must be
+ taken when parsing them: one must find all repeated objects and understand
+ them to be universally unique.
+ That is, one must replace all repeated objects by universally unique references.
+\end_layout
+
+\begin_layout Subsection*
+UUID's
+\end_layout
+
+\begin_layout Standard
+It is very tempting, at this point, to write 
+\begin_inset Quotes eld
+\end_inset
+
+just use universally unique identifiers
+\begin_inset Quotes erd
+\end_inset
+
+ (UUID's).
+ This is good enough for local address spaces; if nothing else, then an
+ ordinary C/C++ pointer is a UUID to the object.
+ But, when writing a text string, what UUID shall one use? Much worse, UUID's
+ cause major, fundamental problems when considering network-distributed
+ storage; this is the problem of UUID collision.
+ One solution to avoid UUID collision is to have a single centralized atomic
+ issuer of ID's that can guarantee uniqueness.
+ This introduces a single, centralized bottleneck.
+ Another solution is to use cryptographic hashes.
+ Each meta-tree string can be hashed down to a number.
+ To avoid collisions due to the birthday paradox, the hashes have to be
+ quite large.
+ For 1 million distinct atoms, a 64-bit hash and crossed fingers should
+ be enough; uncrossing the fingers requires at least a 96-bit hash.
+ For a trillion atoms, a 128-bit hash is just barely enough and a 192-bit
+ hash is preferred.
+ These eat up RAM (as compared to pointers) and the computation of cryptographic
+ hashes requires significant CPU overhead.
+\end_layout
+
+\begin_layout Standard
+Merely adding references to JSON is not enough to solve the problem, either.
+ There may be millions or billions of meta-trees; forcing the user correctly
+ employ references across all of them, without error is just not reasonable.
+ Worse: new meta-trees could be added weeks or months later.
+ Using references would force the user to maintain a table of references
+ over long time periods.
+ How? Where shall this table be stored? How much RAM will it require? References
+ can be convenient, but they don't solve the fundamental representational
+ problem for metatrees.
+\end_layout
+
+\begin_layout Subsection*
+Insertion and Deletion
+\end_layout
+
+\begin_layout Standard
+When a metatree is added to a metagraph, a scan must be made to determine
+ if the tree, or any subtree already occurs in the metagraph.
+ How might we know this? By looking it up! This does require indexing on
+ the metagraph.
+ Using indexes as described in the previous section introduces a bit of
+ a chicken-and-egg problem.
+ Thus, at the meta-graph store level, a naked b-tree or hash table is required.
+ Here, (non-cryptographic) hashes are useful, as they can be made small,
+ and can be used to speed up compares in a b-tree, or used in a hash table,
+ which will resolves any collisions.
+\end_layout
+
+\begin_layout Standard
+Compared to an SQL database, this disambiguation adds to the cost of insertion
+ and deletion into a metagraph store.
+ In SQL, tables have primary keys; these are the primary indexes for each
+ row.
+ They are always made explicit; a table schema is declared with one of the
+ columns designated as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+PRIMARY KEY
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In a metagraph, each distinct node and link is ...
+ distinct, and unique.
+ No explicit declaration is needed; uniqueness is implicit in the definition.
+ This is kind-of nice; why mess with primary keys, if one doesn't have to?
+ One less thing to think about, and not unrelated to the 
+\begin_inset Quotes eld
+\end_inset
+
+automatic
+\begin_inset Quotes erd
+\end_inset
+
+ nature of table normalization with metagraphs.
+ Metagraphs provide automatic key maintenance.
+ Nice!
+\end_layout
+
+\begin_layout Standard
+Compared to a graph database ...
+ well, how, exactly is one supposed to say that 
+\begin_inset Quotes eld
+\end_inset
+
+this vertex is the same as that vertex
+\begin_inset Quotes erd
+\end_inset
+
+ in a graph store? This is non-trivial; it requires either references or
+ some other technique; if one is not careful, one finds oneself performing
+ queries while inputting data.
+ Again, we seem to have discovered, quite accidentally, with no explicit
+ intent, that hypergraphs offer an elegant property that graph databases
+ lack.
+\end_layout
+
+\begin_layout Section*
+Types and Atomese
+\end_layout
+
+\begin_layout Standard
+Lets return to the string expression 
+\begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
+\end_inset
+
+.
+ Since nodes and links (atoms) are unique, the subscripts on the hyperedges
+ are not required.
+ Nor is the use of the colon.
+ The above is representable with the S-expression
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Node 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+					(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Node 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+Just as with JSON, the same considerations about repeated objects apply.
+\end_layout
+
+\begin_layout Subsection*
+Types
+\end_layout
+
+\begin_layout Standard
+Perhaps the most interesting aspect of the s-expression format is the first
+ explicit appearance of types.
+ Here, there are just two types: the nodes, and the links.
+ The nodes have to be given a name, so as to disambiguate them from one-another.
+ The links do not: the metatree structure is enough to disambiguate one
+ link from another.
+ Again: nodes and links are naturally universally unique (or conversely,
+ every node having the same name, every link having the same structure is
+ indistinguishable.)
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is eerily similar to atomic physics.
+ All electrons are indistinguishable.
+ All protons are indistinguishable.
+ When combined into atoms, however, this changes.
+ An element of one type (say, carbon) is clearly different than another
+ (say, oxygen), but all carbon atoms are indistinguishable...
+ unless they appear in an organic molecule.
+ That is, it is the relationship of elementary particles to one-another
+ that gives structure to the universe.
+ It is not the particles themselves.
+\end_layout
+
+\end_inset
+
+ When written in this form, the doubly-typed nature of the metatree is calling
+ out for generalization.
+ The types are sitting there, almost begging: 
+\begin_inset Quotes eld
+\end_inset
+
+do something with me
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Multiple types are not strictly needed for storage: indeed, the two tables,
+ one for nodes, and one for links, is sufficient to tell them apart.
+ Actually generalizing the written form above to multiple types does require
+ additional storage.
+ Is it worth it?
+\end_layout
+
+\begin_layout Standard
+In comp sci, in practice, types are incredibly useful.
+ If they are not given explicit, distinguished treatment in the metatree,
+ they will appear, without question, in the attribute section.
+ Hang on, whats a type?
+\end_layout
+
+\begin_layout Standard
+By 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+ it is meant both the types of computer science, and of type theory.
+ In ordinary programming, ints, floats and strings are types (these are
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+primitive types
+\begin_inset Quotes erd
+\end_inset
+
+), and so are object-oriented classes (these are the 
+\begin_inset Quotes eld
+\end_inset
+
+compound types
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+product types
+\begin_inset Quotes erd
+\end_inset
+
+).
+ Function calls have a type signature too, and ML, CaML, Haskell and F#
+ are all about programming with types.
+ Unlike these standard, well-established languages, there is no particular
+ need to limit oneself to a proscribed set of primitive types with a metagraph.
+ One can have as many different primitive types as desired.
+ One can have user-defined types.
+\end_layout
+
+\begin_layout Standard
+The simplest example of a user-defined type is, for example, a 
+\family sans
+\emph on
+CatLink
+\family default
+\emph default
+.
+ What's a 
+\family sans
+\emph on
+CatLink
+\family default
+\emph default
+?
+\emph on
+ 
+\emph default
+Well, cats - house cats, are those things with paws and whiskers, and have
+ an entire subdivision of the internet devoted to them.
+ What do you do with a 
+\family sans
+\emph on
+CatLink
+\family default
+\emph default
+? Well, anything you want: use it to link to a photo URL.
+ Use it in some phylogenetic tree.
+ Describe the properties of a cat: fur, tail, 
+\emph on
+etc
+\emph default
+.
+ Generic knowledge representation.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		; 
+\begin_inset Quotes eld
+\end_inset
+
+The cat sat on the mat
+\begin_inset Quotes erd
+\end_inset
+
+, as a typed metatree.
+\end_layout
+
+\begin_layout Plain Layout
+
+		(SittingLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(ObjectNode 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(ObjectNode 
+\begin_inset Quotes eld
+\end_inset
+
+mat
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Of course, a good collection 
+\family sans
+\emph on
+IsALink
+\family default
+\emph default
+s, 
+\family sans
+\emph on
+HasALink
+\family default
+\emph default
+s and 
+\family sans
+\emph on
+PartOfLink
+\family default
+\emph default
+s, together with some reasonable verbs might be able to achieve the same
+ goals
+\emph on
+ 
+\emph default
+...
+ but those are ...
+ more types.
+ The point here is that there is no need to limit oneself to ints, floats
+ and strings, and the object-oriented classes one can build out of these
+ primitives.
+ There is no need to be constrained by the philosophy of functional programming
+ language design.
+\end_layout
+
+\begin_layout Standard
+Wait, what? Programming language design?
+\end_layout
+
+\begin_layout Subsection*
+Atomese
+\end_layout
+
+\begin_layout Standard
+Metagraphs fit well with type theory: it is easy, effectively trivial to
+ represent product types, sum types and function signatures with metagraphs.
+ This, in turn, opens the door to a very unusual property of metagraphs:
+ they can be interpreted as programs.
+ To illustrate, consider the case of an abstract syntax tree.
+ Conventionally, one says that an expression, such as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+if (a > b) return a+b;
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ can be represented by an abstract syntax tree.
+ This is a tree where each internal node of the tree is one of the operators:
+ plus, greater-than, if().
+ Leaves are variables or constants.
+\end_layout
+
+\begin_layout Standard
+For the case of (typed) metatrees, the representation is 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(IfLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(GreaterThanLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(PlusLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This not only represents the expression 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+if (a > b) return a+b;
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ but it can also be made active: when supplied with values for the variables,
+ the comparison and the addition can be explicitly performed.
+\end_layout
+
+\begin_layout Standard
+This is a key property that (typed) metatrees have, and that ordinary (typed
+ or untyped) graphs do not.
+ Ordinary graphs are not, in general, DAGs: they can contain cycles.
+ Erecting an abstract syntax tree structure on an ordinary graph store is
+ not natural; one must impose some representational constraints.
+ Now, of course, one could limit oneself to using only DAG's, but any sane,
+ normal designer of any graph store would strenuously object to adding executabl
+e graphs as a fundamental property of the graph store itself.
+ The execution of expressions is 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal
+\begin_inset Quotes erd
+\end_inset
+
+ to the storage of graphs.
+ These tasks have 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal concerns
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+non-overlapping concerns
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Strangely, metatrees erase that orthogonality.
+\end_layout
+
+\begin_layout Subsubsection*
+ProLog
+\end_layout
+
+\begin_layout Standard
+Perhaps this seems dubious.
+ The core issue is most easily exposed by looking at something like ProLog.
+ It's a programming language, of course.
+ It makes abstract syntax trees fairly explicit: it is hard to understand
+ how prolog works, unless one learns to think in terms of trees.
+ Certainly, the 
+\begin_inset Quotes eld
+\end_inset
+
+cut operator
+\begin_inset Quotes erd
+\end_inset
+
+ in prolog is one of the early stumbling blocks for programmers learning
+ prolog.
+ It's hard to see what it does, until one realizes that it is literally
+ cutting branches off of a tree.
+ At the same time, chapter one, the very first chapter of any book on prolog
+ programming is rife with examples of knowledge representation.
+ One will find something like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		father_child(tom, erica).
+\end_layout
+
+\begin_layout Plain Layout
+
+		father_child(mike, tom).
+\end_layout
+
+\begin_layout Plain Layout
+
+		sibling(X, Y) :- parent_child(Z, X), parent_child(Z, Y).
+\end_layout
+
+\end_inset
+
+The first two statements are assertions of fact, the third is a inference
+ rule.
+ They have a very obvious representation as trees, and, more precisely as
+ meta-trees.
+ Yet, strangely, prolog programs are encoded in text files, and 
+\emph on
+not
+\emph default
+ as a collection of entries in a graph database!
+\end_layout
+
+\begin_layout Standard
+This last observation becomes truly bizarre, if one imagines some non-trivial
+ knowledge representation problem.
+ Imagine keeping census data in prolog.
+ Maintaining a text file with dozens of lines of code for millions of people
+ is absurd.
+ Applying transformations or graph rewrites is impossible for text files.
+ Consider the inference 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sibling
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ above.
+ It can be taken as a run-time directive, but it can also be taken as a
+ graph rewrite rule: find all graphs having two terms, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+parent_child(Z, X)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+parent_child(Z, Y)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and crate a new term 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sibling(X, Y)
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Such a rewrite is not all that hard in a database; in SQL, some appropriate
+ combination of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT INTO
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+JOIN
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The only stumbling block being the need to reference the 
+\begin_inset Quotes eld
+\end_inset
+
+parents
+\begin_inset Quotes erd
+\end_inset
+
+ table twice during the join.
+ Hmm...
+ what was that bit, about explicit graph-walking, again?
+\end_layout
+
+\end_inset
+
+ Looking at it this way, prolog 
+\begin_inset Quotes eld
+\end_inset
+
+wants
+\begin_inset Quotes erd
+\end_inset
+
+ to live in a database.
+ Yet it doesn't.
+\end_layout
+
+\begin_layout Standard
+So, yes, superficially, databases and execution are orthogonal concerns.
+ But if one begins to look at what people actually do, in practice, with
+ SQL, and how, in practice, they design code for object-relational databases,
+ that orthogonality gets a bit fuzzy.
+ It's downright cloudy by the time one is writing PL/SQL statements.
+ Coming from the opposite direction, as prolog does, makes the 
+\begin_inset Quotes eld
+\end_inset
+
+separation of concerns
+\begin_inset Quotes erd
+\end_inset
+
+ even cloudier.
+\end_layout
+
+\begin_layout Subsubsection*
+Intermediate Languages
+\end_layout
+
+\begin_layout Standard
+These aren't even the only examples.
+ Inside of compilers, one finds 
+\begin_inset Quotes eld
+\end_inset
+
+intermediate languages
+\begin_inset Quotes erd
+\end_inset
+
+.
+ For Microsoft, this is the CIL or Common Intermediate Language.
+ For Gnu GCC, it is GIMPLE.
+ These are somewhat like assembly code, but abstract, and not specific to
+ CPU hardware.
+ They encode abstract syntax trees, and thus sit above the bytecode layer.
+ Looking carefully, one will observe that 
+\begin_inset Quotes eld
+\end_inset
+
+compiler optimization
+\begin_inset Quotes erd
+\end_inset
+
+ actually consists of a very small database of the currently active, non-retired
+ abstract syntax trees, and that optimization is a collection of re-write
+ rules (in the sense of the prolog rewrite rule, above) being applied to
+ the trees in the active database.
+\end_layout
+
+\begin_layout Standard
+Of course, what happens inside a compiler is very narrow, and very carefully
+ crafted to suite the needs of the compiler, and nothing more.
+ This is a high art that has been honed over many decades.
+ Intermediate languages are almost never written to disk, except as text
+ strings.
+ Yet the lessons they teach can be taken as generic: creating graphs, and
+ then transforming them, via graph re-writing, is a generically useful operation.
+ Representing knowledge as trees, and specifically, as type meta-trees,
+ offers a huge representational efficiency over plain graphs or SQL tables
+ or key-value stores.
+ The efficiency is both computational (RAM usage, CPU cycles) and expressive:
+ writing inferences in prolog really is a lot easier than writing SQL statements.
+\end_layout
+
+\begin_layout Subsubsection*
+Atomese
+\end_layout
+
+\begin_layout Standard
+The above seems to be saying 
+\begin_inset Quotes eld
+\end_inset
+
+typed metatrees are a programming language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is true, and in the OpenCog AtomSpace, it actually is a language,
+ called 
+\begin_inset Quotes eld
+\end_inset
+
+Atomese
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But what kind of language is it? Well, if one abstains from providing some
+ large collection of Link and Node types, then the answer is 
+\begin_inset Quotes eld
+\end_inset
+
+any kind at all
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The metatrees provide just enough structure, just enough groundwork, to
+ create your own language.
+ This is vaguely comparable to lex and yacc: these are just some basic tools
+ that allow competent users to design custom, user-defined languages.
+ Likewise here: metatrees offer the toolset needed to design a custom knowledge
+ representation system.
+ Perhaps offering a built-in 
+\family sans
+\emph on
+IfLink
+\family default
+\emph default
+, 
+\family sans
+\emph on
+GreaterThanLink
+\family default
+\emph default
+, 
+\family sans
+\emph on
+PlusLink
+\family default
+\emph default
+ and 
+\family sans
+\emph on
+VariableNode
+\family default
+\emph default
+ is a good idea, and perhaps not.
+ Nothing compels a metagraph database system to offer these; at the same
+ time, it makes it easy to offer these.
+ To some large degree, it is sufficient to offer a typed metagraph storage
+ system, and nothing more.
+\end_layout
+
+\begin_layout Standard
+The OpenCog AtomSpace almost does this, but it also tacks on more than 100
+ different predefined Atom types.
+ This is effectively a historical accident, having to do with how it evolved.
+ A strong case could be made for splitting out this vast assortment of predefine
+d types into their own module.
+ This is easier said than done; the AtomSpace continues to be a research
+ platform for the concepts described here.
+\end_layout
+
+\begin_layout Section*
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Several important claims were made here about metagraphs and metagraph stores.
+ These are:
+\end_layout
+
+\begin_layout Itemize
+Metagraphs are a simple and relatively minor generalization of graphs.
+\end_layout
+
+\begin_layout Itemize
+Metagraphs are more representationally compact than graphs.
+ They are more efficient at representing data.
+\end_layout
+
+\begin_layout Itemize
+Table normalization, normally an intellectually demanding task for relational
+ database design, comes 
+\begin_inset Quotes eld
+\end_inset
+
+for free
+\begin_inset Quotes erd
+\end_inset
+
+, when one works with metagraphs.
+\end_layout
+
+\begin_layout Itemize
+Specifying metagraphs as text strings is easier than specifying graphs as
+ strings.
+\end_layout
+
+\begin_layout Itemize
+Typed metatrees can be abstract syntax trees; ordinary graphs cannot.
+\end_layout
+
+\begin_layout Itemize
+Typed metagraphs provide a powerful under-girding for symbolic computing,
+ not just for representing knowledge, but also carrying out the computations
+ themselves.
+\end_layout
+
+\begin_layout Standard
+This text started out as an attempt to describe the RAM and CPU usage properties
+ of metagraphs, and unwittingly turned into a strong statement about the
+ general utility of metagraphs as a foundational system.
+ As such, it provides a strong statement about many of the design decisions
+ that went into the OpenCog AtomSpace, which is the primary research vehicle
+ for these ideas.
+ Even so, it is not the culmination of the journey.
+ The series of chapters in this directory are about sheaves.
+ These provide a general connectionist approach to data representation,
+ and the sheaf approach is different from metagraphs, having distinct representa
+tional properties (including CPU and RAM usage).
+ Understanding metagraphs is a key gateway to the sheaves project.
+ Fortunately, the metagraph approach, taken by the current AtomSpace is
+ fairly mature, having more than a decade of implementation and use experience
+ behind it.
+ This text gives a flavor of where it has arrived.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
