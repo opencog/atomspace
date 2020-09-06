@@ -3429,8 +3429,8 @@ ad hoc
 
 \family sans
 \emph on
-SELECT employees.name FROM employees, orgchart WHERE employees.department=orgchart.
-dept AND orgchart.division='marketing & sales';
+SELECT employees.name FROM employees, orgchart WHERE employees.department
+ = orgchart.dept AND orgchart.division = 'marketing & sales';
 \family default
 \emph default
 
@@ -3580,8 +3580,8 @@ This can be written as
 \begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
 \end_inset
 
- or perhaps, with indentation, but without parenthesis to improve readability
- (so, Python-style, 
+ or perhaps, with indentation, but without parenthesis, so as to improve
+ readability (so, Python-style, 
 \emph on
 i.e.
 
@@ -3612,7 +3612,192 @@ e_{4}: & e_{3}: & e_{1}: & n_{1}\\
 \end_inset
 
 To understand this last, indentation matters.
- A strange thing has happened here: the nodes 
+ Yuck.
+ This is still hard to read.
+ Perhaps JSON will do:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	{
+\end_layout
+
+\begin_layout Plain Layout
+
+		Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+			Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						},
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						},
+\end_layout
+
+\begin_layout Plain Layout
+
+					Node: 
+\begin_inset Quotes eld
+\end_inset
+
+one
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+					Link: {
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+two
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Plain Layout
+
+							Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+						}
+\end_layout
+
+\begin_layout Plain Layout
+
+				},
+\end_layout
+
+\begin_layout Plain Layout
+
+			Node: 
+\begin_inset Quotes eld
+\end_inset
+
+three
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+	}
+\end_layout
+
+\end_inset
+
+Much better, but still a bit awkward.
+ Perhaps all the links can be replaced with square brackets, so an array
+ of arrays? Doing this will convert the JSON into funny-looking s-expression.
+ This will be presented shortly, below; in the meantime, it is left to the
+ reader's imagination.
+\end_layout
+
+\begin_layout Standard
+A strange thing has happened here: the nodes 
 \begin_inset Formula $n_{1},n_{2}$
 \end_inset
 
@@ -3847,7 +4032,11 @@ one
 \begin_inset Quotes eld
 \end_inset
 
-two))
+two
+\begin_inset Quotes erd
+\end_inset
+
+))
 \end_layout
 
 \begin_layout Plain Layout
@@ -4091,7 +4280,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(SittingLink   ; 
+		; 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4099,7 +4288,12 @@ The cat sat on the mat
 \begin_inset Quotes erd
 \end_inset
 
-, as a typed metagraph.
+, as a typed metatree.
+\end_layout
+
+\begin_layout Plain Layout
+
+		(SittingLink
 \end_layout
 
 \begin_layout Plain Layout
@@ -4393,7 +4587,7 @@ status open
 
 \begin_layout Plain Layout
 
-		sibling(X, Y)      :- parent_child(Z, X), parent_child(Z, Y).
+		sibling(X, Y) :- parent_child(Z, X), parent_child(Z, Y).
 \end_layout
 
 \end_inset
