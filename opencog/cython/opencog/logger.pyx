@@ -12,10 +12,13 @@ cdef create_logger(filename):
     del c_filename
     return l
 
-cdef Logger wrap_clogger(cLogger *clog, bool not_singleton=False):
+cdef Logger wrap_clogger(cLogger *clog):
     cdef Logger l = Logger.__new__(Logger)
     l.clog = clog
-    l.not_singleton_logger = not_singleton
+    # Setting to False allows to not deallocate when the caller of
+    # wrap_clogger goes out of scope (which can be the case if used in
+    # a singleton manner).
+    l.not_singleton_logger = False
     return l
 
 cdef class Logger:

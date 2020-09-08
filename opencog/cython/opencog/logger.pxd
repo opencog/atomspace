@@ -42,4 +42,4 @@ cdef class Logger:
     cdef _set_level(self,int lvl)
     cdef _level_as_string(self)
 
-cdef Logger wrap_clogger(cLogger *clog, bool not_singleton=*)
+cdef Logger wrap_clogger(cLogger *clog)
