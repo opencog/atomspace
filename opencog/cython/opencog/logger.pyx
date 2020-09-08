@@ -1,40 +1,5 @@
 from libcpp cimport bool
-from cython.operator cimport dereference as deref, preincrement as inc
-
-# basic wrapping for std::string conversion
-cdef extern from "<string>" namespace "std":
-    cdef cppclass string:
-        string()
-        string(char *)
-        char * c_str()
-        int size()
-
-
-cdef extern from "opencog/util/Logger.h" namespace "opencog":
-    # Need to get around cython's lack of support for nested types
-    enum loglevel "opencog::Logger::Level":
-        NONE "opencog::Logger::NONE"
-        ERROR "opencog::Logger::ERROR"
-        WARN "opencog::Logger::WARN"
-        INFO "opencog::Logger::INFO"
-        DEBUG "opencog::Logger::DEBUG"
-        FINE "opencog::Logger::FINE"
-        BAD_LEVEL "opencog::Logger::BAD_LEVEL"
-    cdef cppclass cLogger "opencog::Logger":
-        cLogger()
-        cLogger(string s)
-        void set_level(loglevel lvl)
-        void set_component(string c)
-        loglevel get_level()
-        void set_print_to_stdout_flag(bool flag)
-
-        void log(loglevel lvl, string txt)
-
-        bool is_enabled(loglevel lvl)
-
-    cdef loglevel string_to_log_level "opencog::Logger::get_level_from_string"(string s)
-    cdef string log_level_to_string "opencog::Logger::get_level_string"(loglevel lvl)
-    cLogger& logger()
+from cython.operator cimport dereference as deref
 
 def create_logger(filename):
     cdef Logger l = Logger.__new__(Logger)
@@ -47,9 +12,13 @@ def create_logger(filename):
     del c_filename
     return l
 
+cdef Logger wrap_clogger(cLogger *clog, bool not_singleton=False):
+    cdef Logger l = Logger.__new__(Logger)
+    l.clog = clog
+    l.not_singleton_logger = not_singleton
+    return l
+
 cdef class Logger:
-    cdef cLogger *clog
-    cdef not_singleton_logger
 
     def __cinit__(self):
         self.not_singleton_logger = False
@@ -57,25 +26,25 @@ cdef class Logger:
         if self.not_singleton_logger: del self.clog
     def __init__(self):
         self.clog = &logger()
-    
+
     @property
     def NONE(self): return NONE
-    
+
     @property
     def ERROR(self): return ERROR
-    
+
     @property
     def WARN(self): return WARN
-    
+
     @property
     def INFO(self): return INFO
-    
+
     @property
     def DEBUG(self): return DEBUG
-    
+
     @property
     def FINE(self): return FINE
-    
+
     def set_component(self, c):
         self.clog.set_component(c)
     cdef _set_level(self,int lvl):
