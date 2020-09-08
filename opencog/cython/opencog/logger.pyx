@@ -1,7 +1,7 @@
 from libcpp cimport bool
 from cython.operator cimport dereference as deref
 
-cdef create_logger(filename):
+def create_logger(filename):
     cdef Logger l = Logger.__new__(Logger)
     py_byte_string = filename.encode('UTF-8')
     # create temporary cpp string
