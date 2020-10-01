@@ -24,4 +24,4 @@ C = ConceptNode('Cherry')
 ABC = ListLink(A, B, C)
 
 # Get the outgoing set of ABC
-print("The outgoing set of ABC:\n\n", ABC.get_out())
+print("The outgoing set of ABC:\n\n", ABC.out)
