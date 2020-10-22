@@ -8,7 +8,7 @@ import mymodule as mm
 
 a = AtomSpace()
 
-set_type_ctor_atomspace(a)
+set_default_atomspace(a)
 
 def local_func(x1, x2, x3):
     print("Entering local function with\n", x1, x2, x3)
