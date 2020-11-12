@@ -66,6 +66,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(TypeChoiceUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
+	ADD_CXXTEST(IsClosedUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(VirtualUTest)
 	ADD_CXXTEST(PredicateFormulaUTest)
