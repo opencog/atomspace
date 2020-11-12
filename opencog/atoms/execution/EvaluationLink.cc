@@ -26,6 +26,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
@@ -183,6 +184,17 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 	double v1 = get_numeric_value(as, silent, oset[1]);
 
 	return (v0 > v1);
+}
+
+/// Perform a IsClosed check
+static bool is_closed(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (1 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "IsClosedLink expects one argument");
+
+	return is_closed(oset[0]);
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,
@@ -562,6 +574,7 @@ static bool crispy_maybe(AtomSpace* as,
 	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
+	if (IS_CLOSED_LINK == t) return is_closed(scratch, evelnk, silent);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
