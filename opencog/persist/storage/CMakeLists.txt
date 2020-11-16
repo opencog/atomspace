@@ -16,7 +16,7 @@ ADD_LIBRARY(storage-types SHARED
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(storage-types storage_types)
+ADD_DEPENDENCIES(storage-types storage_types opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(storage-types
 	${ATOMSPACE_atomtypes_LIBRARY}
