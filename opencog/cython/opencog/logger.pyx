@@ -106,8 +106,10 @@ cdef class Logger:
 
     def is_enabled(self, int lvl):
         return self.clog.is_enabled(<loglevel>lvl)
-    def use_stdout(self,use_it=True):
+    def use_stdout(self, use_it=True):
         self.clog.set_print_to_stdout_flag(use_it)
+    def set_sync(self, s):
+        self.clog.set_sync_flag(s)
 
 # This is the singleton instance created by cogutil.
 log = Logger()
