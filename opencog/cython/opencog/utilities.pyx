@@ -115,6 +115,11 @@ def get_default_atomspace():
 def pop_default_atomspace():
     return AtomSpace_factory(pop_context_atomspace())
 
+
 def load_file(path, AtomSpace atomspace):
     cdef string p = path.encode('utf-8')
     c_load_file(p, deref(atomspace.atomspace))
+
+
+def is_closed(Atom atom):
+    return c_is_closed(atom.get_c_handle())
