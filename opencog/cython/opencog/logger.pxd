@@ -26,6 +26,7 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         void set_component(string c)
         loglevel get_level()
         void set_print_to_stdout_flag(bool flag)
+        void set_sync_flag(bool flag)
 
         void log(loglevel lvl, string txt)
 
