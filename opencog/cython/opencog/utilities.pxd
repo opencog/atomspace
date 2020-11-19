@@ -25,3 +25,6 @@ cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog"
 # source location, not the install location.
 cdef extern from "opencog/persist/sexpr/fast_load.h" namespace "opencog":
     void c_load_file "opencog::load_file" (const string path, cAtomSpace & atomspace);
+
+cdef extern from "opencog/atoms/core/FindUtils.h" namespace "opencog":
+    bint c_is_closed "opencog::is_closed" (const cHandle& h)

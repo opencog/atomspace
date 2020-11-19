@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import initialize_opencog, finalize_opencog, load_file
+from opencog.utilities import initialize_opencog, finalize_opencog, load_file, is_closed
 
 __author__ = 'Curtis Faith'
 
@@ -51,6 +51,15 @@ class UtilitiesTest(TestCase):
             new_space1 = AtomSpace()
             load_file(tmp_file, new_space1)
             self.assertTrue(len(new_space1) == 4)
+
+    def test_is_closed(self):
+        A = self.atomspace.add_node(types.ConceptNode, 'A')
+        B = self.atomspace.add_node(types.ConceptNode, 'B')
+        X = self.atomspace.add_node(types.VariableNode, '$X')
+        AB = self.atomspace.add_link(types.InheritanceLink, [A, B])
+        AX = self.atomspace.add_link(types.InheritanceLink, [A, X])
+        self.assertTrue(is_closed(AB))
+        self.assertFalse(is_closed(AX))
 
 
 def gen_name():
