@@ -61,6 +61,9 @@ cdef class Atom(Value):
             return
         atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
+    def id_string(self):
+        return self.get_c_handle().get().id_to_string().decode('UTF-8')
+
     def set_value(self, key, value):
         if not isinstance(key, Atom):
             raise TypeError("key should be an instance of Atom, got {0} instead".format(type(key)))
