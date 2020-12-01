@@ -190,11 +190,8 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 static bool is_closed(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
-	if (1 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "IsClosedLink expects one argument");
-
-	return is_closed(oset[0]);
+	return std::all_of(oset.begin(), oset.end(),
+	                   [](const Handle& h) { return is_closed(h); });
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,
