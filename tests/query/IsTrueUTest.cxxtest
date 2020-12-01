@@ -1,5 +1,5 @@
 /*
- * tests/query/IsClosedUTest.cxxtest
+ * tests/query/IsTrueUTest.cxxtest
  *
  * Copyright (C) 2020 SingularityNET Foundation
  * All Rights Reserved
@@ -26,14 +26,14 @@
 
 using namespace opencog;
 
-class IsClosedUTest : public CxxTest::TestSuite
+class IsTrueUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace *as;
 	SchemeEval* eval;
 
 public:
-	IsClosedUTest(void)
+	IsTrueUTest(void)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -43,7 +43,7 @@ public:
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
-	~IsClosedUTest()
+	~IsTrueUTest()
 	{
 		delete as;
 		// Erase the log file if no assertions failed.
@@ -54,47 +54,47 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_basic_is_closed(void);
+	void test_basic_is_true(void);
 };
 
-void IsClosedUTest::tearDown(void)
+void IsTrueUTest::tearDown(void)
 {
 }
 
-void IsClosedUTest::setUp(void)
+void IsTrueUTest::setUp(void)
 {
 }
 
 /*
- * Basic IsClosedLink unit test. The atomspace contains 2 atoms, one
- * closed
+ * Basic IsTrueLink unit test. The atomspace contains 2 atoms, one
+ * with a TRUE_TV
  *
- * (Inheritance (Concept "A") (Concept "B"))
+ * (Concept "A" (stv 1 1))
  *
- * one open
+ * one without
  *
- * (Inheritance (Concept "A") (Variable "$freevar"))
+ * (Concept "B")
  *
  * querying such atomspace with the condition that the candidates are
- * closed should return only the first atom.
+ * true should return only the first atom.
  */
-void IsClosedUTest::test_basic_is_closed(void)
+void IsTrueUTest::test_basic_is_true(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/is_closed.scm\")");
+	eval->eval("(load-from-path \"tests/query/is_true.scm\")");
 
 	Handle query = eval->eval_h("query");
-	Handle closed_query = eval->eval_h("closed-query");
+	Handle true_query = eval->eval_h("true-query");
 
 	Handle results = HandleCast(query->execute());
-	Handle closed_results = HandleCast(closed_query->execute());
+	Handle true_results = HandleCast(true_query->execute());
 
 	logger().debug() << "results = " << oc_to_string(results);
-	logger().debug() << "closed_results = " << oc_to_string(closed_results);
+	logger().debug() << "true_results = " << oc_to_string(true_results);
 
 	TS_ASSERT_EQUALS(2, results->get_arity());
-	TS_ASSERT_EQUALS(1, closed_results->get_arity());
+	TS_ASSERT_EQUALS(1, true_results->get_arity());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

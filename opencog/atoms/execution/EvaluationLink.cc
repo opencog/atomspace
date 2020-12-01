@@ -37,6 +37,7 @@
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -187,14 +188,29 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 }
 
 /// Perform a IsClosed check
-static bool is_closed(AtomSpace* as, const Handle& h, bool silent)
+static bool is_outgoing_closed(const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
-	if (1 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "IsClosedLink expects one argument");
+	return std::all_of(oset.begin(), oset.end(),
+	                   [](const Handle& o) { return is_closed(o); });
+}
 
-	return is_closed(oset[0]);
+/// Perform a IsTrue check
+static bool is_outgoing_true(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	return std::all_of(oset.begin(), oset.end(),
+		[](const Handle& o)
+			{ return *o->getTruthValue() == *TruthValue::TRUE_TV(); });
+}
+
+/// Perform a IsFalse check
+static bool is_outgoing_false(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	return std::all_of(oset.begin(), oset.end(),
+		[](const Handle& o)
+			{ return *o->getTruthValue() == *TruthValue::FALSE_TV(); });
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,
@@ -574,7 +590,9 @@ static bool crispy_maybe(AtomSpace* as,
 	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
-	if (IS_CLOSED_LINK == t) return is_closed(scratch, evelnk, silent);
+	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
+	if (IS_TRUE_LINK == t) return is_outgoing_true(evelnk);
+	if (IS_FALSE_LINK == t) return is_outgoing_false(evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
