@@ -79,6 +79,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		// specialized operator to explicitely map the higher order into
 		// the lower order but as of today it is required.
 		if (h->is_type(INHERITANCE_LINK) or
+			h->is_type(SET_LINK) or
 		    h->is_type(SIMILARITY_LINK) or
 		    h->is_type(IMPLICATION_LINK) or
 		    h->is_type(EQUIVALENCE_LINK) or
