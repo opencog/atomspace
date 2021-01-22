@@ -626,8 +626,16 @@ ANCHOR_NODE <- NODE
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
+// Test whether all outgoing atoms are closed, that is do not contain
+// any free variable.
+IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// Test whether all outgoing atoms have a TRUE_TV (resp. FALSE_TV).
+IS_TRUE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+IS_FALSE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
-// arguments; it true only if both sides are the same atom.
+// arguments; it is true only if both sides are the same atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same atom.
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK

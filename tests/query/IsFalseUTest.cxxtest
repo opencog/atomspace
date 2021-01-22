@@ -1,0 +1,100 @@
+/*
+ * tests/query/IsFalseUTest.cxxtest
+ *
+ * Copyright (C) 2020 SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class IsFalseUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	IsFalseUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	~IsFalseUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_basic_is_false(void);
+};
+
+void IsFalseUTest::tearDown(void)
+{
+}
+
+void IsFalseUTest::setUp(void)
+{
+}
+
+/*
+ * Basic IsFalseLink unit test. The atomspace contains 2 atoms, one
+ * with a FALSE_TV
+ *
+ * (Concept "A" (stv 1 1))
+ *
+ * one without
+ *
+ * (Concept "B")
+ *
+ * querying such atomspace with the condition that the candidates are
+ * false should return only the first atom.
+ */
+void IsFalseUTest::test_basic_is_false(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/is_false.scm\")");
+
+	Handle query = eval->eval_h("query");
+	Handle false_query = eval->eval_h("false-query");
+
+	Handle results = HandleCast(query->execute());
+	Handle false_results = HandleCast(false_query->execute());
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "false_results = " << oc_to_string(false_results);
+
+	TS_ASSERT_EQUALS(2, results->get_arity());
+	TS_ASSERT_EQUALS(1, false_results->get_arity());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

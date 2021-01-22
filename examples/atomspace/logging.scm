@@ -9,7 +9,7 @@
 ; Logs are written to a file called "opencog.log", by default, and
 ; is written to the current directory, by default.  This can be changed.
 ;
-(use-modules (opencog logger))
+(use-modules (opencog) (opencog logger))
 
 ;; Look in the "opencog.log" file for this message.
 (cog-logger-info "First info message")

@@ -27,6 +27,9 @@ demonstrate two different ways in which the API can be used; one
 creates atoms according to their types, the other creates them
 directly.
 
+## get_outgoings.py
+Simple example to show how to access the outgoing set of a link.
+
 ## stop_go.py
 A simple example of a "behavior tree" implemented in the AtomSpace.
 

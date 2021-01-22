@@ -127,6 +127,10 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
+        string to_string()
+        string to_short_string()
+        string id_to_string()
+
         # Conditionally-valid methods. Not defined for all atoms.
         string get_name()
         vector[cHandle] getOutgoingSet()
@@ -149,8 +153,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         cHandle(const cHandle&)
 
         cAtom* atom_ptr()
-        string to_string()
-        string to_short_string()
 
         bint operator==(cHandle h)
         bint operator!=(cHandle h)

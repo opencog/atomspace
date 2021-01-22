@@ -1,5 +1,6 @@
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
+from libcpp.set cimport set as cpp_set
 from opencog.atomspace cimport AtomSpace, Atom, TruthValue, Value
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factory
@@ -115,6 +116,22 @@ def get_default_atomspace():
 def pop_default_atomspace():
     return AtomSpace_factory(pop_context_atomspace())
 
+
 def load_file(path, AtomSpace atomspace):
     cdef string p = path.encode('utf-8')
     c_load_file(p, deref(atomspace.atomspace))
+
+
+def is_closed(Atom atom):
+    """
+    Return True iff the atom is closed, that is does not contain free variables.
+    """
+    return c_is_closed(atom.get_c_handle())
+
+
+def get_free_variables(Atom atom):
+    """
+    Return the list of free variables in a given atom.
+    """
+    cdef cpp_set[cHandle] variables = c_get_free_variables(atom.get_c_handle())
+    return [create_python_value_from_c_value(<cValuePtr&> h) for h in variables]
