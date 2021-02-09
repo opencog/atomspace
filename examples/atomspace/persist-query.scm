@@ -1,5 +1,5 @@
 ;
-; query-database.scm
+; persist-query.scm
 ;
 ; Demo of using queries to obtain sharply-defined sets of Atoms from
 ; storage, without having to load the entire AtomSpace up front.

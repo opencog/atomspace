@@ -77,7 +77,7 @@ be effective.
 * `persistence.scm`    -- Layering the AtomSpace on a "normal" database.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
-* `query-database.scm` -- Fetching sets of Atoms with queries.
+* `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
