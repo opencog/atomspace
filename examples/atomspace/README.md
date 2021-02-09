@@ -18,7 +18,7 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in PostgreSQL or RocksDB.
+* Storing the AtomSpace in RocksDB, PostgreSQL or plain-text files.
 * Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
@@ -28,7 +28,8 @@ typically encountered:
 Most of the querying and pattern matching examples are in the
 [**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
 a good idea of the basics from the demos here, go and explore the
-examples there.
+examples there. Return to the advanced examples here after exploring
+the pattern engine.
 
 Introductory Examples
 ---------------------
