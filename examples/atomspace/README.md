@@ -18,7 +18,7 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in PostgreSQL.
+* Storing the AtomSpace in PostgreSQL or RocksDB.
 * Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
