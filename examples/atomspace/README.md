@@ -166,9 +166,11 @@ everything else depends on.
 (use-modules (opencog atom-types))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+(use-modules (opencog matrix))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(use-modules (opencog ure))
+(use-modules (opencog sheaf))
+(use-modules (opencog test-runner))
 (use-modules (opencog type-utils))
 ```
 
@@ -176,14 +178,21 @@ There are other modules provided in other projects and repos. Here is
 a reasonably up-to-date list of modules provided by OpenCog:
 ```
 (use-modules (opencog agi-bio))
+(use-modules (opencog attention))
 (use-modules (opencog attention-bank))
 (use-modules (opencog cogserver))
+(use-modules (opencog generate))
 (use-modules (opencog ghost))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 (use-modules (opencog nlp fuzzy))
 (use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
 (use-modules (opencog nlp relex2logic))
 (use-modules (opencog nlp sureal))
+(use-modules (opencog persist-cog))
+(use-modules (opencog persist-rocks))
+(use-modules (opencog pln))
+(use-modules (opencog ure))
 ```
