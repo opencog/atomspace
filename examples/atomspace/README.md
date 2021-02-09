@@ -75,9 +75,9 @@ be effective.
 * `except.scm`         -- Throwing and catching exceptions.
 * `persist-file.scm`   -- Dump and load Atoms to a plain-text file.
 * `persistence.scm`    -- Layering the AtomSpace on a "normal" database.
+* `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
-* `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
