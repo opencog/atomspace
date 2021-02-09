@@ -54,10 +54,10 @@ first).
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
 
-There is an important collection of demos in the
+After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
 demos are vital for understanding how to to be effective in writing
-queries and formulating rules.
+queries and formulating rules.  Then return to the advanced demos below.
 
 Advanced Demos
 --------------
