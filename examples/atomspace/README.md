@@ -72,6 +72,7 @@ be effective.
 * `threaded.scm`       -- Multi-threading in Atomese.
 * `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
+* `persist-file.scm`   -- Dump and load Atoms to a plain-text file.
 * `persistence.scm`    -- Layering the AtomSpace on a "normal" database.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
