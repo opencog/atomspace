@@ -194,5 +194,6 @@ a reasonably up-to-date list of modules provided by OpenCog:
 (use-modules (opencog persist-cog))
 (use-modules (opencog persist-rocks))
 (use-modules (opencog pln))
+(use-modules (opencog spacetime))
 (use-modules (opencog ure))
 ```
