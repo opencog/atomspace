@@ -34,6 +34,11 @@ cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
         Type getType(string typename)
         string getTypeName(Type t)
         Type getNumberOfClasses()
+
+        bint beginTypeDecls(const char* module)
+        void endTypeDecls() 
+        Type declType(const Type parent, const string& name)
+
     cdef cNameServer nameserver()
 
 cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
