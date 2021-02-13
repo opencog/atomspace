@@ -1,0 +1,9 @@
+
+Reading-list TODO:
+------------------
+
+* Russ Harmer and Eugenia Oshurko "Reversibility and composition of
+  rewriting in hierarchies", https://hal.archives-ouvertes.fr/hal-02869865
+
+  The idea here is that sequences of rules can be applied, and then they
+  can be reversed. This enableds back-tracking on a rule system.
