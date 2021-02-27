@@ -55,17 +55,18 @@ private:
 	static void init_in_module(void*);
 
 	static void * c_wrap_register(void *);
-	void really_do_register(const char*, const char*, int);
+	void really_do_register(const char*, const char*, int, bool);
 
 	const char *tmp_module;
 	const char *tmp_name;
 	int tmp_nargs;
+	bool tmp_export;
 
 	static SCM do_call(SCM, SCM);
 	static PrimitiveEnviron *verify_pe(SCM, const char *);
 
 protected:
-	void do_register(const char*, const char*, int);
+	void do_register(const char*, const char*, int, bool=true);
 	virtual SCM invoke (SCM) = 0;
 	virtual const char *get_module(void) = 0;
 	virtual const char *get_name(void) = 0;
@@ -170,11 +171,11 @@ class SchemeFunctionBase :
 	Funct funct;
 public:
 	SchemeFunctionBase(const char* module, const char* name,
-	                    R (*fun)(Args...)) :
+	                    R (*fun)(Args...), bool xport) :
 		SchemeArgConverters<Args...>(module, name)
 	{
 		funct = fun;
-		do_register(module, name, sizeof...(Args));
+		do_register(module, name, sizeof...(Args), xport);
 	}
 
 protected:
@@ -223,12 +224,12 @@ class SchemeMethodBase :
 	C* that;
 public:
 	SchemeMethodBase(const char* module, const char* name,
-	                    R (C::*cb)(Args...), C *data) :
+	                    R (C::*cb)(Args...), C *data, bool xport) :
 		SchemeArgConverters<Args...>(module, name)
 	{
 		that = data;
 		method = cb;
-		do_register(module, name, sizeof...(Args));
+		do_register(module, name, sizeof...(Args), xport);
 	}
 
 protected:
@@ -348,8 +349,8 @@ class SchemeFunction :
 
 public:
 	SchemeFunction(const char* module, const char* name,
-	                R (*func)(Args...))
-		: super(module, name, func) {}
+	                R (*func)(Args...), bool xport)
+		: super(module, name, func, xport) {}
 
 protected:
 	virtual SCM invoke (SCM args)
@@ -367,8 +368,8 @@ class SchemeFunction<void, Args...> :
 
 public:
 	SchemeFunction(const char* module, const char* name,
-	               void (*func)(Args...))
-		: super(module, name, func) {}
+	               void (*func)(Args...), bool xport)
+		: super(module, name, func, xport) {}
 
 protected:
 
@@ -389,8 +390,8 @@ class SchemePrimitive :
 
 public:
 	SchemePrimitive(const char* module, const char* name,
-	                R (C::*cb)(Args...), C *data)
-		: super(module, name, cb, data) {}
+	                R (C::*cb)(Args...), C *data, bool xport)
+		: super(module, name, cb, data, xport) {}
 
 protected:
 	virtual SCM invoke (SCM args)
@@ -408,8 +409,8 @@ class SchemePrimitive<void, C, Args...> :
 
 public:
 	SchemePrimitive(const char* module, const char* name,
-	                void (C::*cb)(Args...), C *data)
-		: super(module, name, cb, data) {}
+	                void (C::*cb)(Args...), C *data, bool xport)
+		: super(module, name, cb, data, xport) {}
 
 protected:
 
@@ -424,9 +425,10 @@ protected:
 template<typename R, class... Args >
 inline void define_scheme_primitive(const char *name,
                                     R (func)(Args...),
-                                    const char* module="extension")
+                                    const char* module="extension",
+                                    bool xport=true)
 {
-	new SchemeFunction<R, Args...>(module, name, func);
+	new SchemeFunction<R, Args...>(module, name, func, xport);
 }
 
 // Method on a class C
@@ -434,9 +436,10 @@ template<typename R, typename C, class... Args >
 inline void define_scheme_primitive(const char *name,
                                     R (C::*method)(Args...),
                                     C *data,
-                                    const char* module="extension")
+                                    const char* module="extension",
+                                    bool xport=true)
 {
-	new SchemePrimitive<R, C, Args...>(module, name, method, data);
+	new SchemePrimitive<R, C, Args...>(module, name, method, data, xport);
 }
 
 }
