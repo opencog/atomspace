@@ -40,8 +40,6 @@ cog-atomspace-uuid
 cog-confidence
 cog-count
 cog-count-atoms
-cog-delete!
-cog-delete-recursive!
 cog-extract!
 cog-extract-recursive!
 cog-get-subtypes
@@ -115,9 +113,6 @@ cog-value-ref
 
 ; Renamed functions
 (define-public (cog-as ATOM) "See cog-atomspace" (cog-atomspace ATOM))
-(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
-(define-public (cog-delete-recursive ATOM)
-	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
 (define-public (cog-extract ATOM) "See cog-extract!" (cog-extract! ATOM))
 (define-public (cog-extract-recursive ATOM)
 	"See cog-extract-recursive!" (cog-extract-recursive! ATOM))

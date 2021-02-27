@@ -25,6 +25,8 @@
 	store-atom
 	store-value
 	load-atoms-of-type
+	cog-delete!
+	cog-delete-recursive!
 	barrier
 	load-atomspace
 	store-atomspace)
@@ -353,5 +355,77 @@
 		)
 	)
 )
+
+; --------------------------------------------------------------------
+; Renamed functions
+(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
+(define-public (cog-delete-recursive ATOM)
+	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
+
+
+(set-procedure-property! cog-delete! 'documentation
+"
+ cog-delete! ATOM [ATOMSPACE]
+    Remove the indicated ATOM, but only if it has no incoming links.
+    If it has incoming links, the remove fails.  If storage is attached,
+    the ATOM is also removed from the storage.
+
+    Returns #t if the atom was removed, else returns #f if not removed.
+
+    Use cog-extract! to remove from the AtomSpace only, leaving storage
+    unaffected.
+
+    Use cog-delete-recursive! to force removal of this atom, together
+    with any links that might be holding this atom.
+
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (Concept \"def\"))
+       guile> (define l (Link x y))
+
+       ; Verify that there's an atom called x:
+       guile> x
+       (ConceptNode \"abc\")
+
+       ; Try to delete x. This should fail, since there's a link
+       ; containing x.
+       guile> (cog-delete! x)
+       #f
+
+       ; Delete x, and everything pointing to it. This should delete
+       ; both x, and the link l.
+       guile> (cog-delete-recursive! x)
+       #t
+
+       ; Verify that the link l is gone:
+       guile> l
+       Invalid handle
+
+       ; Verify that the node x is gone:
+       guile> x
+       Invalid handle
+
+       ; Verify that the node y still exists:
+       guile> y
+       (ConceptNode \"def\")
+")
+
+(set-procedure-property! cog-delete-recursive! 'documentation
+"
+ cog-delete-recursive! ATOM [ATOMSPACE]
+    Remove the indicated ATOM, and all atoms that point at it.
+    If storage is attached, the ATOM is also removed from storage.
+
+    Return #t on success, else return #f if not removed.
+
+    If the optional ATOMSPACE argument is provided, then the ATOM is
+    removed from that AtomSpace; otherwise, it is removed from the
+    current AtomSpace for this thread.
+")
 
 ; --------------------------------------------------------------------
