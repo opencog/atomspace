@@ -363,9 +363,9 @@
 	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
 
 
-(set-procedure-property! cog-delete! 'documentation
+(define*-public (cog-delete! ATOM #:optional (STORAGE #f))
 "
- cog-delete! ATOM [ATOMSPACE]
+ cog-delete! ATOM [STORAGE]
     Remove the indicated ATOM, but only if it has no incoming links.
     If it has incoming links, the remove fails.  If storage is attached,
     the ATOM is also removed from the storage.
@@ -378,54 +378,36 @@
     Use cog-delete-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
 
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
 
-    Example:
-       ; Define two nodes and a link between them:
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (Concept \"def\"))
-       guile> (define l (Link x y))
+    Example usage:
+       (cog-delete! (Concept "foo"))
+       (cog-delete! (Concept "foo")
+              (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-delete! (Concept "foo")
+              (PostgresStorage \"postgres://USER:PASSWORD@HOST/DBNAME\"))
+       (cog-delete! (Concept "foo")
+              (CogStorage \"cog://cogserver.example.com\"))
 
-       ; Verify that there's an atom called x:
-       guile> x
-       (ConceptNode \"abc\")
-
-       ; Try to delete x. This should fail, since there's a link
-       ; containing x.
-       guile> (cog-delete! x)
-       #f
-
-       ; Delete x, and everything pointing to it. This should delete
-       ; both x, and the link l.
-       guile> (cog-delete-recursive! x)
-       #t
-
-       ; Verify that the link l is gone:
-       guile> l
-       Invalid handle
-
-       ; Verify that the node x is gone:
-       guile> x
-       Invalid handle
-
-       ; Verify that the node y still exists:
-       guile> y
-       (ConceptNode \"def\")
-")
-
-(set-procedure-property! cog-delete-recursive! 'documentation
 "
- cog-delete-recursive! ATOM [ATOMSPACE]
+	(if STORAGE (sn-delete ATOM STORAGE) (dflt-delete ATOM))
+)
+
+(define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
+"
+ cog-delete-recursive! ATOM [STORAGE]
     Remove the indicated ATOM, and all atoms that point at it.
     If storage is attached, the ATOM is also removed from storage.
 
     Return #t on success, else return #f if not removed.
 
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
-")
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
+"
+	(if STORAGE (sn-delete-rec ATOM STORAGE) (dflt-delete-rec ATOM))
+)
 
 ; --------------------------------------------------------------------
