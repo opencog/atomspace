@@ -43,55 +43,58 @@ void PersistSCM::init(void)
 	define_scheme_primitive("cog-close",
 	             &PersistSCM::close, this, "persist");
 
+	// define_scheme_primitive(..., false); means that these functions
+	// will NOT be `define-public` and just plain `define`. Thus,
+	// accessible within the module, but not outside of it.
 	define_scheme_primitive("sn-fetch-atom",
-	             &PersistSCM::sn_fetch_atom, "persist");
+	             &PersistSCM::sn_fetch_atom, "persist", false);
 	define_scheme_primitive("sn-fetch-value",
-	             &PersistSCM::sn_fetch_value, "persist");
+	             &PersistSCM::sn_fetch_value, "persist", false);
 	define_scheme_primitive("sn-fetch-incoming-set",
-	             &PersistSCM::sn_fetch_incoming_set, "persist");
+	             &PersistSCM::sn_fetch_incoming_set, "persist", false);
 	define_scheme_primitive("sn-fetch-incoming-by-type",
-	             &PersistSCM::sn_fetch_incoming_by_type, "persist");
+	             &PersistSCM::sn_fetch_incoming_by_type, "persist", false);
 	define_scheme_primitive("sn-fetch-query-2args",
-	             &PersistSCM::sn_fetch_query2, "persist");
+	             &PersistSCM::sn_fetch_query2, "persist", false);
 	define_scheme_primitive("sn-fetch-query-4args",
-	             &PersistSCM::sn_fetch_query4, "persist");
+	             &PersistSCM::sn_fetch_query4, "persist", false);
 	define_scheme_primitive("sn-store-atom",
-	             &PersistSCM::sn_store_atom, "persist");
+	             &PersistSCM::sn_store_atom, "persist", false);
 	define_scheme_primitive("sn-store-value",
-	             &PersistSCM::sn_store_value, "persist");
+	             &PersistSCM::sn_store_value, "persist", false);
 	define_scheme_primitive("sn-load-atoms-of-type",
-	             &PersistSCM::sn_load_type, "persist");
+	             &PersistSCM::sn_load_type, "persist", false);
 	define_scheme_primitive("sn-load-atomspace",
-	             &PersistSCM::sn_load_atomspace, "persist");
+	             &PersistSCM::sn_load_atomspace, "persist", false);
 	define_scheme_primitive("sn-store-atomspace",
-	             &PersistSCM::sn_store_atomspace, "persist");
+	             &PersistSCM::sn_store_atomspace, "persist", false);
 	define_scheme_primitive("sn-barrier",
-	             &PersistSCM::sn_barrier, "persist");
+	             &PersistSCM::sn_barrier, "persist", false);
 
 	define_scheme_primitive("dflt-fetch-atom",
-	             &PersistSCM::dflt_fetch_atom, this, "persist");
+	             &PersistSCM::dflt_fetch_atom, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-value",
-	             &PersistSCM::dflt_fetch_value, this, "persist");
+	             &PersistSCM::dflt_fetch_value, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-incoming-set",
-	             &PersistSCM::dflt_fetch_incoming_set, this, "persist");
+	             &PersistSCM::dflt_fetch_incoming_set, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-incoming-by-type",
-	             &PersistSCM::dflt_fetch_incoming_by_type, this, "persist");
+	             &PersistSCM::dflt_fetch_incoming_by_type, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-query-2args",
-	             &PersistSCM::dflt_fetch_query2, this, "persist");
+	             &PersistSCM::dflt_fetch_query2, this, "persist", false);
 	define_scheme_primitive("dflt-fetch-query-4args",
-	             &PersistSCM::dflt_fetch_query4, this, "persist");
+	             &PersistSCM::dflt_fetch_query4, this, "persist", false);
 	define_scheme_primitive("dflt-store-atom",
-	             &PersistSCM::dflt_store_atom, this, "persist");
+	             &PersistSCM::dflt_store_atom, this, "persist", false);
 	define_scheme_primitive("dflt-store-value",
-	             &PersistSCM::dflt_store_value, this, "persist");
+	             &PersistSCM::dflt_store_value, this, "persist", false);
 	define_scheme_primitive("dflt-load-atoms-of-type",
-	             &PersistSCM::dflt_load_type, this, "persist");
+	             &PersistSCM::dflt_load_type, this, "persist", false);
 	define_scheme_primitive("dflt-load-atomspace",
-	             &PersistSCM::dflt_load_atomspace, this, "persist");
+	             &PersistSCM::dflt_load_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-store-atomspace",
-	             &PersistSCM::dflt_store_atomspace, this, "persist");
+	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-barrier",
-	             &PersistSCM::dflt_barrier, this, "persist");
+	             &PersistSCM::dflt_barrier, this, "persist", false);
 }
 
 // =====================================================================
