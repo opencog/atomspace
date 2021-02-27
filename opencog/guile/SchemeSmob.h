@@ -103,8 +103,6 @@ private:
 	static SCM ss_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
-	static SCM ss_delete(SCM, SCM);
-	static SCM ss_delete_recursive(SCM, SCM);
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_value_p(SCM);
