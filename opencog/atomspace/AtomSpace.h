@@ -138,8 +138,7 @@ public:
         { return _atom_table.getNumAtomsOfType(type, subclass); }
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
-    //! Clear the atomspace, extract all atoms. Does NOT clear the
-    //! attached backingstore.
+    //! Clear the atomspace, extract all atoms.
     void clear()
         { _atom_table.clear(); }
 
@@ -249,12 +248,8 @@ public:
     /**
      * Extract an atom from the atomspace.  This only removes the atom
      * from the (local, in-RAM) AtomSpace (in this process); any copies
-     * of the atom in persistent storage orin other address spaces are
-     * unaffected.  To also delete from persistant storage, use the
-     * remove_atom() method. Of course, the AtomSpace must be connected
-     * to storage in order for remove_atom() to reach out that far; if
-     * the AtomSpace is not connected to a backend, there is no
-     * difference between remove and extract.
+     * of the atom in persistent storage or in other address spaces are
+     * unaffected.
      *
      * The atom itself remains valid as long as there are Handles
      * that reference it; the RAM associated with the atom is
@@ -291,11 +286,8 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
-     * Get a node from the AtomTable, if it's in there. If its not found
-     * in the AtomTable, and there's a backing store, then the atom will
-     * be fetched from the backingstore (and added to the AtomTable). If
-     * the atom can't be found in either place, Handle::UNDEFINED will be
-     * returned.
+     * Get a node from the AtomTable, if it's in there. If the atom
+     * can't be found, Handle::UNDEFINED will be returned.
      *
      * @param t     Type of the node
      * @param str   Name of the node
@@ -306,11 +298,8 @@ public:
     }
 
     /**
-     * Get a link from the AtomTable, if it's in there. If its not found
-     * in the AtomTable, and there's a backing store, then the atom will
-     * be fetched from the backingstore (and added to the AtomTable). If
-     * the atom can't be found in either place, Handle::UNDEFINED will be
-     * returned.
+     * Get a link from the AtomTable, if it's in there. If the atom
+     * can't be found, Handle::UNDEFINED will be returned.
      *
      * See also the get_atom() method.
      *

@@ -1,5 +1,5 @@
 /*
- * opencog/persist/ati/StorageNode.cc
+ * opencog/persist/api/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
  * Copyright (c) 2009,2013,2020 Linas Vepstas
