@@ -383,12 +383,12 @@
     the current StorageNode attached to this thread.
 
     Example usage:
-       (cog-delete! (Concept "foo"))
-       (cog-delete! (Concept "foo")
+       (cog-delete! (Concept \"foo\"))
+       (cog-delete! (Concept \"foo\")
               (RocksStorage \"rocks:///tmp/my-rocks-db\"))
-       (cog-delete! (Concept "foo")
+       (cog-delete! (Concept \"foo\")
               (PostgresStorage \"postgres://USER:PASSWORD@HOST/DBNAME\"))
-       (cog-delete! (Concept "foo")
+       (cog-delete! (Concept \"foo\")
               (CogStorage \"cog://cogserver.example.com\"))
 
 "
