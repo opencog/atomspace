@@ -186,12 +186,12 @@ interface.
           )
 
 
-=== cog-delete atom ===
+=== cog-extract atom ===
       Delete the indicated atom, but only if it has no incoming links.
 
       Returns #t if the atom was deleted, else returns #f if not deleted.
 
-=== cog-delete-recursive atom ===
+=== cog-extract-recursive atom ===
       Delete the indicated atom, and all atoms that point at it.
 
       Both functions return #t on success, else they return #f.
@@ -212,12 +212,12 @@ interface.
 
          ; Try to delete x. This should fail, since there's a link
          ; containing x.
-         guile> (cog-delete x)
+         guile> (cog-extract x)
          #f
 
          ; Delete x, and everything pointing to it. This should delete
          ; both x, and the link l.
-         guile> (cog-delete-recursive x)
+         guile> (cog-extract-recursive x)
          #t
 
          ; Verify that the link l is gone:
@@ -565,7 +565,7 @@ in a list.
   (define (killall lst)
      (if (null? lst)
          '()
-         (cons (cog-delete (car lst))
+         (cons (cog-extract (car lst))
                (killall (cdr lst)))))
 
 

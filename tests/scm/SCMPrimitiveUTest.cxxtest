@@ -233,7 +233,7 @@ void SCMPrimitiveUTest::test_parallel(void)
 	                 12
 	                 (lambda (n)
 	                     (tango (mango (cog-new-node 'ConceptNode (number->string n))))
-	                     (cog-delete! (mango (cog-new-node 'ConceptNode (number->string (+ n 1)))))
+	                     (cog-extract! (mango (cog-new-node 'ConceptNode (number->string (+ n 1)))))
 	                 )
 	                 (iota 30000)
 	             )

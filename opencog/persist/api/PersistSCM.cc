@@ -68,6 +68,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_load_atomspace, "persist", false);
 	define_scheme_primitive("sn-store-atomspace",
 	             &PersistSCM::sn_store_atomspace, "persist", false);
+	define_scheme_primitive("sn-delete",
+	             &PersistSCM::sn_delete, "persist", false);
+	define_scheme_primitive("sn-delete-rec",
+	             &PersistSCM::sn_delete_recursive, "persist", false);
 	define_scheme_primitive("sn-barrier",
 	             &PersistSCM::sn_barrier, "persist", false);
 
@@ -93,6 +97,10 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_load_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-store-atomspace",
 	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
+	define_scheme_primitive("dflt-delete",
+	             &PersistSCM::dflt_delete, this, "persist", false);
+	define_scheme_primitive("dflt-delete-rec",
+	             &PersistSCM::dflt_delete_recursive, this, "persist", false);
 	define_scheme_primitive("dflt-barrier",
 	             &PersistSCM::dflt_barrier, this, "persist", false);
 }
@@ -209,6 +217,18 @@ void PersistSCM::sn_store_atomspace(Handle hsn)
 	stnp->store_atomspace();
 }
 
+bool PersistSCM::sn_delete(Handle h, Handle hsn)
+{
+	GET_STNP;
+	return stnp->remove_atom(h, false);
+}
+
+bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
+{
+	GET_STNP;
+	return stnp->remove_atom(h, true);
+}
+
 void PersistSCM::sn_barrier(Handle hsn)
 {
 	GET_STNP;
@@ -292,6 +312,18 @@ void PersistSCM::dflt_store_atomspace(void)
 {
 	CHECK;
 	_sn->store_atomspace();
+}
+
+bool PersistSCM::dflt_delete(Handle h)
+{
+	CHECK;
+	return _sn->remove_atom(h, false);
+}
+
+bool PersistSCM::dflt_delete_recursive(Handle h)
+{
+	CHECK;
+	return _sn->remove_atom(h, true);
 }
 
 void PersistSCM::dflt_barrier(void)
