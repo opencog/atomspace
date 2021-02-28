@@ -415,7 +415,7 @@ void BasicSaveUTest::do_test_fresh_atom(void)
     store->open();
     if (!store->connected())
     {
-        logger().debug("single_atom_save_restore: cannot connect to db");
+        logger().debug("test_fresh_atom: cannot connect to db");
         return;
     }
 
