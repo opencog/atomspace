@@ -188,7 +188,7 @@ void BasicDeleteUTest::test_key_deletion(void)
 
 	as = new AtomSpace();
 
-	hsn = as->add_node(ROCKS_STORAGE_NODE, std::string(uri));
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	store = StorageNodeCast(hsn);
 
 	store->open();
@@ -229,7 +229,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 	// Create an Atom with some keys on it.
 	AtomSpace* as = new AtomSpace();
 
-	Handle hsn = as->add_node(ROCKS_STORAGE_NODE, std::string(uri));
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	StorageNodePtr store = StorageNodeCast(hsn);
 
 	store->open();
@@ -270,7 +270,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 
 	as = new AtomSpace();
 
-	hsn = as->add_node(ROCKS_STORAGE_NODE, std::string(uri));
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	store = StorageNodeCast(hsn);
 
 	store->open();
@@ -313,7 +313,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 
 	as = new AtomSpace();
 
-	hsn = as->add_node(ROCKS_STORAGE_NODE, std::string(uri));
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	store = StorageNodeCast(hsn);
 
 	store->open();
