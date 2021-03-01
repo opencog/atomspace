@@ -42,12 +42,19 @@ using namespace opencog;
 
 void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 {
-	// The uuid is the PRIMARY KEY so below shou;ld be fast...
+	// The Atom being deleted might be a foreign key in the valuations
+	// table. So clobber all of those...
 	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Valuations WHERE key = %lu;", uuid);
+	rp.exec(buff);
+
+	// The uuid is the PRIMARY KEY so below should be fast...
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
 
 	rp.exec(buff);
+
 	_num_atom_deletes++;
 }
 
