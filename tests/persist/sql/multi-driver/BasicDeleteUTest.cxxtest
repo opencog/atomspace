@@ -1,0 +1,340 @@
+/*
+ * tests/persist/sql/multi-driver/BasicDeleteUTest.cxxtest
+ *
+ * Verify that deletion of keys works, even if some Atoms are still
+ * using those keys.
+ *
+ * Copyright (C) 2008, 2009, 2019, 2021 Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cstdio>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include "mkuri.h"
+
+using namespace opencog;
+
+class BasicDeleteUTest :  public CxxTest::TestSuite
+{
+	private:
+		std::string uri;
+		const char * dbname;
+		const char * username;
+		const char * passwd;
+
+	public:
+
+		BasicDeleteUTest(void);
+
+		~BasicDeleteUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void friendlyFailMessage()
+		{
+			TS_FAIL("The FetchUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistence is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_key_deletion(void);
+		void test_key_corruption(void);
+};
+
+BasicDeleteUTest::BasicDeleteUTest(void)
+{
+	try
+	{
+		config().load("atomspace-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.get_message() << std::endl;
+	}
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+
+		// use postgres preferentially, unless its missing.
+#ifdef HAVE_ODBC_STORAGE
+		uri = mkuri("odbc", dbname, username, passwd);
+#endif
+#ifdef HAVE_PGSQL_STORAGE
+		uri = mkuri("postgres", dbname, username, passwd);
+#endif
+	}
+	catch (InvalidParamException &e)
+	{
+		friendlyFailMessage();
+	}
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void BasicDeleteUTest::setUp(void)
+{
+}
+
+void BasicDeleteUTest::tearDown(void)
+{
+}
+
+// ============================================================
+
+void BasicDeleteUTest::test_key_deletion(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create an Atom with some keys on it.
+	AtomSpace* as = new AtomSpace();
+
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->erase();
+
+	Handle ha(as->add_node(CONCEPT_NODE, "a"));
+	Handle ka(as->add_node(PREDICATE_NODE, "key-a"));
+	Handle kb(as->add_node(PREDICATE_NODE, "key-b"));
+	Handle kc(as->add_node(PREDICATE_NODE, "key-c"));
+
+	ha = as->set_value(ha, ka, createFloatValue(std::vector<double>({1, 2, 3})));
+	ha = as->set_value(ha, kb, createFloatValue(std::vector<double>({4, 5, 6})));
+	ha = as->set_value(ha, kc, createFloatValue(std::vector<double>({7, 8, 9})));
+
+	// Store all three keys.
+	store->store_atom(ha);
+	store->barrier();
+
+	// Verify the atomspace size
+	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	// Verify that there are three keys
+	HandleSet hs = ha->getKeys();
+	for (const Handle& k : hs)
+		printf("key=%s\n", k->get_name().c_str());
+	TS_ASSERT_EQUALS(hs.size(), 3);
+
+	// Remove one of the keys
+	store->remove_atom(kb);
+	as->extract_atom(kb);
+	TS_ASSERT_EQUALS(as->get_size(), 4);
+
+	// We are done.
+	store->close();
+	delete as;
+
+	// -------------------------------------------------------
+	// Start again, with a fresh connection.
+	// Verify that the delete key is really deleted.
+
+	as = new AtomSpace();
+
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// We expect 5 keys, including the truth-value key.
+	printf("Loading the atomspace ...\n");
+	store->load_atomspace();
+	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	// Verify that there are only two keys
+	ha = as->add_node(CONCEPT_NODE, "a");
+	hs = ha->getKeys();
+	for (const Handle& k : hs)
+		printf("key=%s\n", k->get_name().c_str());
+	TS_ASSERT_EQUALS(hs.size(), 2);
+
+	// Verify that none of the keys are key-b
+	kb = as->add_node(PREDICATE_NODE, "key-b");
+	for (const Handle& k : hs)
+		TS_ASSERT(*k != *kb);
+
+	store->erase();
+	store->close();
+	delete as;
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+// This tests for a nasty off-by-one bug that showed up
+// in RocksDB. Make sure it never happens again.
+void BasicDeleteUTest::test_key_corruption(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create an Atom with some keys on it.
+	AtomSpace* as = new AtomSpace();
+
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->erase();
+
+	Handle hb(as->add_node(CONCEPT_NODE, "b"));
+	Handle hx(as->add_node(CONCEPT_NODE, "x"));
+	Handle kx(as->add_node(PREDICATE_NODE, "key-x"));
+
+	hb = as->set_value(hb, kx, hx);
+
+	// Store everything.
+	store->store_atom(hb);
+	store->barrier();
+
+	// Verify the atomspace size
+	TS_ASSERT_EQUALS(as->get_size(), 4);
+
+	// Remove the value
+	store->remove_atom(hx);
+	as->extract_atom(hx);
+	TS_ASSERT_EQUALS(as->get_size(), 3);
+
+	// We are done.
+	store->close();
+	delete as;
+
+	// -------------------------------------------------------
+	// Start again, with a fresh connection.
+	// Verify that the delete key is really deleted.
+
+	as = new AtomSpace();
+
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// We expect 4 keys, including the truth-value key.
+	printf("Loading the atomspace ...\n");
+	store->load_atomspace();
+
+	HandleSet hset;
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h: hset)
+		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
+	TS_ASSERT_EQUALS(as->get_size(), 4);
+
+	hb = as->add_node(CONCEPT_NODE, "b");
+	hx = as->add_node(CONCEPT_NODE, "x");
+	Handle hy(as->add_node(CONCEPT_NODE, "y"));
+	Handle kl(as->add_node(PREDICATE_NODE, "key-li"));
+
+	hb = as->set_value(hb, kl, createLinkValue(ValueSeq({hx, hy})));
+
+	// Store the new value
+	store->store_atom(hb);
+	store->barrier();
+
+	TS_ASSERT_EQUALS(as->get_size(), 7);
+
+	// Remove the value .. again
+	store->remove_atom(hx);
+	as->extract_atom(hx);
+	TS_ASSERT_EQUALS(as->get_size(), 6);
+
+	// We are done.
+	store->close();
+	delete as;
+
+	// -------------------------------------------------------
+	// Start again, with a fresh connection.
+	// Verify that the delete key is really deleted.
+
+	as = new AtomSpace();
+
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// We expect 7 keys, including the truth-value key.
+	printf("Loading the atomspace ...\n");
+	store->load_atomspace();
+
+	hset.clear();
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h: hset)
+		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
+	TS_ASSERT_EQUALS(as->get_size(), 6);
+
+	// Verify that there are no keys
+	// The Atom (Concept "x") was in both values, and when it was
+	// deleted, the associated values were trashed as well. So both
+	// values (both keys) are gone.
+	hb = as->add_node(CONCEPT_NODE, "b");
+	HandleSet hs = hb->getKeys();
+	TS_ASSERT_EQUALS(hs.size(), 0);
+
+	store->erase();
+	store->close();
+	delete as;
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */

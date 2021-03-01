@@ -253,6 +253,35 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
+	else
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// Store the Atom first.
+		Handle vato = HandleCast(pap);
+		UUID uuid = TLB::INVALID_UUID;
+		{
+			std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+			try {
+				uuid = check_uuid(vato);
+			} catch (const NotFoundException& ex) {}
+			if (TLB::INVALID_UUID == uuid)
+			{
+				do_store_atom(vato);
+				uuid = check_uuid(vato);
+			}
+		}
+
+		// Double-duty -- re-use the linkvalue field for solo atoms.
+		// This is kind-of cheating but I don't want to change
+		// the table schema.
+		char uidbuff[BUFSZ];
+		snprintf(uidbuff, BUFSZ, "\'{%lu}\'", uuid);
+		STMT("linkvalue", uidbuff);
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"Unsupported value type=%d %s", vtype,
+			nameserver().getTypeName(vtype).c_str());
 
 	std::string insert = cols + vals + coda;
 
@@ -312,6 +341,35 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
+	else
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// Store the Atom first.
+		Handle vato = HandleCast(pap);
+		UUID uuid = TLB::INVALID_UUID;
+		{
+			std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+			try {
+				uuid = check_uuid(vato);
+			} catch (const NotFoundException& ex) {}
+			if (TLB::INVALID_UUID == uuid)
+			{
+				do_store_atom(vato);
+				uuid = check_uuid(vato);
+			}
+		}
+
+		// Double-duty -- re-use the linkvalue field for solo atoms.
+		// This is kind-of cheating but I don't want to change
+		// the table schema.
+		char uidbuff[BUFSZ];
+		snprintf(uidbuff, BUFSZ, "\'{%lu}\'", uuid);
+		STMT("linkvalue", uidbuff);
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"Unsupported value type=%d %s", vtype,
+			nameserver().getTypeName(vtype).c_str());
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
@@ -347,7 +405,7 @@ ValuePtr SQLAtomStorage::doGetValue(const char * buff)
 /// fetch is performed.
 ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 {
-	// Convert from databasse type to C++ runtime type
+	// Convert from database type to C++ runtime type
 	Type vtype = loading_typemap[rp.vtype];
 
 	// We expect rp.strval to be of the form
@@ -413,6 +471,13 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			if (*p == '}' or *p == '\0') break;
 			VUID vu = atol(p);
 			ValuePtr pap = getValue(vu);
+
+			// XXX FIXME. If the VUID is an Atom, and that Atom was
+			// deleted, then pap will be a nullptr. This invalidates
+			// the whole thing, so we return null. it would be nice
+			// if there was some more cnsistent way to handle this...
+			if (nullptr == pap) return nullptr;
+
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -420,7 +485,36 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 		return createLinkValue(lnkarr);
 	}
 
-	throw IOException(TRACE_INFO, "Unexpected value type=%d", rp.vtype);
+	// Well, it could be an atom!
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// We are storing atom UUID's in the linkvalue field.
+		// Yes this is a cheat ...
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		UUID uid = atol(p);
+
+		// Perhaps we have it already!?
+		Handle h(_tlbuf.getAtom(uid));
+		if (h) return h;
+
+		PseudoPtr psu(petAtom(uid));
+
+		// XXX FIXME. If the Atom was deleted, then we've got
+		// a dangling reference to it, that we cannot resolve.
+		// This is actually a bug in the deletion code, but it
+		// is painful to fix. Given that it's been 5+ years,
+		// and no one has tripped over this before, I'm just
+		// gonna punt on this. Look at deleteSingleAtom() for
+		// more info.
+		if (nullptr == psu) return nullptr;
+
+		Handle ha(get_recursive_if_not_exists(psu));
+		return ha;
+	}
+
+	throw IOException(TRACE_INFO,
+		"Unexpected value type=%d->%d", rp.vtype, vtype);
 	return nullptr;
 }
 

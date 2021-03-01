@@ -67,6 +67,7 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(BasicSaveUTest)
     ADD_CXXTEST(ValueSaveUTest)
     ADD_CXXTEST(PersistUTest)
+    ADD_CXXTEST(BasicDeleteUTest)
     ADD_CXXTEST(DeleteUTest)
 
     # AlphaEquivUTest is stubbed out because alpha-equiv in SQL is
