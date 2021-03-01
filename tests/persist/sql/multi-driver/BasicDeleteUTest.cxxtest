@@ -174,12 +174,8 @@ void BasicDeleteUTest::test_key_deletion(void)
 	as->extract_atom(kb);
 	TS_ASSERT_EQUALS(as->get_size(), 4);
 
-	// FYI, we should call store->close() at this point, but we
-	// don't, because ... most users forget to do this too.
-	// So this is a softball check that everything worked, even
-	// without the close().
-
 	// We are done.
+	store->close();
 	delete as;
 
 	// -------------------------------------------------------
@@ -256,12 +252,8 @@ void BasicDeleteUTest::test_key_corruption(void)
 	as->extract_atom(hx);
 	TS_ASSERT_EQUALS(as->get_size(), 3);
 
-	// FYI, we should call store->close() at this point, but we
-	// don't, because ... most users forget to do this too.
-	// So this is a softball check that everything worked, even
-	// without the close().
-
 	// We are done.
+	store->close();
 	delete as;
 
 	// -------------------------------------------------------
@@ -276,10 +268,15 @@ void BasicDeleteUTest::test_key_corruption(void)
 	store->open();
 	TS_ASSERT(store->connected())
 
-	// We expect 5 keys, including the truth-value key.
+	// We expect 4 keys, including the truth-value key.
 	printf("Loading the atomspace ...\n");
 	store->load_atomspace();
-	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	HandleSet hset;
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h: hset)
+		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
+	TS_ASSERT_EQUALS(as->get_size(), 4);
 
 	hb = as->add_node(CONCEPT_NODE, "b");
 	hx = as->add_node(CONCEPT_NODE, "x");
@@ -299,12 +296,8 @@ void BasicDeleteUTest::test_key_corruption(void)
 	as->extract_atom(hx);
 	TS_ASSERT_EQUALS(as->get_size(), 6);
 
-	// FYI, we should call store->close() at this point, but we
-	// don't, because ... most users forget to do this too.
-	// So this is a softball check that everything worked, even
-	// without the close().
-
 	// We are done.
+	store->close();
 	delete as;
 
 	// -------------------------------------------------------
@@ -322,18 +315,20 @@ void BasicDeleteUTest::test_key_corruption(void)
 	// We expect 7 keys, including the truth-value key.
 	printf("Loading the atomspace ...\n");
 	store->load_atomspace();
-	TS_ASSERT_EQUALS(as->get_size(), 7);
 
-	// Verify that there are two keys
+	hset.clear();
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h: hset)
+		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
+	TS_ASSERT_EQUALS(as->get_size(), 6);
+
+	// Verify that there are no keys
+	// The Atom (Concept "x") was in both values, and when it was
+	// deleted, the associated values were trashed as well. So both
+	// values (both keys) are gone.
 	hb = as->add_node(CONCEPT_NODE, "b");
 	HandleSet hs = hb->getKeys();
-	for (const Handle& k : hs)
-	{
-		ValuePtr vp = hb->getValue(k);
-		printf("key=%s value=%s\n", k->to_short_string().c_str(),
-			vp->to_short_string().c_str());
-	}
-	TS_ASSERT_EQUALS(hs.size(), 2);
+	TS_ASSERT_EQUALS(hs.size(), 0);
 
 	store->erase();
 	store->close();
