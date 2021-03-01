@@ -42,11 +42,26 @@ using namespace opencog;
 
 void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 {
+	char buff[BUFSZ];
+
 	// The Atom being deleted might be a foreign key in the valuations
 	// table. So clobber all of those...
-	char buff[BUFSZ];
+	// XXX We have not index on this, so it will be slow.
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Valuations WHERE key = %lu;", uuid);
+	rp.exec(buff);
+
+	// Argh. It might be a value or a valuation.
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Valuations WHERE linkvalue = \'{%lu}\';", uuid);
+	rp.exec(buff);
+
+	// Yikes! This is wrong, because it might be recursively embedded
+	// deep down in some structure! This will cause a crash! The user
+	// will be unhappy! FIXME! (OK, its been like five years and no
+	// one has ever done this before, and its late at night...)
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Values WHERE linkvalue = \'{%lu}\';", uuid);
 	rp.exec(buff);
 
 	// The uuid is the PRIMARY KEY so below should be fast...
