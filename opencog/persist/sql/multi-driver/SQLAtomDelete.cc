@@ -51,6 +51,14 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 		"DELETE FROM Valuations WHERE key = %lu;", uuid);
 	rp.exec(buff);
 
+#if UGLY_AND_UNDESIRED
+	// This is commented out because I'm not sure of what to do.
+	// This is a complex problem. We have two choices: walk the
+	// values table, (this is a recursive walk), find all atoms
+	// in it, and clobber them. Alternately, we can do nothing,
+	// here, just leave the Atoms, where they will sit, forever.
+	// Handle the failed restore elsewhere.
+
 	// Argh. It might be a value or a valuation.
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Valuations WHERE linkvalue = \'{%lu}\';", uuid);
@@ -63,6 +71,7 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Values WHERE linkvalue = \'{%lu}\';", uuid);
 	rp.exec(buff);
+#endif
 
 	// The uuid is the PRIMARY KEY so below should be fast...
 	snprintf(buff, BUFSZ,
