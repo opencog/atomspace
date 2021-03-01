@@ -422,6 +422,9 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
+      - atomspace-rocks:
+          requires:
+            - atomspace
       - cogserver:
           requires:
             - atomspace
