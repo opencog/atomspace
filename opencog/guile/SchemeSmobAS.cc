@@ -92,6 +92,7 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, as);
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
+	std::lock_guard<std::mutex> lck(as_mtx);
 	if (deleteable_as.end() != deleteable_as.find(as))
 		deleteable_as[as]++;
 	return smob;
@@ -153,18 +154,21 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	scm_gc_register_allocation(sizeof(*as));
 
-	// Only the internally-created atomspaces are trackable.
-	std::lock_guard<std::mutex> lck(as_mtx);
-	deleteable_as[as] = 0;
-
-	// Guile might have discarded all references to the parent; but
-	// we must not delete it, as long as a child is still referencing
-	// it.  The issue is that guile-gc does not know about this
-	// reference, so we have to track it manually.
-	while (parent and deleteable_as.end() != deleteable_as.find(parent))
 	{
-		deleteable_as[parent]++;
-		parent = parent->get_environ();
+		// Only the internally-created atomspaces are trackable.
+		std::lock_guard<std::mutex> lck(as_mtx);
+		deleteable_as[as] = 0;
+
+		// Guile might have discarded all references to the parent; but
+		// we must not delete it, as long as a child is still referencing
+		// it.  The issue is that guile-gc does not know about this
+		// reference, so we have to track it manually.
+		while (parent and deleteable_as.end() != deleteable_as.find(parent))
+		{
+			deleteable_as[parent]++;
+			parent = parent->get_environ();
+		}
+		// block scope unlock mutex
 	}
 
 	return make_as(as);
