@@ -1,0 +1,7 @@
+{
+   <lg_suppress_pp_know>
+   Memcheck:Cond
+   ...
+   fun:pp_knowledge_open
+   ...
+}
