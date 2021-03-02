@@ -1,0 +1,103 @@
+#
+# guile garbage collection uses these. Ignore them.
+#
+handle SIGPWR noprint nostop
+handle SIGXCPU noprint nostop
+set print thread-events off
+
+
+# This allows use of poc printing on all opencog objects.
+set overload-resolution on
+
+#
+# Print opencog objects. To be printabled the object must overload the
+# function oc_to_string in the opencog namespace (it must use
+# namespace opencog { ... }, using namespace opencog won't do)..
+#
+ 
+define poc
+	if $argc == 0
+		help patom
+	else
+		whatis $arg0
+		printf "%s", opencog::oc_to_string($arg0)._M_dataplus._M_p
+	end
+end
+ 
+document poc
+	Prints opencog object information.
+	Syntax: poc <opencog object>
+	Example:
+	poc h - Prints the hypergraph corresponding to h
+end
+
+#
+# Print opencog::AtomSpace
+#
+
+define patomspace
+	if $argc == 0
+		help patomspace
+	else
+		printf "%s", $arg0.to_string()._M_dataplus._M_p
+	end
+end
+
+document patomspace
+	Prints opencog::AtomSpace information.
+	Syntax: patomspace <atomspace>
+	Example:
+	patomspace as - Prints the whole atomspace as
+end
+
+add-auto-load-safe-path  /usr/lib/debug/usr/bin/python2.7-gdb.py
+
+# add-auto-load-safe-path /usr/local/lib/libguile-2.2.so.1.2.0-gdb.scm
+
+# print python frame
+define pyf
+  if $rip >= &PyEval_EvalFrameEx
+   if $rip < &PyEval_EvalCodeEx
+    x/s ((PyStringObject*)f->f_code->co_filename)->ob_sval
+    x/s ((PyStringObject*)f->f_code->co_name)->ob_sval
+    echo py line #
+    p f->f_lineno
+   end
+ end
+end
+document pyf
+show python stack frame
+end
+
+
+define pbt
+ set $i = 0
+ set $j = 0
+ set $prev = 0
+ while $i < 105
+  select $i
+  if $rip >= &PyEval_EvalFrameEx
+   if $rip < &PyEval_EvalCodeEx
+    if $prev !=f
+      echo c frame #
+      p $i
+      echo py frame #
+      p $j
+      set $j = $j+1
+      x/s ((PyStringObject*)f->f_code->co_filename)->ob_sval
+      x/s ((PyStringObject*)f->f_code->co_name)->ob_sval
+      echo line #
+      p f->f_lineno
+      $prev = f
+    end
+   end
+  end
+  set $i = $i+1
+ end
+end
+document pbt
+show python backtrace
+end
+
+
+
