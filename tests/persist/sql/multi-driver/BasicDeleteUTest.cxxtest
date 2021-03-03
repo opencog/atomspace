@@ -81,6 +81,7 @@ class BasicDeleteUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
+		void test_duplicates(void);
 		void test_key_deletion(void);
 		void test_key_corruption(void);
 };
@@ -127,6 +128,49 @@ void BasicDeleteUTest::setUp(void)
 
 void BasicDeleteUTest::tearDown(void)
 {
+}
+
+// ============================================================
+
+void BasicDeleteUTest::test_duplicates(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create an Atom with some keys on it.
+	AtomSpace* as = new AtomSpace();
+
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->erase();
+
+	Handle ha(as->add_node(CONCEPT_NODE, "a"));
+	Handle hb(as->add_node(CONCEPT_NODE, "b"));
+	Handle li(as->add_link(LIST_LINK, ha, hb, ha, hb));
+
+	// Store the link.
+	store->store_atom(li);
+	store->barrier();
+
+	// Verify the atomspace size
+	TS_ASSERT_EQUALS(as->get_size(), 4);
+
+	// Remove the link. Since the link has duplicate atoms
+	// in it, this can cause trouble, depending on how the
+	// incoming set is managed.
+	store->remove_atom(li);
+	as->extract_atom(li);
+	TS_ASSERT_EQUALS(as->get_size(), 3);
+
+	store->erase();
+	store->close();
+	delete as;
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
