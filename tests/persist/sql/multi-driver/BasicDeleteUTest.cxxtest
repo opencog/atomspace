@@ -82,6 +82,7 @@ class BasicDeleteUTest :  public CxxTest::TestSuite
 		void tearDown(void);
 
 		void test_duplicates(void);
+		void test_recursive(void);
 		void test_key_deletion(void);
 		void test_key_corruption(void);
 };
@@ -166,6 +167,105 @@ void BasicDeleteUTest::test_duplicates(void)
 	as->extract_atom(li);
 	TS_ASSERT_EQUALS(as->get_size(), 3);
 
+	store->erase();
+	store->close();
+	delete as;
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicDeleteUTest::test_recursive(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	AtomSpace* as = new AtomSpace();
+
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
+
+	store->open();
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->erase();
+
+	Handle ha(as->add_node(CONCEPT_NODE, "a"));
+	Handle hb(as->add_node(CONCEPT_NODE, "b"));
+	Handle li(as->add_link(LIST_LINK, ha, hb));
+	Handle lj(as->add_link(LIST_LINK, ha, li));
+
+	// Store the link.
+	store->store_atom(lj);
+	store->barrier();
+
+	printf("Atomspace size=%lu\n", as->get_size());
+	HandleSet hset;
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h : hset)
+		printf("Atomspace contains: %s\n", h->to_short_string().c_str());
+
+	// Verify the atomspace size
+	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	// Remove (Concept "a"). Since this appears twice, recursion
+	// will hit it twice, in stange ways, and maybe crash.
+	store->remove_atom(ha, true);
+	as->extract_atom(ha);
+
+	printf("Post-delete atomspace size=%lu\n", as->get_size());
+	hset.clear();
+	as->get_rootset_by_type(hset, ATOM, true);
+	for (const Handle& h : hset)
+		printf("Post delete: %s\n", h->to_short_string().c_str());
+
+	TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	// --------------------------------------
+	// Do it again, but with a different order.
+	ha = as->add_node(CONCEPT_NODE, "a");
+	li = as->add_link(LIST_LINK, ha, hb);
+	lj = as->add_link(LIST_LINK, li, ha);
+
+	store->store_atom(lj);
+	store->barrier();
+	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	store->remove_atom(ha, true);
+	as->extract_atom(ha);
+	TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	// --------------------------------------
+	// Do it again, but with a complex order.
+	ha = as->add_node(CONCEPT_NODE, "a");
+	li = as->add_link(LIST_LINK, ha, hb);
+	lj = as->add_link(LIST_LINK, ha, li, ha);
+
+	store->store_atom(lj);
+	store->barrier();
+	TS_ASSERT_EQUALS(as->get_size(), 5);
+
+	store->remove_atom(ha, true);
+	as->extract_atom(ha);
+	TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	// --------------------------------------
+	// Do it again, but more deeply.
+	ha = as->add_node(CONCEPT_NODE, "a");
+	li = as->add_link(LIST_LINK, ha, hb);
+	lj = as->add_link(LIST_LINK, ha, li, ha);
+	Handle lk = as->add_link(LIST_LINK, ha, lj, ha);
+
+	store->store_atom(lk);
+	store->barrier();
+	TS_ASSERT_EQUALS(as->get_size(), 6);
+
+	store->remove_atom(ha, true);
+	as->extract_atom(ha);
+	TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	// --------------------------------------
 	store->erase();
 	store->close();
 	delete as;
