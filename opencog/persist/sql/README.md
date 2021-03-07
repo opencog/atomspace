@@ -99,7 +99,7 @@ the missing features are kind-of complicated, and likely to be slow.
 Be sure to install the Postgres server and the Postgres client.
 
 ```
-    sudo apt-get install postgresql-9.5
+    sudo apt-get install postgresql
 ```
 
 
@@ -230,6 +230,10 @@ return to your own account:
 
 ```
    $ exit
+```
+Then:
+```
+   $ createdb alex # Replace this with your username
 ```
 
 If you ran into the error above, you still need to go back and create
