@@ -98,11 +98,10 @@ SQLAtomStorage::~SQLAtomStorage()
 /* ================================================================ */
 // Connections and opening
 
-void SQLAtomStorage::enlarge_conn_pool(int delta)
+void SQLAtomStorage::enlarge_conn_pool(int delta, const char* uri)
 {
 	if (0 >= delta) return;
 
-	const char * uri = _name.c_str();
 	for (int i=0; i<delta; i++)
 	{
 		LLConnection* db_conn = nullptr;
@@ -153,7 +152,7 @@ void SQLAtomStorage::connect(const char * uri)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
 	if (0 == _initial_conn_pool_size)
-		enlarge_conn_pool(NUM_WB_QUEUES + 2);
+		enlarge_conn_pool(NUM_WB_QUEUES + 2, uri);
 
 	if (!connected()) return;
 
@@ -196,7 +195,7 @@ void SQLAtomStorage::open(void)
 // #define NUM_OMP_THREADS 8
 
 	// minus 2 because we had a +2 in connect();
-	enlarge_conn_pool(NUM_OMP_THREADS - 2);
+	enlarge_conn_pool(NUM_OMP_THREADS - 2, _name.c_str());
 
 	if (!connected()) return;
 
