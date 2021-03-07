@@ -200,7 +200,24 @@
 }
 
 # ------------------------------------------
-# libuistring stuff
+# guile-3.0 stuff
+
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <scm_read_cond>
+   Memcheck:Cond
+   ...
+   fun:scm_read
+   ...
+   fun:scm_call_n
+	fun:scm_primitive_eval
+	fun:scm_eval
+	fun:scm_shell
+   ...
+}
+
+# ------------------------------------------
+# libunistring stuff
 
 {
    <unistring>
