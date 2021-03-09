@@ -434,6 +434,15 @@
 		; Compute and cache the values of the computation with the
 		; report-api can find them.
 
+		(define (cache-total)
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-left))
+		)
+
 		(define (cache-left)
 			(define start-time (current-time))
 			(define (elapsed-secs)
@@ -516,6 +525,7 @@
 				((right-rms-count)   (get-right-rms-count))
 				((cache-left)        (cache-left))
 				((cache-right)       (cache-right))
+				((cache-total)       (cache-total))
 				((cache-all)         (cache-all))
 
 				((help)              (help))
