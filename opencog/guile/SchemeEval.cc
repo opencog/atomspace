@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 
 #include <cstddef>
 #include <libguile.h>
@@ -401,6 +402,45 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	{
 		free(restr);
 		return SCM_CAR(throw_args);
+	}
+
+	// If the user types (quit) or (exit) at the cogserver shell, we will
+	// end up here. That's because (quit) (exit) and (exit 42) all get
+	// converted into (throw 'quit (list 42)). We have two choices:
+	// Rethrow this to the main guile shell, or just exit(). Now, in
+	// guile-3.0, the (throw 'quit) just turns into an exit(), so it
+	// mostly doesn't matter what we do (although guile allows (quit #t)
+	// which means exit(0) and I don't want to futz with this trivia.)
+	// However, we do one important thing: the guile repl loop does
+	// mess with the termios settings and mangles the shell. So we
+	// do a minimalist `stty sane` here.
+	if (0 == strcmp(restr, "quit"))
+	{
+		logger().info("[SchemeEval]: exit\n");
+
+		struct termios tio;
+		tcgetattr (STDIN_FILENO, &tio);
+
+		tio.c_iflag = tio.c_iflag | ICRNL;
+		tio.c_iflag = tio.c_iflag | IXON;
+		tio.c_iflag = tio.c_iflag | IUTF8;
+
+		tio.c_lflag = tio.c_lflag | ISIG;
+		tio.c_lflag = tio.c_lflag | ICANON;
+		tio.c_lflag = tio.c_lflag | ECHO;
+
+		tcsetattr(STDIN_FILENO, TCSADRAIN, &tio);
+
+		scm_throw(scm_from_utf8_symbol("quit"), throw_args);
+
+		// The above should not return.  It should have done this:
+		if (SCM_EOL == throw_args) exit(0);
+		exit(scm_to_int(scm_car(throw_args)));
+
+		// r7rs allows (quit #t) which means exit(0) and (quit #f)
+		// which means exit(1) but we are not going to futz with this.
+		// Because the throw above should not return.
+		exit(1);
 	}
 
 	// If it's not a read error, and it's not flow-control,
