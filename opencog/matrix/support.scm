@@ -25,7 +25,7 @@
   that these have been previously computed, as described below.
 
   See the documentation on `add-support-compute` for precise definitions
-  of \"support\", \"count\" and \"length\"; in breif, these are just the
+  of \"support\", \"count\" and \"length\"; in brief, these are just the
   l_0, l_1 and l_2 norms of the rows and columns.
 
   This object provides per-row/per-column values for support, count and
