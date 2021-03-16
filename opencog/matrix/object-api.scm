@@ -255,8 +255,50 @@
   and so this offers two different ways of iterating over the same
   list of pairs.
 
-  Here, the LLOBJ is expected to be an object, with methods for
-  'left-type, 'right-type and 'pair-type on it.
+  Here, the LLOBJ is expected to be the object that defines a pair
+  in the AtomSpace. All such objects provide the following methods:
+
+  'name - A one-sentence description of the pair object.
+  'id - A one-word id for the object; can be used to build strings.
+
+  'left-type, 'right-type - Returns the types of the Atoms making up
+      each side of the pair.
+  'pair-type - Returns the type of the Atom holding the pair.
+
+  'pair-count L R - Returns the total observed count on the pair (L,R)
+      L must be an Atom of type 'left-type and likewise for R.
+
+  'get-pair L R - Returns the Atom holding the pair (L,R). The returned
+      Atom will be of type 'pair-type. All statistics and information
+      about this pair are attached as Values on this Atom.
+
+  'get-count P - Returns the total observed count on the pair P, where
+      P is the Atom returned by 'get-pair.
+
+  'make-pair L R - Create the Atom holding the pair, if it does not
+      already exist.
+
+  'left-wildcard R - Return the marginal atom for the column R.
+      The column must be an Atom of type 'right-type. The marginal
+      Atom will be of type 'pair-type. The marginal Atom contains
+      all information applicable to this column, such as sums over
+      counts. (This info is held in Values on this Atom).
+
+  'right-wildcard L - Same as above, but for row L.
+
+  'wild-wild - Same as above, except that this applies matrix-wide.
+      This returns the Atom (of type 'pair-type) that holds all
+      information applicable to the matrix, as a whole. Ths includes
+      a grand-total count.
+
+  'fetch-pairs - Fetch all pairs from an open database.
+
+  'provides - Return a list of other methods that this obct provides. These
+      methods are typically used to overload the default methods in
+      derived classes.
+
+  'filters - Used in filtering out certain rows, columns or individual
+      entries.
 "
 	(let ((l-basis '())
 			(r-basis '())
