@@ -776,19 +776,19 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-freq ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
 		(if (null? ATOM) (plus-inf ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (plus-inf ATOM) (cog-value-ref val 1)))))
+				(if (nil? val) (plus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 2)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 2)))))
 
 	; Set the frequency and -log_2(frequency) on the ATOM.
 	; Return the atom that holds this count.
@@ -811,7 +811,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-total-entropy ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM entropy-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional entropy on ATOM
 	(define (get-fractional-entropy ATOM)
@@ -836,7 +836,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-total-mi ATOM)
 		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) (minus-inf ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional MI (lexical attraction) on ATOM.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
@@ -845,7 +845,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-fractional-mi ATOM)
 		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) (minus-inf ATOM) (cog-value-ref val 1)))))
+				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
