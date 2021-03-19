@@ -611,7 +611,7 @@
 		((add-support-api OBJ) 'total-count-left)
 		((add-support-api OBJ) 'total-count-right))
 
-	; May as well get the support avarages out of the way, too.
+	; May as well get the support averages out of the way, too.
 	(central-obj 'cache-left)
 	(central-obj 'cache-right)
 
