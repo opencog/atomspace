@@ -37,3 +37,51 @@
 (use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
+
+(define-public (make-concatenation LLA LLB)
+"
+  left-concatenation
+"
+
+	(let ((x 0)
+		)
+
+		; ---------------
+		(define (fetch-all-pairs)
+			(LLA 'fetch-pairs)
+			(LLB 'fetch-pairs))
+
+		; ---------------
+		(define (get-name)
+			(string-append (LLA 'name) " . " (LLB 'name)))
+		(define (get-id)
+			(string-append (LLA 'id) "." (LLB 'id)))
+
+		; -------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((name)             (get-name))
+				((id)               (get-id))
+				((left-type)        (apply LLA (cons message args)))
+
+				; ((right-type) get-right-type)
+				; ((pair-type) get-pair-type)
+				; ((pair-count) get-pair-count)
+				; ((get-pair) get-pair)
+				; ((get-count) get-count)
+				; ((make-pair) make-pair)
+				; ((left-wildcard) get-left-wildcard)
+				; ((right-wildcard) get-right-wildcard)
+				; ((wild-wild) get-wild-wild)
+				((fetch-pairs)      (fetch-all-pairs))
+				; ((provides) (lambda (symb) #f))
+				((filters?)         #f)
+
+				; Block anything that we can't handle.
+				(else               (throw 'bad-use 'make-concatenation
+					(format #f "Sorry, method ~A not available!" message)))
+	)))
+)
+
+; ---------------------------------------------------------------------
