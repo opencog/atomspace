@@ -294,7 +294,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
+	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
 
 	if (not h->is_link()) return SCM_EOL;
 

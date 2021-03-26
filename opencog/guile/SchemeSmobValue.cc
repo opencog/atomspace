@@ -509,7 +509,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 {
 	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
-   size_t index = verify_size(sindex, "cog-value-ref", 2);
+	size_t index = verify_size_t(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))
