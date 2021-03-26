@@ -111,9 +111,8 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	Arity ari = 0;
 	if (h->is_link()) ari = h->get_arity();
 
-	/* Arity is currently an unsigned short */
-	SCM sari = scm_from_ushort(ari);
-	return sari;
+	/* Arity is size_t */
+	return scm_from_size_t(ari);
 }
 
 /* ============================================================== */
