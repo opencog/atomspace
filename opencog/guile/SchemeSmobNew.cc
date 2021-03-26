@@ -260,16 +260,15 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 }
 
 /**
- * Check that the argument is an int, else throw errors.
- * Use C++ casting to convert the int to size_t. Return the size_t.
+ * Check that the argument is a size_t, else throw errors.
  */
-size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
+size_t SchemeSmob::verify_size (SCM ssizet, const char *subrname,
                                 int pos, const char * msg)
 {
-	if (scm_is_false(scm_integer_p(sint)))
-		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
+	if (scm_is_false(scm_integer_p(ssizet)))
+		scm_wrong_type_arg_msg(subrname, pos, ssizet, msg);
 
-	return (size_t) scm_to_int(sint);
+	return scm_to_size_t(ssizet);
 }
 
 /**
