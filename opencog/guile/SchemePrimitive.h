@@ -103,7 +103,7 @@ protected:
 	size_t scm_to(SCM args, size_t idx, size_t) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_size(arg, scheme_name, idx);
+		return SchemeSmob::verify_size_t(arg, scheme_name, idx);
 	}
 	int scm_to(SCM args, size_t idx, int) const
 	{
