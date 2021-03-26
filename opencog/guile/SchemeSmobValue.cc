@@ -452,7 +452,7 @@ SCM SchemeSmob::ss_keys_alist (SCM satom)
 
 #define CPPL_TO_SCML(VAL, FN) \
 	SCM list = SCM_EOL; \
-	for (int i = VAL.size()-1; i >= 0; i--) { \
+	for (size_t i = VAL.size()-1; i >= 0; i--) { \
 		SCM smob = FN(VAL[i]); \
 		list = scm_cons (smob, list); \
 	} \

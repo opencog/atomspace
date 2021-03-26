@@ -213,7 +213,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	Handle h = verify_handle(satom, "cog-inc-value!");
 	Handle key = verify_handle(skey, "cog-inc-value!", 2);
 	double cnt = verify_real(scnt, "cog-inc-value!", 3);
-	int ref = verify_int(sref, "cog-inc-value!", 4);
+	size_t ref = verify_size_t(sref, "cog-inc-value!", 4);
 
 	std::vector<double> new_value;
 
@@ -225,7 +225,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	{
 		FloatValuePtr fv(FloatValueCast(v));
 		new_value = fv->value();
-		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
+		if (new_value.size() <= ref) new_value.resize(ref+1, 0.0);
 	}
 	else
 	{
