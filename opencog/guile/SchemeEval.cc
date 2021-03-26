@@ -1067,9 +1067,9 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 
 		// Iterate in reverse, because cons chains in reverse.
 		size_t sz = oset.size();
-		for (size_t i=sz-1; i>=0; i--)
+		for (size_t i=sz; i>0; i--)
 		{
-			SCM sh = SchemeSmob::handle_to_scm(oset[i]);
+			SCM sh = SchemeSmob::handle_to_scm(oset[i-1]);
 			expr = scm_cons(sh, expr);
 		}
 	}
