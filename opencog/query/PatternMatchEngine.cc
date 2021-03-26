@@ -2475,7 +2475,8 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	HandleSeq key;
 
 	// Single-variable cache. Due to the way we are called, `term`
-	// is the variable in the clause, and `grnd` is it's grounding.
+	// is a subterm of the clause that contains a variable, and
+	// `grnd` is the grounding of that variable.
 	const Handle& clause = pclause->getHandle();
 	if (_pat->cacheable_clauses.find(clause) != _pat->cacheable_clauses.end())
 		key = HandleSeq({clause, grnd});
@@ -2495,7 +2496,16 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (cac != _gnd_cache.end())
 	{
 		logmsg("Cache hit!");
+
+		// Record the clause grounding.
 		var_grounding[clause] = cac->second;
+
+		// Copy variable groundings, which were stored in the key.
+		const HandleSeq& clvars(_pat->clause_variables.at(pclause));
+		size_t cvsz = clvars.size();
+		for (size_t iv=0; iv<cvsz; iv++)
+			var_grounding[clvars[iv]] = key[iv+1];
+
 		return do_next_clause();
 	}
 
