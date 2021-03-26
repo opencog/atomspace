@@ -253,7 +253,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size()-1; i >= 0; i--)
 	{
 		SCM smob = handle_to_scm(oset[i]);
 		list = scm_cons (smob, list);
@@ -277,7 +277,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size()-1; i >= 0; i--)
 	{
 		if (oset[i]->get_type() != t) continue;
 		SCM smob = handle_to_scm(oset[i]);
