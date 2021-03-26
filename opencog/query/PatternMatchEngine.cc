@@ -2273,14 +2273,14 @@ bool PatternMatchEngine::report_forall(void)
  * where in the clause the search should begin.
  *
  * Inputs:
- * do_clause: must be one of the clauses previously specified in the
+ * do_clause: Must be one of the clauses previously specified in the
  *            clause list of the match() method.
- * term:      must be a sub-clause of do_clause; that is, must be a link
- *            that appears in do_clause. Must contain `grnd` below.
- * grnd:      must be a (non-variable) node in the `term` term.
- *            That is, this must be one of the outgoing atoms of the
- *            `term` link; it must be a node, and it must not be
- *            a variable node or glob node.
+ * term:      Must be a sub-term of do_clause; that is, must be a link
+ *            that appears in do_clause. (It may be the clause itself,
+ *            which happens when the clause is shallow.)
+ * grnd:      Must be one of the outgoing atoms of `term` that is
+ *            constant, i.e. is not a variable, and does not contain
+ *            any variables.
  *
  * Returns true if one (or more) matches are found
  *
@@ -2318,7 +2318,7 @@ bool PatternMatchEngine::is_clause_grounded(const PatternTermPtr& clause) const
 
 /// Return a lookup key for this clause.
 /// The `varseq` should be the variables in this clause
-/// as recorded in ` _pat->clause_variables.find(clause)`
+/// as recorded in `_pat->clause_variables.find(clause)`
 HandleSeq PatternMatchEngine::clause_grounding_key(const Handle& clause,
                                                    const HandleSeq& varseq) const
 {
@@ -2494,6 +2494,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	const auto& cac = _gnd_cache.find(key);
 	if (cac != _gnd_cache.end())
 	{
+		logmsg("Cache hit!");
 		var_grounding[clause] = cac->second;
 		return do_next_clause();
 	}
