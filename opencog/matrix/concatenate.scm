@@ -38,11 +38,11 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-concatenation LLA LLB)
+(define-public (make-left-concatenation LLA LLB)
 "
   left-concatenation
 "
-	(let (id-string (string-append "(" (LLA 'id) "." (LLB 'id) ")"))
+	(let ((id-string (string-append "(" (LLA 'id) "." (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
@@ -146,7 +146,7 @@
 			l-basis)
 
 		(define (left-basis-size)
-			(if (eq? 0 l-size) (set! l-size (length (get-left-basis))))
+			(if (eq? 0 l-size) (set! l-size (length (left-basis))))
 			l-size)
 
 		; The right basis is easy: since the items are completely
@@ -205,7 +205,7 @@
 				(LLA 'id) (LLB 'id)))
 
 		(define (describe)
-			(display (procedure-property left-concatenation 'documentation)))
+			(display (procedure-property make-left-concatenation 'documentation)))
 
 		; -------------
 		; Return a pointer to each method that this class overloads.
@@ -237,7 +237,7 @@
 				((pair-count)       (apply get-pair-count args))
 				((get-count)        (apply get-count args))
 				((make-pair)        (apply make-pair args))
-				((left-wildcard)    (apply get-left-wildcard args))
+				((left-wildcard)    (apply left-wildcard args))
 				; ((right-wildcard) get-right-wildcard)
 				; ((wild-wild) get-wild-wild)
 				((fetch-pairs)      (fetch-all-pairs))
