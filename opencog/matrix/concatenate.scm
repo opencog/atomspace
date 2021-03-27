@@ -157,11 +157,34 @@
 		(define (right-basis-size)
 			(+ (a-stars 'right-basis-size) (b-stars 'right-basis-size)))
 
+		; Delegate left stars and duals according to the type
+		; of the right-atom.
+		(define (left-stars R-ATOM)
+			(init-ra)
+			(if (r-type-a? R-ATOM)
+				(a-stars 'left-stars R-ATOM)
+				(b-stars 'left-stars R-ATOM)))
+
+		(define (left-duals R-ATOM)
+			(init-ra)
+			(if (r-type-a? R-ATOM)
+				(a-stars 'left-duals R-ATOM)
+				(b-stars 'left-duals R-ATOM)))
+
+		; Right stars and duals are a simple concatenaition
+		(define (right-stars L-ATOM)
+			(append
+				(a-stars 'right-stars L-ATOM)
+				(b-stars 'right-stars L-ATOM)))
+
+		(define (right-duals L-ATOM)
+			(append
+				(a-stars 'right-duals L-ATOM)
+				(b-stars 'right-duals L-ATOM)))
+
 		; Just get all the parts, and append them.
 		(define (get-all-elts)
 			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
-
-
 
 		; XXX Uh, is this neeed/correct?
 		(define (clobber)
