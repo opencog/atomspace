@@ -42,11 +42,11 @@
 "
   left-concatenation
 "
-
 	(let ((a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
 			(l-size 0)
+			(is-from-a? #f)
 		)
 
 		; ---------------
@@ -68,6 +68,32 @@
 			(string-append (LLA 'name) " . " (LLB 'name)))
 		(define (get-id)
 			(string-append (LLA 'id) "." (LLB 'id)))
+
+		; ---------------
+
+		; Return the pair, if it exists.
+		; Brute force; try A, then B.
+		(define (get-pair L-ATOM R-ATOM)
+			(define maybe-a (LLA 'get-pair L-ATOM R-ATOM))
+			(if (not (nil? maybe-a)) maybe-a
+				(LLB 'get-pair L-ATOM R-ATOM)))
+
+		; Return the count on the pair, if it exists.
+		(define (get-pair-count L-ATOM R-ATOM)
+			(define maybe-a (LLA 'get-pair L-ATOM R-ATOM))
+			(if (not (nil? maybe-a))
+				(LLA 'get-count maybe-a)
+				(LLB 'pair-count L-ATOM R-ATOM)))
+
+		; Return the count on the pair, by delgating.
+		; Maintains a cache of all atoms in LLA, and uses that
+		; to delegate.
+		(define (get-count PAIR)
+			(if (not is-from-a?) ; initialize if not initialized.
+				(set! is-from-a?
+					(make-aset-predicate (a-stars 'get-all-elts))))
+			(if (is-from-a? PAIR)
+				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
 
 		; ===================================================
 		; Overloaded stars functions
@@ -127,9 +153,9 @@
 				((right-type)       (get-right-type))
 				((pair-type)        (get-pair-type))
 
-				; ((pair-count) get-pair-count)
-				; ((get-pair) get-pair)
-				; ((get-count) get-count)
+				((get-pair)         (apply get-pair args))
+				((pair-count)       (apply get-pair-count args))
+				((get-count)        (apply get-count args))
 				; ((make-pair) make-pair)
 				; ((left-wildcard) get-left-wildcard)
 				; ((right-wildcard) get-right-wildcard)
