@@ -47,6 +47,15 @@
 		)
 
 		; ---------------
+		; Right type can be either one of two things...
+		; This is a provisional hack, for now. Not sure if it makes sense.
+		(define (get-right-type)
+			(ChoiceLink (LLA 'right-type) (LLB 'right-type)))
+		(define (get-pair-type)
+			(ChoiceLink (LLA 'pair-type) (LLB 'pair-type)))
+
+		; ---------------
+		; Delegate the pair fetching to each subobject.
 		(define (fetch-all-pairs)
 			(LLA 'fetch-pairs)
 			(LLB 'fetch-pairs))
@@ -63,10 +72,10 @@
 			(case message
 				((name)             (get-name))
 				((id)               (get-id))
-				((left-type)        (apply LLA (cons message args)))
+				((left-type)        (apply LLA message))
+				((right-type)       (get-right-type))
+				((pair-type)        (get-pair-type))
 
-				; ((right-type) get-right-type)
-				; ((pair-type) get-pair-type)
 				; ((pair-count) get-pair-count)
 				; ((get-pair) get-pair)
 				; ((get-count) get-count)
