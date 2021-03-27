@@ -43,7 +43,8 @@
   left-concatenation
 "
 
-	(let ((x 0)
+	(let ((l-basis '())
+			(l-size 0)
 		)
 
 		; ---------------
@@ -66,6 +67,54 @@
 		(define (get-id)
 			(string-append (LLA 'id) "." (LLB 'id)))
 
+		; ===================================================
+		; Overloaded stars functions
+
+		; Left basis must be the union of the two.
+		(define (compute-left-basis)
+			(define atom-set (make-atom-set))
+			(for-each atom-set (LLA 'left-basis))
+			(for-each atom-set (LLB 'left-basis))
+			(atom-set #f)
+		)
+
+		(define (left-basis)
+			(if (null? l-basis) (set! l-basis (compute-left-basis)))
+			l-basis)
+
+		(define (left-basis-size)
+			(if (eq? 0 l-size) (set! l-size (length (get-left-basis))))
+			l-size)
+
+		; The right basis is easy: since the items are completely
+		; different, all we have to do is to append them.
+		(define (right-basis)
+			(append (LLA 'right-basis) (LLB 'right-basis)))
+
+		(define (right-basis-size)
+			(+ (LLA 'right-basis-size) (LLB 'right-basis-size)))
+
+		; Just get all the parts, and append them.
+		(define (get-all-elts)
+			(append (LLA 'get-all-elts) (LLB 'get-all-elts)))
+
+		; XXX Uh, is this neeed/correct?
+		(define (clobber)
+			(LLA 'clobber)
+			(LLB 'clobber))
+
+		; -------------
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((left-basis)       left-basis)
+				((right-basis)      right-basis)
+				((left-basis-size)  left-basis-size)
+				((right-basis-size) right-basis-size)
+				((get-all-elts)     get-all-elts)
+				((clobber)          clobber)
+			))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -84,7 +133,16 @@
 				; ((right-wildcard) get-right-wildcard)
 				; ((wild-wild) get-wild-wild)
 				((fetch-pairs)      (fetch-all-pairs))
-				; ((provides) (lambda (symb) #f))
+
+				; Overloaded stars functions
+				((left-basis)       (left-basis))
+				((right-basis)      (right-basis))
+				((left-basis-size)  (left-basis-size))
+				((right-basis-size) (right-basis-size))
+				((get-all-elts)     (get-all-elts))
+				((clobber)          (clobber))
+
+				((provides)         (apply provides args))
 				((filters?)         #f)
 
 				; Block anything that we can't handle.
