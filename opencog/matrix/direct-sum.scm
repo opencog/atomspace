@@ -1,8 +1,7 @@
 ;
-; concatenate.scm
+; direct-sum.scm
 ;
-; Define API's for concatenating two matrices. These can be concatenated
-; left-right, or above-below.
+; Define an API for taking the direct sum of two matrices.
 ;
 ; Copyright (c) 2021 Linas Vepstas
 ;
@@ -13,23 +12,30 @@
 ; different columns (column types); it can be useful to work with a
 ; matrix that is the concatenation of these two, so that the combined
 ; matrix has rows that have entries from one, and from the other, as if
-; the two matrices were stacked side-by-side. Alternately, if the have
-; the same column labels, but different rows, they can be stacked one
-; above the other.
+; the two matrices were stacked side-by-side.
 ;
-; In diagrams, if [A] and [B] are two matrices, then thier left-
-; concatenation is [L] = [AB] and the right-concatenation is 
-; [R] = [A]
-;       [B]
+; A protoypical example of the need for this the combination of a
+; word-disjunct matrix with a shape matrix. A word-disjunct matrix has
+; the form of `(Section (Word "left-item") (Disjunct ...))` where the
+; Disjunct has Words inside of it. A shape matrix is similar, but this
+; time isolating the Words in the Disjunct, and making them be the left
+; item. Both matrices have the same type of left-item. Thus,
+; concatenating them allows one left item to index a union of the
+; right-items of the two matrices. Each row of this matrix is a vector,
+; the concatenation of the corresponding rows in each matrix.
 ;
-; In index notation, if matrix A has n columns, then L_ij = A_ij if j<n
-; and L_ij = B_i(j-n) if j>n. Likewise for R, transposing rows and
-; columns.
+; More formally, this creates the direct sum of these two matrices,
+; after taking the set-union of the left and the right indexes on
+; the matrix.  This avoids any assumptions that the types of the
+; indexes are the same, or are even compatible; it simply mashes them
+; up to create a union-type.
 ;
-; The code here takes two matrix-API objects, and creates a single
-; matrix API. Note that there can be some difficulties with the API,
-; as the row or column types might not be consistenst across the whole
-; matrix.
+; In index notation, if matrix D is the direct sum of matrix A and B,
+; that is, if D = A ⊕ B, then the left basis of D is the set-union of
+; the left basis of A and of B, and likewise the right-basis. The
+; matrix elements D_ij are either A_ij or B_ij, depending on which one
+; exists. It is generally assumed that either one or the other exists,
+; but not both. It is ill-defined if both exist.
 ;
 ; ---------------------------------------------------------------------
 
@@ -40,9 +46,11 @@
 
 (define-public (make-left-concatenation LLA LLB)
 "
-  left-concatenation
+  make-left-concatenation LLA LLB -- concatenate/append/sum A and B
+
+  Given objects LLA and LLB
 "
-	(let ((id-string (string-append "(" (LLA 'id) "." (LLB 'id) ")"))
+	(let ((id-string (string-append "(" (LLA 'id) "+" (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
@@ -64,7 +72,9 @@
 		; whenever 'filters? is #t. So don't just change the id;
 		; doing so will corrupt existing databases using this code.
 		(define (get-name)
-			(string-append "Left concatenation " (LLA 'name) " . " (LLB 'name)))
+			(string-append "Left concatenation of \"" (LLA 'name)
+				 "\" and \"" (LLB 'name) "\""))
+
 		(define (get-id) id-string)
 
 		; ---------------
@@ -149,6 +159,7 @@
 			(if (eq? 0 l-size) (set! l-size (length (left-basis))))
 			l-size)
 
+xxxxxxxxx
 		; The right basis is easy: since the items are completely
 		; different, all we have to do is to append them.
 		(define (right-basis)
@@ -186,7 +197,7 @@
 		(define (get-all-elts)
 			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
 
-		; XXX Uh, is this neeed/correct?
+		; XXX Uh, is this needed/correct?
 		(define (clobber)
 			(a-stars 'clobber)
 			(b-stars 'clobber))
