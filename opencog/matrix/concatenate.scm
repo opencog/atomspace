@@ -192,6 +192,22 @@
 			(b-stars 'clobber))
 
 		; -------------
+		(define (help)
+			(format #t
+				(string-append
+"This is the `left-concatentation` of \"~A\" and \"~A\"\n"
+"It allows these two objects to share a common left-basis\n"
+"while concatenating the right-basis. For more information,\n"
+"say `,d left-concatentation` or `,describe left-concatentation`\n"
+"at the guile prompt, or just use the 'describe method on this\n"
+"object.\n"
+)
+				(LLA 'id) (LLB 'id)))
+
+		(define (describe)
+			(display (procedure-property left-concatenation 'documentation)))
+
+		; -------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
@@ -240,6 +256,9 @@
 
 				((provides)         (apply provides args))
 				((filters?)         #t)
+
+				((help)             (help))
+				((describe)         (describe))
 
 				; Block anything that we can't handle.
 				(else               (throw 'bad-use 'make-concatenation
