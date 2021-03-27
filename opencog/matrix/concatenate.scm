@@ -43,7 +43,9 @@
   left-concatenation
 "
 
-	(let ((l-basis '())
+	(let ((a-stars (add-pair-stars LLA))
+			(b-stars (add-pair-stars LLB))
+			(l-basis '())
 			(l-size 0)
 		)
 
@@ -73,8 +75,8 @@
 		; Left basis must be the union of the two.
 		(define (compute-left-basis)
 			(define atom-set (make-atom-set))
-			(for-each atom-set (LLA 'left-basis))
-			(for-each atom-set (LLB 'left-basis))
+			(for-each atom-set (a-stars 'left-basis))
+			(for-each atom-set (b-stars 'left-basis))
 			(atom-set #f)
 		)
 
@@ -89,19 +91,19 @@
 		; The right basis is easy: since the items are completely
 		; different, all we have to do is to append them.
 		(define (right-basis)
-			(append (LLA 'right-basis) (LLB 'right-basis)))
+			(append (a-stars 'right-basis) (b-stars 'right-basis)))
 
 		(define (right-basis-size)
-			(+ (LLA 'right-basis-size) (LLB 'right-basis-size)))
+			(+ (a-stars 'right-basis-size) (b-stars 'right-basis-size)))
 
 		; Just get all the parts, and append them.
 		(define (get-all-elts)
-			(append (LLA 'get-all-elts) (LLB 'get-all-elts)))
+			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
 
 		; XXX Uh, is this neeed/correct?
 		(define (clobber)
-			(LLA 'clobber)
-			(LLB 'clobber))
+			(a-stars 'clobber)
+			(b-stars 'clobber))
 
 		; -------------
 		; Return a pointer to each method that this class overloads.
