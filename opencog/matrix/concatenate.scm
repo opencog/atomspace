@@ -42,12 +42,30 @@
 "
   left-concatenation
 "
-	(let ((a-stars (add-pair-stars LLA))
+	(let (id-string (string-append "(" (LLA 'id) "." (LLB 'id) ")"))
+			(a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
 			(l-size 0)
 			(is-from-a? #f)
+			(r-type-a? #f)
 		)
+
+		; Initialize if not initialized.
+		(define (init-ra)
+			(if (not r-type-a?)
+				(set! r-type-a?
+					(make-aset-predicate (a-stars 'right-basis)))))
+
+		; ---------------
+		; Name and id of this object.
+		; Caution: other objects, e.g. those that access marginals,
+		; use the id as part of the marginal label. This happens
+		; whenever 'filters? is #t. So don't just change the id;
+		; doing so will corrupt existing databases using this code.
+		(define (get-name)
+			(string-append "Left concatenation " (LLA 'name) " . " (LLB 'name)))
+		(define (get-id) id-string)
 
 		; ---------------
 		; Right type can be either one of two things...
@@ -64,12 +82,6 @@
 			(LLB 'fetch-pairs))
 
 		; ---------------
-		(define (get-name)
-			(string-append (LLA 'name) " . " (LLB 'name)))
-		(define (get-id)
-			(string-append (LLA 'id) "." (LLB 'id)))
-
-		; ---------------
 
 		; Return the pair, if it exists.
 		; Brute force; try A, then B.
@@ -77,6 +89,18 @@
 			(define maybe-a (LLA 'get-pair L-ATOM R-ATOM))
 			(if (not (nil? maybe-a)) maybe-a
 				(LLB 'get-pair L-ATOM R-ATOM)))
+
+		; Create a pair, whether or not it exists.
+		; Assumes that the right-basis of LLA is disjoint from the
+		; right-basis of LLB. Thus, we can unambigously know which
+		; type to create. This assumes the user is only trying to
+		; create wild-cards with this function; it breaks down utterly
+		; for anything else.
+		(define (make-pair L-ATOM R-ATOM)
+			(init-ra)
+			(if (r-type-a? R-ATOM)
+				(LLA 'make-pair L-ATOM R-ATOM)
+				(LLB 'make-pair L-ATOM R-ATOM)))
 
 		; Return the count on the pair, if it exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -94,6 +118,17 @@
 					(make-aset-predicate (a-stars 'get-all-elts))))
 			(if (is-from-a? PAIR)
 				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
+
+		; Delegate left-wildcards to the two components
+		; Unambiguous, since we can use the right-type to
+		; figure out which one to delegate to. This works
+		; safely because 'filters? is #t and so marginals are
+		; labelled with the 'id of this object.
+		(define (left-wildcard R-ATOM)
+			(init-ra)
+			(if (r-type-a? R-ATOM)
+				(LLA 'left-wildcard R-ATOM)
+				(LLB 'left-wildcard R-ATOM)))
 
 		; ===================================================
 		; Overloaded stars functions
@@ -126,6 +161,8 @@
 		(define (get-all-elts)
 			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
 
+
+
 		; XXX Uh, is this neeed/correct?
 		(define (clobber)
 			(a-stars 'clobber)
@@ -139,6 +176,10 @@
 				((right-basis)      right-basis)
 				((left-basis-size)  left-basis-size)
 				((right-basis-size) right-basis-size)
+				((left-stars)       left-stars)
+				((right-stars)      right-stars)
+				((left-duals)       left-duals)
+				((right-duals)      right-duals)
 				((get-all-elts)     get-all-elts)
 				((clobber)          clobber)
 			))
@@ -156,8 +197,8 @@
 				((get-pair)         (apply get-pair args))
 				((pair-count)       (apply get-pair-count args))
 				((get-count)        (apply get-count args))
-				; ((make-pair) make-pair)
-				; ((left-wildcard) get-left-wildcard)
+				((make-pair)        (apply make-pair args))
+				((left-wildcard)    (apply get-left-wildcard args))
 				; ((right-wildcard) get-right-wildcard)
 				; ((wild-wild) get-wild-wild)
 				((fetch-pairs)      (fetch-all-pairs))
@@ -167,11 +208,15 @@
 				((right-basis)      (right-basis))
 				((left-basis-size)  (left-basis-size))
 				((right-basis-size) (right-basis-size))
+				((left-stars)       (apply left-stars args))
+				((right-stars)      (apply right-stars args))
+				((left-duals)       (apply left-duals args))
+				((right-duals)      (apply right-duals args))
 				((get-all-elts)     (get-all-elts))
 				((clobber)          (clobber))
 
 				((provides)         (apply provides args))
-				((filters?)         #f)
+				((filters?)         #t)
 
 				; Block anything that we can't handle.
 				(else               (throw 'bad-use 'make-concatenation
