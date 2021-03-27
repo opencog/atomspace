@@ -164,66 +164,52 @@
 		; ===================================================
 		; Overloaded stars functions
 
-		; Left basis must be the union of the two.
-		(define (compute-left-basis)
+		(define (union MSG)
 			(define atom-set (make-atom-set))
-			(for-each atom-set (a-stars 'left-basis))
-			(for-each atom-set (b-stars 'left-basis))
-			(atom-set #f)
-		)
+			(for-each atom-set (a-stars MSG))
+			(for-each atom-set (b-stars MSG))
+			(atom-set #f))
 
 		(define (left-basis)
-			(if (null? l-basis) (set! l-basis (compute-left-basis)))
+			(if (null? l-basis) (set! l-basis (union 'left-basis)))
 			l-basis)
 
 		(define (left-basis-size)
 			(if (eq? 0 l-size) (set! l-size (length (left-basis))))
 			l-size)
 
-		; In the prototypical example, the right basis is a union
-		; of two disjoint sets, so the below is overkill. But the
-		; general case requires this.
-		(define (compute-right-basis)
-			(define atom-set (make-atom-set))
-			(for-each atom-set (a-stars 'right-basis))
-			(for-each atom-set (b-stars 'right-basis))
-			(atom-set #f)
-		)
-
 		(define (right-basis)
-			(if (null? r-basis) (set! r-basis (compute-right-basis)))
+			(if (null? r-basis) (set! r-basis (union 'right-basis)))
 			r-basis)
 
 		(define (right-basis-size)
 			(if (eq? 0 r-size) (set! r-size (length (right-basis))))
 			r-size)
 
-		; Delegate left stars and duals according to the type
-		; of the right-atom.
+		(define (gunion MSG ARG)
+			(define atom-set (make-atom-set))
+			(for-each atom-set (a-stars MSG ARG))
+			(for-each atom-set (b-stars MSG ARG))
+			(atom-set #f))
+
+		; Stars and duals are unions.
 		(define (left-stars R-ATOM)
-			(init-ra)
-			(if (r-type-a? R-ATOM)
-				(a-stars 'left-stars R-ATOM)
-				(b-stars 'left-stars R-ATOM)))
+			(gunion 'left-stars R-ATOM))
 
 		(define (left-duals R-ATOM)
-			(init-ra)
-			(if (r-type-a? R-ATOM)
-				(a-stars 'left-duals R-ATOM)
-				(b-stars 'left-duals R-ATOM)))
+			(gunion 'left-duals R-ATOM))
 
-		; Right stars and duals are a simple concatenaition
 		(define (right-stars L-ATOM)
-			(append
-				(a-stars 'right-stars L-ATOM)
-				(b-stars 'right-stars L-ATOM)))
+			(gunion 'right-stars L-ATOM))
 
 		(define (right-duals L-ATOM)
-			(append
-				(a-stars 'right-duals L-ATOM)
-				(b-stars 'right-duals L-ATOM)))
+			(gunion 'right-duals L-ATOM))
 
 		; Just get all the parts, and append them.
+		; Avoid a cpu-sucking union. Thus, any elts appearing in
+		; both will be dpulicated. This may or may not be what the
+		; user expects. It's up to the user to de-dupe if that's
+		; what they want.
 		(define (get-all-elts)
 			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
 
