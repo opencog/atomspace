@@ -37,6 +37,15 @@
 ; exists. It is generally assumed that either one or the other exists,
 ; but not both. It is ill-defined if both exist.
 ;
+; More formally still, calling this thing a "direct sum" is an abuse of
+; the formal defintion of a direct sum. In many ways, it resembles just
+; an "ordinary sum" of two matrices. However, because this is enlarging
+; the set of basis elements, it is not "just" the sum of two matrices.
+; It is creating a new union type from the types of the two matrices;
+; an ordinary sum normally requires that the types of the indexes be
+; the same. There's no obvious formal term in mathematics that I know
+; of, that would apply here. "Direct sum" seems close enough.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -44,17 +53,19 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-left-concatenation LLA LLB)
+(define-public (direct-sum LLA LLB)
 "
-  make-left-concatenation LLA LLB -- concatenate/append/sum A and B
+  direct-sum LLA LLB -- concatenate/append/sum A and B
 
   Given objects LLA and LLB
 "
-	(let ((id-string (string-append "(" (LLA 'id) "+" (LLB 'id) ")"))
+	(let ((id-string (string-append "(" (LLA 'id) "⊕" (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
+			(r-basis '())
 			(l-size 0)
+			(r-size 0)
 			(is-from-a? #f)
 			(r-type-a? #f)
 		)
@@ -67,23 +78,33 @@
 
 		; ---------------
 		; Name and id of this object.
+		(define (get-name)
+			(string-append "Direct sum of \"" (LLA 'name)
+				 "\" and \"" (LLB 'name) "\""))
+
 		; Caution: other objects, e.g. those that access marginals,
 		; use the id as part of the marginal label. This happens
 		; whenever 'filters? is #t. So don't just change the id;
 		; doing so will corrupt existing databases using this code.
-		(define (get-name)
-			(string-append "Left concatenation of \"" (LLA 'name)
-				 "\" and \"" (LLB 'name) "\""))
-
 		(define (get-id) id-string)
 
 		; ---------------
-		; Right type can be either one of two things...
+		; Types ...
 		; This is a provisional hack, for now. Not sure if it makes sense.
+		(define (get-left-type)
+			(define at (LLA 'left-type))
+			(define bt (LLB 'left-type))
+			(if (equal? at bt) at (ChoiceLink at bt)))
+
 		(define (get-right-type)
-			(ChoiceLink (LLA 'right-type) (LLB 'right-type)))
+			(define at (LLA 'right-type))
+			(define bt (LLB 'right-type))
+			(if (equal? at bt) at (ChoiceLink at bt)))
+
 		(define (get-pair-type)
-			(ChoiceLink (LLA 'pair-type) (LLB 'pair-type)))
+			(define at (LLA 'pair-type))
+			(define bt (LLB 'pair-type))
+			(if (equal? at bt) at (ChoiceLink at bt)))
 
 		; ---------------
 		; Delegate the pair fetching to each subobject.
@@ -104,8 +125,8 @@
 		; Assumes that the right-basis of LLA is disjoint from the
 		; right-basis of LLB. Thus, we can unambigously know which
 		; type to create. This assumes the user is only trying to
-		; create wild-cards with this function; it breaks down utterly
-		; for anything else.
+		; create wild-cards with this function; it breaks down
+		; utterly for anything else.
 		(define (make-pair L-ATOM R-ATOM)
 			(init-ra)
 			(if (r-type-a? R-ATOM)
@@ -159,14 +180,23 @@
 			(if (eq? 0 l-size) (set! l-size (length (left-basis))))
 			l-size)
 
-xxxxxxxxx
-		; The right basis is easy: since the items are completely
-		; different, all we have to do is to append them.
+		; In the prototypical example, the right basis is a union
+		; of two disjoint sets, so the below is overkill. But the
+		; general case requires this.
+		(define (compute-right-basis)
+			(define atom-set (make-atom-set))
+			(for-each atom-set (a-stars 'right-basis))
+			(for-each atom-set (b-stars 'right-basis))
+			(atom-set #f)
+		)
+
 		(define (right-basis)
-			(append (a-stars 'right-basis) (b-stars 'right-basis)))
+			(if (null? r-basis) (set! r-basis (compute-right-basis)))
+			r-basis)
 
 		(define (right-basis-size)
-			(+ (a-stars 'right-basis-size) (b-stars 'right-basis-size)))
+			(if (eq? 0 r-size) (set! r-size (length (right-basis))))
+			r-size)
 
 		; Delegate left stars and duals according to the type
 		; of the right-atom.
@@ -240,7 +270,7 @@ xxxxxxxxx
 			(case message
 				((name)             (get-name))
 				((id)               (get-id))
-				((left-type)        (apply LLA message))
+				((left-type)        (get-left-type))
 				((right-type)       (get-right-type))
 				((pair-type)        (get-pair-type))
 
