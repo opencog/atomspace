@@ -55,9 +55,18 @@
 
 (define-public (direct-sum LLA LLB)
 "
-  direct-sum LLA LLB -- concatenate/append/sum A and B
+  direct-sum LLA LLB -- provide a matrix API for the 'sum' of A and B.
 
-  Given objects LLA and LLB
+  This has aspects of being a concatenation of A and B, of being an
+  'ordinary' sum of A and B, and of being a direct sum, .. kind-of.
+
+  Given objects LLA and LLB, this presents a new object whose
+  left-basis is the set-union of the left-basis of A and B, and
+  likewise the right basis. The matrix elements are likewise the
+  set-union; it is assumed that the matrix elements of A and B are
+  *disjoint sets*, so that the union is well-defined. If they are
+  not disjoint, then the behavior is ill-defined (i.e. it is not
+  currently specified.)
 "
 	(let ((id-string (string-append "(" (LLA 'id) "⊕" (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
@@ -127,6 +136,8 @@
 		; type to create. This assumes the user is only trying to
 		; create wild-cards with this function; it breaks down
 		; utterly for anything else.
+xxxx
+this is wrong.
 		(define (make-pair L-ATOM R-ATOM)
 			(init-ra)
 			(if (r-type-a? R-ATOM)
@@ -140,7 +151,7 @@
 				(LLA 'get-count maybe-a)
 				(LLB 'pair-count L-ATOM R-ATOM)))
 
-		; Return the count on the pair, by delgating.
+		; Return the count on the pair, by delegating.
 		; Maintains a cache of all atoms in LLA, and uses that
 		; to delegate.
 		(define (get-count PAIR)
@@ -222,17 +233,16 @@
 		(define (help)
 			(format #t
 				(string-append
-"This is the `left-concatentation` of \"~A\" and \"~A\"\n"
-"It allows these two objects to share a common left-basis\n"
-"while concatenating the right-basis. For more information,\n"
-"say `,d left-concatentation` or `,describe left-concatentation`\n"
-"at the guile prompt, or just use the 'describe method on this\n"
-"object.\n"
+"This is the `direct sum` of \"~A\" and \"~A\"\n"
+"It takes the union of the left-basis of both objects, and likewise\n"
+"the right-basis. For more information, say `,d diect-sum` or\n"
+"`,describe direct-sum` at the guile prompt, or just use the 'describe\n"
+"method on this object.\n"
 )
 				(LLA 'id) (LLB 'id)))
 
 		(define (describe)
-			(display (procedure-property make-left-concatenation 'documentation)))
+			(display (procedure-property direct-sum 'documentation)))
 
 		; -------------
 		; Return a pointer to each method that this class overloads.
