@@ -82,6 +82,8 @@
 			(r-size 0)
 			(is-from-a? #f)
 			(type-a? #f)
+			(disjoint-left #f)
+			(disjoint-right #f)
 		)
 
 		; Initialization
@@ -98,6 +100,9 @@
 					(if (not (or djl djr))
 						(throw 'wrong-type-arg 'direct-sum
 							"Either the left or the right basis must be disjoint!"))
+
+					(set! disjoint-left djl)
+					(set! disjoint-right djr)
 
 					; Return #t if one of the two atoms belongs to the
 					; disjoint basis of LLA
@@ -186,17 +191,41 @@
 			(if (is-from-a? PAIR)
 				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
 
-		; Delegate left-wildcards to the two components
-		; Unambiguous, since we can use the right-type to
-		; figure out which one to delegate to. This works
-		; safely because 'filters? is #t and so marginals are
-		; labelled with the 'id of this object.
+		; Delegate wildcards to the two components.
+		; The disjoint is gives us an unambiguous wildcard that
+		; we can delegate to. This works safely because 'filters?
+		; is #t and so marginals are labelled with the 'id of this
+		; object. The non-disjoint side requires a custom wildcard.
+		; The hope here is that we save a little bit of RAM by
+		; recycling existing wildcards on the disjoint side.
+		; Otherwise, we can just use custom wildcarrds for both sides.
 		(define (left-wildcard R-ATOM)
 			(init-a)
-			(if (type-a? L-ATOM R-ATOM)
-xxx this is wrong..
-				(LLA 'left-wildcard R-ATOM)
-				(LLB 'left-wildcard R-ATOM)))
+			(if disjoint-right
+				(if (type-a? R-ATOM R-ATOM)
+					(LLA 'left-wildcard R-ATOM)
+					(LLB 'left-wildcard R-ATOM))
+				(EvaluationLink
+					(PredicateNode (string-append "*-Direct Sum Wild " id-string))
+					(AnyNode "left-wild")
+					R-ATOM)))
+
+		(define (right-wildcard L-ATOM)
+			(init-a)
+			(if disjoint-right
+				(if (type-a? L-ATOM L-ATOM)
+					(LLA 'right-wildcard L-ATOM)
+					(LLB 'right-wildcard L-ATOM))
+				(EvaluationLink
+					(PredicateNode (string-append "*-Direct Sum Wild " id-string))
+					L-ATOM
+					(AnyNode "right-wild"))))
+
+		(define (get-wild-wild)
+			(EvaluationLink
+				(PredicateNode (string-append "*-Direct Sum Wild " id-string))
+				(AnyNode "left-wild")
+				(AnyNode "right-wild")))
 
 		; ===================================================
 		; Overloaded stars functions
@@ -301,8 +330,8 @@ xxx this is wrong..
 				((get-count)        (apply get-count args))
 				((make-pair)        (apply make-pair args))
 				((left-wildcard)    (apply left-wildcard args))
-				; ((right-wildcard) get-right-wildcard)
-				; ((wild-wild) get-wild-wild)
+				((right-wildcard)   (apply right-wildcard args))
+				((wild-wild)        (get-wild-wild))
 				((fetch-pairs)      (fetch-all-pairs))
 
 				; Overloaded stars functions
