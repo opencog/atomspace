@@ -343,25 +343,40 @@ Direct sums
 -----------
 If one has a collection of things that can be vectors in two different
 ways, then the direct sum can be used to create a single vector out of
-the two.  For example, a word "foo" can be associated with a vector of
-disjuncts. It can also be associated with a vector of connectors that
-it appears in (a "shape"). These are two completely different kinds of
-vectors; all they have in common is that both are associated with the
-word "foo". As martices, one consists of (word,disjunct) pairs, while
-the other consists of (word,shape) pairs. The left-side of the matrix
-(the rows of the matrix) all have the same type (i.e. words) while the
-right side (the columns) are two different types (and are completely
-disjoint, as sets).
+the two.  It can be thought of as a concatentation of the two vectors,
+appending one to the other to create a single vector.
+
+For example, a word "foo" can be associated with a vector of disjuncts.
+It can also be associated with a vector of connectors that it appears
+in (a "shape"). These are two completely different kinds of vectors;
+all they have in common is that both are associated with the word "foo".
+As matrices, one consists of (word,disjunct) pairs, while the other
+consists of (word,shape) pairs. The left-side of the matrix (the rows
+of the matrix) all have the same type (i.e. words) while the right
+side (the columns) are two different types (and are completely disjoint,
+as sets). Concatenating these two matrices, placing one after the other,
+results in a single matrix where the rows are result of appending the
+rows of the second matrix to the first. If the dimensions of the two
+matrices are N x M and N x K, then the dimensions of the combined matrix
+would be N x (M + K).
 
 The `direct-sum` class will combine these two matrices to provide an
 object that behaves like a single matrix. The left and right basis
 elements will be the set-union of the left and right basis elts of each
-component matrix. By assumption, the types of either the left basis or
-the right basis are distinct, and so one of these sets is disjoint.
-Thus, the union is unambiguous; there is no concern with double-counting
-or any kind of "overlap". The total number of non-zero entries in the
-combined matrix is the sum of the number of non-zero entries in each
-component.
+component matrix. By assumption, the types of either the columns or
+the rows are distinct, and so one of these sets is disjoint.  Thus, the
+union is unambiguous; the matrices are either placed side-by-side by
+concatenating rows, or above-below, by concatenating columns. There is
+no "overlap".  The total number of non-zero entries in the combined
+matrix is the sum of the number of non-zero entries in each component.
+
+(Caution: this is not the conventional definition of a direct sum, which
+results in block-diagonal matrix. The conventional defintion takes the
+disjoint-union of the indexes (the basis), whereas here, we take the
+set-union of the basis. The set-union makes more sense in the current
+context, because the rows and columns have explicit labels, and it is
+the labels that are important. The set union is obtained from the
+disjoint union by means of a projection.)
 
 
 Working with rows and columns
