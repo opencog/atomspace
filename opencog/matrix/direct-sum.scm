@@ -67,6 +67,11 @@
   *disjoint sets*, so that the union is well-defined. If they are
   not disjoint, then the behavior is ill-defined (i.e. it is not
   currently specified.)
+
+  The current implementation also assumes that either the left-basis
+  of A and B are disjoint, or that the right-basis is. The current
+  design of this whole module makes it kind-of hard if not impossible
+  for this not to be the case. So this is a reasonable assumption.
 "
 	(let ((id-string (string-append "(" (LLA 'id) "⊕" (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
@@ -76,14 +81,36 @@
 			(l-size 0)
 			(r-size 0)
 			(is-from-a? #f)
-			(r-type-a? #f)
+			(type-a? #f)
 		)
 
-		; Initialize if not initialized.
-		(define (init-ra)
-			(if (not r-type-a?)
-				(set! r-type-a?
-					(make-aset-predicate (a-stars 'right-basis)))))
+		; Initialization
+		(define (init-a)
+			(if (not type-a?)
+				; The bases are disjoint, if the number of elts in the
+				; union is equal to the num elts in each part.
+				(let ((djl (= (+ (LLA 'left-basis-size) (LLB 'left-basis-size))
+								(left-basis-size)))
+						(djr (= (+ (LLA 'right-basis-size) (LLB 'right-basis-size))
+								(right-basis-size))))
+
+					; Either the left or the right basis must be disjoint.
+					(if (not (or djl djr))
+						(throw 'wrong-type-arg 'direct-sum
+							"Either the left or the right basis must be disjoint!"))
+
+					; Return #t if one of the two atoms belongs to the
+					; disjoint basis of LLA
+					(set! type-a?
+						(lambda (L-ATOM R-ATOM)
+							(define in-base?
+								(if djl
+									(make-aset-predicate (a-stars 'left-basis))
+									(make-aset-predicate (a-stars 'right-basis))))
+							(or
+								(and djl (in-base? L-ATOM))
+								(and djr (in-base? R-ATOM)))))
+			)))
 
 		; ---------------
 		; Name and id of this object.
@@ -136,11 +163,9 @@
 		; type to create. This assumes the user is only trying to
 		; create wild-cards with this function; it breaks down
 		; utterly for anything else.
-xxxx
-this is wrong.
 		(define (make-pair L-ATOM R-ATOM)
-			(init-ra)
-			(if (r-type-a? R-ATOM)
+			(init-a)
+			(if (type-a? L-ATOM R-ATOM)
 				(LLA 'make-pair L-ATOM R-ATOM)
 				(LLB 'make-pair L-ATOM R-ATOM)))
 
@@ -167,8 +192,9 @@ this is wrong.
 		; safely because 'filters? is #t and so marginals are
 		; labelled with the 'id of this object.
 		(define (left-wildcard R-ATOM)
-			(init-ra)
-			(if (r-type-a? R-ATOM)
+			(init-a)
+			(if (type-a? L-ATOM R-ATOM)
+xxx this is wrong..
 				(LLA 'left-wildcard R-ATOM)
 				(LLB 'left-wildcard R-ATOM)))
 
