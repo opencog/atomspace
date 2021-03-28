@@ -354,7 +354,11 @@
 
 		; Loop over the top-N most frequent basis elements
 		(define (batch TOP-N)
-			(define top-items (take (get-sorted-basis) TOP-N))
+			(define sbase (get-sorted-basis))
+			(define nbase (length sbase))
+			; `take` fails if asked to take more than length of list.
+			(define num (if (< TOP-N nbase) TOP-N nbase))
+			(define top-items (take sbase num))
 			(batch-sim-pairs top-items))
 
 		; Loop over the top-N most frequent basis elements
