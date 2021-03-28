@@ -3,7 +3,61 @@ Correlation/Covariance Matrix Analysis Tools
 ============================================
 [See also: key ideas presentation](docs/AtomSpace.pdf).
 
-In this project, there's a generic theme of "pairs of things" that
+In symbolic AI, there is a generic need to perform "reasoning" or
+"inference". There are more than a few ways this can be done. A
+traditional approach is "chaining", where one explores connected
+paths between a starting point and an end-point, connected by edges
+(one-dimensional links).  Each edge has two end-points: two vertices
+define an edge.
+
+In conventional crisp-logic symbolic AI, these vertexes are either
+connected, or not; either there is an edge connecting them, or there
+is not.  One assigns true/false values to the edges in a connectivity
+diagram.  In a probabilistic approach, the edges carry weights or
+"truth values".
+
+A collection of edges forms a graph. It can also be thought of forming
+a matrix `M(v,w)` where `v` and `w` are two vertices. An adjacency
+matrix is the matrix `M(v,w)=true` if the vertexes `v` and `w` are
+connected by an edge; otherwise, `M(v,w)=false`. If the graph edges are
+weighted, then `M(v,w)` can be understood to be the weight on that edge.
+Thus, graphs can be represented as matrices, and vice-versa.
+
+The matrix representation of a graph simplifies certain types of
+reasoning and inference. For example, backward/forward chaining limited
+to two steps can be understood as just the square of the matrix. That
+is, two vertexes `u` and `w` are connected if and only if
+```
+    sum_v  M(u,v) M(v,w)
+```
+is not zero. Three chaining steps requires three matrix products, and so
+on.
+
+A fundamental limitation of the matrix representation of graphs is that,
+for most graphs, the corresponding matrix is sparse, sometimes extremely
+sparse. Thus, storing an `m x k`-dimensional matrix as a block of
+numbers makes no sense, if 99.99% of those numbers are zero. Thus, in
+terms of RAM usage (or disk usage), a graph representation is much more
+compact than a matrix representation.  In the AtomSpace, a vertex can be
+any Atom whatsoever; an edge is then just a pair of Atoms.
+
+The code here provides a set of tools to layer a matrix API on top of
+an arbitrary graph or collection of Atoms in the AtomSpace. One merely
+needs to define the types of the vertices, what the edges are, and how
+to find the associated weight on that edge. The toolkit then provides
+a decent set of matrix tools, skewing heavily towards probability-type
+functions, such as conditional probabilities, mutual information, and so
+on.
+
+A deeper abstraction of graphs, more suitable for complex reasoning,
+learning and inference tasks, can be found in the [sheaf](../sheaf)
+directory, as well as the [learn](https://github.com/opencog/learn)
+github repo. Those systems are heavily reliant on the code here.
+
+
+Pairs
+-----
+More generally, there is a generic theme of "pairs of things" that
 are statistically related. These can be pairs of words, they can be
 connector-sets, which are a pair of (word, disjunct), or they can
 any kind of general pairs, correlating events and actions, causes
@@ -56,19 +110,8 @@ in relations between, say, `ConceptNodes` and `ContextLink`s. For
 biology, the left side might be a GeneNode, and the right side a
 ProteinNode.
 
-The core idea is that the AtomSpace can hold sparse matrix data; in a
-certain sense, the AtomSpace was designed from the get-go to do exactly
-that. Once you realize that your data can be seen as a kind of matrix,
-you can then apply a variety of generic matrix analysis tools to it.
-
-Another way to arrive at this idea is to view your data as a graph,
-(of vertexes connected with edges) and then realize that any graph can
-be described in terms of it's adjacency matrix. This directory provides
-tools to work with a graph from the point of view of its being an
-adjacency matrix.
-
-Thus, generically, a "matrix" in the AtomSpace is simply a collection of
-Atoms, all of the same kind and general structure, with some
+Thus, generically, a "matrix" in the AtomSpace is simply a collection
+of Atoms, all of the same kind and general structure, with some
 identifiable sub-part, called "the rows", or the "left atoms", and some
 other identifiable sub-part, called "the columns", or the "right atoms".
 As long as one can easily identify all of the Atoms that belong to the
@@ -88,8 +131,11 @@ The tools implemented here include:
  * Row and column subtotals (i.e. "marginals").
  * Computing and caching frequencies from counts.
  * Computing and caching mutual information of pairs.
- * Computing and caching marginal mutual information.
+ * Computing and caching marginal mutual information of pairs.
  * Computing cosine similarity between rows or columns.
+ * Computing mutual information between rows or columns
+   (as opposed to pairs).
+ * Concatenating dissimilar matrices.
  * Performing PCA (principal component analysis) in the matrix.
  * Performing cuts, to remove unwanted rows, columns and individual entries.
 
@@ -127,11 +173,10 @@ FAQ
 
 **Q:** Really, C++ is sooo fast...
 
-**A:** Yes, but since the data is stored in values associated with
-   atoms in the AtomSpace, adding numbers together is NOT the
-   bottleneck. Accessing Atom Values *is* the bottleneck. Finding
-   a good performance optimization for the atom values framework
-   is a lot harder.
+**A:** Yes, but since the data is stored in Values associated with
+   Atoms in the AtomSpace, adding numbers together is NOT the
+   bottleneck. Accessing Atom Values *is* the bottleneck. For this case,
+   the overhead of using scheme, compared to C++, is not outrageous.
 
 **Q:** Why don't you just export all your data to SciPy or to Gnu R, or to
    Octave, or MatLab, for that matter, and just do your data analytics
@@ -177,15 +222,15 @@ FAQ
 
 **Q:** Any other design issues?
 
-**A:** Yes. As currently structured, all of these classes assume that your
-   data is readily available in RAM. They will not work correctly, if
-   your dataset is too big to fit into RAM.  At the time of this
+**A:** Yes. As currently structured, all of these classes assume that
+   your data is readily available in RAM. They will not work correctly,
+   if your dataset is too big to fit into RAM.  At the time of this
    writing, a single atom takes about 1.5KBytes or so, so a dataset
    consisting of 100M atoms will require about 150GBytes of RAM, plus
    a bit more for other processes (e.g. Postgres). Since most computers
    max out at about 256 GBytes RAM, this limits datasets to 100M atoms.
    Some language datasets can be considerably larger than this.
-   The largest Amazon EC2 instances are 256 GBytes.
+   At this time, the largest Amazon EC2 instances are 256 GBytes.
 
 
 Generic Programming
