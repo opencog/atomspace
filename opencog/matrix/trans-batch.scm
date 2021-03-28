@@ -15,7 +15,7 @@
 ;
 ; This file precomputes the various partial sums (marginals) that occur
 ; in the definition of the symmetric MI.  It assumes that the vectors
-; (i.e. observation counts) are in an SQL database; it fetches those,
+; (i.e. observation counts) are in an open database; it fetches those,
 ; computes the assorted marginals, and writes those marginals back to
 ; disk. Specifically, the marginals are those needed for the
 ; `transpose-api`, which is used to compute the symmetric MI.

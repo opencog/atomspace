@@ -75,6 +75,7 @@
 ; Most users will find it easiest to use the `make-evaluation-pair-api`
 ; to provide the low-level API.  It is ideal, when counts are stored
 ; in the form of `EvaluationLink PredicateNode "..." ListLink ...`.
+; See `eval-pair.scm` for details.
 ;
 ; The `add-pair-freq-api` class, below, is a typical user of this
 ; class; it provides getters and setters for the frequencies.

@@ -19,12 +19,12 @@ and so on. Vectors are buried in essentially all neural-net type
 algorithms.  But - this is key: a collection of vectors can be viewed
 as a matrix. Entries in the matrix are (row, column) pairs.
 
-The code in this directory exposes portions of the atomspace as pairs,
+The code in this directory exposes portions of the AtomSpace as pairs,
 or as a matrix, or as a collection of vectors, depending on how you want
 to think about it.  It implements the low-level code for this access,
 so that high-level algorithms can be implemented on top of it: so that
 they can grab that data, do things with it, and write it back.  It
-provides a "window" onto a portion of the atomspace, and everything
+provides a "window" onto a portion of the AtomSpace, and everything
 seen through that "window" looks like vectors, like one big matrix.
 
 That is, the structure of interest are ordered pairs `(x,y)` of atoms
@@ -40,7 +40,7 @@ might do with such a matrix.  That's what the code in this directory
 does.
 
 The prototypical example is that of word-pairs. These are stored in the
-atomspace as
+AtomSpace as
 ```
     EvaluationLink   (count=6789)
         PredicateNode "word-pair"
@@ -52,10 +52,12 @@ which indicates that the word-pair (foo,bar) was observed 6789 times.
 In the general, generic case, we might want to observe not just these
 `PredicateNode "word-pair"` relations, but maybe some other kinds of
 predicates. We are interested, perhaps, not just in `WordNode`'s but
-in relations between, say, `ConceptNodes` and `ContextLink`s.
+in relations between, say, `ConceptNodes` and `ContextLink`s. For
+biology, the left side might be a GeneNode, and the right side a
+ProteinNode.
 
-The core idea is that the atomspace can hold sparse matrix data; in a
-certain sense, the atomspace was designed from the get-go to do exactly
+The core idea is that the AtomSpace can hold sparse matrix data; in a
+certain sense, the AtomSpace was designed from the get-go to do exactly
 that. Once you realize that your data can be seen as a kind of matrix,
 you can then apply a variety of generic matrix analysis tools to it.
 
@@ -77,7 +79,7 @@ a Value, some Value, any Value, holding a floating-point number for each
 pair. This number is called `N(x,y)`. This number can represent any
 numeric data at all.  In the prototypical usage, this number is an
 observation count obtained by sensory data flowing in from the outside
-world. It dosn't have to be - the matrix toolset provided here is
+world. It doesn't have to be - the matrix toolset provided here is
 generic, intended to be useful for any AtomSpace data that meets the
 requirement of having a numeric value attached to a collection of pairs.
 
@@ -126,7 +128,7 @@ FAQ
 **Q:** Really, C++ is sooo fast...
 
 **A:** Yes, but since the data is stored in values associated with
-   atoms in the atomspace, adding numbers together is NOT the
+   atoms in the AtomSpace, adding numbers together is NOT the
    bottleneck. Accessing Atom Values *is* the bottleneck. Finding
    a good performance optimization for the atom values framework
    is a lot harder.
@@ -221,14 +223,15 @@ the pairs, and provides methods to get them, and to get the associated
 count (or other numeric value).
 
 The methods that need to be implemented are described in
-`object-api.scm`. Working examples of the base classes can be found in
+`object-api.scm`; a working example is in `eval-pair.scm`.
+Additional working examples of the base classes can be found in
 https://github.com/opencog/learn/tree/master/scm/batch-word-pair.scm
 and in
 https://github.com/opencog/learn/tree/master/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------
-... and some notation to go with it:
+Some notation:
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
@@ -335,6 +338,47 @@ The class also provides the Jaccard similarity
             sum_x max (N(x,y), N(x,z))
 ```
 
+
+Direct sums
+-----------
+If one has a collection of things that can be vectors in two different
+ways, then the direct sum can be used to create a single vector out of
+the two.  It can be thought of as a concatenation of the two vectors,
+appending one to the other to create a single vector.
+
+For example, a word "foo" can be associated with a vector of disjuncts.
+It can also be associated with a vector of connectors that it appears
+in (a "shape"). These are two completely different kinds of vectors;
+all they have in common is that both are associated with the word "foo".
+As matrices, one consists of (word,disjunct) pairs, while the other
+consists of (word,shape) pairs. The left-side of the matrix (the rows
+of the matrix) all have the same type (i.e. words) while the right
+side (the columns) are two different types (and are completely disjoint,
+as sets). Concatenating these two matrices, placing one after the other,
+results in a single matrix where the rows are result of appending the
+rows of the second matrix to the first. If the dimensions of the two
+matrices are N x M and N x K, then the dimensions of the combined matrix
+would be N x (M + K).
+
+The `direct-sum` class will combine these two matrices to provide an
+object that behaves like a single matrix. The left and right basis
+elements will be the set-union of the left and right basis elts of each
+component matrix. By assumption, the types of either the columns or
+the rows are distinct, and so one of these sets is disjoint.  Thus, the
+union is unambiguous; the matrices are either placed side-by-side by
+concatenating rows, or above-below, by concatenating columns. There is
+no "overlap".  The total number of non-zero entries in the combined
+matrix is the sum of the number of non-zero entries in each component.
+
+(Caution: this is not the conventional definition of a direct sum, which
+results in block-diagonal matrix. The conventional definition takes the
+disjoint-union of the indexes (the basis), whereas here, we take the
+set-union of the basis. The set-union makes more sense in the current
+context, because the rows and columns have explicit labels, and it is
+the labels that are important. The set union is obtained from the
+disjoint union by means of a projection.)
+
+
 Working with rows and columns
 -----------------------------
 The `add-tuple-math` class provides methods for applying arbitrary
@@ -344,7 +388,7 @@ element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
 
 The class works by defining a new matrix, whose rows or columns
-are tuples (pairs, triples, etc) of the underlying matix. For example,
+are tuples (pairs, triples, etc) of the underlying matrix. For example,
 one can ask for the matrix entry `(x, [y,z,w])`.  The value returned
 will be `(x, f((x,y), (x,z), (x,w)))` where the user-defined function
 `f` was used to create the `x` row.
@@ -362,8 +406,9 @@ The code designed to work fast for sparse matrices, and can obtain
 eigenvectors in under 20 seconds or so for 15K by 15K matrices with
 100K non-zero entries.
 
-The code is beta, in active development: only a bare minimum of function
-is provided.
+The code is beta; only a bare minimum of function is provided. So far,
+PCA is not terribly interesting for the kinds of graph problems we are
+interested in solving.
 
 
 Data Cuts
@@ -388,15 +433,16 @@ TODO
 ----
 To-do list items.
  * The "star" objects need to be redesigned. They fetch wild-card counts
-   etc. straight out of the atomspace, which can only work if no filtering
-   is applied. But if there are pre-filters, then the returned values are
-   necessarily garbage. Yucko.  Can we fail-safe this for now?
+   and other marginal values straight out of the AtomSpace.  But those
+   marginal values are correct only if no filtering is applied. If there
+   are pre-filters, then the returned marginals are garbage. Yucko.  Can
+   we fail-safe this for now?
 
  * Need to support columns/rows that can be one of several types
-   (e.g. can be WordNodes, or be WordClassNodes)
+   (e.g. can be WordNodes, or be WordClassNodes) This is currently
+   handled in an ad hoc manner.
 
- * Need to provide better support for complex structures (viz. cases
-   where left and right are not immediately underneath a common link).
-   Currently all pairs are necessarily of the form
-     (pair-type (left-type right-type))
-   and we need more complex variations than that.
+ * Need a more consistent/coherent API for interacting with storage.
+   Currently, the `fetch` methods do this, and there is a scattering
+   of other store methods provided in an ad hoc, as-needed basis. All
+   this should be made prettier.

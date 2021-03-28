@@ -43,4 +43,5 @@
 (include-from-path "opencog/matrix/trans-batch.scm")
 (include-from-path "opencog/matrix/filter.scm")
 (include-from-path "opencog/matrix/similarity-api.scm")
+(include-from-path "opencog/matrix/direct-sum.scm")
 (include-from-path "opencog/matrix/thresh-pca.scm")
