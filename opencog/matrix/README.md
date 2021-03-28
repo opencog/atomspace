@@ -52,7 +52,9 @@ which indicates that the word-pair (foo,bar) was observed 6789 times.
 In the general, generic case, we might want to observe not just these
 `PredicateNode "word-pair"` relations, but maybe some other kinds of
 predicates. We are interested, perhaps, not just in `WordNode`'s but
-in relations between, say, `ConceptNodes` and `ContextLink`s.
+in relations between, say, `ConceptNodes` and `ContextLink`s. For
+biology, the left side might be a GeneNode, and the right side a
+ProteinNode.
 
 The core idea is that the atomspace can hold sparse matrix data; in a
 certain sense, the atomspace was designed from the get-go to do exactly
@@ -221,14 +223,15 @@ the pairs, and provides methods to get them, and to get the associated
 count (or other numeric value).
 
 The methods that need to be implemented are described in
-`object-api.scm`. Working examples of the base classes can be found in
+`object-api.scm`; a working example is in `eval-pair.scm`.
+Additional working examples of the base classes can be found in
 https://github.com/opencog/learn/tree/master/scm/batch-word-pair.scm
 and in
 https://github.com/opencog/learn/tree/master/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------
-... and some notation to go with it:
+Some notation:
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
@@ -335,6 +338,32 @@ The class also provides the Jaccard similarity
             sum_x max (N(x,y), N(x,z))
 ```
 
+
+Direct sums
+-----------
+If one has a collection of things that can be vectors in two different
+ways, then the direct sum can be used to create a single vector out of
+the two.  For example, a word "foo" can be associated with a vector of
+disjuncts. It can also be associated with a vector of connectors that
+it appears in (a "shape"). These are two completely different kinds of
+vectors; all they have in common is that both are associated with the
+word "foo". As martices, one consists of (word,disjunct) pairs, while
+the other consists of (word,shape) pairs. The left-side of the matrix
+(the rows of the matrix) all have the same type (i.e. words) while the
+right side (the columns) are two different types (and are completely
+disjoint, as sets).
+
+The `direct-sum` class will combine these two matrices to provide an
+object that behaves like a single matrix. The left and right basis
+elements will be the set-union of the left and right basis elts of each
+component matrix. By assumption, the types of either the left basis or
+the right basis are distinct, and so one of these sets is disjoint.
+Thus, the union is unambiguous; there is no concern with double-counting
+or any kind of "overlap". The total number of non-zero entries in the
+combined matrix is the sum of the number of non-zero entries in each
+component.
+
+
 Working with rows and columns
 -----------------------------
 The `add-tuple-math` class provides methods for applying arbitrary
@@ -362,8 +391,9 @@ The code designed to work fast for sparse matrices, and can obtain
 eigenvectors in under 20 seconds or so for 15K by 15K matrices with
 100K non-zero entries.
 
-The code is beta, in active development: only a bare minimum of function
-is provided.
+The code is beta; only a bare minimum of function is provided. So far,
+PCA is not terribly interesting for the kinds of graph problems we are
+interested in solving.
 
 
 Data Cuts
@@ -388,15 +418,16 @@ TODO
 ----
 To-do list items.
  * The "star" objects need to be redesigned. They fetch wild-card counts
-   etc. straight out of the atomspace, which can only work if no filtering
-   is applied. But if there are pre-filters, then the returned values are
-   necessarily garbage. Yucko.  Can we fail-safe this for now?
+   and other marginal values straight out of the atomspace.  But those
+   marginal values are correct only if no filtering is applied. If there
+   are pre-filters, then the returned marginals are garbage. Yucko.  Can
+   we fail-safe this for now?
 
  * Need to support columns/rows that can be one of several types
-   (e.g. can be WordNodes, or be WordClassNodes)
+   (e.g. can be WordNodes, or be WordClassNodes) This is currently
+   handled in an ad hoc manner.
 
- * Need to provide better support for complex structures (viz. cases
-   where left and right are not immediately underneath a common link).
-   Currently all pairs are necessarily of the form
-     (pair-type (left-type right-type))
-   and we need more complex variations than that.
+ * Need a more consistent/coherent API for interacting with storage.
+   Currently, the `fetch` mathods do this, and there is a scattering
+   of other store methods provided in an ad hoc, as-needed basis. All
+   this should be made prettier.

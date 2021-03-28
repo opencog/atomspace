@@ -120,8 +120,8 @@
 		; ---------------
 		; Name and id of this object.
 		(define (get-name)
-			(string-append "Direct sum of \"" (LLA 'name)
-				 "\" and \"" (LLB 'name) "\""))
+			(string-append "Direct sum of '" (LLA 'name)
+				 "' and '" (LLB 'name) "'"))
 
 		; Caution: other objects, e.g. those that access marginals,
 		; use the id as part of the marginal label. This happens
@@ -288,7 +288,7 @@
 		(define (help)
 			(format #t
 				(string-append
-"This is the `direct sum` of \"~A\" and \"~A\"\n"
+"This is the `direct sum` of '~A' and '~A'\n"
 "It takes the union of the left-basis of both objects, and likewise\n"
 "the right-basis. For more information, say `,d diect-sum` or\n"
 "`,describe direct-sum` at the guile prompt, or just use the 'describe\n"
