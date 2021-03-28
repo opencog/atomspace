@@ -11,6 +11,9 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
+; TODO: this class sort-of works for the simplest case, but is
+; incomplete. Support for duals is missing. It also won't work
+; for pairs that have a non-trivial structure.
 
 (define-public (add-dynamic-stars LLOBJ)
 "
@@ -95,6 +98,8 @@
 		(define (get-right-stars ITEM)
 			(get-incoming ITEM)
 			(stars-obj 'right-stars ITEM))
+
+		; XXX TODO: implement left and right duals.
 
 		;-------------------------------------------
 		; Release (extract) row or column. No specific check is made
