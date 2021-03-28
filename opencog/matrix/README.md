@@ -19,12 +19,12 @@ and so on. Vectors are buried in essentially all neural-net type
 algorithms.  But - this is key: a collection of vectors can be viewed
 as a matrix. Entries in the matrix are (row, column) pairs.
 
-The code in this directory exposes portions of the atomspace as pairs,
+The code in this directory exposes portions of the AtomSpace as pairs,
 or as a matrix, or as a collection of vectors, depending on how you want
 to think about it.  It implements the low-level code for this access,
 so that high-level algorithms can be implemented on top of it: so that
 they can grab that data, do things with it, and write it back.  It
-provides a "window" onto a portion of the atomspace, and everything
+provides a "window" onto a portion of the AtomSpace, and everything
 seen through that "window" looks like vectors, like one big matrix.
 
 That is, the structure of interest are ordered pairs `(x,y)` of atoms
@@ -40,7 +40,7 @@ might do with such a matrix.  That's what the code in this directory
 does.
 
 The prototypical example is that of word-pairs. These are stored in the
-atomspace as
+AtomSpace as
 ```
     EvaluationLink   (count=6789)
         PredicateNode "word-pair"
@@ -56,8 +56,8 @@ in relations between, say, `ConceptNodes` and `ContextLink`s. For
 biology, the left side might be a GeneNode, and the right side a
 ProteinNode.
 
-The core idea is that the atomspace can hold sparse matrix data; in a
-certain sense, the atomspace was designed from the get-go to do exactly
+The core idea is that the AtomSpace can hold sparse matrix data; in a
+certain sense, the AtomSpace was designed from the get-go to do exactly
 that. Once you realize that your data can be seen as a kind of matrix,
 you can then apply a variety of generic matrix analysis tools to it.
 
@@ -79,7 +79,7 @@ a Value, some Value, any Value, holding a floating-point number for each
 pair. This number is called `N(x,y)`. This number can represent any
 numeric data at all.  In the prototypical usage, this number is an
 observation count obtained by sensory data flowing in from the outside
-world. It dosn't have to be - the matrix toolset provided here is
+world. It doesn't have to be - the matrix toolset provided here is
 generic, intended to be useful for any AtomSpace data that meets the
 requirement of having a numeric value attached to a collection of pairs.
 
@@ -128,7 +128,7 @@ FAQ
 **Q:** Really, C++ is sooo fast...
 
 **A:** Yes, but since the data is stored in values associated with
-   atoms in the atomspace, adding numbers together is NOT the
+   atoms in the AtomSpace, adding numbers together is NOT the
    bottleneck. Accessing Atom Values *is* the bottleneck. Finding
    a good performance optimization for the atom values framework
    is a lot harder.
@@ -343,7 +343,7 @@ Direct sums
 -----------
 If one has a collection of things that can be vectors in two different
 ways, then the direct sum can be used to create a single vector out of
-the two.  It can be thought of as a concatentation of the two vectors,
+the two.  It can be thought of as a concatenation of the two vectors,
 appending one to the other to create a single vector.
 
 For example, a word "foo" can be associated with a vector of disjuncts.
@@ -371,7 +371,7 @@ no "overlap".  The total number of non-zero entries in the combined
 matrix is the sum of the number of non-zero entries in each component.
 
 (Caution: this is not the conventional definition of a direct sum, which
-results in block-diagonal matrix. The conventional defintion takes the
+results in block-diagonal matrix. The conventional definition takes the
 disjoint-union of the indexes (the basis), whereas here, we take the
 set-union of the basis. The set-union makes more sense in the current
 context, because the rows and columns have explicit labels, and it is
@@ -388,7 +388,7 @@ element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
 
 The class works by defining a new matrix, whose rows or columns
-are tuples (pairs, triples, etc) of the underlying matix. For example,
+are tuples (pairs, triples, etc) of the underlying matrix. For example,
 one can ask for the matrix entry `(x, [y,z,w])`.  The value returned
 will be `(x, f((x,y), (x,z), (x,w)))` where the user-defined function
 `f` was used to create the `x` row.
@@ -433,7 +433,7 @@ TODO
 ----
 To-do list items.
  * The "star" objects need to be redesigned. They fetch wild-card counts
-   and other marginal values straight out of the atomspace.  But those
+   and other marginal values straight out of the AtomSpace.  But those
    marginal values are correct only if no filtering is applied. If there
    are pre-filters, then the returned marginals are garbage. Yucko.  Can
    we fail-safe this for now?
@@ -443,6 +443,6 @@ To-do list items.
    handled in an ad hoc manner.
 
  * Need a more consistent/coherent API for interacting with storage.
-   Currently, the `fetch` mathods do this, and there is a scattering
+   Currently, the `fetch` methods do this, and there is a scattering
    of other store methods provided in an ad hoc, as-needed basis. All
    this should be made prettier.
