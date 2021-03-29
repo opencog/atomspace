@@ -148,15 +148,11 @@
 			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
 		; ---------------
-		(define start-time (current-time))
-		(define (elapsed-secs)
-			(define diff (- (current-time) start-time))
-			(set! start-time (current-time))
-			diff)
 
 		; Loop over all columns.
 		(define (cache-all-left-entropy)
-			(elapsed-secs)
+			(define elapsed-secs (make-elapsed-secs))
+
 			(maybe-par-for-each cache-left-entropy (star-obj 'right-basis))
 			(format #t "Finished left entropy subtotals in ~A secs\n"
 				(elapsed-secs))
@@ -164,7 +160,8 @@
 
 		; Loop over all rows.
 		(define (cache-all-right-entropy)
-			(elapsed-secs)
+			(define elapsed-secs (make-elapsed-secs))
+
 			(maybe-par-for-each cache-right-entropy (star-obj 'left-basis))
 			(format #t "Finished right entropy subtotals in ~A secs\n"
 				(elapsed-secs))
@@ -172,7 +169,8 @@
 
 		; Loop over all columns.
 		(define (cache-all-left-mi)
-			(elapsed-secs)
+			(define elapsed-secs (make-elapsed-secs))
+
 			(maybe-par-for-each cache-left-mi (star-obj 'right-basis))
 			(format #t "Finished left MI subtotals in ~A secs\n"
 				(elapsed-secs))
@@ -180,7 +178,8 @@
 
 		; Loop over all rows.
 		(define (cache-all-right-mi)
-			(elapsed-secs)
+			(define elapsed-secs (make-elapsed-secs))
+
 			(maybe-par-for-each cache-right-mi (star-obj 'left-basis))
 			(format #t "Finished right MI subtotals in ~A secs\n"
 				(elapsed-secs))

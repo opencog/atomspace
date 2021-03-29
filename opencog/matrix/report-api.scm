@@ -444,11 +444,7 @@
 		)
 
 		(define (cache-left)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+			(define elapsed-secs (make-elapsed-secs))
 
 			; Note that total-support-left should equal
 			; 'total-support-right, up to round-off errors.
@@ -468,11 +464,7 @@
 		)
 
 		(define (cache-right)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+			(define elapsed-secs (make-elapsed-secs))
 
 			; Note that total-support-left should equal
 			; 'total-support-right, up to round-off errors.

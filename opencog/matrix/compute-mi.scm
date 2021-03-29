@@ -386,8 +386,6 @@
 
   'store-pairs - Store the provided list of Atoms.
 "
-	(define elapsed-secs (make-elapsed-secs))
-
 	(define (store-list XLATE all-atoms CNT MSG)
 		(define num-prs (length all-atoms))
 
@@ -401,8 +399,7 @@
 
 		(define (xlate atom) (store-rpt (XLATE atom)))
 
-		; Reset the timer.
-		(elapsed-secs)
+		(define elapsed-secs (make-elapsed-secs))
 
 		(maybe-par-for-each
 			(lambda (atom) (if (not (null? atom)) (xlate atom)))
