@@ -46,8 +46,9 @@
 
 ; ---------------------------------------------------------------------
 
-; Create a timer. The timer returns teh number of elapsed seconds
+; Create a timer. The timer returns the number of elapsed seconds
 ; since the last call to it.
+;
 ; Example usage:
 ; (define elapsed-secs (make-elapsed-secs))
 ; (sleep 2)

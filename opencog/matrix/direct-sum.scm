@@ -82,6 +82,7 @@
 			(r-size 0)
 			(is-from-a? #f)
 			(type-a? #f)
+			(in-base? #f)
 			(disjoint-left #f)
 			(disjoint-right #f)
 		)
@@ -104,14 +105,15 @@
 					(set! disjoint-left djl)
 					(set! disjoint-right djr)
 
+					(set! in-base?
+						(if djl
+							(make-aset-predicate (a-stars 'left-basis))
+							(make-aset-predicate (a-stars 'right-basis))))
+
 					; Return #t if one of the two atoms belongs to the
 					; disjoint basis of LLA
 					(set! type-a?
 						(lambda (L-ATOM R-ATOM)
-							(define in-base?
-								(if djl
-									(make-aset-predicate (a-stars 'left-basis))
-									(make-aset-predicate (a-stars 'right-basis))))
 							(or
 								(and djl (in-base? L-ATOM))
 								(and djr (in-base? R-ATOM)))))
