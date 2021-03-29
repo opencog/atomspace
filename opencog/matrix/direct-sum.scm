@@ -73,7 +73,7 @@
   design of this whole module makes it kind-of hard if not impossible
   for this not to be the case. So this is a reasonable assumption.
 "
-	(let ((id-string (string-append "(" (LLA 'id) "⊕" (LLB 'id) ")"))
+	(let* ((id-string (string-append "(" (LLA 'id) "⊕" (LLB 'id) ")"))
 			(a-stars (add-pair-stars LLA))
 			(b-stars (add-pair-stars LLB))
 			(l-basis '())
@@ -85,6 +85,10 @@
 			(in-base? #f)
 			(disjoint-left #f)
 			(disjoint-right #f)
+			(pred-node (PredicateNode
+				(string-append "*-Direct Sum Wild " id-string)))
+			(left-wnode (AnyNode "left-wild-direct"))
+			(right-wnode (AnyNode "right-wild-direct"))
 		)
 
 		; Initialization
@@ -151,9 +155,12 @@
 
 		; ---------------
 		; Delegate the pair fetching to each subobject.
+		; We must fetch any wild-cards that we created!
 		(define (fetch-all-pairs)
 			(LLA 'fetch-pairs)
-			(LLB 'fetch-pairs))
+			(LLB 'fetch-pairs)
+			(fetch-incoming-by-type pred-node 'EvaluationLink)
+		)
 
 		; ---------------
 
@@ -207,10 +214,7 @@
 				(if (type-a? R-ATOM R-ATOM)
 					(LLA 'left-wildcard R-ATOM)
 					(LLB 'left-wildcard R-ATOM))
-				(EvaluationLink
-					(PredicateNode (string-append "*-Direct Sum Wild " id-string))
-					(AnyNode "left-wild")
-					R-ATOM)))
+				(EvaluationLink pred-node left-wnode R-ATOM)))
 
 		(define (right-wildcard L-ATOM)
 			(init-a)
@@ -218,16 +222,10 @@
 				(if (type-a? L-ATOM L-ATOM)
 					(LLA 'right-wildcard L-ATOM)
 					(LLB 'right-wildcard L-ATOM))
-				(EvaluationLink
-					(PredicateNode (string-append "*-Direct Sum Wild " id-string))
-					L-ATOM
-					(AnyNode "right-wild"))))
+				(EvaluationLink pred-node L-ATOM right-wnode)))
 
 		(define (get-wild-wild)
-			(EvaluationLink
-				(PredicateNode (string-append "*-Direct Sum Wild " id-string))
-				(AnyNode "left-wild")
-				(AnyNode "right-wild")))
+			(EvaluationLink pred-node left-wnode right-wnode))
 
 		; ===================================================
 		; Overloaded stars functions
