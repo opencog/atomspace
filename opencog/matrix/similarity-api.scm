@@ -122,10 +122,10 @@
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		(define (fetch-sim-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(load-atoms-of-type pair-sim-type)
 			(format #t "Elapsed time to load sims: ~A secs\n"
-				(- (current-time) start-time)))
+				(elapsed-secs)))
 
 		; Methods on this class.
 		(lambda (message . args)

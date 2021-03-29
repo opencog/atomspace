@@ -3,7 +3,7 @@
 ;
 ; (Private) Timing and progress report utilities.
 ;
-; Copyright (c) 2013, 2014, 2017, 2018 Linas Vepstas
+; Copyright (c) 2013, 2014, 2017, 2018, 2021 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ;

@@ -151,10 +151,10 @@
 		; fetch-all-pairs -- fetch all counts for atom pairs
 		; from the currently-open database.
 		(define (fetch-all-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(fetch-incoming-set PRED-NODE)
 			(format #t "Elapsed time to load pairs: ~A secs\n"
-				(- (current-time) start-time))
+				(elapsed-secs))
 		)
 
 		; Delete the pairs from the atomspace AND the database.
@@ -162,14 +162,14 @@
 		; deleted; if any are hiding in the database, they will not be
 		; touched.
 		(define (delete-all-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(for-each (lambda (PAIR) (cog-delete-recursive! (gdr PAIR)))
 				(cog-incoming-set PRED-NODE))
 			(cog-delete! PRED-NODE)
 			(cog-delete! ANY-LEFT)
 			(cog-delete! ANY-RIGHT)
 			(format #t "Elapsed time to delete pairs: ~A secs\n"
-				(- (current-time) start-time))
+				(elapsed-secs))
 		)
 
       ;-------------------------------------------
