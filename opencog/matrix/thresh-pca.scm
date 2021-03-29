@@ -135,7 +135,7 @@
 		; Caution: it's time-consuming, because it runs over the
 		; entire left-dimension, when it's invoked.
 		(define (left-norm FVEC)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sumsq
 				(fold
 					(lambda (item sum)
@@ -143,11 +143,11 @@
 						(+ sum (* val val)))
 					0
 					(star-obj 'left-basis)))
-			(format #t "left-norm took ~d seconds\n" (- (current-time) start))
+			(format #t "left-norm took ~d seconds\n" (elapsed-secs))
 			(sqrt sumsq))
 
 		(define (right-norm FVEC)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sumsq
 				(fold
 					(lambda (item sum)
@@ -155,7 +155,7 @@
 						(+ sum (* val val)))
 					0
 					(star-obj 'right-basis)))
-			(format #t "right-norm took ~d seconds\n" (- (current-time) start))
+			(format #t "right-norm took ~d seconds\n" (elapsed-secs))
 			(sqrt sumsq))
 
 		; --------------------
@@ -210,7 +210,7 @@
 		; --------------------
 		; Print the top-K values of the vector
 		(define (print-fvec FVEC K BASIS)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sorted-vals
 				(sort
 					(get-fvec FVEC BASIS)
@@ -219,7 +219,7 @@
 			(for-each
 				(lambda (item) (format #t "~A\n" item))
 				(take sorted-vals K))
-			(format #t "get-fvec took ~d seconds\n" (- (current-time) start))
+			(format #t "get-fvec took ~d seconds\n" (elapse-secs))
 		)
 
 		(define (left-print FVEC K) (print-fvec FVEC K 'left-basis))

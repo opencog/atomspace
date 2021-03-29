@@ -230,14 +230,14 @@
 			(define tot (* 0.5 len (- len 1))) ; number of pairs todo
 			(define done 0)      ; items done
 			(define prevcomp 0)  ; pairs computed
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define prevelap 0.0) ; previous elapsed time.
 
 			(define (do-one-and-rpt ITM-LST)
 				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
-					(let* ((elapsed (- (current-time) start))
+					(let* ((elapsed (elapsed-secs))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(nprdone (- tot togo))  ; number of pairs done
 							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
@@ -285,7 +285,7 @@
 			(define tot (* 0.5 len (- len 1)))
 			(define done 0)
 			(define prevcomp 0)  ; pairs computed
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define prevelap 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
@@ -293,7 +293,7 @@
 				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
-					(let* ((elapsed (- (current-time) start))
+					(let* ((elapsed (elapsed-secs))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(nprdone (- tot togo))
 							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
