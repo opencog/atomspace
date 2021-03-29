@@ -219,7 +219,7 @@
 			(for-each
 				(lambda (item) (format #t "~A\n" item))
 				(take sorted-vals K))
-			(format #t "get-fvec took ~d seconds\n" (elapse-secs))
+			(format #t "get-fvec took ~d seconds\n" (elapsed-secs))
 		)
 
 		(define (left-print FVEC K) (print-fvec FVEC K 'left-basis))
