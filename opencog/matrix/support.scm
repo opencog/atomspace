@@ -487,15 +487,10 @@
 			(define l2 (sqrt (third sums)))
 			(api-obj 'set-right-norms ITEM l0 l1 l2))
 
-		(define start-time 0)
-		(define (elapsed-secs)
-			(define diff (- (current-time) start-time))
-			(set! start-time (current-time))
-			diff)
-
 		(define (all-left-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the right-basis
-			(elapsed-secs)
 			(maybe-par-for-each set-left-marginals (star-obj 'right-basis))
 			(format #t "Finished left norm marginals in ~A secs\n"
 				(elapsed-secs))
@@ -510,8 +505,9 @@
 		)
 
 		(define (all-right-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the left-basis
-			(elapsed-secs)
 			(maybe-par-for-each set-right-marginals (star-obj 'left-basis))
 			(format #t "Finished right norm marginals in ~A secs\n"
 				(elapsed-secs))
