@@ -120,39 +120,6 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; A progress report utility.
-; The wraps the FUNC function, and prints a progress report MSG
-; every WHEN calls to FUNC.
-; FUNC should be the function to be called, taking one argument.
-; MSG should be a string of the form
-;    "Did ~A of ~A in ~A seconds (~A items/sec)\n"
-; WHEN should be how often to print (modulo)
-; TOTAL should be the total number of items to process.
-
-(define (make-progress-rpt FUNC WHEN TOTAL MSG)
-	(let ((func FUNC)
-			(when WHEN)
-			(total TOTAL)
-			(msg MSG)
-			(cnt 0)
-			(start-time 0))
-		(lambda (item)
-			; back-date to avoid divide-by-zero
-			(if (eqv? 0 cnt) (set! start-time (- (current-time) 0.00001)))
-			(func item)
-			(set! cnt (+ 1 cnt))
-			(if (eqv? 0 (modulo cnt when))
-				(let* ((elapsed (- (current-time) start-time))
-						(ilapsed (inexact->exact (round elapsed)))
-						(rate (/ (exact->inexact when) elapsed))
-						(irate (inexact->exact (round rate)))
-					)
-					(format #t msg cnt total ilapsed irate)
-					(set! start-time (current-time))))))
-)
-
-; ---------------------------------------------------------------------
 ;
 (define-public (make-compute-freq LLOBJ)
 "
@@ -309,11 +276,7 @@
 				(define swp (atomic-box-compare-and-swap! ctr old new))
 				(if (= old swp) new (atomic-inc ctr)))
 
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+			(define elapsed-secs (make-elapsed-secs))
 
 			(define cnt-start 0)
 			(define (elapsed-count cnt)
@@ -423,11 +386,7 @@
 
   'store-pairs - Store the provided list of Atoms.
 "
-	(define start-time (current-time))
-	(define (elapsed-secs)
-		(define diff (- (current-time) start-time))
-		(set! start-time (current-time))
-		diff)
+	(define elapsed-secs (make-elapsed-secs))
 
 	(define (store-list XLATE all-atoms CNT MSG)
 		(define num-prs (length all-atoms))
@@ -555,12 +514,8 @@
   open database. If the optional argument DO-STORE is set to #f, then
   the storage will not be performed.
 "
-	(define overall-start-time (current-time))
-	(define start-time (current-time))
-	(define (elapsed-secs)
-		(define diff (- (current-time) start-time))
-		(set! start-time (current-time))
-		diff)
+	(define overall-time (make-elapsed-secs))
+	(define elapsed-secs (make-elapsed-secs))
 
 	; Decorate the object with methods that provide wild-cards.
 	; All the others get to work off of the basis cached by this one.
@@ -666,7 +621,7 @@
 		(display "Done computing totals.\n"))
 
 	(format #t "Finished with MI computations; this took ~5f hours.\n"
-		(/ (- (current-time) overall-start-time) 3600.0))
+		(/ (overall-time) 3600.0))
 )
 
 ; ---------------------------------------------------------------------
