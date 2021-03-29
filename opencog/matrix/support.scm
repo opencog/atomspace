@@ -134,12 +134,11 @@
 
 	;--------
 	(define (error-no-data)
-		(format #t
+		(throw 'no-data 'add-support-api
 			(string-append
-"Error: support-api: There isn't any cached data on ~A\n"
-"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data\n")
-			ID)
-		*unspecified*)
+"There isn't any cached data on " ID "\n"
+"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
+				))
 
 	(define (get-total-support-left)
 		(catch 'wrong-type-arg

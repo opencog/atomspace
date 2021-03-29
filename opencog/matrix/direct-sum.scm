@@ -160,6 +160,7 @@
 			(LLA 'fetch-pairs)
 			(LLB 'fetch-pairs)
 			(fetch-incoming-by-type pred-node 'EvaluationLink)
+			*unspecified*
 		)
 
 		; ---------------
