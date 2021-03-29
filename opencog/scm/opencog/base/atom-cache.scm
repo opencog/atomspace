@@ -101,6 +101,35 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (make-once-predicate)
+"
+  make-once-predicate - create a fast only-once predicate.
+
+  This returns a function - a predicate - that will return #t if the
+  Atom passed as a argument has been seen before. Otherwise it will
+  return #f.  This is useful for performing an operation only once on
+  any given atom.
+
+  Example usage:
+     (define done-already? (make-once-predicate))
+     (done-already? (Concept \"C\"))
+     => #f
+     (done-already? (Concept \"C\"))
+     => #t
+"
+   ; Define the local hash table we will use.
+   (define cache (make-hash-table))
+
+	; Return #t if the atom is already in the hash table.
+	; If its not in the table, put it in.
+   (lambda (ITEM)
+		(define done (hashx-ref atom-hash atom-assoc cache ITEM))
+		(if (not done) (hashx-set! atom-hash atom-assoc cache ITEM #t))
+		done)
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (make-atom-set)
 "
   make-atom-set - Return a function that can hold set of atoms.
