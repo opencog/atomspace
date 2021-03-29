@@ -135,17 +135,17 @@
 		(define (get-left-type)
 			(define at (LLA 'left-type))
 			(define bt (LLB 'left-type))
-			(if (equal? at bt) at (ChoiceLink at bt)))
+			(if (equal? at bt) at (list at bt)))
 
 		(define (get-right-type)
 			(define at (LLA 'right-type))
 			(define bt (LLB 'right-type))
-			(if (equal? at bt) at (ChoiceLink at bt)))
+			(if (equal? at bt) at (list at bt)))
 
 		(define (get-pair-type)
 			(define at (LLA 'pair-type))
 			(define bt (LLB 'pair-type))
-			(if (equal? at bt) at (ChoiceLink at bt)))
+			(if (equal? at bt) at (list at bt)))
 
 		; ---------------
 		; Delegate the pair fetching to each subobject.
