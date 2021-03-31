@@ -219,6 +219,12 @@
 			(if (is-from-a? PAIR)
 				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
 
+		; As above, but the setter.
+		(define (set-count PAIR)
+			(init-a-set)
+			(if (is-from-a? PAIR)
+				(LLA 'set-count PAIR) (LLB 'set-count PAIR)))
+
 		; Delegate wildcards to the two components.
 		; The disjoint is gives us an unambiguous wildcard that
 		; we can delegate to. This works safely because 'filters?
