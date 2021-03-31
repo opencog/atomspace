@@ -629,56 +629,6 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define*-public (add-pair-count-api LLOBJ
-    #:optional (ID (LLOBJ 'id)))
-"
-  add-pair-count-api LLOBJ ID - Extend LLOBJ with count-getters.
-XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
-
-  'left-wild-count ATOM   -- return N(*,y) == sum_x N(x,y)
-  'right-wild-count ATOM  -- return N(x,*) == sum_y N(x,y)
-  'wild-wild-count        -- return N(*,*) == sum_x,y N(x,y)
-"
-	; ----------------------------------------------------
-	; Key under which the count values are stored.
-	(define is-filtered? (and ID (LLOBJ 'filters?)))
-
-	(define cnt-name (string-append "*-CountKey " ID))
-
-	(define cnt-key (PredicateNode cnt-name))
-
-	; Return the count on ATOM. Use the CountTruthValue if not
-	; filtered, else use the CountKey predicate.
-	(define (get-count ATOM)
-		(if (null? ATOM) 0
-			(if is-filtered?
-				(cog-value-ref (cog-value ATOM cnt-key) 0)
-				(cog-tv-count (cog-tv ATOM)))))
-
-	; Get the left wildcard count
-	(define (get-left-wild-count ITEM)
-		(get-count (LLOBJ 'left-wildcard ITEM)))
-
-	; Get the right wildcard count
-	(define (get-right-wild-count ITEM)
-		(get-count (LLOBJ 'right-wildcard ITEM)))
-
-	; Get the wildcard-wildcard count
-	(define (get-wild-wild-count)
-		(get-count (LLOBJ 'wild-wild)))
-
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-wild-count)      (apply get-left-wild-count args))
-			((right-wild-count)     (apply get-right-wild-count args))
-			((wild-wild-count)      (get-wild-wild-count))
-			(else                   (apply LLOBJ (cons message args))))
-	)
-)
-
-; ---------------------------------------------------------------------
-
 (define*-public (add-pair-freq-api LLOBJ
     #:optional (ID (LLOBJ 'id))
     #:key (nothrow #f)
