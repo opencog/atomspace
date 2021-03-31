@@ -62,7 +62,7 @@
 	; Set the grand-total count. Use the CountTruthValue.
 	; Backwards-compatibility method. Remove this someday.
 	(define (set-wild-wild-count CNT)
-		(cog-set-tv! (LLOBJ 'wild-wild) (cog-new-ctv 0 0 CNT)))
+		(cog-set-tv! (LLOBJ 'wild-wild) (CountTruthValue 0 0 CNT)))
 
 	; -----------------
 	(define left-total-key-name
