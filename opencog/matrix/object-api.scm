@@ -184,8 +184,8 @@
 ;              ((get-pair) get-pair)
 ;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
-;              ((pair-left) get-pair-left)
-;              ((pair-right) get-pair-right)
+;              ((left-element) get-pair-left)
+;              ((right-element) get-pair-right)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
@@ -286,8 +286,8 @@
   'make-pair L R - Create the Atom holding the pair, if it does not
       already exist.
 
-  'pair-left P - Return the atom on the left of the pair P.
-  'pair-right P - Return the atom on the right of the pair P.
+  'left-element P - Return the atom on the left of the pair P.
+  'right-element P - Return the atom on the right of the pair P.
       These two together undo what 'make-pair creates.
 
   'left-wildcard R - Return the marginal atom for the column R.

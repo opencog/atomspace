@@ -194,15 +194,15 @@
 		(define (get-pair-left PAIR)
 			(init-a-set)
 			(if (is-from-a? PAIR)
-				(LLA 'pair-left PAIR)
-				(LLB 'pair-left PAIR)))
+				(LLA 'left-element PAIR)
+				(LLB 'left-element PAIR)))
 
 		; Given a pair, find the right element in it.
 		(define (get-pair-right PAIR)
 			(init-a-set)
 			(if (is-from-a? PAIR)
-				(LLA 'pair-right PAIR)
-				(LLB 'pair-right PAIR)))
+				(LLA 'right-element PAIR)
+				(LLB 'right-element PAIR)))
 
 		; Return the count on the pair, if it exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -348,6 +348,8 @@
 				((pair-count)       (apply get-pair-count args))
 				((get-count)        (apply get-count args))
 				((make-pair)        (apply make-pair args))
+				((left-element)     (apply get-pair-left args))
+				((right-element)    (apply get-pair-right args))
 				((left-wildcard)    (apply left-wildcard args))
 				((right-wildcard)   (apply right-wildcard args))
 				((wild-wild)        (get-wild-wild))
