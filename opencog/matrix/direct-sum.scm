@@ -91,8 +91,8 @@
 			(right-wnode (AnyNode "right-wild-direct"))
 		)
 
-		; Initialization
-		(define (init-a)
+		; Initialize predicates for the left-right basis members.
+		(define (init-a-base)
 			(if (not type-a?)
 				; The bases are disjoint, if the number of elts in the
 				; union is equal to the num elts in each part.
@@ -122,6 +122,12 @@
 								(and djl (in-base? L-ATOM))
 								(and djr (in-base? R-ATOM)))))
 			)))
+
+		; Initialize predicate for the members of A
+		(define (init-a-set)
+			(if (not is-from-a?) ; initialize if not initialized.
+				(set! is-from-a?
+					(make-aset-predicate (a-stars 'get-all-elts)))))
 
 		; ---------------
 		; Name and id of this object.
@@ -179,10 +185,24 @@
 		; create wild-cards with this function; it breaks down
 		; utterly for anything else.
 		(define (make-pair L-ATOM R-ATOM)
-			(init-a)
+			(init-a-base)
 			(if (type-a? L-ATOM R-ATOM)
 				(LLA 'make-pair L-ATOM R-ATOM)
 				(LLB 'make-pair L-ATOM R-ATOM)))
+
+		; Given a pair, find the left element in it.
+		(define (get-pair-left PAIR)
+			(init-a-set)
+			(if (is-from-a? PAIR)
+				(LLA 'pair-left PAIR)
+				(LLB 'pair-left PAIR)))
+
+		; Given a pair, find the right element in it.
+		(define (get-pair-right PAIR)
+			(init-a-set)
+			(if (is-from-a? PAIR)
+				(LLA 'pair-right PAIR)
+				(LLB 'pair-right PAIR)))
 
 		; Return the count on the pair, if it exists.
 		(define (get-pair-count L-ATOM R-ATOM)
@@ -195,9 +215,7 @@
 		; Maintains a cache of all atoms in LLA, and uses that
 		; to delegate.
 		(define (get-count PAIR)
-			(if (not is-from-a?) ; initialize if not initialized.
-				(set! is-from-a?
-					(make-aset-predicate (a-stars 'get-all-elts))))
+			(init-a-set)
 			(if (is-from-a? PAIR)
 				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
 
@@ -210,7 +228,7 @@
 		; recycling existing wildcards on the disjoint side.
 		; Otherwise, we can just use custom wildcarrds for both sides.
 		(define (left-wildcard R-ATOM)
-			(init-a)
+			(init-a-base)
 			(if disjoint-right
 				(if (type-a? R-ATOM R-ATOM)
 					(LLA 'left-wildcard R-ATOM)
@@ -218,7 +236,7 @@
 				(EvaluationLink pred-node left-wnode R-ATOM)))
 
 		(define (right-wildcard L-ATOM)
-			(init-a)
+			(init-a-base)
 			(if disjoint-right
 				(if (type-a? L-ATOM L-ATOM)
 					(LLA 'right-wildcard L-ATOM)
