@@ -91,6 +91,8 @@
 
 		; Get the observational count on ATOM.
 		(define (get-count ATOM) (cog-count ATOM))
+		(define (set-count ATOM CNT)
+			(cog-set-tv! ATOM (CountTruthValue 1 0 CNT)))
 
 		(define (get-left-type) LEFT-TYPE)
 		(define (get-right-type) RIGHT-TYPE)
@@ -227,6 +229,7 @@
 					((pair-count)       get-pair-count)
 					((get-pair)         get-pair)
 					((get-count)        get-count)
+					((set-count)        set-count)
 					((make-pair)        make-pair)
 					((left-element)     get-left-element)
 					((right-element)    get-right-element)
