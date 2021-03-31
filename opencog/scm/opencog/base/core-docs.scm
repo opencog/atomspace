@@ -542,7 +542,9 @@
   Example usage:
      (cog-inc-count! (Concept \"Answer\") 42.0)
 
-  See also: cog-inc-value! for a generic version
+  See also:
+      cog-count to fetch the current count
+      cog-inc-value! for a generic version
 ")
 
 (set-procedure-property! cog-inc-value! 'documentation
@@ -572,6 +574,8 @@
  cog-mean ATOM
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-confidence, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-confidence 'documentation
@@ -579,6 +583,8 @@
  cog-confidence ATOM
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-count 'documentation
@@ -586,6 +592,8 @@
  cog-count ATOM
     Return the `count` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
 ")
 
 ; ===================================================================
@@ -603,6 +611,8 @@
        (stv 0.2 0.5)
        guile> (cog-tv? (cog-tv x))
        #t
+
+    See also: cog-set-tv!
 ")
 
 (set-procedure-property! cog-set-tv! 'documentation
@@ -626,6 +636,8 @@
  cog-tv-mean TV
     Return the `mean` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-mean
 ")
 
 (set-procedure-property! cog-tv-confidence 'documentation
@@ -633,6 +645,8 @@
  cog-tv-confidence TV
     Return the `confidence` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-confidence
 ")
 
 (set-procedure-property! cog-tv-count 'documentation
@@ -640,6 +654,8 @@
  cog-tv-count TV
     Return the `count` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-count
 ")
 
 ; ===================================================================
