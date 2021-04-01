@@ -1,6 +1,6 @@
 
-Sheafs and Network Inference
-============================
+Sheafs and Graph/Network Inference
+==================================
 This directory provides two sets of tools. One set, the "sheaves",
 provides a simple and easy API for working with graphs. The second
 toolset extracts graphical relationships from linear data, via an MST

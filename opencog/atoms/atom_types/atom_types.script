@@ -264,14 +264,19 @@ EXECUTE_THREADED_LINK <- ORDERED_LINK
 // The generic structure encoded here would be:
 //
 //     Section
-//         Lexical "something"
+//         Lexical "playing"
 //         ConnectorSeq
 //             Connector
-//                 Lexical "it's"
+//                 Lexical "level"
 //                 ConnectorDir "-"
 //             Connector
-//                 Lexical "curious"
+//                 Lexical "field"
 //                 ConnectorDir "+"
+//
+// The above encodes the phrase "level playing field", indicating that
+// "playing" connects to "level" on the left, and to "field" on the
+// right. In this example, "playing" is the germ; it is at the center
+// of the section.
 //
 // LexicalNode is for anything we keep a table of.
 // It inherits from PredicateNode because it is a kind of predicate:
@@ -294,6 +299,38 @@ CONNECTOR_SEQ <- ORDERED_LINK       // Conjoined sequence of connectors
 CONNECTOR_SET <- UNORDERED_LINK     // Unordered conjunction of connectors
 CONNECTOR_CHOICE <- CHOICE_LINK     // Disjoined set of connectors
 SECTION <- ORDERED_LINK             // Sheaf section, connector set
+
+// Given a Section, the CrossSection reorganizes it so that one of the
+// connectors is now in the center. For the above example, there are two
+// CrossSections, one for each Connector. The CrossSection for "level"
+// is:
+//
+//     CrossSectionLink
+//         LexicalNode "level"
+//         ShapeLink
+//             LexicalNode "playing"
+//             Connector
+//                 AnyNode "$wildcard"
+//                 ConnectorDir "-"
+//             Connector
+//                 Lexical "field"
+//                 ConnectorDir "+"
+//
+// The original germ "playing" is now the head of the shape. The word
+// "level" becomes the germ of the CrossSection. The wild-card indicates
+// which slot the the germ of the CrossSection came from. Thus, the
+// original Section can be obtained from the CrossSection by reinserting
+// the new germ into the wild-card.
+//
+// CrossSections (and Shapes) are useful for computing the similarity
+// between vectors of Sections.
+
+// ShapeLink looks like a "labelled" ConnectorSeq (and so a ConnectorSeq
+// is an "anonymous" shape.)
+SHAPE_LINK <- CONNECTOR_SEQ
+
+// The CrossSection is just a special kind of Section.
+CROSS_SECTION <- SECTION
 
 // ====================================================================
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
