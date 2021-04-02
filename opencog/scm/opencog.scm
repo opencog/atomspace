@@ -1,8 +1,8 @@
 ;
-; Main OpenCog guile module
+; Main Atomese guile module
 ;
 ; When this module is loaded from the guile prompt, it sets up all of
-; the opencog infrastructure, including a default atomspace.
+; the Atomese infrastructure, including a default AtomSpace.
 ;
 ; To use, say this from the guile prompt:
 ; (use-modules (opencog))
