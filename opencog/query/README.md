@@ -803,6 +803,18 @@ it is supported.
 
 TODO
 ----
+ * Performance: If all variables in a clause have been grounded, then
+   there is no need to explore the clause; we only need to plug the
+   variables in, and see if the corresponding link exists. The
+   prototypical case for this is
+```
+      (Get (And
+          (Link (Glob "head") (Foo) (Glob "tail"))
+          (Link (Glob "head") (Bar) (Glob "tail"))))
+```
+   So if the `Foo` clause was matched, the existance of a `Bar` clause
+   can be trivially verified.
+
  * API change: Instead of returning results wrapped in a huge SetLink,
    the results should be returned, linked to some anchor. Huge SetLinks
    suck. There's an open github issue for this: issue #1502.
@@ -824,7 +836,7 @@ TODO
    Can we do something nicer, here?
 
  * AtomSpaces are done wrong. Grounding should always be performed
-   in the same AtomSpace that the BindLink is in.  Thus should be fetched
+   in the same AtomSpace that the BindLink is in.  This should be fetched
    directly from the bind-link, and not passed as a third-party parameter.
 
 Document Status
