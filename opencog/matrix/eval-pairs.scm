@@ -236,7 +236,7 @@
 					((left-wildcard)    get-left-wildcard)
 					((right-wildcard)   get-right-wildcard)
 					((wild-wild)        get-wild-wild)
-					((all-pairs)        get-all-pairs)
+					((get-all-elts)     get-all-pairs)
 					((fetch-pairs)      fetch-all-pairs)
 					((delete-pairs)     delete-all-pairs)
 					((provides)         (lambda (symb) #f))
