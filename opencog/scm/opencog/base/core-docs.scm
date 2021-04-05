@@ -915,6 +915,10 @@
   Example usage:
      (display (cog-count-atoms 'Concept))
   will display a count of all atoms of type 'Concept
+
+  See also:
+     cog-get-atoms -- return a list of all atoms of a given type.
+     cog-report-counts -- return a report of counts of all atom types.
 ")
 
 (set-procedure-property! cog-atomspace 'documentation
