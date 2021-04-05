@@ -116,6 +116,17 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+		; Invalidate all the caches, and pass the clober down to the
+		; stars.
+		(define (clobber)
+			(stars-obj 'clobber)
+			(set! l-basis #f)
+			(set! r-basis #f)
+			(set! l-size 0)
+			(set! r-size 0)
+			(set! all-elts #f)
+		)
+
 		; ---------------
 		; Return only those duals that pass the cutoffs.
 		;
@@ -226,6 +237,7 @@
 				((left-duals)       cache-left-duals)
 				((right-duals)      cache-right-duals)
 				((get-all-elts)     get-all-elts)
+				((clobber)          clobber)
 				(else               (LLOBJ 'provides meth))))
 
 		; -------------
@@ -246,6 +258,7 @@
 				((get-count)        (apply get-count args))
 				((get-pair-count)   (apply get-pair-count args))
 				((get-all-elts)     (get-all-elts))
+				((clobber)          (clobber))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 
