@@ -538,7 +538,11 @@
 			(atomic-box-set! dual-l-hit '())
 			(atomic-box-set! dual-l-miss '())
 			(atomic-box-set! dual-r-hit '())
-			(atomic-box-set! dual-r-miss '()))
+			(atomic-box-set! dual-r-miss '())
+
+			; Pass it on to the LLOBJ, too.
+			(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
+		)
 
 		;-------------------------------------------
 		; Perform a query to find all (non-marginal) matrix entries
@@ -593,7 +597,7 @@
 				(f-left-duals (overload 'left-duals get-left-duals))
 				(f-right-duals (overload 'right-duals get-right-duals))
 				(f-get-all-elts (overload 'get-all-elts get-all-pairs))
-				(f-clobber (overload 'clobber clobber)))
+			)
 
 			;-------------------------------------------
 			; Explain what it is that I provide. The point here is that
@@ -612,7 +616,7 @@
 					((left-duals)       f-left-duals)
 					((right-duals)      f-right-duals)
 					((get-all-elts)     f-get-all-elts)
-					((clobber)          f-clobber)
+					((clobber)          clobber)
 					(else               (LLOBJ 'provides meth))))
 
 			;-------------------------------------------
@@ -628,7 +632,7 @@
 					((left-duals)       (apply f-left-duals args))
 					((right-duals)      (apply f-right-duals args))
 					((get-all-elts)     (f-get-all-elts))
-					((clobber)          (f-clobber))
+					((clobber)          (clobber))
 					((provides)         (apply provides args))
 					((help)             (help))
 					((describe)         (describe))

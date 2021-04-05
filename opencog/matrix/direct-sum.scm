@@ -304,7 +304,9 @@
 		(define (get-all-elts)
 			(append (a-stars 'get-all-elts) (b-stars 'get-all-elts)))
 
-		; XXX Uh, is this needed/correct?
+		; This is needed, as the current code base delete members in
+		; the matrix out from under it. So we use 'clobber to invalidate
+		; counts.
 		(define (clobber)
 			(a-stars 'clobber)
 			(b-stars 'clobber))
