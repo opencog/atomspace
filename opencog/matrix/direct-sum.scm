@@ -309,7 +309,16 @@
 		; counts.
 		(define (clobber)
 			(a-stars 'clobber)
-			(b-stars 'clobber))
+			(b-stars 'clobber)
+
+			(set! l-basis '())
+			(set! r-basis '())
+			(set! l-size 0)
+			(set! r-size 0)
+			(set! is-from-a? #f)
+			(set! type-a? #f)
+			(set! in-base? #f)
+		)
 
 		; -------------
 		(define (help)
