@@ -268,14 +268,6 @@
 			; progress stats
 			(define cnt-pairs (make-atomic-box 0))
 			(define cnt-lefties (make-atomic-box 0))
-
-			; Atomic increment of counter.
-			(define (atomic-inc ctr)
-				(define old (atomic-box-ref ctr))
-				(define new (+ 1 old))
-				(define swp (atomic-box-compare-and-swap! ctr old new))
-				(if (= old swp) new (atomic-inc ctr)))
-
 			(define elapsed-secs (make-elapsed-secs))
 
 			(define cnt-start 0)

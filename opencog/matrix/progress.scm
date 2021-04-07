@@ -1,7 +1,7 @@
 ;
 ; progress.scm
 ;
-; (Private) Timing and progress report utilities.
+; Timing and progress report utilities.
 ;
 ; Copyright (c) 2013, 2014, 2017, 2018, 2021 Linas Vepstas
 ;
@@ -12,35 +12,65 @@
 ; (use-modules (ice-9 threads))
 
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; A progress report utility.
-; This wraps the FUNC function, and prints a progress report MSG
-; every WHEN calls to FUNC.
-; FUNC should be the function to be called, taking one argument.
-; MSG should be a string of the form
-;    "Did ~A of ~A in ~A seconds (~A items/sec)\n"
-; WHEN should be how often to print (modulo)
-; TOTAL should be the total number of items to process.
 
-(define (make-progress-rpt FUNC WHEN TOTAL MSG)
+(define-public (atomic-inc ctr)
+"
+  atomic-inc CTR - increment the atomic-boc CTR by one.
+
+  This is the atomic version of (set! CTR (+ 1 CTR)).
+  This returns the new, incremented value.
+
+  Example usage:
+     (define cnt (make-atomic-box 0))
+     (atomic-inc cnt)
+     (atomic-inc cnt)
+     (format #t "Its ~A\n" (atomic-box-ref cnt))
+"
+	(define old (atomic-box-ref ctr))
+	(define new (+ 1 old))
+	(define swp (atomic-box-compare-and-swap! ctr old new))
+	(if (= old swp) new (atomic-inc ctr))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-progress-rpt FUNC WHEN TOTAL MSG)
+"
+  make-progress-rpt FUNC WHEN TOTAL MSG - print progress report.
+
+  This returns a wrapper around FUNC, so that it calls FUNC whenever
+  it is called.
+
+  Whenever the number of calls is a multiple of WHEN, a progress
+  report is printed, as given by MSG.
+
+  FUNC should be the function to be called, taking one argument.
+  MSG should be a string of the form
+     \"Did ~A of ~A in ~A seconds (~A items/sec)\n\"
+     The first argument is the message; the second is the TOTAL,
+     the third is the elapsed time in seconds, the fourth is the
+     rate, in calls per second.
+  WHEN should be how often to print (modulo)
+  TOTAL should be the total number of items to process; it becomes
+     the second argument to the MSG.
+"
 	(let ((func FUNC)
 			(when WHEN)
 			(total TOTAL)
 			(msg MSG)
-			(cnt 0)
+			(cnt (make-atomic-box 0))
 			(start-time 0))
 		(lambda (item)
 			; back-date to avoid divide-by-zero
 			(if (eqv? 0 cnt) (set! start-time (- (current-time) 0.00001)))
 			(func item)
-			(set! cnt (+ 1 cnt))
-			(if (eqv? 0 (modulo cnt when))
+			(if (eqv? 0 (modulo (atomic-inc cnt) when))
 				(let* ((elapsed (- (current-time) start-time))
 						(ilapsed (inexact->exact (round elapsed)))
 						(rate (/ (exact->inexact when) elapsed))
 						(irate (inexact->exact (round rate)))
 					)
-					(format #t msg cnt total ilapsed irate)
+					(format #t msg (atomic-box-ref cnt) total ilapsed irate)
 					(set! start-time (current-time))))))
 )
 
