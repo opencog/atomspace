@@ -24,7 +24,7 @@
      (define cnt (make-atomic-box 0))
      (atomic-inc cnt)
      (atomic-inc cnt)
-     (format #t "Its ~A\n" (atomic-box-ref cnt))
+     (format #t \"Its ~A\n\" (atomic-box-ref cnt))
 "
 	(define old (atomic-box-ref ctr))
 	(define new (+ 1 old))
