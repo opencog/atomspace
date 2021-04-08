@@ -1,0 +1,250 @@
+/*
+ * tests/persist/sql/multi-driver/MultiDeleteUTest.cxxtest
+ *
+ * Verify that racing atom insertion and deletion does not trigger 
+ * internal errors.
+ *
+ * Copyright (C) 2008, 2009, 2019, 2021 Linas Vepstas <linasvepstas@gmail.com>
+ *
+ * LICENSE:
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cstdio>
+#include <string>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include "mkuri.h"
+
+using namespace opencog;
+
+class MultiDeleteUTest :  public CxxTest::TestSuite
+{
+	private:
+		const char* dbname;
+		const char* username;
+		const char* passwd;
+		std::string uri;
+
+		AtomSpace* as;
+		StorageNodePtr store;
+
+	public:
+
+		MultiDeleteUTest(void);
+
+		~MultiDeleteUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void kill_data(void);
+
+		void friendlyFailMessage()
+		{
+			TS_FAIL("The MultiDeleteUTest failed.\n"
+				"This is probably because you do not have SQL installed\n"
+				"or configured the way that OpenCog expects.\n\n"
+				"SQL persistence is optional for OpenCog, so if you don't\n"
+				"want it or need it, just ignore this test failure.\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
+				"and create/configure the SQL database as described there.\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
+				"to indicate the location of your database. If this is\n"
+				"done correctly, then this test will pass.\n");
+			exit(1);
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void worker(int);
+		void test_add_delete(void);
+};
+
+MultiDeleteUTest:: MultiDeleteUTest(void)
+{
+	try
+	{
+		config().load("atomspace-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.get_message() << std::endl;
+	}
+
+	logger().set_level(Logger::INFO);
+	// logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+
+	try
+	{
+		// Get the database logins & etc from the config file.
+		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		friendlyFailMessage();
+	}
+
+	uri = mkuri("postgres", dbname, username, passwd);
+}
+
+void MultiDeleteUTest::kill_data(void)
+{
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
+	if (!astore->connected())
+	{
+		logger().info("setUp: SQLAtomStorage cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	}
+	logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+
+	// Trash the contents of the database.
+	astore->kill_data();
+
+	// Destructor also logs out of database (avoid warning in DB log file)
+	delete astore;
+}
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void MultiDeleteUTest::setUp(void)
+{
+	kill_data();
+}
+
+void MultiDeleteUTest::tearDown(void)
+{
+	store->close();
+	delete as;
+	kill_data();
+}
+
+// ============================================================
+
+// Add and then remove a bunch of links.
+// This is designed so that multiple threads will be
+// touching the same atoms, adding and removing the same atoms.
+// This should not cause any failures or crashes.
+void MultiDeleteUTest::worker(int thread_id)
+{
+	int nloops = 50000;
+
+	Handle ha(as->add_node(CONCEPT_NODE, "a"));
+
+	for (int i=0; i<nloops; i++)
+	{
+		int id = (thread_id + i) % (thread_id + 7);
+		Handle hb(as->add_node(CONCEPT_NODE, std::to_string(id)));
+		Handle li(as->add_link(LIST_LINK, ha, hb, ha, hb));
+
+		// Store the link.
+		store->store_atom(li);
+		store->barrier();
+	}
+
+	for (int i=0; i<nloops; i++)
+	{
+		int id = (thread_id + i) % (thread_id + 7);
+		Handle hb(as->get_node(CONCEPT_NODE, std::to_string(id)));
+		Handle li(as->get_link(LIST_LINK, ha, hb, ha, hb));
+
+		// If it's already gone, do nothing.
+		if (nullptr == li) continue;
+
+		// Remove the link.
+		store->remove_atom(li);
+		as->extract_atom(li);
+		store->barrier();
+	}
+}
+
+// ============================================================
+
+void MultiDeleteUTest::test_add_delete(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Configuration. On my machine, the locks allow about 2.5 to
+	// 3 threads run in parallel, and of that time, a third is spent
+	// in the kernel (I assume that's kernel time for file-writes.)
+	int n_threads = 10;
+
+	as = new AtomSpace();
+
+	Handle hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	store = StorageNodeCast(hsn);
+
+	try {
+		store->open();
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQL cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->erase();
+
+	printf("Start creating %d threads\n", n_threads);
+
+	std::vector<std::thread> thread_pool;
+	for (int i=0; i < n_threads; i++) {
+		thread_pool.push_back(
+			std::thread(&MultiDeleteUTest::worker, this, i));
+	}
+
+	for (std::thread& t : thread_pool) t.join();
+	printf("Done joining threads\n");
+
+	printf("Final atomspace size=%lu\n", as->get_size());
+	// Verify the atomspace size
+	// TS_ASSERT_EQUALS(as->get_size(), 2);
+
+	store->erase();
+	store->close();
+	store = nullptr;
+	delete as;
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/* ============================= END OF FILE ================= */
