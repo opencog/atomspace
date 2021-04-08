@@ -117,6 +117,12 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 		if (not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 	}
+	catch (const NotFoundException& ex)
+	{
+		// No-op. This happens when atoms stores and atom deletes are
+		// racing with each-other. Provoked by MultiDeleteUTest.
+		// get_uuid() is throwing, because the atom has been deleted.
+	}
 	catch (...)
 	{
 		_async_write_queue_exception = std::current_exception();
