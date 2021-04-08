@@ -150,8 +150,6 @@ void MultiDeleteUTest::setUp(void)
 
 void MultiDeleteUTest::tearDown(void)
 {
-	store->close();
-	delete as;
 	kill_data();
 }
 
@@ -163,7 +161,8 @@ void MultiDeleteUTest::tearDown(void)
 // This should not cause any failures or crashes.
 void MultiDeleteUTest::worker(int thread_id)
 {
-	int nloops = 50000;
+	// int nloops = 50000;
+	int nloops = 2000;
 
 	Handle ha(as->add_node(CONCEPT_NODE, "a"));
 
