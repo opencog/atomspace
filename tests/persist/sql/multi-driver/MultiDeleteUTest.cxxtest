@@ -161,35 +161,39 @@ void MultiDeleteUTest::tearDown(void)
 // This should not cause any failures or crashes.
 void MultiDeleteUTest::worker(int thread_id)
 {
-	// int nloops = 50000;
-	int nloops = 2000;
+	int nloops = 50;
+	// int nsplice = 1000;
+	int nsplice = 50;
 
 	Handle ha(as->add_node(CONCEPT_NODE, "a"));
 
-	for (int i=0; i<nloops; i++)
+	for (int j=0; j<nsplice; j++)
 	{
-		int id = (thread_id + i) % (thread_id + 7);
-		Handle hb(as->add_node(CONCEPT_NODE, std::to_string(id)));
-		Handle li(as->add_link(LIST_LINK, ha, hb, ha, hb));
+		for (int i=0; i<nloops; i++)
+		{
+			int id = (thread_id + i) % (thread_id + 7);
+			Handle hb(as->add_node(CONCEPT_NODE, std::to_string(id)));
+			Handle li(as->add_link(LIST_LINK, ha, hb, ha, hb));
 
-		// Store the link.
-		store->store_atom(li);
-		store->barrier();
-	}
+			// Store the link.
+			store->store_atom(li);
+			store->barrier();
+		}
 
-	for (int i=0; i<nloops; i++)
-	{
-		int id = (thread_id + i) % (thread_id + 7);
-		Handle hb(as->get_node(CONCEPT_NODE, std::to_string(id)));
-		Handle li(as->get_link(LIST_LINK, ha, hb, ha, hb));
+		for (int i=0; i<nloops; i++)
+		{
+			int id = (thread_id + i) % (thread_id + 7);
+			Handle hb(as->get_node(CONCEPT_NODE, std::to_string(id)));
+			Handle li(as->get_link(LIST_LINK, ha, hb, ha, hb));
 
-		// If it's already gone, do nothing.
-		if (nullptr == li) continue;
+			// If it's already gone, do nothing.
+			if (nullptr == li) continue;
 
-		// Remove the link.
-		store->remove_atom(li);
-		as->extract_atom(li);
-		store->barrier();
+			// Remove the link.
+			store->remove_atom(li);
+			as->extract_atom(li);
+			store->barrier();
+		}
 	}
 }
 
