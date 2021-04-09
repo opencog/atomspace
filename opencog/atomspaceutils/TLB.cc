@@ -98,7 +98,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
             _uuid_map.erase(oid);
 
             if (uuid != INVALID_UUID and oid != uuid)
-                throw InvalidParamException(TRACE_INFO,
+                throw AssertionException(TRACE_INFO,
                      "Earlier version of atom has mis-matched UUID!");
 
             // If not given a uuid, now we know what it is.
@@ -126,7 +126,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
         if (_handle_map.end() != pr)
         {
             if (uuid != pr->second)
-                throw InvalidParamException(TRACE_INFO,
+                throw AssertionException(TRACE_INFO,
                      "Atom is already in the TLB, and UUID's don't match!");
 
             // If the atom that we are holding is in the same atomspace
@@ -162,18 +162,6 @@ Handle TLB::getAtom(UUID uuid)
     return pr->second;
 }
 
-void TLB::removeAtom(UUID uuid)
-{
-    if (INVALID_UUID == uuid) return;
-    std::lock_guard<std::mutex> lck(_mtx);
-
-    auto pr = _uuid_map.find(uuid);
-    if (_uuid_map.end() == pr) return;
-
-    _uuid_map.erase(uuid);
-    _handle_map.erase(pr->second);
-}
-
 UUID TLB::getUUID(const Handle& h)
 {
     std::lock_guard<std::mutex> lck(_mtx);
@@ -184,6 +172,31 @@ UUID TLB::getUUID(const Handle& h)
     return INVALID_UUID;
 }
 
+// The two remove functions below erase the uuid from the uuid-to-handle
+// lookup. This means that getAtom() will not be able to find the Atom,
+// which is what we want for somthing deleted. However, we do keep the
+// handle-to-uuid lookup, so that if we ever see this handle again, we
+// recycle the old uuid for it. This is required to correctly process
+// multi-threaded add-delete races. If the same atom is being repeatedly
+// added and deleted (see MultiDeleteUTest), then there are races where
+// the same atom might be assigned two different uuid's, leading to a
+// throw of either of the above exceptions. Avoid this by just keeping
+// the atom-to-uuid map, so we can recycle the uuid next time we see
+// this atom. (Without this, MultiDeleteUTest hits the race once every
+// dozen runs.)
+void TLB::removeAtom(UUID uuid)
+{
+    if (INVALID_UUID == uuid) return;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    auto pr = _uuid_map.find(uuid);
+    if (_uuid_map.end() == pr) return;
+
+    _uuid_map.erase(uuid);
+    // Do NOT remove from the handle_map. See note above.
+    // _handle_map.erase(pr->second);
+}
+
 void TLB::removeAtom(const Handle& h)
 {
     std::lock_guard<std::mutex> lck(_mtx);
@@ -191,6 +204,7 @@ void TLB::removeAtom(const Handle& h)
     if (_handle_map.end() != pr)
     {
         _uuid_map.erase(pr->second);
-        _handle_map.erase(pr);
+        // Do NOT remove from the handle_map. See note above.
+        // _handle_map.erase(pr);
     }
 }
