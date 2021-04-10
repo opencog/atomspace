@@ -58,12 +58,18 @@ github repo. Those systems are heavily reliant on the code here.
 Pairs
 -----
 More generally, there is a generic theme of "pairs of things" that
-are statistically related. These can be pairs of words, they can be
-connector-sets, which are a pair of (word, disjunct), or they can
-any kind of general pairs, correlating events and actions, causes
-and effects, or pair-wise relationships of any sort. A recurring
-problem is to obtain statistics for these pairs, and to manipulate
-them in various ways.
+are statistically related. These can be pairs of vertexes, or the
+paring of (vertex, nearest-neighbors). For example, the vertexes might
+be words of the English language. The nearest-neighbors might be
+N-grams or skip-grams. The vertexes might be proteins or genes,
+and the pairing might be (gene, expressed-protein) or (gene,
+up/down-regulated-reaction). The pairs can be homogenous, such as
+(event, event) pairs, or they can be inhomogenous, such as (cause,
+effect) pairs.
+
+A recurring therem is to obtain and analyze statistics for such pairs,
+to correlate them, to classify them, to discriminate among them. In
+these cases, the pairs have some associated weight, frequency or count.
 
 A common theme in machine learning are "vectors of data": a vector
 of numbers can be associated to some object, and one is interested in
@@ -72,6 +78,18 @@ Analysis (PCA), Singular Value Decomposition (SVD), K-means clustering,
 and so on. Vectors are buried in essentially all neural-net type
 algorithms.  But - this is key: a collection of vectors can be viewed
 as a matrix. Entries in the matrix are (row, column) pairs.
+
+A prototypical example arising in graph theory is the (vertex,
+nearest-neighbors) pairing. Suppose one has a graph consisting of
+many vertexes of type A (or having "feature" A), and many vertexes of
+type B, C, ... The typical classification problem on such a graph is to
+determine if vertexes of type A are similar to the vertexes of type B.
+Each neighborhood of a vertex A is a single component of a vector; all
+such neighborhood defines the vector as a whole. To determine if A and
+B have similar neighborhoods, it suffices to compute either the
+dot-product (cosine distance) of the two vectors, or the mutual
+information between them. In this way, common subgraphs can be fished
+out.
 
 The code in this directory exposes portions of the AtomSpace as pairs,
 or as a matrix, or as a collection of vectors, depending on how you want
