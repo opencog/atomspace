@@ -110,7 +110,10 @@ def get_default_atomspace():
     """
     Get default atomspace
     """
-    return AtomSpace_factory(get_context_atomspace())
+    cdef cAtomSpace * context = get_context_atomspace()
+    if context is NULL:
+        return None
+    return AtomSpace_factory(context)
 
 
 def pop_default_atomspace():
