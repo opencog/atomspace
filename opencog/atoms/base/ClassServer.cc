@@ -51,17 +51,6 @@ ClassServer::ClassServer(const NameServer & nameServer):
 /// by the new one. This allows factories to be installed in any
 /// order, and still have them mirror the correct type hierarchy.
 ///
-/// As currently designed, this will 'work correctly' only if the
-/// full atom type hierarchy has already been set up. If a new atom
-/// subtype is declared, after the factories have been set up, then
-/// the new subtype will not automatically inherit a factory from the
-/// supertype; you will have to write new code for that. XXX FIXME.
-/// So I think that is a bug, as many atom types live outside of the
-/// atomspace. Fixing this bug does NOT require changes to the below;
-/// instead, it requires copying factories whenever the new atom type
-/// is added. That is, whenever the nameserver registers an new type,
-/// it needs to call back here, so that the factories can be copied
-/// over.
 template<typename T>
 void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 {
@@ -105,6 +94,45 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 void ClassServer::addValidator(Type t, Validator* checker)
 {
 	splice(_validator, t, checker);
+}
+
+/// update() -- just copy the parent's factory, if any.
+template<typename T>
+void ClassServer::update(std::vector<T>& methods, Type t)
+{
+	for (Type parent=0; parent < t; parent++)
+	{
+		if (_nameServer.isAncestor(parent, t) and methods[parent])
+			methods[t] = methods[parent];
+	}
+}
+
+/// update_factories() -- install inherited factories.
+/// This is called by NameServer::endTypeDecls(void) whenever some
+/// **other** shared library (not us!) adds some new atom types.
+/// This will then install the inherited factories and checkers
+/// for those types. They are, of course, welcome to add further
+/// factories, after the base type declarations.  (Note that the
+/// base type declarations will be running in the shared library
+/// ctor, so this code is guaranteed to run before anything else.)
+///
+void ClassServer::update_factories()
+{
+	Type nfact = _atomFactory.size();
+	if (0 == nfact) return;  // Do nothing for the base atom types.
+
+	Type ntypes = _nameServer.getNumberOfClasses();
+
+	std::unique_lock<std::mutex> l(factory_mutex);
+
+	_atomFactory.resize(ntypes);
+	_validator.resize(ntypes);
+
+	for (Type t=nfact; t < ntypes; t++)
+	{
+		update(_atomFactory, t);
+		update(_validator, t);
+	}
 }
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
