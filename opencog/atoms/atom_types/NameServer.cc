@@ -212,11 +212,6 @@ TypeSignal& NameServer::typeAddedSignal()
     return _addTypeSignal;
 }
 
-Type NameServer::getNumberOfClasses() const
-{
-    return nTypes;
-}
-
 bool NameServer::isAncestor(Type super, Type sub) const
 {
 	std::lock_guard<std::mutex> l(type_mutex);
