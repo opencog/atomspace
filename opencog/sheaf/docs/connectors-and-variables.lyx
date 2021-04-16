@@ -1385,9 +1385,14 @@ Types and fibers
 \end_layout
 
 \begin_layout Standard
-TODO: talk about quark wave function here and the different types of the
- different indexes on it.
- Follow outline given in email.
+TODO: talk about how vectors can have different indexes of diffferent types
+ on them.
+ A prototypical example are the quark wave functions, which have a color
+ index, a flavor index, a spin index and a momentum index.
+\end_layout
+
+\begin_layout Standard
+Follow outline given in email.
 \end_layout
 
 \begin_layout Section*
@@ -1511,6 +1516,27 @@ well-foundedness
 
  itself.
  Restricted compositionality is more powerful and more general.
+\end_layout
+
+\begin_layout Subsubsection*
+Inductive logic programming
+\end_layout
+
+\begin_layout Standard
+See, for example, the wikipedia article on this.
+ The learning of sheaf structure is a generalization of 
+\begin_inset Quotes eld
+\end_inset
+
+inductive logic programming
+\begin_inset Quotes erd
+\end_inset
+
+, where the specific axioms of logic have been abstracted away.
+ More precisely, logic has an explicit directionaly to all of it's rules
+ and axioms; sheaves can not only capture this directional, but they also
+ provide a non-directional generalization.
+ XXX TODO: this entire paragraph needs to be extended to a full-sized paper.
 \end_layout
 
 \begin_layout Section*
@@ -1865,6 +1891,18 @@ A co-Relational Model of Data for Large Shared Data Banks.
 ACM Databases
 \emph default
  Volume 9, issue 3.
+\end_layout
+
+\begin_layout Itemize
+Wikipedia, 
+\begin_inset Quotes eld
+\end_inset
+
+Inductive Logic Programming
+\begin_inset Quotes erd
+\end_inset
+
+, https://en.wikipedia.org/wiki/Inductive_logic_programming
 \end_layout
 
 \end_body
