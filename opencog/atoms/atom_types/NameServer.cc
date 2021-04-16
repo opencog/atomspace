@@ -33,6 +33,7 @@
 
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/util/exceptions.h>
 
@@ -91,6 +92,8 @@ void NameServer::endTypeDecls(void)
 	// Valid types are odd-numbered.
 	_tmod++;
 	_module_mutex.unlock();
+
+	classserver().update_factories();
 }
 
 Type NameServer::declType(const Type parent, const std::string& name)
