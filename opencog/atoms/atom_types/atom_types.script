@@ -896,7 +896,7 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 // These are currently a poorly-defined and a messy hash. They could be
 // defined to return (crisp) truth values, or to return satsifying sets.
 //
-// -- PLN uses ForAllLink, but fails to quote it qhen giving it to the
+// -- PLN uses ForAllLink, but fails to quote it when giving it to the
 //    pattern engine. A unit test fails, if we make it actually
 //    evaluatable.
 //
