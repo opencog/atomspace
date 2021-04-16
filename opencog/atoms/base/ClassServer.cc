@@ -36,9 +36,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/Value.h>
 
-//#define DPRINTF printf
-#define DPRINTF(...)
-
 using namespace opencog;
 
 ClassServer::ClassServer(const NameServer & nameServer):
@@ -56,7 +53,7 @@ ClassServer::ClassServer(const NameServer & nameServer):
 ///
 /// As currently designed, this will 'work correctly' only if the
 /// full atom type hierarchy has already been set up. If a new atom
-/// subtype is delcared, after the factories have been set up, then
+/// subtype is declared, after the factories have been set up, then
 /// the new subtype will not automatically inherit a factory from the
 /// supertype; you will have to write new code for that. XXX FIXME.
 /// So I think that is a bug, as many atom types live outside of the
@@ -122,12 +119,14 @@ ClassServer::Validator* ClassServer::getValidator(Type t) const
 
 Handle ClassServer::factory(const Handle& h) const
 {
-	Handle result = h;
+	Handle result;
 
 	// If there is a factory, then use it.
 	AtomFactory* fact = getFactory(h->get_type());
 	if (fact)
 		result = (*fact)(h);
+	else
+		result = h;
 
 	/* Look to see if we have static typechecking to do */
 	Validator* checker =
