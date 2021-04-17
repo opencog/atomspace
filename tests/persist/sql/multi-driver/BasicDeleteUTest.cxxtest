@@ -210,7 +210,7 @@ void BasicDeleteUTest::test_recursive(void)
 	TS_ASSERT_EQUALS(as->get_size(), 5);
 
 	// Remove (Concept "a"). Since this appears twice, recursion
-	// will hit it twice, in stange ways, and maybe crash.
+	// will hit it twice, in strange ways, and maybe crash.
 	store->remove_atom(ha, true);
 	as->extract_atom(ha);
 
