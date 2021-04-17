@@ -115,11 +115,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	{
 		dbh = doGetLink(h->get_type(), h->getOutgoingSet());
 	}
-	// If it was found in the database, then the TLB got updated.
-	if (dbh) return _tlbuf.getUUID(h);
 
-	// If it was not found in the database, then say so.
-	return TLB::INVALID_UUID;
+	// If it was found in the database, then the TLB got updated.
+	// If it was not found in the databse, we might still be
+	// recreating a previously known atom.
+	return _tlbuf.getUUID(h);
 }
 
 /// Return the UUID of the handle, if it is known, else throw exception.
