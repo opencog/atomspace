@@ -122,6 +122,7 @@ public:
     }
     void removeAtom(const Handle&);
     void removeAtom(UUID);
+    void purgeAtom(UUID);
 };
 
 } // namespace opencog

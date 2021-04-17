@@ -97,7 +97,8 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Optimize for bulk stores. That is, we know for a fact that
 	// the database cannot possibly contain this atom yet, so do
@@ -114,11 +115,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	{
 		dbh = doGetLink(h->get_type(), h->getOutgoingSet());
 	}
-	// If it was found in the database, then the TLB got updated.
-	if (dbh) return _tlbuf.getUUID(h);
 
-	// If it was not found in the database, then say so.
-	return TLB::INVALID_UUID;
+	// If it was found in the database, then the TLB got updated.
+	// If it was not found, we might still be recreating a
+	// a previously known atom, and so should reuse that uuid.
+	return _tlbuf.getUUID(h);
 }
 
 /// Return the UUID of the handle, if it is known, else throw exception.
@@ -127,7 +128,8 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 UUID SQLAtomStorage::get_uuid(const Handle& h)
 {
 	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Throw a silent exception; don't clutter log-files with this!
 	throw NotFoundException(TRACE_INFO, "");

@@ -142,7 +142,9 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 bool SQLAtomStorage::not_yet_stored(const Handle& h)
 {
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
-	return TLB::INVALID_UUID == _tlbuf.getUUID(h);
+	UUID uuid = _tlbuf.getUUID(h);
+	return (TLB::INVALID_UUID == uuid) and
+	       (Handle::UNDEFINED == _tlbuf.getAtom(uuid));
 }
 
 /**
@@ -157,10 +159,11 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::unique_lock<std::mutex> create_lock(_store_mutex);
 
 	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return;
 
-	// If it was not found, then issue a brand-spankin new UUID.
-	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	// Make sure the Atom in the the TLB.
+	uuid = _tlbuf.addAtom(h, uuid);
 
 	std::string uuidbuff = std::to_string(uuid);
 
@@ -271,7 +274,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	}
 	catch (const SilentException& ex)
 	{
-		_tlbuf.removeAtom(uuid);
+		_tlbuf.purgeAtom(uuid);
 		create_lock.unlock();
 		do_store_single_atom(h, aheight);
 	}
