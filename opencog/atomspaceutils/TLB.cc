@@ -172,18 +172,18 @@ UUID TLB::getUUID(const Handle& h)
     return INVALID_UUID;
 }
 
-// The two remove functions below erase the uuid from the uuid-to-handle
-// lookup. This means that getAtom() will not be able to find the Atom,
-// which is what we want for something deleted. However, we do keep the
-// handle-to-uuid lookup, so that if we ever see this handle again, we
-// recycle the old uuid for it. This is required to correctly process
-// multi-threaded add-delete races. If the same atom is being repeatedly
-// added and deleted (see MultiDeleteUTest), then there are races where
-// the same atom might be assigned two different uuid's, leading to a
-// throw of either of the above exceptions. Avoid this by just keeping
-// the atom-to-uuid map, so we can recycle the uuid next time we see
-// this atom. (Without this, MultiDeleteUTest hits the race once every
-// dozen runs.)
+/// The two remove functions below erase the uuid from the uuid-to-handle
+/// lookup. This means that getAtom() will not be able to find the Atom,
+/// which is what we want for something deleted. However, we do keep the
+/// handle-to-uuid lookup, so that if we ever see this handle again, we
+/// recycle the old uuid for it. This is required to correctly process
+/// multi-threaded add-delete races. If the same atom is being repeatedly
+/// added and deleted (see MultiDeleteUTest), then there are races where
+/// the same atom might be assigned two different uuid's, leading to a
+/// throw of either of the above exceptions. Avoid this by just keeping
+/// the atom-to-uuid map, so we can recycle the uuid next time we see
+/// this atom. (Without this, MultiDeleteUTest hits the race once every
+/// dozen runs.)
 void TLB::removeAtom(UUID uuid)
 {
     if (INVALID_UUID == uuid) return;
@@ -207,4 +207,21 @@ void TLB::removeAtom(const Handle& h)
         // Do NOT remove from the handle_map. See note above.
         // _handle_map.erase(pr);
     }
+}
+
+/// Much like removeAtom(), except all traces of the atom are removed,
+/// allowing corrected UUID assignments to be performed.  This is
+/// used in managing races with atom insertion, where two distinct
+/// UUID's might get issued for the same atom. This method is guaranteed
+/// to clobber the UUID.
+void TLB::purgeAtom(UUID uuid)
+{
+    if (INVALID_UUID == uuid) return;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    auto pr = _uuid_map.find(uuid);
+    if (_uuid_map.end() == pr) return;
+
+    _uuid_map.erase(uuid);
+    _handle_map.erase(pr->second);
 }

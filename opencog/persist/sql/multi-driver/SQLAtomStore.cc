@@ -275,7 +275,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	}
 	catch (const SilentException& ex)
 	{
-		_tlbuf.removeAtom(uuid);
+		_tlbuf.purgeAtom(uuid);
 		create_lock.unlock();
 		do_store_single_atom(h, aheight);
 	}
