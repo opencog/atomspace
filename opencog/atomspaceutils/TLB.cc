@@ -174,7 +174,7 @@ UUID TLB::getUUID(const Handle& h)
 
 // The two remove functions below erase the uuid from the uuid-to-handle
 // lookup. This means that getAtom() will not be able to find the Atom,
-// which is what we want for somthing deleted. However, we do keep the
+// which is what we want for something deleted. However, we do keep the
 // handle-to-uuid lookup, so that if we ever see this handle again, we
 // recycle the old uuid for it. This is required to correctly process
 // multi-threaded add-delete races. If the same atom is being repeatedly
