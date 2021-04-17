@@ -97,7 +97,8 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Optimize for bulk stores. That is, we know for a fact that
 	// the database cannot possibly contain this atom yet, so do
@@ -127,7 +128,8 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 UUID SQLAtomStorage::get_uuid(const Handle& h)
 {
 	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Throw a silent exception; don't clutter log-files with this!
 	throw NotFoundException(TRACE_INFO, "");
