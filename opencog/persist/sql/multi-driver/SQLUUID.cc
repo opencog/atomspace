@@ -117,8 +117,8 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	}
 
 	// If it was found in the database, then the TLB got updated.
-	// If it was not found in the databse, we might still be
-	// recreating a previously known atom.
+	// If it was not found, we might still be recreating a
+	// a previously known atom, and so should reuse that uuid.
 	return _tlbuf.getUUID(h);
 }
 
