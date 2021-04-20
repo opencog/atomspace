@@ -1,0 +1,76 @@
+/*
+ * tests/atoms/base/FactoryUTest.cxxtest
+ *
+ * Copyright (c) 2020 OpenCog Foundation
+ * All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/Variables.h>
+#include <opencog/spacetime/types/atom_types.h>
+#include <opencog/pln/types/atom_types.h>
+
+using namespace std;
+using namespace opencog;
+
+class FactoryUTest : public CxxTest::TestSuite
+{
+public:
+	void testFactory(void);
+};
+
+#define an as->add_node
+#define al as->add_link
+
+void FactoryUTest::testFactory(void)
+{
+	AtomSpace* as = new AtomSpace();
+
+	Handle t_intvl = al(TIME_INTERVAL_LINK,
+	                    an(TIME_NODE, "1"),
+	                    an(TIME_NODE, "2"));
+	Handle pis = al(PREDICTIVE_IMPLICATION_SCOPE_LINK,
+	                an(VARIABLE_NODE, "$X"),
+	                t_intvl,
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "P"),
+	                   an(VARIABLE_NODE, "$X")),
+	                   an(PREDICATE_NODE, "Q"));
+
+	printf("pis=%s\n", pis->to_string().c_str());
+
+	TSM_ASSERT("Expecting a ScopeLink",
+		nameserver().isA(PREDICTIVE_IMPLICATION_SCOPE_LINK, SCOPE_LINK));
+
+	ScopeLinkPtr scp = ScopeLinkCast(pis);
+	printf("scope=%p\n", scp.operator->());
+
+	Variables result = ScopeLinkCast(pis)->get_variables();
+	Variables exp = Variables(an(VARIABLE_NODE, "$X"));
+
+	std::cout << "exp : " << oc_to_string(exp, empty_string)
+	          << std::endl
+	          << std::endl
+	          << "result : " << oc_to_string(result, empty_string)
+	          << std::endl
+	          << std::endl;
+
+	TS_ASSERT_EQUALS(result, exp);
+}
