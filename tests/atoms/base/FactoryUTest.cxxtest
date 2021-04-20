@@ -24,8 +24,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/Variables.h>
-#include <opencog/spacetime/types/atom_types.h>
-#include <opencog/pln/types/atom_types.h>
+
+#include <tests/atoms/base/test_types.h>
 
 using namespace std;
 using namespace opencog;
