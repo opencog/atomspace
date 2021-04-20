@@ -1,7 +1,7 @@
 /**
  * TestTypes.cc
  *
- * Atom Types used during for unit testing.
+ * Atom Types needed unit testing.
  *
  * Copyright (c) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  */

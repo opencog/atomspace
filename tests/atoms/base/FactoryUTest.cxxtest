@@ -41,6 +41,13 @@ public:
 #define an as->add_node
 #define al as->add_link
 
+// The PredictiveImplicationScopeLink inherits from ScopeLink,
+// and therefore, it should be possible to cast it to a ScopeLink.
+// This tests that.  The tricky part here is that it is not defined
+// in the base atom types library, but in another shared library,
+// loaded after the basic types library has been loaded. This second
+// shared lib should inherit any factories defined in earlier shared
+// libs. This tests the code in opencog/atomspace#2809
 void FactoryUTest::testFactory(void)
 {
 	AtomSpace* as = new AtomSpace();
