@@ -2505,7 +2505,7 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 		// Usually, this is not needed; however, if the variable
 		// is in the outgoing set of the clause, then the grounding
 		// won't have been recorded yet, and so we have to do it here.
-		// There's no unit test for this (as of March 2021)
+		// Tested by `CacheHitUTest`.
 		const HandleSeq& clvars(_pat->clause_variables.at(pclause));
 		size_t cvsz = clvars.size();
 		for (size_t iv=0; iv<cvsz; iv++)
