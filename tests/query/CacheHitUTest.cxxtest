@@ -90,6 +90,7 @@ void CacheHitUTest::add_cruft(char junk)
 
 /*
  * Verify that a cache hit does not result in a crash.
+ *
  * This bug can be hard to trigger, as it depends on the order
  * in which the search is performed, and the search order depends
  * on how the atoms lay out in RAM. So the actual test strategy
@@ -97,12 +98,16 @@ void CacheHitUTest::add_cruft(char junk)
  * to scramble the memory order, and then run the test. This
  * eventually results in a core dump, when the patch in pull req
  * opencog/atomspace#2803 is not applied.
+ *
+ * There are three places where the search can start, and so,
+ * if memory really is randomized, it should not take more than
+ * about 6-8 iterations of the loop before the bug is hit.
  */
 void CacheHitUTest::test_hit(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	for (char c='0'; c<'z'; c++)
+	for (char c='0'; c<'Z'; c++)
 	{
 		printf("Start iteration %c\n", c);
 		as->clear();
