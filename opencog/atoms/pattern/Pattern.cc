@@ -29,7 +29,7 @@ std::string Pattern::to_string(const std::string& indent) const
 	ss << indent << "Pattern: " << redex_name << std::endl;
 
 	if (body)
-		ss << indent << "PatternLink with body"
+		ss << indent << "PatternLink with body: "
 		   << body->to_short_string() << std::endl;
 	else
 		ss << indent << "No pattern body" << std::endl;

@@ -1,0 +1,146 @@
+/*
+ * tests/query/CacheHitUTest.cxxtest
+ *
+ * Copyright (C) 2014, 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+#include "imply.h"
+
+using namespace opencog;
+
+class CacheHitUTest: public CxxTest::TestSuite
+{
+private:
+		AtomSpace *as;
+		SchemeEval* eval;
+
+public:
+	CacheHitUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec))");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	~CacheHitUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void add_cruft(char);
+	void test_hit(void);
+};
+
+void CacheHitUTest::tearDown(void)
+{
+}
+
+void CacheHitUTest::setUp(void)
+{
+}
+
+void CacheHitUTest::add_cruft(char junk)
+{
+	char buf[8192];
+	snprintf(buf, 8192,
+"  (EvaluationLink"
+"    (PredicateNode \"*-word-shape pair-*\")"
+"    (ConceptNode \"d\")"
+"    (EvaluationLink"
+"      (PredicateNode \"*-shape-*\")"
+"      (ConceptNode \"%c\")"
+"      (Connector (ConceptNode \"e\") (ConnectorDir \"-\"))"
+"      (Connector (ConceptNode \"j\") (ConnectorDir \"+\"))"
+"      (Connector (ConceptNode \"g\") (ConnectorDir \"+\"))"
+"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"+\"))"
+"      (Connector (ConceptNode \"!\") (ConnectorDir \"+\"))"
+"    ))", junk);
+	eval->eval(buf);
+}
+
+/*
+ * Verify cache hit.
+ */
+void CacheHitUTest::test_hit(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	for (char c='0'; c<'z'; c++)
+	{
+printf("duuude workin on %c\n", c);
+		as->clear();
+		eval->eval(
+"  (EvaluationLink"
+"    (PredicateNode \"*-word-shape pair-*\")"
+"    (Concept \"b\")"
+"    (EvaluationLink"
+"      (PredicateNode \"*-shape-*\")"
+"      (Concept \"b\")"
+"      (Connector (Concept \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
+"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
+"      (Connector (Concept \"a\") (ConnectorDir \"+\"))))"
+""
+""
+"(define var (Variable \"$api-right-star\"))"
+"(define term "
+"(EvaluationLink"
+"  (PredicateNode \"*-word-shape pair-*\")"
+"  (ConceptNode \"b\")"
+"  (VariableNode \"$api-right-star\")))"
+""
+""
+"(define b (Bind (TypedVariable var (Type \"Evaluation\")) term term))"
+		);
+
+		for (char j='0'; j<c; j++)
+			add_cruft(j);
+
+		Handle crash = eval->eval_h("(cog-execute! b)");
+
+		std::cout << "Answer: " << crash->to_string() << std::endl;
+		TS_ASSERT_EQUALS(1, crash->get_arity());
+
+#if 0
+	// Create the expected answer, and compare
+	Handle expected = eval->eval_h(
+	"(SetLink "
+	"   (EvaluationLink "
+	"      (PredicateNode \"power\")"
+	"      (ListLink "
+	"         (ConceptNode \"Ken\")"
+	"         (NumberNode 1000))))");
+#endif
+	}
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
