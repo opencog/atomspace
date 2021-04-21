@@ -1,7 +1,7 @@
 /*
  * tests/query/CacheHitUTest.cxxtest
  *
- * Copyright (C) 2014, 2015 Linas Vepstas
+ * Copyright (C) 2014, 2015, 2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,7 +89,14 @@ void CacheHitUTest::add_cruft(char junk)
 }
 
 /*
- * Verify cache hit.
+ * Verify that a cache hit does not result in a crash.
+ * This bug can be hard to trigger, as it depends on the order
+ * in which the search is performed, and the search order depends
+ * on how the atoms lay out in RAM. So the actual test strategy
+ * is to loop: in each loop, clear the atomspace, add some cruft
+ * to scramble the memory order, and then run the test. This
+ * eventually results in a core dump, when the patch in pull req
+ * opencog/atomspace#2803 is not applied.
  */
 void CacheHitUTest::test_hit(void)
 {
@@ -97,29 +104,27 @@ void CacheHitUTest::test_hit(void)
 
 	for (char c='0'; c<'z'; c++)
 	{
-printf("duuude workin on %c\n", c);
+		printf("Start iteration %c\n", c);
 		as->clear();
 		eval->eval(
-"  (EvaluationLink"
-"    (PredicateNode \"*-word-shape pair-*\")"
-"    (Concept \"b\")"
-"    (EvaluationLink"
-"      (PredicateNode \"*-shape-*\")"
-"      (Concept \"b\")"
-"      (Connector (Concept \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
-"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
-"      (Connector (Concept \"a\") (ConnectorDir \"+\"))))"
-""
-""
-"(define var (Variable \"$api-right-star\"))"
-"(define term "
-"(EvaluationLink"
-"  (PredicateNode \"*-word-shape pair-*\")"
-"  (ConceptNode \"b\")"
-"  (VariableNode \"$api-right-star\")))"
-""
-""
-"(define b (Bind (TypedVariable var (Type \"Evaluation\")) term term))"
+		"  (EvaluationLink"
+		"    (PredicateNode \"*-word-shape pair-*\")"
+		"    (Concept \"b\")"
+		"    (EvaluationLink"
+		"      (PredicateNode \"*-shape-*\")"
+		"      (Concept \"b\")"
+		"      (Connector (Concept \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
+		"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
+		"      (Connector (Concept \"a\") (ConnectorDir \"+\"))))"
+		""
+		"  (define var (Variable \"$api-right-star\"))"
+		"  (define term "
+		"    (EvaluationLink"
+		"      (PredicateNode \"*-word-shape pair-*\")"
+		"      (ConceptNode \"b\")"
+		"      (VariableNode \"$api-right-star\")))"
+		""
+		"  (define b (Bind (TypedVariable var (Type \"Evaluation\")) term term))"
 		);
 
 		for (char j='0'; j<c; j++)
@@ -127,19 +132,23 @@ printf("duuude workin on %c\n", c);
 
 		Handle crash = eval->eval_h("(cog-execute! b)");
 
-		std::cout << "Answer: " << crash->to_string() << std::endl;
+		// std::cout << "Answer: " << crash->to_string() << std::endl;
 		TS_ASSERT_EQUALS(1, crash->get_arity());
 
-#if 0
-	// Create the expected answer, and compare
-	Handle expected = eval->eval_h(
-	"(SetLink "
-	"   (EvaluationLink "
-	"      (PredicateNode \"power\")"
-	"      (ListLink "
-	"         (ConceptNode \"Ken\")"
-	"         (NumberNode 1000))))");
-#endif
+		// Create the expected answer, and compare
+		Handle expected = eval->eval_h(
+		"(SetLink"
+		"  (EvaluationLink"
+		"    (PredicateNode \"*-word-shape pair-*\")"
+		"    (ConceptNode \"b\")"
+		"    (EvaluationLink"
+		"      (PredicateNode \"*-shape-*\")"
+		"      (ConceptNode \"b\")"
+		"      (Connector (ConceptNode \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
+		"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
+		"      (Connector (ConceptNode \"a\") (ConnectorDir \"+\")))))"
+		);
+		TS_ASSERT_EQUALS(expected, crash);
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
