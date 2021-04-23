@@ -87,8 +87,8 @@
 			(disjoint-right #f)
 			(pred-node (PredicateNode
 				(string-append "*-Direct Sum Wild " id-string)))
-			(left-wnode (AnyNode "left-wild-direct"))
-			(right-wnode (AnyNode "right-wild-direct"))
+			(left-wnode (AnyNode "left-wild-direct-sum"))
+			(right-wnode (AnyNode "right-wild-direct-sum"))
 		)
 
 		; Initialize predicates for the left-right basis members.
@@ -226,13 +226,13 @@
 				(LLA 'set-count PAIR) (LLB 'set-count PAIR)))
 
 		; Delegate wildcards to the two components.
-		; The disjoint is gives us an unambiguous wildcard that
+		; The disjoint side gives us an unambiguous wildcard that
 		; we can delegate to. This works safely because 'filters?
 		; is #t and so marginals are labelled with the 'id of this
 		; object. The non-disjoint side requires a custom wildcard.
 		; The hope here is that we save a little bit of RAM by
 		; recycling existing wildcards on the disjoint side.
-		; Otherwise, we can just use custom wildcarrds for both sides.
+		; Otherwise, we can just use custom wildcards for both sides.
 		(define (left-wildcard R-ATOM)
 			(init-a-base)
 			(if disjoint-right
@@ -243,7 +243,7 @@
 
 		(define (right-wildcard L-ATOM)
 			(init-a-base)
-			(if disjoint-right
+			(if disjoint-left
 				(if (type-a? L-ATOM L-ATOM)
 					(LLA 'right-wildcard L-ATOM)
 					(LLB 'right-wildcard L-ATOM))
