@@ -181,13 +181,14 @@
 				(lambda (rght) (LLOBJ 'get-pair LEFTY rght))
 				TUPLE))
 
-		(define (get-right-tuple RIGHTY TUPLE)
+		(define (get-right-tuple ROW-TUPLE COL)
 			(map
-				(lambda (left) (LLOBJ 'get-pair left RIGHTY))
-				TUPLE))
+				(lambda (row) (LLOBJ 'get-pair row COL))
+				ROW-TUPLE))
 
 		; ---------------
 		; Expects TUPLE to be a scheme list of items of 'right-type.
+		; That is, TUPLE is a list of columns.
 		; Returns a list of tuples of the left-stars appropriate for
 		; that TUPLE.  The left-star tuples are "aligned", so that
 		; that within one tuple, all pairs have exactly the same
@@ -215,16 +216,17 @@
 		; will be the typical case: the intersection will be typically
 		; non-empty, and the union will typically be strictly larger.
 
-		(define (left-star-union TUPLE)
+		(define (left-star-union COL-TUPLE)
 			(map
-				(lambda (lefty) (get-left-tuple lefty TUPLE))
-				(get-left-union TUPLE)))
+				(lambda (lefty) (get-left-tuple lefty COL-TUPLE))
+				(get-left-union COL-TUPLE)))
 
-		; Same as above, but for the right
-		(define (right-star-union TUPLE)
+		; Same as above, but for the right. ROW-TUPLE is a list of rows.
+		; `get-right-union` returns a set of columns.
+		(define (right-star-union ROW-TUPLE)
 			(map
-				(lambda (righty) (get-right-tuple righty TUPLE))
-				(get-right-union TUPLE)))
+				(lambda (col) (get-right-tuple ROW-TUPLE col))
+				(get-right-union ROW-TUPLE)))
 
 		; ---------------
 		; Given a TUPLE of pairs, return a single number.
