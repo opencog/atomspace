@@ -212,7 +212,7 @@ public:
      *
      * @return The total number of classes in the system.
      */
-    Type getNumberOfClasses() const;
+    Type getNumberOfClasses() const { return nTypes; }
 
     /**
      * Returns whether a given class is assignable from another.

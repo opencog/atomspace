@@ -25,6 +25,8 @@
 	store-atom
 	store-value
 	load-atoms-of-type
+	cog-delete!
+	cog-delete-recursive!
 	barrier
 	load-atomspace
 	store-atomspace)
@@ -352,6 +354,60 @@
 				(cog-incoming-set ATOM))
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+; Renamed functions
+(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
+(define-public (cog-delete-recursive ATOM)
+	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
+
+
+(define*-public (cog-delete! ATOM #:optional (STORAGE #f))
+"
+ cog-delete! ATOM [STORAGE]
+    Remove the indicated ATOM, but only if it has no incoming links.
+    If it has incoming links, the remove fails.  If storage is attached,
+    the ATOM is also removed from the storage.
+
+    Returns #t if the atom was removed, else returns #f if not removed.
+
+    Use cog-extract! to remove from the AtomSpace only, leaving storage
+    unaffected.
+
+    Use cog-delete-recursive! to force removal of this atom, together
+    with any links that might be holding this atom.
+
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
+
+    Example usage:
+       (cog-delete! (Concept \"foo\"))
+       (cog-delete! (Concept \"foo\")
+              (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-delete! (Concept \"foo\")
+              (PostgresStorage \"postgres://USER:PASSWORD@HOST/DBNAME\"))
+       (cog-delete! (Concept \"foo\")
+              (CogStorage \"cog://cogserver.example.com\"))
+
+"
+	(if STORAGE (sn-delete ATOM STORAGE) (dflt-delete ATOM))
+)
+
+(define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
+"
+ cog-delete-recursive! ATOM [STORAGE]
+    Remove the indicated ATOM, and all atoms that point at it.
+    If storage is attached, the ATOM is also removed from storage.
+
+    Return #t on success, else return #f if not removed.
+
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
+"
+	(if STORAGE (sn-delete-rec ATOM STORAGE) (dflt-delete-rec ATOM))
 )
 
 ; --------------------------------------------------------------------

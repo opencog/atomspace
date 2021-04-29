@@ -1,5 +1,5 @@
 ;
-; query-sql.scm
+; persist-query.scm
 ;
 ; Demo of using queries to obtain sharply-defined sets of Atoms from
 ; storage, without having to load the entire AtomSpace up front.
@@ -26,11 +26,19 @@
 ;
 ; -------------------------------
 ; Basic initialization and set-up.
-; Make sure you've gone through the `persistence-sql.scm` demo first!
+; Make sure you've gone through the `persistence.scm` demo first!
 ;
 (use-modules (opencog) (opencog persist))
+
+; If you are using the PosgreSQL backend, do this:
 (use-modules (opencog persist-sql))
-(sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
+(cog-open psn)
+
+; If you are using the RocksDB backend, do this:
+(use-modules (opencog persist-rocks))
+(define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
+(cog-open rsn)
 
 ; -----------------------
 ; Populate the Atomspace.

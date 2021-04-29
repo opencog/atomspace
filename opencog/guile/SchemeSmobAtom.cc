@@ -111,9 +111,8 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	Arity ari = 0;
 	if (h->is_link()) ari = h->get_arity();
 
-	/* Arity is currently an unsigned short */
-	SCM sari = scm_from_ushort(ari);
-	return sari;
+	/* Arity is size_t */
+	return scm_from_size_t(ari);
 }
 
 /* ============================================================== */
@@ -214,7 +213,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	Handle h = verify_handle(satom, "cog-inc-value!");
 	Handle key = verify_handle(skey, "cog-inc-value!", 2);
 	double cnt = verify_real(scnt, "cog-inc-value!", 3);
-	int ref = verify_int(sref, "cog-inc-value!", 4);
+	size_t ref = verify_size_t(sref, "cog-inc-value!", 4);
 
 	std::vector<double> new_value;
 
@@ -226,7 +225,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	{
 		FloatValuePtr fv(FloatValueCast(v));
 		new_value = fv->value();
-		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
+		if (new_value.size() <= ref) new_value.resize(ref+1, 0.0);
 	}
 	else
 	{
@@ -254,9 +253,9 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size(); i > 0; i--)
 	{
-		SCM smob = handle_to_scm(oset[i]);
+		SCM smob = handle_to_scm(oset[i-1]);
 		list = scm_cons (smob, list);
 	}
 
@@ -278,10 +277,10 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size(); i > 0; i--)
 	{
-		if (oset[i]->get_type() != t) continue;
-		SCM smob = handle_to_scm(oset[i]);
+		if (oset[i-1]->get_type() != t) continue;
+		SCM smob = handle_to_scm(oset[i-1]);
 		list = scm_cons (smob, list);
 	}
 
@@ -295,7 +294,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
+	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
 
 	if (not h->is_link()) return SCM_EOL;
 

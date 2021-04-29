@@ -103,8 +103,6 @@ private:
 	static SCM ss_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
-	static SCM ss_delete(SCM, SCM);
-	static SCM ss_delete_recursive(SCM, SCM);
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_value_p(SCM);
@@ -224,8 +222,8 @@ private:
 	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "integer");
-	static size_t verify_size (SCM, const char *, int pos = 1,
-	                           const char *msg = "size integer");
+	static size_t verify_size_t (SCM, const char *, int pos = 1,
+	                             const char *msg = "integer size_t");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);

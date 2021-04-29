@@ -11,6 +11,11 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
+; TODO: this class sort-of works for the simplest case, but is
+; incomplete. Support for duals is missing. It also won't work
+; for pairs that have a non-trivial structure.
+;
+; XXX the fetching of the basis should be moved to the base object API.
 
 (define-public (add-dynamic-stars LLOBJ)
 "
@@ -54,7 +59,7 @@
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
 			(r-basis '())
-			(cache-incoming '())
+			(done-already? (make-once-predicate))
 			(pair-type (LLOBJ 'pair-type))
 		)
 
@@ -79,10 +84,8 @@
 		; already done so. XXX FIXME: this only works if ITEM is
 		; immediately under 'pair-type. If its deeper, its broken.
 		(define (get-incoming ITEM)
-			(if (not (member ITEM cache-incoming))
-				(begin
-					(fetch-incoming-by-type ITEM pair-type)
-					(set! cache-incoming (cons ITEM cache-incoming)))))
+			(if (not (done-already? ITEM))
+				(fetch-incoming-by-type ITEM pair-type)))
 
 		; Return a list matrix entries with ITEM on the right;
 		; that is, a wild-card on the left. That is, the set of
@@ -95,6 +98,8 @@
 		(define (get-right-stars ITEM)
 			(get-incoming ITEM)
 			(stars-obj 'right-stars ITEM))
+
+		; XXX TODO: implement left and right duals.
 
 		;-------------------------------------------
 		; Release (extract) row or column. No specific check is made

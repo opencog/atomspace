@@ -184,72 +184,6 @@
         )
 ")
 
-(set-procedure-property! cog-delete! 'documentation
-"
- cog-delete! ATOM [ATOMSPACE]
-    Remove the indicated ATOM, but only if it has no incoming links.
-    If it has incoming links, the remove fails.  If storage is attached,
-    the ATOM is also removed from the storage.
-
-    Returns #t if the atom was removed, else returns #f if not removed.
-
-    Use cog-extract! to remove from the AtomSpace only, leaving storage
-    unaffected.
-
-    Use cog-delete-recursive! to force removal of this atom, together
-    with any links that might be holding this atom.
-
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
-
-    Example:
-       ; Define two nodes and a link between them:
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (Concept \"def\"))
-       guile> (define l (Link x y))
-
-       ; Verify that there's an atom called x:
-       guile> x
-       (ConceptNode \"abc\")
-
-       ; Try to delete x. This should fail, since there's a link
-       ; containing x.
-       guile> (cog-delete! x)
-       #f
-
-       ; Delete x, and everything pointing to it. This should delete
-       ; both x, and the link l.
-       guile> (cog-delete-recursive! x)
-       #t
-
-       ; Verify that the link l is gone:
-       guile> l
-       Invalid handle
-
-       ; Verify that the node x is gone:
-       guile> x
-       Invalid handle
-
-       ; Verify that the node y still exists:
-       guile> y
-       (ConceptNode \"def\")
-")
-
-(set-procedure-property! cog-delete-recursive! 'documentation
-"
- cog-delete-recursive! ATOM [ATOMSPACE]
-    Remove the indicated ATOM, and all atoms that point at it.
-    If SQL or other data storage is attached, the ATOM is also removed
-    from the storage.
-
-    Return #t on success, else return #f if not removed.
-
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
-")
-
 (set-procedure-property! cog-extract! 'documentation
 "
  cog-extract! ATOM [ATOMSPACE]
@@ -258,8 +192,9 @@
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
-    This does NOT remove the atom from any attached storage (e.g. SQL
-    storage).  Use cog-delete! to remove from atoms from storage.
+    This does NOT remove the atom from any attached persistant storage.
+    Use cog-delete! from the (opencog persist) module to remove atoms
+    from storage.
 
     Use cog-extract-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
@@ -307,13 +242,15 @@
     Remove the indicated ATOM, and all atoms that point at it.
     Return #t on success, else return #f if not removed.
 
-    The atom is NOT removed from SQL or other attached data storage.
-    If you need to delete from storage, use cog-delete! and
-    cog-delete-recursive!.
+    This does NOT remove the atom from any attached persistant storage.
+    Use cog-delete-recursive! from the (opencog persist) module to
+    remove atoms from storage.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
     removed from that AtomSpace; otherwise, it is removed from the
     current AtomSpace for this thread.
+
+    See also: cog-extract!
 ")
 
 (set-procedure-property! cog-atom? 'documentation
@@ -605,7 +542,9 @@
   Example usage:
      (cog-inc-count! (Concept \"Answer\") 42.0)
 
-  See also: cog-inc-value! for a generic version
+  See also:
+      cog-count to fetch the current count
+      cog-inc-value! for a generic version
 ")
 
 (set-procedure-property! cog-inc-value! 'documentation
@@ -635,6 +574,8 @@
  cog-mean ATOM
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-confidence, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-confidence 'documentation
@@ -642,6 +583,8 @@
  cog-confidence ATOM
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-count 'documentation
@@ -649,6 +592,8 @@
  cog-count ATOM
     Return the `count` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
 ")
 
 ; ===================================================================
@@ -666,6 +611,8 @@
        (stv 0.2 0.5)
        guile> (cog-tv? (cog-tv x))
        #t
+
+    See also: cog-set-tv!
 ")
 
 (set-procedure-property! cog-set-tv! 'documentation
@@ -689,6 +636,8 @@
  cog-tv-mean TV
     Return the `mean` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-mean
 ")
 
 (set-procedure-property! cog-tv-confidence 'documentation
@@ -696,6 +645,8 @@
  cog-tv-confidence TV
     Return the `confidence` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-confidence
 ")
 
 (set-procedure-property! cog-tv-count 'documentation
@@ -703,6 +654,8 @@
  cog-tv-count TV
     Return the `count` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-count
 ")
 
 ; ===================================================================
@@ -962,6 +915,10 @@
   Example usage:
      (display (cog-count-atoms 'Concept))
   will display a count of all atoms of type 'Concept
+
+  See also:
+     cog-get-atoms -- return a list of all atoms of a given type.
+     cog-report-counts -- return a report of counts of all atom types.
 ")
 
 (set-procedure-property! cog-atomspace 'documentation

@@ -18,7 +18,7 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in PostgreSQL.
+* Storing the AtomSpace in RocksDB, PostgreSQL or plain-text files.
 * Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
@@ -28,7 +28,8 @@ typically encountered:
 Most of the querying and pattern matching examples are in the
 [**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
 a good idea of the basics from the demos here, go and explore the
-examples there.
+examples there. Return to the advanced examples here after exploring
+the pattern engine.
 
 Introductory Examples
 ---------------------
@@ -53,10 +54,10 @@ first).
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
 
-There is an important collection of demos in the
+After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
 demos are vital for understanding how to to be effective in writing
-queries and formulating rules.
+queries and formulating rules.  Then return to the advanced demos below.
 
 Advanced Demos
 --------------
@@ -72,10 +73,11 @@ be effective.
 * `threaded.scm`       -- Multi-threading in Atomese.
 * `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
+* `persist-file.scm`   -- Dump and load Atoms to a plain-text file.
 * `persistence.scm`    -- Layering the AtomSpace on a "normal" database.
+* `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
-* `query-sql.scm`      -- Fetching sets of Atoms with queries.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
@@ -164,9 +166,11 @@ everything else depends on.
 (use-modules (opencog atom-types))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+(use-modules (opencog matrix))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(use-modules (opencog ure))
+(use-modules (opencog sheaf))
+(use-modules (opencog test-runner))
 (use-modules (opencog type-utils))
 ```
 
@@ -174,14 +178,22 @@ There are other modules provided in other projects and repos. Here is
 a reasonably up-to-date list of modules provided by OpenCog:
 ```
 (use-modules (opencog agi-bio))
+(use-modules (opencog attention))
 (use-modules (opencog attention-bank))
 (use-modules (opencog cogserver))
+(use-modules (opencog generate))
 (use-modules (opencog ghost))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 (use-modules (opencog nlp fuzzy))
 (use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
 (use-modules (opencog nlp relex2logic))
 (use-modules (opencog nlp sureal))
+(use-modules (opencog persist-cog))
+(use-modules (opencog persist-rocks))
+(use-modules (opencog pln))
+(use-modules (opencog spacetime))
+(use-modules (opencog ure))
 ```

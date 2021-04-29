@@ -18,3 +18,30 @@ Currently, only Atomese s-expressions are supported. No other subset
 of scheme is supported!
 
 The code includes a file-reader utiliity.
+
+C++ API
+-------
+The `fast_load.h` file defines the C++ API.
+
+Python API
+----------
+There's a python wrapper for this, somewhere. Not sure where.
+
+Scheme API
+----------
+The fast file loader loads Atomese formatted as scheme. So, of course,
+you could just use the scheme `load` function!  But this can be slow,
+painfully slow. The fast loader provies a 10x performance improvement.
+
+Use it like so:
+```
+(use-modules (opencog))
+(use-modules (opencog persist-file))
+
+(load-file "/some/path/to/atomese.scm")
+```
+
+where `atomese.scm` contains Atomese. The contents of the AtomSpace can
+be written out by saying `(export-all-atoms "/tmp/atomese.scm")`. The
+`export-atoms`, `cog-prt-atomspace` and `prt-atom-list` are useful for
+writing Atoms to a file.

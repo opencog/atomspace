@@ -92,6 +92,7 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, as);
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
+	std::lock_guard<std::mutex> lck(as_mtx);
 	if (deleteable_as.end() != deleteable_as.find(as))
 		deleteable_as[as]++;
 	return smob;
@@ -153,18 +154,21 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	scm_gc_register_allocation(sizeof(*as));
 
-	// Only the internally-created atomspaces are trackable.
-	std::lock_guard<std::mutex> lck(as_mtx);
-	deleteable_as[as] = 0;
-
-	// Guile might have discarded all references to the parent; but
-	// we must not delete it, as long as a child is still referencing
-	// it.  The issue is that guile-gc does not know about this
-	// reference, so we have to track it manually.
-	while (parent and deleteable_as.end() != deleteable_as.find(parent))
 	{
-		deleteable_as[parent]++;
-		parent = parent->get_environ();
+		// Only the internally-created atomspaces are trackable.
+		std::lock_guard<std::mutex> lck(as_mtx);
+		deleteable_as[as] = 0;
+
+		// Guile might have discarded all references to the parent; but
+		// we must not delete it, as long as a child is still referencing
+		// it.  The issue is that guile-gc does not know about this
+		// reference, so we have to track it manually.
+		while (parent and deleteable_as.end() != deleteable_as.find(parent))
+		{
+			deleteable_as[parent]++;
+			parent = parent->get_environ();
+		}
+		// block scope unlock mutex
 	}
 
 	return make_as(as);
@@ -212,11 +216,11 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 
 AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 {
-   AtomSpace* as = ss_to_atomspace(sas);
-   if (nullptr == as)
-      scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
+	AtomSpace* as = ss_to_atomspace(sas);
+	if (nullptr == as)
+		scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
 
-   return as;
+	return as;
 }
 
 /* ============================================================== */
@@ -445,8 +449,8 @@ void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
-   // There are weird test-case scenarios where the fluid is not
-   // initalized. Those will crash-n-burn without this test.
+	// There are weird test-case scenarios where the fluid is not
+	// initalized. Those will crash-n-burn without this test.
 	if (0x0 == atomspace_fluid) return nullptr;
 
 	SCM ref = scm_fluid_ref(atomspace_fluid);

@@ -22,7 +22,7 @@
 ; Values (such as TruthValues) live in a per-Atom key-value database.
 ; Given any Atom, and a Key, you can get the Value attached there.
 ; Given any Atom, Key and Value, you can quickly swap the new value for
-; the old. Here's what you cannot do:
+; the old. Here's what you cannot do (see, however, footnote at bottom):
 ;
 ; 1) Use GetLink or BindLink to search for Values
 ; 2) Use PutLink to create new Values
@@ -123,3 +123,43 @@
 (cog-value a kav)
 (cog-av a)
 (equal? (cog-value a kav) (cog-av a))
+
+; That's all for this demo. Thanks for paying attention!
+; ----------------------------------------------------------------
+; * Footnote:
+;
+; Well, you can search for values, if you are clever. Here's how.
+; You could, for example, say:
+(cog-set-value! (Concept "Fido the Dog")
+   (Predicate "weight_in_kg") (FloatValue 12.5))
+;
+; and then search for it:
+(cog-execute!
+   (Get
+      (GreaterThan
+         (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+         (Number "10"))))
+;
+; The problem here is that this search will examine *every* Atom in the
+; AtomSpace, looking to see if they have the key "weight_in_kg" on it,
+; (and if the value is more than 10). Keys are NOT automatically
+; indexed. This is done to save space (RAM) and time (CPU). If you want
+; this search to run rapidly, you can build your own index:
+(Member (Concept "Fido the Dog") (Concept "things that have weight"))
+;
+; and then sharply constrain the search:
+(cog-execute!
+   (Get
+      (And
+         (Member (Variable "dog_node") (Concept "things that have weight"))
+         (GreaterThan
+            (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+            (Number "10")))))
+;
+; The above will only look at Atoms that have a weight. One can go
+; farther, and write:
+(Member (Concept "Fido the Dog") (Concept "things that weigh more than 10 kg"))
+;
+; It is up to you to maintain these structures, if you want them and can
+; use them. The AtomSpace does not keep these automatically, because it
+; cannot guess what you want.

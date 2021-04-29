@@ -49,6 +49,7 @@ namespace opencog
  */
 class ClassServer
 {
+    friend class opencog::NameServer;
     friend class ::ClassServerUTest;
 
 public:
@@ -79,6 +80,10 @@ private:
 
     template<typename T>
     void splice(std::vector<T>&, Type, T);
+
+    template<typename T>
+    void update(std::vector<T>&, Type);
+    void update_factories();
 
     const NameServer & _nameServer;
 

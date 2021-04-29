@@ -75,6 +75,7 @@
 ; Most users will find it easiest to use the `make-evaluation-pair-api`
 ; to provide the low-level API.  It is ideal, when counts are stored
 ; in the form of `EvaluationLink PredicateNode "..." ListLink ...`.
+; See `eval-pair.scm` for details.
 ;
 ; The `add-pair-freq-api` class, below, is a typical user of this
 ; class; it provides getters and setters for the frequencies.
@@ -130,6 +131,11 @@
 ;     (define (make-pair L-ATOM R-ATOM)
 ;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
 ;
+;     ; Return the atom that forms the left, resp. right side of
+;     ; the pair. These undo what 'make-pair does.
+;     (define (get-pair-left PAIR) (gadr PAR))
+;     (define (get-pair-rigt PAIR) (gddr PAR))
+;
 ;     ; Return an atom to which column subtotals can be attached,
 ;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
 ;     ; denotes a column, and the star is on the left (the star
@@ -178,6 +184,8 @@
 ;              ((get-pair) get-pair)
 ;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
+;              ((left-element) get-pair-left)
+;              ((right-element) get-pair-right)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
@@ -255,8 +263,54 @@
   and so this offers two different ways of iterating over the same
   list of pairs.
 
-  Here, the LLOBJ is expected to be an object, with methods for
-  'left-type, 'right-type and 'pair-type on it.
+  Here, the LLOBJ is expected to be the object that defines a pair
+  in the AtomSpace. All such objects provide the following methods:
+
+  'name - A one-sentence description of the pair object.
+  'id - A one-word id for the object; can be used to build strings.
+
+  'left-type, 'right-type - Returns the types of the Atoms making up
+      each side of the pair.
+  'pair-type - Returns the type of the Atom holding the pair.
+
+  'pair-count L R - Returns the total observed count on the pair (L,R)
+      L must be an Atom of type 'left-type and likewise for R.
+
+  'get-pair L R - Returns the Atom holding the pair (L,R). The returned
+      Atom will be of type 'pair-type. All statistics and information
+      about this pair are attached as Values on this Atom.
+
+  'get-count P - Returns the total observed count on the pair P, where
+      P is the Atom returned by 'get-pair.
+
+  'make-pair L R - Create the Atom holding the pair, if it does not
+      already exist.
+
+  'left-element P - Return the atom on the left of the pair P.
+  'right-element P - Return the atom on the right of the pair P.
+      These two together undo what 'make-pair creates.
+
+  'left-wildcard R - Return the marginal atom for the column R.
+      The column must be an Atom of type 'right-type. The marginal
+      Atom will be of type 'pair-type. The marginal Atom contains
+      all information applicable to this column, such as sums over
+      counts. (This info is held in Values on this Atom).
+
+  'right-wildcard L - Same as above, but for row L.
+
+  'wild-wild - Same as above, except that this applies matrix-wide.
+      This returns the Atom (of type 'pair-type) that holds all
+      information applicable to the matrix, as a whole. Ths includes
+      a grand-total count.
+
+  'fetch-pairs - Fetch all pairs from an open database.
+
+  'provides - Return a list of other methods that this obct provides. These
+      methods are typically used to overload the default methods in
+      derived classes.
+
+  'filters - Used in filtering out certain rows, columns or individual
+      entries.
 "
 	(let ((l-basis '())
 			(r-basis '())
@@ -484,7 +538,11 @@
 			(atomic-box-set! dual-l-hit '())
 			(atomic-box-set! dual-l-miss '())
 			(atomic-box-set! dual-r-hit '())
-			(atomic-box-set! dual-r-miss '()))
+			(atomic-box-set! dual-r-miss '())
+
+			; Pass it on to the LLOBJ, too.
+			(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
+		)
 
 		;-------------------------------------------
 		; Perform a query to find all (non-marginal) matrix entries
@@ -539,7 +597,7 @@
 				(f-left-duals (overload 'left-duals get-left-duals))
 				(f-right-duals (overload 'right-duals get-right-duals))
 				(f-get-all-elts (overload 'get-all-elts get-all-pairs))
-				(f-clobber (overload 'clobber clobber)))
+			)
 
 			;-------------------------------------------
 			; Explain what it is that I provide. The point here is that
@@ -558,7 +616,7 @@
 					((left-duals)       f-left-duals)
 					((right-duals)      f-right-duals)
 					((get-all-elts)     f-get-all-elts)
-					((clobber)          f-clobber)
+					((clobber)          clobber)
 					(else               (LLOBJ 'provides meth))))
 
 			;-------------------------------------------
@@ -574,7 +632,7 @@
 					((left-duals)       (apply f-left-duals args))
 					((right-duals)      (apply f-right-duals args))
 					((get-all-elts)     (f-get-all-elts))
-					((clobber)          (f-clobber))
+					((clobber)          (clobber))
 					((provides)         (apply provides args))
 					((help)             (help))
 					((describe)         (describe))
@@ -584,56 +642,6 @@
 			))))
 
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-
-(define*-public (add-pair-count-api LLOBJ
-    #:optional (ID (LLOBJ 'id)))
-"
-  add-pair-count-api LLOBJ ID - Extend LLOBJ with count-getters.
-XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
-
-  'left-wild-count ATOM   -- return N(*,y) == sum_x N(x,y)
-  'right-wild-count ATOM  -- return N(x,*) == sum_y N(x,y)
-  'wild-wild-count        -- return N(*,*) == sum_x,y N(x,y)
-"
-	; ----------------------------------------------------
-	; Key under which the count values are stored.
-	(define is-filtered? (and ID (LLOBJ 'filters?)))
-
-	(define cnt-name (string-append "*-CountKey " ID))
-
-	(define cnt-key (PredicateNode cnt-name))
-
-	; Return the count on ATOM. Use the CountTruthValue if not
-	; filtered, else use the CountKey predicate.
-	(define (get-count ATOM)
-		(if (null? ATOM) 0
-			(if is-filtered?
-				(cog-value-ref (cog-value ATOM cnt-key) 0)
-				(cog-tv-count (cog-tv ATOM)))))
-
-	; Get the left wildcard count
-	(define (get-left-wild-count ITEM)
-		(get-count (LLOBJ 'left-wildcard ITEM)))
-
-	; Get the right wildcard count
-	(define (get-right-wild-count ITEM)
-		(get-count (LLOBJ 'right-wildcard ITEM)))
-
-	; Get the wildcard-wildcard count
-	(define (get-wild-wild-count)
-		(get-count (LLOBJ 'wild-wild)))
-
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-wild-count)      (apply get-left-wild-count args))
-			((right-wild-count)     (apply get-right-wild-count args))
-			((wild-wild-count)      (get-wild-wild-count))
-			(else                   (apply LLOBJ (cons message args))))
-	)
-)
-
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-freq-api LLOBJ
@@ -734,19 +742,19 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-freq ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
 		(if (null? ATOM) (plus-inf ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (plus-inf ATOM) (cog-value-ref val 1)))))
+				(if (nil? val) (plus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 2)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 2)))))
 
 	; Set the frequency and -log_2(frequency) on the ATOM.
 	; Return the atom that holds this count.
@@ -769,7 +777,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-total-entropy ATOM)
 		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM entropy-key)))
-				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional entropy on ATOM
 	(define (get-fractional-entropy ATOM)
@@ -794,7 +802,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-total-mi ATOM)
 		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) (minus-inf ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional MI (lexical attraction) on ATOM.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
@@ -803,7 +811,7 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-fractional-mi ATOM)
 		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) (minus-inf ATOM) (cog-value-ref val 1)))))
+				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)

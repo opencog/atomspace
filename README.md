@@ -341,7 +341,7 @@ you; in fact, if you are good at any of these ... we want you. Bad.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
 * GPU processing pipelines, lighting-shading pipelines, CUDA, OpenCL.
-* Dataflow in GPU's for neural bets.
+* Dataflow in GPU's for neural networks.
 
 Basically, Atomese is a mash-up of ideas taken from all of the above
 fields.  It's kind-of trying to do and be all of these, all at once,

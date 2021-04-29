@@ -242,7 +242,10 @@
      (display (cog-get-atoms 'Atom #t))
   will return and display all atoms in the AtomSpace.
 
-  See also: cog-get-all-roots to get only the roots.
+  See also:
+     cog-get-all-roots -- get only the roots.
+     cog-count-atoms -- count atoms of a given type.
+     cog-report-counts -- provide a report of the different atom types.
 "
 	(let ((lst '()))
 		(define (mklist atom)

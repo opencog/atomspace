@@ -25,7 +25,7 @@
   that these have been previously computed, as described below.
 
   See the documentation on `add-support-compute` for precise definitions
-  of \"support\", \"count\" and \"length\"; in breif, these are just the
+  of \"support\", \"count\" and \"length\"; in brief, these are just the
   l_0, l_1 and l_2 norms of the rows and columns.
 
   This object provides per-row/per-column values for support, count and
@@ -62,7 +62,7 @@
 	; Set the grand-total count. Use the CountTruthValue.
 	; Backwards-compatibility method. Remove this someday.
 	(define (set-wild-wild-count CNT)
-		(cog-set-tv! (LLOBJ 'wild-wild) (cog-new-ctv 0 0 CNT)))
+		(cog-set-tv! (LLOBJ 'wild-wild) (CountTruthValue 0 0 CNT)))
 
 	; -----------------
 	(define left-total-key-name
@@ -134,12 +134,11 @@
 
 	;--------
 	(define (error-no-data)
-		(format #t
+		(throw 'no-data 'add-support-api
 			(string-append
-"Error: support-api: There isn't any cached data on ~A\n"
-"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data\n")
-			ID)
-		*unspecified*)
+"There isn't any cached data on " ID "\n"
+"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
+				))
 
 	(define (get-total-support-left)
 		(catch 'wrong-type-arg
@@ -487,15 +486,10 @@
 			(define l2 (sqrt (third sums)))
 			(api-obj 'set-right-norms ITEM l0 l1 l2))
 
-		(define start-time 0)
-		(define (elapsed-secs)
-			(define diff (- (current-time) start-time))
-			(set! start-time (current-time))
-			diff)
-
 		(define (all-left-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the right-basis
-			(elapsed-secs)
 			(maybe-par-for-each set-left-marginals (star-obj 'right-basis))
 			(format #t "Finished left norm marginals in ~A secs\n"
 				(elapsed-secs))
@@ -510,8 +504,9 @@
 		)
 
 		(define (all-right-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the left-basis
-			(elapsed-secs)
 			(maybe-par-for-each set-right-marginals (star-obj 'left-basis))
 			(format #t "Finished right norm marginals in ~A secs\n"
 				(elapsed-secs))

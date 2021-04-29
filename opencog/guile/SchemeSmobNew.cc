@@ -247,6 +247,18 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 }
 
 /**
+ * Check that the argument is a size_t, else throw errors.
+ */
+size_t SchemeSmob::verify_size_t (SCM ssizet, const char *subrname,
+                                  int pos, const char * msg)
+{
+	if (scm_is_false(scm_integer_p(ssizet)))
+		scm_wrong_type_arg_msg(subrname, pos, ssizet, msg);
+
+	return scm_to_size_t(ssizet);
+}
+
+/**
  * Check that the argument is convertible to a real, else throw errors.
  * Return as a float.
  */
@@ -257,19 +269,6 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 		scm_wrong_type_arg_msg(subrname, pos, sreal, msg);
 
 	return scm_to_double(sreal);
-}
-
-/**
- * Check that the argument is an int, else throw errors.
- * Use C++ casting to convert the int to size_t. Return the size_t.
- */
-size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
-                                int pos, const char * msg)
-{
-	if (scm_is_false(scm_integer_p(sint)))
-		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
-
-	return (size_t) scm_to_int(sint);
 }
 
 /**
@@ -549,66 +548,6 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
-}
-
-/* ============================================================== */
-/**
- * Delete the atom, but only if it has no incoming links.
- * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
- * This deletes the atom from both the atomspace, and any attached
- * backing store; thus deletion is permanent!
- */
-SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
-{
-	Handle h = verify_handle(satom, "cog-delete!");
-
-	// It can happen that the atom has already been deleted, but we're
-	// still holding on to a pointer to it.  This is rare... but possible.
-	// So don't crash when it happens. XXX Is it really possible? How?
-	if (NULL == h.operator->()) return SCM_BOOL_F;
-
-	// The remove will fail/log warning if the incoming set isn't null.
-	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
-
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete!");
-
-	// AtomSpace::removeAtom() returns true if atom was deleted,
-	// else returns false
-	// bool rc = atomspace->remove_atom(h, false);
-	bool rc = atomspace->extract_atom(h, false);
-
-	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
-	scm_remember_upto_here_1(satom);
-
-	// rc should always be true at this point ...
-	if (rc) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
-/**
- * Delete the atom, and everything pointing to it.
- * This deletes the atom from both the atomspace, and any attached
- * backing store; thus deletion is permanent!
- */
-SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
-{
-	Handle h = verify_handle(satom, "cog-delete-recursive!");
-
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive!");
-
-	// bool rc = atomspace->remove_atom(h, true);
-	bool rc = atomspace->extract_atom(h, true);
-
-	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
-	scm_remember_upto_here_1(satom);
-
-	if (rc) return SCM_BOOL_T;
-	return SCM_BOOL_F;
 }
 
 /* ============================================================== */

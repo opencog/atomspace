@@ -329,15 +329,10 @@
 			(define l1 (sum-mmt-count ITEM))
 			(api-obj 'set-mmt-norms ITEM l0 l1))
 
-		(define start-time 0)
-		(define (elapsed-secs)
-			(define diff (- (current-time) start-time))
-			(set! start-time (current-time))
-			diff)
-
 		(define (all-mtm-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the right basis ...
-			(elapsed-secs)
 			(for-each set-mtm-marginals (star-obj 'right-basis))
 			(format #t "Finished mtm norm marginals in ~A secs\n"
 				(elapsed-secs))
@@ -351,8 +346,9 @@
 
 
 		(define (all-mmt-marginals)
+			(define elapsed-secs (make-elapsed-secs))
+
 			; Loop over each item in the left basis ...
-			(elapsed-secs)
 			(for-each set-mmt-marginals (star-obj 'left-basis))
 			(format #t "Finished mmt norm marginals in ~A secs\n"
 				(elapsed-secs))

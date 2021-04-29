@@ -61,7 +61,7 @@ class SQLAtomStorage : public StorageNode
 		// Pool of shared connections
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
-		void enlarge_conn_pool(int);
+		void enlarge_conn_pool(int, const char*);
 		void close_conn_pool(void);
 
 		// Utility for handling responses (on stack).

@@ -52,6 +52,8 @@ private:
 	static void sn_load_type(Type, Handle);
 	static void sn_load_atomspace(Handle);
 	static void sn_store_atomspace(Handle);
+	static bool sn_delete(Handle, Handle);
+	static bool sn_delete_recursive(Handle, Handle);
 	static void sn_barrier(Handle);
 
 	// Single global default storage node,
@@ -72,6 +74,8 @@ private:
 	void dflt_load_type(Type);
 	void dflt_load_atomspace(void);
 	void dflt_store_atomspace(void);
+	bool dflt_delete(Handle);
+	bool dflt_delete_recursive(Handle);
 	void dflt_barrier(void);
 
 public:

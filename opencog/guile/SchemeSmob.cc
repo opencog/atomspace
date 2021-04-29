@@ -107,7 +107,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 {
 	// If they're not something we know about, let scheme sort it out.
 	// (Actualy, this should never happen ...)
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a))
+	if ((not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a)) or
+	    (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, b)))
 		return scm_equal_p(a, b);
 
 	// If the types don't match, they can't be equal.
@@ -159,6 +160,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
+			if (av->get() == bv->get()) return SCM_BOOL_T;
+			if (av->get() == nullptr or bv->get() == nullptr) return SCM_BOOL_F;
 			if (**av == **bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
@@ -267,9 +270,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atom",              1, 0, 1, C(ss_atom));
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
-	register_proc("cog-delete!",           1, 0, 1, C(ss_delete));
-	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
-	register_proc("cog-delete-recursive!", 1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
 

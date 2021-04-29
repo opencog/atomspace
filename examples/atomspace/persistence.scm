@@ -5,7 +5,7 @@
 ; write some of it out to disk, and save it for later; or maybe you want
 ; to share AtomSpace contents with other AtomSpaces. This is accomplished
 ; with "persistance" plug-in modules. As of this writing, there are
-; three stable, supported modules for doing this:
+; four stable, supported modules for doing this:
 ;
 ; (persist-sql)   - Stores the AtomSpace to a PostgreSQL database.
 ;                   This can be accessed/shared by multiple users,
@@ -18,9 +18,15 @@
 ;                   thus allowing a form of distributed processing.
 ;                   This is several times faster than the Postgres
 ;                   backend, because it avoids assorted complexities.
+; (persist-file)  - Load and store AtomSpace contents as scheme
+;                   s-expressions. This is 10x faster than using the
+;                   scheme interpreter to load Atomese data.
 ;
-; This demo illustrates the Postgres backend; the others work exactly
-; the same way, so you can try them, if you've got them installed.
+; This demo illustrates the Postgres backend; the RocksDB and the
+; CogServer backend work exactly the same way. You can try them, if
+; you've got them installed. The plain-old s-expression subsystem is
+; less powerful and less sophisticated; it has a much simpler API,
+; and it's own demo.
 ;
 ; -------------------------------------------------------------------
 ; Architectural Notes & Commentary.

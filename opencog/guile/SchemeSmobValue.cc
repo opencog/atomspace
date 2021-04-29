@@ -452,8 +452,8 @@ SCM SchemeSmob::ss_keys_alist (SCM satom)
 
 #define CPPL_TO_SCML(VAL, FN) \
 	SCM list = SCM_EOL; \
-	for (int i = VAL.size()-1; i >= 0; i--) { \
-		SCM smob = FN(VAL[i]); \
+	for (size_t i = VAL.size(); i > 0; i--) { \
+		SCM smob = FN(VAL[i-1]); \
 		list = scm_cons (smob, list); \
 	} \
 	return list;
@@ -509,7 +509,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 {
 	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
-   size_t index = verify_size(sindex, "cog-value-ref", 2);
+	size_t index = verify_size_t(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))

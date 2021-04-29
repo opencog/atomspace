@@ -15,7 +15,7 @@
 ;
 ; This file precomputes the various partial sums (marginals) that occur
 ; in the definition of the symmetric MI.  It assumes that the vectors
-; (i.e. observation counts) are in an SQL database; it fetches those,
+; (i.e. observation counts) are in an open database; it fetches those,
 ; computes the assorted marginals, and writes those marginals back to
 ; disk. Specifically, the marginals are those needed for the
 ; `transpose-api`, which is used to compute the symmetric MI.
@@ -115,10 +115,6 @@
 		; -------------
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-left-support)
-			; The shape-objects need to have the stars created, before
-			; they can be used.
-			(if (LLOBJ 'provides 'make-left-stars)
-				(LLOBJ 'make-left-stars))
 
 			; 'mmt-marginals loops over 'left-basis and for each
 			; of those, loops over 'right-duals and calls 'left-count
@@ -132,10 +128,6 @@
 
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-right-support)
-			; The shape-objects need to have the stars created, before
-			; they can be used.
-			(if (LLOBJ 'provides 'make-right-stars)
-				(LLOBJ 'make-right-stars))
 
 			(scomp-obj 'all-right-marginals)
 			(centr-obj 'cache-right)

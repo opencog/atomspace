@@ -67,19 +67,23 @@ void PrimitiveEnviron::init_in_module(void*)
 PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char * module,
-                                   const char *name, int nargs)
+                                   const char *name,
+                                   int nargs,
+                                   bool xport)
 {
 	// Now enter guile mode, and do the actual work there.
 	tmp_module = module;
 	tmp_name = name;
 	tmp_nargs = nargs;
+	tmp_export = xport;
 	scm_with_guile(c_wrap_register, this);
 }
 
 void *PrimitiveEnviron::c_wrap_register(void *p)
 {
 	PrimitiveEnviron *self = (PrimitiveEnviron *) p;
-	self->really_do_register(self->tmp_module, self->tmp_name, self->tmp_nargs);
+	self->really_do_register(self->tmp_module, self->tmp_name,
+	                         self->tmp_nargs, self->tmp_export);
 	return NULL;
 }
 
@@ -95,7 +99,8 @@ void *PrimitiveEnviron::c_wrap_register(void *p)
  */
 void
 PrimitiveEnviron::really_do_register(const char * module_name,
-                                     const char *name, int nargs)
+                                     const char *name, int nargs,
+                                     bool xport)
 {
 	init();
 
@@ -121,7 +126,10 @@ PrimitiveEnviron::really_do_register(const char * module_name,
 	scm_c_module_define(module, buff, smob);
 
 	std::string wrapper = "(use-modules (opencog extension))";
-	wrapper += "(define-public (";
+	if (xport)
+		wrapper += "(define-public (";
+	else
+		wrapper += "(define (";
 	wrapper += name;
 	for (int i=0; i<nargs; i++)
 	{

@@ -2,7 +2,7 @@
 from libc.string cimport strcmp
 from libcpp cimport string
 import sys
-
+from contextlib import contextmanager
 
 # Dynamically construct a "types" module.
 # XXX FIXME This should also listen to "addtype" signals in case
@@ -58,6 +58,27 @@ cdef generate_type_module():
 
 types = type('atom_types', (), generate_type_module())
 
+def begin_type_decls(module):
+    return nameserver().beginTypeDecls(module.encode('UTF-8'))
+
+def end_type_decls():
+    nameserver().endTypeDecls()
+
+@contextmanager
+def type_decl_context(module):
+    if begin_type_decls(module):
+        raise RuntimeError('Cannot declare types for already loaded module: ' +
+                module)
+    try:
+        yield
+    finally:
+        end_type_decls()
+
+def decl_type(parent, name):
+    type_id = nameserver().declType(parent, name.encode('UTF-8'))
+    setattr(types, name, type_id)
+    return type_id
+
 # Update/refresh list of types. This needs to be called whenever
 # additional atom types were declared in other atomspace modules.
 # i.e. when new types were added to the C++ nameserver.
@@ -86,7 +107,6 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     # For handling the children types of LinkValue.
     if is_a(value_type, types.LinkValue):
         return LinkValue(ptr_holder=ptr_holder)
-
     # For handling the children types of Atom.
     if is_a(value_type, types.Atom):
         return Atom(ptr_holder=ptr_holder)

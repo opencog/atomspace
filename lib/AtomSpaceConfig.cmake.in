@@ -22,6 +22,11 @@ set_property(TARGET truthvalue
 	execution
 )
 
+set_property(TARGET atom_types
+	APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+	atombase
+)
+
 # These names are used in various projects e.g. opencog, as-moses, etc.
 # XXX FIXME ... they probably should not be! It would be best if the all
 # of the libs were specified i.e. LINK_LIBRARIES(${ATOMSPACE_LIBRARIES})
