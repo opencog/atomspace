@@ -107,7 +107,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 {
 	// If they're not something we know about, let scheme sort it out.
 	// (Actualy, this should never happen ...)
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a))
+	if ((not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a)) or
+	    (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, b)))
 		return scm_equal_p(a, b);
 
 	// If the types don't match, they can't be equal.
