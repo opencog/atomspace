@@ -160,6 +160,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
+			if (av->get() == bv->get()) return SCM_BOOL_T;
+			if (av->get() == nullptr or bv->get() == nullptr) return SCM_BOOL_F;
 			if (**av == **bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
