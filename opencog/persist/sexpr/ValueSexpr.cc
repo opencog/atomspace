@@ -342,13 +342,6 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 		return fv->FloatValue::to_string();
 	}
 
-	if (nameserver().isA(v->get_type(), STRING_VALUE))
-	{
-		// The StringValue to_string() method does not escape quotes.
-		// The to_string_esc() method does.
-		StringValuePtr sv(StringValueCast(v));
-		return sv->StringValue::to_string_esc();
-	}
 	if (not v->is_atom())
 		return v->to_short_string();
 	return prt_atom(HandleCast(v));
