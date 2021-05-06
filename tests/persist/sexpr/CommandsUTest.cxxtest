@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
+
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -47,6 +49,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void tearDown() {}
 
 		void test_node();
+		void test_node_quoted();
 		void test_link();
 		void test_set_tv();
 		void test_set_value();
@@ -75,6 +78,38 @@ void CommandsUTest::test_node()
 	printf("Got >>%s<<\n", out.c_str());
 	TS_ASSERT_EQUALS(1, as->get_size());
 	TS_ASSERT(0 == out.compare("(ConceptNode \"foo\")"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-node with quoted names
+void CommandsUTest::test_node_quoted()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::stringstream ss;
+	ss << "(cog-node 'Concept " << std::quoted(R"("f""o"""o"!!!"")") << ")";
+	std::string in = ss.str();
+	printf("Input %s\n", in.c_str());
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(0, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->add_node(CONCEPT_NODE, R"("f""o"""o"!!!"")");
+	printf("Added atom %s\n", h->to_short_string().c_str());
+
+	out = Commands::interpret_command(as, in);
+	printf("Got    >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(1, as->get_size());
+
+	std::stringstream sso;
+	sso << "(ConceptNode " << std::quoted(R"("f""o"""o"!!!"")") << ")";
+	std::string expect = sso.str();
+	printf("Expect >>%s<<\n", expect.c_str());
+	TS_ASSERT(0 == out.compare(expect));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
