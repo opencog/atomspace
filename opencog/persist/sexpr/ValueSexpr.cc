@@ -176,23 +176,32 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return valueserver().create(vtype, fv);
 	}
 
-	// XXX FIXME this mishandles escaped quotes
+	// Unescape escaped quotes
 	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		std::vector<std::string> sv;
-		size_t epos = stv.find(')', vos+1);
-		if (std::string::npos == epos)
+		size_t p = vos+1;
+		if ('"' != stv[p])
 			throw SyntaxException(TRACE_INFO,
-				"Malformed StringValue: %s", stv.substr(pos).c_str());
-		while (vos < epos)
+				"Malformed StringValue: %s", stv.substr(p).c_str());
+
+		while (p < totlen)
 		{
-			vos = stv.find('\"', vos);
-			if (std::string::npos == vos) break;
-			size_t evos = stv.find('\"', vos+1);
-			sv.push_back(stv.substr(vos+1, evos-vos-1));
-			vos = evos+1;
+			size_t e = p + 1;
+
+			// Advance past escaped quotes.
+			for (; e < totlen and (stv[e] != '"' or (stv[e-1] == '\\')); e++);
+			e++;
+			if (e >= totlen) break;
+
+			// Unescape quotes in the string.
+			std::stringstream ss;
+			std::string val;
+			ss << stv.substr(p, e-p);
+			ss >> quoted(val);
+			sv.push_back(val);
+			p = e+1;
 		}
-		pos = epos + 1;
 		return valueserver().create(vtype, sv);
 	}
 
