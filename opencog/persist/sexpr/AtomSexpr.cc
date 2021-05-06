@@ -119,8 +119,8 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 /// If the node is a Type node, then `l` points at the first
 /// non-whitespace character of the type name and `r` points to the next
 /// opening parenthesis.
-static void get_node_name(const std::string& s, size_t& l, size_t& r,
-                          size_t line_cnt, bool typeNode = false)
+void Sexpr::get_node_name(const std::string& s, size_t& l, size_t& r,
+                          size_t line_cnt, bool typeNode)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
