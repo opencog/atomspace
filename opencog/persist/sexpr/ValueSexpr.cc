@@ -181,18 +181,17 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 	{
 		std::vector<std::string> sv;
 		size_t p = vos+1;
-		if ('"' != stv[p])
-			throw SyntaxException(TRACE_INFO,
-				"Malformed StringValue: %s", stv.substr(p).c_str());
 
-		while (p < totlen)
+		while ('"' == stv[p])
 		{
 			size_t e = p + 1;
 
 			// Advance past escaped quotes.
 			for (; e < totlen and (stv[e] != '"' or (stv[e-1] == '\\')); e++);
 			e++;
-			if (e >= totlen) break;
+			if (totlen <= e)
+				throw SyntaxException(TRACE_INFO,
+					"Malformed StringValue: %s", stv.substr(vos).c_str());
 
 			// Unescape quotes in the string.
 			std::stringstream ss;
@@ -200,8 +199,13 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			ss << stv.substr(p, e-p);
 			ss >> quoted(val);
 			sv.push_back(val);
-			p = e+1;
+
+			// Skip past whitespace
+			p = stv.find_first_not_of(" \n\t", e);
 		}
+		if (')' != stv[p])
+			throw SyntaxException(TRACE_INFO,
+				"Missing closing paren in StringValue: %s", stv.substr(vos).c_str());
 		return valueserver().create(vtype, sv);
 	}
 
