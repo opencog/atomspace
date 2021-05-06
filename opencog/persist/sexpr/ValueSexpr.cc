@@ -23,8 +23,10 @@
 #include <iomanip>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/ValueFactory.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
@@ -324,11 +326,19 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{
-		// The FloatValue to_string() print prints out a high-precision
+		// The FloatValue to_string() method prints out a high-precision
 		// form of the value, as compared to SimpleTruthValue, which
 		// only prints 6 digits and breaks the unit tests.
 		FloatValuePtr fv(FloatValueCast(v));
 		return fv->FloatValue::to_string();
+	}
+
+	if (nameserver().isA(v->get_type(), STRING_VALUE))
+	{
+		// The StringValue to_string() method does not escape quotes.
+		// The to_string_esc() method does.
+		StringValuePtr sv(StringValueCast(v));
+		return sv->StringValue::to_string_esc();
 	}
 	if (not v->is_atom())
 		return v->to_short_string();
