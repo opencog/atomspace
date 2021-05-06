@@ -144,6 +144,14 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			while (0 < pcnt and epos < totlen)
 			{
 				char c = stv[++epos];
+
+				// Advance past escaped quotes.
+				if ('"' == c)
+				{
+					++epos;
+					for (; epos < totlen and (stv[epos] != '"' or (stv[epos-1] == '\\')); epos++);
+					continue;
+				}
 				if ('(' == c) pcnt ++;
 				else if (')' == c) pcnt--;
 			}
