@@ -55,6 +55,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_set_value();
 		void test_set_value_quoted();
 		void test_get_value();
+		void test_get_value_quoted();
 		void test_set_values();
 		void test_get_values();
 		void test_extract();
@@ -268,6 +269,36 @@ void CommandsUTest::test_get_value()
 	out = Commands::interpret_command(as, in);
 	printf("Got %s\n", out.c_str());
 	TS_ASSERT(0 == out.compare(0, 18, "(SimpleTruthValue "));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-value, with quoted string
+void CommandsUTest::test_get_value_quoted()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = as->add_node(CONCEPT_NODE, "a");
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	Handle fiz = as->add_node(PREDICATE_NODE, "fiz");
+	Handle buz = as->add_node(PREDICATE_NODE, "buz");
+
+	h->setValue(key, createFloatValue(std::vector<double>{4, 5, 6}));
+	h->setValue(fiz, createStringValue(std::vector<std::string>
+		{"\"f\"\"o\"\"\"o\"!!!\"\"", "b\"\"\"a\"\"\"r"}));
+	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
+
+	std::string in = "(cog-value (Concept \"a\") (Predicate \"fiz\"))";
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got    %s\n", out.c_str());
+
+	std::stringstream oss;
+	oss << "(StringValue ";
+	oss << std::quoted(R"("f""o"""o"!!!"")") << " ";
+	oss << std::quoted(R"(b"""a"""r)") << ")";
+	std::string xpt = oss.str();
+	printf("Expect %s\n", xpt.c_str());
+	TS_ASSERT(0 == out.compare(xpt));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
