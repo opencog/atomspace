@@ -56,7 +56,7 @@ std::string StringValue::to_string_esc(void) const
 	std::stringstream ss;
 	ss << "(" << nameserver().getTypeName(_type);
 	for (const std::string& v :_value)
-		ss << "" << std::quoted(v);
+		ss << " " << std::quoted(v);
 	ss << ")";
 	return ss.str();
 }
