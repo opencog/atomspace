@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
 #include <stdexcept>
 #include <string>
 
@@ -206,7 +207,11 @@ Handle Sexpr::decode_atom(const std::string& s,
 		l2 = r1;
 		if ('"' == s[l2]) l2++; // step past trailing quote.
 
-		const std::string name = s.substr(l1, r1-l1);
+		std::stringstream ss;
+		std::string name;
+		ss << s.substr(l1-1, r1-l1+2); // Pad, to pick up quotes.
+		ss >> std::quoted(name);
+
 		Handle h(createNode(atype, std::move(name)));
 
 		// There might be an stv in the content. Handle it.
