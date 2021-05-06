@@ -53,6 +53,7 @@ class CommandsUTest : public CxxTest::TestSuite
 		void test_link();
 		void test_set_tv();
 		void test_set_value();
+		void test_set_value_quoted();
 		void test_get_value();
 		void test_set_values();
 		void test_get_values();
@@ -193,6 +194,48 @@ void CommandsUTest::test_set_value()
 	ValuePtr vp = h->getValue(key);
 	TS_ASSERT(nullptr != vp);
 	TS_ASSERT_EQUALS(SIMPLE_TRUTH_VALUE, vp->get_type());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test cog-set-value! with nested quotes
+void CommandsUTest::test_set_value_quoted()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::stringstream ss;
+	ss << "(cog-set-value! (Concept \"a\") (Predicate \"key\") ";
+	ss << "(StringValue ";
+	ss << std::quoted(R"("f""o"""o"!!!"")") << " ";
+	ss << std::quoted(R"(b"""a"""r)") << "))";
+	std::string in = ss.str();
+	printf("Input %s\n", in.c_str());
+
+	std::string out = Commands::interpret_command(as, in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(2, as->get_size());
+	TS_ASSERT(0 == out.compare("()\n"));
+
+	Handle h = as->get_node(CONCEPT_NODE, "a");
+	TS_ASSERT(nullptr != h);
+
+	Handle key = as->add_node(PREDICATE_NODE, "key");
+	ValuePtr vp = h->getValue(key);
+	TS_ASSERT(nullptr != vp);
+	TS_ASSERT_EQUALS(STRING_VALUE, vp->get_type());
+
+	std::string vps = vp->to_string();
+	printf("Value  %s\n", vps.c_str());
+
+	std::stringstream oss;
+	oss << "(StringValue ";
+	oss << std::quoted(R"("f""o"""o"!!!"")") << " ";
+	oss << std::quoted(R"(b"""a"""r)") << ")";
+	std::string xpt = oss.str();
+	printf("Expect %s\n", xpt.c_str());
+
+	TS_ASSERT(0 == vps.compare(xpt));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
