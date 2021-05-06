@@ -20,6 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <iomanip>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -285,9 +287,11 @@ void Sexpr::decode_slist(const Handle& atom,
 
 static std::string prt_node(const Handle& h)
 {
-	std::string txt = "(" + nameserver().getTypeName(h->get_type())
-		+ " \"" + h->get_name() + "\")";
-	return txt;
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name()) << ")";
+
+	return ss.str();
 }
 
 static std::string prt_atom(const Handle&);
