@@ -52,8 +52,8 @@ public:
 		return decode_atom(s, junk);
 	}
 
-	static void get_node_name(const std::string&, size_t& l, size_t& r,
-	                          size_t line = 0, bool typeNode = false);
+	static std::string get_node_name(const std::string&, size_t& l, size_t& r,
+	                                 Type, size_t line = 0);
 
 	static ValuePtr decode_value(const std::string&, size_t&);
 	static Type decode_type(const std::string& s, size_t& pos);

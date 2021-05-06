@@ -119,11 +119,19 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 /// If the node is a Type node, then `l` points at the first
 /// non-whitespace character of the type name and `r` points to the next
 /// opening parenthesis.
-void Sexpr::get_node_name(const std::string& s, size_t& l, size_t& r,
-                          size_t line_cnt, bool typeNode)
+///
+/// This function was originally written to allow in-place extraction
+/// of the node name. Unfortunately, node names containing escaped
+/// quotes need to be unescaped, which prevents in-place extraction.
+/// So, instead, this returns the unescaped node name.
+std::string Sexpr::get_node_name(const std::string& s,
+                                 size_t& l, size_t& r,
+                                 Type atype, size_t line_cnt)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+
+	bool typeNode = namer.isA(atype, TYPE_NODE);
 
 	// Scheme strings start and end with double-quote.
 	// Scheme symbols start with single-quote.
@@ -142,6 +150,17 @@ void Sexpr::get_node_name(const std::string& s, size_t& l, size_t& r,
 	else
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 	r = p;
+
+	// We use std::quoted() to unescape embedded quotes.
+	// Unescaping works ONLY if the leading character is a quote!
+	// So readjust left and right to pick those up.
+	if ('"' == s[l-1]) l--; // grab leading quote, for std::quoted().
+	if ('"' == s[r]) r++;   // step past trailing quote.
+	std::stringstream ss;
+	std::string name;
+	ss << s.substr(l, r-l);
+	ss >> std::quoted(name);
+	return name;
 }
 
 /// Extract SimpleTruthValue and return that, else throw an error.
@@ -202,24 +221,12 @@ Handle Sexpr::decode_atom(const std::string& s,
 	{
 		l1 = l;
 		r1 = r;
-		size_t l2;
-		get_node_name(s, l1, r1, line_cnt, namer.isA(atype, TYPE_NODE));
-
-		// We use std::quoted() to unescape embedded quotes.
-		// Unescaping works ONLY if the leading character is a quote!
-		// So readjust left and right to pick those up.
-		if ('"' == s[l1-1]) l1--; // grab leading quote, for std::quoted().
-		if ('"' == s[r1]) r1++; // step past trailing quote.
-		l2 = r1;
-
-		std::stringstream ss;
-		std::string name;
-		ss << s.substr(l1, r1-l1);
-		ss >> std::quoted(name);
+		const std::string name = get_node_name(s, l1, r1, atype, line_cnt);
 
 		Handle h(createNode(atype, std::move(name)));
 
 		// There might be an stv in the content. Handle it.
+		size_t l2 = r1;
 		size_t r2 = r;
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
