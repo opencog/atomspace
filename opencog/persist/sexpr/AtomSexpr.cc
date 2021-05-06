@@ -204,12 +204,17 @@ Handle Sexpr::decode_atom(const std::string& s,
 		r1 = r;
 		size_t l2;
 		get_node_name(s, l1, r1, line_cnt, namer.isA(atype, TYPE_NODE));
+
+		// We use std::quoted() to unescape embedded quotes.
+		// Unescaping works ONLY if the leading character is a quote!
+		// So readjust left and right to pick those up.
+		if ('"' == s[l1-1]) l1--; // grab leading quote, for std::quoted().
+		if ('"' == s[r1]) r1++; // step past trailing quote.
 		l2 = r1;
-		if ('"' == s[l2]) l2++; // step past trailing quote.
 
 		std::stringstream ss;
 		std::string name;
-		ss << s.substr(l1-1, r1-l1+2); // Pad, to pick up quotes.
+		ss << s.substr(l1, r1-l1);
 		ss >> std::quoted(name);
 
 		Handle h(createNode(atype, std::move(name)));
