@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
+
 #include <opencog/atoms/atom_types/NameServer.h>
 
 #include "Node.h"
@@ -38,8 +40,9 @@ void Node::init()
 }
 
 /// Return a universally-unique string for each distinct node.
-/// It needs to be fast, to be human-readable, and without any
-/// trailing newlines.
+/// It needs to be fast (because it is used in performance-critical
+/// code paths), it needs to be human-readable, and it must not have
+/// any trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
     std::string answer = indent;
@@ -52,6 +55,21 @@ std::string Node::to_short_string(const std::string& indent) const
 
     answer += ")";
     return answer;
+}
+
+/// Return a universally-unique string for each distinct node.
+/// It needs to be fast (because it is used in performance-critical
+/// code paths), it needs to escape embedded quotes, and it must
+/// not have any trailing newlines.
+///
+std::string Node::to_string_esc() const
+{
+    std::stringstream ss;
+
+    ss << "(" << nameserver().getTypeName(_type) << " "
+       << std::quoted(_name) << ")";
+
+    return ss.str();
 }
 
 std::string Node::to_string(const std::string& indent) const

@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
+
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
@@ -47,6 +49,16 @@ std::string StringValue::to_string(const std::string& indent) const
 		rv += std::string(" \"") + v + "\"";
 	rv += ")";
 	return rv;
+}
+
+std::string StringValue::to_string_esc(void) const
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(_type);
+	for (const std::string& v :_value)
+		ss << "" << std::quoted(v);
+	ss << ")";
+	return ss.str();
 }
 
 // Adds factory when library is loaded.
