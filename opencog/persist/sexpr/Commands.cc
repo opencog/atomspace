@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include <functional>
+#include <iomanip>
 #include <string>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -225,9 +226,10 @@ std::string Commands::interpret_command(AtomSpace* as,
 		Handle h;
 		if (node == act)
 		{
-			pos = cmd.find('"', pos+1) + 1;
-			size_t nos = cmd.find('"', pos);
-			h = as->get_node(t, cmd.substr(pos, nos-pos));
+			size_t l = pos+1;
+			size_t r = cmd.size();
+			std::string name = Sexpr::get_node_name(cmd, l, r, t);
+			h = as->get_node(t, std::move(name));
 		}
 		else
 		if (link == act)
