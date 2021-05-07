@@ -893,7 +893,7 @@ void ValueSaveUTest::do_test_link_by_type_quoted()
 	// Start it up again.
 
 	as = new AtomSpace();
-	hsn = as->add_node(ROCKS_STORAGE_NODE, std::string(uri));
+	hsn = as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	store = StorageNodeCast(hsn);
 	store->open();
 	TS_ASSERT(store->connected())
@@ -914,9 +914,8 @@ void ValueSaveUTest::do_test_link_by_type_quoted()
 	store->fetch_all_atoms_of_type(LIST_LINK);
 	store->barrier();
 
-	// We created 9 new atoms above, so expect 15 from before plus 9
-	printf ("fetched %lu atoms, expecting 24\n", as->get_size());
-	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 24);
+	printf ("fetched %lu atoms, expecting 15\n", as->get_size());
+	TSM_ASSERT("Wrong number of Atoms fetched!", as->get_size() == 15);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
