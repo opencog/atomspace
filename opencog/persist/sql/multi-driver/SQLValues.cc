@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <iomanip>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -71,16 +73,27 @@ std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
 
 std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
 {
+	const char delim {'\\'};
+	const char escape {'\\'};
 	bool not_first = false;
-	std::string str = "\'{";
+	std::stringstream ss;
+	ss << "E\'{";
 	for (const std::string& v : svle->value())
 	{
-		if (not_first) str += ", ";
+		if (not_first) ss << ", ";
 		not_first = true;
-		str += v;
+
+		// Ugh. Escape the quotes, and then double the backslashes.
+		// I tried to use postgres double-dollar escapes, but could
+		// not get it to work.
+		std::stringstream esc, bak;
+		esc << std::quoted(v);
+		bak << std::quoted(esc.str(), delim, escape);
+		std::string backback = bak.str();
+		ss << backback.substr(1, backback.length()-2);
 	}
-	str += "}\'";
-	return str;
+	ss << "}\'";
+	return ss.str();
 }
 
 std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
@@ -410,29 +423,53 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
+	// or, when there are embeddd quotes:
+	// {aaa,"bb\"bb\"bb","ccc\"{,}\"ccc ccc"}
 	// Split it along the commas.
 	if (vtype == STRING_VALUE)
 	{
 		std::vector<std::string> strarr;
 		char *s = strdup(rp.strval);
-		char *p = s;
+		char* p = s;
 		if (p and *p == '{') p++;
 		while (p)
 		{
-			if (*p == '}' or *p == '\0') break;
-			// String terminates at comma or close-brace.
-			char * c = strchr(p, ',');
-			if (c) *c = 0;
-			else c = strchr(p, '}');
-			if (c) *c = 0;
+			if ('}' == *p or '\0' == *p) break;
 
-			// Wipe out quote marks
-			if (*p == '"') p++;
-			if (c and *(c-1) == '"') *(c-1) = 0;
+			// Advance past escaped quotes.
+			if ('"' == *p)
+			{
+				p++;
+				char* a = p;
+				char* q = p;
+				while (true)
+				{
+					if ('"' == *p and '\\' != *(p-1)) break;
+					*q = *p;
+					p++;
+					// Drop backslashes
+					if ('\\' != *q or '"' != *p) q++;
+				}
+				*q = 0;
+				strarr.emplace_back(a);
+				p++;
+				if (',' == *p) p++;
+			}
+			else
+			{
+				// String terminates at comma or close-brace.
+				char * c = strchr(p, ',');
+				if (c) *c = 0;
+				else c = strchr(p, '}');
+				if (c) *c = 0;
+				else
+					throw IOException(TRACE_INFO,
+						"Malformed value list=%s", s);
 
-			strarr.emplace_back(p);
-			p = c;
-			p++;
+				strarr.emplace_back(p);
+				p = c;
+				p++;
+			}
 		}
 		free(s);
 		return createStringValue(strarr);
