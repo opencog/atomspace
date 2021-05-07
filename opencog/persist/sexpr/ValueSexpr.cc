@@ -214,6 +214,7 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		if (')' != stv[p])
 			throw SyntaxException(TRACE_INFO,
 				"Missing closing paren in StringValue: %s", stv.substr(vos).c_str());
+		pos = ++p;
 		return valueserver().create(vtype, sv);
 	}
 
