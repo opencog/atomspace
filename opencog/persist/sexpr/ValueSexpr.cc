@@ -20,9 +20,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <iomanip>
+
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/ValueFactory.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
@@ -140,6 +144,14 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			while (0 < pcnt and epos < totlen)
 			{
 				char c = stv[++epos];
+
+				// Advance past escaped quotes.
+				if ('"' == c)
+				{
+					++epos;
+					for (; epos < totlen and (stv[epos] != '"' or (stv[epos-1] == '\\')); epos++);
+					continue;
+				}
 				if ('(' == c) pcnt ++;
 				else if (')' == c) pcnt--;
 			}
@@ -172,23 +184,37 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return valueserver().create(vtype, fv);
 	}
 
-	// XXX FIXME this mishandles escaped quotes
+	// Unescape escaped quotes
 	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		std::vector<std::string> sv;
-		size_t epos = stv.find(')', vos+1);
-		if (std::string::npos == epos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed StringValue: %s", stv.substr(pos).c_str());
-		while (vos < epos)
+		size_t p = vos+1;
+
+		while ('"' == stv[p])
 		{
-			vos = stv.find('\"', vos);
-			if (std::string::npos == vos) break;
-			size_t evos = stv.find('\"', vos+1);
-			sv.push_back(stv.substr(vos+1, evos-vos-1));
-			vos = evos+1;
+			size_t e = p + 1;
+
+			// Advance past escaped quotes.
+			for (; e < totlen and (stv[e] != '"' or (stv[e-1] == '\\')); e++);
+			e++;
+			if (totlen <= e)
+				throw SyntaxException(TRACE_INFO,
+					"Malformed StringValue: %s", stv.substr(vos).c_str());
+
+			// Unescape quotes in the string.
+			std::stringstream ss;
+			std::string val;
+			ss << stv.substr(p, e-p);
+			ss >> quoted(val);
+			sv.push_back(val);
+
+			// Skip past whitespace
+			p = stv.find_first_not_of(" \n\t", e);
 		}
-		pos = epos + 1;
+		if (')' != stv[p])
+			throw SyntaxException(TRACE_INFO,
+				"Missing closing paren in StringValue: %s", stv.substr(vos).c_str());
+		pos = ++p;
 		return valueserver().create(vtype, sv);
 	}
 
@@ -285,9 +311,11 @@ void Sexpr::decode_slist(const Handle& atom,
 
 static std::string prt_node(const Handle& h)
 {
-	std::string txt = "(" + nameserver().getTypeName(h->get_type())
-		+ " \"" + h->get_name() + "\")";
-	return txt;
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name()) << ")";
+
+	return ss.str();
 }
 
 static std::string prt_atom(const Handle&);
@@ -320,12 +348,13 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{
-		// The FloatValue to_string() print prints out a high-precision
+		// The FloatValue to_string() method prints out a high-precision
 		// form of the value, as compared to SimpleTruthValue, which
 		// only prints 6 digits and breaks the unit tests.
 		FloatValuePtr fv(FloatValueCast(v));
 		return fv->FloatValue::to_string();
 	}
+
 	if (not v->is_atom())
 		return v->to_short_string();
 	return prt_atom(HandleCast(v));

@@ -19,6 +19,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <iomanip>
+
 #include <opencog/atoms/value/LinkValue.h>
 
 // Installed into opencog/persist/file/fast_load.h
@@ -43,6 +46,7 @@ public:
     void tearDown() {}
 
     void test_expr_parse();
+    void test_quoted_node();
     void test_pattern_parse();
     void test_dense_parse();
     void test_dense_loop();
@@ -62,6 +66,28 @@ void FastLoadUTest::test_expr_parse()
 
     TS_ASSERT_EQUALS(5, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test parseExpression
+void FastLoadUTest::test_quoted_node()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::stringstream ss;
+    ss << "(Concept " << std::quoted(R"("f""o"""o"!!!"")") << ")";
+    std::string in = ss.str();
+    printf("Input string %s\n", in.c_str());
+
+    Handle h = parseExpression(in, _as);
+    printf("Parsed Atom h=%s\n", h->to_short_string().c_str());
+
+    Handle expected = _as.get_node(CONCEPT_NODE, R"("f""o"""o"!!!"")");
+    TS_ASSERT (expected != nullptr);
+
+    printf("Got %s\n", expected->to_short_string().c_str());
+    TS_ASSERT_EQUALS(h, expected);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

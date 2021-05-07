@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
+
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
@@ -40,13 +42,18 @@ bool StringValue::operator==(const Value& other) const
 
 // ==============================================================
 
+/// Print the StringValue. Escape any quotes in the strings when
+/// printing. This is needed for readability, since this is an
+/// array of strings, and without the escapes, we can't tell where
+/// strings start and end.
 std::string StringValue::to_string(const std::string& indent) const
 {
-	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	for (std::string v :_value)
-		rv += std::string(" \"") + v + "\"";
-	rv += ")";
-	return rv;
+	std::stringstream ss;
+	ss << indent << "(" << nameserver().getTypeName(_type);
+	for (const std::string& v :_value)
+		ss << " " << std::quoted(v);
+	ss << ")";
+	return ss.str();
 }
 
 // Adds factory when library is loaded.

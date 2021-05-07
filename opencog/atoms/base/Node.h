@@ -84,6 +84,7 @@ public:
      */
     std::string to_string(const std::string& indent) const;
     std::string to_short_string(const std::string& indent) const;
+    std::string to_string_esc(void) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
