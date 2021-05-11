@@ -85,6 +85,7 @@
 			(in-base? #f)
 			(disjoint-left #f)
 			(disjoint-right #f)
+			(distinct-type #f)
 			(pred-node (PredicateNode
 				(string-append "*-Direct Sum Wild " id-string)))
 			(left-wnode (AnyNode "left-wild-direct-sum"))
@@ -93,24 +94,36 @@
 
 		; Initialize predicates for the left-right basis members.
 		(define (init-a-base)
-			(if (not type-a?)
-				; The bases are disjoint, if the number of elts in the
-				; union is equal to the num elts in each part.
-				(let ((djl (= (+ (LLA 'left-basis-size) (LLB 'left-basis-size))
+			(when (not type-a?)
+
+				; If the right-types are different, then clearly they're
+				; disjoint.
+				(set! disjoint-left
+					(not (equal? (LLA 'left-type) (LLB 'left-type))))
+				(set! disjoint-right
+					(not (equal? (LLA 'right-type) (LLB 'right-type))))
+
+				(set! distinct-type (or disjoint-left disjoint-right))
+
+				; Hmm. Interesting. A direct sum of the same kind.
+				(when (not distinct-type)
+
+					; The bases are disjoint, if the number of elts in
+					; the union is equal to the num elts in each part.
+					(set! disjoint-left
+						 (= (+ (LLA 'left-basis-size) (LLB 'left-basis-size))
 								(left-basis-size)))
-						(djr (= (+ (LLA 'right-basis-size) (LLB 'right-basis-size))
-								(right-basis-size))))
+					(set! disjoint-right
+						 (= (+ (LLA 'right-basis-size) (LLB 'right-basis-size))
+								(right-basis-size)))
 
 					; Either the left or the right basis must be disjoint.
-					(if (not (or djl djr))
+					(if (not (or disjoint-left disjoint-right))
 						(throw 'wrong-type-arg 'direct-sum
 							"Either the left or the right basis must be disjoint!"))
 
-					(set! disjoint-left djl)
-					(set! disjoint-right djr)
-
 					(set! in-base?
-						(if djl
+						(if disjoint-left
 							(make-aset-predicate (a-stars 'left-basis))
 							(make-aset-predicate (a-stars 'right-basis))))
 
@@ -119,8 +132,8 @@
 					(set! type-a?
 						(lambda (L-ATOM R-ATOM)
 							(or
-								(and djl (in-base? L-ATOM))
-								(and djr (in-base? R-ATOM)))))
+								(and disjoint-left (in-base? L-ATOM))
+								(and disjoint-right (in-base? R-ATOM)))))
 			)))
 
 		; Initialize predicate for the members of A
@@ -179,16 +192,25 @@
 				(LLB 'get-pair L-ATOM R-ATOM)))
 
 		; Create a pair, whether or not it exists.
-		; Assumes that the right-basis of LLA is disjoint from the
-		; right-basis of LLB. Thus, we can unambigously know which
-		; type to create. This assumes the user is only trying to
-		; create wild-cards with this function; it breaks down
-		; utterly for anything else.
+		; Assumes that either the left or right types are distinct
+		; (and so we can dispatch based on the types) or, if not,
+		; then that the atoms are in left/right basis, (and can thus
+		; be dispatched based on membership.) If this is not the case,
+		; this will return undefined results. This should be good enough
+		; to create the needed wild-cards.
 		(define (make-pair L-ATOM R-ATOM)
 			(init-a-base)
-			(if (type-a? L-ATOM R-ATOM)
-				(LLA 'make-pair L-ATOM R-ATOM)
-				(LLB 'make-pair L-ATOM R-ATOM)))
+			(if distinct-type
+				(if disjoint-left
+					(if (equal? (cog-type L-ATOM) (LLA 'left-type))
+						(LLA 'make-pair L-ATOM R-ATOM)
+						(LLB 'make-pair L-ATOM R-ATOM))
+					(if (equal? (cog-type R-ATOM) (LLA 'right-type))
+						(LLA 'make-pair L-ATOM R-ATOM)
+						(LLB 'make-pair L-ATOM R-ATOM)))
+				(if (type-a? L-ATOM R-ATOM)
+					(LLA 'make-pair L-ATOM R-ATOM)
+					(LLB 'make-pair L-ATOM R-ATOM))))
 
 		; Given a pair, find the left element in it.
 		(define (get-pair-left PAIR)
