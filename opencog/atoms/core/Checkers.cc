@@ -66,7 +66,10 @@ bool check_evaluatable(const Handle& bool_atom)
 		// well, in that case these are interpreted as intersection,
 		// union and complement. Since it cannot inherit from
 		// EVALUATABLE_LINK (cause it's a Node) we have to add it here.
-		if (h->is_type(CONCEPT_NODE)) continue;
+		// We add SetLink here as they can be interpreted as a concept.
+		if (h->is_type(CONCEPT_NODE) or
+			h->is_type(SET_LINK))
+			continue;
 
 		// Fucking quote links. I hate those with a passion.
 		if (QUOTE_LINK == t) continue;
@@ -79,7 +82,6 @@ bool check_evaluatable(const Handle& bool_atom)
 		// specialized operator to explicitely map the higher order into
 		// the lower order but as of today it is required.
 		if (h->is_type(INHERITANCE_LINK) or
-			h->is_type(SET_LINK) or
 		    h->is_type(SIMILARITY_LINK) or
 		    h->is_type(IMPLICATION_LINK) or
 		    h->is_type(EQUIVALENCE_LINK) or
