@@ -181,12 +181,8 @@
 "
   delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-duplicates`, but is faster.
-
-  This will usually be faster than calling `delete-duplicates` whenever
-  the ATOM-LIST is large (probably when its longer than 10 atoms long??)
+  This does the same thing as srfi-1 `delete-duplicates`, but is faster.
 "
-
 	(define atom-set (make-atom-set))
 	(for-each atom-set ATOM-LIST)
 	(atom-set #f)
@@ -198,20 +194,9 @@
 "
   remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-dup-atoms` but is slower(?)
-
-  This will usually be faster than calling `delete-duplicates` whenever
-  the ATOM-LIST is large (probably when its longer than 10 atoms long??)
+  This does the same thing as srfi-1 `delete-duplicates` but is faster.
 "
-
-	; Sort first, and then filter.
-	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
-	(if (null? sorted-atoms) '()
-		(fold
-			(lambda (ATM LST)
-				(if (equal? ATM (car LST)) LST (cons ATM LST)))
-			(list (car sorted-atoms))
-			(cdr sorted-atoms)))
+	(delete-dup-atoms ATOM-LIST)
 )
 
 ; ---------------------------------------------------------------------
