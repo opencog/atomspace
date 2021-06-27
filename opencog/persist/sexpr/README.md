@@ -31,7 +31,7 @@ Scheme API
 ----------
 The fast file loader loads Atomese formatted as scheme. So, of course,
 you could just use the scheme `load` function!  But this can be slow,
-painfully slow. The fast loader provies a 10x performance improvement.
+painfully slow. The fast loader provides a 10x performance improvement.
 
 Use it like so:
 ```
