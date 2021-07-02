@@ -110,11 +110,6 @@ void PersistSCM::init(void)
 // South Texas Nuclear Project
 #define GET_STNP \
 	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) { \
-		if (hsn->get_type() == STORAGE_NODE) { \
-			throw RuntimeException(TRACE_INFO, \
-				"A StorageNode cannot be used directly; " \
-				"only it's sub-types provide the needed implementation!"); \
-		} \
 		throw RuntimeException(TRACE_INFO, \
 			"Expecting StorageNode, got %s", hsn->to_short_string().c_str()); \
 	} \
@@ -124,12 +119,18 @@ void PersistSCM::init(void)
 	/* The cast will fail, if the dynamic library that defines the type */ \
 	/* isn't loaded. This is the user's job. They can do it by saying */ \
 	/* (use-modules (opencog persist-foo) */ \
-	if (nullptr == stnp) \
+	if (nullptr == stnp) { \
+		if (hsn->get_type() == STORAGE_NODE) { \
+			throw RuntimeException(TRACE_INFO, \
+				"A StorageNode cannot be used directly; " \
+				"only it's sub-types provide the needed implementation!"); \
+		} \
 		throw RuntimeException(TRACE_INFO, \
 			"Not opened; please load module that defines %s\n" \
 			"Like so: (use-modules (persist-foo))\n" \
 			"where `foo` is the module providing the node.", \
-			nameserver().getTypeName(hsn->get_type()).c_str());
+			nameserver().getTypeName(hsn->get_type()).c_str()); \
+	}
 
 StorageNodePtr PersistSCM::_sn;
 
