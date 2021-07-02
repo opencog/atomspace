@@ -109,9 +109,15 @@ void PersistSCM::init(void)
 
 // South Texas Nuclear Project
 #define GET_STNP \
-	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) \
+	if (not nameserver().isA(hsn->get_type(), STORAGE_NODE)) { \
+		if (hsn->get_type() == STORAGE_NODE) { \
+			throw RuntimeException(TRACE_INFO, \
+				"A StorageNode cannot be used directly; " \
+				"only it's sub-types provide the needed implementation!"); \
+		} \
 		throw RuntimeException(TRACE_INFO, \
 			"Expecting StorageNode, got %s", hsn->to_short_string().c_str()); \
+	} \
  \
 	StorageNodePtr stnp = StorageNodeCast(hsn); \
  \
@@ -121,7 +127,8 @@ void PersistSCM::init(void)
 	if (nullptr == stnp) \
 		throw RuntimeException(TRACE_INFO, \
 			"Not opened; please load module that defines %s\n" \
-			"Like so: (use-modules (persist-foo))", \
+			"Like so: (use-modules (persist-foo))\n" \
+			"where `foo` is the module providing the node.", \
 			nameserver().getTypeName(hsn->get_type()).c_str());
 
 StorageNodePtr PersistSCM::_sn;
