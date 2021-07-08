@@ -42,12 +42,16 @@ StorageNode::~StorageNode()
 {
 }
 
+std::string StorageNode::monitor(void)
+{
+	return "This StorageNode does not implement a monitor.";
+}
+
 // ====================================================================
 
 void StorageNode::barrier(void)
 {
 	getAtomTable()->barrier();
-	barrier();
 }
 
 void StorageNode::store_atom(const Handle& h)

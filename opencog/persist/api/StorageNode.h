@@ -82,6 +82,11 @@ public:
 	 */
 	virtual void erase(void) = 0;
 
+	/**
+	 * Return debug diagnostics and/or performance monitoring stats.
+	 */
+	virtual std::string monitor(void);
+
 	// ----------------------------------------------------------------
 	// Operations regarding specific atomspace contents.
 

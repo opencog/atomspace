@@ -55,6 +55,7 @@ private:
 	static bool sn_delete(Handle, Handle);
 	static bool sn_delete_recursive(Handle, Handle);
 	static void sn_barrier(Handle);
+	static std::string sn_monitor(Handle);
 
 	// Single global default storage node,
 	// which all the functions below use.
@@ -77,6 +78,7 @@ private:
 	bool dflt_delete(Handle);
 	bool dflt_delete_recursive(Handle);
 	void dflt_barrier(void);
+	std::string dflt_monitor(void);
 
 public:
 	PersistSCM(void);

@@ -74,6 +74,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_delete_recursive, "persist", false);
 	define_scheme_primitive("sn-barrier",
 	             &PersistSCM::sn_barrier, "persist", false);
+	define_scheme_primitive("sn-monitor",
+	             &PersistSCM::sn_monitor, "persist", false);
 
 	define_scheme_primitive("dflt-fetch-atom",
 	             &PersistSCM::dflt_fetch_atom, this, "persist", false);
@@ -103,6 +105,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_delete_recursive, this, "persist", false);
 	define_scheme_primitive("dflt-barrier",
 	             &PersistSCM::dflt_barrier, this, "persist", false);
+	define_scheme_primitive("dflt-monitor",
+	             &PersistSCM::dflt_monitor, this, "persist", false);
 }
 
 // =====================================================================
@@ -243,6 +247,12 @@ void PersistSCM::sn_barrier(Handle hsn)
 	stnp->barrier();
 }
 
+std::string PersistSCM::sn_monitor(Handle hsn)
+{
+	GET_STNP;
+	return stnp->monitor();
+}
+
 // =====================================================================
 
 #define CHECK \
@@ -338,6 +348,12 @@ void PersistSCM::dflt_barrier(void)
 {
 	CHECK;
 	_sn->barrier();
+}
+
+std::string PersistSCM::dflt_monitor(void)
+{
+	CHECK;
+	return _sn->monitor();
 }
 
 void opencog_persist_init(void)

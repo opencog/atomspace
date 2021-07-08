@@ -28,6 +28,7 @@
 	cog-delete!
 	cog-delete-recursive!
 	barrier
+	monitor
 	load-atomspace
 	store-atomspace)
 
@@ -205,6 +206,19 @@
     be applied to it. It must be a StorageNode.
 "
 	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
+)
+
+(define*-public (monitor-storage #:optional (STORAGE #f))
+"
+ monitor-storage [STORAGE]
+
+    Return a string containing storage performance monitoring and
+    debugging information.
+
+    If the optional STORAGE argument is provided, then the statistics
+    will be printed for that Node. It must be a StorageNode.
+"
+	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
 )
 
 (define*-public (load-atomspace #:optional (STORAGE #f))
