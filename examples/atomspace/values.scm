@@ -26,8 +26,9 @@
 ;
 ; 1) Use GetLink or BindLink to search for Values
 ; 2) Use PutLink to create new Values
-; 3) Store them in the Atomspace for later retrieval. (but you can
-;    store the Atom attache there; the Value will ride with it.)
+; 3) Store them in the Atomspace for later retrieval. (But you do
+;    store the Atom that serves as the anchor for the Value; the Value
+;    will ride with it.)
 ;
 ; Values and Atoms do share a common type system: one can work with
 ; Value types in the same was as with Atom types. This includes using
@@ -106,6 +107,12 @@
 (cog-tv a)
 (equal? (cog-value a ktv) (cog-tv a))
 
+; ----------------------------------------------------------------
+; If you have the Attention module built and installed, you can
+; use AttentionValues.  If you don't, then the rest of this demo
+; won't work.  That's OK; AttentionValues ar optional.
+(use-modules (opencog attention-bank))
+
 ; Truth Values are values, just like the rest. So are Attention Values:
 (define l2 (LinkValue
   (stv 0.1 0.2) (stv 0.3 0.4) (Concept "foobar") (av 3 2 1) (av 4 5 0)))
@@ -114,7 +121,6 @@
 (cog-value a k2)
 
 ; Attention values are stored under a special key as well:
-(use-modules (opencog attentionbank))
 (cog-set-av! a (av 3 2 1))
 (cog-keys a)
 
@@ -134,6 +140,7 @@
    (Predicate "weight_in_kg") (FloatValue 12.5))
 ;
 ; and then search for it:
+(use-modules (opencog exec))
 (cog-execute!
    (Get
       (GreaterThan
