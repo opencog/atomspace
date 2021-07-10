@@ -374,6 +374,13 @@ jobs:
           name: Install Attention
           command: cd /ws/attention/build && make install && ldconfig
       - run:
+          name: Install Link Grammar Atomese
+          command: |
+            git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/lg-atomese /ws/lg-atomese
+            mkdir -p /ws/lg-atomese/build
+            cd /ws/lg-atomese/build && cmake .. && make -j2 && make -j2 install
+            ldconfig
+      - run:
           name: Checkout OpenCog
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/opencog .
       - run:
