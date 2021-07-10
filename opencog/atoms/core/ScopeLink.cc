@@ -343,6 +343,10 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 	// As to not mix together VariableList and VariableSet
 	fnv1a_hash(hsh, _variables._ordered);
 
+	// If there's an AnchorNode, hash that too.
+	if (_variables._anchor)
+		fnv1a_hash(hsh, _variables._anchor);
+
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;
 	UnorderedHandleSet hidden;
