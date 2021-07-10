@@ -90,9 +90,11 @@ ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
 ///
 void ScopeLink::extract_variables(const HandleSeq& oset)
 {
-	if (oset.size() == 0)
+	size_t sz = oset.size();
+	if (0 == sz)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a non-empty outgoing set.");
+			"Expecting an outgoing set size of at least one; got %s",
+			to_short_string().c_str());
 
 	Type decls = oset.at(0)->get_type();
 
@@ -115,6 +117,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	    // declaration, that is if the Scope has only one argument.
 	    (VARIABLE_NODE != decls or oset.size() == 1) and
 	    TYPED_VARIABLE_LINK != decls and
+	    ANCHOR_NODE != decls and
 	    GLOB_NODE != decls)
 	{
 		_body = oset[0];
@@ -132,16 +135,23 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	size_t sz = oset.size();
-	if (sz < 1)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an outgoing set size of at least one; got %s",
-			to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration. JoinLinks need not have a body.
 	_vardecl = oset[0];
-	if (2 <= sz) _body = oset[1];
+
+	if (2 <= sz)
+	{
+		_body = oset[1];
+
+		// If the user is using an AnchorNode, but not otherwise specifying
+		// variables, we have to fish them out of the body.
+		if (ANCHOR_NODE == decls)
+		{
+			_variables.find_variables(_body);
+			return;
+		}
+	}
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
