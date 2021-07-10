@@ -51,8 +51,25 @@ std::string Node::to_short_string(const std::string& indent) const
     answer = indent + '(' + nameserver().getTypeName(_type) + " \"";
     for (unsigned int i=0; i < len; i++)
     {
-        if ('"' == _name[i] or '\\' == _name[i]) answer += '\\';
-        answer += _name[i];
+        if ('"' == _name[i] or '\\' == _name[i])
+        {
+            answer += '\\';
+            answer += _name[i];
+        }
+        else if ((unsigned char) _name[i] < 0x20)
+        {
+            // Characters that control printing.
+            if ('\a' == _name[i]) answer += "\a";
+            else if ('\b' == _name[i]) answer += "\\b";
+            else if ('\t' == _name[i]) answer += "\\t";
+            else if ('\n' == _name[i]) answer += "\\n";
+            else if ('\v' == _name[i]) answer += "\\v";
+            else if ('\f' == _name[i]) answer += "\\f";
+            else if ('\r' == _name[i]) answer += "\\r";
+            else answer += _name[i];
+        }
+        else
+            answer += _name[i];
     }
     answer += '\"';
 
