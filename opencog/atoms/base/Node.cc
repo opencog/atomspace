@@ -45,15 +45,22 @@ void Node::init()
 /// any trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::string answer = indent;
-    answer += "(" + nameserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
+    size_t len = _name.length();
+    std::string answer;
+    answer.reserve(2*len);
+    answer = indent + '(' + nameserver().getTypeName(_type) + " \"";
+    for (unsigned int i=0; i < len; i++)
+    {
+        if ('"' == _name[i] or '\\' == _name[i]) answer += '\\';
+        answer += _name[i];
+    }
+    answer += '\"';
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
+        answer += ' ' + getTruthValue()->to_string();
 
-    answer += ")";
+    answer += ')';
     return answer;
 }
 
