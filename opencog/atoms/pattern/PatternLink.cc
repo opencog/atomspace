@@ -139,7 +139,7 @@ void PatternLink::init(void)
 	{
 		throw InvalidParamException(TRACE_INFO,
 		      "Expecting (optional) variable decls and a body; got %s",
-		      to_string().c_str());
+		      to_short_string().c_str());
 	}
 
 	unbundle_clauses(_body);

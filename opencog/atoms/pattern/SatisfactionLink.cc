@@ -55,8 +55,7 @@ TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 	// If there is an anchor, then attach results to the anchor.
 	if (_variables._anchor and as)
 	{
-		for (const Handle& h : sater._ground->getOutgoingSet())
-			as->add_link(MEMBER_LINK, h, _variables._anchor);
+		as->add_link(MEMBER_LINK, sater._ground, _variables._anchor);
 	}
 
 	return sater._result;
