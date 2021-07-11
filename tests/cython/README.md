@@ -5,7 +5,7 @@
 
 Installation using ```apt-get``` package manager :
 ```
-apt-get install python-nose
+apt-get install python3-nose
 ```
 
 ## Running tests

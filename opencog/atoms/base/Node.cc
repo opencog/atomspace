@@ -45,15 +45,39 @@ void Node::init()
 /// any trailing newlines.
 std::string Node::to_short_string(const std::string& indent) const
 {
-    std::string answer = indent;
-    answer += "(" + nameserver().getTypeName(_type);
-    answer += " \"" + _name + "\"";
+    size_t len = _name.length();
+    std::string answer;
+    answer.reserve(2*len);
+    answer = indent + '(' + nameserver().getTypeName(_type) + " \"";
+    for (unsigned int i=0; i < len; i++)
+    {
+        if ('"' == _name[i] or '\\' == _name[i])
+        {
+            answer += '\\';
+            answer += _name[i];
+        }
+        else if ((unsigned char) _name[i] < 0x20)
+        {
+            // Characters that control printing.
+            if ('\a' == _name[i]) answer += "\a";
+            else if ('\b' == _name[i]) answer += "\\b";
+            else if ('\t' == _name[i]) answer += "\\t";
+            else if ('\n' == _name[i]) answer += "\\n";
+            else if ('\v' == _name[i]) answer += "\\v";
+            else if ('\f' == _name[i]) answer += "\\f";
+            else if ('\r' == _name[i]) answer += "\\r";
+            else answer += _name[i];
+        }
+        else
+            answer += _name[i];
+    }
+    answer += '\"';
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
+        answer += ' ' + getTruthValue()->to_string();
 
-    answer += ")";
+    answer += ')';
     return answer;
 }
 
