@@ -40,6 +40,8 @@ static Handle parseStream(std::istream& in, AtomSpace& as)
     Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
+    int pcount = 0;
+    size_t r = 0;
 
     std::string expr;
     while (!in.eof())
@@ -51,10 +53,10 @@ static Handle parseStream(std::istream& in, AtomSpace& as)
         while (true)
         {
             size_t l = 0;
-            size_t r = expr.length();
+            r = expr.length();
 
             // Zippy the Pinhead says: Are we having fun yet?
-            int pcount = Sexpr::get_next_expr(expr, l, r, line_cnt);
+            pcount = Sexpr::get_next_expr(expr, l, r, line_cnt);
 
             // Trim away comments at end of line
             if (0 < pcount)
@@ -73,6 +75,10 @@ static Handle parseStream(std::istream& in, AtomSpace& as)
         }
     }
 
+    if (0 < pcount)
+        throw std::runtime_error(
+            "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
+
     return h;
 }
 
@@ -81,7 +87,7 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 {
     std::ifstream f(fname);
     if (not f.is_open())
-       throw std::runtime_error("Cannot find file >>" + fname + "<<");
+        throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
     parseStream(f, as);
     
@@ -89,8 +95,33 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 }
 
 // Parse an Atomese string expression and return a Handle to the parsed atom
-Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
+Handle opencog::parseExpression(const std::string& exp, AtomSpace &as)
 {
-    std::istringstream sstream(expr);
-    return parseStream(sstream, as);
+    Handle h;
+    size_t expr_cnt = 0;
+    size_t line_cnt = 0;
+    std::string expr = exp;
+
+    while (true)
+    {
+        size_t l = 0;
+        size_t r = expr.length();
+
+        // Zippy the Pinhead says: Are we having fun yet?
+        int pcount = Sexpr::get_next_expr(expr, l, r, line_cnt);
+
+        if (0 < pcount)
+            throw std::runtime_error(
+                "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
+
+        // Finished.
+        if (l == r)
+            break;
+
+        expr_cnt++;
+        h = as.add_atom(Sexpr::decode_atom(expr, l, r, line_cnt));
+        expr = expr.substr(r + 1);
+    }
+
+    return h;
 }
