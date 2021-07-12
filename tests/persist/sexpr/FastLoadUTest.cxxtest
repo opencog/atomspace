@@ -53,6 +53,7 @@ public:
     void test_value();
     void test_value_mix();
     void test_null_value();
+    void test_escapes();
 };
 
 // Test parseExpression
@@ -243,6 +244,30 @@ void FastLoadUTest::test_null_value()
 
     TS_ASSERT_EQUALS(vp, nullptr);
     TS_ASSERT_EQUALS(pos, 2);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test parseExpression
+void FastLoadUTest::test_escapes()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = R"((List (Concept "Zek.\\") (Concept "Planet")))";
+    printf("Going to parse %s\n", in.c_str());
+
+    Handle h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(3, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\n\r\a\b\"") (Concept "Planet")))";
+    printf("Going to parse %s\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(5, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

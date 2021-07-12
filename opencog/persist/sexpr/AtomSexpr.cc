@@ -64,11 +64,11 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
 	bool quoted = false;
 	do {
 		p++;
-		if (s[p] == '"')
-		{
-			if (0 < p and s[p - 1] != '\\')
-				quoted = !quoted;
-		}
+
+		// Skip over any escapes
+		if (s[p] == '\\') { p ++; continue; }
+
+		if (s[p] == '"') quoted = !quoted;
 		else if (quoted) continue;
 		else if (s[p] == '(') count++;
 		else if (s[p] == ')') count--;
