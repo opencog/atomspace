@@ -96,36 +96,16 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 
 // Parse an Atomese string expression and return a Handle to the parsed atom
 // The expression is assumed not to contain any newlines!
-Handle opencog::parseExpression(const std::string& exp, AtomSpace &as)
+Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
 {
     size_t l = 0;
-    size_t r = exp.length();
+    size_t r = expr.length();
     size_t rr = r;
-    int pcount = Sexpr::get_next_expr(exp, l, r, 0);
 
-    if (0 < pcount)
-        throw std::runtime_error(
-            "Unbalanced parenthesis >>" + exp.substr(r) + "<<");
-
-    Handle h = as.add_atom(Sexpr::decode_atom(exp, l, r, 0));
-
-    l = r+1;
-    r = rr;
-    if (l == r) return h;
-
-    Sexpr::get_next_expr(exp, l, r, 0);
-    if (l == r) return h;
-
-    // If we are here, then there is more than one atom in the exp.
-    // For that, we pay the price of a string copy.
-    std::string expr = exp.substr(l);
-    size_t expr_cnt = 1;
+    Handle h;
 
     while (true)
     {
-        l = 0;
-        r = expr.length();
-
         // Zippy the Pinhead says: Are we having fun yet?
         int pcount = Sexpr::get_next_expr(expr, l, r, 0);
 
@@ -137,9 +117,9 @@ Handle opencog::parseExpression(const std::string& exp, AtomSpace &as)
             throw std::runtime_error(
                 "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
 
-        expr_cnt++;
         h = as.add_atom(Sexpr::decode_atom(expr, l, r, 0));
-        expr = expr.substr(r + 1);
+        l = r + 1;
+        r = rr;
     }
 
     return h;
