@@ -52,7 +52,7 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
 	if (l == r) return 0;
 
 	// Ignore comment lines.
-	if (s[l] == ';') { r = l; return 1; }
+	if (s[l] == ';') { l = r; return 1; }
 
 	if (s[l] != '(')
 		throw std::runtime_error(

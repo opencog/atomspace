@@ -254,7 +254,7 @@ void FastLoadUTest::test_escapes()
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     std::string in = R"((List (Concept "Zek.\\") (Concept "Planet")))";
-    printf("Going to parse %s\n", in.c_str());
+    printf("Going to parse >>%s<<\n", in.c_str());
 
     Handle h = parseExpression(in, _as);
 
@@ -262,12 +262,44 @@ void FastLoadUTest::test_escapes()
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
 
     in = R"((List (Concept "Zek.\\;\"\n\r\a\b\"") (Concept "Planet")))";
-    printf("Going to parse %s\n", in.c_str());
+    printf("Going to parse >>%s<<\n", in.c_str());
 
     h = parseExpression(in, _as);
 
     TS_ASSERT_EQUALS(5, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\t\v\f\"") (Concept "Planet"))   )";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(7, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\"\b\a\"") (Concept "Planet")); backspace bell)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(9, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\t;;(\a)\"") (Concept "Planet")) ; what)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(11, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\"\b\a\"") (Concept "Planet")) (Concept "more") ; more more)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(12, _as.get_size());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, h->get_type());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

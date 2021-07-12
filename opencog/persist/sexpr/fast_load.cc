@@ -95,32 +95,28 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 }
 
 // Parse an Atomese string expression and return a Handle to the parsed atom
+// The expression is assumed not to contain any newlines!
 Handle opencog::parseExpression(const std::string& exp, AtomSpace &as)
 {
-    size_t line_cnt = 0;
     size_t l = 0;
     size_t r = exp.length();
     size_t rr = r;
-    int pcount = Sexpr::get_next_expr(exp, l, r, line_cnt);
+    int pcount = Sexpr::get_next_expr(exp, l, r, 0);
 
     if (0 < pcount)
         throw std::runtime_error(
             "Unbalanced parenthesis >>" + exp.substr(r) + "<<");
 
-    Handle h = as.add_atom(Sexpr::decode_atom(exp, l, r, line_cnt));
+    Handle h = as.add_atom(Sexpr::decode_atom(exp, l, r, 0));
 
     l = r+1;
     r = rr;
     if (l == r) return h;
 
-    pcount = Sexpr::get_next_expr(exp, l, r, line_cnt);
-    if (0 < pcount)
-        throw std::runtime_error(
-            "Unbalanced parenthesis >>" + exp.substr(r) + "<<");
-
+    Sexpr::get_next_expr(exp, l, r, 0);
     if (l == r) return h;
 
-    // If we are here, then ther is more than one atom in the exp.
+    // If we are here, then there is more than one atom in the exp.
     // For that, we pay the price of a string copy.
     std::string expr = exp.substr(l);
     size_t expr_cnt = 1;
@@ -131,18 +127,18 @@ Handle opencog::parseExpression(const std::string& exp, AtomSpace &as)
         r = expr.length();
 
         // Zippy the Pinhead says: Are we having fun yet?
-        int pcount = Sexpr::get_next_expr(expr, l, r, line_cnt);
-
-        if (0 < pcount)
-            throw std::runtime_error(
-                "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
+        int pcount = Sexpr::get_next_expr(expr, l, r, 0);
 
         // Finished.
         if (l == r)
             break;
 
+        if (0 < pcount)
+            throw std::runtime_error(
+                "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
+
         expr_cnt++;
-        h = as.add_atom(Sexpr::decode_atom(expr, l, r, line_cnt));
+        h = as.add_atom(Sexpr::decode_atom(expr, l, r, 0));
         expr = expr.substr(r + 1);
     }
 
