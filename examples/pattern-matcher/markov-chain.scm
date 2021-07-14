@@ -22,7 +22,7 @@
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state
@@ -31,24 +31,18 @@
 (define my-state (Anchor "My Chain's Current State"))
 (define my-nexts (Anchor "My Chain's Next State"))
 
-;; The initial state of the Markov chain.  It starts with 100%
-;; probability in this state.
-( (stv 1 1)
-	my-state
-	(Concept "initial state")
+;; Define a function to set the initial state of the Markov chain.
+;; It starts with 100% probability in this state.
+
+(define (reset-state)
+	(List (stv 1 1) my-state (Concept "initial state"))
+	(List (stv 0 1) my-state (Concept "green"))
+	(List (stv 0 1) my-state (Concept "yellow"))
+	(List (stv 0 1) my-state (Concept "red"))
 )
-( (stv 0 1)
-	my-state
-	(Concept "green")
-)
-( (stv 0 1)
-	my-state
-	(Concept "yellow")
-)
-( (stv 0 1)
-	my-state
-	(Concept "red")
-)
+
+;; Call the function to initialize the state
+(reset-state)
 
 ;; --------------------------------------------------------------------
 ;; The set of allowed state transitions.  Its a triangular cycle,
@@ -58,7 +52,7 @@
 ;; Each rule is labelled with the "my-fsm", so that rules for
 ;; different FSM's do not clash with one-another.  A ContextLink is used
 ;; because that will allow this example to generalize: Context's are
-;; usually used to  express conditional probabilities, so that
+;; usually used to express conditional probabilities, so that
 ;;
 ;;     Context  <TV>
 ;;         A
@@ -74,83 +68,47 @@
 ; Transition from initial to green with 90% probability.
 (ContextLink (stv 0.9 1)
 	(Concept "initial state")
-	(
-		my-trans
-		(Concept "green")
-	)
-)
+	(List my-trans (Concept "green")))
 
 ; Transition from initial state to yellow with 10% probability.
 (ContextLink (stv 0.1 1)
 	(Concept "initial state")
-	(
-		my-trans
-		(Concept "yellow")
-	)
-)
+	(List my-trans (Concept "yellow")))
 
 ; Stay in the initial state with probability zero
 (ContextLink (stv 0.0 1)
 	(Concept "initial state")
-	(
-		my-trans
-		(Concept "initial state")
-	)
-)
+	(List my-trans (Concept "initial state")))
 
 ; Transition from green to yellow with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "green")
-	(
-		my-trans
-		(Concept "yellow")
-	)
-)
+	(List my-trans (Concept "yellow")))
 
 ; Transition from green to red with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "green")
-	(
-		my-trans
-		(Concept "red")
-	)
-)
+	(List my-trans (Concept "red")))
 
 ; Transition from yellow to red with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "yellow")
-	(
-		my-trans
-		(Concept "red")
-	)
-)
+	(List my-trans (Concept "red")))
 
 ; Transition from yellow to green with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "yellow")
-	(
-		my-trans
-		(Concept "green")
-	)
-)
+	(List my-trans (Concept "green")))
 
 ; Transition from red to green with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "red")
-	(
-		my-trans
-		(Concept "green")
-	)
-)
+	(List my-trans (Concept "green")))
 
 ; Stay in the red state with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "red")
-	(
-		my-trans
-		(Concept "red")
-	)
-)
+	(List my-trans (Concept "red")))
 
 ;; --------------------------------------------------------------------
 ;;; Create a BindLink that can take a Markov Chain with the name
@@ -161,7 +119,7 @@
 ;;;
 (define (create-chain-stepper chain-name chain-next chain-state)
 	(define curr-state
-		(
+		(List
 			chain-state
 			(Variable "$curr-state")
 		)
@@ -169,14 +127,14 @@
 	(define state-trans
 		(ContextLink
 			(Variable "$curr-state")
-			(
+			(List
 				chain-name
 				(Variable "$next-state")
 			)
 		)
 	)
 	(define next-state
-		(
+		(List
 			chain-next
 			(Variable "$next-state")
 		)
@@ -196,7 +154,7 @@
 		;; ... then adjust the probability...
 		(ExecutionOutput
 			(GroundedSchema "scm: accum-probability")
-			(
+			(List
 				next-state
 				state-trans
 				curr-state
@@ -255,11 +213,11 @@
 (define (create-chain-deleter chain-state)
 	(Bind
 		(Variable "$state")
-        ;; Find the state vector...
-        (List chain-state (Variable "$state"))
-        ;; Delete the state vector.
-        (Delete
-           (List chain-state (Variable "$state"))
+		;; Find the state vector...
+		(List chain-state (Variable "$state"))
+		;; Delete the state vector.
+		(Delete
+			(List chain-state (Variable "$state"))
 		)
 	)
 )
@@ -275,19 +233,19 @@
 (define (create-chain-copier chain-to chain-from)
 	(Bind
 		(Variable "$state")
-        ;; Find the copy-from state vector...
-        (List
-            chain-from
-            (Variable "$state")
-        )
-        ;; Copy it to the copy-to state vector.
-        ;; We need to use an execution-output link to copy
-        ;; the tv values from one to the other.
-        (ExecutionOutput
-            (GroundedSchema "scm:copy-tv")
-            (List
-                (List chain-to (Variable "$state"))
-                (List chain-from (Variable "$state"))
+		;; Find the copy-from state vector...
+		(List
+			chain-from
+			(Variable "$state")
+		)
+		;; Copy it to the copy-to state vector.
+		;; We need to use an execution-output link to copy
+		;; the tv values from one to the other.
+		(ExecutionOutput
+			(GroundedSchema "scm:copy-tv")
+			(List
+				(List chain-to (Variable "$state"))
+				(List chain-from (Variable "$state"))
 			)
 		)
 	)
@@ -306,25 +264,25 @@
 			(Variable "$state")
 			(Type "Concept")
 		)
-        ;; Find the copy-from state vector...
-        (List
-            chain-from
-            (Variable "$state")
+		;; Find the copy-from state vector...
+		(List
+			chain-from
+			(Variable "$state")
 		)
-        (And
-            ;; Copy it to the copy-to state vector.
-            ;; We need to use an execution-output link to copy
-            ;; the tv values from one to the other.
-            (ExecutionOutput
-                (GroundedSchema "scm:copy-tv")
-                (List
-                    (List chain-to (Variable "$state"))
-                    (List chain-from (Variable "$state"))
-                )
-            )
-            ;; Delete the copy-from state vector
-            (Delete
-                (List chain-from (Variable "$state"))
+		(List
+			;; Copy it to the copy-to state vector.
+			;; We need to use an execution-output link to copy
+			;; the tv values from one to the other.
+			(ExecutionOutput
+				(GroundedSchema "scm:copy-tv")
+				(List
+					(List chain-to (Variable "$state"))
+					(List chain-from (Variable "$state"))
+				)
+			)
+			;; Delete the copy-from state vector
+			(Delete
+				(List chain-from (Variable "$state"))
 			)
 		)
 	)
@@ -334,17 +292,15 @@
 ;; Create a utility to show the state probabilities
 
 (define (show-state state-vect)
-	(define (get-tv atom) (cog-tv (List state-vect atom)))
+	(define (get-tv atom) (cog-mean (List state-vect atom)))
 
-	(format #t "State vector for ~A\n" (cog-name state-vect))
-
+	(format #t "State vector for \"~A\"\n" (cog-name state-vect))
 	(format #t "Initial state: ~A\n" (get-tv (Concept "initial state")))
-
 	(format #t "Green state: ~A\n" (get-tv (Concept "green")))
-
 	(format #t "Yellow state: ~A\n" (get-tv (Concept "yellow")))
-
 	(format #t "Red state: ~A\n" (get-tv (Concept "red")))
+
+	*unspecified*
 )
 
 ;; --------------------------------------------------------------------
@@ -375,3 +331,7 @@
 ;(take-a-step)
 ;(take-a-step)
 ;(take-a-step)
+
+; Reset the state, and run it again
+; (reset-state)
+; (take-a-step)
