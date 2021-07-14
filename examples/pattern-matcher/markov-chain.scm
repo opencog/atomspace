@@ -22,7 +22,7 @@
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state
@@ -33,19 +33,19 @@
 
 ;; The initial state of the Markov chain.  It starts with 100%
 ;; probability in this state.
-( (stv 1 1)
+(List (stv 1 1)
 	my-state
 	(Concept "initial state")
 )
-( (stv 0 1)
+(List (stv 0 1)
 	my-state
 	(Concept "green")
 )
-( (stv 0 1)
+(List (stv 0 1)
 	my-state
 	(Concept "yellow")
 )
-( (stv 0 1)
+(List (stv 0 1)
 	my-state
 	(Concept "red")
 )
@@ -74,7 +74,7 @@
 ; Transition from initial to green with 90% probability.
 (ContextLink (stv 0.9 1)
 	(Concept "initial state")
-	(
+	(List
 		my-trans
 		(Concept "green")
 	)
@@ -83,7 +83,7 @@
 ; Transition from initial state to yellow with 10% probability.
 (ContextLink (stv 0.1 1)
 	(Concept "initial state")
-	(
+	(List
 		my-trans
 		(Concept "yellow")
 	)
@@ -92,7 +92,7 @@
 ; Stay in the initial state with probability zero
 (ContextLink (stv 0.0 1)
 	(Concept "initial state")
-	(
+	(List
 		my-trans
 		(Concept "initial state")
 	)
@@ -101,7 +101,7 @@
 ; Transition from green to yellow with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "green")
-	(
+	(List
 		my-trans
 		(Concept "yellow")
 	)
@@ -110,7 +110,7 @@
 ; Transition from green to red with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "green")
-	(
+	(List
 		my-trans
 		(Concept "red")
 	)
@@ -119,7 +119,7 @@
 ; Transition from yellow to red with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "yellow")
-	(
+	(List
 		my-trans
 		(Concept "red")
 	)
@@ -128,7 +128,7 @@
 ; Transition from yellow to green with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "yellow")
-	(
+	(List
 		my-trans
 		(Concept "green")
 	)
@@ -137,7 +137,7 @@
 ; Transition from red to green with 90% probability
 (ContextLink (stv 0.9 1)
 	(Concept "red")
-	(
+	(List
 		my-trans
 		(Concept "green")
 	)
@@ -146,7 +146,7 @@
 ; Stay in the red state with 10% probability
 (ContextLink (stv 0.1 1)
 	(Concept "red")
-	(
+	(List
 		my-trans
 		(Concept "red")
 	)
@@ -161,7 +161,7 @@
 ;;;
 (define (create-chain-stepper chain-name chain-next chain-state)
 	(define curr-state
-		(
+		(List
 			chain-state
 			(Variable "$curr-state")
 		)
@@ -169,14 +169,14 @@
 	(define state-trans
 		(ContextLink
 			(Variable "$curr-state")
-			(
+			(List
 				chain-name
 				(Variable "$next-state")
 			)
 		)
 	)
 	(define next-state
-		(
+		(List
 			chain-next
 			(Variable "$next-state")
 		)
@@ -196,7 +196,7 @@
 		;; ... then adjust the probability...
 		(ExecutionOutput
 			(GroundedSchema "scm: accum-probability")
-			(
+			(List
 				next-state
 				state-trans
 				curr-state
