@@ -52,7 +52,7 @@
 ;; Each rule is labelled with the "my-fsm", so that rules for
 ;; different FSM's do not clash with one-another.  A ContextLink is used
 ;; because that will allow this example to generalize: Context's are
-;; usually used to  express conditional probabilities, so that
+;; usually used to express conditional probabilities, so that
 ;;
 ;;     Context  <TV>
 ;;         A
