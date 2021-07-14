@@ -269,7 +269,7 @@
 			chain-from
 			(Variable "$state")
 		)
-		(And
+		(List
 			;; Copy it to the copy-to state vector.
 			;; We need to use an execution-output link to copy
 			;; the tv values from one to the other.
