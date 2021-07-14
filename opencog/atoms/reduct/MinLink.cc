@@ -6,6 +6,8 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <cfloat>
+
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
