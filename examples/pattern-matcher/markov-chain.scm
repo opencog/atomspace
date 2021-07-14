@@ -31,24 +31,18 @@
 (define my-state (Anchor "My Chain's Current State"))
 (define my-nexts (Anchor "My Chain's Next State"))
 
-;; The initial state of the Markov chain.  It starts with 100%
-;; probability in this state.
-(List (stv 1 1)
-	my-state
-	(Concept "initial state")
+;; Define a function to set the initial state of the Markov chain.
+;; It starts with 100% probability in this state.
+
+(define (reset-state)
+	(List (stv 1 1) my-state (Concept "initial state"))
+	(List (stv 0 1) my-state (Concept "green"))
+	(List (stv 0 1) my-state (Concept "yellow"))
+	(List (stv 0 1) my-state (Concept "red"))
 )
-(List (stv 0 1)
-	my-state
-	(Concept "green")
-)
-(List (stv 0 1)
-	my-state
-	(Concept "yellow")
-)
-(List (stv 0 1)
-	my-state
-	(Concept "red")
-)
+
+;; Call the function to initialize the state
+(reset-state)
 
 ;; --------------------------------------------------------------------
 ;; The set of allowed state transitions.  Its a triangular cycle,
@@ -334,17 +328,15 @@
 ;; Create a utility to show the state probabilities
 
 (define (show-state state-vect)
-	(define (get-tv atom) (cog-tv (List state-vect atom)))
+	(define (get-tv atom) (cog-mean (List state-vect atom)))
 
-	(format #t "State vector for ~A\n" (cog-name state-vect))
-
+	(format #t "State vector for \"~A\"\n" (cog-name state-vect))
 	(format #t "Initial state: ~A\n" (get-tv (Concept "initial state")))
-
 	(format #t "Green state: ~A\n" (get-tv (Concept "green")))
-
 	(format #t "Yellow state: ~A\n" (get-tv (Concept "yellow")))
-
 	(format #t "Red state: ~A\n" (get-tv (Concept "red")))
+
+	*unspecified*
 )
 
 ;; --------------------------------------------------------------------
@@ -375,3 +367,7 @@
 ;(take-a-step)
 ;(take-a-step)
 ;(take-a-step)
+
+; Reset the state, and run it again
+; (reset-state)
+; (take-a-step)
