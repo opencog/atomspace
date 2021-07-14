@@ -213,11 +213,11 @@
 (define (create-chain-deleter chain-state)
 	(Bind
 		(Variable "$state")
-        ;; Find the state vector...
-        (List chain-state (Variable "$state"))
-        ;; Delete the state vector.
-        (Delete
-           (List chain-state (Variable "$state"))
+		;; Find the state vector...
+		(List chain-state (Variable "$state"))
+		;; Delete the state vector.
+		(Delete
+			(List chain-state (Variable "$state"))
 		)
 	)
 )
@@ -233,19 +233,19 @@
 (define (create-chain-copier chain-to chain-from)
 	(Bind
 		(Variable "$state")
-        ;; Find the copy-from state vector...
-        (List
-            chain-from
-            (Variable "$state")
-        )
-        ;; Copy it to the copy-to state vector.
-        ;; We need to use an execution-output link to copy
-        ;; the tv values from one to the other.
-        (ExecutionOutput
-            (GroundedSchema "scm:copy-tv")
-            (List
-                (List chain-to (Variable "$state"))
-                (List chain-from (Variable "$state"))
+		;; Find the copy-from state vector...
+		(List
+			chain-from
+			(Variable "$state")
+		)
+		;; Copy it to the copy-to state vector.
+		;; We need to use an execution-output link to copy
+		;; the tv values from one to the other.
+		(ExecutionOutput
+			(GroundedSchema "scm:copy-tv")
+			(List
+				(List chain-to (Variable "$state"))
+				(List chain-from (Variable "$state"))
 			)
 		)
 	)
@@ -264,25 +264,25 @@
 			(Variable "$state")
 			(Type "Concept")
 		)
-        ;; Find the copy-from state vector...
-        (List
-            chain-from
-            (Variable "$state")
+		;; Find the copy-from state vector...
+		(List
+			chain-from
+			(Variable "$state")
 		)
-        (And
-            ;; Copy it to the copy-to state vector.
-            ;; We need to use an execution-output link to copy
-            ;; the tv values from one to the other.
-            (ExecutionOutput
-                (GroundedSchema "scm:copy-tv")
-                (List
-                    (List chain-to (Variable "$state"))
-                    (List chain-from (Variable "$state"))
-                )
-            )
-            ;; Delete the copy-from state vector
-            (Delete
-                (List chain-from (Variable "$state"))
+		(And
+			;; Copy it to the copy-to state vector.
+			;; We need to use an execution-output link to copy
+			;; the tv values from one to the other.
+			(ExecutionOutput
+				(GroundedSchema "scm:copy-tv")
+				(List
+					(List chain-to (Variable "$state"))
+					(List chain-from (Variable "$state"))
+				)
+			)
+			;; Delete the copy-from state vector
+			(Delete
+				(List chain-from (Variable "$state"))
 			)
 		)
 	)
