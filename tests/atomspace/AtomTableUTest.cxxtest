@@ -177,7 +177,7 @@ public:
     void testRecursiveAdd()
     {
         // Once for an ordered link type, and again for an unordered
-        // type.   Unordered links get spcial handling.
+        // type.   Unordered links get special handling.
         doRecursiveAdd(LIST_LINK);
         doRecursiveAdd(SET_LINK);
         doRecursiveAdd(SIMILARITY_LINK);

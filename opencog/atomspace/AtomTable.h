@@ -73,7 +73,7 @@ private:
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    mutable std::recursive_mutex _mtx;
+    mutable std::shared_mutex _mtx;
 
     //! Index of atoms.
     TypeIndex typeIndex;
@@ -194,7 +194,7 @@ public:
                        bool subclass=false,
                        bool parent=true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         auto tit = typeIndex.begin(type, subclass);
         auto tend = typeIndex.end();
         while (tit != tend) { hset.insert(*tit); tit++; }
@@ -220,7 +220,7 @@ public:
                      bool subclass=false,
                      bool parent=true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         auto tit = typeIndex.begin(type, subclass);
         auto tend = typeIndex.end();
         while (tit != tend) {
@@ -257,7 +257,7 @@ public:
         }
 
         // No parent ... avoid the copy above.
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         return std::copy(typeIndex.begin(type, subclass),
                          typeIndex.end(), result);
     }
@@ -284,7 +284,7 @@ public:
 
         // No parent ... avoid the copy above.
         // This can (will) deadlock if func touches the table.
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](const Handle& h)->void {
@@ -320,7 +320,7 @@ public:
 
         // No parent ... avoid the copy above.
         // This can (will) deadlock if func touches the table.
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
@@ -343,7 +343,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(const Handle&, bool force=false);
+    Handle add(const Handle&, bool force=false, bool do_lock=true);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
@@ -374,7 +374,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    HandleSet extract(Handle& handle, bool recursive=true);
+    HandleSet extract(Handle& handle, bool recursive=true, bool do_lock=true);
 
     /**
      * Return a random atom in the AtomTable.

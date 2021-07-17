@@ -265,8 +265,8 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool extract_atom(Handle h, bool recursive=false) {
-        return 0 < _atom_table.extract(h, recursive).size();
+    bool extract_atom(Handle h, bool recursive=false, bool do_lock=true) {
+        return 0 < _atom_table.extract(h, recursive, do_lock).size();
     }
     bool remove_atom(Handle h, bool recursive=false) {
         return extract_atom(h, recursive);

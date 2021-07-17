@@ -86,7 +86,7 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
 
 AtomTable::~AtomTable()
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx);
 
     if (_environ) _environ->_num_nested--;
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
@@ -117,7 +117,7 @@ void AtomTable::clear_transient()
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - clear_transient called on non-transient atom table.");
 
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx);
 
     // Clear all the atoms
     clear_all_atoms();
@@ -135,7 +135,7 @@ void AtomTable::clear_all_atoms()
 
 void AtomTable::clear()
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx);
     clear_all_atoms();
 }
 
@@ -157,7 +157,7 @@ Handle AtomTable::lookupHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::shared_lock<std::shared_mutex> lck(_mtx);
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
@@ -179,26 +179,7 @@ Handle AtomTable::getHandle(const Handle& a) const
     return lookupHandle(a);
 }
 
-#if 0
-static void prt_diag(Handle atom, size_t i, size_t arity, const HandleSeq& ogs)
-{
-    Logger::Level save = logger().getBackTraceLevel();
-    logger().setBackTraceLevel(Logger::Level::NONE);
-    logger().error() << "AtomTable - Insert link with "
-               "invalid outgoing members";
-    logger().error() << "Failing index i=" << i
-                    << " and arity=" << arity;
-    logger().error() << "Failing outset is this:";
-    for (unsigned int fk=0; fk<arity; fk++)
-        logger().error() << "outset i=" << fk;
-
-    logger().error() << "link is " << atom->to_string();
-    logger().flush();
-    logger().setBackTraceLevel(save);
-}
-#endif
-
-Handle AtomTable::add(const Handle& orig, bool force)
+Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -213,20 +194,24 @@ Handle AtomTable::add(const Handle& orig, bool force)
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
     if (not force) {
-        Handle hcheck(getHandle(orig));
+        if (in_environ(orig)) return orig;
+
+        Handle hcheck(typeIndex.findAtom(orig));
+        if (nullptr == hcheck and _environ)
+            hcheck = _environ->lookupHandle(orig);
         if (hcheck) {
             // Oh we have it already. Update the values, as needed.
             hcheck->copyValues(orig);
             return hcheck;
         }
     } else {
-
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
-        Handle hcheck(lookupHandle(orig));
-        if (hcheck and hcheck->getAtomSpace() == _as) {
+        Handle hcheck(typeIndex.findAtom(orig));
+        if (hcheck) {
             hcheck->copyValues(orig);
             return hcheck;
         }
@@ -255,7 +240,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h));
+                closet.emplace_back(add(h, force, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
         } else {
@@ -278,7 +263,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
     typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
-    lck.unlock();
+    if (do_lock) lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
@@ -308,7 +293,7 @@ size_t AtomTable::getNumLinks() const
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::shared_lock<std::shared_mutex> lck(_mtx);
 
     size_t result = typeIndex.size(type);
     if (subclass)
@@ -347,7 +332,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-HandleSet AtomTable::extract(Handle& handle, bool recursive)
+HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
 {
     HandleSet result;
 
@@ -368,11 +353,11 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
         return other->extract(handle, recursive);
     }
 
-    // Lock before fetching the incoming set. Since getting the
-    // incoming set also grabs a lock, we need this mutex to be
-    // recursive. We need to lock here to avoid confusion if multiple
-    // threads are trying to delete the same atom.
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
+    // Lock before fetching the incoming set. (Why, exactly??)
+    // Because if multiple threads are trying to delete the same
+    // atom, then ... ???
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
 
     if (handle->isMarkedForRemoval()) return result;
     handle->markForRemoval();
@@ -403,10 +388,15 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
                                 << "non-DAG membership.";
             }
             if (not his->isMarkedForRemoval()) {
-                DPRINTF("[AtomTable::extract] marked for removal is false");
                 if (other) {
-                    HandleSet ex = other->extract(his, true);
-                    result.insert(ex.begin(), ex.end());
+                    if (other != this) {
+                        HandleSet ex = other->extract(his, true);
+                        result.insert(ex.begin(), ex.end());
+                    } else {
+                        // Do not lock; we laready have the lock
+                        HandleSet ex = extract(his, true, false);
+                        result.insert(ex.begin(), ex.end());
+                    }
                 }
             }
         }
@@ -432,12 +422,9 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
-    // Pfft. Give up the pretension. This is a recursive lock;
-    // unlocking it once is not enough, because it can still be
-    // recurisvely locked.
-    // lck.unlock();
+    if (do_lock) lck.unlock();
     _removeAtomSignal.emit(handle);
-    // lck.lock();
+    if (do_lock) lck.lock();
 
     typeIndex.removeAtom(handle);
 
@@ -453,6 +440,6 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
 /// This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx);
     typeIndex.resize();
 }
