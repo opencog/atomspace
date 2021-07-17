@@ -374,7 +374,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    HandleSet extract(Handle& handle, bool recursive=true);
+    HandleSet extract(Handle& handle, bool recursive=true, bool do_lock=true);
 
     /**
      * Return a random atom in the AtomTable.

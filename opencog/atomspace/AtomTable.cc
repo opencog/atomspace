@@ -332,7 +332,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-HandleSet AtomTable::extract(Handle& handle, bool recursive)
+HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
 {
     HandleSet result;
 
@@ -356,7 +356,8 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
     // Lock before fetching the incoming set. (Why, exactly??)
     // Because if multiple threads are trying to delete the same
     // atom, then ... ???
-    std::unique_lock<std::shared_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
 
     if (handle->isMarkedForRemoval()) return result;
     handle->markForRemoval();
@@ -387,10 +388,15 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive)
                                 << "non-DAG membership.";
             }
             if (not his->isMarkedForRemoval()) {
-                DPRINTF("[AtomTable::extract] marked for removal is false");
                 if (other) {
-                    HandleSet ex = other->extract(his, true);
-                    result.insert(ex.begin(), ex.end());
+                    if (other != this) {
+                        HandleSet ex = other->extract(his, true);
+                        result.insert(ex.begin(), ex.end());
+                    } else {
+                        // Do not lock; we laready have the lock
+                        HandleSet ex = extract(his, true, false);
+                        result.insert(ex.begin(), ex.end());
+                    }
                 }
             }
         }
