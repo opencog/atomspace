@@ -179,7 +179,7 @@ Handle AtomTable::getHandle(const Handle& a) const
     return lookupHandle(a);
 }
 
-Handle AtomTable::add(const Handle& orig, bool force)
+Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -194,7 +194,8 @@ Handle AtomTable::add(const Handle& orig, bool force)
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
-    std::unique_lock<std::shared_mutex> lck(_mtx);
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
     if (not force) {
         if (in_environ(orig)) return orig;
 
@@ -239,7 +240,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h));
+                closet.emplace_back(add(h, force, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
         } else {
@@ -262,7 +263,7 @@ Handle AtomTable::add(const Handle& orig, bool force)
     typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
-    lck.unlock();
+    if (do_lock) lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!

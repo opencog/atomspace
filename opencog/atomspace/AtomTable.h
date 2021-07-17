@@ -343,7 +343,7 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(const Handle&, bool force=false);
+    Handle add(const Handle&, bool force=false, bool do_lock=true);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
