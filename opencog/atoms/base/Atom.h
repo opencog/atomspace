@@ -29,7 +29,7 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_set>
 
@@ -133,7 +133,7 @@ protected:
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // kind-of fat.
-    mutable std::mutex _mtx;
+    mutable std::shared_mutex _mtx;
 
     /**
      * Constructor for this class. Protected; no user should call this
@@ -330,7 +330,7 @@ public:
     getIncomingSet(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
-        std::lock_guard<std::mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
@@ -370,7 +370,7 @@ public:
     getIncomingSetByType(OutputIterator result, Type type) const
     {
         if (nullptr == _incoming_set) return result;
-        std::lock_guard<std::mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
 
         const auto bucket = _incoming_set->_iset.find(type);
         if (bucket == _incoming_set->_iset.cend()) return result;

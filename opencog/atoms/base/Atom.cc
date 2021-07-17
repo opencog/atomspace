@@ -158,7 +158,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	// then load-from-file and load-from-network breaks.
 	if (key != truth_key() and *key == *truth_key())
 	{
-		std::lock_guard<std::mutex> lck(_mtx);
+		std::unique_lock<std::shared_mutex> lck(_mtx);
 		if (nullptr != value)
 			_values[truth_key()] = value;
 		else
@@ -166,7 +166,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	}
 	else
 	{
-		std::lock_guard<std::mutex> lck(_mtx);
+		std::unique_lock<std::shared_mutex> lck(_mtx);
 		if (nullptr != value)
 			_values[key] = value;
 		else
@@ -194,13 +194,13 @@ ValuePtr Atom::getValue(const Handle& key) const
     // then load-from-file and load-from-network breaks.
     if ((key != truth_key()) and (*key == *truth_key()))
     {
-        std::lock_guard<std::mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         auto pr = _values.find(truth_key());
         if (_values.end() != pr) pap = pr->second;
     }
     else
     {
-        std::lock_guard<std::mutex> lck(_mtx);
+        std::shared_lock<std::shared_mutex> lck(_mtx);
         auto pr = _values.find(key);
         if (_values.end() != pr) pap = pr->second;
     }
@@ -210,7 +210,7 @@ ValuePtr Atom::getValue(const Handle& key) const
 HandleSet Atom::getKeys() const
 {
     HandleSet keyset;
-    std::lock_guard<std::mutex> lck(_mtx);
+    std::shared_lock<std::shared_mutex> lck(_mtx);
     for (const auto& pr : _values)
         keyset.insert(pr.first);
 
@@ -327,7 +327,7 @@ void Atom::keep_incoming_set()
 void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::shared_mutex> lck (_mtx);
     // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
@@ -336,7 +336,7 @@ void Atom::drop_incoming_set()
 void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::shared_mutex> lck (_mtx);
 
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
@@ -357,7 +357,7 @@ void Atom::insert_atom(const Handle& a)
 void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::shared_mutex> lck (_mtx);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -373,7 +373,7 @@ void Atom::remove_atom(const Handle& a)
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::shared_mutex> lck (_mtx);
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
@@ -404,7 +404,7 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::shared_lock<std::shared_mutex> lck (_mtx);
 
     size_t cnt = 0;
     if (as)
@@ -438,7 +438,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     if (as) {
         const AtomTable *atab = &as->get_atomtable();
         // Prevent update of set while a copy is being made.
-        std::lock_guard<std::mutex> lck (_mtx);
+        std::shared_lock<std::shared_mutex> lck (_mtx);
         IncomingSet iset;
         for (const auto& bucket : _incoming_set->_iset)
         {
@@ -453,7 +453,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     }
 
     // Prevent update of set while a copy is being made.
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::shared_lock<std::shared_mutex> lck (_mtx);
     IncomingSet iset;
     for (const auto& bucket : _incoming_set->_iset)
     {
@@ -472,7 +472,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
     if (nullptr == _incoming_set) return empty_set;
 
     // Lock to prevent updates of the set of atoms.
-    std::lock_guard<std::mutex> lck(_mtx);
+    std::shared_lock<std::shared_mutex> lck(_mtx);
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
@@ -500,7 +500,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
-    std::lock_guard<std::mutex> lck(_mtx);
+    std::shared_lock<std::shared_mutex> lck(_mtx);
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return 0;
