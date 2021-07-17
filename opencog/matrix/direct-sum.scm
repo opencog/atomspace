@@ -121,20 +121,22 @@
 					(if (not (or disjoint-left disjoint-right))
 						(throw 'wrong-type-arg 'direct-sum
 							"Either the left or the right basis must be disjoint!"))
+				)
 
-					(set! in-base?
-						(if disjoint-left
-							(make-aset-predicate (a-stars 'left-basis))
-							(make-aset-predicate (a-stars 'right-basis))))
+				; Actually initialize the predicates.
+				(set! in-base?
+					(if disjoint-left
+						(make-aset-predicate (a-stars 'left-basis))
+						(make-aset-predicate (a-stars 'right-basis))))
 
-					; Return #t if one of the two atoms belongs to the
-					; disjoint basis of LLA
-					(set! type-a?
-						(lambda (L-ATOM R-ATOM)
-							(or
-								(and disjoint-left (in-base? L-ATOM))
-								(and disjoint-right (in-base? R-ATOM)))))
-			)))
+				; Return #t if one of the two atoms belongs to the
+				; disjoint basis of LLA
+				(set! type-a?
+					(lambda (L-ATOM R-ATOM)
+						(or
+							(and disjoint-left (in-base? L-ATOM))
+							(and disjoint-right (in-base? R-ATOM)))))
+			))
 
 		; Initialize predicate for the members of A
 		(define (init-a-set)
