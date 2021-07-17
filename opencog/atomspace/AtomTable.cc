@@ -422,12 +422,9 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
-    // Pfft. Give up the pretension. This is a recursive lock;
-    // unlocking it once is not enough, because it can still be
-    // recurisvely locked.
-    // lck.unlock();
+    if (do_lock) lck.unlock();
     _removeAtomSignal.emit(handle);
-    // lck.lock();
+    if (do_lock) lck.lock();
 
     typeIndex.removeAtom(handle);
 
