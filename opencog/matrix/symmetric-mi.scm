@@ -41,30 +41,49 @@
        left-product(y,z) = [M^TM](y,z)
   Likewise, the right-product is an entry in the matrix MM^T.
 
-  These two symmtric matricies can be re-interpreted as pair-wise
+  These two symmtric matricies can be re-interpreted as joint (pair)
   probabilities (frequencies) simply by normalizing by the total count.
   That is, if f(y,z) is a symmetric matrix, then
        p(y,z) = f(y,z) / f(*,*)
-  can be interpreted as a (frequentist) probability. From this, one can
-  construct the (fractional) mutual information:
+  can be interpreted as a (frequentist) joint probability of observing y
+  and z together. From this, one can construct the (fractional) mutual
+  information:
        FMI(y,z) = log_2 p(y,z) / p(y) p(z)
   where p(y) = p(y,*) = p(*,y) is the marginal probability. The full MI
   is just of course
        MI(y,z) = p(y,z) FMI(y,z)
 
+  Provided methods:
+  -----------------
+  'mtm-mi  CA CB -- return the left-MI between columns CA and CB.
+  'mtm-fmi CA CB -- return the left-FMI between columns CA and CB.
+  'mmt-mi  RA RB -- return the right-MI between rows RA and RB.
+  'mmt-fmi RA RB -- return the right-FMI between rows RA and RB.
+  'mtm-joint-prob CA CB - return the joint probability between columns
+  'mmr-joint-prob RA RB - return the joint probability between rows
+  'mtm-marginal COL - return the marginal probability for column COL
+  'mmt-marginal ROW - return the marginal probability for row ROW
+
   Arguments:
   ----------
   Here, the LLOBJ is expected to be an object defining a sparse matrix,
-  with valid counts associated with each pair. LLOBJ is expected to have
-  working, functional methods for 'left-type, 'right-type and 'pair-type
-  on it. It is assumed that the transpose-marginals on it have been
-  previously computed, and are available in the atomspace.
+  with valid counts associated with each pair. It is expected to have
+  all the usual sparse-matrix methods on it.
+
+  Importantly: It is assumed that the transpose-marginals on it have
+  been previously computed, and are available in the AtomSpace. The
+  mmt methods on this object require that the mmt transpose marginals
+  to have ben precomputed. Likewise for mtm; it is typical that most
+  users will be interested in only one or the other, and thus only one
+  of these need to be precomputed.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
   i.e. it is literally the count. The optional argument GET-CNT allows
   this to be over-ridden with any other method that returns a number.
 
-  If 'get-count is over-ridden, then the cached transpose values too ...
+  If 'get-count is over-ridden, then the precomputed transpose-marginals
+  should have been recomputed with the same method, else garbage will
+  result.
 "
 
 	(let* ((ol2 (/ 1.0 (log 2.0)))
@@ -122,6 +141,25 @@
 		(define (compute-right-product ROW-A ROW-B)
 			(prod-obj 'right-count (list ROW-A ROW-B)))
 
+		; Same as above, but normalized, so that the value is the
+		; joint probability between COL-A and COL-B.
+		(define (compute-left-prob COL-A COL-B)
+			(set-mtm-total)
+			(/ (compute-left-product COL-A COL-B) mtm-total))
+
+		(define (compute-right-prob ROW-A ROW-B)
+			(set-mmt-total)
+			(/ (compute-right-product ROW-A ROW-B) mmt-total))
+
+		; Marginal probabilities
+		(define (compute-mtm-marginal COL)
+			(set-mtm-total)
+			(/ (trans-obj 'mtm-count COL) mtm-total))
+
+		(define (compute-mmt-marginal ROW)
+			(set-mmt-total)
+			(/ (trans-obj 'mmt-count ROW) mmt-total))
+
 		(define (compute-mtm-fmi COL-A COL-B)
 			(define marga (trans-obj 'mtm-count COL-A))
 			(define margb (trans-obj 'mtm-count COL-B))
@@ -160,6 +198,10 @@
 				((mmt-mi)          (apply compute-mmt-mi args))
 				((mtm-fmi)         (apply compute-mtm-fmi args))
 				((mmt-fmi)         (apply compute-mmt-fmi args))
+				((mtm-joint-prob)  (apply compute-left-prob args))
+				((mmt-joint-prob)  (apply compute-right-prob args))
+				((mtm-marginal)    (apply compute-mtm-marginal args))
+				((mmt-marginal)    (apply compute-mmt-marginal args))
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
