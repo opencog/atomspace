@@ -63,6 +63,8 @@
   'mmr-joint-prob RA RB - return the joint probability between rows
   'mtm-marginal COL - return the marginal probability for column COL
   'mmt-marginal ROW - return the marginal probability for row ROW
+  'mtm-total -- return the total count
+  'mmt-total -- return the total count
 
   Arguments:
   ----------
@@ -202,6 +204,8 @@
 				((mmt-joint-prob)  (apply compute-right-prob args))
 				((mtm-marginal)    (apply compute-mtm-marginal args))
 				((mmt-marginal)    (apply compute-mmt-marginal args))
+				((mtm-total)       mtm-total)
+				((mmt-total)       mmt-total)
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
