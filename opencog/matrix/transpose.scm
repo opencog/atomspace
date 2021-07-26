@@ -46,7 +46,8 @@
   The margins (the pre-computed values) can be populated by saying
   `((add-transpose-compute LLOBJ) 'cache-all)`
   The `add-transpose-api` and `add-transpose-compute` API's are designed
-  to work together and complement one-another.
+  to work together and complement one-another. See the documentation on
+  `add-transpose-compute` for detailed documentation.
 
   Optional argument ID is #f to use the default value key; otherwise
   a filtered key is used. That is, the marginals are fetched from a
@@ -68,8 +69,8 @@
 	(define mmt-key (PredicateNode mmt-name))
 	(define mtm-key (PredicateNode mtm-name))
 
-	(define (set-norms KEY ATOM L0 L1)
-		(cog-set-value! ATOM KEY (FloatValue L0 L1)))
+	(define (set-norms KEY ATOM L0 L1 L2)
+		(cog-set-value! ATOM KEY (FloatValue L0 L1 L2)))
 
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
@@ -84,6 +85,11 @@
 			(lambda () (cog-value-ref (cog-value ATOM KEY) 1))
 			(lambda (key . args) 0)))
 
+	(define (get-length KEY ATOM)
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM KEY) 2))
+			(lambda (key . args) 0)))
+
 	;--------
 	; The internal sum is over the left items, so hang on the left.
 	; This is an arbitrary choice, but seems less confusing than the
@@ -94,8 +100,11 @@
 	(define (get-mtm-count ITEM)
 		(get-count mtm-key (LLOBJ 'left-wildcard ITEM)))
 
-	(define (set-mtm-norms ITEM L0 L1)
-		(set-norms mtm-key (LLOBJ 'left-wildcard ITEM) L0 L1))
+	(define (get-mtm-length ITEM)
+		(get-length mtm-key (LLOBJ 'left-wildcard ITEM)))
+
+	(define (set-mtm-norms ITEM L0 L1 L2)
+		(set-norms mtm-key (LLOBJ 'left-wildcard ITEM) L0 L1 L2))
 
 	;--------
 	(define (get-mmt-support ITEM)
@@ -104,8 +113,11 @@
 	(define (get-mmt-count ITEM)
 		(get-count mmt-key (LLOBJ 'right-wildcard ITEM)))
 
-	(define (set-mmt-norms ITEM L0 L1)
-		(set-norms mmt-key (LLOBJ 'right-wildcard ITEM) L0 L1))
+	(define (get-mmt-length ITEM)
+		(get-length mmt-key (LLOBJ 'right-wildcard ITEM)))
+
+	(define (set-mmt-norms ITEM L0 L1 L2)
+		(set-norms mmt-key (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
 	;--------
 	(define (tot-mmt-support)
@@ -114,8 +126,11 @@
 	(define (tot-mmt-count)
 		(get-count mmt-key (LLOBJ 'wild-wild)))
 
-	(define (set-mmt-totals L0 L1)
-		(set-norms mmt-key (LLOBJ 'wild-wild) L0 L1))
+	(define (tot-mmt-length)
+		(get-length mmt-key (LLOBJ 'wild-wild)))
+
+	(define (set-mmt-totals L0 L1 L2)
+		(set-norms mmt-key (LLOBJ 'wild-wild) L0 L1 L2))
 
 	;--------
 	(define (tot-mtm-support)
@@ -124,8 +139,11 @@
 	(define (tot-mtm-count)
 		(get-count mtm-key (LLOBJ 'wild-wild)))
 
-	(define (set-mtm-totals L0 L1)
-		(set-norms mtm-key (LLOBJ 'wild-wild) L0 L1))
+	(define (tot-mtm-length)
+		(get-length mtm-key (LLOBJ 'wild-wild)))
+
+	(define (set-mtm-totals L0 L1 L2)
+		(set-norms mtm-key (LLOBJ 'wild-wild) L0 L1 L2))
 
 	;--------
 	; Methods on this class.
@@ -135,6 +153,8 @@
 			((mmt-support)        (apply get-mmt-support args))
 			((mtm-count)          (apply get-mtm-count args))
 			((mmt-count)          (apply get-mmt-count args))
+			((mtm-length)         (apply get-mtm-length args))
+			((mmt-length)         (apply get-mmt-length args))
 			((set-mtm-norms)      (apply set-mtm-norms args))
 			((set-mmt-norms)      (apply set-mmt-norms args))
 
@@ -142,6 +162,8 @@
 			((total-mmt-support)  (tot-mmt-support))
 			((total-mtm-count)    (tot-mtm-count))
 			((total-mmt-count)    (tot-mmt-count))
+			((total-mtm-length)   (tot-mtm-length))
+			((total-mmt-length)   (tot-mmt-length))
 			((set-mtm-totals)     (apply set-mtm-totals args))
 			((set-mmt-totals)     (apply set-mmt-totals args))
 			(else                 (apply LLOBJ (cons message args)))))
@@ -154,7 +176,9 @@
 	 (LEFT-SUPPORT 'left-support)
 	 (RIGHT-SUPPORT 'right-support)
 	 (LEFT-COUNT 'left-count)
-	 (RIGHT-COUNT 'right-count))
+	 (RIGHT-COUNT 'right-count)
+	 (LEFT-LENGTH 'left-length)
+	 (RIGHT-LENGTH 'right-length))
 "
   add-transpose-compute LLOBJ - Extend LLOBJ with methods to compute
   marginals (wild-card sums) for a matrix times it's transpose. These
@@ -217,11 +241,17 @@
   The 'mtm-count is the wild-card sum_x N(x,y) N(x,*) for fixed y.
   The 'mmt-count is the wild-card sum_y N(x,y) N(*,y) for fixed x.
 
+  The 'mtm-length is the wild-card sum_x N^2(x,y) N^2(x,*) for fixed y.
+  The 'mmt-length is the wild-card sum_y N^2(x,y) N^2(*,y) for fixed x.
+
   The 'total-mtm-support is sum_x D(x,*) D(x,*)
   The 'total-mmt-support is sum_y D(*,y) D(*,y)
 
   The 'total-mtm-count is sum_x N(x,*) N(x,*)
   The 'total-mmt-count is sum_y N(*,y) N(*,y)
+
+  The 'total-mtm-length is sum_x N^2(x,*) N^2(x,*)
+  The 'total-mmt-length is sum_y N^2(*,y) N^2(*,y)
 
   Here, the LLOBJ is expected to be an object, with valid counts
   and count-marginals.
@@ -238,6 +268,8 @@
   D(x,*) == 'right-support   override with #:RIGHT-SUPPORT
   N(*,y) == 'left-count      override with #:LEFT-COUNT
   N(x,*) == 'right-count     override with #:RIGHT-COUNT
+  N^2(*,y) == 'left-length   override with #:LEFT-LENGTH
+  N^2(x,*) == 'right-length  override with #:RIGHT-LENGTH
 "
 	(let* ((star-obj     (add-pair-stars LLOBJ))
 			(support-obj   (add-support-api LLOBJ))
@@ -248,6 +280,8 @@
 			(right-support (lambda (x) (support-obj RIGHT-SUPPORT x)))
 			(left-count    (lambda (x) (support-obj LEFT-COUNT x)))
 			(right-count   (lambda (x) (support-obj RIGHT-COUNT x)))
+			(left-length   (lambda (x) (support-obj LEFT-LENGTH x)))
+			(right-length  (lambda (x) (support-obj RIGHT-LENGTH x)))
 		)
 
 		; -------------
@@ -292,6 +326,20 @@
 				(star-obj 'left-duals ITEM)))
 
 		; -------------
+		; Sum lengths
+		(define (sum-mmt-length ITEM)
+			(fold (lambda (rdual sum)
+				(define cnt (get-pr-cnt ITEM rdual))
+				(+ sum (* (left-length rdual) cnt cnt ))) 0
+				(star-obj 'right-duals ITEM)))
+
+		(define (sum-mtm-length ITEM)
+			(fold (lambda (ldual sum)
+				(define cnt (get-pr-cnt ITEM ldual))
+				(+ sum (* (right-length ldual) cnt cnt))) 0
+				(star-obj 'left-duals ITEM)))
+
+		; -------------
 		; Compute grand-totals for the two matrix products.
 		(define (compute-total-mtm-support)
 			(fold
@@ -301,6 +349,11 @@
 		(define (compute-total-mtm-count)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mtm-count item))) 0
+				(star-obj 'right-basis)))
+
+		(define (compute-total-mtm-length)
+			(fold
+				(lambda (item sum) (+ sum (api-obj 'mtm-length item))) 0
 				(star-obj 'right-basis)))
 
 		(define (compute-total-mmt-support)
@@ -313,21 +366,28 @@
 				(lambda (item sum) (+ sum (api-obj 'mmt-count item))) 0
 				(star-obj 'left-basis)))
 
+		(define (compute-total-mmt-length)
+			(fold
+				(lambda (item sum) (+ sum (api-obj 'mmt-length item))) 0
+				(star-obj 'left-basis)))
+
 		; -------------
-		; Compute all l_0 and l_1 norms, attach them to the
+		; Compute all l_0, l_1 and l_2 norms, attach them to the
 		; wildcards, where the transpose-api can find them.
 
-		; XXX FIXME can make this 2x faster by performing
-		; both loops at the same time.
+		; XXX FIXME can make this 3x faster by performing
+		; all three loops at the same time.
 		(define (set-mtm-marginals ITEM)
 			(define l0 (sum-mtm-support ITEM))
 			(define l1 (sum-mtm-count ITEM))
-			(api-obj 'set-mtm-norms ITEM l0 l1))
+			(define l2 (sum-mtm-length ITEM))
+			(api-obj 'set-mtm-norms ITEM l0 l1 l2))
 
 		(define (set-mmt-marginals ITEM)
 			(define l0 (sum-mmt-support ITEM))
 			(define l1 (sum-mmt-count ITEM))
-			(api-obj 'set-mmt-norms ITEM l0 l1))
+			(define l2 (sum-mmt-length ITEM))
+			(api-obj 'set-mmt-norms ITEM l0 l1 l2))
 
 		(define (all-mtm-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -339,8 +399,9 @@
 
 			; Compute the grand-totals
 			(let ((mtm-sup (compute-total-mtm-support))
-					(mtm-cnt (compute-total-mtm-count)))
-				(api-obj 'set-mtm-totals mtm-sup mtm-cnt))
+					(mtm-cnt (compute-total-mtm-count))
+					(mtm-len (compute-total-mtm-length)))
+				(api-obj 'set-mtm-totals mtm-sup mtm-cnt mtm-len))
 			(format #t "Finished mtm totals in ~A secs\n"
 				(elapsed-secs)))
 
@@ -355,8 +416,9 @@
 
 			; Compute the grand-totals
 			(let ((mmt-sup (compute-total-mmt-support))
-					(mmt-cnt (compute-total-mmt-count)))
-				(api-obj 'set-mmt-totals mmt-sup mmt-cnt))
+					(mmt-cnt (compute-total-mmt-count))
+					(mmt-len (compute-total-mmt-length)))
+				(api-obj 'set-mmt-totals mmt-sup mmt-cnt mmt-len))
 			(format #t "Finished mmt totals in ~A secs\n"
 				(elapsed-secs)))
 
@@ -375,11 +437,15 @@
 				((mmt-support)        (apply sum-mmt-support args))
 				((mtm-count)          (apply sum-mtm-count args))
 				((mmt-count)          (apply sum-mmt-count args))
+				((mtm-length)         (apply sum-mtm-length args))
+				((mmt-length)         (apply sum-mmt-length args))
 
 				((total-mtm-support)  (compute-total-mtm-support))
 				((total-mtm-count)    (compute-total-mtm-count))
+				((total-mtm-length)   (compute-total-mtm-length))
 				((total-mmt-support)  (compute-total-mmt-support))
 				((total-mmt-count)    (compute-total-mmt-count))
+				((total-mmt-length)   (compute-total-mmt-length))
 
 				((set-mtm-marginals)  (apply set-mtm-marginals args))
 				((set-mmt-marginals)  (apply set-mmt-marginals args))
