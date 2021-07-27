@@ -428,35 +428,34 @@ Key Development Goals
 Looking ahead, some key major projects.
 
 ### Distributed Processing
-One of the major development goals for the 2019-2021 time frame
+One of the development goals for the 2021-2023 time frame
 is to gain experience with distributed data processing. Currently,
-the AtomSpace uses Postgres to provide distributed, scalable
-storage. We're also talking about porting to Apache Ignite, or
-possibly some other graph database, such as Redis, Riak or Grakn,
-all of which also support scalable, distributed storage.
+one can build simple distributed networks of AtomSpaces, by using
+the [**StorageNode**](https://wiki.opencog.org/w/StorageNode) to
+specify a remote AtomSpace. However, it is up to you as to what
+kinds of data these AtomSpace exchange with one-another. There
+are no pre-configured, suggested communications styles.
 
-However, despite the fact that Postgres is already distributed,
-and fairly scalable, none of the actual users of the AtomSpace
-use it in it's distributed mode. Exactly why this is the case
-remains unclear: is it the difficulty of managing a distributed
-Postgres database? (I guess you have to be a good DB Admin to
-know how to do this?) Is it the programming API offered by the
-AtomSpace?  Maybe it's not yet urgent for them?  Would rebasing
-on a non-SQL database (such as Ignite, Riak, Redis or Grakn) make
-this easier and simpler?  This is quite unclear, and quite unknown
-at this stage.
+### Cross-system Bridges
+Because the AtomSpace can hold many different representatioinal
+styles, it is relatively easy to import data into the AtomSpace.
+The low-brow way to do this is to write a script file that imports
+the data. This is fine, but leads to data management issues: who's
+got the master copy?
 
-If a port to one of the distributed graph databases is undertaken,
-there are several implementation issues that need to be cleared
-up.  One is to eliminate many usages of SetLink (
-[Issues #1502](https://github.com/opencog/atomspace/issues/1502)
-and [#1507](https://github.com/opencog/atomspace/issues/1507) ).
-Another is to change the AtomTable API to look like a bunch
-of MemberLink's.  (Currently, the AtomTable conceptually looks and
-behaves like a large set, which makes scaling and distribution
-harder than it could be). How to transform the AtomTable into a bunch
-of MemberLinks without blowing up RAM usage or hurting performance
-is unclear.
+The goal of data bridges is to create new Atoms that allow live
+access into other online systems. For example, if an SQL database
+holds a table of `(name, address, phone-number)`, it should be
+possible to map this into the AtomSpace, such that updates not
+only alter the SQL table, live and on line, but also such that
+a query performed on the AtomSpace side translates into a query on
+the SQL database side. This is not hard to do, but no one's done it
+yet.
+
+Similarly, a live online bridge between the AtomSpace and popular
+graph databases should also be possible. It's not clear if this
+should use the [StorageNode](https://wiki.opencog.org/w/StorageNode)
+API mentioned above, or if it needs something else.
 
 
 ### Exploring Values
@@ -472,9 +471,20 @@ some important design decisions to be made. Developers have not begun
 to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
-2020-2024 time-frame. See the
+2021-2024 time-frame. See the
 [value flows](https://blog.opencog.org/2020/04/08/value-flows/) blog
 entry.
+
+A particularly important first step would be to build interfaces
+between values and an audio DSP framework. This would allow AtomSpace
+structures to control audio processing, thus enabling (for example)
+sound recognition (do I hear clapping? Cheers? Boos?) without having
+to hard-code a "cheer recognizer". This opens the door to using machine
+learning to learn how to detect different kinds of audio events.
+
+There is no particular need to limit oneself to audio: other kinds
+of data is possible (*e.g.* exploring the syntactic, hierarchical
+part-whole structure in images) but audio is perhaps easier!?
 
 
 ### Sheaf theory
