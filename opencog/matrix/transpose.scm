@@ -375,18 +375,42 @@
 		; Compute all l_0, l_1 and l_2 norms, attach them to the
 		; wildcards, where the transpose-api can find them.
 
-		; XXX FIXME can make this 3x faster by performing
-		; all three loops at the same time.
+		; Equivalent to
+		;    (define l0 (sum-mtm-support ITEM))
+		;    (define l1 (sum-mtm-count ITEM))
+		;    (define l2 (sum-mtm-length ITEM))
+		; but 3x faster by performing all three loops at the
+		; same time.
 		(define (set-mtm-marginals ITEM)
-			(define l0 (sum-mtm-support ITEM))
-			(define l1 (sum-mtm-count ITEM))
-			(define l2 (sum-mtm-length ITEM))
+			(define l0 0.0)
+			(define l1 0.0)
+			(define l2 0.0)
+			(for-each
+				(lambda (ldual)
+					(define cnt (get-pr-cnt ldual ITEM))
+					(define term (* (right-count ldual) cnt))
+					(define len (* (right-length ldual) cnt cnt))
+					(set! l0 (+ l0 (if (< 0 term) 1 0)))
+					(set! l1 (+ l1 term))
+					(set! l2 (+ l2 len))
+				)
+				(star-obj 'left-duals ITEM))
 			(api-obj 'set-mtm-norms ITEM l0 l1 l2))
 
 		(define (set-mmt-marginals ITEM)
-			(define l0 (sum-mmt-support ITEM))
-			(define l1 (sum-mmt-count ITEM))
-			(define l2 (sum-mmt-length ITEM))
+			(define l0 0.0)
+			(define l1 0.0)
+			(define l2 0.0)
+			(for-each
+				(lambda (rdual)
+					(define cnt (get-pr-cnt rdual ITEM))
+					(define term (* (left-count rdual) cnt))
+					(define len (* (left-length rdual) cnt cnt))
+					(set! l0 (+ l0 (if (< 0 term) 1 0)))
+					(set! l1 (+ l1 term))
+					(set! l2 (+ l2 len))
+				)
+				(star-obj 'right-duals ITEM))
 			(api-obj 'set-mmt-norms ITEM l0 l1 l2))
 
 		(define (all-mtm-marginals)
