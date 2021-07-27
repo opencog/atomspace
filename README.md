@@ -177,8 +177,12 @@ The actual AtomSpace resembles some aspects of all three, without
 being specifically any of them. It tries to be general: it wants to
 let you work with structured data or with unstructured data or with
 graphs, or any mixture of all three, however you please. It does not
-force any particular style.  Its meant to be allow general knowledge
-representation.
+force any particular style. You can store data as ontologies, or as
+lambda expressions, or as prolog-like logical statements, or as
+syntactic (BNF-style) productions or as constraints or as RDF/OWL
+style schemas ... you can mix declarative and proceedural styles
+... we don't care. The AtomSpace is meant to allow general knowledge
+representation, in any format.
 
 That said: it means that the AtomSpace is different and unusual.
 It might be a bit outside of the comfort zone for most programmers.
