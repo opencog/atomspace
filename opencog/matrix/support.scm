@@ -24,9 +24,9 @@
   support, count and length subtotals on rows and columns. It is assumed
   that these have been previously computed, as described below.
   See the documentation on `add-support-compute` for precise definitions
-  of \"support\", \"root\", \"count\" and \"length\"; in brief, these
-  are just the l_0, l_0.5, l_1 and l_2 (Banach) norms of the rows and
-  columns.
+  of \"support\", \"amplitude\", \"count\" and \"length\"; in brief,
+  these are just the l_0, l_0.5, l_1 and l_2 (Banach lp-space) norms of
+  the rows and columns.
 
   This object provides per-row/per-column values for support, count and
   length.  The `add-report-api` has methods with similar, or the same
@@ -106,7 +106,7 @@
 			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
 			(lambda (key . args) 0)))
 
-	(define (get-root ATOM)
+	(define (get-amplitude ATOM)
 		(catch 'wrong-type-arg
 			(lambda () (cog-value-ref (cog-value ATOM norm-key) 3))
 			(lambda (key . args) 0)))
@@ -121,8 +121,8 @@
 	(define (get-left-length ITEM)
 		(get-length (LLOBJ 'left-wildcard ITEM)))
 
-	(define (get-left-root ITEM)
-		(get-root (LLOBJ 'left-wildcard ITEM)))
+	(define (get-left-amplitude ITEM)
+		(get-amplitude (LLOBJ 'left-wildcard ITEM)))
 
 	(define (set-left-norms ITEM L0 L1 L2 LQ)
 		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ))
@@ -137,8 +137,8 @@
 	(define (get-right-length ITEM)
 		(get-length (LLOBJ 'right-wildcard ITEM)))
 
-	(define (get-right-root ITEM)
-		(get-root (LLOBJ 'right-wildcard ITEM)))
+	(define (get-right-amplitude ITEM)
+		(get-amplitude (LLOBJ 'right-wildcard ITEM)))
 
 	(define (set-right-norms ITEM L0 L1 L2 LQ)
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ))
@@ -211,8 +211,8 @@
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
 			((right-length)       (apply get-right-length args))
-			((left-root)          (apply get-left-root args))
-			((right-root)         (apply get-right-root args))
+			((left-amplitude)     (apply get-left-amplitude args))
+			((right-amplitude)    (apply get-right-amplitude args))
 
 			((total-support-left) (get-total-support-left))
 			((total-support-right)(get-total-support-right))
@@ -243,8 +243,8 @@
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
-  the root (lp-norm for p=0.5), the count (lp-norm for p=1), the
-  Euclidean length (lp-norm for p=2) and the general lp-norm.
+  the amplitude (lp-norm for p=0.5), the count (lp-norm for p=1),
+  the Euclidean length (lp-norm for p=2) and the general lp-norm.
   By default, these are computed from the counts on the matrix;
   optionally, a different source of numbers can be used.  This object
   does not make use of any pre-computed (marginal or \"cached\")
@@ -284,7 +284,7 @@
 
   The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
-  The 'left-root is (sum_x N^0.5(x,y))^2 for fixed y.
+  The 'left-amplitude is (sum_x N^0.5(x,y))^2 for fixed y.
 
   The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
@@ -400,7 +400,7 @@
 
 		; -------------
 		; Return the sum of probability amplitudes
-		(define (sum-root LIST)
+		(define (sum-amplitude LIST)
 			(define tot
 				(fold
 					(lambda (lopr sum)
@@ -412,11 +412,11 @@
 
 		; Returns the sum of probability amplitudes aka the l_0.5 norm
 		; (l_p norm for p=0.5)
-		(define (sum-left-root ITEM)
-			(sum-root (star-obj 'left-stars ITEM)))
+		(define (sum-left-amplitude ITEM)
+			(sum-amplitude (star-obj 'left-stars ITEM)))
 
-		(define (sum-right-root ITEM)
-			(sum-root (star-obj 'right-stars ITEM)))
+		(define (sum-right-amplitude ITEM)
+			(sum-amplitude (star-obj 'right-stars ITEM)))
 
 		; -------------
 		; Return the lp-norm (Banach-space norm) of the counts
@@ -596,8 +596,8 @@
 				((right-count)        (apply sum-right-count args))
 				((left-length)        (apply sum-left-length args))
 				((right-length)       (apply sum-right-length args))
-				((left-root)          (apply sum-left-root args))
-				((right-root)         (apply sum-right-root args))
+				((left-amplitude)     (apply sum-left-amplitude args))
+				((right-amplitude)    (apply sum-right-amplitude args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
