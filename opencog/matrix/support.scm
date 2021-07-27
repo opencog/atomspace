@@ -184,6 +184,14 @@
 	; Force data to be recomputed, but clobbering any
 	; existing data.
 	(define (clobber)
+		(for-each (lambda (ATOM)
+			(cog-set-value! (LLOBJ 'right-wildcard ATOM) norm-key #f))
+			((add-pair-stars  LLOBJ) 'left-basis))
+
+		(for-each (lambda (ATOM)
+			(cog-set-value! (LLOBJ 'left-wildcard ATOM) norm-key #f))
+			((add-pair-stars  LLOBJ) 'right-basis))
+
 		(cog-set-value! (LLOBJ 'wild-wild) left-total-key #f)
 		(cog-set-value! (LLOBJ 'wild-wild) right-total-key #f)
 		(LLOBJ 'clobber)
