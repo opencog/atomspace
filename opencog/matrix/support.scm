@@ -181,6 +181,15 @@
 		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
 
 	;-------------------------------------------
+	; Force data to be recomputed, but clobbering any
+	; existing data.
+	(define (clobber)
+		(cog-set-value! (LLOBJ 'wild-wild) left-total-key #f)
+		(cog-set-value! (LLOBJ 'wild-wild) right-total-key #f)
+		(star-obj 'clobber)
+	)
+
+	;-------------------------------------------
 
 	(define (help)
 		(format #t
@@ -228,6 +237,7 @@
 			((set-left-totals)    (apply set-left-totals args))
 			((set-right-totals)   (apply set-right-totals args))
 
+			((clobber)            (clobber))
 			((help)               (help))
 			((describe)           (describe))
 			((obj)                "add-support-api")
@@ -564,6 +574,13 @@
 			(all-left-marginals)
 			(all-right-marginals))
 
+		; Force data to be recomputed, but clobbering any
+		; existing data.
+		(define (clobber)
+			(api-obj 'clobber)
+			(star-obj 'clobber)
+		)
+
 		;-------------------------------------------
 
 		(define (help)
@@ -612,18 +629,14 @@
 				((all-left-marginals)  (all-left-marginals))
 				((all-right-marginals) (all-right-marginals))
 				((cache-all)           (cache-all))
+				((clobber)             (clobber))
 
-; XXX hack alert. We need something more elegant!?
-; the language-learning clustering code uses this
-; to invalidate the star objects in use.
-				((clobber)            (star-obj 'clobber))
+				((help)                (help))
+				((describe)            (describe))
+				((obj)                 "add-support-compute")
+				((base)                LLOBJ)
 
-				((help)               (help))
-				((describe)           (describe))
-				((obj)                "add-support-compute")
-				((base)               LLOBJ)
-
-				(else                 (apply LLOBJ (cons message args))))
+				(else                  (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------
