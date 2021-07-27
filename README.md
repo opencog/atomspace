@@ -129,6 +129,65 @@ listed below.  Things are things that no one else does:
   sure they have balls in them, but also testing each and every ball in
   a basket to make sure they are **all** of the same color.
 
+### What it isn't
+Newcomers often struggle with the AtomSpace, because they bring
+preconceived notions of what they think it should be, and its not that.
+So, a few things it is not.
+
+* **Its not JSON.**  So JSON is a perfectly good way of representing
+  structured data. JSON records data as `key:value` pairs, arranged
+  hierarchically, with braces, or as lists, with square brackets.
+  The AtomSpace is imilar, except that there are not keys! The
+  AtomSpace still organizes data hierarchically, and provides lists,
+  but all entries are anonymous, nameless. Why? There are CPU performance,
+  RAM usage and design tradeoffs in not using explict named keys in the
+  data structure. You can still have named values; it is just that they
+  are not required. There are several different ways of importing JSON
+  data into the AtomSpace. If your mental model of "data" is JSON, then
+  you will be confused by the AtomSpace.
+
+* **It's not SQL. It's also not noSQL**. Databases from 50 years ago
+  organized structured data into tables, where the `key` is the label
+  of a column, and different `values` sit in different rows. This is
+  more efficient than JSON, if you have many rows: you don't have to
+  store the same key over and over again, for each row. Of course,
+  tabular data is impractical if you have zillions of tales, each with
+  only one or two rows. That's one reason why JSON was invented.
+  The AtmSpace was designed to store *unstructured* data. You can
+  still store structured data in it; there are several different ways
+  of importing tabular data into the AtomSpace. If your mental model
+  of "data" is structured data, then you will be confused by the AtomSpace.
+
+* **It's not a vertex+edge store**. (Almost?) all graph databases
+  decompose graphs into lists of vertexes and edges. This is just fine,
+  if you don't use complex algorithms. The problem with this storage
+  format is locality: graph traversal becomes a game of repeatedly
+  looking up a sepcific vertex and then, a sepcific edge, each taken
+  from a large table for vertexes and edges. This is non-local, it
+  requires large indexes on those tables (requires a lot of RAM),
+  and the lookups are CPU consuming. Graph traversal can be a
+  bottleneck. The AtomSpace avoids much of this overhead by using
+  (hyper-/meta-)graphs. This enables more effective and simpler
+  traversal algorithms, which in turn allows more sophisticated
+  search features to be implemented.  If your mental model of
+  graph data is lists of vertexes and edges, then you will be confused
+  by the AtomSpace.
+
+The actual AtomSpace resembles some aspects of all three, without
+being specifically any of them. It tries to be general: it wants to
+let you work with structured data or with unstructured data or with
+graphs, however you please. It does not force any particular style.
+Its meant to be general.
+
+That said: it means that the AtomSpace is different and unusual.
+It might be a bit outside of the comfort zone for most programmers.
+It doesn't have API's that are instantly recognizable to users of
+these other systems. There is a challenging learning curve involved,
+here. We're sorry about that: if you have ideas for better API's that
+would allow the AtomSpace to look more conventional, then contact us!
+
+### Status and Invitation
+
 As it turns out, knowledge representation is hard, and so the AtomSpace
 has been (and continues to be) a platform for active scientific research
 on knowledge representation, knowledge discovery and knowledge
