@@ -186,7 +186,7 @@
 	(define (clobber)
 		(cog-set-value! (LLOBJ 'wild-wild) left-total-key #f)
 		(cog-set-value! (LLOBJ 'wild-wild) right-total-key #f)
-		(star-obj 'clobber)
+		(LLOBJ 'clobber)
 	)
 
 	;-------------------------------------------
