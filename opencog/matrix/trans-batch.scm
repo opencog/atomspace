@@ -188,6 +188,7 @@
 				((right-marginals) (batch-right-support))
 				((mmt-marginals)   (batch-mmt-marginals))
 				((mtm-marginals)   (batch-mtm-marginals))
+				((clobber)         (support-obj 'clobber))
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
