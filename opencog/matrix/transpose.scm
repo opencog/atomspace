@@ -303,15 +303,17 @@
 		; Identical to (length (get-mmt-support-set ITEM))
 		(define (sum-mmt-support ITEM)
 			(fold (lambda (rdual sum)
-				(if (< 0 (* (left-count rdual)
-						(get-pr-cnt ITEM rdual))) (+ sum 1) sum)) 0
-				(star-obj 'right-duals ITEM)))
+				(if (< 0 (get-pr-cnt ITEM rdual))
+					(+ sum (left-support rdual))
+					sum))
+				0 (star-obj 'right-duals ITEM)))
 
 		(define (sum-mtm-support ITEM)
 			(fold (lambda (ldual sum)
-				(if (< 0 (* (right-count ldual)
-						(get-pr-cnt ldual ITEM))) (+ sum 1) sum)) 0
-				(star-obj 'left-duals ITEM)))
+				(if (< 0 (get-pr-cnt ITEM ldual))
+					(+ sum (right-support ldual))
+					sum))
+				0 (star-obj 'left-duals ITEM)))
 
 		; -------------
 		; Sum counts
@@ -388,9 +390,10 @@
 			(for-each
 				(lambda (ldual)
 					(define cnt (get-pr-cnt ldual ITEM))
+					(define sup (if (< 0 cnt) (right-support ldual) 0))
 					(define term (* (right-count ldual) cnt))
 					(define len (* (right-length ldual) cnt cnt))
-					(set! l0 (+ l0 (if (< 0 term) 1 0)))
+					(set! l0 (+ l0 sup))
 					(set! l1 (+ l1 term))
 					(set! l2 (+ l2 len))
 				)
@@ -404,9 +407,10 @@
 			(for-each
 				(lambda (rdual)
 					(define cnt (get-pr-cnt rdual ITEM))
+					(define sup (if (< 0 cnt) (left-support rdual) 0))
 					(define term (* (left-count rdual) cnt))
 					(define len (* (left-length rdual) cnt cnt))
-					(set! l0 (+ l0 (if (< 0 term) 1 0)))
+					(set! l0 (+ l0 sup))
 					(set! l1 (+ l1 term))
 					(set! l2 (+ l2 len))
 				)
