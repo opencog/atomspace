@@ -23,10 +23,10 @@
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
   support, count and length subtotals on rows and columns. It is assumed
   that these have been previously computed, as described below.
-
   See the documentation on `add-support-compute` for precise definitions
-  of \"support\", \"count\" and \"length\"; in brief, these are just the
-  l_0, l_1 and l_2 norms of the rows and columns.
+  of \"support\", \"root\", \"count\" and \"length\"; in brief, these
+  are just the l_0, l_0.5, l_1 and l_2 (Banach) norms of the rows and
+  columns.
 
   This object provides per-row/per-column values for support, count and
   length.  The `add-report-api` has methods with similar, or the same
@@ -55,8 +55,8 @@
 
 	(define norm-key (PredicateNode key-name))
 
-	(define (set-norms ATOM L0 L1 L2)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
+	(define (set-norms ATOM L0 L1 L2 LQ)
+		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2 LQ)))
 
 	; -----------------
 	; Set the grand-total count. Use the CountTruthValue.
@@ -106,6 +106,11 @@
 			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
 			(lambda (key . args) 0)))
 
+	(define (get-root ATOM)
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 3))
+			(lambda (key . args) 0)))
+
 	;--------
 	(define (get-left-support ITEM)
 		(get-support (LLOBJ 'left-wildcard ITEM)))
@@ -116,8 +121,11 @@
 	(define (get-left-length ITEM)
 		(get-length (LLOBJ 'left-wildcard ITEM)))
 
-	(define (set-left-norms ITEM L0 L1 L2)
-		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2))
+	(define (get-left-root ITEM)
+		(get-root (LLOBJ 'left-wildcard ITEM)))
+
+	(define (set-left-norms ITEM L0 L1 L2 LQ)
+		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ))
 
 	;--------
 	(define (get-right-support ITEM)
@@ -129,8 +137,11 @@
 	(define (get-right-length ITEM)
 		(get-length (LLOBJ 'right-wildcard ITEM)))
 
-	(define (set-right-norms ITEM L0 L1 L2)
-		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
+	(define (get-right-root ITEM)
+		(get-root (LLOBJ 'right-wildcard ITEM)))
+
+	(define (set-right-norms ITEM L0 L1 L2 LQ)
+		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ))
 
 	;--------
 	(define (error-no-data)
@@ -200,6 +211,8 @@
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
 			((right-length)       (apply get-right-length args))
+			((left-root)          (apply get-left-root args))
+			((right-root)         (apply get-right-root args))
 
 			((total-support-left) (get-total-support-left))
 			((total-support-right)(get-total-support-right))
@@ -230,15 +243,16 @@
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
-  the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
-  and the general lp-norm.  By default, these are computed from the
-  counts on the matrix; optionally, a different source of numbers can
-  be used.  This object does not make use of any pre-computed (marginal
-  or \"cached\") values; instead, all computations are done on the raw
-  matrix data.  The computed norms are not placed back into the
-  atomspace after being computed (unless the 'cache-all method is
-  invoked, in which case a bulk computation is done.) Cached values
-  can be access with the `add-support-api` object.
+  the root (lp-norm for p=0.5), the count (lp-norm for p=1), the
+  Euclidean length (lp-norm for p=2) and the general lp-norm.
+  By default, these are computed from the counts on the matrix;
+  optionally, a different source of numbers can be used.  This object
+  does not make use of any pre-computed (marginal or \"cached\")
+  values; instead, all computations are done on the raw matrix data.
+  The computed norms are not placed back into the AtomSpace after
+  being computed (unless the 'cache-all method is invoked, in which
+  case a bulk computation is done.) Cached values can be access with
+  the `add-support-api` object.
 
   This object provides per-row/per-column values for these quantities.
   The `make-central-compute` object has methods with similar or the
@@ -269,6 +283,8 @@
   That is, for a given column y, this sums all counts in that column.
 
   The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
+
+  The 'left-root is (sum_x N^0.5(x,y))^2 for fixed y.
 
   The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
@@ -383,9 +399,29 @@
 			(sum-length (star-obj 'right-stars ITEM)))
 
 		; -------------
+		; Return the sum of probability amplitudes
+		(define (sum-root LIST)
+			(define tot
+				(fold
+					(lambda (lopr sum)
+						(define cnt (get-cnt lopr))
+						(+ sum (sqrt cnt)))
+					0
+					LIST))
+			(* tot tot))
+
+		; Returns the sum of probability amplitudes aka the l_0.5 norm
+		; (l_p norm for p=0.5)
+		(define (sum-left-root ITEM)
+			(sum-root (star-obj 'left-stars ITEM)))
+
+		(define (sum-right-root ITEM)
+			(sum-root (star-obj 'right-stars ITEM)))
+
+		; -------------
 		; Return the lp-norm (Banach-space norm) of the counts
-		; on LIST.  Viz sum_k N^p(k) for counted-pairs k in the
-		; list
+		; on LIST.  Viz (sum_k N^p(k))^1/p for counted-pairs k
+		; in the list
 		(define (sum-lp-norm P LIST)
 			(define tot
 				(fold
@@ -450,8 +486,8 @@
 				(star-obj 'right-basis)))
 
 		; -------------
-		; Compute all l_0, l_1 and l_2 norms, attach them to the
-		; wildcards, where the support-api can find them.
+		; Compute all l_0, l_0.5, l_1 and l_2 norms, attach them
+		; to the wildcards, where the support-api can find them.
 
 		; Perform three sums at once. The final sqrt taken later.
 		(define (sum-norms LIST)
@@ -461,9 +497,10 @@
 					(if (< 0 cnt) (list
 							(+ (first sum) 1)
 							(+ (second sum) cnt)
-							(+ (third sum) (* cnt cnt)))
+							(+ (third sum) (* cnt cnt))
+							(+ (fourth sum) (sqrt cnt)))
 						sum))
-				(list 0 0 0)
+				(list 0 0 0 0)
 				LIST))
 
 		(define (sum-left-norms ITEM)
@@ -477,14 +514,16 @@
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
-			(api-obj 'set-left-norms ITEM l0 l1 l2))
+			(define lq (* (fourth sums) (fourth sums)))
+			(api-obj 'set-left-norms ITEM l0 l1 l2 lq))
 
 		(define (set-right-marginals ITEM)
 			(define sums (sum-right-norms ITEM))
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
-			(api-obj 'set-right-norms ITEM l0 l1 l2))
+			(define lq (* (fourth sums) (fourth sums)))
+			(api-obj 'set-right-norms ITEM l0 l1 l2 lq))
 
 		(define (all-left-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -557,6 +596,8 @@
 				((right-count)        (apply sum-right-count args))
 				((left-length)        (apply sum-left-length args))
 				((right-length)       (apply sum-right-length args))
+				((left-root)          (apply sum-left-root args))
+				((right-root)         (apply sum-right-root args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
