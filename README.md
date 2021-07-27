@@ -44,7 +44,7 @@ This is carefully explained
 [here,](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
 which also gives a precise definition of what a metagraph is, and how it
 is related to a graph.  As a side-effect, metagraphs open up many
-possibilities not available to ordinary graph databasases. These are
+possibilities not available to ordinary graph databases. These are
 listed below.  Things are things that no one else does:
 * **Search queries are graphs.**
   (The API to the [pattern engine](https://wiki.opencog.org/w/Pattern_engine)
@@ -140,7 +140,7 @@ So, a few things it is not.
   The AtomSpace is similar, except that there are no keys! The
   AtomSpace still organizes data hierarchically, and provides lists,
   but all entries are anonymous, nameless. Why? There are performance
-  (CPU and RAM usage) and other design tradeoffs in not using explict
+  (CPU and RAM usage) and other design tradeoffs in not using explicit
   named keys in the data structure. You can still have named values;
   it is just that they are not required. There are several different
   ways of importing JSON data into the AtomSpace. If your mental model
@@ -180,9 +180,9 @@ graphs, or any mixture of all three, however you please. It does not
 force any particular style. You can store data as ontologies, or as
 lambda expressions, or as prolog-like logical statements, or as
 syntactic (BNF-style) productions or as constraints or as RDF/OWL
-style schemas ... you can mix declarative and proceedural styles
-... we don't care. The AtomSpace is meant to allow general knowledge
-representation, in any format.
+style schemas ... you can mix declarative, procedural and functional
+styles ... we don't care. The AtomSpace is meant to allow general
+knowledge representation, in any format.
 
 That said: it means that the AtomSpace is different and unusual.
 It might be a bit outside of the comfort zone for most programmers.
