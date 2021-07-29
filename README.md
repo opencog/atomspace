@@ -129,12 +129,12 @@ listed below.  Things are things that no one else does:
   sure they have balls in them, but also testing each and every ball in
   a basket to make sure they are **all** of the same color.
 
-### What it isn't
+### What it Isn't
 Newcomers often struggle with the AtomSpace, because they bring
 preconceived notions of what they think it should be, and its not that.
 So, a few things it is not.
 
-* **Its not JSON.**  So JSON is a perfectly good way of representing
+* **It's not JSON.**  So JSON is a perfectly good way of representing
   structured data. JSON records data as `key:value` pairs, arranged
   hierarchically, with braces, or as lists, with square brackets.
   The AtomSpace is similar, except that there are no keys! The
@@ -173,22 +173,45 @@ So, a few things it is not.
   graph data is lists of vertexes and edges, then you will be confused
   by the AtomSpace.
 
-The actual AtomSpace resembles some aspects of all three, without
-being specifically any of them. It tries to be general: it wants to
-let you work with structured data or with unstructured data or with
-graphs, or any mixture of all three, however you please. It does not
-force any particular style. You can store data as ontologies, or as
-lambda expressions, or as prolog-like logical statements, or as
-syntactic (BNF-style) productions or as constraints or as RDF/OWL
-style schemas ... you can mix declarative, procedural and functional
-styles ... we don't care. The AtomSpace is meant to allow general
-knowledge representation, in any format.
+**What is it, then?** Most simply, the AtomSpace stores immutable,
+globally unique, [typed](https://en.wikipedia.org/wiki/Type_theory)
+[s-expressions.](https://en.wikipedia.org/wiki/S-expression) The types
+can be thought of as being like object-oriented classes, and many (not
+all) Atom types do have a corresponding C++ class. Each s-expression is
+called "an Atom". Each Atom is globally unique: there is only one copy,
+ever, of any given s-expression (Atom). It's almost just that simple,
+with only one little twist: a (mutable) key-value database is attached
+to each Atom. Atoms can be used to define (hyper-/meta-)graphs. It's fun
+to think of these graphs as defining "plumbing"; whereas the Values
+stored in the associated key-value database is like the "fluid" in
+these pipes.
 
-That said: it means that the AtomSpace is different and unusual.
+The AtomSpace borrows ideas and concepts from many different systems,
+including ideas from JSON, SQL and graph stores. The goal of the
+AtomSpace is to be general: to allow you to work with whatever style
+of data you want: structured or unstructured. As graphs, as tables,
+as objects. As lambda expressions, as abstract syntax trees, as
+prolog-like logical statements.  A place to store relational data
+obeying some relational algebra. As a place to store ontologies or
+mereologies or taxonomies. A place for syntactic (BNF-style)
+productions or constraints or RDF/OWL-style schemas.
+In a mix of declarative, procedural and functional styles.
+The AtomSpace is meant to allow general knowledge representation,
+in any format.
+
+The "special extra twist" of immutable graphs decorated with mutable
+values resembles a corresponding idea in logic: the split between
+logical statements, and the truth values (valuations) attached to them.
+This is useful not only for logic, but also for specifying data
+processing pipelines: the graph specifies the pipeline; the values are
+what flow through that pipeline. The graph is the "code"; the values
+are the data that the code acts on.
+
+All this means that the AtomSpace is different and unusual.
 It might be a bit outside of the comfort zone for most programmers.
 It doesn't have API's that are instantly recognizable to users of
-these other systems. There is a challenging learning curve involved,
-here. We're sorry about that: if you have ideas for better API's that
+these other systems. There is a challenging learning curve involved.
+We're sorry about that: if you have ideas for better API's that
 would allow the AtomSpace to look more conventional, and be less
 intimidating to most programmers, then contact us!
 
