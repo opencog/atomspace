@@ -22,12 +22,19 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-store LLOBJ)
+(define*-public (make-store LLOBJ #:optional (STORAGE #f))
 "
-  make-store -- Extend the LLOBJ with additional methods to store
-  the left and right wild-card values. The primary utility of this
-  class is that it prints a progress report. Its really just a fancy
-  wrapper around store-atom, which does the actual work.
+  make-store LLOBJ [STORAGE] -- Extend the LLOBJ with additional
+  methods to store the left and right wild-card values. If the STORAGE
+  argument is provided, then Atoms will be stored there, else the
+  default storage will be used. If the STORAGE is provided, it must
+  be a StorageNode, and it must be open. If its not provided, then
+  the AtomSpace must be connected to default storage that is open.
+
+  The primary utility of this class is that it prints a progress report.
+  (That is, its not hard to write a simple loop over all atoms in a
+  matrix.) So this is really just a fancy wrapper around store-atom,
+  which does the actual work.
 
   The provided methods are:
   'store-left-marginals - Store all of the left (row) marginal atoms,
@@ -49,6 +56,9 @@
 
   'store-pairs - Store the provided list of Atoms.
 "
+	(define (do-store-atom ATM)
+		(if STORAGE (store-atom ATM STORAGE) (store-atom ATM)))
+
 	(define (store-list XLATE all-atoms CNT MSG)
 		(define num-prs (length all-atoms))
 
@@ -56,7 +66,7 @@
 		; report.  The problem is that millions of pairs may need to be
 		; stored, and this just takes a long time.
 		(define store-rpt
-			(make-progress-rpt store-atom CNT num-prs
+			(make-progress-rpt do-store-atom CNT num-prs
 				(string-append
 					"Stored ~A of ~A " MSG " in ~d secs (~A pairs/sec)\n")))
 
@@ -80,7 +90,7 @@
 		(define (store-left-wildcards)
 			; Store the wild-wild-card atom, first.
 			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
+			(do-store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'left-wildcard x))
 				(star-obj 'right-basis)
@@ -89,7 +99,7 @@
 		(define (store-right-wildcards)
 			; Store the wild-wild-card atom, first.
 			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
+			(do-store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'right-wildcard x))
 				(star-obj 'left-basis)
