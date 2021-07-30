@@ -150,7 +150,7 @@ The tools implemented here include:
  * Computing and caching frequencies from counts.
  * Computing and caching mutual information of pairs.
  * Computing and caching marginal mutual information of pairs.
- * Computing cosine similarity between rows or columns.
+ * Computing cosine and jaccard similarity between rows or columns.
  * Computing mutual information between rows or columns
    (as opposed to pairs).
  * Concatenating dissimilar matrices.
@@ -383,7 +383,7 @@ and v.v.
 
 Computing similarity measures
 -----------------------------
-The `add-pair-cosine-compute` class provides methods for taking the
+The `add-similarity-compute` class provides methods for taking the
 vector product of two different rows or columns, viz. the product
 `left-prod(y,z) = sum_x N(x,y) N(x,z)` and likewise for the right.
 The cosine similarity is
@@ -395,11 +395,15 @@ where
    left-length(y) = sqrt sum_x N(x,y) N(x,y)
                   = sqrt left-prod(y,y)
 ````
-The class also provides the Jaccard similarity
+The class also provides several other similarity measures,
+including the Jaccard similarity (Ruzicka distance)
 ```
    left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
             sum_x max (N(x,y), N(x,z))
 ```
+and the Probability-Jaccard distance (a maximally consistent distance
+for probability distributions; see Wikiepdia for details). This class
+also provides a plain overlap similarity function.
 
 
 Direct sums

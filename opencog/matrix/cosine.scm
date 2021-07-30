@@ -18,10 +18,10 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-pair-cosine-compute LLOBJ
+(define*-public (add-similarity-compute LLOBJ
 	#:optional (GET-CNT 'get-count))
 "
-  add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
+  add-similarity-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products, cosine angles and jaccard distances between two
   rows or columns of the LLOBJ sparse matrix.
 
@@ -52,11 +52,28 @@
 
   Jaccard:
   --------
-  The Jaccard similarity can be defined as one minus the Jaccard
+  The Jaccard distance can be defined as one minus the Jaccard
   similarity, which is defined as
 
-      left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
-               sum_x max (N(x,y), N(x,z))
+      left-jacc-sim(a,b) = sum_x min (N(x,a), N(x,b)) /
+               sum_x max (N(x,a), N(x,b))
+
+  The above is also sometimes called the 'Ruzicka distances'.
+
+  Probability Jaccard:
+  --------------------
+  The Proability-Jaccard distance can be defined as one minus the
+  Probability-Jaccard similarity. The later is defined as
+
+      left-prjacc-sim(a,b) = sum_x
+             [sum_y max {N(y,a)/N(x,a), N(y,b)/N(x,b) }]^-1
+
+  Note the x sum is a sum over reciprocals of a sum.  This form is
+  discussed in greater detail in Wikipedia; it has the advantage of
+  providing 'maximally consistent sampling'. Its appropriate for the
+  case where the counts really are meant to be interpreted as providing
+  probabilistic frequencies.
+
 
   Overlap:
   --------
@@ -163,6 +180,45 @@
 		)
 
 		; -------------
+		; Return the probability-jaccard distance
+		(define (compute-prob-jaccard-dist COL-A COL-B METH)
+
+			; Given weights `weig-a` and `weig-b` take the sum of the
+			; maxes of the two rows, weighted by the weights.
+			(define (weighted-max weig-a weig-b)
+				(define (wmax a b)
+					(max (* a weig-a) (* b weig-b)))
+				(define wmax-obj
+					(add-support-compute
+						(add-tuple-math star-obj wmax GET-CNT)))
+				(wmax-obj METH (list COL-A COL-B)))
+
+			; Given two numbers, compute the denominator of the
+			; prob-jaccard sum. The tuple math object iterates
+			; over the union, so we have to manually reject counts
+			; where one is zero (i.e. to get the intersection)
+			(define (denom na nb)
+				(if (and (< 0.0 na) (< 0.0 nb))
+					(/ 1.0 (weighted-max (/ 1.0 na) (/ 1.0 nb)))
+					0.0))
+
+			; Use the tuple math object to run over both rows
+			(define pjac-obj
+				(add-support-compute
+					(add-tuple-math star-obj denom GET-CNT)))
+
+			(- 1.0 (pjac-obj METH (list COL-A COL-B)))
+		)
+
+		; Return the left-probability-jaccard distance
+		(define (compute-left-prob-jaccard-dist COL-A COL-B)
+			(compute-prob-jaccard-dist COL-A COL-B 'left-count))
+
+		; Return the right-probability-jaccard distance
+		(define (compute-right-prob-jaccard-dist COL-A COL-B)
+			(compute-prob-jaccard-dist COL-A COL-B 'right-count))
+
+		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -172,6 +228,8 @@
 				((right-cosine)    (apply compute-right-cosine args))
 				((left-jaccard)    (apply compute-left-jaccard-dist args))
 				((right-jaccard)   (apply compute-right-jaccard-dist args))
+				((left-prjaccard)  (apply compute-left-prob-jaccard-dist args))
+				((right-prjaccard) (apply compute-right-prob-jaccard-dist args))
 				((left-overlap)    (apply compute-left-overlap-sim args))
 				((right-overlap)   (apply compute-right-overlap-sim args))
 				(else              (apply LLOBJ (cons message args))))

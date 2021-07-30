@@ -155,7 +155,7 @@
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
 	(CUTOFF 0.1)
 	(SIM-FUN
-		(let ((acc (add-pair-cosine-compute LLOBJ)))
+		(let ((acc (add-similarity-compute LLOBJ)))
 			(if MTM?
 				(lambda (x y) (acc 'left-cosine x y))
 				(lambda (x y) (acc 'right-cosine x y)))))
