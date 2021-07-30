@@ -14,6 +14,7 @@ ADD_GUILE_MODULE (FILES
 	progress.scm
 	report-api.scm
 	similarity-api.scm
+	store.scm
 	support.scm
 	symmetric-mi.scm
 	thresh-pca.scm

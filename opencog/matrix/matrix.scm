@@ -38,6 +38,7 @@
 (include-from-path "opencog/matrix/eval-pairs.scm")
 (include-from-path "opencog/matrix/object-api.scm")
 (include-from-path "opencog/matrix/dynamic.scm")
+(include-from-path "opencog/matrix/store.scm")
 (include-from-path "opencog/matrix/support.scm")
 (include-from-path "opencog/matrix/transpose.scm")
 (include-from-path "opencog/matrix/report-api.scm")
