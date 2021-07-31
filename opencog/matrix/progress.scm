@@ -62,7 +62,8 @@
 			(start-time 0))
 		(lambda (item)
 			; back-date to avoid divide-by-zero
-			(if (eqv? 0 cnt) (set! start-time (- (current-time) 0.00001)))
+			(if (eqv? 0 (atomic-box-ref cnt))
+				(set! start-time (- (current-time) 0.00001)))
 			(func item)
 			(if (eqv? 0 (modulo (atomic-inc cnt) when))
 				(let* ((elapsed (- (current-time) start-time))
