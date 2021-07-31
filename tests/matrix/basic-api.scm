@@ -134,10 +134,10 @@
 (define cent (make-central-compute bapi))
 (define rapi (add-report-api bapi))
 
-(define cosi (add-pair-cosine-compute bapi))
+(define cosi (add-similarity-compute bapi))
 
 (define dapi (add-dynamic-stars bapi))
-(define dosi (add-pair-cosine-compute dapi))
+(define dosi (add-similarity-compute dapi))
 
 (define suby (add-tuple-math bapi -))
 (define norm (add-support-compute suby))
