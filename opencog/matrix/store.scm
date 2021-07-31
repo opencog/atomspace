@@ -115,7 +115,14 @@
 
 		; Store all elements in the matrix.
 		(define (store-all-elts)
-			(store-pairs (star-obj 'get-all-elts)))
+			; The 'get-all-elts method can take a very long time
+			; on big objects, especially when they are filtered.
+			; So report that time.
+			(define elap (make-elapsed-secs))
+			(define all-prs (star-obj 'get-all-elts))
+			(format #t "Found ~A pairs in ~A secs\n"
+				(length all-prs) (elapsed-secs))
+			(store-pairs all-prs))
 
 		; Store everything, including auxilliaries
 		(define (store-all)
