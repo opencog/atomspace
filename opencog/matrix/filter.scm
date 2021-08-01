@@ -76,6 +76,11 @@
 
   The RENAME argument should be #f or #t, it is used to determine how
   other API's generate predicate keys to obtain values.
+
+  The filtered matrix may contain empty rows or columns! This can
+  occur when the PAIR-PRED removes everything in a row or column,
+  but the other predicates do not. These can be removed by applying
+  the `add-zero-filter` object afterwards.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis #f)
@@ -85,7 +90,7 @@
 			(all-elts #f)
 		)
 
-		; Cache the result of filtering basuis elements
+		; Cache the result of filtering basis elements
 		(define cache-left-pred (make-afunc-cache LEFT-BASIS-PRED))
 		(define cache-right-pred (make-afunc-cache RIGHT-BASIS-PRED))
 
