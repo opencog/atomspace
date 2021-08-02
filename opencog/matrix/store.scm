@@ -121,7 +121,7 @@
 			(define elap (make-elapsed-secs))
 			(define all-prs (star-obj 'get-all-elts))
 			(format #t "Found ~A pairs in ~A secs\n"
-				(length all-prs) (elapsed-secs))
+				(length all-prs) (elap))
 			(store-pairs all-prs))
 
 		; Store everything, including auxilliaries

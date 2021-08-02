@@ -60,6 +60,23 @@
 
   The above is also sometimes called the 'Ruzicka distances'.
 
+  Conditional Jaccard:
+  --------------------
+  The Jaccard distance gives an awkward result if the two count vectors
+  are colinear but of different lengths. For most problems considered
+  here, colinear count vectors should be considered to be equal. Thus,
+  a normalized version is defined below. The normalization is to use
+  the conditional probability instead of the count. (Normalization by
+  Euclidean lenght does noe make sense for counts).
+
+  The conditional probability is then defined as
+       p(x|a) = N(x,a) / N(*,a)
+
+  The conditional similarity is defined as
+
+      left-cond-jacc-sim(a,b) = sum_x min (p(x|a), p(x|b)) /
+               sum_x max (p(x|a), p(x|b))
+
   Probability Jaccard:
   --------------------
   The Proability-Jaccard distance can be defined as one minus the
@@ -165,6 +182,42 @@
 		)
 
 		; -------------
+		; Return the left conditional jaccard distance
+		(define (compute-left-cond-jacc-dist COL-A COL-B)
+			; left-count is N(*,COL)
+			(define sum-A (supp-obj 'left-count COL-A))
+			(define sum-B (supp-obj 'left-count COL-B))
+			(define (pmin x y)
+				(min (/ x sum-A) (/ y sum-B)))
+			(define (pmax x y)
+				(max (/ x sum-A) (/ y sum-B)))
+			(define pmin-obj (add-support-compute
+				(add-tuple-math star-obj pmin GET-CNT)))
+			(define pmax-obj (add-support-compute
+				(add-tuple-math star-obj pmax GET-CNT)))
+			(define left-min (pmin-obj 'left-count (list COL-A COL-B)))
+			(define left-max (pmax-obj 'left-count (list COL-A COL-B)))
+			(- 1.0 (/ left-min left-max))
+		)
+
+		(define (compute-right-cond-jacc-dist ROW-A ROW-B)
+			; right-count is N(ROW,*)
+			(define sum-A (supp-obj 'right-count ROW-A))
+			(define sum-B (supp-obj 'right-count ROW-B))
+			(define (pmin x y)
+				(min (/ x sum-A) (/ y sum-B)))
+			(define (pmax x y)
+				(max (/ x sum-A) (/ y sum-B)))
+			(define pmin-obj (add-support-compute
+				(add-tuple-math star-obj pmin GET-CNT)))
+			(define pmax-obj (add-support-compute
+				(add-tuple-math star-obj pmax GET-CNT)))
+			(define right-min (pmin-obj 'right-count (list ROW-A ROW-B)))
+			(define right-max (pmax-obj 'right-count (list ROW-A ROW-B)))
+			(- 1.0 (/ right-min right-max))
+		)
+
+		; -------------
 		; Return the left-overlap similarity
 		(define (compute-left-overlap-sim COL-A COL-B)
 			(define left-eith (either-obj 'left-count (list COL-A COL-B)))
@@ -230,6 +283,8 @@
 				((right-jaccard)   (apply compute-right-jaccard-dist args))
 				((left-prjaccard)  (apply compute-left-prob-jaccard-dist args))
 				((right-prjaccard) (apply compute-right-prob-jaccard-dist args))
+				((left-cond-jacc)  (apply compute-left-cond-jacc-dist args))
+				((right-cond-jacc) (apply compute-right-cond-jacc-dist args))
 				((left-overlap)    (apply compute-left-overlap-sim args))
 				((right-overlap)   (apply compute-right-overlap-sim args))
 				(else              (apply LLOBJ (cons message args))))
