@@ -84,6 +84,8 @@
 
       left-prjacc-sim(a,b) = sum_x
              [sum_y max {N(y,a)/N(x,a), N(y,b)/N(x,b) }]^-1
+         = sum_x
+             [sum_y max {p(y|a)/p(x|a), p(y|b)/p(x|b) }]^-1
 
   Note the x sum is a sum over reciprocals of a sum.  This form is
   discussed in greater detail in Wikipedia; it has the advantage of
@@ -182,40 +184,31 @@
 		)
 
 		; -------------
-		; Return the left conditional jaccard distance
-		(define (compute-left-cond-jacc-dist COL-A COL-B)
-			; left-count is N(*,COL)
-			(define sum-A (supp-obj 'left-count COL-A))
-			(define sum-B (supp-obj 'left-count COL-B))
+		; Return the conditional jaccard distance
+		; IDX is a row or a column
+		; METH is either 'left-count or 'right-count
+		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		(define (compute-cond-jacc-dist IDX-A IDX-B METH)
+			(define osum-A (/ 1.0 (supp-obj METH IDX-A)))
+			(define osum-B (/ 1.0 (supp-obj METH IDX-B)))
 			(define (pmin x y)
-				(min (/ x sum-A) (/ y sum-B)))
+				(min (* x osum-A) (* y osum-B)))
 			(define (pmax x y)
-				(max (/ x sum-A) (/ y sum-B)))
+				(max (* x osum-A) (* y osum-B)))
 			(define pmin-obj (add-support-compute
 				(add-tuple-math star-obj pmin GET-CNT)))
 			(define pmax-obj (add-support-compute
 				(add-tuple-math star-obj pmax GET-CNT)))
-			(define left-min (pmin-obj 'left-count (list COL-A COL-B)))
-			(define left-max (pmax-obj 'left-count (list COL-A COL-B)))
-			(- 1.0 (/ left-min left-max))
+			(define j-min (pmin-obj METH (list IDX-A IDX-B)))
+			(define j-max (pmax-obj METH (list IDX-A IDX-B)))
+			(- 1.0 (/ j-min j-max))
 		)
 
+		(define (compute-left-cond-jacc-dist COL-A COL-B)
+			(compute-cond-jacc-dist COL-A COL-B 'left-count))
+
 		(define (compute-right-cond-jacc-dist ROW-A ROW-B)
-			; right-count is N(ROW,*)
-			(define sum-A (supp-obj 'right-count ROW-A))
-			(define sum-B (supp-obj 'right-count ROW-B))
-			(define (pmin x y)
-				(min (/ x sum-A) (/ y sum-B)))
-			(define (pmax x y)
-				(max (/ x sum-A) (/ y sum-B)))
-			(define pmin-obj (add-support-compute
-				(add-tuple-math star-obj pmin GET-CNT)))
-			(define pmax-obj (add-support-compute
-				(add-tuple-math star-obj pmax GET-CNT)))
-			(define right-min (pmin-obj 'right-count (list ROW-A ROW-B)))
-			(define right-max (pmax-obj 'right-count (list ROW-A ROW-B)))
-			(- 1.0 (/ right-min right-max))
-		)
+			(compute-cond-jacc-dist ROW-A ROW-B 'right-count))
 
 		; -------------
 		; Return the left-overlap similarity
@@ -234,7 +227,10 @@
 
 		; -------------
 		; Return the probability-jaccard distance
-		(define (compute-prob-jaccard-dist COL-A COL-B METH)
+		; IDX is a row or a column
+		; METH is either 'left-count or 'right-count
+		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		(define (compute-prob-jaccard-dist IDX-A IDX-B METH)
 
 			; Given weights `weig-a` and `weig-b` take the sum of the
 			; maxes of the two rows, weighted by the weights.
@@ -244,7 +240,7 @@
 				(define wmax-obj
 					(add-support-compute
 						(add-tuple-math star-obj wmax GET-CNT)))
-				(wmax-obj METH (list COL-A COL-B)))
+				(wmax-obj METH (list IDX-A IDX-B)))
 
 			; Given two numbers, compute the denominator of the
 			; prob-jaccard sum. The tuple math object iterates
@@ -260,7 +256,7 @@
 				(add-support-compute
 					(add-tuple-math star-obj denom GET-CNT)))
 
-			(- 1.0 (pjac-obj METH (list COL-A COL-B)))
+			(- 1.0 (pjac-obj METH (list IDX-A IDX-B)))
 		)
 
 		; Return the left-probability-jaccard distance
