@@ -102,6 +102,9 @@
       left-overlap(y,z) = sum_x (0 < N(x,y)) * (0 < N(x,z)) /
                sum_x (0 < N(x,y) + N(x,z))
 
+  If is effectively the unweighted Jaccard similarity, where each point
+  is given exactly the same weight (zero or non-zero).
+
   Arguments:
   ----------
   Here, the LLOBJ is expected to be an object defining a sparse matrix,
