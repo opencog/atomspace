@@ -50,15 +50,24 @@
       left-length(y) = sqrt sum_x N(x,y) N(x,y)
                      = sqrt left-prod(y,y)
 
-  Jaccard:
-  --------
-  The Jaccard distance can be defined as one minus the Jaccard
-  similarity, which is defined as
+  Jaccard (Ruzicka):
+  ------------------
+  The (weighted) Jaccard similarity, also called the Ruzicka similarity,
+  is defined as
 
       left-jacc-sim(a,b) = sum_x min (N(x,a), N(x,b)) /
                sum_x max (N(x,a), N(x,b))
 
-  The above is also sometimes called the 'Ruzicka distances'.
+  The (weighted) Jaccard distance is defined as one minus the above.
+
+  The above is not an approrpriate distance to use when N is an
+  observation count. For example, suppose that N(x,b) was a constant
+  multiple of N(x,a). The above formula would judge these two vectors
+  as being dis-similar, even though for most applications, scaling by
+  a constant would be considered to be irrelevant.
+
+  By default, the value used for N(x,a) is provided by the 'get-count
+  method. It can be over-ridden with the GET-COUNT method.
 
   Conditional Jaccard:
   --------------------
@@ -67,7 +76,7 @@
   here, colinear count vectors should be considered to be equal. Thus,
   a normalized version is defined below. The normalization is to use
   the conditional probability instead of the count. (Normalization by
-  Euclidean lenght does noe make sense for counts).
+  Euclidean length does not make sense for counts).
 
   The conditional probability is then defined as
        p(x|a) = N(x,a) / N(*,a)
@@ -79,6 +88,11 @@
 
   Probability Jaccard:
   --------------------
+  The above conditional form of the similarity is not quite appropriate
+  for true probabilities: it exhibits some discontinuities and
+  non-uniformities. The reciprocal of a sum over reciprocals provides
+  the ideal, maximally consistent form (according to Wikipedia.)
+
   The Proability-Jaccard distance can be defined as one minus the
   Probability-Jaccard similarity. The later is defined as
 
@@ -93,17 +107,22 @@
   case where the counts really are meant to be interpreted as providing
   probabilistic frequencies.
 
+  The implementation provided here is rather slow, as it does not make
+  use of cached values. In particular, is is a LOT slower than any of
+  the other methods, especially when the vectors are large.
 
-  Overlap:
-  --------
+  Overlap (Jaccard):
+  ------------------
   The overlap similarity simply counts how many common non-zero entries
   are shared in common between two rows or columns.  That is, it is
 
       left-overlap(y,z) = sum_x (0 < N(x,y)) * (0 < N(x,z)) /
                sum_x (0 < N(x,y) + N(x,z))
 
-  If is effectively the unweighted Jaccard similarity, where each point
-  is given exactly the same weight (zero or non-zero).
+  It is the same thing as the (unweighted) Jaccard similarity, where each
+  point is given exactly the same weight (zero or non-zero). That is,
+  the overlap similarity is the same thing as the original, simplest
+  definition of the Jaccard distance.
 
   Arguments:
   ----------
