@@ -75,7 +75,7 @@ struct FreeVariables : Replacement
 	bool is_identical(const FreeVariables& other) const;
 
 	/// Return true if variable `var` is in this variableset.
-	bool is_in_varset(const Handle& v) const;
+	bool is_in_varset(const Handle& var) const;
 
 	/// Return true if all variables within the given range is in
 	/// varset.
