@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sys/prctl.h>
 #include <thread>
 
 #include <opencog/util/concurrent_queue.h>
@@ -91,6 +92,7 @@ static void thread_exec(AtomSpace* as, bool silent,
                         QueueValuePtr qvp,
                         std::exception_ptr* returned_ex)
 {
+	prctl(PR_SET_NAME, "atoms:execlink", 0, 0, 0);
 	while (true)
 	{
 		Handle h;
