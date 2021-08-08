@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
+#include <sys/prctl.h>
 #include <thread>
 
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -41,6 +41,7 @@ static void thread_eval(AtomSpace* as,
                         const Handle& evelnk, AtomSpace* scratch,
                         bool silent)
 {
+	prctl(PR_SET_NAME, "atoms:parallel", 0, 0, 0);
 	try
 	{
 		EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);

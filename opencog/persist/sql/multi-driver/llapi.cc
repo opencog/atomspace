@@ -34,6 +34,7 @@
 
 #ifdef HAVE_SQL_STORAGE
 
+#include <sys/prctl.h>
 #include <stack>
 #include <string>
 
@@ -49,6 +50,7 @@
 
 LLConnection::LLConnection(void)
 {
+    prctl(PR_SET_NAME, "atoms:pgconn", 0, 0, 0);
     is_connected = false;
 }
 
