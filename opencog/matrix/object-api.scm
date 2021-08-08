@@ -349,16 +349,14 @@
 			(define uleft (uniquely-named-variable))
 			(define uright (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair uleft uright))
-			(define setlnk (cog-execute! (Bind
+			(define queue (cog-execute! (Query
 				(VariableList
 					(TypedVariable uleft (Type (symbol->string left-type)))
 					(TypedVariable uright (Type (symbol->string right-type))))
 				term (if LEF uleft uright))))
-			(define basis (cog-outgoing-set setlnk))
-			(cog-extract! setlnk)
 			(cog-extract-recursive! uleft)
 			(cog-extract-recursive! uright)
-			basis)
+			(cog-value->list queue))
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
@@ -391,13 +389,13 @@
 		(define (default-left-star-pat ITEM)
 			(let* ((var (Variable "$api-left-star"))
 					(term (LLOBJ 'make-pair var ITEM)))
-				(Bind (TypedVariable var (Type left-type))
+				(Query (TypedVariable var (Type left-type))
 					term term)))
 
 		(define (default-right-star-pat ITEM)
 			(let* ((var (Variable "$api-right-star"))
 					(term (LLOBJ 'make-pair ITEM var)))
-				(Bind (TypedVariable var (Type right-type))
+				(Query (TypedVariable var (Type right-type))
 					term term)))
 
 		(define f-left-star-pat
@@ -415,12 +413,12 @@
 		(define (default-left-dual-pat ITEM)
 			(let* ((var (Variable "$api-left-dual"))
 					(term (LLOBJ 'make-pair var ITEM)))
-				(Get (TypedVariable var (Type left-type)) term)))
+				(Meet (TypedVariable var (Type left-type)) term)))
 
 		(define (default-right-dual-pat ITEM)
 			(let* ((var (Variable "$api-right-dual"))
 					(term (LLOBJ 'make-pair ITEM var)))
-				(Get (TypedVariable var (Type right-type)) term)))
+				(Meet (TypedVariable var (Type right-type)) term)))
 
 		(define f-left-dual-pat
 			(overload 'left-dual-pattern default-left-dual-pat))
@@ -429,54 +427,10 @@
 
 		; -------------------------------------------------------
 		;
-		; Use RAII-style code, so that if the user hits ctrl-C
-		; while we are in this, we will catch that and set the
-		; atomspace back to normal.
-		;
-		; XXX there is a small race here, between the setting
-		; of the atomspace, and the invocation of the
-		; throw-handler, but I don't care.
-		;
-		; To make this multi-threaded, we would use an atomspace
-		; per fluid. Unfortunately, this is quite slow when threads
-		; are being constantly created/destroyed, as it results in
-		; the temp atomspace being created/destroyed, which is
-		; just inefficient and slow, in the end.
-		;
-		; (let* ((tmp-asp
-		;			(let ((asp (fluid-ref fluasp)))
-		;				(if asp asp
-		;					(let ((nasp (cog-new-atomspace (cog-atomspace))))
-		;						(fluid-set! fluasp nasp)
-		;						nasp))))
-		;
-		(define (raii-get-pattern FUNC ITEM)
-			(define old-as (cog-set-atomspace! aspace))
-			(with-throw-handler #t
-				(lambda ()
-					; execute returns a SetLink. We don't want that.
-					(let* ((setlnk (cog-execute! (FUNC ITEM)))
-							(stars (cog-outgoing-set setlnk)))
-						(cog-atomspace-clear aspace)
-						(cog-set-atomspace! old-as)
-						stars))
-				(lambda (key . args)
-					(cog-atomspace-clear aspace)
-					(cog-set-atomspace! old-as)
-					'())))
-
-		; This is a wrapper to serialize access to a temp atomspace,
-		; where the query is actually performed.
+		; Handy wrapper. Run the MeetLink/QueryLink and return
+		; the results.
 		(define (run-query FUNC ITEM)
-			(lock-mutex mtx)
-			(with-throw-handler #t
-				(lambda ()
-					(define stars (raii-get-pattern FUNC ITEM))
-					(unlock-mutex mtx)
-					stars)
-				(lambda (key . args)
-					(unlock-mutex mtx)
-					'())))
+			(cog-value->list (cog-execute! (FUNC ITEM))))
 
 		; -------------------------------------------------------
 		;
@@ -551,16 +505,14 @@
 			(define uleft (uniquely-named-variable))
 			(define uright (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair uleft uright))
-			(define setlnk (cog-execute! (Bind
+			(define queue (cog-execute! (Query
 				(VariableList
 					(TypedVariable uleft (Type (symbol->string left-type)))
 					(TypedVariable uright (Type (symbol->string right-type))))
 				term term)))
-			(define all-pairs (cog-outgoing-set setlnk))
-			(cog-extract! setlnk)
 			(cog-extract-recursive! uleft)
 			(cog-extract-recursive! uright)
-			all-pairs)
+			(cog-value->list queue))
 
 		;-------------------------------------------
 
