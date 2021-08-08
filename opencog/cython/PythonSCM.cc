@@ -106,8 +106,8 @@ void* PythonSCM::init_in_guile(void* self)
 	// way of telling python which atomspace it is supposed to use
 	// by default.
 	pev.eval("from opencog.atomspace import AtomSpace");
-	pev.eval("from opencog.type_constructors import set_type_ctor_atomspace");
-	pev.eval("set_type_ctor_atomspace(AtomSpace(" +
+	pev.eval("from opencog.type_constructors import set_default_atomspace");
+	pev.eval("set_default_atomspace(AtomSpace(" +
             std::to_string((uint64_t) as) + "))\n");
 
 	return NULL;
