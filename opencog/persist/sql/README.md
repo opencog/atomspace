@@ -24,8 +24,8 @@ provides some benchmarking results.
 
 Meta-Status
 -----------
-In retrospect, database-backed storage is a fundamental design mistake.
-Why?
+In retrospect, client-server-backed storage is a fundamental design
+mistake.  Why?
 
 * A vast number of cycles are wasted serializing and unserializing
   Atoms and Values, and converting them to "unnatural" formats.
@@ -41,10 +41,21 @@ key-value of "column store" database that is small, simple, fast and
 feature-poor. Something that doesn't eat RAM, so that it does not
 compete with the AtomSpace for RAM.
 
-Well, in a futuristic world, there would be one nice feature to have:
-pattern matching in the file-backed database. But this would have to
-somehow be faster and more effective that pattern-matching in RAM, and
-so this is a very high bar to exceed.
+Exactly this was done with RocksDB; the code is in
+https://github.com/opencog/atomspace-rocks and its 5x faster than this
+Postgres backend.
+
+Mapping the AtomSpace to RocksDB was actually quite easy, and the data
+structures are simple. In retrospect, the Postgres mapping now feels
+over-engineered and badly designed. It's possible (likely even?) that if
+a new SQL driver was written, using the atomspace-rocks mapping, that it
+would be just as fast.
+
+In a futuristic world, there would be one nice feature to have: pattern
+matching in the file-backed database. But this would have to somehow be
+faster and more effective that pattern-matching in RAM, and so this is a
+very high bar to exceed.
+
 
 Features
 --------
