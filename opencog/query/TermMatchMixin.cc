@@ -122,7 +122,7 @@ bool TermMatchMixin::scope_match(const Handle& npat_h,
 {
 	// If there are scoped vars, then accept anything that is
 	// alpha-equivalent. (i.e. equivalent after alpha-conversion)
-	if (_pat_bound_vars and _pat_bound_vars->is_in_varset(npat_h))
+	if (_pat_bound_vars and _pat_bound_vars->varset_contains(npat_h))
 	{
 		bool aok = _pat_bound_vars->is_alpha_convertible(npat_h,
 		                  nsoln_h, *_gnd_bound_vars);

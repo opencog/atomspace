@@ -389,7 +389,7 @@ bool FreeVariables::is_identical(const FreeVariables& other) const
 	return true;
 }
 
-bool FreeVariables::is_in_varset(const Handle& v) const
+bool FreeVariables::varset_contains(const Handle& v) const
 {
 	return varset.end() != varset.find(v);
 }

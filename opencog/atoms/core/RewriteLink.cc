@@ -442,7 +442,7 @@ bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
 		    vdt == VARIABLE_NODE or
 		    vdt == TYPED_VARIABLE_LINK) {
 			Variables local_vars = VariableList(vardecl).get_variables();
-			return variables.are_in_varset(local_vars.varset);
+			return variables.varset_includes(local_vars.varset);
 		}
 	}
 	return false;
