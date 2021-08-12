@@ -138,6 +138,14 @@ bool content_eq(const opencog::HandleSetSeq& lhs,
 	return true;
 }
 
+bool content_contains(const opencog::HandleSeq& hs, const opencog::Handle& h)
+{
+	for (const Handle& o : hs)
+		if (content_eq(h, o))
+			return true;
+	return false;
+}
+
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging. You can configure GDB as follows
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
