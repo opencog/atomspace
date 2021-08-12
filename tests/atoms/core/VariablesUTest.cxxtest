@@ -850,10 +850,10 @@ void VariablesUTest::test_find_variables_alt_as()
 	// treated equally.  That is body should have variables X, Y, Z,
 	// without duplicates.
 	AtomSpace _alt_as;
-	Handle AltX = _alt_as.add_node(VARIABLE_NODE, "$X");
+	Handle altX = _alt_as.add_node(VARIABLE_NODE, "$X");
 	Handle body = al(LIST_LINK,
 	                 al(INHERITANCE_LINK, X, Y),
-	                 al(INHERITANCE_LINK, Z, AltX));
+	                 al(INHERITANCE_LINK, Z, altX));
 	Variables vars;
 	vars.find_variables(body);
 	HandleSeq varseq = vars.varseq;
