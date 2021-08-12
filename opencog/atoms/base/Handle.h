@@ -253,6 +253,11 @@ bool content_eq(const opencog::HandleSet& lhs,
 bool content_eq(const opencog::HandleSetSeq& lhs,
                 const opencog::HandleSetSeq& rhs);
 
+//! Check if hs contains h using content_eq as equality.  hs is not
+//! assumed to be sorted, thus the complexity is up to linear with the
+//! size hs.
+bool content_contains(const opencog::HandleSeq& hs, const opencog::Handle& h);
+
 struct content_based_atom_ptr_less
 {
     bool operator()(const Atom* al, const Atom* ar) const

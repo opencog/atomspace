@@ -75,18 +75,18 @@ struct FreeVariables : Replacement
 	bool is_identical(const FreeVariables& other) const;
 
 	/// Return true if variable `var` is in this variableset.
-	bool is_in_varset(const Handle& var) const;
+	bool varset_contains(const Handle& var) const;
 
 	/// Return true if all variables within the given range is in
 	/// varset.
 	template<typename It>
-	bool are_in_varset(It from, It to) const {
+	bool varset_includes(It from, It to) const {
 		return std::all_of(from, to, [&](const Handle& v)
-		                   { return is_in_varset(v); });
+		                   { return varset_contains(v); });
 	}
 	template <typename C>
-	bool are_in_varset(const C& c) const {
-		return are_in_varset(c.begin(), c.end());
+	bool varset_includes(const C& c) const {
+		return varset_includes(c.begin(), c.end());
 	}
 
 	/// Create an ordered set of the free variables in the given body.

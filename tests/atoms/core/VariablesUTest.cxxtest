@@ -92,6 +92,7 @@ public:
 	void test_find_variables_mixed_9();
 	void test_find_variables_mixed_10();
 	void test_find_variables_mixed_11();
+	void test_find_variables_alt_as();
 
 	void test_is_type_1();
 	void test_is_type_2();
@@ -837,6 +838,31 @@ void VariablesUTest::test_find_variables_mixed_11()
 	std::reverse(varseq2.begin(), varseq2.end());
 
 	TS_ASSERT_EQUALS(varseq1, varseq2);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_find_variables_alt_as()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure that variables coming from another atomspace are
+	// treated equally.  That is body should have variables X, Y, Z,
+	// without duplicates.
+	AtomSpace _alt_as;
+	Handle altX = _alt_as.add_node(VARIABLE_NODE, "$X");
+	Handle body = al(LIST_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Z, altX));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y, Z};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
