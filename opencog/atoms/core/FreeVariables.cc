@@ -223,7 +223,7 @@ HandleSeq VarScraper::sorted_free_variables_ordered_outgoing(
 		HandleSeq fvs_n;
 		std::copy_if(fvs.begin(), fvs.end(), std::back_inserter(fvs_n),
 		             [&res](const Handle& var) {
-			             return std::find(res.begin(), res.end(), var) == res.end();
+			             return not content_contains(res, var);
 		             });
 
 		// Concatenate
@@ -444,7 +444,10 @@ void FreeVariables::erase(const Handle& var)
 
 	// Remove from varseq and update all arguments in the subsequent
 	// index as they have changed.
-	auto it = std::find(varseq.begin(), varseq.end(), var);
+	auto content_eq_var = [&var](const Handle& h) {
+		return content_eq(var, h);
+	};
+	auto it = std::find_if(varseq.begin(), varseq.end(), content_eq_var);
 	if (it != varseq.end()) {
 		it = varseq.erase(it);
 		for (; it != varseq.end(); ++it)
