@@ -491,6 +491,10 @@ std::string FreeVariables::to_string(const std::string& indent) const
 	ss << indent << "varseq:" << std::endl
 	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT) << std::endl;
 
+	// Varset
+	ss << indent << "varset:" << std::endl
+	   << oc_to_string(varset, indent + OC_TO_STRING_INDENT) << std::endl;
+
 	// index
 	ss << indent << "index:" << std::endl
 	   << oc_to_string(index, indent + OC_TO_STRING_INDENT);
