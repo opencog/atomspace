@@ -505,11 +505,22 @@ void AtomTable::getRootSetByType(HandleSet& hset,
     std::shared_lock<std::shared_mutex> lck(_mtx);
     auto tit = typeIndex.begin(type, subclass);
     auto tend = typeIndex.end();
-    while (tit != tend) {
-        if (0 == (*tit)->getIncomingSetSize())
-             hset.insert(*tit);
-        tit++;
+
+    if (STATE_LINK == type) {
+        while (tit != tend) {
+            if (0 == (*tit)->getIncomingSetSize(cas))
+                hset.insert(
+                    StateLink::get_link(StateLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else {
+        while (tit != tend) {
+            if (0 == (*tit)->getIncomingSetSize(cas))
+                hset.insert(*tit);
+            tit++;
+        }
     }
+
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
