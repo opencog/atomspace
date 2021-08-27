@@ -39,6 +39,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -442,4 +443,75 @@ void AtomTable::typeAdded(Type t)
 {
     std::unique_lock<std::shared_mutex> lck(_mtx);
     typeIndex.resize();
+}
+
+/**
+ * Returns the set of atoms of a given type (subclasses optionally).
+ *
+ * @param The desired type.
+ * @param Whether type subclasses should be considered.
+ * @return The set of atoms of a given type (subclasses optionally).
+ */
+void AtomTable::getHandleSetByType(HandleSet& hset,
+                                   Type type,
+                                   bool subclass,
+                                   bool parent,
+                                   AtomSpace* cas) const
+{
+    if (nullptr == cas) cas = _as;
+    std::shared_lock<std::shared_mutex> lck(_mtx);
+    auto tit = typeIndex.begin(type, subclass);
+    auto tend = typeIndex.end();
+
+    // Iterating over tit++ will just iterate over all atoms
+    // of type `type`. That's fine, except for STATE_LINK, where
+    // we only want the shallowest state (which over-rides any
+    // deeper state).
+    // XXX Open issue: we should probably do this for DEFINE_LINK
+    // and for TYPED_ATOM_LINK, or anything inheriting from
+    // UNIQUE_LINK.
+    if (STATE_LINK == type) {
+        while (tit != tend) {
+            hset.insert(
+                StateLink::get_link(StateLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else {
+        while (tit != tend) { hset.insert(*tit); tit++; }
+    }
+
+    // If an atom is already in the set, it will hide any duplicate
+    // atom in the parent.
+    if (parent and _environ)
+        _environ->getHandleSetByType(hset, type, subclass, parent, cas);
+}
+
+/**
+ * Returns the set of atoms of a given type, but only if they have
+ * and empty outgoing set. This holds the AtomTable lock for a
+ * longer period of time, but wastes less RAM when getting big sets.
+ * As a net result, it might run faster, maybe.
+ *
+ * @param The desired type.
+ * @param Whether type subclasses should be considered.
+ * @return The set of atoms of a given type (subclasses optionally).
+ */
+void AtomTable::getRootSetByType(HandleSet& hset,
+                                 Type type,
+                                 bool subclass,
+                                 bool parent,
+                                 AtomSpace* cas) const
+{
+    std::shared_lock<std::shared_mutex> lck(_mtx);
+    auto tit = typeIndex.begin(type, subclass);
+    auto tend = typeIndex.end();
+    while (tit != tend) {
+        if (0 == (*tit)->getIncomingSetSize())
+             hset.insert(*tit);
+        tit++;
+    }
+    // If an atom is already in the set, it will hide any duplicate
+    // atom in the parent.
+    if (parent and _environ)
+        _environ->getRootSetByType(hset, type, subclass, parent);
 }

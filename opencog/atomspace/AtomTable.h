@@ -40,7 +40,6 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 
 #include <opencog/atomspace/TypeIndex.h>
-#include <opencog/atoms/core/StateLink.h>
 
 class AtomSpaceUTest;
 class AtomTableUTest;
@@ -194,35 +193,7 @@ public:
                        Type type,
                        bool subclass=false,
                        bool parent=true,
-                       AtomSpace* cas = nullptr) const
-    {
-        if (nullptr == cas) cas = _as;
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        auto tit = typeIndex.begin(type, subclass);
-        auto tend = typeIndex.end();
-
-        // Iterating over tit++ will just iterate over all atoms
-        // of type `type`. That's fine, except for STATE_LINK, where
-        // we only want the shallowest state (which over-rides any
-        // deeper state).
-        // XXX Open issue: we should probably do this for DEFINE_LINK
-        // and for TYPED_ATOM_LINK, or anything inheriting from
-        // UNIQUE_LINK.
-        if (STATE_LINK == type) {
-            while (tit != tend) {
-                hset.insert(
-                    StateLink::get_link(StateLinkCast(*tit)->get_alias(), cas));
-                tit++;
-            }
-        } else {
-            while (tit != tend) { hset.insert(*tit); tit++; }
-        }
-
-        // If an atom is already in the set, it will hide any duplicate
-        // atom in the parent.
-        if (parent and _environ)
-            _environ->getHandleSetByType(hset, type, subclass, parent, cas);
-    }
+                       AtomSpace* = nullptr) const;
 
     /**
      * Returns the set of atoms of a given type, but only if they have
@@ -238,22 +209,8 @@ public:
     getRootSetByType(HandleSet& hset,
                      Type type,
                      bool subclass=false,
-                     bool parent=true) const
-    {
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        auto tit = typeIndex.begin(type, subclass);
-        auto tend = typeIndex.end();
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize())
-                 hset.insert(*tit);
-            tit++;
-        }
-        // If an atom is already in the set, it will hide any duplicate
-        // atom in the parent.
-        if (parent and _environ)
-            _environ->getRootSetByType(hset, type, subclass, parent);
-    }
-
+                     bool parent=true,
+                     AtomSpace* = nullptr) const;
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -277,6 +234,7 @@ public:
         }
 
         // No parent ... avoid the copy above.
+        // XXX This is wrong, because StateLink is mis-handled.
         std::shared_lock<std::shared_mutex> lck(_mtx);
         return std::copy(typeIndex.begin(type, subclass),
                          typeIndex.end(), result);
