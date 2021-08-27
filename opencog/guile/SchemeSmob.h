@@ -138,10 +138,10 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
-	static SCM ss_incoming_set(SCM);
-	static SCM ss_incoming_size(SCM);
-	static SCM ss_incoming_by_type(SCM, SCM);
-	static SCM ss_incoming_size_by_type(SCM, SCM);
+	static SCM ss_incoming_set(SCM, SCM);
+	static SCM ss_incoming_size(SCM, SCM);
+	static SCM ss_incoming_by_type(SCM, SCM, SCM);
+	static SCM ss_incoming_size_by_type(SCM, SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
 	static SCM ss_outgoing_by_type(SCM, SCM);
 	static SCM ss_outgoing_atom(SCM, SCM);
