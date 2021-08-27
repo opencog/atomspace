@@ -238,7 +238,7 @@ void StateLinkUTest::test_putting()
 
 	Handle strawberry = N(CONCEPT_NODE, "strawberry");
 
-	Handle state = StateLink::get_state(N(ANCHOR_NODE, "fruit"));
+	Handle state = StateLink::get_state(N(ANCHOR_NODE, "fruit"), &_as);
 
 	// The incoming set should be simple.
 	TS_ASSERT_EQUALS(state, strawberry);
