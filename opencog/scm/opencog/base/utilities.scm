@@ -261,31 +261,6 @@
 )
 
 ; -----------------------------------------------------------------------
-(define* (traverse-roots func ATOMSPACE)
-"
-  traverse-roots -- Applies func to every root atom in the atomspace.
-
-  The root atoms are those, which have no incoming atoms, located
-  in the atomspace or its ancestors (i.e. visible from the atomspace).
-"
-	; A list of the atomspace and all parents
-	(define atomspace-and-parents
-		(unfold null? identity cog-atomspace-env ATOMSPACE))
-
-	; Is the atom in any of the atomspaces?
-	(define (is-visible? atom)
-		(member (cog-as atom) atomspace-and-parents))
-
-	(define (apply-if-root h)
-		(if (not (any is-visible? (cog-incoming-set h)))
-			(func h))
-		#f)
-
-	(for-each
-		(lambda (ty) (cog-map-type apply-if-root ty ATOMSPACE))
-		(cog-get-types))
-)
-; -----------------------------------------------------------------------
 (define*-public (cog-prt-atomspace #:optional (ATOMSPACE (cog-atomspace)))
 "
   cog-prt-atomspace [ATOMSPACE] -- Prints all atoms in the atomspace
@@ -299,7 +274,15 @@
 
   This is equivalent to `(display (cog-get-all-roots))`.
 "
-	(traverse-roots display ATOMSPACE)
+	(define (prt-atom h)
+		; Print only the top-level atoms.
+		(if (null? (cog-incoming-set h ATOMSPACE))
+			(display h))
+		#f)
+
+	(for-each
+		(lambda (ty) (cog-map-type prt-atom ty ATOMSPACE))
+		(cog-get-types))
 )
 
 ; -----------------------------------------------------------------------
@@ -316,10 +299,15 @@
 
   See also: cog-get-atoms, cog-get-root
 "
-  (define roots '())
-  (define (cons-roots x) (set! roots (cons x roots)))
-  (traverse-roots cons-roots ATOMSPACE)
-  roots
+	(define roots '())
+	(define (cons-roots x)
+		(if (null? (cog-incoming-set x ATOMSPACE))
+			(set! roots (cons x roots)))
+		#f)
+	(for-each
+		(lambda (ty) (cog-map-type cons-roots ty ATOMSPACE))
+		(cog-get-types))
+	roots
 )
 
 ; -----------------------------------------------------------------------

@@ -308,11 +308,13 @@ SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 /**
  * Convert the incoming set of an atom into a list; return the list.
  */
-SCM SchemeSmob::ss_incoming_set (SCM satom)
+SCM SchemeSmob::ss_incoming_set (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-set");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-set");
 
 	// This reverses the order of the incoming set, but so what ...
 	SCM head = SCM_EOL;
@@ -330,12 +332,14 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 /**
  * Convert the incoming set of an atom into a list; return the list.
  */
-SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
+SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
 	Type t = verify_type(stype, "cog-incoming-by-type", 2);
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-by-type");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-by-type");
 
 	IncomingSet iset = h->getIncomingSetByType(t, as);
 	SCM head = SCM_EOL;
@@ -352,10 +356,12 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 /**
  * Return the length (size) of the incoming set of an atom.
  */
-SCM SchemeSmob::ss_incoming_size (SCM satom)
+SCM SchemeSmob::ss_incoming_size (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size");
-	AtomSpace* as = ss_get_env_as("cog-incoming-size");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-size");
 
 	size_t sz = h->getIncomingSetSize(as);
 	return scm_from_size_t(sz);
@@ -366,12 +372,15 @@ SCM SchemeSmob::ss_incoming_size (SCM satom)
  * Return the length (size) of the incoming set of type stype
  * of the atom.
  */
-SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
+SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
 	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-size-by-type");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-size-by-type");
+
 	size_t sz = h->getIncomingSetSizeByType(t, as);
 	return scm_from_size_t(sz);
 }
