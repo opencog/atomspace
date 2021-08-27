@@ -77,6 +77,11 @@ Handle DefineLink::get_definition(const Handle& alias, AtomSpace* as)
 	return uniq->getOutgoingAtom(1);
 }
 
+Handle DefineLink::get_link(const Handle& alias, AtomSpace* as)
+{
+	return get_unique(alias, DEFINE_LINK, false, as);
+}
+
 DEFINE_LINK_FACTORY(DefineLink, DEFINE_LINK)
 
 /* ===================== END OF FILE ===================== */

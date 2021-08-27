@@ -39,7 +39,9 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/StateLink.h>
+#include <opencog/atoms/core/TypedAtomLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -459,6 +461,7 @@ void AtomTable::getHandleSetByType(HandleSet& hset,
                                    AtomSpace* cas) const
 {
     if (nullptr == cas) cas = _as;
+
     std::shared_lock<std::shared_mutex> lck(_mtx);
     auto tit = typeIndex.begin(type, subclass);
     auto tend = typeIndex.end();
@@ -467,13 +470,24 @@ void AtomTable::getHandleSetByType(HandleSet& hset,
     // of type `type`. That's fine, except for STATE_LINK, where
     // we only want the shallowest state (which over-rides any
     // deeper state).
-    // XXX Open issue: we should probably do this for DEFINE_LINK
-    // and for TYPED_ATOM_LINK, or anything inheriting from
+    // XXX This needs to be done for anything inheriting from
     // UNIQUE_LINK.
     if (STATE_LINK == type) {
         while (tit != tend) {
             hset.insert(
-                StateLink::get_link(StateLinkCast(*tit)->get_alias(), cas));
+                StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else if (DEFINE_LINK == type) {
+        while (tit != tend) {
+            hset.insert(
+                DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else if (TYPED_ATOM_LINK == type) {
+        while (tit != tend) {
+            hset.insert(
+                TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else {
@@ -510,7 +524,21 @@ void AtomTable::getRootSetByType(HandleSet& hset,
         while (tit != tend) {
             if (0 == (*tit)->getIncomingSetSize(cas))
                 hset.insert(
-                    StateLink::get_link(StateLinkCast(*tit)->get_alias(), cas));
+                    StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else if (DEFINE_LINK == type) {
+        while (tit != tend) {
+            if (0 == (*tit)->getIncomingSetSize(cas))
+                hset.insert(
+                    DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
+            tit++;
+        }
+    } else if (TYPED_ATOM_LINK == type) {
+        while (tit != tend) {
+            if (0 == (*tit)->getIncomingSetSize(cas))
+                hset.insert(
+                    TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else {
@@ -524,5 +552,5 @@ void AtomTable::getRootSetByType(HandleSet& hset,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->getRootSetByType(hset, type, subclass, parent);
+        _environ->getRootSetByType(hset, type, subclass, parent, cas);
 }

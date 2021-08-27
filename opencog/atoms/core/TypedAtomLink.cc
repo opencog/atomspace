@@ -80,6 +80,11 @@ Handle TypedAtomLink::get_type(const Handle& atom, AtomSpace* as)
 	return uniq->getOutgoingAtom(1);
 }
 
+Handle TypedAtomLink::get_link(const Handle& atom, AtomSpace* as)
+{
+	return get_unique(atom, TYPED_ATOM_LINK, false, as);
+}
+
 DEFINE_LINK_FACTORY(TypedAtomLink, TYPED_ATOM_LINK);
 
 /* ===================== END OF FILE ===================== */

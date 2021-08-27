@@ -70,6 +70,17 @@ public:
 	 */
 	static Handle get_type(const Handle&, AtomSpace*);
 
+	/**
+	 * Given a Handle pointing to <atom> in
+	 *
+	 * TypedAtomLink
+	 *    <atom>
+	 *    <type-specification>
+	 *
+	 * return the TypedAtomLink for the given AtomSpace.
+	 */
+	static Handle get_link(const Handle&, AtomSpace*);
+
 	static Handle factory(const Handle&);
 };
 
