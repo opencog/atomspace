@@ -211,8 +211,11 @@ public:
                      bool subclass=false,
                      bool parent=true,
                      AtomSpace* = nullptr) const;
+
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
+     * Caution: this copies handles; use getHandleSetByType() to avoid
+     * the pointless copy.
      *
      * @param The desired type.
      * @param Whether type subclasses should be considered.
@@ -224,20 +227,10 @@ public:
                      bool subclass=false,
                      bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
-           return std::copy(hset.begin(), hset.end(), result);
-        }
-
-        // No parent ... avoid the copy above.
-        // XXX This is wrong, because StateLink is mis-handled.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        return std::copy(typeIndex.begin(type, subclass),
-                         typeIndex.end(), result);
+        // Sigh. Copy the handles. This hurts performance.
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
+        return std::copy(hset.begin(), hset.end(), result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -247,24 +240,9 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
-           std::for_each(hset.begin(), hset.end(),
-                [&](const Handle& h)->void {
-                     (func)(h);
-                });
-           return;
-        }
-
-        // No parent ... avoid the copy above.
-        // This can (will) deadlock if func touches the table.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        std::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
+        std::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
              });
@@ -276,34 +254,13 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
 
-           // Parallelize, always, no matter what!
-           opencog::setting_omp(opencog::num_threads(), 1);
-
-           OMP_ALGO::for_each(hset.begin(), hset.end(),
-                [&](const Handle& h)->void {
-                     (func)(h);
-                });
-
-           // Reset to default.
-           opencog::setting_omp(opencog::num_threads());
-           return;
-        }
-
-        // No parent ... avoid the copy above.
-        // This can (will) deadlock if func touches the table.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
-        OMP_ALGO::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
+        OMP_ALGO::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
              });
