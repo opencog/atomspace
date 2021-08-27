@@ -138,6 +138,26 @@ public:
     AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
+     * Return the depth of the Atom, relative to this AtomTable.
+     * The depth is zero, if the Atom is in this table; it is one
+     * if it is in the parent, and so on. It is -1 if it is not
+     * in the chain.
+     */
+    int depth(const Handle& atom) const
+    {
+        if (nullptr == atom) return -1;
+        AtomTable* atab = atom->getAtomTable();
+        const AtomTable* env = this;
+        int count = 0;
+        while (env) {
+            if (atab == env) return count;
+            env = env->_environ;
+            count ++;
+        }
+        return -1;
+    }
+
+    /**
      * Return true if the atom is in this atomtable, or if it is
      * in the environment of this atomtable.
      *
