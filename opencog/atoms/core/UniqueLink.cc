@@ -85,12 +85,12 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 
 /// Get the unique link for this alias.
 Handle UniqueLink::get_unique(const Handle& alias, Type type,
-                              bool allow_open)
+                              bool allow_open, AtomSpace* as)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
 	// have the alias in a position other than the first.
-	IncomingSet defs = alias->getIncomingSetByType(type);
+	IncomingSet defs = alias->getIncomingSetByType(type, as);
 
 	// Return the first (supposedly unique) definition that has no
 	// variables in it.

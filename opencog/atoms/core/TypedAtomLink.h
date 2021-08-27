@@ -68,7 +68,7 @@ public:
 	 *
 	 * return <type-specification>
 	 */
-	static Handle get_type(const Handle&);
+	static Handle get_type(const Handle&, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

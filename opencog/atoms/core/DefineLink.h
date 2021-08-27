@@ -81,7 +81,10 @@ public:
 	 *
 	 * return <body>
 	 */
-	static Handle get_definition(const Handle& alias);
+	static Handle get_definition(const Handle& alias, AtomSpace*);
+
+	static Handle get_definition(const Handle& alias)
+	{ return get_definition(alias, alias->getAtomSpace()); }
 
 	static Handle factory(const Handle&);
 };

@@ -36,11 +36,15 @@ namespace opencog
 /// that atom in the first position.  Adding another StateLink with
 /// the same first-atom causes the previous StateLink to be removed!
 ///
-/// This class is intended for holding single-valued state in a safe,
-/// automated fashion. Of course, a user can also store unique state
-/// simply by being careful to delete the old state after adding the
-/// new state; but this can be error prone.  Thus link type provides
-/// convenience and safety.
+/// This class is intended for holding single-valued state in a
+/// thread-safe, fully-automated fashion. Of course, a user can also
+/// store unique state simply by being careful to delete the old state
+/// after adding the new state; but this would not be thread-safe.
+///
+/// By "thread-safe", it is meant that any other thread observing the
+/// AtomSpace will only see one StateLink: either the old one, or the
+/// new one; they will never see two StateLinks, and they will never
+/// see zero StateLinks.
 ///
 class StateLink : public UniqueLink
 {
@@ -72,7 +76,7 @@ public:
 	 *
 	 * return <body>. Throws exception if there is no such StateLink.
 	 */
-	static Handle get_state(const Handle& alias);
+	static Handle get_state(const Handle& alias, AtomSpace*);
 
 	/**
 	 * Given a Handle pointing to <name> in
@@ -84,7 +88,7 @@ public:
 	 * return the whole StateLink. Throws exception if there is
 	 * no such StateLink.
 	 */
-	static Handle get_link(const Handle& alias);
+	static Handle get_link(const Handle& alias, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

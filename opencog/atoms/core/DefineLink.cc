@@ -71,9 +71,9 @@ DefineLink::DefineLink(const Handle& name, const Handle& defn)
  * This will be the second atom of some DefineLink, where
  * `alias` is the first.
  */
-Handle DefineLink::get_definition(const Handle& alias)
+Handle DefineLink::get_definition(const Handle& alias, AtomSpace* as)
 {
-	Handle uniq(get_unique(alias, DEFINE_LINK, false));
+	Handle uniq(get_unique(alias, DEFINE_LINK, false, as));
 	return uniq->getOutgoingAtom(1);
 }
 
