@@ -1,5 +1,5 @@
 ;
-; Basic guile usage example!
+; basic.scm -- Basic guile usage example!
 ;
 ; See `opencog/guile/README` or http://wiki.opencog.org/w/Scheme
 ; for additional documentation.
