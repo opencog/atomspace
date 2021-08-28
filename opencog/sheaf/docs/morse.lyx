@@ -431,6 +431,215 @@ Great! Some terms have been defined, an an inspirational idea has been sketched.
 \end_layout
 
 \begin_layout Section*
+Clarifications and Remarks
+\end_layout
+
+\begin_layout Standard
+Some clarifications and remarks are in order.
+\end_layout
+
+\begin_layout Description
+Axioms This text will mostly avoid the term 
+\begin_inset Quotes eld
+\end_inset
+
+axiom
+\begin_inset Quotes erd
+\end_inset
+
+, and use the term 
+\begin_inset Quotes eld
+\end_inset
+
+assumption
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+fact
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+statement
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+evidence
+\begin_inset Quotes erd
+\end_inset
+
+ in it's place.
+ This is for several reasons.
+ In conventional mathematial logic, one distinguishes between logical and
+ non-logical axioms.
+ An example of a logical axiom might be 
+\begin_inset Formula $A\rightarrow\left(B\rightarrow A\right)$
+\end_inset
+
+, whereas an example of a non-logical axiom is 
+\begin_inset Formula $a+b=b+a$
+\end_inset
+
+.
+ Neither of these seem appropriate when one falters into the domain of natural
+ language and common sense, where axioms take the form 
+\begin_inset Formula $\vdash likes\left(John,baseball\right).$
+\end_inset
+
+ which is to be read 
+\begin_inset Quotes eld
+\end_inset
+
+It is true that John likes baseball
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Even this is wrong: probabilistic logics make statements such as 
+\begin_inset Quotes eld
+\end_inset
+
+there is a probability of 0.9 that John likes baseball
+\begin_inset Quotes erd
+\end_inset
+
+ which is in turn an oversimplification of possible world-model statements
+ beleif system (epistemic logic): 
+\begin_inset Quotes eld
+\end_inset
+
+based on the evidence at hand, you and I beleive that John likes baseball,
+ probably.
+\begin_inset Quotes erd
+\end_inset
+
+ To call such complex statements 
+\begin_inset Quotes eld
+\end_inset
+
+axioms
+\begin_inset Quotes erd
+\end_inset
+
+ seems strange.
+ (We are already getting tangled here: the above is framed as an inference:
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+evidence
+\begin_inset Quotes erd
+\end_inset
+
+ is that 
+\begin_inset Quotes eld
+\end_inset
+
+John talks about baseball a lot
+\begin_inset Quotes erd
+\end_inset
+
+, from which we infer that he likes it.
+ Or rather, 
+\begin_inset Quotes eld
+\end_inset
+
+you and I have heard a rumour that John talks about baseball a lot
+\begin_inset Quotes erd
+\end_inset
+
+ which only moves us further from the axiomatic foundations of truth into
+ the domain of sense-perception and world-model building.)
+\end_layout
+
+\begin_layout Description
+Entailment The use of the word 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+, and the turnstile symbol 
+\begin_inset Formula $\vdash$
+\end_inset
+
+ should generally be understood to be in the sense of 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic consequence
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic entailment.
+ This is because, in the current context, it's difficult to build up enough
+ of a mechanism to define models, in the model-theoretic sense, or of interpreta
+tions.
+ There is not (yet?) enough machinery present to define 
+\begin_inset Quotes eld
+\end_inset
+
+semantic entailment
+\begin_inset Quotes erd
+\end_inset
+
+ (the double-turnstile symbol 
+\begin_inset Formula $\models$
+\end_inset
+
+.) More broadly, 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+ is a property of the logic system in use, and most probabilistic logics
+ do not have entailment in them, 
+\emph on
+per se
+\emph default
+.
+ For example, in Bayesian inference, one does not normally speak of 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Neither does one in probabilistic programming, even if its in the form
+ of probabilistic lambda calculus.
+ Thus, entailment is used only loosely here, as a stand-in for more specific
+ types of probabilistic relations in the probabilistic logic being contemplated.
+\end_layout
+
+\begin_layout Description
+Inference The rules of inference are meant to be taken as distinct from
+ implication and entailment.
+ 
+\end_layout
+
+\begin_layout Section*
 The End
 \end_layout
 
