@@ -241,7 +241,201 @@ critical points
 \end_layout
 
 \begin_layout Standard
+Observe that there are manifold-like surfaces in this system.
+ That is, each input premise 
+\begin_inset Formula $i$
+\end_inset
+
+ has it's own distinct probability 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+, and the probability of any conclusion is some complicated (real-valued)
+ function of the 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+.
+ This function is almost-everywhere continuous and almost-everywhere smooth
+ (for most 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ reasoning systems).
+\end_layout
+
+\begin_layout Standard
+A geometric character arises from the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+confluence
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Term rewriting systems are generically 
+\begin_inset Quotes eld
+\end_inset
+
 confluent
+\begin_inset Quotes erd
+\end_inset
+
+, in that the same inference can be reached via multiple paths.
+ This suggests the possibility of homologies or homological arguments being
+ applied to collections of inference chains.
+ This is clouded by the fact that some inference chains can be homotopic,
+ and others are not.
+ A more precise articulation requires the use of concepts such as 
+\begin_inset Quotes eld
+\end_inset
+
+Scott continuity
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Scott topology
+\begin_inset Quotes erd
+\end_inset
+
+ (see Wikipedia) and homotopy type theory (see the HoTT book).
+ Inspirationally, one can think of a particular inference chain as a kind
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+geodesic
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Confluence is the convergence of multiple inference chains on the same
+ location, resembling the convergence of geodesics at a critical point in
+ conventional Morse theory.
+\end_layout
+
+\begin_layout Standard
+Of course, the goal here is to convert these inspirational observations
+ into practical tools that could be deployed to control inference in practical
+ situations.
+ An example might be the use of a SAT solver (these are very fast) to prune
+ the inference problem to a manageable size, and then restore the probabilistic
+ formulas at each step.
+ This vaguely resembles some of the workings used in Satisfiability Modulo
+ Theories (SMT) technologies.
+\end_layout
+
+\begin_layout Subsubsection*
+Modal Logic
+\end_layout
+
+\begin_layout Standard
+The act of inference can be considered to be a special case of modal logic.
+ To hand-wave a bit: if it is possible to make an inference, then that inference
+ belongs to a 
+\begin_inset Quotes eld
+\end_inset
+
+possible world
+\begin_inset Quotes erd
+\end_inset
+
+, and that possible world is 
+\begin_inset Quotes eld
+\end_inset
+
+accessible
+\begin_inset Quotes erd
+\end_inset
+
+ from the premises.
+ If an inference occurs in every accessible world, then it is a 
+\begin_inset Quotes eld
+\end_inset
+
+neccessary inference
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That is, modal logic provides the vocabulary for discussing the invariant
+ properties of the graphical network of logical inferences.
+\end_layout
+
+\begin_layout Standard
+The introduction of probabilistic inference alters the structure and interpretat
+ion of 
+\begin_inset Quotes eld
+\end_inset
+
+possible
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+necessary
+\begin_inset Quotes erd
+\end_inset
+
+, as possible worlds can be assigned probabilisitic values, and accessibility
+ relations alter probabilities.
+ Whether or not a particular accessibility relation exists becomes dependent
+ on the Morse cutoff.
+ Again, the 
+\begin_inset Quotes eld
+\end_inset
+
+critical points
+\begin_inset Quotes erd
+\end_inset
+
+ are those cutoffs where accessibility relations appear or disappear.
+\end_layout
+
+\begin_layout Standard
+The use of modal logic does not offer much beyond the core Morse-theoretic
+ insight, above.
+ What it does offer is some vocabulary and a viewpoint 
+\begin_inset Quotes eld
+\end_inset
+
+from above
+\begin_inset Quotes erd
+\end_inset
+
+ into the inference proccess: it offers a way of thinking about the global
+ structure of inference.
+\end_layout
+
+\begin_layout Subsection*
+Now what?
+\end_layout
+
+\begin_layout Standard
+Great! Some terms have been defined, an an inspirational idea has been sketched.
+ Now what? Well, that's it, for now.
+ You are on your own.
+ Converting this inspiration into something usable is the hard part, eh?
+\end_layout
+
+\begin_layout Section*
+The End
+\end_layout
+
+\begin_layout Standard
+That's all for now.
 \end_layout
 
 \end_body
