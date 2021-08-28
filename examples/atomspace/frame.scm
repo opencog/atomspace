@@ -9,6 +9,9 @@
 ; It should be possible to set the StateLink in a derived AtomSpace
 ; without affecting the state in the base AtomSpace. That's what is
 ; demonstrated here.
+;
+; The word `frame` is used as the title of the example, as the usage
+; resembles that of Kripke frames used in forward-chaining.
 
 (use-modules (opencog))
 
@@ -48,3 +51,7 @@
 
 ; And print, again, to make sure it went back to the original state.
 (cog-prt-atomspace)
+
+; The above can also be repeated using `cog-new-atomspace` instead.
+; Up to you to explore that!
+; That's all for now -- the end!
