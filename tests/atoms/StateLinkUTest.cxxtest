@@ -475,12 +475,29 @@ void StateLinkUTest::test_spaces()
 
 	Handle r43 = L3(STATE_LINK, robot, b43);
 
+	// Verify static methods
 	Handle gempty = StateLink::get_link(robot, &_as);
 	TS_ASSERT_EQUALS(gempty, rempty)
 	Handle g42 = StateLink::get_link(robot, as2);
 	TS_ASSERT_EQUALS(g42, r42)
 	Handle g43 = StateLink::get_link(robot, as3);
 	TS_ASSERT_EQUALS(g43, r43)
+
+	// Verify AtomTable getter
+	HandleSet hset;
+	_as.get_handleset_by_type(hset, STATE_LINK);
+	Handle tempty = *hset.begin();
+	TS_ASSERT_EQUALS(tempty, rempty)
+
+	hset.clear();
+	as2->get_handleset_by_type(hset, STATE_LINK);
+	Handle t42 = *hset.begin();
+	TS_ASSERT_EQUALS(t42, r42)
+
+	hset.clear();
+	as3->get_handleset_by_type(hset, STATE_LINK);
+	Handle t43 = *hset.begin();
+	TS_ASSERT_EQUALS(t43, r43)
 
 	// -----------------------
 	// Test atmospace-dependent incoming sets.
@@ -510,6 +527,23 @@ void StateLinkUTest::test_spaces()
 	Handle ifull = *robot->getIncomingSet(&_as).begin();
 	TS_ASSERT_EQUALS(ifull, rfull)
 
+	hset.clear();
+	_as.get_handleset_by_type(hset, STATE_LINK);
+	Handle tfull = *hset.begin();
+	TS_ASSERT_EQUALS(tfull, rfull)
+
+	hset.clear();
+	as2->get_handleset_by_type(hset, STATE_LINK);
+	t42 = *hset.begin();
+	TS_ASSERT_EQUALS(t42, r42)
+
+	hset.clear();
+	as3->get_handleset_by_type(hset, STATE_LINK);
+	t43 = *hset.begin();
+	TS_ASSERT_EQUALS(t43, r43)
+
+	// ------------------------------------------------------------
+	// We are done.
 	delete as3;
 	delete as2;
 	logger().info("END TEST: %s", __FUNCTION__);
