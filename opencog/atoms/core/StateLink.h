@@ -77,6 +77,8 @@ public:
 	 * return <body>. Throws exception if there is no such StateLink.
 	 */
 	static Handle get_state(const Handle& alias, AtomSpace*);
+	static Handle get_state(const Handle& alias)
+	{ return get_state(alias, alias->getAtomSpace()); }
 
 	/**
 	 * Given a Handle pointing to <name> in

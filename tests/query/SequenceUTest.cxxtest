@@ -316,7 +316,7 @@ void SequenceUTest::test_or_put(void)
 	// Check the state.
 	Handle not_viz = eval->eval_h("(ConceptNode \"not-vis\")");
 	Handle stateh = eval->eval_h("(AnchorNode \"state\")");
-	Handle state = StateLink::get_state(stateh, stateh->getAtomSpace());
+	Handle state = StateLink::get_state(stateh);
 	TS_ASSERT_EQUALS(state, not_viz);
 
 	// ----
