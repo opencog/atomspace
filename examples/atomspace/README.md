@@ -79,6 +79,7 @@ be effective.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
 * `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
+* `frame.scm`          -- Using StateLink in overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
 Documentation
