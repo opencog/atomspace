@@ -118,6 +118,14 @@ public:
         return _atom_table.in_environ(h);
     }
 
+    /// Return the depth of the Atom, relative to this AtomSpace.
+    /// The depth is zero, if the Atom is in this space; it is one
+    /// if it is in the parent, and so on. It is -1 if it is not
+    /// in the chain.
+    int depth(const Handle& h) const {
+        return _atom_table.depth(h);
+    }
+
     /**
      * Compare atomspaces for equality. Useful during testing.
      */

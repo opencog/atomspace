@@ -138,6 +138,26 @@ public:
     AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
+     * Return the depth of the Atom, relative to this AtomTable.
+     * The depth is zero, if the Atom is in this table; it is one
+     * if it is in the parent, and so on. It is -1 if it is not
+     * in the chain.
+     */
+    int depth(const Handle& atom) const
+    {
+        if (nullptr == atom) return -1;
+        AtomTable* atab = atom->getAtomTable();
+        const AtomTable* env = this;
+        int count = 0;
+        while (env) {
+            if (atab == env) return count;
+            env = env->_environ;
+            count ++;
+        }
+        return -1;
+    }
+
+    /**
      * Return true if the atom is in this atomtable, or if it is
      * in the environment of this atomtable.
      *
@@ -192,17 +212,8 @@ public:
     getHandleSetByType(HandleSet& hset,
                        Type type,
                        bool subclass=false,
-                       bool parent=true) const
-    {
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        auto tit = typeIndex.begin(type, subclass);
-        auto tend = typeIndex.end();
-        while (tit != tend) { hset.insert(*tit); tit++; }
-        // If an atom is already in the set, it will hide any duplicate
-        // atom in the parent.
-        if (parent and _environ)
-            _environ->getHandleSetByType(hset, type, subclass, parent);
-    }
+                       bool parent=true,
+                       AtomSpace* = nullptr) const;
 
     /**
      * Returns the set of atoms of a given type, but only if they have
@@ -218,24 +229,13 @@ public:
     getRootSetByType(HandleSet& hset,
                      Type type,
                      bool subclass=false,
-                     bool parent=true) const
-    {
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        auto tit = typeIndex.begin(type, subclass);
-        auto tend = typeIndex.end();
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize())
-                 hset.insert(*tit);
-            tit++;
-        }
-        // If an atom is already in the set, it will hide any duplicate
-        // atom in the parent.
-        if (parent and _environ)
-            _environ->getRootSetByType(hset, type, subclass, parent);
-    }
+                     bool parent=true,
+                     AtomSpace* = nullptr) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
+     * Caution: this copies handles; use getHandleSetByType() to avoid
+     * the pointless copy.
      *
      * @param The desired type.
      * @param Whether type subclasses should be considered.
@@ -247,19 +247,10 @@ public:
                      bool subclass=false,
                      bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
-           return std::copy(hset.begin(), hset.end(), result);
-        }
-
-        // No parent ... avoid the copy above.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        return std::copy(typeIndex.begin(type, subclass),
-                         typeIndex.end(), result);
+        // Sigh. Copy the handles. This hurts performance.
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
+        return std::copy(hset.begin(), hset.end(), result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -269,24 +260,9 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
-           std::for_each(hset.begin(), hset.end(),
-                [&](const Handle& h)->void {
-                     (func)(h);
-                });
-           return;
-        }
-
-        // No parent ... avoid the copy above.
-        // This can (will) deadlock if func touches the table.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
-        std::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
+        std::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
              });
@@ -298,34 +274,13 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        // If parent wanted, and parent exists, then we must use the
-        // handleset to disambiguate results.  This causes an extra
-        // copy of the handles, unfortunately.
-        if (parent and _environ) {
-           HandleSet hset;
-           getHandleSetByType(hset, type, subclass, parent);
+        HandleSet hset;
+        getHandleSetByType(hset, type, subclass, parent);
 
-           // Parallelize, always, no matter what!
-           opencog::setting_omp(opencog::num_threads(), 1);
-
-           OMP_ALGO::for_each(hset.begin(), hset.end(),
-                [&](const Handle& h)->void {
-                     (func)(h);
-                });
-
-           // Reset to default.
-           opencog::setting_omp(opencog::num_threads());
-           return;
-        }
-
-        // No parent ... avoid the copy above.
-        // This can (will) deadlock if func touches the table.
-        std::shared_lock<std::shared_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
-        OMP_ALGO::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
+        OMP_ALGO::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
              });

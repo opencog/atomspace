@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "UniqueLink.h"
 
@@ -53,17 +54,16 @@ void UniqueLink::init(bool allow_open)
 	IncomingSet defs = alias->getIncomingSetByType(_type);
 	for (const Handle& def : defs)
 	{
-		if (def->getOutgoingAtom(0) == alias)
+		if (def->getOutgoingAtom(0) != alias) continue;
+
+		size_t sz = _outgoing.size();
+		for (size_t i=1; i<sz; i++)
 		{
-			size_t sz = _outgoing.size();
-			for (size_t i=1; i<sz; i++)
+			if (def->getOutgoingAtom(i) != _outgoing[i])
 			{
-				if (def->getOutgoingAtom(i) != _outgoing[i])
-				{
-					throw InvalidParamException(TRACE_INFO,
-					      "Already defined: %s\n",
-					       alias->to_string().c_str());
-				}
+				throw InvalidParamException(TRACE_INFO,
+				      "Already defined: %s\n",
+				       alias->to_string().c_str());
 			}
 		}
 	}
@@ -85,31 +85,40 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 
 /// Get the unique link for this alias.
 Handle UniqueLink::get_unique(const Handle& alias, Type type,
-                              bool allow_open)
+                              bool allow_open, AtomSpace* as)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
 	// have the alias in a position other than the first.
-	IncomingSet defs = alias->getIncomingSetByType(type);
+	IncomingSet defs = alias->getIncomingSetByType(type, as);
 
-	// Return the first (supposedly unique) definition that has no
-	// variables in it.
+	// Return the shallowest (supposedly unique) definition that
+	// has no variables in it. We look for the shallowest, since
+	// it is the one that hides any of the deeper ones, defined
+	// in deeper atomspaces.
+	Handle shallowest;
+	int depth = INT_MAX;
 	for (const Handle& defl : defs)
 	{
-		if (defl->getOutgoingAtom(0) == alias)
+		if (defl->getOutgoingAtom(0) != alias) continue;
+		if (allow_open)
 		{
-			if (allow_open)
-			{
-				UniqueLinkPtr ulp(UniqueLinkCast(defl));
-				if (0 < ulp->get_vars().varseq.size()) continue;
-			}
-			return defl;
+			UniqueLinkPtr ulp(UniqueLinkCast(defl));
+			if (0 < ulp->get_vars().varseq.size()) continue;
+		}
+		int lvl = as->depth(defl);
+		if (0 <= lvl and lvl < depth)
+		{
+			shallowest = defl;
+			depth = lvl;
 		}
 	}
 
+	if (shallowest) return shallowest;
+
 	// There is no definition for the alias.
 	throw InvalidParamException(TRACE_INFO,
-	                            "Cannot find defined hypergraph for atom %s",
+	                            "Cannot find defintion for atom %s",
 	                            alias->to_string().c_str());
 }
 

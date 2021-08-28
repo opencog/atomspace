@@ -81,7 +81,20 @@ public:
 	 *
 	 * return <body>
 	 */
-	static Handle get_definition(const Handle& alias);
+	static Handle get_definition(const Handle& alias, AtomSpace*);
+	static Handle get_definition(const Handle& alias)
+	{ return get_definition(alias, alias->getAtomSpace()); }
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * DefineLink
+	 *    <name>
+	 *    <body>
+	 *
+	 * return the DefineLink for the given AtomSpace.
+	 */
+	static Handle get_link(const Handle& alias, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

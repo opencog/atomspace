@@ -50,6 +50,7 @@ public:
 	void test_putting();
 	void test_list();
 	void test_scope();
+	void test_spaces();
 };
 
 #define N _as.add_node
@@ -238,7 +239,7 @@ void StateLinkUTest::test_putting()
 
 	Handle strawberry = N(CONCEPT_NODE, "strawberry");
 
-	Handle state = StateLink::get_state(N(ANCHOR_NODE, "fruit"));
+	Handle state = StateLink::get_state(N(ANCHOR_NODE, "fruit"), &_as);
 
 	// The incoming set should be simple.
 	TS_ASSERT_EQUALS(state, strawberry);
@@ -437,5 +438,113 @@ void StateLinkUTest::test_scope()
 	// The result of the get should be correct.
 	TS_ASSERT_EQUALS(regotten, empty_set);
 
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test to make sure that there is only ever one StateLink,
+// even as child AtomSpaces are used. That is, the StateLink
+// in each child overloads the one in it's parent.
+#define N2 as2->add_node
+#define L2 as2->add_link
+#define N3 as3->add_node
+#define L3 as3->add_link
+void StateLinkUTest::test_spaces()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Empty robot gripper.
+	Handle robot = N(CONCEPT_NODE, "robot arm");
+	Handle empty = N(CONCEPT_NODE, "empty");
+
+	// Set the gripper to empty.
+	Handle rempty = L(STATE_LINK, robot, empty);
+
+	AtomSpace* as2 = new AtomSpace(&_as);
+	Handle b42 =
+		L2(EVALUATION_LINK,
+			N2(PREDICATE_NODE, "holding"),
+			N2(CONCEPT_NODE, "block 42"));
+
+	Handle r42 = L2(STATE_LINK, robot, b42);
+
+	AtomSpace* as3 = new AtomSpace(as2);
+	Handle b43 =
+		L3(EVALUATION_LINK,
+			N3(PREDICATE_NODE, "holding"),
+			N3(CONCEPT_NODE, "block 43"));
+
+	Handle r43 = L3(STATE_LINK, robot, b43);
+
+	// Verify static methods
+	Handle gempty = StateLink::get_link(robot, &_as);
+	TS_ASSERT_EQUALS(gempty, rempty)
+	Handle g42 = StateLink::get_link(robot, as2);
+	TS_ASSERT_EQUALS(g42, r42)
+	Handle g43 = StateLink::get_link(robot, as3);
+	TS_ASSERT_EQUALS(g43, r43)
+
+	// Verify AtomTable getter
+	HandleSet hset;
+	_as.get_handleset_by_type(hset, STATE_LINK);
+	Handle tempty = *hset.begin();
+	TS_ASSERT_EQUALS(tempty, rempty)
+
+	hset.clear();
+	as2->get_handleset_by_type(hset, STATE_LINK);
+	Handle t42 = *hset.begin();
+	TS_ASSERT_EQUALS(t42, r42)
+
+	hset.clear();
+	as3->get_handleset_by_type(hset, STATE_LINK);
+	Handle t43 = *hset.begin();
+	TS_ASSERT_EQUALS(t43, r43)
+
+	// -----------------------
+	// Test atmospace-dependent incoming sets.
+	TS_ASSERT_EQUALS(1, robot->getIncomingSetSize(&_as));
+	TS_ASSERT_EQUALS(2, robot->getIncomingSetSize(as2));
+	TS_ASSERT_EQUALS(3, robot->getIncomingSetSize(as3));
+
+	Handle iempty = *robot->getIncomingSet(&_as).begin();
+	TS_ASSERT_EQUALS(iempty, rempty)
+
+	// -----------------------
+	Handle full = N(CONCEPT_NODE, "full");
+	Handle rfull = L(STATE_LINK, robot, full);
+
+	Handle gfull = StateLink::get_link(robot, &_as);
+	TS_ASSERT_EQUALS(gfull, rfull)
+	g42 = StateLink::get_link(robot, as2);
+	TS_ASSERT_EQUALS(g42, r42)
+	g43 = StateLink::get_link(robot, as3);
+	TS_ASSERT_EQUALS(g43, r43)
+
+	// Verify no change to atmospace-dependent incoming sets.
+	TS_ASSERT_EQUALS(1, robot->getIncomingSetSize(&_as));
+	TS_ASSERT_EQUALS(2, robot->getIncomingSetSize(as2));
+	TS_ASSERT_EQUALS(3, robot->getIncomingSetSize(as3));
+
+	Handle ifull = *robot->getIncomingSet(&_as).begin();
+	TS_ASSERT_EQUALS(ifull, rfull)
+
+	hset.clear();
+	_as.get_handleset_by_type(hset, STATE_LINK);
+	Handle tfull = *hset.begin();
+	TS_ASSERT_EQUALS(tfull, rfull)
+
+	hset.clear();
+	as2->get_handleset_by_type(hset, STATE_LINK);
+	t42 = *hset.begin();
+	TS_ASSERT_EQUALS(t42, r42)
+
+	hset.clear();
+	as3->get_handleset_by_type(hset, STATE_LINK);
+	t43 = *hset.begin();
+	TS_ASSERT_EQUALS(t43, r43)
+
+	// ------------------------------------------------------------
+	// We are done.
+	delete as3;
+	delete as2;
 	logger().info("END TEST: %s", __FUNCTION__);
 }
