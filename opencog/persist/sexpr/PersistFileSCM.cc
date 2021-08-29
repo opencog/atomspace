@@ -67,10 +67,9 @@ PersistFileSCM::PersistFileSCM(void)
 	module_init();
 }
 
-// XXX FIXME This API is OK for now, but fancier version would both
-// read and write files. To handle both, it would use `Backend.h`
-// and define `(file-open "/some/file")` and `(file-close)` and then
-// allow many of the other `(opencog persist)` functions to work.
+// This API is outdated, and is being kept for backwards-compat.
+// Use the FileStorageNode to read and write files using the
+// StorageNode API.
 
 void PersistFileSCM::init(void)
 {

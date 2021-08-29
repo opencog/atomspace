@@ -50,6 +50,7 @@ INSTALL (FILES
 # -------------------------------
 
 ADD_LIBRARY (persist-file
+	FileStorage.cc
 	PersistFileSCM.cc
 )
 
