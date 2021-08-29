@@ -38,6 +38,18 @@
 
 using namespace opencog;
 
+/// The cogserver provides a network API to send/receive Atoms over
+/// the internet. The actual API is that of the StorageNode (see the
+/// wiki page https://wiki.opencog.org/w/StorageNode for details.)
+/// The cogserver supports the full `StorageNode` API, and it uses
+/// the code in this directory in order to make it fast.
+///
+/// To aid in performance, a very special set of about 15 scheme
+/// functions have been hard-coded in C++, in the static function
+/// `Commands::interpret_command()` below.  The goal is to avoid the
+/// overhead of entry/exit into guile. This works because the cogserver
+/// is guaranteed to send only these commands, and no others.
+//
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {

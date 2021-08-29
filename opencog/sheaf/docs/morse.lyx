@@ -145,9 +145,9 @@ probabilistic logic
 
  is used as an umbrella term for any kind of inference system that does
  not use crisp true/false logic.
- This includes Bayesian inference, fuzzy logic, Markovian models, systems
- such as Ben Goertzel's Probabilistic Logic Networks (PLN) or Pei Wang's
- Non-axiomatic Reasoning System (NARS).
+ This includes Bayesian inference, Markovian models, fuzzy logic, possibility
+ logic, systems such as Ben Goertzel's Probabilistic Logic Networks (PLN)
+ or Pei Wang's Non-axiomatic Reasoning System (NARS).
  These are all conventional reasoning systems, in that they start with some
  sets of facts, to which are assigned one or more floating point numbers,
  and a collection of inference rules, which can combine facts to form new
@@ -636,7 +636,6 @@ entailment
 \begin_layout Description
 Inference The rules of inference are meant to be taken as distinct from
  implication and entailment.
- 
 \end_layout
 
 \begin_layout Section*
