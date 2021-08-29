@@ -308,6 +308,7 @@ void Sexpr::decode_slist(const Handle& atom,
 }
 
 /* ================================================================== */
+// Atom printers that do NOT print associated Values.
 
 static std::string prt_node(const Handle& h)
 {
@@ -335,6 +336,8 @@ static std::string prt_atom(const Handle& h)
 	return prt_link(h);
 }
 
+/// Convert the Atom into a string. It does NOT print any of the
+/// associated values; use `dump_atom()` to get those.
 std::string Sexpr::encode_atom(const Handle& h)
 {
 	return prt_atom(h);
@@ -376,6 +379,45 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	}
 	rv << ")";
 	return rv.str();
+}
+
+/* ================================================================== */
+// Atom printers that encode ALL associated Values.
+
+static std::string dump_node(const Handle& h)
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name()) << " ";
+	ss << Sexpr::encode_atom_values(h) << ")";
+
+	return ss.str();
+}
+
+static std::string dump_atm(const Handle&);
+
+static std::string dump_link(const Handle& h)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += dump_atm(ho);
+	txt += " ";
+	txt += Sexpr::encode_atom_values(h);
+	txt += ")";
+	return txt;
+}
+
+static std::string dump_atm(const Handle& h)
+{
+	if (h->is_node()) return dump_node(h);
+	return dump_link(h);
+}
+
+/// Print the Atom, and all of the values attached to it.
+/// Similar to `encode_atom()`, except that it also prints the values.
+std::string Sexpr::dump_atom(const Handle& h)
+{
+	return dump_atm(h);
 }
 
 /* ================================================================== */
