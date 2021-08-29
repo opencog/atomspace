@@ -46,6 +46,19 @@ be written out by saying `(export-all-atoms "/tmp/atomese.scm")`. The
 `export-atoms`, `cog-prt-atomspace` and `prt-atom-list` are useful for
 writing Atoms to a file.
 
+* `export-atoms LST FILENAME` -- Export the atoms in LST to FILENAME.
+* `prt-atom-list PORT LST`    -- Print a list LST of atoms to PORT.
+  Prints the list of atoms LST to PORT, but only those atoms
+  without an incoming set.
+* `export-all-atoms FILENAME` -- Export entire atomspace into file
+
+Example:
+```
+(define fp (open-file "/tmp/foo.scm" "w"))
+(prt-atom-list fp (list (Concept "a")))
+(close fp)
+```
+
 Network API
 -----------
 The cogserver provides a network API to send/receive Atoms over the
