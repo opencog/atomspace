@@ -70,7 +70,8 @@ Example:
 The `FileStorageNode` atom implements some of the `StorageNode` API.
 I'ts just enough to save and load entire AtomSpaces, or to store
 individual Atoms.  Here's a short example of writing selected Atoms,
-and the entire AtomSpace, to a file:
+and the entire AtomSpace, to a file. See also `persist-store.scm` in
+the main examples directory.
 
 ```
 (use-modules (opencog) (opencog persist) (opencog persist-file))
