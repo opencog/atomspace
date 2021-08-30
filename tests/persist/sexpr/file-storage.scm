@@ -8,6 +8,13 @@
 (use-modules (opencog test-runner))
 
 ; ---------------------------------------------------------------------
+; Create a unique file name.
+(set! *random-state* (random-state-from-platform))
+(define fname (format #f "/tmp/opencog-test-~D.scm" (random 1000000000)))
+
+(format #t "Using file ~A\n" fname)
+
+; ---------------------------------------------------------------------
 (opencog-test-runner)
 (define tname "store_load_file")
 (test-begin tname)
@@ -22,7 +29,7 @@
 (cog-set-value! wli (Predicate "str") (StringValue "x" "y" "z"))
 
 ; Store some individual Atoms, and then store everything.
-(define wfsn (FileStorageNode "/tmp/foo.scm"))
+(define wfsn (FileStorageNode fname))
 (cog-open wfsn)
 
 ; Store just one Atom.
@@ -50,7 +57,7 @@
 ; ---------------------------------------------------------------------
 
 ; Load everything from the file.
-(define rfsn (FileStorageNode "/tmp/foo.scm"))
+(define rfsn (FileStorageNode fname))
 (cog-open rfsn)
 (load-atomspace rfsn)
 (cog-close rfsn)
@@ -75,6 +82,7 @@
 	(equal? (cog-value rli (Predicate "str")) (StringValue "x" "y" "z")))
 
 ; --------------------------
-; The End. That's all folks!
+; Clean up.
+(delete-file fname)
 
 (test-end tname)
