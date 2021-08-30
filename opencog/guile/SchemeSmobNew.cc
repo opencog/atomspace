@@ -521,11 +521,24 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		// Now, create the actual link... in the actual atom space.
 		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
-		// Fish out a truth value, if its there.
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(satom_list));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
+		SCM kv_pairs = satom_list;
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist))
+				set_values(h, atomspace, slist);
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
 		return handle_to_scm(h);
