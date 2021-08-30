@@ -369,8 +369,6 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 /// association list.
 std::string Sexpr::encode_atom_values(const Handle& h)
 {
-	if (not h->haveValues()) return "";
-
 	std::stringstream rv;
 
 	rv << "(list ";
@@ -390,8 +388,12 @@ static std::string dump_node(const Handle& h)
 {
 	std::stringstream ss;
 	ss << "(" << nameserver().getTypeName(h->get_type())
-		<< " " << std::quoted(h->get_name()) << " ";
-	ss << Sexpr::encode_atom_values(h) << ")";
+		<< " " << std::quoted(h->get_name());
+
+	if (h->haveValues())
+		ss << " " << Sexpr::encode_atom_values(h);
+
+	ss << ")";
 
 	return ss.str();
 }
@@ -401,8 +403,13 @@ static std::string dump_link(const Handle& h)
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
 		txt += prt_atom(ho);
-	txt += " ";
-	txt += Sexpr::encode_atom_values(h);
+
+	if (h->haveValues())
+	{
+		txt += " ";
+		txt += Sexpr::encode_atom_values(h);
+	}
+
 	txt += ")";
 	return txt;
 }
