@@ -170,6 +170,17 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
+/// Return true if s is the scm representation of an Atom or Value
+bool SchemeSmob::scm_is_protom(SCM s)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return false;
+
+	return COG_PROTOM == SCM_SMOB_FLAGS(s);
+}
+
+/* ============================================================== */
+
 [[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
                                                 const char *func,
                                                 SCM args)

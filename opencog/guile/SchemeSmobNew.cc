@@ -464,30 +464,42 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 	HandleSeq outgoing_set;
 	SCM sl = satom_list;
 	pos = 2;
-	while (scm_is_pair(sl)) {
+	while (scm_is_pair(sl))
+	{
 		SCM satom = SCM_CAR(sl);
 
 		// Verify that the contents of the list are actual atoms.
 		Handle h(scm_to_handle(satom));
-		if (h) {
+		if (h)
+		{
 			outgoing_set.emplace_back(h);
 		}
-		else if (scm_is_pair(satom) and !scm_is_null(satom_list)) {
-			// Allow lists to be specified: e.g.
-			// (cog-new-link 'ListLink (list x y z))
-			// Do this via a recursive call, flattening nested lists
-			// as we go along.
-			const HandleSeq &oset =
-				verify_handle_list(satom, subrname, pos);
-			HandleSeq::const_iterator it;
-			for (it = oset.begin(); it != oset.end(); ++it) {
-				outgoing_set.emplace_back(*it);
+		else if (scm_is_pair(satom) and
+		         not scm_is_null(satom_list))
+		{
+			// Ignore lists of key-value pairs. For example
+			//   (List (Concept "foo")
+			//      (list (cons (Predicate "key") (StringValue "bar"))))
+			if (not scm_is_protom(SCM_CDR(satom)))
+			{
+				// Allow lists to be specified: e.g.
+				// (cog-new-link 'ListLink (list x y z))
+				// Do this via a recursive call, flattening nested lists
+				// as we go along.
+				const HandleSeq &oset =
+					verify_handle_list(satom, subrname, pos);
+				HandleSeq::const_iterator it;
+				for (it = oset.begin(); it != oset.end(); ++it) {
+					outgoing_set.emplace_back(*it);
+				}
 			}
 		}
-		else if (scm_is_null(satom)) {
+		else if (scm_is_null(satom))
+		{
 			// No-op, just ignore.
 		}
-		else {
+		else
+		{
 			// Its legit to have embedded truth values, just skip them.
 			if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, satom)) {
 				// If its not an atom, and its not a truth value, and
