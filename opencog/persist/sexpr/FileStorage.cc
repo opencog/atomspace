@@ -86,24 +86,28 @@ void FileStorageNode::barrier(void)
 
 Handle FileStorageNode::getNode(Type, const char *)
 {
-	printf("hello getNode\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 	return Handle::UNDEFINED;
 }
 
 Handle FileStorageNode::getLink(Type, const HandleSeq&)
 {
-	printf("hello getLink\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 	return Handle::UNDEFINED;
 }
 
 void FileStorageNode::getIncomingSet(AtomTable&, const Handle&)
 {
-	printf("hello getIncomingSet\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::getIncomingByType(AtomTable&, const Handle&, Type t)
 {
-	printf("hello getIncomingSetByType\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::storeAtom(const Handle&, bool synchronous)
@@ -113,22 +117,26 @@ void FileStorageNode::storeAtom(const Handle&, bool synchronous)
 
 void FileStorageNode::removeAtom(const Handle&, bool recursive)
 {
-	printf("hello removeAtom\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::storeValue(const Handle&, const Handle&)
 {
-	printf("hello storeValue\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::loadValue(const Handle&, const Handle&)
 {
-	printf("hello loadValue\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::loadType(AtomTable&, Type)
 {
-	printf("hello loadType\n");
+	throw IOException(TRACE_INFO,
+		"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::loadAtomSpace(AtomTable &)
@@ -140,6 +148,5 @@ void FileStorageNode::storeAtomSpace(const AtomTable &)
 {
 	printf("hello storeAtomSpace\n");
 }
-
 
 DEFINE_NODE_FACTORY(FileStorageNode, FILE_STORAGE_NODE)
