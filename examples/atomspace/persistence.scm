@@ -22,11 +22,14 @@
 ;                   s-expressions. This is 10x faster than using the
 ;                   scheme interpreter to load Atomese data.
 ;
-; This demo illustrates the Postgres backend; the RocksDB and the
-; CogServer backend work exactly the same way. You can try them, if
-; you've got them installed. The plain-old s-expression subsystem is
-; less powerful and less sophisticated; it has a much simpler API,
-; and it's own demo.
+; All of the above use exactly the same API, the `StorageNode` API.
+; This demo illustrates the Postgres `StorageNode`; the RocksDB and
+; the CogServer backend work exactly the same way. You can try them,
+; if you've got them installed. The `FileStorageNode` implements a
+; subset of the `StorageNode` API, just enough to read and write
+; plain-ASCII (plain-UTF8) flat files containing s-expressions.
+; It would be useful to review the `persist-store.scm` example before
+; studying this one.
 ;
 ; -------------------------------------------------------------------
 ; Architectural Notes & Commentary.
