@@ -28,9 +28,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <fstream>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 
+#include "fast_load.h"
 #include "FileStorage.h"
 #include "Sexpr.h"
 
@@ -127,7 +130,7 @@ void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
 
 	const std::string sex = Sexpr::dump_atom(h);
 	fwrite(sex.c_str(), sex.length(), 1, _fh);
-	fwrite("\n", 2, 1, _fh);
+	fwrite("\n", 1, 1, _fh);
 }
 
 void FileStorageNode::removeAtom(const Handle&, bool recursive)
@@ -154,11 +157,6 @@ void FileStorageNode::loadType(AtomTable&, Type)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::loadAtomSpace(AtomTable &)
-{
-	printf("hello loadAtomSpace\n");
-}
-
 void FileStorageNode::storeAtomSpace(const AtomTable& table)
 {
 	if (not connected())
@@ -171,6 +169,23 @@ void FileStorageNode::storeAtomSpace(const AtomTable& table)
 		storeAtom(h);
 
 	fflush(_fh);
+}
+
+void FileStorageNode::loadAtomSpace(AtomTable& table)
+{
+printf("hello loadAtomSpace\n");
+	// Check to see if it's connected, and then ignore the file handle.
+	if (not connected())
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is not open!", _name.c_str());
+
+	std::ifstream stream(_name);
+	if (not stream.is_open())
+		throw IOException(TRACE_INFO,
+			"FileStorageNode cannot open %s", _name.c_str());
+
+	parseStream(stream, *table.getAtomSpace());
+	stream.close();
 }
 
 DEFINE_NODE_FACTORY(FileStorageNode, FILE_STORAGE_NODE)

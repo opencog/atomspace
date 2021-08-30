@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-static Handle parseStream(std::istream& in, AtomSpace& as)
+Handle opencog::parseStream(std::istream& in, AtomSpace& as)
 {
     Handle h;
     size_t expr_cnt = 0;
