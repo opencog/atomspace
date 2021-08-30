@@ -396,30 +396,25 @@ static std::string dump_node(const Handle& h)
 	return ss.str();
 }
 
-static std::string dump_atm(const Handle&);
-
 static std::string dump_link(const Handle& h)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += dump_atm(ho);
+		txt += prt_atom(ho);
 	txt += " ";
 	txt += Sexpr::encode_atom_values(h);
 	txt += ")";
 	return txt;
 }
 
-static std::string dump_atm(const Handle& h)
+/// Print the Atom, and all of the values attached to it.
+/// Similar to `encode_atom()`, except that it also prints the values.
+/// Values on going Atoms in a Link are NOT dumped!
+/// This is in order to avoid duplication.
+std::string Sexpr::dump_atom(const Handle& h)
 {
 	if (h->is_node()) return dump_node(h);
 	return dump_link(h);
-}
-
-/// Print the Atom, and all of the values attached to it.
-/// Similar to `encode_atom()`, except that it also prints the values.
-std::string Sexpr::dump_atom(const Handle& h)
-{
-	return dump_atm(h);
 }
 
 /* ================================================================== */
