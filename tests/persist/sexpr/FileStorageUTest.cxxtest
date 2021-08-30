@@ -52,6 +52,13 @@ void FileStorageUTest::test_read_write()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Can't use tmpfile() here, so fake it.
+	srandom(time(0));
+	long int r = random();
+	char buff[500];
+	sprintf(buff, "/tmp/opencog-test-%08lX.scm", r);
+	printf("Using test file: %s\n", buff);
+
 	std::string in = R"((Concept "foo"))";
 
 	logger().info("END TEST: %s", __FUNCTION__);
