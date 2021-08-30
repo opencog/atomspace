@@ -164,9 +164,14 @@ void FileStorageNode::storeAtomSpace(const AtomTable& table)
 		"FileStorageNode %s is not open!", _name.c_str());
 
 	HandleSet hset;
-	table.getRootSetByType(hset, ATOM, true);
+	table.getHandleSetByType(hset, ATOM, true);
 	for(const Handle& h: hset)
-		storeAtom(h);
+	{
+		// Store roots, and Atoms that have values.
+		// All other Atoms will appear in outgoing sets.
+		if (h->haveValues() or 0 == h->getIncomingSetSize())
+			storeAtom(h);
+	}
 
 	fflush(_fh);
 }
