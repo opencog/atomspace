@@ -22,8 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/base/Node.h>
+#include <error.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 
@@ -31,57 +33,58 @@
 
 using namespace opencog;
 
-FileStorageNode::FileStorageNode(const std::string& uri)
-	: StorageNode(FILE_STORAGE_NODE, uri)
-{
-	printf("hello ctor\n");
-}
-
 FileStorageNode::FileStorageNode(Type t, const std::string& uri)
 	: StorageNode(t, uri)
 {
-	printf("hello ctor w tuype\n");
+	_fh = nullptr;
+	// Nothing to do. Never fail.
 }
 
 FileStorageNode::~FileStorageNode()
 {
+	if (_fh) fclose(_fh);
+	_fh = nullptr;
 	printf("hello dtor\n");
-}
-
-void FileStorageNode::create(void)
-{
-	printf("hello create\n");
-}
-
-void FileStorageNode::destroy(void)
-{
-	printf("hello destroy\n");
 }
 
 void FileStorageNode::erase(void)
 {
-	printf("hello erase\n");
+	if (not connected())
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is noty open!", _name.c_str());
+}
+
+void FileStorageNode::kill_data(void)
+{
 }
 
 void FileStorageNode::open(void)
 {
-	printf("hello open\n");
+	if (_fh)
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is already open!", _name.c_str());
+	_fh = fopen(_name.c_str(), "a+");
+
+	if (nullptr == _fh)
+		throw IOException(TRACE_INFO,
+		"FileStorageNode cannot open %s: %s",
+			_name.c_str(), strerror(errno));
 }
 
 void FileStorageNode::close(void)
 {
-	printf("hello close\n");
+	if (_fh) fclose(_fh);
+	_fh = nullptr;
 }
 
 bool FileStorageNode::connected(void)
 {
-	printf("hello connected\n");
-	return false;
+	return nullptr != _fh;
 }
 
 void FileStorageNode::barrier(void)
 {
-	printf("hello barrier\n");
+	if (_fh) fflush(_fh);
 }
 
 Handle FileStorageNode::getNode(Type, const char *)

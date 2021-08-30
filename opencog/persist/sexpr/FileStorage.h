@@ -25,12 +25,6 @@
 #ifndef _OPENCOG_FILE_STORAGE_H
 #define _OPENCOG_FILE_STORAGE_H
 
-#include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/base/Valuation.h>
-
 #include <opencog/persist/api/StorageNode.h>
 
 namespace opencog
@@ -42,21 +36,20 @@ namespace opencog
 class FileStorageNode : public StorageNode
 {
 	private:
+		FILE* _fh;
 		void connect(const char *);
 
 	public:
 		FileStorageNode(Type t, const std::string& uri);
-		FileStorageNode(const std::string& uri);
 		virtual ~FileStorageNode();
 
 		void open(void);
 		void close(void);
-		void connect(void);
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void);       // destroy DB contents
-		void create(void);
-		void destroy(void);
+		void create(void) { erase(); }
+		void destroy(void) { erase(); }
 		void erase(void);
 
 		// AtomStorage interface
