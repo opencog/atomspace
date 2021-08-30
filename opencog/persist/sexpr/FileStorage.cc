@@ -159,9 +159,18 @@ void FileStorageNode::loadAtomSpace(AtomTable &)
 	printf("hello loadAtomSpace\n");
 }
 
-void FileStorageNode::storeAtomSpace(const AtomTable &)
+void FileStorageNode::storeAtomSpace(const AtomTable& table)
 {
-	printf("hello storeAtomSpace\n");
+	if (not connected())
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is not open!", _name.c_str());
+
+	HandleSet hset;
+	table.getRootSetByType(hset, ATOM, true);
+	for(const Handle& h: hset)
+		storeAtom(h);
+
+	fflush(_fh);
 }
 
 DEFINE_NODE_FACTORY(FileStorageNode, FILE_STORAGE_NODE)

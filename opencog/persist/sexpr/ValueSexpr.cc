@@ -369,6 +369,8 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 /// association list.
 std::string Sexpr::encode_atom_values(const Handle& h)
 {
+	if (not h->haveValues()) return "";
+
 	std::stringstream rv;
 
 	rv << "(list ";
