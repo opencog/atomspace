@@ -25,11 +25,14 @@
 #include <error.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/storage/storage_types.h>
 
 #include "FileStorage.h"
+#include "Sexpr.h"
 
 using namespace opencog;
 
@@ -44,18 +47,21 @@ FileStorageNode::~FileStorageNode()
 {
 	if (_fh) fclose(_fh);
 	_fh = nullptr;
-	printf("hello dtor\n");
 }
 
 void FileStorageNode::erase(void)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is noty open!", _name.c_str());
+		"FileStorageNode %s is not open!", _name.c_str());
+
+	ftruncate(fileno(_fh), 0);
 }
 
 void FileStorageNode::kill_data(void)
 {
+	if (_fh) erase();
+	else unlink(_name.c_str());
 }
 
 void FileStorageNode::open(void)
@@ -113,9 +119,15 @@ void FileStorageNode::getIncomingByType(AtomTable&, const Handle&, Type t)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::storeAtom(const Handle&, bool synchronous)
+void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
 {
-	printf("hello storeAtom\n");
+	if (not connected())
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is not open!", _name.c_str());
+
+	const std::string sex = Sexpr::dump_atom(h);
+	fwrite(sex.c_str(), sex.length(), 1, _fh);
+	fwrite("\n", 2, 1, _fh);
 }
 
 void FileStorageNode::removeAtom(const Handle&, bool recursive)
