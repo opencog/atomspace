@@ -1,0 +1,58 @@
+/*
+ * FileStorageUTest.cxxtest
+ *
+ * Copyright (c) 2021 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+
+using namespace opencog;
+
+class FileStorageUTest : public CxxTest::TestSuite
+{
+	private:
+		AtomSpace* as;
+
+	public:
+		FileStorageUTest()
+		{
+			logger().set_print_to_stdout_flag(true);
+			as = new AtomSpace();
+		}
+
+		void setUp() { as->clear(); }
+		void tearDown() {}
+
+		void test_read_write();
+};
+
+// Basic test: dump to file, and then read it.
+void FileStorageUTest::test_read_write()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((Concept "foo"))";
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
