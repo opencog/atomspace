@@ -139,10 +139,15 @@ void FileStorageNode::removeAtom(const Handle&, bool recursive)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::storeValue(const Handle&, const Handle&)
+void FileStorageNode::storeValue(const Handle& h, const Handle& key)
 {
-	throw IOException(TRACE_INFO,
-		"FileStorageNode does not support this operation!");
+	if (not connected())
+		throw IOException(TRACE_INFO,
+		"FileStorageNode %s is not open!", _name.c_str());
+
+	const std::string sex = Sexpr::dump_vatom(h, key);
+	fwrite(sex.c_str(), sex.length(), 1, _fh);
+	fwrite("\n", 1, 1, _fh);
 }
 
 void FileStorageNode::loadValue(const Handle&, const Handle&)

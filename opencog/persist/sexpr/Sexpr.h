@@ -81,6 +81,7 @@ public:
 	static std::string encode_atom_values(const Handle&);
 
 	static std::string dump_atom(const Handle&);
+	static std::string dump_vatom(const Handle&, const Handle&);
 };
 
 /** @}*/
