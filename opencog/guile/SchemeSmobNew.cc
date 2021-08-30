@@ -345,7 +345,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	std::string name;
-	if (nameserver().isA(t, NUMBER_NODE)) {
+	if (nameserver().isA(t, NUMBER_NODE))
+	{
 		std::vector<double> vec;
 		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
@@ -388,10 +389,40 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		// Now, create the actual node... in the actual atom space.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist))
+			{
+				while (scm_is_pair(slist))
+				{
+					SCM skvp = SCM_CAR(slist);
+					if (scm_is_pair(skvp))
+					{
+						SCM skey = SCM_CAR(skvp);
+						SCM sval = SCM_CDR(skvp);
+
+						// Handle h(scm_to_handle(skey));
+						Handle key(verify_handle(skey, "cog-new-node"));
+						ValuePtr vp(verify_protom(sval, "cog-new-node"));
+						h->
+printf("its a pair %s %s\n", key->to_string().c_str(),
+vp->to_string().c_str());
+					}
+					slist = SCM_CDR(slist);
+				}
+			}
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
 		return handle_to_scm(h);
