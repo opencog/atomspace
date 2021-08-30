@@ -55,6 +55,8 @@ ADD_LIBRARY (persist-file
 )
 
 TARGET_LINK_LIBRARIES(persist-file
+	persist
+	storage-types
 	load_scm
 	sexpr
 	atomspace

@@ -28,3 +28,118 @@
 #include <opencog/persist/storage/storage_types.h>
 
 #include "FileStorage.h"
+
+using namespace opencog;
+
+FileStorageNode::FileStorageNode(const std::string& uri)
+	: StorageNode(FILE_STORAGE_NODE, uri)
+{
+	printf("hello ctor\n");
+}
+
+FileStorageNode::FileStorageNode(Type t, const std::string& uri)
+	: StorageNode(t, uri)
+{
+	printf("hello ctor w tuype\n");
+}
+
+FileStorageNode::~FileStorageNode()
+{
+	printf("hello dtor\n");
+}
+
+void FileStorageNode::create(void)
+{
+	printf("hello create\n");
+}
+
+void FileStorageNode::destroy(void)
+{
+	printf("hello destroy\n");
+}
+
+void FileStorageNode::erase(void)
+{
+	printf("hello erase\n");
+}
+
+void FileStorageNode::open(void)
+{
+	printf("hello open\n");
+}
+
+void FileStorageNode::close(void)
+{
+	printf("hello close\n");
+}
+
+bool FileStorageNode::connected(void)
+{
+	printf("hello connected\n");
+	return false;
+}
+
+void FileStorageNode::barrier(void)
+{
+	printf("hello barrier\n");
+}
+
+Handle FileStorageNode::getNode(Type, const char *)
+{
+	printf("hello getNode\n");
+	return Handle::UNDEFINED;
+}
+
+Handle FileStorageNode::getLink(Type, const HandleSeq&)
+{
+	printf("hello getLink\n");
+	return Handle::UNDEFINED;
+}
+
+void FileStorageNode::getIncomingSet(AtomTable&, const Handle&)
+{
+	printf("hello getIncomingSet\n");
+}
+
+void FileStorageNode::getIncomingByType(AtomTable&, const Handle&, Type t)
+{
+	printf("hello getIncomingSetByType\n");
+}
+
+void FileStorageNode::storeAtom(const Handle&, bool synchronous)
+{
+	printf("hello storeAtom\n");
+}
+
+void FileStorageNode::removeAtom(const Handle&, bool recursive)
+{
+	printf("hello removeAtom\n");
+}
+
+void FileStorageNode::storeValue(const Handle&, const Handle&)
+{
+	printf("hello storeValue\n");
+}
+
+void FileStorageNode::loadValue(const Handle&, const Handle&)
+{
+	printf("hello loadValue\n");
+}
+
+void FileStorageNode::loadType(AtomTable&, Type)
+{
+	printf("hello loadType\n");
+}
+
+void FileStorageNode::loadAtomSpace(AtomTable &)
+{
+	printf("hello loadAtomSpace\n");
+}
+
+void FileStorageNode::storeAtomSpace(const AtomTable &)
+{
+	printf("hello storeAtomSpace\n");
+}
+
+
+DEFINE_NODE_FACTORY(FileStorageNode, FILE_STORAGE_NODE)

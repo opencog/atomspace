@@ -55,12 +55,9 @@ class FileStorageNode : public StorageNode
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void);       // destroy DB contents
-
-#if 0
-		void create(void) { create_database(); }
-		void destroy(void) { kill_data(); /* TODO also delete the db */ }
-		void erase(void) { kill_data(); }
-#endif
+		void create(void);
+		void destroy(void);
+		void erase(void);
 
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
@@ -73,7 +70,6 @@ class FileStorageNode : public StorageNode
 		void loadValue(const Handle&, const Handle&);
 		void loadType(AtomTable&, Type);
 		void barrier();
-		void flushStoreQueue();
 
 		// Large-scale loads and saves
 		void loadAtomSpace(AtomTable &); // Load entire contents of DB
