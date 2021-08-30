@@ -173,7 +173,6 @@ void FileStorageNode::storeAtomSpace(const AtomTable& table)
 
 void FileStorageNode::loadAtomSpace(AtomTable& table)
 {
-printf("hello loadAtomSpace\n");
 	// Check to see if it's connected, and then ignore the file handle.
 	if (not connected())
 		throw IOException(TRACE_INFO,

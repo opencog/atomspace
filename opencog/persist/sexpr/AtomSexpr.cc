@@ -195,7 +195,6 @@ Handle Sexpr::decode_atom(const std::string& s,
 	l = r1;
 	if (namer.isLink(atype))
 	{
-		TruthValuePtr tvp;
 		HandleSeq outgoing;
 		do {
 			l1 = l;
@@ -204,16 +203,23 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (l1 == r1) break;
 
 			// Atom names never start with lower-case.
-			if ('s' == s[l1+1])
-				tvp = get_stv(s, l1, r1, line_cnt);
-			else
-				outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
+			if (islower(s[l1+1])) break;
+
+			outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
 
 			l = r1 + 1;
 		} while (l < r);
 
 		Handle h(createLink(std::move(outgoing), atype));
-		if (tvp) h->setTruthValue(tvp);
+
+		// stv's and alist's occur at the end of the sexpr.
+		if (l1 != r1)
+		{
+			if ('s' == s[l1+1])  // s.compare("(stv ")
+				h->setTruthValue(get_stv(s, l1, r1, line_cnt));
+			else
+				decode_slist(h, s, l1);
+		}
 		return h;
 	}
 	else
@@ -230,7 +236,12 @@ Handle Sexpr::decode_atom(const std::string& s,
 		size_t r2 = r;
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
-			h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+		{
+			if (s.compare(l2, 5, "(list "))
+				decode_slist(h, s, l2);
+			else
+				h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+		}
 
 		return h;
 	}
