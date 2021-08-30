@@ -343,6 +343,27 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 }
 
 // alist is an association-list of key-value pairs.
+Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
+{
+	Handle atom = h;
+	SCM kvpli = alist;
+	while (scm_is_pair(kvpli))
+	{
+		SCM kvp = SCM_CAR(kvpli);
+
+		if (scm_is_pair(kvp))
+		{
+			Handle key(scm_to_handle(SCM_CAR(kvp)));
+			ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
+			atom = as->set_value(atom, key, pa);
+		}
+		kvpli = SCM_CDR(kvpli);
+	}
+
+	return atom;
+}
+
+// alist is an association-list of key-value pairs.
 SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 {
 	AtomSpace* as = ss_get_env_as("cog-set-values!");
@@ -352,24 +373,15 @@ SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 		scm_wrong_type_arg_msg("cog-set-values!", 2, alist, "list of key-value pairs");
 
 	Handle oldh = atom;
-	SCM kvpli = alist;
-	while (scm_is_pair(kvpli))
+
+	// Atomspace may be read-only. Respect that.
+	try
 	{
-		SCM kvp = SCM_CAR(kvpli);
-
-		Handle key(scm_to_handle(SCM_CAR(kvp)));
-		ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
-
-		// Atomspace may be read-only. Respect that.
-		try
-		{
-			atom = as->set_value(atom, key, pa);
-		}
-		catch (const std::exception& ex)
-		{
-			throw_exception(ex, "cog-set-values!", satom);
-		}
-		kvpli = SCM_CDR(kvpli);
+		atom = set_values(atom, as, alist);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-values!", satom);
 	}
 
 	// Atomspace may have given us a new atom...

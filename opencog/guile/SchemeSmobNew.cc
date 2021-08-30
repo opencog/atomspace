@@ -396,35 +396,18 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
 		if (tv) h = atomspace->set_truthvalue(h, tv);
 
-#if LATER
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
 		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
 		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
 		while (scm_is_pair(kv_pairs))
 		{
 			SCM slist = SCM_CAR(kv_pairs);
 			if (scm_is_pair(slist))
-			{
-				while (scm_is_pair(slist))
-				{
-					SCM skvp = SCM_CAR(slist);
-					if (scm_is_pair(skvp))
-					{
-						SCM skey = SCM_CAR(skvp);
-						SCM sval = SCM_CDR(skvp);
-
-						// Handle h(scm_to_handle(skey));
-						Handle key(verify_handle(skey, "cog-new-node"));
-						ValuePtr vp(verify_protom(sval, "cog-new-node"));
-						atomspace->set_value(h, key, vp);
-					}
-					slist = SCM_CDR(slist);
-				}
-			}
+				set_values(h, atomspace, slist);
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
-#endif
 
 		return handle_to_scm(h);
 	}

@@ -192,6 +192,7 @@ private:
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
+	static Handle set_values(const Handle&, AtomSpace*, SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
