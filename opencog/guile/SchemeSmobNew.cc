@@ -387,6 +387,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
+		// This is a try-catch blcok, in case the AtomSpace is read-only.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (nullptr == h) return handle_to_scm(h);
@@ -395,6 +396,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
 		if (tv) h = atomspace->set_truthvalue(h, tv);
 
+#if LATER
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
 		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
@@ -415,15 +417,14 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 						// Handle h(scm_to_handle(skey));
 						Handle key(verify_handle(skey, "cog-new-node"));
 						ValuePtr vp(verify_protom(sval, "cog-new-node"));
-						h->
-printf("its a pair %s %s\n", key->to_string().c_str(),
-vp->to_string().c_str());
+						atomspace->set_value(h, key, vp);
 					}
 					slist = SCM_CDR(slist);
 				}
 			}
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
+#endif
 
 		return handle_to_scm(h);
 	}
