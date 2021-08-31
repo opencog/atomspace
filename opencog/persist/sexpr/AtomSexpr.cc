@@ -237,7 +237,7 @@ Handle Sexpr::decode_atom(const std::string& s,
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
 		{
-			if (s.compare(l2, 5, "(list "))
+			if (s.compare(l2, 6, "(alist "))
 				decode_slist(h, s, l2);
 			else
 				h->setTruthValue(get_stv(s, l2, r2, line_cnt));
