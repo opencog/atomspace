@@ -308,7 +308,7 @@ void CommandsUTest::test_set_values()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string in = "(cog-set-values! (Concept \"a\") (list "
+	std::string in = "(cog-set-values! (Concept \"a\") (alist "
 		"(cons (Predicate \"*-TruthValueKey-*\") (stv 0.3 0.5))"
 		"(cons (Predicate \"key\") (stv 0.6 0.8))"
 		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"

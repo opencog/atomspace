@@ -271,7 +271,7 @@ void Sexpr::decode_alist(const Handle& atom,
 /**
  * Decode a Valuation association list.
  * This list has the format
- * (list (cons KEY VALUE)(cons KEY2 VALUE2)...)
+ *    (alist (cons KEY VALUE)(cons KEY2 VALUE2)...)
  * Store the results as values on the atom.
  */
 void Sexpr::decode_slist(const Handle& atom,
@@ -281,7 +281,7 @@ void Sexpr::decode_slist(const Handle& atom,
 
 	pos = alist.find_first_not_of(" \n\t", pos);
 	if (std::string::npos == pos) return;
-	if (alist.compare(pos, 5, "(list"))
+	if (alist.compare(pos, 6, "(alist"))
 		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
 			alist.substr(pos).c_str());
 
@@ -371,7 +371,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 {
 	std::stringstream rv;
 
-	rv << "(list ";
+	rv << "(alist ";
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
@@ -435,7 +435,7 @@ static std::string dump_vnode(const Handle& h, const Handle& key)
 
 	ValuePtr p = h->getValue(key);
 	if (nullptr != p)
-		ss << " (list (cons " << prt_atom(key) << Sexpr::encode_value(p) << ")))";
+		ss << " (alist (cons " << prt_atom(key) << Sexpr::encode_value(p) << ")))";
 
 	return ss.str();
 }
@@ -448,7 +448,7 @@ static std::string dump_vlink(const Handle& h, const Handle& key)
 
 	ValuePtr p = h->getValue(key);
 	if (nullptr != p)
-		txt += " (list (cons " + prt_atom(key) + Sexpr::encode_value(p) + ")))";
+		txt += " (alist (cons " + prt_atom(key) + Sexpr::encode_value(p) + ")))";
 
 	return txt;
 }

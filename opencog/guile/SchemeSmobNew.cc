@@ -404,8 +404,11 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		while (scm_is_pair(kv_pairs))
 		{
 			SCM slist = SCM_CAR(kv_pairs);
-			if (scm_is_pair(slist))
-				set_values(h, atomspace, slist);
+			if (scm_is_pair(slist) and
+			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
+			{
+				set_values(h, atomspace, SCM_CADR(slist));
+			}
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
@@ -477,19 +480,15 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 		else if (scm_is_pair(satom) and
 		         not scm_is_null(satom_list))
 		{
-			// Ignore lists of key-value pairs. For example
+			// Ignore alists of key-value pairs. For example
 			//   (List (Concept "foo")
-			//      (list (cons (Predicate "key") (StringValue "bar"))))
-			// if (not scm_is_protom(SCM_CDR(satom)))
-			// FIXME -- can't do this check, because the current URE
-			// violates this. The URE is spaghetti code that does
-			// crazy things with cons that breaks the core assumption
-			// here.
+			//      (alist (cons (Predicate "key") (StringValue "bar"))))
+			if (not scm_to_bool(scm_equal_p(_alist, SCM_CAR(satom))))
 			{
 				// Allow lists to be specified: e.g.
 				// (cog-new-link 'ListLink (list x y z))
 				// Do this via a recursive call, flattening nested lists
-				// as we go along.
+				// as we go along. The URE does this a lot.
 				const HandleSeq &oset =
 					verify_handle_list(satom, subrname, pos);
 				HandleSeq::const_iterator it;
@@ -543,26 +542,22 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		const TruthValuePtr tv(get_tv_from_list(satom_list));
 		if (tv) h = atomspace->set_truthvalue(h, tv);
 
-#ifdef BREAKS_URE
-XXX FIXME. The code below does what we want, but the URE
-is coded like spaghetti code, using cons all over the place,
-and that breaks the assumption here that only key-value
-pairs occur in cons lists.  Bummer. Basically, URE needs
-to be fixed before wa can uncork this.
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
-		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		//    (alist (cons (Predicate "p") (FloatValue 1 2 3)))
 		// which we will staple onto the atom.
 		// Oddly, though, it shows up as a list inside a list.
 		SCM kv_pairs = satom_list;
 		while (scm_is_pair(kv_pairs))
 		{
 			SCM slist = SCM_CAR(kv_pairs);
-			if (scm_is_pair(slist))
-				set_values(h, atomspace, slist);
+			if (scm_is_pair(slist) and
+			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
+			{
+				set_values(h, atomspace, SCM_CADR(slist));
+			}
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
-#endif
 
 		return handle_to_scm(h);
 	}

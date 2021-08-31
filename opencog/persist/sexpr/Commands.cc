@@ -282,7 +282,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// (cog-set-values! (Concpet "foo")
-	//     (list (cons (Predicate "bar") (stv 0.9 0.8)) ...))
+	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
 	{
 		pos = epos + 1;

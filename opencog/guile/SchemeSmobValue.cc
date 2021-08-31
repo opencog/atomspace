@@ -355,7 +355,7 @@ Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
 		{
 			Handle key(scm_to_handle(SCM_CAR(kvp)));
 			ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
-			atom = as->set_value(atom, key, pa);
+			if (key) atom = as->set_value(atom, key, pa);
 		}
 		kvpli = SCM_CDR(kvpli);
 	}
