@@ -37,7 +37,6 @@ class FileStorageNode : public StorageNode
 {
 	private:
 		FILE* _fh;
-		void connect(const char *);
 
 	public:
 		FileStorageNode(Type t, const std::string& uri);
