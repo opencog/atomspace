@@ -117,6 +117,9 @@ cog-value-ref
 (define-public (cog-extract-recursive ATOM)
 	"See cog-extract-recursive!" (cog-extract-recursive! ATOM))
 
+; A very special association-list ctor.
+(define-public (alist . x) (list 'alist x))
+
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")
 

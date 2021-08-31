@@ -112,6 +112,7 @@ private:
 	static SCM ss_node_p(SCM);
 	static SCM ss_link_p(SCM);
 	static SCM _radix_ten;
+	static SCM _alist;
 
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);

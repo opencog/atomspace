@@ -52,6 +52,7 @@ using namespace opencog;
 scm_t_bits SchemeSmob::cog_misc_tag;
 std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
 SCM SchemeSmob::_radix_ten;
+SCM SchemeSmob::_alist;
 
 void SchemeSmob::init()
 {
@@ -74,6 +75,7 @@ void SchemeSmob::init()
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 	_radix_ten = scm_from_int8(10);
+	_alist = scm_from_utf8_symbol("alist");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
