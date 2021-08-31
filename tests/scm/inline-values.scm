@@ -49,10 +49,10 @@
 		(cons (Predicate "str") (StringValue "x" "y" "z"))))
 
 (define rli (Link (Concept "foo") (Concept "bar")))
-(test-assert "List Keys" (equal? 2 (length (cog-keys rli))))
-(test-assert "List Num"
-	(equal? (cog-value rli (Predicate "num")) (FloatValue 4 5 6)))
-(test-assert "List Str"
-	(equal? (cog-value rli (Predicate "str")) (StringValue "x" "y" "z")))
+;;;(test-assert "List Keys" (equal? 2 (length (cog-keys rli))))
+;;;(test-assert "List Num"
+;;;	(equal? (cog-value rli (Predicate "num")) (FloatValue 4 5 6)))
+;;;(test-assert "List Str"
+;;;	(equal? (cog-value rli (Predicate "str")) (StringValue "x" "y" "z")))
 
 (test-end tname)
