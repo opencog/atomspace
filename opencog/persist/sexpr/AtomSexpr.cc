@@ -215,7 +215,7 @@ Handle Sexpr::decode_atom(const std::string& s,
 		// stv's and alist's occur at the end of the sexpr.
 		if (l1 != r1 and l < r)
 		{
-			if ('s' == s[l1+1])  // s.compare("(stv ")
+			if ('s' == s[l1+1])  // 0 == s.compare(l1, 5, "(stv ")
 				h->setTruthValue(get_stv(s, l1, r1, line_cnt));
 			else
 				decode_slist(h, s, l1);
@@ -237,7 +237,7 @@ Handle Sexpr::decode_atom(const std::string& s,
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
 		{
-			if (s.compare(l2, 6, "(alist "))
+			if (0 == s.compare(l2, 7, "(alist "))
 				decode_slist(h, s, l2);
 			else
 				h->setTruthValue(get_stv(s, l2, r2, line_cnt));
