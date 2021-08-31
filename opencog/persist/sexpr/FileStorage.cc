@@ -58,7 +58,11 @@ void FileStorageNode::erase(void)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode %s is not open!", _name.c_str());
 
-	ftruncate(fileno(_fh), 0);
+	int rc = ftruncate(fileno(_fh), 0);
+	if (rc)
+		throw IOException(TRACE_INFO,
+		"FileStorageNode cannot erase %s: %s",
+			_name.c_str(), strerror(errno));
 }
 
 void FileStorageNode::kill_data(void)
