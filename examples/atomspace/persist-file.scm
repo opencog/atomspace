@@ -4,16 +4,21 @@
 ; The AtomSpace is an in-RAM database. You just might want to sometimes
 ; write some of it out to disk, and save it for later; or maybe you want
 ; to share AtomSpace contents with other users. There are several ways
-; to do this. The "best" way to do this is to use the RocksDB
-; persistence backend. It is the fastest and most powerful way of saving
-; to a file. Unfortunately, it is not "human-readable"; the file format
-; is binary.
+; to do this. The "best" way to do this is to use the RocksStorageNode.
+; It is a full-fledged database (built on RocksDB) with all the database
+; bells and whistles.  Unfortunately, it is not "human-readable"; the
+; file format used by RocksDB is binary.
 ;
 ; This demo illustrates how to dump plain-text Atomese to a file, and
 ; several ways of reading it back in. The most important part of this
 ; demo is to illustrate the fast file reader, which is vital for loading
 ; large files quickly.
 ;
+; The API below is the very simplest, brute-force mechanism for storing
+; Atoms (but not Values) to a file.  A different and more flexibile
+; interface is provided by `FileStorageNode`, which implements a subset
+; of the `StorageNode` API suitable for flat files. See
+; `persist-store.scm` for a working example.
 
 (use-modules (ice-9 readline))
 (activate-readline)

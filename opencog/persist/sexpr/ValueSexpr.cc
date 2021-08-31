@@ -308,6 +308,7 @@ void Sexpr::decode_slist(const Handle& atom,
 }
 
 /* ================================================================== */
+// Atom printers that do NOT print associated Values.
 
 static std::string prt_node(const Handle& h)
 {
@@ -335,6 +336,8 @@ static std::string prt_atom(const Handle& h)
 	return prt_link(h);
 }
 
+/// Convert the Atom into a string. It does NOT print any of the
+/// associated values; use `dump_atom()` to get those.
 std::string Sexpr::encode_atom(const Handle& h)
 {
 	return prt_atom(h);
@@ -372,10 +375,89 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
-		rv << "(cons " << prt_atom(k) << encode_value(p) + ")";
+		rv << "(cons " << prt_atom(k) << encode_value(p) << ")";
 	}
 	rv << ")";
 	return rv.str();
+}
+
+/* ================================================================== */
+// Atom printers that encode ALL associated Values.
+
+static std::string dump_node(const Handle& h)
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name());
+
+	if (h->haveValues())
+		ss << " " << Sexpr::encode_atom_values(h);
+
+	ss << ")";
+
+	return ss.str();
+}
+
+static std::string dump_link(const Handle& h)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += prt_atom(ho);
+
+	if (h->haveValues())
+	{
+		txt += " ";
+		txt += Sexpr::encode_atom_values(h);
+	}
+
+	txt += ")";
+	return txt;
+}
+
+/// Print the Atom, and all of the values attached to it.
+/// Similar to `encode_atom()`, except that it also prints the values.
+/// Values on going Atoms in a Link are NOT dumped!
+/// This is in order to avoid duplication.
+std::string Sexpr::dump_atom(const Handle& h)
+{
+	if (h->is_node()) return dump_node(h);
+	return dump_link(h);
+}
+
+/* ================================================================== */
+// Atom printers that encode only one associated Value.
+
+static std::string dump_vnode(const Handle& h, const Handle& key)
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name());
+
+	ValuePtr p = h->getValue(key);
+	if (nullptr != p)
+		ss << " (list (cons " << prt_atom(key) << Sexpr::encode_value(p) << ")))";
+
+	return ss.str();
+}
+
+static std::string dump_vlink(const Handle& h, const Handle& key)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += prt_atom(ho);
+
+	ValuePtr p = h->getValue(key);
+	if (nullptr != p)
+		txt += " (list (cons " + prt_atom(key) + Sexpr::encode_value(p) + ")))";
+
+	return txt;
+}
+
+/// Print the Atom, and just one of the values attached to it.
+std::string Sexpr::dump_vatom(const Handle& h, const Handle& key)
+{
+	if (h->is_node()) return dump_vnode(h, key);
+	return dump_vlink(h, key);
 }
 
 /* ================================================================== */

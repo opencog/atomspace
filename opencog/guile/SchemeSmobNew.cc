@@ -345,7 +345,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	std::string name;
-	if (nameserver().isA(t, NUMBER_NODE)) {
+	if (nameserver().isA(t, NUMBER_NODE))
+	{
 		std::vector<double> vec;
 		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
@@ -386,12 +387,26 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
+		// This is a try-catch blcok, in case the AtomSpace is read-only.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist))
+				set_values(h, atomspace, slist);
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
 		return handle_to_scm(h);
@@ -449,30 +464,46 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 	HandleSeq outgoing_set;
 	SCM sl = satom_list;
 	pos = 2;
-	while (scm_is_pair(sl)) {
+	while (scm_is_pair(sl))
+	{
 		SCM satom = SCM_CAR(sl);
 
 		// Verify that the contents of the list are actual atoms.
 		Handle h(scm_to_handle(satom));
-		if (h) {
+		if (h)
+		{
 			outgoing_set.emplace_back(h);
 		}
-		else if (scm_is_pair(satom) and !scm_is_null(satom_list)) {
-			// Allow lists to be specified: e.g.
-			// (cog-new-link 'ListLink (list x y z))
-			// Do this via a recursive call, flattening nested lists
-			// as we go along.
-			const HandleSeq &oset =
-				verify_handle_list(satom, subrname, pos);
-			HandleSeq::const_iterator it;
-			for (it = oset.begin(); it != oset.end(); ++it) {
-				outgoing_set.emplace_back(*it);
+		else if (scm_is_pair(satom) and
+		         not scm_is_null(satom_list))
+		{
+			// Ignore lists of key-value pairs. For example
+			//   (List (Concept "foo")
+			//      (list (cons (Predicate "key") (StringValue "bar"))))
+			// if (not scm_is_protom(SCM_CDR(satom)))
+			// FIXME -- can't do this check, because the current URE
+			// violates this. The URE is spaghetti code that does
+			// crazy things with cons that breaks the core assumption
+			// here.
+			{
+				// Allow lists to be specified: e.g.
+				// (cog-new-link 'ListLink (list x y z))
+				// Do this via a recursive call, flattening nested lists
+				// as we go along.
+				const HandleSeq &oset =
+					verify_handle_list(satom, subrname, pos);
+				HandleSeq::const_iterator it;
+				for (it = oset.begin(); it != oset.end(); ++it) {
+					outgoing_set.emplace_back(*it);
+				}
 			}
 		}
-		else if (scm_is_null(satom)) {
+		else if (scm_is_null(satom))
+		{
 			// No-op, just ignore.
 		}
-		else {
+		else
+		{
 			// Its legit to have embedded truth values, just skip them.
 			if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, satom)) {
 				// If its not an atom, and its not a truth value, and
@@ -506,12 +537,32 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		// Now, create the actual link... in the actual atom space.
 		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
-		// Fish out a truth value, if its there.
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(satom_list));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+#ifdef BREAKS_URE
+XXX FIXME. The code below does what we want, but the URE
+is coded like spaghetti code, using cons all over the place,
+and that breaks the assumption here that only key-value
+pairs occur in cons lists.  Bummer. Basically, URE needs
+to be fixed before wa can uncork this.
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
+		SCM kv_pairs = satom_list;
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist))
+				set_values(h, atomspace, slist);
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
+#endif
 
 		return handle_to_scm(h);
 	}

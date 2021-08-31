@@ -50,10 +50,13 @@ INSTALL (FILES
 # -------------------------------
 
 ADD_LIBRARY (persist-file
+	FileStorage.cc
 	PersistFileSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(persist-file
+	persist
+	storage-types
 	load_scm
 	sexpr
 	atomspace

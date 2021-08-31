@@ -14,10 +14,16 @@ of CPU time to string-compare, string-substring, string-increment,
 as it does to create Atoms and place them in the AtomSpace. (Yes,
 we measured. Results were a mostly-even 50-50 split.)
 
-Currently, only Atomese s-expressions are supported. No other subset
-of scheme is supported!
+Only Atomese s-expressions, plus a very special subset of other
+functions are supported. This is NOT a generic scheme interpreter.
 
-The code includes a file-reader utiliity.
+The code includes a file-reader utiliity.  It also implements the
+`FileStorageNode`, while implements some of the `StorageNode` API.
+Entire AtomSpaces can be read and written. Individual Atoms can be
+written. More complex queries offered by `StorageNode` are not
+supported (because, obviously, flat files aren't databases. Use the
+`RocksStorageNode` if you need a full-featured file-backed
+`StorageNode`.)
 
 C++ API
 -------
@@ -58,6 +64,58 @@ Example:
 (prt-atom-list fp (list (Concept "a")))
 (close fp)
 ```
+
+`StorageNode` API
+-----------------
+The `FileStorageNode` atom implements some of the `StorageNode` API.
+I'ts just enough to save and load entire AtomSpaces, or to store
+individual Atoms.  Here's a short example of writing selected Atoms,
+and the entire AtomSpace, to a file. See also `persist-store.scm` in
+the main examples directory.
+
+```
+(use-modules (opencog) (opencog persist) (opencog persist-file))
+
+; Populate the AtomSpace with some data.
+(define a (Concept "foo"))
+(cog-set-value! a (Predicate "num") (FloatValue 1 2 3))
+(cog-set-value! a (Predicate "str") (StringValue "p" "q" "r"))
+
+(define li (Link (Concept "foo") (Concept "bar")))
+(cog-set-value! li (Predicate "num") (FloatValue 4 5 6))
+(cog-set-value! li (Predicate "str") (StringValue "x" "y" "z"))
+
+; Store some individual Atoms, and then store everything.
+(define fsn (FileStorageNode "/tmp/foo.scm"))
+(cog-open fsn)
+(store-atom a fsn)
+(store-value a (Predicate "num") fsn)
+(store-value a (Predicate "num") fsn)
+(store-value a (Predicate "num") fsn)
+(barrier fsn)
+
+(store-atomspace fsn)  ; Store everything.
+(cog-close fsn)
+```
+
+Here's an example of reading back what was stored above:
+```
+(use-modules (opencog) (opencog persist) (opencog persist-file))
+
+(define fsn (FileStorageNode "/tmp/foo.scm"))
+(cog-open fsn)
+(load-atomspace fsn)
+(cog-close fsn)
+
+; Verify the load
+(cog-prt-atomspace)
+
+(define li (Link (Concept "foo") (Concept "bar")))
+(cog-keys li)
+(cog-value li (Predicate "num"))
+(cog-value li (Predicate "str"))
+```
+
 
 Network API
 -----------

@@ -85,6 +85,8 @@ private:
 	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
 
+	static bool scm_is_protom(SCM);
+
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ValuePtr&);
 	static Handle scm_to_handle(SCM);
@@ -192,6 +194,7 @@ private:
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
+	static Handle set_values(const Handle&, AtomSpace*, SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
