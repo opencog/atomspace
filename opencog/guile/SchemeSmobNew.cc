@@ -480,7 +480,11 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 			// Ignore lists of key-value pairs. For example
 			//   (List (Concept "foo")
 			//      (list (cons (Predicate "key") (StringValue "bar"))))
-			if (not scm_is_protom(SCM_CDR(satom)))
+			// if (not scm_is_protom(SCM_CDR(satom)))
+			// FIXME -- can't do this check, because the current URE
+			// violates this. The URE is spaghetti code that does
+			// crazy things with cons that breaks the core assumption
+			// here.
 			{
 				// Allow lists to be specified: e.g.
 				// (cog-new-link 'ListLink (list x y z))
@@ -539,6 +543,12 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		const TruthValuePtr tv(get_tv_from_list(satom_list));
 		if (tv) h = atomspace->set_truthvalue(h, tv);
 
+#ifdef BREAKS_URE
+XXX FIXME. The code below does what we want, but the URE
+is coded like spaghetti code, using cons all over the place,
+and that breaks the assumption here that only key-value
+pairs occur in cons lists.  Bummer. Basically, URE needs
+to be fixed before wa can uncork this.
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
 		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
@@ -552,6 +562,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 				set_values(h, atomspace, slist);
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
+#endif
 
 		return handle_to_scm(h);
 	}
