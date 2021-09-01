@@ -43,7 +43,12 @@ FileStorageNode::FileStorageNode(Type t, const std::string& uri)
 	: StorageNode(t, uri)
 {
 	_fh = nullptr;
-	// Nothing to do. Never fail.
+
+	_filename = get_name();
+
+	// If the URL begins with `file://` then just strip that off.
+	if (0 == _filename.compare(0, 7, "file://"))
+		_filename = _filename.substr(7);
 }
 
 FileStorageNode::~FileStorageNode()
@@ -56,32 +61,32 @@ void FileStorageNode::erase(void)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is not open!", _name.c_str());
+		"FileStorageNode %s is not open!", _filename.c_str());
 
 	int rc = ftruncate(fileno(_fh), 0);
 	if (rc)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode cannot erase %s: %s",
-			_name.c_str(), strerror(errno));
+			_filename.c_str(), strerror(errno));
 }
 
 void FileStorageNode::kill_data(void)
 {
 	if (_fh) erase();
-	else unlink(_name.c_str());
+	else unlink(_filename.c_str());
 }
 
 void FileStorageNode::open(void)
 {
 	if (_fh)
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is already open!", _name.c_str());
-	_fh = fopen(_name.c_str(), "a+");
+		"FileStorageNode %s is already open!", _filename.c_str());
+	_fh = fopen(_filename.c_str(), "a+");
 
 	if (nullptr == _fh)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode cannot open %s: %s",
-			_name.c_str(), strerror(errno));
+			_filename.c_str(), strerror(errno));
 }
 
 void FileStorageNode::close(void)
@@ -130,7 +135,7 @@ void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is not open!", _name.c_str());
+		"FileStorageNode %s is not open!", _filename.c_str());
 
 	const std::string sex = Sexpr::dump_atom(h);
 	fwrite(sex.c_str(), sex.length(), 1, _fh);
@@ -147,7 +152,7 @@ void FileStorageNode::storeValue(const Handle& h, const Handle& key)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is not open!", _name.c_str());
+		"FileStorageNode %s is not open!", _filename.c_str());
 
 	const std::string sex = Sexpr::dump_vatom(h, key);
 	fwrite(sex.c_str(), sex.length(), 1, _fh);
@@ -170,7 +175,7 @@ void FileStorageNode::storeAtomSpace(const AtomTable& table)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is not open!", _name.c_str());
+		"FileStorageNode %s is not open!", _filename.c_str());
 
 	HandleSet hset;
 	table.getHandleSetByType(hset, ATOM, true);
@@ -190,12 +195,12 @@ void FileStorageNode::loadAtomSpace(AtomTable& table)
 	// Check to see if it's connected, and then ignore the file handle.
 	if (not connected())
 		throw IOException(TRACE_INFO,
-		"FileStorageNode %s is not open!", _name.c_str());
+		"FileStorageNode %s is not open!", _filename.c_str());
 
-	std::ifstream stream(_name);
+	std::ifstream stream(_filename);
 	if (not stream.is_open())
 		throw IOException(TRACE_INFO,
-			"FileStorageNode cannot open %s", _name.c_str());
+			"FileStorageNode cannot open %s", _filename.c_str());
 
 	parseStream(stream, *table.getAtomSpace());
 	stream.close();

@@ -36,6 +36,7 @@ namespace opencog
 class FileStorageNode : public StorageNode
 {
 	private:
+		std::string _filename;
 		FILE* _fh;
 
 	public:
