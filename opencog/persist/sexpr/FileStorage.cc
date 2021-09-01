@@ -73,7 +73,14 @@ void FileStorageNode::erase(void)
 void FileStorageNode::kill_data(void)
 {
 	if (_fh) erase();
-	else unlink(_filename.c_str());
+	else
+	{
+		int rc = unlink(_filename.c_str());
+		if (rc)
+			throw IOException(TRACE_INFO,
+			"FileStorageNode cannot remove %s: %s",
+				_filename.c_str(), strerror(errno));
+	}
 }
 
 void FileStorageNode::open(void)
@@ -139,7 +146,12 @@ void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
 
 	const std::string sex = Sexpr::dump_atom(h);
 	fwrite(sex.c_str(), sex.length(), 1, _fh);
-	fwrite("\n", 1, 1, _fh);
+	size_t rc = fwrite("\n", 1, 1, _fh);
+
+	if (1 != rc)
+		throw IOException(TRACE_INFO,
+		"FileStorageNode failed to store Atom at %s: %s",
+			_filename.c_str(), strerror(errno));
 }
 
 void FileStorageNode::removeAtom(const Handle&, bool recursive)
@@ -156,7 +168,12 @@ void FileStorageNode::storeValue(const Handle& h, const Handle& key)
 
 	const std::string sex = Sexpr::dump_vatom(h, key);
 	fwrite(sex.c_str(), sex.length(), 1, _fh);
-	fwrite("\n", 1, 1, _fh);
+	size_t rc = fwrite("\n", 1, 1, _fh);
+
+	if (1 != rc)
+		throw IOException(TRACE_INFO,
+		"FileStorageNode failed to store Atom at %s: %s",
+			_filename.c_str(), strerror(errno));
 }
 
 void FileStorageNode::loadValue(const Handle&, const Handle&)
