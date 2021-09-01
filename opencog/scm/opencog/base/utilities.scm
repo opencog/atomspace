@@ -273,6 +273,12 @@
   somewhere underneath these top-most atoms.
 
   This is equivalent to `(display (cog-get-all-roots))`.
+
+  To dump large atomspaces to a file, use `FileStorageNode`. For example:
+     (define fsn (FileStoreNode \"/tmp/bigspace.scm\"))
+     (cog-open fsn)
+     (store-atomspace fsn)
+     (cog-close fsn)
 "
 	(define (prt-atom h)
 		; Print only the top-level atoms.
