@@ -25,12 +25,24 @@ ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
 	opencog/logger.scm
 	opencog/randgen.scm
-	opencog/persist.scm
-	opencog/persist-file.scm
 	opencog/query.scm
 	opencog/test-runner.scm
 	opencog/type-utils.scm
 	opencog/uuid.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+# Need to recompile persist.scm whenever storage_types.scm changes
+# However, no matter what I do, I can't get the rebuild to trigger.
+# In other words, the persist module is badly broken.
+ADD_GUILE_MODULE (FILES
+	opencog/persist.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+	DEPENDS storage_types
+)
+
+ADD_GUILE_MODULE (FILES
+	opencog/persist-file.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
 
