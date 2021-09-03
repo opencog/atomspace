@@ -633,8 +633,8 @@
 	(define rpt-obj (add-report-api LLOBJ))
 	(define sup-obj (add-support-api LLOBJ))
 
-	(define nrows (rpt-obj 'left-dim))
-	(define ncols (rpt-obj 'right-dim))
+	(define nrows (LLOBJ 'left-basis-size))
+	(define ncols (LLOBJ 'right-basis-size))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
@@ -643,6 +643,12 @@
 	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
 	(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
+
+	(if (or (not (equal? nrows (rpt-obj 'left-dim)))
+			(not (equal? ncols (rpt-obj 'right-dim))))
+		(format PORT
+			"Error: cache matrix dimensions do not match object dimensions!\n\tRows: ~A vs ~A  Columns: ~A vs ~A\n"
+			nrows (rpt-obj 'left-dim) ncols (rpt-obj 'right-dim)))
 
 	(let ((size (rpt-obj 'num-pairs))
 			(tot (* nrows ncols))
