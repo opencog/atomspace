@@ -633,27 +633,25 @@
 	(define rpt-obj (add-report-api LLOBJ))
 	(define sup-obj (add-support-api LLOBJ))
 
-	(define nrows (LLOBJ 'left-basis-size))
-	(define ncols (LLOBJ 'right-basis-size))
-
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
 		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
 	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
-	(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
-
-	(if (or (not (equal? nrows (rpt-obj 'left-dim)))
-			(not (equal? ncols (rpt-obj 'right-dim))))
-		(format PORT
-			"Error: cached matrix dimensions do not match object dimensions!\n\tRows: ~A vs ~A  Columns: ~A vs ~A\n"
-			nrows (rpt-obj 'left-dim) ncols (rpt-obj 'right-dim)))
-
-	(let ((size (rpt-obj 'num-pairs))
+	; (rpt-obj 'left-dim) is exactly the same as (LLOBJ 'left-basis-size)
+	; but is much much faster, because the cached marginal value is used.
+	; On large datasets, triggering (LLOBJ 'left-basis-size) can take
+	; tens of minutes and many gigabytes of RAM. Downside is that we
+	; won't print the dimensions, or the sparsify, if the cached values
+	; are not present.
+	(let ((nrows (rpt-obj 'left-dim))
+			(ncols (rpt-obj 'right-dim))
+			(size (rpt-obj 'num-pairs))
 			(tot (* nrows ncols))
 			(obs (sup-obj 'wild-wild-count)))
 
+		(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
 		(format PORT "Size: ~d non-zero entries of ~d possible\n"
 			size tot)
 		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
