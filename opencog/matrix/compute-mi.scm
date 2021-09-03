@@ -209,6 +209,11 @@
 		(define (cache-all-right-freqs)
 			(for-each cache-right-freq (wldobj 'left-basis)))
 
+		(define (cache-all)
+			(cache-all-left-freqs)
+			(cache-all-right-freqs)
+			(cache-all-pair-freqs))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -225,6 +230,7 @@
 				((cache-all-pair-freqs)  (cache-all-pair-freqs))
 				((cache-all-left-freqs)  (cache-all-left-freqs))
 				((cache-all-right-freqs) (cache-all-right-freqs))
+				((cache-all)             (cache-all))
 
 				(else (apply llobj       (cons message args))))
 		))

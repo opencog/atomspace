@@ -681,10 +681,10 @@
 	(define freq-key (PredicateNode freq-name))
 
 	(define (zero ATOM) (if nothrow 0
-		(error "No such value! Did you forget to compute frequencies?\n\tUse `make-compute-freq` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	(define (plus-inf ATOM) (if nothrow +inf.0
-		(error "No such value! Did you forget to compute frequencies?\n\tUse `make-compute-freq` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (or was not observed) return 0.
@@ -723,10 +723,10 @@
 	(define entropy-key (PredicateNode entr-name))
 
 	(define (ezero ATOM) (if nothrow 0
-		(error "No such value! Did you forget to compute entropies?\n\tUse `batch-all-pair-mi` to compute them." ATOM)))
+		 (error "No such value! Did you forget to compute entropies?\n\tRun `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
 
 	(define (eminus-inf ATOM) (if nothrow -inf.0
-		 (error "No such value! Did you forget to compute entropies?\n\tUse `batch-all-pair-mi` to compute them." ATOM)))
+		 (error "No such value! Did you forget to compute entropies?\n\tRun `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)

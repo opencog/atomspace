@@ -284,7 +284,7 @@
 				; Or any of the various subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!"
-						 message))))
+						message))))
 		)))
 
 ; ---------------------------------------------------------------------
