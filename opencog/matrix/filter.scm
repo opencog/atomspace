@@ -358,6 +358,12 @@
 			LEFT-CUT RIGHT-CUT PAIR-CUT))
 
 	; ---------------
+	; Filtering will fail, if the support has not been computed yet.
+	; Check this now, and throw an error in this situation. Accessing
+	; the total will cause an error to be throw, with a helpful message.
+	(sup-obj 'total-support-left)
+
+	; ---------------
 	(add-generic-filter stars-obj
 		left-basis-pred right-basis-pred pair-pred id-str RENAME)
 )
