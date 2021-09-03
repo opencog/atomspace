@@ -689,6 +689,8 @@
 			(format PORT
 				"No cached matrix data available;\n  run ((make-central-compute LLOBJ) 'cache-all) to make one.\n")
 			#f))
+
+	*unspecified*
 )
 
 ; ---------------------------------------------------------------------
