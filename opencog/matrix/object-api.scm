@@ -681,13 +681,10 @@
 	(define freq-key (PredicateNode freq-name))
 
 	(define (zero ATOM) (if nothrow 0
-		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tUse `make-compute-freq` to compute them." ATOM)))
 
 	(define (plus-inf ATOM) (if nothrow +inf.0
-		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
-
-	(define (minus-inf ATOM) (if nothrow -inf.0
-		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tUse `make-compute-freq` to compute them." ATOM)))
 
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (or was not observed) return 0.
@@ -725,11 +722,17 @@
 
 	(define entropy-key (PredicateNode entr-name))
 
+	(define (ezero ATOM) (if nothrow 0
+		(error "No such value! Did you forget to compute entropies?\n\tUse `batch-all-pair-mi` to compute them." ATOM)))
+
+	(define (eminus-inf ATOM) (if nothrow -inf.0
+		 (error "No such value! Did you forget to compute entropies?\n\tUse `batch-all-pair-mi` to compute them." ATOM)))
+
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
-		(if (null? ATOM) (zero ATOM)
+		(if (null? ATOM) (ezero ATOM)
 			(let ((val (cog-value ATOM entropy-key)))
-				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (ezero ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional entropy on ATOM
 	(define (get-fractional-entropy ATOM)
@@ -752,18 +755,18 @@
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
-		(if (null? ATOM) (minus-inf ATOM)
+		(if (null? ATOM) (eminus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 0)))))
+				(if (nil? val) (eminus-inf ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional MI (lexical attraction) on ATOM.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
-		(if (null? ATOM) (minus-inf ATOM)
+		(if (null? ATOM) (eminus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (nil? val) (minus-inf ATOM) (cog-value-ref val 1)))))
+				(if (nil? val) (eminus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
