@@ -582,7 +582,7 @@
 
 	; Print nothing, if neither rows nor columns available
 	(if (not (or ls rs))
-		(format PORT "No support statistics are present. Use make-central-compute to get them.\n")
+		(format PORT "No support statistics are present. Run `((make-central-compute LLOBJ) 'cache-all)` to get them.\n")
 		(begin
 
 	(format PORT "\n")
@@ -647,7 +647,7 @@
 	(if (or (not (equal? nrows (rpt-obj 'left-dim)))
 			(not (equal? ncols (rpt-obj 'right-dim))))
 		(format PORT
-			"Error: cache matrix dimensions do not match object dimensions!\n\tRows: ~A vs ~A  Columns: ~A vs ~A\n"
+			"Error: cached matrix dimensions do not match object dimensions!\n\tRows: ~A vs ~A  Columns: ~A vs ~A\n"
 			nrows (rpt-obj 'left-dim) ncols (rpt-obj 'right-dim)))
 
 	(let ((size (rpt-obj 'num-pairs))
