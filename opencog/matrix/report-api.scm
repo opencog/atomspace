@@ -627,17 +627,14 @@
 		(format PORT "No M^TM data present\n"))
 )
 
-(define* (do-print-report LLOBJ PORT)
+(define (do-print-report LLOBJ PORT)
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define rpt-obj (add-report-api LLOBJ))
 	(define sup-obj (add-support-api LLOBJ))
 
-	(define size (rpt-obj 'num-pairs))
 	(define nrows (rpt-obj 'left-dim))
 	(define ncols (rpt-obj 'right-dim))
-	(define tot (* nrows ncols))
-	(define obs (sup-obj 'wild-wild-count))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
@@ -647,12 +644,17 @@
 
 	(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
 
-	(format PORT "Size: ~d non-zero entries of ~d possible\n"
-		size tot)
-	(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
-		(/ size tot) (log2 (/ tot size)))
-	(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
-		obs (/ obs size))
+	(let ((size (rpt-obj 'num-pairs))
+			(tot (* nrows ncols))
+			(obs (sup-obj 'wild-wild-count)))
+
+		(format PORT "Size: ~d non-zero entries of ~d possible\n"
+			size tot)
+		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
+			(/ size tot) (log2 (/ tot size)))
+		(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
+			obs (/ obs size))
+	)
 
 	(catch #t
 		(lambda () (print-entropy-summary-report LLOBJ PORT))
