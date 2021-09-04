@@ -630,7 +630,6 @@
 (define (do-print-report LLOBJ PORT)
 	(define (log2 x) (/ (log x) (log 2)))
 
-	(define rpt-obj (add-report-api LLOBJ))
 	(define sup-obj (add-support-api LLOBJ))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
@@ -639,14 +638,14 @@
 		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
 	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
-	; (rpt-obj 'left-dim) is exactly the same as (LLOBJ 'left-basis-size)
+	; (sup-obj 'left-dim) is exactly the same as (LLOBJ 'left-basis-size)
 	; but is much much faster, because the cached marginal value is used.
 	; On large datasets, triggering (LLOBJ 'left-basis-size) can take
 	; tens of minutes and many gigabytes of RAM. Downside is that we
 	; won't print the dimensions, or the sparsify, if the cached values
 	; are not present.
-	(let* ((nrows (rpt-obj 'left-dim))
-			(ncols (rpt-obj 'right-dim))
+	(let* ((nrows (sup-obj 'left-dim))
+			(ncols (sup-obj 'right-dim))
 			(tot (* nrows ncols))
 			(lsize (sup-obj 'total-support-left))
 			(rsize (sup-obj 'total-support-right))
@@ -657,7 +656,7 @@
 			(nlobs (inexact->exact (round lobs)))
 			(nrobs (inexact->exact (round robs))))
 
-		; lsize should equal rsize should equal (rpt-obj 'num-pairs)
+		; lsize should equal rsize should equal (sup-obj 'num-pairs)
 		; should equal (length (LLOBJ 'get-all-pairs)).
 		(if (not (equal? nlsize nrsize))
 			(format PORT "Error: left and right total pairs not equal! ~A ~A\n"
