@@ -544,7 +544,7 @@
 	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
 )
 
-(define (print-support-summary-report LLOBJ PORT)
+(define (print-centrality-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
 	(define ls
@@ -627,16 +627,14 @@
 		(format PORT "No M^TM data present\n"))
 )
 
-(define (do-print-report LLOBJ PORT)
+(define (print-basic-summary-report LLOBJ PORT)
+"
+  Print only the most basic report. Requires that the support
+  was previously computed, with ((add-support-compute LLOBJ) 'cache-all)
+"
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define sup-obj (add-support-api LLOBJ))
-
-	(format PORT "Summary Report for Correlation Matrix ~A\n"
-		(LLOBJ 'name))
-	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
-		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
-	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
 	; (sup-obj 'left-dim) is exactly the same as (LLOBJ 'left-basis-size)
 	; but is much much faster, because the cached marginal value is used.
@@ -676,15 +674,6 @@
 			lobs (/ lobs lsize))
 	)
 
-	(catch #t
-		(lambda () (print-entropy-summary-report LLOBJ PORT))
-		(lambda (key . args)
-			(format PORT
-				"No MI statistics are present; run compute-mi to get them.\n")
-			#f))
-
-	(print-support-summary-report LLOBJ PORT)
-	(print-transpose-summary-report LLOBJ PORT)
 )
 
 (define*-public (print-matrix-summary-report LLOBJ
@@ -697,11 +686,27 @@
   See documentation for `add-report-api` for an explanation of
   what is being printed.
 "
+	(format PORT "Summary Report for Correlation Matrix ~A\n"
+		(LLOBJ 'name))
+	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
+		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
+	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
+
 	(catch #t
-		(lambda () (do-print-report LLOBJ PORT))
+		(lambda () (print-basic-summary-report LLOBJ PORT))
 		(lambda (key . args)
 			(format PORT
-				"No cached matrix data available;\n  run ((make-central-compute LLOBJ) 'cache-all) to make one.\n")
+				"No cached matrix data available;\n  run ((add-support-compute LLOBJ) 'cache-all) to make one.\n")
+			#f))
+
+	(print-centrality-summary-report LLOBJ PORT)
+	(print-transpose-summary-report LLOBJ PORT)
+
+	(catch #t
+		(lambda () (print-entropy-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No MI statistics are present; run compute-mi to get them.\n")
 			#f))
 
 	*unspecified*
