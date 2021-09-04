@@ -47,6 +47,33 @@
   it with the optional ID argument.
 "
 	; ----------------------------------------------------
+	; Key under which the matrix dimensions are stored.
+	; Note that the report object already uses *-Dimension Key-*
+	; to hold exactly the same values. We duplicate that data here,
+	; because we want to avoid the overhead of the graph centrality
+	; computations that the report object does.
+	(define dim-key (PredicateNode
+		(if is-filtered?
+			(string-append "*-Supp Dimension Key " ID)
+			"*-Supp Dimension Key-*")))
+
+	(define (set-size LEFT RIGHT NPAIRS)
+		(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
+
+	; Use round to force return of integer.
+	(define (get-left-dim)
+		(inexact->exact (round
+			(cog-value-ref (cog-value wild-atom dim-key) 0))))
+
+	(define (get-right-dim)
+		(inexact->exact (round
+			(cog-value-ref (cog-value wild-atom dim-key) 1))))
+
+	(define (get-num-pairs)
+		(inexact->exact (round
+			(cog-value-ref (cog-value wild-atom dim-key) 2))))
+
+	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
 	(define key-name
 		(if (and ID (LLOBJ 'filters?))
@@ -222,6 +249,10 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
+			((left-dim)           (get-left-dim))
+			((right-dim)          (get-right-dim))
+			((num-pairs)          (get-num-pairs))
+
 			((left-support)       (apply get-left-support args))
 			((right-support)      (apply get-right-support args))
 			((left-count)         (apply get-left-count args))
@@ -240,6 +271,7 @@
 			; with the old `add-pair-count-api` object. Remove whenever.
 			((wild-wild-count)    (get-wild-wild-count))
 
+			((set-size)           (apply set-size args))
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
 			((set-left-totals)    (apply set-left-totals args))
