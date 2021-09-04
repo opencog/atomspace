@@ -575,6 +575,14 @@
 			(define lq (* (fourth sums) (fourth sums)))
 			(api-obj 'set-right-norms ITEM l0 l1 l2 lq))
 
+		; ----------------------------------------------------
+
+		(define (set-dimensions NPAIRS)
+			(api-obj 'set-size
+				(star-obj 'left-basis-size)
+				(star-obj 'right-basis-size)
+				NPAIRS))
+
 		(define (all-left-marginals)
 			(define elapsed-secs (make-elapsed-secs))
 
@@ -587,6 +595,9 @@
 			(api-obj 'set-left-totals
 				(compute-total-support-from-left)
 				(compute-total-count-from-left))
+
+			; total-support-left should equal total-support-right
+			(set-dimensions (api-obj 'total-support-left))
 
 			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
@@ -604,6 +615,9 @@
 			(api-obj 'set-right-totals
 				(compute-total-support-from-right)
 				(compute-total-count-from-right))
+
+			; total-support-left should equal total-support-right
+			(set-dimensions (api-obj 'total-support-right))
 
 			(format #t "Finished right totals in ~A secs\n"
 				(elapsed-secs))
