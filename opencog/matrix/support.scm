@@ -47,15 +47,19 @@
   it with the optional ID argument.
 "
 	; ----------------------------------------------------
+
 	; Key under which the matrix dimensions are stored.
 	; Note that the report object already uses *-Dimension Key-*
 	; to hold exactly the same values. We duplicate that data here,
 	; because we want to avoid the overhead of the graph centrality
 	; computations that the report object does.
+	(define is-filtered? (and ID (LLOBJ 'filters?)))
 	(define dim-key (PredicateNode
 		(if is-filtered?
 			(string-append "*-Supp Dimension Key " ID)
 			"*-Supp Dimension Key-*")))
+
+	(define wild-atom (LLOBJ 'wild-wild))
 
 	(define (set-size LEFT RIGHT NPAIRS)
 		(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
@@ -76,7 +80,7 @@
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
 	(define key-name
-		(if (and ID (LLOBJ 'filters?))
+		(if is-filtered?
 			(string-append "*-Norm Key " ID)
 			"*-Norm Key-*"))
 
@@ -93,7 +97,7 @@
 
 	; -----------------
 	(define left-total-key-name
-		(if (and ID (LLOBJ 'filters?))
+		(if is-filtered?
 			(string-append "*-Left Total Key " ID)
 			"*-Left Total Key-*"))
 
