@@ -645,19 +645,36 @@
 	; tens of minutes and many gigabytes of RAM. Downside is that we
 	; won't print the dimensions, or the sparsify, if the cached values
 	; are not present.
-	(let ((nrows (rpt-obj 'left-dim))
+	(let* ((nrows (rpt-obj 'left-dim))
 			(ncols (rpt-obj 'right-dim))
-			(size (rpt-obj 'num-pairs))
 			(tot (* nrows ncols))
-			(obs (sup-obj 'wild-wild-count)))
+			(lsize (sup-obj 'total-support-left))
+			(rsize (sup-obj 'total-support-right))
+			(nlsize (inexact->exact (round lsize)))
+			(nrsize (inexact->exact (round rsize)))
+			(lobs (sup-obj 'total-count-left))
+			(robs (sup-obj 'total-count-right))
+			(nlobs (inexact->exact (round lobs)))
+			(nrobs (inexact->exact (round robs))))
+
+		; lsize should equal rsize should equal (rpt-obj 'num-pairs)
+		; should equal (length (LLOBJ 'get-all-pairs)).
+		(if (not (equal? nlsize nrsize))
+			(format PORT "Error: left and right total pairs not equal! ~A ~A\n"
+				lsize rsize))
+
+		; lobs should equal robs should equal (sup-obj 'wild-wild-count)
+		(if (not (equal? nlobs nrobs))
+			(format PORT "Error: left and right total counts not equal! ~A ~A\n"
+				lobs robs))
 
 		(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
 		(format PORT "Size: ~d non-zero entries of ~d possible\n"
-			size tot)
+			lsize tot)
 		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
-			(/ size tot) (log2 (/ tot size)))
+			(/ lsize tot) (log2 (/ tot lsize)))
 		(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
-			obs (/ obs size))
+			lobs (/ lobs lsize))
 	)
 
 	(catch #t
