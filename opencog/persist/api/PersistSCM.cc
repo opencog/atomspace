@@ -42,6 +42,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::open, this, "persist");
 	define_scheme_primitive("cog-close",
 	             &PersistSCM::close, this, "persist");
+	define_scheme_primitive("cog-connected?",
+	             &PersistSCM::connected, this, "persist");
 
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
@@ -141,6 +143,11 @@ StorageNodePtr PersistSCM::_sn;
 void PersistSCM::open(Handle hsn)
 {
 	GET_STNP;
+	if (stnp->connected())
+		throw RuntimeException(TRACE_INFO,
+			"StorageNode %s is already open!",
+			hsn->to_short_string().c_str());
+
 	stnp->open();
 
 	if (nullptr == _sn) _sn = stnp;
@@ -149,9 +156,20 @@ void PersistSCM::open(Handle hsn)
 void PersistSCM::close(Handle hsn)
 {
 	GET_STNP;
+	if (not stnp->connected())
+		throw RuntimeException(TRACE_INFO,
+			"StorageNode %s is not open!",
+			hsn->to_short_string().c_str());
+
 	stnp->close();
 
 	if (stnp == _sn) _sn = nullptr;
+}
+
+bool PersistSCM::connected(Handle hsn)
+{
+	GET_STNP;
+	return stnp->connected();
 }
 
 // =====================================================================

@@ -67,6 +67,14 @@
        `cog-open` to open a connection.
 ")
 
+(set-procedure-property! cog-connected? 'documentation
+"
+ cog-connected? STORAGE-ATOM
+
+    Return #t if there is an open connection to STORAGE-ATOM.
+    Connections are opened with `cog-open` and closed with `cog-close`.
+")
+
 (define*-public (fetch-atom ATOM #:optional (STORAGE #f))
 "
  fetch-atom ATOM [STORAGE]

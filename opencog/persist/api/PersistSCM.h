@@ -63,6 +63,7 @@ private:
 
 	void open(Handle);
 	void close(Handle);
+	bool connected(Handle);
 
 	Handle dflt_fetch_atom(Handle);
 	Handle dflt_fetch_value(Handle, Handle);
