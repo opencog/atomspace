@@ -330,13 +330,13 @@
 			(dual-r-miss (make-atomic-box '()))
 
 #! ============ Alternate variant, not currently used. See below.
-			; Temporary atomspaces
+			; Temporary atomspaces, fluid style.
 			(fluasp (make-fluid))
-=============== !#
 
 			; Temporary atomspaces, non-fluid style.
 			(mtx (make-mutex))
 			(aspace (cog-new-atomspace (cog-atomspace)))
+=============== !#
 
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
