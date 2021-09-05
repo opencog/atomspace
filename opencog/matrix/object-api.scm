@@ -386,17 +386,24 @@
 
 		; Define default patterns, that, when executed, return the stars.
 		; The LLOBJ can provide custom versions of this.
+		(define default-left-star-var (Variable "$api-left-star"))
 		(define (default-left-star-pat ITEM)
-			(let* ((var (Variable "$api-left-star"))
+			(let* ((var default-left-star-var)
 					(term (LLOBJ 'make-pair var ITEM)))
 				(Query (TypedVariable var (Type left-type))
 					term term)))
 
+		(define default-right-star-var (Variable "$api-right-star"))
 		(define (default-right-star-pat ITEM)
-			(let* ((var (Variable "$api-right-star"))
+			(let* ((var default-right-star-var)
 					(term (LLOBJ 'make-pair ITEM var)))
 				(Query (TypedVariable var (Type right-type))
 					term term)))
+
+		(define f-left-star-var
+			(overload 'left-star-variable default-left-star-var))
+		(define f-right-star-var
+			(overload 'right-star-variable default-right-star-var))
 
 		(define f-left-star-pat
 			(overload 'left-star-pattern default-left-star-pat))
@@ -410,15 +417,22 @@
 		;
 		; Define default patterns, that, when executed, return the duals.
 		; The LLOBJ can provide custom versions of this.
+		(define default-left-dual-var (Variable "$api-left-dual"))
 		(define (default-left-dual-pat ITEM)
-			(let* ((var (Variable "$api-left-dual"))
+			(let* ((var default-left-dual-var)
 					(term (LLOBJ 'make-pair var ITEM)))
 				(Meet (TypedVariable var (Type left-type)) term)))
 
+		(define default-right-dual-var (Variable "$api-right-dual"))
 		(define (default-right-dual-pat ITEM)
-			(let* ((var (Variable "$api-right-dual"))
+			(let* ((var default-right-dual-var)
 					(term (LLOBJ 'make-pair ITEM var)))
 				(Meet (TypedVariable var (Type right-type)) term)))
+
+		(define f-left-dual-var
+			(overload 'left-dual-variable default-left-dual-var))
+		(define f-right-dual-var
+			(overload 'right-dual-variable default-right-dual-var))
 
 		(define f-left-dual-pat
 			(overload 'left-dual-pattern default-left-dual-pat))
@@ -428,9 +442,12 @@
 		; -------------------------------------------------------
 		;
 		; Handy wrapper. Run the MeetLink/QueryLink and return
-		; the results.
-		(define (run-query FUNC ITEM)
-			(cog-value->list (cog-execute! (FUNC ITEM))))
+		; the results. Recursively delete the var, so that we don't
+		; have a pile-up of QueryLinks in the atomspace.
+		(define (run-query FUNC ITEM VAR)
+			(define rv (cog-value->list (cog-execute! (FUNC ITEM))))
+			(cog-extract-recursive! VAR)
+			rv)
 
 		; -------------------------------------------------------
 		;
@@ -465,22 +482,26 @@
 		; Apply caching to the stars
 		(define (get-left-stars ITEM)
 			(do-run-query star-l-hit star-l-miss
-				(lambda (itm) (run-query f-left-star-pat itm)) ITEM))
+				(lambda (itm)
+					(run-query f-left-star-pat itm f-left-star-var)) ITEM))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
 			(do-run-query star-r-hit star-r-miss
-				(lambda (itm) (run-query f-right-star-pat itm)) ITEM))
+				(lambda (itm)
+					(run-query f-right-star-pat itm f-right-star-var)) ITEM))
 
 		; Apply caching to the duals
 		(define (get-left-duals ITEM)
 			(do-run-query dual-l-hit dual-l-miss
-				(lambda (itm) (run-query f-left-dual-pat itm)) ITEM))
+				(lambda (itm)
+					(run-query f-left-dual-pat itm f-left-dual-var)) ITEM))
 
 		; Same as above, but on the right.
 		(define (get-right-duals ITEM)
 			(do-run-query dual-r-hit dual-r-miss
-				(lambda (itm) (run-query f-right-dual-pat itm)) ITEM))
+				(lambda (itm)
+					(run-query f-right-dual-pat itm f-right-dual-var)) ITEM))
 
 		; Invalidate the caches. This is needed, when atoms get deleted.
 		(define (clobber)
