@@ -417,7 +417,7 @@
 		;
 		; Define default patterns, that, when executed, return the duals.
 		; The LLOBJ can provide custom versions of this.
-		(define (default-left-dual-var (Variable "$api-left-dual"))
+		(define (default-left-dual-var) (Variable "$api-left-dual"))
 		(define (default-left-dual-pat ITEM)
 			(let* ((var (default-left-dual-var))
 					(term (LLOBJ 'make-pair var ITEM)))
