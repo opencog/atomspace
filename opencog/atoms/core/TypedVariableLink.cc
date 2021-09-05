@@ -34,7 +34,7 @@ void TypedVariableLink::init()
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting atom and type specification; got %s",
-			to_string().c_str());
+			to_short_string().c_str());
 
 	// Type-check. This is ... kind of a pointless restriction,
 	// except that pretty much everything else expects variables
