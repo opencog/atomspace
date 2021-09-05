@@ -386,16 +386,16 @@
 
 		; Define default patterns, that, when executed, return the stars.
 		; The LLOBJ can provide custom versions of this.
-		(define default-left-star-var (Variable "$api-left-star"))
+		(define (default-left-star-var) (Variable "$api-left-star"))
 		(define (default-left-star-pat ITEM)
-			(let* ((var default-left-star-var)
+			(let* ((var (default-left-star-var))
 					(term (LLOBJ 'make-pair var ITEM)))
 				(Query (TypedVariable var (Type left-type))
 					term term)))
 
-		(define default-right-star-var (Variable "$api-right-star"))
+		(define (default-right-star-var) (Variable "$api-right-star"))
 		(define (default-right-star-pat ITEM)
-			(let* ((var default-right-star-var)
+			(let* ((var (default-right-star-var))
 					(term (LLOBJ 'make-pair ITEM var)))
 				(Query (TypedVariable var (Type right-type))
 					term term)))
@@ -417,15 +417,15 @@
 		;
 		; Define default patterns, that, when executed, return the duals.
 		; The LLOBJ can provide custom versions of this.
-		(define default-left-dual-var (Variable "$api-left-dual"))
+		(define (default-left-dual-var (Variable "$api-left-dual"))
 		(define (default-left-dual-pat ITEM)
-			(let* ((var default-left-dual-var)
+			(let* ((var (default-left-dual-var))
 					(term (LLOBJ 'make-pair var ITEM)))
 				(Meet (TypedVariable var (Type left-type)) term)))
 
-		(define default-right-dual-var (Variable "$api-right-dual"))
+		(define (default-right-dual-var) (Variable "$api-right-dual"))
 		(define (default-right-dual-pat ITEM)
-			(let* ((var default-right-dual-var)
+			(let* ((var (default-right-dual-var))
 					(term (LLOBJ 'make-pair ITEM var)))
 				(Meet (TypedVariable var (Type right-type)) term)))
 
@@ -444,9 +444,9 @@
 		; Handy wrapper. Run the MeetLink/QueryLink and return
 		; the results. Recursively delete the var, so that we don't
 		; have a pile-up of QueryLinks in the atomspace.
-		(define (run-query FUNC ITEM VAR)
+		(define (run-query FUNC ITEM VARGEN)
 			(define rv (cog-value->list (cog-execute! (FUNC ITEM))))
-			(cog-extract-recursive! VAR)
+			(cog-extract-recursive! (VARGEN))
 			rv)
 
 		; -------------------------------------------------------
