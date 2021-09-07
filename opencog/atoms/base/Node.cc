@@ -135,10 +135,10 @@ ContentHash Node::compute_hash() const
 	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// 1<<43 - 369 is a prime number.
-	hsh += (hsh<<5) + ((1UL<<43)-369) * get_type();
+	hsh += (hsh<<5) + ((1ULL<<43)-369) * get_type();
 
 	// Nodes will never have the MSB set.
-	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));
+	ContentHash mask = ~(((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1));
 	hsh &= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
