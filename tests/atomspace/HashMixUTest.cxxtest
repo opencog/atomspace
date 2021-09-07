@@ -70,7 +70,7 @@ public:
 		// Just for grins. This is meaningless.
 		size_t sz = as->get_size();
 
-		printf("Final size is %lu\n", sz);
+		printf("Final size is %zu\n", sz);
 		TS_ASSERT_EQUALS(sz, num_atoms+1);
 
 		while (h->is_link())

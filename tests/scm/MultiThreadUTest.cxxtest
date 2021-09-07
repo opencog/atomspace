@@ -164,7 +164,7 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 	TSM_ASSERT("Bad handles", h1 == h4);
 	TSM_ASSERT("Bad handles", h1 == h5);
 
-	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
+	printf ("h1 = %llu %p\n", (long long unsigned int) h1.value(), h1.operator->());
 
 	delete as;
 	logger().debug("END TEST: %s", __FUNCTION__);

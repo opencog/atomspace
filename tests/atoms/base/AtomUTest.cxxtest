@@ -109,7 +109,7 @@ public:
         IncomingSet i0 = sortedHandles[0]->getIncomingSetByType(INHERITANCE_LINK);
         std::set<Handle> expected_i0 = {inh01};
         printf("Expected %s\n", inh01->to_string().c_str());
-        printf("got a set of size %lu\n", i0.size());
+        printf("got a set of size %zu\n", i0.size());
 
         TS_ASSERT_EQUALS(std::set<Handle>(i0.begin(), i0.end()), expected_i0);
 

@@ -111,7 +111,7 @@ void ThreadedUTest::test_many(void)
 	QueueValuePtr qvp = QueueValueCast(vp);
 	const std::vector<ValuePtr>& vals = qvp->value();
 
-	printf("Got %lu results\n", vals.size());
+	printf("Got %zu results\n", vals.size());
 	TS_ASSERT_EQUALS(100, vals.size());
 
 	Handle flower = as->add_node(CONCEPT_NODE, "flower");
@@ -126,7 +126,7 @@ void ThreadedUTest::test_many(void)
 		if (rock == hs[0]) nrocks++;
 	}
 
-	printf("Got %lu flowers and %lu rocks\n", nflowers, nrocks);
+	printf("Got %zu flowers and %zu rocks\n", nflowers, nrocks);
 	TS_ASSERT_EQUALS(50, nflowers)
 	TS_ASSERT_EQUALS(50, nrocks);
 

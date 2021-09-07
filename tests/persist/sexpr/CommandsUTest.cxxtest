@@ -367,7 +367,7 @@ void CommandsUTest::test_get_values()
 	std::string in = "(cog-keys->alist (Concept \"a\"))";
 
 	std::string out = Commands::interpret_command(as, in);
-	printf("Got %lu %s\n", out.size(), out.c_str());
+	printf("Got %zu %s\n", out.size(), out.c_str());
 
 	TS_ASSERT(0 == out.compare(0, 17, "(((PredicateNode "));
 	TS_ASSERT(std::string::npos != out.find("SimpleTruthValue"));

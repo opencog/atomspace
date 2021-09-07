@@ -129,8 +129,8 @@ void MultiAtomSpace::test_two_scm(void)
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->get_type());
 
-	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
-	printf ("h2 = %lu %p\n", h2.value(), h2.operator->());
+	printf ("h1 = %llu %p\n", (long long unsigned int) h1.value(), h1.operator->());
+	printf ("h2 = %llu %p\n", (long long unsigned int) h2.value(), h2.operator->());
 
 	// h1 and h2 had better be different.
 	TSM_ASSERT("Wrong handles", h1 != h2);
@@ -225,7 +225,7 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter1 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter1 = %lu %p\n", counter1.value(), counter1.operator->());
+	printf ("counter1 = %llu %p\n", (long long unsigned int) counter1.value(), counter1.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
@@ -247,7 +247,7 @@ void MultiAtomSpace::test_load(void)
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter2 = ev2->eval_h("counter");
 	CHKEV(ev2);
-	printf ("counter2 = %lu %p\n", counter2.value(), counter2.operator->());
+	printf ("counter2 = %llu %p\n", (long long unsigned int) counter2.value(), counter2.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->get_type());
@@ -266,7 +266,7 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter3 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter3 = %lu %p\n", counter3.value(), counter3.operator->());
+	printf ("counter3 = %llu %p\n", (long long unsigned int) counter3.value(), counter3.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->get_type());
