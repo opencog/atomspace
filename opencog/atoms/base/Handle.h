@@ -305,7 +305,8 @@ static inline std::string operator+ (const char *lhs, Handle h)
 {
     std::string rhs = lhs;
     char buff[25];
-    snprintf(buff, 24, "%lu)", h.value());
+    // The cast to (unsigned long long) is for 32-bit arches
+    snprintf(buff, 24, "%llu)", (unsigned long long) h.value());
     return rhs + buff;
 }
 
@@ -313,7 +314,8 @@ static inline std::string operator+ (const char *lhs, Handle h)
 static inline std::string operator+ (const std::string &lhs, Handle h)
 {
     char buff[25];
-    snprintf(buff, 24, "%lu)", h.value());
+    // The cast to (unsigned long long) is for 32-bit arches
+    snprintf(buff, 24, "%llu)", (unsigned long long) h.value());
     return lhs + buff;
 }
 
