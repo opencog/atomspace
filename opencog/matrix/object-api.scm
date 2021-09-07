@@ -57,15 +57,21 @@
 ;    http://community.schemewiki.org/?simple-object
 ; Read this URL to understand what is happening here.
 ;
-; There are several API's here. The lowest-level ones are listed first.
+; The system here could have been implemented with srfi-9 "Defining
+; record types" but using srfi-9 seems to offer little or no advantage.
+; Using srfi-57 "Records" does not seem to offer an advantage.
 ;
-; XXX FIXME ... the calling sequence is exactly backwards. In order
-; for overloading to work correctly, attempts must be made to call
-; methods on the base object first, and only later on the wrapper.
-; For now, we blow this off, but in the long run, this needs to be
-; fixed.
+; XXX FIXME ... method overloading is screwy and sometimes backwards.
+; For example, the filter object overloads a bunch of methods, and
+; it overloads in the "normal" direction: when calling a method, the
+; method on the filter should be called. However, the stars object
+; works in the "backwards" direction: it provides default methods,
+; but only if the underlying object does not already provide them.
+; A proper OO wrapper would allow both kinds of overloading.
 ;
 ; ---------------------------------------------------------------------
+;
+; There are several API's in this file. The lowest-level ones are listed first.
 ;
 ; Example low-level API class. It provides a handful of core methods;
 ; these return atoms on which observation counts are stored as values.
