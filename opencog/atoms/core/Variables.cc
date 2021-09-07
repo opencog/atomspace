@@ -24,7 +24,6 @@
  */
 
 // #include <opencog/util/Logger.h>
-#include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
