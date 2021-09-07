@@ -525,7 +525,12 @@ void GetLinkUTest::test_embed_vardels(void)
 
 	// ----------------------
 	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
-#if REVERSE
+
+// 32-bit and 64-bit hashes differ because std::hash() returns size_t
+// As a result, the order is randomly reversed. Hack around this
+// inconsistency.
+// #if REVERSE
+#if __WORDSIZE == 64
 	hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
