@@ -10,26 +10,26 @@ namespace opencog {
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a
 const size_t FNV_32_PRIME = 0x01000193;
 const size_t FNV_32_OFFSET = 0x811c9dc5;
-const size_t FNV_64_PRIME = 0x100000001b3;
-const size_t FNV_64_OFFSET = 0xcbf29ce484222325;
+const uint64_t FNV_64_PRIME = 0x100000001b3ULL;
+const uint64_t FNV_64_OFFSET = 0xcbf29ce484222325ULL;
 
 template <unsigned n>
-constexpr size_t get_fvna_prime(){
+constexpr uint64_t get_fvna_prime(){
 	return FNV_32_PRIME;
 }
 
 template <>
-constexpr size_t get_fvna_prime<8>(){
+constexpr uint64_t get_fvna_prime<8>(){
 	return FNV_64_PRIME;
 }
 
 template <unsigned n>
-constexpr size_t get_fvna_offset(){
+constexpr uint64_t get_fvna_offset(){
 	return FNV_32_OFFSET;
 }
 
 template <>
-constexpr size_t get_fvna_offset<8>(){
+constexpr uint64_t get_fvna_offset<8>(){
 	return FNV_64_OFFSET;
 }
 
