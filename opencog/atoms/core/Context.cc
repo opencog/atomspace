@@ -81,7 +81,7 @@ bool Context::is_free_variable(const Handle& h) const
 	Type t = h->get_type();
 	return (t == VARIABLE_NODE or t == GLOB_NODE)
 		and quotation.is_unquoted()
-		and not contains(shadow, h);
+		and not content_contains(HandleSeq(shadow.begin(), shadow.end()), h);
 }
 
 bool Context::operator==(const Context& other) const
