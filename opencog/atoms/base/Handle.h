@@ -58,7 +58,7 @@ namespace opencog
 typedef size_t UUID;
 
 //! ContentHash == 64-bit hash of an Atom.
-typedef size_t ContentHash;
+typedef uint64_t ContentHash;
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
@@ -305,7 +305,7 @@ static inline std::string operator+ (const char *lhs, Handle h)
 {
     std::string rhs = lhs;
     char buff[25];
-    snprintf(buff, 24, "%zu)", h.value());
+    snprintf(buff, 24, "%lu)", h.value());
     return rhs + buff;
 }
 
@@ -313,7 +313,7 @@ static inline std::string operator+ (const char *lhs, Handle h)
 static inline std::string operator+ (const std::string &lhs, Handle h)
 {
     char buff[25];
-    snprintf(buff, 24, "%zu)", h.value());
+    snprintf(buff, 24, "%lu)", h.value());
     return lhs + buff;
 }
 
