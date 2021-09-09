@@ -165,11 +165,6 @@ MEMBER_LINK <- ORDERED_LINK
 // the probability.
 CONTEXT_LINK <- ORDERED_LINK
 
-// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute truth values.
-// UNION_LINK <- OR_LINK
-// INTERSECTION_LINK <- AND_LINK
-
 // Binary-valued (0/1, T/F) Boolean algebra operations and logical
 // constants. These are used by the pattern matcher to compute
 // crisp-logic boolean algebra combinations of predicates (that is,
@@ -187,6 +182,13 @@ OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+
+// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
+// These use probabilistic formulas to compute truth values.
+// See issue opencog/atomspace#2814 for a discussion.
+UNION_LINK <- OR_LINK
+INTERSECTION_LINK <- AND_LINK
+COMPLEMENT_LINK <- NOT_LINK
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
