@@ -180,6 +180,9 @@
 			(display "Done computing and saving sum_x N(x,y) N(x,*)\n")
 		)
 
+		(define (describe)
+			(display (procedure-property batch-transpose 'documentation)))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -189,6 +192,10 @@
 				((mmt-marginals)   (batch-mmt-marginals))
 				((mtm-marginals)   (batch-mtm-marginals))
 				((clobber)         (support-obj 'clobber))
+				((help)            (describe))
+				((describe)        (describe))
+				((obj)             "batch-transpose")
+				((base)            LLOBJ)
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
