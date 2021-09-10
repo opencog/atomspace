@@ -160,6 +160,13 @@ SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK
 
+// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
+// These use probabilistic formulas to compute truth values.
+// See issue opencog/atomspace#2814 for a discussion.
+UNION_LINK <- UNORDERED_LINK
+INTERSECTION_LINK <- UNORDERED_LINK
+COMPLEMENT_LINK <- UNORDERED_LINK
+
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
 // the probability.
@@ -182,13 +189,6 @@ OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
-
-// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute truth values.
-// See issue opencog/atomspace#2814 for a discussion.
-UNION_LINK <- OR_LINK
-INTERSECTION_LINK <- AND_LINK
-COMPLEMENT_LINK <- NOT_LINK
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
