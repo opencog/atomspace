@@ -684,6 +684,12 @@
 
   See documentation for `add-report-api` for an explanation of
   what is being printed.
+
+  All information printed by the report is cahced on the wild-card
+  atom.  Thus, for quick peeks into datasets residing on disk, it
+  can be convenient to say `(fetch-atom (LLOBJ 'wild-wild))` and
+  then printing the report. Careful, though: this fetch may clobber
+  recently recomputed data that has not yet been stored!
 "
 
 	; All data needed for this report is hanging off of just one Atom.
