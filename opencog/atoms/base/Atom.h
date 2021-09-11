@@ -240,6 +240,24 @@ public:
     ///
     /// If a crypto hash was ever needed, the IPLD hash format would
     /// be recommended.  See https://ipld.io/ for details.
+    ///
+    /// This hash is NOT stable against modifications of the type
+    /// inheritance hierarchy! Changing the type hierarchy might
+    /// change the hash, because it will assign a different numeric
+    /// value to to the type, which is used in computing the hash.
+    /// (this could be avoided by using the string name of the type.)
+    ///
+    /// This hash is NOT stable against different-sized address spaces,
+    /// or even different C++ libraries! That is because it uses the
+    /// `std::hash()` function to compute string hashes, and this gives
+    /// different answers on 32-bit and 64-bit arches. This could be
+    /// fixed by using our own, private strng hash function.
+    ///
+    /// It might be nice to have a hash that is stable against both of
+    /// these changes, as it would then enable the comparison of hashes
+    /// in a distributed atomspace network. But no one needs this, for
+    /// now. (There's no code that sends hashes over the network, or
+    /// stores them in a file.)
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
