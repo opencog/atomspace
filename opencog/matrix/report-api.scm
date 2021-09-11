@@ -673,7 +673,6 @@
 		(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
 			lobs (/ lobs lsize))
 	)
-
 )
 
 (define*-public (print-matrix-summary-report LLOBJ
@@ -686,6 +685,11 @@
   See documentation for `add-report-api` for an explanation of
   what is being printed.
 "
+
+	; All data needed for this report is hanging off of just one Atom.
+	; Make sure that Atom is in memory.
+	(fetch-atom (LLOBJ 'wild-wild))
+
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"

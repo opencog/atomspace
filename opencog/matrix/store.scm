@@ -94,7 +94,7 @@
 			(store-list
 				(lambda (x) (llobj 'left-wildcard x))
 				(star-obj 'right-basis)
-				40000 "left-wilds"))
+				200000 "left-wilds"))
 
 		(define (store-right-wildcards)
 			; Store the wild-wild-card atom, first.
@@ -103,7 +103,7 @@
 			(store-list
 				(lambda (x) (llobj 'right-wildcard x))
 				(star-obj 'left-basis)
-				40000 "right-wilds"))
+				200000 "right-wilds"))
 
 		(define (store-all-wildcards)
 			(store-left-wildcards)
@@ -111,7 +111,7 @@
 
 		; Store the list of given pairs.
 		(define (store-pairs all-pairs)
-			(store-list (lambda (x) x) all-pairs 100000 "pairs"))
+			(store-list (lambda (x) x) all-pairs 200000 "pairs"))
 
 		; Store all elements in the matrix.
 		(define (store-all-elts)
