@@ -251,7 +251,7 @@ public:
     /// or even different C++ libraries! That is because it uses the
     /// `std::hash()` function to compute string hashes, and this gives
     /// different answers on 32-bit and 64-bit arches. This could be
-    /// fixed by using our own, private strng hash function.
+    /// fixed by using our own, private string hash function.
     ///
     /// It might be nice to have a hash that is stable against both of
     /// these changes, as it would then enable the comparison of hashes
