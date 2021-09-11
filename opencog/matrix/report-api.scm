@@ -687,8 +687,9 @@
 "
 
 	; All data needed for this report is hanging off of just one Atom.
-	; Make sure that Atom is in memory.
-	(fetch-atom (LLOBJ 'wild-wild))
+	; Make sure that Atom is in memory. Uhh no, because this may clobber
+	; the content that is in RAM!  Youch!
+	; (fetch-atom (LLOBJ 'wild-wild))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
