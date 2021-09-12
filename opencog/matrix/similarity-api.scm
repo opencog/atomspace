@@ -122,6 +122,12 @@
 
 		(define pair-sim-type 'SimilarityLink)
 
+		(define (get-pair L-ATOM R-ATOM)
+			(cog-link pair-sim-type L-ATOM R-ATOM))
+
+		(define (make-pair L-ATOM R-ATOM)
+			(SimilarityLink L-ATOM R-ATOM))
+
 		(define sim-key (PredicateNode
 			(if ID
 				(string-append "*-SimKey " ID)
@@ -154,6 +160,9 @@
 				((left-type)      item-type)
 				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
+				((get-pair)       (apply get-pair args))
+				((make-pair)      (apply make-pair args))
+
 				((fetch-pairs)    (fetch-sim-pairs))
 
 				((pair-similarity)     (apply get-sim args))
@@ -230,11 +239,14 @@
   'batch-compute N -- compute the similarity for the top-ranked N
      rows or columns in the matrix. Ranking is obtained by looking
      at the count on the support object for the row/column.
+
+  XXX FIXME: This API provides only a subset of the full set of
+  matrix methods, so using it like a "normal" matrix will lead to
+  confusion and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
 			(simobj (add-similarity-api wldobj MTM? ID))
-			(pair-sim-type (simobj 'pair-type))
 			(compcnt 0)  ; number computed
 			(savecnt 0)  ; number saved
 		)
@@ -244,7 +256,7 @@
 		; compute it. If the computed value is greater than CUTOFF,
 		; then cache it in the atomspace.
 		(define (compute-sim A B)
-			(define mpr (cog-link pair-sim-type A B))
+			(define mpr (simobj 'get-pair A B))
 			(define prs (simobj 'pair-similarity mpr))
 			(if (not (nil? prs))
 				(cog-value-ref prs 0)
@@ -257,7 +269,7 @@
 						(begin
 							(set! savecnt (+ savecnt 1))
 							(simobj 'set-pair-similarity
-								(cog-new-link pair-sim-type A B)
+								(simobj 'make-pair A B)
 									(FloatValue simv))))
 					simv)))
 
