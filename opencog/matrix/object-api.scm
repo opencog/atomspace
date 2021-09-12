@@ -167,9 +167,9 @@
 ;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
 ;
 ;     ; Retrieve, from storage, the entire matrix, including the
-;     ; subtotal and total anchor atoms.  In this example, its enough
-;     ; to get the incoming set of (Predicate "foo"), but this need
-;     ; not generally be the case.
+;     ; subtotal and total anchor atoms (the atoms where the marginals
+;     ; are stored).  In this example, its enough to get the incoming
+;     ; set of (Predicate "foo"), but this need not generally be the case.
 ;     (define (fetch-all-pairs)
 ;        (fetch-incoming-by-type (Predicate "foo") 'EvaluationLink))
 ;
