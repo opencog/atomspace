@@ -299,11 +299,10 @@
 				; Reverse, so that we work from the diagonal, outwards.
 				(define rev-lst (reverse ITM-LST))
 				(batch-simlist (car rev-lst) rev-lst)
-				(set! done (+  done 1))
+				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (elapsed-secs))
-							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(nprdone (- tot togo))  ; number of pairs done
+							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
 							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 						)
 
@@ -361,8 +360,7 @@
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (elapsed-secs))
-							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(nprdone (- tot togo))
+							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
 							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 							)
 						(format #t
