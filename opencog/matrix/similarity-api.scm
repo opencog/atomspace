@@ -237,9 +237,9 @@
      rows or columns in the matrix. Ranking is obtained by looking
      at the count on the support object for the row/column.
 
-  XXX FIXME: This API provides only a subset of the full set of
-  matrix methods, so using it like a "normal" matrix will lead to
-  confusion and weird bugs. Read the source for details.
+  XXX FIXME: This API provides only a subset of the full set of matrix
+  methods, so using it like a convetional' matrix will lead to confusion
+  and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
@@ -421,13 +421,13 @@
 
 		; Loop over the top-N most frequent basis elements
 		(define (batch TOP-N)
-			(define elapsed (elapsed-secs))
+			(define elapsed (make-elapsed-secs))
 			(define sbase (get-sorted-basis))
 			(define nbase (length sbase))
 			; `take` fails if asked to take more than length of list.
 			(define num (if (< TOP-N nbase) TOP-N nbase))
 			(define top-items (take sbase num))
-			(format #t "Obtained top ~A items in ~A secs\n" num (elapsed-secs))
+			(format #t "Obtained top ~A items in ~A secs\n" num (elapsed))
 			(batch-sim-pairs top-items))
 
 		; Loop over the top-N most frequent basis elements
