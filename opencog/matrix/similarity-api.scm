@@ -246,7 +246,7 @@
 		(define (compute-sim A B)
 			(define mpr (cog-link pair-sim-type A B))
 			(define prs (simobj 'pair-similarity mpr))
-			(if (not (null? prs))
+			(if (not (nil? prs))
 				(cog-value-ref prs 0)
 				(let ((simv (SIM-FUN A B)))
 					(set! compcnt (+ compcnt 1))
@@ -280,14 +280,16 @@
 		(define (batch-sim-pairs ITEM-LIST)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1))) ; number of pairs todo
+			(define tot (* 0.5 len (+ len 1))) ; number of pairs todo
 			(define done 0)      ; items done
 			(define prevcomp 0)  ; pairs computed
 			(define elapsed-secs (make-elapsed-secs))
 			(define prevelap 0.0) ; previous elapsed time.
 
 			(define (do-one-and-rpt ITM-LST)
-				(batch-simlist (car ITM-LST) (cdr ITM-LST))
+				; Reverse, so that we work from the diagonal, outwards.
+				(define rev-lst (reverse ITM-LST))
+				(batch-simlist (car rev-lst) rev-lst)
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (elapsed-secs))
@@ -335,15 +337,18 @@
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1)))
+			(define tot (* 0.5 len (+ len 1)))
 			(define done 0)
 			(define prevcomp 0)  ; pairs computed
 			(define elapsed-secs (make-elapsed-secs))
 			(define prevelap 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
+				; Reverse, so that we work from the diagonal, outwards.
+				(define rev-lst (reverse ITM-LST))
+				(batch-simlist (car rev-lst) rev-lst)
 				; These sets are not thread-safe but I don't care.
-				(batch-simlist (car ITM-LST) (cdr ITM-LST))
+				; XXX this is easy to fix, just use atomic boxes.
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (elapsed-secs))
