@@ -1,9 +1,9 @@
 ;
 ; similarity-api.scm
 ;
-; Provide framework to fetch/store similarity values.
+; Provide framework to compute and hold similarity values.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017,2021 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -15,8 +15,8 @@
 ; control pretty quickly.
 ;
 ; Two things are provided below. First, an API to set and get
-; similarities.  Specifically, it provides an API for storing
-; similarities as Values in the atomspace. This not only avoids
+; similarities.  Specifically, it provides an API for holding
+; similarities as Values in the AtomSpace. This not only avoids
 ; recomputation, but also allows them to be persisted in the database.
 ;
 ; The second tool provided is a batch-compute function, that will
@@ -29,7 +29,7 @@
 ;
 ; It is assumed that similarity scores are symmetric, so that exchanging
 ; left and right give the same answer.  Thus, an UnorderedLink is best
-; for storing the pair. Specifically, the SimilarityLink.  So,
+; for holding the pair. Specifically, the SimilarityLink.  So,
 ;
 ;    SimilarityLink
 ;        Atom "this"
@@ -42,7 +42,7 @@
 ;        Atom "this"
 ;
 ; are both exactly the same atom. The actual similarity values are
-; stored as Values on these atoms.  The specific key used to store
+; held as Values on these atoms.  The specific key used to hold
 ; the value depends on the arguments the API is given; by default,
 ; the (Predicate "*-Cosine Sim Key-*") is used; if the underlying
 ; matrix is filtered, then a filter-name-dependent key is used.
@@ -70,8 +70,7 @@
   rows or columns of the LLOBJ.  This API merely provides access to
   values that were previously computed, located as Values attached
   to pairs of Atoms under certain specific keys. This API is meant
-  to simiplify the naming and managent of similarity values (stored
-  in a database.)
+  to simiplify the naming and managent of similarity values.
 
   Arguments:
   LLOBJ -- the matrix whose rows or columns will be compared.
@@ -81,7 +80,7 @@
       If not specified, defaults to #f (rows are compared.)
 
   ID -- String used to generate a unique access key. The actual
-      similarity values are stored under a key generated using this
+      similarity values are held under a key generated using this
       string. If not specified, this defaults to the string returned
       by `(LLOBJ 'id)`.
 
@@ -193,11 +192,9 @@
 "
   batch-similarity LLOBJ [MTM? ID CUTOFF SIM-FUN] - bulk computation.
 
-  This adds an API for bulk computing and storing similarity values
+  This adds an API for bulk computing and holding similarity values
   between rows or columns of the LLOBJ. The computed similarity values
-  will be stored in the database (a database must be open for this to
-  work.) The computed similarity values are accessible through the
-  `add-similarity-api` object.
+  will be saved in the AtomSpace via the `add-similarity-api` object.
 
   Batching is EXTREMELY CPU-intensive.  A typical run will take days or
   a week or more, even for modest-sized datasets. It will also blow up
@@ -218,9 +215,9 @@
       If not specified, defaults to #f (compares rows.)
 
   CUTOFF -- Floating-point cutoff value. If the similarity if less
-      than this value, it will NOT be stored to the database. This
-      may be used to avoid bloating storage with low-similarity values.
-      If not specified, defaults to 0.1.
+      than this value, then it will NOT be recorded in the AtomSpace.
+      This can be used to avoid bloating storage with low-similarity
+      values.  If not specified, defaults to 0.1.
 
   SIM-FUN -- Function taking two arguments, both rows or columns, as
       appropriate, and returning a single floating-point number. This
