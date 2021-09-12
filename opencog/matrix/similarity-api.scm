@@ -150,8 +150,9 @@
 ; Extend the LLOBJ with additional methods to batch-compute similarity
 ; scores.
 ;
-(define*-public (batch-similarity LLOBJ MTM?
+(define*-public (batch-similarity LLOBJ
 	#:optional
+	(MTM? #f)
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
 	(CUTOFF 0.1)
 	(SIM-FUN
@@ -161,9 +162,13 @@
 				(lambda (x y) (acc 'right-cosine x y)))))
 	)
 "
-  batch-similarity - Add API to batch-compute similarity values between
-  rows or columns of the LLOBJ.  By default, the cosine similarity is
-  computed, unless some alternate function is specified in the ctor.
+  batch-similarity LLOBJ [MTM? ID CUTOFF SIM-FUN] - bulk computation.
+
+  This adds an API for bulk computing and storing similarity values
+  between rows or columns of the LLOBJ. The computed similarity values
+  will be stored in the database (a database must be open for this to
+  work.) The computed similarity values are accessible through the
+  `add-similarity-api` object.
 
   Batching is EXTREMELY CPU-intensive.  A typical run will take days or
   a week or more, even for modest-sized datasets. It will also blow up
@@ -171,12 +176,40 @@
   for each pair of atoms. For N=1000, this means N^2=one million
   SimilarityLinks and values. This might require a few GBytes of RAM.
 
-  This creates a new NON-sparse matrix that can be understood as a
-  kind-of matrix product of LLOBJ with it's transpose.
+  This assumes that the support for each row or column has been
+  previously computed (using the `add-support-api` object).  The
+  support is needed to determine which rows/columns have the highest
+  ranking.
 
-  If MTM? is #t, then the similarity matrix is the product M^T M
-  for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
-  matrix-transpose.
+  Arguments:
+  LLOBJ -- The matrix whose rows or columns will be compared.
+
+  Optional arguments:
+  MTM? -- If set to #t then columns will be compared, else rows.
+      If not specified, defaults to #f (compares rows.)
+
+  CUTOFF -- Floating-point cutoff value. If the similarity if less
+      than this value, it will NOT be stored to the database. This
+      may be used to avoid bloating storage with low-similarity values.
+      If not specified, defaults to 0.1.
+
+  SIM-FUN -- Function taking two arguments, both rows or columns, as
+      appropriate, and returning a single floating-point number. This
+      is the function that will be called to compute the similarity
+      between two rows or columns.
+      If not specified, this defaults to the cosine similarity.
+
+  This creates a new NON-sparse matrix that can be understood as a
+  matrix product of LLOBJ with it's transpose. The product is not
+  the conventional dot-product, but rather is that defined by the
+  SIM-FUN.  If MTM? is #t, then the similarity matrix is the product
+  M^T M for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is
+  the matrix-transpose.
+
+  Methods provided:
+  'batch-compute N -- compute the similarity for the top-ranked N
+     rows or columns in the matrix. Ranking is obtained by looking
+     at the count on the support object for the row/column.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
