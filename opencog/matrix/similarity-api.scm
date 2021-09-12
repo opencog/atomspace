@@ -265,7 +265,7 @@
 					; If we already have a similarity link for this object,
 					; go ahead and use it. Otherwise, save the similarity
 					; value only if it is greater than the cutoff.
-					(if (or (not (null? mpr)) (<= CUTOFF simv))
+					(if (or (not (nil? mpr)) (<= CUTOFF simv))
 						(begin
 							(set! savecnt (+ savecnt 1))
 							(simobj 'set-pair-similarity
@@ -424,11 +424,13 @@
 
 		; Loop over the top-N most frequent basis elements
 		(define (batch TOP-N)
+			(define elapsed (elapsed-secs))
 			(define sbase (get-sorted-basis))
 			(define nbase (length sbase))
 			; `take` fails if asked to take more than length of list.
 			(define num (if (< TOP-N nbase) TOP-N nbase))
 			(define top-items (take sbase num))
+			(format #t "Obtained top ~A items in ~A secs\n" num (elapsed-secs))
 			(batch-sim-pairs top-items))
 
 		; Loop over the top-N most frequent basis elements
