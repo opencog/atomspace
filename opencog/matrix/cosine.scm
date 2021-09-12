@@ -69,6 +69,8 @@
   By default, the value used for N(x,a) is provided by the 'get-count
   method. It can be over-ridden with the GET-COUNT method.
 
+  Note: The API methods return the distance, not the similarity!
+
   Conditional Jaccard:
   --------------------
   The Jaccard distance gives an awkward result if the two count vectors
@@ -85,6 +87,9 @@
 
       left-cond-jacc-sim(a,b) = sum_x min (p(x|a), p(x|b)) /
                sum_x max (p(x|a), p(x|b))
+
+  The distance is one minus the similarity; the methods return the
+  distance, not the similarity!
 
   Probability Jaccard:
   --------------------
@@ -110,6 +115,9 @@
   The implementation provided here is rather slow, as it does not make
   use of cached values. In particular, is is a LOT slower than any of
   the other methods, especially when the vectors are large.
+
+  The distance is one minus the similarity; the methods return the
+  distance, not the similarity!
 
   Overlap (Jaccard):
   ------------------
