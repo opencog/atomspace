@@ -61,30 +61,48 @@
 ;
 ; Extend the LLOBJ with additional methods to access similarity scores.
 ;
-(define*-public (add-similarity-api LLOBJ MTM?
+(define*-public (add-similarity-api LLOBJ
 	#:optional
+	(MTM? #f)
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f)))
 "
-  add-similarity-api - Add API to access similarity values between
+  add-similarity-api - Add an API to access similarity values between
   rows or columns of the LLOBJ.  This API merely provides access to
   values that were previously computed, located as Values attached
-  to pairs of Atoms under certain specific keys. That means that this
-  API is appropriate for working with similarity values that were
-  stored in a database.
+  to pairs of Atoms under certain specific keys. This API is meant
+  to simiplify the naming and managent of similarity values (stored
+  in a database.)
 
-  The 'set-pair-similarity method is used to set a value.
-  The 'pair-similarity method is used to fetch it.
+  Arguments:
+  LLOBJ -- the matrix whose rows or columns will be compared.
 
-  This creates a new NON-sparse matrix that can be understood as a
-  kind-of matrix product of LLOBJ with it's transpose.
+  Optional arguments:
+  MTM? -- If set to #t, then columns will be compared, else rows.
+      If not specified, defaults to #f (rows are compared.)
 
+  ID -- String used to generate a unique access key. The actual
+      similarity values are stored under a key generated using this
+      string. If not specified, this defaults to the string returned
+      by `(LLOBJ 'id)`.
+
+  Provided methods:
+  'set-pair-similarity PAIR VALUE -- Attach VALUE to PAIR. It is
+      assumed that PAIR is a SimilarityLink (holding a pair of rows
+      or columns).  The VALUE can be any Atomese Value; most users
+      will use the FloatValue, but it can be anything.
+
+  'pair-similarity PAIR -- Return the Value attached to PAIR.
+
+  One may think of this object in either of two different ways. One
+  way is to think of it as an easy way to get row or column
+  similarities. Another way is to think of it as defining a new matrix
+  that is a product of LLOBJ with its transpose.  The product is not
+  to conventional dot-product, but rather the similarity metric.
   If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
-  matrix-transpose.
-
-  If the optional argument ID is present, it is used to construct the
-  key under which the similarity scores are accessed.  This is needed
-  if the similarity scores are not the default cosine similarity scores.
+  matrix-transpose. Fun fact: taking a more formal approach means
+  that the similarity metric can be thought of as a true metric,
+  used for raising and lowering covariant or contravariant indexes.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
@@ -112,7 +130,7 @@
 		; Return the precomputed similarity value on ATOM
 		; This returns the Value on the atom, and not a number!
 		(define (get-sim ATOM)
-			(if (null? ATOM) '()
+			(if (nil? ATOM) #f
 				(cog-value ATOM sim-key)))
 
 		; Save a precomputed similarity on ATOM. The SIM should be a
@@ -121,6 +139,8 @@
 			(cog-set-value! ATOM sim-key SIM))
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
+		; XXX FIXME This is disasterously wrong, if the database contains
+		; similarities for several different kinds of matrices in it!!
 		(define (fetch-sim-pairs)
 			(define elapsed-secs (make-elapsed-secs))
 			(load-atoms-of-type pair-sim-type)
