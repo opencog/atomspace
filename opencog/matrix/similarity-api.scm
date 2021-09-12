@@ -323,17 +323,13 @@
 						(set! prevcomp compcnt)
 				)))
 
-			; tail-recursive list-walker.
-			(define (make-pairs ITM-LST)
-				(if (not (null? ITM-LST))
-					(begin
-						(do-one-and-rpt ITM-LST)
-						(make-pairs (cdr ITM-LST)))))
 
 			; Reset the states, before restarting
 			(set! compcnt 0)
 			(set! savecnt 0)
-			(make-pairs ITEM-LIST)
+			(for-each
+				(lambda (n) (do-one-and-rpt (take ITEM-LIST n)))
+				(iota (length ITEM-LIST) 1))
 		)
 
 		; Loop over the entire list of items, and compute similarity
