@@ -300,7 +300,7 @@
 				(batch-simlist (car rev-lst) rev-lst)
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 10))
-					(let* ((elapsed (elapsed-secs))
+					(let* ((elapsed (- (elapsed-secs) 1.0e-6))
 							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
 							(rate (/ (- compcnt prevcomp) elapsed))
 						)
@@ -355,7 +355,7 @@
 				; XXX this is easy to fix, just use atomic boxes.
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
-					(let* ((elapsed (elapsed-secs))
+					(let* ((elapsed (- (elapsed-secs) 1.0e-6))
 							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
 							(rate (/ (- compcnt prevcomp) elapsed))
 							)
