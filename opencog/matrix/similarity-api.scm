@@ -102,6 +102,10 @@
   matrix-transpose. Fun fact: taking a more formal approach means
   that the similarity metric can be thought of as a true metric,
   used for raising and lowering covariant or contravariant indexes.
+
+  XXX FIXME: This API provides only a subset of the full set of matrix
+  methods, so using it like a convetional matrix will lead to confusion
+  and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
@@ -236,10 +240,6 @@
   'batch-compute N -- compute the similarity for the top-ranked N
      rows or columns in the matrix. Ranking is obtained by looking
      at the count on the support object for the row/column.
-
-  XXX FIXME: This API provides only a subset of the full set of matrix
-  methods, so using it like a convetional matrix will lead to confusion
-  and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
