@@ -189,6 +189,7 @@ static TruthValuePtr get_stv(const std::string& s,
 Handle Sexpr::decode_atom(const std::string& s,
                           size_t l, size_t r, size_t line_cnt)
 {
+	TruthValuePtr stv;
 	size_t l1 = l, r1 = r;
 	Type atype = get_typename(s, l1, r1, line_cnt);
 
@@ -203,23 +204,31 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (l1 == r1) break;
 
 			// Atom names never start with lower-case.
-			if (islower(s[l1+1])) break;
-
-			outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
+			// We allow (stv nn nn) to occur in the middle of a long
+			// sexpr, because apparently some users (agi-bio) do that.
+			if (islower(s[l1+1]))
+			{
+				if ('s' == s[l1+1])  // 0 == s.compare(l1, 5, "(stv ")
+					stv = get_stv(s, l1, r1, line_cnt);
+				else
+					break;
+			}
+			else
+			{
+				outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
+			}
 
 			l = r1 + 1;
 		} while (l < r);
 
 		Handle h(createLink(std::move(outgoing), atype));
 
-		// stv's and alist's occur at the end of the sexpr.
+		if (stv) h->setTruthValue(stv);
+
+		// alist's occur at the end of the sexpr.
 		if (l1 != r1 and l < r)
-		{
-			if ('s' == s[l1+1])  // 0 == s.compare(l1, 5, "(stv ")
-				h->setTruthValue(get_stv(s, l1, r1, line_cnt));
-			else
-				decode_slist(h, s, l1);
-		}
+			decode_slist(h, s, l1);
+
 		return h;
 	}
 	else
