@@ -238,7 +238,7 @@
      at the count on the support object for the row/column.
 
   XXX FIXME: This API provides only a subset of the full set of matrix
-  methods, so using it like a convetional' matrix will lead to confusion
+  methods, so using it like a convetional matrix will lead to confusion
   and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
@@ -324,7 +324,7 @@
 				)))
 
 
-			; Reset the states, before restarting
+			; Reset the stats, before restarting
 			(set! compcnt 0)
 			(set! savecnt 0)
 			(for-each
