@@ -85,7 +85,7 @@
 ; (sleep 2)
 ; (format #t "Seconds since start: ~A\n" (elapsed-secs))
 
-(define (make-elapsed-secs)
+(define-public (make-elapsed-secs)
 	(define start-time (current-time))
 	(lambda ()
 		(define now (current-time))

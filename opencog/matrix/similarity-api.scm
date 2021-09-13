@@ -293,7 +293,6 @@
 			(define done 0)      ; items done
 			(define prevcomp 0)  ; pairs computed
 			(define elapsed-secs (make-elapsed-secs))
-			(define prevelap 0.0) ; previous elapsed time.
 
 			(define (do-one-and-rpt ITM-LST)
 				; Reverse, so that we work from the diagonal, outwards.
@@ -303,7 +302,7 @@
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (elapsed-secs))
 							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
-							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
+							(rate (/ (- compcnt prevcomp) elapsed))
 						)
 
 						; Frac is the percentage fraction that had
@@ -319,7 +318,6 @@
 							rate
 							(/ 1.0 rate)
 						)
-						(set! prevelap (- elapsed 1.0e-6))
 						(set! prevcomp compcnt)
 				)))
 
@@ -345,7 +343,6 @@
 			(define done 0)
 			(define prevcomp 0)  ; pairs computed
 			(define elapsed-secs (make-elapsed-secs))
-			(define prevelap 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
 				; Reverse, so that we work from the diagonal, outwards.
@@ -357,7 +354,7 @@
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (elapsed-secs))
 							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
-							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
+							(rate (/ (- compcnt prevcomp) elapsed))
 							)
 						(format #t
 							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
@@ -368,7 +365,6 @@
 							rate
 							(/ 1.0 rate)
 						)
-						(set! prevelap (- elapsed 1.0e-6))
 						(set! prevcomp compcnt)
 					)))
 
