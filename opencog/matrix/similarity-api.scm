@@ -336,6 +336,9 @@
 		; to any vaue bigger than 3 results in a net slow-down, and even
 		; for NTHREADS=3, it can be pretty bad suckage, as the system
 		; starts thrashing due to some kind of live-lock like thing.
+		; The root cause for this is unclear. It may be thrashing on the
+		; locks in the AtomSpace. The current guile bindings hit the
+		; AtomSpace surprisingly often.
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
@@ -368,25 +371,17 @@
 						(set! prevcomp compcnt)
 					)))
 
-			; tail-recursive list-walker.
-			(define (make-pairs ITM-LST)
-				(if (not (null? ITM-LST))
-					(begin
-						(do-one-and-rpt ITM-LST)
-						(if (< NTHREADS (length ITM-LST))
-							(make-pairs (drop ITM-LST NTHREADS))))))
-
-			; thread launcher
-			(define (launch ITM-LST CNT)
-				(if (< 0 CNT)
-					(begin
-						(call-with-new-thread (lambda () (make-pairs ITM-LST)))
-						(launch (cdr ITM-LST) (- CNT 1)))))
-
 			; Reset the states, before restarting
 			(set! compcnt 0)
 			(set! savecnt 0)
-			(launch ITEM-LIST NTHREADS)
+			(for-each
+				(lambda (thnum)
+					(call-with-new-thread
+						(lambda ()
+							(for-each
+								(lambda (n) (do-one-and-rpt (take ITEM-LIST n)))
+								(iota (length ITEM-LIST) thnum NTHREADS)))))
+				(iota NTHREADS 1))
 
 			(format #t "Started ~d threads\n" NTHREADS)
 		)
