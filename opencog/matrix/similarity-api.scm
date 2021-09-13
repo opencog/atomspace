@@ -310,7 +310,7 @@
 						; Rate is the rate of computing pairs, whether
 						; or not they are actually saved.
 						(format #t
-							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
+							 "Done ~A/~A Frac=~,2f% Time: ~,1f Done: ~,1f% Rate=~,2f prs/sec (~,2f sec/pr)\n"
 							done len
 							(* 100.0 (/ savecnt nprdone))
 							elapsed
@@ -360,7 +360,7 @@
 							(rate (/ (- compcnt prevcomp) elapsed))
 							)
 						(format #t
-							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
+							 "Done ~A/~A Frac=~,2f% Time: ~,1f Done: ~,1f% Rate=~,2f prs/sec (~,2f sec/pr)\n"
 							done len
 							(* 100.0 (/ (* NTHREADS savecnt) nprdone))
 							elapsed
