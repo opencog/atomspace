@@ -392,24 +392,20 @@
 
 		; Define default patterns, that, when executed, return the stars.
 		; The LLOBJ can provide custom versions of this.
-		(define (default-left-star-var) (Variable "$api-left-star"))
-		(define (default-left-star-pat ITEM)
-			(let* ((var (default-left-star-var))
-					(term (LLOBJ 'make-pair var ITEM)))
-				(Query (TypedVariable var (Type left-type))
+		(define (default-left-star-pat ITEM VAR)
+			(let ((term (LLOBJ 'make-pair VAR ITEM)))
+				(Query (TypedVariable VAR (Type left-type))
 					term term)))
 
-		(define (default-right-star-var) (Variable "$api-right-star"))
-		(define (default-right-star-pat ITEM)
-			(let* ((var (default-right-star-var))
-					(term (LLOBJ 'make-pair ITEM var)))
-				(Query (TypedVariable var (Type right-type))
+		(define (default-right-star-pat ITEM VAR)
+			(let ((term (LLOBJ 'make-pair ITEM VAR)))
+				(Query (TypedVariable VAR (Type right-type))
 					term term)))
 
 		(define f-left-star-var
-			(overload 'left-star-variable default-left-star-var))
+			(overload 'left-star-variable uniquely-named-variable))
 		(define f-right-star-var
-			(overload 'right-star-variable default-right-star-var))
+			(overload 'right-star-variable uniquely-named-variable))
 
 		(define f-left-star-pat
 			(overload 'left-star-pattern default-left-star-pat))
@@ -423,22 +419,18 @@
 		;
 		; Define default patterns, that, when executed, return the duals.
 		; The LLOBJ can provide custom versions of this.
-		(define (default-left-dual-var) (Variable "$api-left-dual"))
-		(define (default-left-dual-pat ITEM)
-			(let* ((var (default-left-dual-var))
-					(term (LLOBJ 'make-pair var ITEM)))
-				(Meet (TypedVariable var (Type left-type)) term)))
+		(define (default-left-dual-pat ITEM VAR)
+			(let ((term (LLOBJ 'make-pair VAR ITEM)))
+				(Meet (TypedVariable VAR (Type left-type)) term)))
 
-		(define (default-right-dual-var) (Variable "$api-right-dual"))
-		(define (default-right-dual-pat ITEM)
-			(let* ((var (default-right-dual-var))
-					(term (LLOBJ 'make-pair ITEM var)))
-				(Meet (TypedVariable var (Type right-type)) term)))
+		(define (default-right-dual-pat ITEM VAR)
+			(let ((term (LLOBJ 'make-pair ITEM VAR)))
+				(Meet (TypedVariable VAR (Type right-type)) term)))
 
 		(define f-left-dual-var
-			(overload 'left-dual-variable default-left-dual-var))
+			(overload 'left-dual-variable uniquely-named-variable))
 		(define f-right-dual-var
-			(overload 'right-dual-variable default-right-dual-var))
+			(overload 'right-dual-variable uniquely-named-variable))
 
 		(define f-left-dual-pat
 			(overload 'left-dual-pattern default-left-dual-pat))
@@ -451,8 +443,9 @@
 		; the results. Recursively delete the var, so that we don't
 		; have a pile-up of QueryLinks in the atomspace.
 		(define (run-query FUNC ITEM VARGEN)
-			(define rv (cog-value->list (cog-execute! (FUNC ITEM))))
-			(cog-extract-recursive! (VARGEN))
+			(define var (VARGEN))
+			(define rv (cog-value->list (cog-execute! (FUNC ITEM var))))
+			(if (cog-atom? var) (cog-extract-recursive! var))
 			rv)
 
 		; -------------------------------------------------------
