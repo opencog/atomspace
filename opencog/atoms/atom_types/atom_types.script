@@ -156,19 +156,22 @@ ALPHA_CONVERTIBLE_LINK <- LINK
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-// Plain old list aka Cartesian product
-LIST_LINK <- ORDERED_LINK
-
 // Base class for sets and for operations that return sets.
-COLLECTION_LINK <- UNORDERED_LINK
-SET_LINK <- COLLECTION_LINK
+COLLECTION_LINK <- LINK
+
+// Plain old list AKA Cartesian product
+LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
+
+// Unordered multi-set (Classical Set-Theory set)
+SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 
 // Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
 // These use probabilistic formulas to compute truth values.
 // See issue opencog/atomspace#2814 for a discussion.
-UNION_LINK <- COLLECTION_LINK
-INTERSECTION_LINK <- COLLECTION_LINK
-COMPLEMENT_LINK <- COLLECTION_LINK
+UNION_LINK <- UNORDERED_LINK,COLLECTION_LINK
+INTERSECTION_LINK <- UNORDERED_LINK,COLLECTION_LINK
+COMPLEMENT_LINK <- UNORDERED_LINK,COLLECTION_LINK
+SET_DIFFERENCE_LINK <- ORDERED_LINK,COLLECTION_LINK
 
 // Set membership. Declaration: individual belongs to set.
 MEMBER_LINK <- ORDERED_LINK
