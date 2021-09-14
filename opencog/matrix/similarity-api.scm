@@ -102,10 +102,6 @@
   matrix-transpose. Fun fact: taking a more formal approach means
   that the similarity metric can be thought of as a true metric,
   used for raising and lowering covariant or contravariant indexes.
-
-  XXX FIXME: This API provides only a subset of the full set of matrix
-  methods, so using it like a convetional matrix will lead to confusion
-  and weird bugs. Read the source for details.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
@@ -142,10 +138,23 @@
 			(if (nil? ATOM) #f
 				(cog-value ATOM sim-key)))
 
+		(define (get-pair-sim A B) (get-sim (get-pair A B)))
+
 		; Save a precomputed similarity on ATOM. The SIM should be a
 		; Value, e.g. a FloatValue.
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key SIM))
+
+		; Since SimilarityLink is an UnorderedLink, the ordering of
+		; left and right will be random, depending on the atom hash.
+		; However, it will be consistent within a given session.
+		; Same remarks for the wildcards.
+		(define (get-pair-left PAIR) (gadr PAIR))
+		(define (get-pair-rigt PAIR) (gddr PAIR))
+		(define (get-wildcard ITEM)
+			(Similarity (AnyNode "wild") ITEM))
+		(define (get-wild-wild)
+			(Similarity (AnyNode "wild") (AnyNode "wild")))
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		; XXX FIXME This is disasterously wrong, if the database contains
@@ -165,13 +174,21 @@
 				((pair-type)      pair-sim-type)
 				((get-pair)       (apply get-pair args))
 				((make-pair)      (apply make-pair args))
+				((get-count)      (apply get-sim args))
+				((pair-count)     (apply get-pair-sim args))
+				((left-element)   (apply get-pair-left args))
+				((right-element)  (apply get-pair-right args))
+				((left-wildcard)  (apply get-wildcard args))
+				((right-wildcard) (apply get-wildcard args))
+				((wild-wild)      (get-wild-wild))
 
 				((fetch-pairs)    (fetch-sim-pairs))
+				((provides)       #f)
+				((filters?)       #f)
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
 
-				; (else             (apply LLOBJ (cons message args)))
 				(else (error "Bad method call on similarity API:" message))
 		)))
 )

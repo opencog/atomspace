@@ -118,7 +118,7 @@
 ;     ;
 ;     (define (get-pair L-ATOM R-ATOM)
 ;        (define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
-;        (if (null? maybe-list) '()
+;        (if (nil? maybe-list) #f
 ;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
 ;
 ;     ; Return the observed count for the pair PAIR.
@@ -129,7 +129,7 @@
 ;     ; exists, else return zero.
 ;     (define (get-pair-count L-ATOM R-ATOM)
 ;        (define stats-atom (get-pair L-ATOM R-ATOM))
-;        (if (null? stats-atom) 0 (get-count stats-atom)))
+;        (if (nil? stats-atom) #f (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'get-pair
@@ -139,8 +139,8 @@
 ;
 ;     ; Return the atom that forms the left, resp. right side of
 ;     ; the pair. These undo what 'make-pair does.
-;     (define (get-pair-left PAIR) (gadr PAR))
-;     (define (get-pair-rigt PAIR) (gddr PAR))
+;     (define (get-pair-left PAIR) (gadr PAIR))
+;     (define (get-pair-rigt PAIR) (gddr PAIR))
 ;
 ;     ; Return an atom to which column subtotals can be attached,
 ;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
