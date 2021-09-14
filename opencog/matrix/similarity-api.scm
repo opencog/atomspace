@@ -203,13 +203,20 @@
   Batching is EXTREMELY CPU-intensive.  A typical run will take days or
   a week or more, even for modest-sized datasets. It will also blow up
   memory usage, since a SimilarityLink and also an atom Value is created
-  for each pair of atoms. For N=1000, this means N^2=one million
+  for each pair of atoms. For N = 1000, this means N(N+1)/2 = 500K
   SimilarityLinks and values. This might require a few GBytes of RAM.
 
   This assumes that the support for each row or column has been
   previously computed (using the `add-support-api` object).  The
   support is needed to determine which rows/columns have the highest
   ranking.
+
+  This assumes that the similarity metric is symmetric; that is,
+  exchanging the two items in the pair give the same results. In
+  other words, it is assumed that `(SIM-FUN A B)` and `(SIM-FUN B A)`
+  return the same value.  This also assumes that the self-similarity
+  of an item is non-trivial, so that `(SIM-FUN A A)` depends on `A`,
+  and so it will loop over the diagonal entries as well.
 
   Arguments:
   LLOBJ -- The matrix whose rows or columns will be compared.
@@ -237,9 +244,25 @@
   the matrix-transpose.
 
   Methods provided:
-  'batch-compute N -- compute the similarity for the top-ranked N
+  'batch-compute N -- Compute the similarity for the top-ranked N
      rows or columns in the matrix. Ranking is obtained by looking
-     at the count on the support object for the row/column.
+     at the count on the support object for the row/column. A total
+     of N(N+1)/2 similarity values will be computed, including the
+     similarity for pairs along the diagonal. (Some kinds of similarity
+     have non-trivial values along the diagonal.) The similarity is
+     assumed to be symmetric; thus only the lower triangle is computed.
+
+  'batch-list LIST -- Compute the similarity between all pairs in the
+     LIST.  Thus, if the length of LIST is N, then N(N+1)/2 similarity
+     values will be computed, including those along the diagonal. The
+     similarity is assumed to be symmetric; thus only the lower triangle
+     is computed.
+
+  'compute-similarity A B -- Return the similarity between A and B
+     (which are both either rows or columns). If the value has been
+     previously computed, then that value is returned. If not, then
+     it is computed by calling `SIM-FUN A B` and storing the result
+     with the `add-similarity-api` object.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
@@ -430,6 +453,7 @@
 				((compute-similarity)  (apply compute-sim args))
 				((batch-compute)       (apply batch args))
 				((parallel-batch)      (apply para-batch args))
+				((batch-list)          (apply batch-sim-pairs args))
 
 				(else                  (apply LLOBJ (cons message args)))
 		)))
