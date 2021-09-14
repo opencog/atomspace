@@ -23,6 +23,7 @@
 #include <iomanip>
 
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 // Installed into opencog/persist/file/fast_load.h
 // but this wants the source location, not the install.
@@ -41,7 +42,7 @@ public:
         logger().set_print_to_stdout_flag(true);
     }
 
-    void setUp() {}
+    void setUp() { _as.clear(); }
 
     void tearDown() {}
 
@@ -54,6 +55,7 @@ public:
     void test_value_mix();
     void test_null_value();
     void test_escapes();
+    void test_stv_in_middle();
 };
 
 // Test parseExpression
@@ -300,6 +302,40 @@ void FastLoadUTest::test_escapes()
 
     TS_ASSERT_EQUALS(12, _as.get_size());
     TS_ASSERT_EQUALS(CONCEPT_NODE, h->get_type());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// agi-bio apparently places stv's in the moddle of links
+// test fix for issue #2847
+void FastLoadUTest::test_stv_in_middle()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in =
+        "(Implication (stv 0.9 1)"
+        "   (Concept \"f3\" (stv 0.4 1))"
+        "   (Concept \"f4\" (stv 0.3 1)))";
+
+    Handle h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(3, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    // Verify the right TV was extracted.
+    TruthValuePtr stv = h->getTruthValue();
+    TruthValuePtr estv = createSimpleTruthValue(0.9, 1);
+    TS_ASSERT (*stv == *estv);
+
+    HandleSeq oset = h->getOutgoingSet();
+    TS_ASSERT_EQUALS(oset[0]->get_type(), CONCEPT_NODE);
+    TS_ASSERT_EQUALS(oset[1]->get_type(), CONCEPT_NODE);
+
+    estv = createSimpleTruthValue(0.4, 1);
+    TS_ASSERT (*estv == *oset[0]->getTruthValue());
+
+    estv = createSimpleTruthValue(0.3, 1);
+    TS_ASSERT (*estv == *oset[1]->getTruthValue());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
