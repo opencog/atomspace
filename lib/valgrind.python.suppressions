@@ -196,6 +196,13 @@
    fun:PyMem_Realloc
    ...
 }
+{
+   <py_use_frame_default4>
+   Memcheck:Value4
+   ...
+   fun:_PyEval_EvalFrameDefault
+   ...
+}
 # Conditional jump or move depends on uninitialised value(s)
 {
    <py_free_cond>
@@ -214,6 +221,13 @@
    Memcheck:Cond
    ...
    fun:_PyBytes_Resize
+   ...
+}
+{
+   <py_frame_default4>
+   Memcheck:Cond
+   ...
+   fun:_PyEval_EvalFrameDefault
    ...
 }
 #
