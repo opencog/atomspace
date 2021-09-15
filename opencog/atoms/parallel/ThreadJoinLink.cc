@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <sys/prctl.h>
 #include <thread>
 
+#include <opencog/util/platform.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/parallel/ThreadJoinLink.h>
@@ -44,7 +44,7 @@ static void thread_eval_tv(AtomSpace* as,
                            bool silent, TruthValuePtr* tv,
                            std::exception_ptr* returned_ex)
 {
-	prctl(PR_SET_NAME, "atoms:joinlink", 0, 0, 0);
+	set_thread_name("atoms:joinlink");
 	try
 	{
 		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);

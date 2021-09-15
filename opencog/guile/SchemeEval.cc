@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/prctl.h>
 #include <termios.h>
 
 #include <cstddef>
@@ -35,6 +34,7 @@
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
 
+#include <opencog/util/platform.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
@@ -272,7 +272,7 @@ static volatile bool done_with_init = false;
 static void immortal_thread(void)
 {
 	scm_with_guile(c_wrap_init_only_once, NULL);
-	prctl(PR_SET_NAME, "atoms:immortal", 0, 0, 0);
+	set_thread_name("atoms:immortal");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");

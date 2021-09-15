@@ -34,15 +34,14 @@
 
 #ifdef HAVE_SQL_STORAGE
 
-#include <sys/prctl.h>
 #include <stack>
 #include <string>
 
 #include <stdio.h>
 
+#include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 
 #include "llapi.h"
 
@@ -50,7 +49,7 @@
 
 LLConnection::LLConnection(void)
 {
-    prctl(PR_SET_NAME, "atoms:pgconn", 0, 0, 0);
+    opencog::set_thread_name("atoms:pgconn");
     is_connected = false;
 }
 
