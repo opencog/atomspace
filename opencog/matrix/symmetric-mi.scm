@@ -60,7 +60,7 @@
   'mmt-mi  RA RB -- return the right-MI between rows RA and RB.
   'mmt-fmi RA RB -- return the right-FMI between rows RA and RB.
   'mtm-joint-prob CA CB - return the joint probability between columns
-  'mmr-joint-prob RA RB - return the joint probability between rows
+  'mmt-joint-prob RA RB - return the joint probability between rows
   'mtm-marginal COL - return the marginal probability for column COL
   'mmt-marginal ROW - return the marginal probability for row ROW
   'mtm-total -- return the total count
