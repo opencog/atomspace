@@ -150,7 +150,7 @@
 		; However, it will be consistent within a given session.
 		; Same remarks for the wildcards.
 		(define (get-pair-left PAIR) (gadr PAIR))
-		(define (get-pair-rigt PAIR) (gddr PAIR))
+		(define (get-pair-right PAIR) (gddr PAIR))
 		(define (get-wildcard ITEM)
 			(Similarity (AnyNode "wild") ITEM))
 		(define (get-wild-wild)
