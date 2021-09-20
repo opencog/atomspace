@@ -141,19 +141,24 @@
 		; that the one that mmt doesn't need is fast to compute! So do
 		; them both.
 		(define (setup-supports)
-			; If left supports have not yet been computed, then
-			; do so now. We can tell if they have been, by simply
-			; accessing a quantity we expect to have already.
-			(catch #t (lambda () (support-obj 'total-support-left))
-				(lambda (key . args)
-					(batch-left-support)))
+			;; If left supports have not yet been computed, then
+			;; do so now. We can tell if they have been, by simply
+			;; accessing a quantity we expect to have already.
+			;(catch #t (lambda () (support-obj 'total-support-left))
+			;	(lambda (key . args)
+			;		(batch-left-support)))
 
-			; If right supports have not yet been computed, then
-			; do so now. We can tell if they have been, by simply
-			; accessing a quantity we expect to have already.
-			(catch #t (lambda () (support-obj 'total-support-right))
-				(lambda (key . args)
-					(batch-right-support)))
+			;; If right supports have not yet been computed, then
+			;; do so now. We can tell if they have been, by simply
+			;; accessing a quantity we expect to have already.
+			;(catch #t (lambda () (support-obj 'total-support-right))
+			;	(lambda (key . args)
+			;		(batch-right-support)))
+
+			; No! Do not depend on cached valus!
+			; This interacts badly with trimming!
+			(batch-left-support)
+			(batch-right-support)
 		)
 
 		; -------------
