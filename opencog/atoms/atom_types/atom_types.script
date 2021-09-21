@@ -884,6 +884,8 @@ QUANTITY_LINK <- ORDERED_LINK
 
 // SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
 // Therefore the later has been removed.
+// XXX FIXME: SUBSET_LINK should probably inherit from ORDERED_LINK.
+// See discussion w/ Nil at pull req #2846.
 INHERITANCE_LINK <- ORDERED_LINK
 SUBSET_LINK <- INHERITANCE_LINK
 INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
