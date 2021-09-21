@@ -854,13 +854,6 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
-// ====================================================================
-//
-// Link to represent the magnitude or the multitude of something,
-// such as 10kg, 10s, $10, etc. (??) XXX This probably should be moved
-// to the NLP module...
-QUANTITY_LINK <- ORDERED_LINK
-
 // ==============================================================
 // Assorted PLN link types. Most of these should probably be moved
 // so that they live with PLN, and not here. Why? Because the
