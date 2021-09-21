@@ -900,3 +900,9 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 // A relation much stronger than Similarity, and not just EqualLink.
 // Used only in unit tests, at this time.
 EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// A poorly-defined link that is used for something in some way.
+// Seems to be of central importance to the URE, but is not otherwise
+// documented! We define it here, because the URE does not define
+// any custom types itself.
+EXECUTION_LINK <- ORDERED_LINK
