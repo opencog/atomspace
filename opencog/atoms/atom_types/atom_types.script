@@ -890,3 +890,13 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // somewhat confused, because PLN is not the same thing as first-order
 // logic. (or even second-order logic). So .. a bit of a mess.
 FORALL_LINK <- SCOPE_LINK "ForAllLink"
+
+// These are used only in unit tests, at this point.
+// No clear role assigned, other than that there is some "association"
+// Perhaps this should be a base type for ... some knowledge
+// representation thingy?
+ASSOCIATIVE_LINK <- ORDERED_LINK
+
+// A relation much stronger than Similarity, and not just EqualLink.
+// Used only in unit tests, at this time.
+EQUIVALENCE_LINK <- UNORDERED_LINK

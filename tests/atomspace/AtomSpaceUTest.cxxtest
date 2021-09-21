@@ -493,9 +493,7 @@ public:
             }
 
             logger().debug("Subset %d checked", vhIdx);
-            TS_ASSERT(nameserver().isA(SUBSET_LINK, INHERITANCE_LINK));
 
-            // Note: SUBSET_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             get_handles_by_name(atomSpace, back_inserter(links), "", LINK, true);
             logger().debug("1) links.size() = %d Expected = %d", (int) links.size(), 8);
