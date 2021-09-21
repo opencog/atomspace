@@ -864,8 +864,7 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
-// Assorted PLN link types. I think that the ImplicationScopeLink
-// should be moved to PLN at earliest convenience. XXX FIXME.
+// Assorted miscellaneous link types with an unclear future.
 //
 
 DIRECTLY_EVALUATABLE_LINK <- LINK
@@ -873,23 +872,41 @@ DIRECTLY_EVALUATABLE_LINK <- LINK
 // The ImplicationLink and the InheritanceLink ... these are really
 // basic knowledge representation links, and so basically should
 // probably stay in the core AtomSpace. However, they should be
-// described more carefully.
+// described more carefully. Right now, they seem ambiguous.
 
 // Sugar forms of implication and equivalence links. See
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink
 // for more information
 IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
+
+// ImplicationScopeLink should be moved to PLN at earliest
+// convenience. XXX FIXME.
 IMPLICATION_SCOPE_LINK <- SCOPE_LINK
 
 INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
-// A first-order logic link. Currently appears only in a unit test.
-// As above, this is a relatively standard knowledge representation
-// link, and so could arguably stay in the core atomspace. But the
-// cor atomspace does not really need this, and the semantics are
-// somewhat confused, because PLN is not the same thing as first-order
-// logic. (or even second-order logic). So .. a bit of a mess.
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
+// Logical quantifiers (adjoints to pullbacks of relations). Both are
+// scoped.
+//
+// Exists == left adjoint to the pullback functor of a relation.
+//           Note that PRESENT_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation.
+//           Note that ALWAYS_LINK below is the unscoped variant
+//           of this, used in the pattern matcher.
+//
+// At least, that's the fancy defintion. It's not used anywhere. The
+// plain defintion is just the conventional first-order-logic definition.
+// Since they have a conventional and well-known meaning, I guess they
+// can stay in the core AtomSpace, as a part of the set of links useful
+// for knowledge representation.
+//
+// In reality, its a mish-mash. Currently, these are used only in unit
+// tests.  They're somwhate poorly defined. They are currently defined
+// to inherit from CollectionLink, thus allowing them to be set-valued,
+// and used in probabilistic contexts.
+FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,COLLECTION_LINK
 
 // These are used only in unit tests, at this point.
 // No clear role assigned, other than that there is some "association"
