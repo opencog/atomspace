@@ -526,24 +526,25 @@ void GetLinkUTest::test_embed_vardels(void)
 	// ----------------------
 	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
 
-// 32-bit and 64-bit hashes differ because std::hash() returns size_t
-// As a result, the order is randomly reversed. Hack around this
-// inconsistency.
-// #if REVERSE
-#if __WORDSIZE == 64
-	hans = eval->eval_h(
+	// 32-bit and 64-bit hashes differ because std::hash() returns size_t
+	// As a result, the order is randomly reversed. Hack around this
+	// inconsistency. Also: the hash depends on the the number of types
+	// that appear before SetLink, because the type number is hashed in.
+	// Thus, changing the type hierarchy changes the hash. So, to make
+	// this work, we look for either answer.
+	Handle hans1 = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
-#else
-	hans = eval->eval_h(
+	Handle hans2 = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
-#endif
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Expected this: %s\n", hans1->to_string().c_str());
+	printf("or maybe this: %s\n", hans2->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding",
+		(hans1 == hgnd) or (hans2 == hgnd));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
