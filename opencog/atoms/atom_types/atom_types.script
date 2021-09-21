@@ -906,3 +906,13 @@ EQUIVALENCE_LINK <- UNORDERED_LINK
 // documented! We define it here, because the URE does not define
 // any custom types itself.
 EXECUTION_LINK <- ORDERED_LINK
+
+// Mystery link used by URE in it's unit tests. It is not documented
+// anywhere that I know of. But since URE does not define it's own
+// custom atom types ... we keep it here, for now. XXX FIXME
+ATTRACTION_LINK <- ORDERED_LINK
+
+// Used in the URE unit tests. XXX FIXME the URE unit tests should
+// define thier own custom test types, rather than expecting us to
+// provide them XXX FIXME
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
