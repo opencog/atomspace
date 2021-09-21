@@ -70,7 +70,7 @@ public:
                         float link_size_mean = 2.0f,
                         Type default_node_type = CONCEPT_NODE,
                         float chance_of_non_default_node = 0.4f,
-                        Type default_link_type = INHERITANCE_LINK,
+                        Type default_link_type = ORDERED_LINK,
                         float chance_of_non_default_link = 0.4f,
                         float chance_of_default_tv = 0.8f);
     ~RandomAtomGenerator();
