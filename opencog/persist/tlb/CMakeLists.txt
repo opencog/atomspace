@@ -15,5 +15,5 @@ INSTALL (TARGETS tlb EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	TLB.h
-	DESTINATION "include/persist/tlb"
+	DESTINATION "include/opencog/persist/tlb"
 )
