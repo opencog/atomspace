@@ -87,7 +87,7 @@ bool check_evaluatable(const Handle& bool_atom)
 			continue;
 
 		// This is used by PLN to avoid type-checking.
-		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) return false;
+		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
 	}
