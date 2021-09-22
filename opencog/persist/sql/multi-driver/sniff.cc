@@ -18,8 +18,8 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/tlb/TLB.h>
 
 using namespace opencog;
 

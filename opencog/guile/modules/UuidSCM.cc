@@ -22,7 +22,7 @@
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 using namespace opencog;
 namespace opencog {

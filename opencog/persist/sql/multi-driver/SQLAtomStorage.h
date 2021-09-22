@@ -40,8 +40,8 @@
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "llapi.h"
 

@@ -1,7 +1,6 @@
 
 ADD_LIBRARY (atomspaceutils
 	AtomSpaceUtils
-	TLB
 )
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
@@ -18,6 +17,5 @@ INSTALL (TARGETS atomspaceutils EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AtomSpaceUtils.h
-	TLB.h
 	DESTINATION "include/opencog/atomspaceutils"
 )
