@@ -31,7 +31,6 @@ set(ATOMSPACE_atomcore_LIBRARY atomcore)
 set(ATOMSPACE_atomflow_LIBRARY atomflow)
 set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atomspace_LIBRARY atomspace)
-set(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils)
 set(ATOMSPACE_atomtypes_LIBRARY atom_types)
 set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_container_LIBRARY container)
@@ -51,7 +50,6 @@ set(ATOMSPACE_LIBRARIES
 	atombase
 	atomcore
 	atomflow
-	atomspaceutils
 	truthvalue
 	clearbox
 	container
