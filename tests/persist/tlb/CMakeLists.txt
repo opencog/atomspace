@@ -1,5 +1,6 @@
 
 LINK_LIBRARIES(
+	tlb
 	atombase
 	atomspace
 )
