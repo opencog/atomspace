@@ -10,7 +10,7 @@ provide a RocksDB backend (`atomspace-rocks`) and a network backend
 
 Local subdirectories include:
 
-* guile    -- The scheme module for the generic peristance API.
+* api      -- The generic StorageNode API.
               It provides open, close, load and store primitives that
               work for any of the I/O back-ends, including those not
               in this repo (there are at several others, including one
@@ -31,6 +31,12 @@ Local subdirectories include:
               server, and thus they can share Atoms over the network in
               this fashion.  Note that it is almost certanily faster (?)
               to use `atomspace-cog` for sharing Atoms over the network.
+
+* tlb      -- Implements a table that issues a unique integer ID for an
+              Atom. Useful, if you think your code needs to substitute
+              integer ID's for Atoms. Note that doing this consumes both
+              RAM, to store the table, and CPU, to perform lookup. So it
+              is probably not a good idea, in general.
 
 
 Semantics

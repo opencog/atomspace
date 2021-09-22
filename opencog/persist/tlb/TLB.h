@@ -1,5 +1,5 @@
 /*
- * opencog/atomspaceutils/TLB.h
+ * opencog/persist/tlb/TLB.h
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
