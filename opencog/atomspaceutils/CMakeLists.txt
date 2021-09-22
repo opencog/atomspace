@@ -1,7 +1,6 @@
 
 ADD_LIBRARY (atomspaceutils
 	AtomSpaceUtils
-	RandomAtomGenerator
 	TLB
 )
 
