@@ -52,10 +52,18 @@ static std::string prt_atom(const Handle&, const std::string& = "");
 
 static std::string prt_link(const Handle& h, const std::string& indent)
 {
-	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	std::string idt = indent + "  ";
+	std::string txt = indent + "{\n" + idt + "\"type\": \""
+		+ nameserver().getTypeName(h->get_type()) + "\",\n"
+		+ idt + "\"outgoing\": [\n";
+
+	bool first = true;
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho, indent + "  ");
-	txt += ")";
+	{
+		if (not first) { txt += ",\n"; } else { first = false; }
+		txt += prt_atom(ho, idt + "  ");
+	}
+	txt += "]}";
 	return txt;
 }
 
