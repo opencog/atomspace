@@ -64,4 +64,39 @@ Type Json::decode_type(const std::string& tna, size_t& pos)
 	return t;
 }
 
+/* ================================================================== */
+
+/// Extracts Node name-string. Given the string `s`, this updates
+/// the `l` and `r` values such that `l` points at the first
+/// non-whitespace character of the name, and `r` points at the last.
+/// The string is considered to start *after* the first quote, and ends
+/// just before the last quote. In this case, escaped quotes \" are
+/// ignored (are considered to be part of the string).
+///
+/// This returns the unescaped node name.
+///
+std::string Json::get_node_name(const std::string& s,
+                                size_t& l, size_t& r)
+{
+	// Advance past whitespace.
+	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+
+	l++;
+	size_t p = l;
+	for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
+	r = p;
+
+	// We use std::quoted() to unescape embedded quotes.
+	// Unescaping works ONLY if the leading character is a quote!
+	// So readjust left and right to pick those up.
+	if ('"' == s[l-1]) l--; // grab leading quote, for std::quoted().
+	if ('"' == s[r]) r++;   // step past trailing quote.
+	std::stringstream ss;
+	std::string name;
+	ss << s.substr(l, r-l);
+	ss >> std::quoted(name);
+	return name;
+}
+
+
 /* ============================= END OF FILE ================= */

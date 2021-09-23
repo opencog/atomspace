@@ -53,10 +53,11 @@ public:
 		size_t junk = 0;
 		return decode_atom(s, junk);
 	}
+#endif // NOT_IMPLEMENTED_YET
 
-	static std::string get_node_name(const std::string&, size_t& l, size_t& r,
-	                                 Type, size_t line = 0);
+	static std::string get_node_name(const std::string&, size_t& l, size_t& r);
 
+#if NOT_IMPLEMENTED_YET
 	static ValuePtr decode_value(const std::string&, size_t&);
 #endif // NOT_IMPLEMENTED_YET
 	static Type decode_type(const std::string& s, size_t& pos);

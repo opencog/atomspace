@@ -54,6 +54,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, just prepend a dot?)
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
+	static const size_t haven = std::hash<std::string>{}("haveNode");
+	static const size_t havel = std::hash<std::string>{}("haveLink");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -105,6 +107,36 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		}
 		rv += "]\n";
 		return rv;
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.haveNode("Concept", "foo")
+	if (haven == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		Type t = NOTYPE;
+		try {
+			t = Json::decode_type(cmd, pos);
+		}
+		catch(...) {
+			return "Unknown type: " + cmd.substr(pos);
+		}
+
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+printf("duuude its %s\n", cmd.substr(pos).c_str());
+		std::string name = Json::get_node_name(cmd, pos, epos);
+printf("duude name=%s\n", name.c_str());
+
+		return "{}";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
+	if (havel == act)
+	{
+		return "{}";
 	}
 
 	return reterr(cmd);
