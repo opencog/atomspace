@@ -36,6 +36,7 @@ set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_container_LIBRARY container)
 set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_grounded_LIBRARY grounded)
+set(ATOMSPACE_json_LIBRARY json)
 set(ATOMSPACE_pattern_LIBRARY pattern)
 set(ATOMSPACE_load_scm_LIBRARY load_scm)
 set(ATOMSPACE_persist_LIBRARY persist)
@@ -59,6 +60,7 @@ set(ATOMSPACE_LIBRARIES
 	query-engine
 	execution
 	grounded
+	json
 	sexpr
 	smob
 	atomspace
