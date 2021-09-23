@@ -136,16 +136,44 @@ printf("duuude entry=%ld %ld %s\n", l, r, s.substr(l, r-l).c_str());
 
 	if (nameserver().isA(t, NODE))
 	{
-		size_t npos = s.find("\"name\":", l);
-		if (std::string::npos == npos) return Handle::UNDEFINED;
-		npos += 7;  // skip past "name":
+		size_t apos = s.find("\"name\":", l);
+		if (std::string::npos == apos) return Handle::UNDEFINED;
+		apos += 7;  // skip past "name":
 
-		npos = s.find_first_not_of(" \n\t", npos);
-		std::string name = Json::get_node_name(s, npos, r);
+		apos = s.find_first_not_of(" \n\t", apos);
+		std::string name = Json::get_node_name(s, apos, r);
 
 		r = s.find("}", r); // Move past the closing paren
 		return createNode(t, std::move(name));
 	}
+
+	if (nameserver().isA(t, LINK))
+	{
+		size_t opos = s.find("\"outgoing\":", l);
+		if (std::string::npos == opos) return Handle::UNDEFINED;
+		opos += 11;  // skip past "outgoing":
+
+		l = s.find("{", opos);
+		size_t epos = r;
+
+		HandleSeq hs;
+
+		while (std::string::npos != r)
+		{
+			Handle ho = Json::decode_atom(s, l, r);
+			if (nullptr == ho) return Handle::UNDEFINED;
+			hs.push_back(ho);
+
+			// Look for the comma
+			l = s.find(",", r);
+			if (std::string::npos == l) break;
+			l ++;
+			r = epos;
+		}
+
+		return createLink(std::move(hs), t);
+	}
+
 	return Handle::UNDEFINED;
 }
 

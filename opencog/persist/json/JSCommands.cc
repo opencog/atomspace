@@ -56,6 +56,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
 	static const size_t haven = std::hash<std::string>{}("haveNode");
 	static const size_t havel = std::hash<std::string>{}("haveLink");
+	static const size_t havea = std::hash<std::string>{}("haveAtom");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -174,6 +175,24 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 			r = epos;
 		}
 		Handle h = as->get_link(t, std::move(hs));
+
+		if (nullptr == h) return "{}\n";
+		return Json::encode_atom(h) + "\n";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.haveAtom({ "type": "ConceptNode", "name": "foo"})
+	if (havea == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "{}\n";
+
+		h = as->get_atom(h);
 
 		if (nullptr == h) return "{}\n";
 		return Json::encode_atom(h) + "\n";
