@@ -81,10 +81,10 @@ std::string Json::encode_atom(const Handle& h, const std::string& indent)
 }
 
 /// Convert value (or Atom) into a string.
-std::string Json::encode_value(const ValuePtr& v)
+std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 {
 	// Empty values are used to erase keys from atoms.
-	if (nullptr == v) return " #f";
+	if (nullptr == v) return "false";
 
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{

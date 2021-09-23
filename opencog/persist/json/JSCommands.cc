@@ -58,6 +58,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
+	static const size_t gtval = std::hash<std::string>{}("getValues");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -75,7 +76,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
-printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 	// -----------------------------------------------
 	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
@@ -245,5 +245,36 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		return alist;
 	}
 
+	// -----------------------------------------------
+	// AtomSpace.getValues({ "type": "ConceptNode", "name": "foo"})
+	if (gtval == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "[]\n";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "[]\n";
+
+		bool first = true;
+		std::string alist = "[\n";
+		for (const Handle& key : h->getKeys())
+		{
+			if (not first) { alist += ",\n"; } else { first = false; }
+			alist += "  {\n";
+			alist += "    \"key\": " + Json::encode_atom(key, "    ") + ",\n";
+			alist += "    \"value\": ";
+			alist += Json::encode_value(h->getValue(key), "    ") + "}";
+		}
+		alist += "]\n";
+		return alist;
+	}
+
+	// -----------------------------------------------
 	return reterr(cmd);
 }

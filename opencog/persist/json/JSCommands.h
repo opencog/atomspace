@@ -49,6 +49,13 @@ public:
 	///    AtomSpace.haveLink(type, outgoing)
 	///    AtomSpace.haveAtom(atom)
 	///    AtomSpace.getIncoming(atom)
+	///    AtomSpace.getIncoming(atom, type)
+	///    AtomSpace.getValues(atom)
+	///
+	/// So far, there aren't any commands to change the contents of
+	/// the atomspace, but there could be ... these aren't hard.
+	/// Sp far, the query command is not supported. It could be,
+	/// its really easy. See `../sexpr/Commands.cc` for examples.
 	///
 	static std::string interpret_command(AtomSpace*, const std::string&);
 };
