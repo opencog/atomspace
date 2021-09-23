@@ -125,11 +125,12 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		}
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
-printf("duuude its %s\n", cmd.substr(pos).c_str());
+		epos = cmd.size();
 		std::string name = Json::get_node_name(cmd, pos, epos);
-printf("duude name=%s\n", name.c_str());
+		Handle h = as->get_node(t, std::move(name));
 
-		return "{}";
+		if (nullptr == h) return "{}\n";
+		return Json::encode_atom(h) + "\n";
 	}
 
 	// -----------------------------------------------

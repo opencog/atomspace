@@ -98,5 +98,4 @@ std::string Json::get_node_name(const std::string& s,
 	return name;
 }
 
-
 /* ============================= END OF FILE ================= */
