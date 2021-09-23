@@ -23,6 +23,8 @@
 #include <iomanip>
 
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -96,6 +98,47 @@ std::string Json::get_node_name(const std::string& s,
 	ss << s.substr(l, r-l);
 	ss >> std::quoted(name);
 	return name;
+}
+
+/* ================================================================== */
+
+/// Convert an Atomese JSON expression into a C++ Atom.
+/// For example: `{ "type": "Concept", "name": "foo" }`
+/// will return the corresponding atom.
+///
+/// The string to decode is `s`, begining at location `l` and using `r`
+/// as a hint for the end of the expression.
+///
+/// XXX FIXME. This is a quick hack. It will be confused be embedded
+/// quotes n stuff. This does NOT use any external JSON decoder
+/// libraries because those libs don't really make anything simpler,
+/// and also we don't need most of the features that they offer, and
+/// also I don't want more dependencies in the AtomSpace.
+///
+Handle Json::decode_atom(const std::string& s,
+                         size_t l, size_t r)
+{
+printf("duuude entry=%ld %ld %s\n", l, r, s.substr(l, r-l).c_str());
+	size_t tpos = s.find("\"type\":", l);
+	if (std::string::npos == tpos) return Handle::UNDEFINED;
+
+	Type t = NOTYPE;
+	try {
+		t = Json::decode_type(s, tpos);
+	}
+	catch(...) {
+		return Handle::UNDEFINED;
+	}
+
+	if (nameserver().isA(t, NODE))
+	{
+		size_t npos = s.find("\"name\":", l);
+
+		npos = s.find_first_not_of(" \n\t", npos);
+		std::string name = Json::get_node_name(s, npos, r);
+		return createNode(t, std::move(name));
+	}
+	return Handle::UNDEFINED;
 }
 
 /* ============================= END OF FILE ================= */

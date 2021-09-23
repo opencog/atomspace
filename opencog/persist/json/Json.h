@@ -35,25 +35,23 @@ namespace opencog
 class Json
 {
 public:
-
-#if NOT_IMPLEMENTED_YET
 	/// Decode the JSON containing an atom, starting at
 	/// location `pos`. Return the Atom, and update `pos` to point
-	/// just past the end of the trailing parenthesis.
+	/// just past the end of the trailing brace.
 	static Handle decode_atom(const std::string& s, size_t& pos)
 	{
 		size_t start = pos;
 		size_t end = s.length();
-		get_next_expr(s, start, end, 0);
-		pos = end;
-		return decode_atom(s, start, end, 0);
+		return decode_atom(s, start, end);
 	}
 
 	static Handle decode_atom(const std::string& s) {
 		size_t junk = 0;
 		return decode_atom(s, junk);
 	}
-#endif // NOT_IMPLEMENTED_YET
+
+	static Handle decode_atom(const std::string& s,
+                             size_t l, size_t r);
 
 	static std::string get_node_name(const std::string&, size_t& l, size_t& r);
 
@@ -69,15 +67,6 @@ public:
 		size_t junk = 0;
 		decode_alist(h, s, junk);
 	}
-
-	// -------------------------------------------
-	// API more suitable to very long, file-driven I/O.
-	static int get_next_expr(const std::string&,
-                            size_t& l, size_t& r, size_t line_cnt);
-	static Handle decode_atom(const std::string& s,
-                             size_t l, size_t r, size_t line_cnt);
-
-	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
 #endif // NOT_IMPLEMENTED_YET
 
 	// -------------------------------------------

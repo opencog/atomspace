@@ -45,6 +45,8 @@ public:
 	///
 	/// Supported function calls:
 	///    AtomSpace.getAtoms(type, recursive)
+	///    AtomSpace.haveNode(type, name)
+	///    AtomSpace.haveLink(type, outgoing)
 	///
 	static std::string interpret_command(AtomSpace*, const std::string&);
 };

@@ -124,6 +124,9 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 			return "Unknown type: " + cmd.substr(pos);
 		}
 
+		if (not nameserver().isA(t, NODE))
+			return "Type is not a Node type: " + cmd.substr(epos);
+
 		pos = cmd.find_first_not_of(",) \n\t", pos);
 		epos = cmd.size();
 		std::string name = Json::get_node_name(cmd, pos, epos);
@@ -137,7 +140,35 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
 	if (havel == act)
 	{
-		return "{}";
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		Type t = NOTYPE;
+		try {
+			t = Json::decode_type(cmd, pos);
+		}
+		catch(...) {
+			return "Unknown type: " + cmd.substr(pos);
+		}
+
+		if (not nameserver().isA(t, LINK))
+			return "Type is not a Link type: " + cmd.substr(epos);
+
+		pos = cmd.find_first_not_of(", \n\t", pos);
+		epos = cmd.size();
+
+		HandleSeq hs;
+
+		Handle ho = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == ho) return "{}\n";
+
+printf("duude pos=%ld %ld %s\n", pos, epos, cmd.substr(epos).c_str());
+printf("duuude ho=%s\n", ho->to_string().c_str());
+		hs.push_back(ho);
+		Handle h = as->get_link(t, std::move(hs));
+
+		if (nullptr == h) return "{}\n";
+		return Json::encode_atom(h) + "\n";
 	}
 
 	return reterr(cmd);
