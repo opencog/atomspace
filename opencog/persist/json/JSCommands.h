@@ -36,12 +36,15 @@ class AtomSpace;
 class JSCommands
 {
 public:
-	/// Interpret a handful of Javascript functions.
+	/// Interpret a handful of Javascript function calls.
 	/// This is an ultra-minimalistic command interpreter. It only
 	/// supports those commands needed for network I/O of AtomSpace
 	/// contents (The cogserver uses this to provide peer AtomSpace
 	/// network services). The goal is to provide just enough stuff
 	/// to allow WebApps to be developed. 
+	///
+	/// Supported function calls:
+	///    AtomSpace.getAtoms(type, recursive)
 	///
 	static std::string interpret_command(AtomSpace*, const std::string&);
 };

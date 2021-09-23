@@ -34,6 +34,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "JSCommands.h"
+#include "Json.h"
 
 using namespace opencog;
 
@@ -46,36 +47,34 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 {
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
-	// are collisions, post-pend whitespace?)
-	static const size_t gtatm = std::hash<std::string>{}("cog-get-atoms");
+	// are collisions, just prepend a dot?)
+	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
 	if (std::string::npos == pos) return "";
 
 	// Ignore comments
-	if (';' == cmd[pos]) return "";
+	if ('/' == cmd[pos]) return "";
 
-	if ('(' != cmd[pos])
-		throw SyntaxException(TRACE_INFO, "Badly formed command: %s",
-			cmd.c_str());
-
-	pos ++; // Skip over the open-paren
-
-	size_t epos = cmd.find_first_of(" \n\t", pos);
+	size_t epos = cmd.find_first_of("/ \n\t", pos);
 	if (std::string::npos == epos)
-		throw SyntaxException(TRACE_INFO, "Not a command: %s",
-			cmd.c_str());
+	{
+		std::string err = "Not a command: " + cmd;
+		return err;
+	}
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
 	// -----------------------------------------------
-	// (cog-get-atoms 'Node #t)
+	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
 	{
 return "hello world";
 	}
 
-	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
-		cmd.substr(pos, epos-pos).c_str());
+	std::string err =
+		"Command not supported: >>" +
+		cmd.substr(pos, epos-pos) + "<<\n";
+	return err;
 }

@@ -1,6 +1,7 @@
 
 # Generic JSON decoding.
 ADD_LIBRARY (json
+	EncodeJson
 	JSCommands
 	JsonEval
 )
@@ -21,6 +22,7 @@ INSTALL (TARGETS json EXPORT AtomSpaceTargets
 INSTALL (FILES
 	JSCommands.h
 	JsonEval.h
+	Json.h
 	DESTINATION "include/opencog/persist/json"
 )
 
