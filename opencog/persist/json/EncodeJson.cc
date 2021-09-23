@@ -36,37 +36,40 @@ using namespace opencog;
 /* ================================================================== */
 // Atom printers that do NOT print associated Values.
 
-static std::string prt_node(const Handle& h)
+static std::string prt_node(const Handle& h, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "(" << nameserver().getTypeName(h->get_type())
-		<< " " << std::quoted(h->get_name()) << ")";
+	ss << indent << "{\n" << indent << "  \"type\": \""
+		<< nameserver().getTypeName(h->get_type())
+		<< "\",\n" << indent << "  \"name\": ";
+	ss << std::quoted(h->get_name());
+	ss << "\n" << indent << "}";
 
 	return ss.str();
 }
 
-static std::string prt_atom(const Handle&);
+static std::string prt_atom(const Handle&, const std::string& = "");
 
-static std::string prt_link(const Handle& h)
+static std::string prt_link(const Handle& h, const std::string& indent)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
+		txt += prt_atom(ho, indent + "  ");
 	txt += ")";
 	return txt;
 }
 
-static std::string prt_atom(const Handle& h)
+static std::string prt_atom(const Handle& h, const std::string& indent)
 {
-	if (h->is_node()) return prt_node(h);
-	return prt_link(h);
+	if (h->is_node()) return prt_node(h, indent);
+	return prt_link(h, indent);
 }
 
 /// Convert the Atom into a string. It does NOT print any of the
 /// associated values; use `dump_atom()` to get those.
-std::string Json::encode_atom(const Handle& h)
+std::string Json::encode_atom(const Handle& h, const std::string& indent)
 {
-	return prt_atom(h);
+	return prt_atom(h, indent);
 }
 
 /// Convert value (or Atom) into a string.

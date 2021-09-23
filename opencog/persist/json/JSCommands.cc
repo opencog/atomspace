@@ -40,9 +40,7 @@ using namespace opencog;
 
 static std::string reterr(const std::string& cmd)
 {
-	std::string err =
-		"JSON/JavaScript function not supported: >>" + cmd + "<<\n";
-	return err;
+	return "JSON/JavaScript function not supported: >>" + cmd + "<<\n";
 }
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
@@ -73,12 +71,40 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
+printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 	// -----------------------------------------------
 	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
 	{
-printf("yo: %s\n", cmd.substr(pos, epos-pos).c_str());
-return "hello world";
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		Type t = NOTYPE;
+		try {
+			t = Json::decode_type(cmd, pos);
+		}
+		catch(...) {
+			return "Unknown type: " + cmd.substr(pos);
+		}
+
+		pos = cmd.find_first_not_of(",) \n\t", pos);
+		bool get_subtypes = true;
+		if (std::string::npos != pos and (
+				0 == cmd.compare(pos, 1, "0") or
+				0 == cmd.compare(pos, 5, "false")))
+			get_subtypes = false;
+
+		std::string rv = "[\n";
+		HandleSet hset;
+		as->get_handleset_by_type(hset, t, get_subtypes);
+		bool first = true;
+		for (const Handle& h: hset)
+		{
+			if (not first) { rv += ",\n"; } else { first = false; }
+			rv += Json::encode_atom(h, "  ");
+		}
+		rv += "]\n";
+		return rv;
 	}
 
 	return reterr(cmd);
