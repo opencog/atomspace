@@ -51,7 +51,7 @@ public:
 	}
 
 	static Handle decode_atom(const std::string& s,
-                             size_t l, size_t r);
+                             size_t& l, size_t& r);
 
 	static std::string get_node_name(const std::string&, size_t& l, size_t& r);
 

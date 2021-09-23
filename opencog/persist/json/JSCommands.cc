@@ -159,12 +159,20 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 
 		HandleSeq hs;
 
-		Handle ho = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == ho) return "{}\n";
+		size_t l = pos;
+		size_t r = epos;
+		while (std::string::npos != r)
+		{
+			Handle ho = Json::decode_atom(cmd, l, r);
+			if (nullptr == ho) return "{}\n";
+			hs.push_back(ho);
 
-printf("duude pos=%ld %ld %s\n", pos, epos, cmd.substr(epos).c_str());
-printf("duuude ho=%s\n", ho->to_string().c_str());
-		hs.push_back(ho);
+			// Look for the comma
+			l = cmd.find(",", r);
+			if (std::string::npos == l) break;
+			l ++;
+			r = epos;
+		}
 		Handle h = as->get_link(t, std::move(hs));
 
 		if (nullptr == h) return "{}\n";

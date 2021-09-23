@@ -116,11 +116,15 @@ std::string Json::get_node_name(const std::string& s,
 /// also I don't want more dependencies in the AtomSpace.
 ///
 Handle Json::decode_atom(const std::string& s,
-                         size_t l, size_t r)
+                         size_t& l, size_t& r)
 {
 printf("duuude entry=%ld %ld %s\n", l, r, s.substr(l, r-l).c_str());
+	l = s.find("{", l);
+	if (std::string::npos == l) return Handle::UNDEFINED;
+
 	size_t tpos = s.find("\"type\":", l);
 	if (std::string::npos == tpos) return Handle::UNDEFINED;
+	tpos += 7;  // skip past "type":
 
 	Type t = NOTYPE;
 	try {
@@ -133,9 +137,13 @@ printf("duuude entry=%ld %ld %s\n", l, r, s.substr(l, r-l).c_str());
 	if (nameserver().isA(t, NODE))
 	{
 		size_t npos = s.find("\"name\":", l);
+		if (std::string::npos == npos) return Handle::UNDEFINED;
+		npos += 7;  // skip past "name":
 
 		npos = s.find_first_not_of(" \n\t", npos);
 		std::string name = Json::get_node_name(s, npos, r);
+
+		r = s.find("}", r); // Move past the closing paren
 		return createNode(t, std::move(name));
 	}
 	return Handle::UNDEFINED;
