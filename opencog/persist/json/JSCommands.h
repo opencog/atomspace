@@ -47,6 +47,8 @@ public:
 	///    AtomSpace.getAtoms(type, recursive)
 	///    AtomSpace.haveNode(type, name)
 	///    AtomSpace.haveLink(type, outgoing)
+	///    AtomSpace.haveAtom(atom)
+	///    AtomSpace.getIncoming(atom)
 	///
 	static std::string interpret_command(AtomSpace*, const std::string&);
 };

@@ -57,6 +57,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t haven = std::hash<std::string>{}("haveNode");
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
+	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -133,8 +134,8 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		std::string name = Json::get_node_name(cmd, pos, epos);
 		Handle h = as->get_node(t, std::move(name));
 
-		if (nullptr == h) return "{}\n";
-		return Json::encode_atom(h) + "\n";
+		if (nullptr == h) return "false\n";
+		return "true\n";
 	}
 
 	// -----------------------------------------------
@@ -165,7 +166,7 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		while (std::string::npos != r)
 		{
 			Handle ho = Json::decode_atom(cmd, l, r);
-			if (nullptr == ho) return "{}\n";
+			if (nullptr == ho) return "false\n";
 			hs.push_back(ho);
 
 			// Look for the comma
@@ -176,8 +177,8 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		}
 		Handle h = as->get_link(t, std::move(hs));
 
-		if (nullptr == h) return "{}\n";
-		return Json::encode_atom(h) + "\n";
+		if (nullptr == h) return "false\n";
+		return "true\n";
 	}
 
 	// -----------------------------------------------
@@ -190,12 +191,39 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 		epos = cmd.size();
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "{}\n";
+		if (nullptr == h) return "false\n";
 
 		h = as->get_atom(h);
 
-		if (nullptr == h) return "{}\n";
-		return Json::encode_atom(h) + "\n";
+		if (nullptr == h) return "false\n";
+		return "true\n";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
+	if (gtinc == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "[]\n";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "[]\n";
+
+		bool first = true;
+		std::string alist = "[";
+		for (const Handle& hi : h->getIncomingSet())
+		{
+			if (not first) { alist += ",\n"; } else { first = false; }
+			alist += Json::encode_atom(hi, "");
+		}
+		alist += "]\n";
+		return alist;
 	}
 
 	return reterr(cmd);

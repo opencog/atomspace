@@ -118,7 +118,6 @@ std::string Json::get_node_name(const std::string& s,
 Handle Json::decode_atom(const std::string& s,
                          size_t& l, size_t& r)
 {
-printf("duuude entry=%ld %ld %s\n", l, r, s.substr(l, r-l).c_str());
 	l = s.find("{", l);
 	if (std::string::npos == l) return Handle::UNDEFINED;
 
