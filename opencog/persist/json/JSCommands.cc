@@ -215,9 +215,28 @@ printf("duude cmd is: %s\n", cmd.substr(pos, epos-pos).c_str());
 
 		if (nullptr == h) return "[]\n";
 
+		Type t = NOTYPE;
+		pos = cmd.find(",", epos);
+		if (std::string::npos != pos)
+		{
+			pos++;
+			try {
+				t = Json::decode_type(cmd, pos);
+			}
+			catch(...) {
+				return "Unknown type: " + cmd.substr(pos);
+			}
+		}
+
+		IncomingSet is;
+		if (NOTYPE != t)
+			is = h->getIncomingSetByType(t);
+		else
+			is = h->getIncomingSet();
+
 		bool first = true;
 		std::string alist = "[";
-		for (const Handle& hi : h->getIncomingSet())
+		for (const Handle& hi : is)
 		{
 			if (not first) { alist += ",\n"; } else { first = false; }
 			alist += Json::encode_atom(hi, "");
