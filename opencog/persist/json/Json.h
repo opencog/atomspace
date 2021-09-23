@@ -58,8 +58,10 @@ public:
 	                                 Type, size_t line = 0);
 
 	static ValuePtr decode_value(const std::string&, size_t&);
+#endif // NOT_IMPLEMENTED_YET
 	static Type decode_type(const std::string& s, size_t& pos);
 
+#if NOT_IMPLEMENTED_YET
 	static void decode_slist(const Handle&, const std::string&, size_t&);
 	static void decode_alist(const Handle&, const std::string&, size_t&);
 	static void decode_alist(const Handle& h, const std::string& s) {
@@ -75,8 +77,7 @@ public:
                              size_t l, size_t r, size_t line_cnt);
 
 	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
-
-#endif
+#endif // NOT_IMPLEMENTED_YET
 
 	// -------------------------------------------
 	// Encoding functions

@@ -38,31 +38,38 @@
 
 using namespace opencog;
 
+static std::string reterr(const std::string& cmd)
+{
+	std::string err =
+		"JSON/JavaScript function not supported: >>" + cmd + "<<\n";
+	return err;
+}
+
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
 /// s-expression API, but is more convenient for web developers.
 //
 std::string JSCommands::interpret_command(AtomSpace* as,
-                                        const std::string& cmd)
+                                          const std::string& cmd)
 {
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, just prepend a dot?)
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
 
+	// Ignore comments, blank lines
+	if ('/' == cmd[0]) return "";
+	if ('\n' == cmd[0]) return "";
+
 	// Find the command and dispatch
-	size_t pos = cmd.find_first_not_of(" \n\t");
-	if (std::string::npos == pos) return "";
+	size_t cpos = cmd.find_first_of(".");
+	if (std::string::npos == cpos) return reterr(cmd);
 
-	// Ignore comments
-	if ('/' == cmd[pos]) return "";
+	size_t pos = cmd.find_first_not_of(". \n\t", cpos);
+	if (std::string::npos == pos) return reterr(cmd);
 
-	size_t epos = cmd.find_first_of("/ \n\t", pos);
-	if (std::string::npos == epos)
-	{
-		std::string err = "Not a command: " + cmd;
-		return err;
-	}
+	size_t epos = cmd.find_first_of("( \n\t", pos);
+	if (std::string::npos == epos) return reterr(cmd);
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
@@ -70,11 +77,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
 	{
+printf("yo: %s\n", cmd.substr(pos, epos-pos).c_str());
 return "hello world";
 	}
 
-	std::string err =
-		"Command not supported: >>" +
-		cmd.substr(pos, epos-pos) + "<<\n";
-	return err;
+	return reterr(cmd);
 }

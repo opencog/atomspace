@@ -35,7 +35,7 @@ using namespace opencog;
 
 /* ================================================================== */
 /**
- * Look for a type name, either of the form "ConceptNode" (wwith quotes)
+ * Look for a type name, either of the form "ConceptNode" (with quotes)
  * or 'ConceptNode (symbol) starting at location `pos` in `tna`.
  * Return the type and update `pos` to point after the typename.
  */

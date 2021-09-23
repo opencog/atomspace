@@ -1,6 +1,7 @@
 
 # Generic JSON decoding.
 ADD_LIBRARY (json
+	DecodeJson
 	EncodeJson
 	JSCommands
 	JsonEval
