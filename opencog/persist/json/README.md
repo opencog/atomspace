@@ -1,5 +1,5 @@
 Atomese in JSON
----------------
+===============
 Read and write UTF-8 Atomese JSON expressions. This is a collection
 of utilities that take Atomese JSON expressions and convert then into
 in-RAM Atoms and Values living in an AtomSpace. It is intended to make
@@ -8,6 +8,16 @@ it easy for developers to write WebApps, Javascript apps, and so on.
 To allow the remote app to communicate with the AtomSpace, a small
 number of special commands have been hard-coded. These commands are
 just enough to interact with the AtomSpace, and nothing more.
+
+Status
+------
+**Version 0.8.0.** There is just enough here to be usable for basic things.
+Still missing is the ability to update the AtomSpace via JSON, and the
+ability to run arbitrary queries. Adding support for this is **really
+easy**, and just slightly tedious.  The hard part is writing the docs!
+See the neighboring directory `../sexpr/Commands.cc` for explict
+examples of how to implement what's missing.  Patches are solicited and
+will be accepted.
 
 
 Network API
