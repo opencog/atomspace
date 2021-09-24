@@ -17,7 +17,7 @@ we measured. Results were a mostly-even 50-50 split.)
 Only Atomese s-expressions, plus a very special subset of other
 functions are supported. This is NOT a generic scheme interpreter.
 
-The code includes a file-reader utiliity.  It also implements the
+The code includes a file-reader utility.  It also implements the
 `FileStorageNode`, while implements some of the `StorageNode` API.
 Entire AtomSpaces can be read and written. Individual Atoms can be
 written. More complex queries offered by `StorageNode` are not
@@ -119,7 +119,7 @@ Here's an example of reading back what was stored above:
 
 Network API
 -----------
-The cogserver provides a network API to send/receive Atoms over the
+The CogServer provides a network API to send/receive Atoms over the
 internet. The actual API is that of the StorageNode (see the wiki page
 https://wiki.opencog.org/w/StorageNode for details.) The cogserver
 supports the full `StorageNode` API, and it uses the code in this
