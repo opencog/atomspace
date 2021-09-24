@@ -21,6 +21,10 @@ Local subdirectories include:
               GearMan. Unused, unsupported, deprecated, more or less.
               If you are interested in this, contact the mailing list.
 
+* json     -- Read and write Atomese JSON expressions. Suitable for
+              web applications. Note, however, the `sexpr` interface
+              is superior for performance and function.
+
 * sexpr    -- Read and write Atomese s-expression as UTF-8 strings.
               Includes utilities to read files, and dump Atomspace
               contents to files or guile ports.
