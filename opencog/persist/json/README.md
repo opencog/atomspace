@@ -70,3 +70,8 @@ json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
       "name": "bar"
     }]}]
 ```
+
+JavaScript API
+--------------
+Version 0.0.0 of a JavaScript API for this thing can be found at
+https://github.com/opencog/atomspace-js
