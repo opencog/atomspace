@@ -53,3 +53,20 @@ AtomSpace.getIncoming({"type": "Concept", "name": "bbb"}) // Empty list
 AtomSpace.getValues({ "type": "Concept", "name": "foo"})  // All values
 AtomSpace.getValues({ "type": "Concept", "name": "bar"})  // All values
 ```
+
+Example output:
+```
+json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
+
+[{
+  "type": "ListLink",
+  "outgoing": [
+    {
+      "type": "ConceptNode",
+      "name": "foo"
+    },
+    {
+      "type": "ConceptNode",
+      "name": "bar"
+    }]}]
+```
