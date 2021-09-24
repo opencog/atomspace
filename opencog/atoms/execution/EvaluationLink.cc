@@ -876,14 +876,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (// Links that evaluate to themselves
-		INHERITANCE_LINK == t or
-		IMPLICATION_LINK == t or
-		EXECUTION_LINK == t
-		)
-	{
-		return evelnk->getTruthValue();
-	}
 	else if (PREDICATE_FORMULA_LINK == t)
 	{
 		return evelnk->evaluate(scratch, silent);
@@ -919,6 +911,11 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 			                    HandleCast(pap), scratch, silent);
 
 		return TruthValueCast(pap);
+	}
+	else if ( // Links that evaluate to themselves
+		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
+	{
+		return evelnk->getTruthValue();
 	}
 
 	try_crispy = true;

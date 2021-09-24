@@ -563,7 +563,7 @@ void VariablesUTest::test_find_variables_mixed_2()
 	// IntensionalSimilarityLink type.
 	Handle body = al(AND_LINK,
 	                 al(SUBSET_LINK, X, Y),
-	                 al(INTENSIONAL_INHERITANCE_LINK, Y, X));
+	                 al(INHERITANCE_LINK, Y, X));
 	Variables vars;
 	vars.find_variables(body);
 	HandleSeq varseq = vars.varseq;

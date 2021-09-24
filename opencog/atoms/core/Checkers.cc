@@ -66,6 +66,8 @@ bool check_evaluatable(const Handle& bool_atom)
 		// well, in that case these are interpreted as intersection,
 		// union and complement. Since it cannot inherit from
 		// EVALUATABLE_LINK (cause it's a Node) we have to add it here.
+		// XXX FIXME, this is to be removed, becuase UnionLink,
+		// IntersectionLink takes the place of OrLink, AndLink.
 		if (h->is_type(CONCEPT_NODE)) continue;
 
 		// Fucking quote links. I hate those with a passion.
@@ -78,12 +80,14 @@ bool check_evaluatable(const Handle& bool_atom)
 		// want to forbid it in the future by maybe introducing a
 		// specialized operator to explicitely map the higher order into
 		// the lower order but as of today it is required.
-		if (h->is_type(INHERITANCE_LINK) or
-		    h->is_type(SIMILARITY_LINK) or
-		    h->is_type(IMPLICATION_LINK) or
-		    h->is_type(EQUIVALENCE_LINK) or
+		// XXX FIXME ... Perhaps IntersectionLink, UnionLink will
+		// resolve this?
+		if (h->is_type(SIMILARITY_LINK) or
 		    h->is_type(MEMBER_LINK))
 			continue;
+
+		// This is used by PLN to avoid type-checking.
+		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
 	}

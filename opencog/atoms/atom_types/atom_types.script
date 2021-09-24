@@ -8,8 +8,6 @@
 // unused!  Be sure to grep for the CamelCase names, to see if they
 // show up elsewhere!
 //
-// Some of them are used by Python PLN code (which also uses the
-// CamelCase names).
 // ===========================================================
 
 // Special type designating that no atom type has been assigned. It is
@@ -174,7 +172,13 @@ COMPLEMENT_LINK <- UNORDERED_LINK,COLLECTION_LINK
 SET_DIFFERENCE_LINK <- ORDERED_LINK,COLLECTION_LINK
 
 // Set membership. Declaration: individual belongs to set.
+// See also the section of relation-links below (including equality,
+// etc.) Perhaps the defintion of MemberLink and SubsetLink should
+// be moved to that section!?
 MEMBER_LINK <- ORDERED_LINK
+
+// Indicates a subset relationship.
+SUBSET_LINK <- ORDERED_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
@@ -653,6 +657,11 @@ ANCHOR_NODE <- NODE
 // true/false, indicating set membership. For Atomese, the subject
 // classifier is explicitly always a TRUTH_VALUE.
 
+// A generic catch-all equality-relation link. No particular semantics
+// is assigned to this, other than that it relates things that
+// are "similar" in some way.
+SIMILARITY_LINK <- UNORDERED_LINK
+
 // A VirtualLink is equivalent to an EvaluationLink, with a
 // GroundedPredicateNode in it, except that the GPN is "built in".
 // So, for example, GreaterThanLink is equivalent to an EvaluationLink
@@ -855,37 +864,26 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
-// Assorted PLN link types. Most of these should probably be moved
-// so that they live with PLN, and not here. Why? Because the
-// AtomSpace does not actually need or use these. XXX FIXME.
-
-// Assorted PLN link types.  These are specific to the theory of PLN
-// and the rules it defines for knowledge representation and reasoning.
-// See the book on PLN by Goertzel etal. to understand what these are
-// all about.
+// Assorted miscellaneous link types with an unclear future.
 //
-// The concepts of extension and intension are needed, whenever one
-// has more truth values than simply true and false. These correspond
-// to the sigma and pi types of the Borel hierarchy of set theory.
-// More precisely, they are the left and right adjunctions to the
-// pullback functor of sets over an object -- that is, the pullback
-// functor on the slice category, where the slice is given by a
-// PredicateNode.
-//
-// Some of these have "scope" versions, but I don't understand what
-// these are or why they are needed. That might be a bug(?)
 
-// SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
-// Therefore the later has been removed.
-// XXX FIXME: SUBSET_LINK should probably inherit from ORDERED_LINK.
-// See discussion w/ Nil at pull req #2846.
-INHERITANCE_LINK <- ORDERED_LINK
-SUBSET_LINK <- INHERITANCE_LINK
-INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
+DIRECTLY_EVALUATABLE_LINK <- LINK
 
-SIMILARITY_LINK <- UNORDERED_LINK
-EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+// The ImplicationLink and the InheritanceLink ... these are really
+// basic knowledge representation links, and so basically should
+// probably stay in the core AtomSpace. However, they should be
+// described more carefully. Right now, they seem ambiguous.
+
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
+
+// ImplicationScopeLink should be moved to PLN at earliest
+// convenience. XXX FIXME.
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+
+INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
 // Logical quantifiers (adjoints to pullbacks of relations). Both are
 // scoped.
@@ -897,53 +895,41 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 //           Note that ALWAYS_LINK below is the unscoped variant
 //           of this, used in the pattern matcher.
 //
-// ExistsLink is currently defined to return a crisp true/false value,
-// when it is evaluated. It works outside of the pattern engine...
+// At least, that's the fancy defintion. It's not used anywhere. The
+// plain defintion is just the conventional first-order-logic definition.
+// Since they have a conventional and well-known meaning, I guess they
+// can stay in the core AtomSpace, as a part of the set of links useful
+// for knowledge representation.
 //
-// These are currently a poorly-defined and a messy hash. They could be
-// defined to return (crisp) truth values, or to return satsifying sets.
-//
-// -- PLN uses ForAllLink, but fails to quote it when giving it to the
-//    pattern engine. A unit test fails, if we make it actually
-//    evaluatable.
-//
-// -- Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
-//    is scoped.)
-//
-EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
+// In reality, its a mish-mash. Currently, these are used only in unit
+// tests.  They're somwhate poorly defined. They are currently defined
+// to inherit from CollectionLink, thus allowing them to be set-valued,
+// and used in probabilistic contexts.
+FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,COLLECTION_LINK
 
-// Concept constructor
-SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
-
-// Convert predicate into concept
-SATISFYING_SET_LINK <- LINK
-
-// Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK
-INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-
-EQUIVALENCE_LINK <- UNORDERED_LINK
-INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-
-// Sugar forms of implication and equivalence links. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
-// for more information
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK
-INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-
-EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
-INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-
-// Generic association. Mystery link. What does this do ???
+// These are used only in unit tests, at this point.
+// No clear role assigned, other than that there is some "association"
+// Perhaps this should be a base type for ... some knowledge
+// representation thingy?
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Mystery link used by PLN
+// A relation much stronger than Similarity, and not just EqualLink.
+// Used only in unit tests, at this time.
+EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// A poorly-defined link that is used for something in some way.
+// Seems to be of central importance to the URE, but is not otherwise
+// documented! We define it here, because the URE does not define
+// any custom types itself.
+EXECUTION_LINK <- ORDERED_LINK
+
+// Mystery link used by URE in it's unit tests. It is not documented
+// anywhere that I know of. But since URE does not define it's own
+// custom atom types ... we keep it here, for now. XXX FIXME
 ATTRACTION_LINK <- ORDERED_LINK
 
-// Mystery link. What does this do ??? Can we get rid of it?
-EXECUTION_LINK <- ORDERED_LINK
+// Used in the URE unit tests. XXX FIXME the URE unit tests should
+// define thier own custom test types, rather than expecting us to
+// provide them XXX FIXME
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK

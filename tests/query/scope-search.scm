@@ -16,7 +16,7 @@
 (define (content-1)
    (MemberLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
-      (SatisfyingSetScopeLink
+      (ScopeLink
          (VariableNode "$X")
          (EvaluationLink
             (PredicateNode "breathe@ea723bda-70bb-47c0-8930-b344fb47a4d1")
@@ -34,7 +34,7 @@
 ; MemberLink having the same Variable name as rule
    (MemberLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
-      (SatisfyingSetScopeLink
+      (ScopeLink
          (VariableNode "$X-M2E")
          (EvaluationLink
             (PredicateNode "breathe@ea723bda-70bb-47c0-8930-b344fb47a4d1")
@@ -60,7 +60,7 @@
       )
       (MemberLink
          (VariableNode "$B")
-         (SatisfyingSetScopeLink
+         (ScopeLink
             (VariableNode "$X-M2E")
             (EvaluationLink
                (VariableNode "$D")
@@ -83,7 +83,7 @@
             )
             (MemberLink
                (VariableNode "$B")
-               (SatisfyingSetScopeLink
+               (ScopeLink
                   (VariableNode "$X-M2E")
                   (EvaluationLink
                      (VariableNode "$D")
@@ -113,7 +113,7 @@
       )
       (MemberLink
          (VariableNode "$B")
-         (SatisfyingSetScopeLink
+         (ScopeLink
             (VariableNode "$X-M2E")
             (EvaluationLink
                (VariableNode "$D")
@@ -136,7 +136,7 @@
             )
             (MemberLink
                (VariableNode "$B")
-               (SatisfyingSetScopeLink
+               (ScopeLink
                   (VariableNode "$some-bound-var")
                   (EvaluationLink
                      (VariableNode "$D")

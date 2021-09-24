@@ -218,7 +218,7 @@ void PatternUTest::setUp(void)
 	// create a confounding link, like above, but different
 	Handle hwrong = an(CONCEPT_NODE, "incorrect solution concept node");
 
-	al(ASSOCIATIVE_LINK, hconst_1, hwrong);
+	al(SIMILARITY_LINK, hconst_1, hwrong);
 
 	// Create a standard-format opencog predicate
 	hitem_1 = an(CONCEPT_NODE, "concept kanjiru 1");
