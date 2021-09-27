@@ -22,23 +22,30 @@
 
   LLOBJ should be an object with the conventional matrix methods on it.
 
-"
-	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
-  trim-matrix LLOBJ LEFT-BASIS-PRED RIGHT-BASIS-PRED ELEMENT-PRED
-  Remove (delete) Atoms from the AtomSpace that pass the predicates.
-  If storage is connected, then these are removed from storage too.
+  The methods on this object provide functions that resemble those of
+  the `add-generic-filter`, `add-subtotal-filter`, and
+  `add-zero-filter`, except that this object simply deletes those atoms,
+  instead of filtering them out of the object API. By using the trimmer,
+  the total size of the dataset will in general be smaller, and the
+  access to the matrix entries will be faster.  This is the primary
+  advantage of using the trimmer over use the filters.
 
-  LLOBJ should be an object with the conventional matrix methods on it.
+  The provided methods are:
 
-  LEFT-BASIS-PRED should be a function taking a ROW as an argument; it
-      should return #t if that row is to be deleted, else it returns #f.
+  'generic-trim LEFT-BASIS-PRED RIGHT-BASIS-PRED ELEMENT-PRED
+      Remove (delete) Atoms from the AtomSpace that pass the predicates.
+      If storage is connected, then these are removed from storage too.
 
-  RIGHT-BASIS-PRED should be a function taking a COL as an argument; it
-      should return #t if that column is to be deleted, else it returns #f.
+      LEFT-BASIS-PRED should be a function taking a ROW as an argument;
+      it should return #t if that row is to be deleted, else it returns #f.
 
-  ELEMENT-PRED should be a function taking a matrix element as an
+      RIGHT-BASIS-PRED should be a function taking a COL as an argument;
+      it should return #t if that column is to be deleted, else it
+      returns #f.
+
+      ELEMENT-PRED should be a function taking a matrix element as an
       argument; it should return #t if that matrix element should be
-      deleted, else should returns #f.
+      deleted, else it should return #f.
 "
 	(define star-obj (add-pair-stars LLOBJ))
 
@@ -120,6 +127,8 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
+			((generic-trim)     (apply trim-generic args))
+
 			((help)             (help))
 			((describe)         (describe))
 			((obj)              "add-trimmer")
