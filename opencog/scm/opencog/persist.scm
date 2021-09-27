@@ -453,10 +453,10 @@
 
 "
 	(if STORAGE (sn-delete ATOM STORAGE)
-		(let ((sn (cog-storage-node))
+		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
 				(dflt-delete ATOM)
-				(cog-extract! ATOM)))))
+				(cog-extract! ATOM))))
 )
 
 (define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
@@ -472,10 +472,10 @@
     the current StorageNode attached to this thread.
 "
 	(if STORAGE (sn-delete-rec ATOM STORAGE)
-		(let ((sn (cog-storage-node))
+		(let ((sn (cog-storage-node)))
 			(if (and sn (cog-connected? sn))
 				(dflt-delete-rec ATOM)
-				(cog-extract-recursive! ATOM)))))
+				(cog-extract-recursive! ATOM))))
 )
 
 ; --------------------------------------------------------------------
