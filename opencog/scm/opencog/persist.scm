@@ -17,6 +17,8 @@
 (export
 	cog-open
 	cog-close
+	cog-connected?
+	cog-storage-node
 	fetch-atom
 	fetch-value
 	fetch-incoming-set
@@ -28,7 +30,7 @@
 	cog-delete!
 	cog-delete-recursive!
 	barrier
-	monitor
+	monitor-storage
 	load-atomspace
 	store-atomspace)
 
@@ -48,6 +50,9 @@
 
     See also:
        `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-close 'documentation
@@ -65,6 +70,9 @@
 
     See also:
        `cog-open` to open a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-connected? 'documentation
@@ -73,6 +81,29 @@
 
     Return #t if there is an open connection to STORAGE-ATOM.
     Connections are opened with `cog-open` and closed with `cog-close`.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+")
+
+(set-procedure-property! cog-storage-node 'documentation
+"
+ cog-storage-node
+
+    Return the currently open StorageNode. Returns an invalid handle
+	 if the previously-open StorageNode was closed.  If there are
+    multiple open connections, this will return only the first one
+    to have been opened. If it has been closed, this will return
+    an invalid handle, even if others may have been opened later.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `monitor-storage` to print connection information.
 ")
 
 (define*-public (fetch-atom ATOM #:optional (STORAGE #f))
@@ -221,10 +252,17 @@
  monitor-storage [STORAGE]
 
     Return a string containing storage performance monitoring and
-    debugging information.
+    debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storeage))`.
 
     If the optional STORAGE argument is provided, then the statistics
     will be printed for that Node. It must be a StorageNode.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
 "
 	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
 )
@@ -414,7 +452,11 @@
               (CogStorage \"cog://cogserver.example.com\"))
 
 "
-	(if STORAGE (sn-delete ATOM STORAGE) (dflt-delete ATOM))
+	(if STORAGE (sn-delete ATOM STORAGE)
+		(let ((sn (cog-storage-node)))
+			(if (and sn (cog-connected? sn))
+				(dflt-delete ATOM)
+				(cog-extract! ATOM))))
 )
 
 (define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
@@ -429,7 +471,11 @@
     removed from that StorageNode; otherwise it will be removed from
     the current StorageNode attached to this thread.
 "
-	(if STORAGE (sn-delete-rec ATOM STORAGE) (dflt-delete-rec ATOM))
+	(if STORAGE (sn-delete-rec ATOM STORAGE)
+		(let ((sn (cog-storage-node)))
+			(if (and sn (cog-connected? sn))
+				(dflt-delete-rec ATOM)
+				(cog-extract-recursive! ATOM))))
 )
 
 ; --------------------------------------------------------------------

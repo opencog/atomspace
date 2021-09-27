@@ -57,13 +57,13 @@ private:
 	static void sn_barrier(Handle);
 	static std::string sn_monitor(Handle);
 
-	// Single global default storage node,
-	// which all the functions below use.
-	static StorageNodePtr _sn;
-
 	void open(Handle);
 	void close(Handle);
 	bool connected(Handle);
+
+	// Single global default storage node,
+	// which all the functions below use.
+	static StorageNodePtr _sn;
 
 	Handle dflt_fetch_atom(Handle);
 	Handle dflt_fetch_value(Handle, Handle);
@@ -80,6 +80,7 @@ private:
 	bool dflt_delete_recursive(Handle);
 	void dflt_barrier(void);
 	std::string dflt_monitor(void);
+	Handle current_storage(void);
 
 public:
 	PersistSCM(void);

@@ -42,7 +42,7 @@ namespace opencog
  * process exits), while the remote server may be persistant (if it is
  * backed to a file or other long-term storage.).
  *
- * This class focuses on "on-demand" atom retreival, rather than on
+ * This class focuses on "on-demand" atom retrieval, rather than on
  * bulk-save/restore.
  *
  * Most methods return `void`, so that they can run asynchronously.

@@ -632,7 +632,7 @@
 			(all-left-marginals)
 			(all-right-marginals))
 
-		; Force data to be recomputed, but clobbering any
+		; Force data to be recomputed, by clobbering any
 		; existing data.
 		(define (clobber)
 			(api-obj 'clobber)

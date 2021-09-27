@@ -44,6 +44,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::close, this, "persist");
 	define_scheme_primitive("cog-connected?",
 	             &PersistSCM::connected, this, "persist");
+	define_scheme_primitive("cog-storage-node",
+	             &PersistSCM::current_storage, this, "persist");
 
 	// define_scheme_primitive(..., false); means that these functions
 	// will NOT be `define-public` and just plain `define`. Thus,
@@ -168,7 +170,8 @@ void PersistSCM::close(Handle hsn)
 
 bool PersistSCM::connected(Handle hsn)
 {
-	GET_STNP;
+	StorageNodePtr stnp = StorageNodeCast(hsn);
+	if (nullptr == stnp) return false;
 	return stnp->connected();
 }
 
@@ -370,8 +373,14 @@ void PersistSCM::dflt_barrier(void)
 
 std::string PersistSCM::dflt_monitor(void)
 {
-	CHECK;
+	if (nullptr == _sn)
+		return "No open connection to storage!";
 	return _sn->monitor();
+}
+
+Handle PersistSCM::current_storage(void)
+{
+	return Handle(_sn);
 }
 
 void opencog_persist_init(void)
