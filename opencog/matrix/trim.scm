@@ -156,7 +156,7 @@
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
-		(trim-generic supp-obj left-basis-pred right-basis-pred pair-pred)
+		(trim-generic sup-obj left-basis-pred right-basis-pred pair-pred)
 	)
 
 	; ------------------------------------------------------------
@@ -178,7 +178,7 @@
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
-		(trim-generic supp-obj left-basis-pred right-basis-pred pair-pred)
+		(trim-generic sup-obj left-basis-pred right-basis-pred pair-pred)
 	)
 
 	; -------------
