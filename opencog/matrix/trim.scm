@@ -6,7 +6,6 @@
 ;
 ; XXX TODO
 ; -- finish writing documentation
-; -- move to the (opencog matrix) module
 ;
 ; ---------------------------------------------------------------------
 
@@ -14,20 +13,17 @@
 
 ; ---------------------------------------------------------------------
 
-(define (make-elapsed-secs)
-   (define start-time (current-time))
-   (lambda ()
-      (define now (current-time))
-      (define diff (- now start-time))
-      (set! start-time now)
-      diff)
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (trim-matrix LLOBJ
-	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
+(define-public (add-trimmer LLOBJ)
 "
+  add-trimmer LLOBJ - Assorted methods for removing matrix entries,
+  rows and columns. Removed entries are removed (deleted) from the
+  AtomSpace.  If storage is connected, then these are removed from
+  storage, too.
+
+  LLOBJ should be an object with the conventional matrix methods on it.
+
+"
+	LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
   trim-matrix LLOBJ LEFT-BASIS-PRED RIGHT-BASIS-PRED ELEMENT-PRED
   Remove (delete) Atoms from the AtomSpace that pass the predicates.
   If storage is connected, then these are removed from storage too.
@@ -45,57 +41,95 @@
       deleted, else should returns #f.
 "
 	(define star-obj (add-pair-stars LLOBJ))
-	(define elapsed-secs (make-elapsed-secs))
 
-	; After removing pairs, it may now happen that there are left
-	; and right basis elements that are no longer in any pairs.
-	; Remove these too.
-	(define (trim-type BASIS-LIST)
-		(define party (star-obj 'pair-type))
+	(define (trim-generic LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
+
+		(define elapsed-secs (make-elapsed-secs))
+
+		; After removing pairs, it may now happen that there are left
+		; and right basis elements that are no longer in any pairs.
+		; Remove these too.
+		(define (trim-type BASIS-LIST)
+			(define party (star-obj 'pair-type))
+			(for-each
+				(lambda (base)
+					(if (and (cog-atom? base)
+							(equal? 0 (cog-incoming-size-by-type base party)))
+						(cog-delete! base)))
+				BASIS-LIST))
+
+		; Walk over the left and right basis.
+		; The use of cog-delete-recursive! may knock out other
+		; elements in the matrix, and so `cog-atom?` is used
+		; to see if that particular entry still exists.
 		(for-each
 			(lambda (base)
-				(if (and (cog-atom? base)
-						(equal? 0 (cog-incoming-size-by-type base party)))
-					(cog-delete! base)))
-			BASIS-LIST))
+				(if (and (cog-atom? base) (not (LEFT-BASIS-PRED base)))
+					(cog-delete-recursive! base)))
+			(star-obj 'left-basis))
 
-	; Walk over the left and right basis.
-	; The use of cog-delete-recursive! may knock out other
-	; elements in the matrix, and so `cog-atom?` is used
-	; to see if that particular entry still exists.
-	(for-each
-		(lambda (base)
-			(if (and (cog-atom? base) (not (LEFT-BASIS-PRED base)))
-				(cog-delete-recursive! base)))
-		(star-obj 'left-basis))
+		(format #t "Trimmed left basis in ~A seconds.\n" (elapsed-secs))
 
-	(format #t "Trimmed left basis in ~A seconds.\n" (elapsed-secs))
+		(for-each
+			(lambda (base)
+				(if (and (cog-atom? base) (not (RIGHT-BASIS-PRED base)))
+					(cog-delete-recursive! base)))
+			(star-obj 'right-basis))
 
-	(for-each
-		(lambda (base)
-			(if (and (cog-atom? base) (not (RIGHT-BASIS-PRED base)))
-				(cog-delete-recursive! base)))
-		(star-obj 'right-basis))
+		(format #t "Trimmed right basis in ~A seconds.\n" (elapsed-secs))
 
-	(format #t "Trimmed right basis in ~A seconds.\n" (elapsed-secs))
+		; Walk over the list of all entries and just delete them.
+		(for-each
+			(lambda (atom)
+				(if (and (cog-atom? atom) (not (PAIR-PRED atom)))
+					(cog-delete-recursive! atom)))
+			(star-obj 'get-all-elts))
 
-	; Walk over the list of all entries and just delete them.
-	(for-each
-		(lambda (atom)
-			(if (and (cog-atom? atom) (not (PAIR-PRED atom)))
-				(cog-delete-recursive! atom)))
-		(star-obj 'get-all-elts))
+		; After removing pairs, it may now happen that there are left
+		; and right basis elements that are no longer in any pairs.
+		; Remove these too.
+		(trim-type (star-obj 'left-basis))
+		(trim-type (star-obj 'right-basis))
 
-	; After removing pairs, it may now happen that there are left
-	; and right basis elements that are no longer in any pairs.
-	; Remove these too.
-	(trim-type (star-obj 'left-basis))
-	(trim-type (star-obj 'right-basis))
+		; Trimming has commited violence to the matrix. Let it know.
+		(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
 
-	; Trimming has commited violence to the matrix. Let it know.
-	(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
+		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
+	)
 
-	(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
+	; -------------
+	(define (help)
+		(format #t
+			(string-append
+"This is the `add-trimmer` object applied to the \"~A\" object.\n"
+"It provides methods to remove (delete) rows, columns and matrix\n"
+"entries that pass assorted predicates. It is generally used to remove\n"
+"unwanted junk, garbage and noise from datasets. By removing, rather\n"
+"than filtering, the resulting dataset is generally smaller, and\n"
+"accessing matrix entries is generally faster. For more information, say\n"
+"`,d add-trimmer` or `,describe add-trimmer` at the guile prompt,\n"
+"or just use the 'describe method on this object. You can also get at\n"
+"the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+		(LLOBJ 'id)))
+
+	(define (describe)
+		(display (procedure-property add-trimmer 'documentation)))
+
+	; -------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((help)             (help))
+			((describe)         (describe))
+			((obj)              "add-trimmer")
+			((base)             LLOBJ)
+
+			; Block anything that might have to be filtered.
+			; For example: 'pair-freq which we don't, can't filter.
+			; Or any of the various subtotals and marginals.
+			(else               (apply LLOBJ (cons message args))))
+	)
 )
 
 
