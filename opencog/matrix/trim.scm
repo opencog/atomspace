@@ -2,10 +2,7 @@
 ; trim.scm
 ;
 ; Like filter.scm, but removes Atoms outright from the AtomSpace.
-; The goal is to be a bit more CPU and storage efficient.
-;
-; XXX TODO
-; -- finish writing documentation
+; The goal is to be more CPU and storage efficient.
 ;
 ; ---------------------------------------------------------------------
 
