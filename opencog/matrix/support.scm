@@ -212,7 +212,7 @@
 		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
 
 	;-------------------------------------------
-	; Force data to be recomputed, but clobbering any
+	; Force data to be recomputed, by clobbering any
 	; existing data.
 	(define (clobber)
 		(for-each (lambda (ATOM)
@@ -323,6 +323,10 @@
   After computing the marginals, it is wise to store them back to
   disk. This can be done with `((make-store LLOBJ) 'store-wildcards)`
 
+  Here, the LLOBJ is expected to be an object, with valid counts
+  associated with each pair. LLOBJ is expected to have working,
+  functional methods for 'left-type and 'right-type on it.
+
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
 
@@ -357,19 +361,19 @@
   be more convenient, if the right-marginal sums are not available
   (and v.v. if the other marginals are not available.)
 
-  The 'set-left-marginals ITEM requires an argument ITEM from the
-  right basis. It computes the marginals for that ITEM and caches
+  The 'set-left-marginals COL requires an argument COL from the
+  right basis. It computes the marginals for that COL and caches
   them.  This is useful when some algorithm has modified the matrix,
   and the marginals for a specific column need to be recomputed.
+  After calling 'set-left-marginals, the 'set-left-totals method
+  should be called, so that the totals are recomputed.
 
-  The 'set-right-marginals ITEM requires an argument ITEM from the
-  left basis. It computes the marginals for that ITEM and caches them.
+  The 'set-right-marginals ROW requires an argument ROW from the
+  left basis. It computes the marginals for that ROW and caches them.
   This is useful when some algorithm has modified the matrix, and the
-  marginals for a specific row need to be recomputed.
-
-  Here, the LLOBJ is expected to be an object, with valid counts
-  associated with each pair. LLOBJ is expected to have working,
-  functional methods for 'left-type and 'right-type on it.
+  marginals for a specific row need to be recomputed.  After calling
+  'set-right-marginals, the 'set-right-totals method should be called,
+  so that the totals are recomputed.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
   i.e. it is literally the count. The optional argument GET-CNT allows
@@ -563,21 +567,21 @@
 		(define (sum-right-norms ITEM)
 			(sum-norms (star-obj 'right-stars ITEM)))
 
-		(define (set-left-marginals ITEM)
-			(define sums (sum-left-norms ITEM))
+		(define (set-left-marginals COL)
+			(define sums (sum-left-norms COL))
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-left-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-left-norms COL l0 l1 l2 lq))
 
-		(define (set-right-marginals ITEM)
-			(define sums (sum-right-norms ITEM))
+		(define (set-right-marginals ROW)
+			(define sums (sum-right-norms ROW))
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-right-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-right-norms ROW l0 l1 l2 lq))
 
 		; ----------------------------------------------------
 
@@ -586,6 +590,16 @@
 				(star-obj 'left-basis-size)
 				(star-obj 'right-basis-size)
 				NPAIRS))
+
+		; Totals can only be computed, after all marginals have been done.
+		(define (do-left-totals)
+			(api-obj 'set-left-totals
+				(compute-total-support-from-left)
+				(compute-total-count-from-left))
+
+			; total-support-left should equal total-support-right
+			(set-dimensions (api-obj 'total-support-left))
+		)
 
 		(define (all-left-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -596,15 +610,20 @@
 				(elapsed-secs))
 
 			; Totals can only be computed, after above has been cached.
-			(api-obj 'set-left-totals
-				(compute-total-support-from-left)
-				(compute-total-count-from-left))
-
-			; total-support-left should equal total-support-right
-			(set-dimensions (api-obj 'total-support-left))
+			(do-left-totals)
 
 			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
+		)
+
+		; Totals can only be computed, after all marginals have been done.
+		(define (do-right-totals)
+			(api-obj 'set-right-totals
+				(compute-total-support-from-right)
+				(compute-total-count-from-right))
+
+			; total-support-left should equal total-support-right
+			(set-dimensions (api-obj 'total-support-right))
 		)
 
 		(define (all-right-marginals)
@@ -616,12 +635,7 @@
 				(elapsed-secs))
 
 			; Totals can only be computed, after above has been cached.
-			(api-obj 'set-right-totals
-				(compute-total-support-from-right)
-				(compute-total-count-from-right))
-
-			; total-support-left should equal total-support-right
-			(set-dimensions (api-obj 'total-support-right))
+			(do-right-totals)
 
 			(format #t "Finished right totals in ~A secs\n"
 				(elapsed-secs))
@@ -680,6 +694,9 @@
 				((total-support-right) (compute-total-support-from-right))
 				((total-count-left)    (compute-total-count-from-left))
 				((total-count-right)   (compute-total-count-from-right))
+
+				((set-left-totals)     (do-left-totals))
+				((set-right-totals)    (do-right-totals))
 
 				((set-left-marginals)  (apply set-left-marginals args))
 				((set-right-marginals) (apply set-right-marginals args))
