@@ -318,8 +318,8 @@
   'filters - Used in filtering out certain rows, columns or individual
       entries.
 "
-	(let ((l-basis '())
-			(r-basis '())
+	(let ((l-basis #f)
+			(r-basis #f)
 			(l-size 0)
 			(r-size 0)
 
@@ -369,11 +369,11 @@
 		; items x from the pair (x,y) for any y.
 		;
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (do-get-basis #t)))
+			(if (not l-basis) (set! l-basis (do-get-basis #t)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (do-get-basis #f)))
+			(if (not r-basis) (set! r-basis (do-get-basis #f)))
 			r-basis)
 
 		(define (get-left-size)
@@ -513,6 +513,12 @@
 			(atomic-box-set! dual-l-miss '())
 			(atomic-box-set! dual-r-hit '())
 			(atomic-box-set! dual-r-miss '())
+
+			; The basis may have changed, too.
+			(set! l-basis #f)
+			(set! r-basis #f)
+			(set! l-basis-size 0)
+			(set! r-basis-size 0)
 
 			; Pass it on to the LLOBJ, too.
 			(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
