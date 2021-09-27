@@ -48,6 +48,7 @@
 
     See also:
        `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status
 ")
 
 (set-procedure-property! cog-close 'documentation
@@ -65,6 +66,7 @@
 
     See also:
        `cog-open` to open a connection.
+       `cog-connected?` to obtain the connection status
 ")
 
 (set-procedure-property! cog-connected? 'documentation

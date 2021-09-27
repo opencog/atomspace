@@ -370,7 +370,8 @@ void PersistSCM::dflt_barrier(void)
 
 std::string PersistSCM::dflt_monitor(void)
 {
-	CHECK;
+	if (nullptr == _sn)
+		return "No open connection to storage!";
 	return _sn->monitor();
 }
 
