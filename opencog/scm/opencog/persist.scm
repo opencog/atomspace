@@ -52,6 +52,7 @@
        `cog-close` to close a connection.
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-close 'documentation
@@ -71,6 +72,7 @@
        `cog-open` to open a connection.
        `cog-connected?` to obtain the connection status.
        `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-connected? 'documentation
@@ -80,8 +82,11 @@
     Return #t if there is an open connection to STORAGE-ATOM.
     Connections are opened with `cog-open` and closed with `cog-close`.
 
-    See also: `cog-storage-node`, which will return the current open
-    connection.
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
 ")
 
 (set-procedure-property! cog-storage-node 'documentation
@@ -94,8 +99,11 @@
     to have been opened. If it has been closed, this will return
     an invalid handle, even if others may have been opened later.
 
-    Connections are opened with `cog-open` and closed with `cog-close`.
-    Connection status can be tested with `cog-connected?`.
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `monitor-storage` to print connection information.
 ")
 
 (define*-public (fetch-atom ATOM #:optional (STORAGE #f))
@@ -244,10 +252,17 @@
  monitor-storage [STORAGE]
 
     Return a string containing storage performance monitoring and
-    debugging information.
+    debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storeage))`.
 
     If the optional STORAGE argument is provided, then the statistics
     will be printed for that Node. It must be a StorageNode.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
 "
 	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
 )
