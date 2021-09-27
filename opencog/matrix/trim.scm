@@ -137,7 +137,7 @@
 	; ------------------------------------------------------------
 
 	(define (subtotal-trim LEFT-CUT RIGHT-CUT PAIR-CUT)
-		(define sup-obj (add-support-api stars-obj))
+		(define sup-obj (add-support-api star-obj))
 
 		; Remove rows and columns that are below-count.
 		;
@@ -159,7 +159,7 @@
 	; ------------------------------------------------------------
 
 	(define (support-trim LEFT-CUT RIGHT-CUT PAIR-CUT)
-		(define sup-obj (add-support-api stars-obj))
+		(define sup-obj (add-support-api star-obj))
 
 		; Remove rows and columns that are below-count.
 		;
