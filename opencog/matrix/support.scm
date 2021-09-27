@@ -212,7 +212,7 @@
 		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
 
 	;-------------------------------------------
-	; Force data to be recomputed, but clobbering any
+	; Force data to be recomputed, by clobbering any
 	; existing data.
 	(define (clobber)
 		(for-each (lambda (ATOM)
@@ -357,13 +357,13 @@
   be more convenient, if the right-marginal sums are not available
   (and v.v. if the other marginals are not available.)
 
-  The 'set-left-marginals ITEM requires an argument ITEM from the
-  right basis. It computes the marginals for that ITEM and caches
+  The 'set-left-marginals COL requires an argument COL from the
+  right basis. It computes the marginals for that COL and caches
   them.  This is useful when some algorithm has modified the matrix,
   and the marginals for a specific column need to be recomputed.
 
-  The 'set-right-marginals ITEM requires an argument ITEM from the
-  left basis. It computes the marginals for that ITEM and caches them.
+  The 'set-right-marginals ROW requires an argument ROW from the
+  left basis. It computes the marginals for that ROW and caches them.
   This is useful when some algorithm has modified the matrix, and the
   marginals for a specific row need to be recomputed.
 
@@ -563,21 +563,21 @@
 		(define (sum-right-norms ITEM)
 			(sum-norms (star-obj 'right-stars ITEM)))
 
-		(define (set-left-marginals ITEM)
-			(define sums (sum-left-norms ITEM))
+		(define (set-left-marginals COL)
+			(define sums (sum-left-norms COL))
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-left-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-left-norms COL l0 l1 l2 lq))
 
-		(define (set-right-marginals ITEM)
-			(define sums (sum-right-norms ITEM))
+		(define (set-right-marginals ROW)
+			(define sums (sum-right-norms ROW))
 			(define l0 (first sums))
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-right-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-right-norms ROW l0 l1 l2 lq))
 
 		; ----------------------------------------------------
 
