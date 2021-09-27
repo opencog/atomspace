@@ -17,6 +17,8 @@
 (export
 	cog-open
 	cog-close
+	cog-connected?
+	cog-storage-node
 	fetch-atom
 	fetch-value
 	fetch-incoming-set
@@ -28,7 +30,7 @@
 	cog-delete!
 	cog-delete-recursive!
 	barrier
-	monitor
+	monitor-storage
 	load-atomspace
 	store-atomspace)
 
@@ -48,7 +50,8 @@
 
     See also:
        `cog-close` to close a connection.
-       `cog-connected?` to obtain the connection status
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
 ")
 
 (set-procedure-property! cog-close 'documentation
@@ -66,7 +69,8 @@
 
     See also:
        `cog-open` to open a connection.
-       `cog-connected?` to obtain the connection status
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
 ")
 
 (set-procedure-property! cog-connected? 'documentation
@@ -75,6 +79,23 @@
 
     Return #t if there is an open connection to STORAGE-ATOM.
     Connections are opened with `cog-open` and closed with `cog-close`.
+
+    See also: `cog-storage-node`, which will return the current open
+    connection.
+")
+
+(set-procedure-property! cog-storage-node 'documentation
+"
+ cog-storage-node
+
+    Return the currently open StorageNode. Returns an invalid handle
+	 if the previously-open StorageNode was closed.  If there are
+    multiple open connections, this will return only the first one
+    to have been opened. If it has been closed, this will return
+    an invalid handle, even if others may have been opened later.
+
+    Connections are opened with `cog-open` and closed with `cog-close`.
+    Connection status can be tested with `cog-connected?`.
 ")
 
 (define*-public (fetch-atom ATOM #:optional (STORAGE #f))
