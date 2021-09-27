@@ -46,10 +46,40 @@
       ELEMENT-PRED should be a function taking a matrix element as an
       argument; it should return #t if that matrix element should be
       deleted, else it should return #f.
+
+  'subtotal-trim LEFT-CUT RIGHT-CUT PAIR-CUT
+      Remove (delete) Atoms from the AtomSpace whose counts are at or
+      below the indicated cutoffs. If storage is connected, then these
+      are removed from storage too.
+
+      This method will fail to work correctly, if support marginals
+      have not been computed on LLOBJ. That is because the support
+      marginals are used to obtain subtotal counts for rows and
+      columns. To compute support marginals, say
+      `((add-support-compute LLOBJ) 'cache-all)`
+
+      LEFT-CUT should be a number; if the count on that row is equal or
+          less than this number, then the entire row (including marginals)
+          will be deleted.
+
+      RIGHT-CUT should be a number; if the count on that column is equal
+          or less than this number, then the entire row (including
+          marginals) will be deleted.
+
+      PAIR-CUT should be a number; if the count on that matrix element
+          is equal or less than this number, then that matrix element
+          will be deleted.
+
+  'support-trim LEFT-CUT RIGHT-CUT PAIR-CUT
+      Almost exactly identical to 'subtotal-trim, except that the cuts
+      apply to the size of the support of a column or row, rather than
+      to the count.  This is particularly useful when a matrix might
+      have only one matrix entry in a given row or column, no matter how
+      big the count on that entry may be.
 "
 	(define star-obj (add-pair-stars LLOBJ))
 
-	(define (trim-generic LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
+	(define (trim-generic OBJ LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
 
 		(define elapsed-secs (make-elapsed-secs))
 
@@ -99,9 +129,56 @@
 		(trim-type (star-obj 'right-basis))
 
 		; Trimming has commited violence to the matrix. Let it know.
-		(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))
+		(if (OBJ 'provides 'clobber) (OBJ 'clobber))
 
 		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
+	)
+
+	(define (generic-trim LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
+		(trim-generic star-obj LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED))
+
+	; ------------------------------------------------------------
+
+	(define (subtotal-trim LEFT-CUT RIGHT-CUT PAIR-CUT)
+		(define sup-obj (add-support-api stars-obj))
+
+		; Remove rows and columns that are below-count.
+		;
+		; Yes, we want LEFT-CUT < right-wild-count this looks weird,
+		; but is correct: as LEFT-CUT gets larger, the size of the
+		; left-basis shrinks.
+		(define (left-basis-pred ITEM)
+			(< LEFT-CUT (sup-obj 'right-count ITEM)))
+
+		(define (right-basis-pred ITEM)
+			(< RIGHT-CUT (sup-obj 'left-count ITEM)))
+
+		(define (pair-pred PAIR)
+			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
+
+		(trim-generic supp-obj left-basis-pred right-basis-pred pair-pred)
+	)
+
+	; ------------------------------------------------------------
+
+	(define (support-trim LEFT-CUT RIGHT-CUT PAIR-CUT)
+		(define sup-obj (add-support-api stars-obj))
+
+		; Remove rows and columns that are below-count.
+		;
+		; Yes, we want LEFT-CUT < right-support this looks weird,
+		; but is correct: as LEFT-CUT gets larger, the size of the
+		; left-basis shrinks.
+		(define (left-basis-pred ITEM)
+			(< LEFT-CUT (sup-obj 'right-support ITEM)))
+
+		(define (right-basis-pred ITEM)
+			(< RIGHT-CUT (sup-obj 'left-support ITEM)))
+
+		(define (pair-pred PAIR)
+			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
+
+		(trim-generic supp-obj left-basis-pred right-basis-pred pair-pred)
 	)
 
 	; -------------
@@ -127,7 +204,9 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((generic-trim)     (apply trim-generic args))
+			((generic-trim)     (apply generic-trim args))
+			((subtotal-trim)    (apply subtotal-trim args))
+			((support-trim)     (apply support-trim args))
 
 			((help)             (help))
 			((describe)         (describe))
@@ -141,75 +220,4 @@
 	)
 )
 
-
-(define-public (subtotal-trim LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT)
-"
-  subtotal-trim LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT
-  Remove (delete) Atoms from the AtomSpace whose counts are at or below
-  the indicated cutoffs. If storage is connected, then these are removed
-  from storage too.
-
-  This function will fail to work correctly, if support marginals have
-  not been computed on LLOBJ. That is because the support marginals are
-  used to obtain subtotal counts for rows and columns.  To compute
-  support marginals, say `((add-support-compute LLOBJ) 'cache-all)`
-
-  LLOBJ should be an object with the conventional matrix methods on it.
-
-  LEFT-CUT should be a number; if the count on that row is equal or less
-      than this number, then the entire row (including marginals) will
-      be deleted.
-"
-	(define stars-obj (add-pair-stars LLOBJ))
-	(define sup-obj (add-support-api stars-obj))
-
-	; ---------------
-	; Remove rows and columns that are below-count.
-	;
-	; Yes, we want LEFT-CUT < right-wild-count this looks weird,
-	; but is correct: as LEFT-CUT gets larger, the size of the
-	; left-basis shrinks.
-	(define (left-basis-pred ITEM)
-		(< LEFT-CUT (sup-obj 'right-count ITEM)))
-
-	(define (right-basis-pred ITEM)
-		(< RIGHT-CUT (sup-obj 'left-count ITEM)))
-
-	(define (pair-pred PAIR)
-		(< PAIR-CUT (LLOBJ 'get-count PAIR)))
-
-	; ---------------
-	(trim-matrix stars-obj
-		left-basis-pred right-basis-pred pair-pred)
-)
-
-
-(define-public (support-trim LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT)
-"
-  support-trim LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT
-
-  Almost exactly identical to subtotal-trim, except that the cuts apply
-  to the size of the support, rather than to the count.
-"
-	(define stars-obj (add-pair-stars LLOBJ))
-	(define sup-obj (add-support-api stars-obj))
-
-	; ---------------
-	; Remove rows and columns that are below-count.
-	;
-	; Yes, we want LEFT-CUT < right-support this looks weird,
-	; but is correct: as LEFT-CUT gets larger, the size of the
-	; left-basis shrinks.
-	(define (left-basis-pred ITEM)
-		(< LEFT-CUT (sup-obj 'right-support ITEM)))
-
-	(define (right-basis-pred ITEM)
-		(< RIGHT-CUT (sup-obj 'left-support ITEM)))
-
-	(define (pair-pred PAIR)
-		(< PAIR-CUT (LLOBJ 'get-count PAIR)))
-
-	; ---------------
-	(trim-matrix stars-obj
-		left-basis-pred right-basis-pred pair-pred)
-)
+; ================= END OF FILE ===============
