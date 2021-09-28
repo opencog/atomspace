@@ -517,8 +517,8 @@
 			; The basis may have changed, too.
 			(set! l-basis #f)
 			(set! r-basis #f)
-			(set! l-basis-size 0)
-			(set! r-basis-size 0)
+			(set! l-size 0)
+			(set! r-size 0)
 
 			; Pass it on to the LLOBJ, too.
 			(if (LLOBJ 'provides 'clobber) (LLOBJ 'clobber))

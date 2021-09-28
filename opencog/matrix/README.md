@@ -156,6 +156,8 @@ The tools implemented here include:
  * Concatenating dissimilar matrices.
  * Performing PCA (principal component analysis) in the matrix.
  * Performing cuts, to remove unwanted rows, columns and individual entries.
+   This includes both filtering (to hide those entries) and removing
+   (deleting) them from the AtomSpace.
 
 To use these tools, all you need to do is to specify a low-level
 object that describes the matrix. If the matrix is in the form of an
@@ -192,12 +194,12 @@ FAQ
 **Q:** Really, C++ is sooo fast...
 
 **A:** Yes, but since the data is stored in Values associated with
-   Atoms in the AtomSpace, adding numbers together is NOT the
-   bottleneck. Accessing Atom Values *is* the bottleneck. For this case,
-   the overhead of using scheme, compared to C++, is not outrageous.
+   Atoms in the AtomSpace, adding numbers together is NOT the bottleneck.
+   Accessing Atom Values *is* the bottleneck. For this case, the overhead
+   of using scheme, compared to C++, is not outrageous.
 
-**Q:** Why don't you just export all your data to SciPy or to Gnu R, or to
-   Octave, or MatLab, for that matter, and just do your data analytics
+**Q:** Why don't you just export all your data to SciPy or to Gnu R, or
+   to Octave, or MatLab, for that matter, and just do your data analytics
    there?  That way, you don't need to re-implement all these basic
    statistical algorithms!
 
@@ -220,15 +222,16 @@ FAQ
    to work with different cuts and filters, where you discard much of
    the data, or average together different parts: can you really afford
    the RAM needed to export all of these different cut and filtered
-   datasets?  Maybe you can, its just not trivial. (In my datasets,
-   petabytes of RAM would be needed for non-sparse representations.)
+   datasets?  Maybe you can; its just not trivial. (In my datasets,
+   petabytes of RAM would be needed for non-sparse representations.
+   The AtomSpace is all about sparse representations of data.)
 
 **Q:** But if I did want to do it for Gnu R, how could I do it?
 
 **A:** You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    Quote:
    *The Rcpp package provides C++ classes that greatly facilitate
-   interfacing C or C++ code in R packages using the .Call() interface
+   interfacing C or C++ code in R packages using the `.Call()` interface
    provided by R. Rcpp provides matching C++ classes for a large
    number of basic R data types. Hence, a package author can keep his
    data in normal R data structures without having to worry about
@@ -488,12 +491,20 @@ a filter that masks out rows, columns and entries that have counts
 below a threshold.  Another filter can mask out explicitly-named rows
 and columns.
 
+Unfortunately, filtering can be slow, and loading a large matrix only
+to access small subsets of it is wasteful of RAM, and can add CPU
+overhead.  Thus, a similar set of interfaces is provided in `trim.scm`,
+which will remove (delete) rows, columns and matrix entries from both
+the AtomSpace, and from attached storage. With appopropriate trimming,
+noisy datasets can be reduced in size by factors of two, ten or a
+hundred. This can have a huge impact on processing.
+
 
 Tensors, in general
 -------------------
 Suppose you have more than just pairs. Suppose you have triples that
 you want to work with. Then what?  Answer: use the network analysis
-tools in the (opencog network) module.
+tools in the `(opencog network)` module.
 
 
 TODO
