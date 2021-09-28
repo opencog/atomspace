@@ -505,6 +505,14 @@
 				(star-obj 'right-duals ITEM))
 			(api-obj 'set-mmt-norms ITEM l0 l1 l2 lq))
 
+		; Compute the grand-totals
+		(define (set-mtm-totals)
+			(let ((mtm-sup (compute-total-mtm-support))
+					(mtm-cnt (compute-total-mtm-count))
+					(mtm-len (compute-total-mtm-length))
+					(mtm-amp (compute-total-mtm-amplitude)))
+				(api-obj 'set-mtm-totals mtm-sup mtm-cnt mtm-len mtm-amp)))
+
 		(define (all-mtm-marginals)
 			(define elapsed-secs (make-elapsed-secs))
 
@@ -513,15 +521,17 @@
 			(format #t "Finished mtm norm marginals in ~A secs\n"
 				(elapsed-secs))
 
-			; Compute the grand-totals
-			(let ((mtm-sup (compute-total-mtm-support))
-					(mtm-cnt (compute-total-mtm-count))
-					(mtm-len (compute-total-mtm-length))
-					(mtm-amp (compute-total-mtm-amplitude)))
-				(api-obj 'set-mtm-totals mtm-sup mtm-cnt mtm-len mtm-amp))
+			(set-mtm-totals)  ;; Compute the grand-totals
 			(format #t "Finished mtm totals in ~A secs\n"
 				(elapsed-secs)))
 
+		; Compute the grand-totals
+		(define (set-mmt-totals)
+			(let ((mmt-sup (compute-total-mmt-support))
+					(mmt-cnt (compute-total-mmt-count))
+					(mmt-len (compute-total-mmt-length))
+					(mmt-amp (compute-total-mmt-amplitude)))
+				(api-obj 'set-mmt-totals mmt-sup mmt-cnt mmt-len mmt-amp)))
 
 		(define (all-mmt-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -531,12 +541,7 @@
 			(format #t "Finished mmt norm marginals in ~A secs\n"
 				(elapsed-secs))
 
-			; Compute the grand-totals
-			(let ((mmt-sup (compute-total-mmt-support))
-					(mmt-cnt (compute-total-mmt-count))
-					(mmt-len (compute-total-mmt-length))
-					(mmt-amp (compute-total-mmt-amplitude)))
-				(api-obj 'set-mmt-totals mmt-sup mmt-cnt mmt-len mmt-amp))
+			(set-mmt-totals)  ;; Compute the grand-totals
 			(format #t "Finished mmt totals in ~A secs\n"
 				(elapsed-secs)))
 
@@ -571,6 +576,8 @@
 
 				((set-mtm-marginals)  (apply set-mtm-marginals args))
 				((set-mmt-marginals)  (apply set-mmt-marginals args))
+				((set-mtm-totals)     (apply set-mtm-totals args))
+				((set-mmt-totals)     (apply set-mmt-totals args))
 
 				((all-mtm-marginals)  (all-mtm-marginals))
 				((all-mmt-marginals)  (all-mmt-marginals))
