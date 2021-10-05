@@ -53,18 +53,42 @@
   is just of course
        MI(y,z) = p(y,z) FMI(y,z)
 
+  The symmetric matrix here has a natural scale, given by it's
+  normalization relative to M. For clarity, consider the MM^T case.
+  The normalization is then
+       Q = -log_2 sum_y N(*,y) N(*,y) / [sum_y N(*,y)]^2
+
+  If M was already a probability matrix itself, then it would have been
+  normalized so that 1 = sum_y N(*,y), so the denominator would be the
+  identity.
+
+  A useful linear combination is a ranked fractional MI. This is given
+  by the sum of the FMI and the average of the log_2 marginals. A
+  suitable scale is provided by adding the Q to the whole thing. Thus,
+  we define
+
+       RMI(y,z) = FMI(y,z) + 0.5 log_2 [p(y)p(z)] + Q
+
+  Note that the average of the log_2 marginals is equal to the log_2 of
+  the square root of the product of the marginals. So that's a curious
+  quantity.
+
   Provided methods:
   -----------------
   'mtm-mi  CA CB -- return the left-MI between columns CA and CB.
   'mtm-fmi CA CB -- return the left-FMI between columns CA and CB.
+  'mtm-rmi CA CB -- return the left-RMI between columns CA and CB.
   'mmt-mi  RA RB -- return the right-MI between rows RA and RB.
   'mmt-fmi RA RB -- return the right-FMI between rows RA and RB.
+  'mmt-rmi RA RB -- return the right-RMI between rows RA and RB.
   'mtm-joint-prob CA CB - return the joint probability between columns
   'mmt-joint-prob RA RB - return the joint probability between rows
   'mtm-marginal COL - return the marginal probability for column COL
   'mmt-marginal ROW - return the marginal probability for row ROW
-  'mtm-total -- return the total count
-  'mmt-total -- return the total count
+  'mtm-total -- return the total count (the f(*,*) defined above)
+  'mmt-total -- return the total count (the f(*,*) defined above)
+  'mtm-q -- return the scale factor (the Q defined above)
+  'mmt-q -- return the scale factor (the Q defined above)
 
   Arguments:
   ----------
@@ -89,7 +113,8 @@
 "
 
 	(let* ((ol2 (/ 1.0 (log 2.0)))
-			(star-obj (add-pair-stars LLOBJ))
+			(star-obj  (add-pair-stars LLOBJ))
+			(sup-obj   (add-support-api star-obj))
 			(trans-obj (add-transpose-api star-obj))
 			(prod-obj  (add-support-compute
 				(add-tuple-math star-obj * GET-CNT)))
@@ -97,6 +122,8 @@
 			; Cache of the totals
 			(mtm-total #f)
 			(mmt-total #f)
+			(mtm-q #f)
+			(mmt-q #f)
 		)
 
 		; Compute the log base two.  It can happen that log of zero
@@ -105,30 +132,47 @@
 		; been zeroed, and the 'set-mmt-marginals method is called
 		; on that row.
 		(define (log2 x y)
-			(if (< 0 x) (* (log (/ x y)) ol2) (- (inf))))
+			(if (< 0 x) (* (log (/ x y)) ol2) -inf.0))
 
 		; Cache the totals, so that we can avoid fetching them,
 		; over and over. They only tricky part here is that the
 		; totals might not yet be available when this object is
 		; defined.
 		(define (set-mtm-total)
-			(if (not mtm-total)
+			(when (not mtm-total)
 				(set! mtm-total
 					(catch #t (lambda () (trans-obj 'total-mtm-count))
-						(lambda (key . args) #f))))
-			(if (eq? 0 mtm-total)
-				(throw 'no-transpose-data 'mtm-mi
-					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
+						(lambda (key . args) #f)))
+				(when (eq? 0 mtm-total)
+					(set! mtm-total #f)
+					(throw 'no-transpose-data 'mtm-mi
+						"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
+			mtm-total)
 
 		(define (set-mmt-total)
-			(if (not mmt-total)
+			(when (not mmt-total)
 				(set! mmt-total
 					(catch #t (lambda () (trans-obj 'total-mmt-count))
-						(lambda (key . args) #f))))
-			(if (eq? 0 mmt-total)
-				(throw 'no-transpose-data 'mmt-mi
-					"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
+						(lambda (key . args) #f)))
+				(when (eq? 0 mmt-total)
+					(set! mmt-total #f)
+					(throw 'no-transpose-data 'mmt-mi
+						"No transpose data available for this dataset! Did you forget to (batch-transpose)? ")))
+			mmt-total)
 
+		(define (set-mtm-q)
+			(when (not mtm-q)
+				(set-mtm-total)
+				(define tcr (sup-obj 'total-count-right))
+				(set! mtm-q (- (log2 mtm-total (* tcr tcr)))))
+			mtm-q)
+
+		(define (set-mmt-q)
+			(when (not mmt-q)
+				(set-mmt-total)
+				(define tcl (sup-obj 'total-count-left))
+				(set! mmt-q (- (log2 mmt-total (* tcl tcl)))))
+			mmt-q)
 
 		; -------------
 		; Return the vector product of column A and column B
@@ -177,6 +221,13 @@
 			(* (log2 (* prod mtm-total) (* marga margb))
 				(/ prod mtm-total)))
 
+		(define (compute-mtm-rmi COL-A COL-B)
+			(define fmi (compute-mtm-fmi COL-A COL-B))
+			(define mra (compute-mtm-marginal COL-A))
+			(define mrb (compute-mtm-marginal COL-B))
+			(set-mtm-q)
+			(+ fmi (* 0.5 (log2 (* mra mrb) 1.0)) mtm-q))
+
 		(define (compute-mmt-fmi ROW-A ROW-B)
 			(define marga (trans-obj 'mmt-count ROW-A))
 			(define margb (trans-obj 'mmt-count ROW-B))
@@ -192,6 +243,13 @@
 			(* (log2 (* prod mmt-total) (* marga margb))
 				(/ prod mmt-total)))
 
+		(define (compute-mmt-rmi ROW-A ROW-B)
+			(define fmi (compute-mmt-fmi ROW-A ROW-B))
+			(define mra (compute-mmt-marginal ROW-A))
+			(define mrb (compute-mmt-marginal ROW-B))
+			(set-mmt-q)
+			(+ fmi (* 0.5 (log2 (* mra mrb) 1.0)) mmt-q))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -200,12 +258,16 @@
 				((mmt-mi)          (apply compute-mmt-mi args))
 				((mtm-fmi)         (apply compute-mtm-fmi args))
 				((mmt-fmi)         (apply compute-mmt-fmi args))
+				((mtm-rmi)         (apply compute-mtm-rmi args))
+				((mmt-rmi)         (apply compute-mmt-rmi args))
 				((mtm-joint-prob)  (apply compute-left-prob args))
 				((mmt-joint-prob)  (apply compute-right-prob args))
 				((mtm-marginal)    (apply compute-mtm-marginal args))
 				((mmt-marginal)    (apply compute-mmt-marginal args))
-				((mtm-total)       mtm-total)
-				((mmt-total)       mmt-total)
+				((mtm-total)       (set-mtm-total))
+				((mmt-total)       (set-mmt-total))
+				((mtm-q)           (set-mtm-q))
+				((mmt-q)           (set-mmt-q))
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
