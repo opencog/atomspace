@@ -161,17 +161,17 @@
 			mmt-total)
 
 		(define (set-mtm-q)
-			(when (not mtm-q)
-				(set-mtm-total)
-				(define tcr (sup-obj 'total-count-right))
-				(set! mtm-q (- (log2 mtm-total (* tcr tcr)))))
+			(if (not mtm-q)
+				(let ((tcr (sup-obj 'total-count-right)))
+					(set-mtm-total)
+					(set! mtm-q (- (log2 mtm-total (* tcr tcr))))))
 			mtm-q)
 
 		(define (set-mmt-q)
-			(when (not mmt-q)
-				(set-mmt-total)
-				(define tcl (sup-obj 'total-count-left))
-				(set! mmt-q (- (log2 mmt-total (* tcl tcl)))))
+			(if (not mmt-q)
+				(let ((tcl (sup-obj 'total-count-left)))
+					(set-mmt-total)
+					(set! mmt-q (- (log2 mmt-total (* tcl tcl))))))
 			mmt-q)
 
 		; -------------
