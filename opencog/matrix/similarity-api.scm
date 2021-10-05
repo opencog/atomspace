@@ -141,7 +141,8 @@
 		(define (get-pair-sim A B) (get-sim (get-pair A B)))
 
 		; Save a precomputed similarity on ATOM. The SIM should be a
-		; Value, e.g. a FloatValue.
+		; Value, e.g. a FloatValue. If SIM if #f then any existing
+		; value is removed.
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key SIM))
 
@@ -199,16 +200,10 @@
 ; Extend the LLOBJ with additional methods to batch-compute similarity
 ; scores.
 ;
-(define*-public (batch-similarity LLOBJ
+(define*-public (batch-similarity LLOBJ SIM-FUN
 	#:optional
 	(MTM? #f)
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
-	(CUTOFF 0.1)
-	(SIM-FUN
-		(let ((acc (add-similarity-compute LLOBJ)))
-			(if MTM?
-				(lambda (x y) (acc 'left-cosine x y))
-				(lambda (x y) (acc 'right-cosine x y)))))
 	)
 "
   batch-similarity LLOBJ [MTM? ID CUTOFF SIM-FUN] - bulk computation.
@@ -238,20 +233,16 @@
   Arguments:
   LLOBJ -- The matrix whose rows or columns will be compared.
 
+  SIM-FUN -- Function taking two arguments, both rows or columns, as
+      appropriate, and returning a single Value. This is the function
+      that will be called to compute the similarity between two rows
+      or columns.
+
   Optional arguments:
   MTM? -- If set to #t then columns will be compared, else rows.
       If not specified, defaults to #f (compares rows.)
 
-  CUTOFF -- Floating-point cutoff value. If the similarity if less
-      than this value, then it will NOT be recorded in the AtomSpace.
-      This can be used to avoid bloating storage with low-similarity
-      values.  If not specified, defaults to 0.1.
-
-  SIM-FUN -- Function taking two arguments, both rows or columns, as
-      appropriate, and returning a single floating-point number. This
-      is the function that will be called to compute the similarity
-      between two rows or columns.
-      If not specified, this defaults to the cosine similarity.
+  ID -- named location where the similarity values should be stored.
 
   This creates a new NON-sparse matrix that can be understood as a
   matrix product of LLOBJ with it's transpose. The product is not
@@ -294,20 +285,21 @@
 		; then cache it in the atomspace.
 		(define (compute-sim A B)
 			(define mpr (simobj 'get-pair A B))
-			(define prs (simobj 'pair-similarity mpr))
-			(if (not (nil? prs))
-				(cog-value-ref prs 0)
+			(define existing-sim (simobj 'pair-similarity mpr))
+			(if (not (nil? existing-sim))
+				existing-sim
 				(let ((simv (SIM-FUN A B)))
 					(set! compcnt (+ compcnt 1))
-					; If we already have a similarity link for this object,
-					; go ahead and use it. Otherwise, save the similarity
-					; value only if it is greater than the cutoff.
-					(if (or (not (nil? mpr)) (<= CUTOFF simv))
-						(begin
-							(set! savecnt (+ savecnt 1))
-							(simobj 'set-pair-similarity
-								(simobj 'make-pair A B)
-									(FloatValue simv))))
+					(when simv
+						(set! savecnt (+ savecnt 1))
+						(simobj 'set-pair-similarity
+							(simobj 'make-pair A B) simv))
+
+					; If there's some existing Similarity pair,
+					; but the computed similarity is bad, then
+					; clobber the existing value.
+					(if (and (not simv) (not (nil? mpr)))
+						(simobj 'set-pair-similarity mpr #f))
 					simv)))
 
 		; Compute and cache the similarity between the ITEM, and the
