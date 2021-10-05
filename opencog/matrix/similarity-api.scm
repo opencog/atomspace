@@ -130,7 +130,7 @@
 		(define sim-key (PredicateNode
 			(if ID
 				(string-append "*-SimKey " ID)
-				"*-Cosine Sim Key-*")))
+				"*-Similarity Key-*")))
 
 		; Return the precomputed similarity value on ATOM
 		; This returns the Value on the atom, and not a number!
