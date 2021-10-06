@@ -162,17 +162,23 @@
 		(define (get-left-type)
 			(define at (LLA 'left-type))
 			(define bt (LLB 'left-type))
-			(if (equal? at bt) at (list at bt)))
+			(define tat (if (cog-atom? at) at (Type at)))
+			(define tbt (if (cog-atom? bt) bt (Type bt)))
+			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		(define (get-right-type)
 			(define at (LLA 'right-type))
 			(define bt (LLB 'right-type))
-			(if (equal? at bt) at (list at bt)))
+			(define tat (if (cog-atom? at) at (Type at)))
+			(define tbt (if (cog-atom? bt) bt (Type bt)))
+			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		(define (get-pair-type)
 			(define at (LLA 'pair-type))
 			(define bt (LLB 'pair-type))
-			(if (equal? at bt) at (list at bt)))
+			(define tat (if (cog-atom? at) at (Type at)))
+			(define tbt (if (cog-atom? bt) bt (Type bt)))
+			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		; ---------------
 		; Delegate the pair fetching to each subobject.
