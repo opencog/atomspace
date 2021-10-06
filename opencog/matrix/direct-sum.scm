@@ -199,6 +199,16 @@
 			(if (not (nil? maybe-a)) maybe-a
 				(LLB 'get-pair L-ATOM R-ATOM)))
 
+		; Is the type of ATM equal to the type MTH?
+		; MTH can be either a symbol e.g. 'Concept or a Type atom.
+		; XXX possible bug?? what is MTH is a TypeChoiceLink?
+		; Then maybe we should scane the type choices?
+		; There's some atomspace utility that handles this already...
+		(define (symb-comp? ATM MTH)
+			(if (cog-atom? MTH)
+				(equal? (Type (cog-type ATM)) MTH)
+				(equal? (cog-type ATM) MTH)))
+
 		; Create a pair, whether or not it exists.
 		; Assumes that either the left or right types are distinct
 		; (and so we can dispatch based on the types) or, if not,
@@ -210,10 +220,10 @@
 			(init-a-base)
 			(if distinct-type
 				(if disjoint-left
-					(if (equal? (cog-type L-ATOM) (LLA 'left-type))
+					(if (symb-comp? L-ATOM (LLA 'left-type))
 						(LLA 'make-pair L-ATOM R-ATOM)
 						(LLB 'make-pair L-ATOM R-ATOM))
-					(if (equal? (cog-type R-ATOM) (LLA 'right-type))
+					(if (symb-comp? R-ATOM (LLA 'right-type))
 						(LLA 'make-pair L-ATOM R-ATOM)
 						(LLB 'make-pair L-ATOM R-ATOM)))
 				(if (type-a? L-ATOM R-ATOM)
