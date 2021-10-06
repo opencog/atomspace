@@ -98,6 +98,10 @@
 ;     ; the left side of the (row, column) pairs.
 ;     (define (get-left-type) 'WordNode)
 ;
+;     ; Complex types are allowed. The above can also be written as
+;     (define (get-left-type) (Type 'WordNode))
+;     (define (get-left-type) (TypeChoice (Type 'WordNode) (Type 'WordClassNode)))
+;
 ;     ; Return the atom-type of the matrix columns, i.e. the type of
 ;     ; the right side of the (row, column) pairs.
 ;     (define (get-right-type) 'WordNode)
@@ -343,11 +347,15 @@
 			(mtx (make-mutex))
 			(aspace (cog-new-atomspace (cog-atomspace)))
 =============== !#
-
-			(pair-type (LLOBJ 'pair-type))
-			(left-type (LLOBJ 'left-type))
-			(right-type (LLOBJ 'right-type))
 		)
+
+		; LLOBJ can return either a symbol or an Atom. If it's a
+		; symbol, its a primitive type name.
+		(define lt (LLOBJ 'left-type))
+		(define left-type (if (cog-atom? lt) lt (Type lt)))
+
+		(define rt (LLOBJ 'right-type))
+		(define right-type (if (cog-atom? rt) rt (Type rt)))
 
 		; Perform a query to find all atoms that might appear on
 		; the left, or the right of a pair.  Return a list of them.
@@ -357,8 +365,8 @@
 			(define term (LLOBJ 'make-pair uleft uright))
 			(define queue (cog-execute! (Query
 				(VariableList
-					(TypedVariable uleft (Type (symbol->string left-type)))
-					(TypedVariable uright (Type (symbol->string right-type))))
+					(TypedVariable uleft left-type)
+					(TypedVariable uright right-type))
 				term (if LEF uleft uright))))
 			(cog-extract-recursive! uleft)
 			(cog-extract-recursive! uright)
@@ -394,12 +402,12 @@
 		; The LLOBJ can provide custom versions of this.
 		(define (default-left-star-pat ITEM VAR)
 			(let ((term (LLOBJ 'make-pair VAR ITEM)))
-				(Query (TypedVariable VAR (Type left-type))
+				(Query (TypedVariable VAR left-type)
 					term term)))
 
 		(define (default-right-star-pat ITEM VAR)
 			(let ((term (LLOBJ 'make-pair ITEM VAR)))
-				(Query (TypedVariable VAR (Type right-type))
+				(Query (TypedVariable VAR right-type)
 					term term)))
 
 		(define f-left-star-var
@@ -421,11 +429,11 @@
 		; The LLOBJ can provide custom versions of this.
 		(define (default-left-dual-pat ITEM VAR)
 			(let ((term (LLOBJ 'make-pair VAR ITEM)))
-				(Meet (TypedVariable VAR (Type left-type)) term)))
+				(Meet (TypedVariable VAR left-type) term)))
 
 		(define (default-right-dual-pat ITEM VAR)
 			(let ((term (LLOBJ 'make-pair ITEM VAR)))
-				(Meet (TypedVariable VAR (Type right-type)) term)))
+				(Meet (TypedVariable VAR right-type) term)))
 
 		(define f-left-dual-var
 			(overload 'left-dual-variable uniquely-named-variable))
@@ -533,8 +541,8 @@
 			(define term (LLOBJ 'make-pair uleft uright))
 			(define queue (cog-execute! (Query
 				(VariableList
-					(TypedVariable uleft (Type (symbol->string left-type)))
-					(TypedVariable uright (Type (symbol->string right-type))))
+					(TypedVariable uleft left-type)
+					(TypedVariable uright right-type))
 				term term)))
 			(cog-extract-recursive! uleft)
 			(cog-extract-recursive! uright)
