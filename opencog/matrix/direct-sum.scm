@@ -361,6 +361,22 @@
 		)
 
 		; -------------
+		;
+		; Here's the deal: if one, but not the other object provides
+		; the method, just call it. If both provide it, then we are
+		; confused, and throw an error. If neither provide it, that's
+		; also an error.
+		(define (catch-all message args)
+			(define method-on-a (LLA 'provides message))
+			(define method-on-b (LLB 'provides message))
+			(cond
+				((and method-on-a (not method-on-b)) (apply method-on-a args))
+				((and method-on-b (not method-on-a)) (apply method-on-b args))
+				(else (throw 'bad-use 'direct-sum
+							(format #f "Sorry, method `~A` on ~A not available!"
+								message id-string)))))
+
+		; -------------
 		(define (help)
 			(format #t
 				(string-append
@@ -431,9 +447,7 @@
 				((describe)         (describe))
 
 				; Block anything that we can't handle.
-				(else               (throw 'bad-use 'direct-sum
-					(format #f "Sorry, method `~A` on ~A not available!"
-						message id-string)))
+				(else               (catch-all message args))
 	)))
 )
 
