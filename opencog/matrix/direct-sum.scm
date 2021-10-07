@@ -431,8 +431,9 @@
 				((describe)         (describe))
 
 				; Block anything that we can't handle.
-				(else               (throw 'bad-use 'make-concatenation
-					(format #f "Sorry, method ~A not available!" message)))
+				(else               (throw 'bad-use 'direct-sum
+					(format #f "Sorry, method `~A` on ~A not available!"
+						message id-string)))
 	)))
 )
 
