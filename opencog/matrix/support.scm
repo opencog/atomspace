@@ -178,7 +178,7 @@
 	(define (error-no-data)
 		(throw 'no-data 'add-support-api
 			(string-append
-"There isn't any cached data on " ID "\n"
+"There isn't any cached data on `" ID "`\n"
 "Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
 				))
 
