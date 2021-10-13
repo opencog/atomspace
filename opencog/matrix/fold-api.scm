@@ -350,7 +350,7 @@
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
-				((left-stars)  left-star-intersct)
+				((left-stars)  left-star-intersect)
 				((right-stars) right-star-intersect)
 				((get-count)   get-func-count)
 				(else          (LLOBJ 'provides meth))))
