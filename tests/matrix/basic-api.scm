@@ -43,6 +43,12 @@
 	(define (get-count PAIR)
 		(cog-value-ref (cog-value PAIR (Predicate "counter")) 2))
 
+	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+	; exists, else return zero.
+	(define (get-pair-count L-ATOM R-ATOM)
+		(define stats-atom (get-pair L-ATOM R-ATOM))
+		(if (null? stats-atom) 0 (get-count stats-atom)))
+
 	; Return the atom holding the count, creating it if it does
 	; not yet exist.  Returns the same structure as the 'item-pair
 	; method (the get-pair function, above).
@@ -88,16 +94,6 @@
 	(define (fetch-all-pairs)
 		(fetch-incoming-by-type (Predicate "foo") 'EvaluationLink))
 
-	; Tell the stars object what we provide.
-	(define (provides meth)
-		(case meth
-			((get-pair)         get-pair)
-			((get-count)        get-count)
-			((make-pair)        make-pair)
-			((left-element)     get-left-element)
-			((right-element)    get-right-element)
-			(else               #f)))
-
 	; Methods on the class. To call these, quote the method name.
 	; Example: (OBJ 'left-wildcard WORD) calls the
 	; get-left-wildcard function, passing WORD as the argument.
@@ -111,6 +107,7 @@
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
+				((pair-count) get-pair-count)
 				((get-pair) get-pair)
 				((get-count) get-count)
 				((make-pair) make-pair)
@@ -120,7 +117,7 @@
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)
 				((fetch-pairs) fetch-all-pairs)
-				((provides) provides)
+				((provides) (lambda (symb) #f))
 				((filters?) (lambda () #f))
 				(else (error "Bad method call on low-level API")))
 			args)))
@@ -149,5 +146,8 @@
 (define tapi (add-transpose-api bapi))
 
 (define symc (add-symmetric-mi-compute bapi))
+
+(define prod-t (add-support-compute (add-tuple-math sapi *)))
+(define prod-f (add-support-compute (add-fast-math sapi *)))
 
 *unspecified*

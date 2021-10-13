@@ -281,10 +281,13 @@
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 		; ---------------
+		(define (thunk-type TY) (if (symbol? TY) (TypeNode TY) TY))
+
+		; ---------------
 		(define (left-star-intersect COL-TUPLE)
 			(define killer (uniquely-named-variable))  ; will be used for cleanup
 			(define row-var (uniquely-named-variable)) ; shared rows
-			(define row-type (LLOBJ 'left-type))
+			(define row-type (thunk-type (LLOBJ 'left-type)))
 			(define term-list
 				(map (lambda (COL) (LLOBJ 'make-pair row-var COL)) COL-TUPLE))
 
@@ -312,7 +315,7 @@
 		(define (right-star-intersect ROW-TUPLE)
 			(define killer (uniquely-named-variable))  ; will be used for cleanup
 			(define col-var (uniquely-named-variable)) ; shared cols
-			(define col-type (LLOBJ 'right-type))
+			(define col-type (thunk-type (LLOBJ 'right-type)))
 			(define term-list
 				(map (lambda (ROW) (LLOBJ 'make-pair ROW col-var)) ROW-TUPLE))
 
