@@ -120,17 +120,20 @@
 ;     ; so on. Users are free to (are encouraged to) use this atom to
 ;     ; attach additional information and statistics.
 ;     ;
+;     ; Optional; if not provided, the stars object will provide a default
 ;     (define (get-pair L-ATOM R-ATOM)
 ;        (define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
 ;        (if (nil? maybe-list) #f
 ;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
 ;
 ;     ; Return the observed count for the pair PAIR.
+;     ; Optional; if not provided, the stars object will provide a default
 ;     (define (get-count PAIR)
 ;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
 ;
 ;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 ;     ; exists, else return zero.
+;     ; Optional; if not provided, the stars object will provide a default
 ;     (define (get-pair-count L-ATOM R-ATOM)
 ;        (define stats-atom (get-pair L-ATOM R-ATOM))
 ;        (if (nil? stats-atom) #f (get-count stats-atom)))
@@ -138,6 +141,7 @@
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'get-pair
 ;     ; method (the get-pair function, above).
+;     ; Optional; if not provided, the stars object will provide a default
 ;     (define (make-pair L-ATOM R-ATOM)
 ;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
 ;
@@ -222,6 +226,11 @@
   methods (aka wildcard methods). This is a core utility, widely
   used to simplify iteration over the rows and columns of LLOBJ.
 
+  This also provides default implementations for the `get-pair`,
+  `make-pair`, `left-element`, `right-element`, `pair-count`,
+  `get-count`, `set-count` and `move-count` methods, in case the
+  LLOBJ does not provide them.
+
   The supported methods are:
   'left-basis - Return all items (atoms) that can be used to index
       a row in the matrix.  That is, given a matrix `N(x,y)`, this
@@ -273,15 +282,8 @@
   and so this offers two different ways of iterating over the same
   list of pairs.
 
-  Here, the LLOBJ is expected to be the object that defines a pair
-  in the AtomSpace. All such objects provide the following methods:
-
-  'name - A one-sentence description of the pair object.
-  'id - A one-word id for the object; can be used to build strings.
-
-  'left-type, 'right-type - Returns the types of the Atoms making up
-      each side of the pair.
-  'pair-type - Returns the type of the Atom holding the pair.
+  This also provides default implementations for the following methods,
+  in case the base LLOBJ object did not provide them:
 
   'pair-count L R - Returns the total observed count on the pair (L,R)
       L must be an Atom of type 'left-type and likewise for R.
@@ -300,6 +302,17 @@
   'right-element P - Return the atom on the right of the pair P.
       These two together undo what 'make-pair creates.
 
+
+  Here, the LLOBJ is expected to be the object that defines a pair
+  in the AtomSpace. All such objects provide the following methods:
+
+  'name - A one-sentence description of the pair object.
+  'id - A one-word id for the object; can be used to build strings.
+
+  'left-type, 'right-type - Returns the types of the Atoms making up
+      each side of the pair.
+  'pair-type - Returns the type of the Atom holding the pair.
+
   'left-wildcard R - Return the marginal atom for the column R.
       The column must be an Atom of type 'right-type. The marginal
       Atom will be of type 'pair-type. The marginal Atom contains
@@ -315,13 +328,38 @@
 
   'fetch-pairs - Fetch all pairs from an open database.
 
-  'provides - Return a list of other methods that this obct provides. These
-      methods are typically used to overload the default methods in
-      derived classes.
+  'provides - Return a list of methods that should be used in place of
+      the default stars implementation.
 
   'filters - Used in filtering out certain rows, columns or individual
-      entries.
+      entries. Return #f if none.
 "
+	(define pair-type (LLOBJ 'pair-type))
+
+	; Basic defaults for base class methods. If the base class provides
+	; these, then the base-classes methods will be used.
+	(define (get-pair L R)
+		(cog-link pair-type L R))
+
+	(define (make-pair L R)
+		(cog-new-link pair-type L R))
+
+	(define (left-element PR) (gar PR))
+	(define (right-element PR) (gdr PR))
+
+	; Get the observational count on ATOM.
+	(define (get-count ATOM) (cog-count ATOM))
+	(define (set-count ATOM CNT)
+		(cog-set-tv! ATOM (CountTruthValue 1 0 CNT)))
+
+	; Return the raw observational count on PAIR. If the counter for
+	; PAIR does not exist (was not observed), then return 0.
+	(define (pair-count L R)
+		(define pr (get-pair L R))
+		(if (nil? pr) 0 (get-count pr)))
+
+	(define (move-count ACCUM DONOT FRAC) 0)
+
 	(let ((l-basis #f)
 			(r-basis #f)
 			(l-size 0)
@@ -574,16 +612,24 @@
 		; the stars methods to work differently.  The other is to
 		; allow an underlying object to provide cached basis, as these
 		; can sometimes take an obscenely long time to compute.
-		(let ((f-left-basis (overload 'left-basis get-left-basis))
-				(f-right-basis (overload 'right-basis get-right-basis))
-				(f-left-basis-size (overload 'left-basis-size get-left-size))
+		(let ((f-left-basis       (overload 'left-basis get-left-basis))
+				(f-right-basis      (overload 'right-basis get-right-basis))
+				(f-left-basis-size  (overload 'left-basis-size get-left-size))
 				(f-right-basis-size (overload 'right-basis-size get-right-size))
-				(f-left-stars (overload 'left-stars get-left-stars))
-				(f-right-stars (overload 'right-stars get-right-stars))
-				(f-left-duals (overload 'left-duals get-left-duals))
-				(f-right-duals (overload 'right-duals get-right-duals))
-				(f-get-all-elts (overload 'get-all-elts get-all-pairs))
-			)
+				(f-left-stars       (overload 'left-stars get-left-stars))
+				(f-right-stars      (overload 'right-stars get-right-stars))
+				(f-left-duals       (overload 'left-duals get-left-duals))
+				(f-right-duals      (overload 'right-duals get-right-duals))
+				(f-get-all-elts     (overload 'get-all-elts get-all-pairs))
+
+				(f-get-pair         (overload 'get-pair get-pair))
+				(f-make-pair        (overload 'make-pair make-pair))
+				(f-left-element     (overload 'left-element left-element))
+				(f-right-element    (overload 'right-element right-element))
+				(f-pair-count       (overload 'pair-count pair-count))
+				(f-get-count        (overload 'get-count get-count))
+				(f-set-count        (overload 'set-count set-count))
+				(f-move-count       (overload 'move-count move-count)))
 
 			;-------------------------------------------
 			; Explain what it is that I provide. The point here is that
@@ -602,6 +648,16 @@
 					((left-duals)       f-left-duals)
 					((right-duals)      f-right-duals)
 					((get-all-elts)     f-get-all-elts)
+
+					((get-pair)         f-get-pair)
+					((make-pair)        f-make-pair)
+					((left-element)     f-left-element)
+					((right-element)    f-right-element)
+					((pair-count)       f-pair-count)
+					((get-count)        f-get-count)
+					((set-count)        f-set-count)
+					((move-count)       f-move-count)
+
 					((clobber)          clobber)
 					(else               (LLOBJ 'provides meth))))
 
@@ -618,6 +674,16 @@
 					((left-duals)       (apply f-left-duals args))
 					((right-duals)      (apply f-right-duals args))
 					((get-all-elts)     (f-get-all-elts))
+
+					((get-pair)         (apply f-get-pair args))
+					((make-pair)        (apply f-make-pair args))
+					((left-element)     (apply f-left-element args))
+					((right-element)    (apply f-right-element args))
+					((pair-count)       (apply f-pair-count args))
+					((get-count)        (apply f-get-count args))
+					((set-count)        (apply f-set-count args))
+					((move-count)       (apply f-move-count args))
+
 					((clobber)          (clobber))
 					((provides)         (apply provides args))
 					((help)             (help))

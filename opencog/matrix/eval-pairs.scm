@@ -89,11 +89,6 @@
 "
 	(let ((all-pairs '()))
 
-		; Get the observational count on ATOM.
-		(define (get-count ATOM) (cog-count ATOM))
-		(define (set-count ATOM CNT)
-			(cog-set-tv! ATOM (CountTruthValue 1 0 CNT)))
-
 		(define (get-left-type) LEFT-TYPE)
 		(define (get-right-type) RIGHT-TYPE)
 		(define (get-pair-type) 'EvaluationLink)
@@ -115,12 +110,6 @@
 			(gadr PAIR))
 		(define (get-right-element PAIR)
 			(gddr PAIR))
-
-		; Return the raw observational count on PAIR. If the counter for
-		; PAIR does not exist (was not observed), then return 0.
-		(define (get-pair-count L-ATOM R-ATOM)
-			(define pr (get-pair L-ATOM R-ATOM))
-			(if (null? pr) 0 (get-count pr)))
 
 		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-left-wildcard WORD)
@@ -195,9 +184,7 @@
 "    left-type        The type of the row Atoms\n"
 "    right-type       The type of the column Atoms\n"
 "    pair-type        Returns 'EvalutionLink\n"
-"    pair-count L R   Returns the count on Evaluation Pred List L R\n"
 "    get-pair L R     Returns Evaluation Pred List L R, if it exists, else null\n"
-"    get-count E      Returns the count on E (an EvaluationLink)\n"
 "    make-pair L R    Unconditionally make Evaluation Pred List L R\n"
 "    left-element E   Return the row Atom of the EvaluationLink E\n"
 "    right-element E  Return the column Atom of the EvaluationLink E\n"
@@ -218,6 +205,18 @@
 
       ;-------------------------------------------
 
+		; Tell the stars object what we provide.
+		(define (provides meth)
+			(case meth
+				((get-pair)         get-pair)
+				((make-pair)        make-pair)
+				((left-element)     get-left-element)
+				((right-element)    get-right-element)
+				((get-all-elts)     get-all-pairs)
+				(else               #f)))
+
+      ;-------------------------------------------
+
 		; Methods on the object.
 		(lambda (message . args)
 			(apply (case message
@@ -226,10 +225,7 @@
 					((left-type)        get-left-type)
 					((right-type)       get-right-type)
 					((pair-type)        get-pair-type)
-					((pair-count)       get-pair-count)
 					((get-pair)         get-pair)
-					((get-count)        get-count)
-					((set-count)        set-count)
 					((make-pair)        make-pair)
 					((left-element)     get-left-element)
 					((right-element)    get-right-element)
@@ -239,7 +235,7 @@
 					((get-all-elts)     get-all-pairs)
 					((fetch-pairs)      fetch-all-pairs)
 					((delete-pairs)     delete-all-pairs)
-					((provides)         (lambda (symb) #f))
+					((provides)         provides)
 					((filters?)         (lambda () #f))
 					((help)             help)
 					((describe)         describe)

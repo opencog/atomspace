@@ -121,12 +121,6 @@
 
 		(define pair-sim-type 'SimilarityLink)
 
-		(define (get-pair L-ATOM R-ATOM)
-			(cog-link pair-sim-type L-ATOM R-ATOM))
-
-		(define (make-pair L-ATOM R-ATOM)
-			(SimilarityLink L-ATOM R-ATOM))
-
 		(define sim-key (PredicateNode
 			(if ID
 				(string-append "*-SimKey " ID)
@@ -138,20 +132,12 @@
 			(if (nil? ATOM) #f
 				(cog-value ATOM sim-key)))
 
-		(define (get-pair-sim A B) (get-sim (get-pair A B)))
-
 		; Save a precomputed similarity on ATOM. The SIM should be a
 		; Value, e.g. a FloatValue. If SIM if #f then any existing
 		; value is removed.
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key SIM))
 
-		; Since SimilarityLink is an UnorderedLink, the ordering of
-		; left and right will be random, depending on the atom hash.
-		; However, it will be consistent within a given session.
-		; Same remarks for the wildcards.
-		(define (get-pair-left PAIR) (gadr PAIR))
-		(define (get-pair-right PAIR) (gddr PAIR))
 		(define (get-wildcard ITEM)
 			(Similarity (AnyNode "wild") ITEM))
 		(define (get-wild-wild)
@@ -166,6 +152,13 @@
 			(format #t "Elapsed time to load sims: ~A secs\n"
 				(elapsed-secs)))
 
+		; Tell the stars object what we provide.
+		(define (provides meth)
+			(case meth
+				((get-count)      get-sim)
+				((set-count)      set-sim)
+				(else               #f)))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -173,18 +166,14 @@
 				((left-type)      item-type)
 				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
-				((get-pair)       (apply get-pair args))
-				((make-pair)      (apply make-pair args))
 				((get-count)      (apply get-sim args))
-				((pair-count)     (apply get-pair-sim args))
-				((left-element)   (apply get-pair-left args))
-				((right-element)  (apply get-pair-right args))
+				((set-count)      (apply set-sim args))
 				((left-wildcard)  (apply get-wildcard args))
 				((right-wildcard) (apply get-wildcard args))
 				((wild-wild)      (get-wild-wild))
 
 				((fetch-pairs)    (fetch-sim-pairs))
-				((provides)       #f)
+				((provides)       (apply provides args))
 				((filters?)       #f)
 
 				((pair-similarity)     (apply get-sim args))

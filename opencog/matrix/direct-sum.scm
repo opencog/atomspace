@@ -405,6 +405,16 @@
 				((right-duals)      right-duals)
 				((get-all-elts)     get-all-elts)
 				((clobber)          clobber)
+
+				((get-pair)         get-pair)
+				((pair-count)       get-pair-count)
+				((get-count)        get-count)
+				((set-count)        set-count)
+				((make-pair)        make-pair)
+				((left-element)     get-pair-left)
+				((right-element)    get-pair-right)
+
+				(else               #f)
 			))
 
 		; -------------
@@ -420,6 +430,7 @@
 				((get-pair)         (apply get-pair args))
 				((pair-count)       (apply get-pair-count args))
 				((get-count)        (apply get-count args))
+				((set-count)        (apply set-count args))
 				((make-pair)        (apply make-pair args))
 				((left-element)     (apply get-pair-left args))
 				((right-element)    (apply get-pair-right args))
