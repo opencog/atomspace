@@ -292,51 +292,40 @@
 				(map (lambda (COL) (LLOBJ 'make-pair row-var COL)) COL-TUPLE))
 
 			(define qry
-				(Bind
+				(Meet
 					(TypedVariable row-var row-type)
-					(Present term-list)
-					(List term-list killer)))
+					(Present term-list)))
 
-			(define qryset (cog-value->list (cog-execute! qry)))
+			(define rowset (cog-value->list (cog-execute! qry)))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
-			(define ncol (length COL-TUPLE))
-			(define colset
-				(map
-					(lambda (ITM) (take (cog-outgoing-set ITM) ncol))
-					qryset))
-
-			(cog-extract-recursive! killer)
-			colset
+			(map
+				(lambda (ROW)
+					(map (lambda (COL) (LLOBJ 'make-pair ROW COL)) COL-TUPLE))
+				rowset)
 		)
 
 		; ---------------
 		(define (right-star-intersect ROW-TUPLE)
-			(define killer (uniquely-named-variable))  ; will be used for cleanup
 			(define col-var (uniquely-named-variable)) ; shared cols
 			(define col-type (thunk-type (LLOBJ 'right-type)))
 			(define term-list
 				(map (lambda (ROW) (LLOBJ 'make-pair ROW col-var)) ROW-TUPLE))
 
 			(define qry
-				(Bind
+				(Meet
 					(TypedVariable col-var col-type)
-					(Present term-list)
-					(List term-list killer)))
+					(Present term-list)))
 
-			(define qryset (cog-value->list (cog-execute! qry)))
+			(define colset (cog-value->list (cog-execute! qry)))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
-			(define nrow (length ROW-TUPLE))
-			(define rowset
-				(map
-					(lambda (ITM) (take (cog-outgoing-set ITM) nrow))
-					qryset))
-
-			(cog-extract-recursive! killer)
-			rowset
+			(map
+				(lambda (COL)
+					(map (lambda (ROW) (LLOBJ 'make-pair ROW COL)) ROW-TUPLE))
+				colset)
 		)
 
 		; ---------------
