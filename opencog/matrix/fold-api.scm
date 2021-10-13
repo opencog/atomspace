@@ -89,7 +89,7 @@
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
   of rows or columns, and then call FUNC on that tuple, in the place of
-  a regular call to the 'pair-count method. This creates a 'virtual'
+  a regular call to the 'get-count method. This creates a 'virtual'
   matrix whose entries are a function FUNC of the rows or columns of
   the original matrix. So, for example, given that LLOBJ holds a matrix
   N(x,y) of pairs, and FUNC taking three arguments, then this object
@@ -258,6 +258,51 @@
 				((provides)        (apply provides args))
 				(else              (apply LLOBJ (cons message args))))
 			)))
+
+; ---------------------------------------------------------------------
+;
+(define*-public (add-fast-math LLOBJ FUNC #:optional
+	(GET-CNT 'get-count))
+"
+  add-fast-math LLOBJ FUNC - Fast version of `add-tuple-math`
+
+  See `add-tuple-math` for details. This is much faster, as it uses
+  the pattern engine to find tuples. It is limited in two ways, though:
+  it can only be used to find intersections, and it only works for
+  doubles, at the moment.
+"
+
+		; ---------------
+		; Given a TUPLE of pairs, return a single number.
+		; The FUNC is applied to reduce the counts on each pair
+		; in the tuple down to just one number.
+		(define (get-func-count TUPLE)
+			(apply FUNC
+				(map
+					(lambda (pr) (if (null? pr) 0 (get-cnt pr)))
+					TUPLE)))
+
+		; ---------------
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((left-stars)  left-star-intersct)
+				((right-stars) right-star-intersect)
+				((get-count)   get-func-count)
+				(else          (LLOBJ 'provides meth))))
+
+		; ---------------
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-stars)      (apply left-star-intersect args))
+				((right-stars)     (apply right-star-intersect args))
+				((get-count)       (apply get-func-count args))
+				((provides)        (apply provides args))
+				(else              (apply LLOBJ (cons message args))))
+			)))
+)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
