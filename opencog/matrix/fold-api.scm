@@ -285,7 +285,6 @@
 
 		; ---------------
 		(define (left-star-intersect COL-TUPLE)
-			(define killer (uniquely-named-variable))  ; will be used for cleanup
 			(define row-var (uniquely-named-variable)) ; shared rows
 			(define row-type (thunk-type (LLOBJ 'left-type)))
 			(define term-list
@@ -313,6 +312,15 @@
 			(define term-list
 				(map (lambda (ROW) (LLOBJ 'make-pair ROW col-var)) ROW-TUPLE))
 
+			; XXX TODO -- It is MUCH faster to have the qry create the
+			; desired pairs for us. However, this is problematic for
+			; the direct-sum, where the top query term is a ChoiceLink,
+			; and there is no easy way to get which choice was made!
+			; So we pay a fairly hefty penalty runningthe map immediately
+			; below. It would be better to do it all in the pattern engine.
+			; Even better: run the FUNC on everything return that.
+			; Better still: run the FUNC on the query results, in the C++
+			; code, and not in scheme.
 			(define qry
 				(Meet
 					(TypedVariable col-var col-type)
