@@ -214,10 +214,11 @@
 		; (and so we can dispatch based on the types) or, if not,
 		; then that the atoms are in left/right basis, (and can thus
 		; be dispatched based on membership.) If this is not the case,
-		; this will return undefined results. This should be good enough
-		; to create the needed wild-cards.
-		(define (make-pair L-ATOM R-ATOM)
-			(init-a-base)
+		; then this attempts to handle the special case of one or the
+		; other being a VariableNode, and tries to do the right thing.
+		; If this is not the case, it will return undefined results.
+		; (which may be crazy.)
+		(define (make-ordinary-pair L-ATOM R-ATOM)
 			(if distinct-type
 				(if disjoint-left
 					(if (symb-comp? L-ATOM (LLA 'left-type))
@@ -229,6 +230,37 @@
 				(if (type-a? L-ATOM R-ATOM)
 					(LLA 'make-pair L-ATOM R-ATOM)
 					(LLB 'make-pair L-ATOM R-ATOM))))
+
+		(define (make-left-variable-pair L-ATOM R-ATOM)
+			(if disjoint-right
+				(if (symb-comp? R-ATOM (LLA 'right-type))
+					(LLA 'make-pair L-ATOM R-ATOM)
+					(LLB 'make-pair L-ATOM R-ATOM))
+				(if (equal? (cog-type (get-pair-type)) 'TypeChoice)
+					(ChoiceLink
+						(LLA 'make-pair L-ATOM R-ATOM)
+						(LLB 'make-pair L-ATOM R-ATOM))
+					(throw 'invalid 'direct-sum "Don't know how to make this pair"))))
+
+		(define (make-right-variable-pair L-ATOM R-ATOM)
+			(if disjoint-left
+				(if (symb-comp? L-ATOM (LLA 'left-type))
+					(LLA 'make-pair L-ATOM R-ATOM)
+					(LLB 'make-pair L-ATOM R-ATOM))
+				(if (equal? (cog-type (get-pair-type)) 'TypeChoice)
+					(ChoiceLink
+						(LLA 'make-pair L-ATOM R-ATOM)
+						(LLB 'make-pair L-ATOM R-ATOM))
+					(throw 'invalid 'direct-sum "Don't know how to make this pair"))))
+
+		(define (make-pair L-ATOM R-ATOM)
+			(init-a-base)
+			(cond
+				((equal? (cog-type L-ATOM) 'VariableNode)
+					(make-left-variable-pair L-ATOM R-ATOM))
+				((equal? (cog-type R-ATOM) 'VariableNode)
+					(make-right-variable-pair L-ATOM R-ATOM))
+				(else (make-ordinary-pair L-ATOM R-ATOM))))
 
 		; Given a pair, find the left element in it.
 		(define (get-pair-left PAIR)
