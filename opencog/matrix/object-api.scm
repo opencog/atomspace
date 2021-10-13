@@ -358,7 +358,33 @@
 		(define pr (LLOBJ 'get-pair L R))
 		(if (nil? pr) 0 (LLOBJ 'get-count pr)))
 
-	(define (move-count ACCUM DONOT FRAC) 0)
+	; Accumulate a fraction FRAC of the count from DONOR into ACC.
+	; ACC and DONOR should be two pairs in this matrix.
+	; FRAC should be a numeric fraction, between 0.0 and 1.0.
+	; This is not thread-safe!
+	(define (move-count ACCUM DONOR FRAC)
+		; Return #t if the count is effectively zero.
+		; Use an epsilon for rounding errors.
+		(define (is-zero? cnt) (< cnt 1.0e-10))
+
+		; The counts on the accumulator and the pair to merge.
+		(define donor-cnt (LLOBJ 'get-count DONOR))
+		(define frac-cnt (* FRAC donor-cnt))
+		(define rem-cnt (- donor-cnt frac-cnt))
+
+		; If there is nothing to transfer over, do nothing.
+		(when (not (is-zero? frac-cnt))
+
+			; The accumulated count
+			(LLOBJ 'set-count ACCUM (+ frac-cnt (LLOBJ 'get-count ACCUM)))
+
+			; Update the count on the donor pair.
+			(LLOBJ 'set-count DONOR rem-cnt)
+		)
+
+		; Return how much was transfered over.
+		frac-cnt
+	)
 
 	(let ((l-basis #f)
 			(r-basis #f)
