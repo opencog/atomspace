@@ -135,7 +135,7 @@ void VectorAPIUTest::test_basic(void)
 	CHKERR;
 
 	std::string tru = eval->eval("(eq? 'WordNode (bapi 'left-type))");
-	printf ("Got >>>%s", tru.c_str());
+	printf ("L Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval("(eq? 'WordNode (bapi 'right-type))");
@@ -149,8 +149,8 @@ void VectorAPIUTest::test_basic(void)
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval(
-		"(equal? 3.0 (bapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
-	printf ("Got >>>%s", tru.c_str());
+		"(equal? 3.0 (sapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
+	printf ("P Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	logger().debug("END TEST: %s", __FUNCTION__);

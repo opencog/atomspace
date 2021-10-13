@@ -111,7 +111,6 @@
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
-				((pair-count) get-pair-count)
 				((get-pair) get-pair)
 				((get-count) get-count)
 				((make-pair) make-pair)

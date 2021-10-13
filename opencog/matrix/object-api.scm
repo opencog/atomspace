@@ -355,8 +355,8 @@
 	; Return the raw observational count on PAIR. If the counter for
 	; PAIR does not exist (was not observed), then return 0.
 	(define (pair-count L R)
-		(define pr (get-pair L R))
-		(if (nil? pr) 0 (get-count pr)))
+		(define pr (LLOBJ 'get-pair L R))
+		(if (nil? pr) 0 (LLOBJ 'get-count pr)))
 
 	(define (move-count ACCUM DONOT FRAC) 0)
 
