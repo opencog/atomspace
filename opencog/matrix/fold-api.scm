@@ -80,7 +80,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
 ;
@@ -267,9 +267,9 @@
   add-fast-math LLOBJ FUNC - Fast version of `add-tuple-math`
 
   See `add-tuple-math` for details. This is much faster, as it uses
-  the pattern engine to find tuples. It is limited in two ways, though:
-  it can only be used to find intersections, and it only works for
-  doubles, at the moment.
+  the pattern engine to find tuples. It is limited, though: it will
+  only return intersections!  This is sufficient for taking products
+  but is not enough for sums.
 
   For example, given two columns [y,z], the 'left-stars method
   will return the set
