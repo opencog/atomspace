@@ -277,6 +277,9 @@
      { [(x,y), (x,z)] | both (x,y) and (x,z) are present in
                        the atomspace. }
 "
+	(let ((star-obj (add-pair-stars LLOBJ))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
+		)
 		; ---------------
 		(define (left-star-intersect COL-TUPLE)
 			(define killer (uniquely-named-variable))  ; will be used for cleanup
@@ -361,8 +364,8 @@
 				((right-stars)     (apply right-star-intersect args))
 				((get-count)       (apply get-func-count args))
 				((provides)        (apply provides args))
-				(else              (apply LLOBJ (cons message args))))
-			)))
+				(else              (apply LLOBJ (cons message args)))))
+	)
 )
 
 ; ---------------------------------------------------------------------
