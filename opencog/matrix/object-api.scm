@@ -335,14 +335,20 @@
       entries. Return #f if none.
 "
 	(define pair-type (LLOBJ 'pair-type))
+	(define pair-type-str
+		(cond
+			((symbol? pair-type) (symbol->string pair-type))
+			((and (cog-atom? pair-type) (equal? (cog-type pair-type) 'TypeNode))
+				(cog-name pair-type))
+			(else #f)))
 
 	; Basic defaults for base class methods. If the base class provides
 	; these, then the base-classes methods will be used.
 	(define (get-pair L R)
-		(cog-link pair-type L R))
+		(cog-link pair-type-str L R))
 
 	(define (make-pair L R)
-		(cog-new-link pair-type L R))
+		(cog-new-link pair-type-str L R))
 
 	(define (left-element PR) (gar PR))
 	(define (right-element PR) (gdr PR))
