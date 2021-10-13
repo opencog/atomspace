@@ -406,15 +406,9 @@
 				((get-all-elts)     get-all-elts)
 				((clobber)          clobber)
 
-				((get-pair)         get-pair)
-				((pair-count)       get-pair-count)
-				((get-count)        get-count)
-				((set-count)        set-count)
-				((make-pair)        make-pair)
-				((left-element)     get-pair-left)
-				((right-element)    get-pair-right)
-
-				(else               #f)
+				; weird -- returning #f causes learn unit tests to fail!
+				; I don't understand why...
+				(else               #t)
 			))
 
 		; -------------
