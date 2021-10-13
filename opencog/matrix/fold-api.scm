@@ -89,7 +89,7 @@
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
   of rows or columns, and then call FUNC on that tuple, in the place of
-  a regular call to the 'get-count method. This creates a 'virtual'
+  a regular call to the 'pair-count method. This creates a 'virtual'
   matrix whose entries are a function FUNC of the rows or columns of
   the original matrix. So, for example, given that LLOBJ holds a matrix
   N(x,y) of pairs, and FUNC taking three arguments, then this object
@@ -270,7 +270,68 @@
   the pattern engine to find tuples. It is limited in two ways, though:
   it can only be used to find intersections, and it only works for
   doubles, at the moment.
+
+  For example, given two columns [y,z], the 'left-stars method
+  will return the set
+
+     { [(x,y), (x,z)] | both (x,y) and (x,z) are present in
+                       the atomspace. }
 "
+		; ---------------
+		(define (left-star-intersect COL-TUPLE)
+			(define killer (uniquely-named-variable))  ; will be used for cleanup
+			(define row-var (uniquely-named-variable)) ; shared rows
+			(define row-type (LLOBJ 'left-type))
+			(define term-list
+				(map (lambda (COL) (LLOBJ 'make-pair row-var COL)) COL-TUPLE))
+
+			(define qry
+				(Bind
+					(TypedVariable row-var row-type)
+					(Present term-list)
+					(List term-list killer)))
+
+			(define qryset (cog-value->list (cog-execute! qry)))
+
+			; Convert what the pattern engine returned to
+			; a list of scheme lists.
+			(define ncol (length COL-TUPLE))
+			(define colset
+				(map
+					(lambda (ITM) (take (cog-outgoing-set ITM) ncol))
+					qryset))
+
+			(cog-extract-recursive! killer)
+			colset
+		)
+
+		; ---------------
+		(define (right-star-intersect ROW-TUPLE)
+			(define killer (uniquely-named-variable))  ; will be used for cleanup
+			(define col-var (uniquely-named-variable)) ; shared cols
+			(define col-type (LLOBJ 'right-type))
+			(define term-list
+				(map (lambda (ROW) (LLOBJ 'make-pair ROW col-var)) ROW-TUPLE))
+
+			(define qry
+				(Bind
+					(TypedVariable col-var col-type)
+					(Present term-list)
+					(List term-list killer)))
+
+			(define qryset (cog-value->list (cog-execute! qry)))
+
+			; Convert what the pattern engine returned to
+			; a list of scheme lists.
+			(define nrow (length ROW-TUPLE))
+			(define rowset
+				(map
+					(lambda (ITM) (take (cog-outgoing-set ITM) nrow))
+					qryset))
+
+			(cog-extract-recursive! killer)
+			rowset
+		)
 
 		; ---------------
 		; Given a TUPLE of pairs, return a single number.
