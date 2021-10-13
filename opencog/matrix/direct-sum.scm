@@ -260,10 +260,10 @@
 				(LLA 'get-count PAIR) (LLB 'get-count PAIR)))
 
 		; As above, but the setter.
-		(define (set-count PAIR)
+		(define (set-count PAIR CNT)
 			(init-a-set)
 			(if (is-from-a? PAIR)
-				(LLA 'set-count PAIR) (LLB 'set-count PAIR)))
+				(LLA 'set-count PAIR CNT) (LLB 'set-count PAIR CNT)))
 
 		; Delegate wildcards to the two components.
 		; The disjoint side gives us an unambiguous wildcard that
