@@ -549,17 +549,21 @@
 
 		; Perform three sums at once. The final sqrt taken later.
 		(define (sum-norms LIST)
-			(fold
-				(lambda (lopr sum)
-					(define cnt (get-cnt lopr))
-					(if (< 0 cnt) (list
-							(+ (first sum) 1)
-							(+ (second sum) cnt)
-							(+ (third sum) (* cnt cnt))
-							(+ (fourth sum) (sqrt cnt)))
-						sum))
-				(list 0 0 0 0)
-				LIST))
+			; Instead of using fold, use set! It should be faster.
+			(define l0 0)
+			(define l1 0)
+			(define l2 0)
+			(define lq 0)
+			(for-each
+				(lambda (ITM)
+					(define cnt (get-cnt ITM))
+					(when (< 0 cnt)
+						(set! l0 (+ l0 1))
+						(set! l1 (+ l1 cnt))
+						(set! l2 (+ l2 (* cnt cnt)))
+						(set! lq (+ lq (sqrt cnt)))))
+				LIST)
+			(list l0 l1 l2 lq))
 
 		(define (sum-left-norms ITEM)
 			(sum-norms (star-obj 'left-stars ITEM)))
