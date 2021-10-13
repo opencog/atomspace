@@ -438,6 +438,27 @@ void VectorAPIUTest::test_fast(void)
 	CHKCMP("fast-product (table,chicken)", num, nuf);
 	// --------------
 
+#define LEFT_PROD(A,B)\
+	num = eval->eval("(cosi 'left-product (Word \"" A "\") (Word \"" B "\"))");\
+	nut = eval->eval("(prod-t 'left-count (list (Word \"" A "\") (Word \"" B "\")))");\
+	nuf = eval->eval("(prod-f 'left-count (list (Word \"" A "\") (Word \"" B "\")))");\
+	CHKCMP("tuple-product(" A "," B ")", num, nut);\
+	CHKCMP("fast-product (" A "," B ")", num, nuf);
+
+	LEFT_PROD("wings", "wings")
+	LEFT_PROD("wings", "eyes")
+	LEFT_PROD("wings", "legs")
+	LEFT_PROD("wings", "snouts")
+
+	LEFT_PROD("eyes", "eyes")
+	LEFT_PROD("eyes", "legs")
+	LEFT_PROD("eyes", "snouts")
+
+	LEFT_PROD("legs", "legs")
+	LEFT_PROD("legs", "snouts")
+
+	LEFT_PROD("snouts", "snouts")
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
