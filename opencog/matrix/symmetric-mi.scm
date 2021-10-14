@@ -117,7 +117,7 @@
 			(sup-obj   (add-support-api star-obj))
 			(trans-obj (add-transpose-api star-obj))
 			(prod-obj  (add-support-compute
-				(add-tuple-math star-obj * GET-CNT)))
+				(add-fast-math star-obj * GET-CNT)))
 
 			; Cache of the totals
 			(mtm-total #f)

@@ -152,7 +152,7 @@
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj  (add-support-compute star-obj GET-CNT))
 			(prod-obj  (add-support-compute
-				(add-tuple-math star-obj * GET-CNT)))
+				(add-fast-math star-obj * GET-CNT)))
 			(min-obj   (add-support-compute
 				(add-tuple-math star-obj min GET-CNT)))
 			(max-obj   (add-support-compute
@@ -160,7 +160,7 @@
 			(either-obj   (add-support-compute
 				(add-tuple-math star-obj either GET-CNT)))
 			(both-obj   (add-support-compute
-				(add-tuple-math star-obj both GET-CNT)))
+				(add-fast-math star-obj both GET-CNT)))
 		)
 
 		; -------------
