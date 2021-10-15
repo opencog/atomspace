@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "ArithmeticLink.h"
 #include "AccumulateLink.h"
 
@@ -77,13 +78,13 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 	{
 		const std::vector<ValuePtr>& lvec(LinkValueCast(vi)->value());
 		std::vector<double> acc;
-		for (const LinkValuePtr& lv : lvec)
+		for (const ValuePtr& lv : lvec)
 		{
 			Type lvtype = lv->get_type();
 			if (not nameserver().isA(lvtype, FLOAT_VALUE)) continue;
 
 			const std::vector<double>& dvec(FloatValueCast(lv)->value());
-			acc = plus(acc, devc);
+			acc = plus(acc, dvec);
 		}
 		return createFloatValue(acc);
 	}
