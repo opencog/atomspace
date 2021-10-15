@@ -84,6 +84,9 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 			if (not nameserver().isA(lvtype, FLOAT_VALUE)) continue;
 
 			const std::vector<double>& dvec(FloatValueCast(lv)->value());
+
+			if (acc.size() < dvec.size())
+				acc.resize(dvec.size());
 			acc = plus(acc, dvec);
 		}
 		return createFloatValue(acc);
