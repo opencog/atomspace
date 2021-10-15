@@ -119,7 +119,7 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-// GetLink groundings go through here.
+// MeetLink and GetLink groundings go through here.
 bool SatisfyingSet::grounding(const GroundingMap &var_soln,
                               const GroundingMap &term_soln)
 {
@@ -172,13 +172,10 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 			vargnds.push_back(hv);
 		}
 	}
-	Handle gnds(_as->add_atom(createLink(std::move(vargnds), LIST_LINK)));
+	ValuePtr gnds(createLinkValue(std::move(vargnds)));
 
-	if (_satisfying_set.end() == _satisfying_set.find(gnds))
-	{
-		_satisfying_set.emplace(gnds);
-		_result_queue->push(std::move(gnds));
-	}
+	_satisfying_set.emplace(gnds);
+	_result_queue->push(std::move(gnds));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);
