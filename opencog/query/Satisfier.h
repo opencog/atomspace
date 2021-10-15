@@ -110,7 +110,6 @@ class SatisfyingSet :
 		AtomSpace* _as;
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
-		HandleSet _satisfying_set;
 		QueueValuePtr _result_queue;
 
 	public:
