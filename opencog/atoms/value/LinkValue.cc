@@ -62,7 +62,7 @@ HandleSet LinkValue::to_handle_set(void) const
 		{
 			HandleSeq hsr(LinkValueCast(v)->to_handle_seq());
 			Handle h(createLink(std::move(hsr), LIST_LINK));
-			hs.push_back(h);
+			hs.insert(h);
 		}
 	}
 	return hs;
