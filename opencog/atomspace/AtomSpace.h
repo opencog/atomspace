@@ -468,18 +468,11 @@ public:
     /* ----------------------------------------------------------- */
     // ---- Signals
 
-    AtomSignal& atomAddedSignal()
-    {
-        return AtomTable::atomAddedSignal();
-    }
-    AtomSignal& atomRemovedSignal()
-    {
-        return AtomTable::atomRemovedSignal();
-    }
-    TVCHSigl& TVChangedSignal()
-    {
-        return AtomTable::TVChangedSignal();
-    }
+    AtomSignal& atomAddedSignal() { return AtomTable::_addAtomSignal; }
+    AtomSignal& atomRemovedSignal() { return AtomTable::_removeAtomSignal; }
+
+    /** Provide ability for others to find out about TV changes */
+    TVCHSigl& TVChangedSignal() { return AtomTable::_TVChangedSignal; }
 };
 
 /** @}*/

@@ -129,10 +129,10 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         atom->setUnchecked();
 
     // Loop to see if each atom in the first has a match in the second.
-    const AtomTable& table_second = (AtomTable*)space_second;
+    const AtomTable& table_second = (AtomTable&)space_second;
     for (auto atom_first : atomsInFirstSpace)
     {
-        Handle atom_second = table_second.getHandle(atom_first);
+        Handle atom_second = table_second.get_atom(atom_first);
 
         if( false)
         {
@@ -264,7 +264,7 @@ Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return AtomTable::.get_atom(h);
+    if (_read_only) return AtomTable::get_atom(h);
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;

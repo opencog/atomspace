@@ -341,7 +341,7 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
 
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    handle = getHandle(handle);
+    handle = get_atom(handle);
 
     if (nullptr == handle or handle->isMarkedForRemoval()) return result;
 
@@ -510,7 +510,7 @@ void AtomTable::get_handle_set_by_type(HandleSet& hset,
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomTable::getRootSetByType(HandleSet& hset,
+void AtomTable::get_root_set_by_type(HandleSet& hset,
                                  Type type,
                                  bool subclass,
                                  bool parent,
@@ -552,5 +552,5 @@ void AtomTable::getRootSetByType(HandleSet& hset,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->getRootSetByType(hset, type, subclass, parent, cas);
+        _environ->get_root_set_by_type(hset, type, subclass, parent, cas);
 }

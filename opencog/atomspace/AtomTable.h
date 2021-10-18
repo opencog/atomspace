@@ -68,7 +68,7 @@ class AtomTable
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
 
-private:
+protected:
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
@@ -197,7 +197,7 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle get_atom(const Handle&) const;
-protected:
+//protected:
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
     Handle lookupHandle(const Handle&) const;
@@ -291,7 +291,7 @@ public:
         opencog::setting_omp(opencog::num_threads());
     }
 
-protected:
+// protected:
     /**
      * Adds an atom to the table.
      *
@@ -339,12 +339,6 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
-
-    AtomSignal& atomAddedSignal() { return _addAtomSignal; }
-    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
-
-    /** Provide ability for others to find out about TV changes */
-    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
 };
 
 /** @}*/
