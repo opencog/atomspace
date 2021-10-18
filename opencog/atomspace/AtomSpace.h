@@ -47,7 +47,7 @@ namespace opencog
  *  AtomSpace atomspace;
  * @endcode
  */
-class AtomSpace
+class AtomSpace : public AtomTable
 {
     friend class Atom;               // Needs to call get_atomtable()
     friend class BackingStore;       // Needs to call get_atomtable()
@@ -72,9 +72,7 @@ class AtomSpace
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
-    AtomTable _atom_table;
-
-    AtomTable& get_atomtable(void) { return _atom_table; }
+    AtomTable& get_atomtable(void) { return (AtomTable&) (*this); }
 
     bool _read_only;
     bool _copy_on_write;
@@ -109,13 +107,13 @@ public:
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
-        AtomTable* env = _atom_table.get_environ();
+        AtomTable* env = get_environ();
         if (env) return env->getAtomSpace();
         return nullptr;
     }
 
     bool in_environ(const Handle& h) const {
-        return _atom_table.in_environ(h);
+        return AtomTable::in_environ(h);
     }
 
     /// Return the depth of the Atom, relative to this AtomSpace.
@@ -123,7 +121,7 @@ public:
     /// if it is in the parent, and so on. It is -1 if it is not
     /// in the chain.
     int depth(const Handle& h) const {
-        return _atom_table.depth(h);
+        return AtomTable::depth(h);
     }
 
     /**
@@ -139,16 +137,16 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline size_t get_size() const { return _atom_table.getSize(); }
-    inline size_t get_num_nodes() const { return _atom_table.getNumNodes(); }
-    inline size_t get_num_links() const { return _atom_table.getNumLinks(); }
+    inline size_t get_size() const { return getSize(); }
+    inline size_t get_num_nodes() const { return getNumNodes(); }
+    inline size_t get_num_links() const { return getNumLinks(); }
     inline size_t get_num_atoms_of_type(Type type, bool subclass=false) const
-        { return _atom_table.getNumAtomsOfType(type, subclass); }
-    inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
+        { return getNumAtomsOfType(type, subclass); }
+    inline UUID get_uuid(void) const { return AtomTable::get_uuid(); }
 
     //! Clear the atomspace, extract all atoms.
     void clear()
-        { _atom_table.clear(); }
+        { AtomTable::clear(); }
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
@@ -251,7 +249,7 @@ public:
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
+    Handle get_atom(const Handle& h) const { return getHandle(h); }
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom
@@ -274,7 +272,7 @@ public:
      *         removed. False, otherwise.
      */
     bool extract_atom(Handle h, bool recursive=false, bool do_lock=true) {
-        return 0 < _atom_table.extract(h, recursive, do_lock).size();
+        return 0 < extract(h, recursive, do_lock).size();
     }
     bool remove_atom(Handle h, bool recursive=false) {
         return extract_atom(h, recursive);
@@ -369,7 +367,7 @@ public:
                                Type type,
                                bool subclass=false) const
     {
-        return _atom_table.getHandleSetByType(hset, type, subclass);
+        return getHandleSetByType(hset, type, subclass);
     }
 
     /**
@@ -393,7 +391,7 @@ public:
                              Type type,
                              bool subclass=false) const
     {
-        return _atom_table.getRootSetByType(hset, type, subclass);
+        return getRootSetByType(hset, type, subclass);
     }
 
     /**
@@ -421,7 +419,7 @@ public:
         size_t initial_size = appendToHandles.size();
 
         // Determine the number of atoms we'll be adding.
-        size_t size_of_append = _atom_table.getNumAtomsOfType(type, subclass);
+        size_t size_of_append = getNumAtomsOfType(type, subclass);
 
         // Now reserve size for the addition. This is faster for large
         // append iterations since appends to the list won't require new
@@ -459,7 +457,7 @@ public:
                         Type type,
                         bool subclass=false) const
     {
-        return _atom_table.getHandlesByType(result, type, subclass);
+        return getHandlesByType(result, type, subclass);
     }
 
     /**
@@ -472,15 +470,15 @@ public:
 
     AtomSignal& atomAddedSignal()
     {
-        return _atom_table.atomAddedSignal();
+        return AtomTable::atomAddedSignal();
     }
     AtomSignal& atomRemovedSignal()
     {
-        return _atom_table.atomRemovedSignal();
+        return AtomTable::atomRemovedSignal();
     }
     TVCHSigl& TVChangedSignal()
     {
-        return _atom_table.TVChangedSignal();
+        return AtomTable::TVChangedSignal();
     }
 };
 
