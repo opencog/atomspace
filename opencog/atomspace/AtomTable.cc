@@ -172,7 +172,7 @@ Handle AtomTable::lookupHandle(const Handle& a) const
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
 /// Otherwise, search for an equivalent atom that we might be holding.
-Handle AtomTable::getHandle(const Handle& a) const
+Handle AtomTable::get_atom(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 

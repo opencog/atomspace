@@ -249,7 +249,7 @@ public:
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) const { return getHandle(h); }
+    Handle get_atom(const Handle& h) const { return AtomTable::get_atom(h); }
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom

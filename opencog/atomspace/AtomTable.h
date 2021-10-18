@@ -196,11 +196,13 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
+    Handle get_atom(const Handle&) const;
+protected:
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
-    Handle getHandle(const Handle&) const;
     Handle lookupHandle(const Handle&) const;
 
+public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -289,6 +291,7 @@ public:
         opencog::setting_omp(opencog::num_threads());
     }
 
+protected:
     /**
      * Adds an atom to the table.
      *
@@ -300,6 +303,7 @@ public:
      */
     Handle add(const Handle&, bool force=false, bool do_lock=true);
 
+public:
     /**
      * Read-write synchronization barrier fence.  When called, this
      * will not return until all the atoms previously added to the
