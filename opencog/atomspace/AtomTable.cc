@@ -454,7 +454,7 @@ void AtomTable::typeAdded(Type t)
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomTable::getHandleSetByType(HandleSet& hset,
+void AtomTable::get_handle_set_by_type(HandleSet& hset,
                                    Type type,
                                    bool subclass,
                                    bool parent,
@@ -497,7 +497,7 @@ void AtomTable::getHandleSetByType(HandleSet& hset,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->getHandleSetByType(hset, type, subclass, parent, cas);
+        _environ->get_handle_set_by_type(hset, type, subclass, parent, cas);
 }
 
 /**

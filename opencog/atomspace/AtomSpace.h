@@ -367,7 +367,7 @@ public:
                                Type type,
                                bool subclass=false) const
     {
-        return getHandleSetByType(hset, type, subclass);
+        return AtomTable::get_handle_set_by_type(hset, type, subclass);
     }
 
     /**
@@ -387,11 +387,11 @@ public:
      *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_rootset_by_type(HandleSet& hset,
+    void get_root_set_by_type(HandleSet& hset,
                              Type type,
                              bool subclass=false) const
     {
-        return getRootSetByType(hset, type, subclass);
+        return AtomTable::get_root_set_by_type(hset, type, subclass);
     }
 
     /**
@@ -457,7 +457,7 @@ public:
                         Type type,
                         bool subclass=false) const
     {
-        return getHandlesByType(result, type, subclass);
+        return AtomTable::get_handles_by_type(result, type, subclass);
     }
 
     /**

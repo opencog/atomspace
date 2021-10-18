@@ -209,7 +209,7 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      */
     void
-    getHandleSetByType(HandleSet& hset,
+    get_handle_set_by_type(HandleSet& hset,
                        Type type,
                        bool subclass=false,
                        bool parent=true,
@@ -226,7 +226,7 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      */
     void
-    getRootSetByType(HandleSet& hset,
+    get_root_set_by_type(HandleSet& hset,
                      Type type,
                      bool subclass=false,
                      bool parent=true,
@@ -242,14 +242,14 @@ public:
      * @return The set of atoms of a given type (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByType(OutputIterator result,
+    get_handles_by_type(OutputIterator result,
                      Type type,
                      bool subclass=false,
                      bool parent=true) const
     {
         // Sigh. Copy the handles. This hurts performance.
         HandleSet hset;
-        getHandleSetByType(hset, type, subclass, parent);
+        get_handle_set_by_type(hset, type, subclass, parent);
         return std::copy(hset.begin(), hset.end(), result);
     }
 
@@ -261,7 +261,7 @@ public:
                         bool parent=true) const
     {
         HandleSet hset;
-        getHandleSetByType(hset, type, subclass, parent);
+        get_handle_set_by_type(hset, type, subclass, parent);
         std::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
@@ -275,7 +275,7 @@ public:
                         bool parent=true) const
     {
         HandleSet hset;
-        getHandleSetByType(hset, type, subclass, parent);
+        get_handle_set_by_type(hset, type, subclass, parent);
 
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);

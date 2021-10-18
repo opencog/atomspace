@@ -136,7 +136,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     setValue (truth_key(), ValueCast(newTV));
 
     if (_atom_space != nullptr) {
-        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
+        TVCHSigl& tvch = _atom_space->TVChangedSignal();
         tvch.emit(get_handle(), oldTV, newTV);
     }
 }
@@ -299,7 +299,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 
 AtomTable* Atom::getAtomTable() const
 {
-    return &(_atom_space->_atom_table);
+    return (AtomTable*) _atom_space;
 }
 
 // ==============================================================
@@ -529,7 +529,7 @@ std::string Atom::id_to_string() const
 {
     std::stringstream ss;
     ss << "[" << std::hex << get_hash() << "][";
-    if (_atom_space) ss << _atom_space->_atom_table.get_uuid();
+    if (_atom_space) ss << _atom_space->get_uuid();
     else ss << "-1";
     ss << "]";
     return ss.str();
