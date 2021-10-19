@@ -186,6 +186,7 @@ public:
     ~AtomSpace();
 
     UUID get_uuid(void) const { return _uuid; }
+
     /// Transient atomspaces are lighter-weight, faster, but are missing
     /// some features. They are used during pattern matching, to hold
     /// temporary results. The are always copy-on-write spaces.
@@ -216,7 +217,7 @@ public:
     AtomSpace* get_environ(void) const { return _environ; }
 
     /**
-     * Return the depth of the Atom, relative to this AtomTable.
+     * Return the depth of the Atom, relative to this AtomSpace.
      * The depth is zero, if the Atom is in this table; it is one
      * if it is in the parent, and so on. It is -1 if it is not
      * in the chain.
@@ -225,7 +226,7 @@ public:
     {
         if (nullptr == atom) return -1;
         AtomSpace* atab = atom->getAtomSpace();
-        const AtomSpace* env = _as;
+        const AtomSpace* env = this;
         int count = 0;
         while (env) {
             if (atab == env) return count;
@@ -249,7 +250,7 @@ public:
     {
         if (nullptr == atom) return false;
         AtomSpace* atab = atom->getAtomSpace();
-        const AtomSpace* env = _as;
+        const AtomSpace* env = this;
         while (env) {
             if (atab == env) return true;
             env = env->_environ;
@@ -274,7 +275,6 @@ public:
     size_t get_num_nodes() const;
     size_t get_num_links() const;
     size_t get_num_atoms_of_type(Type type, bool subclass=false) const;
-    UUID get_uuid(void) const;
 
     //! Clear the atomspace, extract all atoms.
     void clear();
@@ -307,7 +307,7 @@ public:
     }
 
     /**
-     * Add a link to the AtomTable. If the atom already exists, then
+     * Add a link to the AtomSpace. If the atom already exists, then
      * that is returned.
      *
      * @param t         Type of the link
@@ -430,7 +430,7 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
-     * Get a node from the AtomTable, if it's in there. If the atom
+     * Get a node from the AtomSpace, if it's in there. If the atom
      * can't be found, Handle::UNDEFINED will be returned.
      *
      * @param t     Type of the node
@@ -442,7 +442,7 @@ public:
     }
 
     /**
-     * Get a link from the AtomTable, if it's in there. If the atom
+     * Get a link from the AtomSpace, if it's in there. If the atom
      * can't be found, Handle::UNDEFINED will be returned.
      *
      * See also the get_atom() method.
@@ -550,23 +550,25 @@ public:
      *         atomSpace.get_handle_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_handles_by_type(HandleSeq& appendToHandles,
+    void get_handles_by_type(HandleSeq& hseq,
                              Type type,
                              bool subclass=false) const
     {
         // Get the initial size of the handles vector.
-        size_t initial_size = appendToHandles.size();
+        size_t initial_size = hseq.size();
 
         // Determine the number of atoms we'll be adding.
-        size_t size_of_append = getNumAtomsOfType(type, subclass);
+        size_t size_of_append = get_num_atoms_of_type(type, subclass);
 
         // Now reserve size for the addition. This is faster for large
         // append iterations since appends to the list won't require new
         // allocations and copies whenever the allocated size is exceeded.
-        appendToHandles.reserve(initial_size + size_of_append);
+        hseq.reserve(initial_size + size_of_append);
 
         // Now defer to the output iterator call, eating the return.
-        get_handles_by_type(back_inserter(appendToHandles), type, subclass);
+        HandleSet hset;
+        get_handleset_by_type(hset, type, subclass);
+        std::copy(hset.begin(), hset.end(), hseq.end());
     }
 
     /**
@@ -599,7 +601,7 @@ public:
     {
         // Sigh. Copy the handles. This hurts performance.
         HandleSet hset;
-        get_handle_set_by_type(hset, type, subclass, parent);
+        get_handleset_by_type(hset, type, subclass, parent);
         return std::copy(hset.begin(), hset.end(), result);
     }
 
@@ -611,7 +613,7 @@ public:
                         bool parent=true) const
     {
         HandleSet hset;
-        get_handle_set_by_type(hset, type, subclass, parent);
+        get_handleset_by_type(hset, type, subclass, parent);
         std::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
@@ -625,7 +627,7 @@ public:
                         bool parent=true) const
     {
         HandleSet hset;
-        get_handle_set_by_type(hset, type, subclass, parent);
+        get_handleset_by_type(hset, type, subclass, parent);
 
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
@@ -647,11 +649,11 @@ public:
     /* ----------------------------------------------------------- */
     // ---- Signals
 
-    AtomSignal& atomAddedSignal() { return AtomTable::_addAtomSignal; }
-    AtomSignal& atomRemovedSignal() { return AtomTable::_removeAtomSignal; }
+    AtomSignal& atomAddedSignal() { return _addAtomSignal; }
+    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
 
     /** Provide ability for others to find out about TV changes */
-    TVCHSigl& TVChangedSignal() { return AtomTable::_TVChangedSignal; }
+    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
 };
 
 /** @}*/
