@@ -460,12 +460,23 @@ void AtomSpace::typeAdded(Type t)
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomSpace::get_handleset_by_type(HandleSet& hset,
-                                      Type type,
-                                      bool subclass,
-                                      bool parent,
-                                      const AtomSpace* cas) const
+void AtomSpace::get_handles_by_type(HandleSeq& hseq,
+                                    Type type,
+                                    bool subclass,
+                                    bool parent,
+                                    const AtomSpace* cas) const
 {
+    // Get the initial size of the handles vector.
+    size_t initial_size = hseq.size();
+
+    // Determine the number of atoms we'll be adding.
+    size_t size_of_append = get_num_atoms_of_type(type, subclass);
+
+    // Now reserve size for the addition. This is faster for large
+    // append iterations since appends to the list won't require new
+    // allocations and copies whenever the allocated size is exceeded.
+    hseq.reserve(initial_size + size_of_append);
+
     if (nullptr == cas) cas = this;
 
     std::shared_lock<std::shared_mutex> lck(_mtx);
@@ -480,30 +491,30 @@ void AtomSpace::get_handleset_by_type(HandleSet& hset,
     // UNIQUE_LINK.
     if (STATE_LINK == type) {
         while (tit != tend) {
-            hset.insert(
+            hseq.push_back(
                 StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else if (DEFINE_LINK == type) {
         while (tit != tend) {
-            hset.insert(
+            hseq.push_back(
                 DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else if (TYPED_ATOM_LINK == type) {
         while (tit != tend) {
-            hset.insert(
+            hseq.push_back(
                 TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else {
-        while (tit != tend) { hset.insert(*tit); tit++; }
+        while (tit != tend) { hseq.push_back(*tit); tit++; }
     }
 
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->get_handleset_by_type(hset, type, subclass, parent, cas);
+        _environ->get_handles_by_type(hseq, type, subclass, parent, cas);
 }
 
 /**
@@ -516,7 +527,7 @@ void AtomSpace::get_handleset_by_type(HandleSet& hset,
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomSpace::get_root_set_by_type(HandleSet& hset,
+void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
                                      Type type,
                                      bool subclass,
                                      bool parent,
@@ -529,28 +540,28 @@ void AtomSpace::get_root_set_by_type(HandleSet& hset,
     if (STATE_LINK == type) {
         while (tit != tend) {
             if (0 == (*tit)->getIncomingSetSize(cas))
-                hset.insert(
+                hseq.push_back(
                     StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else if (DEFINE_LINK == type) {
         while (tit != tend) {
             if (0 == (*tit)->getIncomingSetSize(cas))
-                hset.insert(
+                hseq.push_back(
                     DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else if (TYPED_ATOM_LINK == type) {
         while (tit != tend) {
             if (0 == (*tit)->getIncomingSetSize(cas))
-                hset.insert(
+                hseq.push_back(
                     TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
             tit++;
         }
     } else {
         while (tit != tend) {
             if (0 == (*tit)->getIncomingSetSize(cas))
-                hset.insert(*tit);
+                hseq.push_back(*tit);
             tit++;
         }
     }
@@ -558,5 +569,5 @@ void AtomSpace::get_root_set_by_type(HandleSet& hset,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->get_root_set_by_type(hset, type, subclass, parent, cas);
+        _environ->get_root_set_by_type(hseq, type, subclass, parent, cas);
 }

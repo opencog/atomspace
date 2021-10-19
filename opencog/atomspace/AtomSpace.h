@@ -490,11 +490,11 @@ public:
      * @endcode
      */
     void
-    get_handleset_by_type(HandleSet& hset,
-                          Type type,
-                          bool subclass=false,
-                          bool parent=true,
-                          const AtomSpace* = nullptr) const;
+    get_handles_by_type(HandleSeq&,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true,
+                        const AtomSpace* = nullptr) const;
 
     /**
      * Gets a set of handles that matches with the given type,
@@ -514,50 +514,11 @@ public:
      * @endcode
      */
     void
-    get_root_set_by_type(HandleSet& hset,
+    get_root_set_by_type(HandleSeq&,
                          Type type,
                          bool subclass=false,
                          bool parent=true,
                          const AtomSpace* = nullptr) const;
-
-
-    /**
-     * Gets a sequence of handles that matches with the given type
-     * (subclasses optionally).
-     * Caution: this is slower than using get_handleset_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * Example of call to this method, which would return all ConceptNodes
-     * in the AtomSpace:
-     * @code
-     *         HandleSeq atoms;
-     *         atomSpace.get_handle_by_type(atoms, CONCEPT_NODE);
-     * @endcode
-     */
-    void get_handles_by_type(HandleSeq& hseq,
-                             Type type,
-                             bool subclass=false) const
-    {
-        // Get the initial size of the handles vector.
-        size_t initial_size = hseq.size();
-
-        // Determine the number of atoms we'll be adding.
-        size_t size_of_append = get_num_atoms_of_type(type, subclass);
-
-        // Now reserve size for the addition. This is faster for large
-        // append iterations since appends to the list won't require new
-        // allocations and copies whenever the allocated size is exceeded.
-        hseq.reserve(initial_size + size_of_append);
-
-        // Now defer to the output iterator call, eating the return.
-        HandleSet hset;
-        get_handleset_by_type(hset, type, subclass);
-        std::copy(hset.begin(), hset.end(), hseq.end());
-    }
 
     /**
      * Gets a container of handles that matches with the given type
@@ -588,8 +549,8 @@ public:
                      bool parent=true) const
     {
         // Sigh. Copy the handles. This hurts performance.
-        HandleSet hset;
-        get_handleset_by_type(hset, type, subclass, parent);
+        HandleSeq hset;
+        get_handles_by_type(hset, type, subclass, parent);
         return std::copy(hset.begin(), hset.end(), result);
     }
 
@@ -600,8 +561,8 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        HandleSet hset;
-        get_handleset_by_type(hset, type, subclass, parent);
+        HandleSeq hset;
+        get_handles_by_type(hset, type, subclass, parent);
         std::for_each(hset.begin(), hset.end(),
              [&](const Handle& h)->void {
                   (func)(h);
@@ -614,8 +575,8 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        HandleSet hset;
-        get_handleset_by_type(hset, type, subclass, parent);
+        HandleSeq hset;
+        get_handles_by_type(hset, type, subclass, parent);
 
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
