@@ -115,7 +115,7 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             return None
-        atom_ptr.getIncomingSet(back_inserter(handle_vector))
+        atom_ptr.getIncomingIter(back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector)
 
     def incoming_by_type(self, Type type):

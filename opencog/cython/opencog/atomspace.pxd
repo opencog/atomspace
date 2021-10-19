@@ -122,7 +122,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
-        output_iterator getIncomingSet(output_iterator)
+        output_iterator getIncomingIter(output_iterator)
 
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
@@ -209,7 +209,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         # ==== query methods ====
         # get by type
-        output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
+        output_iterator get_handleset_by_type(output_iterator, Type t, bint subclass)
 
         void clear()
         bint extract_atom(cHandle h, bint recursive)
