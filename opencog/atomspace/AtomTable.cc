@@ -342,11 +342,11 @@ Handle AtomSpace::getRandom(RandGen *rng) const
     return randy;
 }
 
-bool AtomSpace::extract_atom(const Handle& handle, bool recursive, bool do_lock)
+bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
 {
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    handle = get_atom(handle);
+    Handle handle(get_atom(h));
 
     if (nullptr == handle or handle->isMarkedForRemoval()) return false;
 

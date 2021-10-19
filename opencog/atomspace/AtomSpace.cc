@@ -393,12 +393,12 @@ std::string AtomSpace::to_string() const
 
 namespace std {
 
-ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
-    list<opencog::Handle> results;
-    as.get_handlesset_by_type(back_inserter(results), opencog::ATOM, true);
-    for (const opencog::Handle& h : results)
-	    if (h->getIncomingSetSize() == 0)
-		    out << h->to_string() << std::endl;
+ostream& operator<<(ostream& out, const opencog::AtomSpace& as)
+{
+    HandleSeq hseq;
+    as.get_root_set_by_type(hseq, opencog::ATOM, true);
+    for (const opencog::Handle& h : hseq)
+		  out << h->to_string() << std::endl;
     return out;
 }
 
