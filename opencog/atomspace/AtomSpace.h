@@ -72,6 +72,15 @@ class AtomSpace : public AtomTable
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
+    /// Parent environment for this table.  Null if top-level.
+    /// This allows atomspaces to be nested; atoms in this atomspace
+    /// can reference those in the parent environment.
+    /// The UUID is used to uniquely identify it, for distributed
+    /// operation. Viz, other computers on the network may have a copy
+    /// of this atomtable, and so need to have its UUID to sync up.
+    AtomSpace* _environ;
+    std::atomic_int _num_nested;
+
     bool _read_only;
     bool _copy_on_write;
 
@@ -103,12 +112,10 @@ public:
     void clear_copy_on_write(void) { _copy_on_write = false; }
     bool get_copy_on_write(void) { return _copy_on_write; }
 
+    // -------------------------------------------------------
+
     /// Get the environment that this atomspace was created in.
-    AtomSpace* get_environ() const {
-        AtomTable* env = get_environ();
-        if (env) return env->getAtomSpace();
-        return nullptr;
-    }
+    AtomSpace* get_environ(void) const { return _environ; }
 
     /**
      * Return the depth of the Atom, relative to this AtomTable.

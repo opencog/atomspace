@@ -78,15 +78,6 @@ protected:
     //! Index of atoms.
     TypeIndex typeIndex;
 
-    /// Parent environment for this table.  Null if top-level.
-    /// This allows atomspaces to be nested; atoms in this atomspace
-    /// can reference those in the parent environment.
-    /// The UUID is used to uniquely identify it, for distributed
-    /// operation. Viz, other computers on the network may have a copy
-    /// of this atomtable, and so need to have its UUID to sync up.
-    AtomTable* _environ;
-    std::atomic_int _num_nested;
-
     // The AtomSpace that is holding us (if any).
     AtomSpace* _as;
     bool _transient;
@@ -134,7 +125,6 @@ public:
     void clear();
 
     UUID get_uuid(void) const { return _uuid; }
-    AtomTable* get_environ(void) const { return _environ; }
     AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
