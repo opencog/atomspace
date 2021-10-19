@@ -32,7 +32,6 @@
 
 namespace opencog
 {
-class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -47,8 +46,6 @@ class AtomTable;
  */
 class Link : public Atom
 {
-    friend class AtomTable;
-
 private:
     void init();
 

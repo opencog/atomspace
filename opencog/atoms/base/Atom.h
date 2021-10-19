@@ -76,7 +76,6 @@ namespace opencog
  */
 
 class AtomSpace;
-class AtomTable;
 
 //! arity of Links, represented as size_t to match outcoming set limit
 typedef std::size_t Arity;
@@ -100,13 +99,9 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 class Atom
     : public Value
 {
-    friend class AtomTable;       // Needs to call MarkedForRemoval()
-    friend class AtomSpace;       // Needs to call getAtomTable()
     friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
-    friend class SQLAtomStorage;  // Needs to call getAtomTable()
-    friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 protected:
     //! Sets the AtomSpace in which this Atom is inserted.

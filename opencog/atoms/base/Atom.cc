@@ -37,7 +37,6 @@
 #include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
 #define FETCHED_RECENTLY        1  //BIT0
@@ -297,11 +296,6 @@ void Atom::setAtomSpace(AtomSpace *tb)
     _atom_space = tb;
 }
 
-AtomTable* Atom::getAtomTable() const
-{
-    return (AtomTable*) _atom_space;
-}
-
 // ==============================================================
 // Incoming set stuff
 
@@ -409,13 +403,12 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
     size_t cnt = 0;
     if (as)
     {
-        const AtomTable *atab = &as->get_atomtable();
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
                 Handle l(w.lock());
-                if (l and atab->in_environ(l)) cnt++;
+                if (l and as->in_environ(l)) cnt++;
             }
         }
         return cnt;
@@ -436,7 +429,6 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         // Prevent update of set while a copy is being made.
         std::shared_lock<std::shared_mutex> lck (_mtx);
         IncomingSet iset;
@@ -445,7 +437,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
             for (const WinkPtr& w : bucket.second)
             {
                 Handle l(w.lock());
-                if (l and atab->in_environ(l))
+                if (l and as->in_environ(l))
                     iset.emplace_back(l);
             }
         }
@@ -479,11 +471,10 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 
     IncomingSet result;
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
             Handle l(w.lock());
-            if (l and atab->in_environ(l))
+            if (l and as->in_environ(l))
                 result.emplace_back(l);
         }
         return result;
@@ -508,11 +499,10 @@ size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
     size_t cnt = 0;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
             Handle l(w.lock());
-            if (l and atab->in_environ(l)) cnt++;
+            if (l and as->in_environ(l)) cnt++;
         }
         return cnt;
     }
