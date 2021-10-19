@@ -317,7 +317,7 @@ public:
     std::string valuesToString() const;
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize(AtomSpace* = nullptr) const;
+    size_t getIncomingSetSize(const AtomSpace* = nullptr) const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms
@@ -328,7 +328,7 @@ public:
     //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSet(const AtomSpace* = nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -395,10 +395,10 @@ public:
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type, AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSetByType(Type, const AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type, AtomSpace* = nullptr) const;
+    size_t getIncomingSetSizeByType(Type type, const AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;

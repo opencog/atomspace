@@ -394,7 +394,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize(AtomSpace* as) const
+size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
@@ -423,7 +423,7 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet(AtomSpace* as) const
+IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
@@ -458,7 +458,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
+IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
@@ -488,7 +488,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
     return result;
 }
 
-size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
+size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
     std::shared_lock<std::shared_mutex> lck(_mtx);
