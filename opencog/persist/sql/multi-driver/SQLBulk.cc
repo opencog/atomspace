@@ -48,7 +48,7 @@ using namespace opencog;
 /**
  * Retreive the incoming set of the indicated atom.
  */
-void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
+void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 {
 	std::vector<PseudoPtr> pset;
 	Response rp(conn_pool);
@@ -85,7 +85,7 @@ void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
+void SQLAtomStorage::getIncomingSet(AtomSpace& table, const Handle& h)
 {
 	rethrow();
 
@@ -113,7 +113,7 @@ void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
  * Retreive the incoming set of the indicated atom, but only those atoms
  * of type t.
  */
-void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+void SQLAtomStorage::getIncomingByType(AtomSpace& table, const Handle& h, Type t)
 {
 	rethrow();
 
@@ -143,7 +143,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 	return rp.intval;
 }
 
-void SQLAtomStorage::loadAtomSpace(AtomTable &table)
+void SQLAtomStorage::loadAtomSpace(AtomSpace &table)
 {
 	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
@@ -201,7 +201,7 @@ void SQLAtomStorage::loadAtomSpace(AtomTable &table)
 	table.barrier();
 }
 
-void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
+void SQLAtomStorage::loadType(AtomSpace &table, Type atom_type)
 {
 	rethrow();
 
@@ -262,7 +262,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 }
 
 /// Store all of the atoms in the atom table.
-void SQLAtomStorage::storeAtomSpace(const AtomTable &table)
+void SQLAtomStorage::storeAtomSpace(const AtomSpace &table)
 {
 	rethrow();
 

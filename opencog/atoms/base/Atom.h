@@ -99,6 +99,7 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 class Atom
     : public Value
 {
+    friend class AtomSpace;       // Needs to setChecked
     friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()

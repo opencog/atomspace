@@ -126,13 +126,13 @@ Handle FileStorageNode::getLink(Type, const HandleSeq&)
 	return Handle::UNDEFINED;
 }
 
-void FileStorageNode::getIncomingSet(AtomTable&, const Handle&)
+void FileStorageNode::getIncomingSet(AtomSpace&, const Handle&)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::getIncomingByType(AtomTable&, const Handle&, Type t)
+void FileStorageNode::getIncomingByType(AtomSpace&, const Handle&, Type t)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
@@ -182,13 +182,13 @@ void FileStorageNode::loadValue(const Handle&, const Handle&)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::loadType(AtomTable&, Type)
+void FileStorageNode::loadType(AtomSpace&, Type)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::storeAtomSpace(const AtomTable& table)
+void FileStorageNode::storeAtomSpace(const AtomSpace& table)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
@@ -207,7 +207,7 @@ void FileStorageNode::storeAtomSpace(const AtomTable& table)
 	fflush(_fh);
 }
 
-void FileStorageNode::loadAtomSpace(AtomTable& table)
+void FileStorageNode::loadAtomSpace(AtomSpace& table)
 {
 	// Check to see if it's connected, and then ignore the file handle.
 	if (not connected())

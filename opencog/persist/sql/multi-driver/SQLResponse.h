@@ -161,7 +161,7 @@ class SQLAtomStorage::Response
 			return true;
 		}
 
-		AtomTable *table;
+		AtomSpace *table;
 		SQLAtomStorage *store;
 		bool load_all_atoms_cb(void)
 		{
@@ -341,21 +341,21 @@ class SQLAtomStorage::Response
 				// Try really hard to stick the key into a table.
 				// XXX This is potentially broken, as no other code
 				// ever verifies that the key gets inserted into some
-				// table.  The correct fix is to add AtomTable as a
+				// table.  The correct fix is to add AtomSpace as a
 				// part of the BackingStore API. XXX TODO FIXME.
 				if (table) hkey = table->add(hkey, false);
-				else if (atom->getAtomTable())
-					hkey = atom->getAtomTable()->add(hkey, false);
+				else if (atom->getAtomSpace())
+					hkey = atom->getAtomSpace()->add(hkey, false);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 
 			// The below usually triggers only on tvpred,
 			// and so we could save some CPU cycles by handling
 			// tvpred earlier, and avoiding this check.
-			if (nullptr == hkey->getAtomTable() and
-			    nullptr != atom->getAtomTable())
+			if (nullptr == hkey->getAtomSpace() and
+			    nullptr != atom->getAtomSpace())
 			{
-				hkey = atom->getAtomTable()->add(hkey, false);
+				hkey = atom->getAtomSpace()->add(hkey, false);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 

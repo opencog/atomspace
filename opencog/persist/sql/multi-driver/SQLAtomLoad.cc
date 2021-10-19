@@ -256,7 +256,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 		}
 	}
 
-	// Give the atom the correct UUID. The AtomTable will need this.
+	// Give the atom the correct UUID. The AtomSpace will need this.
 	atom->type = realtype;
 	atom->uuid = uuid;
 
