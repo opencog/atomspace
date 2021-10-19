@@ -123,8 +123,8 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
         SQLAtomStorage *astore;
         void single_atom_save_restore(std::string id);
-        void add_to_table(int, AtomTable *, std::string id);
-        void check_table(int, AtomTable *, std::string id);
+        void add_to_table(int, AtomSpace *, std::string id);
+        void check_table(int, AtomSpace *, std::string id);
 
         void do_test_single_atom(void);
         void do_test_fresh_atom(void);
@@ -301,7 +301,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 // ============================================================
 
-void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
+void BasicSaveUTest::add_to_table(int idx, AtomSpace *table, std::string id)
 {
     // Create an atom ...
     n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
@@ -327,7 +327,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     n3[idx] = table->add(n3[idx]);
     a3[idx] = n3[idx];
 
-    // The NumberNode will go through the AtomTable clone factory
+    // The NumberNode will go through the AtomSpace clone factory
     // and should thus elicit any errors in clone uuid handling.
     char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
     n4[idx] = createNode(NUMBER_NODE, buf);
@@ -349,7 +349,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     al[idx] = l[idx];
 }
 
-void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
+void BasicSaveUTest::check_table(int idx, AtomSpace *table, std::string id)
 {
     Handle hb1 = table->getHandle(Handle(n1[idx]));
     atomCompare(a1[idx], hb1, "check_table hb1");
@@ -459,7 +459,7 @@ void BasicSaveUTest::do_test_table()
         return;
     }
 
-    AtomTable *table1 = new AtomTable();
+    AtomSpace *table1 = new AtomSpace();
     int idx = 0;
     add_to_table(idx++, table1, "AA-aa-wow ");
     add_to_table(idx++, table1, "BB-bb-wow ");
@@ -477,7 +477,7 @@ void BasicSaveUTest::do_test_table()
     store->open();
     TSM_ASSERT("Not connected to database", store->connected());
 
-    AtomTable *table2 = new AtomTable();
+    AtomSpace *table2 = new AtomSpace();
 
     store->loadAtomSpace(*table2);
     store->barrier();
