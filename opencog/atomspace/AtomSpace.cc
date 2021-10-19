@@ -226,6 +226,25 @@ bool AtomSpace::operator!=(const AtomSpace& other) const
     return not operator==(other);
 }
 
+bool AtomSpace::operator==(const Atom& other) const
+{
+    if (ATOMSPACE != other.get_type()) return FALSE;
+    AtomSpacePtr asp(AtomSpaceCast(other));
+    return compare_atomspaces(*this, *asp, CHECK_VALUES,
+            DONT_EMIT_DIAGNOSTICS);
+}
+
+bool AtomSpace::operator<(const Atom& other) const
+{
+    if (ATOMSPACE != other.get_type()) return FALSE;
+    AtomSpacePtr asp(AtomSpaceCast(other));
+    return _uuid  < asp->_uuid;
+}
+
+ContentHash AtomSpace::compute_hash() const
+{
+	return _uuid;
+}
 
 // ====================================================================
 
@@ -384,11 +403,16 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     return Handle::UNDEFINED;
 }
 
-std::string AtomSpace::to_string() const
+std::string AtomSpace::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	ss << *this;
 	return ss.str();
+}
+
+std::string AtomSpace::to_short_string(const std::string& indent) const
+{
+	return to_string(indent);
 }
 
 namespace std {

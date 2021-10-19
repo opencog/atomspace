@@ -38,6 +38,7 @@
 #include <opencog/util/sigslot.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/TypeIndex.h>
@@ -61,7 +62,7 @@ typedef SigSlot<const Handle&,
  * OpenCog. It contains methods to add and remove atoms, as well as to
  * retrieve specific sets according to different criteria.
  */
-class AtomSpace 
+class AtomSpace : public Atom
 {
     friend class ::AtomSpaceUTest;   // Needs to touch typeIndex
     friend class ::AtomTableUTest;   // Needs to call getRandom()
@@ -144,6 +145,8 @@ class AtomSpace
      * Used in unit testing only.
      */
     Handle getRandom(RandGen* rng) const;
+
+    virtual ContentHash compute_hash() const;
 
 public:
     /**
@@ -240,6 +243,16 @@ public:
                                    bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
+
+    /**
+     * Perform a content-based comparison of two AtomSpaces.
+     * Returns true if the other AtomSpace contains the same
+     * atoms.
+     */
+    virtual bool operator==(const Atom& atm) const;
+
+    /** Ordering operator for AtomSpaces. */
+    virtual bool operator<(const Atom&) const;
 
     /**
      * Return the number of atoms contained in the space.
@@ -580,10 +593,9 @@ public:
         opencog::setting_omp(opencog::num_threads());
     }
 
-    /**
-     * Convert the atomspace into a string
-     */
-    std::string to_string() const;
+    /** Returns a string representation of the AtomSpace. */
+    virtual std::string to_string(const std::string& indent) const;
+    virtual std::string to_short_string(const std::string& indent) const;
 
     /* ----------------------------------------------------------- */
     // ---- Signals
@@ -597,6 +609,18 @@ public:
     // Not for public use! Only StorageNodes get to call this!
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
+
+typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
+// static inline AtomSpacePtr AtomSpaceCast(const Handle& h)
+//    { return std::dynamic_pointer_cast<AtomSpace>(AtomCast(h)); }
+static inline AtomSpacePtr AtomSpaceCast(const AtomPtr& a)
+    { return std::dynamic_pointer_cast<AtomSpace>(a); }
+
+template< class... Args >
+Handle createAtomSpace( Args&&... args )
+{
+   return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
+}
 
 /** @}*/
 } // namespace opencog
