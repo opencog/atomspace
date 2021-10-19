@@ -506,7 +506,7 @@ public:
                           Type type,
                           bool subclass=false,
                           bool parent=true,
-                          AtomSpace* = nullptr) const;
+                          const AtomSpace* = nullptr) const;
 
     /**
      * Gets a set of handles that matches with the given type,
@@ -530,7 +530,7 @@ public:
                          Type type,
                          bool subclass=false,
                          bool parent=true,
-                         AtomSpace* = nullptr) const;
+                         const AtomSpace* = nullptr) const;
 
 
     /**

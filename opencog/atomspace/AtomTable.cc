@@ -26,7 +26,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomTable.h"
+#include "AtomSpace.h"
 
 #include <atomic>
 #include <functional>
@@ -290,22 +290,22 @@ void AtomSpace::barrier()
 {
 }
 
-size_t AtomSpace::getSize() const
+size_t AtomSpace::get_size() const
 {
-    return getNumAtomsOfType(ATOM, true);
+    return get_num_atoms_of_type(ATOM, true);
 }
 
-size_t AtomSpace::getNumNodes() const
+size_t AtomSpace::get_num_nodes() const
 {
-    return getNumAtomsOfType(NODE, true);
+    return get_num_atoms_of_type(NODE, true);
 }
 
-size_t AtomSpace::getNumLinks() const
+size_t AtomSpace::get_num_links() const
 {
-    return getNumAtomsOfType(LINK, true);
+    return get_num_atoms_of_type(LINK, true);
 }
 
-size_t AtomSpace::getNumAtomsOfType(Type type, bool subclass) const
+size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
     std::shared_lock<std::shared_mutex> lck(_mtx);
 
@@ -322,14 +322,14 @@ size_t AtomSpace::getNumAtomsOfType(Type type, bool subclass) const
     }
 
     if (_environ)
-        result += _environ->getNumAtomsOfType(type, subclass);
+        result += _environ->get_num_atoms_of_type(type, subclass);
 
     return result;
 }
 
 Handle AtomSpace::getRandom(RandGen *rng) const
 {
-    size_t x = rng->randint(getSize());
+    size_t x = rng->randint(get_size());
 
     Handle randy(Handle::UNDEFINED);
 
@@ -465,11 +465,11 @@ void AtomSpace::typeAdded(Type t)
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomSpace::get_handle_set_by_type(HandleSet& hset,
-                                   Type type,
-                                   bool subclass,
-                                   bool parent,
-                                   AtomSpace* cas) const
+void AtomSpace::get_handleset_by_type(HandleSet& hset,
+                                      Type type,
+                                      bool subclass,
+                                      bool parent,
+                                      const AtomSpace* cas) const
 {
     if (nullptr == cas) cas = this;
 
@@ -508,7 +508,7 @@ void AtomSpace::get_handle_set_by_type(HandleSet& hset,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
     if (parent and _environ)
-        _environ->get_handle_set_by_type(hset, type, subclass, parent, cas);
+        _environ->get_handleset_by_type(hset, type, subclass, parent, cas);
 }
 
 /**
@@ -522,10 +522,10 @@ void AtomSpace::get_handle_set_by_type(HandleSet& hset,
  * @return The set of atoms of a given type (subclasses optionally).
  */
 void AtomSpace::get_root_set_by_type(HandleSet& hset,
-                                 Type type,
-                                 bool subclass,
-                                 bool parent,
-                                 AtomSpace* cas) const
+                                     Type type,
+                                     bool subclass,
+                                     bool parent,
+                                     const AtomSpace* cas) const
 {
     std::shared_lock<std::shared_mutex> lck(_mtx);
     auto tit = typeIndex.begin(type, subclass);

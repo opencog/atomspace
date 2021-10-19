@@ -78,7 +78,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
     // used to free up RAM storage.
     if (not _atom_space->get_read_only())
         removeAtom(h, recursive);
-    return 0 < getAtomSpace()->extract(h, recursive).size();
+    return getAtomSpace()->extract(h, recursive);
 }
 
 Handle StorageNode::fetch_atom(const Handle& h)
