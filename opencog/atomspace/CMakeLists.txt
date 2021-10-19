@@ -38,7 +38,6 @@ INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AtomSpace.h
-	AtomTable.h
 	Transient.h
 	TypeIndex.h
 	version.h

@@ -25,13 +25,25 @@
 #ifndef _OPENCOG_ATOMSPACE_H
 #define _OPENCOG_ATOMSPACE_H
 
+#include <atomic>
+#include <iostream>
 #include <list>
+#include <set>
+#include <vector>
 
+#include <opencog/util/async_method_caller.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_omp.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/sigslot.h>
+
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/TypeIndex.h>
 
+class AtomSpaceUTest;
+class AtomTableUTest;
 class BasicSaveUTest;
 
 namespace opencog
@@ -39,16 +51,20 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+typedef SigSlot<const Handle&> AtomSignal;
+typedef SigSlot<const Handle&,
+                const TruthValuePtr&,
+                const TruthValuePtr&> TVCHSigl;
+
 /**
- * The AtomSpace class exposes the public API of the OpenCog AtomSpace
- *
- * @code
- *  // Create an atomspace
- *  AtomSpace atomspace;
- * @endcode
+ * This class provides mechanisms to store atoms and keep indices for
+ * efficient lookups. It implements the local storage data structure of
+ * OpenCog. It contains methods to add and remove atoms, as well as to
+ * retrieve specific sets according to different criteria.
  */
-class AtomSpace : public AtomTable
+class AtomSpace 
 {
+#if 0
     friend class Atom;               // Needs to call get_atomtable()
     friend class BackingStore;       // Needs to call get_atomtable()
     friend class StorageNode;        // Needs to call get_atomtable()
@@ -58,6 +74,7 @@ class AtomSpace : public AtomTable
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
     friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
+#endif
 
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
@@ -72,6 +89,32 @@ class AtomSpace : public AtomTable
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
+    // --------------------------------------------------
+    // Single, global mutex for locking the indexes.
+    // Its recursive because we need to lock twice during atom insertion
+    // and removal: we need to keep the indexes stable while we search
+    // them during add/remove.
+    mutable std::shared_mutex _mtx;
+
+    //! Index of atoms.
+    TypeIndex typeIndex;
+
+    bool _transient;
+    UUID _uuid;
+
+    /** Find out about atom type additions in the NameServer. */
+    NameServer& _nameserver;
+    int addedTypeConnection;
+    void typeAdded(Type);
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
+
+    void clear_all_atoms();
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
     /// can reference those in the parent environment.
@@ -84,10 +127,65 @@ class AtomSpace : public AtomTable
     bool _read_only;
     bool _copy_on_write;
 
+    Handle getHandle(Type, const std::string&&) const;
+    Handle getHandle(Type, const HandleSeq&&) const;
+    Handle lookupHandle(const Handle&) const;
+
+    /**
+     * Adds an atom to the table.
+     *
+     * The `force` flag forces the addition of this atom into the
+     * atomtable, even if it is already in a parent atomspace.
+     *
+     * @param The new atom to be added.
+     * @return The handle of the newly added atom.
+     */
+    Handle add(const Handle&, bool force=false, bool do_lock=true);
+
+    /**
+     * Return true if the atom table holds this handle, else return false.
+     */
+    bool holds(const Handle& h) const {
+        return (nullptr != h) and h->getAtomSpace() == this;
+    }
+
+    /**
+     * Extracts atoms from the table. Table will not contain the
+     * extracted atoms anymore.
+     *
+     * Note that if the recursive flag is set to false, and the atom
+     * appears in the incoming set of some other atom, then extraction
+     * will fail.  Thus, it is generally recommended that extraction
+     * be recursive, unless you can guarentee that the atom is not in
+     * someone else's outgoing set.
+     *
+     * @param handle The atom to be extracted.
+     * @param recursive Recursive-removal flag; if set, the links in the
+     *        incoming set will also be extracted.
+     * @return A set of the extracted atoms.
+     */
+    HandleSet extract(Handle& handle, bool recursive=true, bool do_lock=true);
+
+    /**
+     * Return a random atom in the AtomTable.
+     * Used in unit testing only.
+     */
+    Handle getRandom(RandGen* rng) const;
+
 public:
+    /**
+     * Constructor and destructor for this class.
+     *
+     * If 'transient' is true, then some non-essential initialization
+     * is skipped.  This makes the constructor run faster. This is
+     * useful when the AtomSpace is being used only for holding
+     * temporary, scratch results, e.g. as a result of evaluation
+     * or inference.
+     */
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
+    UUID get_uuid(void) const { return _uuid; }
     /// Transient atomspaces are lighter-weight, faster, but are missing
     /// some features. They are used during pattern matching, to hold
     /// temporary results. The are always copy-on-write spaces.
@@ -172,16 +270,21 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline size_t get_size() const { return getSize(); }
-    inline size_t get_num_nodes() const { return getNumNodes(); }
-    inline size_t get_num_links() const { return getNumLinks(); }
-    inline size_t get_num_atoms_of_type(Type type, bool subclass=false) const
-        { return getNumAtomsOfType(type, subclass); }
-    inline UUID get_uuid(void) const { return AtomTable::get_uuid(); }
+    size_t get_size() const;
+    size_t get_num_nodes() const;
+    size_t get_num_links() const;
+    size_t get_num_atoms_of_type(Type type, bool subclass=false) const;
+    UUID get_uuid(void) const;
 
     //! Clear the atomspace, extract all atoms.
-    void clear()
-        { AtomTable::clear(); }
+    void clear();
+
+    /**
+     * Read-write synchronization barrier fence.  When called, this
+     * will not return until all the atoms previously added to the
+     * atomspace have been fully inserted.
+     */
+    void barrier(void);
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
@@ -281,10 +384,10 @@ public:
     ValuePtr add_atoms(const ValuePtr&);
 
     /**
-     * Get an atom from the AtomTable. If the atom is not there, then
+     * Get an atom from the AtomSpace. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) const { return AtomTable::get_atom(h); }
+    Handle get_atom(const Handle&) const;
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom
@@ -398,12 +501,12 @@ public:
      *         atomSpace.get_handlset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_handleset_by_type(HandleSet& hset,
-                               Type type,
-                               bool subclass=false) const
-    {
-        return AtomTable::get_handle_set_by_type(hset, type, subclass);
-    }
+    void
+    get_handleset_by_type(HandleSet& hset,
+                          Type type,
+                          bool subclass=false,
+                          bool parent=true,
+                          AtomSpace* = nullptr) const;
 
     /**
      * Gets a set of handles that matches with the given type,
@@ -412,8 +515,8 @@ public:
      * less RAM when getting large sets, and thus might be faster.
      *
      * @param hset the HandleSet into which to insert handles.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
      *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
@@ -422,12 +525,13 @@ public:
      *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_root_set_by_type(HandleSet& hset,
-                             Type type,
-                             bool subclass=false) const
-    {
-        return AtomTable::get_root_set_by_type(hset, type, subclass);
-    }
+    void
+    get_root_set_by_type(HandleSet& hset,
+                         Type type,
+                         bool subclass=false,
+                         bool parent=true,
+                         AtomSpace* = nullptr) const;
+
 
     /**
      * Gets a sequence of handles that matches with the given type
@@ -489,10 +593,50 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     get_handles_by_type(OutputIterator result,
-                        Type type,
-                        bool subclass=false) const
+                     Type type,
+                     bool subclass=false,
+                     bool parent=true) const
     {
-        return AtomTable::get_handles_by_type(result, type, subclass);
+        // Sigh. Copy the handles. This hurts performance.
+        HandleSet hset;
+        get_handle_set_by_type(hset, type, subclass, parent);
+        return std::copy(hset.begin(), hset.end(), result);
+    }
+
+    /** Calls function 'func' on all atoms */
+    template <typename Function> void
+    foreachHandleByType(Function func,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true) const
+    {
+        HandleSet hset;
+        get_handle_set_by_type(hset, type, subclass, parent);
+        std::for_each(hset.begin(), hset.end(),
+             [&](const Handle& h)->void {
+                  (func)(h);
+             });
+    }
+
+    template <typename Function> void
+    foreachParallelByType(Function func,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true) const
+    {
+        HandleSet hset;
+        get_handle_set_by_type(hset, type, subclass, parent);
+
+        // Parallelize, always, no matter what!
+        opencog::setting_omp(opencog::num_threads(), 1);
+
+        OMP_ALGO::for_each(hset.begin(), hset.end(),
+             [&](const Handle& h)->void {
+                  (func)(h);
+             });
+
+        // Reset to default.
+        opencog::setting_omp(opencog::num_threads());
     }
 
     /**
