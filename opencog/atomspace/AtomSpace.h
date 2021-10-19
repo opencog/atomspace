@@ -150,23 +150,6 @@ class AtomSpace
     }
 
     /**
-     * Extracts atoms from the table. Table will not contain the
-     * extracted atoms anymore.
-     *
-     * Note that if the recursive flag is set to false, and the atom
-     * appears in the incoming set of some other atom, then extraction
-     * will fail.  Thus, it is generally recommended that extraction
-     * be recursive, unless you can guarentee that the atom is not in
-     * someone else's outgoing set.
-     *
-     * @param handle The atom to be extracted.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set will also be extracted.
-     * @return A set of the extracted atoms.
-     */
-    HandleSet extract(Handle& handle, bool recursive=true, bool do_lock=true);
-
-    /**
      * Return a random atom in the AtomTable.
      * Used in unit testing only.
      */
@@ -399,6 +382,12 @@ public:
      * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
+     * Note that if the recursive flag is set to false, and the atom
+     * appears in the incoming set of some other atom, then extraction
+     * will fail.  Thus, it is generally recommended that extraction
+     * be recursive, unless you can guarentee that the atom is not in
+     * someone else's outgoing set.
+     *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag. If the flag is set,
      *       then this atom, and *everything* that points to it will
@@ -409,10 +398,9 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool extract_atom(Handle h, bool recursive=false, bool do_lock=true) {
-        return 0 < extract(h, recursive, do_lock).size();
-    }
-    bool remove_atom(Handle h, bool recursive=false) {
+    bool extract_atom(const Handle&, bool recursive=true, bool do_lock=true);
+
+    bool remove_atom(const Handle& h, bool recursive=false) {
         return extract_atom(h, recursive);
     }
 

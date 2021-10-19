@@ -346,15 +346,13 @@ Handle AtomSpace::getRandom(RandGen *rng) const
     return randy;
 }
 
-HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
+bool AtomSpace::extract_atom(const Handle& handle, bool recursive, bool do_lock)
 {
-    HandleSet result;
-
     // Make sure the atom is fully resolved before we go about
     // deleting it.
     handle = get_atom(handle);
 
-    if (nullptr == handle or handle->isMarkedForRemoval()) return result;
+    if (nullptr == handle or handle->isMarkedForRemoval()) return false;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
@@ -363,8 +361,8 @@ HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
     AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
-        if (not in_environ(handle)) return result;
-        return other->extract(handle, recursive);
+        if (not in_environ(handle)) return false;
+        return other->extract_atom(handle, recursive);
     }
 
     // Lock before fetching the incoming set. (Why, exactly??)
@@ -373,7 +371,7 @@ HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
 
-    if (handle->isMarkedForRemoval()) return result;
+    if (handle->isMarkedForRemoval()) return false;
     handle->markForRemoval();
 
     // If recursive-flag is set, also extract all the links in the atom's
@@ -404,12 +402,10 @@ HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
             if (not his->isMarkedForRemoval()) {
                 if (other) {
                     if (other != this) {
-                        HandleSet ex = other->extract(his, true);
-                        result.insert(ex.begin(), ex.end());
+                        other->extract_atom(his, true);
                     } else {
                         // Do not lock; we laready have the lock
-                        HandleSet ex = extract(his, true, false);
-                        result.insert(ex.begin(), ex.end());
+                        extract_atom(his, true, false);
                     }
                 }
             }
@@ -428,7 +424,7 @@ HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
             // User asked for a non-recursive remove, and the
             // atom is still referenced. So, do nothing.
             handle->unsetRemovalFlag();
-            return result;
+            return false;
         }
     }
 
@@ -447,8 +443,7 @@ HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
 
     handle->setAtomSpace(nullptr);
 
-    result.insert(handle);
-    return result;
+    return true;
 }
 
 /// This is the resize callback, when a new type is dynamically added.
