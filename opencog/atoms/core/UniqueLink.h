@@ -47,7 +47,7 @@ class UniqueLink : public FreeLink
 {
 protected:
 	void init(bool);
-	static Handle get_unique(const Handle&, Type, bool, AtomSpace*);
+	static Handle get_unique(const Handle&, Type, bool, const AtomSpace*);
 
 public:
 	UniqueLink(const HandleSeq&&, Type=UNIQUE_LINK);

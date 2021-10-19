@@ -85,7 +85,7 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 
 /// Get the unique link for this alias.
 Handle UniqueLink::get_unique(const Handle& alias, Type type,
-                              bool allow_open, AtomSpace* as)
+                              bool allow_open, const AtomSpace* as)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
