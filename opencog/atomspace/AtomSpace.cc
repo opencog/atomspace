@@ -41,36 +41,6 @@ using namespace opencog;
 
 // ====================================================================
 
-/**
- * Transient atomspaces skip some of the initialization steps,
- * so that they can be constructed more quickly.  Transient atomspaces
- * are typically used as scratch spaces, to hold temporary results
- * during evaluation, pattern matching and inference. Such temporary
- * spaces don't need some of the heavier-weight crud that atomspaces
- * are festooned with.
- */
-AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    AtomTable(parent, this, transient),
-    _read_only(false),
-    _copy_on_write(transient)
-{
-}
-
-AtomSpace::~AtomSpace()
-{
-}
-
-void AtomSpace::ready_transient(AtomSpace* parent)
-{
-    _copy_on_write = true;
-    AtomTable::ready_transient(parent, this);
-}
-
-void AtomSpace::clear_transient()
-{
-    AtomTable::clear_transient();
-}
-
 // An extremely primitive permissions system.
 void AtomSpace::set_read_only(void)
 {
@@ -129,22 +99,21 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         atom->setUnchecked();
 
     // Loop to see if each atom in the first has a match in the second.
-    const AtomTable& table_second = (AtomTable&)space_second;
     for (auto atom_first : atomsInFirstSpace)
     {
-        Handle atom_second = table_second.get_atom(atom_first);
+        Handle atom_second = space_second.get_atom(atom_first);
 
         if( false)
         {
         Handle atom_second;
         if (atom_first->is_node())
         {
-            atom_second = table_second.getHandle(atom_first->get_type(),
+            atom_second = space_second.getHandle(atom_first->get_type(),
                         std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
-            atom_second =  table_second.getHandle(atom_first->get_type(),
+            atom_second =  space_second.getHandle(atom_first->get_type(),
                         HandleSeq(atom_first->getOutgoingSet()));
         }
         else
@@ -264,7 +233,7 @@ Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return AtomTable::get_atom(h);
+    if (_read_only) return get_atom(h);
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;

@@ -67,14 +67,24 @@
 
 using namespace opencog;
 
+// ====================================================================
 // Nothing should ever get the uuid of zero. Zero is reserved for
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
-AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
-    _nameserver(nameserver())
+/**
+ * Transient atomspaces skip some of the initialization steps,
+ * so that they can be constructed more quickly.  Transient atomspaces
+ * are typically used as scratch spaces, to hold temporary results
+ * during evaluation, pattern matching and inference. Such temporary
+ * spaces don't need some of the heavier-weight crud that atomspaces
+ * are festooned with.
+ */
+AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
+    _nameserver(nameserver()),
+    _read_only(false),
+    _copy_on_write(transient)
 {
-    _as = holder;
     _environ = parent;
     if (_environ) _environ->_num_nested++;
     _num_nested = 0;
@@ -84,10 +94,11 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
     // Connect signal to find out about type additions
     addedTypeConnection =
         _nameserver.typeAddedSignal().connect(
-            std::bind(&AtomTable::typeAdded, this, std::placeholders::_1));
+            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
 }
 
-AtomTable::~AtomTable()
+
+AtomSpace::~AtomSpace()
 {
     std::unique_lock<std::shared_mutex> lck(_mtx);
 
@@ -98,27 +109,28 @@ AtomTable::~AtomTable()
 
     if (0 != _num_nested)
         throw opencog::RuntimeException(TRACE_INFO,
-           "AtomTable - deleteing atomtable %lu which has subtables!",
+           "AtomSpace - deleteing atomtable %lu which has subtables!",
            _uuid);
 }
 
-void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
+void AtomSpace::ready_transient(AtomSpace* parent)
 {
+    _copy_on_write = true;
+
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - ready called on non-transient atom table.");
+                "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
     _environ = parent;
     if (_environ) _environ->_num_nested++;
-    _as = holder;
 }
 
-void AtomTable::clear_transient()
+void AtomSpace::clear_transient()
 {
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - clear_transient called on non-transient atom table.");
+                "AtomSpace - clear_transient called on non-transient atom table.");
 
     std::unique_lock<std::shared_mutex> lck(_mtx);
 
@@ -128,27 +140,26 @@ void AtomTable::clear_transient()
     // Clear the  parent environment and holder atomspace.
     if (_environ) _environ->_num_nested--;
     _environ = NULL;
-    _as = NULL;
 }
 
-void AtomTable::clear_all_atoms()
+void AtomSpace::clear_all_atoms()
 {
     typeIndex.clear();
 }
 
-void AtomTable::clear()
+void AtomSpace::clear()
 {
     std::unique_lock<std::shared_mutex> lck(_mtx);
     clear_all_atoms();
 }
 
-Handle AtomTable::getHandle(Type t, const std::string&& n) const
+Handle AtomSpace::getHandle(Type t, const std::string&& n) const
 {
     Handle h(createNode(t, std::move(n)));
     return lookupHandle(h);
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq&& seq) const
+Handle AtomSpace::getHandle(Type t, const HandleSeq&& seq) const
 {
     Handle h(createLink(std::move(seq), t));
     return lookupHandle(h);
@@ -156,7 +167,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq&& seq) const
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
-Handle AtomTable::lookupHandle(const Handle& a) const
+Handle AtomSpace::lookupHandle(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -172,7 +183,7 @@ Handle AtomTable::lookupHandle(const Handle& a) const
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
 /// Otherwise, search for an equivalent atom that we might be holding.
-Handle AtomTable::get_atom(const Handle& a) const
+Handle AtomSpace::get_atom(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -182,7 +193,7 @@ Handle AtomTable::get_atom(const Handle& a) const
     return lookupHandle(a);
 }
 
-Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
+Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -228,7 +239,7 @@ Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
     Handle atom(orig);
     if (atom->is_link()) {
         bool need_copy = false;
-        if (atom->getAtomTable())
+        if (atom->getAtomSpace())
             need_copy = true;
         else
             for (const Handle& h : atom->getOutgoingSet())
@@ -250,7 +261,7 @@ Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
             atom->unsetRemovalFlag();
         }
     }
-    else if (atom->getAtomTable())
+    else if (atom->getAtomSpace())
     {
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
@@ -259,7 +270,7 @@ Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
         atom->unsetRemovalFlag();
 
     if (atom != orig) atom->copyValues(orig);
-    atom->setAtomSpace(_as);
+    atom->setAtomSpace(this);
     atom->install();
     atom->keep_incoming_set();
 
@@ -275,26 +286,26 @@ Handle AtomTable::add(const Handle& orig, bool force, bool do_lock)
     return atom;
 }
 
-void AtomTable::barrier()
+void AtomSpace::barrier()
 {
 }
 
-size_t AtomTable::getSize() const
+size_t AtomSpace::getSize() const
 {
     return getNumAtomsOfType(ATOM, true);
 }
 
-size_t AtomTable::getNumNodes() const
+size_t AtomSpace::getNumNodes() const
 {
     return getNumAtomsOfType(NODE, true);
 }
 
-size_t AtomTable::getNumLinks() const
+size_t AtomSpace::getNumLinks() const
 {
     return getNumAtomsOfType(LINK, true);
 }
 
-size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
+size_t AtomSpace::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::shared_lock<std::shared_mutex> lck(_mtx);
 
@@ -316,7 +327,7 @@ size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
     return result;
 }
 
-Handle AtomTable::getRandom(RandGen *rng) const
+Handle AtomSpace::getRandom(RandGen *rng) const
 {
     size_t x = rng->randint(getSize());
 
@@ -335,7 +346,7 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
+HandleSet AtomSpace::extract(Handle& handle, bool recursive, bool do_lock)
 {
     HandleSet result;
 
@@ -349,7 +360,7 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    AtomTable* other = handle->getAtomTable();
+    AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
         if (not in_environ(handle)) return result;
@@ -378,16 +389,16 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
         for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
-            DPRINTF("[AtomTable::extract] incoming set: %s",
+            DPRINTF("[AtomSpace::extract] incoming set: %s",
                  (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomtable, and its not a child of this
             // atom table.  So flag that as an error; it will assert
             // a few dozen lines later, below.
-            AtomTable* other = his->getAtomTable();
+            AtomSpace* other = his->getAtomSpace();
             if (other and other != this and not other->in_environ(handle)) {
-                logger().warn() << "AtomTable::extract() internal error, "
+                logger().warn() << "AtomSpace::extract() internal error, "
                                 << "non-DAG membership.";
             }
             if (not his->isMarkedForRemoval()) {
@@ -441,7 +452,7 @@ HandleSet AtomTable::extract(Handle& handle, bool recursive, bool do_lock)
 }
 
 /// This is the resize callback, when a new type is dynamically added.
-void AtomTable::typeAdded(Type t)
+void AtomSpace::typeAdded(Type t)
 {
     std::unique_lock<std::shared_mutex> lck(_mtx);
     typeIndex.resize();
@@ -454,13 +465,13 @@ void AtomTable::typeAdded(Type t)
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomTable::get_handle_set_by_type(HandleSet& hset,
+void AtomSpace::get_handle_set_by_type(HandleSet& hset,
                                    Type type,
                                    bool subclass,
                                    bool parent,
                                    AtomSpace* cas) const
 {
-    if (nullptr == cas) cas = _as;
+    if (nullptr == cas) cas = this;
 
     std::shared_lock<std::shared_mutex> lck(_mtx);
     auto tit = typeIndex.begin(type, subclass);
@@ -502,7 +513,7 @@ void AtomTable::get_handle_set_by_type(HandleSet& hset,
 
 /**
  * Returns the set of atoms of a given type, but only if they have
- * and empty outgoing set. This holds the AtomTable lock for a
+ * and empty outgoing set. This holds the AtomSpace lock for a
  * longer period of time, but wastes less RAM when getting big sets.
  * As a net result, it might run faster, maybe.
  *
@@ -510,7 +521,7 @@ void AtomTable::get_handle_set_by_type(HandleSet& hset,
  * @param Whether type subclasses should be considered.
  * @return The set of atoms of a given type (subclasses optionally).
  */
-void AtomTable::get_root_set_by_type(HandleSet& hset,
+void AtomSpace::get_root_set_by_type(HandleSet& hset,
                                  Type type,
                                  bool subclass,
                                  bool parent,
