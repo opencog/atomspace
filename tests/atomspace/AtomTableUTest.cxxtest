@@ -90,21 +90,21 @@ public:
 
     void testSimple()
     {
-        Handle time = table->add(createNode(TIME_NODE, "1"));
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
-        Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"));
+        Handle time = table->add_atom(createNode(TIME_NODE, "1"));
+        Handle word = table->add_atom(createNode(NUMBER_NODE, "1"));
+        Handle sense = table->add_atom(createNode(CONCEPT_NODE, "28675194"));
         HandleSeq os;
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
-        table->add(createLink(std::move(os), INHERITANCE_LINK));
+        table->add_atom(createLink(std::move(os), INHERITANCE_LINK));
         table->barrier();
     }
 
     void testHolds()
     {
         Handle h;
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        Handle word = table->add_atom(createNode(NUMBER_NODE, "1"));
         TS_ASSERT(table->holds(word));
         TS_ASSERT(!table->holds(h));
     }
@@ -112,9 +112,9 @@ public:
     void testIsCleared()
     {
         atomSpace->clear();
-        TS_ASSERT(0 == table->getSize());
-        Handle word = table->add(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT(1 == table->getSize());
+        TS_ASSERT(0 == table->get_size());
+        Handle word = table->add_atom(createNode(NUMBER_NODE, "1"));
+        TS_ASSERT(1 == table->get_size());
     }
 
     void doRecursiveAdd(Type list_type)
@@ -137,7 +137,7 @@ public:
         Handle hle(createLink(EVALUATION_LINK, hnp, hll));
 
         // Add the link.  All the outgoing atoms should get added too.
-        Handle hlet = table->add(hle);
+        Handle hlet = table->add_atom(hle);
         const HandleSeq& hs = hlet->getOutgoingSet();
 
         const HandleSeq& hsl = hs[1]->getOutgoingSet();
@@ -186,11 +186,11 @@ public:
     void testGetRandom()
     {
         ostringstream oss;
-        size_t numBuckets = table->getSize() / 10;
+        size_t numBuckets = table->get_size() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;
-            table->add(createNode(NUMBER_NODE, oss.str()));
+            table->add_atom(createNode(NUMBER_NODE, oss.str()));
         }
         table->barrier();
 
@@ -214,16 +214,16 @@ public:
     {
         Handle n1(createNode(NUMBER_NODE, "1"));
         Handle n2(createNode(NUMBER_NODE, "2"));
-        Handle hn1 = table->add(n1);
-        Handle hn2 = table->add(n2);
+        Handle hn1 = table->add_atom(n1);
+        Handle hn2 = table->add_atom(n2);
 
         HandleSeq os;
         os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
         Handle l1(createLink(std::move(os), LIST_LINK));
-        Handle hl1 = table->add(l1);
+        Handle hl1 = table->add_atom(l1);
 
         // Now, remove hn1 from the table ...
-        table->extract(hn1, true);
+        table->extract_atom(hn1, true);
 
         // Number nodes are handled differently, in the atomspace. Try
         // again, with concept nodes.
@@ -232,7 +232,7 @@ public:
         os.push_back(h3);
         os.push_back(h3);
 
-        Handle l33 = table->add(createLink(std::move(os), LIST_LINK));
+        Handle l33 = table->add_atom(createLink(std::move(os), LIST_LINK));
         HandleSeq hs = l33->getOutgoingSet();
         printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
         TS_ASSERT_EQUALS(hs[0], hs[1]);
@@ -247,11 +247,11 @@ public:
         nameserver().endTypeDecls();
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
         Handle wp = createNode(MY_NUMBER_NODE, "1");
-        Handle word = table->add(wp);
+        Handle word = table->add_atom(wp);
         Handle sp = createNode(MY_CONCEPT_NODE, "28675194");
-        Handle sense = table->add(sp);
+        Handle sense = table->add_atom(sp);
         Handle lp = createLink(MY_INHERITANCE_LINK, word, sense);
-        Handle lh = table->add(lp);
+        Handle lh = table->add_atom(lp);
 
         TS_ASSERT(table->getHandle(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
         TS_ASSERT(table->getHandle(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);

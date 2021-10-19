@@ -71,10 +71,10 @@ class AtomSpace
     friend class IPFSAtomStorage;    // Needs to call get_atomtable()
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class UuidSCM;            // Needs to call get_atomtable()
-    friend class ::AtomTableUTest;
     friend class ::AtomSpaceUTest;
     friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
 #endif
+    friend class ::AtomTableUTest;   // Needs to call getRandom
 
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
