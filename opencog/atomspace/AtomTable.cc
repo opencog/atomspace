@@ -73,12 +73,8 @@ using namespace opencog;
 static std::atomic<UUID> _id_pool(1);
 
 /**
- * Transient atomspaces skip some of the initialization steps,
- * so that they can be constructed more quickly.  Transient atomspaces
- * are typically used as scratch spaces, to hold temporary results
- * during evaluation, pattern matching and inference. Such temporary
- * spaces don't need some of the heavier-weight crud that atomspaces
- * are festooned with.
+ * Transient atomspaces are intended for use as scratch spaces, to hold
+ * temporary results during evaluation, pattern matching and inference.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _nameserver(nameserver()),

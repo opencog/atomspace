@@ -99,8 +99,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			get_subtypes = false;
 
 		std::string rv = "[\n";
-		HandleSet hset;
-		as->get_handleset_by_type(hset, t, get_subtypes);
+		HandleSeq hset;
+		as->get_handles_by_type(hset, t, get_subtypes);
 		bool first = true;
 		for (const Handle& h: hset)
 		{

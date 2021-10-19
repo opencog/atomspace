@@ -523,7 +523,7 @@ public:
     /**
      * Gets a container of handles that matches with the given type
      * (subclasses optionally).
-     * Caution: this is slower than using get_handleset_by_type() to
+     * Caution: this is slower than using get_handles_by_type() to
      * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param result An output iterator.
@@ -543,10 +543,10 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    get_handles_by_type(OutputIterator result,
-                     Type type,
-                     bool subclass=false,
-                     bool parent=true) const
+    get_handleset_by_type(OutputIterator result,
+                          Type type,
+                          bool subclass=false,
+                          bool parent=true) const
     {
         // Sigh. Copy the handles. This hurts performance.
         HandleSeq hset;

@@ -90,9 +90,9 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     // If we get this far, we need to compare each individual atom.
 
     // Get the atoms in each atomspace.
-    HandleSet atomsInFirstSpace, atomsInSecondSpace;
-    space_first.get_handleset_by_type(atomsInFirstSpace, ATOM, true);
-    space_second.get_handleset_by_type(atomsInSecondSpace, ATOM, true);
+    HandleSeq atomsInFirstSpace, atomsInSecondSpace;
+    space_first.get_handles_by_type(atomsInFirstSpace, ATOM, true);
+    space_second.get_handles_by_type(atomsInSecondSpace, ATOM, true);
 
     // Uncheck each atom in the second atomspace.
     for (auto atom : atomsInSecondSpace)
@@ -395,7 +395,7 @@ namespace std {
 
 ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     list<opencog::Handle> results;
-    as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
+    as.get_handlesset_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
 	    if (h->getIncomingSetSize() == 0)
 		    out << h->to_string() << std::endl;
