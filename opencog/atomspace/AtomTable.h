@@ -138,48 +138,6 @@ public:
     AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
-     * Return the depth of the Atom, relative to this AtomTable.
-     * The depth is zero, if the Atom is in this table; it is one
-     * if it is in the parent, and so on. It is -1 if it is not
-     * in the chain.
-     */
-    int depth(const Handle& atom) const
-    {
-        if (nullptr == atom) return -1;
-        AtomTable* atab = atom->getAtomTable();
-        const AtomTable* env = this;
-        int count = 0;
-        while (env) {
-            if (atab == env) return count;
-            env = env->_environ;
-            count ++;
-        }
-        return -1;
-    }
-
-    /**
-     * Return true if the atom is in this atomtable, or if it is
-     * in the environment of this atomtable.
-     *
-     * This is provided in the header file, so that it gets inlined
-     * into Atom.cc, where the incoming link is fetched.  This helps
-     * avoid what would otherwise be a circular dependency between
-     * shared libraries. Yes, this is kind-of hacky, but its the
-     * simplest fix for just right now.
-     */
-    bool in_environ(const Handle& atom) const
-    {
-        if (nullptr == atom) return false;
-        AtomTable* atab = atom->getAtomTable();
-        const AtomTable* env = this;
-        while (env) {
-            if (atab == env) return true;
-            env = env->_environ;
-        }
-        return false;
-    }
-
-    /**
      * Return the number of atoms contained in a table.
      */
     size_t getSize() const;
@@ -315,7 +273,7 @@ public:
      * Return true if the atom table holds this handle, else return false.
      */
     bool holds(const Handle& h) const {
-        return (nullptr != h) and h->getAtomTable() == this;
+        return (nullptr != h) and h->getAtomSpace() == _as;
     }
 
     /**

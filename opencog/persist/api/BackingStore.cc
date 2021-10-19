@@ -29,17 +29,17 @@ using namespace opencog;
 
 void BackingStore::getIncomingSet(AtomSpace* as, const Handle& h)
 {
-	getIncomingSet(as->get_atomtable(), h);
+	getIncomingSet(as, h);
 }
 
 void BackingStore::doGetIncomingSet(AtomSpace* as, const Handle& h)
 {
-	getIncomingSet(as->get_atomtable(), h);
+	getIncomingSet(as, h);
 }
 
 void BackingStore::getIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
-	getIncomingByType(as->get_atomtable(), h, t);
+	getIncomingByType(as, h, t);
 }
 
 // ==========================================================

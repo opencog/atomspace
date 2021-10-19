@@ -72,8 +72,6 @@ class AtomSpace : public AtomTable
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
-    AtomTable& get_atomtable(void) { return (AtomTable&) (*this); }
-
     bool _read_only;
     bool _copy_on_write;
 
@@ -112,16 +110,46 @@ public:
         return nullptr;
     }
 
-    bool in_environ(const Handle& h) const {
-        return AtomTable::in_environ(h);
+    /**
+     * Return the depth of the Atom, relative to this AtomTable.
+     * The depth is zero, if the Atom is in this table; it is one
+     * if it is in the parent, and so on. It is -1 if it is not
+     * in the chain.
+     */
+    int depth(const Handle& atom) const
+    {
+        if (nullptr == atom) return -1;
+        AtomSpace* atab = atom->getAtomSpace();
+        const AtomSpace* env = _as;
+        int count = 0;
+        while (env) {
+            if (atab == env) return count;
+            env = env->_environ;
+            count ++;
+        }
+        return -1;
     }
 
-    /// Return the depth of the Atom, relative to this AtomSpace.
-    /// The depth is zero, if the Atom is in this space; it is one
-    /// if it is in the parent, and so on. It is -1 if it is not
-    /// in the chain.
-    int depth(const Handle& h) const {
-        return AtomTable::depth(h);
+    /**
+     * Return true if the atom is in this atomtable, or if it is
+     * in the environment of this atomtable.
+     *
+     * This is provided in the header file, so that it gets inlined
+     * into Atom.cc, where the incoming link is fetched.  This helps
+     * avoid what would otherwise be a circular dependency between
+     * shared libraries. Yes, this is kind-of hacky, but its the
+     * simplest fix for just right now.
+     */
+    bool in_environ(const Handle& atom) const
+    {
+        if (nullptr == atom) return false;
+        AtomSpace* atab = atom->getAtomSpace();
+        const AtomSpace* env = _as;
+        while (env) {
+            if (atab == env) return true;
+            env = env->_environ;
+        }
+        return false;
     }
 
     /**
@@ -169,7 +197,7 @@ public:
     }
 
     /**
-     * Add a link to the Atom Table. If the atom already exists, then
+     * Add a link to the AtomTable. If the atom already exists, then
      * that is returned.
      *
      * @param t         Type of the link
@@ -345,7 +373,7 @@ public:
      * (any) atomspace; else return false.
      */
     bool is_valid_handle(const Handle& h) const {
-        return (nullptr != h) and (h->getAtomTable() != nullptr);
+        return (nullptr != h) and (h->getAtomSpace() != nullptr);
     }
 
     /**

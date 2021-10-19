@@ -77,7 +77,7 @@ class BackingStore
 
 		/**
 		 * Fetch the entire incoming set of the indicated Atom,
-		 * and put them into the AtomTable. All of the values attached
+		 * and put them into the AtomSpace. All of the values attached
 		 * to each of the Atoms in the incoming set will be fetched
 		 * and the local copies will be updated.
 		 *
@@ -85,11 +85,11 @@ class BackingStore
 		 * as a generalized incoming set which can be tailored to
 		 * more precise needs.
 		 */
-		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
+		virtual void getIncomingSet(AtomSpace&, const Handle&) = 0;
 
 		/**
 		 * Fetch all Atoms of the given Type in the incoming set of
-		 * the indicated Atom, and put them into the AtomTable. All of
+		 * the indicated Atom, and put them into the AtomSpace. All of
 		 * the values attached to each of the Atoms in the incoming set
 		 * will be fetched as well, and the local copies updated.
 		 *
@@ -97,7 +97,7 @@ class BackingStore
 		 * as a generalized incoming set which can be tailored to
 		 * more precise needs.
 		 */
-		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
+		virtual void getIncomingByType(AtomSpace&, const Handle&, Type) = 0;
 
 		/**
 		 * Recursively store the Atom and anything in it's outgoing set.
@@ -201,24 +201,24 @@ class BackingStore
 
 		/**
 		 * Fetch *all* Atoms of the given type, and place them into the
-		 * AtomTable. All of the associated Values are also be fetched,
+		 * AtomSpace. All of the associated Values are also be fetched,
 		 * and clobber any earlier values that might be present on
 		 * existing Atoms. Values on the outgoing set of Type are NOT
 		 * fetched!
 		 */
-		virtual void loadType(AtomTable&, Type) = 0;
+		virtual void loadType(AtomSpace&, Type) = 0;
 
 		/**
 		 * Load *all* atoms from the remote server into this (local)
-		 * AtomTable. Also load all Values attached to the Atoms.
+		 * AtomSpace. Also load all Values attached to the Atoms.
 		 */
-		virtual void loadAtomSpace(AtomTable&) = 0;
+		virtual void loadAtomSpace(AtomSpace&) = 0;
 
 		/**
-		 * Store *all* atoms from this (local) AtomTable to the remote
+		 * Store *all* atoms from this (local) AtomSpace to the remote
 		 * server. This stores all Values as well.
 		 */
-		virtual void storeAtomSpace(const AtomTable&) = 0;
+		virtual void storeAtomSpace(const AtomSpace&) = 0;
 
 		/**
 		 * Read-write synchronization barrier.

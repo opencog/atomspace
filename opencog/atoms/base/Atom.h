@@ -112,9 +112,6 @@ protected:
     //! Sets the AtomSpace in which this Atom is inserted.
     virtual void setAtomSpace(AtomSpace *);
 
-    //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const;
-
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
     mutable char _flags;

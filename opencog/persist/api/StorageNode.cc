@@ -51,7 +51,7 @@ std::string StorageNode::monitor(void)
 
 void StorageNode::barrier(void)
 {
-	getAtomTable()->barrier();
+	getAtomSpace()->barrier();
 }
 
 void StorageNode::store_atom(const Handle& h)
@@ -78,7 +78,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
     // used to free up RAM storage.
     if (not _atom_space->get_read_only())
         removeAtom(h, recursive);
-    return 0 < getAtomTable()->extract(h, recursive).size();
+    return 0 < getAtomSpace()->extract(h, recursive).size();
 }
 
 Handle StorageNode::fetch_atom(const Handle& h)
@@ -103,8 +103,8 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
 	// Not clear if we really have to do this, or if its enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = getAtomTable()->add(key);
-	Handle lh = getAtomTable()->add(h);
+	Handle lkey = getAtomSpace()->add(key);
+	Handle lh = getAtomSpace()->add(h);
 	loadValue(lh, lkey);
 	return lh;
 }
@@ -140,7 +140,7 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	getIncomingByType(*getAtomTable(), lh, t);
+	getIncomingByType(*getAtomSpace(), lh, t);
 
 	return lh;
 }
@@ -158,10 +158,10 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	// Not clear if we really have to do this, or if it's enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = getAtomTable()->add(key);
-	Handle lq = getAtomTable()->add(query);
+	Handle lkey = getAtomSpace()->add(key);
+	Handle lq = getAtomSpace()->add(query);
 	Handle lmeta = metadata;
-	if (Handle::UNDEFINED != lmeta) lmeta = getAtomTable()->add(lmeta);
+	if (Handle::UNDEFINED != lmeta) lmeta = getAtomSpace()->add(lmeta);
 
 	runQuery(lq, lkey, lmeta, fresh);
 	return lq;
@@ -169,7 +169,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 
 void StorageNode::load_atomspace(void)
 {
-	loadAtomSpace(*getAtomTable());
+	loadAtomSpace(*getAtomSpace());
 }
 
 /**
@@ -177,10 +177,10 @@ void StorageNode::load_atomspace(void)
  */
 void StorageNode::store_atomspace(void)
 {
-	storeAtomSpace(*getAtomTable());
+	storeAtomSpace(*getAtomSpace());
 }
 
 void StorageNode::fetch_all_atoms_of_type(Type t)
 {
-	loadType(*getAtomTable(), t);
+	loadType(*getAtomSpace(), t);
 }
