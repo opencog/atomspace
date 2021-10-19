@@ -338,7 +338,7 @@ public:
     //! that were actually part of the incoming set at the time of
     //! the call to this function.
     template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result) const
+    getIncomingIter(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
         std::shared_lock<std::shared_mutex> lck(_mtx);

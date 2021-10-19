@@ -159,11 +159,11 @@ public:
     /**
      * Constructor and destructor for this class.
      *
-     * If 'transient' is true, then some non-essential initialization
-     * is skipped.  This makes the constructor run faster. This is
-     * useful when the AtomSpace is being used only for holding
-     * temporary, scratch results, e.g. as a result of evaluation
-     * or inference.
+     * If 'transient' is true, then the resulting AtomSpace is operates
+     * in a copy-on-write mode, suitable for holding temporary, scratch
+     * results (e.g. for evaluation or inference.) Transient AtomSpaces
+     * should have a parent which holds the actual Atoms being worked
+     * with.
      */
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
