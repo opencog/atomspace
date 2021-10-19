@@ -194,8 +194,8 @@ void FileStorageNode::storeAtomSpace(const AtomSpace& table)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode %s is not open!", _filename.c_str());
 
-	HandleSet hset;
-	table.get_handle_set_by_type(hset, ATOM, true);
+	HandleSeq hset;
+	table.get_handles_by_type(hset, ATOM, true);
 	for(const Handle& h: hset)
 	{
 		// Store roots, and Atoms that have values.
@@ -219,7 +219,7 @@ void FileStorageNode::loadAtomSpace(AtomSpace& table)
 		throw IOException(TRACE_INFO,
 			"FileStorageNode cannot open %s", _filename.c_str());
 
-	parseStream(stream, *table.getAtomSpace());
+	parseStream(stream, table);
 	stream.close();
 }
 

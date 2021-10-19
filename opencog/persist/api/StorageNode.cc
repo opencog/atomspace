@@ -78,7 +78,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
     // used to free up RAM storage.
     if (not _atom_space->get_read_only())
         removeAtom(h, recursive);
-    return getAtomSpace()->extract(h, recursive);
+    return getAtomSpace()->extract_atom(h, recursive);
 }
 
 Handle StorageNode::fetch_atom(const Handle& h)
@@ -103,8 +103,8 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
 	// Not clear if we really have to do this, or if its enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = getAtomSpace()->add(key);
-	Handle lh = getAtomSpace()->add(h);
+	Handle lkey = getAtomSpace()->add_atom(key);
+	Handle lh = getAtomSpace()->add_atom(h);
 	loadValue(lh, lkey);
 	return lh;
 }
@@ -158,10 +158,10 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	// Not clear if we really have to do this, or if it's enough
 	// to just assume  that they are. Could save a few CPU cycles,
 	// here, by trading efficiency for safety.
-	Handle lkey = getAtomSpace()->add(key);
-	Handle lq = getAtomSpace()->add(query);
+	Handle lkey = getAtomSpace()->add_atom(key);
+	Handle lq = getAtomSpace()->add_atom(query);
 	Handle lmeta = metadata;
-	if (Handle::UNDEFINED != lmeta) lmeta = getAtomSpace()->add(lmeta);
+	if (Handle::UNDEFINED != lmeta) lmeta = getAtomSpace()->add_atom(lmeta);
 
 	runQuery(lq, lkey, lmeta, fresh);
 	return lq;
