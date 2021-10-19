@@ -248,6 +248,28 @@ ContentHash AtomSpace::compute_hash() const
 
 // ====================================================================
 
+const std::string& AtomSpace::get_name() const
+{
+	return "";  // should be uuid
+}
+
+Arity AtomSpace::get_arity() const
+{
+	return 0;
+}
+
+const HandleSeq& AtomSpace::getOutgoingSet() const
+{
+	return HandleSeq();
+}
+
+Handle AtomSpace::getOutgoingAtom(Arity n) const
+{
+	return Handle();
+}
+
+// ====================================================================
+
 Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already

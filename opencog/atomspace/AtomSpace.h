@@ -234,6 +234,11 @@ public:
         return false;
     }
 
+    virtual const std::string& get_name() const;
+    virtual Arity get_arity() const;
+    virtual const HandleSeq& getOutgoingSet() const;
+    virtual Handle getOutgoingAtom(Arity) const;
+
     /**
      * Compare atomspaces for equality. Useful during testing.
      */
