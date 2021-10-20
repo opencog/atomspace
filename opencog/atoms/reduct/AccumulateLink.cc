@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "ArithmeticLink.h"
 #include "AccumulateLink.h"
 
@@ -52,6 +53,7 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
 	Type vitype = vi->get_type();
 
+	// If its a plain number, assume it's a vector, and sum.
 	if (NUMBER_NODE == vitype)
 	{
 		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
@@ -61,12 +63,32 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 		return createNumberNode(acc);
 	}
 
+	// If its a float value, it's a vector. Sum.
 	if (nameserver().isA(vitype, FLOAT_VALUE))
 	{
 		const std::vector<double>& dvec(FloatValueCast(vi)->value());
 		double acc = 0.0;
 		for (double dv : dvec)
 			acc += dv;
+		return createFloatValue(acc);
+	}
+
+	// If it's a link value, assume its a list of floats. Sum.
+	if (nameserver().isA(vitype, LINK_VALUE))
+	{
+		const std::vector<ValuePtr>& lvec(LinkValueCast(vi)->value());
+		std::vector<double> acc;
+		for (const ValuePtr& lv : lvec)
+		{
+			Type lvtype = lv->get_type();
+			if (not nameserver().isA(lvtype, FLOAT_VALUE)) continue;
+
+			const std::vector<double>& dvec(FloatValueCast(lv)->value());
+
+			if (acc.size() < dvec.size())
+				acc.resize(dvec.size());
+			acc = plus(acc, dvec);
+		}
 		return createFloatValue(acc);
 	}
 
