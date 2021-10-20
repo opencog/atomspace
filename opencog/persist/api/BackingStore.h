@@ -239,9 +239,8 @@ class BackingStore
 		virtual void barrier() = 0;
 
 	protected:
-		virtual void getIncomingSet(AtomSpace*, const Handle&);
 		virtual void doGetIncomingSet(AtomSpace*, const Handle&);
-		virtual void getIncomingByType(AtomSpace*, const Handle&, Type);
+		virtual void doGetIncomingByType(AtomSpace*, const Handle&, Type);
 
 		/**
 		 * Return a Link with the indicated type and outset,

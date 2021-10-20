@@ -140,7 +140,7 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	getIncomingByType(*getAtomSpace(), lh, t);
+	doGetIncomingByType(getAtomSpace(), lh, t);
 
 	return lh;
 }
