@@ -95,7 +95,8 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _transient(transient),
     _nameserver(nameserver())
 {
-    _environ.push_back(HandleCast(parent->shared_from_this()));
+    if (parent)
+        _environ.push_back(HandleCast(parent->shared_from_this()));
     init();
 }
 
@@ -130,7 +131,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 {
     _copy_on_write = true;
 
-    if (not _transient)
+    if (not _transient or nullptr == parent)
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomSpace - ready called on non-transient atom table.");
 
