@@ -85,7 +85,7 @@ void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-void SQLAtomStorage::getIncomingSet(AtomSpace& table, const Handle& h)
+void SQLAtomStorage::fetchIncomingSet(AtomSpace* table, const Handle& h)
 {
 	rethrow();
 
@@ -106,14 +106,14 @@ void SQLAtomStorage::getIncomingSet(AtomSpace& table, const Handle& h)
 	// The cast to BIGINT is needed, as otherwise one gets
 	// ERROR:  operator does not exist: bigint[] @> integer[]
 
-	getIncoming(table, buff);
+	getIncoming(*table, buff);
 }
 
 /**
  * Retreive the incoming set of the indicated atom, but only those atoms
  * of type t.
  */
-void SQLAtomStorage::getIncomingByType(AtomSpace& table, const Handle& h, Type t)
+void SQLAtomStorage::fetchIncomingByType(AtomSpace* table, const Handle& h, Type t)
 {
 	rethrow();
 
@@ -129,7 +129,7 @@ void SQLAtomStorage::getIncomingByType(AtomSpace& table, const Handle& h, Type t
 		"SELECT * FROM Atoms WHERE type = %d AND outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
 		dbtype, uuid);
 
-	getIncoming(table, buff);
+	getIncoming(*table, buff);
 }
 
 /* ================================================================ */
@@ -143,7 +143,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 	return rp.intval;
 }
 
-void SQLAtomStorage::loadAtomSpace(AtomSpace &table)
+void SQLAtomStorage::loadAtomSpace(AtomSpace* table)
 {
 	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
@@ -178,7 +178,7 @@ void SQLAtomStorage::loadAtomSpace(AtomSpace &table)
 			[&](unsigned long rec)
 		{
 			Response rp(conn_pool);
-			rp.table = &table;
+			rp.table = table;
 			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
@@ -198,10 +198,10 @@ void SQLAtomStorage::loadAtomSpace(AtomSpace &table)
 	bulk_load = false;
 
 	// synchrnonize!
-	table.barrier();
+	table->barrier();
 }
 
-void SQLAtomStorage::loadType(AtomSpace &table, Type atom_type)
+void SQLAtomStorage::loadType(AtomSpace* table, Type atom_type)
 {
 	rethrow();
 
@@ -240,7 +240,7 @@ void SQLAtomStorage::loadType(AtomSpace &table, Type atom_type)
 			[&](unsigned long rec)
 		{
 			Response rp(conn_pool);
-			rp.table = &table;
+			rp.table = table;
 			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
@@ -258,11 +258,11 @@ void SQLAtomStorage::loadType(AtomSpace &table, Type atom_type)
 		_load_count- start_count);
 
 	// Synchronize!
-	table.barrier();
+	table->barrier();
 }
 
 /// Store all of the atoms in the atom table.
-void SQLAtomStorage::storeAtomSpace(const AtomSpace &table)
+void SQLAtomStorage::storeAtomSpace(const AtomSpace* table)
 {
 	rethrow();
 
@@ -287,19 +287,19 @@ void SQLAtomStorage::storeAtomSpace(const AtomSpace &table)
 	if (2 >= max_uuid) bulk_store = true;
 
 	setup_typemap();
-	store_atomtable_id(table);
+	store_atomtable_id(*table);
 
 	bulk_start = time(0);
 
 	// Try to knock out the nodes first, then the links.
 	HandleSeq atoms;
-	atoms.reserve(table.get_num_nodes());
-	table.get_handles_by_type(atoms, NODE, true);
+	atoms.reserve(table->get_num_nodes());
+	table->get_handles_by_type(atoms, NODE, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	atoms.clear();
-	atoms.reserve(table.get_num_links());
-	table.get_handles_by_type(atoms, LINK, true);
+	atoms.reserve(table->get_num_links());
+	table->get_handles_by_type(atoms, LINK, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();

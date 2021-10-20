@@ -26,18 +26,6 @@
 using namespace opencog;
 
 // ==========================================================
-
-void BackingStore::doGetIncomingSet(AtomSpace* as, const Handle& h)
-{
-	getIncomingSet(*as, h);
-}
-
-void BackingStore::doGetIncomingByType(AtomSpace* as, const Handle& h, Type t)
-{
-	getIncomingByType(*as, h, t);
-}
-
-// ==========================================================
 // Provide a backwards-compat implementation.
 // This is for those providers that implemented `getNode()` and
 // `getLink()`.  They should be updated to provide the below

@@ -126,13 +126,13 @@ Handle FileStorageNode::getLink(Type, const HandleSeq&)
 	return Handle::UNDEFINED;
 }
 
-void FileStorageNode::getIncomingSet(AtomSpace&, const Handle&)
+void FileStorageNode::fetchIncomingSet(AtomSpace*, const Handle&)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::getIncomingByType(AtomSpace&, const Handle&, Type t)
+void FileStorageNode::fetchIncomingByType(AtomSpace*, const Handle&, Type t)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
@@ -182,20 +182,20 @@ void FileStorageNode::loadValue(const Handle&, const Handle&)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::loadType(AtomSpace&, Type)
+void FileStorageNode::loadType(AtomSpace*, Type)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::storeAtomSpace(const AtomSpace& table)
+void FileStorageNode::storeAtomSpace(const AtomSpace* table)
 {
 	if (not connected())
 		throw IOException(TRACE_INFO,
 		"FileStorageNode %s is not open!", _filename.c_str());
 
 	HandleSeq hset;
-	table.get_handles_by_type(hset, ATOM, true);
+	table->get_handles_by_type(hset, ATOM, true);
 	for(const Handle& h: hset)
 	{
 		// Store roots, and Atoms that have values.
@@ -207,7 +207,7 @@ void FileStorageNode::storeAtomSpace(const AtomSpace& table)
 	fflush(_fh);
 }
 
-void FileStorageNode::loadAtomSpace(AtomSpace& table)
+void FileStorageNode::loadAtomSpace(AtomSpace* table)
 {
 	// Check to see if it's connected, and then ignore the file handle.
 	if (not connected())
@@ -219,7 +219,7 @@ void FileStorageNode::loadAtomSpace(AtomSpace& table)
 		throw IOException(TRACE_INFO,
 			"FileStorageNode cannot open %s", _filename.c_str());
 
-	parseStream(stream, table);
+	parseStream(stream, *table);
 	stream.close();
 }
 

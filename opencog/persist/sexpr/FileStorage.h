@@ -55,18 +55,18 @@ class FileStorageNode : public StorageNode
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
-		void getIncomingSet(AtomSpace&, const Handle&);
-		void getIncomingByType(AtomSpace&, const Handle&, Type t);
+		void fetchIncomingSet(AtomSpace*, const Handle&);
+		void fetchIncomingByType(AtomSpace*, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void storeValue(const Handle&, const Handle&);
 		void loadValue(const Handle&, const Handle&);
-		void loadType(AtomSpace&, Type);
+		void loadType(AtomSpace*, Type);
 		void barrier();
 
 		// Large-scale loads and saves
-		void loadAtomSpace(AtomSpace &); // Load entire contents of DB
-		void storeAtomSpace(const AtomSpace &); // Store all of AtomSpace
+		void loadAtomSpace(AtomSpace*); // Load entire contents of DB
+		void storeAtomSpace(const AtomSpace*); // Store all of AtomSpace
 
 		static Handle factory(const Handle&);
 };

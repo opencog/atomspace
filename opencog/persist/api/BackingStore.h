@@ -85,7 +85,7 @@ class BackingStore
 		 * as a generalized incoming set which can be tailored to
 		 * more precise needs.
 		 */
-		virtual void getIncomingSet(AtomSpace&, const Handle&) = 0;
+		virtual void fetchIncomingSet(AtomSpace*, const Handle&) = 0;
 
 		/**
 		 * Fetch all Atoms of the given Type in the incoming set of
@@ -97,7 +97,7 @@ class BackingStore
 		 * as a generalized incoming set which can be tailored to
 		 * more precise needs.
 		 */
-		virtual void getIncomingByType(AtomSpace&, const Handle&, Type) = 0;
+		virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type) = 0;
 
 		/**
 		 * Recursively store the Atom and anything in it's outgoing set.
@@ -206,19 +206,19 @@ class BackingStore
 		 * existing Atoms. Values on the outgoing set of Type are NOT
 		 * fetched!
 		 */
-		virtual void loadType(AtomSpace&, Type) = 0;
+		virtual void loadType(AtomSpace*, Type) = 0;
 
 		/**
 		 * Load *all* atoms from the remote server into this (local)
 		 * AtomSpace. Also load all Values attached to the Atoms.
 		 */
-		virtual void loadAtomSpace(AtomSpace&) = 0;
+		virtual void loadAtomSpace(AtomSpace*) = 0;
 
 		/**
 		 * Store *all* atoms from this (local) AtomSpace to the remote
 		 * server. This stores all Values as well.
 		 */
-		virtual void storeAtomSpace(const AtomSpace&) = 0;
+		virtual void storeAtomSpace(const AtomSpace*) = 0;
 
 		/**
 		 * Read-write synchronization barrier.
@@ -239,9 +239,6 @@ class BackingStore
 		virtual void barrier() = 0;
 
 	protected:
-		virtual void doGetIncomingSet(AtomSpace*, const Handle&);
-		virtual void doGetIncomingByType(AtomSpace*, const Handle&, Type);
-
 		/**
 		 * Return a Link with the indicated type and outset,
 		 * if it exists; else return nullptr. The returned atom

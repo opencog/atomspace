@@ -119,7 +119,7 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	doGetIncomingSet(_atom_space, lh);
+	fetchIncomingSet(_atom_space, lh);
 
 	if (not recursive) return lh;
 
@@ -140,7 +140,7 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	doGetIncomingByType(getAtomSpace(), lh, t);
+	fetchIncomingByType(getAtomSpace(), lh, t);
 
 	return lh;
 }
@@ -169,7 +169,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 
 void StorageNode::load_atomspace(void)
 {
-	loadAtomSpace(*getAtomSpace());
+	loadAtomSpace(getAtomSpace());
 }
 
 /**
@@ -177,10 +177,10 @@ void StorageNode::load_atomspace(void)
  */
 void StorageNode::store_atomspace(void)
 {
-	storeAtomSpace(*getAtomSpace());
+	storeAtomSpace(getAtomSpace());
 }
 
 void StorageNode::fetch_all_atoms_of_type(Type t)
 {
-	loadType(*getAtomSpace(), t);
+	loadType(getAtomSpace(), t);
 }

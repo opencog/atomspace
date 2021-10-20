@@ -467,7 +467,7 @@ void BasicSaveUTest::do_test_table()
     add_to_table(idx++, table1, "DD-dd-wow ");
     add_to_table(idx++, table1, "EE-ee-wow ");
 
-    store->storeAtomSpace(*table1);
+    store->storeAtomSpace(table1);
     // table1->print();
     delete store;
     delete table1;
@@ -479,7 +479,7 @@ void BasicSaveUTest::do_test_table()
 
     AtomSpace *table2 = new AtomSpace();
 
-    store->loadAtomSpace(*table2);
+    store->loadAtomSpace(table2);
     store->barrier();
     // table2->print();
 
