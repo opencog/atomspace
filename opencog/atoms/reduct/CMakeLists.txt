@@ -8,6 +8,7 @@ ADD_LIBRARY (clearbox
 	DivideLink.cc
 	FoldLink.cc
 	HeavisideLink.cc
+	Log2Link.cc
 	MaxLink.cc
 	MinLink.cc
 	MinusLink.cc
@@ -36,6 +37,7 @@ INSTALL (FILES
 	DivideLink.h
 	FoldLink.h
 	HeavisideLink.h
+	Log2Link.h
 	MaxLink.h
 	MinLink.h
 	MinusLink.h

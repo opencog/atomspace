@@ -91,7 +91,7 @@ FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
     # this regular expression is more complex than required due to cmake's
     # regex engine bugs
-    STRING(REGEX MATCH "^[ 	]*([A-Z_]+)?([ 	]*<-[ 	]*([A-Z_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
+    STRING(REGEX MATCH "^[ 	]*([A-Z0-9_]+)?([ 	]*<-[ 	]*([A-Z0-9_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
     IF (MATCHED AND CMAKE_MATCH_1)
         SET(TYPE ${CMAKE_MATCH_1})
         SET(PARENT_TYPES ${CMAKE_MATCH_3})
