@@ -530,13 +530,13 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 
-	if (STRING_VALUE == t)
+	if (nameserver().isA(t, STRING_VALUE))
 	{
 		const std::vector<std::string>& v = StringValueCast(pa)->value();
 		if (index < v.size()) return scm_from_string(v[index]);
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		if (index < v.size()) return protom_to_scm(v[index]);

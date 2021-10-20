@@ -49,4 +49,12 @@
 			(equal? (cog-type LV) 'LinkValue)))
 	(cog-value->list qvalue))
 
+; Verify that cog-value-ref works correctly
+(for-each
+	(lambda (N)
+		(define LV (cog-value-ref qvalue N))
+		(test-assert "Still a link value"
+			(equal? (cog-type LV) 'LinkValue)))
+	(iota 10))
+
 (test-end tname)
