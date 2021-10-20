@@ -36,7 +36,7 @@ using namespace opencog;
 
 void SQLAtomStorage::registerWith(AtomSpace* as)
 {
-	_tlbuf.set_resolver(&as->get_atomtable());
+	_tlbuf.set_resolver(as);
 
 #ifdef NOT_NEEDED_RIGHT_NOW
 	// The goal here is to avoid cluttering the TLB with lots of
@@ -61,7 +61,7 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
 	flushStoreQueue();
-	_tlbuf.clear_resolver(&as->get_atomtable());
+	_tlbuf.clear_resolver(as);
 
 #ifdef NOT_NEEDED_RIGHT_NOW
 	_extract_sig.disconnect();

@@ -70,7 +70,7 @@ void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 		[&] (const PseudoPtr& p)
 	{
 		Handle hi(get_recursive_if_not_exists(p));
-		hi = table.add(hi, false);
+		hi = table.add_atom(hi);
 		_tlbuf.addAtom(hi, p->uuid);
 		get_atom_values(hi);
 		std::lock_guard<std::mutex> lck(iset_mutex);
@@ -293,13 +293,13 @@ void SQLAtomStorage::storeAtomSpace(const AtomSpace &table)
 
 	// Try to knock out the nodes first, then the links.
 	HandleSeq atoms;
-	atoms.reserve(table.getNumNodes());
-	table.getHandlesByType(std::back_inserter(atoms), NODE, true);
+	atoms.reserve(table.get_num_nodes());
+	table.get_handles_by_type(atoms, NODE, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	atoms.clear();
-	atoms.reserve(table.getNumLinks());
-	table.getHandlesByType(std::back_inserter(atoms), LINK, true);
+	atoms.reserve(table.get_num_links());
+	table.get_handles_by_type(atoms, LINK, true);
 	for (const Handle& h: atoms) { storeAtom(h); }
 
 	flushStoreQueue();
