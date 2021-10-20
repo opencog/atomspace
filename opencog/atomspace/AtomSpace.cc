@@ -261,17 +261,51 @@ const std::string& AtomSpace::get_name() const
 
 Arity AtomSpace::get_arity() const
 {
-	return 0;
+	return _environ.size();
 }
 
 const HandleSeq& AtomSpace::getOutgoingSet() const
 {
-	return HandleSeq();
+	return _environ;
 }
 
 Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
-	return Handle();
+	if (n <= _environ.size()) return Handle::UNDEFINED;
+	return _environ[n];
+}
+
+// ====================================================================
+
+AtomSpace* AtomSpace::get_environ(void) const
+{
+	// XXX this is a hack...
+	if (0 == _environ.size()) return nullptr;
+	return AtomSpaceCast(_environ[0]).get();
+}
+
+int AtomSpace::depth(const Handle& atom) const
+{
+    if (nullptr == atom) return -1;
+    if (atom->getAtomSpace() == this) return 0;
+
+    for (const Handle& base : _environ)
+    {
+        int d = AtomSpaceCast(base)->depth(atom);
+        if (0 < d) return d+1;
+    }
+    return -1;
+}
+
+bool AtomSpace::in_environ(const Handle& atom) const
+{
+    if (nullptr == atom) return false;
+    if (atom->getAtomSpace() == this) return true;
+    for (const Handle& base : _environ)
+    {
+        if (AtomSpaceCast(base)->in_environ(atom)) return true;
+    }
+    return false;
 }
 
 // ====================================================================
