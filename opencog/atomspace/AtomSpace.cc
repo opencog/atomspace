@@ -256,7 +256,7 @@ ContentHash AtomSpace::compute_hash() const
 
 const std::string& AtomSpace::get_name() const
 {
-	return "";  // should be uuid
+	return _name;
 }
 
 Arity AtomSpace::get_arity() const

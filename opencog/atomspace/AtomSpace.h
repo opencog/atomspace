@@ -95,6 +95,14 @@ class AtomSpace : public Atom
     bool _copy_on_write;
     bool _transient;
 
+    /// Base AtomSpaces wrapped by this space. Empty if top-level.
+    /// This AtomSpace will behave like the set-union of the base
+    /// atomspaces in the `_environ`: it exposes all Atoms in those
+    /// bases, plus also anything in this AtomSpace.
+    HandleSeq _environ;
+
+    std::string _name;
+
     /** Find out about atom type additions in the NameServer. */
     NameServer& _nameserver;
     int addedTypeConnection;
@@ -107,26 +115,19 @@ class AtomSpace : public Atom
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
 
+    void init();
     void clear_all_atoms();
-
-    /// Base AtomSpaces wrapped by this space. Empty if top-level.
-    /// This AtomSpace will behave like the set-union of the base
-    /// atomspaces in the `_environ`: it exposes all Atoms in those
-    /// bases, plus also anything in this AtomSpace.
-    HandleSeq _environ;
 
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
     Handle lookupHandle(const Handle&) const;
 
     /**
-     * Adds an atom to the table.
+     * Private: add an atom to the table. This skips the read-only
+     * check. To be used only by the storage nodes.
      *
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
-     *
-     * @param The new atom to be added.
-     * @return The handle of the newly added atom.
      */
     Handle add(const Handle&, bool force=false, bool do_lock=true);
 

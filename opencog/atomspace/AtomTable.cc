@@ -72,6 +72,18 @@ using namespace opencog;
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
+void AtomSpace::init(void)
+{
+    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
+
+    _name = "AtomSpace " + _uuid;
+
+    // Connect signal to find out about type additions
+    addedTypeConnection =
+        _nameserver.typeAddedSignal().connect(
+            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
+}
+
 /**
  * Transient atomspaces are intended for use as scratch spaces, to hold
  * temporary results during evaluation, pattern matching and inference.
@@ -83,13 +95,8 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _transient(transient),
     _nameserver(nameserver())
 {
-    _environ[0] = parent;
-    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
-
-    // Connect signal to find out about type additions
-    addedTypeConnection =
-        _nameserver.typeAddedSignal().connect(
-            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
+    _environ[0] = std::dynamic_pointer_cast<AtomSpace>(*parent);
+    init();
 }
 
 AtomSpace::AtomSpace(const HandleSeq& bases) :
@@ -106,13 +113,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
             throw opencog::RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
     }
-
-    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
-
-    // Connect signal to find out about type additions
-    addedTypeConnection =
-        _nameserver.typeAddedSignal().connect(
-            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
+    init();
 }
 
 
@@ -134,7 +135,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ[0] = parent;
+    _environ[0] = std::dynamic_pointer_cast<AtomSpace>(*parent);
 }
 
 void AtomSpace::clear_transient()
