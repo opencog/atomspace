@@ -95,7 +95,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _transient(transient),
     _nameserver(nameserver())
 {
-    _environ[0] = std::dynamic_pointer_cast<AtomSpace>(*parent);
+    _environ.push_back(HandleCast(parent->shared_from_this()));
     init();
 }
 
@@ -135,7 +135,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ[0] = std::dynamic_pointer_cast<AtomSpace>(*parent);
+    _environ.push_back(HandleCast(parent->shared_from_this()));
 }
 
 void AtomSpace::clear_transient()
