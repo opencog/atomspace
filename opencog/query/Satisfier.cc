@@ -119,7 +119,7 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-// GetLink groundings go through here.
+// MeetLink and GetLink groundings go through here.
 bool SatisfyingSet::grounding(const GroundingMap &var_soln,
                               const GroundingMap &term_soln)
 {
@@ -127,7 +127,7 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
-	if (_satisfying_set.size() >= max_results)
+	if (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results)
 		return true;
 
 	if (1 == _varseq.size())
@@ -135,14 +135,7 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			// Insert atom into the atomspace immediately, so that
-			// it becomes visible in other threads.
-			Handle gnd(_as->add_atom(var_soln.at(_varseq[0])));
-			if (_satisfying_set.end() == _satisfying_set.find(gnd))
-			{
-				_satisfying_set.emplace(gnd);
-				_result_queue->push(std::move(gnd));
-			}
+			_result_queue->push(var_soln.at(_varseq[0]));
 		}
 		catch (...)
 		{
@@ -152,12 +145,12 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 		}
 
 		// If we found as many as we want, then stop looking for more.
-		return (_satisfying_set.size() >= max_results);
+		return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
 	}
 
 	// If more than one variable, encapsulate in sequential order,
 	// in a ListLink.
-	HandleSeq vargnds;
+	std::vector<ValuePtr> vargnds;
 	for (const Handle& hv : _varseq)
 	{
 		// Optional clauses (e.g. AbsentLink) may have variables
@@ -172,16 +165,12 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 			vargnds.push_back(hv);
 		}
 	}
-	Handle gnds(_as->add_atom(createLink(std::move(vargnds), LIST_LINK)));
+	ValuePtr gnds(createLinkValue(std::move(vargnds)));
 
-	if (_satisfying_set.end() == _satisfying_set.find(gnds))
-	{
-		_satisfying_set.emplace(gnds);
-		_result_queue->push(std::move(gnds));
-	}
+	_result_queue->push(std::move(gnds));
 
 	// If we found as many as we want, then stop looking for more.
-	return (_satisfying_set.size() >= max_results);
+	return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
 }
 
 bool SatisfyingSet::start_search(void)

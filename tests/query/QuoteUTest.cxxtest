@@ -388,7 +388,7 @@ void QuoteUTest::test_quote_scope(void)
     TS_ASSERT_EQUALS(1, hs.size());
 
     Handle ex = eval->eval_h("expect");
-    TS_ASSERT_EQUALS(ex, hs[0]);
+    TS_ASSERT_EQUALS(ex, as->add_atom(hs[0]));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
