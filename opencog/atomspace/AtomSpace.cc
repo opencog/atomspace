@@ -228,17 +228,23 @@ bool AtomSpace::operator!=(const AtomSpace& other) const
 
 bool AtomSpace::operator==(const Atom& other) const
 {
-    if (ATOMSPACE != other.get_type()) return FALSE;
-    AtomSpacePtr asp(AtomSpaceCast(other));
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
+    if (ATOMSPACE != other.get_type()) return false;
+    AtomSpace* asp = (AtomSpace*) &other;
     return compare_atomspaces(*this, *asp, CHECK_VALUES,
             DONT_EMIT_DIAGNOSTICS);
 }
 
 bool AtomSpace::operator<(const Atom& other) const
 {
-    if (ATOMSPACE != other.get_type()) return FALSE;
-    AtomSpacePtr asp(AtomSpaceCast(other));
-    return _uuid  < asp->_uuid;
+    // If other points to this, then have equality.
+    if (this == &other) return false;
+
+    if (ATOMSPACE != other.get_type()) return false;
+    AtomSpace* asp = (AtomSpace*) &other;
+    return _uuid  < (asp->_uuid);
 }
 
 ContentHash AtomSpace::compute_hash() const

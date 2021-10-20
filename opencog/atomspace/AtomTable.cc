@@ -77,6 +77,7 @@ static std::atomic<UUID> _id_pool(1);
  * temporary results during evaluation, pattern matching and inference.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
+    Atom(ATOMSPACE),
     _nameserver(nameserver()),
     _read_only(false),
     _copy_on_write(transient)
