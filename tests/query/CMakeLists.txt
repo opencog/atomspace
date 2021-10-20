@@ -102,6 +102,9 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
+
+	ADD_GUILE_TEST(meet-link-value.scm)
+
 ENDIF (HAVE_GUILE)
 
 # Run only the tests in this subdirectory

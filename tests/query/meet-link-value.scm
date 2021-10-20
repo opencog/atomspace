@@ -1,9 +1,17 @@
+;
+; meet-link-value.scm
+;
+; MeetLink should return LinkValues when there is more then
+; one variable to report.
+;
 
 (use-modules (opencog) (opencog exec))
+(use-modules (opencog test-runner))
 
-;A workig 
-; ----------------------
-; Fancier version -- the dot product
+(opencog-test-runner)
+
+(define tname "meet-link-value")
+(test-begin tname)
 
 ; A pair of vectors
 (Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
@@ -18,7 +26,6 @@
 (Evaluation (Predicate "furry")    (Concept "cat") (CountTruthValue 1 0 4))
 (Evaluation (Predicate "domestic") (Concept "cat") (CountTruthValue 1 0 5))
 
-
 (define flow-pairs
 	(Meet
 		(VariableList
@@ -27,6 +34,19 @@
 		(Present
 			(Evaluation (Variable "$prop") (Variable "$cpt")))))
 
-(cog-execute! flow-pairs)
+(define qvalue (cog-execute! flow-pairs))
 
+(test-assert "Return value is a queue value"
+	(equal? (cog-type qvalue) 'QueueValue))
 
+(test-assert "Size of queue is ten"
+	(equal? 10 (length (cog-value->list qvalue))))
+
+; Verify they are all link-values
+(for-each
+	(lambda (LV)
+		(test-assert "Its a link value"
+			(equal? (cog-type LV) 'LinkValue)))
+	(cog-value->list qvalue))
+
+(test-end tname)
