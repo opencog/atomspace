@@ -749,6 +749,9 @@ MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // for vectors, and returns numeric value.
 HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
+// Logarithm base2
+LOG2_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
 // Return uniformly distributed random number between two limits.
 RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
