@@ -90,8 +90,10 @@ class AtomSpace : public Atom
     //! Index of atoms.
     TypeIndex typeIndex;
 
-    bool _transient;
     UUID _uuid;
+    bool _read_only;
+    bool _copy_on_write;
+    bool _transient;
 
     /** Find out about atom type additions in the NameServer. */
     NameServer& _nameserver;
@@ -112,10 +114,6 @@ class AtomSpace : public Atom
     /// atomspaces in the `_environ`: it exposes all Atoms in those
     /// bases, plus also anything in this AtomSpace.
     HandleSeq _environ;
-    std::atomic_int _num_nested;
-
-    bool _read_only;
-    bool _copy_on_write;
 
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;

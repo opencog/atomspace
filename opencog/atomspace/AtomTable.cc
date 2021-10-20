@@ -78,15 +78,36 @@ static std::atomic<UUID> _id_pool(1);
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     Atom(ATOMSPACE),
-    _nameserver(nameserver()),
     _read_only(false),
-    _copy_on_write(transient)
+    _copy_on_write(transient),
+    _transient(transient),
+    _nameserver(nameserver())
 {
-    _environ = parent;
-    if (_environ) _environ->_num_nested++;
-    _num_nested = 0;
+    _environ[0] = parent;
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
-    _transient = transient;
+
+    // Connect signal to find out about type additions
+    addedTypeConnection =
+        _nameserver.typeAddedSignal().connect(
+            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
+}
+
+AtomSpace::AtomSpace(const HandleSeq& bases) :
+    Atom(ATOMSPACE),
+    _read_only(false),
+    _copy_on_write(false),
+    _transient(false),
+    _nameserver(nameserver())
+{
+    _environ = bases;
+    for (const Handle& base : bases)
+    {
+        if (not _nameserver.isA(base->get_type(), ATOMSPACE))
+            throw opencog::RuntimeException(TRACE_INFO,
+                    "AtomSpace - bases must be AtomSpaces!");
+    }
+
+    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
 
     // Connect signal to find out about type additions
     addedTypeConnection =
@@ -99,15 +120,9 @@ AtomSpace::~AtomSpace()
 {
     std::unique_lock<std::shared_mutex> lck(_mtx);
 
-    if (_environ) _environ->_num_nested--;
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
 
     clear_all_atoms();
-
-    if (0 != _num_nested)
-        throw opencog::RuntimeException(TRACE_INFO,
-           "AtomSpace - deleteing atomtable %lu which has subtables!",
-           _uuid);
 }
 
 void AtomSpace::ready_transient(AtomSpace* parent)
@@ -119,8 +134,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ = parent;
-    if (_environ) _environ->_num_nested++;
+    _environ[0] = parent;
 }
 
 void AtomSpace::clear_transient()
@@ -135,8 +149,7 @@ void AtomSpace::clear_transient()
     clear_all_atoms();
 
     // Clear the  parent environment and holder atomspace.
-    if (_environ) _environ->_num_nested--;
-    _environ = NULL;
+    _environ[0] = nullptr;
 }
 
 void AtomSpace::clear_all_atoms()
@@ -172,8 +185,11 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
-    if (_environ)
-        return _environ->lookupHandle(a);
+    for (const Handle& base: _environ)
+    {
+        const Handle& found = AtomSpaceCast(base)->lookupHandle(a);
+        if (found) return found;
+    }
 
     return Handle::UNDEFINED;
 }
@@ -208,13 +224,9 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     if (not force) {
-        if (in_environ(orig)) return orig;
-
-        Handle hcheck(typeIndex.findAtom(orig));
-        if (nullptr == hcheck and _environ)
-            hcheck = _environ->lookupHandle(orig);
+        // If we have it already, Update the values, as needed.
+        Handle hcheck(lookupHandle(orig));
         if (hcheck) {
-            // Oh we have it already. Update the values, as needed.
             hcheck->copyValues(orig);
             return hcheck;
         }
@@ -318,8 +330,10 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
         }
     }
 
-    if (_environ)
-        result += _environ->get_num_atoms_of_type(type, subclass);
+    for (const Handle& base : _environ)
+    {
+        result += AtomSpaceCast(base)->get_num_atoms_of_type(type, subclass);
+    }
 
     return result;
 }
@@ -510,8 +524,10 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
-    if (parent and _environ)
-        _environ->get_handles_by_type(hseq, type, subclass, parent, cas);
+    if (parent) {
+        for (const Handle& base : _environ)
+            AtomSpaceCast(base)->get_handles_by_type(hseq, type, subclass, parent, cas);
+    }
 }
 
 /**
@@ -565,6 +581,8 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
 
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent.
-    if (parent and _environ)
-        _environ->get_root_set_by_type(hseq, type, subclass, parent, cas);
+    if (parent) {
+        for (const Handle& base : _environ)
+            AtomSpaceCast(base)->get_root_set_by_type(hseq, type, subclass, parent, cas);
+    }
 }
