@@ -44,7 +44,6 @@
 
 class AtomSpaceUTest;
 class AtomTableUTest;
-class BasicSaveUTest;
 
 namespace opencog
 {
@@ -81,10 +80,10 @@ class AtomSpace
     AtomSpace(const AtomSpace&) = delete;
 
     // --------------------------------------------------
-    // Single, global mutex for locking the indexes.
+    // Single, global mutex for locking the index.
     // Its recursive because we need to lock twice during atom insertion
-    // and removal: we need to keep the indexes stable while we search
-    // them during add/remove.
+    // and removal: we need to keep the index stable while we search
+    // it during add/remove.
     mutable std::shared_mutex _mtx;
 
     //! Index of atoms.
@@ -594,6 +593,9 @@ public:
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
+
+    // Not for public use! Only StorageNodes get to call this!
+    Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
 
 /** @}*/

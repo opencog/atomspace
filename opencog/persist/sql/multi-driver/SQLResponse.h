@@ -180,7 +180,7 @@ class SQLAtomStorage::Response
 				PseudoPtr p(store->makeAtom(*this, uuid));
 
 				Handle atom(store->get_recursive_if_not_exists(p));
-				Handle h(table->add_atom(atom));
+				Handle h(table->storage_add_nocheck(atom));
 
 				// Force resolution in TLB, so that later removes work.
 				store->_tlbuf.addAtom(h, uuid);
@@ -205,14 +205,14 @@ class SQLAtomStorage::Response
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
 				h = store->get_recursive_if_not_exists(p);
-				h = table->add_atom(h);
+				h = table->storage_add_nocheck(h);
 				store->_tlbuf.addAtom(h, uuid);
 			}
 			else
 			{
 				// In case it's still in the TLB, but was
 				// previously removed from the atomspace.
-				h = table->add_atom(h);
+				h = table->storage_add_nocheck(h);
 			}
 
 			// Clobber all values, including truth values.
@@ -343,9 +343,9 @@ class SQLAtomStorage::Response
 				// ever verifies that the key gets inserted into some
 				// table.  The correct fix is to add AtomSpace as a
 				// part of the BackingStore API. XXX TODO FIXME.
-				if (table) hkey = table->add_atom(hkey);
+				if (table) hkey = table->storage_add_nocheck(hkey);
 				else if (atom->getAtomSpace())
-					hkey = atom->getAtomSpace()->add_atom(hkey);
+					hkey = atom->getAtomSpace()->storage_add_nocheck(hkey);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 
@@ -355,7 +355,7 @@ class SQLAtomStorage::Response
 			if (nullptr == hkey->getAtomSpace() and
 			    nullptr != atom->getAtomSpace())
 			{
-				hkey = atom->getAtomSpace()->add_atom(hkey);
+				hkey = atom->getAtomSpace()->storage_add_nocheck(hkey);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 

@@ -70,7 +70,7 @@ void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 		[&] (const PseudoPtr& p)
 	{
 		Handle hi(get_recursive_if_not_exists(p));
-		hi = table.add_atom(hi);
+		hi = table.storage_add_nocheck(hi);
 		_tlbuf.addAtom(hi, p->uuid);
 		get_atom_values(hi);
 		std::lock_guard<std::mutex> lck(iset_mutex);
