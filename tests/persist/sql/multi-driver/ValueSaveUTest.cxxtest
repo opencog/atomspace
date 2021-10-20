@@ -545,8 +545,8 @@ void ValueSaveUTest::do_test_load_by_type()
 	TSM_ASSERT_EQUALS("Wrong number of Atoms fetched!", as->get_size(), 7);
 
 	printf("Got %lu Atoms\n", as->get_size());
-	HandleSet hset;
-	as->get_rootset_by_type(hset, ATOM, true);
+	HandleSeq hset;
+	as->get_root_set_by_type(hset, ATOM, true);
 	for (const Handle& h : hset)
 		printf("%s\n", h->to_string().c_str());
 

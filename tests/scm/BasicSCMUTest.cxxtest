@@ -528,7 +528,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
-	as->get_handles_by_type(back_inserter(links), type, true);
+	as->get_handles_by_type(links, type, true);
 	//printf("Number of links found: %d\n",links.size());
 	for (const Handle& h: links)
 		check_tv(h, truth, conf);
@@ -653,7 +653,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
-	as->get_handles_by_type(back_inserter(links), type, true);
+	as->get_handles_by_type(links, type, true);
 	//printf("Number of links found: %d\n",links.size());
 	for (const Handle& h: links)
 		check_tv(h, 1.0, 0.0); // DEFAULT_TV is true with no confidence

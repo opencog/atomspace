@@ -460,7 +460,7 @@ void PatternUTest::test_implication(void)
 	// Be sure to explicitly check that we got hitem_2 as the result
 
 	HandleSeq ret;
-	as->get_handles_by_type(back_inserter(ret), PARSE_LINK);
+	as->get_handles_by_type(ret, PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	if (0 < ret.size())

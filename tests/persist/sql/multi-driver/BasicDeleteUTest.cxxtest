@@ -201,8 +201,8 @@ void BasicDeleteUTest::test_recursive(void)
 	store->barrier();
 
 	printf("Atomspace size=%lu\n", as->get_size());
-	HandleSet hset;
-	as->get_rootset_by_type(hset, ATOM, true);
+	HandleSeq hset;
+	as->get_root_set_by_type(hset, ATOM, true);
 	for (const Handle& h : hset)
 		printf("Atomspace contains: %s\n", h->to_short_string().c_str());
 
@@ -216,7 +216,7 @@ void BasicDeleteUTest::test_recursive(void)
 
 	printf("Post-delete atomspace size=%lu\n", as->get_size());
 	hset.clear();
-	as->get_rootset_by_type(hset, ATOM, true);
+	as->get_root_set_by_type(hset, ATOM, true);
 	for (const Handle& h : hset)
 		printf("Post delete: %s\n", h->to_short_string().c_str());
 
@@ -416,8 +416,8 @@ void BasicDeleteUTest::test_key_corruption(void)
 	printf("Loading the atomspace ...\n");
 	store->load_atomspace();
 
-	HandleSet hset;
-	as->get_rootset_by_type(hset, ATOM, true);
+	HandleSeq hset;
+	as->get_root_set_by_type(hset, ATOM, true);
 	for (const Handle& h: hset)
 		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
 	TS_ASSERT_EQUALS(as->get_size(), 4);
@@ -461,7 +461,7 @@ void BasicDeleteUTest::test_key_corruption(void)
 	store->load_atomspace();
 
 	hset.clear();
-	as->get_rootset_by_type(hset, ATOM, true);
+	as->get_root_set_by_type(hset, ATOM, true);
 	for (const Handle& h: hset)
 		printf("Atomspace contains h=%s\n", h->to_short_string().c_str());
 	TS_ASSERT_EQUALS(as->get_size(), 6);

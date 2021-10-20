@@ -145,13 +145,13 @@ public:
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
         // that is in the atomspace.
-        Handle hle_resolved(table->getHandle(hle));
+        Handle hle_resolved(table->get_atom(hle));
         TS_ASSERT(*((AtomPtr)hlet) == *((AtomPtr)hle_resolved));
 
-        Handle hnp_resolved(table->getHandle(hnp));
+        Handle hnp_resolved(table->get_atom(hnp));
         TS_ASSERT(*((AtomPtr)hs[0]) == *((AtomPtr)hnp_resolved));
 
-        Handle hll_resolved(table->getHandle(hll));
+        Handle hll_resolved(table->get_atom(hll));
         TS_ASSERT(*((AtomPtr)hs[1]) == *((AtomPtr)hll_resolved));
 
         // The remainder of the test assumes an ordered link,
@@ -160,16 +160,16 @@ public:
         if (not nameserver().isA(list_type, ORDERED_LINK))
             return;
 
-        Handle hn1_resolved(table->getHandle(hn1));
+        Handle hn1_resolved(table->get_atom(hn1));
         TS_ASSERT(*((AtomPtr)hsl[0]) == *((AtomPtr)hn1_resolved));
 
-        Handle hn2_resolved(table->getHandle(hn2));
+        Handle hn2_resolved(table->get_atom(hn2));
         TS_ASSERT(*((AtomPtr)hsl[1]) == *((AtomPtr)hn2_resolved));
 
-        Handle hn3_resolved(table->getHandle(hn3));
+        Handle hn3_resolved(table->get_atom(hn3));
         TS_ASSERT(*((AtomPtr)hsl[2]) == *((AtomPtr)hn3_resolved));
 
-        Handle hn4_resolved(table->getHandle(hn4));
+        Handle hn4_resolved(table->get_atom(hn4));
         TS_ASSERT(*((AtomPtr)hsl[3]) == *((AtomPtr)hn4_resolved));
     }
 

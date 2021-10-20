@@ -64,17 +64,8 @@ typedef SigSlot<const Handle&,
  */
 class AtomSpace 
 {
-#if 0
-    friend class Atom;               // Needs to call get_atomtable()
-    friend class BackingStore;       // Needs to call get_atomtable()
-    friend class StorageNode;        // Needs to call get_atomtable()
-    friend class IPFSAtomStorage;    // Needs to call get_atomtable()
-    friend class SQLAtomStorage;     // Needs to call get_atomtable()
-    friend class UuidSCM;            // Needs to call get_atomtable()
-    friend class ::AtomSpaceUTest;
-    friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
-#endif
-    friend class ::AtomTableUTest;   // Needs to call getRandom
+    friend class ::AtomSpaceUTest;   // Needs to touch typeIndex
+    friend class ::AtomTableUTest;   // Needs to call getRandom()
 
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
