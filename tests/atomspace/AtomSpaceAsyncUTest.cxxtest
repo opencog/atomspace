@@ -563,7 +563,7 @@ public:
         // First, seetup the contents, and get all the concept nodes
         testEvalAdd();
         HandleSeq hs;
-        atomSpace->get_handles_by_type(back_inserter(hs), CONCEPT_NODE);
+        atomSpace->get_handles_by_type(hs, CONCEPT_NODE);
 
         std::cout << "Num concept nodes:" << hs.size() << std::endl;
         TS_ASSERT_EQUALS(hs.size(), num_atoms);

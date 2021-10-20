@@ -76,7 +76,6 @@ namespace opencog
  */
 
 class AtomSpace;
-class AtomTable;
 
 //! arity of Links, represented as size_t to match outcoming set limit
 typedef std::size_t Arity;
@@ -100,20 +99,14 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 class Atom
     : public Value
 {
-    friend class AtomTable;       // Needs to call MarkedForRemoval()
-    friend class AtomSpace;       // Needs to call getAtomTable()
+    friend class AtomSpace;       // Needs to setChecked
     friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
-    friend class SQLAtomStorage;  // Needs to call getAtomTable()
-    friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 protected:
     //! Sets the AtomSpace in which this Atom is inserted.
     virtual void setAtomSpace(AtomSpace *);
-
-    //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const;
 
     // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
@@ -324,7 +317,7 @@ public:
     std::string valuesToString() const;
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize(AtomSpace* = nullptr) const;
+    size_t getIncomingSetSize(const AtomSpace* = nullptr) const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms
@@ -335,7 +328,7 @@ public:
     //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSet(const AtomSpace* = nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -345,7 +338,7 @@ public:
     //! that were actually part of the incoming set at the time of
     //! the call to this function.
     template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result) const
+    getIncomingIter(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
         std::shared_lock<std::shared_mutex> lck(_mtx);
@@ -402,10 +395,10 @@ public:
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type, AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSetByType(Type, const AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type, AtomSpace* = nullptr) const;
+    size_t getIncomingSetSizeByType(Type type, const AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;

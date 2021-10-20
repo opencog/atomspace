@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "TLB.h"
 
 using namespace opencog;
@@ -43,12 +43,12 @@ void TLB::clear()
 // ===================================================
 // Handle resolution stuff.
 
-void TLB::set_resolver(const AtomTable* tab)
+void TLB::set_resolver(const AtomSpace* tab)
 {
     _resolver.push_back(tab);
 }
 
-void TLB::clear_resolver(const AtomTable* tab)
+void TLB::clear_resolver(const AtomSpace* tab)
 {
     auto it = std::find(_resolver.begin(), _resolver.end(), tab);
     if (it != _resolver.end())
@@ -62,8 +62,8 @@ Handle TLB::do_res(const Handle& h)
     // No-op if it's already in an atomspace.
     if (h->getAtomSpace()) return h->get_handle();
 
-    for (const AtomTable* at : _resolver) {
-        Handle hr(at->getHandle(h));
+    for (const AtomSpace* at : _resolver) {
+        Handle hr(at->get_atom(h));
         if (nullptr != hr) return hr;
     }
     return Handle::UNDEFINED;

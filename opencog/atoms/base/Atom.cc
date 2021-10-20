@@ -37,7 +37,6 @@
 #include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
 #define FETCHED_RECENTLY        1  //BIT0
@@ -136,7 +135,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     setValue (truth_key(), ValueCast(newTV));
 
     if (_atom_space != nullptr) {
-        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
+        TVCHSigl& tvch = _atom_space->TVChangedSignal();
         tvch.emit(get_handle(), oldTV, newTV);
     }
 }
@@ -297,11 +296,6 @@ void Atom::setAtomSpace(AtomSpace *tb)
     _atom_space = tb;
 }
 
-AtomTable* Atom::getAtomTable() const
-{
-    return &(_atom_space->_atom_table);
-}
-
 // ==============================================================
 // Incoming set stuff
 
@@ -400,7 +394,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize(AtomSpace* as) const
+size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
@@ -409,13 +403,12 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
     size_t cnt = 0;
     if (as)
     {
-        const AtomTable *atab = &as->get_atomtable();
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
                 Handle l(w.lock());
-                if (l and atab->in_environ(l)) cnt++;
+                if (l and as->in_environ(l)) cnt++;
             }
         }
         return cnt;
@@ -430,13 +423,12 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet(AtomSpace* as) const
+IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         // Prevent update of set while a copy is being made.
         std::shared_lock<std::shared_mutex> lck (_mtx);
         IncomingSet iset;
@@ -445,7 +437,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
             for (const WinkPtr& w : bucket.second)
             {
                 Handle l(w.lock());
-                if (l and atab->in_environ(l))
+                if (l and as->in_environ(l))
                     iset.emplace_back(l);
             }
         }
@@ -466,7 +458,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
+IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
@@ -479,11 +471,10 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
 
     IncomingSet result;
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
             Handle l(w.lock());
-            if (l and atab->in_environ(l))
+            if (l and as->in_environ(l))
                 result.emplace_back(l);
         }
         return result;
@@ -497,7 +488,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
     return result;
 }
 
-size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
+size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
     std::shared_lock<std::shared_mutex> lck(_mtx);
@@ -508,11 +499,10 @@ size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
     size_t cnt = 0;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
         for (const WinkPtr& w : bucket->second)
         {
             Handle l(w.lock());
-            if (l and atab->in_environ(l)) cnt++;
+            if (l and as->in_environ(l)) cnt++;
         }
         return cnt;
     }
@@ -529,7 +519,7 @@ std::string Atom::id_to_string() const
 {
     std::stringstream ss;
     ss << "[" << std::hex << get_hash() << "][";
-    if (_atom_space) ss << _atom_space->_atom_table.get_uuid();
+    if (_atom_space) ss << _atom_space->get_uuid();
     else ss << "-1";
     ss << "]";
     return ss.str();

@@ -394,7 +394,7 @@ public:
 		delete ex1;
 
 		std::list<Handle> handle_set;
-		as1.get_handles_by_type(back_inserter(handle_set), ATOM, false);
+		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 
 		AtomSpace* ex2 = new AtomSpace(&as2);
@@ -407,7 +407,7 @@ public:
 		delete ex2;
 
 		handle_set.clear();
-		as1.get_handles_by_type(back_inserter(handle_set), ATOM, false);
+		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 	}
 

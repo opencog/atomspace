@@ -226,7 +226,7 @@ getHandleSetFiltered(AtomSpace* as, OutputIterator result,
              HandlePredicate& compare)
 {
     HandleSeq hs;
-    as->get_handles_by_type(back_inserter(hs), type, subclass);
+    as->get_handles_by_type(hs, type, subclass);
 
     return std::copy_if(hs.begin(), hs.end(), result,
         [&](Handle h)->bool { return compare(h); } );
@@ -270,7 +270,7 @@ getSortedHandleSet(AtomSpace* as,
     // get the handle set as a vector and sort it.
     HandleSeq hs;
 
-    as->get_handles_by_type(back_inserter(hs), type, subclass);
+    as->get_handles_by_type(hs, type, subclass);
     std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
     return std::copy(hs.begin(), hs.end(), result);
 }
@@ -283,7 +283,7 @@ get_handles_by_name(AtomSpace* as,
                     bool subclass = true)
 {
     if (name.c_str()[0] == 0)
-        return as->get_handles_by_type(result, type, subclass);
+        return as->get_handleset_by_type(result, type, subclass);
 
     if (false == subclass) {
         Handle h(as->get_handle(type, name));
@@ -423,11 +423,11 @@ public:
             //}
 
             HandleSeq nodes;
-            atomSpace->get_handles_by_type(back_inserter(nodes), NODE, true);
+            atomSpace->get_handles_by_type(nodes, NODE, true);
             logger().debug("Get nodes by type %d checked", vhIdx);
 
             HandleSeq links;
-            atomSpace->get_handles_by_type(back_inserter(links), LINK, true);
+            atomSpace->get_handles_by_type(links, LINK, true);
             logger().debug("Get links by type %d checked", vhIdx);
 
             HandleSeq all;
@@ -556,13 +556,13 @@ public:
                               );
 
         HandleSeq links;
-        atomSpace->get_handles_by_type(back_inserter(links), LINK, true);
+        atomSpace->get_handles_by_type(links, LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
-        atomSpace->get_handles_by_type(back_inserter(links), LINK, true);
+        atomSpace->get_handles_by_type(links, LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 2);
         delete tr;
@@ -806,7 +806,7 @@ public:
         h3->setTruthValue(SimpleTruthValue::createTV(0.5, 0.99));
 
         HandleSeq namedAtoms;
-        atomSpace->get_handles_by_type(back_inserter(namedAtoms), NODE, true);
+        atomSpace->get_handles_by_type(namedAtoms, NODE, true);
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
 
@@ -830,7 +830,7 @@ public:
 
     void testQuoteLink()
     {
-        TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
+        TypeIndex& type_index = atomSpace->typeIndex;
 
         Handle A = make_node(CONCEPT_NODE, "A"),
             B = make_node(CONCEPT_NODE, "B"),
@@ -891,7 +891,7 @@ public:
     // preconstructed structures to the atomspace.
     void testPreconstructedQuote()
     {
-        TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
+        TypeIndex& type_index = atomSpace->typeIndex;
 
         Handle A = factory_node(CONCEPT_NODE, "A"),
             B = factory_node(CONCEPT_NODE, "B"),

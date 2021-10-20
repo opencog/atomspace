@@ -173,8 +173,8 @@ std::string Commands::interpret_command(AtomSpace* as,
 			get_subtypes = true;
 
 		std::string rv = "(";
-		HandleSet hset;
-		as->get_handleset_by_type(hset, t, get_subtypes);
+		HandleSeq hset;
+		as->get_handles_by_type(hset, t, get_subtypes);
 		for (const Handle& h: hset)
 			rv += Sexpr::encode_atom(h);
 		rv += ")";

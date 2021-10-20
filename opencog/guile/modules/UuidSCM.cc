@@ -82,7 +82,7 @@ void UuidSCM::init(void)
 	// resolvers for nested atomspaces. But for now, no one uses this so
 	// what the heck. I'm gonna punt. XXX FIXME.
 	AtomSpace* as = SchemeSmob::ss_get_env_as("uuid");
-	_tlb.set_resolver(&as->get_atomtable());
+	_tlb.set_resolver(as);
 
 	define_scheme_primitive("cog-add-uuid",
 		&UuidSCM::add_atom, this, "uuid");

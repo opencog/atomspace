@@ -39,7 +39,7 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/StorageNode.h>
 #include <opencog/persist/tlb/TLB.h>
 
@@ -78,7 +78,7 @@ class SQLAtomStorage : public StorageNode
 		// Handle multiple atomspaces like typecodes: we have to
 		// convert from sql UUID to the actual UUID.
 		std::set<UUID> table_id_cache;
-		void store_atomtable_id(const AtomTable&);
+		void store_atomtable_id(const AtomSpace&);
 
 		// ---------------------------------------------
 		// Fetching of atoms.
@@ -104,7 +104,7 @@ class SQLAtomStorage : public StorageNode
 		int getMaxObservedHeight(void);
 		int max_height;
 
-		void getIncoming(AtomTable&, const char *);
+		void getIncoming(AtomSpace&, const char *);
 		// --------------------------
 		// Storing of atoms
 		std::mutex _store_mutex;
@@ -262,19 +262,19 @@ class SQLAtomStorage : public StorageNode
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
-		void getIncomingSet(AtomTable&, const Handle&);
-		void getIncomingByType(AtomTable&, const Handle&, Type t);
+		void fetchIncomingSet(AtomSpace*, const Handle&);
+		void fetchIncomingByType(AtomSpace*, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void removeAtom(const Handle&, bool recursive);
 		void storeValue(const Handle&, const Handle&);
 		void loadValue(const Handle&, const Handle&);
-		void loadType(AtomTable&, Type);
+		void loadType(AtomSpace*, Type);
 		void barrier();
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
-		void loadAtomSpace(AtomTable &); // Load entire contents of DB
-		void storeAtomSpace(const AtomTable &); // Store all of AtomTable
+		void loadAtomSpace(AtomSpace*); // Load entire contents of DB
+		void storeAtomSpace(const AtomSpace*); // Store all of AtomSpace
 
 		// Debugging and performance monitoring
 		void print_stats(void);

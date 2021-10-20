@@ -74,13 +74,13 @@ TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
  * This will be the second atom of some TypedAtomLink, where
  * `atom` is the first.
  */
-Handle TypedAtomLink::get_type(const Handle& atom, AtomSpace* as)
+Handle TypedAtomLink::get_type(const Handle& atom, const AtomSpace* as)
 {
 	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false, as));
 	return uniq->getOutgoingAtom(1);
 }
 
-Handle TypedAtomLink::get_link(const Handle& atom, AtomSpace* as)
+Handle TypedAtomLink::get_link(const Handle& atom, const AtomSpace* as)
 {
 	return get_unique(atom, TYPED_ATOM_LINK, false, as);
 }

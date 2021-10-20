@@ -85,7 +85,7 @@ using namespace opencog;
 
 IncomingSet BackingImplicator::get_incoming_set(const Handle& h, Type t)
 {
-	_store->getIncomingByType(_ras, h, t);
+	_store->fetchIncomingByType(_ras, h, t);
 	_store->barrier();
 	return h->getIncomingSetByType(t, _ras);
 }
@@ -102,7 +102,7 @@ Handle BackingImplicator::get_link(const Handle& hg,
 
 IncomingSet BackingSatisfyingSet::get_incoming_set(const Handle& h, Type t)
 {
-	_store->getIncomingByType(_as, h, t);
+	_store->fetchIncomingByType(_as, h, t);
 	_store->barrier();
 	return h->getIncomingSetByType(t, _as);
 }
@@ -119,7 +119,7 @@ Handle BackingSatisfyingSet::get_link(const Handle& hg,
 
 IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 {
-	_store->getIncomingSet(_as, h);
+	_store->fetchIncomingSet(_as, h);
 	_store->barrier();
 	return h->getIncomingSet(_as);
 }

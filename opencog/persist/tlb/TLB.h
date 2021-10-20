@@ -58,7 +58,7 @@ public:
     };
 };
 
-class AtomTable;
+class AtomSpace;
 
 /**
  * Each atom stored in the AtomSpace will have an immutable UUID, which
@@ -84,7 +84,7 @@ private:
                       std::equal_to<opencog::Handle> > _handle_map;
 
     // Its a vector, not a set, because it's priority ranked.
-    std::vector<const AtomTable*> _resolver;
+    std::vector<const AtomSpace*> _resolver;
     Handle do_res(const Handle&);
 
 public:
@@ -92,8 +92,8 @@ public:
     static const UUID INVALID_UUID = ULONG_MAX;
 
     TLB(uuid_pool* = nullptr);
-    void set_resolver(const AtomTable*);
-    void clear_resolver(const AtomTable*);
+    void set_resolver(const AtomSpace*);
+    void clear_resolver(const AtomSpace*);
 
     size_t size() { return _uuid_map.size(); }
     void clear();

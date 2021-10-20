@@ -124,7 +124,7 @@ void single_atom_test(std::string id)
     delete store;
 }
 
-void add_to_table(AtomTable *table, std::string id)
+void add_to_table(AtomSpace *table, std::string id)
 {
     // Create an atom ... 
     Atom *a = new Node(SCHEMA_NODE, id + "fromNode");
@@ -172,7 +172,7 @@ int main ()
              // "postgres:///opencog_test?user=opencog_tester&host=localhost");
              "postgres:///opencog_test?user=opencog_tester&password=cheese");
 
-    AtomTable *table = new AtomTable();
+    AtomSpace *table = new AtomSpace();
     store->load(*table);
 
     printf("Printing table:\n");
@@ -215,7 +215,7 @@ int main ()
 #if 0
     SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
 
-    AtomTable *table = new AtomTable();
+    AtomSpace *table = new AtomSpace();
     add_to_table(table, "aaa ");
     add_to_table(table, "bbb ");
     add_to_table(table, "ccc ");

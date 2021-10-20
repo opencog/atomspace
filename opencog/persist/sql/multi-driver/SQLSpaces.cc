@@ -32,8 +32,8 @@
 using namespace opencog;
 
 /* ================================================================== */
-/* AtomTable UUID stuff */
-void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
+/* AtomSpace UUID stuff */
+void SQLAtomStorage::store_atomtable_id(const AtomSpace& at)
 {
 	UUID tab_id = at.get_uuid();
 	if (table_id_cache.count(tab_id)) return;
@@ -42,7 +42,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 	// Get the parent table as well.
 	UUID parent_id = 1;
-	AtomTable *env = at.get_environ();
+	AtomSpace *env = at.get_environ();
 	if (env)
 	{
 		parent_id = env->get_uuid();

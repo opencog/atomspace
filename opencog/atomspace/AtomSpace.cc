@@ -41,36 +41,6 @@ using namespace opencog;
 
 // ====================================================================
 
-/**
- * Transient atomspaces skip some of the initialization steps,
- * so that they can be constructed more quickly.  Transient atomspaces
- * are typically used as scratch spaces, to hold temporary results
- * during evaluation, pattern matching and inference. Such temporary
- * spaces don't need some of the heavier-weight crud that atomspaces
- * are festooned with.
- */
-AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
-    _read_only(false),
-    _copy_on_write(transient)
-{
-}
-
-AtomSpace::~AtomSpace()
-{
-}
-
-void AtomSpace::ready_transient(AtomSpace* parent)
-{
-    _copy_on_write = true;
-    _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
-}
-
-void AtomSpace::clear_transient()
-{
-    _atom_table.clear_transient();
-}
-
 // An extremely primitive permissions system.
 void AtomSpace::set_read_only(void)
 {
@@ -120,31 +90,30 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     // If we get this far, we need to compare each individual atom.
 
     // Get the atoms in each atomspace.
-    HandleSet atomsInFirstSpace, atomsInSecondSpace;
-    space_first.get_handleset_by_type(atomsInFirstSpace, ATOM, true);
-    space_second.get_handleset_by_type(atomsInSecondSpace, ATOM, true);
+    HandleSeq atomsInFirstSpace, atomsInSecondSpace;
+    space_first.get_handles_by_type(atomsInFirstSpace, ATOM, true);
+    space_second.get_handles_by_type(atomsInSecondSpace, ATOM, true);
 
     // Uncheck each atom in the second atomspace.
     for (auto atom : atomsInSecondSpace)
         atom->setUnchecked();
 
     // Loop to see if each atom in the first has a match in the second.
-    const AtomTable& table_second = space_second._atom_table;
     for (auto atom_first : atomsInFirstSpace)
     {
-        Handle atom_second = table_second.getHandle(atom_first);
+        Handle atom_second = space_second.get_atom(atom_first);
 
         if( false)
         {
         Handle atom_second;
         if (atom_first->is_node())
         {
-            atom_second = table_second.getHandle(atom_first->get_type(),
+            atom_second = space_second.getHandle(atom_first->get_type(),
                         std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
-            atom_second =  table_second.getHandle(atom_first->get_type(),
+            atom_second =  space_second.getHandle(atom_first->get_type(),
                         HandleSeq(atom_first->getOutgoingSet()));
         }
         else
@@ -264,12 +233,12 @@ Handle AtomSpace::add_atom(const Handle& h)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(h);
+    if (_read_only) return get_atom(h);
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(h);
+        rh = add(h);
     }
     catch (const DeleteException& ex) {
         // Hmmm. Need to notify the backing store
@@ -282,26 +251,26 @@ Handle AtomSpace::add_node(Type t, std::string&& name)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, std::move(name));
+    if (_read_only) return getHandle(t, std::move(name));
 
-    return _atom_table.add(createNode(t, std::move(name)));
+    return add(createNode(t, std::move(name)));
 }
 
 Handle AtomSpace::get_node(Type t, std::string&& name) const
 {
-    return _atom_table.getHandle(t, std::move(name));
+    return getHandle(t, std::move(name));
 }
 
 Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return _atom_table.getHandle(t, std::move(outgoing));
+    if (_read_only) return getHandle(t, std::move(outgoing));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle h(createLink(std::move(outgoing), t));
     try {
-        return _atom_table.add(h);
+        return add(h);
     }
     catch (const DeleteException& ex) {
         // Hmmm. Need to notify the backing store
@@ -312,7 +281,7 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 
 Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
-    return _atom_table.getHandle(t, std::move(outgoing));
+    return getHandle(t, std::move(outgoing));
 }
 
 ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
@@ -358,7 +327,7 @@ Handle AtomSpace::set_value(const Handle& h,
     if (nullptr == has or has->_read_only or _copy_on_write) {
         if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
-            Handle copy(_atom_table.add(h, true));
+            Handle copy(add(h, true));
             copy->setValue(key, value);
             return copy;
         }
@@ -396,7 +365,7 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     if (nullptr == has or has->_read_only or _copy_on_write) {
         if (has != this and (_copy_on_write or not _read_only)) {
             // Copy the atom into this atomspace
-            Handle copy(_atom_table.add(h, true));
+            Handle copy(add(h, true));
             copy->setTruthValue(tvp);
             return copy;
         }
@@ -424,12 +393,12 @@ std::string AtomSpace::to_string() const
 
 namespace std {
 
-ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
-    list<opencog::Handle> results;
-    as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
-    for (const opencog::Handle& h : results)
-	    if (h->getIncomingSetSize() == 0)
-		    out << h->to_string() << std::endl;
+ostream& operator<<(ostream& out, const opencog::AtomSpace& as)
+{
+    HandleSeq hseq;
+    as.get_root_set_by_type(hseq, opencog::ATOM, true);
+    for (const opencog::Handle& h : hseq)
+		  out << h->to_string() << std::endl;
     return out;
 }
 

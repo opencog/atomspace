@@ -402,8 +402,8 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 		atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
-	HandleSet hset;
-	atomspace->get_handleset_by_type(hset, t);
+	HandleSeq hset;
+	atomspace->get_handles_by_type(hset, t);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.

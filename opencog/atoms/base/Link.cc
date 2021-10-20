@@ -28,7 +28,6 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/AtomTable.h>
 
 #include "Link.h"
 
