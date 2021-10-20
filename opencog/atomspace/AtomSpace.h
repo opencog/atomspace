@@ -388,7 +388,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool extract_atom(const Handle&, bool recursive=true, bool do_lock=true);
+    bool extract_atom(const Handle&, bool recursive=false, bool do_lock=true);
 
     bool remove_atom(const Handle& h, bool recursive=false) {
         return extract_atom(h, recursive);
