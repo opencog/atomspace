@@ -105,8 +105,8 @@ public:
     {
         Handle h;
         Handle word = table->add_atom(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT(table->holds(word));
-        TS_ASSERT(!table->holds(h));
+        TS_ASSERT(word->getAtomSpace() == table);
+        TS_ASSERT(h->getAtomSpace() != table);
     }
 
     void testIsCleared()
