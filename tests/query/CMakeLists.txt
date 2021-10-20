@@ -102,6 +102,8 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
+
+	ADD_GUILE_TEST(DotProductUTest dot-product-test.scm)
 ENDIF (HAVE_GUILE)
 
 # Run only the tests in this subdirectory

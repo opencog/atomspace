@@ -112,6 +112,7 @@ are the logics of theorem-proving, in general.)
 * `absent.scm`       -- Using the AbsentLink ("there-does-not-exist").
 * `always.scm`       -- Testing if a clause always holds ("for-all").
 * `value-of.scm`     -- Looking for high or low TruthValues.
+* `dot-product.scm`  -- Numeric computations on query results.
 * `query.scm`        -- Running queries in parallel.
 
 
