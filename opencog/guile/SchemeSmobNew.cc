@@ -133,7 +133,8 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	// designed so that all atoms are in atomspaces, and any
 	// exceptions to this assumption leads to confusion and
 	// unexpected behavior -- i.e. leads to bugs.
-	if (nullptr == h->getAtomSpace())
+	if (nullptr == h->getAtomSpace() and
+	    not (ATOMSPACE == h->get_type()))
 	{
 		*((Handle *) SCM_SMOB_DATA(sh)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(sh);
