@@ -46,7 +46,15 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
     instance.owns_atomspace = False
     return instance
 
-cdef class AtomSpace:
+cdef AtomSpace_factoid(cValuePtr to_wrap):
+    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
+    instance.asp = PtrHolder.create(<shared_ptr[void]&> to_wrap)
+    instance.atomspace = <cAtomSpace*> to_wrap.get()
+    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get())
+    instance.owns_atomspace = False
+    return instance
+
+cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
     #cdef bint owns_atomspace
@@ -61,7 +69,9 @@ cdef class AtomSpace:
     # about it.  But I can't find any better way.
     def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
-            self.atomspace = new cAtomSpace()
+            tasp = createAtomSpace(NULL)
+            self.asp = PtrHolder.create(<shared_ptr[void]&> tasp)
+            self.atomspace = <cAtomSpace*> tasp.get()
             self.owns_atomspace = True
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
@@ -269,7 +279,7 @@ cdef class AtomSpace:
         return result != result.UNDEFINED
 
 
-cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+cdef api object py_atomspace(cAtomSpace* c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
@@ -278,8 +288,8 @@ cdef api object py_atom(const cHandle& h):
     return atom
 
 def create_child_atomspace(object atomspace):
-    cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
-    cdef AtomSpace result = AtomSpace_factory(child)
+    cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef AtomSpace result = AtomSpace_factoid(asp)
     result.owns_atomspace = True
     result.parent_atomspace = atomspace
     return result
