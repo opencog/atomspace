@@ -16,18 +16,6 @@
 using namespace opencog;
 
 /* ============================================================== */
-
-std::string SchemeSmob::as_to_string(const AtomSpace *as)
-{
-#define BUFLEN 120
-	char buff[BUFLEN];
-
-	snprintf(buff, BUFLEN, "#<atomspace %lu>",
-		(long unsigned int) as->get_uuid());
-	return buff;
-}
-
-/* ============================================================== */
 /**
  * Create SCM object wrapping the atomspace.
  */

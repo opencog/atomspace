@@ -238,10 +238,6 @@ public:
 	// This allows other users to get the atomspace that scheme is
 	// using.
 	static AtomSpace* ss_get_env_as(const char *);
-public:
-
-	// Utility printing functions
-	static std::string as_to_string(const AtomSpace *);
 };
 
 /** @}*/
