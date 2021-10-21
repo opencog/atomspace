@@ -275,6 +275,14 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 	return _environ[n];
 }
 
+void AtomSpace::setAtomSpace(AtomSpace* as)
+{
+	// No-op. AtomSpaces cannot be "owned" by other AtomSpaces.
+	// Why? Well, right now, allowing this seems like an awkward
+	// thing to do. It's not clear how to think about this correctly.
+	// So we'll just pre-emptively disallow it.
+}
+
 // ====================================================================
 
 int AtomSpace::depth(const Handle& atom) const

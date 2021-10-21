@@ -220,6 +220,7 @@ public:
     virtual Arity get_arity() const;
     virtual const HandleSeq& getOutgoingSet() const;
     virtual Handle getOutgoingAtom(Arity) const;
+    virtual void setAtomSpace(AtomSpace *);
 
     /**
      * Compare atomspaces for equality. Useful during testing.
