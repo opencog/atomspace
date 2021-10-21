@@ -164,7 +164,7 @@ void AtomSpace::clear_transient()
     clear_all_atoms();
 
     // Clear the  parent environment and holder atomspace.
-    _environ[0] = nullptr;
+    _environ.clear();
 }
 
 void AtomSpace::clear_all_atoms()
