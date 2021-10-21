@@ -2,7 +2,7 @@
  * opencog/atomspace/AtomSpace.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009, 2013 Linas Vepstas
+ * Copyright (c) 2009, 2013, 2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

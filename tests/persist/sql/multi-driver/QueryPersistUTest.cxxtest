@@ -49,7 +49,7 @@ using namespace opencog;
 class QueryPersistUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace* _as;
+		AtomSpacePtr _as;
 		std::string uri;
 		const char * dbname;
 		const char * username;
@@ -205,7 +205,7 @@ void QueryPersistUTest::setup_data(void)
 {
 	kill_data();
 
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	StorageNodePtr store = StorageNodeCast(hsn);
 
@@ -254,7 +254,6 @@ void QueryPersistUTest::setup_data(void)
 	store->barrier();
 
 	store->close();
-	delete _as;
 }
 
 void QueryPersistUTest::do_test_meet(void)
@@ -263,7 +262,7 @@ void QueryPersistUTest::do_test_meet(void)
 
 	setup_data();
 
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	StorageNodePtr store = StorageNodeCast(hsn);
 
@@ -326,7 +325,6 @@ void QueryPersistUTest::do_test_meet(void)
 	TSM_ASSERT("Expect same results as before", hset == htoo);
 
 	store->close();
-	delete _as;
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
@@ -336,7 +334,7 @@ void QueryPersistUTest::do_test_join(void)
 
 	setup_data();
 
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
 	StorageNodePtr store = StorageNodeCast(hsn);
 
@@ -386,7 +384,6 @@ void QueryPersistUTest::do_test_join(void)
 	TSM_ASSERT_EQUALS("Expecting airplane, bicycle and car", hset, expect);
 
 	store->close();
-	delete _as;
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 

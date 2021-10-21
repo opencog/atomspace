@@ -305,7 +305,7 @@ void MapLinkUTest::test_local_quote_map(void)
 
     eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
-    Instantiator inst(as);
+    Instantiator inst(as.get());
     Handle local_quote_map = eval->eval_h("local-quote-map"),
         result = HandleCast(inst.execute(local_quote_map)),
         expected1 = eval->eval_h("local-quote-map-result-1"),
@@ -326,7 +326,7 @@ void MapLinkUTest::xtest_quote_arg_map(void)
 
     eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
-    Instantiator inst(as);
+    Instantiator inst(as.get());
     Handle quote_arg_map = eval->eval_h("quote-arg-map"),
         result = HandleCast(inst.execute(quote_arg_map)),
         expected = eval->eval_h("quote-arg-map-result");

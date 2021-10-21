@@ -39,12 +39,22 @@ class MultiSpaceUTest :  public CxxTest::TestSuite
 {
 private:
 
-	AtomSpace as1;
-	AtomSpace as2;
-	AtomSpace as3;
+	AtomSpacePtr asp1;
+	AtomSpacePtr asp2;
+	AtomSpacePtr asp3;
+	AtomSpace& as1;
+	AtomSpace& as2;
+	AtomSpace& as3;
 
 public:
-	MultiSpaceUTest() {}
+	MultiSpaceUTest() :
+		asp1(createAtomSpace()),
+		asp2(createAtomSpace()),
+		asp3(createAtomSpace()),
+		as1(*asp1.get()),
+		as2(*asp2.get()),
+		as3(*asp3.get())
+	{}
 
 	void setUp() {}
 

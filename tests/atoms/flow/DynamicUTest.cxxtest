@@ -26,7 +26,7 @@ using namespace opencog;
 class DynamicUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 	
 public:
@@ -42,7 +42,7 @@ public:
 	void test_formula_stream();
 };
 
-DynamicUTest::DynamicUTest(void) : _eval(&_as)
+DynamicUTest::DynamicUTest(void) : _asp(createAtomSpace()), _eval(_asp)
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
@@ -223,8 +223,8 @@ void DynamicUTest::test_formula_stream()
 		nameserver().getTypeName(result->get_type()).c_str());
 	TS_ASSERT_EQUALS(result->get_type(), FORMULA_STREAM);
 
-	Handle foo = _as.get_handle(CONCEPT_NODE, "foo");
-	Handle akey = _as.get_handle(PREDICATE_NODE, "some key");
+	Handle foo = _asp->get_handle(CONCEPT_NODE, "foo");
+	Handle akey = _asp->get_handle(PREDICATE_NODE, "some key");
 
 	for (int i=0; i<10; i++)
 	{

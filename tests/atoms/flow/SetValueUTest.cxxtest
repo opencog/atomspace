@@ -22,7 +22,7 @@ using namespace opencog;
 class SetValueUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 	
 public:
@@ -36,7 +36,7 @@ public:
 	void test_triangle();
 };
 
-SetValueUTest::SetValueUTest(void) : _eval(&_as)
+SetValueUTest::SetValueUTest(void) : _asp(createAtomSpace()), _eval(_asp)
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);

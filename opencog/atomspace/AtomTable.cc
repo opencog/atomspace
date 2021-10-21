@@ -2,7 +2,7 @@
  * opencog/atomspace/AtomTable.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2013-2015 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013-2021 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Previous versions were written by
