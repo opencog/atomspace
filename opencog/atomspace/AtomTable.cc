@@ -76,7 +76,7 @@ void AtomSpace::init(void)
 {
     _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
 
-    _name = "AtomSpace " + _uuid;
+    _name = "(uuid . " + std::to_string(_uuid) + ")";
 
     // Connect signal to find out about type additions
     addedTypeConnection =

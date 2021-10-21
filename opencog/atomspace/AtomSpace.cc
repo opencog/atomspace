@@ -460,9 +460,7 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 
 std::string AtomSpace::to_string(const std::string& indent) const
 {
-	std::stringstream ss;
-	ss << *this;
-	return ss.str();
+	return indent + "(AtomSpace \"" + _name + "\")";
 }
 
 std::string AtomSpace::to_short_string(const std::string& indent) const
