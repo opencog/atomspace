@@ -242,9 +242,10 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     if (not force) {
-        // If we have it already, Update the values, as needed.
+        // If we have it already, update the values, as needed.
         Handle hcheck(lookupUnlocked(orig));
-        if (hcheck) {
+        if (hcheck and not hcheck->getAtomSpace()->get_read_only())
+        {
             hcheck->copyValues(orig);
             return hcheck;
         }
