@@ -37,12 +37,12 @@ using namespace opencog;
 class ExecutionOutputUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpacePtr as;
 	SchemeEval eval;
 
 public:
 
-	ExecutionOutputUTest(void) : eval(&as)
+	ExecutionOutputUTest(void) : as(createAtomSpace()), eval(as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -75,14 +75,14 @@ public:
 	void test_exec_variable(void);
 };
 
-#define an as.add_node
-#define al as.add_link
+#define an as->add_node
+#define al as->add_link
 #define getarity(hand) hand->get_arity()
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void ExecutionOutputUTest::tearDown(void)
 {
-	as.clear();
+	as->clear();
 }
 void ExecutionOutputUTest::setUp(void)
 {
@@ -170,7 +170,7 @@ void ExecutionOutputUTest::test_exec(void)
 	eval.eval(str);
 
 	// Result should be a ListLink
-	Handle result = imply(&as, clauses, implicand);
+	Handle result = imply(as, clauses, implicand);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the
@@ -247,7 +247,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	BindLinkPtr predicament(BindLinkCast(pred));
 
 	// Now perform the search.
-	Implicator simpl(&as);
+	Implicator simpl(as.get());
 	simpl.implicand = situation->get_implicand();
 	simpl.satisfy(situation);
 
@@ -263,7 +263,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
 	// Now perform the search.
-	Implicator pimpl(&as);
+	Implicator pimpl(as.get());
 	pimpl.implicand = predicament->get_implicand();
 	pimpl.satisfy(predicament);
 
@@ -286,11 +286,11 @@ void ExecutionOutputUTest::test_query_exec(void)
 	eval.eval("(load-from-path \"tests/query/exec.scm\")");
 
 	Handle exec_query = eval.eval_h("exec-query");
-	Handle results = satisfying_set(&as, exec_query);
+	Handle results = satisfying_set(as, exec_query);
 	TS_ASSERT_EQUALS(results->get_arity(), 4);
 
 	exec_query = eval.eval_h("quote-exec-query");
-	results = satisfying_set(&as, exec_query);
+	results = satisfying_set(as, exec_query);
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -309,10 +309,10 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 		N21 = an(NUMBER_NODE, "21"),
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 	Handle expected = an(NUMBER_NODE, "42");
 	Handle result = HandleCast(inst.execute(twice21));
-	result = as.add_atom(result);
+	result = as->add_atom(result);
 
 	TS_ASSERT_EQUALS(expected, result);
 
@@ -321,7 +321,7 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 	Handle N21_LST = al(LIST_LINK, N21);
 	Handle twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST);
 	Handle result_lst = HandleCast(inst.execute(twice21_lst));
-	result_lst = as.add_atom(result_lst);
+	result_lst = as->add_atom(result_lst);
 
 	TS_ASSERT_EQUALS(expected, result_lst);
 
@@ -349,7 +349,7 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 	Handle exec =
 		al(EXECUTION_OUTPUT_LINK, identity, AB);
 
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 	Handle expected = AB;
 	Handle result = HandleCast(inst.execute(exec));
 
@@ -433,7 +433,7 @@ void ExecutionOutputUTest::test_lambda(void)
 	eval.eval("(load-from-path \"tests/query/exec-lambda.scm\")");
 	Handle bl = eval.eval_h("bl");
 
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 	Handle result = HandleCast(inst.execute(bl));
 	Handle expect = al(SET_LINK,
 	                   al(LAMBDA_LINK,
@@ -458,7 +458,7 @@ void ExecutionOutputUTest::test_lambda_get(void)
 	eval.eval("(load-from-path \"tests/query/exec-lambda-get.scm\")");
 	Handle exo = eval.eval_h("exo");
 
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 	Handle result = HandleCast(inst.execute(exo));
 	Handle expect = al(SET_LINK, an(NUMBER_NODE, "0.6"));
 
@@ -479,7 +479,7 @@ void ExecutionOutputUTest::test_implication_scope(void)
 	eval.eval("(load-from-path \"tests/query/exec-implication-scope.scm\")");
 	Handle bl = eval.eval_h("bl");
 
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 	Handle result = HandleCast(inst.execute(bl));
 	Handle expect = al(SET_LINK,
 	                   al(IMPLICATION_SCOPE_LINK,
@@ -543,7 +543,7 @@ void ExecutionOutputUTest::test_variable_schema(void)
 			al(LIST_LINK, an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7"))
 		)
 	);
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(get_link);
 	TS_ASSERT_EQUALS(result, al(SET_LINK, an(NUMBER_NODE, "42")));
@@ -571,7 +571,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 			al(LIST_LINK, an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7"))
 		)
 	);
-	Instantiator inst(&as);
+	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(bind_link);
 

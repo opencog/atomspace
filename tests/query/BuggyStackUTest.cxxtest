@@ -18,7 +18,7 @@ using namespace opencog;
 class BuggyStackUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		Handle restrict;
 
 	public:
@@ -55,7 +55,7 @@ class BuggyStackUTest :  public CxxTest::TestSuite
 
 void BuggyStackUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 

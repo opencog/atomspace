@@ -33,7 +33,7 @@ using namespace opencog;
 class SCMPrimitiveUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -119,7 +119,7 @@ class MyExampleClass
  */
 void SCMPrimitiveUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 }
 
@@ -127,7 +127,6 @@ void SCMPrimitiveUTest::tearDown(void)
 {
 	delete eval;
 	eval = NULL;
-	delete as;
 }
 
 // ============================================================
@@ -138,7 +137,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 
 	// Create the example class, and define a scheme function,
 	// named "bingo", that will call one of its methods
-	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	MyExampleClass *mtc = new MyExampleClass(as.get(), 42);
 	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
 	// Now, call bingo, with a reasonable argument. Since
@@ -180,7 +179,7 @@ void SCMPrimitiveUTest::test_throw(void)
 
 	// Test the throw of an assertion. This should cause an evaluation
 	// error. (In the shell, stuff would get printed to terminal)
-	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	MyExampleClass *mtc = new MyExampleClass(as.get(), 42);
 	define_scheme_primitive("whoops", &MyExampleClass::my_other_func, mtc);
 	std::string trc = eval->eval("(whoops nnn)");
 	bool eval_err = eval->eval_error();
@@ -223,7 +222,7 @@ void SCMPrimitiveUTest::test_parallel(void)
 	as->clear();
 
 	// Create "mango" for creating, and "tango" for deleting
-	MyExampleClass *mtc = new MyExampleClass(as, 42);
+	MyExampleClass *mtc = new MyExampleClass(as.get(), 42);
 	define_scheme_primitive("mango", &MyExampleClass::my_more_func_1, mtc);
 	define_scheme_primitive("tango", &MyExampleClass::my_more_func_2, mtc);
 

@@ -31,7 +31,7 @@ using namespace opencog;
 class BiggerPatternUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 
 		Handle clauses, implicand;
 		Handle hbenode, hvar0, hvar1, hvar2, hvar2_france;
@@ -95,11 +95,10 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
  */
 void BiggerPatternUTest::tearDown(void)
 {
-	delete as;
 }
 void BiggerPatternUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 
 	// Create an implication link that will be tested.
 	clauses =
@@ -234,7 +233,7 @@ void BiggerPatternUTest::do_tst_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle imlist = imply(as, clauses, implicand);
+	Handle imlist = imply(as.get(), clauses, implicand);
 
 	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)
@@ -316,10 +315,9 @@ void BiggerPatternUTest::test_prep_overlay(void)
 {
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	do_tst_prep();
-	delete as;
 	as = save;
 	as->set_read_write();
 }

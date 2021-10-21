@@ -30,7 +30,7 @@ using namespace opencog;
 class EvaluationUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace* as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -40,14 +40,13 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_sync_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 	}
 
 	~EvaluationUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -218,8 +217,8 @@ void EvaluationUTest::test_eval_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -227,7 +226,6 @@ void EvaluationUTest::test_eval_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 
@@ -242,8 +240,8 @@ void EvaluationUTest::test_logic_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -251,7 +249,6 @@ void EvaluationUTest::test_logic_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 
@@ -266,8 +263,8 @@ void EvaluationUTest::test_varval_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -275,7 +272,6 @@ void EvaluationUTest::test_varval_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 

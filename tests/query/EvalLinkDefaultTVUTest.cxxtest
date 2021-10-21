@@ -43,21 +43,20 @@ using namespace opencog;
 class EvalLinkDefaultTVUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace * as;
+	AtomSpacePtr as;
 	SchemeEval * eval;
 public:
 	EvalLinkDefaultTVUTest(){
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
-		this->as = new AtomSpace();
-		this->eval = new SchemeEval(as);
-		this->eval->eval("(use-modules (opencog exec))");
+		as = createAtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~EvalLinkDefaultTVUTest(){
-		delete this->eval;
-		delete this->as;
+		delete eval;
 
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())

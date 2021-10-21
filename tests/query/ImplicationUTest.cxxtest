@@ -31,7 +31,7 @@ using namespace opencog;
 class ImplicationUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 		Handle varscope, restrict, restrict2, restrict_multi;
 		Handle clauses1, implicand1, clauses2, implicand2;
@@ -85,7 +85,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 
 void ImplicationUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	// Create initialzation

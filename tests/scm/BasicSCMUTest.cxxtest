@@ -44,7 +44,7 @@ using namespace std;
 class BasicSCMUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -109,7 +109,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
  */
 void BasicSCMUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.

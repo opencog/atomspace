@@ -30,7 +30,7 @@ using namespace opencog;
 class MultiThreadUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace* as;
+		AtomSpacePtr as;
 
 	public:
 
@@ -84,7 +84,7 @@ static std::atomic_int start_cnt(0);
 void MultiThreadUTest::test_init_race(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	as = new AtomSpace();
+	as = createAtomSpace();
 	std::vector<std::thread> thread_pool;
 
 	int n_threads = 120;
@@ -101,7 +101,6 @@ void MultiThreadUTest::test_init_race(void)
 	for (std::thread& t : thread_pool) t.join();
 
 	printf("Done joining %d threads\n", n_threads);
-	delete as;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -127,7 +126,7 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Three evaluators all touching one atomspace.
-	as = new AtomSpace();
+	as = createAtomSpace();
 	SchemeEval* ev1 = new SchemeEval(as);
 	SchemeEval* ev2 = new SchemeEval(as);
 	SchemeEval* ev3 = new SchemeEval(as);
@@ -166,7 +165,6 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 
 	printf ("h1 = %llu %p\n", (long long unsigned int) h1.value(), h1.operator->());
 
-	delete as;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -201,7 +199,7 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 void MultiThreadUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	as = new AtomSpace();
+	as = createAtomSpace();
 	as->clear();
 
 	std::vector<std::thread> thread_pool;

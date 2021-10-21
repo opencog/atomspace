@@ -31,7 +31,7 @@ using namespace opencog;
 class BigPatternUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 
 		Handle clauses, implicand, hmake_from, hpottery, hclay;
 
@@ -80,11 +80,10 @@ class BigPatternUTest :  public CxxTest::TestSuite
 
 void BigPatternUTest::tearDown(void)
 {
-	delete as;
 }
 void BigPatternUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 
 	// Create an clauses and implicand links that will be tested.
 	clauses =
@@ -147,7 +146,7 @@ void BigPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = imply(as, clauses, implicand);
+	Handle result = imply(as.get(), clauses, implicand);
 	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
 
 	// Then, evaluationLink, as above.
