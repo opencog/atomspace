@@ -39,20 +39,18 @@ class COWSpaceUTest :  public CxxTest::TestSuite
 {
 private:
 
-	AtomSpace* base;
-	AtomSpace* ovly;
+	AtomSpacePtr base;
+	AtomSpacePtr ovly;
 
 public:
 	COWSpaceUTest() {}
 
 	void setUp() {
-		base = new AtomSpace();
-		ovly = new AtomSpace(base);
+		base = createAtomSpace();
+		ovly = createAtomSpace(base);
 	}
 
 	void tearDown() {
-		delete ovly;
-		delete base;
 	}
 
 	void testSimple()
