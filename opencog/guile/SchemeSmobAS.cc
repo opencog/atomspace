@@ -70,7 +70,7 @@ SCM SchemeSmob::ss_as_p (SCM s)
 AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 {
 	ValuePtr vp(scm_to_protom(sas));
-	if (ATOMSPACE != vp->get_type())
+	if (nullptr == vp or ATOMSPACE != vp->get_type())
 		return nullptr;
 
 	return (AtomSpace*) vp.get();

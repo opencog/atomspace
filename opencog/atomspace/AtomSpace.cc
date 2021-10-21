@@ -277,13 +277,6 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 
 // ====================================================================
 
-AtomSpace* AtomSpace::get_environ(void) const
-{
-	// XXX this is a hack...
-	if (0 == _environ.size()) return nullptr;
-	return AtomSpaceCast(_environ[0]).get();
-}
-
 int AtomSpace::depth(const Handle& atom) const
 {
     if (nullptr == atom) return -1;

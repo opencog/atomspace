@@ -196,10 +196,6 @@ public:
 
     // -------------------------------------------------------
 
-    /// Get the environment that this atomspace was created in.
-    /// XXX this is a hack and must go away.
-    AtomSpace* get_environ(void) const;
-
     /**
      * Return the depth of the Atom, relative to this AtomSpace.
      * The depth is zero, if the Atom is in this table; it is one

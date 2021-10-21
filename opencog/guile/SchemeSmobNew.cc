@@ -387,6 +387,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
+printf("duuude ola type=%d name=%s\n", t, name.c_str());
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
