@@ -116,7 +116,7 @@ void opencog::release_transient_atomspace(AtomSpace* atomspace)
 			atomspace->clear_transient();
 
 			// Place this transient into the cache.
-			AtomSpacePtr tranny(AtomSpaceCast(atomspace->shared_from_this()));
+			AtomSpacePtr tranny(AtomSpaceCast(atomspace));
 			s_transient_cache.push_back(tranny);
 			s_issued.erase(tranny);
 			num_issued--;

@@ -597,10 +597,10 @@ public:
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
 
-// static inline AtomSpacePtr AtomSpaceCast(const Handle& h)
-//    { return std::dynamic_pointer_cast<AtomSpace>(AtomCast(h)); }
 static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
     { return std::dynamic_pointer_cast<AtomSpace>(a); }
+static inline AtomSpacePtr AtomSpaceCast(AtomSpace* as)
+    { return AtomSpaceCast(as->shared_from_this()); }
 
 template< class... Args >
 AtomSpacePtr createAtomSpace( Args&&... args )
