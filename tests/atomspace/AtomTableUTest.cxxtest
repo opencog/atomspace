@@ -56,8 +56,8 @@ class AtomTableUTest : public CxxTest::TestSuite
 
 private:
 
-    AtomSpace* table;
-    AtomSpace* atomSpace;
+    AtomSpacePtr table;
+    AtomSpacePtr atomSpace;
 
 public:
 
@@ -67,11 +67,10 @@ public:
         //logger().setPrintToStdoutFlag(true);
 
 #include "../query/test-types.cc"
-        atomSpace = new AtomSpace();
+        atomSpace = createAtomSpace();
         table = atomSpace;
     }
     ~AtomTableUTest() {
-        delete atomSpace;
     }
 
     void setUp()
@@ -103,10 +102,9 @@ public:
 
     void testHolds()
     {
-        Handle h;
-        Handle word = table->add_atom(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT(word->getAtomSpace() == table);
-        TS_ASSERT(h->getAtomSpace() != table);
+        Handle h(createNode(NUMBER_NODE, "1"));
+        Handle word = table->add_atom(h);
+        TS_ASSERT(word->getAtomSpace() == table.get());
     }
 
     void testIsCleared()
