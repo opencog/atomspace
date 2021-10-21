@@ -61,7 +61,6 @@ private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_AS,         // atom spaces
 		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
 	};
@@ -178,11 +177,7 @@ private:
 	static SCM ss_as_mark_cow(SCM, SCM);
 	static SCM ss_as_cow_p(SCM);
 	static SCM make_as(AtomSpace *);
-	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);
-	static std::mutex as_mtx;
-	static std::map<AtomSpace*, int> deleteable_as;
-	static void as_ref_count(SCM, AtomSpace *);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);

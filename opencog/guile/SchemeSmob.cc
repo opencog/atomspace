@@ -124,16 +124,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		default: // Should never happen.
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
-		case COG_AS:
-		{
-			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
-			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			/* Just a simple pointer comparison */
-			if (as == bs) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
+
 		case COG_LOGGER:
 		{
 			Logger* al = (Logger *) SCM_SMOB_DATA(a);

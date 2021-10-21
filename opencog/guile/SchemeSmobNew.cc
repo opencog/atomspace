@@ -55,6 +55,9 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
+		if (ATOMSPACE == h->get_type())
+			return as_to_string(AtomSpaceCast(h).get());
+
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);
