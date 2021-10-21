@@ -599,7 +599,7 @@ public:
 typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
 // static inline AtomSpacePtr AtomSpaceCast(const Handle& h)
 //    { return std::dynamic_pointer_cast<AtomSpace>(AtomCast(h)); }
-static inline AtomSpacePtr AtomSpaceCast(const AtomPtr& a)
+static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
     { return std::dynamic_pointer_cast<AtomSpace>(a); }
 
 template< class... Args >

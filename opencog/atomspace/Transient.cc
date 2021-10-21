@@ -49,13 +49,13 @@ const int MAX_CACHED_TRANSIENTS = 32;
 
 // Allocated storage for the transient atomspace cache static variables.
 static std::mutex s_transient_cache_mutex;
-static std::vector<AtomSpace*> s_transient_cache;
+static std::vector<AtomSpacePtr> s_transient_cache;
 
 static std::atomic_int num_issued = 0;
 
 AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 {
-	AtomSpace* transient_atomspace = nullptr;
+	AtomSpacePtr transient_atomspace = nullptr;
 
 	// See if the cache has one...
 	if (s_transient_cache.size() > 0)
@@ -81,20 +81,18 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 	// If we didn't get one from the cache, then create a new one.
 	if (!transient_atomspace)
 	{
-		transient_atomspace = new AtomSpace(parent, TRANSIENT_SPACE);
+		transient_atomspace = createAtomSpace(parent, TRANSIENT_SPACE);
 		num_issued ++;
 	}
 
 	if (MAX_CACHED_TRANSIENTS < num_issued.load())
 		throw FatalErrorException(TRACE_INFO, "Transient space memleak!");
 
-	return transient_atomspace;
+	return transient_atomspace.get();
 }
 
 void opencog::release_transient_atomspace(AtomSpace* atomspace)
 {
-	bool atomspace_cached = false;
-
 	// If the cache is not full...
 	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
 	{
@@ -108,18 +106,11 @@ void opencog::release_transient_atomspace(AtomSpace* atomspace)
 			atomspace->clear_transient();
 
 			// Place this transient into the cache.
-			s_transient_cache.push_back(atomspace);
-
-			// The atomspace has been cached.
-			atomspace_cached = true;
+			s_transient_cache.push_back(AtomSpaceCast(atomspace->shared_from_this()));
 
 			num_issued--;
 		}
 	}
-
-	// If we didn't cache the atomspace, then delete it.
-	if (!atomspace_cached)
-		delete atomspace;
 }
 
 /* ===================== END OF FILE ===================== */
