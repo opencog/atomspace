@@ -32,20 +32,20 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 // Test ScopeLink.
 //
 class ScopeLinkUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 	Handle X, Y, Z, S, T, P, Q, CT;
 
 public:
-	ScopeLinkUTest() : _eval(&_as)
+	ScopeLinkUTest() : _asp(createAtomSpace()), _eval(_asp)
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
@@ -401,9 +401,9 @@ void ScopeLinkUTest::test_get_variables_7()
 
 	// Given a body with variables from different atomspaces check that
 	// the variable list is non redundant.
-	AtomSpace alt_as(&_as);
-#define alt_al alt_as.add_link
-#define alt_an alt_as.add_node
+	AtomSpacePtr alt_as(_asp);
+#define alt_al alt_as->add_link
+#define alt_an alt_as->add_node
 	Handle altU = alt_an(VARIABLE_NODE, "$U");
 	Handle altV = alt_an(VARIABLE_NODE, "$V");
 	Handle U = an(VARIABLE_NODE, "$U");
@@ -488,7 +488,7 @@ void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
 		              al(AND_LINK, Y), al(OR_LINK, Y));
 
 	BindLinkPtr bl(BindLinkCast(hbl));
-	Handle result_wo_vardecl = _as.add_atom(bl->alpha_convert({Y}));
+	Handle result_wo_vardecl = _asp->add_atom(bl->alpha_convert({Y}));
 
 	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
 	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);

@@ -30,7 +30,7 @@ using namespace opencog;
 class JoinLinkUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace* _as;
+	AtomSpacePtr _as;
 	SchemeEval* eval;
 
 public:
@@ -41,7 +41,7 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true);
 
-		_as = new AtomSpace();
+		_as = createAtomSpace();
 		eval = new SchemeEval(_as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
@@ -49,7 +49,6 @@ public:
 	~JoinLinkUTest()
 	{
 		delete eval;
-		delete _as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());

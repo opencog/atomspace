@@ -32,22 +32,26 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 // Test RewriteLink.
 //
 class RewriteLinkUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
-	AtomSpace _asa;
-	AtomSpace _asb;
+	AtomSpacePtr _asp;
+	AtomSpacePtr _asa;
+	AtomSpacePtr _asb;
 	SchemeEval _eval;
 	Handle X, Y, P, Q, CT;
 
 public:
-	RewriteLinkUTest() : _eval(&_as)
+	RewriteLinkUTest() :
+		_asp(createAtomSpace()),
+		_asa(createAtomSpace()),
+		_asb(createAtomSpace()),
+		_eval(_asp)
 	{
 		logger().set_level(Logger::INFO);
 		logger().set_print_to_stdout_flag(true);
@@ -77,11 +81,11 @@ public:
 	void test_consume_quotations_5();
 };
 
-#define NA _asa.add_node
-#define LA _asa.add_link
+#define NA _asa->add_node
+#define LA _asa->add_link
 
-#define NB _asb.add_node
-#define LB _asb.add_link
+#define NB _asb->add_node
+#define LB _asb->add_link
 
 // Test RewriteLink::is_equal with undordered links
 void RewriteLinkUTest::test_unordered()
