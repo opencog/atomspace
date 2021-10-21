@@ -100,6 +100,19 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     init();
 }
 
+AtomSpace::AtomSpace(AtomSpacePtr& parent) :
+    Atom(ATOMSPACE),
+    _read_only(false),
+    _copy_on_write(false),
+    _transient(false),
+    _nameserver(nameserver())
+{
+    if (nullptr != parent)
+        _environ.push_back(HandleCast(parent));
+
+    init();
+}
+
 AtomSpace::AtomSpace(const HandleSeq& bases) :
     Atom(ATOMSPACE),
     _read_only(false),

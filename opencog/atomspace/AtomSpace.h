@@ -56,6 +56,9 @@ typedef SigSlot<const Handle&,
                 const TruthValuePtr&,
                 const TruthValuePtr&> TVCHSigl;
 
+class AtomSpace;
+typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
+
 /**
  * This class provides mechanisms to store atoms and keep indices for
  * efficient lookups. It implements the local storage data structure of
@@ -157,6 +160,7 @@ public:
      * with. See COW below.
      */
     AtomSpace(AtomSpace* base=nullptr, bool transient=false);
+    AtomSpace(AtomSpacePtr&);
     AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
@@ -596,7 +600,6 @@ public:
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
 
-typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
 // static inline AtomSpacePtr AtomSpaceCast(const Handle& h)
 //    { return std::dynamic_pointer_cast<AtomSpace>(AtomCast(h)); }
 static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
