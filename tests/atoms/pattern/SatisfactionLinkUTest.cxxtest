@@ -34,7 +34,7 @@ using namespace opencog;
 class SatisfactionLinkUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _as;
 
 public:
 	SatisfactionLinkUTest()
@@ -42,6 +42,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
+		_as = createAtomSpace();
 	}
 
 	void setUp() {}
@@ -59,7 +60,7 @@ void SatisfactionLinkUTest::test_execution()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle have_colors = _as.add_atom(
+	Handle have_colors = _as->add_atom(
 		Satisfaction(
 			Variable ("$color"),
 			Inheritance(
@@ -70,9 +71,9 @@ void SatisfactionLinkUTest::test_execution()
 	ValuePtr vp = have_colors->execute();
 	TS_ASSERT(vp == TruthValue::FALSE_TV());
 
-	_as.add_atom(Inheritance(Concept("red"), Concept("Color")));
-	_as.add_atom(Inheritance(Concept("green"), Concept("Color")));
-	_as.add_atom(Inheritance(Concept("blue"), Concept("Color")));
+	_as->add_atom(Inheritance(Concept("red"), Concept("Color")));
+	_as->add_atom(Inheritance(Concept("green"), Concept("Color")));
+	_as->add_atom(Inheritance(Concept("blue"), Concept("Color")));
 
 	vp = have_colors->execute();
 	TS_ASSERT(vp == TruthValue::TRUE_TV());

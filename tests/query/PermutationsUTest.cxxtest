@@ -29,13 +29,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _as->add_link
+#define an _as->add_node
 
 class PermutationsUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _as;
 
 	Handle X, Y, Z, A, B, C;
 
@@ -45,6 +45,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
+		_as = createAtomSpace();
 	}
 
 	~PermutationsUTest()
@@ -62,7 +63,7 @@ public:
 
 void PermutationsUTest::tearDown(void)
 {
-	_as.clear();
+	_as->clear();
 }
 
 void PermutationsUTest::setUp(void)
@@ -93,7 +94,7 @@ void PermutationsUTest::test_bind(void)
 	Handle rewrite = al(ORDERED_LINK, X, Y, Z);
 	Handle query = al(BIND_LINK, body, rewrite);
 
-	Handle result = HandleCast(query->execute(&_as));
+	Handle result = HandleCast(query->execute(_as.get()));
 	Handle expect = al(SET_LINK,
 	                   al(ORDERED_LINK, A, B, C),
 	                   al(ORDERED_LINK, A, C, B));

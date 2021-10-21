@@ -27,17 +27,17 @@
 
 using namespace opencog;
 
-#define an _as.add_node
-#define al _as.add_link
+#define an _as->add_node
+#define al _as->add_link
 
 class IllPutUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _as;
 	SchemeEval _eval;
 
 public:
-	IllPutUTest() : _eval(&_as)
+	IllPutUTest() : _as(createAtomSpace()), _eval(_as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -62,7 +62,7 @@ public:
 
 void IllPutUTest::tearDown()
 {
-	_as.clear();
+	_as->clear();
 }
 
 void IllPutUTest::setUp()
@@ -80,7 +80,7 @@ void IllPutUTest::test_ill_put()
 	_eval.eval("(load-from-path \"tests/query/ill-put.scm\")");
 
 	Handle get_put = _eval.eval_h("get-put"),
-		results = satisfying_set(&_as, get_put),
+		results = satisfying_set(_as, get_put),
 		expected = al(SET_LINK, _eval.eval_h("put-1"));
 
 	logger().debug() << "results = " << oc_to_string(results);
