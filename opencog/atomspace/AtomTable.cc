@@ -242,12 +242,15 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     if (not force) {
-        // If we have it already, return it. If we have a fast and
-        // easy COW check, then we could `copyValues()`. But we don't,
-        // so we won't.  At this time, this does not trigger any unit
-        // tests, so we leave well-enough alone.
+        // If we have it already, return it. If we had a fast and
+        // easy COW check, then we could avoid `copyValues()` for
+        // read-only atomspaces, and do a COW instead. But we don't,
+        // so we won't.
         Handle hcheck(lookupUnlocked(orig));
-        if (hcheck) return hcheck;
+        if (hcheck) {
+            hcheck->copyValues(orig);
+            return hcheck;
+        }
     } else {
         // If force-adding, we have to be more careful.  We're looking
         // for the atom in this table, and not some other table.
