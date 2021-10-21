@@ -121,6 +121,7 @@ class AtomSpace : public Atom
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
     Handle lookupHandle(const Handle&) const;
+    Handle lookupUnlocked(const Handle&) const;
 
     /**
      * Private: add an atom to the table. This skips the read-only
@@ -602,7 +603,7 @@ static inline AtomSpacePtr AtomSpaceCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<AtomSpace>(a); }
 
 template< class... Args >
-Handle createAtomSpace( Args&&... args )
+AtomSpacePtr createAtomSpace( Args&&... args )
 {
    return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
 }

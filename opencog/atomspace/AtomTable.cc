@@ -179,11 +179,8 @@ Handle AtomSpace::getHandle(Type t, const HandleSeq&& seq) const
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
-Handle AtomSpace::lookupHandle(const Handle& a) const
+Handle AtomSpace::lookupUnlocked(const Handle& a) const
 {
-    if (nullptr == a) return Handle::UNDEFINED;
-
-    std::shared_lock<std::shared_mutex> lck(_mtx);
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
@@ -194,6 +191,12 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     }
 
     return Handle::UNDEFINED;
+}
+
+Handle AtomSpace::lookupHandle(const Handle& a) const
+{
+    std::shared_lock<std::shared_mutex> lck(_mtx);
+    return lookupUnlocked(a);
 }
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
@@ -227,7 +230,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     if (do_lock) lck.lock();
     if (not force) {
         // If we have it already, Update the values, as needed.
-        Handle hcheck(lookupHandle(orig));
+        Handle hcheck(lookupUnlocked(orig));
         if (hcheck) {
             hcheck->copyValues(orig);
             return hcheck;
