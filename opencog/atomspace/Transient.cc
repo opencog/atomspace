@@ -38,6 +38,13 @@ using namespace opencog;
 /// atomspace is CPU-intensive, so its cheaper to just have a cache
 /// of empty atomspaces, hanging around, and ready to go. The code
 /// in this section implements this.
+///
+/// XXX The last statement may be false; using this code may offer
+/// no performance advantage whatsoever! I mean, what the heck,
+/// AtomSpaces are not fat pigs! It might be easier to just ...
+/// create new AtomSpaces as needed!  For now, we keep this code,
+/// but performance should be measured, and this code should be
+/// trashed if it offers no benefit.
 
 // XXX TODO This should be changed to use an use-counting AtomSpacePtr
 // so that the transients are automatically released back to the pool.
@@ -50,12 +57,13 @@ const int MAX_CACHED_TRANSIENTS = 32;
 // Allocated storage for the transient atomspace cache static variables.
 static std::mutex s_transient_cache_mutex;
 static std::vector<AtomSpacePtr> s_transient_cache;
+static std::set<AtomSpacePtr> s_issued;
 
 static std::atomic_int num_issued = 0;
 
 AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 {
-	AtomSpacePtr transient_atomspace = nullptr;
+	AtomSpacePtr tranny;
 
 	// See if the cache has one...
 	if (s_transient_cache.size() > 0)
@@ -68,27 +76,29 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 		if (s_transient_cache.size() > 0)
 		{
 			// Pop the latest transient atomspace off the cache stack.
-			transient_atomspace = s_transient_cache.back();
+			tranny = s_transient_cache.back();
 			s_transient_cache.pop_back();
 
 			// Ready it for the new parent atomspace.
-			transient_atomspace->ready_transient(parent);
-
+			tranny->ready_transient(parent);
+			s_issued.insert(tranny);
 			num_issued ++;
 		}
 	}
 
 	// If we didn't get one from the cache, then create a new one.
-	if (!transient_atomspace)
+	// We stick it into `s_issued` to avoid use-count decrement.
+	if (!tranny)
 	{
-		transient_atomspace = createAtomSpace(parent, TRANSIENT_SPACE);
+		tranny = createAtomSpace(parent, TRANSIENT_SPACE);
+		s_issued.insert(tranny);
 		num_issued ++;
 	}
 
 	if (MAX_CACHED_TRANSIENTS < num_issued.load())
 		throw FatalErrorException(TRACE_INFO, "Transient space memleak!");
 
-	return transient_atomspace.get();
+	return tranny.get();
 }
 
 void opencog::release_transient_atomspace(AtomSpace* atomspace)
@@ -106,8 +116,9 @@ void opencog::release_transient_atomspace(AtomSpace* atomspace)
 			atomspace->clear_transient();
 
 			// Place this transient into the cache.
-			s_transient_cache.push_back(AtomSpaceCast(atomspace->shared_from_this()));
-
+			AtomSpacePtr tranny(AtomSpaceCast(atomspace->shared_from_this()));
+			s_transient_cache.push_back(tranny);
+			s_issued.erase(tranny);
 			num_issued--;
 		}
 	}
