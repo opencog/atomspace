@@ -532,8 +532,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
@@ -585,8 +584,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
