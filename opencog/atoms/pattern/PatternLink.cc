@@ -290,6 +290,13 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
+void PatternLink::record_mandatory(const PatternTermPtr& term)
+{
+	pin_term(term);
+	term->markLiteral();
+	_pat.pmandatory.push_back(term);
+}
+
 /// Make a note of any clauses that must be present (or absent)
 /// in the pattern in their literal form, i.e. uninterpreted.
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
@@ -308,10 +315,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		{
 			const Handle& ph = term->getHandle();
 			if (is_constant(_variables.varset, ph)) continue;
-
-			pin_term(term);
-			term->markLiteral();
-			_pat.pmandatory.push_back(term);
+			record_mandatory(term);
 		}
 		return true;
 	}
@@ -335,16 +339,12 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 				{
 					const Handle& php = sptm->getHandle();
 					if (is_constant(_variables.varset, php)) continue;
-					pin_term(sptm);
-					sptm->markLiteral();
-					_pat.pmandatory.push_back(sptm);
+					record_mandatory(sptm);
 				}
 			}
 			else if (not is_constant(_variables.varset, ph))
 			{
-				pin_term(term);
-				term->markLiteral();
-				_pat.pmandatory.push_back(term);
+				record_mandatory(term);
 			}
 			return true;
 		}
@@ -711,7 +711,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 ///
 /// Another example is
 ///
-///    (GetLink (Equal (Variable "$whole") (Implication ...)))
+///    (GetLink (Identical (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
 /// If the ImplicationLink is suitably simple, it can be added
@@ -720,14 +720,13 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// XXX FIXME: the code here assumes that the situation is indeed
 /// simple: more complex cases are not handled correctly.  Doing this
 /// correctly would require iterating again, and examining the
-/// contents of the left and right side of the EqualLink... ugh.
+/// contents of the left and right side of the IdenticalLink... ugh.
 ///
 /// XXX The situation here is also very dangerous: without any
 /// type constraints, we risk searching atoms created in the scratch
 /// atomspace, resulting in infinite recursion and a blown stack.
 /// Not clear how to avoid that...
 ///
-
 void PatternLink::add_dummies(const PatternTermPtr& ptm)
 {
 	const Handle& h = ptm->getHandle();

@@ -113,6 +113,7 @@ protected:
 	void pin_term_recursive(const PatternTermPtr&,
 	                        const PatternTermPtr&);
 
+	void record_mandatory(const PatternTermPtr&);
 	bool record_literal(const PatternTermPtr&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
 	bool unbundle_clauses_rec(const PatternTermPtr&,
