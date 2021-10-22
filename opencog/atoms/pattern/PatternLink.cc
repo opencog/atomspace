@@ -73,7 +73,7 @@ void PatternLink::common_init(void)
 	for (const PatternTermPtr& ptm : _fixed)
 		concrete_clauses.emplace_back(ptm->getQuote());
 	for (const PatternTermPtr& ptm : _pat.absents)
-		concrete_clauses.emplace_back(ptm->getHandle()); // XXX why not quote?
+		concrete_clauses.emplace_back(ptm->getQuote());
 	validate_variables(_variables.varset, concrete_clauses);
 
 	// Split into connected components by splitting virtual clauses.
