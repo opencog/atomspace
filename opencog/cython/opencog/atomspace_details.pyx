@@ -43,25 +43,22 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
     # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap)
-    instance.owns_atomspace = False
     return instance
 
 cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.asp = PtrHolder.create(<shared_ptr[void]&> to_wrap)
+    instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get())
-    instance.owns_atomspace = False
     return instance
 
 cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
-    #cdef bint owns_atomspace
     #cdef object parent_atomspace
 
-    def __cinit__(self):
-        self.owns_atomspace = False
+    #def __cinit__(self):
+    #    self.owns_atomspace = False
 
     # A tacky hack to pass in a pointer to an atomspace from C++-land.
     # basically, pass an int, and cast it to the C++ pointer.  This
@@ -69,20 +66,11 @@ cdef class AtomSpace(Value):
     # about it.  But I can't find any better way.
     def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
-            tasp = createAtomSpace(<cAtomSpace*> NULL)
-            self.asp = PtrHolder.create(<shared_ptr[void]&> tasp)
-            self.atomspace = <cAtomSpace*> tasp.get()
-            self.owns_atomspace = True
+            self.asp = createAtomSpace(<cAtomSpace*> NULL)
+            self.atomspace = <cAtomSpace*> self.asp.get()
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
-            self.owns_atomspace = False
         self.parent_atomspace = parent
-
-    def __dealloc__(self):
-        if self.owns_atomspace:
-            if self.atomspace:
-                del self.atomspace
-        self.parent_atomspace = None
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -214,7 +202,6 @@ cdef class AtomSpace(Value):
         """ Description of the atomspace """
         return ("<Atomspace\n" +
                 "   addr: " + hex(<long>self.atomspace) + "\n"
-                "   owns: " + str(self.owns_atomspace) + ">\n"
                )
 
     def __len__(self):
@@ -290,7 +277,6 @@ cdef api object py_atom(const cHandle& h):
 def create_child_atomspace(object atomspace):
     cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
     cdef AtomSpace result = AtomSpace_factoid(asp)
-    result.owns_atomspace = True
     result.parent_atomspace = atomspace
     return result
 

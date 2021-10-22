@@ -219,9 +219,8 @@ cdef AtomSpace_factoid(cValuePtr to_wrap)
 
 
 cdef class AtomSpace(Value):
-    cdef PtrHolder asp
+    cdef cValuePtr asp
     cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
     cdef object parent_atomspace
 
 
