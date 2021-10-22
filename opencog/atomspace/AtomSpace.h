@@ -581,6 +581,7 @@ public:
     }
 
     /** Returns a string representation of the AtomSpace. */
+    virtual std::string to_string(void) const;
     virtual std::string to_string(const std::string& indent) const;
     virtual std::string to_short_string(const std::string& indent) const;
 
