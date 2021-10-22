@@ -8,7 +8,7 @@
 
 AtomSpace* AtomSpace_new( AtomSpace* parent_ptr )
 {
-    return new AtomSpace(parent_ptr);
+    return createAtomSpace(parent_ptr).get();
 }
 
 void AtomSpace_delete( AtomSpace* this_ptr )

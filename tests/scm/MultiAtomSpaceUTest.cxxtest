@@ -30,7 +30,7 @@ using namespace opencog;
 class MultiAtomSpace :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace* main_as;
+	AtomSpacePtr main_as;
 	SchemeEval* evaluator;
 	Handle disorder;
 	Handle disordered;
@@ -70,7 +70,7 @@ public:
  */
 void MultiAtomSpace::setUp(void)
 {
-	main_as = new AtomSpace();
+	main_as = createAtomSpace();
 	evaluator = new SchemeEval(main_as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
@@ -80,7 +80,6 @@ void MultiAtomSpace::tearDown(void)
 {
 	delete evaluator;
 	evaluator = nullptr;
-	delete main_as;
 	main_as = nullptr;
 }
 
@@ -146,9 +145,9 @@ void MultiAtomSpace::test_three(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	AtomSpace* as1 = new AtomSpace();
-	AtomSpace* as2 = new AtomSpace();
-	AtomSpace* as3 = new AtomSpace();
+	AtomSpacePtr as1 = createAtomSpace();
+	AtomSpacePtr as2 = createAtomSpace();
+	AtomSpacePtr as3 = createAtomSpace();
 	SchemeEval* ev1 = new SchemeEval(as1);
 	SchemeEval* ev2 = new SchemeEval(as2);
 	SchemeEval* ev3 = new SchemeEval(as3);
@@ -201,9 +200,6 @@ void MultiAtomSpace::test_three(void)
 	delete ev3;
 	delete ev2;
 	delete ev1;
-	delete as3;
-	delete as2;
-	delete as1;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -211,8 +207,8 @@ void MultiAtomSpace::test_load(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	AtomSpace* as1 = new AtomSpace();
-	AtomSpace* as2 = new AtomSpace();
+	AtomSpacePtr as1 = createAtomSpace();
+	AtomSpacePtr as2 = createAtomSpace();
 
 	SchemeEval* ev1 = new SchemeEval(as1);
 	SchemeEval* ev2 = new SchemeEval(as2);
@@ -280,8 +276,6 @@ void MultiAtomSpace::test_load(void)
 
 	delete ev1;
 	delete ev2;
-	delete as1;
-	delete as2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -289,7 +283,7 @@ void MultiAtomSpace::test_load(void)
 void MultiAtomSpace::test_nest(void)
 {
 	main_as->clear();
-	AtomSpace* locas = new AtomSpace(main_as);
+	AtomSpacePtr locas = createAtomSpace(main_as);
 	SchemeEval* lev = new SchemeEval(locas);
 
 	// Push some atoms into the main space
@@ -322,7 +316,6 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Expect atom b in position 1", hb == hl->getOutgoingAtom(1));
 
 	delete lev;
-	delete locas;
 
 	// Above deletion should not affect the main atomspace
 	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->get_size());

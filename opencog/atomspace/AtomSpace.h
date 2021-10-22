@@ -1,9 +1,9 @@
 /*
  * opencog/atomspace/AtomSpace.h
  *
- * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2015-2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@
 #include <opencog/util/sigslot.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/TypeIndex.h>
@@ -55,13 +56,16 @@ typedef SigSlot<const Handle&,
                 const TruthValuePtr&,
                 const TruthValuePtr&> TVCHSigl;
 
+class AtomSpace;
+typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
+
 /**
  * This class provides mechanisms to store atoms and keep indices for
  * efficient lookups. It implements the local storage data structure of
  * OpenCog. It contains methods to add and remove atoms, as well as to
  * retrieve specific sets according to different criteria.
  */
-class AtomSpace 
+class AtomSpace : public Atom
 {
     friend class ::AtomSpaceUTest;   // Needs to touch typeIndex
     friend class ::AtomTableUTest;   // Needs to call getRandom()
@@ -89,8 +93,18 @@ class AtomSpace
     //! Index of atoms.
     TypeIndex typeIndex;
 
-    bool _transient;
     UUID _uuid;
+    bool _read_only;
+    bool _copy_on_write;
+    bool _transient;
+
+    /// Base AtomSpaces wrapped by this space. Empty if top-level.
+    /// This AtomSpace will behave like the set-union of the base
+    /// atomspaces in the `_environ`: it exposes all Atoms in those
+    /// bases, plus also anything in this AtomSpace.
+    HandleSeq _environ;
+
+    std::string _name;
 
     /** Find out about atom type additions in the NameServer. */
     NameServer& _nameserver;
@@ -104,40 +118,22 @@ class AtomSpace
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
 
+    void init();
     void clear_all_atoms();
-    /// Parent environment for this table.  Null if top-level.
-    /// This allows atomspaces to be nested; atoms in this atomspace
-    /// can reference those in the parent environment.
-    /// The UUID is used to uniquely identify it, for distributed
-    /// operation. Viz, other computers on the network may have a copy
-    /// of this atomtable, and so need to have its UUID to sync up.
-    AtomSpace* _environ;
-    std::atomic_int _num_nested;
-
-    bool _read_only;
-    bool _copy_on_write;
 
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
     Handle lookupHandle(const Handle&) const;
+    Handle lookupUnlocked(const Handle&) const;
 
     /**
-     * Adds an atom to the table.
+     * Private: add an atom to the table. This skips the read-only
+     * check. To be used only by the storage nodes.
      *
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
-     *
-     * @param The new atom to be added.
-     * @return The handle of the newly added atom.
      */
     Handle add(const Handle&, bool force=false, bool do_lock=true);
-
-    /**
-     * Return true if the atom table holds this handle, else return false.
-     */
-    bool holds(const Handle& h) const {
-        return (nullptr != h) and h->getAtomSpace() == this;
-    }
 
     /**
      * Return a random atom in the AtomTable.
@@ -145,17 +141,27 @@ class AtomSpace
      */
     Handle getRandom(RandGen* rng) const;
 
+    virtual ContentHash compute_hash() const;
+
 public:
     /**
      * Constructor and destructor for this class.
+     *
+     * An AtomSpace can have one or more base AtomSpaces; the created
+     * AtomSpace will behave like the union of the component AtomSpaces.
+     * The created AtomSpace essentially "yokes together" the base
+     * AtomSpaces. Atoms are NOT copied, unless the base spaces are
+     * read-only, in which case a copy-on-write is performed.
      *
      * If 'transient' is true, then the resulting AtomSpace is operates
      * in a copy-on-write mode, suitable for holding temporary, scratch
      * results (e.g. for evaluation or inference.) Transient AtomSpaces
      * should have a parent which holds the actual Atoms being worked
-     * with.
+     * with. See COW below.
      */
-    AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
+    AtomSpace(AtomSpace* base=nullptr, bool transient=false);
+    AtomSpace(AtomSpacePtr&);
+    AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
     UUID get_uuid(void) const { return _uuid; }
@@ -174,20 +180,21 @@ public:
     void set_read_write(void);
     bool get_read_only(void) { return _read_only; }
 
-    /// Copy-on-write (COW) atomspaces provide protection against the
-    /// update of the parent atomspace. When an atomspace is marked COW,
-    /// it behaves as if it is read-write, but the parent is read-only.
-    /// This is convenient for creating temporary atomspaces, wherein
-    /// updates will not trash the parent. Transient atomspaces are
-    /// always COW.
+    /// Copy-on-write (COW) atomspaces protect base atomspaces from
+    /// being damaged by updates to this atomspace. COW only makes
+    /// sense if this atomspace has underlying base atomspaces;
+    /// otherwise its a no-op.
+    ///
+    /// When an atomspace is marked COW, it behaves as if the base is
+    /// read-only, so that any changes to TruthValues and other Values
+    /// affect this atomspace only. This is convenient for creating
+    /// temporary atomspaces, wherein updates will not trash the base.
+    /// Transient atomspaces are always COW.
     void set_copy_on_write(void) { _copy_on_write = true; }
     void clear_copy_on_write(void) { _copy_on_write = false; }
     bool get_copy_on_write(void) { return _copy_on_write; }
 
     // -------------------------------------------------------
-
-    /// Get the environment that this atomspace was created in.
-    AtomSpace* get_environ(void) const { return _environ; }
 
     /**
      * Return the depth of the Atom, relative to this AtomSpace.
@@ -195,19 +202,7 @@ public:
      * if it is in the parent, and so on. It is -1 if it is not
      * in the chain.
      */
-    int depth(const Handle& atom) const
-    {
-        if (nullptr == atom) return -1;
-        AtomSpace* atab = atom->getAtomSpace();
-        const AtomSpace* env = this;
-        int count = 0;
-        while (env) {
-            if (atab == env) return count;
-            env = env->_environ;
-            count ++;
-        }
-        return -1;
-    }
+    int depth(const Handle& atom) const;
 
     /**
      * Return true if the atom is in this atomtable, or if it is
@@ -219,17 +214,13 @@ public:
      * shared libraries. Yes, this is kind-of hacky, but its the
      * simplest fix for just right now.
      */
-    bool in_environ(const Handle& atom) const
-    {
-        if (nullptr == atom) return false;
-        AtomSpace* atab = atom->getAtomSpace();
-        const AtomSpace* env = this;
-        while (env) {
-            if (atab == env) return true;
-            env = env->_environ;
-        }
-        return false;
-    }
+    bool in_environ(const Handle& atom) const;
+
+    virtual const std::string& get_name() const;
+    virtual Arity get_arity() const;
+    virtual const HandleSeq& getOutgoingSet() const;
+    virtual Handle getOutgoingAtom(Arity) const;
+    virtual void setAtomSpace(AtomSpace *);
 
     /**
      * Compare atomspaces for equality. Useful during testing.
@@ -240,6 +231,15 @@ public:
                                    bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
+
+    /**
+     * Perform a content-based comparison of two AtomSpaces.
+     * Wrapper around above.
+     */
+    virtual bool operator==(const Atom&) const;
+
+    /** Ordering operator for AtomSpaces. */
+    virtual bool operator<(const Atom&) const;
 
     /**
      * Return the number of atoms contained in the space.
@@ -580,10 +580,10 @@ public:
         opencog::setting_omp(opencog::num_threads());
     }
 
-    /**
-     * Convert the atomspace into a string
-     */
-    std::string to_string() const;
+    /** Returns a string representation of the AtomSpace. */
+    virtual std::string to_string(void) const;
+    virtual std::string to_string(const std::string& indent) const;
+    virtual std::string to_short_string(const std::string& indent) const;
 
     /* ----------------------------------------------------------- */
     // ---- Signals
@@ -597,6 +597,17 @@ public:
     // Not for public use! Only StorageNodes get to call this!
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
+
+static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
+    { return std::dynamic_pointer_cast<AtomSpace>(a); }
+static inline AtomSpacePtr AtomSpaceCast(AtomSpace* as)
+    { return AtomSpaceCast(as->shared_from_this()); }
+
+template< class... Args >
+AtomSpacePtr createAtomSpace( Args&&... args )
+{
+   return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
+}
 
 /** @}*/
 } // namespace opencog

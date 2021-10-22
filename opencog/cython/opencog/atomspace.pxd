@@ -187,9 +187,6 @@ cdef vector[cHandle] atom_list_to_vector(list lst);
 # AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
-        cAtomSpace()
-        cAtomSpace(cAtomSpace * parent)
-
         cHandle add_atom(cHandle handle) except +
 
         cHandle xadd_node(Type t, string s) except +
@@ -214,13 +211,16 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void clear()
         bint extract_atom(cHandle h, bint recursive)
 
+    cdef cValuePtr createAtomSpace(cAtomSpace *parent)
+
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
+cdef AtomSpace_factoid(cValuePtr to_wrap)
 
 
-cdef class AtomSpace:
+cdef class AtomSpace(Value):
+    cdef cValuePtr asp
     cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
     cdef object parent_atomspace
 
 

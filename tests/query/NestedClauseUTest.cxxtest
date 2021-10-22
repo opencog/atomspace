@@ -26,17 +26,17 @@
 
 using namespace opencog;
 
-#define an _as.add_node
-#define al _as.add_link
+#define an _as->add_node
+#define al _as->add_link
 
 class NestedClauseUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _as;
 	SchemeEval _eval;
 
 public:
-	NestedClauseUTest() : _eval(&_as)
+	NestedClauseUTest() : _as(createAtomSpace()),_eval(_as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -59,7 +59,7 @@ public:
 
 void NestedClauseUTest::tearDown()
 {
-	_as.clear();
+	_as->clear();
 }
 
 void NestedClauseUTest::setUp()

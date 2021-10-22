@@ -31,11 +31,11 @@ using namespace opencog;
 class BuggyBindLinkUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace as;
+        AtomSpacePtr as;
         SchemeEval eval;
 
 public:
-	BuggyBindLinkUTest(void) : eval(&as)
+	BuggyBindLinkUTest(void) : as(createAtomSpace()), eval(as)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
@@ -59,7 +59,7 @@ public:
 
 void BuggyBindLinkUTest::tearDown(void)
 {
-    as.clear();
+    as->clear();
 }
 
 void BuggyBindLinkUTest::setUp(void)
@@ -79,7 +79,7 @@ void BuggyBindLinkUTest::test_implication_introduction(void)
     Handle implication_introduction_rule =
 	    eval.eval_h("implication-introduction-rule");
 
-    Handle result = bindlink(&as, implication_introduction_rule);
+    Handle result = bindlink(as, implication_introduction_rule);
     logger().debug() << "Result is this:\n" << result->to_string();
 
     TS_ASSERT_EQUALS(0, result->get_arity());

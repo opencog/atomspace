@@ -35,7 +35,7 @@ using namespace std;
 class VectorAPIUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -97,7 +97,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
  */
 void VectorAPIUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.

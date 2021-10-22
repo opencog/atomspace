@@ -2,7 +2,7 @@
  * opencog/atomspace/AtomSpace.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009, 2013 Linas Vepstas
+ * Copyright (c) 2009, 2013, 2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -226,6 +226,88 @@ bool AtomSpace::operator!=(const AtomSpace& other) const
     return not operator==(other);
 }
 
+bool AtomSpace::operator==(const Atom& other) const
+{
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
+    if (ATOMSPACE != other.get_type()) return false;
+    AtomSpace* asp = (AtomSpace*) &other;
+    return compare_atomspaces(*this, *asp, CHECK_VALUES,
+            DONT_EMIT_DIAGNOSTICS);
+}
+
+bool AtomSpace::operator<(const Atom& other) const
+{
+    // If other points to this, then have equality.
+    if (this == &other) return false;
+
+    if (ATOMSPACE != other.get_type()) return false;
+    AtomSpace* asp = (AtomSpace*) &other;
+    return _uuid  < (asp->_uuid);
+}
+
+ContentHash AtomSpace::compute_hash() const
+{
+	return _uuid;
+}
+
+// ====================================================================
+
+const std::string& AtomSpace::get_name() const
+{
+	return _name;
+}
+
+Arity AtomSpace::get_arity() const
+{
+	return _environ.size();
+}
+
+const HandleSeq& AtomSpace::getOutgoingSet() const
+{
+	return _environ;
+}
+
+Handle AtomSpace::getOutgoingAtom(Arity n) const
+{
+	if (n <= _environ.size()) return Handle::UNDEFINED;
+	return _environ[n];
+}
+
+void AtomSpace::setAtomSpace(AtomSpace* as)
+{
+	// No-op. AtomSpaces cannot be "owned" by other AtomSpaces.
+	// Why? Well, right now, allowing this seems like an awkward
+	// thing to do. It's not clear how to think about this correctly.
+	// So we'll just pre-emptively disallow it.
+}
+
+// ====================================================================
+
+int AtomSpace::depth(const Handle& atom) const
+{
+    if (nullptr == atom) return -1;
+    if (atom->getAtomSpace() == this) return 0;
+
+    for (const Handle& base : _environ)
+    {
+        int d = AtomSpaceCast(base)->depth(atom);
+        if (0 < d) return d+1;
+    }
+    return -1;
+}
+
+bool AtomSpace::in_environ(const Handle& atom) const
+{
+    if (nullptr == atom) return false;
+    if (atom->getAtomSpace() == this) return true;
+    for (const Handle& base : _environ)
+    {
+        if (AtomSpaceCast(base)->in_environ(atom)) return true;
+    }
+    return false;
+}
 
 // ====================================================================
 
@@ -384,11 +466,21 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     return Handle::UNDEFINED;
 }
 
-std::string AtomSpace::to_string() const
+std::string AtomSpace::to_string(void) const
 {
 	std::stringstream ss;
 	ss << *this;
 	return ss.str();
+}
+
+std::string AtomSpace::to_string(const std::string& indent) const
+{
+	return to_short_string(indent);
+}
+
+std::string AtomSpace::to_short_string(const std::string& indent) const
+{
+	return indent + "(AtomSpace \"" + _name + "\")";
 }
 
 namespace std {

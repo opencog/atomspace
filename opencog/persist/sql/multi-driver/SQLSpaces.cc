@@ -40,23 +40,22 @@ void SQLAtomStorage::store_atomtable_id(const AtomSpace& at)
 
 	table_id_cache.insert(tab_id);
 
-	// Get the parent table as well.
-	UUID parent_id = 1;
-	AtomSpace *env = at.get_environ();
-	if (env)
+	// Get the parent tables as well.
+	for (const Handle& h : at.getOutgoingSet())
 	{
-		parent_id = env->get_uuid();
-		store_atomtable_id(*env);
-	}
+		AtomSpacePtr asp(AtomSpaceCast(h));
+		store_atomtable_id(* ((AtomSpace*) (asp.get())));
 
+		UUID parent_id = asp->get_uuid();
 #define BUFSZ 80
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
-		tab_id, parent_id);
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+			tab_id, parent_id);
 
-	Response rp(conn_pool);
-	rp.exec(buff);
+		Response rp(conn_pool);
+		rp.exec(buff);
+	}
 }
 
 /* ============================= END OF FILE ================= */

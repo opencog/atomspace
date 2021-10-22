@@ -55,6 +55,9 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
+		if (ATOMSPACE == h->get_type())
+			return h->to_short_string();
+
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);
@@ -130,7 +133,8 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	// designed so that all atoms are in atomspaces, and any
 	// exceptions to this assumption leads to confusion and
 	// unexpected behavior -- i.e. leads to bugs.
-	if (nullptr == h->getAtomSpace())
+	if (nullptr == h->getAtomSpace() and
+	    not (ATOMSPACE == h->get_type()))
 	{
 		*((Handle *) SCM_SMOB_DATA(sh)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(sh);
@@ -528,8 +532,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
@@ -581,8 +584,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));

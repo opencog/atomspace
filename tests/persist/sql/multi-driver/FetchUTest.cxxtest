@@ -55,7 +55,7 @@ class FetchUTest :  public CxxTest::TestSuite
 		const char * passwd;
 		std::string sql_open;
 
-		AtomSpace *_as;
+		AtomSpacePtr _as;
 		SchemeEval *eval;
 
 	public:
@@ -132,7 +132,7 @@ FetchUTest::FetchUTest(void)
  */
 void FetchUTest::setUp(void)
 {
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	kill_data();
 
@@ -142,7 +142,6 @@ void FetchUTest::setUp(void)
 
 void FetchUTest::tearDown(void)
 {
-	delete _as;
 	// kill_data();
 }
 
@@ -232,8 +231,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
@@ -263,8 +261,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 
@@ -304,8 +301,7 @@ void FetchUTest::test_readonly(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 	_as->set_read_only();

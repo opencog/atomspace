@@ -32,6 +32,8 @@ using namespace opencog;
 class RemoveUTest :  public CxxTest::TestSuite
 {
 private:
+	AtomSpacePtr asp1;
+	AtomSpacePtr asp2;
 
 public:
 	RemoveUTest()
@@ -39,7 +41,11 @@ public:
 		logger().set_print_to_stdout_flag(true);
 	}
 
-	void setUp() {}
+	void setUp()
+	{
+		asp1 = createAtomSpace();
+		asp2 = createAtomSpace(asp1);
+	}
 
 	void tearDown() {}
 
@@ -57,8 +63,9 @@ public:
 void RemoveUTest::testSimple()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -99,7 +106,7 @@ void RemoveUTest::testSimple()
 void RemoveUTest::testDangling()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
+	AtomSpace& as1(*asp1.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 
@@ -136,8 +143,8 @@ void RemoveUTest::testDangling()
 void RemoveUTest::testRecursive()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -178,8 +185,8 @@ void RemoveUTest::testRecursive()
 void RemoveUTest::testCross()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -220,8 +227,8 @@ void RemoveUTest::testCross()
 void RemoveUTest::testReCross()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -262,8 +269,8 @@ void RemoveUTest::testReCross()
 void RemoveUTest::testRepeat()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -310,8 +317,8 @@ void RemoveUTest::testRepeat()
 void RemoveUTest::testHeads()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -366,8 +373,8 @@ void RemoveUTest::testHeads()
 void RemoveUTest::testTails()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);

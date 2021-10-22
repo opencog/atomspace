@@ -19,13 +19,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 class StreamUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	ValuePtr value;
 	Handle key;
 	Handle atom;
@@ -53,6 +53,7 @@ public:
 };
 
 StreamUTest::StreamUTest(void)
+	: _asp(createAtomSpace())
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
@@ -449,7 +450,7 @@ void StreamUTest::test_chaining()
 	double sum = 0.0;
 	for (int i=0; i<LOOPCNT*LEN; i++)
 	{
-		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_as, chainof));
+		TruthValuePtr tvp(EvaluationLink::do_evaluate(_asp.get(), chainof));
 		if (*tvp == *TruthValue::TRUE_TV()) sum += 1.0;
 	}
 
@@ -468,7 +469,7 @@ void StreamUTest::test_guile()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(&_as);
+	SchemeEval eval(_asp);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval.eval("(load-from-path \"tests/atoms/value/stream.scm\")");
 

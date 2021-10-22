@@ -39,12 +39,22 @@ class MultiSpaceUTest :  public CxxTest::TestSuite
 {
 private:
 
-	AtomSpace as1;
-	AtomSpace as2;
-	AtomSpace as3;
+	AtomSpacePtr asp1;
+	AtomSpacePtr asp2;
+	AtomSpacePtr asp3;
+	AtomSpace& as1;
+	AtomSpace& as2;
+	AtomSpace& as3;
 
 public:
-	MultiSpaceUTest() {}
+	MultiSpaceUTest() :
+		asp1(createAtomSpace()),
+		asp2(createAtomSpace()),
+		asp3(createAtomSpace()),
+		as1(*asp1.get()),
+		as2(*asp2.get()),
+		as3(*asp3.get())
+	{}
 
 	void setUp() {}
 
@@ -258,7 +268,8 @@ public:
 	// github bug report #1530.
 	void testExpand()
 	{
-		AtomSpace ex1(&as1);
+		AtomSpacePtr ex(createAtomSpace(asp1));
+		AtomSpace& ex1(*ex);
 
 		// Create a node, copy it back and forth.
 		Handle n1 = ex1.add_node(CONCEPT_NODE, "Spiders from Mars");
@@ -307,9 +318,9 @@ public:
 	// not test any kind of complicated semantics.  Its minimal.
 	void testNest()
 	{
-		AtomSpace nas1;
-		AtomSpace nas2(&nas1);
-		AtomSpace nas3(&nas2);
+		AtomSpacePtr nas1(createAtomSpace());
+		AtomSpacePtr nas2(createAtomSpace(nas1));
+		AtomSpacePtr nas3(createAtomSpace(nas2));
 
 		// Create three TV's
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.4, 1.0));
@@ -317,39 +328,39 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 1.0/3.0));
 
 		// Create three nodes in the base atomspace
-		Handle hnd1 = nas1.add_node(CONCEPT_NODE, "nest-1");
+		Handle hnd1 = nas1->add_node(CONCEPT_NODE, "nest-1");
 		hnd1->setTruthValue(tv1);
-		Handle hnd2 = nas1.add_node(NUMBER_NODE, "2.34");
+		Handle hnd2 = nas1->add_node(NUMBER_NODE, "2.34");
 		hnd2->setTruthValue(tv2);
-		Handle hnd3 = nas1.add_node(VARIABLE_NODE, "nest-3");
+		Handle hnd3 = nas1->add_node(VARIABLE_NODE, "nest-3");
 		hnd3->setTruthValue(tv3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 1.0/3.0));
 
 		// Create a link in the middle atomspace
-		Handle h2 = nas2.add_link(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h2 = nas2->add_link(LIST_LINK, hnd1, hnd2, hnd3);
 		h2->setTruthValue(tv);
 
 		// Try to create a link in the grandchild atomspace
-		Handle h3 = nas3.add_link(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h3 = nas3->add_link(LIST_LINK, hnd1, hnd2, hnd3);
 		h3->setTruthValue(tv);
 
 		// The middle and grand-child links should be one and the same.
 		TS_ASSERT(h2 == h3);
 
 		// Fetch three atoms in three different atomspaces
-		Handle h1n1 = nas1.add_node(CONCEPT_NODE, "nest-1");
-		Handle h1n2 = nas1.add_node(NUMBER_NODE, "2.34");
-		Handle h1n3 = nas1.add_node(VARIABLE_NODE, "nest-3");
+		Handle h1n1 = nas1->add_node(CONCEPT_NODE, "nest-1");
+		Handle h1n2 = nas1->add_node(NUMBER_NODE, "2.34");
+		Handle h1n3 = nas1->add_node(VARIABLE_NODE, "nest-3");
 
-		Handle h2n1 = nas2.add_node(CONCEPT_NODE, "nest-1");
-		Handle h2n2 = nas2.add_node(NUMBER_NODE, "2.34");
-		Handle h2n3 = nas2.add_node(VARIABLE_NODE, "nest-3");
+		Handle h2n1 = nas2->add_node(CONCEPT_NODE, "nest-1");
+		Handle h2n2 = nas2->add_node(NUMBER_NODE, "2.34");
+		Handle h2n3 = nas2->add_node(VARIABLE_NODE, "nest-3");
 
-		Handle h3n1 = nas3.add_node(CONCEPT_NODE, "nest-1");
-		Handle h3n2 = nas3.add_node(NUMBER_NODE, "2.34");
-		Handle h3n3 = nas3.add_node(VARIABLE_NODE, "nest-3");
+		Handle h3n1 = nas3->add_node(CONCEPT_NODE, "nest-1");
+		Handle h3n2 = nas3->add_node(NUMBER_NODE, "2.34");
+		Handle h3n3 = nas3->add_node(VARIABLE_NODE, "nest-3");
 
 		// They should be identical
 		// They should NOT be copies.
@@ -383,7 +394,7 @@ public:
 	// This tests bug report #9
 	void testCrash()
 	{
-		AtomSpace* ex1 = new AtomSpace(&as1);
+		AtomSpacePtr ex1 = createAtomSpace(asp1);
 
 		// Create mixed nodes.
 		Handle n1 = as1.add_node(CONCEPT_NODE, "aaa");
@@ -391,20 +402,18 @@ public:
 
 		// Create a link
 		Handle h1 = ex1->add_atom(createLink(LIST_LINK, n1, n2));
-		delete ex1;
 
 		std::list<Handle> handle_set;
 		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 
-		AtomSpace* ex2 = new AtomSpace(&as2);
+		AtomSpacePtr ex2 = createAtomSpace(asp2);
 
 		// Create mixed nodes.
 		n2 = ex2->add_node(CONCEPT_NODE, "bbb");
 
 		// Create a link
 		h1 = ex2->add_atom(createLink(LIST_LINK, n1, n2));
-		delete ex2;
 
 		handle_set.clear();
 		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
@@ -414,25 +423,25 @@ public:
 	// This tests bug report #97
 	void testGetType()
 	{
-		AtomSpace as;
-		AtomSpace ex(&as);
+		AtomSpacePtr as = createAtomSpace();
+		AtomSpacePtr ex = createAtomSpace(as);
 
 		// Add nodes of same typ.
-		as.add_node(CONCEPT_NODE, "aaa");
-		ex.add_node(CONCEPT_NODE, "bbb");
+		as->add_node(CONCEPT_NODE, "aaa");
+		ex->add_node(CONCEPT_NODE, "bbb");
 
 		HandleSeq handle_set;
-		ex.get_handles_by_type(handle_set, CONCEPT_NODE);
+		ex->get_handles_by_type(handle_set, CONCEPT_NODE);
 
 		TS_ASSERT(handle_set.size() == 2);
 
-		ex.clear();
+		ex->clear();
 
-		TS_ASSERT(as.get_size() == 1);
-		TS_ASSERT(ex.get_size() == 1);
+		TS_ASSERT(as->get_size() == 1);
+		TS_ASSERT(ex->get_size() == 1);
 
 		handle_set.clear();
-		ex.get_handles_by_type(handle_set, CONCEPT_NODE);
+		ex->get_handles_by_type(handle_set, CONCEPT_NODE);
 
 		TS_ASSERT(handle_set.size() == 1);
 	}
@@ -440,22 +449,22 @@ public:
 	// This tests bug report #221
 	void testMoreSpace()
 	{
-		AtomSpace as;
-		AtomSpace ex(&as);
-		AtomSpace ns;
+		AtomSpacePtr as(createAtomSpace());
+		AtomSpacePtr ex(createAtomSpace(as));
+		AtomSpacePtr ns(createAtomSpace());
 
-		Handle haa = as.add_node(CONCEPT_NODE, "PLN");
-		Handle hab = as.add_node(CONCEPT_NODE, "URE");
-		Handle hea = ex.add_link(LIST_LINK, haa, hab);
-		Handle heb = ex.add_node(CONCEPT_NODE, "VAR");
-		Handle hec = ex.add_link(IMPLICATION_LINK, hea, heb);
+		Handle haa = as->add_node(CONCEPT_NODE, "PLN");
+		Handle hab = as->add_node(CONCEPT_NODE, "URE");
+		Handle hea = ex->add_link(LIST_LINK, haa, hab);
+		Handle heb = ex->add_node(CONCEPT_NODE, "VAR");
+		Handle hec = ex->add_link(IMPLICATION_LINK, hea, heb);
 
-		as.add_link(LIST_LINK, haa, hab);
+		as->add_link(LIST_LINK, haa, hab);
 
-		Handle hna = ns.add_atom(haa);
-		Handle hnb = ns.add_atom(hec);
-		Handle haa_copy = ex.get_atom(hna);
-		Handle hec_copy = ex.get_atom(hnb);
+		Handle hna = ns->add_atom(haa);
+		Handle hnb = ns->add_atom(hec);
+		Handle haa_copy = ex->get_atom(hna);
+		Handle hec_copy = ex->get_atom(hnb);
 
 		TS_ASSERT(haa_copy == haa);
 		TS_ASSERT(hec_copy == hec);

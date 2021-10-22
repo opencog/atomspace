@@ -28,13 +28,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 class TVUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 
 public:
 	TVUTest(void);
@@ -42,7 +42,7 @@ public:
 	void test_guile();
 };
 
-TVUTest::TVUTest(void)
+TVUTest::TVUTest(void) : _asp(createAtomSpace())
 {
 	logger().set_level(Logger::INFO);
 	logger().set_print_to_stdout_flag(true);
@@ -54,7 +54,7 @@ void TVUTest::test_guile()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(&_as);
+	SchemeEval eval(_asp);
 	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	std::string rv = eval.eval("(use-modules (opencog))");
 	TS_ASSERT(not eval.eval_error());

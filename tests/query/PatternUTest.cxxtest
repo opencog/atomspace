@@ -42,7 +42,7 @@ using namespace opencog;
 class PatternUTest: public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 
 		// These handles are documented below.
 		Handle hconst_1;
@@ -81,12 +81,11 @@ class PatternUTest: public CxxTest::TestSuite
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 #include "test-types.cc"
-			as = new AtomSpace();
+			as = createAtomSpace();
 		}
 
 		~PatternUTest()
 		{
-			delete as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -253,7 +252,7 @@ void PatternUTest::test_simple_link(void)
 	HandleSeq preds;
 	preds.push_back(he);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find only one solution.
@@ -307,7 +306,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hl1);
 	preds.push_back(hl2);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find two solutions:
@@ -366,7 +365,7 @@ void PatternUTest::test_eval(void)
 	HandleSeq preds;
 	preds.push_back(heval);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find one solution
@@ -446,7 +445,7 @@ void PatternUTest::test_implication(void)
 
 	Handle hpa = al(PARSE_LINK, h2);
 
-	imply(as, han, hpa);
+	imply(as.get(), han, hpa);
 
 	// Remove the parse link, so that the other one is easier to find.
 	as->extract_atom(hpa);

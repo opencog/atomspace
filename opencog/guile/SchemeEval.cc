@@ -313,6 +313,14 @@ SchemeEval::SchemeEval(AtomSpace* as)
 	scm_with_guile(c_wrap_init, this);
 }
 
+SchemeEval::SchemeEval(AtomSpacePtr& as)
+{
+	init_only_once();
+	_atomspace = (AtomSpace*) as.get();
+
+	scm_with_guile(c_wrap_init, this);
+}
+
 /* This should be called once for every new thread. */
 void SchemeEval::per_thread_init(void)
 {
@@ -1215,6 +1223,11 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 	return evaluator;
 }
 
+SchemeEval* SchemeEval::get_evaluator(AtomSpacePtr& as)
+{
+	return get_evaluator((AtomSpace*) as.get());
+}
+
 /* ============================================================== */
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
@@ -1232,6 +1245,11 @@ void* SchemeEval::c_wrap_set_atomspace(void * vas)
 void SchemeEval::set_scheme_as(AtomSpace* as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as);
+}
+
+void SchemeEval::set_scheme_as(AtomSpacePtr& as)
+{
+	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 
 void SchemeEval::init_scheme(void)

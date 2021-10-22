@@ -36,7 +36,7 @@ using namespace opencog;
 class AnchorUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace* as;
+	AtomSpacePtr as;
 
 public:
 	AnchorUTest(void)
@@ -45,7 +45,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		SchemeEval* eval = SchemeEval::get_evaluator(as);
 		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -53,7 +53,6 @@ public:
 
 	~AnchorUTest()
 	{
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());

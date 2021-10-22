@@ -17,13 +17,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 class SetTVUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 	
 public:
@@ -39,7 +39,7 @@ public:
 	void test_gpn();
 };
 
-SetTVUTest::SetTVUTest(void) : _eval(&_as)
+SetTVUTest::SetTVUTest(void) : _asp(createAtomSpace()), _eval(_asp)
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);

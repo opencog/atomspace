@@ -73,6 +73,8 @@ FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 // NOTE: ATOM will not have a corresponding python constructor, to
 // avoid conflict with the python Atom object.
 ATOM <- VALUE
+ATOMSPACE <- ATOM
+
 NODE <- ATOM
 LINK <- ATOM
 

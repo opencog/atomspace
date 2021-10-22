@@ -31,7 +31,7 @@ using namespace opencog;
 class SCMUtilsUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace* as;
+		AtomSpacePtr as;
 		SchemeEval* evaluator;
 		Handle disorder;
 		Handle disordered;
@@ -66,7 +66,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 #define al as->add_link
 void SCMUtilsUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	evaluator = new SchemeEval(as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
@@ -78,8 +78,6 @@ void SCMUtilsUTest::tearDown(void)
 {
 	delete evaluator;
 	evaluator = NULL;
-	delete as;
-	as = NULL;
 }
 
 #define CHKERR \

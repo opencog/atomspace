@@ -31,7 +31,7 @@ using namespace opencog;
 class StackMoreUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		Handle bind_oo, bind_ou, many_ou, bind_ouu;
 		Handle bind_uo, bind_uu, bind_uuu;
 
@@ -73,7 +73,7 @@ class StackMoreUTest :  public CxxTest::TestSuite
 #define al as->add_link
 void StackMoreUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
 
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");

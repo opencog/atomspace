@@ -30,7 +30,7 @@ using namespace opencog;
 class AlwaysUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -40,7 +40,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -48,7 +48,6 @@ public:
 
 	~AlwaysUTest()
 	{
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());

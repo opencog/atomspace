@@ -48,8 +48,9 @@ public:
             if (not nameserver().isDefined(t)) continue;
             TS_ASSERT(nameserver().isA(t, t));
             if (t > ATOM) {
-                TS_ASSERT(nameserver().isA(t, NODE)
-                          or nameserver().isA(t, LINK));
+                TS_ASSERT(nameserver().isA(t, NODE) or
+                          nameserver().isA(t, LINK) or
+                          nameserver().isA(t, ATOMSPACE));
             }
             else {
                 TS_ASSERT(nameserver().isA(t, VALUE));

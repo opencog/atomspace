@@ -29,13 +29,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _as->add_link
+#define an _as->add_node
 
 class BindVariableSetUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _as;
 
 	Handle X, Y, Z, A, B, C;
 	
@@ -45,6 +45,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
+		_as = createAtomSpace();
 	}
 
 	~BindVariableSetUTest()
@@ -62,7 +63,7 @@ public:
 
 void BindVariableSetUTest::tearDown(void)
 {
-	_as.clear();
+	_as->clear();
 }
 
 void BindVariableSetUTest::setUp(void)
@@ -92,7 +93,7 @@ void BindVariableSetUTest::test_no_type(void)
 	Handle rewrite = al(LIST_LINK, X, Y, Z);
 	Handle query = al(BIND_LINK, body, rewrite);
 
-	Handle result = HandleCast(query->execute(&_as));
+	Handle result = HandleCast(query->execute(_as.get()));
 	Handle expect = al(SET_LINK,
 	                   al(LIST_LINK, A, B, C),
 	                   al(LIST_LINK, A, C, B));
