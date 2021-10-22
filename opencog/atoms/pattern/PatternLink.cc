@@ -171,6 +171,15 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 
 /* ================================================================= */
 
+static bool vector_contains(const std::vector<PatternTermPtr>& vect,
+                            const PatternTermPtr& sub)
+{
+	for (const PatternTermPtr& itm : vect)
+		if (itm->getHandle() == sub->getHandle()) return true;
+	return false;
+}
+
+
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
@@ -196,7 +205,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_variables.unpack_vartype(HandleCast(it->second));
 	}
 
-	// Next, the body... there's no `_body` for lambda. The compo is
+	// Next, the body... there's no `_body` for lambda. The `compo` is
 	// the mandatory clauses; we have to reconstruct the optionals.
 	for (const Handle& h : compo)
 	{
@@ -209,14 +218,18 @@ PatternLink::PatternLink(const HandleSet& vars,
 		{
 			// Clone the PatternTerm. We can't use the old one.
 			PatternTermPtr term(make_term_tree((*it)->getHandle()));
-			term->markLiteral();
-			term->markAbsent();
-			_pat.absents.push_back(term);
+			if (not vector_contains(_pat.absents, term))
+			{
+				term->markLiteral();
+				term->markAbsent();
+				_pat.absents.push_back(term);
+			}
 		}
 		else
 		{
 			PatternTermPtr term(make_term_tree(h));
-			_pat.pmandatory.push_back(term);
+			if (not vector_contains(_pat.pmandatory, term))
+				_pat.pmandatory.push_back(term);
 		}
 	}
 	locate_defines(_pat.pmandatory);
@@ -292,6 +305,9 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 
 void PatternLink::record_mandatory(const PatternTermPtr& term)
 {
+	// Unusual to have duplicate terms, but the CPU savings is
+	// worth it, when it happens.
+	if (vector_contains(_pat.pmandatory, term)) return;
 	pin_term(term);
 	term->markLiteral();
 	_pat.pmandatory.push_back(term);
