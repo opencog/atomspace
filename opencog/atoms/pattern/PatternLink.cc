@@ -171,15 +171,6 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 
 /* ================================================================= */
 
-static bool vector_contains(const std::vector<PatternTermPtr>& vect,
-                            const PatternTermPtr& sub)
-{
-	for (const PatternTermPtr& itm : vect)
-		if (itm->getHandle() == sub->getHandle()) return true;
-	return false;
-}
-
-
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
@@ -218,7 +209,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 		{
 			// Clone the PatternTerm. We can't use the old one.
 			PatternTermPtr term(make_term_tree((*it)->getHandle()));
-			if (not vector_contains(_pat.absents, term))
+			if (not term->contained_in(_pat.absents))
 			{
 				term->markLiteral();
 				term->markAbsent();
@@ -228,7 +219,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 		else
 		{
 			PatternTermPtr term(make_term_tree(h));
-			if (not vector_contains(_pat.pmandatory, term))
+			if (not term->contained_in(_pat.pmandatory))
 				_pat.pmandatory.push_back(term);
 		}
 	}
@@ -305,9 +296,9 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 
 void PatternLink::record_mandatory(const PatternTermPtr& term)
 {
-	// Unusual to have duplicate terms, but the CPU savings is
-	// worth it, when it happens.
-	if (vector_contains(_pat.pmandatory, term)) return;
+	// I don't think this check ever triggers;
+	// earlier deduplication should have done the trick.
+	if (term->contained_in(_pat.pmandatory)) return;
 	pin_term(term);
 	term->markLiteral();
 	_pat.pmandatory.push_back(term);

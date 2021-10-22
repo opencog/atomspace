@@ -227,6 +227,12 @@ public:
 	bool isUnorderedLink() const noexcept { return _handle->is_unordered_link(); }
 	bool isLink() const noexcept { return _handle->is_link(); }
 
+	bool contained_in(const std::vector<PatternTermPtr>& vect) {
+		for (const PatternTermPtr& itm : vect)
+			if (itm->_handle == _handle) return true; // XXX maybe quote?
+		return false;
+	}
+
 	bool operator==(const PatternTerm&);
 
 	// Work around gdb's inability to build a string on the fly;
