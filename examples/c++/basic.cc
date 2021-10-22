@@ -11,7 +11,7 @@ using namespace opencog;
 int main()
 {
 	// Create a new AtomSpace.
-	AtomSpace* as = new AtomSpace();
+	AtomSpacePtr as = createAtomSpace();
 
 	// Create a ConceptNode Atom, place it in the AtomSpace.
 	as->add_atom(Concept("foobar"));
