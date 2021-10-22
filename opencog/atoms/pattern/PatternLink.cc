@@ -71,13 +71,12 @@ void PatternLink::common_init(void)
 	// with some ungrounded variable.
 	HandleSeq concrete_clauses;
 	for (const PatternTermPtr& ptm : _fixed)
-		concrete_clauses.emplace_back(
-			ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		concrete_clauses.emplace_back(ptm->getQuote());
 	for (const PatternTermPtr& ptm : _pat.absents)
-		concrete_clauses.emplace_back(ptm->getHandle());
+		concrete_clauses.emplace_back(ptm->getHandle()); // XXX why not quote?
 	validate_variables(_variables.varset, concrete_clauses);
 
-	// Split the non-virtual clauses into connected components
+	// Split into connected components by splitting virtual clauses.
 	get_bridged_components(_variables.varset, _fixed, _pat.absents,
 	                       _components, _component_vars);
 
@@ -917,7 +916,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			// identify those clauses that bridge across multiple
 			// components... not everything here does so. The
 			// get_bridged_components() should be modified to
-			// identify the bridging cluases...
+			// identify the bridging clauses...
 			if ((parent->getHandle() == nullptr or not parent->isVirtual())
 			     and is_virtual(h))
 			{
