@@ -69,7 +69,7 @@ cdef class AtomSpace(Value):
     # about it.  But I can't find any better way.
     def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
-            tasp = createAtomSpace(NULL)
+            tasp = createAtomSpace(<cAtomSpace*> NULL)
             self.asp = PtrHolder.create(<shared_ptr[void]&> tasp)
             self.atomspace = <cAtomSpace*> tasp.get()
             self.owns_atomspace = True
@@ -294,4 +294,4 @@ def create_child_atomspace(object atomspace):
     result.parent_atomspace = atomspace
     return result
 
-
+# ====================== end of file ============================
