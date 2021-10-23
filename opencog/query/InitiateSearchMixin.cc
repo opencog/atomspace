@@ -757,7 +757,12 @@ PatternTermSeq
 InitiateSearchMixin::term_choices_of_handle(const Handle& h,
                                             const PatternTermPtr& root)
 {
-	if (h == root->getQuote()) return PatternTermSeq({root});
+	if (h == root->getQuote())
+		return PatternTermSeq({root});
+
+	// If no choices, then we only need one.
+	if (not root->hasChoice())
+		return PatternTermSeq({term_of_handle(h, root)});
 
 	PatternTermSeq seq;
 	term_choices_of_handle_rec(h, root, seq);
