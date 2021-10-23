@@ -155,6 +155,7 @@ protected:
 	// interpretation; it can also be an OR_LINK when that OR_LINK
 	// is in a boolean evaluatable context.
 	bool _is_choice;
+	bool _has_choice;
 
 	// True if this is a term that must be present in every successful
 	// patten grounding. There are no groundings at all, unless this
@@ -195,19 +196,20 @@ public:
 	bool isQuoted() const { return _quotation.is_quoted(); }
 
 	void markLiteral();
-	bool isLiteral() const { return _is_literal; }
+	bool isLiteral() const noexcept { return _is_literal; }
 
 	void markPresent();
-	bool isPresent() const { return _is_present; }
+	bool isPresent() const noexcept { return _is_present; }
 
 	void markAbsent();
-	bool isAbsent() const { return _is_absent; }
+	bool isAbsent() const noexcept { return _is_absent; }
 
 	void markChoice();
-	bool isChoice() const { return _is_choice; }
+	bool isChoice() const noexcept { return _is_choice; }
+	bool hasChoice() const noexcept { return _has_choice; }
 
 	void markAlways();
-	bool isAlways() const { return _is_always; }
+	bool isAlways() const noexcept { return _is_always; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
