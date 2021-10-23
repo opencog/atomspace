@@ -94,8 +94,7 @@ PatternLinkPtr PatternLink::jit_analyze(void)
 	}
 
 #ifdef QDEBUG
-	logger().fine("JIT expanded!");
-	jit->debug_log();
+	jit->debug_log("JIT expanded!");
 #endif
 
 	return jit;

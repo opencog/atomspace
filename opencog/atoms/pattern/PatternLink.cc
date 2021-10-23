@@ -146,7 +146,7 @@ void PatternLink::init(void)
 	setup_components();
 
 #ifdef QDEBUG
-	debug_log();
+	debug_log("PatternLink::common_init()");
 	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
 }
@@ -1020,12 +1020,13 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 
 /* ================================================================= */
 
-void PatternLink::debug_log(void) const
+void PatternLink::debug_log(std::string msg) const
 {
 	if (not logger().is_fine_enabled())
 		return;
 
 	// Log the pattern ...
+	logger().fine("Pattern debug log from '%s'", msg.c_str());
 	logger().fine("Pattern '%s' summary:",
 	              _pat.redex_name.c_str());
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());

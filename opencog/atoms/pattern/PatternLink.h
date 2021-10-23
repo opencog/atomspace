@@ -184,7 +184,7 @@ public:
 	// Return the list virtual clauses we are holding.
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	void debug_log(void) const;
+	void debug_log(std::string) const;
 
 	static Handle factory(const Handle&);
 
