@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -1325,6 +1326,16 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 		}
 	}
 
+	// We may have walked up to the top of an evaluatable term.
+	// At this time, we only handle IdenticalLinks.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
+	if (clause == parent and clause->hasEvaluatable())
+	{
+		OC_ASSERT(false, "Error: Unexpected situation!\n");
+	}
+
 	// If we are here, then somehow the upward-term is not unique, and
 	// we have to explore the incoming set of the ground to see which
 	// (if any) of the incoming set satsisfies the parent term.
@@ -1847,27 +1858,30 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	const PatternTermPtr& parent = ptm->getParent();
 	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 
+	// Most of the time, we expect to hit this.
+	if (parent->isPresent() and not parent->isLiteral())
+	{
+		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
+		return explore_present_branches(ptm, hg, clause);
+	}
+
+	// Handle identical terms before evaluatables.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
 	if (parent->hasAnyEvaluatable())
 	{
 		OC_ASSERT(false, "Hit some dead code!");
-
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
 			       clause->getHandle());
-
 		bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
 		logmsg("After evaluating clause, found = ", found);
 		if (found)
 			return clause_accept(clause, hg);
 
 		return false;
-	}
-
-	if (parent->isPresent() and not parent->isLiteral())
-	{
-		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
-		return explore_present_branches(ptm, hg, clause);
 	}
 
 	// Do the simple case first, Choice terms are harder.
@@ -2404,6 +2418,86 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	return false;
 }
 
+bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
+                                                  const Handle& grnd,
+                                                  const PatternTermPtr& clause)
+{
+	// We have not yet reached the IdenticalLink. So keep going.
+	if (not term->getParent()->isIdentical())
+		return explore_term_branches(term, grnd, clause);
+
+	logmsg("Clause is identity:", clause);
+
+	// XXX maybe FIXME: don't we need to push and pop the solution stack?
+	// solution_push();
+	if (not tree_compare(term, grnd, CALL_SOLN))
+	{
+		logmsg("iiii NO solution for term:", term);
+		logmsg("iiii NOT solved by:", grnd);
+		// solution_pop();
+		return false;
+	}
+
+	// Search for one term in the link that is grounded.
+	Handle vterm;
+	Handle gterm;
+	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
+	for (const Handle& side : ioset)
+	{
+		auto gnd = var_grounding.find(side);
+		if (var_grounding.end() != gnd)
+		{
+			vterm = side;
+			gterm = gnd->second;
+			break;
+		}
+	}
+
+	// Something must be grounded, else we're confused.
+	OC_ASSERT(nullptr != gterm, "Internal Error!");
+
+	// Proposed groundings may have ungrounded variables in them.
+	// Reject these. Typically, these are self-groundings.
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	if (any_free_in_tree(gterm, it->second)) return false;
+
+	logmsg("Identity grounding to validate:", gterm);
+
+	// Perhaps another side of the link has been grounded
+	// already. If so, then it must have exactly the same
+	// grounding, else its a mismatch.
+	for (const Handle& side : ioset)
+	{
+		auto gnd = var_grounding.find(side);
+		if (var_grounding.end() == gnd)
+		{
+			// If the side might not be grounded yet, because it's a
+			// constant. If it is a constant, then it must be identical
+			// to gterm.
+			if ((side != gterm) and
+			    (not any_free_in_tree(side, it->second))) return false;
+		}
+		else if (gnd->second != gterm)
+			return false;
+	}
+
+	// We're done. We have a grounding that we can propgate.
+	// XXX TODO: the ungrounded side may have variables in it.
+	// We should fish those out and record them.
+	for (const Handle& side : ioset)
+	{
+		if (side == vterm) continue;
+		var_grounding[side] = gterm;
+	}
+
+	// IdenticalLinks are neccessarily evaluatable, and thus are
+	// neccessarily embedded in an evaluatable clause, which we can
+	// evaluate from the top. So pass this on for completion.
+	// XXX I'm confused. Is this right? The unit tests pass ...
+	return clause_accept(clause, grnd);
+}
+
 /**
  * Same as explore_clause_direct, but looks at the cache of pre-grounded
  * clauses, first. This saves some CPU time for certain patterns that
@@ -2464,6 +2558,10 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
                                         const Handle& grnd,
                                         const PatternTermPtr& pclause)
 {
+	// The two sides of an identity can be equated directly.
+	if (pclause->isIdentical())
+		return explore_clause_identical(term, grnd, pclause);
+
 	// Evaluatable clauses are not cacheable.
 	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
