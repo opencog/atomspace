@@ -121,6 +121,10 @@ protected:
 	// In general, these bridge across components.
 	bool _is_virtual;
 
+	// This term is the IdenticalLink (or can be treated as an
+	// IdenticalLink). This can be used as a transitive assignment.
+	bool _is_identical;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
 	// searched in a straight-forward manner; those with them need to
@@ -221,6 +225,9 @@ public:
 
 	void markVirtual();
 	bool isVirtual() const noexcept { return _is_virtual; }
+
+	void markIdentical();
+	bool isIdentical() const noexcept { return _is_identical; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }

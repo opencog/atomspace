@@ -28,6 +28,7 @@ PatternTerm::PatternTerm(void)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
+	  _is_identical(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
@@ -49,6 +50,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
+	  _is_identical(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
@@ -226,6 +228,14 @@ void PatternTerm::markVirtual()
 	_is_virtual = true;
 }
 
+void PatternTerm::markIdentical()
+{
+	// If quoted, it cannot be evaluated.
+	if (isQuoted()) return;
+
+	_is_identical = true;
+}
+
 // ==============================================================
 
 void PatternTerm::addUnorderedLink()
@@ -327,6 +337,7 @@ std::string PatternTerm::flag_string() const
 	if (_has_any_evaluatable) str += "EE: ";
 	if (_has_evaluatable) str += "E: ";
 	if (_is_virtual) str += "V: ";
+	if (_is_identical) str += "I: ";
 	if (_has_any_unordered_link) str += "U: ";
 	if (_is_literal) str += "L: ";
 	if (_is_present) str += "P: ";
