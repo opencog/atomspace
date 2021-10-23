@@ -51,7 +51,7 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
 	QueueValuePtr qv(MeetLink::do_execute(as, silent));
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	HandleSeq hs(qv->to_handle_seq());
+	HandleSet hs(qv->to_handle_set());
 
 	// If there is an anchor, then attach results to the anchor.
 	// Otherwise, create a SetLink and return that.
