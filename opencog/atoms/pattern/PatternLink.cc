@@ -80,6 +80,11 @@ void PatternLink::common_init(void)
 	get_bridged_components(_variables.varset, _fixed, _pat.absents,
 	                       _components, _component_vars);
 
+	// We created the list of fixed clauses for only one reason:
+	// to determine pattern connectivity (get_bridged_components)
+	// Make this clear by deleting it.
+	_fixed.clear();
+
 	// Make sure every variable is in some component.
 	check_satisfiability(_variables.varset, _component_vars);
 
