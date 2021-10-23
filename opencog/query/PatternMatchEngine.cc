@@ -1844,8 +1844,13 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// higher.
 	logmsg("This term has ground, move upwards:", ptm);
 
-	if (ptm->hasAnyEvaluatable())
+	const PatternTermPtr& parent = ptm->getParent();
+	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
+
+	if (parent->hasAnyEvaluatable())
 	{
+		OC_ASSERT(false, "Hit some dead code!");
+
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
@@ -1858,9 +1863,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 
 		return false;
 	}
-
-	const PatternTermPtr& parent = ptm->getParent();
-	OC_ASSERT(PatternTerm::UNDEFINED != parent, "Unknown term parent");
 
 	if (parent->isPresent() and not parent->isLiteral())
 	{
@@ -1876,7 +1878,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		return found;
 	}
 
-	// If we are here, then we have Choice term.
+	// If we are here, then we have Choice term. (We checked above.)
 	if (parent == clause)
 	{
 		logmsg("Exploring Choice term at root");
