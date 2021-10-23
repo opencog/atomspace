@@ -34,11 +34,12 @@
 			(TypedVariable (Variable "$cat") (Type 'Evaluation))
 		)
 
-		; What to look for.
 		(And
-			(Present
-				(Evaluation (Variable "$prop") (Concept "dog"))
-				(Evaluation (Variable "$prop") (Concept "cat")))
+			; We can explicitly ask for presence, but it should be
+			; enough to implicitly assume it, with the IdenticalLink.
+			;(Present
+			;	(Evaluation (Variable "$prop") (Concept "dog"))
+			;	(Evaluation (Variable "$prop") (Concept "cat")))
 			(Identical (Variable "$dog")
 				(Evaluation (Variable "$prop") (Concept "dog")))
 			(Identical (Variable "$cat")
