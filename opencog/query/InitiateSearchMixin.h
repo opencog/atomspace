@@ -107,6 +107,7 @@ protected:
 	bool search_loop(PatternMatchCallback&, const std::string);
 
 	static PatternTermPtr term_of_handle(const Handle&, const PatternTermPtr&);
+	static PatternTermSeq term_choices_of_handle(const Handle&, const PatternTermPtr&);
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
