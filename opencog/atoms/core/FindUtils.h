@@ -285,6 +285,8 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
  */
 bool any_free_in_tree(const Handle& tree,
                       const HandleSet& atoms);
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSeq& atoms);
 
 /**
  * Return how many of the indicated atoms occur somewhere in

@@ -315,6 +315,15 @@ bool any_free_in_tree(const Handle& tree,
 	return false;
 }
 
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSeq& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_free_in_tree(tree, n))
+			return true;
+	return false;
+}
+
 unsigned int num_unquoted_unscoped_in_tree(const Handle& tree,
                                            const HandleSet& atoms)
 {
