@@ -1,7 +1,7 @@
 ;
 ; Basic unit testing for different ways of nesting evaluatable links.
-; This uses `IdenticalLink` for all testing. See `eval-equal.scm` for
-; a version that uses `EqualLink`.
+; This uses `EqualLink` for all testing. See `evaluation.scm` for
+; a version that uses `IdenticalLink`.
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
@@ -63,7 +63,7 @@
 (define (one-arc-one)
 	(wrapper
 		(list one->x x->one
-			(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
+			(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
 		)
 	)
 )
@@ -71,7 +71,7 @@
 (define (one-arc-three)
 	(wrapper
 		(list one->x x->one
-			(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
+			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
 		)
 	)
 )
@@ -80,8 +80,8 @@
 (define (zero-arcs)
 	(wrapper
 		(list one->x x->one
-			(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
-			(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
+			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+			(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
 		)
 	)
 )
@@ -94,7 +94,7 @@
 	(wrapper
 		(list one->x x->one
 			(NotLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 		)
 	)
@@ -105,13 +105,13 @@
 	(wrapper
 		(list one->x x->one
 			(NotLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 			(NotLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
 			)
 			(NotLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
 			)
 		)
 	)
@@ -122,7 +122,7 @@
 	(wrapper
 		(list one->x x->one
 			(NotLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
 			)
 		)
 	)
@@ -133,8 +133,8 @@
 	(wrapper
 		(list one->x x->one
 			(OrLink
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
-				(IdenticalLink (VariableNode "$x") (ConceptNode "idea two"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+				(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
 			)
 		)
 	)
@@ -146,8 +146,8 @@
 		(list one->x x->one
 			(NotLink
 				(OrLink
-					(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
-					(IdenticalLink (VariableNode "$x") (ConceptNode "idea two"))
+					(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+					(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
 				)
 			)
 		)
@@ -160,12 +160,12 @@
 		(list one->x x->one
 			(AndLink
 				(NotLink
-					(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
+					(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
 				)
 				(NotLink
 					(OrLink
-						(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
-						(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
+						(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+						(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
 					)
 				)
 			)

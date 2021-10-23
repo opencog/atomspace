@@ -33,3 +33,6 @@
 				(VariableNode "$impl"))
 		)
 	))
+
+; This is the test to be done:
+; (equal? (cog-execute! bigger-dummy) stfu)

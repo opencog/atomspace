@@ -352,7 +352,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// in a direct fashion.
 	if (num_comps <= 1)
 	{
-		jit->debug_log();
+		jit->debug_log("SatisfyMixin::satisfy()");
 
 		bool found = start_search();
 		if (found) return found;

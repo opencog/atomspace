@@ -116,7 +116,7 @@ void InitiateSearchMixin::set_pattern(const Variables& vars,
 // size_t& width will be set to the incoming-set size of the thinnest
 //               constant found.
 // The returned value will be the constant at which to start the search.
-// If no constant is found, then the returned value is the undefnied
+// If no constant is found, then the returned value is the undefined
 // handle.
 //
 
@@ -165,7 +165,10 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (ptm->hasEvaluatable())
+	// However, we are allowed to start inside of IdenticalLinks.
+	// XXX TODO We could start inside an evaluatable, but it would
+	// be better to try elsewhere, first. Special-case Identical.
+	if (ptm->hasEvaluatable() and not ptm->isIdentical())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -191,6 +194,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 
 		if (s)
 		{
+			if (sbr->isIdentical())
+				continue;
+
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
 			if (CHOICE_LINK == t)
@@ -222,6 +228,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
  * Iterate over all the clauses, to find the "thinnest" one.
  * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
+ *
+ * An exception: the IdenticalLink can be treated as non-virtual, and we
+ * can begin the search at ne of the terms inside of an IdenticalLink.
  */
 Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
                                           PatternTermPtr& starter_term,
@@ -237,7 +246,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 	for (const PatternTermPtr& ptm: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (ptm->hasAnyEvaluatable()) continue;
+		if (ptm->hasAnyEvaluatable() and not ptm->isIdentical()) continue;
 
 		_curr_clause = ptm;
 		size_t depth = 0;
@@ -273,10 +282,14 @@ const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
 	// start searching with an optional clause. But if there ARE
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
+	//
+	// FYI, At this time, identities are marked as being evaluatable
+	// (because they can be evaluated) but they also behave like
+	// concrete clauses, since one of their terms may be groundable.
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (not m->hasAnyEvaluatable())
+		if (not m->hasAnyEvaluatable() or m->isIdentical())
 		{
 			try_optionals = false;
 			break;
