@@ -146,7 +146,8 @@ void PatternLink::init(void)
 	setup_components();
 
 #ifdef QDEBUG
-	logger().fine("Pattern: %s", to_long_string("").c_str());
+	debug_log();
+	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
 }
 
@@ -656,7 +657,7 @@ void PatternLink::validate_variables(HandleSet& vars,
 /// variables in it. Otherwise, it can be evaluated on the spot.
 ///
 /// At this time, the pattern matcher does not support mathematical
-/// optimzation within virtual clauses.
+/// optimization within virtual clauses.
 /// See https://en.wikipedia.org/wiki/Mathematical_optimization
 ///
 /// So, virtual clauses are already one step towards full support
@@ -674,6 +675,10 @@ bool PatternLink::is_virtual(const Handle& clause)
 {
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
+
+	// IdenticalLinks can bridge over thier two sides.
+	// So we treat them as an unsual but not really virtual link.
+	if (IDENTICAL_LINK == clause->get_type()) return false;
 
 	size_t nsub = 0;
 	size_t nsolv = 0;
@@ -916,12 +921,18 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			// identify those clauses that bridge across multiple
 			// components... not everything here does so. The
 			// get_bridged_components() should be modified to
-			// identify the bridging clauses...
-			if ((parent->getHandle() == nullptr or not parent->isVirtual())
-			     and is_virtual(h))
+			// identify the bridging clauses... XXX Wait, maybe this
+			// does not need to be fixed, since the component splitter
+			// will not split these. So we're good, I think ...
+			if (parent->getHandle() == nullptr or not parent->isVirtual())
 			{
-				_virtual.emplace_back(h);
-				ptm->markVirtual();
+				if (is_virtual(h))
+				{
+					_virtual.emplace_back(h);
+					ptm->markVirtual();
+				}
+				else if (IDENTICAL_LINK == t)
+					ptm->markIdentical();
 			}
 		}
 	}
@@ -1071,6 +1082,7 @@ void PatternLink::debug_log(void) const
 
 DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
 
+// XXX FIXME: debug_log() above is more readable than the below.
 std::string PatternLink::to_long_string(const std::string& indent) const
 {
 	std::string indent_p = indent + oc_to_string_indent;

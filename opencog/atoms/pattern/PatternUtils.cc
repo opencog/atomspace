@@ -105,7 +105,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 bool is_connected(const Handle& cl, const HandleSet& cur_vars)
 {
 	// The likely case.
-	if	(any_unquoted_in_tree(cl, cur_vars)) return true;
+	if (any_unquoted_in_tree(cl, cur_vars)) return true;
 
 	// Unsual case: clause has no variables in it!
 	// This will connect to anything.
