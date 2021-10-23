@@ -67,6 +67,9 @@ public:
 	void test_logic_overlay(void);
 	void test_varval_overlay(void);
 
+	void test_eval_equal(void);
+	void test_logic_equal(void);
+
 	void test_lambda(void);
 };
 
@@ -274,6 +277,28 @@ void EvaluationUTest::test_varval_overlay(void)
 	eval = seval;
 	as = save;
 	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Identical to test_eval_rw, except it uses EqualLink not IdenticalLink
+void EvaluationUTest::test_eval_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/eval-equal.scm\")");
+	do_test_eval();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Identical to test_logic_rw, except it uses EqualLink not IdenticalLink
+void EvaluationUTest::test_logic_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/eval-equal.scm\")");
+	do_test_logic();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
