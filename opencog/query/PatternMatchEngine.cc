@@ -1861,7 +1861,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// Most of the time, we expect to hit this.
 	if (parent->isPresent() and not parent->isLiteral())
 	{
-		OC_ASSERT(parent != clause, "Not expecting a Present term here!");
+		OC_ASSERT(parent != clause, "Not expecting a Present clause here!");
 		return explore_present_branches(ptm, hg, clause);
 	}
 
@@ -2418,6 +2418,24 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 	return false;
 }
 
+/**
+ * IdenticalLinks are a form of equality, stating that all fo the
+ * "sides" (all of the elements of the outgoing set; there may be more
+ * than two) must be identical. During search, two cases arise:
+ * either the sides are already grounded, or they are not. If they're
+ * grounded already, then obviously the grounding is rejected if they
+ * are not identical.  If one side is not grounded, but another side
+ * is, then the IdenticalLink can be treated as an assignment from the
+ * grounded side to the ungrounded side. This is what is implemented
+ * here: both run-time checking and assignment.
+ *
+ * Note that some assignments can be done statically, at pattern compile
+ * time, but not all cases can be handled at compile time.  An example
+ * of an assignment that cannot be done at compile time: `x = (a or b)`
+ * where `(a or b)` is a ChoiceLink. The choice is obviously not known
+ * until pattern run-time.  Thus, run-time assignment is more general
+ * than static analysis at pattern compile time.
+ */
 bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
                                                   const Handle& grnd,
                                                   const PatternTermPtr& clause)
@@ -2428,13 +2446,10 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 
 	logmsg("Clause is identity:", clause);
 
-	// XXX maybe FIXME: don't we need to push and pop the solution stack?
-	// solution_push();
 	if (not tree_compare(term, grnd, CALL_SOLN))
 	{
 		logmsg("iiii NO solution for term:", term);
 		logmsg("iiii NOT solved by:", grnd);
-		// solution_pop();
 		return false;
 	}
 
@@ -2469,12 +2484,14 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 	// grounding, else its a mismatch.
 	for (const Handle& side : ioset)
 	{
+		if (side == vterm) continue;
+
 		auto gnd = var_grounding.find(side);
 		if (var_grounding.end() == gnd)
 		{
-			// If the side might not be grounded yet, because it's a
-			// constant. If it is a constant, then it must be identical
-			// to gterm.
+			// A grounding for the side might not be recorded, because
+			// it's a constant. If it is a constant, then it must be
+			// identical to `gterm`.
 			if ((side != gterm) and
 			    (not any_free_in_tree(side, it->second))) return false;
 		}
