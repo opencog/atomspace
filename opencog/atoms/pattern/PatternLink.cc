@@ -71,13 +71,12 @@ void PatternLink::common_init(void)
 	// with some ungrounded variable.
 	HandleSeq concrete_clauses;
 	for (const PatternTermPtr& ptm : _fixed)
-		concrete_clauses.emplace_back(
-			ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		concrete_clauses.emplace_back(ptm->getQuote());
 	for (const PatternTermPtr& ptm : _pat.absents)
-		concrete_clauses.emplace_back(ptm->getHandle());
+		concrete_clauses.emplace_back(ptm->getQuote());
 	validate_variables(_variables.varset, concrete_clauses);
 
-	// Split the non-virtual clauses into connected components
+	// Split into connected components by splitting virtual clauses.
 	get_bridged_components(_variables.varset, _fixed, _pat.absents,
 	                       _components, _component_vars);
 
@@ -196,7 +195,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 			_variables.unpack_vartype(HandleCast(it->second));
 	}
 
-	// Next, the body... there's no `_body` for lambda. The compo is
+	// Next, the body... there's no `_body` for lambda. The `compo` is
 	// the mandatory clauses; we have to reconstruct the optionals.
 	for (const Handle& h : compo)
 	{
@@ -209,14 +208,18 @@ PatternLink::PatternLink(const HandleSet& vars,
 		{
 			// Clone the PatternTerm. We can't use the old one.
 			PatternTermPtr term(make_term_tree((*it)->getHandle()));
-			term->markLiteral();
-			term->markAbsent();
-			_pat.absents.push_back(term);
+			if (not term->contained_in(_pat.absents))
+			{
+				term->markLiteral();
+				term->markAbsent();
+				_pat.absents.push_back(term);
+			}
 		}
 		else
 		{
 			PatternTermPtr term(make_term_tree(h));
-			_pat.pmandatory.push_back(term);
+			if (not term->contained_in(_pat.pmandatory))
+				_pat.pmandatory.push_back(term);
 		}
 	}
 	locate_defines(_pat.pmandatory);
@@ -290,6 +293,16 @@ PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
 
 /* ================================================================= */
 
+void PatternLink::record_mandatory(const PatternTermPtr& term)
+{
+	// I don't think this check ever triggers;
+	// earlier deduplication should have done the trick.
+	if (term->contained_in(_pat.pmandatory)) return;
+	pin_term(term);
+	term->markLiteral();
+	_pat.pmandatory.push_back(term);
+}
+
 /// Make a note of any clauses that must be present (or absent)
 /// in the pattern in their literal form, i.e. uninterpreted.
 /// Any evaluatable terms appearing in these clauses are NOT evaluated,
@@ -308,10 +321,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		{
 			const Handle& ph = term->getHandle();
 			if (is_constant(_variables.varset, ph)) continue;
-
-			pin_term(term);
-			term->markLiteral();
-			_pat.pmandatory.push_back(term);
+			record_mandatory(term);
 		}
 		return true;
 	}
@@ -335,16 +345,12 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 				{
 					const Handle& php = sptm->getHandle();
 					if (is_constant(_variables.varset, php)) continue;
-					pin_term(sptm);
-					sptm->markLiteral();
-					_pat.pmandatory.push_back(sptm);
+					record_mandatory(sptm);
 				}
 			}
 			else if (not is_constant(_variables.varset, ph))
 			{
-				pin_term(term);
-				term->markLiteral();
-				_pat.pmandatory.push_back(term);
+				record_mandatory(term);
 			}
 			return true;
 		}
@@ -711,7 +717,7 @@ bool PatternLink::is_virtual(const Handle& clause)
 ///
 /// Another example is
 ///
-///    (GetLink (Equal (Variable "$whole") (Implication ...)))
+///    (GetLink (Identical (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
 /// If the ImplicationLink is suitably simple, it can be added
@@ -720,14 +726,13 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// XXX FIXME: the code here assumes that the situation is indeed
 /// simple: more complex cases are not handled correctly.  Doing this
 /// correctly would require iterating again, and examining the
-/// contents of the left and right side of the EqualLink... ugh.
+/// contents of the left and right side of the IdenticalLink... ugh.
 ///
 /// XXX The situation here is also very dangerous: without any
 /// type constraints, we risk searching atoms created in the scratch
 /// atomspace, resulting in infinite recursion and a blown stack.
 /// Not clear how to avoid that...
 ///
-
 void PatternLink::add_dummies(const PatternTermPtr& ptm)
 {
 	const Handle& h = ptm->getHandle();
@@ -911,7 +916,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 			// identify those clauses that bridge across multiple
 			// components... not everything here does so. The
 			// get_bridged_components() should be modified to
-			// identify the bridging cluases...
+			// identify the bridging clauses...
 			if ((parent->getHandle() == nullptr or not parent->isVirtual())
 			     and is_virtual(h))
 			{
