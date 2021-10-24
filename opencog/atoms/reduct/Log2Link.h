@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/Log2Link.h
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2021 Linas Vepstas
  * All Rights Reserved
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */

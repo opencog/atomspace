@@ -1,11 +1,12 @@
 /*
  * opencog/atoms/reduct/Log2Link.cc
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2021 Linas Vepstas
  * All Rights Reserved
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <math.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
@@ -43,11 +44,15 @@ void Log2Link::init(void)
 
 ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 {
+	// ArithmeticLink::get_value causes execution.
 	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
+
+	// get_vector gets numeric values, if possible.
 	Type vitype;
 	const std::vector<double>* dvec =
 		ArithmeticLink::get_vector(as, silent, vi, vitype);
 
+	// No numeric values available. Sorry!
 	if (nullptr == dvec)
 	{
 		// If it did not fully reduce, then return the best-possible
@@ -59,16 +64,15 @@ ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 		return get_handle();
 	}
 
-	std::vector<double> gtvec;
+	// Take the log and return
+	std::vector<double> l2vec;
 	for (double dv : *dvec)
-	{
-		gtvec.push_back(log2(dv));
-	}
+		l2vec.push_back(log2(dv));
 
 	if (NUMBER_NODE == vitype)
-		return createNumberNode(gtvec);
+		return createNumberNode(l2vec);
 	else
-		return createFloatValue(gtvec);
+		return createFloatValue(l2vec);
 }
 
 DEFINE_LINK_FACTORY(Log2Link, LOG2_LINK);
