@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 
+#include "ArithmeticLink.h"
 #include "RandomNumber.h"
 
 using namespace opencog;
@@ -56,10 +57,10 @@ RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-static doublee get_ran(double lb, double ub)
+static double get_ran(double lb, double ub)
 {
 	// Linear algebra slope-intercept formula.
-	return (ub - lb) randy.randdouble() + lb;
+	return (ub - lb) * randy.randdouble() + lb;
 }
 
 /// RandomNumberLink always returns either a NumberNode, or a
@@ -80,12 +81,6 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 	const std::vector<double>* yvec =
 		ArithmeticLink::get_vector(as, silent, vy, vytype);
 
-	size_t len = nmax.size();
-	if (nmin.size() != len)
-		throw SyntaxException(TRACE_INFO,
-			"Unmatched number of bounds: %d vs. %d",
-				nmin.size(), nmax.size());
-
    // No numeric values available. Sorry!
    if (nullptr == xvec or nullptr == yvec or
        0 == xvec->size() or 0 == yvec->size())
@@ -93,7 +88,8 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
       // If it did not fully reduce, then return the best-possible
       // reduction that we did get.
       if (vx->is_atom() and vy->is_atom())
-         return createRandomNumberLink(HandleCast(vx), HandleCast(vy));
+         return createRandomNumberLink(HandleSeq({HandleCast(vx),
+HandleCast(vy)}));
 
       // Unable to reduce at all. Just return the original atom.
       return get_handle();
