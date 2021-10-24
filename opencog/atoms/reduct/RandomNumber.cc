@@ -1,7 +1,7 @@
 /*
- * RandomNumber.cc
+ * opencog/atoms/reduct/RandomNumber.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2021 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -56,72 +56,10 @@ RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-static double get_dbl(AtomSpace* as, bool silent, const Handle& h)
-{
-	Type t = h->get_type();
-	if (NUMBER_NODE == t)
-	{
-		NumberNodePtr na(NumberNodeCast(h));
-		return na->get_value();
-	}
-	if (h->is_executable())
-	{
-		ValuePtr vp = h->execute(as, silent);
-		if (vp->is_atom())
-			return get_dbl(as, silent, HandleCast(vp));
-		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
-			return FloatValueCast(vp)->value().at(0);
-	}
-	throw SyntaxException(TRACE_INFO,
-		"Expecting a number, got %s", h->to_string().c_str());
-}
-
-// The pattern matcher returns sets of atoms; if that set contains
-// numbers or something that when executed, returns numbers, then
-// unwrap it.
-static std::vector<double> unwrap_set(AtomSpace *as, bool silent,
-                                      const Handle& h)
-{
-	Type t = h->get_type();
-	if (NUMBER_NODE == t)
-	{
-		NumberNodePtr na(NumberNodeCast(h));
-		return std::vector<double>(1, na->get_value());
-	}
-	if (SET_LINK == t)
-	{
-		if (0 == h->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a number, got the empty set!\n");
-		std::vector<double> nums;
-		for (const Handle& ho: h->getOutgoingSet())
-		{
-			nums.push_back(get_dbl(as, silent, ho));
-		}
-		return nums;
-	}
-
-	if (h->is_executable())
-	{
-		ValuePtr vp = h->execute(as, silent);
-		if (vp->is_atom())
-			return unwrap_set(as, silent, HandleCast(vp));
-
-		if (nameserver().isA(vp->get_type(), FLOAT_VALUE))
-			return FloatValueCast(vp)->value();
-	}
-
-	throw SyntaxException(TRACE_INFO,
-		"Expecting a number, got this: %s",
-			h->to_string().c_str());
-	return std::vector<double>();
-}
-
-static Handle get_ran(double cept, double nmax)
+static doublee get_ran(double lb, double ub)
 {
 	// Linear algebra slope-intercept formula.
-	double slope = nmax - cept;
-	return HandleCast(createNumberNode(slope * randy.randdouble() + cept));
+	return (ub - lb) randy.randdouble() + lb;
 }
 
 /// RandomNumberLink always returns either a NumberNode, or a
@@ -129,8 +67,18 @@ static Handle get_ran(double cept, double nmax)
 /// which always returns a vector of doubles.
 ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 {
-	std::vector<double> nmin(unwrap_set(as, silent, _outgoing[0]));
-	std::vector<double> nmax(unwrap_set(as, silent, _outgoing[1]));
+	// ArithmeticLink::get_value causes execution.
+	ValuePtr vx(ArithmeticLink::get_value(as, silent, _outgoing[0]));
+	ValuePtr vy(ArithmeticLink::get_value(as, silent, _outgoing[1]));
+
+	// get_vector gets numeric values, if possible.
+	Type vxtype;
+	const std::vector<double>* xvec =
+		ArithmeticLink::get_vector(as, silent, vx, vxtype);
+
+	Type vytype;
+	const std::vector<double>* yvec =
+		ArithmeticLink::get_vector(as, silent, vy, vytype);
 
 	size_t len = nmax.size();
 	if (nmin.size() != len)
@@ -138,14 +86,45 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 			"Unmatched number of bounds: %d vs. %d",
 				nmin.size(), nmax.size());
 
-	if (1 == len)
-		return get_ran(nmin[0], nmax[0]);
+   // No numeric values available. Sorry!
+   if (nullptr == xvec or nullptr == yvec or
+       0 == xvec->size() or 0 == yvec->size())
+   {
+      // If it did not fully reduce, then return the best-possible
+      // reduction that we did get.
+      if (vx->is_atom() and vy->is_atom())
+         return createRandomNumberLink(HandleCast(vx), HandleCast(vy));
 
-	HandleSeq oset;
-	for (size_t i=0; i< len; i++)
-		oset.push_back(get_ran(nmin[i], nmax[i]));
+      // Unable to reduce at all. Just return the original atom.
+      return get_handle();
+   }
 
-	return ValuePtr(createLink(std::move(oset), SET_LINK));
+   std::vector<double> powvec;
+   if (1 == xvec->size())
+   {
+      double x = xvec->back();
+      for (double y : *yvec)
+         powvec.push_back(get_ran(x,y));
+   }
+   else if (1 == yvec->size())
+   {
+      double y = yvec->back();
+      for (double x : *xvec)
+         powvec.push_back(get_ran(x,y));
+   }
+   else
+   {
+      size_t sz = std::min(xvec->size(), yvec->size());
+      for (size_t i=0; i<sz; i++)
+      {
+         powvec.push_back(get_ran(xvec->operator[](i), yvec->operator[](i)));
+      }
+   }
+
+   if (NUMBER_NODE == vxtype and NUMBER_NODE == vytype)
+      return createNumberNode(powvec);
+
+   return createFloatValue(powvec);
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
