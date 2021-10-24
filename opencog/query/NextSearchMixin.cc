@@ -261,7 +261,10 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// Make a list of the as-yet ungrounded variables.
 	HandleSet ungrounded_vars;
 
-	// Grounded variables ordered by the size of their grounding incoming set
+	// Grounded variables ordered by the size of their grounding
+	// incoming set. Ideally, we should look only at the incoming
+	// set that matches the type of the parent term. But for now,
+	// this simpler code is good enough. XXX FIXME someday?
 	std::multimap<std::size_t, Handle> thick_vars;
 
 	for (const Handle &v : _variables->varset)
@@ -378,10 +381,14 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	}
 	else
 	{
-		Choice ch;
-		ch.clause = unsolved_clause;
-		ch.start_term = term_of_handle(joint, unsolved_clause);
-		_next_choices.emplace_back(ch);
+		PatternTermSeq stseq = term_choices_of_handle(joint, unsolved_clause);
+		for (const PatternTermPtr& stm : stseq)
+		{
+			Choice ch;
+			ch.clause = unsolved_clause;
+			ch.start_term = stm;
+			_next_choices.emplace_back(ch);
+		}
 	}
 	return true;
 }

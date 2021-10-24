@@ -105,6 +105,7 @@ IF (HAVE_GUILE)
 
 	ADD_GUILE_TEST(DotProductUTest dot-product-test.scm)
 	ADD_GUILE_TEST(DotIdenticalUTest dot-identical-test.scm)
+	ADD_GUILE_TEST(DotChoiceUTest dot-choice-test.scm)
 	ADD_GUILE_TEST(MeetLinkValueTest meet-link-value.scm)
 
 ENDIF (HAVE_GUILE)

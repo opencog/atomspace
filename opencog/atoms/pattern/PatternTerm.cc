@@ -34,6 +34,7 @@ PatternTerm::PatternTerm(void)
 	  _is_present(false),
 	  _is_absent(false),
 	  _is_choice(false),
+	  _has_choice(false),
 	  _is_always(false)
 {}
 
@@ -56,6 +57,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_present(false),
 	  _is_absent(false),
 	  _is_choice(false),
+	  _has_choice(false),
 	  _is_always(false)
 {
 	Type t = h->get_type();
@@ -298,6 +300,15 @@ void PatternTerm::markChoice()
 	{
 		if (not ptm->isPresent()) ptm->markLiteral();
 	}
+
+	// Everything above holds a Choice.
+	_has_choice = true;
+	PatternTermPtr pnt = _parent;
+	while (pnt and pnt->_handle)
+	{
+		pnt->_has_choice = true;
+		pnt = pnt->_parent;
+	}
 }
 
 // ==============================================================
@@ -334,7 +345,7 @@ std::string PatternTerm::flag_string() const
 	if (_has_any_globby_var) str += "HAGV: ";
 	if (_has_globby_var) str += "HGV: ";
 	if (_is_globby_var) str += "GV: ";
-	if (_has_any_evaluatable) str += "EE: ";
+	if (_has_any_evaluatable) str += "HE: ";
 	if (_has_evaluatable) str += "E: ";
 	if (_is_virtual) str += "V: ";
 	if (_is_identical) str += "I: ";
@@ -343,7 +354,8 @@ std::string PatternTerm::flag_string() const
 	if (_is_present) str += "P: ";
 	if (_is_absent) str += "A: ";
 	if (_is_choice) str += "C: ";
-	if (_is_always) str += "AW: ";
+	if (_has_choice) str += "HC: ";
+	if (_is_always) str += "ALW: ";
 	str += _handle->id_to_string();
 	return str;
 }

@@ -711,19 +711,21 @@ static PatternTermPtr root_of_term(const Handle& term,
 }
 
 // We need to know the term corresponding to the given Handle.
-// It must be some term underneath the root. If it shows up several
-// times, then just take the first occurance...
+// It must be some term underneath the root. Find the shallowest
+// location. Ideally, find a location that is NOT in a ChoiceLink.
+// If this is used in a way such that the handle appears under a
+// ChoiceLink, then an incomplete search will result!  Right now,
+// no unit test triggers this, but its not clear why. XXX FIXME??
+// For this case, use the `term_choices_of_handle` below.
 PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
                                      const PatternTermPtr& root)
 {
 	if (h == root->getQuote()) return root;
-	// if (h == root->getHandle()) return root;
 
 	// Pseudo-but-not-really-breadth-first search.
 	for (const PatternTermPtr& ptm : root->getOutgoingSet())
 	{
 		if (h == ptm->getQuote()) return ptm;
-		// if (h == ptm->getHandle()) return ptm;
 	}
 
 	// If we are here, then recurse.
@@ -734,6 +736,39 @@ PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
 	}
 	return PatternTerm::UNDEFINED;
 }
+
+// Find all terms under `root` corresponding to the given Handle.
+// This is intended for walking over choices.
+void term_choices_of_handle_rec(const Handle& h,
+                                const PatternTermPtr& root,
+                                PatternTermSeq& seq)
+{
+	// Pseudo-but-not-really-breadth-first search.
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+	{
+		if (h == ptm->getQuote()) seq.push_back(ptm);
+	}
+
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+		term_choices_of_handle_rec(h, ptm, seq);
+}
+
+PatternTermSeq
+InitiateSearchMixin::term_choices_of_handle(const Handle& h,
+                                            const PatternTermPtr& root)
+{
+	if (h == root->getQuote())
+		return PatternTermSeq({root});
+
+	// If no choices, then we only need one.
+	if (not root->hasChoice())
+		return PatternTermSeq({term_of_handle(h, root)});
+
+	PatternTermSeq seq;
+	term_choices_of_handle_rec(h, root, seq);
+	return seq;
+}
+
 
 /**
  * Deep types can/should behave a lot like neighbor-search. So try that
@@ -962,9 +997,10 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
-					_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
 					if (all_clauses_are_evaluatable)
 						_starter_term = term_of_handle(var, cl);
+					else
+						_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of "
