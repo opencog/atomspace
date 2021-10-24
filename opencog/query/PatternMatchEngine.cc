@@ -2453,65 +2453,39 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 		return false;
 	}
 
-	// Search for one term in the link that is grounded.
+	const auto& it = _pat->clause_variables.find(clause);
+	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
+	const HandleSeq& clausevars = it->second;
+
+	// Search for a term in the link that is grounded.
+	// Proposed groundings may have ungrounded variables in them.
+	// Reject these. Typically, these are self-groundings.
 	Handle vterm;
 	Handle gterm;
 	const HandleSeq& ioset = clause->getHandle()->getOutgoingSet();
 	for (const Handle& side : ioset)
 	{
 		auto gnd = var_grounding.find(side);
-		if (var_grounding.end() != gnd)
+		if ((var_grounding.end() != gnd) and
+		    not any_free_in_tree(gnd->second, clausevars))
 		{
 			vterm = side;
 			gterm = gnd->second;
 			break;
 		}
 	}
-
-	// Something must be grounded, else we're confused.
-	OC_ASSERT(nullptr != gterm, "Internal Error!");
-
-	// Proposed groundings may have ungrounded variables in them.
-	// Reject these. Typically, these are self-groundings.
-	const auto& it = _pat->clause_variables.find(clause);
-	OC_ASSERT(it != _pat->clause_variables.end(), "Internal Error");
-	if (any_free_in_tree(gterm, it->second)) return false;
+	if (nullptr == gterm) return false;
 
 	logmsg("Identity grounding to validate:", gterm);
-
-	// Perhaps another side of the link has been grounded
-	// already. If so, then it must have exactly the same
-	// grounding, else its a mismatch.
-	for (const Handle& side : ioset)
+	for (const PatternTermPtr& side : clause->getOutgoingSet())
 	{
-		if (side == vterm) continue;
-
-		auto gnd = var_grounding.find(side);
-		if (var_grounding.end() == gnd)
-		{
-			// A grounding for the side might not be recorded, because
-			// it's a constant. If it is a constant, then it must be
-			// identical to `gterm`.
-			if ((side != gterm) and
-			    (not any_free_in_tree(side, it->second))) return false;
-		}
-		else if (gnd->second != gterm)
-			return false;
-	}
-
-	// We're done. We have a grounding that we can propgate.
-	// XXX TODO: the ungrounded side may have variables in it.
-	// We should fish those out and record them.
-	for (const Handle& side : ioset)
-	{
-		if (side == vterm) continue;
-		var_grounding[side] = gterm;
+		if (side->getHandle() == vterm) continue;
+		if (not tree_compare(side, gterm, CALL_SOLN)) return false;
 	}
 
 	// IdenticalLinks are neccessarily evaluatable, and thus are
 	// neccessarily embedded in an evaluatable clause, which we can
 	// evaluate from the top. So pass this on for completion.
-	// XXX I'm confused. Is this right? The unit tests pass ...
 	return clause_accept(clause, grnd);
 }
 
