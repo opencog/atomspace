@@ -6,5 +6,5 @@ IF(HAVE_GUILE)
 	ADD_CXXTEST(MinMaxUTest)
 	ADD_CXXTEST(AccumulateUTest)
 
-	ADD_GUILE_TEST(MathLibraryUTest math-library.scm)
+	ADD_GUILE_TEST(MathLibraryUTest math-library-test.scm)
 ENDIF(HAVE_GUILE)

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/RandomNumber.h
+ * opencog/atoms/reduct/RandomNumber.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
