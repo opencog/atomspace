@@ -32,7 +32,8 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 SCM SchemeSmob::ss_new_as (SCM space_list)
 {
 	HandleSeq spaces;
-	spaces = verify_handle_list(space_list, "cog-new-atomspace", 1);
+	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
+		"a list of AtomSpaces", "an AtomSpace");
 
 	AtomSpacePtr as = createAtomSpace(spaces);
 	return protom_to_scm(as);
