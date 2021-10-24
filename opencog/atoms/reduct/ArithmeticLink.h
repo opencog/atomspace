@@ -43,6 +43,7 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
+
 public:
 	ArithmeticLink(const HandleSeq&&, Type=ARITHMETIC_LINK);
 
@@ -54,6 +55,7 @@ public:
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 
 	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
+	static const std::vector<double>* get_vector(AtomSpace*, bool, ValuePtr, Type&);
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

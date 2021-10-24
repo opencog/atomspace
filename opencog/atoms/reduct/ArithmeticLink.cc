@@ -189,6 +189,27 @@ ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 }
 
 // ===========================================================
+
+const std::vector<double>*
+ArithmeticLink::get_vector(AtomSpace* as, bool silent,
+                           ValuePtr vptr, Type& t)
+{
+	t = vptr->get_type();
+
+	bool is_fv = nameserver().isA(t, FLOAT_VALUE);
+	bool is_nu = (NUMBER_NODE == t);
+
+	if (not is_fv and not is_nu) return nullptr;
+
+	if (is_nu)
+		return & NumberNodeCast(vptr)->value();
+	if (is_fv)
+		return & FloatValueCast(vptr)->value();
+
+	return nullptr; // not reached
+}
+
+// ===========================================================
 /// execute() -- Execute the expression
 ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
 {
