@@ -56,6 +56,8 @@ public:
 
 	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 	static const std::vector<double>* get_vector(AtomSpace*, bool, ValuePtr, Type&);
+	static ValuePtr apply_func(AtomSpace*, bool, const HandleSeq&,
+		double (*)(double, double), ValueSeq&);
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

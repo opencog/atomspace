@@ -157,6 +157,8 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
+/// Generic utility -- execute the argument, and return the result
+/// of the execution.
 ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
 	if (DEFINED_SCHEMA_NODE == vptr->get_type())
@@ -190,6 +192,8 @@ ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 
 // ===========================================================
 
+/// Generic utility -- convert the argument to a vector of doubles,
+/// if possible.  Reutnr nullptr if not possible.
 const std::vector<double>*
 ArithmeticLink::get_vector(AtomSpace* as, bool silent,
                            ValuePtr vptr, Type& t)
@@ -209,7 +213,71 @@ ArithmeticLink::get_vector(AtomSpace* as, bool silent,
 	return nullptr; // not reached
 }
 
+// ============================================================
+
+/// Generic utility -- execute the HandleSeq, and, if that returned
+/// vectors of doubles, then apply the function to them.
+/// If there weren't any vectors, return a null pointer.
+/// In this last case, the result of reduction is returned
+/// in `reduction`
+ValuePtr
+ArithmeticLink::apply_func(AtomSpace* as, bool silent,
+                           const HandleSeq& args,
+                           double (*fun)(double, double),
+                           ValueSeq& reduction)
+{
+	// ArithmeticLink::get_value causes execution.
+	ValuePtr vx(ArithmeticLink::get_value(as, silent, args[0]));
+	ValuePtr vy(ArithmeticLink::get_value(as, silent, args[1]));
+
+	// get_vector gets numeric values, if possible.
+	Type vxtype;
+	const std::vector<double>* xvec =
+		ArithmeticLink::get_vector(as, silent, vx, vxtype);
+
+	Type vytype;
+	const std::vector<double>* yvec =
+		ArithmeticLink::get_vector(as, silent, vy, vytype);
+
+	// No numeric values available. Sorry!
+	if (nullptr == xvec or nullptr == yvec or
+	    0 == xvec->size() or 0 == yvec->size())
+	{
+		reduction.push_back(vx);
+		reduction.push_back(vy);
+		return nullptr;
+	}
+
+	std::vector<double> funvec;
+	if (1 == xvec->size())
+	{
+		double x = xvec->back();
+		for (double y : *yvec)
+			funvec.push_back(fun(x, y));
+	}
+	else if (1 == yvec->size())
+	{
+		double y = yvec->back();
+		for (double x : *xvec)
+			funvec.push_back(fun(x, y));
+	}
+	else
+	{
+		size_t sz = std::min(xvec->size(), yvec->size());
+		for (size_t i=0; i<sz; i++)
+		{
+			funvec.push_back(fun(xvec->operator[](i), yvec->operator[](i)));
+		}
+	}
+
+	if (NUMBER_NODE == vxtype and NUMBER_NODE == vytype)
+		return createNumberNode(funvec);
+
+	return createFloatValue(funvec);
+}
+
 // ===========================================================
+
 /// execute() -- Execute the expression
 ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
 {
