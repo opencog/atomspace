@@ -10,6 +10,15 @@
 (define tname "math-library-test")
 (test-begin tname)
 
+; -----------------------------------------------
+; Test Log2Link
+
+(test-assert "log2"
+	(equal? (Number 0 1 2 3 4 5)
+		(cog-execute! (Log2 (Number 1 2 4 8 16 32)))))
+
+; -----------------------------------------------
+; Test PowLink
 (test-assert "eight"
 	(equal? (Number 8) (cog-execute! (Pow (Number 2) (Number 3)))))
 
