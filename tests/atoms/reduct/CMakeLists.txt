@@ -5,4 +5,6 @@ IF(HAVE_GUILE)
 	ADD_CXXTEST(HeavisideUTest)
 	ADD_CXXTEST(MinMaxUTest)
 	ADD_CXXTEST(AccumulateUTest)
+
+	ADD_GUILE_TEST(MathLibraryUTest math-library.scm)
 ENDIF(HAVE_GUILE)
