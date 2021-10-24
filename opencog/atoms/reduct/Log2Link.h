@@ -18,9 +18,9 @@ namespace opencog
  */
 
 /**
- * The Log2Link implements the arithmetic operation of "greater
- * than" on a component-by-component level. That is,
- *    Log2 (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
+ * The Log2Link implements the elementary function of
+ * logarithm base two. That is,
+ *    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
  */
 class Log2Link : public FunctionLink
 {
@@ -29,7 +29,6 @@ protected:
 
 public:
 	Log2Link(const Handle& a);
-	Log2Link(const Handle& a, const Handle& b);
 	Log2Link(const HandleSeq&&, Type=LOG2_LINK);
 
 	Log2Link(const Log2Link&) = delete;

@@ -26,12 +26,6 @@ Log2Link::Log2Link(const Handle& a)
 	init();
 }
 
-Log2Link::Log2Link(const Handle& a, const Handle& b)
-    : FunctionLink({a, b}, LOG2_LINK)
-{
-	init();
-}
-
 void Log2Link::init(void)
 {
 	Type tscope = get_type();
