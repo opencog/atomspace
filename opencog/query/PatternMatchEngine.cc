@@ -2419,7 +2419,7 @@ bool PatternMatchEngine::explore_clause_evaluatable(const PatternTermPtr& term,
 }
 
 /**
- * IdenticalLinks are a form of equality, stating that all fo the
+ * IdenticalLinks are a form of equality, stating that all of the
  * "sides" (all of the elements of the outgoing set; there may be more
  * than two) must be identical. During search, two cases arise:
  * either the sides are already grounded, or they are not. If they're
