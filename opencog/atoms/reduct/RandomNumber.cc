@@ -68,59 +68,22 @@ static double get_ran(double lb, double ub)
 /// which always returns a vector of doubles.
 ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 {
-	// ArithmeticLink::get_value causes execution.
-	ValuePtr vx(ArithmeticLink::get_value(as, silent, _outgoing[0]));
-	ValuePtr vy(ArithmeticLink::get_value(as, silent, _outgoing[1]));
+	ValueSeq reduction;
 
-	// get_vector gets numeric values, if possible.
-	Type vxtype;
-	const std::vector<double>* xvec =
-		ArithmeticLink::get_vector(as, silent, vx, vxtype);
+	ValuePtr result = ArithmeticLink::apply_func (as, silent, _outgoing,
+		get_ran, reduction);
 
-	Type vytype;
-	const std::vector<double>* yvec =
-		ArithmeticLink::get_vector(as, silent, vy, vytype);
+	if (result) return result;
 
    // No numeric values available. Sorry!
-   if (nullptr == xvec or nullptr == yvec or
-       0 == xvec->size() or 0 == yvec->size())
-   {
-      // If it did not fully reduce, then return the best-possible
-      // reduction that we did get.
-      if (vx->is_atom() and vy->is_atom())
-         return createRandomNumberLink(HandleSeq({HandleCast(vx),
-HandleCast(vy)}));
+	// Return the best-possible reduction that we did get.
+	if (reduction[0]->is_atom() and reduction[1]->is_atom())
+		return createRandomNumberLink(HandleSeq(
+			{HandleCast(reduction[0]),
+			HandleCast(reduction[1])}));
 
-      // Unable to reduce at all. Just return the original atom.
-      return get_handle();
-   }
-
-   std::vector<double> powvec;
-   if (1 == xvec->size())
-   {
-      double x = xvec->back();
-      for (double y : *yvec)
-         powvec.push_back(get_ran(x,y));
-   }
-   else if (1 == yvec->size())
-   {
-      double y = yvec->back();
-      for (double x : *xvec)
-         powvec.push_back(get_ran(x,y));
-   }
-   else
-   {
-      size_t sz = std::min(xvec->size(), yvec->size());
-      for (size_t i=0; i<sz; i++)
-      {
-         powvec.push_back(get_ran(xvec->operator[](i), yvec->operator[](i)));
-      }
-   }
-
-   if (NUMBER_NODE == vxtype and NUMBER_NODE == vytype)
-      return createNumberNode(powvec);
-
-   return createFloatValue(powvec);
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
