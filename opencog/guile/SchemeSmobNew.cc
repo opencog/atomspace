@@ -460,13 +460,17 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
  * Convert argument into a list of handles.
  */
 HandleSeq
-SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
+SchemeSmob::verify_handle_list_msg(SCM satom_list,
+                                   const char* subrname,
+                                   int pos,
+                                   const char* msglst,
+                                   const char* msgatm)
 {
 	// Verify that second arg is an actual list. Allow null list
 	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
-		scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
+		scm_wrong_type_arg_msg(subrname, pos, satom_list, msglst);
 
 	HandleSeq outgoing_set;
 	SCM sl = satom_list;
@@ -512,7 +516,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 				// If its not an atom, and its not a truth value, and
 				// its not an attention value, and its not an atomspace,
 				// then whatever it is, its bad.
-				scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
+				scm_wrong_type_arg_msg(subrname, pos, satom, msgatm);
 			}
 		}
 		sl = SCM_CDR(sl);
@@ -520,6 +524,13 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 	}
 
 	return outgoing_set;
+}
+
+HandleSeq
+SchemeSmob::verify_handle_list(SCM satom_list, const char * subrname, int pos)
+{
+	return verify_handle_list_msg(satom_list, subrname, pos,
+		 "a list of Atoms", "an OpenCog Atom");
 }
 
 /**

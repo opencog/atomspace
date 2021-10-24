@@ -146,9 +146,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
         MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 
+        # -----------------------------------------------------------
         # Try to guess if the thing is a node or link based on its name
         STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
         STRING(REGEX MATCH "STREAM$" ISSTREAM ${TYPE})
+        STRING(REGEX MATCH "ATOMSPACE$" ISATOMSPACE ${TYPE})
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
 
@@ -156,16 +158,19 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # hacky, but is needed for e.g. "VariableList" ...
         IF (NOT ISNODE STREQUAL "NODE"
             AND NOT ISVALUE STREQUAL "VALUE"
-            AND NOT ISSTREAM STREQUAL "STREAM")
+            AND NOT ISSTREAM STREQUAL "STREAM"
+            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE")
             SET(ISLINK "LINK")
         ENDIF (NOT ISNODE STREQUAL "NODE"
             AND NOT ISVALUE STREQUAL "VALUE"
-            AND NOT ISSTREAM STREQUAL "STREAM")
+            AND NOT ISSTREAM STREQUAL "STREAM"
+            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE")
 
         IF (${TYPE} STREQUAL "VALUATION")
             SET(ISLINK "")
         ENDIF (${TYPE} STREQUAL "VALUATION")
 
+        # -----------------------------------------------------------
         # Print out the C++ definitions
         IF (ISNODE STREQUAL "NODE" AND
             NOT SHORT_NAME STREQUAL "" AND
@@ -199,12 +204,15 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ${TYPE})\n")
         ENDIF ()
 
+        # -----------------------------------------------------------
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
+
         IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-value (cons ${TYPE_NAME}Type x)))\n")
         ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+
         IF (ISNODE STREQUAL "NODE")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n")
@@ -213,6 +221,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
                 FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n")
             ENDIF (NOT SHORT_NAME STREQUAL "")
         ENDIF (ISNODE STREQUAL "NODE")
+
         IF (ISLINK STREQUAL "LINK")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n")
@@ -222,6 +231,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDIF (NOT SHORT_NAME STREQUAL "")
         ENDIF (ISLINK STREQUAL "LINK")
 
+        IF (ISATOMSPACE STREQUAL "ATOMSPACE")
+            FILE(APPEND "${SCM_FILE}" "(define-public AtomSpace cog-new-atomspace)\n")
+        ENDIF (ISATOMSPACE STREQUAL "ATOMSPACE")
+
+        # -----------------------------------------------------------
         # Print out the python definitions. Note: We special-case Atom
         # since we don't want to create a function with the same
         # identifier as the Python Atom object.
