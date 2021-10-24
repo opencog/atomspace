@@ -44,35 +44,19 @@ void Log2Link::init(void)
 
 ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 {
-	// ArithmeticLink::get_value causes execution.
-	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
+	ValuePtr reduction;
+	ValuePtr result(ArithmeticLink::apply_func(as, silent,
+		_outgoing[0], log2, reduction));
 
-	// get_vector gets numeric values, if possible.
-	Type vitype;
-	const std::vector<double>* dvec =
-		ArithmeticLink::get_vector(as, silent, vi, vitype);
+	if (result) return result;
 
 	// No numeric values available. Sorry!
-	if (nullptr == dvec)
-	{
-		// If it did not fully reduce, then return the best-possible
-		// reduction that we did get.
-		if (vi->is_atom())
-			return createLog2Link(HandleCast(vi));
+	// Return the best-possible reduction that we did get.
+	if (reduction->is_atom())
+			return createLog2Link(HandleCast(reduction));
 
-		// Unable to reduce at all. Just return the original atom.
-		return get_handle();
-	}
-
-	// Take the log and return
-	std::vector<double> l2vec;
-	for (double dv : *dvec)
-		l2vec.push_back(log2(dv));
-
-	if (NUMBER_NODE == vitype)
-		return createNumberNode(l2vec);
-	else
-		return createFloatValue(l2vec);
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
 }
 
 DEFINE_LINK_FACTORY(Log2Link, LOG2_LINK);

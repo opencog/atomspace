@@ -46,8 +46,8 @@ void PowLink::init(void)
 ValuePtr PowLink::execute(AtomSpace* as, bool silent)
 {
 	ValueSeq reduction;
-	ValuePtr result = ArithmeticLink::apply_func (as, silent, _outgoing,
-		pow, reduction);
+	ValuePtr result(ArithmeticLink::apply_func(as, silent, _outgoing,
+		pow, reduction));
 
 	if (result) return result;
 

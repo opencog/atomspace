@@ -215,6 +215,42 @@ ArithmeticLink::get_vector(AtomSpace* as, bool silent,
 
 // ============================================================
 
+/// Generic utility -- execute the Handle, and, if that returned
+/// a vector of doubles, then apply the function to them.
+/// If there wasn't a numeric vectors, return a null pointer.
+/// In this last case, the result of reduction is returned
+/// in `reduction`
+ValuePtr
+ArithmeticLink::apply_func(AtomSpace* as, bool silent,
+                           const Handle& arg,
+                           double (*fun)(double),
+                           ValuePtr& vx)
+{
+	// ArithmeticLink::get_value causes execution.
+	vx = ArithmeticLink::get_value(as, silent, arg);
+
+	// get_vector gets numeric values, if possible.
+	Type vxtype;
+	const std::vector<double>* xvec =
+		ArithmeticLink::get_vector(as, silent, vx, vxtype);
+
+	// No numeric values available. Sorry!
+	if (nullptr == xvec or 0 == xvec->size())
+		return nullptr;
+
+	std::vector<double> funvec;
+	size_t sz = xvec->size();
+	for (size_t i=0; i<sz; i++)
+		funvec.push_back(fun(xvec->operator[](i)));
+
+	if (NUMBER_NODE == vxtype)
+		return createNumberNode(funvec);
+
+	return createFloatValue(funvec);
+}
+
+// ============================================================
+
 /// Generic utility -- execute the HandleSeq, and, if that returned
 /// vectors of doubles, then apply the function to them.
 /// If there weren't any vectors, return a null pointer.
@@ -265,9 +301,7 @@ ArithmeticLink::apply_func(AtomSpace* as, bool silent,
 	{
 		size_t sz = std::min(xvec->size(), yvec->size());
 		for (size_t i=0; i<sz; i++)
-		{
 			funvec.push_back(fun(xvec->operator[](i), yvec->operator[](i)));
-		}
 	}
 
 	if (NUMBER_NODE == vxtype and NUMBER_NODE == vytype)
