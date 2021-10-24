@@ -46,35 +46,36 @@ ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
 	Type vitype = vi->get_type();
 
-	if (NUMBER_NODE == vitype)
+	bool is_fv = nameserver().isA(vitype, FLOAT_VALUE);
+	bool is_nu = (NUMBER_NODE == vitype);
+
+	if (not is_fv and not is_nu)
 	{
-		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
-		std::vector<double> gtvec;
-		for (double dv : dvec)
-		{
-			gtvec.push_back(log2(dv));
-		}
+		// If it did not fully reduce, then return the best-possible
+		// reduction that we did get.
+		if (vi->is_atom())
+			return createLog2Link(HandleCast(vi));
+
+		// Unable to reduce at all. Just return the original atom.
+		return get_handle();
+	}
+
+	const std::vector<double>* dvec;
+	if (is_nu)
+		dvec = & NumberNodeCast(vi)->value();
+	if (is_fv)
+		dvec = & FloatValueCast(vi)->value();
+
+	std::vector<double> gtvec;
+	for (double dv : *dvec)
+	{
+		gtvec.push_back(log2(dv));
+	}
+
+	if (is_nu)
 		return createNumberNode(gtvec);
-	}
-
-	if (nameserver().isA(vitype, FLOAT_VALUE))
-	{
-		const std::vector<double>& dvec(FloatValueCast(vi)->value());
-		std::vector<double> gtvec;
-		for (double dv : dvec)
-		{
-			gtvec.push_back(log2(dv));
-		}
+	else
 		return createFloatValue(gtvec);
-	}
-
-	// If it did not fully reduce, then return the best-possible
-	// reduction that we did get.
-	if (vi->is_atom())
-		return createLog2Link(HandleCast(vi));
-
-	// Unable to reduce at all. Just return the original atom.
-	return get_handle();
 }
 
 DEFINE_LINK_FACTORY(Log2Link, LOG2_LINK);
