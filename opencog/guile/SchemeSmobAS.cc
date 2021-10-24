@@ -29,10 +29,12 @@ SCM SchemeSmob::make_as(AtomSpace *as)
  * Create a new atom space.  The parent argument might not
  * be present -- its optional.
  */
-SCM SchemeSmob::ss_new_as (SCM s)
+SCM SchemeSmob::ss_new_as (SCM space_list)
 {
-	AtomSpace *parent = ss_to_atomspace(s);
-	AtomSpacePtr as = createAtomSpace(parent);
+	HandleSeq spaces;
+	spaces = verify_handle_list(space_list, "cog-new-atomspace", 1);
+
+	AtomSpacePtr as = createAtomSpace(spaces);
 	return protom_to_scm(as);
 }
 
