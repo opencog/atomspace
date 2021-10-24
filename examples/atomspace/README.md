@@ -53,6 +53,7 @@ first).
 * `formulas.scm`       -- Representing arithmetic and computing Values.
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
+* `multi-space.scm`    -- Using multiple AtomSpaces at once.
 
 After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
