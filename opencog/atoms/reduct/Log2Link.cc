@@ -44,12 +44,11 @@ void Log2Link::init(void)
 ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 {
 	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
-	Type vitype = vi->get_type();
+	Type vitype;
+	const std::vector<double>* dvec =
+		ArithmeticLink::get_vector(as, silent, vi, vitype);
 
-	bool is_fv = nameserver().isA(vitype, FLOAT_VALUE);
-	bool is_nu = (NUMBER_NODE == vitype);
-
-	if (not is_fv and not is_nu)
+	if (nullptr == dvec)
 	{
 		// If it did not fully reduce, then return the best-possible
 		// reduction that we did get.
@@ -60,19 +59,13 @@ ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 		return get_handle();
 	}
 
-	const std::vector<double>* dvec;
-	if (is_nu)
-		dvec = & NumberNodeCast(vi)->value();
-	if (is_fv)
-		dvec = & FloatValueCast(vi)->value();
-
 	std::vector<double> gtvec;
 	for (double dv : *dvec)
 	{
 		gtvec.push_back(log2(dv));
 	}
 
-	if (is_nu)
+	if (NUMBER_NODE == vitype)
 		return createNumberNode(gtvec);
 	else
 		return createFloatValue(gtvec);
