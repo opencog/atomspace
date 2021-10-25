@@ -538,6 +538,16 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 {
 	_silent = silent;
 	return do_reduce();
+
+	// XXX FIXME. What we should really do is to is to execute the
+	// result of do_reduce(), like so:
+	//    Handle h(do_reduce());
+	//    if (h->is_executable()) return h->execute(as, silent);
+	//    return h;
+	// but right now we can't, because execution/Instantiator.cc:319
+	// is trying to do all the work for us. We need to refactor that
+	// code and pull the needed pieces into here. However, this is not
+	// a burning priority right now, so we leave that alone, for now.
 }
 
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)

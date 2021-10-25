@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -103,6 +104,7 @@ public:
 	void test_get_multi();
 	void test_multi_set();
 	void test_full_quotation();
+	void test_count();
 };
 
 #define N _asp->add_node
@@ -2375,6 +2377,33 @@ void PutLinkUTest::test_full_quotation()
 	                             unquoted_vardecl,
 	                             unquoted_body,
 	                             unquoted_args)));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test that CountOf works.
+ */
+void PutLinkUTest::test_count()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle cona = N(CONCEPT_NODE, "aaa");
+	cona->setTruthValue(createCountTruthValue(1,0,42));
+
+	Handle put =
+		L(PUT_LINK,
+			L(COUNT_OF_LINK, N(VARIABLE_NODE, "$x")),
+			cona);
+
+	Instantiator inst(_asp.get());
+	ValuePtr result = inst.execute(put);
+	ValuePtr expected = createFloatValue(42.0);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(*result == *expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

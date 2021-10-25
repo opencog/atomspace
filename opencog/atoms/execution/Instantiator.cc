@@ -693,7 +693,9 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// capable of this, yet, but the FunctionLinks all do seem to work.
 	//
 	// if (expr->is_executable())
-	if (nameserver().isA(expr->get_type(), FUNCTION_LINK))
+	if (nameserver().isA(expr->get_type(), FUNCTION_LINK) or
+	    nameserver().isA(expr->get_type(), SATISFYING_LINK) or
+	    nameserver().isA(expr->get_type(), JOIN_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
 		if (vp->is_atom())
@@ -701,9 +703,17 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		return vp;
 	}
 
-	// XXX FIXME, since the variable map is empty, maybe we can do
-	// something more efficient, here?
+	// XXX FIXME, we need to get rid of this call entirely, and just
+	// return expr->execute(_as, silent) instead, like above.
+	// However, assorted parts are still broken and don't work.
 	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
+
+	// PutLink is incompletely evaluated, above. Finish the job here.
+	if (vp and vp->is_atom())
+	{
+		Handle h(HandleCast(vp));
+		if (h->is_executable()) return h->execute();
+	}
 
 	return vp;
 }
