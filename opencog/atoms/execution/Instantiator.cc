@@ -701,9 +701,17 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		return vp;
 	}
 
-	// XXX FIXME, since the variable map is empty, maybe we can do
-	// something more efficient, here?
+	// XXX FIXME, we need to get rid of this call entirely, and just
+	// return expr->execute(_as, silent) instead, like above.
+	// However, assorted parts are still broken and don't work.
 	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
+
+	// PutLink is incompletely evaluated, above. Finish the job here.
+	if (vp and vp->is_atom())
+	{
+		Handle h(HandleCast(vp));
+		if (h->is_executable()) return h->execute();
+	}
 
 	return vp;
 }
