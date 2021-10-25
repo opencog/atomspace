@@ -353,22 +353,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 				}
 				else
 				{
-					try {
-						TruthValuePtr tvp =
-							EvaluationLink::do_evaluate(_as, plo, true);
-						plo->setTruthValue(tvp);
-					}
-					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
 				}
 			}
 			return createLink(std::move(unwrap), SET_LINK);
 		}
-
-		try {
-			EvaluationLink::do_evaluate(_as, rex, true);
-		}
-		catch (const NotEvaluatableException& ex) {}
 		return rex;
 	}
 
