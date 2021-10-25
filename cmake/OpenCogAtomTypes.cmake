@@ -261,16 +261,21 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # If not named as a node or a link, assume its a link
         # This is kind of hacky, but I don't know what else to do ...
-        IF (NOT ISNODE STREQUAL "NODE" AND
+        IF (NOT ISATOMSPACE STREQUAL "ATOMSPACE" AND
+            NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
             NOT ISVALUE STREQUAL "VALUE" AND
             NOT ISSTREAM STREQUAL "STREAM")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
             FILE(APPEND "${PYTHON_FILE}" "    return add_link(types.${TYPE_NAME}, args)\n")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND
+        ENDIF (NOT ISATOMSPACE STREQUAL "ATOMSPACE" AND
+            NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
             NOT ISVALUE STREQUAL "VALUE" AND
             NOT ISSTREAM STREQUAL "STREAM")
+
+        # -----------------------------------------------------------
+        # Create the type inheritance C++ file.
 
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
