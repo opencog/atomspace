@@ -16,7 +16,7 @@
 using namespace opencog;
 
 MaxLink::MaxLink(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }

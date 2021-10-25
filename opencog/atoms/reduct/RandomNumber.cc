@@ -49,7 +49,7 @@ void RandomNumberLink::init()
 }
 
 RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
-	: NumericOutLink(std::move(oset), t)
+	: NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }

@@ -10,7 +10,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
-#include "NumericOutLink.h"
+#include "NumericFunctionLink.h"
 #include "PlusLink.h"
 
 using namespace opencog;
@@ -45,10 +45,10 @@ ValuePtr MinusLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericOutLink::get_value(as, silent, fi));
+	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(NumericOutLink::get_value(as, silent, fj));
+	ValuePtr vj(NumericFunctionLink::get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// If vj is zero, just drop it.

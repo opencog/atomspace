@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_NUMERIC_OUT_LINK_H
-#define _OPENCOG_NUMERIC_OUT_LINK_H
+#ifndef _OPENCOG_NUMERIC_FUNCTION_LINK_H
+#define _OPENCOG_NUMERIC_FUNCTION_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -48,7 +48,7 @@ protected:
 		double (*)(double, double), ValueSeq&);
 
 public:
-	NumericOutLink(const HandleSeq&&, Type=NUMERIC_OUT_LINK);
+	NumericOutLink(const HandleSeq&&, Type=NUMERIC_FUNCTION_LINK);
 
 	NumericOutLink(const NumericOutLink&) = delete;
 	NumericOutLink& operator=(const NumericOutLink&) = delete;
@@ -67,4 +67,4 @@ static inline NumericOutLinkPtr NumericOutLinkCast(AtomPtr a)
 /** @}*/
 }
 
-#endif // _OPENCOG_NUMERIC_OUT_LINK_H
+#endif // _OPENCOG_NUMERIC_FUNCTION_LINK_H

@@ -15,19 +15,19 @@
 using namespace opencog;
 
 AccumulateLink::AccumulateLink(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 AccumulateLink::AccumulateLink(const Handle& a)
-    : NumericOutLink({a}, ACCUMULATE_LINK)
+    : NumericFunctionLink({a}, ACCUMULATE_LINK)
 {
 	init();
 }
 
 AccumulateLink::AccumulateLink(const Handle& a, const Handle& b)
-    : NumericOutLink({a, b}, ACCUMULATE_LINK)
+    : NumericFunctionLink({a, b}, ACCUMULATE_LINK)
 {
 	init();
 }

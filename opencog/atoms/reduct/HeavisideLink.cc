@@ -14,19 +14,19 @@
 using namespace opencog;
 
 HeavisideLink::HeavisideLink(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 HeavisideLink::HeavisideLink(const Handle& a)
-    : NumericOutLink({a}, HEAVISIDE_LINK)
+    : NumericFunctionLink({a}, HEAVISIDE_LINK)
 {
 	init();
 }
 
 HeavisideLink::HeavisideLink(const Handle& a, const Handle& b)
-    : NumericOutLink({a, b}, HEAVISIDE_LINK)
+    : NumericFunctionLink({a, b}, HEAVISIDE_LINK)
 {
 	init();
 }

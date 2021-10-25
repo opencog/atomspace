@@ -17,13 +17,13 @@
 using namespace opencog;
 
 PowLink::PowLink(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 PowLink::PowLink(const Handle& a, const Handle& b)
-    : NumericOutLink({a, b}, POW_LINK)
+    : NumericFunctionLink({a, b}, POW_LINK)
 {
 	init();
 }

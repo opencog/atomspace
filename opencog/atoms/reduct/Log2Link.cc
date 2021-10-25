@@ -15,13 +15,13 @@
 using namespace opencog;
 
 Log2Link::Log2Link(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 Log2Link::Log2Link(const Handle& a)
-    : NumericOutLink({a}, LOG2_LINK)
+    : NumericFunctionLink({a}, LOG2_LINK)
 {
 	init();
 }

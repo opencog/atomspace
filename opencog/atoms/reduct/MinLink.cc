@@ -16,7 +16,7 @@
 using namespace opencog;
 
 MinLink::MinLink(const HandleSeq&& oset, Type t)
-    : NumericOutLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
@@ -39,7 +39,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 
 	for (const Handle& arg: _outgoing)
 	{
-		ValuePtr vi(NumericOutLink::get_value(as, silent, arg));
+		ValuePtr vi(NumericFunctionLink::get_value(as, silent, arg));
 		Type vitype = vi->get_type();
 
 		if (NUMBER_NODE == vitype)

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/NumericOutLink.cc
+ * opencog/atoms/reduct/NumericFunctionLink.cc
  *
  * Copyright (C) 2015, 2018, 2021 Linas Vepstas
  * All Rights Reserved
@@ -26,32 +26,32 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "NumericOutLink.h"
+#include "NumericFunctionLink.h"
 
 using namespace opencog;
 
-NumericOutLink::NumericOutLink(const HandleSeq&& oset, Type t)
+NumericFunctionLink::NumericFunctionLink(const HandleSeq&& oset, Type t)
     : FunctionLink(std::move(oset), t)
 {
 	init();
 }
 
-void NumericOutLink::init(void)
+void NumericFunctionLink::init(void)
 {
 	Type tscope = get_type();
-	if (NUMERIC_OUT_LINK == tscope)
+	if (NUMERIC_FUNCTION_LINK == tscope)
 		throw InvalidParamException(TRACE_INFO,
 			"NumericOutLinks are private and cannot be instantiated.");
 
-	if (not nameserver().isA(tscope, NUMERIC_OUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting an NumericOutLink");
+	if (not nameserver().isA(tscope, NUMERIC_FUNCTION_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
 }
 
 // ===========================================================
 
 /// Generic utility -- execute the argument, and return the result
 /// of the execution.
-ValuePtr NumericOutLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
+ValuePtr NumericFunctionLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
 	if (DEFINED_SCHEMA_NODE == vptr->get_type())
 	{
@@ -87,7 +87,7 @@ ValuePtr NumericOutLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 /// Generic utility -- convert the argument to a vector of doubles,
 /// if possible.  Reutnr nullptr if not possible.
 const std::vector<double>*
-NumericOutLink::get_vector(AtomSpace* as, bool silent,
+NumericFunctionLink::get_vector(AtomSpace* as, bool silent,
                            ValuePtr vptr, Type& t)
 {
 	t = vptr->get_type();
@@ -113,7 +113,7 @@ NumericOutLink::get_vector(AtomSpace* as, bool silent,
 /// In this last case, the result of reduction is returned
 /// in `reduction`
 ValuePtr
-NumericOutLink::apply_func(AtomSpace* as, bool silent,
+NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
                            const Handle& arg,
                            double (*fun)(double),
                            ValuePtr& vx)
@@ -148,7 +148,7 @@ NumericOutLink::apply_func(AtomSpace* as, bool silent,
 /// In this last case, the result of reduction is returned
 /// in `reduction`
 ValuePtr
-NumericOutLink::apply_func(AtomSpace* as, bool silent,
+NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
                            const HandleSeq& args,
                            double (*fun)(double, double),
                            ValueSeq& reduction)
