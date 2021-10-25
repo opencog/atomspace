@@ -427,19 +427,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return Handle::UNDEFINED;
 	}
 
-	// Ideally, we should not evaluate any EvaluatableLinks.
-	// However, some of these may hold embedded executable links
-	// inside of them, which the current unit tests and code
-	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of their
-	// own lazy-evaluation, and so, if evaluation is needed,
-	// it will be triggered by something else. We do, of course,
-	// substitute in for free variables, if any.
-	//
-	// Non-virtual evaluatables fall through and are handled
-	// below.
-	//
-	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
 
