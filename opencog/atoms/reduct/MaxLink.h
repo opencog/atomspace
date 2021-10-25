@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_MAX_LINK_H
 #define _OPENCOG_MAX_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 
 namespace opencog
 {
@@ -21,7 +21,7 @@ namespace opencog
  * The MaxLink implements the arithmetic operation of "greatest of"
  * on a component-by-component level.
  */
-class MaxLink : public FunctionLink
+class MaxLink : public NumericFunctionLink
 {
 protected:
 	void init(void);

@@ -138,7 +138,7 @@ BOOLEAN_LINK <- LINK
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
 // that can evaluate to NumberNodes: viz NumericOutputLinks, or
 // numeric values (derived from FloatValue).
-NUMERIC_LINK <- LINK
+NUMERIC_INPUT_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
@@ -683,7 +683,7 @@ SIMILARITY_LINK <- UNORDERED_LINK
 // In mathematics nomenclature, VirtualLinks are "relations": they are
 // terms that evaluate to crisp true/false values.
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 
 // Test whether all outgoing atoms are closed, that is do not contain
 // any free variable.
@@ -735,33 +735,35 @@ FUNCTION_LINK <- FREE_LINK
 // --------------------
 // Arithmetic and number-valued functions
 
+NUMERIC_FUNCTION_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,NUMERIC_INPUT_LINK
+
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_INPUT_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- TIMES_LINK
 
 // Minimum and maxmimum of a set of numbers.
-MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+MIN_LINK <- NUMERIC_FUNCTION_LINK
+MAX_LINK <- NUMERIC_FUNCTION_LINK
 
 // Heaviside step function; same as GreaterThan, but works
 // for vectors, and returns numeric value.
-HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Logarithm base2
-LOG2_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+LOG2_LINK <- NUMERIC_FUNCTION_LINK
 
 // Power x**y
-POW_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+POW_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return uniformly distributed random number between two limits.
-RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return the sum of vector components of a number/float-value.
-ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return arity of the wrapped link. If it's a NumberNode
 // of a value, return the length of the underlying vector.
@@ -831,7 +833,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
 // by extracting values for a given set of variables.  In many ways,

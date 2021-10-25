@@ -12,6 +12,7 @@ ADD_LIBRARY (clearbox
 	MaxLink.cc
 	MinLink.cc
 	MinusLink.cc
+	NumericFunctionLink.cc
 	PlusLink.cc
 	PowLink.cc
 	RandomNumber.cc
@@ -43,6 +44,7 @@ INSTALL (FILES
 	MaxLink.h
 	MinLink.h
 	MinusLink.h
+	NumericFunctionLink.h
 	PlusLink.h
 	PowLink.h
 	RandomNumber.h

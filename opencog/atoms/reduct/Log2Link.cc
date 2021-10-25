@@ -10,19 +10,18 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "ArithmeticLink.h"
 #include "Log2Link.h"
 
 using namespace opencog;
 
 Log2Link::Log2Link(const HandleSeq&& oset, Type t)
-    : FunctionLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 Log2Link::Log2Link(const Handle& a)
-    : FunctionLink({a}, LOG2_LINK)
+    : NumericFunctionLink({a}, LOG2_LINK)
 {
 	init();
 }
@@ -45,7 +44,7 @@ void Log2Link::init(void)
 ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
 {
 	ValuePtr reduction;
-	ValuePtr result(ArithmeticLink::apply_func(as, silent,
+	ValuePtr result(apply_func(as, silent,
 		_outgoing[0], log2, reduction));
 
 	if (result) return result;

@@ -9,25 +9,24 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "ArithmeticLink.h"
 #include "HeavisideLink.h"
 
 using namespace opencog;
 
 HeavisideLink::HeavisideLink(const HandleSeq&& oset, Type t)
-    : FunctionLink(std::move(oset), t)
+    : NumericFunctionLink(std::move(oset), t)
 {
 	init();
 }
 
 HeavisideLink::HeavisideLink(const Handle& a)
-    : FunctionLink({a}, HEAVISIDE_LINK)
+    : NumericFunctionLink({a}, HEAVISIDE_LINK)
 {
 	init();
 }
 
 HeavisideLink::HeavisideLink(const Handle& a, const Handle& b)
-    : FunctionLink({a, b}, HEAVISIDE_LINK)
+    : NumericFunctionLink({a, b}, HEAVISIDE_LINK)
 {
 	init();
 }
@@ -52,7 +51,7 @@ static double impulse(double x) {return 1-signbit(x); }
 ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
 {
 	ValuePtr reduction;
-	ValuePtr result(ArithmeticLink::apply_func(as, silent,
+	ValuePtr result(apply_func(as, silent,
 		_outgoing[0], impulse, reduction));
 
 	if (result) return result;
