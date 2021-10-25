@@ -344,7 +344,7 @@ Handle PutLink::do_reduce(void) const
 	// There is no eager execution of arguments, before performing
 	// the reduction ... with one exception. If the argument is a
 	// MeetLink, we perform the search to find what to plug in.
-	if (nameserver().isA(_arguments->get_type(), MEET_LINK))
+	if (nameserver().isA(_arguments->get_type(), SATISFYING_LINK))
 	{
 		vargs = _arguments->execute();
 		if (nullptr == vargs)
