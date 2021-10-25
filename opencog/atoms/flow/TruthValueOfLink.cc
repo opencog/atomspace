@@ -36,7 +36,11 @@ static TruthValuePtr get_the_tv(AtomSpace* as, const Handle& h, bool silent)
 
 	if (h->get_type() == EVALUATION_LINK)
 		return EvaluationLink::do_evaluate(as, h, silent);
-	return as->add_atom(h)->getTruthValue();
+
+	if (as and as != h->getAtomSpace())
+		return as->add_atom(h)->getTruthValue();
+
+	return h->getTruthValue();
 }
 
 TruthValueOfLink::TruthValueOfLink(const HandleSeq&& oset, Type t)
