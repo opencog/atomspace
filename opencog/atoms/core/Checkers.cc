@@ -104,7 +104,7 @@ bool check_numeric(const Handle& bool_atom)
 		// PutLinks and GetLinks cannot be type-checked statically.
 		// Checking has to be defered until runtime.
 		if (PUT_LINK == t) continue;
-		if (GET_LINK == t) continue;
+		if (h->is_type(SATISFYING_LINK)) continue;
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
 		if (VARIABLE_NODE == t) continue;
