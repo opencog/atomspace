@@ -149,6 +149,6 @@ bool check_type_ctors(const Handle& bool_atom)
 static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(BOOLEAN_LINK, check_evaluatable);
-	classserver().addValidator(NUMERIC_LINK, check_numeric);
+	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
 	classserver().addValidator(TYPE_INPUT_LINK, check_type_ctors);
 }

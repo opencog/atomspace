@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_HEAVISIDE_LINK_H
 #define _OPENCOG_HEAVISIDE_LINK_H
 
-#include <opencog/atoms/reduct/NumericOutLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 
 namespace opencog
 {
@@ -22,7 +22,7 @@ namespace opencog
  * than" on a component-by-component level. That is,
  *    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
  */
-class HeavisideLink : public NumericOutLink
+class HeavisideLink : public NumericFunctionLink
 {
 protected:
 	void init(void);

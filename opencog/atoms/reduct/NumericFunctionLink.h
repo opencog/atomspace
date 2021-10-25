@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/NumericOutLink.h
+ * opencog/atoms/reduct/NumericFunctionLink.h
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -32,10 +32,10 @@ namespace opencog
  */
 
 /**
- * The NumericOutLink implements the simple arithmetic operations.
+ * The NumericFunctionLink implements the simple arithmetic operations.
  * It uses FoldLink to perform delta-reduction.
  */
-class NumericOutLink : public FunctionLink
+class NumericFunctionLink : public FunctionLink
 {
 protected:
 	void init();
@@ -48,21 +48,21 @@ protected:
 		double (*)(double, double), ValueSeq&);
 
 public:
-	NumericOutLink(const HandleSeq&&, Type=NUMERIC_FUNCTION_LINK);
+	NumericFunctionLink(const HandleSeq&&, Type=NUMERIC_FUNCTION_LINK);
 
-	NumericOutLink(const NumericOutLink&) = delete;
-	NumericOutLink& operator=(const NumericOutLink&) = delete;
+	NumericFunctionLink(const NumericFunctionLink&) = delete;
+	NumericFunctionLink& operator=(const NumericFunctionLink&) = delete;
 
 	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 };
 
-typedef std::shared_ptr<NumericOutLink> NumericOutLinkPtr;
-static inline NumericOutLinkPtr NumericOutLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<NumericOutLink>(a); }
-static inline NumericOutLinkPtr NumericOutLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<NumericOutLink>(a); }
+typedef std::shared_ptr<NumericFunctionLink> NumericFunctionLinkPtr;
+static inline NumericFunctionLinkPtr NumericFunctionLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<NumericFunctionLink>(a); }
+static inline NumericFunctionLinkPtr NumericFunctionLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<NumericFunctionLink>(a); }
 
-#define createNumericOutLink std::make_shared<NumericOutLink>
+#define createNumericFunctionLink std::make_shared<NumericFunctionLink>
 
 /** @}*/
 }
