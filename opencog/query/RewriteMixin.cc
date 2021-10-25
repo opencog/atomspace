@@ -75,8 +75,8 @@ void RewriteMixin::insert_result(ValuePtr v)
 	if (nullptr == v) return;
 	if (_result_set.end() != _result_set.find(v)) return;
 
-	// Insert atom into the atomspace immediately, so that
-	// it becomes visible in other threads.
+	// Insert atom into the atomspace immediately, so that it
+	// becomes visible in other threads. XXX Is this really needed?
 	if (v->is_atom())
 		v = _as->add_atom(HandleCast(v));
 

@@ -75,8 +75,8 @@ private:
 		 * Consuming quotation should only take place when this is called
 		 * by a pattern matcher function, such as BindLink, GetLink and
 		 * PutLink, etc, as part of the substitution mechanics. Otherwise,
-		 * consuming quotes systematically may changes the semantics of
-		 * the program. This flag is here properly control that.
+		 * consuming quotes systematically may change the semantics of
+		 * the program. This flag is here to properly control that.
 		 */
 		bool _consume_quotations;
 
