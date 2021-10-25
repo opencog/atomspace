@@ -735,6 +735,8 @@ FUNCTION_LINK <- FREE_LINK
 // --------------------
 // Arithmetic and number-valued functions
 
+NUMERIC_OUT_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
@@ -744,33 +746,33 @@ TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- TIMES_LINK
 
 // Minimum and maxmimum of a set of numbers.
-MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+MIN_LINK <- NUMERIC_OUT_LINK
+MAX_LINK <- NUMERIC_OUT_LINK
 
 // Heaviside step function; same as GreaterThan, but works
 // for vectors, and returns numeric value.
-HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+HEAVISIDE_LINK <- NUMERIC_OUT_LINK
 
 // Logarithm base2
-LOG2_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+LOG2_LINK <- NUMERIC_OUT_LINK
 
 // Power x**y
-POW_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+POW_LINK <- NUMERIC_OUT_LINK
 
 // Return uniformly distributed random number between two limits.
-RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+RANDOM_NUMBER_LINK <- NUMERIC_OUT_LINK
 
 // Return the sum of vector components of a number/float-value.
-ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+ACCUMULATE_LINK <- NUMERIC_OUT_LINK
 
 // Return arity of the wrapped link. If it's a NumberNode
 // of a value, return the length of the underlying vector.
 // XXX FIXME .. did we mis-name this? Should it be SizeOfLink
 // or maybe LengthOfLink? (viz, the length of FloatValue...)
-ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+ARITY_LINK <- NUMERIC_OUT_LINK
 
 // Return the current time.
-TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+TIME_LINK <- NUMERIC_OUT_LINK
 
 // --------------------
 // Truth-value manipulating functions. Some of these return numbers,
@@ -783,7 +785,7 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // caught, so its mostly harmless if the returned value isn't actually
 // numeric.  We need this try..catch because sometimes there just isn't
 // a value -- i.e. ValueOfLink can return a null pointer.
-VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+VALUE_OF_LINK <- NUMERIC_OUT_LINK
 STREAM_VALUE_OF_LINK <- VALUE_OF_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
@@ -831,7 +833,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
 // by extracting values for a given set of variables.  In many ways,
