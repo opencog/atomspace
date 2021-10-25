@@ -75,7 +75,7 @@ public:
 	}
 
 	size_t size() const { return _value.size(); }
-	std::vector<double> value(void) { return _value; }
+	const std::vector<double>& value(void) { return _value; }
 	double get_value(void) { return _value[0]; }
 
 	static Handle factory(const Handle&);

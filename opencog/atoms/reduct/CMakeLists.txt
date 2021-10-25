@@ -13,6 +13,8 @@ ADD_LIBRARY (clearbox
 	MinLink.cc
 	MinusLink.cc
 	PlusLink.cc
+	PowLink.cc
+	RandomNumber.cc
 	TimesLink.cc
 )
 
@@ -42,6 +44,8 @@ INSTALL (FILES
 	MinLink.h
 	MinusLink.h
 	PlusLink.h
+	PowLink.h
+	RandomNumber.h
 	TimesLink.h
 	DESTINATION "include/opencog/atoms/reduct"
 )

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/Log2Link.cc
+ * opencog/atoms/reduct/PowLink.cc
  *
  * Copyright (C) 2021 Linas Vepstas
  * All Rights Reserved
@@ -7,58 +7,59 @@
  */
 
 #include <math.h>
+
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
-#include "Log2Link.h"
+#include "PowLink.h"
 
 using namespace opencog;
 
-Log2Link::Log2Link(const HandleSeq&& oset, Type t)
+PowLink::PowLink(const HandleSeq&& oset, Type t)
     : FunctionLink(std::move(oset), t)
 {
 	init();
 }
 
-Log2Link::Log2Link(const Handle& a)
-    : FunctionLink({a}, LOG2_LINK)
+PowLink::PowLink(const Handle& a, const Handle& b)
+    : FunctionLink({a, b}, POW_LINK)
 {
 	init();
 }
 
-void Log2Link::init(void)
+void PowLink::init(void)
 {
 	Type tscope = get_type();
-	if (not nameserver().isA(tscope, LOG2_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a Log2Link");
+	if (not nameserver().isA(tscope, POW_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a PowLink");
 
 	size_t nargs = _outgoing.size();
-	if (1 != nargs)
+	if (2 != nargs)
 		throw InvalidParamException(TRACE_INFO,
-			"Log2Link expects one, got %s",
+			"PowLink expects one, got %s",
 			to_string().c_str());
 }
 
 // ============================================================
 
-ValuePtr Log2Link::execute(AtomSpace* as, bool silent)
+ValuePtr PowLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr reduction;
-	ValuePtr result(ArithmeticLink::apply_func(as, silent,
-		_outgoing[0], log2, reduction));
+	ValueSeq reduction;
+	ValuePtr result(ArithmeticLink::apply_func(as, silent, _outgoing,
+		pow, reduction));
 
 	if (result) return result;
 
 	// No numeric values available. Sorry!
 	// Return the best-possible reduction that we did get.
-	if (reduction->is_atom())
-			return createLog2Link(HandleCast(reduction));
+	if (reduction[0]->is_atom() and reduction[1]->is_atom())
+		return createPowLink(HandleCast(reduction[0]), HandleCast(reduction[1]));
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
 }
 
-DEFINE_LINK_FACTORY(Log2Link, LOG2_LINK);
+DEFINE_LINK_FACTORY(PowLink, POW_LINK);
 
 // ============================================================

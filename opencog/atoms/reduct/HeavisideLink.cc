@@ -47,39 +47,20 @@ void HeavisideLink::init(void)
 
 // ============================================================
 
+static double impulse(double x) {return 1-signbit(x); }
+
 ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
-	Type vitype = vi->get_type();
+	ValuePtr reduction;
+	ValuePtr result(ArithmeticLink::apply_func(as, silent,
+		_outgoing[0], impulse, reduction));
 
-	if (NUMBER_NODE == vitype)
-	{
-		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
-		std::vector<double> gtvec;
-		for (double dv : dvec)
-		{
-			if (dv > 0.0) gtvec.push_back(1.0);
-			else gtvec.push_back(0.0);
-		}
-		return createNumberNode(gtvec);
-	}
+	if (result) return result;
 
-	if (nameserver().isA(vitype, FLOAT_VALUE))
-	{
-		const std::vector<double>& dvec(FloatValueCast(vi)->value());
-		std::vector<double> gtvec;
-		for (double dv : dvec)
-		{
-			if (dv > 0.0) gtvec.push_back(1.0);
-			else gtvec.push_back(0.0);
-		}
-		return createFloatValue(gtvec);
-	}
-
-	// If it did not fully reduce, then return the best-possible
-	// reduction that we did get.
-	if (vi->is_atom())
-		return createHeavisideLink(HandleCast(vi));
+	// No numeric values available. Sorry!
+	// Return the best-possible reduction that we did get.
+	if (reduction->is_atom())
+		return createHeavisideLink(HandleCast(reduction));
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
