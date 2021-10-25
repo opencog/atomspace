@@ -98,17 +98,12 @@ private:
 	};
 
 	/**
-	 * Recursively walk a tree starting with the root of the
-	 * hypergraph to instantiate (typically an ExecutionOutputLink).
+	 * Recursively walk a tree starting with the root, plugging in
+	 * variables from the `_varmap`, and executing the resulting
+	 * expression. Return the result of the execution.
 	 *
-	 * Return the current result of the execution. If the node is an
-	 * ExecutionOutputLink then it returns the final result. If the
-	 * node is another list (typically a ListLink) it returns a copy
-	 * of it, replacing the variables in its outgoing by their
-	 * respective groundings.
-	 *
-	 * See comments in the C++ code for a better explanation of
-	 * what this function actually does.
+	 * That is, perform a beta-reduction (substitution of variables
+	 * by thier values) followed by execution of the resulting tree.
 	 *
 	 * See also the related function VariableList::substitute(),
 	 * which will simply perform a substitution, without performing
