@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_NUMERIC_OUT_LINK_H
 #define _OPENCOG_NUMERIC_OUT_LINK_H
 
-#include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {

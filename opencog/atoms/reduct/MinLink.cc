@@ -11,13 +11,12 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "ArithmeticLink.h"
 #include "MinLink.h"
 
 using namespace opencog;
 
 MinLink::MinLink(const HandleSeq&& oset, Type t)
-    : FunctionLink(std::move(oset), t)
+    : NumericOutLink(std::move(oset), t)
 {
 	init();
 }
@@ -40,7 +39,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 
 	for (const Handle& arg: _outgoing)
 	{
-		ValuePtr vi(ArithmeticLink::get_value(as, silent, arg));
+		ValuePtr vi(NumericOutLink::get_value(as, silent, arg));
 		Type vitype = vi->get_type();
 
 		if (NUMBER_NODE == vitype)

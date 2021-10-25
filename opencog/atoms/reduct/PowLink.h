@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_POW_LINK_H
 #define _OPENCOG_POW_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -27,7 +27,7 @@ namespace opencog
  *    Pow (a, b, c) n is just (a**n,  b**n, c**n).
  *    Pow a (p, q, r) is just (a**p,  a**q, a**r).
  */
-class PowLink : public FunctionLink
+class PowLink : public NumericOutLink
 {
 protected:
 	void init(void);

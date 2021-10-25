@@ -25,7 +25,6 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 
-#include "ArithmeticLink.h"
 #include "RandomNumber.h"
 
 using namespace opencog;
@@ -50,7 +49,7 @@ void RandomNumberLink::init()
 }
 
 RandomNumberLink::RandomNumberLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: NumericOutLink(std::move(oset), t)
 {
 	init();
 }
@@ -70,7 +69,7 @@ ValuePtr RandomNumberLink::execute(AtomSpace *as, bool silent)
 {
 	ValueSeq reduction;
 
-	ValuePtr result = ArithmeticLink::apply_func (as, silent, _outgoing,
+	ValuePtr result = apply_func (as, silent, _outgoing,
 		get_ran, reduction);
 
 	if (result) return result;

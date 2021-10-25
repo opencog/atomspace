@@ -53,13 +53,6 @@ public:
 	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
-
-	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
-	static const std::vector<double>* get_vector(AtomSpace*, bool, ValuePtr, Type&);
-	static ValuePtr apply_func(AtomSpace*, bool, const Handle&,
-		double (*)(double), ValuePtr&);
-	static ValuePtr apply_func(AtomSpace*, bool, const HandleSeq&,
-		double (*)(double, double), ValueSeq&);
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

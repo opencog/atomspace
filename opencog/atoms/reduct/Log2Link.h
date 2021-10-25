@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_LOG2_LINK_H
 #define _OPENCOG_LOG2_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -22,7 +22,7 @@ namespace opencog
  * logarithm base two. That is,
  *    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
  */
-class Log2Link : public FunctionLink
+class Log2Link : public NumericOutLink
 {
 protected:
 	void init(void);

@@ -118,13 +118,12 @@ NumericOutLink::apply_func(AtomSpace* as, bool silent,
                            double (*fun)(double),
                            ValuePtr& vx)
 {
-	// NumericOutLink::get_value causes execution.
-	vx = NumericOutLink::get_value(as, silent, arg);
+	// get_value() causes execution.
+	vx = get_value(as, silent, arg);
 
 	// get_vector gets numeric values, if possible.
 	Type vxtype;
-	const std::vector<double>* xvec =
-		NumericOutLink::get_vector(as, silent, vx, vxtype);
+	const std::vector<double>* xvec = get_vector(as, silent, vx, vxtype);
 
 	// No numeric values available. Sorry!
 	if (nullptr == xvec or 0 == xvec->size())
@@ -154,18 +153,16 @@ NumericOutLink::apply_func(AtomSpace* as, bool silent,
                            double (*fun)(double, double),
                            ValueSeq& reduction)
 {
-	// NumericOutLink::get_value causes execution.
-	ValuePtr vx(NumericOutLink::get_value(as, silent, args[0]));
-	ValuePtr vy(NumericOutLink::get_value(as, silent, args[1]));
+	// get_value() causes execution.
+	ValuePtr vx(get_value(as, silent, args[0]));
+	ValuePtr vy(get_value(as, silent, args[1]));
 
 	// get_vector gets numeric values, if possible.
 	Type vxtype;
-	const std::vector<double>* xvec =
-		NumericOutLink::get_vector(as, silent, vx, vxtype);
+	const std::vector<double>* xvec = get_vector(as, silent, vx, vxtype);
 
 	Type vytype;
-	const std::vector<double>* yvec =
-		NumericOutLink::get_vector(as, silent, vy, vytype);
+	const std::vector<double>* yvec = get_vector(as, silent, vy, vytype);
 
 	// No numeric values available. Sorry!
 	if (nullptr == xvec or nullptr == yvec or

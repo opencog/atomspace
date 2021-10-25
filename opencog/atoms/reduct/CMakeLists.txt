@@ -44,7 +44,7 @@ INSTALL (FILES
 	MaxLink.h
 	MinLink.h
 	MinusLink.h
-	NumericOut.h
+	NumericOutLink.h
 	PlusLink.h
 	PowLink.h
 	RandomNumber.h

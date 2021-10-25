@@ -17,13 +17,13 @@
 using namespace opencog;
 
 PowLink::PowLink(const HandleSeq&& oset, Type t)
-    : FunctionLink(std::move(oset), t)
+    : NumericOutLink(std::move(oset), t)
 {
 	init();
 }
 
 PowLink::PowLink(const Handle& a, const Handle& b)
-    : FunctionLink({a, b}, POW_LINK)
+    : NumericOutLink({a, b}, POW_LINK)
 {
 	init();
 }
@@ -46,7 +46,7 @@ void PowLink::init(void)
 ValuePtr PowLink::execute(AtomSpace* as, bool silent)
 {
 	ValueSeq reduction;
-	ValuePtr result(ArithmeticLink::apply_func(as, silent, _outgoing,
+	ValuePtr result(apply_func(as, silent, _outgoing,
 		pow, reduction));
 
 	if (result) return result;

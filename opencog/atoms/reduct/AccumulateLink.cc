@@ -10,25 +10,24 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include "ArithmeticLink.h"
 #include "AccumulateLink.h"
 
 using namespace opencog;
 
 AccumulateLink::AccumulateLink(const HandleSeq&& oset, Type t)
-    : FunctionLink(std::move(oset), t)
+    : NumericOutLink(std::move(oset), t)
 {
 	init();
 }
 
 AccumulateLink::AccumulateLink(const Handle& a)
-    : FunctionLink({a}, ACCUMULATE_LINK)
+    : NumericOutLink({a}, ACCUMULATE_LINK)
 {
 	init();
 }
 
 AccumulateLink::AccumulateLink(const Handle& a, const Handle& b)
-    : FunctionLink({a, b}, ACCUMULATE_LINK)
+    : NumericOutLink({a, b}, ACCUMULATE_LINK)
 {
 	init();
 }
@@ -50,7 +49,8 @@ void AccumulateLink::init(void)
 
 ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vi(ArithmeticLink::get_value(as, silent, _outgoing[0]));
+	// get_value() causes execution to happen on the arguments
+	ValuePtr vi(get_value(as, silent, _outgoing[0]));
 	Type vitype = vi->get_type();
 
 	// If its a plain number, assume it's a vector, and sum.

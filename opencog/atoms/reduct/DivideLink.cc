@@ -10,6 +10,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "DivideLink.h"
+#include "NumericOutLink.h"
 
 using namespace opencog;
 
@@ -43,10 +44,10 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
                           const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(get_value(as, silent, fi));
+	ValuePtr vi(NumericOutLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(get_value(as, silent, fj));
+	ValuePtr vj(NumericOutLink::get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers? If so, perform vector (pointwise) subtraction.

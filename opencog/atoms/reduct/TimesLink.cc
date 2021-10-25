@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include "NumericOutLink.h"
 #include "DivideLink.h"
 #include "TimesLink.h"
 
@@ -48,10 +49,10 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-		return get_value(as, silent, fi);
+		return NumericOutLink::get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(get_value(as, silent, fi));
+	ValuePtr vi(NumericOutLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
 	ValuePtr vj(fj);

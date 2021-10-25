@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_MIN_LINK_H
 #define _OPENCOG_MIN_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -21,7 +21,7 @@ namespace opencog
  * The MinLink implements the arithmetic operation of "least of"
  * on a component-by-component level.
  */
-class MinLink : public FunctionLink
+class MinLink : public NumericOutLink
 {
 protected:
 	void init(void);

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_RANDOM_NUMBER_LINK_H
 #define _OPENCOG_RANDOM_NUMBER_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericOutLink.h>
 
 namespace opencog
 {
@@ -42,7 +42,7 @@ namespace opencog
 ///
 /// will return a random number between 0.1 ad 0.5
 ///
-class RandomNumberLink : public FunctionLink
+class RandomNumberLink : public NumericOutLink
 {
 protected:
 	void init();
