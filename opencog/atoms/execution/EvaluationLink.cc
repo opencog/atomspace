@@ -780,7 +780,14 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
+		{
+			// If its not in any atomspace, well, we need to have
+			// it somewhere, to get an accurate TV value. We add
+			// it to scratch, just in case it's not in the base as.
+			if (as and as != evelnk->getAtomSpace())
+				return scratch->add_atom(evelnk)->getTruthValue();
 			return evelnk->getTruthValue();
+		}
 
 		HandleSeq args;
 		if (LIST_LINK == sna.at(1)->get_type())
