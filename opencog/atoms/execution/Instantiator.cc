@@ -317,10 +317,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 		// Step two: beta-reduce.
 		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
-
-		// TODO -- Maybe the PutLink should also do everything below,
-		// itself? i.e. we should not have to do the below for it,
-		// right? The right answer is somewhat ... hazy.
 		if (nullptr == red)
 			return red;
 
@@ -329,6 +325,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
 
+		// In some perfect world, calling execute() on the PutLink
+		// should have been enough. Unfortunately, the PutLinkUTest
+		// has many tests where PutLinks appear at random locations
+		// in non-execuatable contexts, and the only way to find them
+		// and run them is to call walk_tree(). So we must make this
+		// call. Were it not for this, much of this code would simplify.
 		Handle rex(walk_tree(red, ist));
 		if (nullptr == rex)
 			return rex;
@@ -341,7 +343,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// The DontExecLink is a weird hack to halt evaluation.
 		// We unwrap it and throw it away when encountered.
 		// Some long-term fix is needed that avoids this step-four
-		// entirely.
+		// entirely. Wouldn't QuoteLink be better? Why not use QuoteLink?
 		if (SET_LINK == rex->get_type())
 		{
 			HandleSeq unwrap;
