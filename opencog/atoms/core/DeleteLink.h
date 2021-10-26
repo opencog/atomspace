@@ -51,6 +51,9 @@ public:
 	DeleteLink(const DeleteLink&) = delete;
 	DeleteLink& operator=(const DeleteLink&) = delete;
 
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace*, bool);
+
 	static Handle factory(const Handle&);
 };
 
