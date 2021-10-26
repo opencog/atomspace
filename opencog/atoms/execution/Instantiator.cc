@@ -641,6 +641,28 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
+	if (PUT_LINK == t)
+	{
+		// There are vars to be beta-reduced. Reduce them.
+		Handle grounded(walk_tree(expr, ist));
+		if (_as) grounded = _as->add_atom(grounded);
+
+		// The walk_tree() code cannot work with executable atoms that
+		// return values when executed. On the other hand, we cannot just
+		// execute indiscriminately, because of complex Quote/Unquote
+		// semantics in walk_tree(). So, for a small handful of links
+		// that we care about, we shall execute by hand. Yes, this is
+		// just more spaghetti code, but I see no other way right now.
+		Type rt = grounded->get_type();
+		if (nameserver().isA(rt, VALUE_OF_LINK) or
+		    nameserver().isA(rt, SET_VALUE_LINK))
+		{
+			return grounded->execute(_as, silent);
+		}
+
+		return grounded;
+	}
+
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
 
