@@ -191,19 +191,26 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
-/// with the groundings held in `varmap`.
+/// with the groundings held in `varmap`. This is basic beta-reduction.
 ///
 /// Second, during the above process, if any executable functions are
 /// encountered, then execute them. This is "eager-execution".  The
 /// results of that execution are plugged into the tree, and so we keep
 /// returning upwards, back to the root.
 ///
-/// The problem with eager execution is that it disallows recursive
+/// One problem with eager execution is that it disallows recursive
 /// functions: if `f(x)` itself calls `f`, then eager execution results
 /// in the infinite loop `f(f(f(f(....))))` that never terminates, the
 /// problem being that any possible termination condition inside of `f`
 /// is never hit. (c.f. The textbook-classic recursive implementation of
 /// factorial.)
+///
+/// Another problem with eager execution is that many Atoms now return
+/// Values when executed. These Values cannot be stored in a HandleSeq.
+/// This makes passing them "upwards", flowing them through the caller
+/// tree problematic.
+///
+/// There does not seem to be any easy way of refactoring this code.
 ///
 /// This can be contrasted with `beta_reduce()` up above, which performs
 /// the substitution only, but does NOT perform an execution at all.
@@ -317,10 +324,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 		// Step two: beta-reduce.
 		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
-
-		// TODO -- Maybe the PutLink should also do everything below,
-		// itself? i.e. we should not have to do the below for it,
-		// right? The right answer is somewhat ... hazy.
 		if (nullptr == red)
 			return red;
 
@@ -329,6 +332,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
 
+		// In some perfect world, calling execute() on the PutLink
+		// should have been enough. Unfortunately, the PutLinkUTest
+		// has many tests where PutLinks appear at random locations
+		// in non-execuatable contexts, and the only way to find them
+		// and run them is to call walk_tree(). So we must make this
+		// call. Were it not for this, much of this code would simplify.
 		Handle rex(walk_tree(red, ist));
 		if (nullptr == rex)
 			return rex;
@@ -341,34 +350,19 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// The DontExecLink is a weird hack to halt evaluation.
 		// We unwrap it and throw it away when encountered.
 		// Some long-term fix is needed that avoids this step-four
-		// entirely.
+		// entirely. Wouldn't QuoteLink be better? Why not use QuoteLink?
 		if (SET_LINK == rex->get_type())
 		{
 			HandleSeq unwrap;
 			for (const Handle& plo : rex->getOutgoingSet())
 			{
 				if (DONT_EXEC_LINK == plo->get_type())
-				{
 					unwrap.push_back(plo->getOutgoingAtom(0));
-				}
 				else
-				{
-					try {
-						TruthValuePtr tvp =
-							EvaluationLink::do_evaluate(_as, plo, true);
-						plo->setTruthValue(tvp);
-					}
-					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
-				}
 			}
 			return createLink(std::move(unwrap), SET_LINK);
 		}
-
-		try {
-			EvaluationLink::do_evaluate(_as, rex, true);
-		}
-		catch (const NotEvaluatableException& ex) {}
 		return rex;
 	}
 
@@ -438,19 +432,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return Handle::UNDEFINED;
 	}
 
-	// Ideally, we should not evaluate any EvaluatableLinks.
-	// However, some of these may hold embedded executable links
-	// inside of them, which the current unit tests and code
-	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of their
-	// own lazy-evaluation, and so, if evaluation is needed,
-	// it will be triggered by something else. We do, of course,
-	// substitute in for free variables, if any.
-	//
-	// Non-virtual evaluatables fall through and are handled
-	// below.
-	//
-	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
 
@@ -499,9 +480,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.
 	if (PREDICATE_FORMULA_LINK == t)
-	{
 		return expr;
-	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
 	// beta-reduce it, but don't execute it. Consume the DontExecLink.

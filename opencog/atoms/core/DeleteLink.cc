@@ -45,29 +45,33 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 
 	for (const Handle& h : _outgoing)
 		as->extract_atom(h, true);
-
-	// The AtomSpace code seems to want this exception, so that
-	// the atom gets deleted from the backingstore too.  But we could
-	// just as easily call `as->delete_atom()` above!?
-	// throw DeleteException();
 }
 
-#if 0
-/*****
-Hmm. This seems not to be needed, right now.
-****/
-Handle DeleteLink::execute(AtomSpace * as) const
+ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 {
+	// In general, neither this link, nor it's outgoing set will be in
+	// any AtomSpace at all. So in order for the delete to be successful,
+	// an AtomSpace to delete from must be explicitly specified. The
+	// reason the outgoing set is not in any AtomSpace is because this
+	// DeleteLink got assembled on the fly, usually by a PutLink, and
+	// so of course ... it's not anywhere, yet.
+	if (nullptr == as)
+		throw InvalidParamException(TRACE_INFO,
+			"DeleteLink::execute() expects AtomSpace");
+
 	const HandleSeq& oset = _outgoing;
 	for (const Handle& h : oset)
 	{
 		Type t = h->get_type();
-		if (VARIABLE_NODE != t)
-			as->removeAtom(h, true);
+		if (VARIABLE_NODE == t or GLOB_NODE == t) continue;
+
+		AtomSpace* oas = h->getAtomSpace();
+		if (nullptr == oas) oas = as;
+		if (oas)
+			oas->extract_atom(h, true);
 	}
-	return Handle::UNDEFINED;
+	return nullptr;
 }
-#endif
 
 DeleteLink::DeleteLink(const HandleSeq&& oset, Type type)
 	: FreeLink(std::move(oset), type)

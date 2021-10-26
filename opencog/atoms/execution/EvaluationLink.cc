@@ -35,6 +35,7 @@
 #include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
@@ -124,33 +125,8 @@ static void throwSyntaxException(bool silent, const char* message...)
 static double get_numeric_value(AtomSpace* as, bool silent,
                                 Handle h)
 {
-	Type t = h->get_type();
-	if (DEFINED_SCHEMA_NODE == t)
-	{
-		h = DefineLink::get_definition(h);
-		t = h->get_type();
-	}
-
-	ValuePtr pap(h);
-	if (h->is_executable())
-	{
-		pap = h->execute(as, silent);
-		t = pap->get_type();
-
-		// Pattern matching hack. The pattern matcher returns sets of
-		// atoms; if that set contains a single number, then unwrap it.
-		// See issue #1502 which proposes to eliminate this SetLink hack.
-		if (SET_LINK == t)
-		{
-			h = HandleCast(pap);
-			if (1 != h->get_arity())
-				throw SyntaxException(TRACE_INFO,
-					"Don't know how to unwrap this: %s",
-					h->to_string().c_str());
-			pap = h->getOutgoingAtom(0);
-			t = pap->get_type();
-		}
-	}
+	ValuePtr pap(NumericFunctionLink::get_value(as, silent, h));
+	Type t = pap->get_type();
 
 	if (NUMBER_NODE == t)
 	{
