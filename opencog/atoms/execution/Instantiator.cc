@@ -323,6 +323,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
 		// Step two: beta-reduce.
+		// Beta reduction of DeleteLink will return a null pointer.
 		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
 		if (nullptr == red)
 			return red;
@@ -339,8 +340,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// and run them is to call walk_tree(). So we must make this
 		// call. Were it not for this, much of this code would simplify.
 		Handle rex(walk_tree(red, ist));
-		if (nullptr == rex)
-			return rex;
+
+		// Rewalk of things returning ValuePtr's and not handles
+		// will look like null pointers. We're done, in this case.
+		if (nullptr == rex) return red;
 
 		// Step four: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
@@ -639,6 +642,42 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+	}
+
+	if (PUT_LINK == t)
+	{
+		// There are vars to be beta-reduced. Reduce them.
+		Handle grounded(walk_tree(expr, ist));
+
+		// (PutLink (DeleteLink ...)) returns nullptr
+		if (nullptr == grounded) return nullptr;
+
+		// Handle the case where (Put (Lambda...)) is being used
+		// for (Query vars body (Put (Lambda ...) query-results))
+		Type lt = expr->getOutgoingAtom(0)->get_type();
+		if (LAMBDA_LINK == lt and grounded->is_executable())
+		{
+			ValuePtr vp(grounded->execute(_as, silent));
+			if (_as and vp->is_atom())
+				return _as->add_atom(HandleCast(vp));
+			return vp;
+		}
+
+		// The walk_tree() code cannot work with executable atoms that
+		// return values when executed. On the other hand, we cannot just
+		// execute indiscriminately, because of complex Quote/Unquote
+		// semantics in walk_tree(). So, for a small handful of links
+		// that we care about, we shall execute by hand. Yes, this is
+		// just more spaghetti code, but I see no other way right now.
+		Type rt = grounded->get_type();
+		if (nameserver().isA(rt, VALUE_OF_LINK) or
+		    nameserver().isA(rt, SET_VALUE_LINK))
+		{
+			return grounded->execute(_as, silent);
+		}
+
+		if (_as) grounded = _as->add_atom(grounded);
+		return grounded;
 	}
 
 	// Instantiate.
