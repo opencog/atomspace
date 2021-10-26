@@ -341,7 +341,7 @@ Handle PutLink::do_reduce(void) const
 	Handle args(_arguments);
 	ValuePtr vargs(_arguments);
 
-	// Must arguments can be executed (should be executed) before
+	// Most arguments can be executed (should be executed) before
 	// reduction. This includes queries and functions; failing to
 	// do so can result in unintended infinite loops. Examples
 	// include MeetLinks, which are run, to determine what to plug in.
@@ -540,17 +540,17 @@ Handle PutLink::do_reduce(void) const
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 {
 	_silent = silent;
-	return do_reduce();
 
-	// XXX FIXME. What we should really do is to is to execute the
-	// result of do_reduce(), like so:
-	//    Handle h(do_reduce());
-	//    if (h->is_executable()) return h->execute(as, silent);
-	//    return h;
-	// but right now we can't, because execution/Instantiator.cc:319
-	// is trying to do all the work for us. We need to refactor that
-	// code and pull the needed pieces into here. However, this is not
-	// a burning priority right now, so we leave that alone, for now.
+	Handle h(do_reduce());
+	Type t = h->get_type();
+	if (h->is_executable() and
+	    not nameserver().isA(t, VALUE_OF_LINK) and
+	    not nameserver().isA(t, SET_VALUE_LINK) and
+	    not (DONT_EXEC_LINK == t))
+	{
+		return h->execute(as, silent);
+	}
+	return h;
 }
 
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)
