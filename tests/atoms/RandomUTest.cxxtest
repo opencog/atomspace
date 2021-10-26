@@ -41,7 +41,6 @@ public:
         as = createAtomSpace();
         eval = new SchemeEval(as);
         eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-
     }
 
     ~RandomUTest()
