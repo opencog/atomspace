@@ -323,6 +323,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
 		// Step two: beta-reduce.
+		// Beta reduction of DeleteLink will return a null pointer.
 		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
 		if (nullptr == red)
 			return red;
@@ -339,8 +340,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// and run them is to call walk_tree(). So we must make this
 		// call. Were it not for this, much of this code would simplify.
 		Handle rex(walk_tree(red, ist));
-		if (nullptr == rex)
-			return rex;
+
+		// Rewalk of things returning ValuePtr's and not handles
+		// will look like null pointers. We're done, in this case.
+		if (nullptr == rex) return red;
 
 		// Step four: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
