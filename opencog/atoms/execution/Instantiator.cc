@@ -645,7 +645,20 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		// There are vars to be beta-reduced. Reduce them.
 		Handle grounded(walk_tree(expr, ist));
-		if (_as) grounded = _as->add_atom(grounded);
+
+		// (PutLink (DeleteLink ...)) returns nullptr
+		if (nullptr == grounded) return nullptr;
+
+		// Handle the case where (Put (Lambda...)) is being used
+		// for (Query vars body (Put (Lambda ...) query-results))
+		Type lt = expr->getOutgoingAtom(0)->get_type();
+		if (LAMBDA_LINK == lt and grounded->is_executable())
+		{
+			ValuePtr vp(grounded->execute(_as, silent));
+			if (_as and vp->is_atom())
+				return _as->add_atom(HandleCast(vp));
+			return vp;
+		}
 
 		// The walk_tree() code cannot work with executable atoms that
 		// return values when executed. On the other hand, we cannot just
@@ -660,6 +673,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			return grounded->execute(_as, silent);
 		}
 
+		if (_as) grounded = _as->add_atom(grounded);
 		return grounded;
 	}
 
