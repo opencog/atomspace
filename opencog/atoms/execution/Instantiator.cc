@@ -191,19 +191,26 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
-/// with the groundings held in `varmap`.
+/// with the groundings held in `varmap`. This is basic beta-reduction.
 ///
 /// Second, during the above process, if any executable functions are
 /// encountered, then execute them. This is "eager-execution".  The
 /// results of that execution are plugged into the tree, and so we keep
 /// returning upwards, back to the root.
 ///
-/// The problem with eager execution is that it disallows recursive
+/// One problem with eager execution is that it disallows recursive
 /// functions: if `f(x)` itself calls `f`, then eager execution results
 /// in the infinite loop `f(f(f(f(....))))` that never terminates, the
 /// problem being that any possible termination condition inside of `f`
 /// is never hit. (c.f. The textbook-classic recursive implementation of
 /// factorial.)
+///
+/// Another problem with eager execution is that many Atoms now return
+/// Values when executed. These Values cannot be stored in a HandleSeq.
+/// This makes passing them "upwards", flowing them through the caller
+/// tree problematic.
+///
+/// There does not seem to be any easy way of refactoring this code.
 ///
 /// This can be contrasted with `beta_reduce()` up above, which performs
 /// the substitution only, but does NOT perform an execution at all.
