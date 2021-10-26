@@ -341,10 +341,13 @@ Handle PutLink::do_reduce(void) const
 	Handle args(_arguments);
 	ValuePtr vargs(_arguments);
 
-	// There is no eager execution of arguments, before performing
-	// the reduction ... with one exception. If the argument is a
-	// MeetLink, we perform the search to find what to plug in.
-	if (nameserver().isA(_arguments->get_type(), SATISFYING_LINK))
+	// Must arguments can be executed (should be executed) before
+	// reduction. This includes queries and functions; failing to
+	// do so can result in unintended infinite loops. Examples
+	// include MeetLinks, which are run, to determine what to plug in.
+	Type t = _arguments->get_type();
+	if (nameserver().isA(t, SATISFYING_LINK) or
+	    nameserver().isA(t, FUNCTION_LINK))
 	{
 		vargs = _arguments->execute();
 		if (nullptr == vargs)
