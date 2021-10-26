@@ -347,9 +347,17 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			HandleSeq unwrap;
 			for (const Handle& plo : rex->getOutgoingSet())
 			{
-				if (DONT_EXEC_LINK == plo->get_type())
+				Type t = plo->get_type();
+				if (DONT_EXEC_LINK == t)
 				{
 					unwrap.push_back(plo->getOutgoingAtom(0));
+				}
+				else
+				if (plo->is_executable() and
+				    not nameserver().isA(t, VALUE_OF_LINK) and
+				    not nameserver().isA(t, SET_VALUE_LINK))
+				{
+					unwrap.push_back(HandleCast(plo->execute()));
 				}
 				else
 				{
@@ -475,9 +483,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.
 	if (PREDICATE_FORMULA_LINK == t)
-	{
 		return expr;
-	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
 	// beta-reduce it, but don't execute it. Consume the DontExecLink.
