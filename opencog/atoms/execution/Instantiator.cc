@@ -347,22 +347,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			HandleSeq unwrap;
 			for (const Handle& plo : rex->getOutgoingSet())
 			{
-				Type t = plo->get_type();
-				if (DONT_EXEC_LINK == t)
-				{
+				if (DONT_EXEC_LINK == plo->get_type())
 					unwrap.push_back(plo->getOutgoingAtom(0));
-				}
 				else
-				if (plo->is_executable() and
-				    not nameserver().isA(t, VALUE_OF_LINK) and
-				    not nameserver().isA(t, SET_VALUE_LINK))
-				{
-					unwrap.push_back(HandleCast(plo->execute()));
-				}
-				else
-				{
 					unwrap.push_back(plo);
-				}
 			}
 			return createLink(std::move(unwrap), SET_LINK);
 		}
