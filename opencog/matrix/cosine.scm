@@ -2,7 +2,7 @@
 ; cosine.scm
 ;
 ; Define API for computing the cosine and jaccard distances between two
-; rows or columns of a sparse matrix.
+; rows or columns of a sparse matrix. See also `group-similarity.scm`.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;

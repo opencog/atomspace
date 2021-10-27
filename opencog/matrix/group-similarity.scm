@@ -1,53 +1,50 @@
 ;
-; gram-majority.scm
+; group-similarity.scm
 ;
-; Merge N vectors at a time into a new cluster. Merge basis elements by
-; majority democratic vote.
+; Provide similarity scores for N vectors.
 ;
 ; Copyright (c) 2021 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; See `gram-classification.scm` and `gram-projective.scm` for an overview.
+; Given N vectors, one may wish to determine how similar they are to
+; one-another. One can, of course, compute pair-wise similarities, but
+; there are N!/2 such pairs, and so this gets quickly out of hand.
+; Besides, its not clear how to combine pair-wise similarities. Thus,
+; it is handy to have similarity measures that work for the entire
+; group, taken as a whole.  This file provides that.
 ;
-; Given N vectors that have been selected to form a cluster, one can
-; determine what basis elements should be a part of that cluster by
-; looking to see what all the vectors have in common. If the majority
-; of the vectors share a particular basis element, then all of them
-; should contribute that element to the cluster.
-;
-; This is termed "democratic voting" since a majority concept is used,
-; and each vector gets one vote. (Future extensions might consider
-; proportional votes?) This idea really only works if N>2 as voting
-; between two contributors does not make really make sense.
-;
-; TODO:
-; * Reintroduce FRAC for those disjuncts not shared by the majority.
-; * Maybe reintroduce NOISE for minimum counts, if this cannot be
-;   handled in other ways.
-;
-; make-merge-majority
-; -------------------
-; Merge N items into a brand new cluster.  See also `make-merge-pair`
-; (not in this file) which merges two items at a time, possibly into
-; existing clusters.
+; Currently, only one function is provided: a generalized Jaccard
+; similarity. It is generalized in that it works for N vectors, and not
+; just two. It is also generalized by replacing the Jaccard "min"
+; function by a "democratic vote" function, where an item is accepted
+; if it is shared in commmon by a majority.
 ;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog matrix) (opencog persist))
+(use-modules (opencog) (opencog persist))
 
 ; ---------------------------------------------------------------------
 
-; TODO: we can very easily re-introduce FRAC here, and thus
-; provide compatibility with the older merge methods. Just
-; modify `clique` below to do this.
-;
-; TODO: maybe reintroduce NOISE as well.
-
-(define-public (make-majority-jaccard LLOBJ QUORUM)
+(define-public (make-group-similarity LLOBJ)
 "
+  make-group-similarity LLOBJ - Extend LLOBJ with methods to compute
+  similarities between rows or columns of the LLOBJ sparse matrix. This
+  is a generalization of pair-wise similarity to the case of finding the
+  mutual similarity btween three or more rows/columns in the matrix. If
+  only pair-wise similarity is needed, use the `add-similarity-compute`
+  object.
+
+  Currently, this only provides a generalized Jaccard distance. This
+  generalizes the conventional Jaccard distance by preplacing the "min"
+  function by a "democratic vote" function, where an item is accepted
+  if it is shared in commmon by a majority.
+
+  Some terminology: Let D(x,y) be 1 if the matrix element (x,y) exists
+  (i.e. has a non-zero count N(x,y)) and be otherwise.
+
   make-majority-jaccard LLOBJ QUORUM -- Return a function that
   counts the number of connector sequences shared by a majority
   of the words in a word list. The majority is determined by QUORUM,
