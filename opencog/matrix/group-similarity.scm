@@ -38,8 +38,8 @@
   object.
 
   Currently, this only provides a generalized Jaccard distance. This
-  generalizes the conventional Jaccard distance by preplacing the "min"
-  function by a "democratic vote" function, where an item is accepted
+  generalizes the conventional Jaccard distance by replacing the 'min'
+  function by a 'democratic vote' function, where an item is accepted
   if it is shared in commmon by a majority.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
@@ -75,7 +75,7 @@
 
   'mutual-row-supp returns a list of two numbers: mutual-row-supp(T,K)
   and mutual-row-supp(0,K). This is because the algo obtains the second
-  "for free" while computing the first. It's up to you to divide these,
+  'for free' while computing the first. It's up to you to divide these,
   if you wish.
 "
 	(define (mutual-vote THRESH IDX-LIST CNT-FUNC BASIS-FUNC)
@@ -107,6 +107,7 @@
 			(fold
 				(lambda (CO-IN CNT)
 					(if (vote-to-accept? CO-IN) (+ 1 CNT) CNT))
+				0
 				list-of-all-co-idx))
 
 		; Return two numbers: the shared count and the total count.

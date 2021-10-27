@@ -47,6 +47,7 @@
 (include-from-path "opencog/matrix/bin-count.scm")
 (include-from-path "opencog/matrix/symmetric-mi.scm")
 (include-from-path "opencog/matrix/cosine.scm")
+(include-from-path "opencog/matrix/group-similarity.scm")
 (include-from-path "opencog/matrix/entropy.scm")
 (include-from-path "opencog/matrix/compute-mi.scm")
 (include-from-path "opencog/matrix/trans-batch.scm")
