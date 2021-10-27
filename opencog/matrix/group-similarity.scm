@@ -78,39 +78,61 @@
   "for free" while computing the first. It's up to you to divide these,
   if you wish.
 "
-	(define (mutual-col-supp THRESH ROW-LIST)
+	(define (mutual-supp THRESH IDX-LIST DFUNC BASIS-FUNC)
 
-		; Return #t if the COL is shared by the majority of the
-		; rows. That is, it return #t if the number of rows that
-		; have COL is greater than THRESH.
-		(define (vote-to-accept? COL)
+		; Return #t if the CO-IN is shared by the majority of the
+		; indexes. That is, it return #t if the number of indexes
+		; that have CO-IN is greater than THRESH.
+		; If IDX are rows, then CO-IN are columns, and vice-versa.
+		(define (vote-to-accept? CO-IN)
 			(< THRESH
 				(fold
-					(lambda (ROW CNT)
-						(if (nil? (LLOBJ 'get-pair ROW COL)) CNT (+ 1 CNT)))
+					(lambda (IDX CNT)
+						(if (DEFUNC IDX CO-IN) CNT (+ 1 CNT)))
 					0
-					ROW-LIST)))
+					IDX-LIST)))
 
-		; Put all of the columns on all of the rows int a bag.
-		(define set-of-all-cols (make-atom-set))
+		; Put all of the co-indexes on all of the indexes int a bag.
+		(define set-of-all-co-idx (make-atom-set))
 		(for-each
-			(lambda (ROW)
+			(lambda (IDX)
 				(for-each
-					(lambda (COL) (set-of-all-cols COL))
-					(LLOBJ 'right-basis ROW)))
-			ROW-LIST)
+					(lambda (CO-IN) (set-of-all-co-idx CO-IN))
+					(BASIS-FUNC IDX)))
+			IDX-LIST)
 
-		(define list-of-all-cols (set-of-all-cols #f))
+		(define list-of-all-co-idx (set-of-all-co-idx #f))
 
-		; Count the particular COL, if it is shared by the majority.
+		; Count the particular CO-IN, if it is shared by the majority.
 		(define shared-count
 			(fold
-				(lambda (COL CNT)
-					(if (vote-to-accept? COL) (+ 1 CNT) CNT))
-				list-of-all-cols))
+				(lambda (CO-IN CNT)
+					(if (vote-to-accept? CO-IN) (+ 1 CNT) CNT))
+				list-of-all-co-idx))
 
 		; Return two numbers: the shared count and the total count.
-		(list shared-count (length list-of-all-cols))
+		(list shared-count (length list-of-all-co-idx))
+	)
+
+	; Return mutual-col-supp, as dfined above.
+	(define (mutual-col-supp THRESH ROW-LIST)
+		(define (defunc ROW COL)
+			(< 0 (LLOBJ 'pair-count ROW COL)))
+		(define (basis-func ROW) (LLOBJ 'right-basis ROW))
+
+		; Call the common framewrok
+		(mutual-supp THRESH ROW-LIST defunc basis-func)
+	)
+
+	(define (mutual-row-supp THRESH COL-LIST)
+		(define (defunc COL ROW)
+			(< 0 (LLOBJ 'pair-count ROW COL)))
+
+		(define (basis-func COL) (LLOBJ 'left-basis COL))
+
+		; Call the common framewrok
+		(mutual-supp THRESH COL-LIST defunc basis-func)
+
 	)
 
 	; -------------

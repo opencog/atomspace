@@ -133,7 +133,7 @@
 ;     ; exists, else return zero.
 ;     (define (get-pair-count L-ATOM R-ATOM)
 ;        (define stats-atom (get-pair L-ATOM R-ATOM))
-;        (if (nil? stats-atom) #f (get-count stats-atom)))
+;        (if (nil? stats-atom) 0 (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'get-pair
