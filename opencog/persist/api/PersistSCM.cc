@@ -126,7 +126,7 @@ void PersistSCM::init(void)
  \
 	/* The cast will fail, if the dynamic library that defines the type */ \
 	/* isn't loaded. This is the user's job. They can do it by saying */ \
-	/* (use-modules (opencog persist-foo) */ \
+	/* (use-modules (opencog persist-foo)) */ \
 	if (nullptr == stnp) { \
 		if (hsn->get_type() == STORAGE_NODE) { \
 			throw RuntimeException(TRACE_INFO, \
@@ -135,7 +135,7 @@ void PersistSCM::init(void)
 		} \
 		throw RuntimeException(TRACE_INFO, \
 			"Not opened; please load module that defines %s\n" \
-			"Like so: (use-modules (persist-foo))\n" \
+			"Like so: (use-modules (opencog persist-foo))\n" \
 			"where `foo` is the module providing the node.", \
 			nameserver().getTypeName(hsn->get_type()).c_str()); \
 	}
