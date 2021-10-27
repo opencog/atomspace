@@ -42,25 +42,41 @@
   function by a "democratic vote" function, where an item is accepted
   if it is shared in commmon by a majority.
 
-  Some terminology: Let D(x,y) be 1 if the matrix element (x,y) exists
-  (i.e. has a non-zero count N(x,y)) and be otherwise.
+  Some terminology: Let N(x,y) be the observed count for the pair (x,y).
+  Let D(x,y) be 1 if N(x,y)>0 and zero otherwise.
 
-  make-majority-jaccard LLOBJ QUORUM -- Return a function that
-  counts the number of connector sequences shared by a majority
-  of the words in a word list. The majority is determined by QUORUM,
-  which should be a floating-point number between 0.0 and 1.0.
+  Then, given a set of K columns K={a,b,...,k}, and a single row x,
+  let row-supp(x, {a,b,...,k}) = D(x,a) + D(x,b) + ... + D(x,k)
+  let row-cnt(x, {a,b,...,k}) = N(x,a) + N(x,b) + ... + N(x,k)
+  That is, the row-supp is the total number of columns of the column-set
+  that are not zero.  The row-cnt is the sum of all of the counts in
+  the column set.
 
-  When the returned function is invoked on a list of words, it returns
-  a list of two numbers: the number of connector sequences shared by
-  the majority, and the total number number of connector sequences that
-  appear on the words.
+  Given a threshold T, the mutual support of a group of K={a,b,...,k}
+  columns is given by
 
-  This returns a function that implements a kind-of Jaccard distance
-  between multiple words (two or more).  The conventional Jaccard
-  distance is defined only for pairs of items. The generalization is
-  done by counting to see if a fraction QUORUM is shared. Setting
-  QUORUM to 1.0, and appplying the function to two items returns
-  the conventional Jaccard distance.
+  mutual-row-supp(T,K) = sum_x [T < row-supp(x,K)]
+
+  The mutual overlap (aka the mutual unweighted Jaccard similarity)
+  is then
+  mutual-row-overlap(T,K) = mutual-row-supp(T,K) / mutual-row-supp(0,K)
+
+  Likewise,
+  mutual-row-count(T,K) = sum_x [T < row-cnt(x,K)]
+
+  Note that for K={a,b} just two columns that the conventional overlap
+  is given by setting T=1.
+
+  Exchanging rows and columns gives similar definitions.
+
+  Provided methods:
+  -----------------
+  'row-supp returns the number as defined above. Likewise 'column-supp
+
+  'mutual-row-supp returns a list of two numbers: mutual-row-supp(T,K)
+  and mutual-row-supp(0,K). This is because the algo obtains the second
+  "for free" while computing the first. It's up to you to divide these,
+  if you wish.
 "
 	; WLIST is a list of WordNodes and/or WordClassNodes that are
 	; being proposed for merger. This will count how many disjuncts
