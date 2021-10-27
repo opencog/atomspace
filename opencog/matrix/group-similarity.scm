@@ -78,17 +78,16 @@
   "for free" while computing the first. It's up to you to divide these,
   if you wish.
 "
-	(define (mutual-supp THRESH IDX-LIST DFUNC BASIS-FUNC)
+	(define (mutual-vote THRESH IDX-LIST CNT-FUNC BASIS-FUNC)
 
 		; Return #t if the CO-IN is shared by the majority of the
-		; indexes. That is, it return #t if the number of indexes
+		; indexes. That is, it return #t if the sum over indexes
 		; that have CO-IN is greater than THRESH.
 		; If IDX are rows, then CO-IN are columns, and vice-versa.
 		(define (vote-to-accept? CO-IN)
 			(< THRESH
 				(fold
-					(lambda (IDX CNT)
-						(if (DEFUNC IDX CO-IN) CNT (+ 1 CNT)))
+					(lambda (IDX CNT) (+ CNT (CNT-FUNC IDX CO-IN)))
 					0
 					IDX-LIST)))
 
@@ -116,23 +115,33 @@
 
 	; Return mutual-col-supp, as dfined above.
 	(define (mutual-col-supp THRESH ROW-LIST)
-		(define (defunc ROW COL)
-			(< 0 (LLOBJ 'pair-count ROW COL)))
+		(define (cntfunc ROW COL)
+			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
+
 		(define (basis-func ROW) (LLOBJ 'right-basis ROW))
 
-		; Call the common framewrok
-		(mutual-supp THRESH ROW-LIST defunc basis-func)
+		; Call the common framework
+		(mutual-vote THRESH ROW-LIST cntfunc basis-func)
 	)
 
 	(define (mutual-row-supp THRESH COL-LIST)
-		(define (defunc COL ROW)
-			(< 0 (LLOBJ 'pair-count ROW COL)))
+		(define (cntfunc COL ROW)
+			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
 
 		(define (basis-func COL) (LLOBJ 'left-basis COL))
+		(mutual-vote THRESH COL-LIST cntfunc basis-func)
+	)
 
-		; Call the common framewrok
-		(mutual-supp THRESH COL-LIST defunc basis-func)
+	(define (mutual-col-cnt THRESH ROW-LIST)
+		(define (cntfunc ROW COL) (LLOBJ 'pair-count ROW COL))
+		(define (basis-func ROW) (LLOBJ 'right-basis ROW))
+		(mutual-vote THRESH ROW-LIST cntfunc basis-func)
+	)
 
+	(define (mutual-row-cnt THRESH COL-LIST)
+		(define (cntfunc COL ROW) (LLOBJ 'pair-count ROW COL))
+		(define (basis-func COL) (LLOBJ 'left-basis COL))
+		(mutual-vote THRESH COL-LIST cntfunc basis-func)
 	)
 
 	; -------------
@@ -141,6 +150,8 @@
 		(case message
 			((mutual-col-supp) (apply mutual-col-supp args))
 			((mutual-row-supp) (apply mutual-row-supp args))
+			((mutual-col-cnt)  (apply mutual-col-cnt args))
+			((mutual-row-cnt)  (apply mutual-row-cnt args))
 			(else              (apply LLOBJ (cons message args)))))
 )
 
