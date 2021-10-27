@@ -78,55 +78,48 @@
   "for free" while computing the first. It's up to you to divide these,
   if you wish.
 "
-	; WLIST is a list of WordNodes and/or WordClassNodes that are
-	; being proposed for merger. This will count how many disjuncts
-	; these share in common. It returns a pair of numbers: the number
-	; of disjuncts shared, and the total disjuncts.
-	(define (count WLIST)
+	(define (mutual-col-supp THRESH ROW-LIST)
 
-		; The minimum number of sections that must exist for
-		; a given disjunct. For a list of length two, both
-		; must share that disjunct (thus giving the traditional
-		; overlap merge).
-		(define wlen (length WLIST))
-		(define vote-thresh
-			(if (equal? wlen 2) 2
-				(inexact->exact (round (* QUORUM wlen)))))
-
-		; Return #t if the DJ is shared by the majority of the
-		; sections. Does the count exceed the threshold?
-		(define (vote-to-accept? DJ)
-			(<= vote-thresh
+		; Return #t if the COL is shared by the majority of the
+		; rows. That is, it return #t if the number of rows that
+		; have COL is greater than THRESH.
+		(define (vote-to-accept? COL)
+			(< THRESH
 				(fold
-					(lambda (WRD CNT)
-						(if (nil? (LLOBJ 'get-pair WRD DJ)) CNT (+ 1 CNT)))
+					(lambda (ROW CNT)
+						(if (nil? (LLOBJ 'get-pair ROW COL)) CNT (+ 1 CNT)))
 					0
-					WLIST)))
+					ROW-LIST)))
 
-		; Put all of the connector-sets on all of the words int a bag.
-		(define set-of-all-djs (make-atom-set))
+		; Put all of the columns on all of the rows int a bag.
+		(define set-of-all-cols (make-atom-set))
 		(for-each
-			(lambda (WRD)
+			(lambda (ROW)
 				(for-each
-					(lambda (DJ) (set-of-all-djs DJ))
-					(LLOBJ 'right-basis WRD)))
-			WLIST)
+					(lambda (COL) (set-of-all-cols COL))
+					(LLOBJ 'right-basis ROW)))
+			ROW-LIST)
 
-		(define list-of-all-djs (set-of-all-djs #f))
+		(define list-of-all-cols (set-of-all-cols #f))
 
-		; Count the particular DJ, if it is shared by the majority.
+		; Count the particular COL, if it is shared by the majority.
 		(define shared-count
 			(fold
-				(lambda (DJ CNT)
-					(if (vote-to-accept? DJ) (+ 1 CNT) CNT))
-				list-of-all-djs))
+				(lambda (COL CNT)
+					(if (vote-to-accept? COL) (+ 1 CNT) CNT))
+				list-of-all-cols))
 
 		; Return two numbers: the shared count and the total count.
-		(list shared-count (length list-of-all-djs))
+		(list shared-count (length list-of-all-cols))
 	)
 
-	; Return the above function
-	count
+	; -------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((mutual-col-supp) (apply mutual-col-supp args))
+			((mutual-row-supp) (apply mutual-row-supp args))
+			(else              (apply LLOBJ (cons message args)))))
 )
 
 ; ---------------------------------------------------------------
