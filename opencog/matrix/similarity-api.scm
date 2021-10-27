@@ -67,10 +67,13 @@
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f)))
 "
   add-similarity-api - Add an API to access similarity values between
-  rows or columns of the LLOBJ.  This API merely provides access to
-  values that were previously computed, located as Values attached
+  two rows or columns of the LLOBJ.  This API merely provides access
+  to values that were previously computed, located as Values attached
   to pairs of Atoms under certain specific keys. This API is meant
-  to simiplify the naming and managent of similarity values.
+  to simiplify the naming and managment of similarity values.
+
+  The computation of similarities between pairs of rows/columns can be
+  performed with the `add-similarity-compute` object.
 
   Arguments:
   LLOBJ -- the matrix whose rows or columns will be compared.
@@ -210,7 +213,7 @@
   batch-similarity LLOBJ [MTM? ID CUTOFF SIM-FUN] - bulk computation.
 
   This adds an API for bulk computing and holding similarity values
-  between rows or columns of the LLOBJ. The computed similarity values
+  between two rows or columns of the LLOBJ. The computed similarity values
   will be saved in the AtomSpace via the `add-similarity-api` object.
 
   Batching is EXTREMELY CPU-intensive.  A typical run will take days or
