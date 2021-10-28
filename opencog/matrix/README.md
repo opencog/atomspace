@@ -506,6 +506,25 @@ Suppose you have more than just pairs. Suppose you have triples that
 you want to work with. Then what?  Answer: use the network analysis
 tools in the `(opencog network)` module.
 
+Reading List
+------------
+If you choose to read the source code, read it in the following order:
+
+* object-api.scm
+* eval-pairs.scm
+* support.scm
+* transpose.scm
+* similarity-api.scm
+* cosine.scm
+* symmetric-mi.scm
+* group-similarity.scm
+* compute-mi.scm
+* trans-batch.scm
+* filter.scm
+* trim.scm
+* direct-sum.scm
+
+There are more files not mentioned in this list, but they are less relevant.
 
 TODO
 ----
