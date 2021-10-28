@@ -78,7 +78,7 @@
   'for free' while computing the first. It's up to you to divide these,
   if you wish.
 "
-	(define (mutual-vote THRESH IDX-LIST CNT-FUNC BASIS-FUNC)
+	(define (mutual-vote THRESH IDX-LIST CNT-FUNC DUALS-FUNC)
 
 		; Return #t if the CO-IN is shared by the majority of the
 		; indexes. That is, it return #t if the sum over indexes
@@ -97,7 +97,7 @@
 			(lambda (IDX)
 				(for-each
 					(lambda (CO-IN) (set-of-all-co-idx CO-IN))
-					(BASIS-FUNC IDX)))
+					(DUALS-FUNC IDX)))
 			IDX-LIST)
 
 		(define list-of-all-co-idx (set-of-all-co-idx #f))
@@ -114,35 +114,35 @@
 		(list shared-count (length list-of-all-co-idx))
 	)
 
-	; Return mutual-col-supp, as dfined above.
+	; Return mutual-col-supp, as defined above.
 	(define (mutual-col-supp THRESH ROW-LIST)
 		(define (cntfunc ROW COL)
 			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
 
-		(define (basis-func ROW) (LLOBJ 'right-basis ROW))
+		(define (duals-func ROW) (LLOBJ 'right-duals ROW))
 
 		; Call the common framework
-		(mutual-vote THRESH ROW-LIST cntfunc basis-func)
+		(mutual-vote THRESH ROW-LIST cntfunc duals-func)
 	)
 
 	(define (mutual-row-supp THRESH COL-LIST)
 		(define (cntfunc COL ROW)
 			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
 
-		(define (basis-func COL) (LLOBJ 'left-basis COL))
-		(mutual-vote THRESH COL-LIST cntfunc basis-func)
+		(define (duals-func COL) (LLOBJ 'left-duals COL))
+		(mutual-vote THRESH COL-LIST cntfunc duals-func)
 	)
 
 	(define (mutual-col-cnt THRESH ROW-LIST)
 		(define (cntfunc ROW COL) (LLOBJ 'pair-count ROW COL))
-		(define (basis-func ROW) (LLOBJ 'right-basis ROW))
-		(mutual-vote THRESH ROW-LIST cntfunc basis-func)
+		(define (duals-func ROW) (LLOBJ 'right-duals ROW))
+		(mutual-vote THRESH ROW-LIST cntfunc duals-func)
 	)
 
 	(define (mutual-row-cnt THRESH COL-LIST)
 		(define (cntfunc COL ROW) (LLOBJ 'pair-count ROW COL))
-		(define (basis-func COL) (LLOBJ 'left-basis COL))
-		(mutual-vote THRESH COL-LIST cntfunc basis-func)
+		(define (duals-func COL) (LLOBJ 'left-duals COL))
+		(mutual-vote THRESH COL-LIST cntfunc duals-func)
 	)
 
 	; -------------
