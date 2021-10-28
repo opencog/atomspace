@@ -97,6 +97,18 @@
 "
 	(define (mutual-vote THRESH NOISE IDX-LIST CNT-FUNC DUALS-FUNC)
 
+		; Put all of the co-indexes on all of the indexes into a bag.
+		; Add them only if the counts are above the noise-floor.
+		(define set-of-all-co-idx (make-atom-set))
+		(for-each
+			(lambda (IDX)
+				(for-each
+					(lambda (CO-IN) (set-of-all-co-idx CO-IN))
+					(DUALS-FUNC IDX)))
+			IDX-LIST)
+
+		(define list-of-all-co-idx (set-of-all-co-idx #f))
+
 		; Return #t if the CO-IN is shared by the majority of the
 		; indexes. That is, it return #t if the sum over indexes
 		; that have CO-IN is greater than THRESH.
@@ -107,17 +119,6 @@
 					(lambda (IDX CNT) (+ CNT (CNT-FUNC IDX CO-IN)))
 					0
 					IDX-LIST)))
-
-		; Put all of the co-indexes on all of the indexes int a bag.
-		(define set-of-all-co-idx (make-atom-set))
-		(for-each
-			(lambda (IDX)
-				(for-each
-					(lambda (CO-IN) (set-of-all-co-idx CO-IN))
-					(DUALS-FUNC IDX)))
-			IDX-LIST)
-
-		(define list-of-all-co-idx (set-of-all-co-idx #f))
 
 		; Count the particular CO-IN, if it is shared by the majority.
 		(define shared-count
