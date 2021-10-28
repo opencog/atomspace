@@ -46,7 +46,7 @@ void HeavisideLink::init(void)
 
 // ============================================================
 
-static double impulse(double x) {return 1-signbit(x); }
+static double impulse(double x) {return 1-std::signbit(x); }
 
 ValuePtr HeavisideLink::execute(AtomSpace* as, bool silent)
 {
