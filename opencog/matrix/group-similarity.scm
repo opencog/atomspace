@@ -69,16 +69,47 @@
 
   Exchanging rows and columns gives similar definitions.
 
+  A 'noisy' variant is provided, by altering the defintion of a non-zero
+  count. Let N(x,y) be the observed count for the pair (x,y), just as
+  before.  Let D(x,y) be 1 if N(x,y)>noise-threshold and zero otherwise.
+  This is useful for working with matrices that have low-level junk in
+  the matrix entries. This junk can, of course, be eliminated by global
+  trimming of the matrix (see the `add-trimmer` and related objects),
+  but sometimes, it is useful to selectively ignore differences. Thus,
+  the noisy variant.
+
   Provided methods:
   -----------------
   'row-supp returns the number as defined above. Likewise 'column-supp
 
-  'mutual-row-supp returns a list of two numbers: mutual-row-supp(T,K)
-  and mutual-row-supp(0,K). This is because the algo obtains the second
-  'for free' while computing the first. It's up to you to divide these,
-  if you wish.
+  'mutual-row-supp THRESH COL-LIST returns a list of two numbers:
+     mutual-row-supp(T,K) and mutual-row-supp(0,K) for T=THRESH and
+     K=COL-LIST.  This is because the algo obtains the second 'for
+     free' while computing the first. It's up to you to divide these,
+     if you wish.
+
+  'mutual-col-supp Likewise.
+
+  'noise-row-supp THRESH NOISE COL-LIST same as above, but using NOISE
+     to determine the no-count threshold.
+
+  'noise-col-supp Likewise.
 "
-	(define (mutual-vote THRESH IDX-LIST CNT-FUNC DUALS-FUNC)
+	(define (mutual-vote THRESH IDX-LIST ACCEPT-FUNC CNT-FUNC DUALS-FUNC)
+
+		; Put all of the co-indexes on all of the indexes into a bag.
+		; Add them only if the counts are above the noise-floor.
+		(define insert-into-set-of-all-co-idx (make-atom-set))
+		(for-each
+			(lambda (IDX)
+				(for-each
+					(lambda (CO-IN)
+						(if (ACCEPT-FUNC IDX CO-IN)
+							(insert-into-set-of-all-co-idx CO-IN)))
+					(DUALS-FUNC IDX)))
+			IDX-LIST)
+
+		(define list-of-all-co-idx (insert-into-set-of-all-co-idx #f))
 
 		; Return #t if the CO-IN is shared by the majority of the
 		; indexes. That is, it return #t if the sum over indexes
@@ -90,17 +121,6 @@
 					(lambda (IDX CNT) (+ CNT (CNT-FUNC IDX CO-IN)))
 					0
 					IDX-LIST)))
-
-		; Put all of the co-indexes on all of the indexes int a bag.
-		(define set-of-all-co-idx (make-atom-set))
-		(for-each
-			(lambda (IDX)
-				(for-each
-					(lambda (CO-IN) (set-of-all-co-idx CO-IN))
-					(DUALS-FUNC IDX)))
-			IDX-LIST)
-
-		(define list-of-all-co-idx (set-of-all-co-idx #f))
 
 		; Count the particular CO-IN, if it is shared by the majority.
 		(define shared-count
@@ -114,35 +134,49 @@
 		(list shared-count (length list-of-all-co-idx))
 	)
 
-	; Return mutual-col-supp, as defined above.
-	(define (mutual-col-supp THRESH ROW-LIST)
+	(define (noise-col-supp THRESH NOISE ROW-LIST)
+		(define (acptfunc ROW COL)
+			(< NOISE (LLOBJ 'pair-count ROW COL)))
+
 		(define (cntfunc ROW COL)
-			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
+			(if (acptfunc ROW COL) 1 0))
 
 		(define (duals-func ROW) (LLOBJ 'right-duals ROW))
 
 		; Call the common framework
-		(mutual-vote THRESH ROW-LIST cntfunc duals-func)
+		(mutual-vote THRESH ROW-LIST acptfunc cntfunc duals-func)
 	)
+	; Return mutual-col-supp, as defined above.
+	(define (mutual-col-supp THRESH ROW-LIST)
+		(noise-col-supp THRESH 0 ROW-LIST))
 
-	(define (mutual-row-supp THRESH COL-LIST)
+	(define (noise-row-supp THRESH NOISE COL-LIST)
+		(define (acptfunc COL ROW)
+			(< NOISE (LLOBJ 'pair-count ROW COL)))
+
 		(define (cntfunc COL ROW)
-			(if (< 0 (LLOBJ 'pair-count ROW COL)) 1 0))
+			(if (acptfunc ROW COL) 1 0))
 
 		(define (duals-func COL) (LLOBJ 'left-duals COL))
-		(mutual-vote THRESH COL-LIST cntfunc duals-func)
+		(mutual-vote THRESH COL-LIST acptfunc cntfunc duals-func)
 	)
+	(define (mutual-row-supp THRESH COL-LIST)
+		(noise-row-supp THRESH 0 COL-LIST))
 
 	(define (mutual-col-cnt THRESH ROW-LIST)
 		(define (cntfunc ROW COL) (LLOBJ 'pair-count ROW COL))
+		(define (acptfunc ROW COL) (< 0 (cntfunc ROW COL)))
+
 		(define (duals-func ROW) (LLOBJ 'right-duals ROW))
-		(mutual-vote THRESH ROW-LIST cntfunc duals-func)
+		(mutual-vote THRESH ROW-LIST acptfunc cntfunc duals-func)
 	)
 
 	(define (mutual-row-cnt THRESH COL-LIST)
 		(define (cntfunc COL ROW) (LLOBJ 'pair-count ROW COL))
+		(define (acptfunc COL ROW) (< 0 (cntfunc COL ROW)))
+
 		(define (duals-func COL) (LLOBJ 'left-duals COL))
-		(mutual-vote THRESH COL-LIST cntfunc duals-func)
+		(mutual-vote THRESH COL-LIST acptfunc cntfunc duals-func)
 	)
 
 	; -------------
@@ -153,6 +187,8 @@
 			((mutual-row-supp) (apply mutual-row-supp args))
 			((mutual-col-cnt)  (apply mutual-col-cnt args))
 			((mutual-row-cnt)  (apply mutual-row-cnt args))
+			((noise-col-supp)  (apply noise-col-supp args))
+			((noise-row-supp)  (apply noise-row-supp args))
 			(else              (apply LLOBJ (cons message args)))))
 )
 
