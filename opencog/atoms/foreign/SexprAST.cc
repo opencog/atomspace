@@ -34,6 +34,16 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SexprAST, got %s", tname.c_str());
 	}
+
+	for (const Handle& h: _outgoing)
+		if (not nameserver().isA(h->get_type(), SEXPR_AST))
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting an SexprAST, got %s", h->to_string().c_str());
+}
+
+SexprAST::SexprAST(const std::string& sexpr)
+	: Link(SEXPR_AST)
+{
 }
 
 // ---------------------------------------------------------------

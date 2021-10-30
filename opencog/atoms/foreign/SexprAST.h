@@ -36,10 +36,16 @@ namespace opencog
 ///
 class SexprAST : public Link
 {
+	std::string _name;
+
 public:
 	SexprAST(const HandleSeq&&, Type = SEXPR_AST);
 	SexprAST(const SexprAST&) = delete;
 	SexprAST& operator=(const SexprAST&) = delete;
+
+	SexprAST(const std::string&);
+
+	virtual const std::string& get_name() const { return _name; }
 
 	virtual std::string to_string(const std::string& indent) const;
 
