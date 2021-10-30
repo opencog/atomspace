@@ -874,9 +874,29 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
+// Foreign abstrast syntax trees (AST's)
+
+// Base class for all foregin (non-atomese) language abstract syntax
+// trees.
+FOREIGN_AST <- LINK
+
+// Abstract syntax trees, in the form of s-expressions
+SEXPR_AST <- FOREIGN_AST
+
+// Storge for guile expressions
+GUILE_AST <- SEXPR_AST
+
+// Storage for JSON.
+JSON_AST <- FOREIGN_AST
+
+// Storage for Python programs
+PYTHON_AST <- FOREIGN_AST
+
+// ==============================================================
 // Assorted miscellaneous link types with an unclear future.
 //
 
+// What is this? I dunno.
 DIRECTLY_EVALUATABLE_LINK <- LINK
 
 // The ImplicationLink and the InheritanceLink ... these are really
