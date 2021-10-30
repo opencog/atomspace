@@ -15,7 +15,7 @@
 
 (define-public (atomic-inc ctr)
 "
-  atomic-inc CTR - increment the atomic-boc CTR by one.
+  atomic-inc CTR - increment the atomic-box CTR by one.
 
   This is the atomic version of (set! CTR (+ 1 CTR)).
   This returns the new, incremented value.
