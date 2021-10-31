@@ -63,6 +63,11 @@ void SexprAST::parse(const std::string& sexpr)
 {
 printf("yasss %s\n", sexpr.c_str());
 	size_t l = sexpr.find_first_not_of(" \t\n");
+	if (std::string::npos == l)
+	{
+		_name = "";
+		return;
+	}
 
 	if ('(' != sexpr[l])
 	{
@@ -73,6 +78,7 @@ printf("yasss %s\n", sexpr.c_str());
 			_name = sexpr.substr(l);
 			return;
 		}
+
 		size_t l2 = sexpr.find_first_not_of(" \t\n", r+1);
 		if (std::string::npos == l2)
 		{
@@ -81,6 +87,8 @@ printf("yasss %s\n", sexpr.c_str());
 		}
 	}
 
+printf("duude name is >>%s<<\n", _name.c_str());
+_name = "xxxx";
 	// Its a paren. Loop
 }
 
@@ -102,9 +110,32 @@ std::string SexprAST::to_string(const std::string& indent) const
 	return "foobar";
 }
 
+std::string SexprAST::to_short_string(const std::string& indent) const
+{
+	if (0 == _outgoing.size())
+		return ">>" + _name + "<<";
+
+	return "foobar";
+}
+
+// Content-based comparison.
+bool SexprAST::operator==(const Atom& other) const
+{
+	// Let Link do most of the work.
+	bool linkeq = Link::operator==(other);
+	if (not linkeq) return false;
+
+	// If other points to this, then have equality.
+	if (this == &other) return true;
+
+	// Names must match.
+	return 0 == _name.compare(SexprASTCast(other.get_handle())->_name);
+}
+
 ContentHash SexprAST::compute_hash() const
 {
-   return 42;
+	// hack alert .. for now.
+   return Link::compute_hash();
 }
 
 DEFINE_NODE_FACTORY(SexprAST, SEXPR_AST)

@@ -41,6 +41,8 @@ class SexprAST : public ForeignAST
 
 	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 
+	virtual ContentHash compute_hash() const;
+
 public:
 	SexprAST(const HandleSeq&&, Type = SEXPR_AST);
 	SexprAST(const SexprAST&) = delete;
@@ -50,8 +52,9 @@ public:
 	SexprAST(const std::string&);
 
 	virtual std::string to_string(const std::string& indent) const;
+	virtual std::string to_short_string(const std::string& indent) const;
 
-	virtual ContentHash compute_hash() const;
+	virtual bool operator==(const Atom&) const;
 	static Handle factory(const Handle&);
 };
 
