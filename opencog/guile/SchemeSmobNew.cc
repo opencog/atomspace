@@ -283,7 +283,7 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
                                        int pos, const char * msg)
 {
-	if (scm_is_string(sname))
+	if (not scm_is_string(sname))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
 	char * cname = scm_to_utf8_string(sname);

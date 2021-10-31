@@ -147,9 +147,9 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 std::string SexprAST::to_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
-		return indent + "(SexprAST \"" + _name + "\") ; " + id_to_string();
+		return indent + "(SexprAst \"" + _name + "\") ; " + id_to_string();
 
-	std::string rv = indent + "(SexprAST\n";
+	std::string rv = indent + "(SexprAst\n";
 	for (const Handle& h: _outgoing)
 		rv += h->to_string(indent + "  ") + "\n";
 
