@@ -459,7 +459,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 /*
  * Helper function: a new AST, of named type stype, and string name sname
  */
-Handle SchemeSmob::h_from_ast(Type t, SCM sexpr)
+Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 {
 	// Recurse the quoted list
 	if (scm_is_pair(sexpr))
@@ -467,7 +467,7 @@ Handle SchemeSmob::h_from_ast(Type t, SCM sexpr)
 		HandleSeq oset;
 		do
 		{
-			oset.emplace_back(h_from_ast(t, SCM_CAR(sexpr)));
+			oset.emplace_back(h_from_ast(t, true, SCM_CAR(sexpr)));
 			sexpr = SCM_CDR(sexpr);
 		} while (scm_is_pair(sexpr));
 
@@ -478,9 +478,9 @@ Handle SchemeSmob::h_from_ast(Type t, SCM sexpr)
 	if (scm_is_string(sexpr))
 	{
 		char * cname = scm_to_utf8_string(sexpr);
-		name = "\"";
+		if (rec) name = "\"";
 		name += cname;
-		name += "\"";
+		if (rec) name += "\"";
 		free(cname);
 	}
 	else if (scm_is_symbol(sexpr))
@@ -523,7 +523,7 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
 	try
 	{
 		// Create the AST
-		Handle h(atomspace->add_atom(h_from_ast(t, sname)));
+		Handle h(atomspace->add_atom(h_from_ast(t, false, sname)));
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
