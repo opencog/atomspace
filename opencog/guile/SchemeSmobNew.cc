@@ -518,7 +518,7 @@ Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 /**
  * Create a new AST, of named type stype, and string name sname
  */
-SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
+SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
 {
 	Type t = verify_type(stype, "cog-new-ast", 1);
 	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
@@ -528,16 +528,21 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
 	// 2) The AtomSpace may be read-only.
 	try
 	{
-		// Create the AST
-		Handle h(atomspace->add_atom(h_from_ast(t, false, sname)));
+		// Create the AST. Unwrap singletons, so they don't get
+		// confused by recursive constructions.
+		Handle h;
+		if (scm_is_pair(sexpr) and scm_is_null(SCM_CDR(sexpr)))
+			h = atomspace->add_atom(h_from_ast(t, false, SCM_CAR(sexpr)));
+		else
+			h = atomspace->add_atom(h_from_ast(t, false, sexpr));
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-ast", sname);
+		throw_exception(ex, "cog-new-ast", sexpr);
 	}
 
-	// scm_remember_upto_here_1(sname);
+	scm_remember_upto_here_1(sexpr);
 	return SCM_EOL;
 }
 
