@@ -533,7 +533,8 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
 		Handle h;
 		if (scm_is_pair(sexpr) and
 		    scm_is_null(SCM_CDR(sexpr)) and
-		    scm_is_string(SCM_CAR(sexpr))
+		    (scm_is_string(SCM_CAR(sexpr)) or
+		     scm_equal_p(scm_sym_quote, SCM_CAR(sexpr)))
 		)
 			h = atomspace->add_atom(h_from_ast(t, false, SCM_CAR(sexpr)));
 		else
