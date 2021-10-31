@@ -283,7 +283,7 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
                                        int pos, const char * msg)
 {
-	if (scm_is_false(scm_string_p(sname)))
+	if (scm_is_string(sname))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
 	char * cname = scm_to_utf8_string(sname);
@@ -474,11 +474,25 @@ Handle SchemeSmob::h_from_ast(Type t, SCM sexpr)
 		return createForeignAST(std::move(oset), t);
 	}
 
-	if (scm_is_symbol(sexpr))
+	std::string name;
+	if (scm_is_string(sexpr))
+	{
+		char * cname = scm_to_utf8_string(sexpr);
+		name = "\"";
+		name += cname;
+		name += "\"";
+		free(cname);
+	}
+	else if (scm_is_symbol(sexpr))
+	{
 		sexpr = scm_symbol_to_string(sexpr);
-
-	std::string name = verify_string(sexpr, "cog-new-ast", 2,
-			"AST string");
+		char * cname = scm_to_utf8_string(sexpr);
+		name = cname;
+		free(cname);
+	}
+	else
+		scm_wrong_type_arg_msg("cog-new-ast", 2, sexpr,
+			"expecting symbol or string");
 
 	// Try-catch, for two reasons:
 	// 1) Invalid syntax of the AST.
