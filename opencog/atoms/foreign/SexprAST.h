@@ -38,6 +38,8 @@ class SexprAST : public Link
 {
 	std::string _name;
 
+	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
+
 public:
 	SexprAST(const HandleSeq&&, Type = SEXPR_AST);
 	SexprAST(const SexprAST&) = delete;
