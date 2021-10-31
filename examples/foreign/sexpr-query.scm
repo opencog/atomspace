@@ -26,7 +26,7 @@
 (define qry-few
 	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
 		(Present
-			(SexprAst (Glob "$x") (SexprAst "stunk")))))
+			(SexprAst (Glob "$x") (SexprAst 'stunk)))))
 
 (cog-execute! qry-few)
 

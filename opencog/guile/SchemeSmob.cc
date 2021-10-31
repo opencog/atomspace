@@ -269,7 +269,7 @@ void SchemeSmob::register_procs()
 
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
-	register_proc("cog-new-ast",           2, 0, 0, C(ss_new_ast));
+	register_proc("cog-new-ast",           1, 0, 1, C(ss_new_ast));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
 	register_proc("cog-atom",              1, 0, 1, C(ss_atom));
