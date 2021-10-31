@@ -46,13 +46,6 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 				"Expecting an SexprAST, got %s", h->to_string().c_str());
 }
 
-SexprAST::SexprAST(Type t, const std::string& sexpr)
-	: ForeignAST(t)
-{
-	init();
-	parse(sexpr);
-}
-
 SexprAST::SexprAST(const std::string& sexpr)
 	: ForeignAST(SEXPR_AST)
 {
@@ -173,6 +166,21 @@ ContentHash SexprAST::compute_hash() const
    return Link::compute_hash();
 }
 
-DEFINE_NODE_FACTORY(SexprAST, SEXPR_AST)
+Handle SexprAST::factory(const Handle& base)
+{
+	/* If it's castable, nothing to do. */
+	if (SexprASTCast(base)) return base;
+
+	if (0 < base->get_arity())
+		return HandleCast(createSexprAST(std::move(base->getOutgoingSet())));
+
+	return HandleCast(createSexprAST(std::move(base->get_name())));
+}
+
+/* This runs when the shared lib is loaded. */
+static __attribute__ ((constructor)) void init_sexprast_factory(void)
+{
+	classserver().addFactory(SEXPR_AST, &SexprAST::factory);
+}
 
 /* ===================== END OF FILE ===================== */

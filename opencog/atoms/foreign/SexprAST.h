@@ -48,7 +48,6 @@ public:
 	SexprAST(const SexprAST&) = delete;
 	SexprAST& operator=(const SexprAST&) = delete;
 
-	SexprAST(Type, const std::string&);
 	SexprAST(const std::string&);
 
 	virtual std::string to_string(const std::string& indent) const;
