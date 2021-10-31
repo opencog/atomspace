@@ -69,6 +69,7 @@ printf("yasss %s\n", sexpr.c_str());
 		return;
 	}
 
+	// Look to see if it is a simple literal.
 	if ('(' != sexpr[l])
 	{
 		// If its a literal, we are done.
@@ -87,17 +88,51 @@ printf("yasss %s\n", sexpr.c_str());
 		}
 	}
 
-printf("duude name is >>%s<<\n", _name.c_str());
-_name = "xxxx";
-	// Its a paren. Loop
+	// If we are here, it is not a literal.
+	size_t r = 0;
+	while (std::string::npos != r)
+	{
+		Handle h(get_next_expr(sexpr, l, r));
+printf("yo %lu %lu handy=%s\n", l, r, h->to_short_string().c_str());
+		_outgoing.emplace_back(h);
+	}
 }
 
 // ---------------------------------------------------------------
 
-Handle SexprAST::get_next_expr(const std::string& s, size_t& l, size_t &r)
+Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
+// printf("enter %lu %lu %s\n", l, r, sexpr.substr(l, r-l).c_str());
+printf("enter %lu %lu c=%c %s\n", l, r, sexpr[l], sexpr.c_str());
 
-	return Handle();
+	if ('(' == sexpr[l]) l++;
+
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+
+	// If its a literal, we are done.
+	r = sexpr.find_first_of(" \t\n)", l);
+printf("duuude now its %lu %s\n", r, sexpr.substr(l).c_str());
+	if (std::string::npos == r)
+		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+
+	// Found the closing paren; just wrap the string.
+	if (')' == sexpr[r])
+	{
+		const std::string& tok = sexpr.substr(l, r-l);
+		l = r;
+		r = std::string::npos;
+		return HandleCast(createSexprAST(tok));
+	}
+
+	// If we are here, r points to whitespace, and l points to the first
+	// thing after the initial opening paren.
+	const std::string& tok = sexpr.substr(l, r-l);
+printf("duuude toke extractt its %lu %lu %s\n", l, r, tok.c_str());
+	l = r;
+	r = 0;
+	return HandleCast(createSexprAST(tok));
 }
 
 // ---------------------------------------------------------------
@@ -121,12 +156,12 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 // Content-based comparison.
 bool SexprAST::operator==(const Atom& other) const
 {
+	// If other points to this, then have equality.
+	if (this == &other) return true;
+
 	// Let Link do most of the work.
 	bool linkeq = Link::operator==(other);
 	if (not linkeq) return false;
-
-	// If other points to this, then have equality.
-	if (this == &other) return true;
 
 	// Names must match.
 	return 0 == _name.compare(SexprASTCast(other.get_handle())->_name);
