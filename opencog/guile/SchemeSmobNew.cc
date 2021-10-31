@@ -491,8 +491,14 @@ Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 		free(cname);
 	}
 	else
+	{
+		// It might be an embedded VariableNode.
+		Handle h(scm_to_handle(sexpr));
+		if (h) return h;
+
 		scm_wrong_type_arg_msg("cog-new-ast", 2, sexpr,
-			"expecting symbol or string");
+			"expecting symbol, string or Atom");
+	}
 
 	// Try-catch, for two reasons:
 	// 1) Invalid syntax of the AST.

@@ -14,10 +14,20 @@
 ; Store a second s-expression. This one as a quoted scheme list.
 (SexprAst (quote (ork ("asdf") stunk)))
 
-; Search for an s-expression
-(define qry
+; Search for all s-expressions.
+(define qry-all
 	(Meet (TypedVariable (Variable "$x") (Type 'SexprAst))
 		(Present
 			(Variable "$x"))))
 
-(cog-execute! qry)
+(cog-execute! qry-all)
+
+; Search for s-expressions containing "stunk"
+(define qry-few
+	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
+		(Present
+			(SexprAst (Glob "$x") (SexprAst "stunk")))))
+
+(cog-execute! qry-few)
+
+; That's all folks! The End.
