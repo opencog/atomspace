@@ -21,10 +21,16 @@
 (SexprAst (quote (Mork from ork)))
 (Inheritance (Concept "tree-like stuffs") (SexprAst "ork"))
 
-
 ; At the risk of becoming very confused, print the contents of the
 ; AtomSpace.
 (cog-prt-atomspace)
+
+;------------------------------------------------------------------
+; ATTENTION: The rest of the demo uses native Atomese interfaces.
+; In order for this system to be truly useful, some simpler-to-use
+; more elegant search interfaces need to be created. Thus, the demo
+; below is for Atomese developers only: more casual users will likely
+; find this stuff to be wacky, confusing and hard to use.
 
 ; Get all s-expressions in the AtomSpace
 (cog-get-atoms 'SexprAst)
@@ -37,7 +43,7 @@
 (cog-incoming-by-type (SexprAst 'ork) 'SexprAst)
 
 ; Search for s-expressions containing only two items, the second
-; of which is 'stunk.
+; of which is 'stunk. Return only the first item.
 (define qry-pair
 	(Meet (TypedVariable (Variable "$x") (Type 'SexprAst))
 		(Present
@@ -46,6 +52,7 @@
 (cog-execute! qry-pair)
 
 ; Search for lists containing 'stunk in the last position.
+; Return only the items that come before.
 (define qry-list
 	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
 		(Present
