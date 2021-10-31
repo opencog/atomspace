@@ -456,19 +456,38 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 }
 
 /* ============================================================== */
-/**
- * Create a new AST, of named type stype, and string name sname
+/*
+ * Helper function: a new AST, of named type stype, and string name sname
  */
-SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
+Handle SchemeSmob::h_from_ast(Type t, SCM sname)
 {
-	Type t = verify_type(stype, "cog-new-ast", 1);
-
 	if (scm_is_symbol(sname))
 		sname = scm_symbol_to_string(sname);
 
 	std::string name = verify_string(sname, "cog-new-ast", 2,
 			"AST string");
 
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
+	try
+	{
+		// Create the AST
+		return HandleCast(createForeignAST(t, name));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sname);
+	}
+	return Handle(); // not reached
+}
+
+/**
+ * Create a new AST, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
+{
+	Type t = verify_type(stype, "cog-new-ast", 1);
 	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
 
 	// Try-catch, for two reasons:
@@ -477,7 +496,7 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
 	try
 	{
 		// Create the AST
-		Handle h(atomspace->add_atom(createForeignAST(t, name)));
+		Handle h(atomspace->add_atom(h_from_ast(t, sname)));
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
