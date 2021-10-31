@@ -20,7 +20,7 @@ INSTALL (TARGETS foreign EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	ForeginAST.h
+	ForeignAST.h
 	SexprAST.h
 	DESTINATION "include/opencog/atoms/foreign"
 )
