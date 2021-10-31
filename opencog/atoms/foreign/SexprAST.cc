@@ -133,9 +133,14 @@ printf("duuude toke extractt its %lu %lu %s\n", l, r, tok.c_str());
 std::string SexprAST::to_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
-		return _name;
+		return indent + "(SexprAST \"" + _name + "\") ; " + id_to_string();
 
-	return "foobar";
+	std::string rv = indent + "(SexprAST\n";
+	for (const Handle& h: _outgoing)
+		rv += h->to_string(indent + "  ") + "\n";
+
+	rv += indent + ") ; " + id_to_string();
+	return rv;
 }
 
 std::string SexprAST::to_short_string(const std::string& indent) const
@@ -148,8 +153,13 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 		rv += h->to_short_string() + " ";
 
 	rv[rv.size()-1] = ')';
+
+	// Debugging print
+	rv += "\n" + to_string(";");
 	return rv;
 }
+
+// ---------------------------------------------------------------
 
 // Content-based comparison.
 bool SexprAST::operator==(const Atom& other) const
@@ -165,18 +175,25 @@ bool SexprAST::operator==(const Atom& other) const
 	return 0 == _name.compare(SexprASTCast(other.get_handle())->_name);
 }
 
+// ---------------------------------------------------------------
+
 ContentHash SexprAST::compute_hash() const
 {
-   ContentHash lhsh = Link::compute_hash();
-	lhsh += std::hash<std::string>()(_name);
+   ContentHash hsh = Link::compute_hash();
+	hsh += std::hash<std::string>()(_name);
 
 	// Links will always have the MSB set.
 	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	return lhsh;
+	return hsh;
 }
+
+// ---------------------------------------------------------------
+// Custom factory, because its a hermaphrodite. The ForgeinAST will
+// pass us a string, behaving like a node, which we parse into an
+// expression tree.
 
 Handle SexprAST::factory(const Handle& base)
 {
