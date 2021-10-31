@@ -25,15 +25,20 @@
 
 using namespace opencog;
 
-SexprAST::SexprAST(const HandleSeq&& oset, Type t)
-	: ForeignAST(std::move(oset), t)
+void SexprAST::init()
 {
-	if (not nameserver().isA(t, SEXPR_AST))
+	if (not nameserver().isA(_type, SEXPR_AST))
 	{
-		const std::string& tname = nameserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(_type);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an SexprAST, got %s", tname.c_str());
 	}
+}
+
+SexprAST::SexprAST(const HandleSeq&& oset, Type t)
+	: ForeignAST(std::move(oset), t)
+{
+	init();
 
 	for (const Handle& h: _outgoing)
 		if (not nameserver().isA(h->get_type(), SEXPR_AST))
@@ -41,9 +46,22 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 				"Expecting an SexprAST, got %s", h->to_string().c_str());
 }
 
+SexprAST::SexprAST(Type t, const std::string& sexpr)
+	: ForeignAST(t)
+{
+	init();
+	parse(sexpr);
+}
+
 SexprAST::SexprAST(const std::string& sexpr)
 	: ForeignAST(SEXPR_AST)
 {
+	parse(sexpr);
+}
+
+void SexprAST::parse(const std::string& sexpr)
+{
+printf("yasss %s\n", sexpr.c_str());
 	size_t l = sexpr.find_first_not_of(" \t\n");
 
 	if ('(' != sexpr[l])
@@ -84,6 +102,11 @@ std::string SexprAST::to_string(const std::string& indent) const
 	return "foobar";
 }
 
-DEFINE_LINK_FACTORY(SexprAST, SEXPR_AST)
+ContentHash SexprAST::compute_hash() const
+{
+   return 42;
+}
+
+DEFINE_NODE_FACTORY(SexprAST, SEXPR_AST)
 
 /* ===================== END OF FILE ===================== */

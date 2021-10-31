@@ -36,7 +36,8 @@ namespace opencog
 ///
 class SexprAST : public ForeignAST
 {
-	std::string _name;
+	void init();
+	void parse(const std::string&);
 
 	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 
@@ -45,12 +46,12 @@ public:
 	SexprAST(const SexprAST&) = delete;
 	SexprAST& operator=(const SexprAST&) = delete;
 
+	SexprAST(Type, const std::string&);
 	SexprAST(const std::string&);
-
-	virtual const std::string& get_name() const { return _name; }
 
 	virtual std::string to_string(const std::string& indent) const;
 
+	virtual ContentHash compute_hash() const;
 	static Handle factory(const Handle&);
 };
 

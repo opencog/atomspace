@@ -50,7 +50,7 @@ ForeignAST::ForeignAST(Type t)
 ForeignAST::ForeignAST(Type t, const std::string& str)
 	: Link(t)
 {
-printf("duuude uhh waht now %s\n", str.c_str());
+	_name = str;
 }
 
 /* ===================== END OF FILE ===================== */

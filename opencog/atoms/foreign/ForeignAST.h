@@ -34,12 +34,17 @@ namespace opencog
 /// The ForeignAST holds generic abstract syntax trees
 class ForeignAST : public Link
 {
+protected:
+	std::string _name;
+
 public:
 	ForeignAST(const HandleSeq&&, Type = FOREIGN_AST);
 	ForeignAST(Type);
 	ForeignAST(Type, const std::string&);
 	ForeignAST(const ForeignAST&) = delete;
 	ForeignAST& operator=(const ForeignAST&) = delete;
+
+	virtual const std::string& get_name() const { return _name; }
 };
 
 typedef std::shared_ptr<ForeignAST> ForeignASTPtr;
