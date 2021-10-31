@@ -14,6 +14,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/foreign/ForeignAST.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -391,7 +392,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		// This is a try-catch blcok, in case the AtomSpace is read-only.
+		// This is a try-catch block, in case the AtomSpace is read-only.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (nullptr == h) return handle_to_scm(h);
@@ -452,6 +453,35 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
+}
+
+/* ============================================================== */
+/**
+ * Create a new AST, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
+{
+	Type t = verify_type(stype, "cog-new-ast", 1);
+
+	std::string name = verify_string(sname, "cog-new-ast", 2,
+			"AST string");
+
+	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
+
+	// Create the AST
+	Handle h = createForeignAST(t, name);
+	try
+	{
+		// Try-catch, in case the AtomSpace is read-only.
+		Handle h = atomspace->add_atom(h);
+		return handle_to_scm(h);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sname);
+	}
+
+	return SCM_EOL;
 }
 
 /* ============================================================== */

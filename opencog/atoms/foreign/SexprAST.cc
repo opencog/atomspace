@@ -26,7 +26,7 @@
 using namespace opencog;
 
 SexprAST::SexprAST(const HandleSeq&& oset, Type t)
-	: Link(std::move(oset), t)
+	: ForeignAST(std::move(oset), t)
 {
 	if (not nameserver().isA(t, SEXPR_AST))
 	{
@@ -42,7 +42,7 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 }
 
 SexprAST::SexprAST(const std::string& sexpr)
-	: Link(SEXPR_AST)
+	: ForeignAST(SEXPR_AST)
 {
 	size_t l = sexpr.find_first_not_of(" \t\n");
 

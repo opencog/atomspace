@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_SEXPR_AST_H
 #define _OPENCOG_SEXPR_AST_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/foreign/ForeignAST.h>
 
 namespace opencog
 {
@@ -34,7 +34,7 @@ namespace opencog
 /// The SexprAST holds generic abstract syntax trees, printed as
 /// s-expressions.
 ///
-class SexprAST : public Link
+class SexprAST : public ForeignAST
 {
 	std::string _name;
 

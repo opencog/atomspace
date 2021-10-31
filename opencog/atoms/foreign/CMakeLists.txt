@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
+	ForeignAST.cc
 	SexprAST.cc
 )
 
@@ -19,6 +20,7 @@ INSTALL (TARGETS foreign EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	ForeginAST.h
 	SexprAST.h
 	DESTINATION "include/opencog/atoms/foreign"
 )
