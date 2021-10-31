@@ -54,7 +54,6 @@ SexprAST::SexprAST(const std::string& sexpr)
 
 void SexprAST::parse(const std::string& sexpr)
 {
-printf("yasss %s\n", sexpr.c_str());
 	size_t l = sexpr.find_first_not_of(" \t\n");
 	if (std::string::npos == l)
 	{
@@ -132,6 +131,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 
 	// If we are here, r points to whitespace, and l points to the first
 	// thing after the initial opening paren.
+	while ('(' == sexpr[r-1]) r--;
 	const std::string& tok = sexpr.substr(l, r-l);
 	l = sexpr.find_first_not_of(" \t\n", r);
 	if (')' == sexpr[l])
