@@ -468,13 +468,14 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
 
 	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
 
-	// Create the AST
-	Handle h(createForeignAST(t, name));
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
 	try
 	{
-		// Try-catch, in case the AtomSpace is read-only.
-		Handle ha(atomspace->add_atom(h));
-		return handle_to_scm(ha);
+		// Create the AST
+		Handle h(atomspace->add_atom(createForeignAST(t, name)));
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
