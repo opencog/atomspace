@@ -155,7 +155,11 @@ std::string SexprAST::to_string(const std::string& indent) const
 std::string SexprAST::to_short_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
-		return _name;
+	{
+		if (0 != indent.size()) return _name;
+
+		return _name + "\n" + to_string(";");
+	}
 
 	std::string rv = "(";
 	for (const Handle& h: _outgoing)
