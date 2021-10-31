@@ -39,11 +39,6 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 	: ForeignAST(std::move(oset), t)
 {
 	init();
-
-	for (const Handle& h: _outgoing)
-		if (not nameserver().isA(h->get_type(), SEXPR_AST))
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting an SexprAST, got %s", h->to_string().c_str());
 }
 
 SexprAST::SexprAST(const std::string& sexpr)
@@ -164,7 +159,12 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 
 	std::string rv = "(";
 	for (const Handle& h: _outgoing)
-		rv += h->to_short_string("x") + " ";
+	{
+		if (SEXPR_AST == h->get_type())
+			rv += h->to_short_string("xx") + " ";
+		else
+			rv += "(atomese " + h->to_short_string("") + ") ";
+	}
 
 	rv[rv.size()-1] = ')';
 
