@@ -14,6 +14,13 @@
 ; Store a second s-expression. This one as a quoted scheme list.
 (SexprAst (quote (ork ("asdf") stunk)))
 
+; And a third one, just a pair.
+(SexprAst (quote (some stunk)))
+
+; At the risk of becoming very confused, print the contents of the
+; AtomSpace.
+(cog-prt-atomspace)
+
 ; Search for all s-expressions.
 (define qry-all
 	(Meet (TypedVariable (Variable "$x") (Type 'SexprAst))
@@ -22,12 +29,21 @@
 
 (cog-execute! qry-all)
 
-; Search for s-expressions containing "stunk"
-(define qry-few
+; Search for lists containing 'stunk in the last position.
+(define qry-list
 	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
 		(Present
 			(SexprAst (Glob "$x") (SexprAst 'stunk)))))
 
-(cog-execute! qry-few)
+(cog-execute! qry-list)
+
+; Search for s-expressions containing only two items, the second
+; of which is 'stunk.
+(define qry-pair
+	(Meet (TypedVariable (Variable "$x") (Type 'SexprAst))
+		(Present
+			(SexprAst (Variable "$x") (SexprAst 'stunk)))))
+
+(cog-execute! qry-pair)
 
 ; That's all folks! The End.
