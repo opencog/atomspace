@@ -17,25 +17,24 @@
 ; And a third one, just a pair.
 (SexprAst (quote (some stunk)))
 
+; Another pair, and some mixed Atomese
+(SexprAst (quote (Mork from ork)))
+(Inheritance (Concept "tree-like stuffs") (SexprAst "ork"))
+
+
 ; At the risk of becoming very confused, print the contents of the
 ; AtomSpace.
 (cog-prt-atomspace)
 
-; Search for all s-expressions.
-(define qry-all
-	(Meet (TypedVariable (Variable "$x") (Type 'SexprAst))
-		(Present
-			(Variable "$x"))))
+; Get all s-expressions in the AtomSpace
+(cog-get-atoms 'SexprAst)
 
-(cog-execute! qry-all)
+; Get all expressions that contain 'ork
+(cog-incoming-set (SexprAst 'ork))
 
-; Search for lists containing 'stunk in the last position.
-(define qry-list
-	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
-		(Present
-			(SexprAst (Glob "$x") (SexprAst 'stunk)))))
-
-(cog-execute! qry-list)
+; Note that the above also returned the InheritanceLink.
+; Lets avoid doing that, by asking only for s-expressions.
+(cog-incoming-by-type (SexprAst 'ork) 'SexprAst)
 
 ; Search for s-expressions containing only two items, the second
 ; of which is 'stunk.
@@ -45,5 +44,13 @@
 			(SexprAst (Variable "$x") (SexprAst 'stunk)))))
 
 (cog-execute! qry-pair)
+
+; Search for lists containing 'stunk in the last position.
+(define qry-list
+	(Meet (TypedVariable (Glob "$x") (Type 'SexprAst))
+		(Present
+			(SexprAst (Glob "$x") (SexprAst 'stunk)))))
+
+(cog-execute! qry-list)
 
 ; That's all folks! The End.

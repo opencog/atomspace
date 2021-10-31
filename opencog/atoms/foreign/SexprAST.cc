@@ -158,7 +158,7 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 	{
 		if (0 != indent.size()) return _name;
 
-		return _name + "\n" + to_string(";");
+		return _name + "\n" + to_string(";") + "\n";
 	}
 
 	std::string rv = "(";
@@ -173,7 +173,7 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 	rv[rv.size()-1] = ')';
 
 	// Debugging print
-	if (0 == indent.size()) rv += "\n" + to_string(";");
+	if (0 == indent.size()) rv += "\n" + to_string(";") + "\n";
 	return rv;
 }
 
