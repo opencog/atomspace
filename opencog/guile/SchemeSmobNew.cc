@@ -463,6 +463,9 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sname)
 {
 	Type t = verify_type(stype, "cog-new-ast", 1);
 
+	if (scm_is_symbol(sname))
+		sname = scm_symbol_to_string(sname);
+
 	std::string name = verify_string(sname, "cog-new-ast", 2,
 			"AST string");
 

@@ -82,12 +82,11 @@ printf("yasss %s\n", sexpr.c_str());
 	}
 
 	// If we are here, l points to the open-paren.
-	l++;
+	l++; // step past open-paren
 	size_t r = 0;
 	while (std::string::npos != r)
 	{
 		Handle h(get_next_expr(sexpr, l, r));
-printf("yo %lu %lu handy=%s\n", l, r, h->to_short_string().c_str());
 		_outgoing.emplace_back(h);
 	}
 }
@@ -96,8 +95,6 @@ printf("yo %lu %lu handy=%s\n", l, r, h->to_short_string().c_str());
 
 Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-printf("enter %lu %lu c=%c s=%s\n", l, r, sexpr[l], sexpr.substr(l).c_str());
-
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
@@ -105,8 +102,7 @@ printf("enter %lu %lu c=%c s=%s\n", l, r, sexpr[l], sexpr.substr(l).c_str());
 	// If another opening paren, recurse
 	if ('(' == sexpr[l])
 	{
-printf("---- duuude recurse at %lu %s\n", l, sexpr.substr(l).c_str());
-		l++;
+		l++; // step past open-paren
 		HandleSeq oset;
 		while (std::string::npos != r)
 		{
@@ -117,9 +113,7 @@ printf("---- duuude recurse at %lu %s\n", l, sexpr.substr(l).c_str());
 		// l will be pointing at the trailing paren, so move past that.
 		l++;
 		r = 0;
-		Handle h = HandleCast(createSexprAST(std::move(oset)));
-printf("---- duuude done recurse whats left=%lu >>%s\n", l, sexpr.substr(l).c_str());
-		return h;
+		return HandleCast(createSexprAST(std::move(oset)));
 	}
 
 	// If its a literal, we are done.
@@ -131,7 +125,7 @@ printf("---- duuude done recurse whats left=%lu >>%s\n", l, sexpr.substr(l).c_st
 	if (')' == sexpr[r])
 	{
 		const std::string& tok = sexpr.substr(l, r-l);
-		l = r;
+		l = r + 1;
 		r = std::string::npos;
 		return HandleCast(createSexprAST(tok));
 	}
@@ -139,7 +133,6 @@ printf("---- duuude done recurse whats left=%lu >>%s\n", l, sexpr.substr(l).c_st
 	// If we are here, r points to whitespace, and l points to the first
 	// thing after the initial opening paren.
 	const std::string& tok = sexpr.substr(l, r-l);
-printf("duuude toke extractt its %lu %lu %s\n", l, r, tok.c_str());
 	l = sexpr.find_first_not_of(" \t\n", r);
 	if (')' == sexpr[l])
 	{
@@ -171,12 +164,12 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 
 	std::string rv = "(";
 	for (const Handle& h: _outgoing)
-		rv += h->to_short_string() + " ";
+		rv += h->to_short_string(" ") + " ";
 
 	rv[rv.size()-1] = ')';
 
 	// Debugging print
-	rv += "\n" + to_string(";");
+	if (0 == indent.size()) rv += "\n" + to_string(";");
 	return rv;
 }
 
