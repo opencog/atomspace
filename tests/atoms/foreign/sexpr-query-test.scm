@@ -16,12 +16,12 @@
 (Inheritance (Concept "tree-like stuffs") (SexprAst "ork"))
 
 ; Get all s-expressions in the AtomSpace
-(test-assert "as-contents" (equal? 18 (length (cog-get-atoms 'SexprAst))))
+(test-assert "as-contents" (equal? 14 (length (cog-get-atoms 'SexprAst))))
 
-(test-assert "ork incoming" (equal? 4
+(test-assert "ork incoming" (equal? 3
 	(length (cog-incoming-set (SexprAst 'ork)))))
 
-(test-assert "ork sexpr incoming" (equal? 3
+(test-assert "ork sexpr incoming" (equal? 2
 	(length (cog-incoming-by-type (SexprAst 'ork) 'SexprAst))))
 
 ; Search for s-expressions containing only two items, the second
@@ -31,7 +31,7 @@
 		(Present
 			(SexprAst (Variable "$x") (SexprAst 'stunk)))))
 
-(test-assert "pair query" (equal? 3
+(test-assert "pair query" (equal? 1
 	(length (cog-value->list (cog-execute! qry-pair)))))
 
 ; Search for lists containing 'stunk in the last position.
