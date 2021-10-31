@@ -141,9 +141,14 @@ std::string SexprAST::to_string(const std::string& indent) const
 std::string SexprAST::to_short_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
-		return ">>" + _name + "<<";
+		return _name;
 
-	return "foobar";
+	std::string rv = "(";
+	for (const Handle& h: _outgoing)
+		rv += h->to_short_string() + " ";
+
+	rv[rv.size()-1] = ')';
+	return rv;
 }
 
 // Content-based comparison.
@@ -162,8 +167,15 @@ bool SexprAST::operator==(const Atom& other) const
 
 ContentHash SexprAST::compute_hash() const
 {
-	// hack alert .. for now.
-   return Link::compute_hash();
+   ContentHash lhsh = Link::compute_hash();
+	lhsh += std::hash<std::string>()(_name);
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	return lhsh;
 }
 
 Handle SexprAST::factory(const Handle& base)
