@@ -112,6 +112,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		// l will be pointing at the trailing paren, so move past that.
 		l++;
 		r = 0;
+		if (')' == sexpr[l]) r = std::string::npos;
 		return HandleCast(createSexprAST(std::move(oset)));
 	}
 
@@ -124,7 +125,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 	if (')' == sexpr[r])
 	{
 		const std::string& tok = sexpr.substr(l, r-l);
-		l = r + 1;
+		l = sexpr.find_first_not_of(" \t\n", r);
 		r = std::string::npos;
 		return HandleCast(createSexprAST(tok));
 	}
@@ -135,10 +136,8 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 	const std::string& tok = sexpr.substr(l, r-l);
 	l = sexpr.find_first_not_of(" \t\n", r);
 	if (')' == sexpr[l])
-	{
-		l++;
 		r = std::string::npos;
-	}
+
 	return HandleCast(createSexprAST(tok));
 }
 
@@ -164,7 +163,7 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 
 	std::string rv = "(";
 	for (const Handle& h: _outgoing)
-		rv += h->to_short_string(" ") + " ";
+		rv += h->to_short_string("x") + " ";
 
 	rv[rv.size()-1] = ')';
 
