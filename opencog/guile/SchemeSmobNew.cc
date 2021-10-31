@@ -528,10 +528,13 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
 	// 2) The AtomSpace may be read-only.
 	try
 	{
-		// Create the AST. Unwrap singletons, so they don't get
-		// confused by recursive constructions.
+		// Create the AST. Unwrap singleton stringss, so they
+		// don't get confused by recursive constructions.
 		Handle h;
-		if (scm_is_pair(sexpr) and scm_is_null(SCM_CDR(sexpr)))
+		if (scm_is_pair(sexpr) and
+		    scm_is_null(SCM_CDR(sexpr)) and
+		    scm_is_string(SCM_CAR(sexpr))
+		)
 			h = atomspace->add_atom(h_from_ast(t, false, SCM_CAR(sexpr)));
 		else
 			h = atomspace->add_atom(h_from_ast(t, false, sexpr));
