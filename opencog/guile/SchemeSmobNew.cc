@@ -459,12 +459,25 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 /*
  * Helper function: a new AST, of named type stype, and string name sname
  */
-Handle SchemeSmob::h_from_ast(Type t, SCM sname)
+Handle SchemeSmob::h_from_ast(Type t, SCM sexpr)
 {
-	if (scm_is_symbol(sname))
-		sname = scm_symbol_to_string(sname);
+	// Recurse the quoted list
+	if (scm_is_pair(sexpr))
+	{
+		HandleSeq oset;
+		do
+		{
+			oset.emplace_back(h_from_ast(t, SCM_CAR(sexpr)));
+			sexpr = SCM_CDR(sexpr);
+		} while (scm_is_pair(sexpr));
 
-	std::string name = verify_string(sname, "cog-new-ast", 2,
+		return createForeignAST(std::move(oset), t);
+	}
+
+	if (scm_is_symbol(sexpr))
+		sexpr = scm_symbol_to_string(sexpr);
+
+	std::string name = verify_string(sexpr, "cog-new-ast", 2,
 			"AST string");
 
 	// Try-catch, for two reasons:
@@ -477,7 +490,7 @@ Handle SchemeSmob::h_from_ast(Type t, SCM sname)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-ast", sname);
+		throw_exception(ex, "cog-new-ast", sexpr);
 	}
 	return Handle(); // not reached
 }
