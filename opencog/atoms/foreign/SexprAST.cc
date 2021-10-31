@@ -81,7 +81,8 @@ printf("yasss %s\n", sexpr.c_str());
 		}
 	}
 
-	// If we are here, it is not a literal.
+	// If we are here, l points to the open-paren.
+	l++;
 	size_t r = 0;
 	while (std::string::npos != r)
 	{
@@ -95,20 +96,36 @@ printf("yo %lu %lu handy=%s\n", l, r, h->to_short_string().c_str());
 
 Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-// printf("enter %lu %lu %s\n", l, r, sexpr.substr(l, r-l).c_str());
-printf("enter %lu %lu c=%c %s\n", l, r, sexpr[l], sexpr.c_str());
-
-	if ('(' == sexpr[l]) l++;
+printf("enter %lu %lu c=%c s=%s\n", l, r, sexpr[l], sexpr.substr(l).c_str());
 
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
+	// If another opening paren, recurse
+	if ('(' == sexpr[l])
+	{
+printf("---- duuude recurse at %lu %s\n", l, sexpr.substr(l).c_str());
+		l++;
+		HandleSeq oset;
+		while (std::string::npos != r)
+		{
+			Handle h(get_next_expr(sexpr, l, r));
+			oset.emplace_back(h);
+		}
+
+		// l will be pointing at the trailing paren, so move past that.
+		l++;
+		r = 0;
+		Handle h = HandleCast(createSexprAST(std::move(oset)));
+printf("---- duuude done recurse whats left=%lu >>%s\n", l, sexpr.substr(l).c_str());
+		return h;
+	}
+
 	// If its a literal, we are done.
 	r = sexpr.find_first_of(" \t\n)", l);
-printf("duuude now its %lu %s\n", r, sexpr.substr(l).c_str());
 	if (std::string::npos == r)
-		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+		throw SyntaxException(TRACE_INFO, "Failed to find closing parenthesis");
 
 	// Found the closing paren; just wrap the string.
 	if (')' == sexpr[r])
@@ -123,8 +140,12 @@ printf("duuude now its %lu %s\n", r, sexpr.substr(l).c_str());
 	// thing after the initial opening paren.
 	const std::string& tok = sexpr.substr(l, r-l);
 printf("duuude toke extractt its %lu %lu %s\n", l, r, tok.c_str());
-	l = r;
-	r = 0;
+	l = sexpr.find_first_not_of(" \t\n", r);
+	if (')' == sexpr[l])
+	{
+		l++;
+		r = std::string::npos;
+	}
 	return HandleCast(createSexprAST(tok));
 }
 
