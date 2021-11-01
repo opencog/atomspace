@@ -27,3 +27,15 @@ that hard: the query engine provides a superset of the tools that these
 other systems provide. It might even be faster! The primary issue is
 that its a bit ... boring.  Unless someone has a particular use-case
 in mind, there's not much of a point to this, right?
+
+This project *might* be able to resolve one sticky aspect of the current
+Atomese design: the problem of embedded Python and scheme code, and,
+more generally, the problem of of executable syntax trees. Right now,
+these are handled in an ad-hoc fashion, case-by-case, with custom code
+and in an interpeted fashion (a REPL loop). If, instead of having a
+hard-coded Atomese PlusLink and GreaterThanLink and so-on, if we could
+just map the native scheme symbols for these (or the native Python
+symbols for these) into Atomese, the results of any queries would then
+be valid scheme (or python) that could be directly executed. We could
+cache byte-code locally, and get high-performance execution of the
+results.  This aspect of the project might be worth it. Maybe.
