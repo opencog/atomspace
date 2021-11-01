@@ -71,6 +71,9 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	Context cp_context = ist._context;
 	for (const Handle& h : expr)
 	{
+		if (nameserver().isA(h->get_type(), EVALUATABLE_LINK))
+			ist._inside_evaluation = true;
+
 		Handle hg(walk_tree(h, ist));
 		ist._context = cp_context;
 		if (hg != h) changed = true;
@@ -269,9 +272,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
-		{
 			return walk_tree(DefineLink::get_definition(expr), ist);
-		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
@@ -318,6 +319,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
+		// Avoid infinite recursion expanding Schema inside of PutLinks.
+		if (ist._inside_evaluation and
+		    DEFINED_SCHEMA_NODE == expr->getOutgoingAtom(0)->get_type())
+			return expr;
+
 		// Step one: perform variable substituions
 		Handle hexpr(beta_reduce(expr, ist._varmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
@@ -548,6 +554,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	Instate ist(varmap);
+	ist._inside_evaluation = false;
 	ist._silent = silent;
 
 	// Since we do not actually instantiate anything, we should not
