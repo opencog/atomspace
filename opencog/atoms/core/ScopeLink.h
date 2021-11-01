@@ -41,7 +41,7 @@ namespace opencog
 /// free variables, these are then bound.
 ///
 /// This class does little other than to check for the above-described
-/// format, and unpacke the variable decalrations, if present; it will
+/// format, and unpack the variable decalrations, if present; it will
 /// throw an error if the variables are somehow ill-formed. As usual,
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
