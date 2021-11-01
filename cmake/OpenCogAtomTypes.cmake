@@ -153,18 +153,21 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         STRING(REGEX MATCH "ATOMSPACE$" ISATOMSPACE ${TYPE})
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
+        STRING(REGEX MATCH "AST$" ISAST ${TYPE})
 
         # If not explicitly named, assume its a link. This is kind of
         # hacky, but is needed for e.g. "VariableList" ...
         IF (NOT ISNODE STREQUAL "NODE"
             AND NOT ISVALUE STREQUAL "VALUE"
             AND NOT ISSTREAM STREQUAL "STREAM"
-            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE")
+            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
+            AND NOT ISAST STREQUAL "AST")
             SET(ISLINK "LINK")
         ENDIF (NOT ISNODE STREQUAL "NODE"
             AND NOT ISVALUE STREQUAL "VALUE"
             AND NOT ISSTREAM STREQUAL "STREAM"
-            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE")
+            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
+            AND NOT ISAST STREQUAL "AST")
 
         IF (${TYPE} STREQUAL "VALUATION")
             SET(ISLINK "")
@@ -234,6 +237,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         IF (ISATOMSPACE STREQUAL "ATOMSPACE")
             FILE(APPEND "${SCM_FILE}" "(define-public AtomSpace cog-new-atomspace)\n")
         ENDIF (ISATOMSPACE STREQUAL "ATOMSPACE")
+
+        IF (ISAST STREQUAL "AST")
+            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n")
+        ENDIF (ISAST STREQUAL "AST")
 
         # -----------------------------------------------------------
         # Print out the python definitions. Note: We special-case Atom

@@ -14,6 +14,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/foreign/ForeignAST.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -282,7 +283,7 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
                                        int pos, const char * msg)
 {
-	if (scm_is_false(scm_string_p(sname)))
+	if (not scm_is_string(sname))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
 	char * cname = scm_to_utf8_string(sname);
@@ -391,7 +392,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		// This is a try-catch blcok, in case the AtomSpace is read-only.
+		// This is a try-catch block, in case the AtomSpace is read-only.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
 		if (nullptr == h) return handle_to_scm(h);
@@ -452,6 +453,101 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
+}
+
+/* ============================================================== */
+/*
+ * Helper function: a new AST, of named type stype, and string name sname
+ */
+Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
+{
+	// Recurse the quoted list
+	if (scm_is_pair(sexpr))
+	{
+		HandleSeq oset;
+		do
+		{
+			oset.emplace_back(h_from_ast(t, true, SCM_CAR(sexpr)));
+			sexpr = SCM_CDR(sexpr);
+		} while (scm_is_pair(sexpr));
+
+		return createForeignAST(std::move(oset), t);
+	}
+
+	std::string name;
+	if (scm_is_string(sexpr))
+	{
+		char * cname = scm_to_utf8_string(sexpr);
+		if (rec) name = "\"";
+		name += cname;
+		if (rec) name += "\"";
+		free(cname);
+	}
+	else if (scm_is_symbol(sexpr))
+	{
+		sexpr = scm_symbol_to_string(sexpr);
+		char * cname = scm_to_utf8_string(sexpr);
+		name = cname;
+		free(cname);
+	}
+	else
+	{
+		// It might be an embedded VariableNode.
+		Handle h(scm_to_handle(sexpr));
+		if (h) return h;
+
+		scm_wrong_type_arg_msg("cog-new-ast", 2, sexpr,
+			"expecting symbol, string or Atom");
+	}
+
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
+	try
+	{
+		// Create the AST
+		return HandleCast(createForeignAST(t, name));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sexpr);
+	}
+	return Handle(); // not reached
+}
+
+/**
+ * Create a new AST, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
+{
+	Type t = verify_type(stype, "cog-new-ast", 1);
+	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
+
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
+	try
+	{
+		// Create the AST. Unwrap singleton stringss, so they
+		// don't get confused by recursive constructions.
+		Handle h;
+		if (scm_is_pair(sexpr) and
+		    scm_is_null(SCM_CDR(sexpr)) and
+		    (scm_is_string(SCM_CAR(sexpr)) or
+		     scm_equal_p(scm_sym_quote, SCM_CAR(sexpr)))
+		)
+			h = atomspace->add_atom(h_from_ast(t, false, SCM_CAR(sexpr)));
+		else
+			h = atomspace->add_atom(h_from_ast(t, false, sexpr));
+		return handle_to_scm(h);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sexpr);
+	}
+
+	scm_remember_upto_here_1(sexpr);
+	return SCM_EOL;
 }
 
 /* ============================================================== */

@@ -36,6 +36,7 @@ TARGET_LINK_LIBRARIES(smob
 	execution
 	atomflow
 	atomcore
+	foreign
 	atombase
 	truthvalue
 	atomspace
