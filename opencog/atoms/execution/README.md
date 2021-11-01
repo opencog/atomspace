@@ -54,37 +54,22 @@ A sharper architectural distinction would be nice.
 
 Design complexity
 -----------------
-The design has gotten complex due to multiple reasons.  But first,
-here is why execution is complex:
+The design has gotten complex due to some confusion about when exeution
+should be done. In simplistic terms, there is confusion between "eager
+execution" and "lazy execution".  Some functions need to execute thier
+arguments, before they can do what they do, while others must have
+arguments applying themselves. Others must not, as that would ruin what
+they do.
 
-* Execution must be done recursively, starting at the leafs.
-  That is, most (but not all) functions require the function
-  arguments to be in their final reduced 'value' form, before
-  the function can be executed.  That is, execution does NOT
-  commute with substitution.
+Substitution does not commute with execution. During substitution,
+values need to be pasted into locations where variables stood. Of
+course, bound variables and quoted variables cannot be substituted.
 
-* Substitution has to be done recursively, but with care: Not all
-  variables are free; not all variables are bound. Thus, for example,
-  the PutLink has two parts: all variables in the body of the PutLink
-  are bound, but all variables in the value-list are free.  Thus,
-  if there is variable substitution outside of PutLink, only the
-  free variables can be substituted!
+The handling of DeleteLink poses a challenge. If the result of
+substitution into a DeleteLink results in a fully grounded (fully
+closed) DeleteLink, the result (and anything that contains that result)
+cannot be placed into the AtomSpace.
 
-* The beta reduction of PutLink does commute with execution.
-  That is, execution can be performed either before or after
-  beta reduction. It is easier to handle execution of e.g.
-  DeleteLink's, if execution is done before beta reduction.
-
-* The execution of the DeleteLink cannot be done by itself, i.e.
-  by it's own execute() method. This is because fully grounded
-  (fully closed) DeleteLinks are forbidden, and cannot be inserted
-  into the AtomSpace: thus, deletion needs to happen outside of
-  its own execute() method.  This could be avoided if the AtomSpace
-  told the atom when it was being inserted, but, right now, the
-  AtomSpace does not send an "insert" message to the atoms being
-  inserted.
-
-* Execution is (almost always?) done in a "lazy" or delayed fashion.
 
 Performance
 -----------
