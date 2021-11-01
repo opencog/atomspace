@@ -36,15 +36,20 @@ Some vocabulary:
   it's return value. There are black-box and clear-box variants of
   these.
 
-The distinction between execution and evaluation is artificial, but
-is motivated by the design of the atom-type hierarchy.  At some
-abstract level, the two are the same thing; we just use the word
-'evaluation' only when talking about functions that return TV's, and
-'execution' when talking about functions that return atoms.
+The distinction between execution and evaluation is a historical
+artifact, dating back to when TruthValues had an elevated, special
+meaning in the type hierarchy. This is now gone, and, for the most part,
+execution and evaluation could be the same thing.
 
 This distinction is slowly being erased, on an as-needed, as-possible
 basis.  We are doing itt slowly because it is not always immediately
 clear exactly how to do this correctly.
+
+However: there is a distinction between evaluations that return crisp
+true-false values, vs. other values. For performance reasons, we want to
+always represent crisp true-false values with c++ booleans, so that the
+code runs fast. Currently, this is done in an ad hoc manner, as needed.
+A sharper architectural distinction would be nice.
 
 
 Design complexity
