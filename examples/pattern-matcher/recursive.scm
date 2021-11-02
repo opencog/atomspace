@@ -165,13 +165,27 @@
 						(DefinedPredicate "recursive relation")
 						(List (Variable "middle") (Variable "that"))))))))
 
+; Let's test it out. Does it work?
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
 		(List	(Concept "Ben") (Concept "animal"))))
 
+; We can also verify that Ben isn't foobar'ed.
+(cog-evaluate!
+	(Evaluation
+		(DefinedPredicate "recursive relation")
+		(List	(Concept "Ben") (Concept "foobar"))))
 
-
+; ----------
+; The above demos all used the EvaluationLink, which, by defintion,
+; will always return a TruthValue.  By contrast, the ExecutionOutput
+; link behaves similarly, except that it can return general Values or
+; even Atoms. Of course, in this demo, it returns the same
+; SimpleTruthValue as before, because that is what the PresentLink
+; returns.
+;
+; Note some differences: we use cog-execute! here, not cog-evaluate!
 (cog-execute!
 	(ExecutionOutput
 		(Lambda
@@ -179,3 +193,9 @@
 			(Present (Inheritance (Variable "this") (Variable "that"))))
 		(List	(Concept "mammal") (Concept "vertebrate"))))
 
+; ExecutionOutput was designed to work with DefinedSchema, not
+; DefinedPredicate. But otherwise, the same ideas apply. (Schemas
+; can return Atoms; Predicates only return TruthValues.)
+;
+; ----------
+; That's All Folks!  The End!
