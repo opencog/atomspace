@@ -744,7 +744,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// If it's evaluatable, assume it has some free variables.
 	// Use the LambdaLink to find those variables (via FreeLink)
 	// and then reduce it.
-	if (pn->is_evaluatable())
+	if (nameserver().isA(pntype, EVALUATABLE_LINK))
 	{
 		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
 		Handle reduct(lam->beta_reduce(cargs));
