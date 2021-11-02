@@ -729,7 +729,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (LAMBDA_LINK == pntype)
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -739,6 +739,16 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
 		Handle args(createLink(std::move(cargs), LIST_LINK));
 		return TruthValueCast(gpn->execute(as, args, silent));
+	}
+
+	// If it's evaluatable, assume it has some free variables.
+	// Use the LambdaLink to find those variables (via FreeLink)
+	// and then reduce it.
+	if (pn->is_evaluatable())
+	{
+		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
 	if (silent)
