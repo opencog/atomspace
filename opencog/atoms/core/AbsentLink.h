@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/PresentLink.h
+ * opencog/atoms/core/AbsentLink.h
  *
- * Copyright (C) 2017 Linas Vepstas
+ * Copyright (C) 2017,2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PRESENT_LINK_H
-#define _OPENCOG_PRESENT_LINK_H
+#ifndef _OPENCOG_ABSENT_LINK_H
+#define _OPENCOG_ABSENT_LINK_H
 
 #include <opencog/atoms/core/UnorderedLink.h>
 
@@ -31,39 +31,39 @@ namespace opencog
  *  @{
  */
 
-/// The PresentLink specifies a set that contains no duplicated elements.
-/// That is, all elements of the PresentLik are pair-wise distinct.
+/// The AbsentLink specifies a set that contains no duplicated elements.
+/// That is, all elements of the AbsentLik are pair-wise distinct.
 /// The constructor removes duplicates.
 ///
 /// For example,
 ///
-///     PresentLink
+///     AbsentLink
 ///         SomeAtom
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// is exactly the same as
 ///
-///     PresentLink
+///     AbsentLink
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// and the copies of the duplicated `SomeAtom` is removed during atom
 /// contruction.
 ///
-/// Conceptually, the ctor for PresentLink applies a rule of inference,
+/// Conceptually, the ctor for AbsentLink applies a rule of inference,
 /// called the "Rule of contraction (or idempotency of entailment)"
 /// https://en.wikipedia.org/wiki/Rule_of_inference
 /// https://en.wikipedia.org/wiki/Idempotency_of_entailment
 ///
-class PresentLink : public UnorderedLink
+class AbsentLink : public UnorderedLink
 {
 	void init(void);
 public:
-	PresentLink(const HandleSeq&&, Type=PRESENT_LINK);
+	AbsentLink(const HandleSeq&&, Type=ABSENT_LINK);
 
-	PresentLink(const PresentLink &) = delete;
-	PresentLink& operator=(const PresentLink &) = delete;
+	AbsentLink(const AbsentLink &) = delete;
+	AbsentLink& operator=(const AbsentLink &) = delete;
 
 	virtual bool is_evaluatable() const { return true; }
 	virtual bool is_executable() const { return true; }
@@ -76,15 +76,15 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PresentLink> PresentLinkPtr;
-static inline PresentLinkPtr PresentLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PresentLink>(h); }
-static inline PresentLinkPtr PresentLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<PresentLink>(a); }
+typedef std::shared_ptr<AbsentLink> AbsentLinkPtr;
+static inline AbsentLinkPtr AbsentLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<AbsentLink>(h); }
+static inline AbsentLinkPtr AbsentLinkCast(const AtomPtr& a)
+	{ return std::dynamic_pointer_cast<AbsentLink>(a); }
 
-#define createPresentLink std::make_shared<PresentLink>
+#define createAbsentLink std::make_shared<AbsentLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PRESENT_LINK_H
+#endif // _OPENCOG_ABSENT_LINK_H

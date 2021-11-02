@@ -20,7 +20,8 @@ IF(HAVE_GUILE)
 	ADD_CXXTEST(QuotationUTest)
 	TARGET_LINK_LIBRARIES(QuotationUTest execution smob)
 
-	ADD_GUILE_TEST(PutRecursiveUTest put-recursive-test.scm)
+	ADD_GUILE_TEST(PutRecursiveTest put-recursive-test.scm)
+	ADD_GUILE_TEST(PresentTest present-test.scm)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(CheckersUTest)

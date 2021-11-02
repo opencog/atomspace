@@ -48,6 +48,9 @@ public:
 	// Apply formula to arguments.
 	TruthValuePtr apply(AtomSpace*, const HandleSeq&, bool);
 
+	virtual bool is_evaluatable() const { return true; }
+	virtual bool is_executable() const { return true; }
+
 	// Return a pointer to the computed truth value.
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {

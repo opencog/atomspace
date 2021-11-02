@@ -1,7 +1,7 @@
 /*
- * PresentLink.cc
+ * AbsentLink.cc
  *
- * Copyright (C) 2017 Linas Vepstas
+ * Copyright (C) 2017, 2021 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009, 2015, 2017
  *
@@ -23,11 +23,11 @@
 
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "PresentLink.h"
+#include "AbsentLink.h"
 
 using namespace opencog;
 
-void PresentLink::init(void)
+void AbsentLink::init(void)
 {
 	// The UnorderedLink ctor will have already sorted the outgoing set
 	// for us into some order.  To find duplicates, we merely need to
@@ -56,30 +56,30 @@ void PresentLink::init(void)
 	_outgoing.swap(uniq);
 }
 
-PresentLink::PresentLink(const HandleSeq&& oset, Type t)
+AbsentLink::AbsentLink(const HandleSeq&& oset, Type t)
 	: UnorderedLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, PRESENT_LINK))
+	if (not nameserver().isA(t, ABSENT_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an PresentLink, got %s", tname.c_str());
+			"Expecting an AbsentLink, got %s", tname.c_str());
 	}
 
 	init();
 }
 
-/// Return true, if all of the outgoing set is present in the
+/// Return true, if none of the outgoing set is present in the
 /// indicated AtomSpace. It only makes sense to call this if
 /// the current "this" pointer is not in any AtomSpace.
-TruthValuePtr PresentLink::evaluate(AtomSpace* as, bool silent)
+TruthValuePtr AbsentLink::evaluate(AtomSpace* as, bool silent)
 {
-	if (nullptr == as) return TruthValue::FALSE_TV();
+	if (nullptr == as) return TruthValue::TRUE_TV();
 
 	for (const Handle& h : _outgoing)
 	{
 		Handle maybe(as->get_atom(h));
-		if (nullptr == maybe) return TruthValue::FALSE_TV();
+		if (maybe) return TruthValue::FALSE_TV();
 	}
 
 	return TruthValue::TRUE_TV();
@@ -87,6 +87,6 @@ TruthValuePtr PresentLink::evaluate(AtomSpace* as, bool silent)
 
 // ---------------------------------------------------------------
 
-DEFINE_LINK_FACTORY(PresentLink, PRESENT_LINK)
+DEFINE_LINK_FACTORY(AbsentLink, ABSENT_LINK)
 
 /* ===================== END OF FILE ===================== */

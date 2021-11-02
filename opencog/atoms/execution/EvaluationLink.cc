@@ -712,7 +712,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		// Treat LambdaLink as if it were a PutLink -- perform
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -729,7 +729,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (LAMBDA_LINK == pntype)
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -739,6 +739,16 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
 		Handle args(createLink(std::move(cargs), LIST_LINK));
 		return TruthValueCast(gpn->execute(as, args, silent));
+	}
+
+	// If it's evaluatable, assume it has some free variables.
+	// Use the LambdaLink to find those variables (via FreeLink)
+	// and then reduce it.
+	if (nameserver().isA(pntype, EVALUATABLE_LINK))
+	{
+		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
 	if (silent)
@@ -859,30 +869,9 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (PREDICATE_FORMULA_LINK == t)
-	{
-		return evelnk->evaluate(scratch, silent);
-	}
 	else if (DYNAMIC_FORMULA_LINK == t)
 	{
 		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
-	}
-	else if (TRUTH_VALUE_OF_LINK == t)
-	{
-		// If the truth value of the link is being requested,
-		// then ... compute the truth value, on the fly!
-		Handle ofatom = evelnk->getOutgoingAtom(0);
-		TruthValuePtr tvp;
-		if (nameserver().isA(ofatom->get_type(), EVALUATABLE_LINK))
-			tvp = EvaluationLink::do_eval_scratch(as,
-		                  ofatom, scratch, silent);
-		else
-			tvp = ofatom->getTruthValue();
-
-		// Cache the computed truth value...
-		// This seems like an OK idea, do users use it?
-		evelnk->setTruthValue(tvp);
-		return tvp;
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
@@ -894,6 +883,10 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 			                    HandleCast(pap), scratch, silent);
 
 		return TruthValueCast(pap);
+	}
+	else if (evelnk->is_evaluatable())
+	{
+		return evelnk->evaluate(scratch, silent);
 	}
 	else if ( // Links that evaluate to themselves
 		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))

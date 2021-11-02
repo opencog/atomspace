@@ -41,6 +41,8 @@ public:
 	TruthValueOfLink(const TruthValueOfLink &) = delete;
 	TruthValueOfLink operator=(const TruthValueOfLink &) = delete;
 
+	virtual bool is_evaluatable() const { return true; }
+
 	// Return a pointer to the truth value for the wrapped atom.
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {

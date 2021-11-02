@@ -103,13 +103,14 @@ IF (HAVE_GUILE)
 		${COGUTIL_LIBRARY}
 	)
 
-	ADD_GUILE_TEST(DotProductUTest dot-product-test.scm)
-	ADD_GUILE_TEST(DotIdenticalUTest dot-identical-test.scm)
-	ADD_GUILE_TEST(DotChoiceUTest dot-choice-test.scm)
-	ADD_GUILE_TEST(DotLambdaUTest dot-lambda-test.scm)
-	ADD_GUILE_TEST(DotMashupUTest dot-mashup-test.scm)
-	ADD_GUILE_TEST(MeetLinkValueTest meet-link-value.scm)
-	ADD_GUILE_TEST(MultiSpaceQueryUTest multi-space-test.scm)
+	ADD_GUILE_TEST(DotProductTest dot-product-test.scm)
+	ADD_GUILE_TEST(DotIdenticalTest dot-identical-test.scm)
+	ADD_GUILE_TEST(DotChoiceTest dot-choice-test.scm)
+	ADD_GUILE_TEST(DotLambdaTest dot-lambda-test.scm)
+	ADD_GUILE_TEST(DotMashupTest dot-mashup-test.scm)
+	ADD_GUILE_TEST(MeetLinkValueTest meet-link-value-test.scm)
+	ADD_GUILE_TEST(MultiSpaceQueryTest multi-space-test.scm)
+	ADD_GUILE_TEST(RecursiveTest recursive-test.scm)
 
 ENDIF (HAVE_GUILE)
 
