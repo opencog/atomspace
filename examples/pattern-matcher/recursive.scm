@@ -118,9 +118,7 @@
 ; PresentLink.
 (cog-evaluate!
 	(Evaluation
-		(Lambda
-			(VariableList (Variable "this") (Variable "that"))
-			(Absent (Inheritance (Variable "this") (Variable "that"))))
+		(Absent (Inheritance (Variable "this") (Variable "that")))
 		(List	(Concept "foobar") (Concept "vertebrate"))))
 
 ; Of course, we could have said "not present"; the AbsentLink is not
@@ -128,15 +126,15 @@
 ; when it appears in patterns.
 (cog-evaluate!
 	(Evaluation
-		(Lambda
-			(VariableList (Variable "this") (Variable "that"))
-			(Not (Absent (Inheritance (Variable "this") (Variable "that")))))
+		(Not (Absent (Inheritance (Variable "this") (Variable "that"))))
 		(List	(Concept "mammal") (Concept "vertebrate"))))
 
 ; ----------
 ; Verifying a grand-parent/grand-child relationship requires moving to a
 ; different syntax. The query below requests that something in the
-; middle is present in the AtomSpace.
+; middle is present in the AtomSpace. (If this seems opaque or
+; confusing, please review the earlier demos that explain how searches
+; are performed.)
 (cog-evaluate!
 	(Satisfaction
 		(Present
@@ -171,7 +169,7 @@
 		(List	(Concept "human") (Concept "vertebrate"))))
 
 ; ----------
-; What about the general recursive case? This is sadly rathr verbose,
+; What about the general recursive case? This is sadly rather verbose,
 ; but here it is. To unpack it verbally:
 ; 1) Start with a definition: the name of the recursive function.
 ; 2) The lambda: it binds two variables, as before.
@@ -186,7 +184,7 @@
 ;    chain. To get that, we refer to the recursive definition itself.
 ;    That defintion takes two arguments. But which two arguments?
 ;    The PutLink explains exactly which two: the middle, and the
-;    other endpoint.
+;    other endpoint. It "plugs things in" (it forms beta redexes.)
 ;
 (Define
 	(DefinedPredicate "recursive relation")                 ;; Step 1)
