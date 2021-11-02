@@ -65,27 +65,47 @@
 ; simple enough that it does not need a scratch AtomSpace.)
 ;
 ; ----------
-; Define a very simple is-a relationship. It defines a predicate that
-; takes two arguments: "this" and "that", and looks to see if the two
-; inherit from each other. When evaluated, it will return true if the
-; AtomSpace contains an InheritanceLink connecting "this" and "that".
-; It explicitly checks for the presence of such a link, with the
-; PresentLink.
+; Farther down in the demo, a fully recursive query will be defined,
+; that will answer the question of whether something inherits from
+; something else. To define that recursive query, we'll need to use the
+; DefineLink, since, to call it (recursively) we need to attach a name
+; to it. This is what DefineLink does: it attaches names to Atoms.
+;
+; The query will have to take two arguments: "this" and "that", as
+; above. However, because it will have a more complex structure, it
+; needs to be defined in terms of a LambdaLink, to specify the location
+; of the arguments. LambdaLinks are the Atomese version of conventional
+; lambdas: they are used to bind the variables appearing in an
+; expression.
+;
+; The query is a predicate: that is, when run, it will return a
+; true/false value. Thus, the query is defined to be a DefinedPredicate.
+; This indicates to the system that it can be evaluated, and will result
+; in a TruthValue. We make a point of this, because most AtomSpace
+; contents are typically not predicates, and are not evaluatable or
+; executable. Atomese is typed, in order to simplify ressoning over
+; symbolic content.
+;
+; These three ideas are combined below. The predicate abstracts away
+; (puts a wrapper around) the internal details. The InheritanceLink is
+; now hidden in the guts of the Lambda, invisible to later uses.
+;
 (Define
 	(DefinedPredicate "simple is-a relation")
 	(Lambda
 		(VariableList (Variable "this") (Variable "that"))
 		(Present (Inheritance (Variable "this") (Variable "that")))))
 
-; Lets check if mammals are vertebrates. This should return the true
-; TV, i.e. (SimpleTruthValue 1 1)  aka (stv 1 1)
+; Lets verify that this works as expected, that is, works as before:
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "simple is-a relation")
 		(List	(Concept "mammal") (Concept "vertebrate"))))
 
 ; The same query also works without the intervening Define; one can
-; stick the Lambda directly into place in the EvaluationLink.
+; stick the Lambda directly into place in the EvaluationLink. This
+; is how the evaluation proceeds: the defintion is expanded in place,
+; and then the evaluation is run.
 (cog-evaluate!
 	(Evaluation
 		(Lambda
@@ -94,13 +114,6 @@
 		(List	(Concept "mammal") (Concept "vertebrate"))))
 
 ; ----------
-
-; We can verify that nonsense returns false aka (stv 0 1).
-(cog-evaluate!
-	(Evaluation
-		(DefinedPredicate "simple is-a relation")
-		(List	(Concept "foobar") (Concept "vertebrate"))))
-
 ; There is an explicit AbsentLink, as well. It's the opposite of the
 ; PresentLink.
 (cog-evaluate!
