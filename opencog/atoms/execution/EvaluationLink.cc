@@ -859,34 +859,9 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (PREDICATE_FORMULA_LINK == t)
-	{
-		return evelnk->evaluate(scratch, silent);
-	}
 	else if (DYNAMIC_FORMULA_LINK == t)
 	{
 		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
-	}
-	else if (TRUTH_VALUE_OF_LINK == t)
-	{
-		// XXX FIXME... why can't we just say
-		//   return evelnk->evaluate(scratch, silent);
-		// ???
-		//
-		// If the truth value of the link is being requested,
-		// then ... compute the truth value, on the fly!
-		Handle ofatom = evelnk->getOutgoingAtom(0);
-		TruthValuePtr tvp;
-		if (nameserver().isA(ofatom->get_type(), EVALUATABLE_LINK))
-			tvp = EvaluationLink::do_eval_scratch(as,
-		                  ofatom, scratch, silent);
-		else
-			tvp = ofatom->getTruthValue();
-
-		// Cache the computed truth value...
-		// This seems like an OK idea, do users use it?
-		evelnk->setTruthValue(tvp);
-		return tvp;
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
@@ -899,14 +874,14 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 
 		return TruthValueCast(pap);
 	}
+	else if (evelnk->is_evaluatable())
+	{
+		return evelnk->evaluate(scratch, silent);
+	}
 	else if ( // Links that evaluate to themselves
 		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
 	{
 		return evelnk->getTruthValue();
-	}
-	else if (evelnk->is_evaluatable())
-	{
-		return evelnk->evaluate(scratch, silent);
 	}
 
 	try_crispy = true;

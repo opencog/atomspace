@@ -34,9 +34,12 @@ static TruthValuePtr get_the_tv(AtomSpace* as, const Handle& h, bool silent)
 	if (h->is_evaluatable())
 		return h->evaluate(as, silent);
 
-	if (h->get_type() == EVALUATION_LINK)
+	if (nameserver().isA(h->get_type(), EVALUATABLE_LINK))
 		return EvaluationLink::do_evaluate(as, h, silent);
 
+	// We do as->add_atom() instead of as->get_atom() because we
+	// assume as is a scratch space, so that add is safe.  Anyway,
+	// if the get failed, then ... what would we return?
 	if (as and as != h->getAtomSpace())
 		return as->add_atom(h)->getTruthValue();
 
