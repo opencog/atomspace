@@ -71,7 +71,7 @@ PresentLink::PresentLink(const HandleSeq&& oset, Type t)
 
 /// Return true, if all of the outgoing set is present in the
 /// indicated AtomSpace. It only makes sense to call this if
-/// the current "this" pointter is not in any AtomSpace.
+/// the current "this" pointer is not in any AtomSpace.
 TruthValuePtr PresentLink::evaluate(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) return TruthValue::FALSE_TV();
