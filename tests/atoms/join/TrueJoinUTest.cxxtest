@@ -1,5 +1,5 @@
 /*
- * tests/atoms/container/TrueJoinUTest.cxxtest
+ * tests/atoms/join/TrueJoinUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -86,7 +86,7 @@ void TrueJoinUTest::test_filter(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/true-join.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-filter-ab)");
@@ -144,7 +144,7 @@ void TrueJoinUTest::test_filter_again(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/true-join.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-filter-ap)");
@@ -202,7 +202,7 @@ void TrueJoinUTest::test_top_type(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/true-container.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/true-container.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-top)");
@@ -234,7 +234,7 @@ void TrueJoinUTest::test_const(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/true-join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/true-join.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-const-ab)");
@@ -323,7 +323,7 @@ void TrueJoinUTest::test_upper(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/true-upper.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/true-upper.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");

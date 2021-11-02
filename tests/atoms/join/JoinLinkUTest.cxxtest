@@ -1,5 +1,5 @@
 /*
- * tests/atoms/container/JoinLinkUTest.cxxtest
+ * tests/atoms/join/JoinLinkUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -90,8 +90,8 @@ void JoinLinkUTest::test_basic(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
@@ -135,8 +135,8 @@ void JoinLinkUTest::test_basic_implicit(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! implicit-min-join)");
@@ -180,8 +180,8 @@ void JoinLinkUTest::test_replace(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! min-replace)");
 	printf("min-replace = %s\n", vp->to_string().c_str());
@@ -224,8 +224,8 @@ void JoinLinkUTest::test_replace_implicit(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! implicit-min-replace)");
 	printf("min-replace = %s\n", vp->to_string().c_str());
@@ -267,8 +267,8 @@ void JoinLinkUTest::test_shallow(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! shallow-join)");
 	printf("shallow-join = %s\n", vp->to_string().c_str());
@@ -303,7 +303,7 @@ void JoinLinkUTest::test_empty(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-join)");
@@ -348,8 +348,8 @@ void JoinLinkUTest::test_const(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
-	eval->eval("(load-from-path \"tests/atoms/container/join-content.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join-content.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-const)");
@@ -425,7 +425,7 @@ void JoinLinkUTest::test_const_empty(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/join.scm\")");
 
 	// ---------------------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-const)");

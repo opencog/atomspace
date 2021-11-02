@@ -1,5 +1,5 @@
 /*
- * tests/atoms/container/GPNJoinUTest.cxxtest
+ * tests/atoms/join/GPNJoinUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -83,7 +83,7 @@ void GPNJoinUTest::test_gpn(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/gpn-join.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/gpn-join.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-gpn)");
@@ -158,7 +158,7 @@ void GPNJoinUTest::test_top(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/gpn-container.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/gpn-container.scm\")");
 
 	// ----------------------------------
 	ValuePtr vp = eval->eval_v("(cog-execute! min-gpn)");

@@ -28,7 +28,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
 
-#include <opencog/atoms/container/JoinLink.h>
+#include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/Satisfier.h>

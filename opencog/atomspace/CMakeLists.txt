@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
-	container
+	join
 	pattern
 	grounded
 	execution

@@ -31,7 +31,7 @@ TARGET_LINK_LIBRARIES(smob
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
-	container
+	join
 	pattern
 	execution
 	atomflow

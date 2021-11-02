@@ -51,7 +51,7 @@ Listed in order of dependency:
    These are all quite complicated, and cache various pre-compiled
    parts of the pattern.
 
- * `container` -- Similar to the pattern queries, but these look
+ * `join` -- Similar to the pattern queries, but these look
    "upwards" instead of "downwards". Thus, `JoinLink` is here
    (contrasted to `MeetLink` above)
 

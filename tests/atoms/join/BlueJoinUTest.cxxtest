@@ -1,5 +1,5 @@
 /*
- * tests/atoms/container/BlueJoinUTest.cxxtest
+ * tests/atoms/join/BlueJoinUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -85,7 +85,7 @@ void BlueJoinUTest::test_naming(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/blue-sky.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/blue-sky.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! min-blue-sky)");
 	printf("min-replace = %s\n", vp->to_string().c_str());
@@ -142,7 +142,7 @@ void BlueJoinUTest::test_region(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/blue-sky.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/blue-sky.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! min-blue-out)");
 	printf("min-blue-out = %s\n", vp->to_string().c_str());
@@ -199,7 +199,7 @@ void BlueJoinUTest::test_embed(void)
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/atoms/container/blue-sky.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/join/blue-sky.scm\")");
 
 	ValuePtr vp = eval->eval_v("(cog-execute! min-thing)");
 	printf("min-thing = %s\n", vp->to_string().c_str());

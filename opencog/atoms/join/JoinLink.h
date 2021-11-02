@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/pattern/JoinLink.h
+ * opencog/atoms/join/JoinLink.h
  *
  * Copyright (C) 2019 Linas Vepstas
  * All Rights Reserved
