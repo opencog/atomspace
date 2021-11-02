@@ -266,15 +266,8 @@ static inline Handle expand(const Handle& arg, bool silent)
 		ValuePtr vp = arg->execute();
 		if (LINK_VALUE == vp->get_type())
 			result = createLink(LinkValueCast(vp)->to_handle_seq(), SET_LINK);
-		else
-		{
-			if (not vp->is_atom())
-			{
-				if (silent) throw SilentException();
-				throw RuntimeException(TRACE_INFO, "Cannot put values!");
-			}
+		else if (vp->is_atom())
 			result = HandleCast(vp);
-		}
 	}
 
 	if (SET_LINK == result->get_type())
