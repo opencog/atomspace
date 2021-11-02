@@ -230,6 +230,7 @@
 ;    That definition takes two arguments. But which two arguments?
 ;    The PutLink explains exactly which two: the middle, and the
 ;    other endpoint. It "plugs things in" (it forms beta redexes.)
+;    (Earlier demos explain PutLink. It's not complicated.)
 ;
 (Define
 	(DefinedPredicate "recursive relation")                 ;; Step 1)
@@ -265,6 +266,11 @@
 ; to be of type 'Concept, to limit the search. As before, the predicate
 ; takes two arguments; we have to plug the search variable into the
 ; right place, using PutLink to do the plugging-in.
+;
+; (Earlier demos explain MeetLink; it is a variant of GetLink, QueryLink
+; and BindLink. The name refers to a 'lattice meet'. It returns the set
+; of all things that satisfy a list of predicates. Here, we have only
+; one predicate.)
 (cog-execute!
 	(Meet (TypedVariable (Variable "?inh") (Type 'Concept))
 		(Put
