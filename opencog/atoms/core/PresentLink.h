@@ -65,6 +65,14 @@ public:
 	PresentLink(const PresentLink &) = delete;
 	PresentLink& operator=(const PresentLink &) = delete;
 
+	virtual bool is_evaluatable() const { return true; }
+	virtual bool is_executable() const { return true; }
+
+	virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false);
+	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
+		return ValueCast(evaluate(as, silent));
+	}
+
 	static Handle factory(const Handle&);
 };
 
