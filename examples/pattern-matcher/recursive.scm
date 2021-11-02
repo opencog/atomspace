@@ -22,6 +22,49 @@
 (Inheritance (Concept "Ben") (Concept "human"))
 
 ; ----------
+; The PresentLink can be used to test if some clause is in the
+; AtomSpace. The following just plugs "mammal" into "this" and
+; "vertebrate" into "that", and then checks to see if there is
+; an InheritanceLink of this kind in the AtomSpace. Running this
+; should return true, or rather (SimpleTruthValue 1 1) which is
+; printed in short-hand form as (stv 1 1)
+(cog-evaluate!
+	(Evaluation
+		(Present (Inheritance (Variable "this") (Variable "that")))
+		(List	(Concept "mammal") (Concept "vertebrate"))))
+
+; We can check that "foobar" is not a vertebrate:
+(cog-evaluate!
+	(Evaluation
+		(Present (Inheritance (Variable "this") (Variable "that")))
+		(List	(Concept "foobar") (Concept "vertebrate"))))
+
+; ----------
+; Here's what we cannot do, or rather, should not do: we should not
+; attempt to run
+;
+;    (cog-execute!
+;        (Present (Inheritance (Concept "foo") (Concept "vertebrate"))))
+;
+; because doing so would have the side-effect of inserting the
+; InhertanceLink relationship between "foo" and vertebrates directly
+; into the AtomSpace. The PresentLink does not magically hold it's
+; arguments outside of the AtomSpace: All Links, includng the
+; PresentLink, always insert thier outgoing set into the AtomSpace.
+;
+; Thus, to avoid polluting the AtomSpace with the stuff that we wish to
+; check for, variables are used. They isolate the form of the question
+; being asked ("is something present in the AtomSpace?") from the
+; specifics of what that question is being applied to.
+;
+; When the cog-evaluate! runs, it substitutes (beta-reduces) the
+; ConceptNodes into the VariableNodes, and then evaluates the result.
+; The evaluation is done outside of the AtomSpace, so that it is not
+; polluted with junk. (More complex queries use a scratch AtomSpace to
+; hold temporary results; this is invisible to the user. This query is
+; simple enough that it does not need a scratch AtomSpace.)
+;
+; ----------
 ; Define a very simple is-a relationship. It defines a predicate that
 ; takes two arguments: "this" and "that", and looks to see if the two
 ; inherit from each other. When evaluated, it will return true if the
@@ -50,23 +93,6 @@
 			(Present (Inheritance (Variable "this") (Variable "that"))))
 		(List	(Concept "mammal") (Concept "vertebrate"))))
 
-; ----------
-; Here's what we cannot do, or rather, should not do: we should not
-; directly assert that
-;    (Present (Inheritance  (Concept "foo") (Concept "vertebrate")))
-; because doing so would have the side-effect of inserting the
-; relationship between "foo" and vertbrates directly into the AtomSpace.
-; This is why the above structures are fairly complex: they are using
-; variables to avoid accidentally asserting new relationships into the
-; AtomSpace. When the cog-evaluate! runs, it of course subsitutes
-; (beta-reduces) the Concepts into the Variables, and then evaluates
-; the result. But the evaluation is done in such a manner that the
-; AtomSpace is not polluted with InheritanceLinks between things that
-; don't belong.
-;
-; For example, below, we check for nonsense, for a "foobar" relation.
-; That comes out false, and the contents of the AtomSpace are not
-; corrupted in the process.
 ; ----------
 
 ; We can verify that nonsense returns false aka (stv 0 1).
