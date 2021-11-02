@@ -177,6 +177,18 @@
 		(DefinedPredicate "recursive relation")
 		(List	(Concept "Ben") (Concept "foobar"))))
 
+; The predicate can be used to search the AtomSpace for all Atoms
+; that obey the relationship.  Here, we ask for all the things that
+; Ben might be. The query variable is "?inh", and we constrain it
+; to be of type 'Concept, to limit the search. As before, the predicate
+; takes two arguments; we have to plug the search variable into the
+; right place, using PutLink to do the plugging-in.
+(cog-execute!
+	(Meet (TypedVariable (Variable "?inh") (Type 'Concept))
+		(Put
+			(DefinedPredicate "recursive relation")
+			(List (Concept "Ben") (Variable "?inh")))))
+
 ; ----------
 ; The above demos all used the EvaluationLink, which, by defintion,
 ; will always return a TruthValue.  By contrast, the ExecutionOutput
