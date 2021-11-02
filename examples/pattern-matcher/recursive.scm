@@ -49,10 +49,10 @@
 ;        (Present (Inheritance (Concept "foo") (Concept "vertebrate"))))
 ;
 ; because doing so would have the side-effect of inserting the
-; InhertanceLink relationship between "foo" and vertebrates directly
+; InheritanceLink relationship between "foo" and vertebrates directly
 ; into the AtomSpace. The PresentLink does not magically hold it's
-; arguments outside of the AtomSpace: All Links, includng the
-; PresentLink, always insert thier outgoing set into the AtomSpace.
+; arguments outside of the AtomSpace: All Links, including the
+; PresentLink, always insert their outgoing set into the AtomSpace.
 ;
 ; Thus, to avoid polluting the AtomSpace with the stuff that we wish to
 ; check for, variables are used. They isolate the form of the question
@@ -85,7 +85,7 @@
 ; This indicates to the system that it can be evaluated, and will result
 ; in a TruthValue. We make a point of this, because most AtomSpace
 ; contents are typically not predicates, and are not evaluatable or
-; executable. Atomese is typed, in order to simplify ressoning over
+; executable. Atomese is typed, in order to simplify reasoning over
 ; symbolic content.
 ;
 ; These three ideas are combined below. The predicate abstracts away
@@ -106,7 +106,7 @@
 
 ; The same query also works without the intervening Define; one can
 ; stick the Lambda directly into place in the EvaluationLink. This
-; is how the evaluation proceeds: the defintion is expanded in place,
+; is how the evaluation proceeds: the definition is expanded in place,
 ; and then the evaluation is run.
 (cog-evaluate!
 	(Evaluation
@@ -143,7 +143,7 @@
 			(Inheritance (Concept "human") (Variable "middle"))
 			(Inheritance (Variable "middle") (Concept "vertebrate")))))
 
-; The above works fine, and is resonably readable. The only problem
+; The above works fine, and is reasonably readable. The only problem
 ; is that the two constants appear in the middle of the expression.
 ; These can be pulled out with a Lambda. It is a bit verbose, but
 ; it allows a generic predicate to be defined.
@@ -174,7 +174,7 @@
 ; What about the general recursive case? It needs to implement
 ; 'transitive closure'. This is the idea that given some relation
 ; R(x,y) (in this case, the InheritanceLink) that either one has
-; R(a,b) is directyly, immediately true for elements a,b or that
+; R(a,b) is directly, immediately true for elements a,b or that
 ; there is a transitive chain
 ;
 ;     R(a,x) & R(x,y) & ... & R(z,b)
@@ -182,17 +182,17 @@
 ; for some intermediate elements x,y,...,z. The & here denotes logical
 ; 'and'; each of the R must be true.
 ;
-; The above can be implemented programatically by defining a recursive
+; The above can be implemented programmatically by defining a recursive
 ; relation S(x,y) as follows:
 ;
 ;    S(x,y) := R(x,y) or (R(x,w) & S(w,y))
 ;
 ; The := symbol here is the definition of S. It is recursive in that the
-; defintion makes reference to itself. It just says that either S is R,
+; definition makes reference to itself. It just says that either S is R,
 ; or that we can peel off one level, and try again.
 ;
 ; ----------
-; Philosphical digression:
+; Philosophical digression:
 ;
 ; Converting the above to Atomese is sadly rather verbose. It is not at
 ; all compact. It's busy and verbose. If one wants to have simple,
@@ -227,7 +227,7 @@
 ;    to the middle.
 ; 7) But we also need the middle connected to a recursively long
 ;    chain. To get that, we refer to the recursive definition itself.
-;    That defintion takes two arguments. But which two arguments?
+;    That definition takes two arguments. But which two arguments?
 ;    The PutLink explains exactly which two: the middle, and the
 ;    other endpoint. It "plugs things in" (it forms beta redexes.)
 ;
@@ -272,7 +272,7 @@
 			(List (Concept "Ben") (Variable "?inh")))))
 
 ; ----------
-; The above demos all used the EvaluationLink, which, by defintion,
+; The above demos all used the EvaluationLink, which, by definition,
 ; will always return a TruthValue.  By contrast, the ExecutionOutput
 ; link behaves similarly, except that it can return general Values or
 ; even Atoms. Of course, in this demo, it returns the same
