@@ -3,7 +3,9 @@
 ;
 ; This demo illustrates how recursive queries can be written. It shows
 ; a very simple kind of forward chaining, made possible by sequencing
-; primitive operations together in sequential execution.
+; primitive operations together in sequential execution. The chaining
+; implements 'transitive closure', in that the recursive search extends
+; the relation transitively.
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -155,7 +157,7 @@
 				(Inheritance (Variable "this") (Variable "middle"))
 				(Inheritance (Variable "middle") (Variable "that"))))))
 
-; Thise new predicate can be used exactly the same way as the earlier
+; This new predicate can be used exactly the same way as the earlier
 ; one.  All the intervening details have been hidden.
 (cog-evaluate!
 	(Evaluation
@@ -169,8 +171,51 @@
 		(List	(Concept "human") (Concept "vertebrate"))))
 
 ; ----------
-; What about the general recursive case? This is sadly rather verbose,
-; but here it is. To unpack it verbally:
+; What about the general recursive case? It needs to implement
+; 'transitive closure'. This is the idea that given some relation
+; R(x,y) (in this case, the InheritanceLink) that either one has
+; R(a,b) is directyly, immediately true for elements a,b or that
+; there is a transitive chain
+;
+;     R(a,x) & R(x,y) & ... & R(z,b)
+;
+; for some intermediate elements x,y,...,z. The & here denotes logical
+; 'and'; each of the R must be true.
+;
+; The above can be implemented programatically by defining a recursive
+; relation S(x,y) as follows:
+;
+;    S(x,y) := R(x,y) or (R(x,w) & S(w,y))
+;
+; The := symbol here is the definition of S. It is recursive in that the
+; defintion makes reference to itself. It just says that either S is R,
+; or that we can peel off one level, and try again.
+;
+; ----------
+; Philosphical digression:
+;
+; Converting the above to Atomese is sadly rather verbose. It is not at
+; all compact. It's busy and verbose. If one wants to have simple,
+; easy-to-read compact expressions, one should create a 'Domain-Specific
+; Language' (DSL) on top of Atomese. Atomese is kind-of-like assembly
+; code: it is not intended for human programmers, but for other algorithms
+; to operate on. It needs to be easy for those other algorithms to work
+; with; the side-effect is that it is verbose, and can be a bit tedious
+; for humans.
+;
+; Attention! We have NOT created a DSL for recursive queries because the
+; AtomSpace is meant to be a general system for holding arbitrary data,
+; and should be usable in a broad variety of domains! Picking one
+; particular syntax over another for representing a recursive query
+; just perpetuates the problem of human-oriented programming languages.
+; The prolog/datalog people will fight with the json/GraphQL people,
+; who are unhappy with the SQL people. Let's not forget the probabilistic
+; programming people, who reject all these approaches! The goal here is
+; to avoid the domain-specific squabbles, and simply to provide tools to
+; actually do things. It is up to the user to add a pretty DSL for this.
+;
+; ----------
+; Diatribe aside, here is an annotation of the Atomese below.
 ; 1) Start with a definition: the name of the recursive function.
 ; 2) The lambda: it binds two variables, as before.
 ; 3) A SequentialOr. Evaluation stops as soon as one of the terms
