@@ -257,12 +257,25 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 }
 
 // If arg is executable, then run it, and unwrap the set link, too.
-// We unwrap the SetLinks cause that is what GetLinks return.
+// We unwrap the SetLinks because that is what GetLinks return.
 static inline Handle expand(const Handle& arg, bool silent)
 {
 	Handle result(arg);
 	if (arg->is_executable())
-		result = HandleCast(arg->execute());
+	{
+		ValuePtr vp = arg->execute();
+		if (LINK_VALUE == vp->get_type())
+			result = createLink(LinkValueCast(vp)->to_handle_seq(), SET_LINK);
+		else
+		{
+			if (not vp->is_atom())
+			{
+				if (silent) throw SilentException();
+				throw RuntimeException(TRACE_INFO, "Cannot put values!");
+			}
+			result = HandleCast(vp);
+		}
+	}
 
 	if (SET_LINK == result->get_type())
 	{
