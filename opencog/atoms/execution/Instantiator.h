@@ -90,6 +90,21 @@ private:
 		 */
 		bool _needless_quotation;
 
+		/**
+		 * Avoid infinite recursion by not expanding DefineLinks
+		 * inside of evaluatable links. That is, expansion of a
+		 * DefineLink is normally done eagerly, except inside an
+		 * evaluatable context, when it might result in an infinite
+		 * loop. In such a case, expansion shoul proceed only if
+		 * evaluation proceeds up to that point. For example,
+		 * (Define (DefinedSchema "foo") (SequentialAnd
+		 *     (SomePred) (Put (DefinedSchema "foo") (List ..))))
+		 * is an inf loop if expanded eagerly, but, when evaluated,
+		 * could terminate after finite steps, if (SomePred) evaluates
+		 * to false.
+		 */
+		bool _inside_evaluation;
+
 		/** Avoid infinite recursion. */
 		bool _halt;
 
