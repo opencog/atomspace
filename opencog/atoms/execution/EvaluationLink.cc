@@ -712,7 +712,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		// Treat LambdaLink as if it were a PutLink -- perform
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -869,6 +869,10 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{
+		// XXX FIXME... why can't we just say
+		//   return evelnk->evaluate(scratch, silent);
+		// ???
+		//
 		// If the truth value of the link is being requested,
 		// then ... compute the truth value, on the fly!
 		Handle ofatom = evelnk->getOutgoingAtom(0);
@@ -899,6 +903,10 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
 	{
 		return evelnk->getTruthValue();
+	}
+	else if (evelnk->is_evaluatable())
+	{
+		return evelnk->evaluate(scratch, silent);
 	}
 
 	try_crispy = true;
