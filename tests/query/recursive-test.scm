@@ -98,18 +98,18 @@
 
 ; ----------
 (Define
-	(DefinedPredicate "recursive relation")                 ;; Step 1)
+	(DefinedPredicate "recursive relation")                 ;; Step 1.
 	(Lambda
-		(VariableList (Variable "this") (Variable "that"))   ;; Step 2)
-		(SequentialOr                                        ;; Step 3)
+		(VariableList (Variable "this") (Variable "that"))   ;; Step 2.
+		(SequentialOr                                        ;; Step 3.
 			(Present
-				(Inheritance (Variable "this") (Variable "that"))) ;; Step 4)
+				(Inheritance (Variable "this") (Variable "that"))) ;; Step 4.
 			(Satisfaction
-				(Variable "middle")                            ;; Step 5)
+				(Variable "middle")                            ;; Step 5.
 				(And
-					(Present                                    ;; Step 6)
+					(Present                                    ;; Step 6.
 						(Inheritance (Variable "this") (Variable "middle")))
-					(Put                                        ;; Step 7)
+					(Put                                        ;; Step 7.
 						(DefinedPredicate "recursive relation")
 						(List (Variable "middle") (Variable "that"))))))))
 
