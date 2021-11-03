@@ -171,6 +171,9 @@ void PatternLink::disjointed_init(void)
 		_virtual.clear();
 	}
 
+	// We do want to keep a record of the real body.
+	_pat.body = _body;
+
 	_num_comps = _components.size();
 	setup_components();
 }
