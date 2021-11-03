@@ -136,7 +136,19 @@ void PatternLink::disjointed_init(void)
 	for (const Handle& h: _body->getOutgoingSet())
 	{
 printf("duuuude disjoining %s\n", h->to_string().c_str());
+
+		// Each component has just one part to it.
+		HandleSeq clseq({h});
+		_components.emplace_back(clseq);
+
+		// The variables for that component are just the variables
+		// that can be found in that component.
+		FindAtoms fv(_variables.varset);
+		fv.search_set(h);
+		_component_vars.emplace_back(fv.varset);
 	}
+
+	_num_comps = _components.size();
 	setup_components();
 }
 
