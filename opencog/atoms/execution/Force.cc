@@ -55,7 +55,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 	if (LIST_LINK != cargs->get_type())
 	{
 		Handle args(HandleCast(inst.execute(cargs, silent)));
-		if (args != cargs)
+		if (nullptr != args and args != cargs)
 			args = as->add_atom(args);
 		return args;
 	}
@@ -65,21 +65,31 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 	bool changed = false;
 	for (const Handle& ho : cargs->getOutgoingSet())
 	{
-		Handle nh(HandleCast(inst.execute(ho, silent)));
-		// nh might be NULL if ho was a DeleteLink
-		if (nullptr == nh)
+		ValuePtr vp(inst.execute(ho, silent));
+		// vp might be NULL if ho was a DeleteLink
+		if (nullptr == vp)
 		{
 			changed = true;
 			continue;
 		}
 
+		// It might have evaluated to something that is
+		// not a Atom. In this case, we want the original.
+		// This is uhh, kind of ugly and CPU-wasteful.
+		if (not vp->is_atom())
+		{
+			new_oset.emplace_back(ho);
+			continue;
+		}
+
+		Handle nh(HandleCast(vp));
+
 		// Unwrap the top-most DontExecLink's.  Lower ones are left
 		// untouched.  We do this as a sop for issue opencog/atomspace#704
 		// but maybe we should not?
 		if (DONT_EXEC_LINK == nh->get_type())
-		{
 			nh = nh->getOutgoingAtom(0);
-		}
+
 		new_oset.emplace_back(nh);
 		if (nh != ho) changed = true;
 	}
