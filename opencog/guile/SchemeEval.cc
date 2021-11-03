@@ -1129,7 +1129,7 @@ ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 	_hargs = nullptr;
 
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "Unable to apply %s to\n%s\n%s",
+		throw RuntimeException(TRACE_INFO, "Unable to apply `%s` to\n%s\n%s",
 			func.c_str(), varargs->to_string().c_str(), _error_msg.c_str());
 
 	// We do not want this->_retval to point at anything after we return.
