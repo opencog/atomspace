@@ -145,6 +145,7 @@ protected:
 
 	void init(void);
 	void common_init(void);
+	void disjointed_init(void);
 	void setup_components(void);
 
 protected:

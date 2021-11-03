@@ -125,6 +125,21 @@ void PatternLink::setup_components(void)
 	}
 }
 
+/// A body that is an OrLink must be treated as a collection of
+/// distinct, unrelated searches. A body that is sequential must
+/// run the searches in sequence, and halt when satisfied.
+/// Thus, these are always busted up into distinct components.
+void PatternLink::disjointed_init(void)
+{
+	_pat.redex_name = "disjointed PatternLink";
+
+	for (const Handle& h: _body->getOutgoingSet())
+	{
+printf("duuuude disjoining %s\n", h->to_string().c_str());
+	}
+	setup_components();
+}
+
 void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
@@ -146,12 +161,23 @@ void PatternLink::init(void)
 		      to_short_string().c_str());
 	}
 
+	// A body that is an OrLink must be treated as a collection of
+	// distinct, unrelated searches. A body that is sequential must
+	// run the searches in sequence, and halt when satisfied.
+	// Thus, these are always busted up into distinct components.
+	Type t = _body->get_type();
+	if (OR_LINK == t or SEQUENTIAL_OR_LINK == t or SEQUENTIAL_AND_LINK == t)
+	{
+		disjointed_init();
+		return;
+	}
+
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
 
 #ifdef QDEBUG
-	debug_log("PatternLink::common_init()");
+	debug_log("PatternLink::init()");
 	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
 }
