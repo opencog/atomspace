@@ -51,10 +51,22 @@ QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
-	SatisfyingSet sater(as);
-	sater.satisfy(PatternLinkCast(get_handle()));
-
-	return sater.get_result_queue();
+	try
+	{
+		SatisfyingSet sater(as);
+		sater.satisfy(PatternLinkCast(get_handle()));
+		return sater.get_result_queue();
+	}
+	catch(const StandardException& ex)
+	{
+		std::string msg =
+			"Exception during pattern execution! Patterns was\n";
+		msg += to_string();
+		msg += "\nException was:\n";
+		msg += ex.get_message();
+		ex.set_message(msg.c_str());
+		throw;
+	}
 }
 
 ValuePtr MeetLink::execute(AtomSpace* as, bool silent)
