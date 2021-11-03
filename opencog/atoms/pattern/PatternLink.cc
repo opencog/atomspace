@@ -945,10 +945,19 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	// Recurse down to the tips. ... after the evaluatable markup below.
 	if (h->is_link())
 	{
+		// Remove constants from PresentLink, as they are pointless.
+		// The URE frequently puts them there.
+		// The gotcha is that some things look const, but that is only
+		// because they involve variables that are bound to some other
+		// scope up above. Those are NOT actually const. This is not
+		// particularly well-thought out. Might be buggy...
+		bool chk_const =
+			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
+		chk_const = chk_const and not parent->hasAnyEvaluatable();
+
 		for (const Handle& ho: h->getOutgoingSet())
 		{
-			if ((PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t)
-			    and is_constant(_variables.varset, ho)) continue;
+			if (chk_const and is_constant(_variables.varset, ho)) continue;
 			PatternTermPtr po(ptm->addOutgoingTerm(ho));
 			make_term_tree_recursive(root, po);
 		}
