@@ -367,17 +367,27 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		return found;
 	}
 
-	// If we are here, then we've got a knot in the center of it all.
-	// Removing the virtual clauses from the hypergraph typically causes
-	// the hypergraph to fall apart into multiple components, (i.e. none
-	// are connected to one another). The virtual clauses tie all of
-	// these back together into a single connected graph.
+	// If we are here, then we have a multi-component graph. These
+	// occur in several different ways. These are:
 	//
-	// There are several solution strategies possible at this point.
-	// The one that we will pursue, for now, is to first ground all of
-	// the distinct components individually, and then run each possible
-	// grounding combination through the virtual link, for the final
-	// accept/reject determination.
+	// 1) OrLink. Each of components in the OrLink must be individually
+	//    grounded. The final set of results is a set-union of each.
+	// 2) SequentialOrLink. Components are grounded, one by one, until
+	//    the first non-empty grounding appears. Grounding then stops.
+	// 3) SequentialAndLink. Components are grounded, one by one, until
+	//    the first empty grounding appears. Grounding then stops.
+	//    If all components are groundable, then the final set of results
+	//    is the intersection of the component groundings.
+	// 4) Virtual clauses. These are clauses, such as GreaterThanLink,
+	//    which, when removed, result in a graph with multiple
+	//    disconnected components. In this case, each of the components
+	//    must be grounded. At the conclusion, a Cartesian product of
+	//    these are formed, and elements of the product are passed
+	//    through the virutal links, to get true/false values which
+	//    keep/discard that particular product. Note that this is a
+	//    source of combinatorial explosion.
+	//
+	// And so, we start grounding the components.
 
 	const HandleSeq& virts = jit->get_virtual();
 
@@ -385,7 +395,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	size_t num_virts = virts.size();
 	if (logger().is_fine_enabled())
 	{
-		logger().fine("VIRTUAL PATTERN: ====== "
+		logger().fine("MULTI-COMPONENT PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n",
 		              num_comps, num_virts);
 		logger().fine("Virtuals are:");
@@ -399,6 +409,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
+	bool have_virtuals = (0 < virts.size());
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
 	const HandleSeq& comp_patterns = jit->get_component_patterns();
@@ -432,13 +443,16 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		}
 		else
 		{
-			// If there is no solution for one component, then no need
-			// to try to solve the other components, their product
-			// will have no solution.
-			if (gcb._term_groundings.empty()) {
+			// If we have multiple components, because there
+			// is a virtual link connecting them, and one of
+			// the components has no solution, then there is
+			// no need to try to solve the other components,
+			// since their Cartesian product will be empty.
+			if (have_virtuals and gcb._term_groundings.empty())
+			{
 #ifdef QDEBUG
 				logger().fine("No solution for this component. "
-				              "Abort search as no product solution may exist.");
+				              "Abort search as product is empty set.");
 #endif
 				return false;
 			}
@@ -451,6 +465,16 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// The pattern was clobbered by the individual component searches.
 	// We need to reset it.
 	set_pattern(vars, pat);
+
+	// OK we've grounded all the components. Now its time to reassemble
+	// them.
+
+	if (0 == virts.size())
+	{
+printf("duuude we have no virts for %s\n",
+pat.body->to_string().c_str());
+		return true;
+	}
 
 	// And now, try grounding each of the virtual clauses.
 #ifdef QDEBUG
