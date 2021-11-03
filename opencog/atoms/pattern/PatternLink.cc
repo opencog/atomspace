@@ -135,17 +135,40 @@ void PatternLink::disjointed_init(void)
 
 	for (const Handle& h: _body->getOutgoingSet())
 	{
-printf("duuuude disjoining %s\n", h->to_string().c_str());
-
-		// Each component has just one part to it.
-		HandleSeq clseq({h});
-		_components.emplace_back(clseq);
-
 		// The variables for that component are just the variables
 		// that can be found in that component.
+		// XXX FIXME, more correct would be to loop over
+		// _pat.clause_variables and add those. Probably makes
+		// no difference in most cases.
 		FindAtoms fv(_variables.varset);
 		fv.search_set(h);
 		_component_vars.emplace_back(fv.varset);
+
+		// This one weird little trick will unpack the components
+		// that we need. We cannot just push_back `h` into it's own
+		// component, because other code assumes the components have
+		// already been pattern-compiled, whereas `h` is still raw.
+		// Unfortunately, unbundle_clauses sets all sorts of other
+		// stuff that we don't need/want, so we have to clobber that
+		// every time through the loop.
+		// BTW, any `absents` and `always` are probably handled
+		// incorrectly, so that's a bug that needs fixing.
+		unbundle_clauses(h);
+
+		// Each component consists of the assorted parts.
+		// XXX FIXME, this handles `absents` and `always` incorrectly.
+		HandleSeq clseq;
+		for (const PatternTermPtr& ptm: _pat.pmandatory)
+			clseq.push_back(ptm->getHandle());
+
+		_components.emplace_back(clseq);
+
+		_pat.pmandatory.clear();
+		_pat.clause_variables.clear();
+		_pat.connectivity_map.clear();
+		_pat.connected_terms_map.clear();
+		_fixed.clear();
+		_virtual.clear();
 	}
 
 	_num_comps = _components.size();
