@@ -775,9 +775,12 @@ bool PatternLink::is_virtual(const Handle& clause)
 /// highly advantageous to find some constant term on which to start
 /// the search. That's what we try to do here.
 ///
-/// If there is an EvaluationLink somewhere inside the evaluatable,
-/// it might provide a good starting point.  So we loop, looking for
-/// those.
+/// This recursively explores the term, attempting to find "ordinary"
+/// links that have exactly one variable in them, and at least one
+/// other atom. Since this other atom appears inside a non-evaluatable
+/// "ordinary", it must necessarily appear in the AtomSpace. Thus, this
+/// kind of "ordinary" link counts as a fixed term. (A link is
+/// "ordinary" if it's not evaluatable and not a function.)
 ///
 bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 {
@@ -821,14 +824,19 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 		// might be. So fall through and look at those.
 	}
 
-#if 0
-// wtf
-	if (not nameserver().isA(t, EVALUATABLE_LINK))
+	// Try to add any kind of "ordinary" link that contains exactly
+	// one variable in it, and at least one non-variable term in it.
+	// (thus, an arity of 2 or more.)  It's "ordinary" if it is not
+	// evaluatable or executable.
+	if (not nameserver().isA(t, NODE) and
+	    1 < h->get_arity() and
+	    not nameserver().isA(t, EVALUATABLE_LINK) and
+	    not nameserver().isA(t, FREE_LINK) and
+	    1 == num_unquoted_unscoped_in_tree(h, _variables.varset))
 	{
 		_pat.pmandatory.push_back(ptm);
 		return true;
 	}
-#endif
 
 	bool added = false;
 	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
