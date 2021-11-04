@@ -768,16 +768,28 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 /* ================================================================= */
 
-/// * If it is an EvalutationLink-PredicateNode combination, then demand
-///   that it be Present. A later stage will *also* treat this as
-///   evaluatable, and will look at the TV on the EvaluationLink.
-/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
-///   as the predicate) are evaluatable, and cannot be treated as
-///   Present. xxxxxxxxxxxx
+/// Add implicit fixed terms. The pattern might consist only of
+/// evaluatable clauses. Unless we find some constant Atom inside of
+/// it, we risk having to perform a very large search trying to find
+/// something that makes the evaluatable clauses true.  Thus, it is
+/// highly advantageous to find some constant term on which to start
+/// the search. That's what we try to do here.
+///
+/// If there is an EvaluationLink somewhere inside the evaluatable,
+/// it might provide a good starting point.  So we loop, looking for
+/// those.
+///
 bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 {
 	const Handle& h = ptm->getHandle();
 
+	// Ignore literals inside of Choice and Always; these should have
+	// been handled earlier. Ditto for Present, Absent.
+	// The Sequentials are weird from a search perspective: they appear
+	// (should only appear) in SatisfactionLinks, and have thier own
+	// distinct logic to them. So if we're inside of one of these,
+	// we drop out. Probably should refactor the code so that we are
+	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
@@ -792,24 +804,31 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 		if (SEQUENTIAL_AND_LINK == pt or SEQUENTIAL_OR_LINK == pt) return false;
 		parnt = parnt->getParent();
 	}
-printf("duuude enter unaries for %s\n", h->to_string().c_str());
 
 	if (EVALUATION_LINK == t)
 	{
 		OC_ASSERT(0 < h->get_arity(),
 			"Don't now what to do with empty EvlauationLinks");
 
-		// PredicateFormulas cannot be found in the AtomSpace.
-	   if (PREDICATE_FORMULA_LINK == h->getOutgoingAtom(0)->get_type())
-			return false;
+		if (PREDICATE_NODE == h->getOutgoingAtom(0)->get_type())
+		{
+			_pat.pmandatory.push_back(ptm);
+			return true;
+		}
 
-		size_t nfree = num_unquoted_unscoped_in_tree(h, _variables.varset);
-		if (1 < nfree) return false;
+		// EvaluationLinks with evaluatable predicates cannot
+		// be found in the AtomSpace. But perhaps thier arguments
+		// might be. So fall through and look at those.
+	}
 
-printf("duuude add unary for %s\n", h->to_string().c_str());
+#if 0
+// wtf
+	if (not nameserver().isA(t, EVALUATABLE_LINK))
+	{
 		_pat.pmandatory.push_back(ptm);
 		return true;
 	}
+#endif
 
 	bool added = false;
 	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
