@@ -163,10 +163,12 @@ void PatternLink::disjointed_init(void)
 
 		_components.emplace_back(clseq);
 
+		// Clear things we don't need.
+		// Cannot clear _pat.connected_terms_map;
+		// that is used to pin the PatternTerms.
 		_pat.pmandatory.clear();
 		_pat.clause_variables.clear();
 		_pat.connectivity_map.clear();
-		_pat.connected_terms_map.clear();
 		_fixed.clear();
 		_virtual.clear();
 	}
