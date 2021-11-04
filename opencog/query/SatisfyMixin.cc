@@ -169,16 +169,24 @@ class PMCGroundings : public SatisfyMixin
  * groundings for disconnected graph components are in 'comp_var_gnds'
  * and 'comp_term_gnds'.
  *
- * Notes below explain the recursive step: how the various disconnected
- * components are brought together into a candidate grounding. That
- * candidate is then run through each of the virtual links.  If these
- * accept the grounding, then the callback is called to make the final
- * determination.
- *
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
  *
  * Return false if no solution is found, true otherwise.
+ * (As always, 'false' means 'search some more' and 'true' means 'halt'.
+ *
+ * XXX FIXME: A major performance optimization is possible, to handle
+ * the truly explosive combinatorial case. The optimization is to first
+ * locate all of the variables in the virtual clauses, and perform the
+ * recursion in the order of these variables. Once all of the variables
+ * in a particular virtual clause have been found, that clause can be
+ * evaluated on the spot. If it rejects the match, then one does not
+ * have to recurse to the bitter end. This basically prunes the search
+ * space. (Similar to how SAT solving works).
+ *
+ * This perf optimization has not been doen because basically no one
+ * uses the pattern engine to explore large, complex cartesian products
+ * in this way.
  */
 bool SatisfyMixin::cartesian_product(
             const HandleSeq& virtuals,
