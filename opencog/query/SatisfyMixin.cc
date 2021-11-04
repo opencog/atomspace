@@ -448,8 +448,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		else
 		{
 #ifdef QDEBUG
-			logger().fine("Found %lu groundings for compoent %lu",
-				gcb._term_groundings.size(), i);
+			logger().fine("Found %lu groundings for component %lu",
+				gcb._term_groundings.size(), i+1);
 #endif
 			if (gcb._term_groundings.empty())
 			{
@@ -468,8 +468,9 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// We need to reset it.
 	set_pattern(vars, pat);
 
-	// OK we've grounded all the components. Now its time to reassemble
-	// them.
+	// ---------------------------------------------------
+	// OK we've grounded all the components.
+	// Now its time to reassemble them.
 
 	if (0 == virts.size())
 	{
@@ -504,10 +505,11 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 			return search_finished(false);
 		}
 
-		OC_ASSERT(false, "Internal error: all cases shuold have been handled");
+		OC_ASSERT(false, "Internal error: all cases should have been handled");
 		return true;
 	}
 
+	// ---------------------------------------------------
 	// And now, try grounding each of the virtual clauses.
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN cartesian recursion on virtual clausess:"
