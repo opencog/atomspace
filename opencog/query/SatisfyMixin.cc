@@ -146,7 +146,24 @@ class PMCGroundings : public SatisfyMixin
 };
 
 /**
- * Recursive evaluator/grounder/unifier of virtual link types.
+ * Loop over all groundings in all components of the pattern. That is,
+ * given an ordered list of N sets, create a Cartesian product over that
+ * list, by choosing one element from each set, and creating a tuple of
+ * length N. The final Cartesian product is a set of all of these
+ * tuples.  Note that there is a potential combinatorial explosion here,
+ * as the total size is the product of the sizes of each of the
+ * component.
+ *
+ * The loop is implemented recursively: The first set is expanded, then
+ * the second set, etc. and so we recurse to depth N. Only at this
+ * deepest call does a single tuple become available.
+ *
+ * During this expansion, filtering is applied. The filters (if any)
+ * are called 'virtual links'. The prototypical example is the
+ * GreaterThanLink. The virtual links return a true/false value, when
+ * applied to the tuple (or to the currently-available fragment of the
+ * tuple), thus accepting/rejecting that tuple.
+ *
  * The virtual links are in 'virtuals', a partial set of groundings
  * are in 'var_gnds' and 'term_gnds', and a collection of possible
  * groundings for disconnected graph components are in 'comp_var_gnds'
@@ -163,7 +180,7 @@ class PMCGroundings : public SatisfyMixin
  *
  * Return false if no solution is found, true otherwise.
  */
-bool SatisfyMixin::recursive_virtual(
+bool SatisfyMixin::cartesian_product(
             const HandleSeq& virtuals,
             const PatternTermSeq& absents,
             const GroundingMap& var_gnds,
@@ -263,7 +280,7 @@ bool SatisfyMixin::recursive_virtual(
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(virtuals, absents, rvg, rpg,
+		bool accept = cartesian_product(virtuals, absents, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -498,7 +515,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(virts, pat.absents,
+	done = cartesian_product(virts, pat.absents,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 	done = search_finished(done);
