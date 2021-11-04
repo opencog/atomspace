@@ -89,6 +89,13 @@ cog-value->list
 cog-value-ref
 )
 
+; Print C++ exceptions so that they are readable.
+(define (cpp-exception-printer port key args default-printer)
+	(format port "Atomspace C++ exception:\n~A\n" args))
+
+; set-exception-printer! is exposed by ice-9/boot-9
+(set-exception-printer! 'C++-EXCEPTION cpp-exception-printer)
+
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
 ; in guile-2.1 that causes this to be collected, anyway.  Its as if
