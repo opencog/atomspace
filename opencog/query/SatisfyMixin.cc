@@ -373,13 +373,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	//
 	// 1) OrLink. Each of components in the OrLink must be individually
 	//    grounded. The final set of results is a set-union of each.
-	// 2) SequentialOrLink. Components are grounded, one by one, until
-	//    the first non-empty grounding appears. Grounding then stops.
-	// 3) SequentialAndLink. Components are grounded, one by one, until
-	//    the first empty grounding appears. Grounding then stops.
-	//    If all components are groundable, then the final set of results
-	//    is the intersection of the component groundings.
-	// 4) Virtual clauses. These are clauses, such as GreaterThanLink,
+	// 2) Virtual clauses. These are clauses, such as GreaterThanLink,
 	//    which, when removed, result in a graph with multiple
 	//    disconnected components. In this case, each of the components
 	//    must be grounded. At the conclusion, a Cartesian product of
@@ -410,9 +404,6 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
-	Type patty = pat.body->get_type();
-	bool seq_and = (SEQUENTIAL_AND_LINK == patty);
-	bool seq_or = (SEQUENTIAL_OR_LINK == patty);
 	bool have_virtuals = (0 < virts.size());
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
@@ -451,13 +442,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 			logger().fine("Found %lu groundings for component %lu",
 				gcb._term_groundings.size(), i+1);
 #endif
-			if (gcb._term_groundings.empty())
-			{
-				if (have_virtuals or seq_and)
-					return false;
-			}
-			else
-				if (seq_or) break;
+			if (have_virtuals and gcb._term_groundings.empty())
+				return false;
 
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
@@ -474,7 +460,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 
 	if (0 == virts.size())
 	{
-		if (OR_LINK == patty or SEQUENTIAL_OR_LINK == patty)
+		if (OR_LINK == pat.body->get_type())
 		{
 			bool done = start_search();
 			if (done) return done;
@@ -489,22 +475,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 			return search_finished(false);
 		}
 
-// XXX take intersection not union.
-		if (SEQUENTIAL_AND_LINK == patty)
-		{
-			bool done = start_search();
-			if (done) return done;
-			for (size_t i = 0; i < num_comps; i++)
-			{
-				for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
-				{
-					bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
-					if (done) return done;
-				}
-			}
-			return search_finished(false);
-		}
-
+printf("duuude num_comps = %lu\n", num_comps);
+printf("duuude wtf huh %s\n", pat.body->to_string().c_str());
 		OC_ASSERT(false, "Internal error: all cases should have been handled");
 		return true;
 	}
