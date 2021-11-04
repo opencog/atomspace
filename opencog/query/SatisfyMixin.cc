@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -409,6 +410,9 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
+	Type patty = pat.body->get_type();
+	bool seq_and = (SEQUENTIAL_AND_LINK == patty);
+	bool seq_or = (SEQUENTIAL_OR_LINK == patty);
 	bool have_virtuals = (0 < virts.size());
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
@@ -443,19 +447,17 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		}
 		else
 		{
-			// If we have multiple components, because there
-			// is a virtual link connecting them, and one of
-			// the components has no solution, then there is
-			// no need to try to solve the other components,
-			// since their Cartesian product will be empty.
-			if (have_virtuals and gcb._term_groundings.empty())
-			{
 #ifdef QDEBUG
-				logger().fine("No solution for this component. "
-				              "Abort search as product is empty set.");
+			logger().fine("Found %lu groundings for compoent %lu",
+				gcb._term_groundings.size(), i);
 #endif
-				return false;
+			if (gcb._term_groundings.empty())
+			{
+				if (have_virtuals or seq_and)
+					return false;
 			}
+			else
+				if (seq_or) break;
 
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
@@ -471,15 +473,46 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 
 	if (0 == virts.size())
 	{
-printf("duuude we have no virts for %s\n",
-pat.body->to_string().c_str());
+		if (OR_LINK == patty or SEQUENTIAL_OR_LINK == patty)
+		{
+			bool done = start_search();
+			if (done) return done;
+			for (size_t i = 0; i < num_comps; i++)
+			{
+				for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
+				{
+					bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
+					if (done) return done;
+				}
+			}
+			return search_finished(false);
+		}
+
+// XXX take intersection not union.
+		if (SEQUENTIAL_AND_LINK == patty)
+		{
+			bool done = start_search();
+			if (done) return done;
+			for (size_t i = 0; i < num_comps; i++)
+			{
+				for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
+				{
+					bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
+					if (done) return done;
+				}
+			}
+			return search_finished(false);
+		}
+
+		OC_ASSERT(false, "Internal error: all cases shuold have been handled");
 		return true;
 	}
 
 	// And now, try grounding each of the virtual clauses.
 #ifdef QDEBUG
-	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
-	              << "num comp=" << comp_var_gnds.size()
+	LAZY_LOG_FINE << "BEGIN cartesian recursion on virtual clausess:"
+	              << " ==========="
+	              << " num comp=" << comp_var_gnds.size()
 	              << " num virts=" << num_virts;
 #endif
 	GroundingMap empty_vg;
