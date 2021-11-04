@@ -384,6 +384,18 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	const Handle& h = clause->getHandle();
 	Type typ = h->get_type();
 
+	if (not reverse and EVALUATION_LINK == typ)
+	{
+		OC_ASSERT(0 < h->get_arity(),
+			"Don't now what to do with empty EvlauationLinks");
+		if (PREDICATE_FORMULA_LINK != h->getOutgoingAtom(0)->get_type())
+		{
+			pin_term(clause);
+			_pat.pmandatory.push_back(clause);
+			return true;
+		}
+	}
+
 	// Pull clauses out of a PresentLink
 	if ((not reverse and PRESENT_LINK == typ) or
 	    (reverse and ABSENT_LINK == typ))
@@ -508,7 +520,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 ///   evaluatable, and will look at the TV on the EvaluationLink.
 /// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
 ///   as the predicate) are evaluatable, and cannot be treated as
-///   Present.
+///   Present. xxxxxxxxxxxx
 ///
 bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
                                        const TypeSet& connectives,
@@ -774,6 +786,39 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 /* ================================================================= */
 
+bool PatternLink::add_unaries(const PatternTermPtr& ptm)
+{
+	const Handle& h = ptm->getHandle();
+
+// printf("duuude enter unaries for %s\n", h->to_string().c_str());
+	Type t = h->get_type();
+	if (CHOICE_LINK == t) return false;
+
+	if (EVALUATION_LINK == t)
+	{
+		OC_ASSERT(0 < h->get_arity(),
+			"Don't now what to do with empty EvlauationLinks");
+
+		// PredicateFormulas cannot be found in the AtomSpace.
+	   if (PREDICATE_FORMULA_LINK == h->getOutgoingAtom(0)->get_type())
+			return false;
+
+		size_t nfree = num_unquoted_unscoped_in_tree(h, _variables.varset);
+		if (1 < nfree) return false;
+
+printf("duuude add unary for %s\n", h->to_string().c_str());
+		_pat.pmandatory.push_back(ptm);
+		return true;
+	}
+
+	bool added = false;
+	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
+	{
+		added = added or add_unaries(sub);
+	}
+	return added;
+}
+
 /// Add dummy clauses for patterns that would otherwise not have any
 /// non-evaluatable clauses.  One example of such is
 ///
@@ -810,6 +855,8 @@ bool PatternLink::is_virtual(const Handle& clause)
 ///
 void PatternLink::add_dummies(const PatternTermPtr& ptm)
 {
+	if (add_unaries(ptm)) return;
+
 	const Handle& h = ptm->getHandle();
 	Type t = h->get_type();
 
@@ -890,7 +937,7 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	//          (Concept "OK"))
 	// and we could add `(Variable "X") (Variable "Y")` with the
 	// `add_dummies()` method above. But if we did, it would be
-	// an info loop that blows out the stack, because X and Y
+	// an infinite loop that blows out the stack, because X and Y
 	// are not constrained, and match everything, including the
 	// temorary terms created during search... so we do NOT
 	// `add_dummies()` this case. See issue #1420 for more.
