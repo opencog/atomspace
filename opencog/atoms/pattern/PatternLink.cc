@@ -202,11 +202,10 @@ void PatternLink::init(void)
 	}
 
 	// A body that is an OrLink must be treated as a collection of
-	// distinct, unrelated searches. A body that is sequential must
-	// run the searches in sequence, and halt when satisfied.
-	// Thus, these are always busted up into distinct components.
+	// distinct, unrelated searches; the result is a union of the
+	// results of the parts.
 	Type t = _body->get_type();
-	if (OR_LINK == t or SEQUENTIAL_OR_LINK == t or SEQUENTIAL_AND_LINK == t)
+	if (OR_LINK == t)
 	{
 		disjointed_init();
 		return;
