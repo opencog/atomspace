@@ -384,18 +384,6 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	const Handle& h = clause->getHandle();
 	Type typ = h->get_type();
 
-	if (not reverse and EVALUATION_LINK == typ)
-	{
-		OC_ASSERT(0 < h->get_arity(),
-			"Don't now what to do with empty EvlauationLinks");
-		if (PREDICATE_FORMULA_LINK != h->getOutgoingAtom(0)->get_type())
-		{
-			pin_term(clause);
-			_pat.pmandatory.push_back(clause);
-			return true;
-		}
-	}
-
 	// Pull clauses out of a PresentLink
 	if ((not reverse and PRESENT_LINK == typ) or
 	    (reverse and ABSENT_LINK == typ))
@@ -508,19 +496,13 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 /// literal, groundable clauses. `record_literal` does this.
 ///
 /// If there weren't any literal Present, Absent or Choice Links, (i.e.
-/// if `record_literal` didn't spot anything) then take some guesses.
-/// This guessing is slightly convoluted, but seems to make sense.
-/// So:
+/// if `record_literal` didn't spot anything) then some later stages
+/// will attempt to fish out any literal-like terms hidden inside of
+/// of evaluatable clauses.
+///
+/// What we do here is:
 /// * If a clause is not evaluatable, then assume `Present` was intended.
-/// * If it is evaluatable, then assume some later stage will evaluate it.
-/// * If it is a variable, then assume something else will ground it, and
-///   that some later stage will evaluate it.
-/// * If it is an EvalutationLink-PredicateNode combination, then demand
-///   that it be Present. A later stage will *also* treat this as
-///   evaluatable, and will look at the TV on the EvaluationLink.
-/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
-///   as the predicate) are evaluatable, and cannot be treated as
-///   Present. xxxxxxxxxxxx
+/// * If it is antyhing else, assume some later stage will evaluate it.
 ///
 bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
                                        const TypeSet& connectives,
@@ -786,13 +768,31 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 /* ================================================================= */
 
+/// * If it is an EvalutationLink-PredicateNode combination, then demand
+///   that it be Present. A later stage will *also* treat this as
+///   evaluatable, and will look at the TV on the EvaluationLink.
+/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
+///   as the predicate) are evaluatable, and cannot be treated as
+///   Present. xxxxxxxxxxxx
 bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 {
 	const Handle& h = ptm->getHandle();
 
-// printf("duuude enter unaries for %s\n", h->to_string().c_str());
 	Type t = h->get_type();
-	if (CHOICE_LINK == t) return false;
+	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
+	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
+	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
+
+	PatternTermPtr parnt = ptm->getParent();
+	while (parnt)
+	{
+		const Handle& ph = parnt->getHandle();
+		if (nullptr == ph) break;
+		Type pt = ph->get_type();
+		if (SEQUENTIAL_AND_LINK == pt or SEQUENTIAL_OR_LINK == pt) return false;
+		parnt = parnt->getParent();
+	}
+printf("duuude enter unaries for %s\n", h->to_string().c_str());
 
 	if (EVALUATION_LINK == t)
 	{
@@ -855,8 +855,6 @@ printf("duuude add unary for %s\n", h->to_string().c_str());
 ///
 void PatternLink::add_dummies(const PatternTermPtr& ptm)
 {
-	if (add_unaries(ptm)) return;
-
 	const Handle& h = ptm->getHandle();
 	Type t = h->get_type();
 
@@ -1112,6 +1110,10 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 				}
 		}
 
+		// If the evaluatables have literal-ish subterms, add those.
+		if (add_unaries(ptm)) return;
+
+		// If the above failed, then try adding dummy variables.
 		add_dummies(ptm);
 		return;
 	}
