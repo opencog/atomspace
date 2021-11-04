@@ -84,9 +84,10 @@ protected:
 	/// that can be used to determine graph connectivity. For the most
 	/// part, they consist of terms that must be literally present in
 	/// order to be satisfied. With the exception of IdenticalLink, the
-	/// fixed clauses are never virtual or evaluatable. (Most Identical
-	/// links can be evaluated statically; the few remaining cases can
-	/// be evaluated dynamically, and do not split graph connectivity.
+	/// fixed clauses are never virtual or evaluatable. (Identical links
+	/// never split graph connecivity, as one 'side' can always be traced
+	/// into the other.)
+	///
 	/// The `_fixed` field is cleared after connectivity is determined.
 	///
 	/// "virtual" clauses are those that contain virtual links.
