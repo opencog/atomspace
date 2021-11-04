@@ -24,6 +24,16 @@
 			(List (Variable "N") (Concept "name1"))))
   (Variable "Y")))
 
+; Same as above but with IdenticalLink
+(define qi-basic (Query
+	(And
+		(Member
+			(Evaluation (Predicate "has_name") (Variable "Y"))
+			(Concept "node2"))
+		(Identical (Variable "Y")
+			(List (Variable "N") (Concept "name1"))))
+  (Variable "Y")))
+
 (define qe1 (Query
 	(And
 		(Member
@@ -67,12 +77,47 @@
 
 ; (cog-execute! qe2)
 
+; Same as above, but with IdenticalLink
+(define qe2i (Query
+	(And
+		(Member
+			(Evaluation (Predicate "has_name") (Variable "Y"))
+			(Concept "node2"))
+		(Identical (Variable "Y")
+			(List (Variable "N") (Concept "name1")))
+		(Evaluation
+			(PredicateFormula
+				(Minus (Number 1)
+					(Times
+						(StrengthOf (Variable "$X"))
+						(StrengthOf (Variable "$Y"))))
+				(Times
+					(ConfidenceOf (Variable "$X"))
+					(ConfidenceOf (Variable "$Y"))))
+			(Variable "Y")))
+  (Variable "Y")))
+
+; (cog-execute! qe2i)
+
 (define qe3 (Query
 	(And
 		(Member
 			(Evaluation (Predicate "has_name") (Variable "Y"))
 			(Concept "node2"))
 		(Equal (Variable "Y")
+			(List (Variable "N") (Concept "name1")))
+		(Evaluation
+			(DefinedPredicate "pred1")
+			(Variable "Y")))
+  (Variable "Y")))
+
+; Same as above, but with Identical
+(define qe3i (Query
+	(And
+		(Member
+			(Evaluation (Predicate "has_name") (Variable "Y"))
+			(Concept "node2"))
+		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
 		(Evaluation
 			(DefinedPredicate "pred1")
