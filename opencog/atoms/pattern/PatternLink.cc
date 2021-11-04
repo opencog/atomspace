@@ -815,7 +815,9 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 
 		if (PREDICATE_NODE == h->getOutgoingAtom(0)->get_type())
 		{
-			_pat.pmandatory.push_back(ptm);
+			// deduplicate on the fly.
+			if (not ptm->contained_in(_pat.pmandatory))
+				_pat.pmandatory.push_back(ptm);
 			return true;
 		}
 
@@ -834,7 +836,9 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	    not nameserver().isA(t, FREE_LINK) and
 	    1 == num_unquoted_unscoped_in_tree(h, _variables.varset))
 	{
-		_pat.pmandatory.push_back(ptm);
+		// deduplicate on the fly.
+		if (not ptm->contained_in(_pat.pmandatory))
+			_pat.pmandatory.push_back(ptm);
 		return true;
 	}
 
