@@ -92,7 +92,7 @@ void SequenceUTest::test_sequence(void)
 		caught_exception = true;
 	}
 	TS_ASSERT_EQUALS(true, caught_exception);
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 
 	// This should not throw any exceptions.
 	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (traffic-lights))");
