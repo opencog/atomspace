@@ -373,14 +373,23 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	//
 	// 1) OrLink. Each of components in the OrLink must be individually
 	//    grounded. The final set of results is a set-union of each.
-	// 2) Virtual clauses. These are clauses, such as GreaterThanLink,
-	//    which, when removed, result in a graph with multiple
-	//    disconnected components. In this case, each of the components
-	//    must be grounded. At the conclusion, a Cartesian product of
-	//    these are formed, and elements of the product are passed
-	//    through the virutal links, to get true/false values which
-	//    keep/discard that particular product. Note that this is a
-	//    source of combinatorial explosion.
+	// 2) Cartesian product of multiple disconnected graph components.
+	//    This is a surprisingly common search (the URE loves to do this)
+	//    The product is product of groundings found in each of the
+	//    components. If there are zero groundings in any component, then
+	//    the product is necessarily the empty set (and so halts further
+	//    search.) A (combinatorially explosive!) loop will then loop
+	//    over the product, passing each combination to the rewrite
+	//    mixin. (The URE typically assembles some deduction in that
+	//    final rewrite.)
+	// 3) Virtual clauses. This is a special case of the Cartesian
+	//    product. Some clauses, such as GreaterThanLink, when removed,
+	//    result in a graph with multiple disconnected components. In
+	//    this case, the Cartesian product is constructed and then the
+	//    elements of the product are passed through the virutal links,
+	//    which produce true/false values which are used to keep/discard
+	//    that particular product. Basically, its just a filter on the
+	//    Cartesian product.
 	//
 	// And so, we start grounding the components.
 
@@ -404,7 +413,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
-	bool have_virtuals = (0 < virts.size());
+	bool have_orlink = (OR_LINK == pat.body->get_type());
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
 	const HandleSeq& comp_patterns = jit->get_component_patterns();
@@ -442,7 +451,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 			logger().fine("Found %lu groundings for component %lu",
 				gcb._term_groundings.size(), i+1);
 #endif
-			if (have_virtuals and gcb._term_groundings.empty())
+			if (not have_orlink and gcb._term_groundings.empty())
 				return false;
 
 			comp_var_gnds.push_back(gcb._var_groundings);
@@ -457,32 +466,28 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// ---------------------------------------------------
 	// OK we've grounded all the components.
 	// Now its time to reassemble them.
-
-	if (0 == virts.size())
+	// In the case of OrLink, the final result is just the set-union
+	// of the groundings delivered by the individual components.
+	if (have_orlink)
 	{
-		if (OR_LINK == pat.body->get_type())
+		OC_ASSERT(0 == virts.size(), "Not expecting virtuals here!");
+		bool done = start_search();
+		if (done) return done;
+		for (size_t i = 0; i < num_comps; i++)
 		{
-			bool done = start_search();
-			if (done) return done;
-			for (size_t i = 0; i < num_comps; i++)
+			for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
 			{
-				for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
-				{
-					bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
-					if (done) return done;
-				}
+				bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
+				if (done) return done;
 			}
-			return search_finished(false);
 		}
-
-printf("duuude num_comps = %lu\n", num_comps);
-printf("duuude wtf huh %s\n", pat.body->to_string().c_str());
-		OC_ASSERT(false, "Internal error: all cases should have been handled");
-		return true;
+		return search_finished(false);
 	}
 
 	// ---------------------------------------------------
-	// And now, try grounding each of the virtual clauses.
+	// If we are here, we have to deal with the Cartesian product.
+	// Loop over everything in that product, and filter it through
+	// the virtual clauses (if any).
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "BEGIN cartesian recursion on virtual clausess:"
 	              << " ==========="
