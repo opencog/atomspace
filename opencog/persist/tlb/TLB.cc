@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "TLB.h"
 
@@ -97,8 +98,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
             _handle_map.erase(pr);
             _uuid_map.erase(oid);
 
-            if (uuid != INVALID_UUID and oid != uuid)
-                throw AssertionException(TRACE_INFO,
+            OC_ASSERT(uuid == INVALID_UUID or oid == uuid,
                      "Earlier version of atom has mis-matched UUID!");
 
             // If not given a uuid, now we know what it is.
@@ -125,8 +125,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     {
         if (_handle_map.end() != pr)
         {
-            if (uuid != pr->second)
-                throw AssertionException(TRACE_INFO,
+            OC_ASSERT(uuid == pr->second,
                      "Atom is already in the TLB, and UUID's don't match!");
 
             // If the atom that we are holding is in the same atomspace
