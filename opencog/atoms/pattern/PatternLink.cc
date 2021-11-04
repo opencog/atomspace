@@ -491,6 +491,48 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	return false;
 }
 
+/// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
+/// recusively embedded inside some evaluatable clause.  Note these as
+/// literal, groundable clauses. `record_literal` does this.
+///
+/// If there weren't any literal Present, Absent or Choice Links, (i.e.
+/// if `record_literal` didn't spot anything) then take some guesses.
+/// This guessing is slightly convoluted, but seems to make sense.
+/// So:
+/// * If a clause is not evaluatable, then assume `Present` was intended.
+/// * If it is evaluatable, then assume some later stage will evaluate it.
+/// * If it is a variable, then assume something else will ground it, and
+///   that some later stage will evaluate it.
+/// * If it is an EvalutationLink-PredicateNode combination, then demand
+///   that it be Present. A later stage will *also* treat this as
+///   evaluatable, and will look at the TV on the EvaluationLink.
+/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
+///   as the predicate) are evaluatable, and cannot be treated as
+///   Present.
+///
+bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
+                                       const TypeSet& connectives,
+                                       bool reverse)
+{
+	const Handle& bdy = term->getHandle();
+	Type t = bdy->get_type();
+
+	if (connectives.find(t) == connectives.end())
+		return false;
+
+	if (NOT_LINK == t) reverse = not reverse;
+
+	bool recorded = true;
+	for (const PatternTermPtr& pto : term->getOutgoingSet())
+	{
+		if (record_literal(pto, reverse)) continue;
+		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
+
+		recorded = false;
+	}
+	return recorded;
+}
+
 /// Unpack the clauses.
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
@@ -563,48 +605,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		if (not clause->isVirtual())
 			_fixed.emplace_back(clause);
 	}
-}
-
-/// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
-/// recusively embedded inside some evaluatable clause.  Note these as
-/// literal, groundable clauses. `record_literal` does this.
-///
-/// If there weren't any literal Present, Absent or Choice Links, (i.e.
-/// if `record_literal` didn't spot anything) then take some guesses.
-/// This guessing is slightly convoluted, but seems to make sense.
-/// So:
-/// * If a clause is not evaluatable, then assume `Present` was intended.
-/// * If it is evaluatable, then assume some later stage will evaluate it.
-/// * If it is a variable, then assume something else will ground it, and
-///   that some later stage will evaluate it.
-/// * If it is an EvalutationLink-PredicateNode combination, then demand
-///   that it be Present. A later stage will *also* treat this as
-///   evaluatable, and will look at the TV on the EvaluationLink.
-/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
-///   as the predicate) are evaluatable, and cannot be treated as
-///   Present.
-///
-bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
-                                       const TypeSet& connectives,
-                                       bool reverse)
-{
-	const Handle& bdy = term->getHandle();
-	Type t = bdy->get_type();
-
-	if (connectives.find(t) == connectives.end())
-		return false;
-
-	if (NOT_LINK == t) reverse = not reverse;
-
-	bool recorded = true;
-	for (const PatternTermPtr& pto : term->getOutgoingSet())
-	{
-		if (record_literal(pto, reverse)) continue;
-		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
-
-		recorded = false;
-	}
-	return recorded;
 }
 
 /* ================================================================= */
