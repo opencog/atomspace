@@ -171,19 +171,25 @@ static bool is_outgoing_closed(const Handle& h)
 	                   [](const Handle& o) { return is_closed(o); });
 }
 
-/// Perform a IsTrue check
-static bool is_outgoing_true(const Handle& h)
+/// Perform the IsTrueLink check
+static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
 {
-	const HandleSeq& oset = h->getOutgoingSet();
+	// Truth values are always relative to the AtomSpace the Atom is in.
+	// So make sure that the Atom is in the AtomSpace.
+	Handle hs(scratch->add_atom(h));
+	const HandleSeq& oset = hs->getOutgoingSet();
 	return std::all_of(oset.begin(), oset.end(),
 		[](const Handle& o)
 			{ return *o->getTruthValue() == *TruthValue::TRUE_TV(); });
 }
 
-/// Perform a IsFalse check
-static bool is_outgoing_false(const Handle& h)
+/// Perform the IsFalseLink check
+static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
 {
-	const HandleSeq& oset = h->getOutgoingSet();
+	// Truth values are always relative to the AtomSpace the Atom is in.
+	// So make sure that the Atom is in the AtomSpace.
+	Handle hs(scratch->add_atom(h));
+	const HandleSeq& oset = hs->getOutgoingSet();
 	return std::all_of(oset.begin(), oset.end(),
 		[](const Handle& o)
 			{ return *o->getTruthValue() == *TruthValue::FALSE_TV(); });
@@ -567,8 +573,8 @@ static bool crispy_maybe(AtomSpace* as,
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
-	if (IS_TRUE_LINK == t) return is_outgoing_true(evelnk);
-	if (IS_FALSE_LINK == t) return is_outgoing_false(evelnk);
+	if (IS_TRUE_LINK == t) return is_outgoing_true(scratch, evelnk);
+	if (IS_FALSE_LINK == t) return is_outgoing_false(scratch, evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);

@@ -177,7 +177,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	catch(const StandardException& ex)
 	{
 		std::string msg =
-			"Exception during pattern execution! Patterns was\n";
+			"Exception during execution of pattern\n";
 		msg += to_string();
 		msg += "\nException was:\n";
 		msg += ex.get_message();

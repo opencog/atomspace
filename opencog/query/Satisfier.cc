@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
@@ -139,7 +141,7 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 		}
 		catch (...)
 		{
-			throw AssertionException(TRACE_INFO,
+			OC_ASSERT(false,
 				"Internal error: ungrounded variable %s\n",
 				_varseq[0]->to_string().c_str());
 		}

@@ -110,6 +110,7 @@ IF (HAVE_GUILE)
 	ADD_GUILE_TEST(DotMashupTest dot-mashup-test.scm)
 	ADD_GUILE_TEST(MeetLinkValueTest meet-link-value-test.scm)
 	ADD_GUILE_TEST(MultiSpaceQueryTest multi-space-test.scm)
+	ADD_GUILE_TEST(OrLinkTest or-link-test.scm)
 	ADD_GUILE_TEST(RecursiveTest recursive-test.scm)
 
 ENDIF (HAVE_GUILE)

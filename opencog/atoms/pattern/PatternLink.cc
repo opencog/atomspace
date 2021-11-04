@@ -125,6 +125,61 @@ void PatternLink::setup_components(void)
 	}
 }
 
+/// A body that is an OrLink must be treated as a collection of
+/// distinct, unrelated searches. A body that is sequential must
+/// run the searches in sequence, and halt when satisfied.
+/// Thus, these are always busted up into distinct components.
+void PatternLink::disjointed_init(void)
+{
+	_pat.redex_name = "disjointed PatternLink";
+
+	for (const Handle& h: _body->getOutgoingSet())
+	{
+		// The variables for that component are just the variables
+		// that can be found in that component.
+		// XXX FIXME, more correct would be to loop over
+		// _pat.clause_variables and add those. Probably makes
+		// no difference in most cases.
+		FindAtoms fv(_variables.varset);
+		fv.search_set(h);
+		_component_vars.emplace_back(fv.varset);
+
+		// This one weird little trick will unpack the components
+		// that we need. We cannot just push_back `h` into it's own
+		// component, because other code assumes the components have
+		// already been pattern-compiled, whereas `h` is still raw.
+		// Unfortunately, unbundle_clauses sets all sorts of other
+		// stuff that we don't need/want, so we have to clobber that
+		// every time through the loop.
+		// BTW, any `absents` and `always` are probably handled
+		// incorrectly, so that's a bug that needs fixing.
+		unbundle_clauses(h);
+
+		// Each component consists of the assorted parts.
+		// XXX FIXME, this handles `absents` and `always` incorrectly.
+		HandleSeq clseq;
+		for (const PatternTermPtr& ptm: _pat.pmandatory)
+			clseq.push_back(ptm->getHandle());
+
+		_components.emplace_back(clseq);
+
+		// Clear things we don't need.
+		// Cannot clear _pat.connected_terms_map;
+		// that is used to pin the PatternTerms.
+		_pat.pmandatory.clear();
+		_pat.clause_variables.clear();
+		_pat.connectivity_map.clear();
+		_fixed.clear();
+		_virtual.clear();
+	}
+
+	// We do want to keep a record of the real body.
+	_pat.body = _body;
+
+	_num_comps = _components.size();
+	setup_components();
+}
+
 void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
@@ -146,12 +201,22 @@ void PatternLink::init(void)
 		      to_short_string().c_str());
 	}
 
+	// A body that is an OrLink must be treated as a collection of
+	// distinct, unrelated searches; the result is a union of the
+	// results of the parts.
+	Type t = _body->get_type();
+	if (OR_LINK == t)
+	{
+		disjointed_init();
+		return;
+	}
+
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
 
 #ifdef QDEBUG
-	debug_log("PatternLink::common_init()");
+	debug_log("PatternLink::init()");
 	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
 }
@@ -238,7 +303,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_num_comps = 1;
 
 	make_connectivity_map();
-	_pat.redex_name = "Unpacked component of a virtual link";
+	_pat.redex_name = "Component of Cartesian product";
 
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
@@ -426,6 +491,48 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	return false;
 }
 
+/// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
+/// recusively embedded inside some evaluatable clause.  Note these as
+/// literal, groundable clauses. `record_literal` does this.
+///
+/// If there weren't any literal Present, Absent or Choice Links, (i.e.
+/// if `record_literal` didn't spot anything) then take some guesses.
+/// This guessing is slightly convoluted, but seems to make sense.
+/// So:
+/// * If a clause is not evaluatable, then assume `Present` was intended.
+/// * If it is evaluatable, then assume some later stage will evaluate it.
+/// * If it is a variable, then assume something else will ground it, and
+///   that some later stage will evaluate it.
+/// * If it is an EvalutationLink-PredicateNode combination, then demand
+///   that it be Present. A later stage will *also* treat this as
+///   evaluatable, and will look at the TV on the EvaluationLink.
+/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
+///   as the predicate) are evaluatable, and cannot be treated as
+///   Present.
+///
+bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
+                                       const TypeSet& connectives,
+                                       bool reverse)
+{
+	const Handle& bdy = term->getHandle();
+	Type t = bdy->get_type();
+
+	if (connectives.find(t) == connectives.end())
+		return false;
+
+	if (NOT_LINK == t) reverse = not reverse;
+
+	bool recorded = true;
+	for (const PatternTermPtr& pto : term->getOutgoingSet())
+	{
+		if (record_literal(pto, reverse)) continue;
+		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
+
+		recorded = false;
+	}
+	return recorded;
+}
+
 /// Unpack the clauses.
 ///
 /// The predicate is either an AndLink of clauses to be satisfied, or a
@@ -498,48 +605,6 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		if (not clause->isVirtual())
 			_fixed.emplace_back(clause);
 	}
-}
-
-/// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
-/// recusively embedded inside some evaluatable clause.  Note these as
-/// literal, groundable clauses. `record_literal` does this.
-///
-/// If there weren't any literal Present, Absent or Choice Links, (i.e.
-/// if `record_literal` didn't spot anything) then take some guesses.
-/// This guessing is slightly convoluted, but seems to make sense.
-/// So:
-/// * If a clause is not evaluatable, then assume `Present` was intended.
-/// * If it is evaluatable, then assume some later stage will evaluate it.
-/// * If it is a variable, then assume something else will ground it, and
-///   that some later stage will evaluate it.
-/// * If it is an EvalutationLink-PredicateNode combination, then demand
-///   that it be Present. A later stage will *also* treat this as
-///   evaluatable, and will look at the TV on the EvaluationLink.
-/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
-///   as the predicate) are evaluatable, and cannot be treated as
-///   Present.
-///
-bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
-                                       const TypeSet& connectives,
-                                       bool reverse)
-{
-	const Handle& bdy = term->getHandle();
-	Type t = bdy->get_type();
-
-	if (connectives.find(t) == connectives.end())
-		return false;
-
-	if (NOT_LINK == t) reverse = not reverse;
-
-	bool recorded = true;
-	for (const PatternTermPtr& pto : term->getOutgoingSet())
-	{
-		if (record_literal(pto, reverse)) continue;
-		if (unbundle_clauses_rec(pto, connectives, reverse)) continue;
-
-		recorded = false;
-	}
-	return recorded;
 }
 
 /* ================================================================= */
