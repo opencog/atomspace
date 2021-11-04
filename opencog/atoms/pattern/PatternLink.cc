@@ -303,7 +303,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_num_comps = 1;
 
 	make_connectivity_map();
-	_pat.redex_name = "Unpacked component of a virtual link";
+	_pat.redex_name = "Component of Cartesian product";
 
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
