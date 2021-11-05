@@ -84,8 +84,8 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 }
 
 /// Get the unique link for this alias.
-Handle UniqueLink::get_unique(const Handle& alias, Type type,
-                              bool allow_open, const AtomSpace* as)
+Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
+                                 bool disallow_open, const AtomSpace* as)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
@@ -101,7 +101,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 	for (const Handle& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) != alias) continue;
-		if (allow_open)
+		if (disallow_open)
 		{
 			UniqueLinkPtr ulp(UniqueLinkCast(defl));
 			if (0 < ulp->get_vars().varseq.size()) continue;
@@ -113,6 +113,13 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 			depth = lvl;
 		}
 	}
+	return shallowest;
+}
+
+Handle UniqueLink::get_unique(const Handle& alias, Type type,
+                              bool allow_open, const AtomSpace* as)
+{
+	Handle shallowest(get_unique_nt(alias, type, allow_open, as));
 
 	if (shallowest) return shallowest;
 
