@@ -768,6 +768,35 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 /* ================================================================= */
 
+/// Return true if the term has variables in it that do not yet appear
+/// in any non-evaluatable mandatory clause. If there are such
+/// variables, we either have to find non-evaluatable terms that hold
+/// them, or add those variables directly, as mandatory terms.
+bool PatternLink::need_dummies(const PatternTermPtr& ptm)
+{
+	// Are there any variables below us?
+	// Do they already appear in some existing mandatory term?
+	// If not, then we have to go fishing for fixed terms,
+	// or add dummies.
+	HandleSet vset = get_free_variables(ptm->getHandle());
+	for (const Handle& v: vset)
+	{
+		bool found_this_v = false;
+		for (const PatternTermPtr& man : _pat.pmandatory)
+		{
+			HandleSet vman = get_free_variables(man->getHandle());
+			if (vman.end() != vman.find(v))
+			{
+				found_this_v = true;
+				break;
+			}
+		}
+		if (not found_this_v)
+			return true;
+	}
+	return false;
+}
+
 /// Add implicit fixed terms. The pattern might consist only of
 /// evaluatable clauses. Unless we find some constant Atom inside of
 /// it, we risk having to perform a very large search trying to find
@@ -1128,34 +1157,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
 	    and not ptm->isQuoted() and can_evaluate(h))
 	{
-		// Are there any variables below us?
-		// Do they already appear in some existing mandatory term?
-		// If not, then we have to go fishing for fixed terms,
-		// or add dummies.
-		// FIXME: It might be conceptually cleaner to do this in a
-		// second pass, after the `make_term_tree()` has been done
-		// on all the clauses. But, for now, we do this here.
-		bool need_dummies = false;
-		HandleSet vset = get_free_variables(h);
-		for (const Handle& v: vset)
-		{
-			bool found_this_v = false;
-			for (const PatternTermPtr& man : _pat.pmandatory)
-			{
-				HandleSet vman = get_free_variables(man->getHandle());
-				if (vman.end() != vman.find(v))
-				{
-					found_this_v = true;
-					break;
-				}
-			}
-			if (not found_this_v)
-			{
-				need_dummies = true;
-				break;
-			}
-		}
-		if (not need_dummies) return;
+		if (not need_dummies(ptm)) return;
 
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
