@@ -496,19 +496,13 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 /// literal, groundable clauses. `record_literal` does this.
 ///
 /// If there weren't any literal Present, Absent or Choice Links, (i.e.
-/// if `record_literal` didn't spot anything) then take some guesses.
-/// This guessing is slightly convoluted, but seems to make sense.
-/// So:
+/// if `record_literal` didn't spot anything) then some later stages
+/// will attempt to fish out any literal-like terms hidden inside of
+/// of evaluatable clauses.
+///
+/// What we do here is:
 /// * If a clause is not evaluatable, then assume `Present` was intended.
-/// * If it is evaluatable, then assume some later stage will evaluate it.
-/// * If it is a variable, then assume something else will ground it, and
-///   that some later stage will evaluate it.
-/// * If it is an EvalutationLink-PredicateNode combination, then demand
-///   that it be Present. A later stage will *also* treat this as
-///   evaluatable, and will look at the TV on the EvaluationLink.
-/// * Other EvalutationLink styles (e.g. with GPN or DPN or Lambda
-///   as the predicate) are evaluatable, and cannot be treated as
-///   Present.
+/// * If it is antyhing else, assume some later stage will evaluate it.
 ///
 bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
                                        const TypeSet& connectives,
@@ -774,6 +768,88 @@ bool PatternLink::is_virtual(const Handle& clause)
 
 /* ================================================================= */
 
+/// Add implicit fixed terms. The pattern might consist only of
+/// evaluatable clauses. Unless we find some constant Atom inside of
+/// it, we risk having to perform a very large search trying to find
+/// something that makes the evaluatable clauses true.  Thus, it is
+/// highly advantageous to find some constant term on which to start
+/// the search. That's what we try to do here.
+///
+/// This recursively explores the term, attempting to find "ordinary"
+/// links that have exactly one variable in them, and at least one
+/// other atom. Since this other atom appears inside a non-evaluatable
+/// "ordinary", it must necessarily appear in the AtomSpace. Thus, this
+/// kind of "ordinary" link counts as a fixed term. (A link is
+/// "ordinary" if it's not evaluatable and not a function.)
+///
+bool PatternLink::add_unaries(const PatternTermPtr& ptm)
+{
+	const Handle& h = ptm->getHandle();
+
+	// Ignore literals inside of Choice and Always; these should have
+	// been handled earlier. Ditto for Present, Absent.
+	// The Sequentials are weird from a search perspective: they appear
+	// (should only appear) in SatisfactionLinks, and have thier own
+	// distinct logic to them. So if we're inside of one of these,
+	// we drop out. Probably should refactor the code so that we are
+	// not even called for any of these cases.
+	Type t = h->get_type();
+	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
+	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
+	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
+
+	PatternTermPtr parnt = ptm->getParent();
+	while (parnt)
+	{
+		const Handle& ph = parnt->getHandle();
+		if (nullptr == ph) break;
+		Type pt = ph->get_type();
+		if (SEQUENTIAL_AND_LINK == pt or SEQUENTIAL_OR_LINK == pt) return false;
+		parnt = parnt->getParent();
+	}
+
+	if (EVALUATION_LINK == t)
+	{
+		OC_ASSERT(0 < h->get_arity(),
+			"Don't now what to do with empty EvlauationLinks");
+
+		if (PREDICATE_NODE == h->getOutgoingAtom(0)->get_type())
+		{
+			// deduplicate on the fly.
+			if (not ptm->contained_in(_pat.pmandatory))
+				_pat.pmandatory.push_back(ptm);
+			return true;
+		}
+
+		// EvaluationLinks with evaluatable predicates cannot
+		// be found in the AtomSpace. But perhaps thier arguments
+		// might be. So fall through and look at those.
+	}
+
+	// Try to add any kind of "ordinary" link that contains exactly
+	// one variable in it, and at least one non-variable term in it.
+	// (thus, an arity of 2 or more.)  It's "ordinary" if it is not
+	// evaluatable or executable.
+	if (not nameserver().isA(t, NODE) and
+	    1 < h->get_arity() and
+	    not nameserver().isA(t, EVALUATABLE_LINK) and
+	    not nameserver().isA(t, FREE_LINK) and
+	    1 == num_unquoted_unscoped_in_tree(h, _variables.varset))
+	{
+		// deduplicate on the fly.
+		if (not ptm->contained_in(_pat.pmandatory))
+			_pat.pmandatory.push_back(ptm);
+		return true;
+	}
+
+	bool added = false;
+	for (const PatternTermPtr& sub: ptm->getOutgoingSet())
+	{
+		added = added or add_unaries(sub);
+	}
+	return added;
+}
+
 /// Add dummy clauses for patterns that would otherwise not have any
 /// non-evaluatable clauses.  One example of such is
 ///
@@ -890,7 +966,7 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	//          (Concept "OK"))
 	// and we could add `(Variable "X") (Variable "Y")` with the
 	// `add_dummies()` method above. But if we did, it would be
-	// an info loop that blows out the stack, because X and Y
+	// an infinite loop that blows out the stack, because X and Y
 	// are not constrained, and match everything, including the
 	// temorary terms created during search... so we do NOT
 	// `add_dummies()` this case. See issue #1420 for more.
@@ -1007,7 +1083,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 	}
 
-	// Recurse down to the tips. ... after the evaluatable markup below.
+	// Recurse down to the tips. ... after the evaluatable markup above.
 	if (h->is_link())
 	{
 		// Remove constants from PresentLink, as they are pointless.
@@ -1052,10 +1128,21 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
 	    and not ptm->isQuoted() and can_evaluate(h))
 	{
+
+		// Yuck. Ugly, ugly hack to pass the FowardChainerUTest.
+		// Need to remove this ASAP.
+		bool already_have_fixed = false;
+		for (const PatternTermPtr& man : _pat.pmandatory)
+			if (not man->hasAnyEvaluatable())
+			{
+				already_have_fixed = true;
+				break;
+			}
+
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
 		// random places...
-		if (AND_LINK == t)
+		if (not already_have_fixed and AND_LINK == t)
 		{
 			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
 				if (ptc->isQuoted() or not can_eval_or_present(ptc->getHandle()))
@@ -1065,6 +1152,10 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 				}
 		}
 
+		// If the evaluatables have literal-ish subterms, add those.
+		if (not already_have_fixed and add_unaries(ptm)) return;
+
+		// If the above failed, then try adding dummy variables.
 		add_dummies(ptm);
 		return;
 	}
