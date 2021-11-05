@@ -66,6 +66,12 @@ static inline void logmsg(const char * msg, const Handle& h)
 	                  h->to_short_string("       "));
 }
 
+static inline void logmsg(const char * msg, const HandleSeq& hs)
+{
+	LAZY_LOG_FINE << msg << std::endl
+	              << oc_to_string(hs, "       ");
+}
+
 static inline void logmsg(const char * msg, const PatternTermPtr& ptm)
 {
 	LAZY_LOG_FINE << msg << ptm->to_string("       ")
@@ -93,6 +99,7 @@ static inline void logmsg(const char * msg)
 static inline void logmsg(const char*, const PatternTermPtr&, bool) {}
 static inline void logmsg(const char*, const PatternTermPtr&) {}
 static inline void logmsg(const char*, const Handle&) {}
+static inline void logmsg(const char*, const HandleSeq&) {}
 static inline void logmsg(const char*, size_t) {}
 static inline void logmsg(const char*) {}
 #endif
@@ -691,8 +698,10 @@ take_next_step:
 				it ++;
 		}
 #endif
+#ifdef QDEBUG
 		if (logger().is_fine_enabled())
 			_perm_count[ptm] ++;
+#endif
 	} while (std::next_permutation(mutation.begin(), mutation.end(),
 	         std::less<PatternTermPtr>()));
 
@@ -770,8 +779,10 @@ bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
 void PatternMatchEngine::perm_push(void)
 {
 	_perm_stack.push(_perm_state);
+#ifdef QDEBUG
 	if (logger().is_fine_enabled())
 		_perm_count_stack.push(_perm_count);
+#endif
 
 	_perm_stepper_stack.push(_perm_to_step);
 	_perm_take_stack.push(_perm_take_step);
@@ -784,8 +795,10 @@ void PatternMatchEngine::perm_push(void)
 void PatternMatchEngine::perm_pop(void)
 {
 	POPSTK(_perm_stack, _perm_state);
+#ifdef QDEBUG
 	if (logger().is_fine_enabled())
 		POPSTK(_perm_count_stack, _perm_count);
+#endif
 
 	POPSTK(_perm_stepper_stack, _perm_to_step)
 	POPSTK(_perm_take_stack, _perm_take_step);
@@ -2608,7 +2621,10 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	// Do we have a negative cache? If so, it will always fail.
 	const auto& nac = _nack_cache.find(key);
 	if (nac != _nack_cache.end())
-			return false;
+	{
+		logmsg("NAC Cache hit!", key);
+		return false;
+	}
 
 	bool okay = explore_clause_direct(term, grnd, pclause);
 	if (not okay)
