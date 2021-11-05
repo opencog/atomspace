@@ -201,11 +201,16 @@ void PatternLink::init(void)
 		      to_short_string().c_str());
 	}
 
-	// A body that is an OrLink must be treated as a collection of
+	// A body that is a ChoiceLink must be treated as a collection of
 	// distinct, unrelated searches; the result is a union of the
-	// results of the parts.
+	// results of the parts. Because must users have trouble
+	// distinguishing between menu-choice and logical-or, we will
+	// allow OrLink at the top level, as well. Both of these result
+	// in the SetUnion of the search results. Of course, this only
+	// needs to be worried about, if there is more than one term in
+	// the body.  Otherwise, its a no-op.
 	Type t = _body->get_type();
-	if (OR_LINK == t)
+	if ((CHOICE_LINK == t or OR_LINK == t) and 1 < _body->get_arity())
 	{
 		disjointed_init();
 		return;

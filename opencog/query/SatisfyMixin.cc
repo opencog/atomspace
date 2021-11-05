@@ -438,7 +438,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
-	bool have_orlink = (OR_LINK == pat.body->get_type());
+	Type patty = pat.body->get_type();
+	bool have_orlink = (OR_LINK == patty) or (CHOICE_LINK == patty);
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
 	const HandleSeq& comp_patterns = jit->get_component_patterns();
