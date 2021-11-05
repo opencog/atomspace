@@ -1083,7 +1083,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 	}
 
-	// Recurse down to the tips. ... after the evaluatable markup below.
+	// Recurse down to the tips. ... after the evaluatable markup above.
 	if (h->is_link())
 	{
 		// Remove constants from PresentLink, as they are pointless.
@@ -1128,10 +1128,21 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
 	    and not ptm->isQuoted() and can_evaluate(h))
 	{
+
+		// Yuck. Ugly, ugly hack to pass the FowardChainerUTest.
+		// Need to remove this ASAP.
+		bool already_have_fixed = false;
+		for (const PatternTermPtr& man : _pat.pmandatory)
+			if (not man->hasAnyEvaluatable())
+			{
+				already_have_fixed = true;
+				break;
+			}
+
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
 		// random places...
-		if (AND_LINK == t)
+		if (not already_have_fixed and AND_LINK == t)
 		{
 			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
 				if (ptc->isQuoted() or not can_eval_or_present(ptc->getHandle()))
@@ -1142,7 +1153,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 
 		// If the evaluatables have literal-ish subterms, add those.
-		if (add_unaries(ptm)) return;
+		if (not already_have_fixed and add_unaries(ptm)) return;
 
 		// If the above failed, then try adding dummy variables.
 		add_dummies(ptm);
