@@ -395,7 +395,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	{
 		for (const PatternTermPtr& term : clause->getOutgoingSet())
 		{
-			const Handle& ph = term->getHandle();
+			const Handle& ph = term->getQuote();
 			if (is_constant(_variables.varset, ph)) continue;
 			record_mandatory(term);
 		}
@@ -612,7 +612,7 @@ void PatternLink::locate_defines(const PatternTermSeq& clauses)
 {
 	for (const PatternTermPtr& ptm: clauses)
 	{
-		const Handle& clause = ptm->getHandle();
+		const Handle& clause = ptm->getQuote();
 		FindAtoms fdpn(DEFINED_PREDICATE_NODE, DEFINED_SCHEMA_NODE, true);
 		fdpn.stopset.insert(SCOPE_LINK);
 		fdpn.search_set(clause);
@@ -645,11 +645,13 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 		if (not ptm->isLiteral() and not ptm->isPresent() and
 		    not ptm->isChoice() and not ptm->isAbsent()) continue;
 
-		const Handle& claw = ptm->getHandle();
+		const Handle& claw = ptm->getQuote();
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
 		{
-			_pat.cacheable_clauses.insert(claw);
+			// XXX Needs work??? I think we need to cache the unquoted
+			// clause, not the quoted one. Right? This might be wrong...
+			_pat.cacheable_clauses.insert(ptm->getHandle());
 			continue;
 		}
 
@@ -674,7 +676,7 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 /// grounded (or not).
 void PatternLink::get_clause_variables(const PatternTermPtr& ptm)
 {
-	const Handle& hcl = ptm->getHandle();
+	const Handle& hcl = ptm->getQuote();
 	HandleSet vset = get_free_variables(hcl);
 
 	// Put them into a sequence; any fixed sequence will do.
