@@ -41,6 +41,3 @@
     (Execution (Schema "A"))
   )
   (Predicate "R"))
-
-;; PM
-(define results (cog-execute! query))
