@@ -338,7 +338,7 @@ std::string PatternTerm::to_short_string(const std::string& sep) const
 std::string PatternTerm::flag_string() const
 {
 	std::string str;
-	if (isQuoted()) str += "Q: ";
+	if (isQuoted()) str += "QUOTED!: ";
 	if (_has_any_bound_var) str += "HABV: ";
 	if (_has_bound_var) str += "HBV: ";
 	if (_is_bound_var) str += "BV: ";
@@ -387,8 +387,8 @@ std::string PatternTerm::to_full_string(const std::string& indent) const
 
 	std::string str = indent;
 	std::string more_indent = indent + "  "; // two spaces
-	str += "(" + nameserver().getTypeName(getQuote()->get_type());
-	str += "\t\t; " + flag_string() + "\n";
+	str += "(" + nameserver().getTypeName(getHandle()->get_type());
+	str += "\t; " + flag_string() + "\n";
 	for (const PatternTermPtr& ptm: getOutgoingSet())
 	{
 		if (str.back() == ')') str += "\n";
