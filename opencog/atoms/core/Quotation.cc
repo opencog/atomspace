@@ -23,6 +23,7 @@
  */
 
 #include <sstream>
+#include <opencog/util/exceptions.h>
 #include "Quotation.h"
 
 namespace opencog {
@@ -70,9 +71,22 @@ void Quotation::update(Type t)
 	_local_quote = is_unquoted and LOCAL_QUOTE_LINK == t;
 
 	// Increment or decrement quotation level if locally unquoted
-	if (is_locally_unquoted) {
+	if (is_locally_unquoted)
+	{
 		if (QUOTE_LINK == t) _quotation_level++;
-	    else if (UNQUOTE_LINK == t) _quotation_level--;
+		else if (UNQUOTE_LINK == t)
+		{
+			// Well, it would make sense to check for unbalanced quotes,
+			// in theory. In practice, this does not quite work, because
+			// this triggers when quoted FunctionLinks are inserted into
+			// the AtomSpace. FunctionLinks are built on FreeLink which
+			// searches for free variables, which often sees one unquote
+			// too many during atomspace insertion. I don't see any easy
+			// fixes at this time.
+			// if (0 == _quotation_level)
+			// 	throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+			_quotation_level--;
+		}
     }
 }
 
