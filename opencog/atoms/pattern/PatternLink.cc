@@ -1128,21 +1128,39 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
 	    and not ptm->isQuoted() and can_evaluate(h))
 	{
-
-		// Yuck. Ugly, ugly hack to pass the FowardChainerUTest.
-		// Need to remove this ASAP.
-		bool already_have_fixed = false;
-		for (const PatternTermPtr& man : _pat.pmandatory)
-			if (not man->hasAnyEvaluatable())
+		// Are there any variables below us?
+		// Do they already appear in some existing mandatory term?
+		// If not, then we have to go fishing for fixed terms,
+		// or add dummies.
+		// FIXME: It might be conceptually cleaner to do this in a
+		// second pass, after the `make_term_tree()` has been done
+		// on all the clauses. But, for now, we do this here.
+		bool need_dummies = false;
+		HandleSet vset = get_free_variables(h);
+		for (const Handle& v: vset)
+		{
+			bool found_this_v = false;
+			for (const PatternTermPtr& man : _pat.pmandatory)
 			{
-				already_have_fixed = true;
+				HandleSet vman = get_free_variables(man->getHandle());
+				if (vman.end() != vman.find(v))
+				{
+					found_this_v = true;
+					break;
+				}
+			}
+			if (not found_this_v)
+			{
+				need_dummies = true;
 				break;
 			}
+		}
+		if (not need_dummies) return;
 
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
 		// random places...
-		if (not already_have_fixed and AND_LINK == t)
+		if (AND_LINK == t)
 		{
 			for (const PatternTermPtr& ptc : ptm->getOutgoingSet())
 				if (ptc->isQuoted() or not can_eval_or_present(ptc->getHandle()))
@@ -1153,7 +1171,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 
 		// If the evaluatables have literal-ish subterms, add those.
-		if (not already_have_fixed and add_unaries(ptm)) return;
+		if (add_unaries(ptm)) return;
 
 		// If the above failed, then try adding dummy variables.
 		add_dummies(ptm);
