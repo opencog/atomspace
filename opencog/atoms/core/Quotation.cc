@@ -70,10 +70,11 @@ void Quotation::update(Type t)
 	_local_quote = is_unquoted and LOCAL_QUOTE_LINK == t;
 
 	// Increment or decrement quotation level if locally unquoted
-	if (is_locally_unquoted) {
+	if (is_locally_unquoted)
+	{
 		if (QUOTE_LINK == t) _quotation_level++;
-	    else if (UNQUOTE_LINK == t) _quotation_level--;
-    }
+		else if (UNQUOTE_LINK == t and 0 < _quotation_level) _quotation_level--;
+	}
 }
 
 bool Quotation::operator<(const Quotation& quotation) const
