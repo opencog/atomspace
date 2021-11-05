@@ -175,7 +175,7 @@ bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 	const Handle& hp = ptm->getHandle();
 	if (not ptm->isQuoted()) var_grounding[hp] = hp;
 
-	logmsg("Compare atom to itself:", hp);
+	logmsg("Compare atom to itself:", ptm->getQuote());
 	return true;
 }
 
@@ -875,7 +875,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		var_grounding[glob->getHandle()] = glp;
 
 		logmsg("Found grounding of glob:");
-		logmsg("$$ glob:", glob->getHandle());
+		logmsg("$$ glob:", glob->getQuote());
 		logmsg("$$ ground term:", glp);
 	};
 
@@ -1748,7 +1748,7 @@ bool PatternMatchEngine::explore_present_branches(const PatternTermPtr& ptm,
 	                                      next_term, joint, jgnd);
 	if (have_more)
 	{
-		logmsg("!! maybe_present:", next_term->getHandle());
+		logmsg("!! maybe_present:", next_term->getQuote());
 
 		// Explore from this joint.
 		bool found = explore_term_branches(joint, jgnd, clause);
@@ -1888,7 +1888,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
-			       clause->getHandle());
+			       clause->getQuote());
 		bool found = _pmc.evaluate_sentence(clause->getHandle(), var_grounding);
 		logmsg("After evaluating clause, found = ", found);
 		if (found)
@@ -2045,14 +2045,14 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	while (true)
 	{
-		logmsg("Next clause is", do_clause->getHandle());
+		logmsg("Next clause is", do_clause->getQuote());
 		DO_LOG({LAZY_LOG_FINE << "This clause is "
 			              << (do_clause->isAbsent()? "absent" : "required");})
 		DO_LOG({LAZY_LOG_FINE << "This clause is "
 			              << (do_clause->hasAnyEvaluatable()?
 			                  "dynamically evaluatable" : "non-dynamic");
-		logmsg("Joining variable is", joiner->getHandle());
-		logmsg("Joining grounding is", var_grounding[joiner->getHandle()]); })
+		logmsg("Joining variable is", joiner->getQuote());
+		logmsg("Joining grounding is", var_grounding[joiner->getQuote()]); })
 
 		// Start solving the next unsolved clause. Note: this is a
 		// recursive call, and not a loop. Recursion is halted when
@@ -2115,7 +2115,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			return found;
 		}
 
-		logmsg("Next optional clause is", do_clause->getHandle());
+		logmsg("Next optional clause is", do_clause->getQuote());
 
 		// Now see if this optional clause has any solutions,
 		// or not. If it does, we'll recurse. If it does not,
