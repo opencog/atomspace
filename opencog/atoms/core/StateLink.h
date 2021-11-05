@@ -92,6 +92,14 @@ public:
 	 */
 	static Handle get_link(const Handle& alias, const AtomSpace*);
 
+	/**
+	 * Non-static version of the above. Uses `this->get_alias()`
+	 * and then tries to find the appropriate closed link.
+	 * Unlike the above, it won't throw, if not found. Instead,
+	 * it will just return `this`.
+	 */
+	Handle get_link(const AtomSpace*);
+
 	static Handle factory(const Handle&);
 };
 

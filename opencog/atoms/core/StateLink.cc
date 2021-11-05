@@ -68,6 +68,14 @@ Handle StateLink::get_link(const Handle& alias, const AtomSpace* as)
 	return get_unique(alias, STATE_LINK, true, as);
 }
 
+/// Return this if not found.
+Handle StateLink::get_link(const AtomSpace* as)
+{
+	Handle shallowest(get_unique_nt(_outgoing[0], STATE_LINK, true, as));
+	if (shallowest) return shallowest;
+	return get_handle();
+}
+
 void StateLink::install()
 {
 	// If the handlset is closed (no free variables), then

@@ -523,8 +523,7 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // UNIQUE_LINK.
     if (STATE_LINK == type) {
         while (tit != tend) {
-            hseq.push_back(
-                StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
+            hseq.push_back(StateLinkCast(*tit)->get_link(cas));
             tit++;
         }
     } else if (DEFINE_LINK == type) {
