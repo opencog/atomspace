@@ -6,7 +6,7 @@
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
-(define tname "or-link-space-test")
+(define tname "or-link-test")
 (test-begin tname)
 
 ; Initial data. Note the (stv 1 1) is necessary, because the IsTrueLink
