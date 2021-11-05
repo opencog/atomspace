@@ -15,7 +15,7 @@
 (State (Concept "you") (Concept "thirsty"))
 (State (Concept "me") (Concept "hungry"))
 (Evaluation (stv 1 1) (Predicate "cold") (Concept "me"))
-(Evaluation (Predicate "tired") (Concept "her"))
+(Evaluation (stv 0.6 0.1) (Predicate "tired") (Concept "her"))
 
 (define qr2
 	(Get (TypedVariable (Variable "someone") (Type 'Concept))
@@ -62,6 +62,35 @@
 
 (test-assert "thirsty or cold but not tired"
 	(equal? (cog-execute! qr6) (Set (Concept "you") (Concept "me"))))
+
+; ------------
+(define qr7
+	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+		(Or
+			(Present (State (Variable "someone") (Concept "thirsty")))
+			(GreaterThan (StrengthOf
+					(Evaluation (Predicate "cold") (Variable "someone")))
+				(Number 0.5))
+			(GreaterThan (StrengthOf
+					(Evaluation (Predicate "tired") (Variable "someone")))
+				(Number 0.5)))))
+
+(test-assert "strong tired no confidence"
+	(equal? (cog-execute! qr7)
+		(Set (Concept "you") (Concept "me") (Concept "her"))))
+
+(define qr8
+	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+		(Or
+			(Present (State (Variable "someone") (Concept "thirsty")))
+			(Not (GreaterThan (Number 0.5) (StrengthOf
+				(Evaluation (Predicate "cold") (Variable "someone")))))
+			(Not (GreaterThan (Number 0.5) (StrengthOf
+				(Evaluation (Predicate "tired") (Variable "someone"))))))))
+
+(test-assert "not strong tired no confidence"
+	(equal? (cog-execute! qr8)
+		(Set (Concept "you") (Concept "me") (Concept "her"))))
 
 ; ------------
 ; Add the stv to force it to be strictly true.
