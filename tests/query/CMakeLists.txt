@@ -112,6 +112,7 @@ IF (HAVE_GUILE)
 	ADD_GUILE_TEST(MultiSpaceQueryTest multi-space-test.scm)
 	ADD_GUILE_TEST(OrLinkTest or-link-test.scm)
 	ADD_GUILE_TEST(OrMoreTest or-more-test.scm)
+	ADD_GUILE_TEST(QuoteStartTest quote-start-test.scm)
 	ADD_GUILE_TEST(RecursiveTest recursive-test.scm)
 
 ENDIF (HAVE_GUILE)
