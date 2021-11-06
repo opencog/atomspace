@@ -649,8 +649,8 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 
 		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
 		{
-			// XXX Needs work??? I think we need to cache the unquoted
-			// clause, not the quoted one. Right? This might be wrong...
+			// The cache uses getHandle() not getQuote()
+			// and so we must as well.
 			_pat.cacheable_clauses.insert(ptm->getHandle());
 			continue;
 		}
