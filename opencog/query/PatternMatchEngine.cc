@@ -1937,7 +1937,7 @@ bool PatternMatchEngine::clause_accept(const PatternTermPtr& clause,
                                        const Handle& hg)
 {
 	// We have to unwrap one more level of quotation before we are done.
-	Handle clause_root = clause->getQuote();
+	const Handle& clause_root(clause->getQuote());
 
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
@@ -2094,7 +2094,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	       (false == clause_accepted) and
 	       (do_clause->isAbsent()))
 	{
-		Handle curr_root = do_clause->getHandle();
+		const Handle& curr_root(do_clause->getHandle());
 		static Handle undef(Handle::UNDEFINED);
 		bool match = _pmc.optional_clause_match(curr_root, undef, var_grounding);
 		logmsg("Exhausted search for optional clause, cb=", match);
@@ -2121,7 +2121,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// or not. If it does, we'll recurse. If it does not,
 		// we'll loop around back to here again.
 		clause_accepted = false;
-		Handle hgnd = var_grounding[joiner->getHandle()];
+		const Handle& hgnd(var_grounding[joiner->getHandle()]);
 
 		found = explore_term_branches(joiner, hgnd, do_clause);
 	}
@@ -2775,8 +2775,8 @@ void PatternMatchEngine::log_solution(
 	// Print out the bindings of solutions to variables.
 	for (const auto& j: vars)
 	{
-		Handle var(j.first);
-		Handle soln(j.second);
+		const Handle& var(j.first);
+		const Handle& soln(j.second);
 
 		// Only print grounding for variables.
 		Type vtype = var->get_type();
@@ -2803,8 +2803,7 @@ void PatternMatchEngine::log_solution(
 		// AbsentLink's won't be grounded...
 		if (not m->second)
 		{
-			Handle mf(m->first);
-			logmsg("Ungrounded (absent) clause", mf);
+			logmsg("Ungrounded (absent) clause", m->first);
 			continue;
 		}
 		std::string str = m->second->to_short_string("       ");
