@@ -61,9 +61,7 @@ public:
 
 	void test_literal(void);
 	void test_virtual(void);
-	// TODO: re-enable test_monotonicity as soon as
-	// https://github.com/opencog/atomspace/issues/2886 is fixed.
-	void xtest_monotonicity(void);
+	void test_monotonicity(void);
 };
 
 void PresentUTest::tearDown(void)
@@ -122,9 +120,9 @@ void PresentUTest::test_virtual(void)
 /**
  * Test the monotonicity of PresentLink.  This is for issue
  * https://github.com/opencog/atomspace/issues/2886
- *
+ * (This turned out to be an unbalanced-quotation issue.)
  */
-void PresentUTest::xtest_monotonicity(void)
+void PresentUTest::test_monotonicity(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
