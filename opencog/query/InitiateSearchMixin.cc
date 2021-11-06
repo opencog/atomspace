@@ -196,8 +196,6 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 		{
 			if (sbr->isIdentical())
 				continue;
-			if (sbr->isQuoted())
-				continue;
 
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
