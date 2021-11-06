@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/Quotation.h>
 #include "FreeLink.h"
 
 using namespace opencog;
@@ -45,6 +46,7 @@ FreeLink::FreeLink(const HandleSeq&& oset, Type t)
 
 void FreeLink::init(void)
 {
+	if (unquoted_below(get_handle())) return;
 	_vars.find_variables(_outgoing, true);
 }
 

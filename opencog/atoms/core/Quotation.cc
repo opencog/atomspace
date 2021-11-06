@@ -24,6 +24,7 @@
 
 #include <sstream>
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/Atom.h>
 #include "Quotation.h"
 
 namespace opencog {
@@ -83,11 +84,53 @@ void Quotation::update(Type t)
 			// searches for free variables, which often sees one unquote
 			// too many during atomspace insertion. I don't see any easy
 			// fixes at this time.
-			// if (0 == _quotation_level)
-			// 	throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+			if (0 == _quotation_level)
+				throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
 			_quotation_level--;
 		}
     }
+}
+
+// This does what `class Quotation`, but in reverse. Given some
+// some Atom `h`, return true if there are more Unquotes below than
+// quotes, from which we infer that `h` must be in a quoted context.
+static bool unquoted_below_rec(const Handle& h, bool skip, bool skiplo)
+{
+	Type t = h->get_type();
+	if (nameserver().isA(t, NODE)) return false;
+
+	if (UNQUOTE_LINK == t)
+	{
+		if (not skip and not skiplo) return true;
+		skip = false;
+	}
+
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		bool unq;
+		Type to = ho->get_type();
+		if (QUOTE_LINK == to)
+		{
+			unq = unquoted_below_rec(ho, true, false);
+		}
+		else if (LOCAL_QUOTE_LINK == to)
+		{
+			unq = unquoted_below_rec(ho, skip, true);
+		}
+		else
+		{
+			unq = unquoted_below_rec(ho, skip, false);
+		}
+		if (unq) return true;
+	}
+	return false;
+}
+
+bool unquoted_below(const Handle& h)
+{
+	bool skip = false;
+	bool skiplo = false;
+	return unquoted_below_rec(h, skip, skiplo);
 }
 
 bool Quotation::operator<(const Quotation& quotation) const

@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/util/empty_string.h>
-#include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
@@ -91,6 +91,11 @@ public:
 
 	std::string to_string(const std::string& indent) const;
 };
+
+/// Return true if there are unquotes below the given atom. From this,
+/// we can infer that the Atom itself is quoted.  Roughly speaking,
+/// this performs the 'opposite' of `class Quotation` above.
+bool unquoted_below(const Handle&);
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
