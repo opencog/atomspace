@@ -1156,7 +1156,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO. Hmm. Should we do this at runtime,
 	// i.e. here, or at static-analysis time, when creating the PatternLink?
-	if (DEFINED_SCHEMA_NODE == tp)
+	if (DEFINED_SCHEMA_NODE == tp and not ptm->isQuoted())
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
 	if (ptm->isBoundVariable())
