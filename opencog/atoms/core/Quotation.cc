@@ -133,6 +133,13 @@ bool unquoted_below(const Handle& h)
 	return unquoted_below_rec(h, skip, skiplo);
 }
 
+bool unquoted_below(const HandleSeq& hs)
+{
+	for (const Handle& h: hs)
+		if (unquoted_below(h)) return true;
+	return false;
+}
+
 bool Quotation::operator<(const Quotation& quotation) const
 {
 	return (_quotation_level < quotation._quotation_level)

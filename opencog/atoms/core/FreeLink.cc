@@ -46,7 +46,7 @@ FreeLink::FreeLink(const HandleSeq&& oset, Type t)
 
 void FreeLink::init(void)
 {
-	if (unquoted_below(get_handle())) return;
+	if (unquoted_below(_outgoing)) return;
 	_vars.find_variables(_outgoing, true);
 }
 

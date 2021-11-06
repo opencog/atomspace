@@ -96,6 +96,7 @@ public:
 /// we can infer that the Atom itself is quoted.  Roughly speaking,
 /// this performs the 'opposite' of `class Quotation` above.
 bool unquoted_below(const Handle&);
+bool unquoted_below(const HandleSeq&);
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
