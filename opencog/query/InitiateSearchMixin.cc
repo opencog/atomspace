@@ -196,6 +196,8 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 		{
 			if (sbr->isIdentical())
 				continue;
+			if (sbr->isQuoted())
+				continue;
 
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
@@ -361,9 +363,18 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 		Choice ch;
 		ch.clause = bestclause;
 		ch.start_term = _starter_term;
-		// XXX ?? Why incoming set ???
-		ch.search_set = get_incoming_set(best_start,
-		                              _starter_term->getQuote()->get_type());
+
+		// This feels wonky. Is this correct?
+		if (_starter_term->getHandle()->is_link())
+		{
+			// XXX ?? Why incoming set ???
+			ch.search_set = get_incoming_set(best_start,
+			                              _starter_term->getHandle()->get_type());
+		}
+		else
+		{
+			ch.search_set = HandleSeq({best_start});
+		}
 		_start_choices.push_back(ch);
 	}
 	else
