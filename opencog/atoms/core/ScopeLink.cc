@@ -40,6 +40,9 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
+	// If unquoted_below() returnes true, that means we are quoted,
+	// and so nothing to be done. Skip variable extraction.
+	if (unquoted_below(_outgoing)) return;
 	extract_variables(_outgoing);
 }
 
@@ -317,6 +320,11 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 
 ContentHash ScopeLink::compute_hash() const
 {
+	// If there are no variables, it's likely that we are quoted,
+	// and so nothing to be done. Skip the complicated computations.
+	if (0 == _variables.varseq.size())
+		return Link::compute_hash();
+
 	return scope_hash(_variables.index);
 }
 
