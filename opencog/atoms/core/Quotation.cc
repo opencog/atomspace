@@ -101,25 +101,16 @@ static bool unquoted_below_rec(const Handle& h, bool skip, bool skiplo)
 	{
 		if (not skip and not skiplo) return true;
 		skip = false;
+		skiplo = false;
 	}
+	else if (QUOTE_LINK == t)
+		skip = true;
+	else if (LOCAL_QUOTE_LINK == t)
+		skiplo = true;
 
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		bool unq;
-		Type to = ho->get_type();
-		if (QUOTE_LINK == to)
-		{
-			unq = unquoted_below_rec(ho, true, false);
-		}
-		else if (LOCAL_QUOTE_LINK == to)
-		{
-			unq = unquoted_below_rec(ho, skip, true);
-		}
-		else
-		{
-			unq = unquoted_below_rec(ho, skip, false);
-		}
-		if (unq) return true;
+		if (unquoted_below_rec(ho, skip, skiplo)) return true;
 	}
 	return false;
 }
