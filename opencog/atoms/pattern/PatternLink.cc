@@ -785,13 +785,13 @@ bool PatternLink::need_dummies(const PatternTermPtr& ptm)
 	// Do they already appear in some existing mandatory term?
 	// If not, then we have to go fishing for fixed terms,
 	// or add dummies.
-	HandleSet vset = get_free_variables(ptm->getHandle());
+	HandleSet vset = get_free_variables(ptm->getQuote());
 	for (const Handle& v: vset)
 	{
 		bool found_this_v = false;
 		for (const PatternTermPtr& man : _pat.pmandatory)
 		{
-			HandleSet vman = get_free_variables(man->getHandle());
+			HandleSet vman = get_free_variables(man->getQuote());
 			if (vman.end() != vman.find(v))
 			{
 				found_this_v = true;
