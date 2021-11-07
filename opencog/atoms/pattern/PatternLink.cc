@@ -785,13 +785,13 @@ bool PatternLink::need_dummies(const PatternTermPtr& ptm)
 	// Do they already appear in some existing mandatory term?
 	// If not, then we have to go fishing for fixed terms,
 	// or add dummies.
-	HandleSet vset = get_free_variables(ptm->getHandle());
+	HandleSet vset = get_free_variables(ptm->getQuote());
 	for (const Handle& v: vset)
 	{
 		bool found_this_v = false;
 		for (const PatternTermPtr& man : _pat.pmandatory)
 		{
-			HandleSet vman = get_free_variables(man->getHandle());
+			HandleSet vman = get_free_variables(man->getQuote());
 			if (vman.end() != vman.find(v))
 			{
 				found_this_v = true;
@@ -1131,6 +1131,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		bool chk_const =
 			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
+		chk_const = chk_const and not ptm->isQuoted();
 
 		for (const Handle& ho: h->getOutgoingSet())
 		{
