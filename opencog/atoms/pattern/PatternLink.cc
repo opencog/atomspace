@@ -1131,6 +1131,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		bool chk_const =
 			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
+		chk_const = chk_const and not ptm->isQuoted();
 
 		for (const Handle& ho: h->getOutgoingSet())
 		{
