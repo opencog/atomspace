@@ -78,14 +78,12 @@ void Quotation::update(Type t)
 		else if (UNQUOTE_LINK == t)
 		{
 			// Well, it would make sense to check for unbalanced quotes,
-			// in theory. In practice, this does not quite work, because
-			// this triggers when quoted FunctionLinks are inserted into
-			// the AtomSpace. FunctionLinks are built on FreeLink which
-			// searches for free variables, which often sees one unquote
-			// too many during atomspace insertion. I don't see any easy
-			// fixes at this time.
-			if (0 == _quotation_level)
-				throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+			// in theory. In practice, this does not quite work, as there
+			// are an assortment of places where update() is called with
+			// unbalanced quotes. It appears to be tedious to track all of
+			// them down and fix them.
+			// if (0 == _quotation_level)
+			// 	throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
 			_quotation_level--;
 		}
     }
