@@ -118,15 +118,13 @@ static bool unquoted_below_rec(const Handle& h, bool skip, bool skiplo)
 
 bool unquoted_below(const Handle& h)
 {
-	bool skip = false;
-	bool skiplo = false;
-	return unquoted_below_rec(h, skip, skiplo);
+	return unquoted_below_rec(h, false, false);
 }
 
 bool unquoted_below(const HandleSeq& hs)
 {
 	for (const Handle& h: hs)
-		if (unquoted_below(h)) return true;
+		if (unquoted_below_rec(h, false, false)) return true;
 	return false;
 }
 
