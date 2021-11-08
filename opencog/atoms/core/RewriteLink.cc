@@ -300,11 +300,11 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 		// any quotation or special executable links is clearly
 		// useless, regardless of whether it has been determined
 		// needless or not.
-		if (is_closed(child) and
+		if (not contains_atomtype(child, UNQUOTE_LINK) and
 		    not contains_atomtype(child, PUT_LINK) and
 		    not contains_atomtype(child, QUOTE_LINK) and
-		    not contains_atomtype(child, UNQUOTE_LINK) and
-		    not contains_atomtype(child, LOCAL_QUOTE_LINK))
+		    not contains_atomtype(child, LOCAL_QUOTE_LINK) and
+		    is_closed(child))
 		{
 			return consume_quotations(variables, child,
 			                          quotation, needless_quotation,

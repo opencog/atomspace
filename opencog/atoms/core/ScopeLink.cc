@@ -40,17 +40,25 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
+	// _quoted is true, that means we are inside a quote,
+	// and so nothing to be done. Skip variable extraction.
+	if (_quoted) return;
 	extract_variables(_outgoing);
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 	: Link({vars, body}, SCOPE_LINK)
 {
+	_quoted = unquoted_below(_outgoing);
 	init();
 }
 
 bool ScopeLink::skip_init(Type t)
 {
+	// If unquoted_below() returnes true, that means we are quoted,
+	// and so nothing to be done. Skip variable extraction.
+	_quoted = unquoted_below(_outgoing);
+
 	// Type must be as expected.
 #if 0
 	// ScopeLinks are created directly in unit tests, so this safety
@@ -317,6 +325,9 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 
 ContentHash ScopeLink::compute_hash() const
 {
+	// If we are quoted, skip the complicated computations.
+	if (_quoted) return Link::compute_hash();
+
 	return scope_hash(_variables.index);
 }
 

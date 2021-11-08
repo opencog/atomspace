@@ -59,6 +59,8 @@ protected:
 	/// Variables bound in the body.
 	Variables _variables;
 
+	bool _quoted;
+
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& vardecl);
