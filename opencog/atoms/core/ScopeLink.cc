@@ -47,7 +47,7 @@ void ScopeLink::init(void)
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
-	: Link({vars, body}, SCOPE_LINK)
+	: Link({vars, body}, SCOPE_LINK), _quoted(false)
 {
 	init();
 }
