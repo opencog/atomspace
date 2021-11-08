@@ -33,13 +33,13 @@
 (cog-evaluate!
 	(Evaluation
 		(Present (Inheritance (Variable "this") (Variable "that")))
-		(List	(Concept "mammal") (Concept "vertebrate"))))
+		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; We can check that "foobar" is not a vertebrate:
 (cog-evaluate!
 	(Evaluation
 		(Present (Inheritance (Variable "this") (Variable "that")))
-		(List	(Concept "foobar") (Concept "vertebrate"))))
+		(List (Concept "foobar") (Concept "vertebrate"))))
 
 ; ----------
 ; Here's what we cannot do, or rather, should not do: we should not
@@ -102,7 +102,7 @@
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "simple is-a relation")
-		(List	(Concept "mammal") (Concept "vertebrate"))))
+		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; The same query also works without the intervening Define; one can
 ; stick the Lambda directly into place in the EvaluationLink. This
@@ -113,7 +113,7 @@
 		(Lambda
 			(VariableList (Variable "this") (Variable "that"))
 			(Present (Inheritance (Variable "this") (Variable "that"))))
-		(List	(Concept "mammal") (Concept "vertebrate"))))
+		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; ----------
 ; There is an explicit AbsentLink, as well. It's the opposite of the
@@ -121,7 +121,7 @@
 (cog-evaluate!
 	(Evaluation
 		(Absent (Inheritance (Variable "this") (Variable "that")))
-		(List	(Concept "foobar") (Concept "vertebrate"))))
+		(List (Concept "foobar") (Concept "vertebrate"))))
 
 ; Of course, we could have said "not present"; the AbsentLink is not
 ; really needed for this demo; it is far more useful and powerful
@@ -129,7 +129,7 @@
 (cog-evaluate!
 	(Evaluation
 		(Not (Absent (Inheritance (Variable "this") (Variable "that"))))
-		(List	(Concept "mammal") (Concept "vertebrate"))))
+		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; ----------
 ; Verifying a grand-parent/grand-child relationship requires moving to a
@@ -162,13 +162,13 @@
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "grandparent relation")
-		(List	(Concept "foobar") (Concept "vertebrate"))))
+		(List (Concept "foobar") (Concept "vertebrate"))))
 
 ; We can check that it indeed "skips a step" correctly.
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "grandparent relation")
-		(List	(Concept "human") (Concept "vertebrate"))))
+		(List (Concept "human") (Concept "vertebrate"))))
 
 ; ----------
 ; What about the general recursive case? It needs to implement
@@ -252,13 +252,13 @@
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
-		(List	(Concept "Ben") (Concept "animal"))))
+		(List (Concept "Ben") (Concept "animal"))))
 
 ; We can also verify that Ben isn't foobar'ed.
 (cog-evaluate!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
-		(List	(Concept "Ben") (Concept "foobar"))))
+		(List (Concept "Ben") (Concept "foobar"))))
 
 ; The predicate can be used to search the AtomSpace for all Atoms
 ; that obey the relationship.  Here, we ask for all the things that
@@ -291,7 +291,7 @@
 		(Lambda
 			(VariableList (Variable "this") (Variable "that"))
 			(Present (Inheritance (Variable "this") (Variable "that"))))
-		(List	(Concept "mammal") (Concept "vertebrate"))))
+		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; ExecutionOutput was designed to work with DefinedSchema, not
 ; DefinedPredicate. But otherwise, the same ideas apply. (Schemas
