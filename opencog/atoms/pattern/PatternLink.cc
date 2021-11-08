@@ -183,7 +183,7 @@ void PatternLink::disjointed_init(void)
 void PatternLink::init(void)
 {
 	// If we are quoted, don't bother to try to do anything.
-	if (unquoted_below(_outgoing)) return;
+	if (_quoted) return;
 
 	_pat.redex_name = "anonymous PatternLink";
 	ScopeLink::extract_variables(_outgoing);

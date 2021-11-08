@@ -44,7 +44,7 @@ void QueryLink::init(void)
 	}
 
 	// If we are quoted, don't bother to try to do anything.
-	if (unquoted_below(_outgoing)) return;
+	if (_quoted) return;
 
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
