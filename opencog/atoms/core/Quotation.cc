@@ -78,12 +78,13 @@ void Quotation::update(Type t)
 		else if (UNQUOTE_LINK == t)
 		{
 			// Well, it would make sense to check for unbalanced quotes,
-			// in theory. In practice, this does not quite work, as there
-			// are an assortment of places where update() is called with
-			// unbalanced quotes. It appears to be tedious to track all of
-			// them down and fix them.
-			// if (0 == _quotation_level)
-			// 	throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+			// in theory. In practice, QuoteUTest builds a weird unbalanced
+			// quote, on purpose. Enabling the exception also causes half
+			// the URE unit tests to fail. So this strict check is disabled.
+#ifdef STRICT_QUOTATION_LEVEL
+			if (0 == _quotation_level)
+				throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+#endif
 			_quotation_level--;
 		}
     }
