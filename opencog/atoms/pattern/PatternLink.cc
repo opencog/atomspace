@@ -571,7 +571,8 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		for (const Handle& ho : dedupe)
 		{
 			PatternTermPtr clause(make_term_tree(ho));
-			if (not is_constant(_variables.varset, ho) and
+			if (not clause->contained_in(_pat.pmandatory) and
+			    not is_constant(_variables.varset, ho) and
 			    not record_literal(clause) and
 			    not unbundle_clauses_rec(clause, connectives))
 			{
@@ -857,6 +858,8 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 			// deduplicate on the fly.
 			if (not ptm->contained_in(_pat.pmandatory))
 				_pat.pmandatory.push_back(ptm);
+
+			// XXX Shouldn't we be adding this to _fixed, too?
 			return true;
 		}
 
@@ -878,6 +881,8 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 		// deduplicate on the fly.
 		if (not ptm->contained_in(_pat.pmandatory))
 			_pat.pmandatory.push_back(ptm);
+
+		// XXX Shouldn't we be adding this to _fixed, too?
 		return true;
 	}
 
