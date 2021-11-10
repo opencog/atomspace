@@ -64,24 +64,27 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 int cnt = 0;
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
+printf("duude %d enter perf search; this=%p\n", cnt, this);
 	try
 	{
 		return InitiateSearchMixin::perform_search(pmc);
 	}
 	catch (const ContinuationException& ex)
 	{
-printf("duude %d caught %s\n", cnt, _continuation->to_string().c_str());
+// printf("duude %d caught %s\n", cnt, _continuation->to_string().c_str());
 
 		Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
-printf("duude make %s\n", plk->to_string().c_str());
+// printf("duude make %s\n", plk->to_string().c_str());
 
 cnt++;
-if (30 < cnt) return true;
+if (300 < cnt) return true;
 
 		AtomSpace* tas = TermMatchMixin::_temp_aspace;
 		tas->clear();
-		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
-printf("duuude crispy=%d\n", crispy);
+		// bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+		GroundingMap empty;
+		bool crispy = TermMatchMixin::evaluate_sentence(plk, empty);
+printf("duuude %p crispy=%d\n", this, crispy);
 return true;
 	}
 }
