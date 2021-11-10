@@ -46,6 +46,12 @@ public:
     ContinuationException(void) {}
 };
 
+class RewindException : public SilentException
+{
+public:
+    RewindException(void) {}
+};
+
 /* ======================================================== */
 
 /**
@@ -76,22 +82,22 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 	if (in_continuation)
 	{
 		localpat = form;
-		throw ContinuationException();
+		throw RewindException();
 	}
 
 	PatternLinkPtr lform = form;
 	cnt = 0;
 
-	// The exception thrown immediately above will be caught below.
-	// Just loop back to here, and run the pattern (the localpat)
-	// that was recorded.
+	// The exception thrown immediately above will be caught near the
+	// very end of this while-loop. The loop just brings us back to the
+	// begining, with lform set to localpat.
 	while (true)
 	{
 		// Wrap the actual satisfier in a try-catch loop. If the pattern
 		// has a ContinuationLink in it, and that link is hit, then the
 		// evaluate_sentence() above will throw. It records the grounding
-		// that it has found, and right after the catch, we take that
-		// grounding and evaluate it.
+		// that it has found. Here, we catch, take that grounding, and
+		// evaluate it.
 		try
 		{
 			in_continuation = true;
@@ -105,8 +111,8 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		// intend to write infinite loops (e.g. REPL loops) so assume
 		// infinite recursion is a user error.
 		cnt++;
-		if (40 < cnt)
-			throw RuntimeException(TRACE_INFO,
+		if (200 < cnt)
+			throw InvalidParamException(TRACE_INFO,
 				"Suspect an infinite continuation loop! Are you sure?\n%s\n",
 				lform->to_short_string().c_str());
 
@@ -144,7 +150,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 			}
 			return false;
 		}
-		catch (const ContinuationException& ex) {}
+		catch (const RewindException& ex) {}
 
 		DO_LOG({LAZY_LOG_FINE
 			<< "**************************************************";})
