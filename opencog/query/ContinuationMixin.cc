@@ -19,8 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <setjmp.h>
-
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
@@ -68,7 +66,6 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 // we are recursing.
 static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
-static thread_local jmp_buf begining;
 static thread_local int cnt = 0;
 
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
@@ -88,14 +85,19 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 	}
 
 	PatternLinkPtr lform = form;
+	cnt = 0;
 
-	// When catching the exception thrown above, we will use longmp
-	// to come back to this point. The longjmp will be made from the
-	// same stack frame...
-	int rc = setjmp(begining);
-	if (rc) lform = localpat;
-	else cnt = 0;
+	// When catching the exception thrown above, the goto below will send
+	// us back to here. That way, we can continue in the same stack frame
+	// as we started with. This is tail recursion, more or less. (We use
+	// the exception mechanism for the non-local goto part of this.)
+beginning:
 
+	// Wrap the actual satisfier in a try-catch loop. If the pattern
+	// has a ContinuationLink in it, and that link is hit, then the
+	// evaluate_sentence() above will throw. It records the grounding
+	// that it has found, and right after the catch, we take that
+	// grounding and evaluate it.
 	try
 	{
 		in_continuation = true;
@@ -106,22 +108,34 @@ printf("duuude %d return from satsify mixing %p\n", cnt, this);
 	}
 	catch (const ContinuationException& ex) {}
 
+	// Temporary safety mechanism. I suspect that most users do not
+	// intend to write infinite loops (e.g. REPL loops) so assume
+	// infinite recursion is a user error.
 	cnt++;
 	if (40 < cnt)
 		throw RuntimeException(TRACE_INFO,
 			"Suspect an infinite continuation loop! Are you sure?\n%s\n",
 			lform->to_short_string().c_str());
 
-	Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
+	DO_LOG({LAZY_LOG_FINE << "Continue cnt=" << cnt
+		<< " evaluate ContinuationLink:\n"
+		<< _continuation->to_short_string(); })
 
-printf("duuude %d %d post catch %p\n", cnt, in_continuation, this);
-	AtomSpace* tas = TermMatchMixin::_temp_aspace;
-
-printf("duuude %d %d enter loop %p\n", cnt, in_continuation, this);
-printf("its %s\n", plk->to_short_string().c_str());
-	tas->clear();
+	// OK. If we are here, then a ContinuationLink was seen earlier in
+	// the evaluation. Convert it into an ordinary PutLink, and evaluate
+	// it. If, during evaluation, someone calls this method that we are
+	// in right now, i.e. if they call ContinuationMixin::satisfy(), then
+	// up above, we record the PatterLink to be grounded, (recording it
+	// in localpat), and up above we throw. That throw is caught below,
+	// thus popping the C++ stack back to here. We can now do that
+	// pattern, simply by using the goto to get back to the start.
+	// So .. no change in stack frame depth, no leakage of malloc'ed
+	// data. We're very very good.
 	try
 	{
+		Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
+		AtomSpace* tas = TermMatchMixin::_temp_aspace;
+		tas->clear();
 		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
 printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 		if (crispy)
@@ -136,7 +150,8 @@ printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 	}
 	catch (const ContinuationException& ex) {}
 
-	longjmp(begining, 666);
+	lform = localpat;
+	goto beginning;
 
 	return true;
 }
