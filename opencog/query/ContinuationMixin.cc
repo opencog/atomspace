@@ -82,16 +82,27 @@ printf("duude %d base case this=%p\n", cnt, this);
 
 	Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
 
-cnt++;
-if (300 < cnt) return true;
-
-printf("duuude %d post catch %p\n", cnt, this);
+printf("duuude %d %d post catch %p\n", cnt, in_continuation, this);
 	AtomSpace* tas = TermMatchMixin::_temp_aspace;
-	tas->clear();
-	bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+	while (true)
+	{
+cnt++;
+if (40 < cnt) return true;
 
-printf("duuude %d %p crispy=%d\n", cnt, this, crispy);
-return true;
+printf("duuude %d %d enter loop %p\n", cnt, in_continuation, this);
+printf("its %s\n", plk->to_short_string().c_str());
+		tas->clear();
+		try
+		{
+			bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
+			if (crispy) return crispy;
+		}
+		catch (const ContinuationException& ex)
+		{
+printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
+		}
+	}
 }
 
 /* ===================== END OF FILE ===================== */
