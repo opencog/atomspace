@@ -103,7 +103,6 @@ beginning:
 		in_continuation = true;
 		bool done = SatisfyMixin::satisfy(lform);
 		in_continuation = false;
-printf("duuude %d return from satsify mixing %p\n", cnt, this);
 		return done;
 	}
 	catch (const ContinuationException& ex) {}
@@ -137,22 +136,29 @@ printf("duuude %d return from satsify mixing %p\n", cnt, this);
 		AtomSpace* tas = TermMatchMixin::_temp_aspace;
 		tas->clear();
 		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
-printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
+
+		DO_LOG({LAZY_LOG_FINE << "Finish continuing, cnt=" << cnt
+			<< " result=" << crispy; })
+
+		cnt = 0;
+		in_continuation = false;
 		if (crispy)
 		{
-			cnt = 0;
-			in_continuation = false;
 			GroundingMap empty;
 			grounding(empty, empty);
-			crispy = search_finished(false);
-			return crispy;
+			return search_finished(false);
 		}
+		return false;
 	}
 	catch (const ContinuationException& ex) {}
 
+	// If we are here, then the exception was caught. Make note of the
+	// pattern we're supposed to ground, jump up to the top, and ground
+	// it.
 	lform = localpat;
 	goto beginning;
 
+	// Not reached, obviously.
 	return true;
 }
 
