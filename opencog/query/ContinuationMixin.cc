@@ -66,8 +66,8 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
 static thread_local jmp_buf begining;
+static thread_local int cnt = 0;
 
-int cnt = 0;
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 {
 printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
@@ -81,10 +81,8 @@ printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
 
 	int rc = setjmp(begining);
 printf("duuude setjump rc=%d\n", rc);
-	if (rc)
-	{
-		lform = localpat;
-	}
+	if (rc) lform = localpat;
+	else cnt = 0;
 
 printf("duuude %d ======= base case %p\n", cnt, this);
 	try
@@ -92,16 +90,21 @@ printf("duuude %d ======= base case %p\n", cnt, this);
 		in_continuation = true;
 		bool done = SatisfyMixin::satisfy(lform);
 		in_continuation = false;
+printf("duuude %d return from satsify mixing %p\n", cnt, this);
 		return done;
 	}
 	catch (const ContinuationException& ex) {}
+
+	cnt++;
+	if (40 < cnt)
+		throw RuntimeException(TRACE_INFO,
+			"Suspect an infinite recursion loop! Are you sure? Form = %s",
+			lform->to_string().c_str());
 
 	Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
 
 printf("duuude %d %d post catch %p\n", cnt, in_continuation, this);
 	AtomSpace* tas = TermMatchMixin::_temp_aspace;
-cnt++;
-if (40 < cnt) { in_continuation = false; return true; }
 
 printf("duuude %d %d enter loop %p\n", cnt, in_continuation, this);
 printf("its %s\n", plk->to_short_string().c_str());
@@ -113,6 +116,7 @@ printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 		if (crispy)
 		{
 			in_continuation = false;
+			crispy = search_finished(crispy);
 			return crispy;
 		}
 	}
