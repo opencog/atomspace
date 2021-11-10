@@ -62,13 +62,19 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 }
 
 static thread_local bool in_continuation = false;
+static thread_local const Variables* localvars = nullptr;
+static thread_local const Pattern* localpat = nullptr;
 
 int cnt = 0;
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
 printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
 	if (in_continuation)
+	{
+		localvars = InitiateSearchMixin::_variables;
+		localpat = InitiateSearchMixin::_pattern;
 		throw ContinuationException();
+	}
 
 printf("duude %d base case this=%p\n", cnt, this);
 	try
@@ -84,25 +90,30 @@ printf("duude %d base case this=%p\n", cnt, this);
 
 printf("duuude %d %d post catch %p\n", cnt, in_continuation, this);
 	AtomSpace* tas = TermMatchMixin::_temp_aspace;
-	while (true)
-	{
 cnt++;
-if (40 < cnt) return true;
+if (40 < cnt) { in_continuation = false; return true; }
 
 printf("duuude %d %d enter loop %p\n", cnt, in_continuation, this);
 printf("its %s\n", plk->to_short_string().c_str());
-		tas->clear();
-		try
-		{
-			bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+	tas->clear();
+	try
+	{
+		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
 printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
-			if (crispy) return crispy;
-		}
-		catch (const ContinuationException& ex)
+		if (crispy)
 		{
-printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
+			in_continuation = false;
+			return crispy;
 		}
 	}
+	catch (const ContinuationException& ex) {}
+
+printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
+	set_pattern(*localvars, *localpat);
+	in_continuation = false;
+	bool done = perform_search(pmc);
+printf("duuude in the end %d %d w %p\n", cnt, in_continuation, this);
+	return done;
 }
 
 /* ===================== END OF FILE ===================== */
