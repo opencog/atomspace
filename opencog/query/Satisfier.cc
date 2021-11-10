@@ -38,6 +38,11 @@ bool Satisfier::grounding(const GroundingMap &var_soln,
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
+	// XXX Temp hack alert. When Continuations finally terminate, they
+	// supply us with empty groundings. This probably needs to be fixed
+	// someday. For now, for the simple examples, its good enough.
+	if (0 == var_soln.size()) return true;
+
 	// Record the grounding; we cache this later.
 	if (1 == _varseq.size())
 	{

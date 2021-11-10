@@ -63,6 +63,9 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 	return TermMatchMixin::evaluate_sentence(top, gnds);
 }
 
+// Assorted thread-local state. This is used to determine if we
+// are entering the query engine for the first time ever, or if
+// we are recursing.
 static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
 static thread_local jmp_buf begining;
@@ -70,7 +73,14 @@ static thread_local int cnt = 0;
 
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 {
-printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
+	DO_LOG({LAZY_LOG_FINE
+		<< "**************************************************";})
+	DO_LOG({LAZY_LOG_FINE << "Enter ContinuationMixin::satisfy cnt="
+		<< cnt << " in_continuation=" << in_continuation;})
+
+	// If we are in_continuation, then this is not the first time we
+	// were called. Record the pattern to be grounded, and throw an
+	// exception to get us back to the first, base call.
 	if (in_continuation)
 	{
 		localpat = form;
@@ -79,12 +89,13 @@ printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
 
 	PatternLinkPtr lform = form;
 
+	// When catching the exception thrown above, we will use longmp
+	// to come back to this point. The longjmp will be made from the
+	// same stack frame...
 	int rc = setjmp(begining);
-printf("duuude setjump rc=%d\n", rc);
 	if (rc) lform = localpat;
 	else cnt = 0;
 
-printf("duuude %d ======= base case %p\n", cnt, this);
 	try
 	{
 		in_continuation = true;
@@ -98,8 +109,8 @@ printf("duuude %d return from satsify mixing %p\n", cnt, this);
 	cnt++;
 	if (40 < cnt)
 		throw RuntimeException(TRACE_INFO,
-			"Suspect an infinite recursion loop! Are you sure? Form = %s",
-			lform->to_string().c_str());
+			"Suspect an infinite continuation loop! Are you sure?\n%s\n",
+			lform->to_short_string().c_str());
 
 	Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
 
@@ -115,14 +126,16 @@ printf("its %s\n", plk->to_short_string().c_str());
 printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 		if (crispy)
 		{
+			cnt = 0;
 			in_continuation = false;
-			crispy = search_finished(crispy);
+			GroundingMap empty;
+			grounding(empty, empty);
+			crispy = search_finished(false);
 			return crispy;
 		}
 	}
 	catch (const ContinuationException& ex) {}
 
-printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
 	longjmp(begining, 666);
 
 	return true;
