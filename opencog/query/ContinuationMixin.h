@@ -54,7 +54,6 @@ class ContinuationMixin :
 		{
 			TermMatchMixin::set_pattern(vars, pat);
 			InitiateSearchMixin::set_pattern(vars, pat);
-			SatisfyMixin::set_pattern(vars, pat);
 		}
 
 		/**
