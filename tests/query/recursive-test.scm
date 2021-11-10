@@ -149,8 +149,9 @@
 					(Present
 						(Inheritance (Variable "this") (Variable "middle")))
 					(Continuation
-						(DefinedPredicate "inf regress")
-						(List (Variable "middle") (Variable "that"))))))))
+						(Put
+							(DefinedPredicate "inf regress")
+							(List (Variable "middle") (Variable "that")))))))))
 
 (test-assert "cont-ben-anim" (equal? (stv 1 1)
 	(cog-evaluate!

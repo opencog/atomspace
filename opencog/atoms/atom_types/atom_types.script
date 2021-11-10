@@ -261,6 +261,14 @@ ABSENT_LINK <- PRESENT_LINK
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
 
+// Continuations are used in the Pattern Engine to implement infinite
+// recursion. They currently behave like an explicit declaration of tail
+// recursion.  (Caution: this may be a misleading name for what this
+// link does. I can't think of a better name. TailRecursionLink is not
+// quite the right name either, because the recursion need not be at the
+// tail.)
+CONTINUATION_LINK <- EVALUATABLE_LINK
+
 // ====================================================================
 // Performance scripting links.
 //
@@ -550,14 +558,6 @@ BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
 // of the pattern and the grounding are reversed: given a grounding, the
 // collection of patterns that are grounded by it can be searched-for.
 DUAL_LINK <- SATISFYING_LINK
-
-// Continuations are used in the Pattern Engine to implement infinite
-// recursion. The currently behave like an explicit declaration of tail
-// recursion. They derive from PutLink because they behave just like
-// PutLink: they plug in the arguments, and take over execution of the
-// pattern search at that point. (Caution: this may be a misleading name
-// for what this link does. I can't think of a better name.)
-CONTINUATION_LINK <- PUT_LINK
 
 // ==============================================================
 // Basic Knowledge-Representation types.
