@@ -113,8 +113,9 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		cnt++;
 		if (200 < cnt)
 			throw InvalidParamException(TRACE_INFO,
+				"Continuation looped %d times.\n"
 				"Suspect an infinite continuation loop! Are you sure?\n%s\n",
-				lform->to_short_string().c_str());
+				cnt, lform->to_short_string().c_str());
 
 		DO_LOG({LAZY_LOG_FINE << "Continue cnt=" << cnt
 			<< " evaluate ContinuationLink:\n"
