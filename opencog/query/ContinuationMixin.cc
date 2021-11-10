@@ -61,31 +61,37 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 	return TermMatchMixin::evaluate_sentence(top, gnds);
 }
 
+static thread_local bool in_continuation = false;
+
 int cnt = 0;
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
-printf("duude %d enter perf search; this=%p\n", cnt, this);
+printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
+	if (in_continuation)
+		throw ContinuationException();
+
+printf("duude %d base case this=%p\n", cnt, this);
 	try
 	{
-		return InitiateSearchMixin::perform_search(pmc);
+		in_continuation = true;
+		bool done = InitiateSearchMixin::perform_search(pmc);
+		in_continuation = false;
+		return done;
 	}
-	catch (const ContinuationException& ex)
-	{
-// printf("duude %d caught %s\n", cnt, _continuation->to_string().c_str());
+	catch (const ContinuationException& ex) {}
 
-		Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
-// printf("duude make %s\n", plk->to_string().c_str());
+	Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
 
 cnt++;
 if (300 < cnt) return true;
 
-		Handle red = HandleCast(plk->execute());
- printf("duude red %s\n", red->to_string().c_str());
+printf("duuude %d post catch %p\n", cnt, this);
+	AtomSpace* tas = TermMatchMixin::_temp_aspace;
+	tas->clear();
+	bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
 
-		bool crispy = satisfy(PatternLinkCast(red));
-printf("duuude %p crispy=%d\n", this, crispy);
+printf("duuude %d %p crispy=%d\n", cnt, this, crispy);
 return true;
-	}
 }
 
 /* ===================== END OF FILE ===================== */
