@@ -22,6 +22,9 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/core/Replacement.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+
 #include "ContinuationMixin.h"
 
 using namespace opencog;
@@ -52,12 +55,13 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 {
 	if (CONTINUATION_LINK == top->get_type())
 	{
-		_continuation = top;
+		_continuation = Replacement::replace_nocheck(top, gnds);
 		throw ContinuationException();
 	}
 	return TermMatchMixin::evaluate_sentence(top, gnds);
 }
 
+int cnt = 0;
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
 	try
@@ -66,7 +70,18 @@ bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 	}
 	catch (const ContinuationException& ex)
 	{
-printf("duude caught %s\n", _continuation->to_string().c_str());
+printf("duude %d caught %s\n", cnt, _continuation->to_string().c_str());
+
+		Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
+printf("duude make %s\n", plk->to_string().c_str());
+
+cnt++;
+if (30 < cnt) return true;
+
+		AtomSpace* tas = TermMatchMixin::_temp_aspace;
+		tas->clear();
+		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+printf("duuude crispy=%d\n", crispy);
 return true;
 	}
 }
