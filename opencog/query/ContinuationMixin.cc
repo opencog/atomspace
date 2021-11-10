@@ -99,10 +99,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		// evaluate it.
 		try
 		{
-			in_continuation = true;
-			bool done = SatisfyMixin::satisfy(lform);
-			in_continuation = false;
-			return done;
+			return SatisfyMixin::satisfy(lform);
 		}
 		catch (const ContinuationException& ex) {}
 
@@ -153,13 +150,14 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		catch (const RewindException& ex) {}
 
 		DO_LOG({LAZY_LOG_FINE
-			<< "**************************************************";})
-		DO_LOG({LAZY_LOG_FINE << "Enter ContinuationMixin::satisfy cnt="
-			<< cnt << " in_continuation=" << in_continuation;})
+			<< "***************************************";})
+		DO_LOG({LAZY_LOG_FINE
+			<< "Enter ContinuationMixin::satisfy cnt=" << cnt;})
 
 		// If we are here, then the exception was caught. Make note of the
 		// pattern we're supposed to ground, jump up to the top, and ground
 		// it.
+		in_continuation = true;
 		lform = localpat;
 	}
 
