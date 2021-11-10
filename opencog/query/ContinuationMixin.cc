@@ -72,7 +72,6 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 // we are recursing.
 static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
-static thread_local int cnt = 0;
 
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 {
@@ -86,7 +85,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 	}
 
 	PatternLinkPtr lform = form;
-	cnt = 0;
+	int cnt = 0;
 
 	// The exception thrown immediately above will be caught near the
 	// very end of this while-loop. The loop just brings us back to the
