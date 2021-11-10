@@ -129,6 +129,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		// data. We're very very good.
 		try
 		{
+			in_continuation = true;
 			Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
 			AtomSpace* tas = TermMatchMixin::_temp_aspace;
 			tas->clear();
@@ -157,7 +158,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		// If we are here, then the exception was caught. Make note of the
 		// pattern we're supposed to ground, jump up to the top, and ground
 		// it.
-		in_continuation = true;
+		in_continuation = false;
 		lform = localpat;
 	}
 
