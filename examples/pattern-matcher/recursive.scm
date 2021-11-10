@@ -225,16 +225,18 @@
 ; 5) If not, then a SatisfactionLink, much as before.
 ; 6) The SatisfactionLink is looking to see if "this" is connected
 ;    to the middle.
-; 7) But we also need the middle connected to a recursively long
-;    chain. To get that, we refer to the recursive definition itself.
-;    That definition takes two arguments. But which two arguments?
-;    The ContinuationLink is a kind of PutLink.  It explains exactly
-;    which two arguments to plug in: the middle, and the other endpoint.
-;    Just like the PutLink, it "plugs things in" (it forms beta redexes.)
-;    Earlier demos explain PutLink. It's not complicated. The reason
-;    that a ContuationLink is used here instead of a PutLink is to allow
-;    tail recursion of the query. Instead of buying a new stack frame
-;    with each query, the same stack frame is reused.
+; 7) The actual recursive step. It is demarcated with a ContinuationLink.
+;    This tells the query engine that an infinite regress will happen
+;    here. The query engine treats this as a form of tail recursion, and
+;    takes steps to avoid growing the stack at this point. The
+;    ContinuationLink can only wrp one evaluatable.
+; 8) To do the recursion, we need to connect the grounded `middle` to
+;    the recursively long chain. To get that, we refer to the recursive
+;    definition itself. That definition takes two arguments. But which
+;    two arguments? The PutLink indicates what to plug in: it explicitly
+;    states that the arguments are the `middle`, and the other endpoint.
+;    The PutLink, "plugs things in" (it forms beta redexes.) Earlier
+;    demos explain PutLink. It's not complicated.
 ;
 (Define
 	(DefinedPredicate "recursive relation")                 ;; Step 1.
@@ -249,8 +251,9 @@
 					(Present                                    ;; Step 6.
 						(Inheritance (Variable "this") (Variable "middle")))
 					(Continuation                               ;; Step 7.
-						(DefinedPredicate "recursive relation")
-						(List (Variable "middle") (Variable "that"))))))))
+						(Put                                     ;; Step 8.
+							(DefinedPredicate "recursive relation")
+							(List (Variable "middle") (Variable "that")))))))))
 
 ; Let's test it out. Does it work?
 (cog-evaluate!
