@@ -228,9 +228,13 @@
 ; 7) But we also need the middle connected to a recursively long
 ;    chain. To get that, we refer to the recursive definition itself.
 ;    That definition takes two arguments. But which two arguments?
-;    The PutLink explains exactly which two: the middle, and the
-;    other endpoint. It "plugs things in" (it forms beta redexes.)
-;    (Earlier demos explain PutLink. It's not complicated.)
+;    The ContinuationLink is a kind of PutLink.  It explains exactly
+;    which two arguments to plug in: the middle, and the other endpoint.
+;    Just like the PutLink, it "plugs things in" (it forms beta redexes.)
+;    Earlier demos explain PutLink. It's not complicated. The reason
+;    that a ContuationLink is used here instead of a PutLink is to allow
+;    tail recursion of the query. Instead of buying a new stack frame
+;    with each query, the same stack frame is reused.
 ;
 (Define
 	(DefinedPredicate "recursive relation")                 ;; Step 1.
@@ -244,7 +248,7 @@
 				(And
 					(Present                                    ;; Step 6.
 						(Inheritance (Variable "this") (Variable "middle")))
-					(Put                                        ;; Step 7.
+					(Continuation                               ;; Step 7.
 						(DefinedPredicate "recursive relation")
 						(List (Variable "middle") (Variable "that"))))))))
 
@@ -276,6 +280,32 @@
 		(Put
 			(DefinedPredicate "recursive relation")
 			(List (Concept "Ben") (Variable "?inh")))))
+
+; ----------
+; And now it is time for some fun and games. Lets try "accidentally"
+; forming an infinite loop.  Do this by declaring that 'everything'
+; is a 'Ben'. This will create a circular inheritance loop, and walking
+; it will be an infinite loop walk.
+(Inheritance (Concept "thing") (Concept "Ben"))
+
+; The earlier query should work as before: in just a few steps, we
+; can discover that 'Ben' is-a 'animal'.
+(cog-evaluate!
+	(Evaluation
+		(DefinedPredicate "recursive relation")
+		(List (Concept "Ben") (Concept "animal"))))
+
+; The attempt to discover if Ben is foobar'ed will enter the infinite
+; loop. That is because no-where along that chain of inheritance is
+; there any foobar. Asking the query engine to do this kind of query
+; is a user error. It currently has a hard-coded loop limit, and will
+; throw an exception once this limit is reached. If you need a higher
+; limit, or a true initite loop, please open a bug report, and describe
+; the use case in detail!
+(cog-evaluate!
+	(Evaluation
+		(DefinedPredicate "recursive relation")
+		(List (Concept "Ben") (Concept "foobar"))))
 
 ; ----------
 ; The above demos all used the EvaluationLink, which, by definition,

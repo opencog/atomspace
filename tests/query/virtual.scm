@@ -20,6 +20,8 @@
 		))
 )
 
+; (cog-execute! get-mouse)
+
 (Inheritance (Concept "snail") (Concept "animal"))
 (Inheritance (Concept "snail") (Concept "gastropod"))
 
