@@ -70,11 +70,6 @@ static thread_local int cnt = 0;
 
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 {
-	DO_LOG({LAZY_LOG_FINE
-		<< "**************************************************";})
-	DO_LOG({LAZY_LOG_FINE << "Enter ContinuationMixin::satisfy cnt="
-		<< cnt << " in_continuation=" << in_continuation;})
-
 	// If we are in_continuation, then this is not the first time we
 	// were called. Record the pattern to be grounded, and throw an
 	// exception to get us back to the first, base call.
@@ -150,6 +145,11 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 			return false;
 		}
 		catch (const ContinuationException& ex) {}
+
+		DO_LOG({LAZY_LOG_FINE
+			<< "**************************************************";})
+		DO_LOG({LAZY_LOG_FINE << "Enter ContinuationMixin::satisfy cnt="
+			<< cnt << " in_continuation=" << in_continuation;})
 
 		// If we are here, then the exception was caught. Make note of the
 		// pattern we're supposed to ground, jump up to the top, and ground
