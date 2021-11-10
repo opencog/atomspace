@@ -87,76 +87,75 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 	PatternLinkPtr lform = form;
 	cnt = 0;
 
-	// When catching the exception thrown above, the goto below will send
-	// us back to here. That way, we can continue in the same stack frame
-	// as we started with. This is tail recursion, more or less. (We use
-	// the exception mechanism for the non-local goto part of this.)
-beginning:
-
-	// Wrap the actual satisfier in a try-catch loop. If the pattern
-	// has a ContinuationLink in it, and that link is hit, then the
-	// evaluate_sentence() above will throw. It records the grounding
-	// that it has found, and right after the catch, we take that
-	// grounding and evaluate it.
-	try
+	// The exception thrown immediately above will be caught below.
+	// Just loop back to here, and run the pattern (the localpat)
+	// that was recorded.
+	while (true)
 	{
-		in_continuation = true;
-		bool done = SatisfyMixin::satisfy(lform);
-		in_continuation = false;
-		return done;
-	}
-	catch (const ContinuationException& ex) {}
-
-	// Temporary safety mechanism. I suspect that most users do not
-	// intend to write infinite loops (e.g. REPL loops) so assume
-	// infinite recursion is a user error.
-	cnt++;
-	if (40 < cnt)
-		throw RuntimeException(TRACE_INFO,
-			"Suspect an infinite continuation loop! Are you sure?\n%s\n",
-			lform->to_short_string().c_str());
-
-	DO_LOG({LAZY_LOG_FINE << "Continue cnt=" << cnt
-		<< " evaluate ContinuationLink:\n"
-		<< _continuation->to_short_string(); })
-
-	// OK. If we are here, then a ContinuationLink was seen earlier in
-	// the evaluation. Convert it into an ordinary PutLink, and evaluate
-	// it. If, during evaluation, someone calls this method that we are
-	// in right now, i.e. if they call ContinuationMixin::satisfy(), then
-	// up above, we record the PatterLink to be grounded, (recording it
-	// in localpat), and up above we throw. That throw is caught below,
-	// thus popping the C++ stack back to here. We can now do that
-	// pattern, simply by using the goto to get back to the start.
-	// So .. no change in stack frame depth, no leakage of malloc'ed
-	// data. We're very very good.
-	try
-	{
-		Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
-		AtomSpace* tas = TermMatchMixin::_temp_aspace;
-		tas->clear();
-		bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
-
-		DO_LOG({LAZY_LOG_FINE << "Finish continuing, cnt=" << cnt
-			<< " result=" << crispy; })
-
-		cnt = 0;
-		in_continuation = false;
-		if (crispy)
+		// Wrap the actual satisfier in a try-catch loop. If the pattern
+		// has a ContinuationLink in it, and that link is hit, then the
+		// evaluate_sentence() above will throw. It records the grounding
+		// that it has found, and right after the catch, we take that
+		// grounding and evaluate it.
+		try
 		{
-			GroundingMap empty;
-			grounding(empty, empty);
-			return search_finished(false);
+			in_continuation = true;
+			bool done = SatisfyMixin::satisfy(lform);
+			in_continuation = false;
+			return done;
 		}
-		return false;
-	}
-	catch (const ContinuationException& ex) {}
+		catch (const ContinuationException& ex) {}
 
-	// If we are here, then the exception was caught. Make note of the
-	// pattern we're supposed to ground, jump up to the top, and ground
-	// it.
-	lform = localpat;
-	goto beginning;
+		// Temporary safety mechanism. I suspect that most users do not
+		// intend to write infinite loops (e.g. REPL loops) so assume
+		// infinite recursion is a user error.
+		cnt++;
+		if (40 < cnt)
+			throw RuntimeException(TRACE_INFO,
+				"Suspect an infinite continuation loop! Are you sure?\n%s\n",
+				lform->to_short_string().c_str());
+
+		DO_LOG({LAZY_LOG_FINE << "Continue cnt=" << cnt
+			<< " evaluate ContinuationLink:\n"
+			<< _continuation->to_short_string(); })
+
+		// OK. If we are here, then a ContinuationLink was seen earlier in
+		// the evaluation. Convert it into an ordinary PutLink, and evaluate
+		// it. If, during evaluation, someone calls this method that we are
+		// in right now, i.e. if they call ContinuationMixin::satisfy(), then
+		// up above, we record the PatterLink to be grounded, (recording it
+		// in localpat), and up above we throw. That throw is caught below,
+		// thus popping the C++ stack back to here. We can now do that
+		// pattern, simply by using the goto to get back to the start.
+		// So .. no change in stack frame depth, no leakage of malloc'ed
+		// data. We're very very good.
+		try
+		{
+			Handle plk = createLink(_continuation->getOutgoingSet(), PUT_LINK);
+			AtomSpace* tas = TermMatchMixin::_temp_aspace;
+			tas->clear();
+			bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+
+			DO_LOG({LAZY_LOG_FINE << "Finish continuing, cnt=" << cnt
+				<< " result=" << crispy; })
+
+			cnt = 0;
+			in_continuation = false;
+			if (crispy)
+			{
+				GroundingMap empty;
+				grounding(empty, empty);
+				return search_finished(false);
+			}
+			return false;
+		}
+		catch (const ContinuationException& ex) {}
+
+		// If we are here, then the exception was caught. Make note of the
+		// pattern we're supposed to ground, jump up to the top, and ground
+		// it.
+		lform = localpat;
+	}
 
 	// Not reached, obviously.
 	return true;
