@@ -1,9 +1,7 @@
 /*
  * ContinuationMixin.cc
  *
- * Copyright (C) 2008,2009,2014,2015 Linas Vepstas
- *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
+ * Copyright (C) 2021 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
