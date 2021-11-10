@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <setjmp.h>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
@@ -63,6 +65,7 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 
 static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
+static thread_local jmp_buf begining;
 
 int cnt = 0;
 bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
@@ -74,11 +77,20 @@ printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
 		throw ContinuationException();
 	}
 
+	PatternLinkPtr lform = form;
+
+	int rc = setjmp(begining);
+printf("duuude setjump rc=%d\n", rc);
+	if (rc)
+	{
+		lform = localpat;
+	}
+
 printf("duuude %d ======= base case %p\n", cnt, this);
 	try
 	{
 		in_continuation = true;
-		bool done = SatisfyMixin::satisfy(form);
+		bool done = SatisfyMixin::satisfy(lform);
 		in_continuation = false;
 		return done;
 	}
@@ -107,10 +119,9 @@ printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 	catch (const ContinuationException& ex) {}
 
 printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
-	in_continuation = false;
-	bool done = satisfy(localpat);
-printf("duuude in the end %d %d w %p\n", cnt, in_continuation, this);
-	return done;
+	longjmp(begining, 666);
+
+	return true;
 }
 
 /* ===================== END OF FILE ===================== */
