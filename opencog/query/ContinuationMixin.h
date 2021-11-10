@@ -67,6 +67,11 @@ class ContinuationMixin :
 		 */
 		virtual bool evaluate_sentence(const Handle&, const GroundingMap&);
 
+		/**
+		 * Continuations enter here.
+		 */
+		virtual bool satisfy(const PatternLinkPtr&);
+
 	protected:
 		Handle _continuation;
 };

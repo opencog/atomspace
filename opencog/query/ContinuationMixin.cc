@@ -62,21 +62,12 @@ bool ContinuationMixin::evaluate_sentence(const Handle& top,
 }
 
 static thread_local bool in_continuation = false;
-static thread_local const Variables* localvars = nullptr;
-static thread_local const Pattern* localpat = nullptr;
+static thread_local PatternLinkPtr localpat = nullptr;
 
 int cnt = 0;
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
 printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
-	if (in_continuation)
-	{
-		localvars = InitiateSearchMixin::_variables;
-		localpat = InitiateSearchMixin::_pattern;
-		throw ContinuationException();
-	}
-
-printf("duude %d base case this=%p\n", cnt, this);
 	try
 	{
 		in_continuation = true;
@@ -109,11 +100,21 @@ printf("duuude %d %d %p crispy=%d\n", cnt, in_continuation, this, crispy);
 	catch (const ContinuationException& ex) {}
 
 printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
-	set_pattern(*localvars, *localpat);
 	in_continuation = false;
-	bool done = perform_search(pmc);
+	bool done = satisfy(localpat);
 printf("duuude in the end %d %d w %p\n", cnt, in_continuation, this);
 	return done;
+}
+
+bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
+{
+	if (in_continuation)
+	{
+		localpat = form;
+		throw ContinuationException();
+	}
+
+	return SatisfyMixin::satisfy(form);
 }
 
 /* ===================== END OF FILE ===================== */
