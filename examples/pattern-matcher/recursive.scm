@@ -300,7 +300,7 @@
 ; there any foobar. Asking the query engine to do this kind of query
 ; is a user error. It currently has a hard-coded loop limit, and will
 ; throw an exception once this limit is reached. If you need a higher
-; limit, or a true initite loop, please open a bug report, and describe
+; limit, or a true infinite loop, please open a bug report, and describe
 ; the use case in detail!
 (cog-evaluate!
 	(Evaluation
