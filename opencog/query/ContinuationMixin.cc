@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
 #include "ContinuationMixin.h"
@@ -32,6 +33,16 @@ using namespace opencog;
 #define DO_LOG(STUFF)
 #endif
 
+
+/**
+ * Exception thrown for continuations
+ */
+class ContinuationException : public SilentException
+{
+public:
+    ContinuationException(void) {}
+};
+
 /* ======================================================== */
 
 /**
@@ -39,12 +50,25 @@ using namespace opencog;
 bool ContinuationMixin::evaluate_sentence(const Handle& top,
                                           const GroundingMap& gnds)
 {
+	if (CONTINUATION_LINK == top->get_type())
+	{
+		_continuation = top;
+		throw ContinuationException();
+	}
 	return TermMatchMixin::evaluate_sentence(top, gnds);
 }
 
 bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
 {
-	return InitiateSearchMixin::perform_search(pmc);
+	try
+	{
+		return InitiateSearchMixin::perform_search(pmc);
+	}
+	catch (const ContinuationException& ex)
+	{
+printf("duude caught %s\n", _continuation->to_string().c_str());
+return true;
+	}
 }
 
 /* ===================== END OF FILE ===================== */

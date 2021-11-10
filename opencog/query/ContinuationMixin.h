@@ -43,8 +43,9 @@ class ContinuationMixin :
 {
 	public:
 		ContinuationMixin(AtomSpace* as) :
-			InitiateSearchMixin(as), TermMatchMixin(as)
-			{}
+			InitiateSearchMixin(as), TermMatchMixin(as),
+			_continuation(nullptr)
+		{}
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
@@ -64,8 +65,8 @@ class ContinuationMixin :
 		 */
 		virtual bool evaluate_sentence(const Handle&, const GroundingMap&);
 
-protected:
-
+	protected:
+		Handle _continuation;
 };
 
 } // namespace opencog
