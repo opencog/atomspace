@@ -97,6 +97,7 @@
 			(List	(Concept "human") (Concept "vertebrate"))))))
 
 ; ----------
+; First time, with an ordinary PutLink
 (Define
 	(DefinedPredicate "recursive relation")                 ;; Step 1.
 	(Lambda
@@ -132,6 +133,64 @@
 			(Put
 				(DefinedPredicate "recursive relation")
 				(List (Concept "Ben") (Variable "?inh")))))))))
+
+; ----------
+; Again with a continuation.
+(Define
+	(DefinedPredicate "inf regress")
+	(Lambda
+		(VariableList (Variable "this") (Variable "that"))
+		(SequentialOr
+			(Present
+				(Inheritance (Variable "this") (Variable "that")))
+			(Satisfaction
+				(Variable "middle")
+				(And
+					(Present
+						(Inheritance (Variable "this") (Variable "middle")))
+					(Continuation
+						(DefinedPredicate "inf regress")
+						(List (Variable "middle") (Variable "that"))))))))
+
+(test-assert "cont-ben-anim" (equal? (stv 1 1)
+	(cog-evaluate!
+		(Evaluation
+			(DefinedPredicate "inf regress")
+			(List	(Concept "Ben") (Concept "animal"))))))
+
+(test-assert "cont-ben-foo" (equal? (stv 0 1)
+	(cog-evaluate!
+		(Evaluation
+			(DefinedPredicate "inf regress")
+			(List	(Concept "Ben") (Concept "foobar"))))))
+
+; There are nine levels in the ontology above.
+(test-assert "cont-ben-list" (equal? 9 (length (cog-value->list
+	(cog-execute!
+		(Meet (TypedVariable (Variable "?inh") (Type 'Concept))
+			(Put
+				(DefinedPredicate "inf regress")
+				(List (Concept "Ben") (Variable "?inh")))))))))
+
+; ----------
+; The infinte loop case.
+(Inheritance (Concept "thing") (Concept "Ben"))
+
+(test-assert "cont-finite-ben-anim" (equal? (stv 1 1)
+	(cog-evaluate!
+		(Evaluation
+			(DefinedPredicate "inf regress")
+			(List	(Concept "Ben") (Concept "animal"))))))
+
+(define (bonkers)
+	(cog-evaluate!
+		(Evaluation
+			(DefinedPredicate "inf regress")
+			(List	(Concept "Ben") (Concept "foobar")))))
+
+(define throwd #f)
+(catch #t bonkers (lambda (key args rest) (set! throwd #t)))
+(test-assert "cont-inf-loop" throwd)
 
 ; ----------
 (test-assert "exout" (equal? (stv 1 1)
