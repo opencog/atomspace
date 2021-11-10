@@ -79,11 +79,10 @@ printf("duude %d enter perf search; this=%p\n", cnt, this);
 cnt++;
 if (300 < cnt) return true;
 
-		AtomSpace* tas = TermMatchMixin::_temp_aspace;
-		tas->clear();
-		// bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
-		GroundingMap empty;
-		bool crispy = TermMatchMixin::evaluate_sentence(plk, empty);
+		Handle red = HandleCast(plk->execute());
+ printf("duude red %s\n", red->to_string().c_str());
+
+		bool crispy = satisfy(PatternLinkCast(red));
 printf("duuude %p crispy=%d\n", this, crispy);
 return true;
 	}

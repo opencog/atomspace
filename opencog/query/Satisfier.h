@@ -31,7 +31,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/ContinuationMixin.h>
-#include <opencog/query/SatisfyMixin.h>
 
 namespace opencog {
 
@@ -47,8 +46,7 @@ namespace opencog {
  */
 
 class Satisfier :
-	public ContinuationMixin,
-	public SatisfyMixin
+	public ContinuationMixin
 {
 	public: // Arghhh. OpenPsi accesses these directly...
 		Handle _pattern_body;
@@ -98,8 +96,7 @@ class Satisfier :
  */
 
 class SatisfyingSet :
-	public ContinuationMixin,
-	public SatisfyMixin
+	public ContinuationMixin
 {
 	protected:
 		AtomSpace* _as;
