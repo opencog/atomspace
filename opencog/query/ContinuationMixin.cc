@@ -65,13 +65,20 @@ static thread_local bool in_continuation = false;
 static thread_local PatternLinkPtr localpat = nullptr;
 
 int cnt = 0;
-bool ContinuationMixin::perform_search(PatternMatchCallback& pmc)
+bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 {
 printf("duude %d %d enter perf search; this=%p\n", cnt, in_continuation, this);
+	if (in_continuation)
+	{
+		localpat = form;
+		throw ContinuationException();
+	}
+
+printf("duuude %d ======= base case %p\n", cnt, this);
 	try
 	{
 		in_continuation = true;
-		bool done = InitiateSearchMixin::perform_search(pmc);
+		bool done = SatisfyMixin::satisfy(form);
 		in_continuation = false;
 		return done;
 	}
@@ -104,17 +111,6 @@ printf("duuude %d %d caught on eval %p\n", cnt, in_continuation, this);
 	bool done = satisfy(localpat);
 printf("duuude in the end %d %d w %p\n", cnt, in_continuation, this);
 	return done;
-}
-
-bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
-{
-	if (in_continuation)
-	{
-		localpat = form;
-		throw ContinuationException();
-	}
-
-	return SatisfyMixin::satisfy(form);
 }
 
 /* ===================== END OF FILE ===================== */

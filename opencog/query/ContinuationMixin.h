@@ -57,12 +57,6 @@ class ContinuationMixin :
 		}
 
 		/**
-		 * Called to perform the actual search. Continuations
-		 * return from here.
-		 */
-		virtual bool perform_search(PatternMatchCallback&);
-
-		/**
 		 * Continuations exit from here.
 		 */
 		virtual bool evaluate_sentence(const Handle&, const GroundingMap&);
