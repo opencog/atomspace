@@ -261,6 +261,14 @@ ABSENT_LINK <- PRESENT_LINK
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
 
+// Continuations are used in the Pattern Engine to implement infinite
+// recursion. They currently behave like an explicit declaration of tail
+// recursion.  (Caution: this may be a misleading name for what this
+// link does. I can't think of a better name. TailRecursionLink is not
+// quite the right name either, because the recursion need not be at the
+// tail.)
+CONTINUATION_LINK <- EVALUATABLE_LINK
+
 // ====================================================================
 // Performance scripting links.
 //

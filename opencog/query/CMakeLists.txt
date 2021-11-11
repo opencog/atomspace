@@ -1,6 +1,7 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
+	ContinuationMixin.cc
 	InitiateSearchMixin.cc
 	NextSearchMixin.cc
 	PatternMatchEngine.cc
@@ -30,6 +31,7 @@ INSTALL (TARGETS query-engine
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	ContinuationMixin.h
 	Implicator.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h
