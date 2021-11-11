@@ -229,13 +229,13 @@
 ;    This tells the query engine that an infinite regress will happen
 ;    here. The query engine treats this as a form of tail recursion, and
 ;    takes steps to avoid growing the stack at this point. The
-;    ContinuationLink can only wrp one evaluatable.
+;    ContinuationLink wraps some (any) evaluatable Atom.
 ; 8) To do the recursion, we need to connect the grounded `middle` to
 ;    the recursively long chain. To get that, we refer to the recursive
 ;    definition itself. That definition takes two arguments. But which
 ;    two arguments? The PutLink indicates what to plug in: it explicitly
 ;    states that the arguments are the `middle`, and the other endpoint.
-;    The PutLink, "plugs things in" (it forms beta redexes.) Earlier
+;    The PutLink "plugs things in" (it forms beta redexes.) Earlier
 ;    demos explain PutLink. It's not complicated.
 ;
 (Define
