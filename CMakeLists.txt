@@ -146,15 +146,23 @@ ENDIF(GEARMAN_FOUND)
 MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# This is required for Guile, Python
-
+# Find Guile
 include(OpenCogFindGuile)
 
+# ----------------------------------------------------------
 # By default, this uses Python3.
 # To use Python2 only, run the following in the build directory:
 # rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
-
 include(OpenCogFindPython)
+
+# ----------------------------------------------------------
+# OCaml
+
+FIND_PACKAGE(OCaml)
+IF (OCAML_FOUND)
+	ADD_DEFINITIONS(-DHAVE_OCAML)
+	SET(HAVE_OCAML 1)
+ENDIF (OCAML_FOUND)
 
 # ----------------------------------------------------------
 # Glasgow Haskell compiler
