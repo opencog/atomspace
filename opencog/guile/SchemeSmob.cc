@@ -1,7 +1,7 @@
 /*
  * SchemeSmob.cc
  *
- * Scheme small objects (SMOBS) for opencog -- core functions.
+ * Scheme small objects (SMOBS) for the AtomSpace -- core functions.
  *
  * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  *
