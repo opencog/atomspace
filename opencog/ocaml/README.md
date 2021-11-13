@@ -41,8 +41,8 @@ Usage
 
 Semi-functional:
 ```
-$ LD_LIBRARY_PATH=/usr/local/lib/opencog/ocaml/ rlwrap ocaml
-# #load "/usr/local/lib/opencog/ocaml/atomese.cma" ;;
+$ rlwrap ocaml -I /usr/local/lib/opencog/ocaml/
+# #load "atomese.cma" ;;
 # open Atomese ;;
 # external newnode : string -> unit = "NewNode" ;;
 # newnode "foo" ;;
@@ -51,6 +51,14 @@ $ LD_LIBRARY_PATH=/usr/local/lib/opencog/ocaml/ rlwrap ocaml
 
 Debugging Hints
 ---------------
+If things don't work, try this:
+```
+$ LD_LIBRARY_PATH=/usr/local/lib/opencog/ocaml/ rlwrap ocaml
+```
+
+Examine what's what:
 ```
 $ ocamlobjinfo opencog/ocaml/atomese.cma
 ```
+
+open Atomese ;; fails unless I copy over atomese.cmi

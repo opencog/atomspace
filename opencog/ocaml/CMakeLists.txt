@@ -8,6 +8,7 @@ ADD_LIBRARY (ocamloc
 
 SET_TARGET_PROPERTIES(ocamloc PROPERTIES
 	PREFIX "dll"
+	INSTALL_PATH "lib${LIB_DIR_SUFFIX}/opencog/ocaml/"
 )
 
 TARGET_LINK_LIBRARIES(ocamloc
