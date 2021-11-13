@@ -13,11 +13,9 @@ TARGET_LINK_LIBRARIES(ocamloc
 ADD_OCAML_LIBRARY(atomese BYTECODE
 	atomese.mli
 	atomese.ml
+	C_LIBRARIES
+	ocamloc
 )
-
-#TARGET_LINK_OCAML_LIBRARIES(ocamloc KIND C_OBJECT
-#	atomspace
-#)
 
 INSTALL_OCAML_INTERFACES(
 	atomese
