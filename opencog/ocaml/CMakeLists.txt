@@ -2,16 +2,16 @@
 # Use UseOCaml.cmake, provided by cogutils
 INCLUDE(UseOCaml)
 
-ADD_LIBRARY (ocamloc
+ADD_LIBRARY (camlatoms
 	CamlWrap.cc
 )
 
-SET_TARGET_PROPERTIES(ocamloc PROPERTIES
+SET_TARGET_PROPERTIES(camlatoms PROPERTIES
 	PREFIX "dll"
 	INSTALL_PATH "lib${LIB_DIR_SUFFIX}/opencog/ocaml/"
 )
 
-TARGET_LINK_LIBRARIES(ocamloc
+TARGET_LINK_LIBRARIES(camlatoms
 	atomspace
 )
 
@@ -23,12 +23,12 @@ ADD_OCAML_LIBRARY(atomese
 		atomese.mli
 		atomese.ml
 	C_LIBRARIES
-		ocamloc
+		camlatoms
 )
 
 INSTALL_OCAML_TARGETS(
 	atomese
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
 
-INSTALL (TARGETS ocamloc
+INSTALL (TARGETS camlatoms
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
