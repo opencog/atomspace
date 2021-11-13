@@ -31,9 +31,16 @@ Guile Scheme binding, which also treats Atoms as opaque objects.
 
 Usage
 -----
+```
 $ rlwrap ocaml
 # #load "/usr/local/lib/opencog/ocaml/atomese.cma" ;;
 # newnode "foo" ;;
 
 external newnode : string -> unit = "NewNode" ;;
+```
 
+Debugging Hints
+---------------
+```
+$ ocamlobjinfo opencog/ocaml/atomese.cma
+```

@@ -2,7 +2,7 @@
 # Use UseOCaml.cmake, provided by cogutils
 INCLUDE(UseOCaml)
 
-ADD_LIBRARY (ocamloc
+ADD_LIBRARY (ocamloc STATIC
 	CamlWrap.cc
 )
 
