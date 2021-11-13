@@ -15,9 +15,11 @@ TARGET_LINK_LIBRARIES(camlatoms
 	atomspace
 )
 
-# This sets "Force link: YES" but this doesn't seem to affect anything.
-# SET(CMAKE_OCaml_LINKER_FLAGS "-linkall")
-
+# Attention: the atomese.ml and atomese.mli files can be named anything.
+# For example, atomfoo.mli. In this case, the user would say:
+# #load "atomese.cma" ;;
+# open Atomfoo ;;
+# and it all works. Be sure to install atomfoo.cmi, below.
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
 		atomese.mli
@@ -30,6 +32,8 @@ INSTALL_OCAML_TARGETS(
 	atomese
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
 
+# Attention: the second (and subsequent) argument is the name of
+# the mli (cmi) file, for example atomfoo, as noted above.
 INSTALL_OCAML_INTERFACES(
 	atomese
 	atomese
