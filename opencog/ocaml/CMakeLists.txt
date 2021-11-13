@@ -21,3 +21,6 @@ ADD_OCAML_LIBRARY(atomese
 INSTALL_OCAML_TARGETS(
 	atomese
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
+
+INSTALL (TARGETS ocamloc
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
