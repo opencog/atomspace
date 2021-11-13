@@ -1,5 +1,5 @@
 /*
- * opencog/ocaml/CamlWrap.cc
+ * opencog/ocaml/CamlWrap.h
  *
  * OCaml wrappers for the AtomSpace -- core functions.
  *
@@ -21,23 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <caml/custom.h>
 #include <caml/mlvalues.h>
 #undef Atom
 
-#include <opencog/atomspace/AtomSpace.h>
-
-#include "CamlWrap.h"
-
-using namespace opencog;
-
-AtomSpacePtr asp = createAtomSpace();
-
-CAMLprim value NewNode(value ostr)
-{
-	const char * str = String_val(ostr);
-
-	Handle h = asp->add_node(NODE, str);
-
-	return Val_unit;
+extern "C" {
+CAMLprim value NewNode(value);
 }

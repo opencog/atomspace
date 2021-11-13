@@ -10,13 +10,14 @@ TARGET_LINK_LIBRARIES(ocamloc
 	atomspace
 )
 
-ADD_OCAML_LIBRARY(atomese BYTECODE
-	atomese.mli
-	atomese.ml
+ADD_OCAML_LIBRARY(atomese
+	BYTECODE
+		atomese.mli
+		atomese.ml
 	C_LIBRARIES
-	ocamloc
+		ocamloc
 )
 
-INSTALL_OCAML_INTERFACES(
+INSTALL_OCAML_TARGETS(
 	atomese
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")

@@ -28,3 +28,12 @@ to behave 'naturally' in an OCaml environment.  Thus, it seems easiest,
 at this point, to just treat Atoms as opaque types, and provide access
 methods to them.  Thus, the OCaml binding here is much the same as the
 Guile Scheme binding, which also treats Atoms as opaque objects.
+
+Usage
+-----
+$ rlwrap ocaml
+# #load "/usr/local/lib/opencog/ocaml/atomese.cma" ;;
+# newnode "foo" ;;
+
+external newnode : string -> unit = "NewNode" ;;
+
