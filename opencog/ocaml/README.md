@@ -38,12 +38,15 @@ apt install ocaml ocaml-findlib
 
 Usage
 -----
+
+Semi-functional:
 ```
-$ rlwrap ocaml
+$ LD_LIBRARY_PATH=/usr/local/lib/opencog/ocaml/ rlwrap ocaml
 # #load "/usr/local/lib/opencog/ocaml/atomese.cma" ;;
+# open Atomese ;;
+# external newnode : string -> unit = "NewNode" ;;
 # newnode "foo" ;;
 
-external newnode : string -> unit = "NewNode" ;;
 ```
 
 Debugging Hints

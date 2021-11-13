@@ -2,13 +2,20 @@
 # Use UseOCaml.cmake, provided by cogutils
 INCLUDE(UseOCaml)
 
-ADD_LIBRARY (ocamloc STATIC
+ADD_LIBRARY (ocamloc
 	CamlWrap.cc
+)
+
+SET_TARGET_PROPERTIES(ocamloc PROPERTIES
+	PREFIX "dll"
 )
 
 TARGET_LINK_LIBRARIES(ocamloc
 	atomspace
 )
+
+# This sets "Force link: YES" but this doesn't seem to affect anything.
+# SET(CMAKE_OCaml_LINKER_FLAGS "-linkall")
 
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
