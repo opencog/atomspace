@@ -81,7 +81,6 @@ private:
 
 	static int print_misc(SCM, SCM, scm_print_state *);
 	static SCM equalp_misc(SCM, SCM);
-	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
 
 	static bool scm_is_protom(SCM);
@@ -243,6 +242,11 @@ public:
 	// using.
 	static AtomSpace* ss_get_env_as(const char *);
 };
+
+// This assumes that sizeof(ValuePtr) == 16. If it ever changes
+// to 24, then this macro has to be changed to SCM_SMOB_OBJECT_1_LOC
+// and if it ever gets larger than 24, then we are SOL.
+#define SCM_SMOB_VALUE_PTR_LOC(x) ((ValuePtr*) SCM_SMOB_OBJECT_2_LOC(x))
 
 /** @}*/
 } // namespace opencog
