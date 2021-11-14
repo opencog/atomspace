@@ -60,7 +60,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 			return h->to_short_string();
 
 		h = Handle::UNDEFINED;
-		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
+		*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
 		scm_remember_upto_here_1(node);
 		return "#<Invalid handle>";
 	}
@@ -86,13 +86,10 @@ SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
 	if (nullptr == pa) return SCM_BOOL_F;
 
-	// Use new so that the smart pointer increments!
-	ValuePtr* pap = new ValuePtr(pa);
-	scm_gc_register_allocation(sizeof(pa));
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, pap);
+	SCM smob = scm_new_double_smob(cog_misc_tag, 0,0,0);
 	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
+	*(SCM_SMOB_VALUE_PTR_LOC(smob)) = pa;
+
 	return smob;
 }
 
@@ -113,9 +110,7 @@ ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
 		return nullptr;
 
-	ValuePtr pv(*((ValuePtr *) SCM_SMOB_DATA(sh)));
-	scm_remember_upto_here_1(sh);
-	return pv;
+	return *(SCM_SMOB_VALUE_PTR_LOC(sh));
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
@@ -137,7 +132,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (nullptr == h->getAtomSpace() and
 	    not (ATOMSPACE == h->get_type()))
 	{
-		*((Handle *) SCM_SMOB_DATA(sh)) = Handle::UNDEFINED;
+		*(SCM_SMOB_VALUE_PTR_LOC(sh)) = nullptr;
 		scm_remember_upto_here_1(sh);
 		return Handle::UNDEFINED;
 	}
@@ -728,7 +723,7 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 	bool rc = atomspace->extract_atom(h, false);
 
 	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
 	scm_remember_upto_here_1(satom);
 
 	// rc should always be true at this point ...
@@ -752,7 +747,7 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 	bool rc = atomspace->extract_atom(h, true);
 
 	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
 	scm_remember_upto_here_1(satom);
 
 	if (rc) return SCM_BOOL_T;

@@ -28,9 +28,7 @@ size_t SchemeSmob::free_misc(SCM node)
 	switch (misctype)
 	{
 		case COG_PROTOM:
-			ValuePtr* pap;
-			pap = (ValuePtr*) SCM_SMOB_DATA(node);
-			delete pap;
+			*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
 			scm_remember_upto_here_1(node);
 			return 0;
 
