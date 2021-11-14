@@ -38,19 +38,20 @@ static void finalize(value v)
 printf("duude finalize called \n");
 }
 
-static struct caml_custom_table opstbl;
+static struct custom_operations opstbl;
 
-static void init()
+static __attribute__ ((constructor)) void init()
 {
 	opstbl.identifier = "OpenCog Value";
 	opstbl.finalize = finalize;
 
 	// XXX FIXME
 	opstbl.compare = custom_compare_default;
-	opstbl.compare_ext = custom_compare_ext_default;
 	opstbl.hash = custom_hash_default;
 	opstbl.serialize = custom_serialize_default;
 	opstbl.deserialize = custom_deserialize_default;
+	opstbl.compare_ext = custom_compare_ext_default;
+	opstbl.fixed_length = custom_fixed_length_default;
 }
 
 value tag_to_value(const ValuePtr& pa)
@@ -60,10 +61,11 @@ value tag_to_value(const ValuePtr& pa)
 	// sizeof(ValuePtr) = 16
 	value v = caml_alloc_custom(&opstbl, sizeof(ValuePtr), 1, 4000000);
 
-	// Use new so that the smart pointer increments!
-	// ValuePtr* pap = new ValuePtr(pa);
+	void* vd = Data_custom_val(v);
+	memset(vd, 0, sizeof(ValuePtr));
 
-	*((ValuePtr*) Data_custom_val(v)) = pa;
+	// Smart pointer increments!
+	*((ValuePtr*) vd) = pa;
 	return v;
 }
 
@@ -71,7 +73,5 @@ CAMLprim value NewNode(value ostr)
 {
 	const char * str = String_val(ostr);
 
-	Handle h = asp->add_node(NODE, str);
-
-	return Val_unit;
+	return tag_to_value(asp->add_node(NODE, str));
 }
