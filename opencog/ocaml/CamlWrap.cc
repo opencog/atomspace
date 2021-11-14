@@ -42,7 +42,7 @@ static struct custom_operations opstbl;
 
 static __attribute__ ((constructor)) void init()
 {
-	opstbl.identifier = "OpenCog Value";
+	opstbl.identifier = "Atomese";
 	opstbl.finalize = finalize;
 
 	// XXX FIXME

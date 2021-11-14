@@ -46,8 +46,20 @@ $ rlwrap ocaml -I /usr/local/lib/opencog/ocaml/
 # open Atomese ;;
 # external newnode : string -> unit = "NewNode" ;;
 # newnode "foo" ;;
-
 ```
+
+Development
+-----------
+If you change `atomese.ml`, then you MUST run, by hand
+```
+ocamlc -i atomese.ml > atomese.mli
+```
+Yes, this should be automated in the CMakefile
+
+Ideas
+-----
+* Use `#directory` instead of `-I`
+* Use a 'META' file, so that everything can be loaded with `#require`.
 
 Debugging Hints
 ---------------
