@@ -83,27 +83,9 @@ class QueryPersistUTest :  public CxxTest::TestSuite
 
 QueryPersistUTest:: QueryPersistUTest(void)
 {
-	try
-	{
-		config().load("atomspace-test.conf");
-	}
-	catch (RuntimeException &e)
-	{
-		std::cerr << e.get_message() << std::endl;
-	}
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
-
-	try {
-		// Get the database logins & etc from the config file.
-		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-	}
-	catch (InvalidParamException &e)
-	{
-		friendlyFailMessage();
-	}
+	getDBconfig();
 }
 
 /*

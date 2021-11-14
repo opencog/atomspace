@@ -76,35 +76,18 @@ class BasicDeleteUTest :  public CxxTest::TestSuite
 
 BasicDeleteUTest::BasicDeleteUTest(void)
 {
-	try
-	{
-		config().load("atomspace-test.conf");
-	}
-	catch (RuntimeException &e)
-	{
-		std::cerr << e.get_message() << std::endl;
-	}
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
-	try {
-		// Get the database logins & etc from the config file.
-		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	getDBconfig();
 
-		// use postgres preferentially, unless its missing.
+	// Use postgres preferentially, unless its missing.
 #ifdef HAVE_ODBC_STORAGE
-		uri = mkuri("odbc", dbname, username, passwd);
+	uri = mkuri("odbc", dbname, username, passwd);
 #endif
 #ifdef HAVE_PGSQL_STORAGE
-		uri = mkuri("postgres", dbname, username, passwd);
+	uri = mkuri("postgres", dbname, username, passwd);
 #endif
-	}
-	catch (InvalidParamException &e)
-	{
-		friendlyFailMessage();
-	}
 }
 
 /*
