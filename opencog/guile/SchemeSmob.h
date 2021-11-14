@@ -81,7 +81,6 @@ private:
 
 	static int print_misc(SCM, SCM, scm_print_state *);
 	static SCM equalp_misc(SCM, SCM);
-	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
 
 	static bool scm_is_protom(SCM);

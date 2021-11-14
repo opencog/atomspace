@@ -13,33 +13,6 @@
 
 using namespace opencog;
 
-SCM SchemeSmob::mark_misc(SCM misc_smob)
-{
-	scm_t_bits misctype = SCM_SMOB_FLAGS(misc_smob);
-
-	switch (misctype)
-	{
-		case COG_PROTOM: // Nothing to do here ...
-		case COG_LOGGER: // Nothing to do here ...
-		case COG_EXTEND: // Nothing to do here ...
-			return SCM_BOOL_F;
-
-		// I don't get it .. started seeing these recently. I'm just
-		// going to silently ignore thse, for now, don't know what
-		// they mean. XXX TODO figure out and fix if needed. Or document.
-		case 0:
-			return SCM_BOOL_F;
-
-		default:
-			fprintf(stderr, "Error: opencog-guile: "
-			        "don't know how to mark this type: %d\n",
-			        (int) misctype);
-			break;
-	}
-
-	return SCM_BOOL_F;
-}
-
 /**
  * Free the memory associated with an opencog guile object.
  * This routine is called by the guile garbage collector, from time to
