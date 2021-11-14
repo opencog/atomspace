@@ -15,3 +15,8 @@ compiled as:
 g++ -std=c++17 -c basic.cc
 g++ -o basic basic.o -L/usr/local/lib/opencog -latom_types -latombase -latomspace
 ```
+
+To run it, just say:
+```
+$ ./basic
+```
