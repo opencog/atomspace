@@ -1,4 +1,10 @@
 
+How to use gdb
+--------------
+Copy either `.gbdinit` or `.gdbinit-print-opencog` to `~/.gbdinit`
+That is, to your home directory.
+
+
 How to use Valgrind suppressions
 --------------------------------
 Using valgrind with opencog can be tricky, because many spurious messages

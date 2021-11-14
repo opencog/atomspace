@@ -1,8 +1,6 @@
-#
-# Create a test configuration file by copying the default config file
-#
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/atomspace-test.conf
-	${PROJECT_BINARY_DIR}/lib/atomspace-test.conf)
+
+# XXX TODO: Why is this stuff in this directory,
+# instead of the `cmake` directory?
 
 # build_type is used in AtomSpaceConfig.cmake.in
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type )
