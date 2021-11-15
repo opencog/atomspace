@@ -25,7 +25,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"\n"
 		"(* This file contains basic OCaml wrappers for atom creation. *)\n"
 		"\n"
-		"type atom = Value | Stream | AtomSpace | Node | Link ;;\n"
+		"type atom = Atom | Node of string | Link of atom list;;\n"
 	)
 
 	FILE(WRITE "${WRAPPER_FILE}"
@@ -45,6 +45,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 ENDMACRO()
 
 MACRO(OPENCOG_OCAML_TEARDOWN OCAML_FILE)
+	# OCAML_MAKE_INTERFACE(${OCAML_FILE})
 ENDMACRO()
 
 # Print out the scheme definitions
@@ -53,7 +54,7 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 	# The function that returns the integer type of the type.
 	# Not needed right now, comment out.
 	# FILE(APPEND "${OCAML_FILE}"
-	#	"external ${LC_SNAKE_TYPE}_atomtype : unit -> int = ${TYPE_NAME}Type ;;\n"
+	#	"external ${LC_SNAKE_TYPE}_atomtype : unit -> int = \"${TYPE_NAME}Type\" ;;\n"
 	# )
 	#
 	# FILE(APPEND "${WRAPPER_FILE}"
@@ -69,7 +70,15 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 	ENDIF ()
 
 	# Avoid reserved keywords
-	IF (ML_NAME STREQUAL "list")
+	IF (ML_NAME STREQUAL "list" OR
+	    ML_NAME STREQUAL "true" OR
+	    ML_NAME STREQUAL "false" OR
+	    ML_NAME STREQUAL "and" OR
+	    ML_NAME STREQUAL "or" OR
+	    ML_NAME STREQUAL "type" OR
+	    ML_NAME STREQUAL "virtual" OR
+	    ML_NAME STREQUAL "function"
+	   )
 		SET(ML_NAME ${LC_SNAKE_TYPE})
 	ENDIF ()
 
@@ -81,12 +90,12 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 
 	ELSEIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${ML_NAME} : unit -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : unit -> atom = \"new_${TYPE_NAME}\" ;;\n"
 		)
 
 	ELSEIF (ISNODE STREQUAL "NODE")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${ML_NAME} : string -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : string -> atom = \"new_${TYPE_NAME}\" ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vname) {\n"
@@ -97,7 +106,7 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 
 	ELSEIF (ISLINK STREQUAL "LINK")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${ML_NAME} : list atom -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : atom list -> atom = \"new_${TYPE_NAME}\" ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vatomlist) {\n"

@@ -9,7 +9,7 @@ MACRO(OCAML_MAKE_INTERFACE name)
 
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${name}i
-		COMMAND ${CMAKE_OCaml_FIND} ocamlc -i ${name}
+		COMMAND ${CMAKE_OCaml_FIND} ocamlc -i ${name} >> ${name}i
 		DEPENDS ${DEPENDS}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		COMMENT "Building the ${name}i file"
