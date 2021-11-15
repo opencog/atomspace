@@ -22,7 +22,8 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 	SET(PARENT_TYPES ${CMAKE_MATCH_3})
 	SET(TYPE_NAME "")
 	IF (CMAKE_MATCH_4)
-		MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
+		# MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
+		MESSAGE(DEBUG "Custom atom type name specified: ${CMAKE_MATCH_4}")
 		STRING(REGEX MATCHALL "." CHARS ${CMAKE_MATCH_4})
 		LIST(LENGTH CHARS LIST_LENGTH)
 		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
@@ -59,7 +60,8 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 	ENDIF (TYPE_NAME STREQUAL "")
 
 	STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
-	MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
+	# MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
+	MESSAGE(DEBUG "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 
 	# -----------------------------------------------------------
 	# Try to guess if the thing is a node or link based on its name
