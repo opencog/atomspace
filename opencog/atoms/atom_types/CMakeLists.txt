@@ -1,5 +1,5 @@
 
-OPENCOG_GEN_CPP_ATOMTYPES(atom_types.script
+OPENCOG_GEN_CXX_ATOMTYPES(atom_types.script
 	atom_types.h
 	atom_types.definitions
 	atom_types.inheritance)
