@@ -111,6 +111,30 @@ MACRO(OPENCOG_CPP_WRITE_DEFS)
 		SHORT_NAME STREQUAL "Arity")
 		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ${TYPE})\n")
 	ENDIF ()
+
+	# ------------------------------------
+	# Create the type inheritance C++ file.
+
+	IF (PARENT_TYPES)
+		STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
+		FOREACH (PARENT_TYPE ${PARENT_TYPES})
+			# Skip inheritance of the special "notype" class; we could move
+			# this test up but it was left here for simplicity's sake
+			IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+				FILE(APPEND "${INHERITANCE_FILE}"
+					"opencog::${TYPE} = ${CLASSSERVER_REFERENCE}"
+					"declType(opencog::${PARENT_TYPE}, \"${TYPE_NAME}\");\n"
+				)
+			ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+		ENDFOREACH (PARENT_TYPE)
+	ELSE (PARENT_TYPES)
+		IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+			FILE(APPEND "${INHERITANCE_FILE}"
+				"opencog::${TYPE} = ${CLASSSERVER_REFERENCE}"
+				"declType(opencog::${TYPE}, \"${TYPE_NAME}\");\n"
+			)
+		ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+	ENDIF (PARENT_TYPES)
 ENDMACRO(OPENCOG_CPP_WRITE_DEFS)
 
 # The main  macro for generating C++ type defintions
@@ -389,23 +413,6 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # Print out the python definitions.
         OPENCOG_PYTHON_WRITE_DEFS()
 
-        # -----------------------------------------------------------
-        # Create the type inheritance C++ file.
-
-        IF (PARENT_TYPES)
-            STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
-            FOREACH (PARENT_TYPE ${PARENT_TYPES})
-                # skip inheritance of the special "notype" class; we could move
-                # this test up but it was left here for simplicity's sake
-                IF (NOT "${TYPE}" STREQUAL "NOTYPE")
-                    FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = ${CLASSSERVER_REFERENCE}declType(opencog::${PARENT_TYPE}, \"${TYPE_NAME}\");\n")
-                ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
-            ENDFOREACH (PARENT_TYPE)
-        ELSE (PARENT_TYPES)
-            IF (NOT "${TYPE}" STREQUAL "NOTYPE")
-                FILE(APPEND "${INHERITANCE_FILE}" "opencog::${TYPE} = ${CLASSSERVER_REFERENCE}declType(opencog::${TYPE}, \"${TYPE_NAME}\");\n")
-            ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
-        ENDIF (PARENT_TYPES)
     ELSE (MATCHED AND CMAKE_MATCH_1)
         IF (NOT MATCHED)
             FILE(REMOVE "${TMPHDR_FILE}")
