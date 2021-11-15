@@ -115,20 +115,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
         void tearDown(void);
         void kill_data(void);
 
-        void friendlyFailMessage()
-        {
-            TS_FAIL("The MultiUserUTest failed.\n"
-                "This is probably because you do not have SQL installed\n"
-                "or configured the way that OpenCog expects.\n\n"
-                "SQL persistence is optional for OpenCog, so if you don't\n"
-                "want it or need it, just ignore this test failure.\n"
-                "Otherwise, please be sure to read opencong/persist/sql/README,\n"
-                "and create/configure the SQL database as described there.\n"
-                "Next, edit lib/atomspace-test.conf appropriately, so as\n"
-                "to indicate the location of your database. If this is\n"
-                "done correctly, then this test will pass.\n");
-            exit(1);
-        }
+#include "friendly-fail.h"
 
         void add_to_space(int, AtomSpace *, StorageNodePtr, std::string id);
         void fetch_space(int, StorageNodePtr);
@@ -146,14 +133,6 @@ class MultiUserUTest :  public CxxTest::TestSuite
 
 MultiUserUTest:: MultiUserUTest(void)
 {
-    try
-    {
-        config().load("atomspace-test.conf");
-    }
-    catch (RuntimeException &e)
-    {
-        std::cerr << e.get_message() << std::endl;
-    }
     logger().set_level(Logger::DEBUG);
     logger().set_print_to_stdout_flag(true);
 
@@ -174,17 +153,7 @@ MultiUserUTest:: MultiUserUTest(void)
     hl2 = new Handle[NATOMS];
     hl3 = new Handle[NATOMS];
 
-    try
-    {
-        // Get the database logins & etc from the config file.
-        dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-        username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-        passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-    }
-    catch (InvalidParamException &e)
-    {
-        friendlyFailMessage();
-    }
+    getDBconfig();
 
     // use postgres preferentially, unless its missing.
 #ifdef HAVE_ODBC_STORAGE

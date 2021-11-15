@@ -1,12 +1,16 @@
 
 # --------------------------------------------------
-OPENCOG_ADD_ATOM_TYPES(storage_types.script
+
+OPENCOG_GEN_CXX_ATOMTYPES(storage_types.script
 	storage_types.h
 	storage_types.definitions
-	storage_types.inheritance
-	storage_types.scm
-	storage_types.pyx)
-ADD_CUSTOM_TARGET(storage_types DEPENDS storage_types.h)
+	storage_types.inheritance)
+
+OPENCOG_GEN_SCM_ATOMTYPES(storage_types.script storage_types.scm)
+OPENCOG_GEN_PYTHON_ATOMTYPES(storage_types.script storage_types.pyx)
+
+ADD_CUSTOM_TARGET(storage_types
+	DEPENDS storage_types.h storage_types.scm storage_types.pyx)
 
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})

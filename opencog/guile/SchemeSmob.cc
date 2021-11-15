@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
@@ -68,6 +69,12 @@ void SchemeSmob::init()
 		return;
 	}
 
+	// If this assert triggers for you, e.g. because it is 24, then you
+	// have an easy fix: change SCM_SMOB_VALUE_PTR_LOC to use
+	// SCM_SMOB_OBJECT_1_LOC. If it is larger than 24 then you need a
+	// more complex fix.
+	static_assert (sizeof(ValuePtr) == 16, "Unexpected ValuePtr size");
+
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
 	scm_c_use_module("opencog");
@@ -96,7 +103,8 @@ void opencog_guile_init(void)
 
 void SchemeSmob::init_smob_type(void)
 {
-	// A SMOB type for everything, incuding atoms.
+	// A SMOB type for everything, incuding Handles/ValuePtrs.
+	// cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (ValuePtr));
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
@@ -147,15 +155,14 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		}
 		case COG_PROTOM:
 		{
-			ValuePtr* av = (ValuePtr *) SCM_SMOB_DATA(a);
-			ValuePtr* bv = (ValuePtr *) SCM_SMOB_DATA(b);
+			ValuePtr* av = SCM_SMOB_VALUE_PTR_LOC(a);
+			ValuePtr* bv = SCM_SMOB_VALUE_PTR_LOC(b);
 			scm_remember_upto_here_1(a);
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
-			if (*av == *bv) return SCM_BOOL_T;
 			if (av->get() == bv->get()) return SCM_BOOL_T;
 			if (av->get() == nullptr or bv->get() == nullptr) return SCM_BOOL_F;
-			if (**av == **bv) return SCM_BOOL_T;
+			if (**av == **bv) return SCM_BOOL_T; // content-compare!
 			return SCM_BOOL_F;
 		}
 	}
