@@ -61,6 +61,21 @@ MACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FIL
 ENDMACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FILE)
 
 
+MACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
+	IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+		FILE(APPEND "${TMPHDR_FILE}" "extern opencog::Type ${TYPE};\n")
+		FILE(APPEND "${DEFINITIONS_FILE}"  "opencog::Type opencog::${TYPE};\n")
+	ELSE (NOT "${TYPE}" STREQUAL "NOTYPE")
+		FILE(APPEND "${TMPHDR_FILE}"
+			"#ifndef _OPENCOG_NOTYPE_\n"
+			"#define _OPENCOG_NOTYPE_\n"
+			"// Set notype's code with the last possible Type code\n"
+			"static const opencog::Type ${TYPE}=((Type) -1);\n"
+			"#endif // _OPENCOG_NOTYPE_\n"
+		)
+	ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+ENDMACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
+
 # The main  macro for generating C++ type defintions
 #MACRO(OPENCOG_CPP_TYPES HEADER_FILE DEFINITIONS_FILE INHERITANCE_FILE)
 #	SET(TMPHDR_FILE ${CMAKE_BINARY_DIR}/tmp_types.h)
@@ -167,15 +182,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDFOREACH(I RANGE ${LIST_LENGTH})
         ENDIF (CMAKE_MATCH_4)
 
-        IF (NOT "${TYPE}" STREQUAL "NOTYPE")
-            FILE(APPEND "${TMPHDR_FILE}" "extern opencog::Type ${TYPE};\n")
-            FILE(APPEND "${DEFINITIONS_FILE}"  "opencog::Type opencog::${TYPE};\n")
-        ELSE (NOT "${TYPE}" STREQUAL "NOTYPE")
-            FILE(APPEND "${TMPHDR_FILE}"  "#ifndef _OPENCOG_NOTYPE_\n#define _OPENCOG_NOTYPE_\n")
-            FILE(APPEND "${TMPHDR_FILE}"  "// Set notype's code with the last possible Type code\n")
-            FILE(APPEND "${TMPHDR_FILE}"  "static const opencog::Type ${TYPE}=((Type) -1);\n")
-            FILE(APPEND "${TMPHDR_FILE}"  "#endif // _OPENCOG_NOTYPE_\n")
-        ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+        OPENCOG_CPP_WRITE_TYPE(${TYPE})
 
         IF (TYPE_NAME STREQUAL "")
             # Set type name using camel casing
