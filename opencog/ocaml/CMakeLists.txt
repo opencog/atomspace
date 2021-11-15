@@ -15,6 +15,9 @@ TARGET_LINK_LIBRARIES(camlatoms
 	atomspace
 )
 
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(camlatoms opencog_atom_types)
+
 # Attention: the atomese.ml and atomese.mli files can be named anything.
 # For example, atomfoo.mli. In this case, the user would say:
 # #load "atomese.cma" ;;
@@ -22,6 +25,7 @@ TARGET_LINK_LIBRARIES(camlatoms
 # and it all works. Be sure to install atomfoo.cmi, below.
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
+		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml
 		atomese.mli
 		atomese.ml
 	C_LIBRARIES
