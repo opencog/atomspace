@@ -8,6 +8,7 @@
 # Macro example call:
 # XXX TBD
 
+# ----------------------------------------------------------------------
 # Write out the initial boilerplate for the four C++ files.
 # Not for external use.
 MACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FILE)
@@ -60,7 +61,7 @@ MACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FIL
 
 ENDMACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FILE)
 
-
+# ------------
 MACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
 	IF (NOT "${TYPE}" STREQUAL "NOTYPE")
 		FILE(APPEND "${TMPHDR_FILE}" "extern opencog::Type ${TYPE};\n")
@@ -75,6 +76,42 @@ MACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
 		)
 	ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
 ENDMACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
+
+# ------------
+MACRO(OPENCOG_CPP_WRITE_DEFS)
+	# Print out the C++ definitions
+	IF (ISNODE STREQUAL "NODE" AND
+		NOT SHORT_NAME STREQUAL "" AND
+		NOT SHORT_NAME STREQUAL "Type")
+		FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(${SHORT_NAME}, ${TYPE})\n")
+	ENDIF ()
+	IF (ISLINK STREQUAL "LINK" AND
+		NOT SHORT_NAME STREQUAL "" AND
+		NOT SHORT_NAME STREQUAL "Atom" AND
+		NOT SHORT_NAME STREQUAL "Notype" AND
+		NOT SHORT_NAME STREQUAL "Type" AND
+		NOT SHORT_NAME STREQUAL "TypeSet" AND
+		NOT SHORT_NAME STREQUAL "Arity")
+		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${SHORT_NAME}, ${TYPE})\n")
+	ENDIF ()
+	# Special case...
+	IF (ISNODE STREQUAL "NODE" AND
+		SHORT_NAME STREQUAL "Type")
+		FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(TypeNode, ${TYPE})\n")
+	ENDIF ()
+	IF (ISLINK STREQUAL "LINK" AND
+		SHORT_NAME STREQUAL "Type")
+		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, ${TYPE})\n")
+	ENDIF ()
+	IF (ISLINK STREQUAL "LINK" AND
+		SHORT_NAME STREQUAL "TypeSet")
+		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeIntersection, ${TYPE})\n")
+	ENDIF ()
+	IF (ISLINK STREQUAL "LINK" AND
+		SHORT_NAME STREQUAL "Arity")
+		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ${TYPE})\n")
+	ENDIF ()
+ENDMACRO(OPENCOG_CPP_WRITE_DEFS)
 
 # The main  macro for generating C++ type defintions
 #MACRO(OPENCOG_CPP_TYPES HEADER_FILE DEFINITIONS_FILE INHERITANCE_FILE)
@@ -240,37 +277,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # -----------------------------------------------------------
         # Print out the C++ definitions
-        IF (ISNODE STREQUAL "NODE" AND
-            NOT SHORT_NAME STREQUAL "" AND
-            NOT SHORT_NAME STREQUAL "Type")
-            FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(${SHORT_NAME}, ${TYPE})\n")
-        ENDIF ()
-        IF (ISLINK STREQUAL "LINK" AND
-            NOT SHORT_NAME STREQUAL "" AND
-            NOT SHORT_NAME STREQUAL "Atom" AND
-            NOT SHORT_NAME STREQUAL "Notype" AND
-            NOT SHORT_NAME STREQUAL "Type" AND
-            NOT SHORT_NAME STREQUAL "TypeSet" AND
-            NOT SHORT_NAME STREQUAL "Arity")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${SHORT_NAME}, ${TYPE})\n")
-        ENDIF ()
-        # Special case...
-        IF (ISNODE STREQUAL "NODE" AND
-            SHORT_NAME STREQUAL "Type")
-            FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(TypeNode, ${TYPE})\n")
-        ENDIF ()
-        IF (ISLINK STREQUAL "LINK" AND
-            SHORT_NAME STREQUAL "Type")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeLink, ${TYPE})\n")
-        ENDIF ()
-        IF (ISLINK STREQUAL "LINK" AND
-            SHORT_NAME STREQUAL "TypeSet")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(TypeIntersection, ${TYPE})\n")
-        ENDIF ()
-        IF (ISLINK STREQUAL "LINK" AND
-            SHORT_NAME STREQUAL "Arity")
-            FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(ArityLink, ${TYPE})\n")
-        ENDIF ()
+        OPENCOG_CPP_WRITE_DEFS()
 
         # -----------------------------------------------------------
         # Print out the scheme definitions
