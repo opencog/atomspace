@@ -24,6 +24,11 @@
 #include <caml/mlvalues.h>
 #undef Atom
 
+#include <opencog/atoms/base/Handle.h>
+
+using namespace opencog;
+
 extern "C" {
-CAMLprim value NewNode(value);
+CAMLprim value NewNode(Type, const char*);
+CAMLprim value NewLink(Type, HandleSeq&);
 }

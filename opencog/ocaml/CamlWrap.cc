@@ -69,9 +69,12 @@ value tag_to_value(const ValuePtr& pa)
 	return v;
 }
 
-CAMLprim value NewNode(value ostr)
+CAMLprim value NewNode(Type t, const char* str)
 {
-	const char * str = String_val(ostr);
+	return tag_to_value(asp->add_node(t, str));
+}
 
-	return tag_to_value(asp->add_node(NODE, str));
+CAMLprim value NewLink(Type t, HandleSeq& oset)
+{
+	return tag_to_value(asp->add_link(t, std::move(oset)));
 }
