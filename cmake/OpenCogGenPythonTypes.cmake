@@ -1,8 +1,8 @@
 #
 # OpenCogGenPythonTypes.cmake
 #
-# Definitions for automatically building Python atom_types.pyx
-# file, given a master file "atom_types.script"
+# Definitions for automatically building a Python `atom_types.pyx`
+# file, given a master file `atom_types.script`.
 #
 # Example usage:
 # OPENCOG_PYTHON_ATOMTYPES(atom_types.script core_types.pyx)

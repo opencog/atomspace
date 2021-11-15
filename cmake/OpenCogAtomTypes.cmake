@@ -9,6 +9,7 @@
 
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenTypes.cmake")
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenPythonTypes.cmake")
+INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenScmTypes.cmake")
 
 IF (BUILD_CPP)
 	OPENCOG_CPP_ATOMTYPES(
