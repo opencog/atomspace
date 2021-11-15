@@ -11,7 +11,15 @@
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
 # Parse one line of type definitions, and set up various
-# flags and values that later stages can use#.
+# flags and values that later stages can use.
+#
+
+MACRO(OPENCOG_TYPEINFO_REGEX)
+	# This regular expression is more complex than required
+	# due to cmake's regex engine bugs
+	STRING(REGEX MATCH "^[ 	]*([A-Z0-9_]+)?([ 	]*<-[ 	]*([A-Z0-9_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
+ENDMACRO(OPENCOG_TYPEINFO_REGEX)
+
 MACRO(OPENCOG_TYPEINFO_SETUP)
 	SET(TYPE ${CMAKE_MATCH_1})
 	SET(PARENT_TYPES ${CMAKE_MATCH_3})
@@ -407,9 +415,7 @@ OPENCOG_PYTHON_SETUP(${PYTHON_FILE})
 
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
-	# This regular expression is more complex than required
-	# due to cmake's regex engine bugs
-	STRING(REGEX MATCH "^[ 	]*([A-Z0-9_]+)?([ 	]*<-[ 	]*([A-Z0-9_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
+	OPENCOG_TYPEINFO_REGEX()
 	IF (MATCHED AND CMAKE_MATCH_1)
 
 		OPENCOG_TYPEINFO_SETUP()
