@@ -62,7 +62,9 @@ MACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FIL
 ENDMACRO(OPENCOG_CPP_SETUP TMPHDR_FILE DEFINITIONS_FILE INHERITANCE_FILE CNAMES_FILE)
 
 # ------------
-MACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
+# Print out the C++ definitions
+MACRO(OPENCOG_CPP_WRITE_DEFS)
+
 	IF (NOT "${TYPE}" STREQUAL "NOTYPE")
 		FILE(APPEND "${TMPHDR_FILE}" "extern opencog::Type ${TYPE};\n")
 		FILE(APPEND "${DEFINITIONS_FILE}"  "opencog::Type opencog::${TYPE};\n")
@@ -75,11 +77,7 @@ MACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
 			"#endif // _OPENCOG_NOTYPE_\n"
 		)
 	ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
-ENDMACRO(OPENCOG_CPP_WRITE_TYPE TYPE)
 
-# ------------
-MACRO(OPENCOG_CPP_WRITE_DEFS)
-	# Print out the C++ definitions
 	IF (ISNODE STREQUAL "NODE" AND
 		NOT SHORT_NAME STREQUAL "" AND
 		NOT SHORT_NAME STREQUAL "Type")
@@ -137,6 +135,20 @@ MACRO(OPENCOG_CPP_WRITE_DEFS)
 	ENDIF (PARENT_TYPES)
 ENDMACRO(OPENCOG_CPP_WRITE_DEFS)
 
+MACRO(OPENCOG_CPP_TEARDOWN)
+	FILE(APPEND "${TMPHDR_FILE}" "} // namespace opencog\n")
+
+	FILE(APPEND "${CNAMES_FILE}"
+		"#undef NODE_CTOR\n"
+		"#undef LINK_CTOR\n"
+		"} // namespace opencog\n"
+	)
+ENDMACRO(OPENCOG_CPP_TEARDOWN)
+
+# Must be last, so that all writing has completed *before* the
+# file appears in the filesystem. Without this, parallel-make
+# will sometimes use an incompletely-written file.
+FILE(RENAME "${TMPHDR_FILE}" "${HEADER_FILE}")
 # The main  macro for generating C++ type defintions
 #MACRO(OPENCOG_CPP_TYPES HEADER_FILE DEFINITIONS_FILE INHERITANCE_FILE)
 #	SET(TMPHDR_FILE ${CMAKE_BINARY_DIR}/tmp_types.h)
@@ -345,8 +357,6 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDFOREACH(I RANGE ${LIST_LENGTH})
         ENDIF (CMAKE_MATCH_4)
 
-        OPENCOG_CPP_WRITE_TYPE(${TYPE})
-
         IF (TYPE_NAME STREQUAL "")
             # Set type name using camel casing
             STRING(REGEX MATCHALL "." CHARS ${TYPE})
@@ -415,20 +425,9 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
     ELSE (MATCHED AND CMAKE_MATCH_1)
         IF (NOT MATCHED)
-            FILE(REMOVE "${TMPHDR_FILE}")
-            FILE(REMOVE "${DEFINITIONS_FILE}")
-            FILE(REMOVE "${INHERITANCE_FILE}")
             MESSAGE(FATAL_ERROR "Invalid line in ${SCRIPT_FILE} file: [${LINE}]")
         ENDIF (NOT MATCHED)
     ENDIF (MATCHED AND CMAKE_MATCH_1)
 ENDFOREACH (LINE)
-FILE(APPEND "${TMPHDR_FILE}" "} // namespace opencog\n")
 
-FILE(APPEND "${CNAMES_FILE}" "#undef NODE_CTOR\n")
-FILE(APPEND "${CNAMES_FILE}" "#undef LINK_CTOR\n")
-FILE(APPEND "${CNAMES_FILE}" "} // namespace opencog\n")
-
-# Must be last, so that all writing has completed *before* the
-# file appears in the filesystem. Without this, parallel-make
-# will sometimes use an incompletely-written file.
-FILE(RENAME "${TMPHDR_FILE}" "${HEADER_FILE}")
+OPENCOG_CPP_TEARDOWN()
