@@ -1,10 +1,10 @@
 INSTALL(FILES
-	OpenCogAtomTypes.cmake
 	OpenCogCython.cmake
 	OpenCogGenCxxTypes.cmake
 	OpenCogGenPythonTypes.cmake
 	OpenCogGenScmTypes.cmake
 	OpenCogGenTypes.cmake
+	OpenCogGenWrapper.cmake
 	OpenCogGuile.cmake
 	OpenCogMacros.cmake
 	OpenCogFunctions.cmake

@@ -1,5 +1,5 @@
 #
-# OpenCogAtomTypes.cmake
+# OpenCogGenWrapper.cmake
 #
 # Wrapper to build Atom Type bindings for various rpogramming languages.
 # This code runs at compile time (when the user types 'make') and NOT
