@@ -8,6 +8,78 @@
 # Macro example call:
 # XXX TBD
 
+MACRO(OPENCOG_TYPEINFO_SETUP)
+	SET(TYPE ${CMAKE_MATCH_1})
+	SET(PARENT_TYPES ${CMAKE_MATCH_3})
+	SET(TYPE_NAME "")
+	IF (CMAKE_MATCH_4)
+		MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
+		STRING(REGEX MATCHALL "." CHARS ${CMAKE_MATCH_4})
+		LIST(LENGTH CHARS LIST_LENGTH)
+		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
+		FOREACH(I RANGE ${LAST_INDEX})
+			LIST(GET CHARS ${I} C)
+			IF (NOT ${C} STREQUAL "\"")
+				SET(TYPE_NAME "${TYPE_NAME}${C}")
+			ENDIF (NOT ${C} STREQUAL "\"")
+		ENDFOREACH(I RANGE ${LIST_LENGTH})
+	ENDIF (CMAKE_MATCH_4)
+
+	IF (TYPE_NAME STREQUAL "")
+		# Set type name using camel casing
+		STRING(REGEX MATCHALL "." CHARS ${TYPE})
+		LIST(LENGTH CHARS LIST_LENGTH)
+		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
+		FOREACH(I RANGE ${LAST_INDEX})
+			LIST(GET CHARS ${I} C)
+			IF (NOT ${C} STREQUAL "_")
+				MATH(EXPR IP "${I} - 1")
+				LIST(GET CHARS ${IP} CP)
+				IF (${I} EQUAL 0)
+					SET(TYPE_NAME "${TYPE_NAME}${C}")
+				ELSE (${I} EQUAL 0)
+					IF (${CP} STREQUAL "_")
+						SET(TYPE_NAME "${TYPE_NAME}${C}")
+					ELSE (${CP} STREQUAL "_")
+						STRING(TOLOWER "${C}" CL)
+						SET(TYPE_NAME "${TYPE_NAME}${CL}")
+					ENDIF (${CP} STREQUAL "_")
+				ENDIF (${I} EQUAL 0)
+			ENDIF (NOT ${C} STREQUAL "_")
+		ENDFOREACH(I RANGE ${LIST_LENGTH})
+	ENDIF (TYPE_NAME STREQUAL "")
+
+	STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
+	MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
+
+	# -----------------------------------------------------------
+	# Try to guess if the thing is a node or link based on its name
+	STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
+	STRING(REGEX MATCH "STREAM$" ISSTREAM ${TYPE})
+	STRING(REGEX MATCH "ATOMSPACE$" ISATOMSPACE ${TYPE})
+	STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
+	STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
+	STRING(REGEX MATCH "AST$" ISAST ${TYPE})
+
+	# If not explicitly named, assume its a link. This is kind of
+	# hacky, but is needed for e.g. "VariableList" ...
+	IF (NOT ISNODE STREQUAL "NODE"
+		AND NOT ISVALUE STREQUAL "VALUE"
+		AND NOT ISSTREAM STREQUAL "STREAM"
+		AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
+		AND NOT ISAST STREQUAL "AST")
+		SET(ISLINK "LINK")
+	ENDIF (NOT ISNODE STREQUAL "NODE"
+		AND NOT ISVALUE STREQUAL "VALUE"
+		AND NOT ISSTREAM STREQUAL "STREAM"
+		AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
+		AND NOT ISAST STREQUAL "AST")
+
+	IF (${TYPE} STREQUAL "VALUATION")
+		SET(ISLINK "")
+	ENDIF (${TYPE} STREQUAL "VALUATION")
+ENDMACRO(OPENCOG_TYPEINFO_SETUP)
+
 # ----------------------------------------------------------------------
 # Write out the initial boilerplate for the four C++ files.
 # Not for external use.
@@ -143,12 +215,13 @@ MACRO(OPENCOG_CPP_TEARDOWN)
 		"#undef LINK_CTOR\n"
 		"} // namespace opencog\n"
 	)
+
+	# Must be last, so that all writing has completed *before* the
+	# file appears in the filesystem. Without this, parallel-make
+	# will sometimes use an incompletely-written file.
+	FILE(RENAME "${TMPHDR_FILE}" "${HEADER_FILE}")
 ENDMACRO(OPENCOG_CPP_TEARDOWN)
 
-# Must be last, so that all writing has completed *before* the
-# file appears in the filesystem. Without this, parallel-make
-# will sometimes use an incompletely-written file.
-FILE(RENAME "${TMPHDR_FILE}" "${HEADER_FILE}")
 # The main  macro for generating C++ type defintions
 #MACRO(OPENCOG_CPP_TYPES HEADER_FILE DEFINITIONS_FILE INHERITANCE_FILE)
 #	SET(TMPHDR_FILE ${CMAKE_BINARY_DIR}/tmp_types.h)
@@ -341,75 +414,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
     # regex engine bugs
     STRING(REGEX MATCH "^[ 	]*([A-Z0-9_]+)?([ 	]*<-[ 	]*([A-Z0-9_, 	]+))?[ 	]*(\"[A-Za-z]*\")?[ 	]*(//.*)?[ 	]*$" MATCHED "${LINE}")
     IF (MATCHED AND CMAKE_MATCH_1)
-        SET(TYPE ${CMAKE_MATCH_1})
-        SET(PARENT_TYPES ${CMAKE_MATCH_3})
-        SET(TYPE_NAME "")
-        IF (CMAKE_MATCH_4)
-            MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
-            STRING(REGEX MATCHALL "." CHARS ${CMAKE_MATCH_4})
-            LIST(LENGTH CHARS LIST_LENGTH)
-            MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
-            FOREACH(I RANGE ${LAST_INDEX})
-                LIST(GET CHARS ${I} C)
-                IF (NOT ${C} STREQUAL "\"")
-                    SET(TYPE_NAME "${TYPE_NAME}${C}")
-                ENDIF (NOT ${C} STREQUAL "\"")
-            ENDFOREACH(I RANGE ${LIST_LENGTH})
-        ENDIF (CMAKE_MATCH_4)
-
-        IF (TYPE_NAME STREQUAL "")
-            # Set type name using camel casing
-            STRING(REGEX MATCHALL "." CHARS ${TYPE})
-            LIST(LENGTH CHARS LIST_LENGTH)
-            MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
-            FOREACH(I RANGE ${LAST_INDEX})
-                LIST(GET CHARS ${I} C)
-                IF (NOT ${C} STREQUAL "_")
-                    MATH(EXPR IP "${I} - 1")
-                    LIST(GET CHARS ${IP} CP)
-                    IF (${I} EQUAL 0)
-                        SET(TYPE_NAME "${TYPE_NAME}${C}")
-                    ELSE (${I} EQUAL 0)
-                        IF (${CP} STREQUAL "_")
-                            SET(TYPE_NAME "${TYPE_NAME}${C}")
-                        ELSE (${CP} STREQUAL "_")
-                            STRING(TOLOWER "${C}" CL)
-                            SET(TYPE_NAME "${TYPE_NAME}${CL}")
-                        ENDIF (${CP} STREQUAL "_")
-                    ENDIF (${I} EQUAL 0)
-                ENDIF (NOT ${C} STREQUAL "_")
-            ENDFOREACH(I RANGE ${LIST_LENGTH})
-        ENDIF (TYPE_NAME STREQUAL "")
-
-        STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
-        MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
-
-        # -----------------------------------------------------------
-        # Try to guess if the thing is a node or link based on its name
-        STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
-        STRING(REGEX MATCH "STREAM$" ISSTREAM ${TYPE})
-        STRING(REGEX MATCH "ATOMSPACE$" ISATOMSPACE ${TYPE})
-        STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
-        STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
-        STRING(REGEX MATCH "AST$" ISAST ${TYPE})
-
-        # If not explicitly named, assume its a link. This is kind of
-        # hacky, but is needed for e.g. "VariableList" ...
-        IF (NOT ISNODE STREQUAL "NODE"
-            AND NOT ISVALUE STREQUAL "VALUE"
-            AND NOT ISSTREAM STREQUAL "STREAM"
-            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
-            AND NOT ISAST STREQUAL "AST")
-            SET(ISLINK "LINK")
-        ENDIF (NOT ISNODE STREQUAL "NODE"
-            AND NOT ISVALUE STREQUAL "VALUE"
-            AND NOT ISSTREAM STREQUAL "STREAM"
-            AND NOT ISATOMSPACE STREQUAL "ATOMSPACE"
-            AND NOT ISAST STREQUAL "AST")
-
-        IF (${TYPE} STREQUAL "VALUATION")
-            SET(ISLINK "")
-        ENDIF (${TYPE} STREQUAL "VALUATION")
+			OPENCOG_TYPEINFO_SETUP()
 
         # -----------------------------------------------------------
         # Print out the C++ definitions
