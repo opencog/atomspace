@@ -8,6 +8,7 @@ INSTALL(FILES
 	OpenCogGenTypes.cmake
 	OpenCogGenWrapper.cmake
 	OpenCogGuile.cmake
+	OpenCogOCaml.cmake
 	OpenCogMacros.cmake
 	OpenCogFunctions.cmake
 	DESTINATION
