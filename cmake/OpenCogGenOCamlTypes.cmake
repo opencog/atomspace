@@ -65,7 +65,15 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		SET(ML_NAME ${LC_SNAKE_SHORT})
 	ENDIF ()
 
-	IF (TYPE STREQUAL "NOTYPE" OR TYPE STREQUAL "VALUATION")
+	# Avoid reserved keywords
+	IF (ML_NAME STREQUAL "list")
+		SET(ML_NAME ${LC_SNAKE_TYPE})
+	ENDIF
+
+	IF (TYPE STREQUAL "NOTYPE" OR
+	    TYPE STREQUAL "VALUATION" OR
+	    TYPE STREQUAL "ATOM"
+	   )
 		# no-op; skip
 
 	ELSEIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
@@ -101,15 +109,17 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		)
 
 	ELSEIF (ISATOMSPACE STREQUAL "ATOMSPACE")
-		FILE(APPEND "${OCAML_FILE}"
-			"(define-public AtomSpace cog-new-atomspace)\n"
-		)
+		# XXX FIXME LATER
+		#FILE(APPEND "${OCAML_FILE}"
+		#	"(define-public AtomSpace cog-new-atomspace)\n"
+		#)
 
 	ELSEIF (ISAST STREQUAL "AST")
-		FILE(APPEND "${OCAML_FILE}"
-			"(define-public (${TYPE_NAME} . x)\n"
-			"\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n"
-		)
+		# XXX FIXME LATER
+		#FILE(APPEND "${OCAML_FILE}"
+		#	"(define-public (${TYPE_NAME} . x)\n"
+		#	"\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n"
+		#)
 	ELSE ()
 		MESSAGE(FATAL_ERROR "Unknown type ${TYPE}")
 	ENDIF ()
