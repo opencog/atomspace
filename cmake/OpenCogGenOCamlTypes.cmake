@@ -38,8 +38,13 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"// This file contains basic OCaml wrappers for atom creation.\n"
 		"//\n"
 		"#include <caml/mlvalues.h>\n"
-		"#include <opencog/atoms/atom_types/atom_types.h>\n"
 		"#include <opencog/ocaml/CamlWrap.h>\n"
+		"\n"
+		"#include <opencog/atoms/atom_types/atom_types.h>\n"
+		"#include <opencog/atoms/base/Atom.h>\n"
+		"#include <opencog/atoms/base/Handle.h>\n"
+		"\n"
+		"using namespace opencog;\n"
 		"\n"
 	)
 ENDMACRO()

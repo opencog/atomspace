@@ -28,6 +28,7 @@
 #undef Atom
 
 #include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/base/Handle.h>
 
 using namespace opencog;
 

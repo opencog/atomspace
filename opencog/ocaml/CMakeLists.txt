@@ -4,6 +4,7 @@ INCLUDE(UseOCaml)
 
 ADD_LIBRARY (camlatoms
 	CamlWrap.cc
+	${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/mlwrappers
 )
 
 SET_TARGET_PROPERTIES(camlatoms PROPERTIES
@@ -16,7 +17,7 @@ TARGET_LINK_LIBRARIES(camlatoms
 )
 
 # Without this, parallel make will race and crap up the generated files.
-# ADD_DEPENDENCIES(camlatoms opencog_atom_types)
+ADD_DEPENDENCIES(camlatoms opencog_atom_types)
 
 OCAML_MAKE_INTERFACE(atomse.ml)
 
