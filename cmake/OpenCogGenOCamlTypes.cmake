@@ -25,7 +25,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"#\n"
 		"# This file contains basic OCaml wrappers for atom creation.\n"
 		"#\n"
-		"type atom = Node | Link ;;\n"
+		"type atom = Value | Stream | AtomSpace | Node | Link ;;\n"
 	)
 
 	FILE(WRITE "${WRAPPER_FILE}"
@@ -65,30 +65,31 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		SET(ML_NAME ${LC_SNAKE_SHORT})
 	ENDIF ()
 
-	IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+	IF (TYPE STREQUAL "NOTYPE" OR TYPE STREQUAL "VALUATION")
+		# no-op; skip
+
+	ELSEIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
 		FILE(APPEND "${OCAML_FILE}"
 			"external ${ML_NAME} : unit -> atom = new_${TYPE_NAME} ;;\n"
 		)
-	ENDIF ()
 
-	IF (ISNODE STREQUAL "NODE")
+	ELSEIF (ISNODE STREQUAL "NODE")
 		FILE(APPEND "${OCAML_FILE}"
 			"external ${ML_NAME} : string -> atom = new_${TYPE_NAME} ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
-			"CAMLprim value  new_${TYPE_NAME}(value vname) {\n"
+			"CAMLprim value new_${TYPE_NAME}(value vname) {\n"
 			"    const char* name = String_val(vname);\n"
 			"    return NewNode(${TYPE}, name);\n"
-			"} \n"
+			"}\n\n"
 		)
-	ENDIF ()
 
-	IF (ISLINK STREQUAL "LINK")
+	ELSEIF (ISLINK STREQUAL "LINK")
 		FILE(APPEND "${OCAML_FILE}"
 			"external ${ML_NAME} : list atom -> atom = new_${TYPE_NAME} ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
-			"CAMLprim value  new_${TYPE_NAME}(value vatomlist) {\n"
+			"CAMLprim value new_${TYPE_NAME}(value vatomlist) {\n"
 			"    size_t len = Wosize_val(vatomlist);\n"
 			"    HandleSeq oset;\n"
 			"    for(size_t n=0; n<len; n++) {\n"
@@ -96,21 +97,21 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 			"        oset.emplace_back(h);\n"
 			"    }\n"
 			"    return NewLink(${TYPE}, oset);\n"
-			"} \n"
+			"}\n\n"
 		)
-	ENDIF ()
 
-	IF (ISATOMSPACE STREQUAL "ATOMSPACE")
+	ELSEIF (ISATOMSPACE STREQUAL "ATOMSPACE")
 		FILE(APPEND "${OCAML_FILE}"
 			"(define-public AtomSpace cog-new-atomspace)\n"
 		)
-	ENDIF ()
 
-	IF (ISAST STREQUAL "AST")
+	ELSEIF (ISAST STREQUAL "AST")
 		FILE(APPEND "${OCAML_FILE}"
 			"(define-public (${TYPE_NAME} . x)\n"
 			"\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n"
 		)
+	ELSE ()
+		MESSAGE(FATAL_ERROR "Unknown type ${TYPE}")
 	ENDIF ()
 ENDMACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE)
 
