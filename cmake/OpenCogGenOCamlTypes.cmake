@@ -46,24 +46,34 @@ ENDMACRO(OPENCOG_OCAML_SETUP OCAML_FILE)
 
 # Print out the scheme definitions
 MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
-	FILE(APPEND "${OCAML_FILE}"
-		"external ${LC_SNAKE_TYPE}_atomtype : unit -> int = ${TYPE_NAME}Type ;;\n"
-	)
 
-	FILE(APPEND "${WRAPPER_FILE}"
-		"CAMLprim value  ${TYPE_NAME}Type(void) {"
-		" return Val_long(${TYPE}); } \n"
-	)
+	# The function that returns the integer type of the type.
+	# Not needed right now, comment out.
+	# FILE(APPEND "${OCAML_FILE}"
+	#	"external ${LC_SNAKE_TYPE}_atomtype : unit -> int = ${TYPE_NAME}Type ;;\n"
+	# )
+	#
+	# FILE(APPEND "${WRAPPER_FILE}"
+	#	"CAMLprim value  ${TYPE_NAME}Type(void) {"
+	#	" return Val_long(${TYPE}); } \n"
+	# )
+
+	# Use short names, whenever possible. There are no backwards-compat
+	# issues here with the long names.
+	SET(ML_NAME ${LC_SNAKE_TYPE})
+	IF (NOT LC_SNAKE_SHORT STREQUAL "")
+		SET(ML_NAME ${LC_SNAKE_SHORT})
+	ENDIF ()
 
 	IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${LC_SNAKE_TYPE} : unit -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : unit -> atom = new_${TYPE_NAME} ;;\n"
 		)
-	ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+	ENDIF ()
 
 	IF (ISNODE STREQUAL "NODE")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${LC_SNAKE_TYPE} : string -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : string -> atom = new_${TYPE_NAME} ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value  new_${TYPE_NAME}(value vname) {\n"
@@ -71,17 +81,11 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 			"    return NewNode(${TYPE}, name);\n"
 			"} \n"
 		)
-		IF (NOT SHORT_NAME STREQUAL "")
-			FILE(APPEND "${OCAML_FILE}"
-				"(define-public (${SHORT_NAME} . x)\n"
-				"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
-			)
-		ENDIF (NOT SHORT_NAME STREQUAL "")
-	ENDIF (ISNODE STREQUAL "NODE")
+	ENDIF ()
 
 	IF (ISLINK STREQUAL "LINK")
 		FILE(APPEND "${OCAML_FILE}"
-			"external ${LC_SNAKE_TYPE} : list atom -> atom = new_${TYPE_NAME} ;;\n"
+			"external ${ML_NAME} : list atom -> atom = new_${TYPE_NAME} ;;\n"
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value  new_${TYPE_NAME}(value vatomlist) {\n"
@@ -94,26 +98,20 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 			"    return NewLink(${TYPE}, oset);\n"
 			"} \n"
 		)
-		IF (NOT SHORT_NAME STREQUAL "")
-			FILE(APPEND "${OCAML_FILE}"
-				"(define-public (${SHORT_NAME} . x)\n"
-				"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
-			)
-		ENDIF (NOT SHORT_NAME STREQUAL "")
-	ENDIF (ISLINK STREQUAL "LINK")
+	ENDIF ()
 
 	IF (ISATOMSPACE STREQUAL "ATOMSPACE")
 		FILE(APPEND "${OCAML_FILE}"
 			"(define-public AtomSpace cog-new-atomspace)\n"
 		)
-	ENDIF (ISATOMSPACE STREQUAL "ATOMSPACE")
+	ENDIF ()
 
 	IF (ISAST STREQUAL "AST")
 		FILE(APPEND "${OCAML_FILE}"
 			"(define-public (${TYPE_NAME} . x)\n"
 			"\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n"
 		)
-	ENDIF (ISAST STREQUAL "AST")
+	ENDIF ()
 ENDMACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE)
 
 # ------------
