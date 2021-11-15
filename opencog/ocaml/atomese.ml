@@ -1,5 +1,5 @@
 
-type atom = Node | Link ;;
+type atom = Node of string | Link  of atom list;;
 
 (** Signature declarations *)
-external newnode : string -> atom = "NewNode" ;;
+external newfoo : string -> atom = "NewNode" ;;
