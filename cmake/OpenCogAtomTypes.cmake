@@ -148,6 +148,7 @@ MACRO(OPENCOG_GEN_OCAML_ATOMTYPES SCRIPT_FILE OCAML_FILE WRAPPER_FILE)
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 		COMMENT "Generating OCaml Atom Type bindings from ${SCRIPT_FILE}"
 	)
+
 ENDMACRO()
 
 # =========================================================

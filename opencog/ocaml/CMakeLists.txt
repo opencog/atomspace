@@ -16,9 +16,15 @@ TARGET_LINK_LIBRARIES(camlatoms
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(camlatoms opencog_atom_types)
+# ADD_DEPENDENCIES(camlatoms opencog_atom_types)
 
 OCAML_MAKE_INTERFACE(atomse.ml)
+
+# The core_types.mli file must be generated before the module can be
+# compiled. Thus we add a phony target.
+ADD_CUSTOM_TARGET(ocaml_wrapper_mli
+	DEPENDS
+		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
 
 # Attention: the atomese.ml and atomese.mli files can be named anything.
 # For example, atomfoo.mli. In this case, the user would say:
