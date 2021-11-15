@@ -1,15 +1,17 @@
 
-OPENCOG_ADD_ATOM_TYPES(atom_types.script
+OPENCOG_GEN_CPP_ATOMTYPES(atom_types.script
 	atom_types.h
 	atom_types.definitions
-	atom_types.inheritance
-	core_types.scm
-	core_types.pyx)
+	atom_types.inheritance)
+
+OPENCOG_GEN_SCM_ATOMTYPES(atom_types.script core_types.scm)
+OPENCOG_GEN_PYTHON_ATOMTYPES(atom_types.script core_types.pyx)
 
 # The target `opencog_atom_types` is satisfied when `atom_types.h`
 # appears in the file system. This target is used in other
 # CMakefiles to make sure that this directory is visited, first.
-ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
+ADD_CUSTOM_TARGET(opencog_atom_types
+	DEPENDS atom_types.h core_types.scm core_types.pyx)
 
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
