@@ -136,6 +136,59 @@ MACRO(OPENCOG_SCM_SETUP SCM_FILE)
 	)
 ENDMACRO(OPENCOG_SCM_SETUP SCM_FILE)
 
+# Print out the scheme definitions
+MACRO(OPENCOG_SCM_WRITE_DEFS)
+	FILE(APPEND "${SCM_FILE}"
+		"(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n"
+	)
+
+	IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public (${TYPE_NAME} . x)\n"
+			"\t(apply cog-new-value (cons ${TYPE_NAME}Type x)))\n"
+		)
+	ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+
+	IF (ISNODE STREQUAL "NODE")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public (${TYPE_NAME} . x)\n"
+			"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
+		)
+		IF (NOT SHORT_NAME STREQUAL "")
+			FILE(APPEND "${SCM_FILE}"
+				"(define-public (${SHORT_NAME} . x)\n"
+				"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
+			)
+		ENDIF (NOT SHORT_NAME STREQUAL "")
+	ENDIF (ISNODE STREQUAL "NODE")
+
+	IF (ISLINK STREQUAL "LINK")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public (${TYPE_NAME} . x)\n"
+			"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
+		)
+		IF (NOT SHORT_NAME STREQUAL "")
+			FILE(APPEND "${SCM_FILE}"
+				"(define-public (${SHORT_NAME} . x)\n"
+				"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
+			)
+		ENDIF (NOT SHORT_NAME STREQUAL "")
+	ENDIF (ISLINK STREQUAL "LINK")
+
+	IF (ISATOMSPACE STREQUAL "ATOMSPACE")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public AtomSpace cog-new-atomspace)\n"
+		)
+	ENDIF (ISATOMSPACE STREQUAL "ATOMSPACE")
+
+	IF (ISAST STREQUAL "AST")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public (${TYPE_NAME} . x)\n"
+			"\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n"
+		)
+	ENDIF (ISAST STREQUAL "AST")
+ENDMACRO(OPENCOG_SCM_WRITE_DEFS)
+
 # ===================================================================
 # Atom types in python.
 
@@ -281,39 +334,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # -----------------------------------------------------------
         # Print out the scheme definitions
-        FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
-
-        IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
-            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-value (cons ${TYPE_NAME}Type x)))\n")
-        ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
-
-        IF (ISNODE STREQUAL "NODE")
-            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n")
-            IF (NOT SHORT_NAME STREQUAL "")
-                FILE(APPEND "${SCM_FILE}" "(define-public (${SHORT_NAME} . x)\n")
-                FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n")
-            ENDIF (NOT SHORT_NAME STREQUAL "")
-        ENDIF (ISNODE STREQUAL "NODE")
-
-        IF (ISLINK STREQUAL "LINK")
-            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n")
-            IF (NOT SHORT_NAME STREQUAL "")
-                FILE(APPEND "${SCM_FILE}" "(define-public (${SHORT_NAME} . x)\n")
-                FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n")
-            ENDIF (NOT SHORT_NAME STREQUAL "")
-        ENDIF (ISLINK STREQUAL "LINK")
-
-        IF (ISATOMSPACE STREQUAL "ATOMSPACE")
-            FILE(APPEND "${SCM_FILE}" "(define-public AtomSpace cog-new-atomspace)\n")
-        ENDIF (ISATOMSPACE STREQUAL "ATOMSPACE")
-
-        IF (ISAST STREQUAL "AST")
-            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-ast (cons ${TYPE_NAME}Type x)))\n")
-        ENDIF (ISAST STREQUAL "AST")
+        OPENCOG_SCM_WRITE_DEFS()
 
         # -----------------------------------------------------------
         # Print out the python definitions. Note: We special-case Atom
