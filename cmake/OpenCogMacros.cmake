@@ -80,7 +80,7 @@ MACRO(OPENCOG_GEN_CPP_ATOMTYPES SCRIPT_FILE
 		# CMAKE_CURRENT_BINARY_DIR and CMAKE_CURRENT_SOURCE_DIR of the
 		# OpenCogAtomTypes.cmake to the CMAKE_CURRENT_BINARY_DIR
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "Generating C++ bindings for Atom Types."
+		COMMENT "Generating C++ Atom Type bindings from ${SCRIPT_FILE}."
 	)
 ENDMACRO()
 
@@ -103,7 +103,7 @@ MACRO(OPENCOG_GEN_SCM_ATOMTYPES SCRIPT_FILE SCM_FILE)
 		# CMAKE_CURRENT_BINARY_DIR and CMAKE_CURRENT_SOURCE_DIR of the
 		# OpenCogAtomTypes.cmake to the CMAKE_CURRENT_BINARY_DIR
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "Generating Scheme bindings for Atom Types."
+		COMMENT "Generating Scheme Atom Type bindings from ${SCRIPT_FILE}."
 	)
 ENDMACRO()
 
@@ -126,7 +126,7 @@ MACRO(OPENCOG_GEN_PYTHON_ATOMTYPES SCRIPT_FILE PYTHON_FILE)
 		# CMAKE_CURRENT_BINARY_DIR and CMAKE_CURRENT_SOURCE_DIR of the
 		# OpenCogAtomTypes.cmake to the CMAKE_CURRENT_BINARY_DIR
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "Generating Python bindings for Atom Types."
+		COMMENT "Generating Python Atom Type bindings from ${SCRIPT_FILE}."
 	)
 ENDMACRO()
 
@@ -171,7 +171,7 @@ MACRO(OPENCOG_ADD_ATOM_TYPES SCRIPT_FILE
 		# CMAKE_CURRENT_BINARY_DIR and CMAKE_CURRENT_SOURCE_DIR of the
 		# OpenCogAtomTypes.cmake to the CMAKE_CURRENT_BINARY_DIR
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-		COMMENT "Generating opencog types"
+		COMMENT "Generating C++, Scheme, Python Atom Type bindings from ${SCRIPT_FILE}."
 	)
 ENDMACRO()
 

@@ -31,7 +31,7 @@ MACRO(OPENCOG_CPP_SETUP HEADER_FILE DEFINITIONS_FILE INHERITANCE_FILE)
 	SET(TMPHDR_FILE ${CMAKE_BINARY_DIR}/tmp_types.h)
 	SET(CNAMES_FILE ${CMAKE_BINARY_DIR}/atom_names.h)
 
-	MESSAGE(STATUS "Generating C++ Atom Type defintions from ${SCRIPT_FILE}.")
+	MESSAGE(DEBUG "Generating C++ Atom Type defintions from ${SCRIPT_FILE}.")
 
 	SET(CLASSSERVER_REFERENCE "opencog::nameserver().")
 	SET(CLASSSERVER_INSTANCE "opencog::nameserver()")

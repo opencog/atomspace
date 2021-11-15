@@ -14,7 +14,7 @@ MACRO(OPENCOG_SCM_SETUP SCM_FILE)
 		MESSAGE(FATAL_ERROR "OPENCOG_SCM_ATOMTYPES missing SCM_FILE")
 	ENDIF (NOT SCM_FILE)
 
-	MESSAGE(STATUS "Generating Scheme Atom Type defintions from ${SCRIPT_FILE}.")
+	MESSAGE(DEBUG "Generating Scheme Atom Type defintions from ${SCRIPT_FILE}.")
 
 	FILE(WRITE "${SCM_FILE}"
 		"\n"
