@@ -39,6 +39,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"//\n"
 		"#include <caml/mlvalues.h>\n"
 		"#include <opencog/atoms/atom_types/atom_types.h>\n"
+		"#include <opencog/ocaml/CamlWrap.h>\n"
 		"\n"
 	)
 ENDMACRO(OPENCOG_OCAML_SETUP OCAML_FILE)
@@ -80,8 +81,18 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 
 	IF (ISLINK STREQUAL "LINK")
 		FILE(APPEND "${OCAML_FILE}"
-			"(define-public (${TYPE_NAME} . x)\n"
-			"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
+			"external ${LC_SNAKE_TYPE} : list atom -> atom = new_${TYPE_NAME} ;;\n"
+		)
+		FILE(APPEND "${WRAPPER_FILE}"
+			"CAMLprim value  new_${TYPE_NAME}(value vatomlist) {\n"
+			"    size_t len = Wosize_val(vatomlist);\n"
+			"    HandleSeq oset;\n"
+			"    for(size_t n=0; n<len; n++) {\n"
+			"        Handle h(HandleCast(value_to_tag(Field(vatomlist, n))));\n"
+			"        oset.emplace_back(h);\n"
+			"    }\n"
+			"    return NewLink(${TYPE}, oset);\n"
+			"} \n"
 		)
 		IF (NOT SHORT_NAME STREQUAL "")
 			FILE(APPEND "${OCAML_FILE}"

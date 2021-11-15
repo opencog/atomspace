@@ -69,6 +69,11 @@ value tag_to_value(const ValuePtr& pa)
 	return v;
 }
 
+ValuePtr value_to_tag(value v)
+{
+	return *((ValuePtr*) Data_custom_val(v));
+}
+
 CAMLprim value NewNode(Type t, const char* str)
 {
 	return tag_to_value(asp->add_node(t, str));

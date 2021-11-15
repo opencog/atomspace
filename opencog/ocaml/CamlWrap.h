@@ -21,10 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _CAML_WRAP_H_
+#define _CAML_WRAP_H_
+
 #include <caml/mlvalues.h>
 #undef Atom
 
-#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/value/Value.h>
 
 using namespace opencog;
 
@@ -32,3 +35,8 @@ extern "C" {
 CAMLprim value NewNode(Type, const char*);
 CAMLprim value NewLink(Type, HandleSeq&);
 }
+
+value tag_to_value(const ValuePtr& pa);
+ValuePtr value_to_tag(value);
+
+#endif // _CAML_WRAP_H_
