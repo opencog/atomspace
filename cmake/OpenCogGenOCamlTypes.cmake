@@ -32,7 +32,7 @@ ENDMACRO(OPENCOG_OCAML_SETUP OCAML_FILE)
 # Print out the scheme definitions
 MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE)
 	FILE(APPEND "${OCAML_FILE}"
-		"(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n"
+		"external ${LC_SNAKE_TYPE} : unit -> int = ${TYPE_NAME} ;;\n"
 	)
 
 	IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
