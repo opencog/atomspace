@@ -1,12 +1,11 @@
 #
 # OpenCogAtomTypes.cmake
 #
-# Old-style API: aDefinitions for automatically building the atom_types files, given
-# a master file "atom_types.script" that defines all of the type
-# relationships.
+# Wrapper to build Atom Type bindings for various rpogramming languages.
+# This code runs at compile time (when the user types 'make') and NOT
+# a CMake time (when the user types 'cmake ..') This may be a source of
+# confusion!  (It was for me.)
 #
-# Macro example call:
-# XXX TBD
 
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenTypes.cmake")
 
