@@ -8,6 +8,7 @@
 #
 
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenTypes.cmake")
+INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenCppTypes.cmake")
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenPythonTypes.cmake")
 INCLUDE("${OC_CMAKE_PATH}/cmake/OpenCogGenScmTypes.cmake")
 
