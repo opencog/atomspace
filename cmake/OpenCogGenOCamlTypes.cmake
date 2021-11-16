@@ -111,8 +111,7 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vname) {\n"
 			"    CAMLparam1(vname);\n"
-			"    const char* name = String_val(vname);\n"
-			"    CAMLreturn(NewNode(${TYPE}, name));\n"
+			"    CAMLreturn(NewNode(vname, ${TYPE}));\n"
 			"}\n\n"
 		)
 
@@ -123,13 +122,7 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vatomlist) {\n"
 			"    CAMLparam1(vatomlist);\n"
-			"    size_t len = Wosize_val(vatomlist);\n"
-			"    HandleSeq oset;\n"
-			"    for(size_t n=0; n<len; n++) {\n"
-			"        Handle h(HandleCast(value_to_tag(Field(vatomlist, n))));\n"
-			"        oset.emplace_back(h);\n"
-			"    }\n"
-			"    CAMLreturn(NewLink(${TYPE}, oset));\n"
+			"    CAMLreturn(NewLink(vatomlist, ${TYPE}));\n"
 			"}\n\n"
 		)
 

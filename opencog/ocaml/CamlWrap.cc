@@ -78,15 +78,27 @@ ValuePtr value_to_tag(value v)
 	return *((ValuePtr*) Data_custom_val(v));
 }
 
-CAMLprim value NewNode(Type t, const char* str)
+CAMLprim value NewNode(value vname, Type t)
 {
-	CAMLparam0();
-	CAMLreturn(tag_to_value(asp->add_node(t, str)));
+	CAMLparam1(vname);
+	const char* name = String_val(vname);
+	CAMLreturn(tag_to_value(asp->add_node(t, name)));
 }
 
-CAMLprim value NewLink(Type t, HandleSeq& oset)
+CAMLprim value NewLink(value vatomlist, Type t)
 {
-	CAMLparam0();
+	CAMLparam1(vatomlist);
+	HandleSeq oset;
+
+	// vatomlist is a linked list. Walk it.
+	CAMLlocal1(p);
+	p = vatomlist;
+	while (p != Val_unit)
+	{
+		Handle h(HandleCast(value_to_tag(Field(p, 0))));
+		oset.emplace_back(h);
+		p = Field(p, 1);
+	}
 	CAMLreturn(tag_to_value(asp->add_link(t, std::move(oset))));
 }
 
@@ -94,7 +106,7 @@ CAMLprim void print_atomspace(void)
 {
 	CAMLparam0();
 	printf("Atomspace size %lu contents:\n%s\n",
-		asp->size(), asp->to_string().c_str());
+		asp->get_size(), asp->to_string().c_str());
 
 	CAMLreturn0;
 }

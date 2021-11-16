@@ -33,8 +33,8 @@
 using namespace opencog;
 
 extern "C" {
-CAMLprim value NewNode(Type, const char*);
-CAMLprim value NewLink(Type, HandleSeq&);
+CAMLprim value NewNode(value, Type);
+CAMLprim value NewLink(value, Type);
 void print_atomspace(void);
 }
 
