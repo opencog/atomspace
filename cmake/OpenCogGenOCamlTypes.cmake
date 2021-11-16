@@ -25,7 +25,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE HEADER_FILE)
 		"\n"
 		"(* This file contains basic OCaml wrappers for atom creation. *)\n"
 		"\n"
-		"type atom = Atom | Node of string | Link of atom list;;\n"
+		"type atom ;; (* = Atom | Node of string | Link of atom list;; *)\n"
 	)
 
 	FILE(WRITE "${WRAPPER_FILE}"
@@ -37,6 +37,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE HEADER_FILE)
 		"//\n"
 		"// This file contains basic OCaml wrappers for atom creation.\n"
 		"//\n"
+		"#define CAML_NAME_SPACE\n"
 		"#include <caml/memory.h>\n"
 		"#include <caml/mlvalues.h>\n"
 		"#include <opencog/ocaml/CamlWrap.h>\n"

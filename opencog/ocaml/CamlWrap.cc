@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#define CAML_NAME_SPACE
 #include <caml/custom.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
@@ -57,27 +58,26 @@ static __attribute__ ((constructor)) void init()
 
 value tag_to_value(const ValuePtr& pa)
 {
-	CAMLparam0();
-	if (nullptr == pa) CAMLreturn(Val_unit);
+	if (nullptr == pa) return Val_unit;
 
 	// sizeof(ValuePtr) = 16
-	CAMLlocal1(v);
-	v = caml_alloc_custom(&opstbl, sizeof(ValuePtr), 1, 4000000);
+	value v = caml_alloc_custom(&opstbl, sizeof(ValuePtr), 1, 4000000);
 
 	void* vd = Data_custom_val(v);
 	memset(vd, 0, sizeof(ValuePtr));
 
 	// Smart pointer increments!
 	*((ValuePtr*) vd) = pa;
-	CAMLreturn(v);
+	return v;
 }
 
 ValuePtr value_to_tag(value v)
 {
-	CAMLparam1(v);
 	return *((ValuePtr*) Data_custom_val(v));
 }
 
+// Functions in the actual interface need to be declared 'CAMLprim'
+// and need to use 'CAMLparam' and 'CAMLreturn'
 CAMLprim value NewNode(value vname, Type t)
 {
 	CAMLparam1(vname);
