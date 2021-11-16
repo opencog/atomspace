@@ -149,6 +149,10 @@ MACRO(OPENCOG_GEN_OCAML_ATOMTYPES SCRIPT_FILE OCAML_FILE WRAPPER_FILE)
 		COMMENT "Generating OCaml Atom Type bindings from ${SCRIPT_FILE}"
 	)
 
+	# Hmm. Without these phone targets, it seems like CMake doesn't
+	ADD_CUSTOM_TARGET(phony_${OCAML_FILE} DEPENDS ${OCAML_FILE})
+	ADD_CUSTOM_TARGET(phony_${WRAPPER_FILE} DEPENDS ${WRAPPER_FILE})
+
 ENDMACRO()
 
 # =========================================================
