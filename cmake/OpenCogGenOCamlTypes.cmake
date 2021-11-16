@@ -37,6 +37,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"//\n"
 		"// This file contains basic OCaml wrappers for atom creation.\n"
 		"//\n"
+		"#include <caml/memory.h>\n"
 		"#include <caml/mlvalues.h>\n"
 		"#include <opencog/ocaml/CamlWrap.h>\n"
 		"\n"
@@ -67,8 +68,9 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 	# )
 	#
 	# FILE(APPEND "${WRAPPER_FILE}"
-	#	"CAMLprim value  ${TYPE_NAME}Type(void) {"
-	#	" return Val_long(${TYPE}); } \n"
+	#	"CAMLprim value  ${TYPE_NAME}Type(void) {\n"
+	#	"    CAMLparam0();\n"
+	#	"    CAMLreturn(Val_long(${TYPE})); } \n"
 	# )
 
 	# Use short names, whenever possible. There are no backwards-compat
@@ -108,8 +110,9 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vname) {\n"
+			"    CAMLparam1(vname);\n"
 			"    const char* name = String_val(vname);\n"
-			"    return NewNode(${TYPE}, name);\n"
+			"    CAMLreturn(NewNode(${TYPE}, name));\n"
 			"}\n\n"
 		)
 
@@ -119,13 +122,14 @@ MACRO(OPENCOG_OCAML_WRITE_DEFS OCAML_FILE WRAPPER_FILE)
 		)
 		FILE(APPEND "${WRAPPER_FILE}"
 			"CAMLprim value new_${TYPE_NAME}(value vatomlist) {\n"
+			"    CAMLparam1(vatomlist);\n"
 			"    size_t len = Wosize_val(vatomlist);\n"
 			"    HandleSeq oset;\n"
 			"    for(size_t n=0; n<len; n++) {\n"
 			"        Handle h(HandleCast(value_to_tag(Field(vatomlist, n))));\n"
 			"        oset.emplace_back(h);\n"
 			"    }\n"
-			"    return NewLink(${TYPE}, oset);\n"
+			"    CAMLreturn(NewLink(${TYPE}, oset));\n"
 			"}\n\n"
 		)
 

@@ -22,6 +22,7 @@
  */
 
 #include <caml/custom.h>
+#include <caml/memory.h>
 #include <caml/mlvalues.h>
 #undef Atom
 
@@ -56,35 +57,44 @@ static __attribute__ ((constructor)) void init()
 
 value tag_to_value(const ValuePtr& pa)
 {
-	if (nullptr == pa) return Val_unit;
+	CAMLparam0();
+	if (nullptr == pa) CAMLreturn(Val_unit);
 
 	// sizeof(ValuePtr) = 16
-	value v = caml_alloc_custom(&opstbl, sizeof(ValuePtr), 1, 4000000);
+	CAMLlocal1(v);
+	v = caml_alloc_custom(&opstbl, sizeof(ValuePtr), 1, 4000000);
 
 	void* vd = Data_custom_val(v);
 	memset(vd, 0, sizeof(ValuePtr));
 
 	// Smart pointer increments!
 	*((ValuePtr*) vd) = pa;
-	return v;
+	CAMLreturn(v);
 }
 
 ValuePtr value_to_tag(value v)
 {
+	CAMLparam1(v);
 	return *((ValuePtr*) Data_custom_val(v));
 }
 
 CAMLprim value NewNode(Type t, const char* str)
 {
-	return tag_to_value(asp->add_node(t, str));
+	CAMLparam0();
+	CAMLreturn(tag_to_value(asp->add_node(t, str)));
 }
 
 CAMLprim value NewLink(Type t, HandleSeq& oset)
 {
-	return tag_to_value(asp->add_link(t, std::move(oset)));
+	CAMLparam0();
+	CAMLreturn(tag_to_value(asp->add_link(t, std::move(oset))));
 }
 
-void print_atomspace(void)
+CAMLprim void print_atomspace(void)
 {
-	printf("Atomspace == %s\n", asp->to_string().c_str());
+	CAMLparam0();
+	printf("Atomspace size %lu contents:\n%s\n",
+		asp->size(), asp->to_string().c_str());
+
+	CAMLreturn0;
 }

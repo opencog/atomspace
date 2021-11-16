@@ -48,6 +48,10 @@ $ rlwrap ocaml -I /usr/local/lib/opencog/ocaml/
 # external concept : string -> atom = "new_ConceptNode" ;;
 # concept "foo" ;;
 # prtspace ()  ;;
+# external list_link : atom list -> atom = "new_ListLink" ;;
+# let f = concept "foo" ;;
+# let b = concept "bar" ;;
+# list_link [ f; b] ;;
 ```
 
 Development
