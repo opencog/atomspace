@@ -9,7 +9,7 @@
 #
 # ===================================================================
 
-MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
+MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE HEADER_FILE)
 	IF (NOT OCAML_FILE)
 		MESSAGE(FATAL_ERROR "OPENCOG_OCAML_ATOMTYPES missing OCAML_FILE")
 	ENDIF (NOT OCAML_FILE)
@@ -41,7 +41,7 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"#include <caml/mlvalues.h>\n"
 		"#include <opencog/ocaml/CamlWrap.h>\n"
 		"\n"
-		"#include <opencog/atoms/atom_types/atom_types.h>\n"
+		"#include <${HEADER_FILE}>\n"
 		"#include <opencog/atoms/base/Atom.h>\n"
 		"#include <opencog/atoms/base/Handle.h>\n"
 		"\n"
@@ -145,9 +145,10 @@ ENDMACRO()
 
 # ------------
 # Main entry point.
-MACRO(OPENCOG_OCAML_ATOMTYPES SCRIPT_FILE OCAML_FILE WRAPPER_FILE)
+MACRO(OPENCOG_OCAML_ATOMTYPES
+	SCRIPT_FILE OCAML_FILE WRAPPER_FILE HEADER_FILE)
 
-	OPENCOG_OCAML_SETUP(${OCAML_FILE} ${WRAPPER_FILE})
+	OPENCOG_OCAML_SETUP(${OCAML_FILE} ${WRAPPER_FILE} ${HEADER_FILE})
 	FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
 	FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 		OPENCOG_TYPEINFO_REGEX()
