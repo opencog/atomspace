@@ -5,9 +5,6 @@ INCLUDE(UseOCaml)
 OPENCOG_GEN_OCAML_ATOMTYPES(../atoms/atom_types/atom_types.script
 	atoms.ml mlwrappers.cc)
 
-# Create an mli file correspnding to the ml file.
-# ADD_CUSTOM_TARGET(ocaml_wrapper_ml DEPENDS atoms.ml)
-
 ADD_LIBRARY (camlatoms
 	CamlWrap.cc
 	mlwrappers.cc
@@ -22,17 +19,7 @@ TARGET_LINK_LIBRARIES(camlatoms
 	atomspace
 )
 
-# Add phony targets, so that CMake doesn't complain about missing
-# files (which don't exist at cmake time). This sets the GENERATED
-# property on these files.
-# Currently un-needed!?
-#ADD_CUSTOM_TARGET(ocaml_wrapper_cc
-#	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mlwrapper.cc)
-#
-# ADD_CUSTOM_TARGET(ocaml_wrapper_ml
-#	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/atoms.ml)
-
-# This does nothing!?? XXX and currently seems un-neeed...
+# This does nothing!?? and currently seems un-neeed...
 # OCAML_MAKE_INTERFACE(atomese.ml)
 
 # For each foo.mli listed below, the user needs to say:
