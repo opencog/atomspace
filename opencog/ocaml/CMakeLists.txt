@@ -2,10 +2,13 @@
 # Use UseOCaml.cmake, provided by cogutils
 INCLUDE(UseOCaml)
 
+OPENCOG_GEN_OCAML_ATOMTYPES(../atoms/atom_types/atom_types.script
+	atoms.ml mlwrappers.cc)
+
 ADD_LIBRARY (camlatoms
 	CamlWrap.cc
-	# mlwrappers.cc
-	${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/mlwrappers
+	mlwrappers.cc
+	# ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/mlwrappers
 )
 
 SET_TARGET_PROPERTIES(camlatoms PROPERTIES
@@ -24,10 +27,10 @@ ADD_DEPENDENCIES(camlatoms opencog_atom_types)
 # files (which don't exist at cmake time). This sets the GENERATED
 # property onn these files.
 ADD_CUSTOM_TARGET(ocaml_wrapper_cc
-	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/mlwrapper.cc)
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/mlwrapper.cc)
 
 ADD_CUSTOM_TARGET(ocaml_wrapper_ml
-	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/atoms.ml)
 
 
 # This does nothing!?? XXX and currently seems un-neeed...
@@ -35,7 +38,7 @@ ADD_CUSTOM_TARGET(ocaml_wrapper_ml
 
 # XXX FIXME, this doesn't seem to do anything...
 # OCAML_MAKE_WRAP_INTF(ocaml_wrapper_mli
-# 	${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
+# 	${CMAKE_CURRENT_BINARY_DIR}/atoms.ml)
 
 # Attention: the atomese.ml and atomese.mli files can be named anything.
 # For example, atomfoo.mli. In this case, the user would say:
@@ -44,8 +47,9 @@ ADD_CUSTOM_TARGET(ocaml_wrapper_ml
 # and it all works. Be sure to install atomfoo.cmi, below.
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
-		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.mli
-		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml
+		${CMAKE_CURRENT_BINARY_DIR}/atoms.mli
+		${CMAKE_CURRENT_BINARY_DIR}/atoms.ml
+		# atoms.ml
 		# atomese.mli
 		atomese.ml
 	C_LIBRARIES
@@ -61,7 +65,7 @@ INSTALL_OCAML_TARGETS(
 INSTALL_OCAML_INTERFACES(
 	atomese
 	atomese
-	core_types
+	atoms
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
 
 INSTALL (TARGETS camlatoms
