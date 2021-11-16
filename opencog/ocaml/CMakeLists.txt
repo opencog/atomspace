@@ -29,6 +29,7 @@ ADD_CUSTOM_TARGET(ocaml_wrapper_cc
 ADD_CUSTOM_TARGET(ocaml_wrapper_ml
 	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
 
+
 # This does nothing!?? XXX and currently seems un-neeed...
 # OCAML_MAKE_INTERFACE(atomse.ml)
 
@@ -43,7 +44,7 @@ ADD_CUSTOM_TARGET(ocaml_wrapper_ml
 # and it all works. Be sure to install atomfoo.cmi, below.
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
-		# ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.mli
+		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.mli
 		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml
 		# atomese.mli
 		atomese.ml
@@ -60,6 +61,7 @@ INSTALL_OCAML_TARGETS(
 INSTALL_OCAML_INTERFACES(
 	atomese
 	atomese
+	core_types
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
 
 INSTALL (TARGETS camlatoms

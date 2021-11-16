@@ -35,6 +35,7 @@ using namespace opencog;
 extern "C" {
 CAMLprim value NewNode(Type, const char*);
 CAMLprim value NewLink(Type, HandleSeq&);
+void print_atomspace(void);
 }
 
 value tag_to_value(const ValuePtr& pa);

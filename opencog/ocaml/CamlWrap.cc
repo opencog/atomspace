@@ -83,3 +83,8 @@ CAMLprim value NewLink(Type t, HandleSeq& oset)
 {
 	return tag_to_value(asp->add_link(t, std::move(oset)));
 }
+
+void print_atomspace(void)
+{
+	printf("Atomspace == %s\n", asp->to_string().c_str());
+}

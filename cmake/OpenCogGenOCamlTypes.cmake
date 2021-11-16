@@ -46,11 +46,15 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE)
 		"\n"
 		"using namespace opencog;\n"
 		"\n"
+		"extern \"C\" {\n"
+		"\n"
 	)
 ENDMACRO()
 
 MACRO(OPENCOG_OCAML_TEARDOWN OCAML_FILE)
-	# OCAML_MAKE_INTERFACE(${OCAML_FILE})
+	FILE(APPEND "${WRAPPER_FILE}"
+		"} // extern \"C\"\n"
+	)
 ENDMACRO()
 
 # Print out the scheme definitions

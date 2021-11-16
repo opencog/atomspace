@@ -44,8 +44,10 @@ Semi-functional:
 $ rlwrap ocaml -I /usr/local/lib/opencog/ocaml/
 # #load "atomese.cma" ;;
 # open Atomese ;;
-# external newnode : string -> unit = "NewNode" ;;
-# newnode "foo" ;;
+# prtspace ()  ;;
+# external concept : string -> atom = "new_ConceptNode" ;;
+# concept "foo" ;;
+# prtspace ()  ;;
 ```
 
 Development
