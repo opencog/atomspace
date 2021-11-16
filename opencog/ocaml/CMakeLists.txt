@@ -2,12 +2,6 @@
 # Use UseOCaml.cmake, provided by cogutils
 INCLUDE(UseOCaml)
 
-INCLUDE_DIRECTORIES(
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_BINARY_DIR}/opencog/atoms/atom_types
-)
-
 ADD_LIBRARY (camlatoms
 	CamlWrap.cc
 	# mlwrappers.cc
@@ -25,16 +19,18 @@ TARGET_LINK_LIBRARIES(camlatoms
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(camlatoms opencog_atom_types)
+
+# Add phony targets, so that CMake doesn't complain about missing
+# files (which don't exist at cmake time). This sets the GENERATED
+# property onn these files.
 ADD_CUSTOM_TARGET(ocaml_wrapper_cc
 	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/mlwrapper.cc)
 
-# This does nothing!?? XXX
-# OCAML_MAKE_INTERFACE(atomse.ml)
+ADD_CUSTOM_TARGET(ocaml_wrapper_ml
+	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
 
-# The core_types.mli file must be generated before the module can be
-# compiled. Thus we add a phony target.
-#ADD_CUSTOM_TARGET(ocaml_wrapper_ml
-#	DEPENDS ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml)
+# This does nothing!?? XXX and currently seems un-neeed...
+# OCAML_MAKE_INTERFACE(atomse.ml)
 
 # XXX FIXME, this doesn't seem to do anything...
 # OCAML_MAKE_WRAP_INTF(ocaml_wrapper_mli
@@ -48,7 +44,7 @@ ADD_CUSTOM_TARGET(ocaml_wrapper_cc
 ADD_OCAML_LIBRARY(atomese
 	SOURCES
 		# ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.mli
-		# ${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml
+		${CMAKE_BINARY_DIR}/opencog/atoms/atom_types/core_types.ml
 		# atomese.mli
 		atomese.ml
 	C_LIBRARIES
