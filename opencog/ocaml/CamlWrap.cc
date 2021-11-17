@@ -176,7 +176,11 @@ static std::string tosnake(const std::string& camel)
 	for (size_t i=1; i<len; i++)
 	{
 		char c = camel[i];
-		if ('A' <= c and c <= 'Z') snake += "_" + (c - ('A' - 'a'));
+		if ('A' <= c and c <= 'Z')
+		{
+			snake += '_';
+			snake += c - ('A' - 'a');
+		}
 		else snake += c;
 	}
 
@@ -200,13 +204,26 @@ std::string oc_to_caml_str(const Handle& h, const std::string& indent)
 	if (h == nullptr)
 		return indent + "null";
 
+	std::string camelcase(nameserver().getTypeName(h->get_type()));
+	std::string snakecase = tosnake(camelcase);
+
 	if (h->is_node())
 	{
-		std::string camelcase(nameserver().getTypeName(h->get_type()));
-		std::string snakecase = tosnake(camelcase);
-		return indent + snakecase + " \"" + h->get_name() + "\"\n";
+		// Chop off the trailing _node
+		size_t un = snakecase.rfind("_node");
+		if (std::string::npos != un)
+			snakecase = snakecase.substr(0, un);
+		return indent + snakecase + " \"" + h->get_name() + "\"";
 	}
-	return h->to_short_string();
+
+	std::string lnk = indent + snakecase + " [";
+	for (const Handle& ho : h->getOutgoingSet())
+	{
+		lnk += "\n" + oc_to_caml_str(ho, indent + oc_to_string_indent) + " ;";
+	}
+	lnk += "]";
+
+	return lnk;
 }
 
 /// Pretty-print the atom in OCaml format; that is, return what it
@@ -216,7 +233,7 @@ CAMLprim value atom_string_printer(value vatom)
 {
 	CAMLparam1(vatom);
 
-	std::string str(oc_to_caml_str(value_to_tag(vatom)));
+	std::string str(oc_to_caml_str(value_to_tag(vatom)) + "\n");
 
 	CAMLreturn(caml_copy_string(str.c_str()));
 }
