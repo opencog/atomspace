@@ -149,6 +149,7 @@ private:
 
 public:
 	Instantiator(AtomSpace* as);
+	Instantiator(const AtomSpacePtr&);
 
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,

@@ -34,6 +34,9 @@ using namespace opencog;
 Instantiator::Instantiator(AtomSpace* as) : _as(as)
 {}
 
+Instantiator::Instantiator(const AtomSpacePtr& asp) : _as(asp.get())
+{}
+
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
 /// member of the pair is the variable; the second is the value that

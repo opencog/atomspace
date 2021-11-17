@@ -8,6 +8,7 @@
 #ifndef _OPENCOG_EVALUATION_LINK_H
 #define _OPENCOG_EVALUATION_LINK_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
@@ -37,6 +38,12 @@ public:
 	                                     const Handle&,
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
+
+	static TruthValuePtr do_evaluate(const AtomSpacePtr& asp, const Handle& h,
+	                                 bool silent=false)
+	{
+		return do_evaluate(asp.get(), h, silent);
+	}
 
 	static bool crisp_evaluate(AtomSpace*, const Handle&,
 	                           bool silent=false);
