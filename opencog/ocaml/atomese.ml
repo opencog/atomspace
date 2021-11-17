@@ -20,6 +20,7 @@ open Storage ;;
  * That's because each interface declares a distinct
  * type atom = Atom ;; perhaps this is a bug? Perhaps
  * type atom should appear in it's own mli file?
+ * I couldn't make it work, so we have this instead.
  *)
 #install_printer Atoms.atom_prettyprt ;;
 #install_printer Storage.atom_prettyprt ;;
