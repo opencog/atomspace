@@ -3,6 +3,7 @@
  *
  * Example of performing AtomSpace queries in OCaml.
  *)
+#use "atomese.ml" ;;
 
 (* Populate the AtomSpace with contents *)
 evaluation [
@@ -36,5 +37,7 @@ let qry =
 					variable "?x" ;
 					concept "outdoors" ]]]] ;;
 
+(* Run the query *)
+cog_execute qry ;;
 
 (* That's all folks! *)

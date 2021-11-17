@@ -165,8 +165,9 @@ CAMLprim value atom_to_sexpr(value vatom)
 	CAMLreturn(caml_copy_string(str.c_str()));
 }
 
-/// Pretty-print the atom; that is, return what it should look like,
-/// when considered in OCaml atomese. e.g 'concept "bar"'
+/// Pretty-print the atom in OCaml format; that is, return what it
+/// should look like, when considered in OCaml atomese. e.g.
+/// `(Concept "bar")` is printed as `concept "bar"`.
 CAMLprim value atom_string_printer(value vatom)
 {
 	CAMLparam1(vatom);

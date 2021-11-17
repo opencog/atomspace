@@ -4,6 +4,8 @@
  * Demos some of the basic OCaml API.
  *)
 
+#use "atomese.ml" ;;
+
 (* Create a foo node *)
 concept "foo" ;;
 
