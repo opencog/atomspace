@@ -187,6 +187,10 @@ static std::string tosnake(const std::string& camel)
 	return snake;
 }
 
+bool starts_with (const std::string& str, const char *cstr)
+{
+	return 0 == str.compare(0, strlen(cstr), cstr);
+}
 
 std::string oc_to_caml_str(const ValuePtr& vp, const std::string& indent)
 {
@@ -216,11 +220,28 @@ std::string oc_to_caml_str(const Handle& h, const std::string& indent)
 		return indent + snakecase + " \"" + h->get_name() + "\"";
 	}
 
+	// Chop off the trailing _link .. unless its a reserved word.
+	if (not starts_with(snakecase, "list") and
+		 not starts_with(snakecase, "true") and
+		 not starts_with(snakecase, "false") and
+		 not starts_with(snakecase, "and") and
+		 not starts_with(snakecase, "or") and
+		 not starts_with(snakecase, "type") and
+		 not starts_with(snakecase, "virtual") and
+		 not starts_with(snakecase, "function"))
+	{
+		size_t un = snakecase.rfind("_link");
+		if (std::string::npos != un)
+			snakecase = snakecase.substr(0, un);
+	}
+
 	std::string lnk = indent + snakecase + " [";
 	for (const Handle& ho : h->getOutgoingSet())
 	{
 		lnk += "\n" + oc_to_caml_str(ho, indent + oc_to_string_indent) + " ;";
 	}
+	if (';' == lnk[lnk.size()-1]) lnk.pop_back();
+	if (' ' == lnk[lnk.size()-1] and ']' == lnk[lnk.size()-2]) lnk.pop_back();
 	lnk += "]";
 
 	return lnk;
