@@ -20,6 +20,7 @@ By the end, you will have a very clear idea of what the AtomSpace is!
                   for, and execute that code. (Experimental, incomplete)
 
 * python        - Python usage examples.
+* ocaml         - OCaml usage examples.
 * haskell       - Haskell usage examples.
 
 * c++           - Example CMakefile and demos for C++ code.
