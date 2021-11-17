@@ -1,14 +1,19 @@
 #
 # TODO FIXME: this is incomplete/broken.
-# OCaml seems to want it installed in /usr/lib/ocaml/atomese/META
-# but we want it elsewhere, so ???
 #
+# sudo ocamlfind install atomese dllcamlatoms.so \
+#     atomese.cma atomese.cmi atoms.cmi storage.cmi META
+# installs this into /usr/local/lib/ocaml/4.11.1/atomese
+# and `ocamlfind list` does list it.
+# After that, #use "topfind";; #require "atomese" ;; open Atomese ;; works
+# but none of the stubs can find the shared lib ...
+# Recall the shared lib is specified in the cma file... so ???
 #
 # Specifications for the "atomese" library:
 description = "AtomSpace OCaml wrappers"
 version = "[AtomSpace built from source]"
-# directory = "^"
-# directory = "."
+# directory = "^"  # this fails with Error: Unbound module Atomese
+directory = "."
 browse_interfaces = " Unit name: Atomese "
 
 # linkopts = ""

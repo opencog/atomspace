@@ -55,6 +55,15 @@ $ rlwrap ocaml
 # prtspace ()  ;;
 ```
 
+Alternate ... doesn't work, can't find the shared libs:
+```
+$ rlwrap ocaml
+# #use "topfind";;
+# #require "atomese" ;;
+# open Atomese ;;
+# prtspace() ;;
+```
+
 Development
 -----------
 If you change `atomese.ml`, then you MUST run, by hand
@@ -67,6 +76,15 @@ Ideas
 -----
 * Use `#directory` instead of `-I`
 * Use a 'META' file, so that everything can be loaded with `#require`.
+* CAML_LD_LIBRARY_PATH = /usr/local/lib/opencog/ocaml but it doesn't work.
+* Doing
+```
+   sudo ocamlfind install atomese dllcamlatoms.so atomese.cma \
+       atomese.cmi atoms.cmi storage.cmi META
+```
+  installs stuff into `/usr/local/lib/ocaml/4.11.1/stublibs` and
+  `ocamlfind list` will list the module ... but still can't find
+  the module. Why ???
 
 Debugging Hints
 ---------------
