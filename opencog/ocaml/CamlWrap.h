@@ -36,7 +36,7 @@ extern "C" {
 CAMLprim value NewNode(value, Type);
 CAMLprim value NewLink(value, Type);
 CAMLprim void print_atomspace(void);
-CAMLprim value atom_sexp_printer(value);
+CAMLprim value atom_to_sexpr(value);
 CAMLprim value atom_string_printer(value);
 }
 

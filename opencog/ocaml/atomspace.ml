@@ -9,7 +9,7 @@ open Atoms ;;
 (** Signature declarations *)
 external prtspace : unit -> unit = "print_atomspace" ;;
 external prtatom : atom -> unit = "print_atom" ;;
-
+external atom_sexpr : atom -> string = "atom_to_sexpr" ;;
 external atom_printer : atom -> string = "atom_string_printer" ;;
 
 (* #install_printer atom_prettyprt ;; *)

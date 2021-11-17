@@ -119,7 +119,8 @@ CAMLprim void print_atomspace(void)
 	CAMLreturn0;
 }
 
-CAMLprim value atom_sexp_printer(value vatom)
+/// Return a string holding the s-expression for the atom.
+CAMLprim value atom_to_sexpr(value vatom)
 {
 	CAMLparam1(vatom);
 
@@ -128,10 +129,13 @@ CAMLprim value atom_sexp_printer(value vatom)
 	CAMLreturn(caml_copy_string(str.c_str()));
 }
 
+/// Pretty-print the atom; that is, return what it should look like,
+/// when considered in OCaml atomese. e.g 'concept "bar"'
 CAMLprim value atom_string_printer(value vatom)
 {
 	CAMLparam1(vatom);
 
+	// FIXME this is clearly wrong.
 	std::string str(value_to_tag(vatom)->to_short_string());
 
 	CAMLreturn(caml_copy_string(str.c_str()));

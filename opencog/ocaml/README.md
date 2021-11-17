@@ -2,7 +2,7 @@
 OCaml wrappers for the AtomSpace
 ================================
 
-Unfinished prototype version 0.0.1
+Unfinished prototype version 0.0.2
 
 I had high hopes that the AtomSpace type system could be smoothly and
 easily mapped to the OCaml type system. This does not appear to be
@@ -39,32 +39,47 @@ apt install ocaml ocaml-findlib
 Usage
 -----
 
-Semi-functional:
+The ocaml interpreter can be started several different ways.
+One way is to say, at the `bash` prompt:
 ```
 $ rlwrap ocaml
-# #directory "/usr/local/lib/opencog/ocaml/" ;;
-# #use "atomese.ml" ;;
-# concept "foo" ;;
-# prtspace ()  ;;
-# let f = concept "foo" ;;
-# let b = concept "bar" ;;
-# list_link [ f; b] ;;
-# prtspace ()  ;;
+#directory "/usr/local/lib/opencog/ocaml/" ;;
+#use "atomese.ml" ;;
+```
+Note: the hash mark `#` must be typed in! The `#directory` and `#use`
+are top-level directives given to the OCaml interpreter. Note that the
+lines end with a double-semicolon.
+
+A different way to start the beast is to give the directory to the
+interpreter via the `-I` option:
+```
+$ rlwrap ocaml -I "/usr/local/lib/opencog/ocaml/"
+#use "atomese.ml" ;;
+```
+
+Here are some basic things you can do, once you have the prompt:
+```
+concept "foo" ;;
+prtspace ()  ;;
+let f = concept "foo" ;;
+let b = concept "bar" ;;
+let l = list_link [ f; b] ;;
+prtspace ()  ;;
+let e = evaluation [ predicate "likely"; l] ;;
+atom_sexpr e ;;
 ```
 
 Ideas
 -----
-* Use `#directory` instead of `-I`
 * Use a 'META' file, so that everything can be loaded with `#require`.
-* CAML_LD_LIBRARY_PATH = /usr/local/lib/opencog/ocaml but it doesn't work.
 * Doing
 ```
-   sudo ocamlfind install atomese dllcamlatoms.so atomese.cma \
-       atomese.cmi atoms.cmi storage.cmi META
+   sudo ocamlfind install atomspace dllcamlatoms.so atomspace.cma \
+       atomspace.cmi atoms.cmi storage.cmi META
 ```
   installs stuff into `/usr/local/lib/ocaml/4.11.1/stublibs` and
-  `ocamlfind list` will list the module ... but still can't find
-  the module. Why ???
+  `ocamlfind list` will list the module. The module can be opened;
+  but after opening, the shared library isn't loaded. Why ???
 
 Debugging Hints
 ---------------
@@ -75,5 +90,5 @@ $ LD_LIBRARY_PATH=/usr/local/lib/opencog/ocaml/ rlwrap ocaml
 
 Examine what's what:
 ```
-$ ocamlobjinfo opencog/ocaml/atomese.cma
+$ ocamlobjinfo opencog/ocaml/atomspace.cma
 ```
