@@ -28,27 +28,27 @@ TARGET_LINK_LIBRARIES(camlatoms
 
 # For each foo.mli listed below, the user needs to say:
 # open Foo ;;
-# (after saying #load "atomese.cma" ;; of course)
+# (after saying #load "atomspace.cma" ;; of course)
 # Be sure to install foo.cmi, below.
-ADD_OCAML_LIBRARY(atomese
+ADD_OCAML_LIBRARY(atomspace
 	SOURCES
 		# atoms.ml
 		${CMAKE_CURRENT_BINARY_DIR}/atoms.ml
 		${CMAKE_CURRENT_BINARY_DIR}/storage.ml
-		atomese.ml
+		atomspace.ml
 	C_LIBRARIES
 		camlatoms
 )
 
 INSTALL_OCAML_TARGETS(
-	atomese
+	atomspace
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
 
 # Attention: the second (and subsequent) argument is the name of
 # the mli (cmi) file, for example foo.mli, as noted above.
 INSTALL_OCAML_INTERFACES(
-	atomese
-	atomese
+	atomspace
+	atomspace
 	atoms
 	storage
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
