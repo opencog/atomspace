@@ -13,6 +13,8 @@ external atom_sexpr : atom -> string = "atom_to_sexpr" ;;
 external atom_printer : atom -> string = "atom_string_printer" ;;
 
 (* #install_printer atom_prettyprt ;; *)
+(*
 let atom_prettyprt : Format.formatter -> atom -> unit =
 	function oport ->
-		(fun atm -> (Format.fprintf oport "%s" (atom_printer atm))) ;;
+		fun atm -> Format.fprintf oport "%s" (atom_printer atm) ;;
+*)

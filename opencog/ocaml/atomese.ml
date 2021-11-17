@@ -16,5 +16,10 @@ open Atomspace ;;
 open Atoms ;;
 open Storage ;;
 
-(* The printer is defined in the atomspace.ml file *)
-#install_printer atom_prettyprt ;;
+(* There is a different printer for each interface!
+ * That's because each interface declares a distinct
+ * type atom = Atom ;; perhaps this is a bug? Perhaps
+ * type atom should appear in it's own mli file?
+ *)
+#install_printer Atoms.atom_prettyprt ;;
+#install_printer Storage.atom_prettyprt ;;

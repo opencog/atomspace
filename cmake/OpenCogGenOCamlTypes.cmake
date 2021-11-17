@@ -26,6 +26,15 @@ MACRO(OPENCOG_OCAML_SETUP OCAML_FILE WRAPPER_FILE HEADER_FILE)
 		"(* This file contains basic OCaml wrappers for atom creation. *)\n"
 		"\n"
 		"type atom = Atom ;; (* | Node of string | Link of atom list;; *)\n"
+		"\n"
+		"external atom_printer : atom -> string = \"atom_string_printer\" ;;\n"
+		"\n"
+		"(* We need a pretty-printer for each set of atom types *)\n"
+		"(* #install_printer atom_prettyprt ;; *)\n"
+		"let atom_prettyprt : Format.formatter -> atom -> unit =\n"
+		"	function oport ->\n"
+		"		fun atm -> Format.fprintf oport \"%s\" (atom_printer atm) ;;\n"
+		"\n"
 	)
 
 	FILE(WRITE "${WRAPPER_FILE}"
