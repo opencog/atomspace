@@ -37,7 +37,10 @@ AtomSpacePtr asp = createAtomSpace();
 
 static void finalize(value v)
 {
-printf("duude finalize called \n");
+	void* vd = Data_custom_val(v);
+
+	// Force smart pointer decrement!
+	*((ValuePtr*) vd) = nullptr;
 }
 
 static struct custom_operations opstbl;
