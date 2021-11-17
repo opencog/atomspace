@@ -29,12 +29,14 @@
 #undef Atom
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "CamlWrap.h"
 
 using namespace opencog;
 
-AtomSpacePtr asp = createAtomSpace();
+AtomSpacePtr atomspace = createAtomSpace();
 
 // All references to Atoms are "boxed".
 static void finalize(value v)
@@ -84,13 +86,15 @@ ValuePtr value_to_tag(value v)
 	return *((ValuePtr*) Data_custom_val(v));
 }
 
+// ==================================================================
+
 // Functions in the actual interface need to be declared 'CAMLprim'
 // and need to use 'CAMLparam' and 'CAMLreturn'
 CAMLprim value NewNode(value vname, Type t)
 {
 	CAMLparam1(vname);
 	const char* name = String_val(vname);
-	CAMLreturn(tag_to_value(asp->add_node(t, name)));
+	CAMLreturn(tag_to_value(atomspace->add_node(t, name)));
 }
 
 CAMLprim value NewLink(value vatomlist, Type t)
@@ -107,14 +111,46 @@ CAMLprim value NewLink(value vatomlist, Type t)
 		oset.emplace_back(h);
 		p = Field(p, 1);
 	}
-	CAMLreturn(tag_to_value(asp->add_link(t, std::move(oset))));
+	CAMLreturn(tag_to_value(atomspace->add_link(t, std::move(oset))));
 }
 
+// ==================================================================
+
+/// Execute an atom, as per usual.
+CAMLprim value execute(value vatom)
+{
+	CAMLparam1(vatom);
+	Handle h(HandleCast(value_to_tag(vatom)));
+	if (nullptr == h) return Val_unit;
+
+	Instantiator inst(atomspace);
+	ValuePtr pap(inst.execute(h));
+	if (pap and pap->is_atom())
+	{
+		pap = atomspace->add_atom(HandleCast(pap));
+	}
+	CAMLreturn(tag_to_value(pap));
+}
+
+/// Evaluate an atom, as per usual.
+CAMLprim value evaluate(value vatom)
+{
+	CAMLparam1(vatom);
+	Handle h(HandleCast(value_to_tag(vatom)));
+	if (nullptr == h) return Val_unit;
+
+	TruthValuePtr tvp(EvaluationLink::do_evaluate(atomspace, h));
+	CAMLreturn(tag_to_value(ValueCast(tvp)));
+}
+
+// ==================================================================
+
+/// Dump to stout. For debugging only!
 CAMLprim void print_atomspace(void)
 {
 	CAMLparam0();
 	printf("Atomspace size %lu contents:\n%s\n",
-		asp->get_size(), asp->to_string().c_str());
+		atomspace->get_size(), atomspace->to_string().c_str());
 
 	CAMLreturn0;
 }
@@ -140,3 +176,5 @@ CAMLprim value atom_string_printer(value vatom)
 
 	CAMLreturn(caml_copy_string(str.c_str()));
 }
+
+// ======================== END OF FILE =============================

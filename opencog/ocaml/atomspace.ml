@@ -5,7 +5,7 @@
 type atom = Atom ;; (* | Node of string | Link of atom list;; *)
 
 (** Signature declarations *)
-external prtspace : unit -> unit = "print_atomspace" ;;
-external prtatom : atom -> unit = "print_atom" ;;
+external cog_print_atomspace : unit -> unit = "print_atomspace" ;;
+external cog_execute : atom -> atom = "execute" ;;
 external atom_sexpr : atom -> string = "atom_to_sexpr" ;;
 external atom_printer : atom -> string = "atom_string_printer" ;;

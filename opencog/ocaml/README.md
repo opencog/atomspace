@@ -60,14 +60,16 @@ $ rlwrap ocaml -I "/usr/local/lib/opencog/ocaml/"
 Here are some basic things you can do, once you have the prompt:
 ```
 concept "foo" ;;
-prtspace ()  ;;
+cog_print_atomspace ()  ;;
 let f = concept "foo" ;;
 let b = concept "bar" ;;
 let l = list_link [ f; b] ;;
-prtspace ()  ;;
+cog_print_atomspace ()  ;;
 let e = evaluation [ predicate "likely"; l] ;;
 atom_sexpr e ;;
 ```
+
+See the `examples/ocaml` directory for more examples.
 
 Ideas
 -----

@@ -38,6 +38,8 @@ CAMLprim value NewLink(value, Type);
 CAMLprim void print_atomspace(void);
 CAMLprim value atom_to_sexpr(value);
 CAMLprim value atom_string_printer(value);
+CAMLprim value execute(value);
+CAMLprim value evaluate(value);
 }
 
 value tag_to_value(const ValuePtr& pa);

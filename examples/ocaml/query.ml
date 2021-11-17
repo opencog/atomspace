@@ -20,7 +20,7 @@ evaluation [
 	] ;;
 
 (* Take a look at the atomspace *)
-prtspace ()  ;;
+cog_print_atomspace ()  ;;
 
 (* Build a query *)
 let qry =
