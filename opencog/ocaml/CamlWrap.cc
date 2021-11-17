@@ -22,6 +22,7 @@
  */
 
 #define CAML_NAME_SPACE
+#include <caml/alloc.h>
 #include <caml/custom.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
@@ -35,6 +36,7 @@ using namespace opencog;
 
 AtomSpacePtr asp = createAtomSpace();
 
+// All references to Atoms are "boxed".
 static void finalize(value v)
 {
 	void* vd = Data_custom_val(v);
@@ -59,8 +61,10 @@ static __attribute__ ((constructor)) void init()
 	opstbl.fixed_length = custom_fixed_length_default;
 }
 
+/// Given a ValuePtr, return a boxed OCaml copy of it.
 value tag_to_value(const ValuePtr& pa)
 {
+	// Is this wise ??? Who gets to handle null pointers?
 	if (nullptr == pa) return Val_unit;
 
 	// sizeof(ValuePtr) = 16
@@ -74,6 +78,7 @@ value tag_to_value(const ValuePtr& pa)
 	return v;
 }
 
+/// Given a boxed OCaml value, unbox it to get the ValuePtr
 ValuePtr value_to_tag(value v)
 {
 	return *((ValuePtr*) Data_custom_val(v));
@@ -114,18 +119,20 @@ CAMLprim void print_atomspace(void)
 	CAMLreturn0;
 }
 
-CAMLprim void print_atom(value vatom)
+CAMLprim value atom_sexp_printer(value vatom)
 {
 	CAMLparam1(vatom);
-	printf("duuduue its an atoms yeah\n");
 
-	CAMLreturn0;
+	std::string str(value_to_tag(vatom)->to_short_string());
+
+	CAMLreturn(caml_copy_string(str.c_str()));
 }
 
-CAMLprim void atom_pretty_printer(value outport, value vatom)
+CAMLprim value atom_string_printer(value vatom)
 {
-	CAMLparam2(outport, vatom);
-	printf("duuduue portapotty yeah\n");
+	CAMLparam1(vatom);
 
-	CAMLreturn0;
+	std::string str(value_to_tag(vatom)->to_short_string());
+
+	CAMLreturn(caml_copy_string(str.c_str()));
 }
