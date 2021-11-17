@@ -41,10 +41,12 @@ Usage
 
 Semi-functional:
 ```
-$ rlwrap ocaml -I /usr/local/lib/opencog/ocaml/
+$ rlwrap ocaml
+# #directory "/usr/local/lib/opencog/ocaml/" ;;
 # #load "atomese.cma" ;;
 # open Atomese ;;
 # open Atoms ;;
+# #install_printer prettyp ;;
 # concept "foo" ;;
 # prtspace ()  ;;
 # let f = concept "foo" ;;
