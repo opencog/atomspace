@@ -596,6 +596,11 @@ during the build, will be more precise as to which parts will not be built.
 * Optional; almost no existing code makes use of Haskell.
 * https://www.haskell.org/
 
+###### OCaml
+* OCaml bindings (experimental).
+* Optional; almost no existing code makes use of Haskell.
+* https://www.ocaml.org/ | `apt install ocaml ocaml-findlib`
+
 ###### Postgres
 * Distributed, multi-client networked storage.
 * Needed for "remembering" between shutdowns (and for distributed AtomSpace)
@@ -657,7 +662,7 @@ Writing Atomese
 Atomese -- that is -- all of the different Atom types, can be thought
 of as the primary API to the AtomSpace.  Atoms can, of course, be
 created and manipulated with Atomese; but, in practice, programmers
-will work with either scheme (guile), python, C++ or haskell.
+will work with either Scheme (guile), Python, C++, OCaml or Haskell.
 
 The simplest, most complete and extensive interface to Atoms and the
 Atomspace is via scheme, and specifically, the GNU Guile scheme
