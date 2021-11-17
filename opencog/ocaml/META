@@ -1,26 +1,34 @@
+#
+# TODO FIXME: this is incomplete/broken.
+# OCaml seems to want it installed in /usr/lib/ocaml/atomese/META
+# but we want it elsewhere, so ???
+#
+#
 # Specifications for the "atomese" library:
 description = "AtomSpace OCaml wrappers"
 version = "[AtomSpace built from source]"
 # directory = "^"
-# browse_interfaces = " Unit name: Atomese "
+# directory = "."
+browse_interfaces = " Unit name: Atomese "
+
 # linkopts = ""
-requires = "atomese.atoms"
-requires += "atomese.storage"
-
-package "atoms" (
-	description = "AtomSpace core Atoms"
-	version = "[AtomSpace built from source]"
-	archive(byte) = "atoms.cma"
-	# archive(native) = "atoms.cmxa"
-	plugin(byte) = "atoms.cma"
-	# plugin(native) = "atoms.cmxs"
-)
-
-package "storage" (
-	description = "AtomSpace StorageNode Atoms"
-	version = "[AtomSpace built from source]"
-	archive(byte) = "storage.cma"
-	# archive(native) = "storage.cmxa"
-	plugin(byte) = "storage.cma"
-	# plugin(native) = "storage.cmxs"
-)
+#requires = "atomese.atoms"
+#requires += "atomese.storage"
+#
+#package "atoms" (
+#	description = "AtomSpace core Atoms"
+#	version = "[AtomSpace built from source]"
+#	archive(byte) = "atoms.cma"
+#	# archive(native) = "atoms.cmxa"
+#	plugin(byte) = "atoms.cma"
+#	# plugin(native) = "atoms.cmxs"
+#)
+#
+#package "storage" (
+#	description = "AtomSpace StorageNode Atoms"
+#	version = "[AtomSpace built from source]"
+#	archive(byte) = "storage.cma"
+#	# archive(native) = "storage.cmxa"
+#	plugin(byte) = "storage.cma"
+#	# plugin(native) = "storage.cmxs"
+#)
