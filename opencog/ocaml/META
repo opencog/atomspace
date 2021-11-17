@@ -1,11 +1,26 @@
 # Specifications for the "atomese" library:
-# requires = "foo"
-version = "[AtomSpace built from source]"
 description = "AtomSpace OCaml wrappers"
-directory = "^"
-browse_interfaces = " Unit name: Atomese "
-archive(byte) = "atomese.cma"
-# archive(native) = "atomese.cmxa"
-plugin(byte) = "atomese.cma"
-# plugin(native) = "atomese.cmxs"
-linkopts = ""
+version = "[AtomSpace built from source]"
+# directory = "^"
+# browse_interfaces = " Unit name: Atomese "
+# linkopts = ""
+requires = "atomese.atoms"
+requires += "atomese.storage"
+
+package "atoms" (
+	description = "AtomSpace core Atoms"
+	version = "[AtomSpace built from source]"
+	archive(byte) = "atoms.cma"
+	# archive(native) = "atoms.cmxa"
+	plugin(byte) = "atoms.cma"
+	# plugin(native) = "atoms.cmxs"
+)
+
+package "storage" (
+	description = "AtomSpace StorageNode Atoms"
+	version = "[AtomSpace built from source]"
+	archive(byte) = "storage.cma"
+	# archive(native) = "storage.cmxa"
+	plugin(byte) = "storage.cma"
+	# plugin(native) = "storage.cmxs"
+)
