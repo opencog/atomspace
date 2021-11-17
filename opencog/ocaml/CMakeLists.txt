@@ -55,3 +55,7 @@ INSTALL_OCAML_INTERFACES(
 
 INSTALL (TARGETS camlatoms
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")
+
+INSTALL(FILES
+	atomese.ml
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/ocaml")

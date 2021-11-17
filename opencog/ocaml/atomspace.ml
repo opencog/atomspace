@@ -1,6 +1,9 @@
 
-type atom = Atom ;; (* | Node of string | Link of atom list;; *)
+(* type atom = Atom ;; | Node of string | Link of atom list;; *)
 
+(* Need to open Atoms to get the pretty-printer to use
+ * the typedef for Atom
+ *)
 open Atoms ;;
 
 (** Signature declarations *)

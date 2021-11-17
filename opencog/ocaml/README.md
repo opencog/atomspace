@@ -43,10 +43,7 @@ Semi-functional:
 ```
 $ rlwrap ocaml
 # #directory "/usr/local/lib/opencog/ocaml/" ;;
-# #load "atomese.cma" ;;
-# open Atomese ;;
-# open Atoms ;;
-# #install_printer prettyp ;;
+# #use "atomese.ml" ;;
 # concept "foo" ;;
 # prtspace ()  ;;
 # let f = concept "foo" ;;
@@ -54,23 +51,6 @@ $ rlwrap ocaml
 # list_link [ f; b] ;;
 # prtspace ()  ;;
 ```
-
-Alternate ... doesn't work, can't find the shared libs:
-```
-$ rlwrap ocaml
-# #use "topfind";;
-# #require "atomese" ;;
-# open Atomese ;;
-# prtspace() ;;
-```
-
-Development
------------
-If you change `atomese.ml`, then you MUST run, by hand
-```
-ocamlc -i atomese.ml > atomese.mli
-```
-Yes, this should be automated in the CMakefile
 
 Ideas
 -----
@@ -97,5 +77,3 @@ Examine what's what:
 ```
 $ ocamlobjinfo opencog/ocaml/atomese.cma
 ```
-
-open Atomese ;; fails unless I copy over atomese.cmi
