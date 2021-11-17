@@ -78,6 +78,8 @@ public:
 	// The default interval for glob matching.
 	static const GlobInterval default_interval(bool);
 
+	bool is_simple(void) const;
+
 	bool is_globby(void) const;
 	bool is_lower_bound(size_t) const;
 	bool is_upper_bound(size_t) const;

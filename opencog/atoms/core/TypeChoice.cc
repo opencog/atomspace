@@ -282,6 +282,16 @@ bool TypeChoice::is_untyped(bool glob) const
 	return _is_untyped and _glob_interval == default_interval(glob);
 }
 
+/// Return true if the type is a plain-old conventional type:
+/// A single TypeNode or perhaps a TypeChoice, and nothing more
+/// complicated.
+bool TypeChoice::is_simple(void) const
+{
+	return
+		0 == _deep_typeset.size() and
+		0 == _sect_typeset.size();
+}
+
 /* ================================================================= */
 
 /// Return true if the glob can match a variable number of items.

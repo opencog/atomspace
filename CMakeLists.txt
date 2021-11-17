@@ -146,15 +146,23 @@ ENDIF(GEARMAN_FOUND)
 MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# This is required for Guile, Python
-
+# Find Guile
 include(OpenCogFindGuile)
 
+# ----------------------------------------------------------
 # By default, this uses Python3.
 # To use Python2 only, run the following in the build directory:
 # rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
-
 include(OpenCogFindPython)
+
+# ----------------------------------------------------------
+# OCaml
+
+FIND_PACKAGE(OCaml)
+IF (OCAML_FOUND)
+	ADD_DEFINITIONS(-DHAVE_OCAML)
+	SET(HAVE_OCAML 1)
+ENDIF (OCAML_FOUND)
 
 # ----------------------------------------------------------
 # Glasgow Haskell compiler
@@ -239,8 +247,11 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogAtomTypes.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+
+# Macros for building language-specific objects.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogOCaml.cmake")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -417,10 +428,11 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
+SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
-SUMMARY_ADD("Scheme bindings" "Scheme bindings" HAVE_GUILE)
+SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
-SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
+SUMMARY_ADD("Postgres StorageNode" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

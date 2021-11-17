@@ -7,6 +7,9 @@ OPENCOG_GEN_CXX_ATOMTYPES(atom_types.script
 OPENCOG_GEN_SCM_ATOMTYPES(atom_types.script core_types.scm)
 OPENCOG_GEN_PYTHON_ATOMTYPES(atom_types.script core_types.pyx)
 
+# This is done in the OCaml directory.
+# OPENCOG_GEN_OCAML_ATOMTYPES(atom_types.script atoms.ml mlwrappers.cc)
+
 # The target `opencog_atom_types` is satisfied when `atom_types.h`
 # appears in the file system. This target is used in other
 # CMakefiles to make sure that this directory is visited, first.

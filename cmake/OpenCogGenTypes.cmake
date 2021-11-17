@@ -24,6 +24,8 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 	IF (CMAKE_MATCH_4)
 		# MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
 		MESSAGE(DEBUG "Custom atom type name specified: ${CMAKE_MATCH_4}")
+
+		# Convert ... uhh ..something...
 		STRING(REGEX MATCHALL "." CHARS ${CMAKE_MATCH_4})
 		LIST(LENGTH CHARS LIST_LENGTH)
 		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
@@ -35,6 +37,8 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 		ENDFOREACH(I RANGE ${LIST_LENGTH})
 	ENDIF (CMAKE_MATCH_4)
 
+	# Convert upper-case snake-case names like FOO_BAR_LINK
+	# to CamelCase names like FooBarLink
 	IF (TYPE_NAME STREQUAL "")
 		# Set type name using camel casing
 		STRING(REGEX MATCHALL "." CHARS ${TYPE})
@@ -59,9 +63,15 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 		ENDFOREACH(I RANGE ${LIST_LENGTH})
 	ENDIF (TYPE_NAME STREQUAL "")
 
+	# Create short CamelCase names
 	STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
 	# MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 	MESSAGE(DEBUG "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
+
+	# Convert upper-case snake-case to lower case.
+	STRING(TOLOWER ${TYPE} LC_SNAKE_TYPE)
+	STRING(REGEX REPLACE "([a-z_]*)(_link|_node)$" "\\1"
+		LC_SNAKE_SHORT ${LC_SNAKE_TYPE})
 
 	# -----------------------------------------------------------
 	# Try to guess if the thing is a node or link based on its name

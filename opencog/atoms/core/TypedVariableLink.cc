@@ -147,9 +147,13 @@ std::string TypedVariableLink::to_string(const std::string& indent) const
 {
 	std::string str = Link::to_string(indent);
 
-	str += "\n" + indent;
-	str += "; _typech:\n";
-	str += _typech->to_string(indent + ";" + OC_TO_STRING_INDENT);
+	// Avoid printing confusing garbage for the simple case.
+	if (not _typech->is_simple())
+	{
+		str += "\n" + indent;
+		str += "; _typech:\n";
+		str += _typech->to_string(indent + ";" + OC_TO_STRING_INDENT);
+	}
 
 	return str;
 }
