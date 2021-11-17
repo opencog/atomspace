@@ -10,9 +10,11 @@ open Atoms ;;
 external prtspace : unit -> unit = "print_atomspace" ;;
 external prtatom : atom -> unit = "print_atom" ;;
 
-(** quick hack *)
-let prettyp : Format.formatter -> Atoms.atom -> unit =
-	(fun oport -> prtatom)
-	;;
+external atom_printer : Format.formatter -> atom -> unit = "atom_pretty_printer" ;;
 
-(* #install_printer prettyp ;; *)
+(* For some reason, installing atom_printer directly core dumps,
+ * so the below is a wrapper around that. Do this:
+ * #install_printer atom_prettyprt ;;
+ *)
+let atom_prettyprt : Format.formatter -> Atoms.atom -> unit =
+	(fun oport -> atom_printer oport) ;;

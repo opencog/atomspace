@@ -37,6 +37,7 @@ CAMLprim value NewNode(value, Type);
 CAMLprim value NewLink(value, Type);
 CAMLprim void print_atomspace(void);
 CAMLprim void print_atom(value);
+CAMLprim void atom_pretty_printer(value, value);
 }
 
 value tag_to_value(const ValuePtr& pa);

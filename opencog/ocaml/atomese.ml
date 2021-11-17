@@ -17,4 +17,4 @@ open Atoms ;;
 open Storage ;;
 
 (* The printer is defined in the atomspace.ml file *)
-#install_printer prettyp ;;
+#install_printer atom_prettyprt ;;

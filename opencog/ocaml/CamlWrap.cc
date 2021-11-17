@@ -121,3 +121,11 @@ CAMLprim void print_atom(value vatom)
 
 	CAMLreturn0;
 }
+
+CAMLprim void atom_pretty_printer(value outport, value vatom)
+{
+	CAMLparam2(outport, vatom);
+	printf("duuduue portapotty yeah\n");
+
+	CAMLreturn0;
+}
