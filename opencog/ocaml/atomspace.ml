@@ -8,13 +8,11 @@ open Atoms ;;
 
 (** Signature declarations *)
 external prtspace : unit -> unit = "print_atomspace" ;;
+external prtatom : atom -> unit = "print_atom" ;;
 
 (** quick hack *)
 let prettyp : Format.formatter -> Atoms.atom -> unit =
-	let prtr = function
-		| atom -> Format.printf "Dude atom\n"
-	in
-		(fun oport -> prtr)
+	(fun oport -> prtatom)
 	;;
 
 (* #install_printer prettyp ;; *)

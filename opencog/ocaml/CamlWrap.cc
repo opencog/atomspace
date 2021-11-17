@@ -113,3 +113,11 @@ CAMLprim void print_atomspace(void)
 
 	CAMLreturn0;
 }
+
+CAMLprim void print_atom(value vatom)
+{
+	CAMLparam1(vatom);
+	printf("duuduue its an atoms yeah\n");
+
+	CAMLreturn0;
+}
