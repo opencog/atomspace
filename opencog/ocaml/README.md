@@ -94,3 +94,25 @@ Examine what's what:
 ```
 $ ocamlobjinfo opencog/ocaml/atomspace.cma
 ```
+
+TODO
+----
+This is a work in progress. Unfinished:
+* Create constructors for the assorted Values.
+  This is in `OpenCogGenOCamlTypes.cmake`
+
+* pretty-print Values.
+
+* add missing functions:
+  - check for node, link existance
+  - implement equality compare (in the opstable)
+  - use existing hash in the opstable.
+  - add tv setter
+  - add CountTV incrementer
+  - add FloatValue incrementer
+  - add cog-keys, cog-value
+  - add cog-incoming-set, cog-incoming-by-type and the size variants
+  - add cog-outgoing-set cog-outgoing-by-type and size
+  - add cog-get-types, cog-subtype?
+  - add tv get-mean, get-confidence, get-count
+  - add atomspace management functions

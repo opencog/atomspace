@@ -187,11 +187,15 @@ static std::string tosnake(const std::string& camel)
 	return snake;
 }
 
-bool starts_with (const std::string& str, const char *cstr)
+/// Emulate the C++20 str.starts_with() method.
+bool starts_with(const std::string& str, const char *cstr)
 {
 	return 0 == str.compare(0, strlen(cstr), cstr);
 }
 
+/// Pretty-print the Value in OCaml format; that is, return what it
+/// should look like, when considered in OCaml atomese. e.g.
+/// `(FloatValue 1.1 2.2 3.3)` is printed as `float_value [1.1 ; 2.2 ; 3.3]`.
 std::string oc_to_caml_str(const ValuePtr& vp, const std::string& indent)
 {
 	if (vp == nullptr)
@@ -203,6 +207,9 @@ std::string oc_to_caml_str(const ValuePtr& vp, const std::string& indent)
 	return vp->to_short_string();
 }
 
+/// Pretty-print the atom in OCaml format; that is, return what it
+/// should look like, when considered in OCaml atomese. e.g.
+/// `(Concept "bar")` is printed as `concept "bar"`.
 std::string oc_to_caml_str(const Handle& h, const std::string& indent)
 {
 	if (h == nullptr)
