@@ -165,6 +165,50 @@ CAMLprim value atom_to_sexpr(value vatom)
 	CAMLreturn(caml_copy_string(str.c_str()));
 }
 
+/// Convert CamelCase to snake_case
+static std::string tosnake(const std::string& camel)
+{
+	std::string snake;
+	size_t len = camel.size();
+
+	// The first char is always uppercase.
+	snake += camel[0] - ('A' - 'a');
+	for (size_t i=1; i<len; i++)
+	{
+		char c = camel[i];
+		if ('A' <= c and c <= 'Z') snake += "_" + (c - ('A' - 'a'));
+		else snake += c;
+	}
+
+	return snake;
+}
+
+
+std::string oc_to_caml_str(const ValuePtr& vp, const std::string& indent)
+{
+	if (vp == nullptr)
+		return indent + "null";
+
+	if (vp->is_atom()) return oc_to_caml_str(HandleCast(vp), indent);
+
+	// XXX FIXME
+	return vp->to_short_string();
+}
+
+std::string oc_to_caml_str(const Handle& h, const std::string& indent)
+{
+	if (h == nullptr)
+		return indent + "null";
+
+	if (h->is_node())
+	{
+		std::string camelcase(nameserver().getTypeName(h->get_type()));
+		std::string snakecase = tosnake(camelcase);
+		return indent + snakecase + " \"" + h->get_name() + "\"\n";
+	}
+	return h->to_short_string();
+}
+
 /// Pretty-print the atom in OCaml format; that is, return what it
 /// should look like, when considered in OCaml atomese. e.g.
 /// `(Concept "bar")` is printed as `concept "bar"`.
@@ -172,8 +216,7 @@ CAMLprim value atom_string_printer(value vatom)
 {
 	CAMLparam1(vatom);
 
-	// FIXME this is clearly wrong.
-	std::string str(value_to_tag(vatom)->to_short_string());
+	std::string str(oc_to_caml_str(value_to_tag(vatom)));
 
 	CAMLreturn(caml_copy_string(str.c_str()));
 }

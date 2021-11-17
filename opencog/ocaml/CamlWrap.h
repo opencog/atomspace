@@ -45,4 +45,10 @@ CAMLprim value evaluate(value);
 value tag_to_value(const ValuePtr& pa);
 ValuePtr value_to_tag(value);
 
+
+std::string oc_to_caml_str(const Handle& h,
+                           const std::string& indent=empty_string);
+std::string oc_to_caml_str(const ValuePtr& vp,
+                           const std::string& indent=empty_string);
+
 #endif // _CAML_WRAP_H_

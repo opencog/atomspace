@@ -23,9 +23,9 @@ evaluation [
 (* Take a look at the atomspace *)
 cog_print_atomspace ()  ;;
 
-(* Build a query *)
+(* Build a simple query *)
 let qry =
-	query [
+	meet [
 		variable_list [
 			typed_variable [
 				variable "?x" ;
