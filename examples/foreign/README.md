@@ -43,3 +43,12 @@ experimental and very incomplete.  The demos explore the limits of what
 is actually possible.
 
 * `sexpr-query.scm`         -- Working with s-expressions.
+
+TODO
+----
+The sexpr code is a proof-of-concept. A slightly more usable API could
+be something similar to or even fully compatible with "OGRE", the
+[Open Generic Representation](http://binaryanalysisplatform.github.io/bap/api/odoc/ogre/Ogre/index.html)
+We already have all the needed bits and parts (DefineLink, ArrowLink,
+SignatureLink, etc.) it just needs to have a pretty user API wrapped
+around it.

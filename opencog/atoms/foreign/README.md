@@ -39,3 +39,12 @@ symbols for these) into Atomese, the results of any queries would then
 be valid scheme (or python) that could be directly executed. We could
 cache byte-code locally, and get high-performance execution of the
 results.  This aspect of the project might be worth it. Maybe.
+
+TODO
+----
+The code here is a proof-of-concept. A slightly more usable API could
+be something similar to or even fully compatible with "OGRE", the
+[Open Generic Representation](http://binaryanalysisplatform.github.io/bap/api/odoc/ogre/Ogre/index.html)
+We already have all the needed bits and parts (DefineLink, ArrowLink,
+SignatureLink, etc.) it just needs to have a pretty user API wrapped
+around it.
