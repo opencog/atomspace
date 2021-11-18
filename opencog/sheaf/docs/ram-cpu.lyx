@@ -5090,7 +5090,7 @@ tional properties (including CPU and RAM usage).
 LatexCommand bibtex
 btprint "btPrintCited"
 bibfiles "lang"
-options "plain"
+options "tufte"
 
 \end_inset
 
