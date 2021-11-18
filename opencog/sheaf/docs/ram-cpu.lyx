@@ -4749,6 +4749,147 @@ separation of concerns
 \end_layout
 
 \begin_layout Subsubsection*
+OGRE: Open Generic Representation
+\end_layout
+
+\begin_layout Standard
+A particularly nice and human-freindly API can be found in the OGRE module
+ in BAP.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "OGRE"
+literal "false"
+
+\end_inset
+
+ It is an s-expression database that allows new data structures to be defined
+ in generic ways.
+ It provides the following example of a generic record:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(student (name Joe) (gpa 3.5))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This has a distinctly JSON-ic feel to it, in that every value is tagged
+ with the field type that names it.
+ But then, the OGRE documentation notes that this is equivalent to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(student Joe 3.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+provided that one already knows the column structure of the data.
+ But this is easily acheived:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(define student (name str) (gpa float))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This last statement resembles a conventional table-database table definition.
+ In this example, the OGRE format required that each and every record be
+ tagged with the table name ('
+\family typewriter
+student
+\family default
+' in this example).
+ This seems vaguely wasteful of RAM storage, and so one might also contemplate
+ an alternative representation: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(students-table
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Joe 3.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Mary 3.6)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Rachel 3.0))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This last form now becomes quite close to what conventional SQL databases
+ store: there is a table definition, providing colum types, and column lables
+ (the labels are needed for search), and the individual records (rows) in
+ the table are uniform.
+ The uniformity allows for every compact storage.
+\end_layout
+
+\begin_layout Standard
+It is worthwhile to go through an explicit analysis of the RAM usage for
+ this example.
+ To start with, if there are many students, then the overhead of defining
+ a table is negligible, and can be ignored.
+ We'll do this, and focus on the table itself.
+\end_layout
+
+\begin_layout Standard
+XXX TODO finish this.
+\end_layout
+
+\begin_layout Subsubsection*
 Intermediate Languages
 \end_layout
 
