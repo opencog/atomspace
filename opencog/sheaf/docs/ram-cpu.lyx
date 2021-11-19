@@ -1439,6 +1439,13 @@ attr-data
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "graph edge table"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1664,6 +1671,13 @@ attr-data
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "graph vertex table"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1870,7 +1884,17 @@ Hypergraph representations
 
 \begin_layout Standard
 The naive representation for the hypergraph is a straight-forward extension
- of the edge table.
+ of the edge table (the table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "graph edge table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ above).
  The table below provides an example that is shown in the figure following
  below.
 \end_layout
@@ -2625,6 +2649,13 @@ attr-data
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "hyper vertex table"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3107,6 +3138,16 @@ metatree
 
 \begin_layout Standard
 The node table for a metagraph is effectively the same as the vertex table
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "hyper vertex table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
  for the hypergraph, before.
  For this graph, it was
 \end_layout
@@ -3508,9 +3549,37 @@ attr-data
 \end_layout
 
 \begin_layout Standard
-Notice how this link-table resembles the vertex-table of an ordinary graph
- store.
- For ordinary directed graphs, one has a vertex pair.
+Notice how this link-table resembles the vertex-table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "graph vertex table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ of an ordinary graph store.
+ It has both 'incoming' and 'outgoing' sets, as before.
+ There are two differences: the outgoing set is no longer a set, but a list.
+ The other is even stranger: the first column (the column of vertexes) has
+ been replaced by a columnn of links!
+\end_layout
+
+\begin_layout Standard
+Perhaps we making the wrong comparison? Oddly, it also resembles the edge
+ table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "graph edge table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ For ordinary directed graphs, each edge is a vertex pair.
  The vertecies of an edge may be termed the 'head vertex' and the 'tail
  vertex'; equivalently, the outgoing vertex and the incoming vertex (or
  
@@ -3519,6 +3588,7 @@ vice-versa
 \emph default
 , depending on how one envisions the arrows).
  These two endpoints are replaced by the incoming set and the outgoing list.
+ Now, the first column remains the same: a column of edges, in both cases.
  The overall four-column form remains the same.
 \end_layout
 
@@ -3527,6 +3597,7 @@ Looking at this table, one might imagine that the naive graph tables, the
  hypergraph tables, and the metagraph tables seem to have much in common.
  This is, however, perhaps a bit deceptive, as performance considerations
  dictate the finer aspects of the design.
+ This will be looked at next.
 \end_layout
 
 \begin_layout Standard
@@ -3718,7 +3789,7 @@ SELECT
 \end_inset
 
 .
- Note that the size of this index is 
+ The size of this index is 
 \begin_inset Formula $O\left(N\right)$
 \end_inset
 
@@ -3775,7 +3846,17 @@ sales
 \begin_inset Quotes erd
 \end_inset
 
- is now trivial: one can trivially find the vertex 
+ is fast: one searches the vertex table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "graph vertex table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to find the vertex 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3789,8 +3870,22 @@ sales
 \begin_inset Quotes erd
 \end_inset
 
-, and trace all edges to the full record.
- The contents of the graph database, after indexing, is illustrated below.
+, and then trace all outgoing edges to the full record.
+ The graph can be thought of as a table with a special 
+\begin_inset Quotes eld
+\end_inset
+
+built in
+\begin_inset Quotes erd
+\end_inset
+
+ index: the index of outgoing edges.
+\end_layout
+
+\begin_layout Standard
+This is to be contrasted to a conventional table database.
+ The contents of a conventional table (row) database, after indexing, is
+ illustrated below.
  Before indexing, the vertexes 
 \begin_inset Formula $v_{6},v_{7},v_{8}$
 \end_inset
@@ -3801,6 +3896,29 @@ sales
 
  simply did not exist.
  The act of indexing creates these vertexes and edges.
+ The documentation for convetional table databases does not 'talk about'
+ vertexes and edges; but, 
+\emph on
+de facto
+\emph default
+, this is how system arhictects think about things.
+ When they think about creating an index on a table, this is what they think
+ of.
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+This is not meant to be a psychological assessment; rather it is meant to
+ provide a translation between the 'algebraic' form of typed commands sent
+ to relational DB's, and an equivalent 'geometric', visual form.
+ The geometric form can be understood as being either metaphorical and abstract,
+ or it can be taken literally, as a collection of pointers and the things
+ they point to.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3836,8 +3954,9 @@ The size of this structure is again
 \end_layout
 
 \begin_layout Standard
-This diagram exposes some unusual possibilities: not every employee has
- to be indexed! It is possible to create only one vertex, 
+This diagram exposes some unusual possibilities: If one is interested only
+ in sales, then not every employee has to be indexed! In a graph database,
+ it is possible to create only one vertex, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3852,9 +3971,11 @@ sales
 \end_inset
 
 , and hook up edges to only that one.
- Effectively, one has a partial-index, with correspondingly less RAM usage!
- Of course, with some cleverness, an experienced DBA can achieve the same
- effect: 
+ Effectively, this is a partial index, with correspondingly less RAM usage!
+ This is not possible in a naive table system; one needs a system which
+ explicitly supports partial indexes.
+ As it happens, most-all SQL systems do.
+ An experienced SQL DBA knows exactly how to achieve this effect: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3866,14 +3987,15 @@ CREATE INDEX ON employees(department) WHERE department=sales;
 \begin_inset Quotes erd
 \end_inset
 
- and this is not a big deal, so, here, at least, graphs do not offer any
+ This is not a big deal, and so, here, at least, graphs do not offer any
  particular advantage, other than perhaps some conceptual clarity.
  Under the covers, the SQL databases effectively have more-or-less the same
- format, although their graph-based nature is 
+ format, although their internal graph-based nature is 
 \emph on
 ad hoc
 \emph default
-, as there are no explicit graph-walking directives in SQL.
+, evolved over the decades and mostly hidden from the user.
+ There are no explicit graph-walking directives in SQL.
 \end_layout
 
 \begin_layout Standard
