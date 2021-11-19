@@ -337,9 +337,8 @@ This section aims to make the above commentary a bit more concrete by working
 \end_layout
 
 \begin_layout Standard
-To make the above commentary a bit more concrete, it is worht walking A
- JSON store can emulate a table store.
- Consider the following data about two students:
+Consider the need to store data about some stundents.
+ Expressed in JSON format, it might be written as:
 \end_layout
 
 \begin_layout Standard
@@ -350,22 +349,48 @@ status open
 
 \begin_layout Plain Layout
 
-		{ student: {name: Joe}, {gpa: 3.5}}
+	{ grades:
 \end_layout
 
 \begin_layout Plain Layout
 
-		{ student: {name: Mary}, {gpa: 3.6}}
+		[
 \end_layout
 
 \begin_layout Plain Layout
 
+			{ student: {name: Joe}, {gpa: 3.5}},
+\end_layout
+
+\begin_layout Plain Layout
+
+			{ student: {name: Mary}, {gpa: 3.6}},
+\end_layout
+
+\begin_layout Plain Layout
+
+			{ student: {name: Rachel}, {gpa: 3.0}}
+\end_layout
+
+\begin_layout Plain Layout
+
+		]
+\end_layout
+
+\begin_layout Plain Layout
+
+	}
 \end_layout
 
 \end_inset
 
-Because this data promises to have a regular structure, it can be converted
- into a JSON-formatted table:
+The square brackets denote a list; as is conventional with a list, all list
+ elements are uniform and of the same type.
+ Clearly, this appears to be a very regular structure, and if there are
+ hundreds of students.
+ One might try to save some space by eliminating the repeated attribute
+ names.
+ If JSON is used for this, this becomes a column-store:
 \end_layout
 
 \begin_layout Standard
@@ -386,17 +411,17 @@ status open
 
 \begin_layout Plain Layout
 
-			{ names: [ Joe, Mary] },
+			{ names: [ Joe, Mary, Rachel] },
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ gpa: [3.5, 3.6 ] }
+			{ gpa: [3.5, 3.6, 3.0 ] }
 \end_layout
 
 \begin_layout Plain Layout
 
-					
+		}
 \end_layout
 
 \begin_layout Plain Layout
@@ -405,7 +430,396 @@ status open
 
 \end_inset
 
-Beca
+That is, each entry in the table is a column name, followed by a list of
+ all of the values in that column.
+\end_layout
+
+\begin_layout Standard
+This is distinct from a row-store.
+ In a row store, one conventionally provides a schema describing the columns
+ and thier formats, much as above, and then provides the rows, one by one,
+ as 
+\begin_inset Quotes eld
+\end_inset
+
+records
+\begin_inset Quotes erd
+\end_inset
+
+, or inhomogenous lists of fixed length.
+ That is, each entry in the list has a different type (it has the type of
+ the column), but each list is exactly the same length; thus, a 
+\begin_inset Quotes eld
+\end_inset
+
+record
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Students
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+gpa
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+float
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joe
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Mary
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.6
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rachel
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+There does not appear to be any way of representing a row-store in JSON,
+ at least not in the JSON as naively conceived here.
+ One wishes to write something like the below, but the syntax makes it illegal:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	{ table:
+\end_layout
+
+\begin_layout Plain Layout
+
+		{ schema: {name: string}, {gpa: float}}
+\end_layout
+
+\begin_layout Plain Layout
+
+		{ students:
+\end_layout
+
+\begin_layout Plain Layout
+
+			[
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Joe, 3.5),		# This is not valid JSON!
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Mary, 3.6),
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Rachel, 3.0)
+\end_layout
+
+\begin_layout Plain Layout
+
+			]
+\end_layout
+
+\begin_layout Plain Layout
+
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+	}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is this last example that makes clear that an s-expression store can
+ offer the best of both worlds.
+ This is shown in the next section.
+\end_layout
+
+\begin_layout Subsubsection*
+OGRE: Open Generic Representation
+\end_layout
+
+\begin_layout Standard
+A particularly nice and human-freindly API can be found in the OGRE module
+ in BAP.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "OGRE"
+literal "false"
+
+\end_inset
+
+ It is an s-expression database that allows new data structures to be defined
+ in generic ways.
+ The above examples were derived from OGRE's representation of a generic
+ record:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(student (name Joe) (gpa 3.5))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This has a distinctly JSON-ic feel to it, in that every value is tagged
+ with the field type that names it.
+ But then, the OGRE documentation notes that this is equivalent to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(student Joe 3.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+provided that one already knows the column structure of the data.
+ But this is easily acheived:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(define student (name str) (gpa float))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This last statement resembles a conventional table-database table definition.
+ In this example, the OGRE format required that each and every record be
+ tagged with the table name ('
+\family typewriter
+student
+\family default
+' in this example).
+ This seems vaguely wasteful of RAM storage, and so one might also contemplate
+ an alternative representation: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(students-table
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Joe 3.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Mary 3.6)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Rachel 3.0))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+This last form now becomes quite close to what conventional SQL databases
+ store: there is a table definition, providing colum types, and column lables
+ (the labels are needed for search), and the individual records (rows) in
+ the table are uniform.
+ The uniformity allows for every compact storage.
+\end_layout
+
+\begin_layout Standard
+It is worthwhile to go through an explicit analysis of the RAM usage for
+ this example.
+ To start with, if there are many students, then the overhead of defining
+ a table is negligible, and can be ignored.
+ We'll do this, and focus on the table itself.
+\end_layout
+
+\begin_layout Standard
+XXX TODO finish this.
 \end_layout
 
 \begin_layout Subsection*
@@ -4849,147 +5263,6 @@ separation of concerns
 \end_inset
 
  even cloudier.
-\end_layout
-
-\begin_layout Subsubsection*
-OGRE: Open Generic Representation
-\end_layout
-
-\begin_layout Standard
-A particularly nice and human-freindly API can be found in the OGRE module
- in BAP.
-\begin_inset CommandInset citation
-LatexCommand cite
-key "OGRE"
-literal "false"
-
-\end_inset
-
- It is an s-expression database that allows new data structures to be defined
- in generic ways.
- It provides the following example of a generic record:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(student (name Joe) (gpa 3.5))
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-This has a distinctly JSON-ic feel to it, in that every value is tagged
- with the field type that names it.
- But then, the OGRE documentation notes that this is equivalent to 
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(student Joe 3.5)
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-provided that one already knows the column structure of the data.
- But this is easily acheived:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(define student (name str) (gpa float))
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-This last statement resembles a conventional table-database table definition.
- In this example, the OGRE format required that each and every record be
- tagged with the table name ('
-\family typewriter
-student
-\family default
-' in this example).
- This seems vaguely wasteful of RAM storage, and so one might also contemplate
- an alternative representation: 
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(students-table
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Joe 3.5)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Mary 3.6)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Rachel 3.0))
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-This last form now becomes quite close to what conventional SQL databases
- store: there is a table definition, providing colum types, and column lables
- (the labels are needed for search), and the individual records (rows) in
- the table are uniform.
- The uniformity allows for every compact storage.
-\end_layout
-
-\begin_layout Standard
-It is worthwhile to go through an explicit analysis of the RAM usage for
- this example.
- To start with, if there are many students, then the overhead of defining
- a table is negligible, and can be ignored.
- We'll do this, and focus on the table itself.
-\end_layout
-
-\begin_layout Standard
-XXX TODO finish this.
 \end_layout
 
 \begin_layout Subsubsection*
