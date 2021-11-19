@@ -333,7 +333,10 @@ Emulating Tables
 \begin_layout Standard
 This section aims to make the above commentary a bit more concrete by working
  though some examples.
- 
+ Although the examples in this section are written in text, the reader is
+ very strongly urged to try to imagine how these structures might be represented
+ in RAM, and how much storage they might take.
+ A later section will return to these questions of in_RAM representations.
 \end_layout
 
 \begin_layout Standard
@@ -696,8 +699,12 @@ literal "false"
 
  It is an s-expression database that allows new data structures to be defined
  in generic ways.
- The above examples were derived from OGRE's representation of a generic
- record:
+ In short, any s-expression is a valid record.
+ Records do not need to be of the same length, or of the same type.
+\end_layout
+
+\begin_layout Standard
+Thus, the previous example can be written as
 \end_layout
 
 \begin_layout Standard
@@ -713,12 +720,27 @@ status open
 
 \begin_layout Plain Layout
 
+		(student (name Mary) (gpa 3.6))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(student (name Rachel) (gpa 3.0))
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
 
-This has a distinctly JSON-ic feel to it, in that every value is tagged
- with the field type that names it.
+Note that these are three distinct records, and are NOT a list of three
+ rows!
+\end_layout
+
+\begin_layout Standard
+As written, this has a distinctly JSON-ic feel to it, in that every value
+ is tagged with the field type that names it.
  But then, the OGRE documentation notes that this is equivalent to 
 \end_layout
 
@@ -731,6 +753,16 @@ status open
 \begin_layout Plain Layout
 
 		(student Joe 3.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(student Mary 3.6)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(student Rachel 3.0)
 \end_layout
 
 \begin_layout Plain Layout
@@ -761,14 +793,17 @@ status open
 \end_inset
 
 This last statement resembles a conventional table-database table definition.
- In this example, the OGRE format required that each and every record be
- tagged with the table name ('
+ 
+\end_layout
+
+\begin_layout Standard
+One can go farther: there is no particular need to tag each row with the
+ row-label '
 \family typewriter
 student
 \family default
-' in this example).
- This seems vaguely wasteful of RAM storage, and so one might also contemplate
- an alternative representation: 
+'.
+ The most compact representation then appears to be the following: 
 \end_layout
 
 \begin_layout Standard
@@ -803,28 +838,30 @@ status open
 
 \end_inset
 
-This last form now becomes quite close to what conventional SQL databases
- store: there is a table definition, providing colum types, and column lables
- (the labels are needed for search), and the individual records (rows) in
- the table are uniform.
- The uniformity allows for every compact storage.
+This last form now obviously has the shape of a row-store.
+ Each row is a tuple, all tuples look alike.
+ 
 \end_layout
 
 \begin_layout Standard
-It is worthwhile to go through an explicit analysis of the RAM usage for
- this example.
- To start with, if there are many students, then the overhead of defining
- a table is negligible, and can be ignored.
- We'll do this, and focus on the table itself.
+This last form enables a rather conventional SQL query system to be defined.
+ There is a table definition, providing colum types, and column lables (the
+ labels are needed for query/search), and the individual records (rows)
+ in the table are uniform.
+ The uniformity allows both for very compact storage and easy query.
 \end_layout
 
 \begin_layout Standard
-XXX TODO finish this.
+The nature of query in these three styles, and what it implies for RAM consumpti
+on and CPU use, is quite dramatic.
+ They can have remarkably different performance profiles, and even some
+ remarkable limitations in the kinds of queries that can be imagined or
+ can be written.
+ This is a more complex topic, and will be returned to later in this text.
 \end_layout
 
-\begin_layout Subsection*
-RAM vs.
- Disk
+\begin_layout Section*
+Representing Graphs in RAM
 \end_layout
 
 \begin_layout Standard
