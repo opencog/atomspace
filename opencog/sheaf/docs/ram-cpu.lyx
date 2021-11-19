@@ -155,7 +155,7 @@ Introduction
 
 \begin_layout Standard
 Currently, graph databases are popular, and they have a rather distinct
- performance profile, differing from SQL and noSQL databases.
+ performance profile, differing from both SQL and noSQL databases.
  At a simplistic level, the OpenCog AtomSpace is a kind of a graph database.
  More correctly, it is a generalized-hypergraph or 
 \begin_inset Quotes eld
@@ -178,7 +178,16 @@ This text is organized into several parts:
 \end_layout
 
 \begin_layout Itemize
-A description of graphs, and how they can be represented in memory,
+An introduction to naive graphs,
+\end_layout
+
+\begin_layout Itemize
+An aside about more traditional knowledge representation formats, including
+ tables, JSON and s-expressions.
+\end_layout
+
+\begin_layout Itemize
+How graphs can be represented in memory,
 \end_layout
 
 \begin_layout Itemize
@@ -858,6 +867,117 @@ on and CPU use, is quite dramatic.
  remarkable limitations in the kinds of queries that can be imagined or
  can be written.
  This is a more complex topic, and will be returned to later in this text.
+\end_layout
+
+\begin_layout Subsection*
+Graphs for Storing Data
+\end_layout
+
+\begin_layout Standard
+The above listed three ways of storing attributes on a graph, and yet seemed
+ to ignore the graph itself.
+ Thus, for completeness, lets draw the diagram of how this might be stored
+ in a graph.
+ 
+\end_layout
+
+\begin_layout Standard
+Obviously, its 
+\begin_inset Quotes eld
+\end_inset
+
+graphical
+\begin_inset Quotes erd
+\end_inset
+
+ if it is drawn as follows:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/joe-mary-v1.eps
+	width 40col%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above, the vertexes are labelled with s-expressions; the edges are
+ not labelled.
+ It consists of two disjoint graphs; one of the graphs is used to encode
+ the type information used in the other graph.
+ There are a large variety of choices that can be made in how this is done.
+ The above just shows one way; it might not be the best way, although that
+ depends on the problem domain.
+ 
+\end_layout
+
+\begin_layout Standard
+Below shows another alternative, this time with labelled edges:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset VSpace defskip
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/joe-mary-v2.eps
+	width 40col%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As before, the graph explicitly includes a description of the schema used
+ in another part of the graph.
+ For the first time, a non-trivial graph is drawn.
+ It begins to give a hint of the utility of graphs for general knowledge
+ representation.
+\end_layout
+
+\begin_layout Standard
+In both of the above examples, the graph store was assumed to have some
+ distinct, separate attribute store for each vertex, and possibly each edge.
+ Thus, in a sense, this is not a 
+\begin_inset Quotes eld
+\end_inset
+
+pure
+\begin_inset Quotes erd
+\end_inset
+
+ graph store, where each edge or vertex can only have an atomic singleton
+ value on it (a single number or a single string).
+ Thus, a kind of 
+\begin_inset Quotes eld
+\end_inset
+
+mixed model
+\begin_inset Quotes erd
+\end_inset
+
+ is assumed here; the reasons for why thiss is a good thing do to will be
+ made clear further below.
+ In the interi
 \end_layout
 
 \begin_layout Section*
