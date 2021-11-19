@@ -2726,8 +2726,8 @@ Counting the memory usage is instructive.
 \end_inset
 
  be the average size of the attribute collection.
- The hyperedges shown in the figure then require 2+3+3+4=12 units of storage,
- plus 5 more for the hyperedge table itself, and 
+ The hyperedges shown in the example figure then require 2+3+3+4=12 units
+ of storage, plus 5 more for the hyperedge table itself, and 
 \begin_inset Formula $4\left\langle J\right\rangle $
 \end_inset
 
@@ -2743,7 +2743,10 @@ Counting the memory usage is instructive.
 \end_inset
 
  total RAM consumption.
- For the general case, one has
+\end_layout
+
+\begin_layout Standard
+For the general case, one has
 \begin_inset Formula 
 \[
 N_{V}\left(1+\left\langle J\right\rangle +\left\langle N_{I}\right\rangle \right)+N_{E}\left(1+\left\langle J\right\rangle +\left\langle N_{O}\right\rangle \right)
@@ -2884,7 +2887,7 @@ Average size of the vertex list
 \end_layout
 
 \begin_layout Standard
-The average size of the incoming set is equal to the average size of the
+The average count of the incoming set is equal to the average count of the
  vertex list, so we can approximate 
 \begin_inset Formula $\left\langle N_{I}\right\rangle =\left\langle N_{O}\right\rangle $
 \end_inset
@@ -3085,8 +3088,8 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \end_layout
 
 \begin_layout Standard
-The primary difference between the above, and a DAG is that the links are
- ordered lists, represented as boxes in this diagram.
+The primary difference between the above, and a 'true DAG' is that the links
+ are ordered lists, represented as boxes in this diagram.
  For lack of a better name, this can be called a 
 \begin_inset Quotes eld
 \end_inset
@@ -3103,9 +3106,9 @@ metatree
 \end_layout
 
 \begin_layout Standard
-The node table is effectively the same as the vertex table for the hypergraph,
- before.
- For this graph, it is
+The node table for a metagraph is effectively the same as the vertex table
+ for the hypergraph, before.
+ For this graph, it was
 \end_layout
 
 \begin_layout Standard
@@ -3506,17 +3509,22 @@ attr-data
 
 \begin_layout Standard
 Notice how this link-table resembles the vertex-table of an ordinary graph
- store: it has columns for both incoming and outgoing 
-\begin_inset Quotes eld
-\end_inset
+ store.
+ For ordinary directed graphs, one has a vertex pair.
+ The vertecies of an edge may be termed the 'head vertex' and the 'tail
+ vertex'; equivalently, the outgoing vertex and the incoming vertex (or
+ 
+\emph on
+vice-versa
+\emph default
+, depending on how one envisions the arrows).
+ These two endpoints are replaced by the incoming set and the outgoing list.
+ The overall four-column form remains the same.
+\end_layout
 
-sets
-\begin_inset Quotes erd
-\end_inset
-
-; the outgoing-set, however, is not a set but an ordered list.
- In terms of designing storage, the naive graph tables, the hypergraph tables,
- and the metagraph tables seem to have much in common.
+\begin_layout Standard
+Looking at this table, one might imagine that the naive graph tables, the
+ hypergraph tables, and the metagraph tables seem to have much in common.
  This is, however, perhaps a bit deceptive, as performance considerations
  dictate the finer aspects of the design.
 \end_layout
@@ -3542,17 +3550,34 @@ Indexing
 \begin_layout Standard
 More interesting is the structure of indexes, or rather, the alternatives
  one has for index representation.
- The whole point of using a graph database, as opposed to an SQL or key-value
- database, is that the graph structure encodes something important about
- the problem, something that cannot be easily achieved by doing table joins
- or key-value look-ups.
-\begin_inset Foot
-status collapsed
+ The whole point of using a graph database, as opposed to a collection of
+ tables, or key-value database, or a JSON-database is that the graph structure
+ encodes something important about the problem, something that cannot be
+ easily achieved by doing table joins or key-value look-ups.
+ Some examples of 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Plain Layout
-In the following, only SQL databases will be discussed.
- The noSQL databases are effectively identical, from our perspective, as
- they are categorical opposites: that is, all arrows reversed.
+difficult
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+impossible
+\begin_inset Quotes erd
+\end_inset
+
+ queries will be looked at in a later section.
+\end_layout
+
+\begin_layout Standard
+It is worth remarking that the so-called noSQL databases are effectively
+ 'identical' to SQL databases.
+ They are 'identical' in the sense of being categorical opposites: the direction
+s of all arrows are reversed.
  This was explicitly articulated in a famous paper by Meijer and Bierman.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3561,16 +3586,51 @@ literal "false"
 
 \end_inset
 
- Thus, in the discussions below, if you are more familiar with key-value
- databases, then simply reverse the directions of all arrows to obtain the
- equivalent discussion.
+ Much of the following uses an SQL-style notation; if the reader is more
+ familiar with key-value databases, then simply reverse the directions of
+ all arrows to obtain the equivalent discussion.
 \end_layout
+
+\begin_layout Standard
+A few comments are in order regarding the SQL-style query notation.
+ It has become dominant.
+ One can look at systems as different as SparQL and GraphQL, or even the
+ OGRE query langauge
+\begin_inset CommandInset citation
+LatexCommand cite
+key "OGRE"
+literal "false"
 
 \end_inset
 
- However, just as with table-based databases, there will be certain types
- of queries that are used a lot, and speeding these up through indexing
- is a key ability.
+ (
+\emph on
+op.
+ cit.
+\emph default
+) and clearly see not just the influence of SQL, but in fact a nearly verbatim
+ copy of it.
+ There is a reason for this dominance, and it is not (just) history.
+ The reason is anchored (once again) in table representations, and the presence
+ (or rather, lack thereof) of inbuilt indexes in the tables.
+ 
+\end_layout
+
+\begin_layout Standard
+This is also the place to make a heretical claim: SQL or it's variants (GraphQL,
+ SparQL...) are 
+\emph on
+NOT
+\emph default
+ the best choice for a metagraph query language.
+ A better alternative will become clear, once a more careful examination
+ is made of the role of indexes in queries.
+\end_layout
+
+\begin_layout Standard
+However, in a hypergraph database, just as in a table-based database, there
+ will be certain types of queries that are used a lot, and speeding these
+ up through indexing is a key ability.
  How might this work, in practice? Let's examine some queries, and see how
  they might work.
 \end_layout
