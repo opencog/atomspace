@@ -174,6 +174,34 @@ metagraph
 \end_layout
 
 \begin_layout Standard
+Graphs offer an interesting storage format for many reasons.
+ Coupled to those reasons is a need for graph traversal, and another need
+ for graph query (solving the subgraph isomorphism problem).
+ Thus, the questions examined here is how one might best be able to traverse
+ graphs, and how to best perform subgraph matching.
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+best
+\begin_inset Quotes erd
+\end_inset
+
+, it is meant algorithms that find a good balance betwen speed and size.
+ Effectively all the discussion in this text assumes uniform memory access;
+ that is a 
+\begin_inset Quotes eld
+\end_inset
+
+flat
+\begin_inset Quotes erd
+\end_inset
+
+ memory topology, where any location in storage can be accessed with the
+ same latency as any other.
+\end_layout
+
+\begin_layout Standard
 This text is organized into several parts:
 \end_layout
 
@@ -1017,7 +1045,7 @@ classical
 
 \end_inset
 
- A straight-forward example can be found in Prolog: in the begining, there
+ A straight-forward example can be found in Prolog: in the beginning, there
  are expressions; by means of inference, truth-value labels are infered.
 \end_layout
 
@@ -1026,13 +1054,19 @@ Of course, things get interesting as soon as one leaves the domain of crisp-logi
 c T/F values, and considers instead valuations that are Bayesian probabilities.
  Some monkeying around then leads one to distinguish Bayesian probabilities
  from fuzzy logic valuations.
- Other kinds of data worms it's way in: confidence intervals; counts.
+ Other kinds of data worms it's way in: confidence intervals; frequentist
+ counts; marginals.
  Some of this data is non-numeric, but are choices (
 \emph on
 e.g.
 
 \emph default
- true, false or unknown).
+ true, false or unknown) or explicitly symbolic (
+\emph on
+e.g.
+
+\emph default
+ red, blue or green).
  It usually does not take long to realize the practical need for a mixed-model
  graph database, supporting both good graph features, and also supporting
  complex attribute systems attached to each node/vertex.
@@ -1057,7 +1091,7 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
 \end_layout
 
 \begin_layout Subsubsection*
-Representing graphs in RAM
+Naive RAM Representations
 \end_layout
 
 \begin_layout Standard
@@ -1066,8 +1100,8 @@ Storing a set of vertexes in RAM is straight-forward.
  array or list.
  For the discussion here, the precise format is not directly relevant, and
  so a tabular format will be used to illustrate the ideas.
- Again, the table rows might actually reside in hash-tables, b-trees, or
- wherever.
+ Again, the table rows might actually reside in hash-tables or b-trees,
+ depending on desired access and update performance.
 \end_layout
 
 \begin_layout Standard
@@ -1198,7 +1232,7 @@ universally unique id
 \end_inset
 
  or uuid) is that it is required by the edge table.
- The edge table might have the form
+ In the most obvious, direct form, the edge table will have the shape
 \end_layout
 
 \begin_layout Standard
@@ -1636,17 +1670,22 @@ attr-data
 Note that the incoming and outgoing columns hold sets: any given vertex
  may appear in more than one edge.
  They are sets, not lists, as the order is not particularly important.
- They are not 
-\begin_inset Quotes eld
-\end_inset
-
-multisets
-\begin_inset Quotes erd
-\end_inset
-
-: any given edge appears at most once in the incoming/outgoing sets.
+ They are not 'multisets': any given edge appears at most once in the incoming/o
+utgoing sets.
  Suitable representations for sets include hash-tables and trees, each with
  it's own distinct RAM and access-time profile.
+\end_layout
+
+\begin_layout Standard
+Table updates must be both thread safe and fast.
+ It is easy to lock the table with a mutex, but this can quickly limit the
+ amount of concurrency.
+ The latest lock-free technology promises reasonable solutions; however,
+ the technology remains immature.
+ There are several implementations of concurrent hash maps, but none for
+ concurrent multimaps (that also support erase).
+ Likewise, lock-free tree implementations are absent; trees offer a considerably
+ more compact storage format when tables are small.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1832,7 +1871,8 @@ Hypergraph representations
 \begin_layout Standard
 The naive representation for the hypergraph is a straight-forward extension
  of the edge table.
- The table below provides an example that is shown in the following figure.
+ The table below provides an example that is shown in the figure following
+ below.
 \end_layout
 
 \begin_layout Standard
@@ -2028,10 +2068,20 @@ The vertex list may be empty, may hold one, or more vertexes.
 \end_layout
 
 \begin_layout Standard
-As before, the ability to traverse the hypergraph is a hard requirement.
- This requires modification to the vertex table.
- Several choices are possible.
- One is to add a new column for each positional location:
+As before, the ability to traverse the hypergraph (quickly) is a core requiremen
+t.
+ This means that, given a vertex, one must be able to quickly find the edges
+ attached to it.
+ This requires modification to the vertex table given before.
+ 
+\end_layout
+
+\begin_layout Standard
+Several choices are possible.
+ One is to add a new column for each positional location in the vertex list.
+ That is, 0'th column holds the edges which have the corresponding vertex
+ in the 0'th position of the vertex list, the 1'th column likewise.
+ This can be read off from the table above:
 \end_layout
 
 \begin_layout Standard
@@ -2381,16 +2431,16 @@ attr-data
 \end_layout
 
 \begin_layout Standard
-This requires a data-structure that is a list-of-sets, which can be a bit
- over-complex and challenging to use.
- It is easier to just mash all of these into one set; this is all that is
+To actually store this table, one must have a data-structure that is a list-of-s
+ets, which can be a bit over-complex and challenging to use.
+ It is easier to just mash all of these into one set; that is all that is
  needed for hypergraph traversal.
  If the positional location is needed, then it can always be looked up per-hyper
 edge.
  This is neither technically challenging nor CPU-intensive: the arity of
  hyperedges is typically small, based on real-world mappings with interesting
  datasets.
- Thus, the vertex table can look like
+ Thus, the vertex table can take the simpler form
 \end_layout
 
 \begin_layout Standard
@@ -2619,6 +2669,10 @@ The boxes denote the fact that the hyperedges are ordered lists.
 \end_inset
 
  ellipses are the hyperedge and vertex tables.
+ If the boxes could be collapsed to single points, this would be a 'true'
+ bipratite graph; but they cannot be.
+ The ordering is needed and important.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
