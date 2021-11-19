@@ -954,6 +954,10 @@ As before, the graph explicitly includes a description of the schema used
  representation.
 \end_layout
 
+\begin_layout Subsubsection*
+Mixed Repesentations
+\end_layout
+
 \begin_layout Standard
 In both of the above examples, the graph store was assumed to have some
  distinct, separate attribute store for each vertex, and possibly each edge.
@@ -967,17 +971,71 @@ pure
 
  graph store, where each edge or vertex can only have an atomic singleton
  value on it (a single number or a single string).
- Thus, a kind of 
+ Of course, one could rework the above graphs so that each vertex/edge does
+ have just one single value on it.
+ While the simplicity of singleton-valued graphs is perhaps intellectually
+ appealing, it proves to not be practical for everyday use.
+ Assuming singleton-valued graphs also has some very strong implications
+ on RAM and CPU use, and the ability to perform searches/queries.
+ This point will be returned to below.
+ In the meanwhile, this kind of mixed model will be assumed: some data will
+ be stored graphically, and some data will be stored as complex attribute
+ sets attached to the nodes and vertexes.
+\end_layout
+
+\begin_layout Standard
+In the interim, some historical hand-waving can be done to justify the origins
+ of a mixed-model graph store.
+ In predicate logic, and in model theory, one distinguishes the predicates
+ and terms that one is discussing, from the truth values or valuations that
+ can be assigned to them.
+ It is relatively straightforward to envision predicates and terms as trees
+ or DAG's.
+ The truth values are distinct from the graphs themselves; instead, they
+ are an assignment of true/false to each expression.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Of course, this is but the grand leap from Aristotelian, 
 \begin_inset Quotes eld
 \end_inset
 
-mixed model
+classical
 \begin_inset Quotes erd
 \end_inset
 
- is assumed here; the reasons for why thiss is a good thing do to will be
- made clear further below.
- In the interi
+ logic, to predicate logic.
+ The disentanglement of truth-valuations from propositions enables giant
+ leaps in reasoning abilities.
+ This in turn opens the ability to further disentangle syntactic from semantic
+ entailment, thus allowing a connection to grammar and language to be made.
+ The adjointness between grammar and graphs is precisely the core, central
+ reason why properly constructed graph databases are central to the pursuit
+ of AGI.
+\end_layout
+
+\end_inset
+
+ A straight-forward example can be found in Prolog: in the begining, there
+ are expressions; by means of inference, truth-value labels are infered.
+\end_layout
+
+\begin_layout Standard
+Of course, things get interesting as soon as one leaves the domain of crisp-logi
+c T/F values, and considers instead valuations that are Bayesian probabilities.
+ Some monkeying around then leads one to distinguish Bayesian probabilities
+ from fuzzy logic valuations.
+ Other kinds of data worms it's way in: confidence intervals; counts.
+ Some of this data is non-numeric, but are choices (
+\emph on
+e.g.
+
+\emph default
+ true, false or unknown).
+ It usually does not take long to realize the practical need for a mixed-model
+ graph database, supporting both good graph features, and also supporting
+ complex attribute systems attached to each node/vertex.
 \end_layout
 
 \begin_layout Section*
