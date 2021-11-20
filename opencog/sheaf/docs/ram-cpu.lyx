@@ -5519,7 +5519,7 @@ noprefix "false"
 \end_inset
 
 ) and includes arrows for both the incoming set and the outgoing list, one
- gets the diagram on the right
+ gets the diagram on the right:
 \end_layout
 
 \begin_layout Standard
@@ -5547,7 +5547,152 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-Thireexamine why most QL's are SQL-like.
+The dotted arrows are back-pointers from lower levels to higher levels:
+ the are the incoming set pointers, in contrast to the solid arrows, which
+ show the outgoing links.
+ They are almost in one-to-one correspondance, but not quite: notice there
+ is only one dotted arrow from 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ to 
+\begin_inset Formula $e_{3}$
+\end_inset
+
+, although there are two distinct downward links.
+\end_layout
+
+\begin_layout Standard
+The back-pointers are needed to maake the graph full traversible; that is
+ the topic of this section.
+ The back-pointers do et up RAM; but this RAM usage has already been counted,
+ above.
+ Here, it is only the diagram that has been corrected to more appropriately
+ show the actual situation.
+ In actual implementations, the dotted arrows are weak pointers.
+ This is required for memory management, whether through garage collection
+ (GC), or through reference counting (RC) with smart pointers.
+ Both kinds of systems (GC and RC) can only work with DAG's, and do not
+ tolerate loops, as these cannot be freed.
+ Yet programmers need to sometimes create loops of pointers; weak pointers
+ are provided for this use.
+ That is what is shown here.
+\end_layout
+
+\begin_layout Standard
+It is natural to use weak pointers for the incoming set, and regular pointers
+ for the outgoing list.
+ This is because, as observed earlier, metatrees must be immutable after
+ they have been created.
+ They cannot be edited; they can only be deleted.
+ There is, however, one minor point of confusion, illustrated in the daigram
+ below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph-new.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This shows that a new link 
+\begin_inset Formula $e_{5}$
+\end_inset
+
+ has been addeed to the previous diagram.
+ This is 
+\emph on
+not
+\emph default
+ an edit! The earlier tree, rooted at 
+\begin_inset Formula $e_{4}$
+\end_inset
+
+, is completely unchanged.
+ None of the regular pointers have changed.
+ Two of the atoms 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ have enlarged incoming sets: they have gained a weak pointer each.
+ That the original metatree has not changed can be most easily observed
+ by the fact that it's corresponding s-expression is the same as before:
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
+\end_layout
+
+\end_inset
+
+The diagram above shows two metatrees.
+ The second one is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(e5 (e2 n2 n3) n3)
+\end_layout
+
+\end_inset
+
+The new root points to two existing metatrees: 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+; neither has been modified.
+ The point here is that immutability does not conflict with creation and
+ deletion.
+ 
+\end_layout
+
+\begin_layout Subsection*
+S-expressions and queries
+\end_layout
+
+\begin_layout Standard
+What does all this have to do with queries?
+\end_layout
+
+\begin_layout Standard
+it has 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+ireexamine why most QL's are SQL-like.
  OGRE the prime example.
 \end_layout
 
