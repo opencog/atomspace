@@ -5506,7 +5506,48 @@ Queries, S-expressions and Query Languages
 \end_layout
 
 \begin_layout Standard
-reexamine why most QL's are SQL-like.
+The example metatree diagram, as originally drawn (on the left) is misleading
+ as to how it is actually represented in memory.
+ If one examines the metagraph link table (
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "metagraph link table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) and includes arrows for both the incoming set and the outgoing list, one
+ gets the diagram on the right
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/metagraph-weak.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thireexamine why most QL's are SQL-like.
  OGRE the prime example.
 \end_layout
 
