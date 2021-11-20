@@ -5319,17 +5319,13 @@ Jumping ahead, the mutable form has been historically called the 'AtomSpace'.
 \end_layout
 
 \begin_layout Subsubsection*
-Vs.
- SQL
+Metagraph mutability vs.
+ SQL table mutability
 \end_layout
 
 \begin_layout Standard
-Compared to an SQL database, this disambiguation adds to the cost of insertion
- and deletion into a metagraph store.
- In SQL, tables have primary keys; these are the primary indexes for each
- row.
- They are always made explicit; a table schema is declared with one of the
- columns designated as 
+There are two ways to delete a row from an SQL table.
+ Either one already knows the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5343,12 +5339,137 @@ PRIMARY KEY
 \begin_inset Quotes erd
 \end_inset
 
-.
- In a metagraph, each distinct node and link is ...
- distinct, and unique.
- No explicit declaration is needed; uniqueness is implicit in the definition.
- This is kind-of nice; why mess with primary keys, if one doesn't have to?
- One less thing to think about, and not unrelated to the 
+ of that row, and one asks for that key to be deleted, or one does not.
+ If one does not know, then one has to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+SELECT key FROM employees WHERE name='Agent Smith';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and present the resulting key to be deleted.
+ Yes, of course, this can be done with a single statement; that only hides
+ the fact that, without the key, nothing can be done.
+\end_layout
+
+\begin_layout Standard
+In SQL, effectively all tables have a primary key: it is the master key
+ for each row.
+ For the discussion above, it is effectively the UUID.
+ As the 
+\emph on
+de facto
+\emph default
+ UUID of SQL systems, it suffers from all the drawbacks previously hinted
+ at.
+ SQL databases are notoriously hard to shard across multiple network nodes.
+ Consistency and atomic updates are hard: there is effectively one centralized
+ bottleneck.
+ This is the foundation stone for the ACID vs.
+ BASE debates.
+\end_layout
+
+\begin_layout Standard
+How does this compare to the one mutable index of all immutable meta-trees?
+ Well, there are at least three 'obvious' ways in which the deletion of
+ a meta-tree could be implemented.
+\end_layout
+
+\begin_layout Itemize
+If the master index is a hash table or a tree of raw memory pointers, and
+ one has the raw pointer to the memory to be deleted, the deletion can be
+ immediately and directly performed.
+ direct.
+ This is analogous to already knowing the primary key of an SQL table row.
+\end_layout
+
+\begin_layout Itemize
+If the master index is a hash table or a tree of abstract indicators, and
+ one has the abstract indicator of the meta-tree to be deleted, the deletion
+ can be immediately and directly performed.
+ Unlike the case of UUID's, there are abstract indicators that can be compuuted
+ uniquely and in a relatively rapid fashion.
+ An example of this is the Merkle tree.
+ It is 'decentralized', in the sense that, no matter who has a copy of a
+ given meta-tree, or where it might be located, everyone will agree as to
+ what it's Merkle tree hash will be.
+ It is not 'unique', in the sense that there might be hash collisions.
+ However, for practical use in the database, being collision-free is not
+ important; being computable in a decentralized fashion is.
+ It avoids the UUID/primary-key pitfall.
+ This certainly turns the ACID vs.
+ BASE debate a bit on it's side.
+ The current actual OpenCog AtomSpace in-RAM implementation uses Merkle
+ trees.
+\end_layout
+
+\begin_layout Itemize
+If the master index is an ordered key-value-store (OKVS, see Wikipedia)
+ of s-expressions, and one has the s-expression corresponding to the meta-tree
+ to be deleted, the deletion can be immediately and directly performed.
+ But it is already apparent that it is easy and cheap to compute (in a decentral
+ized fashion) the s-expression corresponding to a meta-tree.
+ This is effectively a variant of the above, where the 
+\begin_inset Quotes eld
+\end_inset
+
+abstract indicator
+\begin_inset Quotes erd
+\end_inset
+
+ is the s-exp, instead of the Merkle tree.
+ Given the earlier discussion concerning the size of s-expressions vs.
+ the size of pointers, this is certainly a viable storage format for the
+ in-RAM metagraph database.
+ That it is not used by the current in-RAM AtomSpace is largely a historical
+ accident.
+ However, one of several of the current file-storage backends to the AtomSpace
+ is RocksDB.
+ That backend 
+\emph on
+does
+\emph default
+ use s-expressions as the 
+\begin_inset Quotes eld
+\end_inset
+
+primary key
+\begin_inset Quotes erd
+\end_inset
+
+, and ROCKSDB itself is a kind of OKVS.
+\end_layout
+
+\begin_layout Standard
+Metagraph insertion can be compared to SQL table insertion along the same
+ lines.
+ 
+\end_layout
+
+\begin_layout Standard
+As should be clear, there is not really all that much difference here, at
+ least conceptually.
+ The biggest and by far the most apparent difference is that SQL explicitly
+ and overtly exposes UUIDs in the form of primary keys, thus dragging all
+ that baggage along with it.
+ By contrast, a metagraph store can keep all of this hidden, and has multiple
+ implementation options for the analagous concept of a primary key: either
+ Merkle trees, or s-expressions, or possibly something else.
+ From the implementors point of view, this is nice: there are various possible
+ implementations.
+\end_layout
+
+\begin_layout Standard
+This is also nice from the user's point of view: why mess with primary keys,
+ if one doesn't have to? One less thing to think about, and not unrelated
+ to the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5359,6 +5480,11 @@ automatic
  nature of table normalization with metagraphs.
  Metagraphs provide automatic key maintenance.
  Nice!
+\end_layout
+
+\begin_layout Subsubsection*
+Metagraph mutability vs.
+ Graph databases
 \end_layout
 
 \begin_layout Standard
@@ -5373,10 +5499,33 @@ this vertex is the same as that vertex
 
  in a graph store? This is non-trivial; it requires either references or
  some other technique; if one is not careful, one finds oneself performing
- queries while inputting data.
- Again, we seem to have discovered, quite accidentally, with no explicit
+ queries at the same time that one is inserting data.
+ 
+\end_layout
+
+\begin_layout Standard
+The answer to be supplied here is utterly opaque.
+ This section is short because the problem is a bit mind-boggling.
+ To conclude: we seem to have discovered, quite accidentally, with no explicit
  intent, that hypergraphs offer an elegant property that graph databases
  lack.
+\end_layout
+
+\begin_layout Section*
+Queries, S-expressions and Query Languages
+\end_layout
+
+\begin_layout Standard
+reexamine why most QL's are SQL-like.
+ OGRE the prime example.
+\end_layout
+
+\begin_layout Subsection*
+inverted queries, what chatbots do
+\end_layout
+
+\begin_layout Standard
+Why inverted queries are still queries.
 \end_layout
 
 \begin_layout Section*
