@@ -6307,6 +6307,37 @@ The above has the form of an explicit path walk.
 SELECT
 \family default
  statement.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+We've left out more than a few details.
+ There is the concept of '
+\family typewriter
+JOIN
+\family default
+', and its variants of '
+\family typewriter
+INNER JOIN
+\family default
+', '
+\family typewriter
+OUTER JOIN
+\family default
+' and so on, all of which exist to allow the DBA to more carefully control
+ and craft the nature of the graph walk needed, and how the data flows through
+ the query, so that the query will run in an efficient, performant manner.
+ The DBA really needs to actually think of what the query is doing (and
+ to know the concepts, and to consult the documentation).
+ I'd like to suggest that programming in SQL is like programming in assembly
+ code, but for data.
+ Perhaps it's time for a higher-level query langauge that abstracts away
+ these details.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6336,13 +6367,123 @@ upwards
 .
 \end_layout
 
+\begin_layout Subsubsection*
+Query planning
+\end_layout
+
 \begin_layout Standard
-xxx
+Query planning concerns the topic of how the database engine will actually
+ perform the query.
+ The above example was written in a fashion that highlights an obviously
+ efficient and easy way to run the query.
+ Start at the join '
+\family typewriter
+Students.name = 'Rachel'
+\family default
+' and trace the dashed arrows upwards, to immediately arrive at the desired
+ answer.
+\end_layout
+
+\begin_layout Standard
+Of course, there is no guarantee that the SQL engine will actually do this.
+ It might decide to start with '
+\family typewriter
+TABLE Schools
+\family default
+', examine each school in turn, and then trace downwards from the top, until
+ it eventually reaches Rachel, and is able to satisfy this final constraint.
+ Table joins are a constraint satisifaction problem.
+ Solving constraint satsifaction problems (CSP) is non-trivial; there is
+ a vast literature devoted to this, both for the case of general CSP, and
+ to the specific case of query plannning.
+\end_layout
+
+\begin_layout Standard
+Why would an SQL engine run this query in an inefficent way? Well, the query
+ panner may have decided that it is too expensive to create the dashed-arrow
+ indexes.
+ Without the dashed arrows, one obviously has to start at the top.
+ Why would it decide that the dashed arrows are too expensive? Well, it
+ might have looked at all the tables, noted that they are all very small,
+ and that a direct downward-recursive query could be performed rapidly.
+ Why splurge on indexes if they are not needed? 
+\end_layout
+
+\begin_layout Standard
+There are also more mundane reasons to run the query top-down: the particular
+ SQL engine may not even have much of a query planner.
+ It might lack the sophistication to do anything fancy.
+\end_layout
+
+\begin_layout Subsubsection*
+Example: OGRE QL
+\end_layout
+
+\begin_layout Standard
+A worthwhile example to contemplate is the query language for OGRE
+\begin_inset CommandInset citation
+LatexCommand cite
+key "OGRE"
+literal "false"
+
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Documentation for it is currently located at this URL: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://binaryanalysisplatform.github.io/bap/api/odoc/ogre/Ogre/Query/index.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ The influence of SQL in this query language is clear.
+ Interestingly, OGRE was designed to be a dtabase for s-expressions, and,
+ as we've noted, s-expressions seem to make for an almost ideal representation
+ for metatrees.
+ So what's the catch? 
+\end_layout
+
+\begin_layout Standard
+Well, the OGRE s-expressions are just that: strings.
+ They are not metatrees; they are not interpreted as metatrees.
+ They are interpreteed only as ordinary, conventional abstract syntax trees.
+ Because of this, there is no particularly compelling reason to automatically
+ manage the incoming sets for these trees.
+ Or rather, there is no particularly compelling reason, until one considers
+ the implementation of the 'JOIN' keyword.
+ In OGRE, there are no over primary keys, and no foreign keys, so these
+ need to be generated implicitly, as needed, to perform a query that joins
+ together multiple s-expressions.
+\end_layout
+
+\begin_layout Standard
+Does OGRE actually auto-create these primary-key/foreign-key relations,
+ under the covers? Without looking at the implementation, it is hard to
+ guess, but there are a few hints.
+ OGRE works as follows.
+ Each se
 \end_layout
 
 \begin_layout Standard
 ireexamine why most QL's are SQL-like.
  OGRE the prime example.
+\end_layout
+
+\begin_layout Subsection*
+Alternative
 \end_layout
 
 \begin_layout Subsection*
