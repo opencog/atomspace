@@ -399,12 +399,12 @@ status open
 
 \begin_layout Plain Layout
 
-			{ student: {name: Joe}, {gpa: 3.5}},
+			{ student: {name: Joe},    {gpa: 3.5}},
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ student: {name: Mary}, {gpa: 3.6}},
+			{ student: {name: Mary},   {gpa: 3.6}},
 \end_layout
 
 \begin_layout Plain Layout
@@ -451,12 +451,12 @@ status open
 
 \begin_layout Plain Layout
 
-			{ names: [ Joe, Mary, Rachel] },
+			{ names:  [Joe, Mary, Rachel] },
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ gpa: [3.5, 3.6, 3.0 ] }
+			{ gpa:    [3.5, 3.6, 3.0 ] }
 \end_layout
 
 \begin_layout Plain Layout
@@ -681,12 +681,12 @@ status open
 
 \begin_layout Plain Layout
 
-				(Joe, 3.5),		# This is not valid JSON!
+				(Joe,    3.5),		# This is not valid JSON!
 \end_layout
 
 \begin_layout Plain Layout
 
-				(Mary, 3.6),
+				(Mary,   3.6),
 \end_layout
 
 \begin_layout Plain Layout
@@ -752,12 +752,12 @@ status open
 
 \begin_layout Plain Layout
 
-		(student (name Joe) (gpa 3.5))
+		(student (name Joe)    (gpa 3.5))
 \end_layout
 
 \begin_layout Plain Layout
 
-		(student (name Mary) (gpa 3.6))
+		(student (name Mary)   (gpa 3.6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -789,12 +789,12 @@ status open
 
 \begin_layout Plain Layout
 
-		(student Joe 3.5)
+		(student Joe    3.5)
 \end_layout
 
 \begin_layout Plain Layout
 
-		(student Mary 3.6)
+		(student Mary   3.6)
 \end_layout
 
 \begin_layout Plain Layout
@@ -856,12 +856,12 @@ status open
 
 \begin_layout Plain Layout
 
-			(Joe 3.5)
+			(Joe    3.5)
 \end_layout
 
 \begin_layout Plain Layout
 
-			(Mary 3.6)
+			(Mary   3.6)
 \end_layout
 
 \begin_layout Plain Layout
@@ -929,7 +929,7 @@ graphical
 \align center
 \begin_inset Graphics
 	filename graphics/joe-mary-v1.eps
-	width 40col%
+	width 60col%
 
 \end_inset
 
@@ -963,7 +963,7 @@ Below shows another alternative, this time with labelled edges:
 
 \begin_inset Graphics
 	filename graphics/joe-mary-v2.eps
-	width 40col%
+	width 35col%
 
 \end_inset
 
@@ -1886,7 +1886,7 @@ Hypergraph representations
 The naive representation for the hypergraph is a straight-forward extension
  of the edge table (the table 
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "graph edge table"
 plural "false"
 caps "false"
@@ -3111,7 +3111,7 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \begin_inset Graphics
 	filename graphics/metagraph.eps
 	lyxscale 60
-	width 20col%
+	width 25col%
 
 \end_inset
 
@@ -3138,9 +3138,9 @@ metatree
 
 \begin_layout Standard
 The node table for a metagraph is effectively the same as the vertex table
- 
+ for the hypergraph (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "hyper vertex table"
 plural "false"
 caps "false"
@@ -3148,7 +3148,7 @@ noprefix "false"
 
 \end_inset
 
- for the hypergraph, before.
+) for the hypergraph, before.
  For this graph, it was
 \end_layout
 
@@ -3563,9 +3563,9 @@ name "metagraph link table"
 \end_layout
 
 \begin_layout Standard
-Notice how this link-table resembles the vertex-table 
+Notice how this link-table resembles the vertex-table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "graph vertex table"
 plural "false"
 caps "false"
@@ -3573,7 +3573,7 @@ noprefix "false"
 
 \end_inset
 
- of an ordinary graph store.
+) of an ordinary graph store.
  It has both 'incoming' and 'outgoing' sets, as before.
  There are two differences: the outgoing set is no longer a set, but a list.
  The other is even stranger: the first column (the column of vertexes) has
@@ -3582,9 +3582,9 @@ noprefix "false"
 
 \begin_layout Standard
 Perhaps we making the wrong comparison? Oddly, it also resembles the edge
- table 
+ table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "graph edge table"
 plural "false"
 caps "false"
@@ -3592,7 +3592,7 @@ noprefix "false"
 
 \end_inset
 
-.
+).
  For ordinary directed graphs, each edge is a vertex pair.
  The vertecies of an edge may be termed the 'head vertex' and the 'tail
  vertex'; equivalently, the outgoing vertex and the incoming vertex (or
@@ -3860,9 +3860,9 @@ sales
 \begin_inset Quotes erd
 \end_inset
 
- is fast: one searches the vertex table 
+ is fast: one searches the vertex table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "graph vertex table"
 plural "false"
 caps "false"
@@ -3870,7 +3870,7 @@ noprefix "false"
 
 \end_inset
 
- to find the vertex 
+) to find the vertex 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3939,7 +3939,7 @@ This is not meant to be a psychological assessment; rather it is meant to
 \align center
 \begin_inset Graphics
 	filename graphics/partial-index.eps
-	width 70col%
+	width 75col%
 
 \end_inset
 
@@ -4288,7 +4288,7 @@ Conventionally, corporations, political and military organizations are organized
 \begin_inset Graphics
 	filename graphics/org-chart.eps
 	lyxscale 70
-	width 25col%
+	width 30col%
 
 \end_inset
 
@@ -4495,9 +4495,9 @@ just happens naturally
 
 \begin_layout Standard
 Comparing metagraphs to graph stores, one sees a different improvement.
- By discarding the edge table 
+ By discarding the edge table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "graph edge table"
 plural "false"
 caps "false"
@@ -4505,12 +4505,12 @@ noprefix "false"
 
 \end_inset
 
- (that the graph store demands), and the associated edge attributes, one
+) (that the graph store demands), and the associated edge attributes, one
  gets the representational compactness of indexes, without paying a high
  price for them.
- The price one does pay (the incoming set of 
+ The price one does pay (the incoming set of the metagraph link table 
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "metagraph link table"
 plural "false"
 caps "false"
@@ -4590,7 +4590,7 @@ The proper way of representing a meta-tree as a text string can be mildly
 \begin_inset Graphics
 	filename graphics/metagraph.eps
 	lyxscale 60
-	width 20col%
+	width 25col%
 
 \end_inset
 
@@ -4971,9 +4971,9 @@ n
 n
 \family default
 2', instead of being a different instance.
- Refering back to the metagraph node table 
+ Refering back to the metagraph node table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "metagraph node table"
 plural "false"
 caps "false"
@@ -4981,7 +4981,7 @@ noprefix "false"
 
 \end_inset
 
-, we see that there is only one true instance of '
+), we see that there is only one true instance of '
 \family typewriter
 n
 \family default
@@ -4997,9 +4997,9 @@ n
 Every link is globally unique.
  For example, the sub-expression '(e2 n2 n3)' appears twice; in both cases,
  it is exactly the same subexpression.
- This is clear by refering to the metagraph link table 
+ This is clear by refering to the metagraph link table (
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "metagraph link table"
 plural "false"
 caps "false"
@@ -5007,7 +5007,7 @@ noprefix "false"
 
 \end_inset
 
-: there is really just one copy.
+): there is really just one copy.
 \end_layout
 
 \begin_layout Standard
@@ -5103,18 +5103,8 @@ we can't compress; the data lives in memory, not a file!
  form.
  Reviewing the two tables 
 \begin_inset CommandInset ref
-LatexCommand ref
+LatexCommand vpageref
 reference "metagraph node table"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "metagraph link table"
 plural "false"
 caps "false"
 noprefix "false"
@@ -5177,7 +5167,7 @@ To conclude: having hashes around can be useful, as hashes are needed for
  UUID's are horrible; s-expressions are smart.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Insertion, Deletion and Mutability
 \end_layout
 
