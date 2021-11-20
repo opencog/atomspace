@@ -820,7 +820,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(define student (name str) (gpa float))
+		(declare student (name str) (gpa float))
 \end_layout
 
 \begin_layout Plain Layout
@@ -829,8 +829,7 @@ status open
 
 \end_inset
 
-This last statement resembles a conventional table-database table definition.
- 
+This last statement resembles a conventional table-database table declaration.
 \end_layout
 
 \begin_layout Standard
@@ -6474,16 +6473,292 @@ Does OGRE actually auto-create these primary-key/foreign-key relations,
  under the covers? Without looking at the implementation, it is hard to
  guess, but there are a few hints.
  OGRE works as follows.
- Each se
+ Each s-expression has the form
 \end_layout
 
 \begin_layout Standard
-ireexamine why most QL's are SQL-like.
- OGRE the prime example.
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	( <attribute-name> <v1> <v2> ...
+ <vM> )
+\end_layout
+
+\end_inset
+
+That is, the very first word appearing after the opening parenthsis has
+ a special meaning.
+ This is entirely conventional: in LISP/Scheme, the first word appearing
+ after an opening parenthesis also has a very special significance.
+ It is a lambda.
+ For our metatrees written as s-expressions, that first word is necessarily
+ a Link.
+ And so in OGRE, the first word is called the 
+\begin_inset Quotes eld
+\end_inset
+
+name of a proposition
+\begin_inset Quotes erd
+\end_inset
+
+; the subsequent words are the object (or subject) of the proposition.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+proposition
+\begin_inset Quotes erd
+\end_inset
+
+ is no accident.
+ It is meant to make you think of propositional logic.
+ This point will be returned to when we look at ProLog.
+ It is notable that there is confusion between subject and object; that
+ these are taken to be synonymous.
+ In the general sheaf theory, subjects and objects are not synonymous; they
+ correspond to different connector types.
+ But this is a topic outside of teh scope of the present text.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+As noted in the introduction to this text, an s-expression such as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(student (name Joe) (gpa 3.5))
+\end_layout
+
+\end_inset
+
+can be shortened to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(student Joe 3.5)
+\end_layout
+
+\end_inset
+
+provided that one has declared a 
+\begin_inset Quotes eld
+\end_inset
+
+predicate
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(declare student (name str) (gpa float))
+\end_layout
+
+\end_inset
+
+This last statement resembles a conventional table-database table declaration.
+ The resemblance is more than superficial.
+ The explicit BNF syntax for the declaration is
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	declaration ::= ( declare <attribute-name> <field> <field> ...
+ )
+\end_layout
+
+\begin_layout Plain Layout
+
+	field ::= ( <field-name> <field-type> )
+\end_layout
+
+\begin_layout Plain Layout
+
+	field-type ::= int | str | bool | float
+\end_layout
+
+\end_inset
+
+The field type is explicitly a concrete type.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is a good time to start talking about type theory.
+ The correct handling of metatrees requires recognizing that the first word
+ following the open parenthesis, the so-called Link, is a 
+\emph on
+de facto
+\emph default
+ type-theoretical type.
+ Perhaps there is some way for it to not be a type, but, as Sapir-Whorf
+ suggests, it proves to be difficult to imagine how it could be anything
+ other than a type.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The need for explicit declarations, and the explicit identiffication of
+ concrete types for fields, suggests that, under the covers, OGRE is building
+ up all the machinery needed to perform table joins.
+ Presumably this means the creation of the dashed-arrow incoming sets that
+ are needed for upwards traversals.
+ Or perhaps not: maybe the OGRE query planner always initiates queries top-down,
+ starting at the uppermost declaration, and running a stack machine to perform
+ recursive joins downwards.
+ If one has well-defined tables, a top-down query would seem like a viable
+ approach.
+\end_layout
+
+\begin_layout Standard
+Note, by the way, that the declaration statement is of fixed length, and
+ is 
+\emph on
+NOT
+\emph default
+ variadic! The declaration statement really is defining fixed-length records
+ which can be placed into a completely conventional row-table.
+ This is perhaps why the OGRE query language loooks a lot like SQL: it has
+ not departed from the table paradigm.
+ It has merely slapped on a prettier API, prettier in the sense that the
+ primary key and foreign key constraints have disappeared into the woodwork.
+\end_layout
+
+\begin_layout Standard
+As a meta-comment about table declarations and queries: this all works fine,
+ as long as one has a small number of declarations.
+ A dozen, a few dozen, less than a hundred.
+ Pondering the situation of a million different table declarations is ..
+ imponderable, if one comes from an SQL background.
+ Because: oh good lord, how could one ever write meaningful queries if there
+ are a million tables? Can't even imagine.
+ Why, one would need to write meta-queries to query tables, and perhaps
+ query meta-tables of tables.
+ If only there was a meta-query language to query meta-tables in recursively-org
+anized meta-trees...
+ oh wait, what?
+\end_layout
+
+\begin_layout Standard
+We'll get back to you on that one.
+\end_layout
+
+\begin_layout Standard
+In the meanwhile, it is important to observe that OGRE was designed to be
+ a plugin for OCaML.
+ A significant part of the query apparatus is defined in terms of OCaML
+ and not in terms of s-expressions.
+ Portions of the query are explicitly typed; many of the type declarations
+ are functional-programming function arrows (in type theory, these go by
+ the name of 
+\begin_inset Quotes eld
+\end_inset
+
+function type
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+arrow type
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+exponential
+\begin_inset Quotes erd
+\end_inset
+
+, the later name harking back to size of the codomain of set-theoretic functions
+).
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Function_type
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ The query language is usable only if one is writing OCaML.
+\end_layout
+
+\begin_layout Standard
+Perhaps the most innovative aspect of the OGRE query language is that it
+ is wrapped in a Keliesi triple (a Monad).
+ Somewhat oddly, though, that monad seems to reinvent some subset of LISP,
+ or at least of the SRFI-1 list iterators.
+ This is perhaps not enitrely unexpected: s-expressions do look like lists,
+ and it is natural to want to do list operations on them.
 \end_layout
 
 \begin_layout Subsection*
 Alternative
+\end_layout
+
+\begin_layout Standard
+also handls vs values
 \end_layout
 
 \begin_layout Subsection*
