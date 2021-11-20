@@ -5558,8 +5558,8 @@ Query Languages and Graph Traversal
 
 \begin_layout Standard
 The majority of popular query languages (QL) are modelled on SQL, taking
- SQL as not only an inspiration, but also borrowing most of its keywords
- and syntax.
+ SQL as not just as an inspiration, but rather directly borrowing (stealing)
+ most of its keywords and syntax.
  This is good, in that it makes it easy for users who are already familiar
  with SQL to learn the new system.
  This is good, in that it acts as a guidepost to the developer of the NewQL:
@@ -5829,12 +5829,12 @@ The new root points to two existing metatrees:
 \end_layout
 
 \begin_layout Subsection*
-Queries, Tables and S-expressions
+Queries and Tables
 \end_layout
 
 \begin_layout Standard
 What do weak incoming sets have to do with queries? That they allow complete
- traversal of the metagraph is intiuitively obvious: there are plenty-enough
+ traversal of the metagraph is intuitively obvious: there are plenty-enough
  arrows (both regular and weak pointers) to be able to take walks from any
  Atom to any other.
  But are these really needed? The aim here is to show that the answer is
@@ -5897,7 +5897,8 @@ As an initial example, consider a treewalk starting at
 
 \begin_layout Standard
 But is this relevant in any real-world application? Consider the following
- interpretation of the above diagram:
+ interpretation of the above diagram, where the Nodes is individuals, taking
+ school classes and working part-time jobs:
 \end_layout
 
 \begin_layout Standard
@@ -6128,7 +6129,7 @@ Ayurvedic School of Cosmetology II
 \begin_inset Text
 
 \begin_layout Plain Layout
-Joe asists in the Dean's Office
+Joe assists in the Dean's Office
 \end_layout
 
 \end_inset
@@ -6173,11 +6174,12 @@ what schools does Rachel attend?
 \begin_inset Quotes erd
 \end_inset
 
+.
  Starting at 
 \begin_inset Formula $n_{3}$
 \end_inset
 
- one can trace upwards to find that Rachel attends both Whatsamatta U.
+, one can trace upwards to find that Rachel attends both Whatsamatta U.
  and ASCII.
  
 \end_layout
@@ -6238,9 +6240,14 @@ status open
 
 \end_inset
 
-The need to denote employment adds a challenge to representing it properly
- with tables, but is not relevant to the query about the schools that Rachel
- attends.
+The need to denote employment adds a challenge to representing everything
+ properly with tables, but is not relevant to the query about the schools
+ that Rachel attends.
+ Mostly, we just note that, even for this rather simple graph, there already
+ is a profusion of tables with some rather complex relationships between
+ one-another.
+ Textbooks insist that normalization is the correct thing to do; students
+ often find that normalization is just plain hard.
 \end_layout
 
 \begin_layout Standard
@@ -6289,12 +6296,12 @@ The above has the form of an explicit path walk.
 \end_inset
 
  and then ...
- well, obviously, we've left out a few details, in that 
+ Well, obviously, we've left out a few details, in that 
 \begin_inset Formula $e_{2}$
 \end_inset
 
  is jointly managed both by ASCII and by the Dean of WU.
- Representing this properly requires a few more tables, and one more, additional
+ Representing this properly requires a few more tables, and an additional
  clause in the 
 \family typewriter
 SELECT
@@ -6306,24 +6313,17 @@ SELECT
 This query works precisely because the DBA who is creating the query has
  a very concrete grasp of all of the tables involved, and is able to thread
  an explicit path between the tables.
- The reason that the SQL dtabase engine can execute the query is because
+ The reason that the SQL database engine can execute the query is because
  the DBA explicitly inserted 
 \family typewriter
 FOREIGN KEY
 \family default
- constraints into appropriate locations: these foreign keys have the side
- effect of defining an index that we've been calling the 
-\begin_inset Quotes eld
-\end_inset
-
-incoming set
-\begin_inset Quotes erd
-\end_inset
-
-.
- The foreign keys add the dashed lines.
- Not all of them; just some of them, as the DBA saw fit during the table
- design.
+ constraints into appropriate locations.
+ These foreign keys have the side effect of defining an index that manifests
+ the dashed arrows in the metagraph diagram.
+ The foreign keys are the dashed arrows.
+ Not all of them; just some of them, only the ones that the DBA saw fit
+ to add during the table design.
  Just like the dashed weak pointers allowed the metatree to be traversed
  upwards, so also the foreign keys allow the tables to be traversed 
 \begin_inset Quotes eld
