@@ -6754,11 +6754,500 @@ Perhaps the most innovative aspect of the OGRE query language is that it
 \end_layout
 
 \begin_layout Subsection*
-Alternative
+A Meta-Query Language
 \end_layout
 
 \begin_layout Standard
-also handls vs values
+Returning to the example diagram
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/metagraph-new.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and once again noting that the presence of the dotted arrows allows rapid
+ graph traversal starting from any Atom, one might wonder how else could
+ the query about the schools that Rachel attends could be formulated.
+ Here's a possibility: 
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(Get (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Present
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+) (Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The reading of this query is as follows:
+\end_layout
+
+\begin_layout Itemize
+'
+\family typewriter
+Get
+\family default
+' is a special keyword defining the query.
+\end_layout
+
+\begin_layout Itemize
+'
+\family typewriter
+Variable
+\family default
+' is a special keyword, that, when it follows a '
+\family typewriter
+Get
+\family default
+', it indicates what is to be returned.
+ It has other (related) meanings in other contexts.
+\end_layout
+
+\begin_layout Itemize
+'
+\family typewriter
+Present
+\family default
+' is a special keyword, asking that all of the clauses must explicitly appear
+ in the database.
+ They must be matched, as patterns in a pattern matcher.
+\end_layout
+
+\begin_layout Itemize
+The '
+\family typewriter
+Node
+\family default
+' and '
+\family typewriter
+Link
+\family default
+' keywords are special keywords, explicitly denoting the Nodes and Links
+ about which we've been talking all along.
+\end_layout
+
+\begin_layout Standard
+This should be contrasted with the earlier SQL query:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	SELECT Schools.name FROM Schools WHERE
+\end_layout
+
+\begin_layout Plain Layout
+
+		Students.name = 'Rachel' AND
+\end_layout
+
+\begin_layout Plain Layout
+
+		Students.course_id = Courses.uuid AND
+\end_layout
+
+\begin_layout Plain Layout
+
+		Schools.uuid = Courses.school_uuid;
+\end_layout
+
+\end_inset
+
+The most notable difference is that the meta-query does not need to explicitly
+ name the '
+\family typewriter
+Schools
+\family default
+' table.
+ Indeed, the metagraph does not have a '
+\family typewriter
+Schools
+\family default
+' table, and so it is not nameable (this could be 
+\begin_inset Quotes eld
+\end_inset
+
+fixed
+\begin_inset Quotes erd
+\end_inset
+
+ by adding more nodes and links to the metagraph, but that is besides the
+ point.) 
+\end_layout
+
+\begin_layout Standard
+Another fundamental difference is that SQL embodies an explicit 
+\begin_inset Quotes eld
+\end_inset
+
+equational theory
+\begin_inset Quotes erd
+\end_inset
+
+, whereas the meta-query does not.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Theory_of_pure_equality
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Equational_logic
+\end_layout
+
+\end_inset
+
+.
+ In mathematical logic and model theory, the equational theory is the first
+ theory that is more complicated than the 
+\begin_inset Quotes eld
+\end_inset
+
+free theory
+\begin_inset Quotes erd
+\end_inset
+
+ (see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Free_theory
+\end_layout
+
+\end_inset
+
+.) In breif: with the free theory, you can freely 
+\begin_inset Quotes eld
+\end_inset
+
+write down anything
+\begin_inset Quotes erd
+\end_inset
+
+, as long as the parenthesis balance.
+ Both s-expressions and Prolog can be taken to be examples of free theories.
+ The theory of pure equality adds the equals sign, and says 
+\begin_inset Quotes eld
+\end_inset
+
+you can write down anything
+\begin_inset Quotes erd
+\end_inset
+
+, as long as the parenthesis balance and you also take transitive closures
+ of the things that are equated.
+ Problems of consistency first show up here, as it is possible to write
+ down nonsense and paradoxes using equals signs.
+ Relational algebra (
+\emph on
+e.g.
+
+\emph default
+ SQL) is the theory where you can 
+\begin_inset Quotes eld
+\end_inset
+
+write down anything
+\begin_inset Quotes erd
+\end_inset
+
+, but you can also use relations between things.
+ Each relation corresponds to an SQL table.
+ That relation is 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ if the corresponding row exists in the SQL table, else it is 
+\begin_inset Quotes eld
+\end_inset
+
+false
+\begin_inset Quotes erd
+\end_inset
+
+; thus relations are sometimes called predicates.
+ A pure relational algebra, without equality, is not quite interesting enough
+ to be practical.
+ As all of these examples show, you need to fold in the theory of equality
+ in order to perform table joins.
+ The equals sign just says 
+\begin_inset Quotes eld
+\end_inset
+
+this variable appearing in this predicate is equal to this other variable
+ or constant appearing in some other predicate
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ The SQL statement has implicit variables in it: the expression '
+\family typewriter
+Students.course_id
+\family default
+' is meant to be understood as a variable, ranging over all possible values
+ of '
+\family typewriter
+course_id
+\family default
+' in the '
+\family typewriter
+Students
+\family default
+' table.
+ The '
+\family typewriter
+Courses.uuid
+\family default
+' is another implicit variable.
+ The equals sign is needed, because of the way that the variables appeared
+ implicitly.
+ There is no other way of saying 
+\begin_inset Quotes eld
+\end_inset
+
+hey, these two variables are really the same thing
+\begin_inset Quotes erd
+\end_inset
+
+, and thus the concept of table joins is born.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The complexity of table joins is in part a side-effect of the complexity
+ of the theory of equality.
+ You might think that equality seems pretty darned easy; it's just equals
+ signs, right? Contemplating the complexity of SQL table joins, and the
+ complexity of SQL query planners in planning table joins should quickly
+ disabuse you of the idea that 
+\begin_inset Quotes eld
+\end_inset
+
+equality is simple
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It's hard.
+ If you are still not convinced, review the Wikiipedia article on equational
+ logic again: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Equational_logic
+\end_layout
+
+\end_inset
+
+.
+ It has a number of axioms to make it work, and it is no accident that it
+ was developed by computer scientists who were also known for thier contribution
+s to relational algebras and query languages.
+\end_layout
+
+\end_inset
+
+ The meta-query made use of the property of meta-graphs that ever Atom is
+ always the same Atom.
+ That is, the '
+\family typewriter
+(Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+' is the same Atom in both subtrees.
+ There is no need to use an equals sign to equate these two positions; they
+ are already 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+ as metagraphs; they can't not be 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Variables, are, however, always named, given a name.
+ It is an open question is to how anonymous (unamed) variables might be
+ written.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+A third fundamental difference is that the metaquery did not require any
+ prior table definition.
+ The situation is thus quite different than the aforementioned OGRE QL.
+ Thanks to the implicit presence of the dashed arrows, there is no need
+ to explicitly define indexes (i.e.
+ there is no '
+\family typewriter
+CREATE INDEX ON Students (name);
+\family default
+' which would be needed if we wanted to have fast-running SQL queries on
+ student names.
+ The primary keys, of course, did not need explicit index declarations.)
+\end_layout
+
+\begin_layout Standard
+A fourth fundamental difference is that the metaquery is itself a metatree.
+ It does not live outside of the system of metagraphs.
+ It does have a peculiar syntax and a collection of syntax rules (
+\emph on
+i.e.
+
+\emph default
+ it must begin with '
+\family typewriter
+Get
+\family default
+', it must have some variable declarations and use the '
+\family typewriter
+Present
+\family default
+' link, and so on) but that syntax is a sublanguage within the language
+ of free s-expressions.
+\end_layout
+
+\begin_layout Standard
+It is perhaps instructive to draw the metatree diagram for this query:
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+This any prior table defintion
+\end_layout
+
+\begin_layout Subsubsection*
+Handles and Values (attribute Tags) 
 \end_layout
 
 \begin_layout Subsection*
