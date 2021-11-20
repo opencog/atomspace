@@ -5733,20 +5733,471 @@ Queries, Tables and S-expressions
 \begin_layout Standard
 What do weak incoming sets have to do with queries? That they allow complete
  traversal of the metagraph is intiuitively obvious: there are plenty-enough
- arrows (both regular and weak pointers) to be able to talk walks from any
+ arrows (both regular and weak pointers) to be able to take walks from any
  Atom to any other.
+ But are these really needed? The aim here is to show that the answer is
+ 'yes'.
 \end_layout
 
 \begin_layout Standard
-everywhere to 
+As an initial example, consider a treewalk starting at 
+\begin_inset Formula $e_{4}$
+\end_inset
+
+.
+ Using conventional recursion techniques, it is easy to recurse (left to
+ right) down to 
+\begin_inset Formula $e_{3}$
+\end_inset
+
+ then 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ and then 
+\begin_inset Formula $n_{1}$
+\end_inset
+
+.
+ Implemented as a stack machine, the nex step is to pop, and then visit
+ 
+\begin_inset Formula $n_{2}$
+\end_inset
+
+.
+ The next stack pop brings us back to 
+\begin_inset Formula $e_{3}$
+\end_inset
+
+ and traversal procees as normal.
+ Nowhere in this stack machine recursion is it possible to visit 
+\begin_inset Formula $e_{5}$
+\end_inset
+
+.
+ If one has started at 
+\begin_inset Formula $e_{4}$
+\end_inset
+
+, one cannot get to 
+\begin_inset Formula $e_{5}$
+\end_inset
+
+.
+ Worse: perhaps one's starting point was 
+\begin_inset Formula $n_{1}$
+\end_inset
+
+.
+ From there, one cannot get to anywhere, at least, not when there aren't
+ any incoming-set pointers (the dotted lines).
 \end_layout
 
 \begin_layout Standard
-This can be 
+But is this relevant in any real-world application? Consider the following
+ interpretation of the above diagram:
 \end_layout
 
 \begin_layout Standard
-it has 
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="11" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Atom
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Interpretation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joe
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Mary
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rachel
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Intro Computer Science
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Intro Beauty and Hair Care
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Dean of Students
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{4}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Whatsamatta University
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{5}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Ayurvedic School of Cosmetology II
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{3}-n_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Joe asists in the Dean's Office
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{5}-n_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rachel is a TA in cosmetology
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A natural question to pose in this interpretation is 
+\begin_inset Quotes eld
+\end_inset
+
+what schools does Rachel attend?
+\begin_inset Quotes erd
+\end_inset
+
+ Starting at 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ one can trace upwards to find that Rachel attends both Whatsamatta U.
+ and ASCII.
+ 
+\end_layout
+
+\begin_layout Standard
+How might this have worked in conventional SQL? Well, for starters, we need
+ something like this: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	CREATE TABLE Schools (name TEXT, uuid INT PRIMARY KEY);
+\end_layout
+
+\begin_layout Plain Layout
+
+	INSERT INTO Schools ...
+ ;
+\end_layout
+
+\begin_layout Plain Layout
+
+	CREATE TABLE Courses (name TEXT, school_uuid INT FOREIGN KEY, uuid INT
+ PRIMARY KEY);
+\end_layout
+
+\begin_layout Plain Layout
+
+	CREATE TABLE Students (name TEXT, course_id INT FOREIGN KEY, student_id
+ INT PRIMARY KEY);
+\end_layout
+
+\end_inset
+
+One continues in this fashion, creating a few more tables.
+ Denoting that Joe assists in the Dean's Office and that Rachel assists
+ in the School of Cosmetology poses a bit of a challenge.
+ Perhaps this might do?
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	CREATE TABLE Employment (name TEXT, employer TEXT, taxpayer_id INT PRIMARY
+ KEY);
+\end_layout
+
+\end_inset
+
+The need to denote employment adds a challenge to representing it properly
+ with tables, but is not relevant to the query about the schools that Rachel
+ attends.
+\end_layout
+
+\begin_layout Standard
+How does the query work? 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	SELECT Schools.name FROM Schools WHERE
+\end_layout
+
+\begin_layout Plain Layout
+
+		Students.name = 'Rachel' AND
+\end_layout
+
+\begin_layout Plain Layout
+
+		Students.course_id = Courses.uuid AND
+\end_layout
+
+\begin_layout Plain Layout
+
+		Schools.uuid = Courses.school_uuid;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above has the form of an explicit path walk.
+ It starts at 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ and explicitly names a path that takes it to 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ and then ...
+ well, obviously, we've left out a few details, in that 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ is jointly managed both by ASCII and by the Dean of WU.
+ Representing this properly requires a few more tables, and one more, additional
+ clause in the 
+\family typewriter
+SELECT
+\family default
+ statement.
 \end_layout
 
 \begin_layout Standard
