@@ -5557,6 +5557,108 @@ Query Languages and Graph Traversal
 \end_layout
 
 \begin_layout Standard
+The majority of popular query languages (QL) are modelled on SQL, taking
+ SQL as not only an inspiration, but also borrowing most of its keywords
+ and syntax.
+ This is good, in that it makes it easy for users who are already familiar
+ with SQL to learn the new system.
+ This is good, in that it acts as a guidepost to the developer of the NewQL:
+ if things get confusing, just take a look at how SQL did it, and make NewQL
+ do it more-or-less the same way.
+\end_layout
+
+\begin_layout Standard
+This is bad, in that, when the QL is to be applied to a new domain, such
+ as graphs, hypergraphs or metagraphs, the mind-set that was suitable for
+ table queries might not be appropriate for graphs.
+ But this is not obvious: just half an hour with GraphQL documentation and
+ examples will easily leave you with the impression that you can do anything
+ you want with GraphQL.
+ Got a graph? GraphQL can traverse it! That there might be some other way,
+ maybe even a better way, never really enters your mind.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is a reply to the Sapir–Whorf Hypothesis in the strong affirmative.
+ The Sapir–Whorf hypothesis is breifly worded as 
+\begin_inset Quotes eld
+\end_inset
+
+language limits thought.
+\begin_inset Quotes erd
+\end_inset
+
+ Originally, the language was natural language, say English or Chinese.
+ The hypothesis seems a bit absurd: if I speak English or Chinese, why 
+\emph on
+wouldn't
+\emph default
+ I be able to think of anything (if I'm smart enough)? What's limiting about
+ language? It's hard to imagine what one wouldn't be able think of.
+ In the present case, the language is SQL, and if you are a programmer/DBA
+ who thinks in terms of SQL, it is very hard to imagine what kind of queries
+ one could perform that 
+\emph on
+don't
+\emph default
+ look like SQL.
+ This is the topic of this section: exposing the limitations of SQL-thinking.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+There is no doubt that the mathematical theory of relational algebras is
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+correct
+\begin_inset Quotes erd
+\end_inset
+
+, or at least the 
+\begin_inset Quotes eld
+\end_inset
+
+best
+\begin_inset Quotes erd
+\end_inset
+
+ theory for tables and the records stored in them.
+ It's overwhelmingly dominant, and there does not appear to be any reason
+ to question it.
+ Likewise, the manifestion of relational algebras as SQL has the same effect:
+ it works really really well for records and tables, and there is no compelling
+ reason to replace it with something else.
+ (A little voice asks: 
+\begin_inset Quotes eld
+\end_inset
+
+if that's the case, then why graphs?
+\begin_inset Quotes erd
+\end_inset
+
+) The sucess of this theory has the effect of shutting down any thought
+ process that might lead elsewhere.
+\end_layout
+
+\begin_layout Standard
+The aim of this section is to make this thought process overt, and show
+ how there might be QL's that are not SQL clones.
+ It begins by reviewing the actual strucure of metgraphs, and then examines
+ how they compare to conventional table queries.
+\end_layout
+
+\begin_layout Subsection*
+Weak Pointers
+\end_layout
+
+\begin_layout Standard
 The example metatree diagram, as originally drawn (on the left) is misleading
  as to how it is actually represented in memory.
  If one examines the metagraph link table (
@@ -6198,6 +6300,40 @@ The above has the form of an explicit path walk.
 SELECT
 \family default
  statement.
+\end_layout
+
+\begin_layout Standard
+This query works precisely because the DBA who is creating the query has
+ a very concrete grasp of all of the tables involved, and is able to thread
+ an explicit path between the tables.
+ The reason that the SQL dtabase engine can execute the query is because
+ the DBA explicitly inserted 
+\family typewriter
+FOREIGN KEY
+\family default
+ constraints into appropriate locations: these foreign keys have the side
+ effect of defining an index that we've been calling the 
+\begin_inset Quotes eld
+\end_inset
+
+incoming set
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The foreign keys add the dashed lines.
+ Not all of them; just some of them, as the DBA saw fit during the table
+ design.
+ Just like the dashed weak pointers allowed the metatree to be traversed
+ upwards, so also the foreign keys allow the tables to be traversed 
+\begin_inset Quotes eld
+\end_inset
+
+upwards
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
