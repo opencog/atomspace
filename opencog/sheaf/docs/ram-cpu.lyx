@@ -3424,7 +3424,7 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\left(n_{1},n_{3}\right)$
+\begin_inset Formula $\left(n_{2},n_{3}\right)$
 \end_inset
 
 
@@ -4920,12 +4920,102 @@ S-expressions
 \end_layout
 
 \begin_layout Standard
-string expression 
+Let return to the string expression 
 \begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
 \end_inset
 
 .
+ What's wrong with just writing it as a basic s-expression? It appears to
+ be entirely unambiguous to just drop the colon and the comma.
+ It becomes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
+\end_layout
+
+\end_inset
+
+Can't get any shorter than that.
  
+\end_layout
+
+\begin_layout Standard
+This is not exactly an 'ordinary' s-expression, though.
+ Key differences:
+\end_layout
+
+\begin_layout Itemize
+Every open-paren must be followed by a link '
+\family typewriter
+ek
+\family default
+': this is what a meta-edge must necessarily be.
+\end_layout
+
+\begin_layout Itemize
+Every node is globally unique.
+ That is, each time the node '
+\family typewriter
+n
+\family default
+2' appears in this expression, it is exactly the same '
+\family typewriter
+n
+\family default
+2', instead of being a different instance.
+ Refering back to the metagraph node table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "metagraph node table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we see that there is only one true instance of '
+\family typewriter
+n
+\family default
+2': it just has one set of attributes on it.
+ When parsing the s-expression, whichever apparent copy of '
+\family typewriter
+n
+\family default
+2' that we grab hold of, the attributes attached to it will be the same.
+\end_layout
+
+\begin_layout Itemize
+Every link is globally unique.
+ For example, the sub-expression '(e2 n2 n3)' appears twice; in both cases,
+ it is exactly the same subexpression.
+ This is clear by refering to the metagraph link table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "metagraph link table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+: there is really just one copy.
+\end_layout
+
+\begin_layout Standard
+We conclude that s-expressions offer a marvelous compact string representation
+ for metagraphs.
+ Yet one should not be mislead; these are not ordinary s-expressions.
+ This will be further amplified below, when considering queries performed
+ over s-expressions.
 \end_layout
 
 \begin_layout Subsection*
@@ -4933,20 +5023,24 @@ UUID's
 \end_layout
 
 \begin_layout Standard
-It is very tempting, at this point, to write 
+Because each node and link is globally unique, it is very tempting, at this
+ point, to say 
 \begin_inset Quotes eld
 \end_inset
 
-just use universally unique identifiers
+oh, hey, just use universally unique identifiers
 \begin_inset Quotes erd
 \end_inset
 
  (UUID's).
  This is good enough for local address spaces; if nothing else, then an
  ordinary C/C++ pointer is a UUID to the object.
- But, when writing a text string, what UUID shall one use? Much worse, UUID's
- cause major, fundamental problems when considering network-distributed
- storage; this is the problem of UUID collision.
+ But, when writing a text string, what UUID shall one use? 
+\end_layout
+
+\begin_layout Standard
+Much worse, UUID's cause major, fundamental problems when considering network-di
+stributed storage; this is the problem of UUID collision.
  One solution to avoid UUID collision is to have a single centralized atomic
  issuer of ID's that can guarantee uniqueness.
  This introduces a single, centralized bottleneck.
@@ -4960,35 +5054,273 @@ just use universally unique identifiers
  hash is preferred.
  These eat up RAM (as compared to pointers) and the computation of cryptographic
  hashes requires significant CPU overhead.
+ 
 \end_layout
 
 \begin_layout Standard
-Merely adding references to JSON is not enough to solve the problem, either.
- There may be millions or billions of meta-trees; forcing the user correctly
- employ references across all of them, without error is just not reasonable.
- Worse: new meta-trees could be added weeks or months later.
- Using references would force the user to maintain a table of references
- over long time periods.
- How? Where shall this table be stored? How much RAM will it require? References
- can be convenient, but they don't solve the fundamental representational
- problem for metatrees.
+Just how big is a 64-bit hash, vs.
+ the expression it is standing in for? Well, 64-bits is 8 bytes.
+ Suppose that the data that one was storing consisted of English words (there
+ are about a million of them, if you includ geographical place names, product
+ and corporate names, historical events and a smattering of Latin and foreign
+ loan-words.) The average length of these is about six letters, thus six
+ byes; seven if including the null terminator.
+ How about the names of genes and proteins? These are not particularly lengthly
+ either.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Ah, but tree structure!
+\begin_inset Quotes erd
+\end_inset
+
+ you might think.
+ All those parens, they need to be counted too! If you dump those plain-ASCII
+ (plain-UTF8) s-expressions to a file, and then run gzip on it, or better
+ yet, bzip2 or 7z, you find that those raw string s-expressions compress
+ very well, outperforming by a wide margin the 64-bit UUID hash.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+But
+\begin_inset Quotes erd
+\end_inset
+
+, you say, 
+\begin_inset Quotes eld
+\end_inset
+
+we can't compress; the data lives in memory, not a file!
+\begin_inset Quotes erd
+\end_inset
+
+ ah, yes, this is true.
+ The in-RAM representation is explosively larger than the string s-expression
+ form.
+ Reviewing the two tables 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "metagraph node table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "metagraph link table"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, each apparance of a node or link in those tables must be a (64-bit) pointer.
+ The example metagraph being worked here is two levels deep, and is quite
+ 'small'.
+ Yet, counting the edges in the drawing of it, there are ten edges.
+ Each edge is bidirectional: there are pointers going both ways; those 20
+ pointers are required, or 
+\begin_inset Formula $160=20\times8$
+\end_inset
+
+ bytes.
+ Plus three bytes each for the null terminated strings '
+\family typewriter
+n
+\family default
+1', '
+\family typewriter
+n
+\family default
+2' ...
+ 'e1', 'e2' for a total of 
+\begin_inset Formula $160+24=184$
+\end_inset
+
+ bytes minimum.
+ The string-length of the string '
+\family typewriter
+(e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
+\family default
+' is 48 characters: 48 bytes.
+ The s-expression representation is far more compact than the in-RAM representat
+ion!
+\end_layout
+
+\begin_layout Standard
+Finally, there is the problem of the UUID-to-meta-tree mapping.
+ Where is it stored? New meta-trees could be added weeks or months later.
+ Is this UUID-to-meta-tree mapping supposed to be live, available on-line
+ at any time? What happens if it goes down? How is it kept unique? With
+ locks? How many UUID's per second can be issued? What happens if it gets
+ corrupted? Who has spare copies? Do byzantine generals show up here? How
+ much storage does this all require?
+\end_layout
+
+\begin_layout Standard
+To conclude: having hashes around can be useful, as hashes are needed for
+ hash tables.
+ However, conceiving of them as if they were truly universally-unique ID's
+ is problematic in a dozen different ways.
+ By contrast, each and every s-expression really really is globally unique.
+ There is only one of any given kind! No centralized authority was needed
+ to issue this unique string! Anyone can mint it at any time, at very low
+ cost! If forgotten, it can be recreated! And it's ASCII representation,
+ compressed with bog-standard compression routines, is formidably tiny.
+ UUID's are horrible; s-expressions are smart.
 \end_layout
 
 \begin_layout Subsection*
-Insertion and Deletion
+Insertion, Deletion and Mutability
 \end_layout
 
 \begin_layout Standard
 When a metatree is added to a metagraph, a scan must be made to determine
  if the tree, or any subtree already occurs in the metagraph.
- How might we know this? By looking it up! This does require indexing on
- the metagraph.
- Using indexes as described in the previous section introduces a bit of
- a chicken-and-egg problem.
- Thus, at the meta-graph store level, a naked b-tree or hash table is required.
- Here, (non-cryptographic) hashes are useful, as they can be made small,
- and can be used to speed up compares in a b-tree, or used in a hash table,
- which will resolves any collisions.
+ How might we know this? By looking it up! But where is this stored? 
+\end_layout
+
+\begin_layout Standard
+One concludes that there is really only one option: there has to be a mutable,
+ top-level index that holds all of the meta-trees in the metagraph.
+ In a sense, it is the one link to rule them all.
+ Put differently, a metagraph store is, 
+\emph on
+de facto
+\emph default
+, just a store for one single mutable meta-tree.
+ 
+\end_layout
+
+\begin_layout Standard
+The word 'mutable' was used several times in the last few sentences.
+ This is important.
+ For all other meta-trees, it is not only convenient to treat them as if
+ they were immutable, it becomes a necessity.
+ Returning to the example meta-tree:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Suppose one wishes to change 
+\begin_inset Quotes eld
+\end_inset
+
+just one
+\begin_inset Quotes erd
+\end_inset
+
+ of the '
+\family typewriter
+n
+\family default
+3's into an '
+\family typewriter
+n
+\family default
+5'.
+ But which one? They are, after all, all the same '
+\family typewriter
+n
+\family default
+3', so if edited, they all change together, atomically.
+ Suppose now that this meta-tree is a subtree of something larger and more
+ complex.
+ Performing an edit, changing the '
+\family typewriter
+n
+\family default
+3' into an '
+\family typewriter
+n
+\family default
+5' in this meta-tree requires examining the incoming set of this tree, and
+ determining what to do in each case.
+ This might be a non-trvial decision proceedure.
+ Should each of these larger trees get the new, modified version, or should
+ they keep the original unmodified version? If the latter, then the unmodified
+ version becomes 
+\emph on
+de facto
+\emph default
+ immutable, and the new, modified version just becomes a completely new
+ meta-tree.
+\end_layout
+
+\begin_layout Standard
+So immutable meta-trees are quite all right.
+ Besides avoiding the decision problem of what to do with the incoming set,
+ there are some much more mundane advantages.
+ Immutable meta-trees can be traversed lock-free; there is no concern that
+ one thread is traversing it even as another thread is altering it.
+ The importance of having small structures being lock-free cannot be overstated.
+\end_layout
+
+\begin_layout Standard
+This all changes when one considers the top-most, master index.
+ It 
+\emph on
+must
+\emph default
+ be mutable.
+ It 
+\emph on
+must
+\emph default
+ be possible to add new trees, and remove stale ones from this master index.
+ Otherwise, it cannot be called a database!
+\end_layout
+
+\begin_layout Standard
+Yet, oddly, this top-level index/table looks exactly like any other metatree.
+ Yes, its large: it may have many millions of (immutable) subtrees in it.
+ But it itself is just another tree, and there is no particular reason why
+ it cannot be the subtree of yet other trees.
+ The only difference is that it is mutable.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, we've identified two fundamentally differrent structures, serving
+ different purposes, yet both having the same form.
+ The mutable form is a 'database'.
+ The immutable form is the 'data'.
+ In all other respects, they are the same.
+\end_layout
+
+\begin_layout Standard
+Jumping ahead, the mutable form has been historically called the 'AtomSpace'.
+ It can be stacked and nested and used to form diamond-shaped inheritance
+ diagrams, however one wishes.
+ The immutable Nodes and Links have been called 'Atoms', as a stand-in term
+ for something that can be either a Node or a Link.
+\end_layout
+
+\begin_layout Subsubsection*
+Vs.
+ SQL
 \end_layout
 
 \begin_layout Standard
