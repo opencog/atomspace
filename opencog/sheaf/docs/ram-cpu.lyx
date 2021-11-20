@@ -1021,8 +1021,8 @@ In the interim, some historical hand-waving can be done to justify the origins
  or DAG's.
  The truth values are distinct from the graphs themselves; instead, they
  are an assignment of true/false to each expression.
-\begin_inset Note Note
-status open
+\begin_inset Foot
+status collapsed
 
 \begin_layout Plain Layout
 Of course, this is but the grand leap from Aristotelian, 
@@ -3130,7 +3130,58 @@ metatree
 \end_inset
 
 .
- The metatree can be converted to a DAG in two different ways.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Later on, metatrees will be called 
+\begin_inset Quotes eld
+\end_inset
+
+Atoms
+\begin_inset Quotes erd
+\end_inset
+
+.
+ An Atom is simply a term for something that can be either a 
+\begin_inset Quotes eld
+\end_inset
+
+Node
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+Link
+\begin_inset Quotes erd
+\end_inset
+
+.
+ As we haven't yet clearly defined a Nod or Link yet, the term 
+\begin_inset Quotes eld
+\end_inset
+
+metatree
+\begin_inset Quotes erd
+\end_inset
+
+ will suffice.
+\end_layout
+
+\end_inset
+
+ (later on, metatrees will be called 
+\begin_inset Quotes eld
+\end_inset
+
+Atoms
+\begin_inset Quotes erd
+\end_inset
+
+.) The metatree can be converted to a DAG in two different ways.
  One way is to collapse the boxes to single points.
  The other way is to dissolve the boxes entirely, and replace a single arrow
  from point-to-box by many arrows, from point to each of the box elements.
@@ -3918,7 +3969,7 @@ de facto
 , this is how system arhictects think about things.
  When they think about creating an index on a table, this is what they think
  of.
-\begin_inset Note Note
+\begin_inset Foot
 status collapsed
 
 \begin_layout Plain Layout
@@ -5502,7 +5553,7 @@ The answer to be supplied here is utterly opaque.
 \end_layout
 
 \begin_layout Section*
-Queries, S-expressions and Query Languages
+Query Languages and Graph Traversal
 \end_layout
 
 \begin_layout Standard
@@ -5676,11 +5727,22 @@ The new root points to two existing metatrees:
 \end_layout
 
 \begin_layout Subsection*
-S-expressions and queries
+Queries, Tables and S-expressions
 \end_layout
 
 \begin_layout Standard
-What does all this have to do with queries?
+What do weak incoming sets have to do with queries? That they allow complete
+ traversal of the metagraph is intiuitively obvious: there are plenty-enough
+ arrows (both regular and weak pointers) to be able to talk walks from any
+ Atom to any other.
+\end_layout
+
+\begin_layout Standard
+everywhere to 
+\end_layout
+
+\begin_layout Standard
+This can be 
 \end_layout
 
 \begin_layout Standard
