@@ -7934,6 +7934,204 @@ The above introduces the 'Choice' Link.
 \end_layout
 
 \begin_layout Subsection*
+Metatree Query vs.
+ String Pattern Matching
+\end_layout
+
+\begin_layout Standard
+Since metatrees can be written as s-expresion strings, and since metaqueries
+ can be likewise, the question arises: can metaquery evaluation be reduced
+ to (regex) string matching? The initial example certainly feels like this
+ might be possible: the variables are just wild-cards, and everything else
+ is just constant strings that can be matched verbatim.
+ Unfortunately, this is not the case.
+\end_layout
+
+\begin_layout Standard
+This is doubly unfortunate, since pattern matching is well-understood and
+ widely developed.
+ Besides regex and pcre itself, the `syntax-case` subset of 
+\begin_inset Quotes eld
+\end_inset
+
+hygenic macros
+\begin_inset Quotes erd
+\end_inset
+
+ in the scheme programming language provides rudimentary pattern matching
+ and term rewriting.
+ In that direction, most (all?) functional programming languages include
+ pattern matchers as a basic utility.
+ The well-developed ones provide pattern languages that are quite expressive,
+ and the implementations tend to be compact and direct.
+\end_layout
+
+\begin_layout Standard
+(Metatree) querying is not just (string) pattern matching.
+ Key differences are listed below.
+\end_layout
+
+\begin_layout Itemize
+In the s-expression for a metatree, when a sub-expression is repeated, it
+ is understood to be the 
+\begin_inset Quotes eld
+\end_inset
+
+same subexpression
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\emph on
+i.e.
+
+\emph default
+ the same Atom.
+ There is no such guarantee in a string match: the first occurance of a
+ subexpression could be matched one way, and a second occurance a different
+ way, possibly with a conflicting match.
+ Thus, if string pattern matching were to be used, it would need to be enhanced
+ with some sort of conflict-free subterm matching.
+ But how to implement this? That line of thinking seems to lead down the
+ path of reinventing metatrees, but in an application-specific setting.
+\end_layout
+
+\begin_layout Itemize
+Practical metatree matching requires the ability to match into unordered
+ collections (sets).
+ This means that each and every permutation of an unordered set must be
+ attempted during the match.
+ String pattern matchers conventionally cannot do this.
+ When they can, there is often no ability to handle nested unordered sets,
+ subterms of which might need to be identical in the aforementioned conflict-fre
+e fashion.
+ That is, if a variable occurs in multiple places in multiply-nested unordered
+ sets, and it is grounded one way in a specific permutation of one set,
+ it must be grounded exctly the same way in all permutations of all other
+ sets in which it occurs.
+ This is the 'conflict resolution' aspect.
+ How can this be accomplished? Well, one can use either metatrees, or one
+ can use a 'theory of equality'.
+ But, as noted above, the theory of equality provides it's own challenges
+ to implementation: it introduces brand new conflict resolution issues that
+ are difficult to resolve.
+\end_layout
+
+\begin_layout Itemize
+Practical metatree matching needs to provide menu-choice alternatives for
+ subterms: one could match this or this or this.
+ The choice can be buried arbitrarily deep in the pattern.
+ As a string pattern matcher proceeds left-to-right through the string,
+ and encounters a choice, it must explore each and every choice, individually.
+ That means that it must backtrack if some given choice fails to match.
+ Backtracking means that the pattern matcher must be implemented as a stack
+ machine (because partial matches are held in a score-board, and that score-boar
+d must now be placed on a stack).
+ So, two issues here.
+ First: regexes correspond to finite state machines, whereas stack machines
+ corespond to context-free languages.
+ So already, with choice, we've left the (simple, fast, direct) domain of
+ regexes and finite state machines.
+ Second: if the implementation of the pattern matcher is forcing you to
+ think recursively, then why are you still thinking 
+\begin_inset Quotes eld
+\end_inset
+
+strings
+\begin_inset Quotes erd
+\end_inset
+
+? Why not think in terms of trees, which is what recursion (and context
+ free languages) really are? Once one has entered that domain, it is easier
+ to conceptualize in terms of graphs, than strings.
+\end_layout
+
+\begin_layout Itemize
+Practical metatree matching requires the ability to quote and unquote significan
+t keywords in the pattern.
+ For example, one might want to search for all expressions that contain
+ the term '
+\family sans
+Variable
+\family default
+' in it.
+ Obviously, this would have to be quoted (say, as '
+\family sans
+(Quote (Variable ?x?))
+\family default
+') as otherwise, the variable would be interpeted as a variable in the pattern,
+ insted of a constant term to be matched.
+\end_layout
+
+\begin_layout Itemize
+Practical metatree matching requires the ability to match lambda expressions.
+ This requires the ability to find bound variables, and not only treat them
+ as constants, but also to alpha-rewrite them.
+ Consider, for example, the lambda expression '
+\family sans
+(Lambda (Variable $x) (Plus (Variable $x) (Number 2)))
+\family default
+'.
+ This expression is obviously equivalent to '
+\family sans
+(Lambda (Variable $y) (Plus (Variable $y) (Number 2)))
+\family default
+' – the formal name for this kind of equivalence is 
+\begin_inset Quotes eld
+\end_inset
+
+alpha equivalence
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Any pattern that is searching for lambdas that involve '
+\family sans
+Plus
+\family default
+' and the number 2 must be able to determine the alpha-equivalence of the
+ match to the pattern.
+ This is no longer a simple string match: the pattern matcher needs to be
+ aware that '
+\family sans
+Lambda
+\family default
+' is a special keyword that binds its variable declarations.
+ And that bound variables can be alpha-rewritten.
+\end_layout
+
+\begin_layout Standard
+After reading the above, the reader might feel as if there was a bit of
+ a bait-n-switch performed with the pattern matching requirements.
+ Some deeper thinking would have avoided this impression.
+ The overall topic of this text is that metagraphs are suitable for generic
+ knowledge representation.
+ This means representing not only 'simple' graphs and metagraphs, but also
+ quotidian systems like ontologies, phylogenies, first-order logic, Bayesian
+ networks, lambda calculus, probabilistic programs, functional programs,
+ declarative programs, genes, proteins, natural language, visual objects,
+ sounds, 3D spaces, ...
+ As such, a knowledge representation system has to be practical and utilitarian,
+ useful as a tool for the day-to-day knoweldge worker.
+ Thus, funny business like quotes and lambdas and alpha-rewrites and unordered
+ sets must necessarily enter into the picture, and be supportable in the
+ query system.
+\end_layout
+
+\begin_layout Standard
+Note, by the way, that the goals of a knowledge representation system resemble
+ the goals of set theory or topos theory for mathematics: generic frameworks
+ on which it is hoped that all of mathematics can be founded.
+ Knowledge representation is likewise foundational.
+ It is no accident that knowledge representation must borrow or steal ideas
+ from topos theory, ideas such as sheaf theory.
+ Sheaves are actually useful in mathematics.
+ At this time, it is not yet widely understood that sheaves are also useful
+ in knowledge representation.
+ But we wander off-track, here; this is a different topic.
+\end_layout
+
+\begin_layout Subsection*
 Query Planning
 \end_layout
 
