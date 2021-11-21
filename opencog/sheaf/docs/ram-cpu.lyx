@@ -6758,7 +6758,8 @@ A Meta-Query Language
 \end_layout
 
 \begin_layout Standard
-Returning to the example diagram
+How else could the query about the schools that Rachel attends could be
+ formulated? Returning to the example diagram
 \end_layout
 
 \begin_layout Standard
@@ -6775,9 +6776,8 @@ Returning to the example diagram
 
 \begin_layout Standard
 and once again noting that the presence of the dotted arrows allows rapid
- graph traversal starting from any Atom, one might wonder how else could
- the query about the schools that Rachel attends could be formulated.
- Here's a possibility: 
+ graph traversal starting from any Atom, we can offer the following as a
+ possibility: 
 \begin_inset listings
 lstparams "basicstyle={\small\sffamily},tabsize=3"
 inline false
@@ -6896,6 +6896,31 @@ Link
 \family default
 ' keywords are special keywords, explicitly denoting the Nodes and Links
  about which we've been talking all along.
+\end_layout
+
+\begin_layout Standard
+The intent is that the '
+\family typewriter
+(Variable ?course?)
+\family default
+' is grounded by 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+, a course Rachel (
+\begin_inset Formula $n_{3}$
+\end_inset
+
+) is attending.
+ The '
+\family typewriter
+(Variable ?what-school?)
+\family default
+' is grounded by 
+\begin_inset Formula $e_{5}$
+\end_inset
+
+, the School of Cosmetology.
 \end_layout
 
 \begin_layout Standard
@@ -7150,8 +7175,8 @@ s to relational algebras and query languages.
 
 \end_inset
 
- The meta-query made use of the property of meta-graphs that ever Atom is
- always the same Atom.
+ The meta-query made use of the property of meta-graphs that any given Atom
+ is always the same Atom.
  That is, the '
 \family typewriter
 (Variable 
@@ -7194,7 +7219,7 @@ Variables, are, however, always named, given a name.
 
 \end_inset
 
- 
+ There is no explcit need for equality.
 \end_layout
 
 \begin_layout Standard
@@ -7205,7 +7230,7 @@ A third fundamental difference is that the metaquery did not require any
  to explicitly define indexes (i.e.
  there is no '
 \family typewriter
-CREATE INDEX ON Students (name);
+CREATE INDEX ON Students(name);
 \family default
 ' which would be needed if we wanted to have fast-running SQL queries on
  student names.
@@ -7563,12 +7588,7 @@ status open
 
 \begin_layout Plain Layout
 
-    (Link
-\end_layout
-
-\begin_layout Plain Layout
-
-        (Variable 
+   (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7576,12 +7596,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-        (Variable 
+) (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7594,12 +7609,7 @@ status open
 
 \begin_layout Plain Layout
 
-    (Link
-\end_layout
-
-\begin_layout Plain Layout
-
-        (Variable 
+   (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7607,12 +7617,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-        (Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7660,7 +7665,7 @@ status open
 
 \begin_layout Plain Layout
 
-    (Variable 
+   (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7673,17 +7678,12 @@ status open
 
 \begin_layout Plain Layout
 
-    (Present
+   (Present
 \end_layout
 
 \begin_layout Plain Layout
 
-        (Link
-\end_layout
-
-\begin_layout Plain Layout
-
-            (Variable 
+      (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7691,12 +7691,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-            (Variable 
+) (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7709,12 +7704,7 @@ status open
 
 \begin_layout Plain Layout
 
-        (Link
-\end_layout
-
-\begin_layout Plain Layout
-
-            (Variable 
+      (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7722,12 +7712,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-            (Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7754,23 +7739,310 @@ Rachel
 \end_layout
 
 \begin_layout Standard
-xxx
+It is not entirely obvious, but performing this query requires solving a
+ subgraph isomorphism problem.
+ Clearly, the query implictly demands that the variables should be grounded.
+ The variables are to be grounded by Atoms, which may be either Nodes or
+ Links.
+ In the cse of Links, these are (by definition) metatrees themselves, and
+ so the grounding matches a variable to a subgraph.
+ The collection of subgraphs must be those specified in the '
+\family typewriter
+Present
+\family default
+' link: 
+\emph on
+i.e.
+
+\emph default
+ they must be isomorphic to it.
+ Thus, the subgraph isomorphism problem.
 \end_layout
 
 \begin_layout Standard
-call it the subgraph isomorphism problem.
+The careful reader may have noticed that the above query only allows Rachel
+ to be a student of ASCII.
+ The full query, which would also reveal her to be a student of WU, is given
+ below.
+ The comparable SQL statement is considerably more complex and not given.
 \end_layout
 
 \begin_layout Standard
-xxx
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(Get (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
 \end_layout
 
-\begin_layout Standard
-show also the more compex and correct query
+\begin_layout Plain Layout
+
+		(Present
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+) (Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Choice
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Present
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Present
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?deprtment?
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+				(Link (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?department?
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)))))
+\end_layout
+
+\end_inset
+
+The above introduces the 'Choice' Link.
+ For the most part, it can be read as a logical-OR of the two predicates
+ that it wraps.
+ More precisely, it can be used as a menu-choice: pick one or pick the other
+ (but not both).
+ Choice commonly appears as a fragement of intuitionistic logic and of linear
+ logic.
 \end_layout
 
 \begin_layout Subsubsection*
-Handles and Values (attribute Tags) 
+Query Planning
+\end_layout
+
+\begin_layout Standard
+There is little to be said about query planning, other than to notice that
+ performing a query requires a graph walk.
+ Thanks to the incoming set, the query can be started anywhere.
+ It is advantageous to start the graph walk at the thinnest, most distant
+ part of the graph, so that it does not need to be regularly revisted.
+\end_layout
+
+\begin_layout Standard
+Similarly, it is advantageous to borrow some ideas from SAT solving, and
+ prune simple trees from the query, before performing an exhaustive search
+ of a multiply-conneted tight nucleus.
+ The pruned trees can be re-attached later.
+ Equivalently, they might only need to be pattern-matched once.
+ In this case, pruing is equivalent to maintaining a cache of pattern matches
+ acheived earlier during traversal.
+ (That is, a recursive graph walk will typically revisit certain parts of
+ the graph.
+ But if those parts have already been grounded, they do not need to be revisited
+ again; it is sufficeint to have a cache of the groundings.)
+\end_layout
+
+\begin_layout Standard
+The OpenCog query engine makes use of both of these query optimizations.
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes (Tags)
+\end_layout
+
+\begin_layout Standard
+This text opened with an extended discussion of attributes, and about how
+ attributes are attached to the nodes and vertexes of a graph.
+ This is still the case, still a desirable thing to do, when working with
+ metagraphs.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+But why?
+\begin_inset Quotes erd
+\end_inset
+
+ you may wonder, 
+\begin_inset Quotes eld
+\end_inset
+
+why can't everthing be encoded as as metagraph?
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Well, of course, everything can be encoded as a metagraph.
+ However, there's a cost; several costs, actually.
+ One cost is that metatrees are immutable.
+ If one has a list of 100 floating point numbers, and wishes to change the
+ 42nd one, it seems like overkill to be blocked from doing so by immutability.
+ One might like to have something mutable, for this kind of a low-level
+ vector.
+ Another cost is the weak pointer (the dashe arrow).
+ There is no particular need to maintain an incoming set for each floating
+ point in a list.
+ It is unlikely that two different Links will share the same floating point
+ number (to all of it's glorious 18 decimal places!? Really?) It is unlikely
+ that there will ever be any need for a query to traverse backwards (through
+ the incoming set) of that float.
+ Traversing forward into the vector of floats is plenty enough, if the only
+ query decision to be performed is greater-then, less-than on some arithmetic
+ ops on those numbers.
+ Saving some RAM by not storing the weak pointers is a laudable thing do
+ to.
+\end_layout
+
+\begin_layout Standard
+If the attributes are stored as key-value pairs (KVP), then the attributes
+ on any given Atom can be understood conceptually as a key-value database
+ per Atom.
+ This might feel like overkill, but it isn't really any different from graph
+ databases in general.
+ If a vertex or an edge of a graph has some attributes attached to it, then
+ those attributes can be thought of as residing in a database specific to
+ that edge or vertex.
+\end_layout
+
+\begin_layout Standard
+In the present case, there is one fun little twist: if the KVP's are heirarchica
+l, 
+\emph on
+i.e.
+
+\emph default
+ a tree, then they can be thought of as a special case of a metatree (as,
+ indeed, trees are special cases of metatrees), but it is a metatree that
+ is shorn of it's weak back-pointers, and thus can be mutable.
+ One saves RAM and regains the mutability that was lost.
+ The price to be paid is that such attributes are no longer searchable.
+ (More precisely, they are no longer searchable except by brute force exhaustive
+ search.
+ The weak pointers acted as local indexes; without the ability to do an
+ index lookup, brute force exhaustive search is all that one has left.)
+\end_layout
+
+\begin_layout Standard
+The OpenCog AtomSpace supports attributes in the form of KVP trees.
+ It has made one unfortunate naming choice for these attribute trees: they
+ got called 
+\begin_inset Quotes eld
+\end_inset
+
+Values
+\begin_inset Quotes erd
+\end_inset
+
+ with a capital V.
+ This naming choice forces all sorts of contortions when one wants to talk
+ about ordinary values with a lower-case v.
+ The naming choice was arrived at under the influence of model theory, where
+ a clear distinction is made between sentences of a language and thier valuation.
+ In model theory, and in logic, sentences are assigned 
+\begin_inset Quotes eld
+\end_inset
+
+truth values
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Historically, these are crisp true/false values.
+ But in Bayesian beleif networks and in Markov logic networks, these valuations
+ are given floating-point probabilites as thier truth values.
+ On OpenCog, these were historically called TruthValues, wirtten in CamelCase.
+ When generalized to arbitrary KVP valuations, they become Values.
+ A better name might have been Attributes or Tags, as they are treated as
+ ...
+ attributes, or tags.
 \end_layout
 
 \begin_layout Subsection*
