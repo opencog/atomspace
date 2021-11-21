@@ -6807,15 +6807,15 @@ status open
 \begin_inset Quotes eld
 \end_inset
 
-?course?
+?what-school?
 \begin_inset Quotes erd
 \end_inset
 
-) (Node 
+) (Variable 
 \begin_inset Quotes eld
 \end_inset
 
-Rachel
+?course?
 \begin_inset Quotes erd
 \end_inset
 
@@ -6828,15 +6828,15 @@ Rachel
 \begin_inset Quotes eld
 \end_inset
 
-?what-school?
+?course?
 \begin_inset Quotes erd
 \end_inset
 
-) (Variable 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
-?course?
+Rachel
 \begin_inset Quotes erd
 \end_inset
 
@@ -6881,6 +6881,8 @@ Present
 ' is a special keyword, asking that all of the clauses must explicitly appear
  in the database.
  They must be matched, as patterns in a pattern matcher.
+ It is an unordered Link; the order of the clauses in this Link carries
+ no significance.
 \end_layout
 
 \begin_layout Itemize
@@ -7228,6 +7230,10 @@ Present
 \family default
 ' link, and so on) but that syntax is a sublanguage within the language
  of free s-expressions.
+ The fact that the metaquery is itself a metatree opens the possibility
+ of querying for queries.
+ This may sound utterly absurd, but is in fact very commonplace in chatbots!
+ This is expanded on below.
 \end_layout
 
 \begin_layout Standard
@@ -7235,7 +7241,516 @@ It is perhaps instructive to draw the metatree diagram for this query:
 \end_layout
 
 \begin_layout Standard
-xxx
+\align center
+\begin_inset Graphics
+	filename graphics/metaquery.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The reading for this metatree, in terms of its Atoms, is as follows:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Atom
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+S-expression
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $e_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $p_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3,linewidth=40pt"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Present
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Link
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Link
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $g_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+(Get
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+    (Present
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Link
+\end_layout
+
+\begin_layout Plain Layout
+
+            (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?what-school?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+            (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+        (Link
+\end_layout
+
+\begin_layout Plain Layout
+
+            (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?course?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+            (Node 
+\begin_inset Quotes eld
+\end_inset
+
+Rachel
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -7243,7 +7758,15 @@ xxx
 \end_layout
 
 \begin_layout Standard
-This any prior table defintion
+call it the subgraph isomorphism problem.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+show also the more compex and correct query
 \end_layout
 
 \begin_layout Subsubsection*
