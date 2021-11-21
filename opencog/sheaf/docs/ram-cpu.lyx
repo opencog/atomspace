@@ -6753,7 +6753,7 @@ Perhaps the most innovative aspect of the OGRE query language is that it
  and it is natural to want to do list operations on them.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 A Meta-Query Language
 \end_layout
 
@@ -6785,7 +6785,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(Get (Variable 
+	(Meet (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6855,9 +6855,41 @@ The reading of this query is as follows:
 \begin_layout Itemize
 '
 \family typewriter
-Get
+Meet
 \family default
 ' is a special keyword defining the query.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The name '
+\family sans
+Meet
+\family default
+' comes from the mathematical concept of meets and joins on a lattice.
+ See 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Join_and_meet
+\end_layout
+
+\end_inset
+
+.
+ The '
+\family sans
+Present
+\family default
+' link is a listing of several points in a lattice, all of which must be
+ met by any solution to the query.
+\end_layout
+
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Itemize
@@ -6867,7 +6899,7 @@ Variable
 \family default
 ' is a special keyword, that, when it follows a '
 \family typewriter
-Get
+Meet
 \family default
 ', it indicates what is to be returned.
  It has other (related) meanings in other contexts.
@@ -7247,7 +7279,7 @@ i.e.
 \emph default
  it must begin with '
 \family typewriter
-Get
+Meet
 \family default
 ', it must have some variable declarations and use the '
 \family typewriter
@@ -7660,7 +7692,7 @@ status open
 
 \begin_layout Plain Layout
 
-(Get
+(Meet
 \end_layout
 
 \begin_layout Plain Layout
@@ -7775,7 +7807,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(Get (Variable 
+	(Meet (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7901,7 +7933,7 @@ The above introduces the 'Choice' Link.
  logic.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Query Planning
 \end_layout
 
@@ -7931,7 +7963,7 @@ Similarly, it is advantageous to borrow some ideas from SAT solving, and
 The OpenCog query engine makes use of both of these query optimizations.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Attributes (Tags)
 \end_layout
 
@@ -8046,11 +8078,618 @@ truth values
 \end_layout
 
 \begin_layout Subsection*
-inverted queries, what chatbots do
+Chatbots and Inverted Queries
 \end_layout
 
 \begin_layout Standard
-Why inverted queries are still queries.
+Here's something SQL cannot do: it cannot search for SQL.
+ Absurd, right? One of the eary chatbot technologies is called SRAI (Stimulous-R
+esponse AI), and the scripting language for SRAI is known as AIML (AI Markup
+ Language).
+ A snippet of AIML is given below.
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	<aiml>
+\end_layout
+
+\begin_layout Plain Layout
+
+		<category>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<pattern>I love *</pattern>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<template>I like <star/> a lot.</template>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</category>
+\end_layout
+
+\begin_layout Plain Layout
+
+		<category>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<pattern>I * you</pattern>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<template>Well, I <star/> you, too!</template>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</category>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</aiml>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The goal of this is to specify some conversational patterns to be matched,
+ and, if matched, to produce the indicated output.
+ Thus, if a human says 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I love baseball
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+, the chatbot responds 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I like baseball a lot.
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ If the human says 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I hate you
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+, the response 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+Well, I hate you, too!
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ is elicited.
+ In the case of 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I love you
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+, there are two possible responses, and a coin is flipped to pick one.
+\end_layout
+
+\begin_layout Standard
+What is being done here is a kind of inverted query.
+ One is presented with the 'answer', say 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I love you
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+, and the goal is to find all 'queries' which can be satisfied by that answer.
+ In this example, the two queries are '
+\family sans
+<pattern>I love *</pattern>
+\family default
+' and '
+\family sans
+<pattern>I * you</pattern>
+\family default
+'.
+ Abandoning the XML markup in favor of s-expressions, the two patterns are
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(I love (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+	(I (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+) you)
+\end_layout
+
+\end_inset
+
+An AIML chatbot consists of tens of thousands of such patterns, and the
+ matching responses.
+ In order to have rapid query responses, chatbot implementations organize
+ the patterns into a trie
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A prefix tree, see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Trie
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ and typically implement some variation of the Rete algorithm.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Rete_algorithm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All this can be expressed in the Atomese meta-query language.
+ It is necessarily a bit more verbose, but perhaps still readable without
+ assistance.
+ The AtomSpace is populated with SRAI rules, having the form
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(Query
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Present (Word 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+love
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+		((Word 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+like
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+lot
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	(Query
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Present (Word 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+you
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+		((Word 
+\begin_inset Quotes eld
+\end_inset
+
+Well,
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+) (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+?star?
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+you
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+too!
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The reading of this content is as follows:
+\end_layout
+
+\begin_layout Itemize
+'
+\family sans
+Query
+\family default
+' is a special keyword defining the rewrite rule.
+ It is much like '
+\family sans
+Meet
+\family default
+', introduced previously, except that, this time, instead of delivering
+ a grounding, it delivers a rewrite making use of that grounding.
+ The first Atom following the query is the pattern to be matched.
+ The second Atom of the query is the rewrite to apply, after a match has
+ been found.
+\end_layout
+
+\begin_layout Itemize
+The '
+\family sans
+Variable
+\family default
+' and '
+\family sans
+Present
+\family default
+' keywords are just as before.
+\end_layout
+
+\begin_layout Itemize
+The '
+\family sans
+Word
+\family default
+' is a handy variant of a Node, reminding readers that the indicated string
+ is a natural language word.
+ One could have just as easily said '
+\family sans
+Node
+\family default
+', here; this is just some visual bling.
+ 
+\end_layout
+
+\begin_layout Standard
+This is not SQL! We've said this before, but it is worth saying again: the
+ metagraph database is populated with tens of thousands of such statements,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+statements
+\begin_inset Quotes erd
+\end_inset
+
+ which just happen to have the form of queries.
+ In the database, these queries are dormant; they are not running, they
+ are just sitting there, waiting for thier day in the sun.
+ The actual query to be performed looks like this:
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(Dual (Word 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+) (Word 
+\begin_inset Quotes eld
+\end_inset
+
+love
+\begin_inset Quotes erd
+\end_inset
+
+) (Word
+\begin_inset Quotes erd
+\end_inset
+
+you
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that this query has no variables in it: it consists entirely of constants
+! It is an 'answer', not a question! The subgraph isomorphism engine, aka
+ the query engine, aka the 'pattern matcher', finds all matching patterns.
+ In this case, it is the two queries shown earlier.
+ To run the chatbot, one then flips a coin, picks one of the two queries,
+ runs it, and prints the response.
+ Running the query is computationally 'trivial', as there is only one pattern
+ to match: 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+I love you
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+Pay attention: the above is 
+\emph on
+NOT
+\emph default
+ saying that there are ten thousand queries that are each performed, until
+ a match is found! 
+\emph on
+No!
+\emph default
+ It is saying that only two queries are run: first, the '
+\family sans
+Dual
+\family default
+', to find some candidates, and then one of the candidates is chosen and
+ run on a tiny, itsy-bitsy dataset consisting of one sentence.
+ Its fast.
+ In so far as all of this content is stored as metatrees, all of the prior
+ considerations about RAM usage, search performance and tree walking apply.
+\end_layout
+
+\begin_layout Standard
+The take-away lessons are:
+\end_layout
+
+\begin_layout Itemize
+Inverted queries are still queries.
+\end_layout
+
+\begin_layout Itemize
+SQL-inspired languages cannot support inverted queries.
+ As a corollary, most graph databases cannot support inverted queries.
+\end_layout
+
+\begin_layout Itemize
+Chatbots are highly specialized, customized database engines, highly tuned
+ for performing inverse queries.
+\end_layout
+
+\begin_layout Itemize
+A metagraph-style query language can easily support both queries and inverted
+ queries, because the query engine itself is a subgraph isomorphism solver,
+ and it does not particularly care about the types of the Nodes and Links
+ that it is matching, as long as it is able to match.
+\end_layout
+
+\begin_layout Itemize
+Because metatrees contain both the forward pointers and the weak pointers
+ pointing backwards, they effectively have a trie (prefix tree) built in.
+ That is, the organizational advantages of using prefix trees to perform
+ rapid string-matching searches come 
+\begin_inset Quotes eld
+\end_inset
+
+for free
+\begin_inset Quotes erd
+\end_inset
+
+ in a metagraph, as a part of the general infrastructure.
+ 
+\end_layout
+
+\begin_layout Standard
+That chatbots can be unified with convetional query is perhaps one of the
+ more entertaining aspects coming out of metaqueries.
 \end_layout
 
 \begin_layout Section*
