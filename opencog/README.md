@@ -260,8 +260,9 @@ important subdirectories:
                    implements a Maximum Spanning Tree (MST) parser.
 
 <dt>guile, scm <dd>Scheme language bindings.
+<dt>cython     <dd>Python language bindings.
 <dt>haskell    <dd>Haskell language bindings.
-<dt>python,cython<dd>Python language bindings.
+<dt>ocaml      <dd>OCaML language bindings.
 
 </dl>
 

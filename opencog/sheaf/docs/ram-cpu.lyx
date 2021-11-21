@@ -8078,7 +8078,7 @@ truth values
 \end_layout
 
 \begin_layout Subsection*
-Chatbots and Inverted Queries
+Chatbots, Rule Engines and Inverted Queries
 \end_layout
 
 \begin_layout Standard
@@ -8647,6 +8647,13 @@ Dual
 \end_layout
 
 \begin_layout Standard
+The above is more or less a peculiar variation of the Rete algorithm.
+ The Dual link is used to narrow down the selection of rules to apply, then
+ (users choice) either one of the rules is selected and fired, or maybe
+ all of the rules can be fired.
+\end_layout
+
+\begin_layout Standard
 The take-away lessons are:
 \end_layout
 
@@ -8662,6 +8669,11 @@ SQL-inspired languages cannot support inverted queries.
 \begin_layout Itemize
 Chatbots are highly specialized, customized database engines, highly tuned
  for performing inverse queries.
+\end_layout
+
+\begin_layout Itemize
+Rule engines are highly specialized, customized database engines, highly
+ tuned for performing inverse queries.
 \end_layout
 
 \begin_layout Itemize
@@ -8684,11 +8696,17 @@ for free
 \end_inset
 
  in a metagraph, as a part of the general infrastructure.
+\end_layout
+
+\begin_layout Itemize
+Because metaqueries can support both direct and inverted queries, they provide
+ a natural infrastructure on which to build both rule engines and forward-infere
+ncing chainers.
  
 \end_layout
 
 \begin_layout Standard
-That chatbots can be unified with convetional query is perhaps one of the
+That chatbots can be unified with conventional query is perhaps one of the
  more entertaining aspects coming out of metaqueries.
 \end_layout
 
