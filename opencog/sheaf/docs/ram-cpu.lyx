@@ -9039,10 +9039,175 @@ It was observed above that metatrees have a natural string representation
  Every system that works with s-expressions gives a priviledged interpretation
  to the first word after an open parenthesis.
  In Lisp and Scheme, that first word is an operator.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See John N.
+ Shutt's blog post https://fexpr.blogspot.com/2011/04/fexpr.html for careful
+ terminology.
+\end_layout
+
+\end_inset
+
+ What is it for metatrees?
+\end_layout
+
+\begin_layout Standard
+The answer appears to be that it is a type, a type-theoretical type.
+ This is not a proclamation or a theoretical result, this is an experimental
+ result.
+ After working with meta-trees for a decade, and examining how they represent
+ data, it appears that there isn't any other obvious interpretation than
+ to say that it is a type.
+\end_layout
+
+\begin_layout Standard
+The observational evidence is as follows:
+\end_layout
+
+\begin_layout Itemize
+From the begining, it is noted that there is a distinction between Nodes
+ and Links, roughtly analogous to the vertexes and edges of graphs.
+ So it seems these are two different types.
+\end_layout
+
+\begin_layout Itemize
+Could this could be reduced to just one type, by replacing Nodes with nullary
+ Links? Not easily.
+ Nodes need to be distinguishable, and thus are given unique string names.
+ There is no particular need to give a Link a string name: it's outgoing
+ list uniquely disambiguates that Link from any other.
+ In order to get rid of the Node/Link distinction, Links would have to be
+ given names.
+ A compelling reason to do this would need to be found.
+\end_layout
+
+\begin_layout Itemize
+The description of the meta-query langauge introduces a Variable, which
+ is obviously a kind of Node, but is distinguished from a conventional Node,
+ in that it has special semantics in the context of a query.
+\end_layout
+
+\begin_layout Itemize
+Similarly, the metaquery langauge introduces a Present Link, which is a
+ kind of a Link, but, again, has special semantics in the context of a query.
+\end_layout
+
+\begin_layout Itemize
+In the current OpenCog Atomese system, there are will over a hundred distinct
+ Node and Link types, each introduced as a need arose.
+ Booleans: AndLink, OrLink, NotLink.
+ Arithmetic: PlusLink, MinusLink, GreaterThanLink.
+ Set theory: SetLink, MemberLink.
+ Functionals: LambdaLink.
+ 
+\end_layout
+
+\begin_layout Itemize
+For many (but not all) of these Nodes and Links, it became convenient to
+ create a corresponding C++ class that performs some function.
+ A silly example is the PlusLink: when this is executed, the arguments are
+ added together, if the arguments are numeric.
+ The C++ class performs this addition.
+ Now, it is generally regarded tht C++ classes are types.
+ By extension, PlusLink must also be a type.
+\end_layout
+
+\begin_layout Itemize
+After recognizing that Nodes and Links and thier variations are all types,
+ it became easy to create a type system: SignatureLink, TypedVariableLink,
+ TypeNode, ArrowLink.
+ It appears to be entirely consistent and, as a type system, entirely convention
+al.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+All the easy type-theoretical stuff is included.
+ What's currently missing are type equations, type variables and dependent
+ types.
+ These are missing mostly because no one has asked for them yet.
+ Atomese has evolved on an as-needed basis: if something isn't urgently
+ needed, it does not get implemented.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Ergo, it is natural to take the concept of a metatree, which already distinguish
+es between Node and Link, and recognize that this naturally blossomes into
+ a type system.
+\end_layout
+
+\begin_layout Standard
+As a type system, it is dynamically typed, not static-typed.
+ New types can be introduced at any time.
+ It doesn't even make sense to talk of a 
+\begin_inset Quotes eld
+\end_inset
+
+static
+\begin_inset Quotes erd
+\end_inset
+
+ type system, because the metatrees are not being 
+\begin_inset Quotes eld
+\end_inset
+
+compiled
+\begin_inset Quotes erd
+\end_inset
+
+ into the database: they are merely being inserted.
+ There is a long-runing REPL loop, and nothing is gained by preventing users
+ from defining new types at runtime.
+ Note that this does make the type system clash with that of OCaml, Haskell,
+ Scala, all of which deploy a static type system.
+ 
+\end_layout
+
+\begin_layout Standard
+As a practical example: Nodes and Links are of type Atom.
+ The biology subsystem uses GeneNodes and ProteinNodes, since these are
+ useful for biological data representations.
+ These are also type Atom.
+ The biology subsystem is a distinct subsystem, and not part of the core:
+ it is dynamically loaded.
+ This creates issues for the OCaml binding, which might have known about
+ Atoms at compile time, but had no clue about GeneNodes and ProteinNodes
+ at compile time.
+ Static types and metatree types do not play well together.
+\end_layout
+
+\begin_layout Standard
+The second bullet point above idly wondered about a monotyped system, where
+ everything is a Link, and Links have a string name.
+ This would bring the system closer to a Lisp/Scheme conception of the world.
+ Yet, this changes nothing: there is still a need to have variables, as
+ well as and, or, not, set, memeber, plus, minus, 
+\emph on
+etc.
+
+\emph default
+ atoms.
+ These would then have to be demarcated in the string name...
+ and thus have to be recognized 
+\emph on
+de facto
+\emph default
+ types.
 \end_layout
 
 \begin_layout Subsection*
 Types
+\end_layout
+
+\begin_layout Standard
+XXX rewrite/cut this section.
 \end_layout
 
 \begin_layout Standard
@@ -9056,7 +9221,7 @@ Perhaps the most interesting aspect of the s-expression format is the first
  every node having the same name, every link having the same structure is
  indistinguishable.)
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 This is eerily similar to atomic physics.
