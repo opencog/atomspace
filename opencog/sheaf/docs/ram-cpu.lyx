@@ -8969,7 +8969,7 @@ Dual
 The above is more or less a peculiar variation of the Rete algorithm.
  The Dual link is used to narrow down the selection of rules to apply, then
  (users choice) either one of the rules is selected and fired, or maybe
- all of the rules can be fired.
+ all of the selected rules can be fired.
 \end_layout
 
 \begin_layout Standard
@@ -9078,6 +9078,24 @@ Could this could be reduced to just one type, by replacing Nodes with nullary
  Nodes need to be distinguishable, and thus are given unique string names.
  There is no particular need to give a Link a string name: it's outgoing
  list uniquely disambiguates that Link from any other.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is eerily similar to atomic physics.
+ All electrons are indistinguishable.
+ All protons are indistinguishable.
+ When combined into atoms, however, this changes.
+ An element of one type (say, carbon) is clearly different than another
+ (say, oxygen), but all carbon atoms are indistinguishable...
+ unless they appear in an organic molecule.
+ That is, it is the relationship of elementary particles to one-another
+ that gives structure to the universe.
+ It is not the particles themselves.
+\end_layout
+
+\end_inset
+
  In order to get rid of the Node/Link distinction, Links would have to be
  given names.
  A compelling reason to do this would need to be found.
@@ -9203,67 +9221,7 @@ de facto
 \end_layout
 
 \begin_layout Subsection*
-Types
-\end_layout
-
-\begin_layout Standard
-XXX rewrite/cut this section.
-\end_layout
-
-\begin_layout Standard
-Perhaps the most interesting aspect of the s-expression format is the first
- explicit appearance of types.
- Here, there are just two types: the nodes, and the links.
- The nodes have to be given a name, so as to disambiguate them from one-another.
- The links do not: the metatree structure is enough to disambiguate one
- link from another.
- Again: nodes and links are naturally universally unique (or conversely,
- every node having the same name, every link having the same structure is
- indistinguishable.)
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-This is eerily similar to atomic physics.
- All electrons are indistinguishable.
- All protons are indistinguishable.
- When combined into atoms, however, this changes.
- An element of one type (say, carbon) is clearly different than another
- (say, oxygen), but all carbon atoms are indistinguishable...
- unless they appear in an organic molecule.
- That is, it is the relationship of elementary particles to one-another
- that gives structure to the universe.
- It is not the particles themselves.
-\end_layout
-
-\end_inset
-
- When written in this form, the doubly-typed nature of the metatree is calling
- out for generalization.
- The types are sitting there, almost begging: 
-\begin_inset Quotes eld
-\end_inset
-
-do something with me
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Multiple types are not strictly needed for storage: indeed, the two tables,
- one for nodes, and one for links, is sufficient to tell them apart.
- Actually generalizing the written form above to multiple types does require
- additional storage.
- Is it worth it?
-\end_layout
-
-\begin_layout Standard
-In comp sci, in practice, types are incredibly useful.
- If they are not given explicit, distinguished treatment in the metatree,
- they will appear, without question, in the attribute section.
- Hang on, whats a type?
+Examples of Types
 \end_layout
 
 \begin_layout Standard
@@ -9276,8 +9234,8 @@ types
 \end_inset
 
  it is meant both the types of computer science, and of type theory.
- In ordinary programming, ints, floats and strings are types (these are
- the 
+ In conventional computer programming, ints, floats and strings are types
+ (these are the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9302,48 +9260,29 @@ product types
 \end_inset
 
 ).
- Function calls have a type signature too, and ML, CaML, Haskell and F#
- are all about programming with types.
- Unlike these standard, well-established languages, there is no particular
- need to limit oneself to a proscribed set of primitive types with a metagraph.
- One can have as many different primitive types as desired.
- One can have user-defined types.
+ Function calls have a type signature too, this is the arrow type, pointing
+ from the input arguments to the output type.
+ The ML, CaML, Haskell, Scala and F# programming languages provide an explict
+ type system, allowing the programmer to define new types (In OO languages,
+ new types can only be defined by defining a new OO class).
 \end_layout
 
 \begin_layout Standard
-The simplest example of a user-defined type is, for example, a 
-\family sans
+Before proceeding further, a reference example will help clarify the idea.
+ Consider the English language sentence 
 \emph on
-CatLink
-\family default
+
+\begin_inset Quotes eld
+\end_inset
+
+The cat sat on the mat.
+\begin_inset Quotes erd
+\end_inset
+
+
 \emph default
-.
- What's a 
-\family sans
-\emph on
-CatLink
-\family default
-\emph default
-?
-\emph on
- 
-\emph default
-Well, cats - house cats, are those things with paws and whiskers, and have
- an entire subdivision of the internet devoted to them.
- What do you do with a 
-\family sans
-\emph on
-CatLink
-\family default
-\emph default
-? Well, anything you want: use it to link to a photo URL.
- Use it in some phylogenetic tree.
- Describe the properties of a cat: fur, tail, 
-\emph on
-etc
-\emph default
-.
- Generic knowledge representation.
+ This encodes some information; how might it be encoded as a metagraph?
+ There are many possible choices, but one of the simplest is shown here:
 \end_layout
 
 \begin_layout Standard
@@ -9354,25 +9293,12 @@ status open
 
 \begin_layout Plain Layout
 
-		; 
-\begin_inset Quotes eld
-\end_inset
-
-The cat sat on the mat
-\begin_inset Quotes erd
-\end_inset
-
-, as a typed metatree.
+	(SittingLink
 \end_layout
 
 \begin_layout Plain Layout
 
-		(SittingLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(ObjectNode 
+		(ObjectNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9385,7 +9311,7 @@ cat
 
 \begin_layout Plain Layout
 
-			(ObjectNode 
+		(ObjectNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9398,49 +9324,1008 @@ mat
 
 \end_inset
 
+This clearly has the Link-Node structure of a metatree; but appears to be
+ using some derived types.
+ The denotational semantics is obviously that of the English language sentence;
+ the denotation of the remaining pieces is left to the imagination of the
+ reader.
+ This is not laziness on the part of the writer: the word 
+\begin_inset Quotes eld
+\end_inset
+
+denotation
+\begin_inset Quotes erd
+\end_inset
+
+, when used in a computer science context, means 
+\begin_inset Quotes eld
+\end_inset
+
+what the computer programmer is imagining it to be
+\begin_inset Quotes erd
+\end_inset
+
+.
+ So, for example, a 
+\begin_inset Quotes eld
+\end_inset
+
+float
+\begin_inset Quotes erd
+\end_inset
+
+ is only a 
+\begin_inset Quotes eld
+\end_inset
+
+number
+\begin_inset Quotes erd
+\end_inset
+
+ in the programmer's head; what is actually in the machine code is just
+ some bytes, and not 
+\begin_inset Quotes eld
+\end_inset
+
+numbers
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise here, 
+\family sans
+\emph on
+SittingLink
+\family default
+\emph default
+ is just some metatree sitting in RAM.
+ It has no inherent meaning by itself; its meaning emerges only in relation
+ to other metatrees in the system.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Philosophically, this is a panpsychic view of the world: individual ur-items
+ are meaningless; all meaning comes from the relationships between objects.
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Standard
-Of course, a good collection 
+The '
 \family sans
-\emph on
+(ObjectNode 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+' could be replaced by a 
+\family sans
+CatNode
+\family default
+, although the usage woulld appear to change: one would then write '
+\family sans
+(CatNode 
+\begin_inset Quotes eld
+\end_inset
+
+Fuzzykins
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+'.
+ Alternately, one could choose to move in the opposite direction, and write:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(Link
+\end_layout
+
+\begin_layout Plain Layout
+
+		(PredicateNode 
+\begin_inset Quotes eld
+\end_inset
+
+Object
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Node 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+which denotes that cats are objects.
+ The '
+\family sans
+PredicateNode
+\family default
+' denotes something that behaves like a truth value; the assertion is that
+ it is true that cats are objects.
+ But there is also a different denotational idea lurking here: The above
+ is behaving as a kind of type declaration! It appears to be declaring that
+ things of type 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ are things of type 
+\begin_inset Quotes eld
+\end_inset
+
+Object
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One could sharpen this, and write
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(TypeDefinitionLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(TypeNode 
+\begin_inset Quotes eld
+\end_inset
+
+CatNode
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(TypeNode 
+\begin_inset Quotes eld
+\end_inset
+
+ObjectNode
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+After this type definition is provided, it appears to be appropriate to
+ write things like '
+\family sans
+(CatNode 
+\begin_inset Quotes eld
+\end_inset
+
+Fuzzykins
+\begin_inset Quotes erd
+\end_inset
+
+)
+\family default
+'.
+\end_layout
+
+\begin_layout Standard
+To round out this example, it might also be useful to define a '
+\family sans
+CatLink
+\family default
+', which could then be used to link together disparate properties:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(CatLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(PredicateNode 
+\begin_inset Quotes eld
+\end_inset
+
+has
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Node 
+\begin_inset Quotes eld
+\end_inset
+
+fur
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+	(CatLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(PredicateNode 
+\begin_inset Quotes eld
+\end_inset
+
+URL
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Node 
+\begin_inset Quotes eld
+\end_inset
+
+https://example.com/cutie-fuzball.gif
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+This is just generic knowledge representation.
+ Caution: although the metatrees (and metatypes) above are encoding information
+ about cats, they may not be the 
+\begin_inset Quotes eld
+\end_inset
+
+best
+\begin_inset Quotes erd
+\end_inset
+
+ way to represent knowledge.
+ A more conventional approach would be to define '
+\family sans
 IsALink
 \family default
-\emph default
-s, 
+' and '
 \family sans
-\emph on
 HasALink
 \family default
-\emph default
-s and 
+' and '
 \family sans
-\emph on
 PartOfLink
 \family default
-\emph default
-s, together with some reasonable verbs might be able to achieve the same
- goals
-\emph on
- 
-\emph default
-...
- but those are ...
- more types.
- The point here is that there is no need to limit oneself to ints, floats
- and strings, and the object-oriented classes one can build out of these
- primitives.
- There is no need to be constrained by the philosophy of functional programming
- language design.
+': holonyms and meronyms, and use those in one's lexical ontology.
+ There is freedom in how this can be done; there is nothing in the metatrees
+ that is forcing certain types upon the usr, over other types.
+\end_layout
+
+\begin_layout Subsection*
+Properties of a Metagraph Type System
 \end_layout
 
 \begin_layout Standard
-Wait, what? Programming language design?
+In a metagraph, the concept of a primitive type appears to be fluid; new
+ types are naturally definable by means of type inheritance.
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+primitive
+\begin_inset Quotes erd
+\end_inset
+
+, it is meant a type that is not built with one of the usual type constructors:
+ a list constructor, a function-type constructor, a product (pair) constructor.
+ 
+\end_layout
+
+\begin_layout Standard
+There does not seem to be any need to prevent the creation of new types
+ at runtime.
+ This is in contrast to statically-typed programming languages.
+ Languages such as OCaml demand static typing so that type inference can
+ be done at compile time.
+ After a module has been compiled, the resulting binary has an API with
+ fixed types in the interface.
+ This provides safety: the user cannot call into the binary with bogus arguments
+, leading to undefined behavior or crashes.
+ In that sense, static types 
+\begin_inset Quotes eld
+\end_inset
+
+make sense
+\begin_inset Quotes erd
+\end_inset
+
+ for compiled programming languges.
+ The case is different here: with metagraphs, the primary goal is not proramming
+ but data representation.
+ Metagraphs don't 
+\begin_inset Quotes eld
+\end_inset
+
+do anything
+\begin_inset Quotes erd
+\end_inset
+
+, they are not an 
+\begin_inset Quotes eld
+\end_inset
+
+executable program
+\begin_inset Quotes erd
+\end_inset
+
+, they just 
+\begin_inset Quotes eld
+\end_inset
+
+exist
+\begin_inset Quotes erd
+\end_inset
+
+.
+ At least this particular reason for static type-safety seems to disappear.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Signatures and Arrows
+\end_layout
+
+\begin_layout Standard
+It appears that metatree types are also implicit type constructors, in that
+ they are trivially reified.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Reification_(computer_science)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Thus, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ConceptNode 
+\begin_inset Quotes eld
+\end_inset
+
+some
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ConceptNode 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+obviously has the type signature
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Signature_(logic)
+\end_layout
+
+\end_inset
+
+ for the formal definition of a signature, and 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Type_signature
+\end_layout
+
+\end_inset
+
+ for a quotidian, non-abstract working-programmer definition.
+\end_layout
+
+\end_inset
+
+ of
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(SignatureLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode))
+\end_layout
+
+\end_inset
+
+It has two other signatures as well:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(SignatureLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(ConceptNode 
+\begin_inset Quotes eld
+\end_inset
+
+some
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode))
+\end_layout
+
+\end_inset
+
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(SignatureLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(ConceptNode 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This kind of easy reification makes it possible to easily attach complex
+ types to type defintions.
+ Returning to the previous example of a '
+\family sans
+CatLink
+\family default
+', one could write
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(TypeDefinitionLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(TypeNode 
+\begin_inset Quotes eld
+\end_inset
+
+CatLink
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(SignatureLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'PredicateNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'Node)))
+\end_layout
+
+\end_inset
+
+which indicates that the only valid way to use a '
+\family sans
+CatLink
+\family default
+' is as a binary Link, where the first element of the outgoing pair must
+ be a '
+\family sans
+PredicateNode
+\family default
+' and the second must be a '
+\family sans
+Node
+\family default
+' (and not a '
+\family sans
+Link
+\family default
+').
+ There does not appear to be anything challenging to introducing sigma types:
+ one could have written 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(TypeDefinitionLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(TypeNode 
+\begin_inset Quotes eld
+\end_inset
+
+CatLink
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+		(SignatureLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'PredicateNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeChoice
+\end_layout
+
+\begin_layout Plain Layout
+
+				(TypeNode 'Node)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(TypeNode 'Link))))
+\end_layout
+
+\end_inset
+
+which states that the second element of the outgoing pair can be either
+ a Node or a Link.
+ To reiterate: type reification appears to be trivial with metatrees.
+\end_layout
+
+\begin_layout Standard
+To round out the above examples, we present the very common case of the
+ signature of lambdas.
+ Here, the lambda 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(LambdaLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(VariableList
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypedVariable (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+$x
+\begin_inset Quotes erd
+\end_inset
+
+) (TypeNode 'ConceptNode))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypedVariable (Variable 
+\begin_inset Quotes eld
+\end_inset
+
+$y
+\begin_inset Quotes erd
+\end_inset
+
+) (TypeNode 'ConceptNode)))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(FooBarBodyLink  ...))
+\end_layout
+
+\end_inset
+
+obviously must have the signature of
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(ArrowLink
+\end_layout
+
+\begin_layout Plain Layout
+
+		(ListLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(TypeNode 'FooBarBodyLink))
+\end_layout
+
+\end_inset
+
+That is, the arrow points from a list of the input types to a list of the
+ output types.
+\end_layout
+
+\begin_layout Subsection*
+Jigsaw Puzzle Pieces
+\end_layout
+
+\begin_layout Standard
+Caution: the idea of Lambdas, and of Arrows, while extremely widespread
+ in programming practice, is the source of tremendous confusion and difficulty
+ in knowledge representation.
+ Even worse: just as fish are unaware of water, most programmers are unaware
+ of alternatives to lambdas.
+ There is one extremely important alternative, discussed in other texts
+ in this series: the jigsaw puzzle piece, and its tab and slot connectors.
+ Telegraphically: if one has a function 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ and beta-reduces it with 42 to get 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+, one is 'connecting' the jigsaw-puzzle slot 
+\begin_inset Formula $x$
+\end_inset
+
+ in 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ to the jigsaw-puzzle tab 42.
+ That is, beta reduction is an example of jigsaw-puzzle assembly.
+ Now, full-fledged jigsaw puzzle pieces can connect in every-which way (provided
+ that the tabs and slots are correctly mated).
+ This is more general than term algebras, in which term trees are always
+ DAGs.
+ That is, a lambda is an anonymous term, an arrow is a component of a term
+ tree.
+ For computer programming (functional or imperative), one always thinks
+ in terms of calling functions, methods with arguments, leading to the notion
+ of an abstract syntax tree.
+ For knowledge representation, it does not have to be that way.
+ The directionality of the arrow can be discarded, and mating can be indicated
+ with the connectors themselves.
+ That is, the ArrowLink is a special case of a more general jigsaw-puzzle-piece
+ link: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	(ConnectorSeq
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Connector
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(DirectionNode 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Connector
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'ConceptNode)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(DirectionNode 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+		(Connector
+\end_layout
+
+\begin_layout Plain Layout
+
+			(TypeNode 'FooBarBodyLink)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(DirectionNode 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+
+This example fails to show that there can be a vast multitude of directions,
+ beyond just 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The rules for allowed connectivity patterns of conectors lie outside of
+ the definition of individual jigsaw pieces.
+ 
+\end_layout
+
+\begin_layout Standard
+To conclude: metatrees are naturally typed; those types are naturally reified;
+ the reifications are recursive, and the level of recursion is limited by
+ the imagination.
 \end_layout
 
 \begin_layout Section*
 Atomese
+\end_layout
+
+\begin_layout Standard
+Wait, what? Programming language design?
 \end_layout
 
 \begin_layout Standard
