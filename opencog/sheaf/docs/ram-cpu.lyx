@@ -11049,6 +11049,237 @@ Human-oriented vs.
  Machine-oriented
 \end_layout
 
+\begin_layout Standard
+ProLog is a human-oriented programming langauge.
+ It is expected that humans are going to write prolog, and thus the language
+ features are designed to be easy for humans to manipulate.
+ In this sense, it is like almost all programming languages – almost all,
+ but not all.
+\end_layout
+
+\begin_layout Standard
+The intermediate languages are not human-orineted, but machine oriented.
+ It is not expected that programmers will be writing in intermediate languages,
+ no more than they are expected to write in assembly code.
+ Intermediate languages are designed to be easy to use by machines: specifically
+, by the internal algorithms of compilers.
+ A compiler needs to turn high-level languages into assembly code.
+ The resulting assembly code should run fast; but how to perform the optimizatio
+n, the rearrangement of terms that enables fast assembly? Some compiler
+ optimizations can be done directly on the input source: for example, loop
+ hoisting.
+ Some comiler optimizations can be done directly on the assembly: for example,
+ peephole optimizations.
+ The vast majority of desirable program transformations cannot be done in
+ either the source language or the target language.
+ This is why intermediate languages exist.
+ Intermediate languages are fine-tuned to make it easy for algorithms to
+ read and write them.
+ They are designed for machines, and not for people.
+\end_layout
+
+\begin_layout Standard
+It appears that any kind of programming language constructed from raw metatree
+ s-expressions is more machine freindly than it is human-freindly.
+ The example given earlier:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+		(IfLink
+\end_layout
+
+\begin_layout Plain Layout
+
+			(GreaterThanLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+			(PlusLink
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+				(VariableNode 
+\begin_inset Quotes eld
+\end_inset
+
+b
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\end_inset
+
+is stunningly verbose, as compared to the far more abstract 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+if (a > b) return a+b;
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Although humans could write metagraph programs using the s-expression represent
+ation, it would be rather tedious to type up, and rather painful to read.
+\end_layout
+
+\begin_layout Standard
+To conclude: although some metatrees might be executable or evaluatable,
+ and thus constitute a programming language, it does not appear to be a
+ language that is particularly human-freindly, at least, not in it's s-expressio
+n representation.
+\end_layout
+
+\begin_layout Standard
+Lets ruminate one more paragraph on this.
+ One 
+\emph on
+could
+\emph default
+ create a human-readable language on top of of metatree s-expressions.
+ There have been at least two larger efforts: 
+\begin_inset Quotes eld
+\end_inset
+
+ghost
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/Ghost
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+MeTTa
+\begin_inset Quotes erd
+\end_inset
+
+,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/wikihome/images/b/b7/MeTTa_Specification.pdf
+\end_layout
+
+\end_inset
+
+ which can be found in the 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/Hyperon:Atomese
+\end_layout
+
+\end_inset
+
+ wiki page.
+\end_layout
+
+\end_inset
+
+ as well as some lesser efforts (a chatbot triplestore).
+ Doing so defeats the machine-readability of the s-expressions themselves.
+ Much of the primary utility of using metatrees comes from being able to
+ apply graph rewriting rules to them.
+ A graph rewrite rule consists of a pattern template to be matched, and
+ the resultant transformation.
+ When the template is an s-expression, of the kind given in the section
+ on MetaQuery Language, then it is easy to match.
+ When it is something else, the application of the pattern rules becomes
+ difficult.
+ The pattern language can no longer be simple, and worse, the pattern language
+ diverges from the source language itself.
+ The s-expression form seems to hit a happy medium: the pattern language
+ is a valid supset of the whole language.
+ It is easy to parse, making it ideal for algorithmic manipulation.
+ It is too low-level to make it comfortable for humans; but given that we
+ live in a machine age, this is perhaps a not unepected twist.
+\end_layout
+
 \begin_layout Section*
 Atomese
 \end_layout
@@ -11143,11 +11374,10 @@ Metagraphs are foundational, providing a common platform for a broad variety
 
 \begin_layout Itemize
 Metagraphs are low-level.
-\end_layout
-
-\begin_layout Itemize
-a powerful under-girding for symbolic computing, not just for representing
- knowledge, but also carrying out the computations themselves.
+ They appear to be ideal for algorithmic manipulation.
+ They are sufficiently human-readable to allow daily authoring, but they
+ are not a substitute for a proper high-level programming language targeting
+ humans as the programmers.
 \end_layout
 
 \begin_layout Standard
