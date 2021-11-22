@@ -10321,7 +10321,7 @@ To conclude: metatrees are naturally typed; those types are naturally reified;
 \end_layout
 
 \begin_layout Section*
-Evaluation, Execution, Atomese
+Evaluation / Execution
 \end_layout
 
 \begin_layout Standard
@@ -10484,6 +10484,12 @@ Let's not be silly.
  As a metatree, it is as good as any other, differing only in having the
  hint of being possibly, potentially evaluatable.
  
+\end_layout
+
+\begin_layout Standard
+A subset of metatrees can be considered to be a programming language.
+ This may appear to be self-evident; that this has not been the case historicall
+y is demonstrated in the comments below.
 \end_layout
 
 \begin_layout Subsection*
@@ -10717,16 +10723,20 @@ What is new here is that, if the metagraphs are reprsented as s-expressions,
  evaluator.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 ProLog
 \end_layout
 
 \begin_layout Standard
-Perhaps this seems dubious.
- The core issue is most easily exposed by looking at something like ProLog.
- It's a programming language, of course.
- It makes abstract syntax trees fairly explicit: it is hard to understand
- how prolog works, unless one learns to think in terms of trees.
+An alternative to the lisp/scheme fexpr/$vau mindset is provided by ProLog.
+ It is both a programming language, in that ProLog programs are executable,
+ and it is a knowledge store, in that the Datalog fragment of ProLog is
+ explicitly intended to store data.
+\end_layout
+
+\begin_layout Standard
+ProLog makes abstract syntax trees explicit: it is hard to understand how
+ prolog works, unless one learns to think in terms of trees.
  Certainly, the 
 \begin_inset Quotes eld
 \end_inset
@@ -10752,12 +10762,12 @@ status open
 
 \begin_layout Plain Layout
 
-		father_child(tom, erica).
+		parent_child(tom, erica).
 \end_layout
 
 \begin_layout Plain Layout
 
-		father_child(mike, tom).
+		parent_child(mike, tom).
 \end_layout
 
 \begin_layout Plain Layout
@@ -10782,8 +10792,8 @@ not
 This last observation becomes truly bizarre, if one imagines some non-trivial
  knowledge representation problem.
  Imagine keeping census data in prolog.
- Maintaining a text file with dozens of lines of code for millions of people
- is absurd.
+ Maintaining a text file with dozens of lines of code per person, for millions
+ of people is absurd.
  Applying transformations or graph rewrites is impossible for text files.
  Consider the inference 
 \begin_inset Quotes eld
@@ -10923,7 +10933,7 @@ separation of concerns
  even cloudier.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Intermediate Languages
 \end_layout
 
@@ -10939,11 +10949,72 @@ intermediate languages
 
 .
  For Microsoft, this is the CIL or Common Intermediate Language.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Common_Intermediate_Language
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  For Gnu GCC, it is GIMPLE.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://gcc.gnu.org/wiki/GIMPLE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  For LLVM, it is the LLVM IR.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://hub.packtpub.com/introducing-llvm-intermediate-representation/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  These are somewhat like assembly code, but abstract, and not specific to
- CPU hardware.
- They encode abstract syntax trees, and thus sit above the bytecode layer.
+ CPU instruction sets.
+ They encode abstract syntax trees, and thus sit above the bytecode/instruction-
+set layer.
  Looking carefully, one will observe that 
 \begin_inset Quotes eld
 \end_inset
@@ -10962,8 +11033,8 @@ compiler optimization
 Of course, what happens inside a compiler is very narrow, and very carefully
  crafted to suite the needs of the compiler, and nothing more.
  This is a high art that has been honed over many decades.
- Intermediate languages are almost never written to disk, except as text
- strings.
+ Intermediate languages are almost never written to disk, except during
+ debugging, when they are presented to the programmer as text strings.
  Yet the lessons they teach can be taken as generic: creating graphs, and
  then transforming them, via graph re-writing, is a generically useful operation.
  Representing knowledge as trees, and specifically, as typed meta-trees,
@@ -10973,85 +11044,38 @@ Of course, what happens inside a compiler is very narrow, and very carefully
  writing inferences in prolog really is a lot easier than writing SQL statements.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
+Human-oriented vs.
+ Machine-oriented
+\end_layout
+
+\begin_layout Section*
 Atomese
 \end_layout
 
 \begin_layout Standard
-The above seems to be saying 
-\begin_inset Quotes eld
-\end_inset
-
-typed metatrees are a programming language
-\begin_inset Quotes erd
-\end_inset
-
-.
- This is true, and in the OpenCog AtomSpace, it actually is a language,
- called 
-\begin_inset Quotes eld
-\end_inset
-
-Atomese
-\begin_inset Quotes erd
-\end_inset
-
-.
- But what kind of language is it? Well, if one abstains from providing some
- large collection of Link and Node types, then the answer is 
-\begin_inset Quotes eld
-\end_inset
-
-any kind at all
-\begin_inset Quotes erd
-\end_inset
-
-.
- The metatrees provide just enough structure, just enough groundwork, to
- create your own language.
- This is vaguely comparable to lex and yacc: these are just some basic tools
- that allow competent users to design custom, user-defined languages.
- Likewise here: metatrees offer the toolset needed to design a custom knowledge
- representation system.
- Perhaps offering a built-in 
-\family sans
-\emph on
-IfLink
-\family default
-\emph default
-, 
-\family sans
-\emph on
-GreaterThanLink
-\family default
-\emph default
-, 
-\family sans
-\emph on
-PlusLink
-\family default
-\emph default
- and 
-\family sans
-\emph on
-VariableNode
-\family default
-\emph default
- is a good idea, and perhaps not.
- Nothing compels a metagraph database system to offer these; at the same
- time, it makes it easy to offer these.
- To some large degree, it is sufficient to offer a typed metagraph storage
- system, and nothing more.
+Almost all of the various ideas articulated in this text have been implemented
+ in the OpenCog Atomspace, nominally going under the name of Atomese.
+ Historically, it was created to be a knowledge representation system in
+ which probabilisitc reasoning could be performed.
+ Regular use and the pressures of user demands force the sharpening of various
+ concepts and features, most of which have been reviewed above.
 \end_layout
 
 \begin_layout Standard
-The OpenCog AtomSpace does this, but it also tacks on more than 100 different
- predefined Atom types.
- This is effectively a historical accident, having to do with how it evolved.
- A strong case could be made for splitting out this vast assortment of predefine
-d types into their own module.
- This is easier said than done; the AtomSpace continues to be a research
- platform for the concepts described here.
+The platform continues to be deployed in production systems, while also
+ being an experimental platform for the development of new ideas.
+ As these are found to be sound, the system does, as a whole, mutate.
+ 
+\end_layout
+
+\begin_layout Standard
+If the reader of this text finds any of the above concepts to be dubious,
+ or perhaps ill-defined and in need of sharpening, they are encouraged to
+ contact the mailing list.
+ The AtomSpace, and Atomese are malleable.
+ Bad ideas do need to be replaced by good ones.
+ 
 \end_layout
 
 \begin_layout Section*
@@ -11073,6 +11097,12 @@ Metagraphs are more representationally compact than graphs.
 \end_layout
 
 \begin_layout Itemize
+Metagraph query is more general than SQL-inspired query systems, and breaks
+ out of the table-join paradigm that is most commonly offered in graph-query
+ systems.
+\end_layout
+
+\begin_layout Itemize
 Table normalization, normally an intellectually demanding task for relational
  database design, comes 
 \begin_inset Quotes eld
@@ -11091,13 +11121,33 @@ Specifying metagraphs as text strings is easier than specifying graphs as
 \end_layout
 
 \begin_layout Itemize
-Typed metatrees can be abstract syntax trees; ordinary graphs cannot.
+Metatrees are naturally typed.
+ Ordinary graphs are not.
 \end_layout
 
 \begin_layout Itemize
-Typed metagraphs provide a powerful under-girding for symbolic computing,
- not just for representing knowledge, but also carrying out the computations
- themselves.
+Metatrees are naturally (even trivially) reified.
+ Ordinary graphs are not.
+\end_layout
+
+\begin_layout Itemize
+Metatrees are naturally abstract syntax trees; this is possible but not
+ natural when working with ordinary graphs.
+\end_layout
+
+\begin_layout Itemize
+Metagraphs are foundational, providing a common platform for a broad variety
+ of computing tasks: ranging from data storage, to symbolic computing and
+ inference, to functional (or imperative) programming.
+\end_layout
+
+\begin_layout Itemize
+Metagraphs are low-level.
+\end_layout
+
+\begin_layout Itemize
+a powerful under-girding for symbolic computing, not just for representing
+ knowledge, but also carrying out the computations themselves.
 \end_layout
 
 \begin_layout Standard
