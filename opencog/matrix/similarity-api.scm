@@ -369,12 +369,13 @@
 		; Loop over the entire list of items, and compute similarity
 		; scores for them.  Hacked parallel version.
 		; XXX FIXME -- due to guile locking flakiness, setting NTHREADS
-		; to any vaue bigger than 3 results in a net slow-down, and even
+		; to any value bigger than 3 results in a net slow-down, and even
 		; for NTHREADS=3, it can be pretty bad suckage, as the system
 		; starts thrashing due to some kind of live-lock like thing.
 		; The root cause for this is unclear. It may be thrashing on the
 		; locks in the AtomSpace. The current guile bindings hit the
-		; AtomSpace surprisingly often.
+		; AtomSpace surprisingly often. See issue #2553 for a possible
+		; solution.
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
