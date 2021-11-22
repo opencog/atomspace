@@ -10487,11 +10487,11 @@ Let's not be silly.
 \end_layout
 
 \begin_layout Subsection*
-Fexprs
+Fexprs, Macros and Rewriting
 \end_layout
 
 \begin_layout Standard
-In lisp, abstract syntax trees are called 
+In lisp, functions that act on abstract syntax trees are called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10520,7 +10520,201 @@ https://en.wikipedia.org/wiki/Fexpr
 
 \end_inset
 
+ Modern lisps no longer explicitly support fexprs; an influential paper
+ from 1980 labelled them as harmful, and made the argument that macros were
+ superior.
+ 
+\end_layout
 
+\begin_layout Standard
+That's all well and good, but macros, as defined in lisp/scheme, can only
+ be 
+\begin_inset Quotes eld
+\end_inset
+
+run once
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Macros run on source expressions, and they expand the source expression
+ into something evaluatable.
+ That is, macro languages allow the programmer to define a set of rewrite
+ rules to transform input syntx trees into output syntax trees.
+ However, conceived of as macros, they can only be run once, during a pre-proces
+sing stage; they cannot be run later, once the resulting program has started
+ executing.
+ In this sense, they are limited in a way that fexprs are not.
+\end_layout
+
+\begin_layout Standard
+This is in sharp contrst to the needs of predicate logic
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/First-order_logic
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ and proof theory.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Proof_theory
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Theorem provers are constructed out of term rewriting systems.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Rewriting
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Abstract_rewriting_system
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Note that SQL does offer a poor-mans term rewriting system.
+ It is not general, and not suited to the general needs of term rewriting,
+ but it is plenty enough to enable 
+\begin_inset Quotes eld
+\end_inset
+
+data processing
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+And I do mean 
+\begin_inset Quotes eld
+\end_inset
+
+data processing
+\begin_inset Quotes erd
+\end_inset
+
+ in all of its glorous 1960's generality: performing database queries to
+ associate an electric utility customer's account with thier electric usage
+ for thatt month, and thier mailing address, and print a bill to be mailed
+ to the customer.
+ This is, in a sense, quintessential data processing, and central to it
+ is the database holding names, accounts and monthly usages.
+\end_layout
+
+\end_inset
+
+ For example
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "basicstyle={\small\sffamily},tabsize=3"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	CREATE TABLE foo (name TEXT, number INT);
+\end_layout
+
+\begin_layout Plain Layout
+
+	CREATE TABLE bar (person TEXT, phone INT, nickname TEXT);
+\end_layout
+
+\begin_layout Plain Layout
+
+	INSERT INTO bar(person, phone) SELECT name, number FROM foo;
+\end_layout
+
+\end_inset
+
+performs a rewrite of records (rows) from one table to another.
+ Some sort of ability to perform rewrites is innate to any database system,
+ as a primary need is not only to store data, but to perform transformations
+ on it.
+ These transformations must be done at run-time, dynamically; they cannot
+ be done at 
+\begin_inset Quotes eld
+\end_inset
+
+compile time
+\begin_inset Quotes erd
+\end_inset
+
+, the way that the lisp/scheme macro system performs them.
+\end_layout
+
+\begin_layout Standard
+It should be clear that metagraphs in and of themselves are fairly useless
+ without some sort of term rewriting system to go along with them; this
+ was already implied in the earlier discussions concerning database queries.
+ 
+\end_layout
+
+\begin_layout Standard
+What is new here is that, if the metagraphs are reprsented as s-expressions,
+ some of those s-expressions are potentially evaluatable, and thus lisp-like.
+ Unlike conventional lisp, the evaluation system must live in harmony with
+ the term rewriting sytem; thus, enabling the evaluation of metatrees seems
+ to require some sort of clearly defined fexpr or $vau interfaces in the
+ evaluator.
 \end_layout
 
 \begin_layout Subsubsection*
