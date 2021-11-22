@@ -10321,20 +10321,43 @@ To conclude: metatrees are naturally typed; those types are naturally reified;
 \end_layout
 
 \begin_layout Section*
-Atomese
+Evaluation, Execution, Atomese
 \end_layout
 
 \begin_layout Standard
-Wait, what? Programming language design?
+Metatrees generalize the notion of trees.
+ A special case of trees are the 
+\begin_inset Quotes eld
+\end_inset
+
+abstract syntax tree
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Abstract_syntax_tree
 \end_layout
 
-\begin_layout Standard
-Metagraphs fit well with type theory: it is easy, effectively trivial to
- represent product types, sum types and function signatures with metagraphs.
- This, in turn, opens the door to a very unusual property of metagraphs:
- they can be interpreted as programs.
- To illustrate, consider the case of an abstract syntax tree.
- Conventionally, one says that an expression, such as 
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ The denotational semantics of abstract syntax trees is that they are executable
+ programs.
+ Thus an expression such as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10348,22 +10371,7 @@ if (a > b) return a+b;
 \begin_inset Quotes erd
 \end_inset
 
- can be represented by an abstract syntax tree.
- This is a tree where each internal node of the tree is one of the operators:
- plus, greater-than, if().
- Leaves are variables or constants.
-\end_layout
-
-\begin_layout Standard
-For the case of (typed) metatrees, the representation is 
-\begin_inset Quotes eld
-\end_inset
-
-obvious
-\begin_inset Quotes erd
-\end_inset
-
-:
+ can be represented by an abstract syntax tree, given below:
 \end_layout
 
 \begin_layout Standard
@@ -10445,60 +10453,74 @@ b
 \end_layout
 
 \begin_layout Standard
-This not only represents the expression 
-\begin_inset Quotes eld
+As such, some metatrees can serve a dual purpose: both to record syntactic
+ structure, and to be executable.
+ Perhaps this feels painfully obviois at this point; if this is the case,
+ it should be contrasted to the situation of programming in lisp or scheme.
+ First of all, in lisp, one is programming, not representing data.
+ The source code for lisp programs resides in files, not in databases.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Let's not be silly.
+ Of course one could stick the source code into a database.
+ But how would you write a query to get it back out, and evaluate it? In
+ lisp? Well, yes, of course, one could write some wrappers to do that.
+ So what? Are you representing knowledge yet? Did you create a knowledge
+ query system?
+\end_layout
+
 \end_inset
 
+ In the end, a lisp program is always executable (evaluatable); if it is
+ not, that is because it is broken in some way.
+ This is not the case here: there is nothing about metatrees that makes
+ them inherently evaluatable or executable.
+ Indeed, the above fragment is not executable until the variables are bound
+ to some values.
+ Worse, its ambiguous as to what should happen if a is not grater than b.
+ As a program, it is not really valid.
+ As a metatree, it is as good as any other, differing only in having the
+ hint of being possibly, potentially evaluatable.
+ 
+\end_layout
 
-\family sans
-\emph on
-if (a > b) return a+b;
-\family default
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- but it can also be made active: when supplied with values for the variables,
- the comparison and the addition can be explicitly performed.
+\begin_layout Subsection*
+Fexprs
 \end_layout
 
 \begin_layout Standard
-This is a key property that (typed) metatrees have, and that ordinary (typed
- or untyped) graphs do not.
- Ordinary graphs are not, in general, DAGs: they can contain cycles.
- Erecting an abstract syntax tree structure on an ordinary graph store is
- not natural; one must impose some representational constraints.
- Now, of course, one could limit oneself to using only DAG's, but any sane,
- normal designer of any graph store would strenuously object to adding executabl
-e graphs as a fundamental property of the graph store itself.
- The execution of expressions is 
+In lisp, abstract syntax trees are called 
 \begin_inset Quotes eld
 \end_inset
 
-orthogonal
-\begin_inset Quotes erd
-\end_inset
-
- to the storage of graphs.
- These tasks have 
-\begin_inset Quotes eld
-\end_inset
-
-orthogonal concerns
-\begin_inset Quotes erd
-\end_inset
-
- or 
-\begin_inset Quotes eld
-\end_inset
-
-non-overlapping concerns
+fexprs
 \begin_inset Quotes erd
 \end_inset
 
 .
- Strangely, metatrees erase that orthogonality.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Fexpr
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
