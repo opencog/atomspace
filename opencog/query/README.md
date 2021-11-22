@@ -835,9 +835,22 @@ TODO
    in a temporary AtomSpace, but this is ... kind-of-ish icky?
    Can we do something nicer, here?
 
- * AtomSpaces are done wrong. Grounding should always be performed
-   in the same AtomSpace that the BindLink is in.  This should be fetched
-   directly from the bind-link, and not passed as a third-party parameter.
+A reading list of ideas
+-----------------------
+Ideas for future changes, enhancements, redesigns might be stolen from
+these sources:
+
+* [The Kernel Programming Language](http://web.cs.wpi.edu/~jshutt/kernel.html)
+  This is a dialect of Scheme being developed by John N. Shutt. It
+  proposes that lambda can be spilt into two parts: the first part which
+  is a "combiner" and a second part which is an "evaluator of arguments".
+  This idea resonates for the query engine, because `class Instantiator`
+  is an uneasy mix of lazy and eager evaluation of arguments, a collection
+  of ad hoc prescriptions to do what seems right on a case-by-case basis.
+  This has always been a bit thorny, a bit of a ball of spaghetti. Similar
+  issues arise in other places where beta reduction is being done. I
+  suspect that something better can be done, but the overall situation
+  remains murky. Keywords: $vau, wrap, unwrap.
 
 Document Status
 ---------------
