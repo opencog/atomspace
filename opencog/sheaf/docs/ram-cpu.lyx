@@ -8131,22 +8131,137 @@ Note, by the way, that the goals of a knowledge representation system resemble
  But we wander off-track, here; this is a different topic.
 \end_layout
 
+\begin_layout Standard
+Assorted OpenCog documentation and web pages refer to the query engine as
+ 
+\begin_inset Quotes eld
+\end_inset
+
+the pattern matcher
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is misleading, as much of the tech industry understands 
+\begin_inset Quotes eld
+\end_inset
+
+pattern matchers
+\begin_inset Quotes erd
+\end_inset
+
+ to be simple finite state machines with pattern languages.
+ The actual OpenCog system is as described above, a stack machine capable
+ of recursive multi-component graph walks.
+\end_layout
+
+\begin_layout Subsection*
+Query Analysis
+\end_layout
+
+\begin_layout Standard
+Graphs may include equality predicates.
+ In rare cases, these can be statically analyzed, without performing a query.
+\end_layout
+
+\begin_layout Standard
+A full-fledged query language can include evaluatable predicates to accept
+ or reject a paricular grounding.
+ During the analysis phase, these are set aside into a distinct bucket.
+ They cannot be grounded (by definition), they can only be evaluated after
+ a grounding is found.
+\end_layout
+
+\begin_layout Standard
+Some evaluatable predicates, such as 
+\begin_inset Quotes eld
+\end_inset
+
+less than
+\begin_inset Quotes erd
+\end_inset
+
+, may cause a graph to fall apart into disjoint, disconnected components
+ that are bridged only by evaluatable terms.
+ During the analysis phase, the connected components must be identified
+ and set aside.
+ During evaluation of the query, each connected component is grounded separately
+, and then brought together, to evaluate 
+\begin_inset Quotes eld
+\end_inset
+
+less than
+\begin_inset Quotes erd
+\end_inset
+
+ on the resulting groundings.
+ Evaluatable terms, such as 
+\begin_inset Quotes eld
+\end_inset
+
+less than
+\begin_inset Quotes erd
+\end_inset
+
+, act as a filter on the cartesian product of the components.
+ Terms such as logical-or act on the disjoint union of the components.
+ That is, both pi-type and sigma-type arrangements of disjoint components
+ are possible.
+\end_layout
+
+\begin_layout Standard
+A full-fledged query language can include an '
+\family sans
+Absent
+\family default
+' predicate, indicating one or more clauses that must be absent in the dataset,
+ in order for the query to be satisfied.
+ Such clauses are extracted and set aside during the analysis phase.
+ They resemble evaluatable clauses, but have their own distinct peculiarities.
+\end_layout
+
+\begin_layout Standard
+A full-fledged query language can include an '
+\family sans
+Always
+\family default
+' predicate, required to be present in not just one grounding, but in every
+ grounding.
+ They resemble evaluatable clauses, but they cannot be evaluated until all
+ possible groundings have been obtained.
+\end_layout
+
 \begin_layout Subsection*
 Query Planning
 \end_layout
 
 \begin_layout Standard
-There is little to be said about query planning, other than to notice that
- performing a query requires a graph walk.
+The most basic query planning involves choosing a starting point for a graph
+ walk.
  Thanks to the incoming set, the query can be started anywhere.
- It is advantageous to start the graph walk at the thinnest, most distant
- part of the graph, so that it does not need to be regularly revisted.
+ However, it is advantageous to start the graph walk at the thinnest, most
+ distant part of the graph, so that it does not need to be regularly revisted.
 \end_layout
 
 \begin_layout Standard
-Similarly, it is advantageous to borrow some ideas from SAT solving, and
- prune simple trees from the query, before performing an exhaustive search
- of a multiply-conneted tight nucleus.
+Sometimes, finding a starting point is this way is impossible, because the
+ query consists entirely of variables.
+ In other cases, a query may consist entirely of evaluatable terms, which,
+ by definition, are not groundable, but only evaluatable.
+ These cases must be dealt with.
+\end_layout
+
+\begin_layout Standard
+Queries may consist of multiple disconnected components; these must be individua
+lly grounded, and then reassembled with pi-type or sigma-type bridges between
+ them.
+ 
+\end_layout
+
+\begin_layout Standard
+It is advantageous to borrow some ideas from SAT solving, and prune simple
+ trees from the query, before performing an exhaustive search of a multiply-conn
+eted tight nucleus.
  The pruned trees can be re-attached later.
  Equivalently, they might only need to be pattern-matched once.
  In this case, pruing is equivalent to maintaining a cache of pattern matches
@@ -8158,7 +8273,7 @@ Similarly, it is advantageous to borrow some ideas from SAT solving, and
 \end_layout
 
 \begin_layout Standard
-The OpenCog query engine makes use of both of these query optimizations.
+The OpenCog query engine makes use of these query optimizations.
 \end_layout
 
 \begin_layout Subsection*
@@ -8591,7 +8706,12 @@ like
 \begin_inset Quotes erd
 \end_inset
 
-) (Word 
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -8674,7 +8794,12 @@ I
 \begin_inset Quotes erd
 \end_inset
 
-) (Word 
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+			(Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -8695,10 +8820,6 @@ too!
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 The reading of this content is as follows:
 \end_layout
 
@@ -8909,159 +9030,15 @@ That chatbots can be unified with conventional query is perhaps one of the
 \end_layout
 
 \begin_layout Section*
-Types and Atomese
+Types
 \end_layout
 
 \begin_layout Standard
-Lets return to the string expression 
-\begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
-\end_inset
-
-.
- Since nodes and links (atoms) are unique, the subscripts on the hyperedges
- are not required.
- Nor is the use of the colon.
- The above is representable with the S-expression
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-one
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
-))
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
-))
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Node 
-\begin_inset Quotes eld
-\end_inset
-
-one
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-					(Node 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
-)))
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Node 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
-))
-\end_layout
-
-\end_inset
-
-Just as with JSON, the same considerations about repeated objects apply.
+It was observed above that metatrees have a natural string representation
+ as s-expressions.
+ Every system that works with s-expressions gives a priviledged interpretation
+ to the first word after an open parenthesis.
+ In Lisp and Scheme, that first word is an operator.
 \end_layout
 
 \begin_layout Subsection*
@@ -9297,7 +9274,7 @@ s, together with some reasonable verbs might be able to achieve the same
 Wait, what? Programming language design?
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section*
 Atomese
 \end_layout
 
