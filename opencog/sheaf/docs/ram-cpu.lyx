@@ -104,49 +104,63 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-19 Nov 2021 Version 2.0
+22 Nov 2021 Version 2.0
 \end_layout
 
 \begin_layout Abstract
 This text reviews the concepts of a graph store, starting from the fundamental
  question of how to efficiently represent a graph in RAM (that is, in storage).
  Starting with a naive conception of a graph database, it arrives at hypergraphs
- and metagraphs as simpler and more efficient representations for graphical
- data.
+ and metagraphs minor modifications to the definition of a graph.
+ The resulting structure proves to be simpler and more efficient for representat
+ing graphical data.
 \end_layout
 
 \begin_layout Abstract
-Even stronger claims are made: metagraph databases are easier to use than
- graph databases.
- The structure and contents of a metagraph database is easier to understand.
- Algorithms that act on a metagraph database are simpler, more compact,
- and easier to write, than corresponding algorithms for graph databases.
- This is really quite remarkable, and seems to come 
-\begin_inset Quotes eld
-\end_inset
-
-for free
-\begin_inset Quotes erd
-\end_inset
-
- with just a minor change in perspective.
+This starts a domino chain of claims.
+ Metagraphs are more flexible than either graph stores or SQL-style table
+ stores or JSON-stores for storing data.
+ Metagraphs have a natural query langauge that is more powerful and easier
+ to use than SQL-inspired query languages, mostly because the table-join
+ concept is obviated and replaced by isomorphism.
+ 
 \end_layout
 
 \begin_layout Abstract
-Once one arrives at the concept of a metagraph (and arrives at it quite
- naturally, through minor modifications of an ordinary graph store), there
- is then a rather remarkable and easy slide down-hill that culminates at
- the OpenCog AtomSpace and Atomese as a (near-)optimal design point.
- The metagraph representation is remarkably flexible and powerful tool for
- representing data (representing knowledge) and working with (manipulating,
- rewriting) that data.
+It is easy to specify a term rewriting system with metagraphs; it is a trite
+ extension of having a query system.
+ Both forward and reverse queries are natural, and so metagraphs provide
+ a solid foundation for rule-based systems.
 \end_layout
 
 \begin_layout Abstract
-This is part of a sequence of texts on sheaves, although it does not explicitly
- mention these.
- It is a mandatory pre-requisite for understanding the further efficiencies
- and flexibility that sheaves provide.
+Metagraphs are naturally typed, in the sense of type theory.
+ Metagraphs are easily reified, and so the type system is itself trivially
+ expressible as metagraphs.
+ 
+\end_layout
+
+\begin_layout Abstract
+Metagraphs can be used to specify a programing system/language, but that
+ language is low-level, and not really suitable for humans.
+ It is ideal for algorithmic (machine) manipulation, analogous to intermediate
+ languages inside of compilers.
+\end_layout
+
+\begin_layout Abstract
+Most of these claims are experimental results, rather than assertions or
+ theoretical results.
+ The experimental platform is the OpenCog AtomSpace and Atomese language.
+\end_layout
+
+\begin_layout Abstract
+This is part of a sequence of texts on sheaves (
+\emph on
+a la
+\emph default
+ sheaf theory).
+ It is a pre-requisite for understanding the practical foundations on which
+ sheaves can be built.
 \end_layout
 
 \begin_layout Section*
