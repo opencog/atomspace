@@ -396,11 +396,46 @@ A discusion of human-oriented programming languages vs.
  as a programming language which human beings would want to use on a daily
  basis.
  Instead, they have more in common with compiler intermediate languages,
- which 
+ which are term rewriting systems used by machines (compilers) to perform
+ transformations on data.
 \end_layout
 
-\begin_layout Itemize
-A short review of how meta-trees are used to represent knowledge.
+\begin_layout Standard
+As a conclusion, it is noted that the OpenCog AtomSpace has been the experimenta
+l platform on which all of the above results have been obtained, and embodies
+ the most of the ideas presented here.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/AtomSpace
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/opencog/atomspace
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
@@ -10884,7 +10919,7 @@ It should be clear that metagraphs in and of themselves are fairly useless
  without some sort of term rewriting system to go along with them; this
  was already implied in the earlier discussions concerning database queries.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Maude is an example of a term rewriting system disassociated from theorem
@@ -11602,6 +11637,18 @@ tional properties (including CPU and RAM usage).
  fairly mature, having more than a decade of implementation and use experience
  behind it.
  This text gives a flavor of where it has arrived.
+\end_layout
+
+\begin_layout Section*
+Thanks
+\end_layout
+
+\begin_layout Standard
+The second revision of this text has benefited from the (witting or unwitting)
+ helpful input of Amirouche Boubekki, Kino Coursey, John Cowan, Marc Nieper-Wißk
+irchen, Adam Vandervorst and Steven Wiley.
+ Absolutely none of this would have been possible without a decade's worth
+ of gracious support and tutelege of Ben Goertzel.
 \end_layout
 
 \begin_layout Standard
