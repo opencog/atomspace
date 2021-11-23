@@ -254,9 +254,16 @@ opposite category
 \begin_inset Quotes erd
 \end_inset
 
- best termed coSQL.) A key observation is that metagraphs unavoidably have
- a certain kind of index built into them; they come equiped with a (partial)
- index.
+ best termed coSQL.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+) A key observation is that metagraphs unavoidably have a certain kind of
+ index built into them; they come equiped with a (partial) index.
 \end_layout
 
 \begin_layout Itemize
@@ -6133,8 +6140,8 @@ if that's the case, then why graphs?
 \begin_layout Standard
 The aim of this section is to make this thought process overt, and show
  how there might be QL's that are not SQL clones.
- It begins by reviewing the actual strucure of metgraphs, and then examines
- how they compare to conventional table queries.
+ It begins by (once again) reviewing the actual strucure of metgraphs, and
+ then examines how they compare to conventional table queries.
 \end_layout
 
 \begin_layout Subsection*
@@ -6184,7 +6191,7 @@ noprefix "false"
 
 \begin_layout Standard
 The dotted arrows are back-pointers from lower levels to higher levels:
- the are the incoming set pointers, in contrast to the solid arrows, which
+ they are the incoming set pointers, in contrast to the solid arrows, which
  show the outgoing links.
  They are almost in one-to-one correspondance, but not quite: notice there
  is only one dotted arrow from 
@@ -6199,9 +6206,9 @@ The dotted arrows are back-pointers from lower levels to higher levels:
 \end_layout
 
 \begin_layout Standard
-The back-pointers are needed to maake the graph full traversible; that is
+The back-pointers are needed to make the graph fully traversible; that is
  the topic of this section.
- The back-pointers do et up RAM; but this RAM usage has already been counted,
+ The back-pointers do eat up RAM; but this RAM usage has already been counted,
  above.
  Here, it is only the diagram that has been corrected to more appropriately
  show the actual situation.
@@ -6297,7 +6304,11 @@ status open
 
 \end_inset
 
-The new root points to two existing metatrees: 
+The new root 
+\begin_inset Formula $e_{5}$
+\end_inset
+
+ points to two existing metatrees: 
 \begin_inset Formula $e_{2}$
 \end_inset
 
@@ -6308,7 +6319,8 @@ The new root points to two existing metatrees:
 ; neither has been modified.
  The point here is that immutability does not conflict with creation and
  deletion.
- 
+ Creation and deletion do alter the weak pointers/incoming sets, but not
+ the metagraph itself.
 \end_layout
 
 \begin_layout Subsection*
@@ -6321,11 +6333,12 @@ What do weak incoming sets have to do with queries? That they allow complete
  arrows (both regular and weak pointers) to be able to take walks from any
  Atom to any other.
  But are these really needed? The aim here is to show that the answer is
- 'yes'.
+ 'yes', they really are.
 \end_layout
 
 \begin_layout Standard
-As an initial example, consider a treewalk starting at 
+As an initial example, consider the metatree without the incoming-set pointers.
+ Consider a treewalk starting at 
 \begin_inset Formula $e_{4}$
 \end_inset
 
@@ -6344,7 +6357,7 @@ As an initial example, consider a treewalk starting at
 \end_inset
 
 .
- Implemented as a stack machine, the nex step is to pop, and then visit
+ Implemented as a stack machine, the next step is to pop, and then visit
  
 \begin_inset Formula $n_{2}$
 \end_inset
@@ -6354,7 +6367,7 @@ As an initial example, consider a treewalk starting at
 \begin_inset Formula $e_{3}$
 \end_inset
 
- and traversal procees as normal.
+ and traversal proceeds as normal.
  Nowhere in this stack machine recursion is it possible to visit 
 \begin_inset Formula $e_{5}$
 \end_inset
@@ -6380,7 +6393,7 @@ As an initial example, consider a treewalk starting at
 
 \begin_layout Standard
 But is this relevant in any real-world application? Consider the following
- interpretation of the above diagram, where the Nodes is individuals, taking
+ interpretation of the above diagram, where the Nodes are individuals, taking
  school classes and working part-time jobs:
 \end_layout
 
@@ -6726,9 +6739,9 @@ status open
 The need to denote employment adds a challenge to representing everything
  properly with tables, but is not relevant to the query about the schools
  that Rachel attends.
- Mostly, we just note that, even for this rather simple graph, there already
- is a profusion of tables with some rather complex relationships between
- one-another.
+ Mostly, we just observe that, even for this rather simple graph, there
+ already is a profusion of tables with some rather complex relationships
+ between one-another.
  Textbooks insist that normalization is the correct thing to do; students
  often find that normalization is just plain hard.
 \end_layout
@@ -6760,7 +6773,7 @@ status open
 
 \begin_layout Plain Layout
 
-		Schools.uuid = Courses.school_uuid;
+		Courses.school_uuid = Schools.uuid;
 \end_layout
 
 \end_inset
@@ -6848,6 +6861,27 @@ upwards
 \end_inset
 
 .
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This is the point of the Meijer and Bierman result.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+ In a noSQL database, the arrows point in the opposite direction.
+ In either case, useful database queries require arrow-chasing.
+ Turns out that both SQL and noSQL databases are, under the covers, graph
+ databases with awkward API's.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
