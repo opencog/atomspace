@@ -168,8 +168,8 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Currently, graph databases are popular, and they have a rather distinct
- performance profile, differing from both SQL and noSQL databases.
+Currently, graph databases are popular, as they have a rather distinct performan
+ce profile, differing from both SQL and noSQL databases.
  At a simplistic level, the OpenCog AtomSpace is a kind of a graph database.
  More correctly, it is a generalized-hypergraph or 
 \begin_inset Quotes eld
@@ -191,8 +191,8 @@ metagraph
 Graphs offer an interesting storage format for many reasons.
  Coupled to those reasons is a need for graph traversal, and another need
  for graph query (solving the subgraph isomorphism problem).
- Thus, the questions examined here is how one might best be able to traverse
- graphs, and how to best perform subgraph matching.
+ Thus, the questions examined here include how one might best be able to
+ traverse graphs, and how to best perform subgraph matching.
  By 
 \begin_inset Quotes eld
 \end_inset
@@ -202,39 +202,36 @@ best
 \end_inset
 
 , it is meant algorithms that find a good balance betwen speed and size.
- Effectively all the discussion in this text assumes uniform memory access;
- that is a 
-\begin_inset Quotes eld
-\end_inset
-
-flat
-\begin_inset Quotes erd
-\end_inset
-
- memory topology, where any location in storage can be accessed with the
- same latency as any other.
+ 
 \end_layout
 
 \begin_layout Standard
-This text is organized into several parts:
+This text is organized into the following sections:
 \end_layout
 
 \begin_layout Itemize
-An introduction to naive graphs,
+An naive definition of graphs.
 \end_layout
 
 \begin_layout Itemize
-An aside about more traditional knowledge representation formats, including
- tables, JSON and s-expressions.
+An aside about attaching attributes to the edges and vertexes of a graph.
+ This is effectively a quick summary of traditional knowledge representation
+ formats, specifically, tables, JSON and s-expressions.
 \end_layout
 
 \begin_layout Itemize
-How graphs can be represented in memory,
+How graphs can be represented in memory (RAM), and how much storage is used
+ to represent a graph.
 \end_layout
 
 \begin_layout Itemize
 Modifications to the representation that result in hypergraphs and metagraphs,
- including a quick analysis for memory usage
+ including a n analysis of memory usage.
+ A formal definition of a metatree, the core component of a metagraph.
+ A key result is that metatrees are more compact than graphs for most data
+ representation problems.
+ The first hints that they are also more natural and easier to work with
+ start to show.
 \end_layout
 
 \begin_layout Itemize
@@ -246,17 +243,160 @@ indexing
 \begin_inset Quotes erd
 \end_inset
 
-, especially in how it contrasts with the concept as generally understood
- in SQL/noSQL databases,
+, and how indexes are used to find data.
+ Contrasts are drawn between indexing in graphs, and indexing in SQL databases.
+ (The noSQL databases are given short shrift, mostly because of a famous
+ result showing that they are actually an 
+\begin_inset Quotes eld
+\end_inset
+
+opposite category
+\begin_inset Quotes erd
+\end_inset
+
+ best termed coSQL.) A key observation is that metagraphs unavoidably have
+ a certain kind of index built into them; they come equiped with a (partial)
+ index.
 \end_layout
 
 \begin_layout Itemize
-A quick introduction to partial indexes (a full discussion is impossible
- without first tackling pattern matching 
-\emph on
-aka
-\emph default
- querying, done in a later text).
+A discussion of partial indexes, and thier role in database normalization.
+ An argument is made that metatrees are self-normalizing.
+ This feels perhaps uncomfortable, given the vast resources that database
+ textbooks expend on teaching normalization to students.
+\end_layout
+
+\begin_layout Itemize
+Representing metatrees as strings, with specific attention focused on the
+ fact that subtrees are necessarily unique, and how this uniqueness can
+ be managed in a practical way.
+ This includes a rejection of UUID's as a technique for assigning unique
+ labels to metatrees.
+\end_layout
+
+\begin_layout Itemize
+A discusion of insertion, deletion and graph mutability.
+ A primary result is that metatrees are necessarily immutable, as otherwise
+ a host of useful and desirable assumptions are shattered.
+ This is a positive result: immutability is a marvelous property for data
+ structures to have, when they are being accessed by multi-threaded systems.
+ A secondary result is that a metagraph database looks exactly like a single
+ metatree, but a mutable one.
+ Thus, there are two kinds of metatrees: the immutable ones are called 
+\begin_inset Quotes eld
+\end_inset
+
+data
+\begin_inset Quotes erd
+\end_inset
+
+ and the mutable ones are called 
+\begin_inset Quotes eld
+\end_inset
+
+databases
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Since they are both metatrees, they can be layered, nested, hierarchicaly
+ stacked however desired.
+\end_layout
+
+\begin_layout Itemize
+A review of query languages and graph traversal.
+ A primary result is that all SQL-inspired query languages inherit the table-bas
+ed viewpoint of SQL.
+ This in turn causes one to think in terms of table joins, which, in a graph
+ setting, looks like a graph walk, chaining from one edge to the next.
+ This is explicitly seen on systems such as GraphQL, SparQL, Neo4J or grakn.ai
+ (TypeDB), which explicitly present graph queries in terms edge walks.
+\end_layout
+
+\begin_layout Itemize
+An example of a metagraph query language, which hops outside of the *QL
+ paradigm of edge walks (aka table joins), into a query mode that more closely
+ resembles pattern matching.
+ Conventional pattern matching is implemented in terms of a state machine,
+ and so it is not enough for a proper graph query.
+ A true graph walk requires a stack machine; it requires a recursive walk
+ of a graph.
+\end_layout
+
+\begin_layout Itemize
+A short discussion of query analysis and query planning for a metagraph
+ query language.
+\end_layout
+
+\begin_layout Itemize
+A presentation of inverted queries.
+ These are queries that are 
+\begin_inset Quotes eld
+\end_inset
+
+answers
+\begin_inset Quotes erd
+\end_inset
+
+ in search of a 
+\begin_inset Quotes eld
+\end_inset
+
+question
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That is, they are queries that consist entirely of constant terms, that
+ can be matched to forward-queries having variables in them.
+ Inverted queries are the bread-and-butter of chatbots and rule engines.
+ The key observation here is that metatrees represent inverted queries just
+ as readily and naturally as forward queries.
+ That is because a partial index on a metatree can be understood as a kind
+ of trie.
+ Metatrees are therefore able to unify both database concepts, and rule
+ engine concepts with the same framework.
+\end_layout
+
+\begin_layout Itemize
+A discussion of the natural interpretation of metatrees.
+ The experimental result here, after a decade of use, is that metatrees
+ correspond to type-theoretical types.
+ They reify easily and naturally, and have an obvious suite of type constructors.
+ As you might guess from the tone of voice here, the type constructors are
+ themselves just metatrees.
+ The concept of sheaves is touched upoon very quickly here, as the sheaf
+ elements are just 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw puzzle pieces
+\begin_inset Quotes erd
+\end_inset
+
+ and the jigsaw connectors are types.
+\end_layout
+
+\begin_layout Itemize
+A discussion of execution, evaluation, fexprs, macros, $vau, term rewriting
+ systems and intermediate languages.
+ Obviously, abstract syntax trees are a special case of trees, and trees
+ are a special case of metatrees.
+ Abstract syntax trees acheive two things: they encode executable programs,
+ and they also encode syntactic structure that can be re-written by homotopic
+ transformations.
+ As such, they bridge across some old ideas in lisp (fexprs, $vau) and newer
+ ideas in knowlege representation (prolog).
+\end_layout
+
+\begin_layout Itemize
+A discusion of human-oriented programming languages vs.
+ machine-oriented programming languages.
+ Metatrees and metagraphs are themselves too low a level to be suitable
+ as a programming language which human beings would want to use on a daily
+ basis.
+ Instead, they have more in common with compiler intermediate languages,
+ which 
 \end_layout
 
 \begin_layout Itemize
@@ -336,12 +476,12 @@ In practice, one wishes to associate a label to each vertex, and also some
  Additional markup, such as quotes and square brackets, indicate structure
  such as text-strings and arrays.
  An example of disjoint schema–data are tables.
- The name and data type appears only in the column heading; individual rows
- in the table do not need to repeat the schema.
+ The name and data type appears only in the column heading for the table;
+ individual rows in the table do not need to repeat the schema.
  Clearly, for tables with more than a few rows, the tabular format offers
  a huge advantage in terms of memory usage.
  Conversely, having many tables with just one or two rows each quickly becomes
- a table management problem; conentional systems are not designed to hold
+ a table management problem; conventional systems are not designed to hold
  a million tables of one row each.
 \end_layout
 
@@ -366,8 +506,8 @@ ally structured.
 \end_layout
 
 \begin_layout Standard
-In a graph store, one has these three choices for storing attributes, both
- for vertexes and for edges.
+In a graph store, one has these three basic choices for storing attributes,
+ both for vertexes and for edges.
  One might even contemplate a mixture; after all, a JSON blob is isomorphic
  to a table with only a single row.
  The remainder of this text will make little or no assumptions about the
@@ -387,11 +527,11 @@ This section aims to make the above commentary a bit more concrete by working
  Although the examples in this section are written in text, the reader is
  very strongly urged to try to imagine how these structures might be represented
  in RAM, and how much storage they might take.
- A later section will return to these questions of in_RAM representations.
+ A later section will return to these questions of in-RAM representations.
 \end_layout
 
 \begin_layout Standard
-Consider the need to store data about some stundents.
+Consider the need to store data about some students.
  Expressed in JSON format, it might be written as:
 \end_layout
 
@@ -440,10 +580,9 @@ status open
 
 The square brackets denote a list; as is conventional with a list, all list
  elements are uniform and of the same type.
- Clearly, this appears to be a very regular structure, and if there are
- hundreds of students.
- One might try to save some space by eliminating the repeated attribute
- names.
+ Clearly, this appears to be a very regular structure.
+ If there are hundreds of students, one might try to save some space by
+ eliminating the repeated attribute names.
  If JSON is used for this, this becomes a column-store:
 \end_layout
 
@@ -790,7 +929,7 @@ Note that these are three distinct records, and are NOT a list of three
 \end_layout
 
 \begin_layout Standard
-As written, this has a distinctly JSON-ic feel to it, in that every value
+As written, this has a distinctly JSONic feel to it, in that every value
  is tagged with the field type that names it.
  But then, the OGRE documentation notes that this is equivalent to 
 \end_layout
@@ -895,8 +1034,8 @@ This last form now obviously has the shape of a row-store.
 
 \begin_layout Standard
 This last form enables a rather conventional SQL query system to be defined.
- There is a table definition, providing colum types, and column lables (the
- labels are needed for query/search), and the individual records (rows)
+ There is a table definition, providing column types, and column lables
+ (the labels are needed for query/search), and the individual records (rows)
  in the table are uniform.
  The uniformity allows both for very compact storage and easy query.
 \end_layout
@@ -915,8 +1054,8 @@ Graphs for Storing Data
 \end_layout
 
 \begin_layout Standard
-The above listed three ways of storing attributes on a graph, and yet seemed
- to ignore the graph itself.
+The above listed three ways of storing attributes on a graph, and yet ignored
+ the graph itself.
  Thus, for completeness, lets draw the diagram of how this might be stored
  in a graph.
  
@@ -1021,12 +1160,12 @@ pure
  This point will be returned to below.
  In the meanwhile, this kind of mixed model will be assumed: some data will
  be stored graphically, and some data will be stored as complex attribute
- sets attached to the nodes and vertexes.
+ sets attached to the edges and vertexes.
 \end_layout
 
 \begin_layout Standard
-In the interim, some historical hand-waving can be done to justify the origins
- of a mixed-model graph store.
+Some historical hand-waving can be done to justify the origins of a mixed-model
+ graph store.
  In predicate logic, and in model theory, one distinguishes the predicates
  and terms that one is discussing, from the truth values or valuations that
  can be assigned to them.
@@ -1038,7 +1177,7 @@ In the interim, some historical hand-waving can be done to justify the origins
 status collapsed
 
 \begin_layout Plain Layout
-Of course, this is but the grand leap from Aristotelian, 
+This is the grand leap from Aristotelian, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1082,7 +1221,7 @@ e.g.
  red, blue or green).
  It usually does not take long to realize the practical need for a mixed-model
  graph database, supporting both good graph features, and also supporting
- complex attribute systems attached to each node/vertex.
+ complex attribute systems attached to each edge/vertex.
 \end_layout
 
 \begin_layout Section*
@@ -1101,6 +1240,20 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  top of one of these systems to obtain a disk-backed database.
  Of course, there are numerous ifs-and-buts, which provide motivations to
  roll-your-own; these will be ignored in this text.
+\end_layout
+
+\begin_layout Standard
+Effectively all the discussion in this text assumes uniform memory access;
+ that is, a 
+\begin_inset Quotes eld
+\end_inset
+
+flat
+\begin_inset Quotes erd
+\end_inset
+
+ memory topology, where any location in storage can be accessed with the
+ same latency as any other.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -9064,7 +9217,12 @@ See John N.
 
 \end_inset
 
- What is it for metatrees?
+ In a key-value store, the first element is the key, and the trailing elements
+ are the value.
+\end_layout
+
+\begin_layout Standard
+What is the first element for metatrees?
 \end_layout
 
 \begin_layout Standard
@@ -10725,7 +10883,40 @@ compile time
 It should be clear that metagraphs in and of themselves are fairly useless
  without some sort of term rewriting system to go along with them; this
  was already implied in the earlier discussions concerning database queries.
- 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Maude is an example of a term rewriting system disassociated from theorem
+ provers, databases and inference engines.
+ See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://maude.cs.uiuc.edu/maude1/manual/maude-manual-html/maude-manual_0.html
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://maude.cs.illinois.edu/w/index.php/The_Maude_System
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
