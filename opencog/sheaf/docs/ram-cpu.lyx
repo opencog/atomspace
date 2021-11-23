@@ -96,7 +96,7 @@ Graphs, Metagraphs, RAM, CPU
 \end_layout
 
 \begin_layout Author
-Linas Vepstas
+Linas Vepštas
 \end_layout
 
 \begin_layout Right Address
@@ -116,15 +116,15 @@ This text reviews the concepts of a graph store, starting from the fundamental
  question of how to efficiently represent a graph in RAM (that is, in storage).
  Starting with a naive conception of a graph database, it arrives at hypergraphs
  and metagraphs minor modifications to the definition of a graph.
- The resulting structure proves to be simpler and more efficient for representat
-ing graphical data.
+ The resulting structure proves to be simpler and more efficient for representin
+g graphical data.
 \end_layout
 
 \begin_layout Abstract
 This starts a domino chain of claims.
  Metagraphs are more flexible than either graph stores or SQL-style table
  stores or JSON-stores for storing data.
- Metagraphs have a natural query langauge that is more powerful and easier
+ Metagraphs have a natural query language that is more powerful and easier
  to use than SQL-inspired query languages, mostly because the table-join
  concept is obviated and replaced by isomorphism.
  
@@ -145,7 +145,7 @@ Metagraphs are naturally typed, in the sense of type theory.
 \end_layout
 
 \begin_layout Abstract
-Metagraphs can be used to specify a programing system/language, but that
+Metagraphs can be used to specify a programming system/language, but that
  language is low-level, and not really suitable for humans.
  It is ideal for algorithmic (machine) manipulation, analogous to intermediate
  languages inside of compilers.
@@ -163,7 +163,7 @@ This is part of a sequence of texts on sheaves (
 a la
 \emph default
  sheaf theory).
- It is a pre-requisite for understanding the practical foundations on which
+ It is a prerequisite for understanding the practical foundations on which
  sheaves can be built.
 \end_layout
 
@@ -205,7 +205,7 @@ best
 \begin_inset Quotes erd
 \end_inset
 
-, it is meant algorithms that find a good balance betwen speed and size.
+, it is meant algorithms that find a good balance between speed and size.
  
 \end_layout
 
@@ -267,11 +267,11 @@ literal "false"
 \end_inset
 
 ) A key observation is that metagraphs unavoidably have a certain kind of
- index built into them; they come equiped with a (partial) index.
+ index built into them; they come equipped with a (partial) index.
 \end_layout
 
 \begin_layout Itemize
-A discussion of partial indexes, and thier role in database normalization.
+A discussion of partial indexes, and their role in database normalization.
  An argument is made that metatrees are self-normalizing.
  This feels perhaps uncomfortable, given the vast resources that database
  textbooks expend on teaching normalization to students.
@@ -286,7 +286,7 @@ Representing metatrees as strings, with specific attention focused on the
 \end_layout
 
 \begin_layout Itemize
-A discusion of insertion, deletion and graph mutability.
+A discussion of insertion, deletion and graph mutability.
  A primary result is that metatrees are necessarily immutable, as otherwise
  a host of useful and desirable assumptions are shattered.
  This is a positive result: immutability is a marvelous property for data
@@ -310,7 +310,7 @@ databases
 \end_inset
 
 .
- Since they are both metatrees, they can be layered, nested, hierarchicaly
+ Since they are both metatrees, they can be layered, nested, hierarchically
  stacked however desired.
 \end_layout
 
@@ -360,7 +360,7 @@ question
 .
  That is, they are queries that consist entirely of constant terms, that
  can be matched to forward-queries having variables in them.
- Inverted queries are the bread-and-butter of chatbots and rule engines.
+ Inverted queries are the bread-and-butter of chat-bots and rule engines.
  The key observation here is that metatrees represent inverted queries just
  as readily and naturally as forward queries.
  That is because a partial index on a metatree can be understood as a kind
@@ -376,7 +376,7 @@ A discussion of the natural interpretation of metatrees.
  They reify easily and naturally, and have an obvious suite of type constructors.
  As you might guess from the tone of voice here, the type constructors are
  themselves just metatrees.
- The concept of sheaves is touched upoon very quickly here, as the sheaf
+ The concept of sheaves is touched upon very quickly here, as the sheaf
  elements are just 
 \begin_inset Quotes eld
 \end_inset
@@ -393,15 +393,15 @@ A discussion of execution, evaluation, fexprs, macros, $vau, term rewriting
  systems and intermediate languages.
  Obviously, abstract syntax trees are a special case of trees, and trees
  are a special case of metatrees.
- Abstract syntax trees acheive two things: they encode executable programs,
+ Abstract syntax trees achieve two things: they encode executable programs,
  and they also encode syntactic structure that can be re-written by homotopic
  transformations.
  As such, they bridge across some old ideas in lisp (fexprs, $vau) and newer
- ideas in knowlege representation (prolog).
+ ideas in knowledge representation (prolog).
 \end_layout
 
 \begin_layout Itemize
-A discusion of human-oriented programming languages vs.
+A discussion of human-oriented programming languages vs.
  machine-oriented programming languages.
  Metatrees and metagraphs are themselves too low a level to be suitable
  as a programming language which human beings would want to use on a daily
@@ -546,8 +546,12 @@ An example of an s-expression store is a key-value store.
  to be a list of values associated with that key.
  The idea of s-expressions emphasizes that the key-value store can be hierarchic
 ally structured.
- An example is the Unix filesystem structure: each directory can have files,
- but it can alos have subdirectories, ad infinitum.
+ An example is the Unix file-system structure: each directory can have files,
+ but it can also have subdirectories, 
+\emph on
+ad infinitum
+\emph default
+.
  In this sense, a URL can be understood to be a kind-of s-expression.
 \end_layout
 
@@ -676,7 +680,7 @@ That is, each entry in the table is a column name, followed by a list of
 \begin_layout Standard
 This is distinct from a row-store.
  In a row store, one conventionally provides a schema describing the columns
- and thier formats, much as above, and then provides the rows, one by one,
+ and their formats, much as above, and then provides the rows, one by one,
  as 
 \begin_inset Quotes eld
 \end_inset
@@ -685,7 +689,7 @@ records
 \begin_inset Quotes erd
 \end_inset
 
-, or inhomogenous lists of fixed length.
+, or inhomogeneous lists of fixed length.
  That is, each entry in the list has a different type (it has the type of
  the column), but each list is exactly the same length; thus, a 
 \begin_inset Quotes eld
@@ -924,7 +928,7 @@ OGRE: Open Generic Representation
 \end_layout
 
 \begin_layout Standard
-A particularly nice and human-freindly API can be found in the OGRE module
+A particularly nice and human-friendly API can be found in the OGRE module
  in BAP.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1008,7 +1012,7 @@ status open
 \end_inset
 
 provided that one already knows the column structure of the data.
- But this is easily acheived:
+ But this is easily achieved:
 \end_layout
 
 \begin_layout Standard
@@ -1080,7 +1084,7 @@ This last form now obviously has the shape of a row-store.
 
 \begin_layout Standard
 This last form enables a rather conventional SQL query system to be defined.
- There is a table definition, providing column types, and column lables
+ There is a table definition, providing column types, and column labels
  (the labels are needed for query/search), and the individual records (rows)
  in the table are uniform.
  The uniformity allows both for very compact storage and easy query.
@@ -1139,8 +1143,8 @@ graphical
 \end_layout
 
 \begin_layout Standard
-In the above, the vertexes are labelled with s-expressions; the edges are
- not labelled.
+In the above, the vertexes are labeled with s-expressions; the edges are
+ not labeled.
  It consists of two disjoint graphs; one of the graphs is used to encode
  the type information used in the other graph.
  There are a large variety of choices that can be made in how this is done.
@@ -1150,7 +1154,7 @@ In the above, the vertexes are labelled with s-expressions; the edges are
 \end_layout
 
 \begin_layout Standard
-Below shows another alternative, this time with labelled edges:
+Below shows another alternative, this time with labeled edges:
 \end_layout
 
 \begin_layout Standard
@@ -1181,7 +1185,7 @@ As before, the graph explicitly includes a description of the schema used
 \end_layout
 
 \begin_layout Subsubsection*
-Mixed Repesentations
+Mixed Representations
 \end_layout
 
 \begin_layout Standard
@@ -1244,7 +1248,7 @@ classical
 \end_inset
 
  A straight-forward example can be found in Prolog: in the beginning, there
- are expressions; by means of inference, truth-value labels are infered.
+ are expressions; by means of inference, truth-value labels are inferred.
  The truth values are not a part of the original graph; they live outside
  of it, as an attribute.
 \end_layout
@@ -3050,7 +3054,7 @@ The boxes denote the fact that the hyperedges are ordered lists.
 
  ellipses are the hyperedge and vertex tables.
  If the boxes could be collapsed to single points, this would be a 'true'
- bipratite graph; but they cannot be.
+ bipartite graph; but they cannot be.
  The ordering is needed and important.
  
 \end_layout
@@ -3996,7 +4000,7 @@ noprefix "false"
  It has both 'incoming' and 'outgoing' sets, as before.
  There are two differences: the outgoing set is no longer a set, but a list.
  The other is even stranger: the first column (the column of vertexes) has
- been replaced by a columnn of links!
+ been replaced by a column of links!
 \end_layout
 
 \begin_layout Standard
@@ -4013,9 +4017,8 @@ noprefix "false"
 
 ).
  For ordinary directed graphs, each edge is a vertex pair.
- The vertecies of an edge may be termed the 'head vertex' and the 'tail
- vertex'; equivalently, the outgoing vertex and the incoming vertex (or
- 
+ The vertices of an edge may be termed the 'head vertex' and the 'tail vertex';
+ equivalently, the outgoing vertex and the incoming vertex (or 
 \emph on
 vice-versa
 \emph default
@@ -4099,7 +4102,7 @@ literal "false"
 A few comments are in order regarding the SQL-style query notation.
  It has become dominant.
  One can look at systems as different as SparQL and GraphQL, or even the
- OGRE query langauge
+ OGRE query language
 \begin_inset CommandInset citation
 LatexCommand cite
 key "OGRE"
@@ -4356,12 +4359,12 @@ This is to be contrasted to a conventional table database.
 
  simply did not exist.
  The act of indexing creates these vertexes and edges.
- The documentation for convetional table databases does not 'talk about'
+ The documentation for conventional table databases does not 'talk about'
  vertexes and edges; but, 
 \emph on
 de facto
 \emph default
-, this is how system arhictects think about things.
+, this is how system architects think about things.
  When they think about creating an index on a table, this is what they think
  of.
 \begin_inset Foot
@@ -4556,7 +4559,7 @@ The explicit hypergraph representation does cost more than its implicit
  An SQL index can be a b-tree or hash table; the only thing that the b-tree/hash
  table needs to store is the row ID.
  For a hypergraph, we have imposed the additional requirement that hypergraphs
- must be rapidly traversible.
+ must be rapidly traversable.
  This forces the storage of the incoming set in addition to the outgoing
  set.
  Hypergraph stores necessarily use more RAM than equivalent SQL tables.
@@ -4595,7 +4598,7 @@ JOIN
  Mashing it up two levels deep is tougher.
  Can you count to three? It would be a significant challenge, even for experienc
 ed DBAs.
- Some more examples of challenging queries will be presetned later.
+ Some more examples of challenging queries will be presented later.
 \end_layout
 
 \begin_layout Standard
@@ -4604,7 +4607,7 @@ Suppose you are clever enough to write deep table joins in SQL.
  or query compiler, which takes a given SQL statement, analyzes it's structure,
  and then creates a plan as to which data shall be fetched first, and in
  what order.
- Poor planning results in poor performance, sometimes disasterously poor
+ Poor planning results in poor performance, sometimes disastrously poor
  performance.
  For large databases, there has been a vast (multi-billion-dollar) investment
  in sophisticated query planning.
@@ -4733,7 +4736,7 @@ Partial indexes and metagraphs
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
  when one considers query and search optimization.
- Some key aspects of this are reviewwed in the next two sections.
+ Some key aspects of this are reviewed in the next two sections.
 \end_layout
 
 \begin_layout Standard
@@ -5482,7 +5485,7 @@ n
 n
 \family default
 2', instead of being a different instance.
- Refering back to the metagraph node table (
+ Referring back to the metagraph node table (
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "metagraph node table"
@@ -5508,7 +5511,7 @@ n
 Every link is globally unique.
  For example, the sub-expression '(e2 n2 n3)' appears twice; in both cases,
  it is exactly the same subexpression.
- This is clear by refering to the metagraph link table (
+ This is clear by referring to the metagraph link table (
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "metagraph link table"
@@ -5576,7 +5579,7 @@ Just how big is a 64-bit hash, vs.
  and corporate names, historical events and a smattering of Latin and foreign
  loan-words.) The average length of these is about six letters, thus six
  byes; seven if including the null terminator.
- How about the names of genes and proteins? These are not particularly lengthly
+ How about the names of genes and proteins? These are not particularly lengthy
  either.
  
 \begin_inset Quotes eld
@@ -5622,7 +5625,7 @@ noprefix "false"
 
 \end_inset
 
-, each apparance of a node or link in those tables must be a (64-bit) pointer.
+, each appearance of a node or link in those tables must be a (64-bit) pointer.
  The example metagraph being worked here is two levels deep, and is quite
  'small'.
  Yet, counting the edges in the drawing of it, there are ten edges.
@@ -5759,7 +5762,7 @@ n
 \family default
 5' in this meta-tree requires examining the incoming set of this tree, and
  determining what to do in each case.
- This might be a non-trvial decision proceedure.
+ This might be a non-trivial decision procedure.
  Should each of these larger trees get the new, modified version, or should
  they keep the original unmodified version? If the latter, then the unmodified
  version becomes 
@@ -5804,7 +5807,7 @@ Yet, oddly, this top-level index/table looks exactly like any other metatree.
 \end_layout
 
 \begin_layout Standard
-Thus, we've identified two fundamentally differrent utilities, serving different
+Thus, we've identified two fundamentally different utilities, serving different
  purposes, yet both having the same structural form.
  The mutable form is a 'database'.
  The immutable form is the 'data'.
@@ -5908,7 +5911,7 @@ If the master index is a hash table or a tree of raw memory pointers, and
 If the master index is a hash table or a tree of abstract indicators, and
  one has the abstract indicator of the meta-tree to be deleted, the deletion
  can be immediately and directly performed.
- Unlike the case of UUID's, there are abstract indicators that can be compuuted
+ Unlike the case of UUID's, there are abstract indicators that can be computed
  uniquely and in a relatively rapid fashion.
  An example of this is the Merkle tree.
  It is 'decentralized', in the sense that, no matter who has a copy of a
@@ -5978,7 +5981,7 @@ primary key
 \begin_inset Quotes erd
 \end_inset
 
-, and ROCKSDB itself is a kind of OKVS.
+, and RocksDB itself is a kind of OKVS.
 \end_layout
 
 \begin_layout Standard
@@ -5994,9 +5997,9 @@ As should be clear, there is not really all that much difference here, at
  and overtly exposes UUIDs in the form of primary keys, thus dragging all
  that baggage along with it.
  By contrast, a metagraph store can keep all of this hidden, and has multiple
- implementation options for the analagous concept of a primary key: either
+ implementation options for the analogous concept of a primary key: either
  Merkle trees, or s-expressions, or possibly something else.
- From the implementors point of view, this is nice: there are various possible
+ From the implementers point of view, this is nice: there are various possible
  implementations (and they are all hidden from the user! No backwards-compat
  concerns!)
 \end_layout
@@ -6051,7 +6054,7 @@ Query Languages and Graph Traversal
 \end_layout
 
 \begin_layout Standard
-The majority of popular query languages (QL) are modelled on SQL, taking
+The majority of popular query languages (QL) are modeled on SQL, taking
  SQL as not just as an inspiration, but rather directly borrowing (stealing)
  most of its keywords and syntax.
  This is good, in that it makes it easy for users who are already familiar
@@ -6075,7 +6078,7 @@ status collapsed
 
 \begin_layout Plain Layout
 This is a reply to the Sapir–Whorf Hypothesis in the strong affirmative.
- The Sapir–Whorf hypothesis is breifly worded as 
+ The Sapir–Whorf hypothesis is briefly worded as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6126,9 +6129,9 @@ best
  theory for tables and the records stored in them.
  It's overwhelmingly dominant, and there does not appear to be any reason
  to question it.
- Likewise, the manifestion of relational algebras as SQL has the same effect:
- it works really really well for records and tables, and there is no compelling
- reason to replace it with something else.
+ Likewise, the manifestation of relational algebras as SQL has the same
+ effect: it works really really well for records and tables, and there is
+ no compelling reason to replace it with something else.
  (A little voice asks: 
 \begin_inset Quotes eld
 \end_inset
@@ -6137,15 +6140,15 @@ if that's the case, then why graphs?
 \begin_inset Quotes erd
 \end_inset
 
-) The sucess of this theory has the effect of shutting down any thought
+) The success of this theory has the effect of shutting down any thought
  process that might lead elsewhere.
 \end_layout
 
 \begin_layout Standard
 The aim of this section is to make this thought process overt, and show
  how there might be QL's that are not SQL clones.
- It begins by (once again) reviewing the actual strucure of metgraphs, and
- then examines how they compare to conventional table queries.
+ It begins by (once again) reviewing the actual structure of metagraphs,
+ and then examines how they compare to conventional table queries.
 \end_layout
 
 \begin_layout Subsection*
@@ -6197,7 +6200,7 @@ noprefix "false"
 The dotted arrows are back-pointers from lower levels to higher levels:
  they are the incoming set pointers, in contrast to the solid arrows, which
  show the outgoing links.
- They are almost in one-to-one correspondance, but not quite: notice there
+ They are almost in one-to-one correspondence, but not quite: notice there
  is only one dotted arrow from 
 \begin_inset Formula $e_{2}$
 \end_inset
@@ -6210,7 +6213,7 @@ The dotted arrows are back-pointers from lower levels to higher levels:
 \end_layout
 
 \begin_layout Standard
-The back-pointers are needed to make the graph fully traversible; that is
+The back-pointers are needed to make the graph fully traversable; that is
  the topic of this section.
  The back-pointers do eat up RAM; but this RAM usage has already been counted,
  above.
@@ -6232,7 +6235,7 @@ It is natural to use weak pointers for the incoming set, and regular pointers
  This is because, as observed earlier, metatrees must be immutable after
  they have been created.
  They cannot be edited; they can only be deleted.
- There is, however, one minor point of confusion, illustrated in the daigram
+ There is, however, one minor point of confusion, illustrated in the diagram
  below.
 \end_layout
 
@@ -6253,7 +6256,7 @@ This shows that a new link
 \begin_inset Formula $e_{5}$
 \end_inset
 
- has been addeed to the previous diagram.
+ has been added to the previous diagram.
  This is 
 \emph on
 not
@@ -6342,7 +6345,7 @@ What do weak incoming sets have to do with queries? That they allow complete
 
 \begin_layout Standard
 As an initial example, consider the metatree without the incoming-set pointers.
- Consider a treewalk starting at 
+ Consider a tree-walk starting at 
 \begin_inset Formula $e_{4}$
 \end_inset
 
@@ -6831,7 +6834,7 @@ OUTER JOIN
  to know the concepts, and to consult the documentation).
  I'd like to suggest that programming in SQL is like programming in assembly
  code, but for data.
- Perhaps it's time for a higher-level query langauge that abstracts away
+ Perhaps it's time for a higher-level query language that abstracts away
  these details.
 \end_layout
 
@@ -6913,8 +6916,8 @@ TABLE Schools
 \family default
 ', examine each school in turn, and then trace downwards from the top, until
  it eventually reaches Rachel, and is able to satisfy this final constraint.
- Table joins are a constraint satisifaction problem.
- Solving constraint satsifaction problems (CSP) is non-trivial;
+ Table joins are a constraint satisfaction problem.
+ Solving constraint satisfaction problems (CSP) is non-trivial;
 \begin_inset Foot
 status collapsed
 
@@ -6936,12 +6939,12 @@ https://en.wikipedia.org/wiki/Constraint_satisfaction_problem
 \end_inset
 
  there is a vast literature devoted to this, both for the case of general
- CSP, and to the specific case of query plannning.
+ CSP, and to the specific case of query planning.
 \end_layout
 
 \begin_layout Standard
 Why would an SQL engine run this query in an unexpected or inefficient way?
- Well, the query panner may have decided that it is too expensive to create
+ Well, the query planner may have decided that it is too expensive to create
  the dashed-arrow indexes.
  Without the dashed arrows, one obviously has to start at the top.
  Why would it decide that the dashed arrows are too expensive? Well, it
@@ -7000,7 +7003,7 @@ http://binaryanalysisplatform.github.io/bap/api/odoc/ogre/Ogre/Query/index.html
 \begin_layout Standard
 Well, the OGRE s-expressions are just that: strings.
  They are not metatrees; they are not interpreted as metatrees.
- They are interpreteed only as ordinary, conventional abstract syntax trees.
+ They are interpreted only as ordinary, conventional abstract syntax trees.
  Because of this, there is no particularly compelling reason to automatically
  manage the incoming sets for these trees.
  Or rather, there is no particularly compelling reason, until one considers
@@ -7173,7 +7176,7 @@ This is a good time to start talking about type theory.
 de facto
 \emph default
  type-theoretical type.
- Perhaps there is some way for it to not be a type, but, as Sapir-Whorf
+ Perhaps there is some way for it to not be a type, but, as Sapir–Whorf
  suggests, it proves to be difficult to imagine how it could be anything
  other than a type.
  
@@ -7205,7 +7208,7 @@ NOT
 \emph default
  variadic! The declaration statement really is defining fixed-length records
  which can be placed into a completely conventional row-table.
- This is perhaps why the OGRE query language loooks a lot like SQL: it has
+ This is perhaps why the OGRE query language looks a lot like SQL: it has
  not departed from the table paradigm.
  It has merely slapped on a prettier API, prettier in the sense that the
  primary key and foreign key constraints have disappeared into the woodwork.
@@ -7291,7 +7294,7 @@ Perhaps the most innovative aspect of the OGRE query language is that it
  is wrapped in a Keliesi triple (a Monad).
  Somewhat oddly, though, that monad seems to reinvent some subset of LISP,
  or at least of the SRFI-1 list iterators.
- This is perhaps not enitrely unexpected: s-expressions do look like lists,
+ This is perhaps not entirely unexpected: s-expressions do look like lists,
  and it is natural to want to do list operations on them.
 \end_layout
 
@@ -7608,7 +7611,7 @@ https://en.wikipedia.org/wiki/Free_theory
 
 \end_inset
 
-.) In breif: with the free theory, you can freely 
+.) In brief: with the free theory, you can freely 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7743,7 +7746,7 @@ https://en.wikipedia.org/wiki/Equational_logic
 
 .
  It has a number of axioms to make it work, and it is no accident that it
- was developed by computer scientists who were also known for thier contribution
+ was developed by computer scientists who were also known for their contribution
 s to relational algebras and query languages.
 \end_layout
 
@@ -7787,7 +7790,7 @@ status collapsed
 
 \begin_layout Plain Layout
 Variables, are, however, always named, given a name.
- It is an open question is to how anonymous (un-named) variables might be
+ It is an open question is to how anonymous (unnamed) variables might be
  written and used.
 \end_layout
 
@@ -7827,11 +7830,11 @@ Meet
 \family typewriter
 Present
 \family default
-' link, and so on) but that syntax is a sublanguage within the language
+' link, and so on) but that syntax is a sub-language within the language
  of free s-expressions.
  The fact that the metaquery is itself a metatree opens the possibility
  of querying for queries.
- This may sound utterly absurd, but is in fact very commonplace in chatbots
+ This may sound utterly absurd, but is in fact very commonplace in chat-bots
  and rule engines! This is expanded on below.
 \end_layout
 
@@ -8315,10 +8318,10 @@ Rachel
 \begin_layout Standard
 It is not entirely obvious, but performing this query requires solving a
  subgraph isomorphism problem.
- Clearly, the query implictly demands that the variables should be grounded.
+ Clearly, the query implicitly demands that the variables should be grounded.
  The variables are to be grounded by Atoms, which may be either Nodes or
  Links.
- In the cse of Links, these are (by definition) metatrees themselves, and
+ In the case of Links, these are (by definition) metatrees themselves, and
  so the grounding matches a variable to a subgraph.
  The collection of subgraphs must be those specified in the '
 \family typewriter
@@ -8475,7 +8478,7 @@ Choice
  that it wraps.
  More precisely, it denotes a menu-choice: pick one or pick the other (but
  not both).
- Choice commonly appears as a fragement of intuitionistic logic and of linear
+ Choice commonly appears as a fragment of intuitionist logic and of linear
  logic.
 \end_layout
 
@@ -8496,7 +8499,7 @@ Since metatrees can be written as s-expression strings, and since metaqueries
 \begin_layout Standard
 This is doubly unfortunate, since pattern matching is well-understood and
  widely developed.
- Besides regex and pcresyntax case scheme
+ Besides regex and pcre syntax case scheme
 \begin_inset Foot
 status collapsed
 
@@ -8543,7 +8546,7 @@ https://www.gnu.org/software/guile/manual/html_node/Syntax-Case.html
 \begin_inset Quotes eld
 \end_inset
 
-hygenic macros
+hygienic macros
 \begin_inset Quotes erd
 \end_inset
 
@@ -8618,8 +8621,8 @@ i.e.
 
 \emph default
  the same Atom.
- There is no such guarantee in a string match: the first occurance of a
- subexpression could be matched one way, and a second occurance a different
+ There is no such guarantee in a string match: the first occurrence of a
+ subexpression could be matched one way, and a second occurrence a different
  way, possibly with a conflicting match.
  Thus, if string pattern matching were to be used, it would need to be enhanced
  with some sort of conflict-free subterm matching.
@@ -8638,7 +8641,7 @@ Practical metatree matching requires the ability to match into unordered
 e fashion.
  That is, if a variable occurs in multiple places in multiply-nested unordered
  sets, and it is grounded one way in a specific permutation of one set,
- it must be grounded exctly the same way in all permutations of all other
+ it must be grounded exactly the same way in all permutations of all other
  sets in which it occurs.
  This is the 'conflict resolution' aspect.
  How can this be accomplished? Well, one can use either metatrees, or one
@@ -8690,8 +8693,8 @@ Variable
 \family sans
 (Quote (Variable ?x?))
 \family default
-') as otherwise, the variable would be interpeted as a variable in the pattern,
- insted of a constant term to be matched.
+') as otherwise, the variable would be interpreted as a variable in the
+ pattern, instead of a constant term to be matched.
 \end_layout
 
 \begin_layout Itemize
@@ -8743,7 +8746,7 @@ After reading the above, the reader might feel as if there was a bit of
  declarative programs, genes, proteins, natural language, visual objects,
  sounds, 3D spaces, ...
  As such, a knowledge representation system has to be practical and utilitarian,
- useful as a tool for the day-to-day knoweldge worker.
+ useful as a tool for the day-to-day knowledge worker.
  Thus, funny business like quotes and lambdas and alpha-rewrites and unordered
  sets must necessarily enter into the picture, and be supportable in the
  query system.
@@ -8873,7 +8876,7 @@ The most basic query planning involves choosing a starting point for a graph
  walk.
  Thanks to the incoming set, the query can be started anywhere.
  However, it is advantageous to start the graph walk at the thinnest, most
- distant part of the graph, so that it does not need to be regularly revisted.
+ distant part of the graph, so that it does not need to be regularly revisited.
 \end_layout
 
 \begin_layout Standard
@@ -8898,11 +8901,11 @@ ected tight nucleus.
  The pruned trees can be re-attached later.
  Equivalently, they might only need to be pattern-matched once.
  In this case, pruning is equivalent to maintaining a cache of pattern matches
- acheived earlier during traversal.
+ achieved earlier during traversal.
  (That is, a recursive graph walk will typically revisit certain parts of
  the graph.
  But if those parts have already been grounded, they do not need to be revisited
- again; it is sufficeint to have a cache of the groundings.)
+ again; it is sufficient to have a cache of the groundings.)
 \end_layout
 
 \begin_layout Standard
@@ -8930,7 +8933,7 @@ But why?
 \begin_inset Quotes eld
 \end_inset
 
-why can't everthing be encoded as as metagraph?
+why can't everything be encoded as as metagraph?
 \begin_inset Quotes erd
 \end_inset
 
@@ -8971,7 +8974,7 @@ If the attributes are stored as key-value pairs (KVP), then the attributes
 \end_layout
 
 \begin_layout Standard
-In the present case, there is one fun little twist: if the KVP's are heirarchica
+In the present case, there is one fun little twist: if the KVP's are hierarchica
 l, 
 \emph on
 i.e.
@@ -9003,7 +9006,7 @@ Values
  This naming choice forces all sorts of contortions when one wants to talk
  about ordinary values with a lower-case v.
  The naming choice was arrived at under the influence of model theory, where
- a clear distinction is made between sentences of a language and thier valuation.
+ a clear distinction is made between sentences of a language and their valuation.
  In model theory, and in logic, sentences are assigned 
 \begin_inset Quotes eld
 \end_inset
@@ -9015,7 +9018,7 @@ truth values
 .
  Historically, these are crisp true/false values.
  But in Bayesian belief networks and in Markov logic networks, these valuations
- are given floating-point probabilites as thier truth values.
+ are given floating-point probabilities as their truth values.
  On OpenCog, these were historically called TruthValues, written in CamelCase.
  When generalized to arbitrary KVP valuations, they become Values.
  A better name might have been Attributes or Tags, as they are treated as
@@ -9029,7 +9032,7 @@ Chatbots, Rule Engines and Inverted Queries
 
 \begin_layout Standard
 Here's something SQL cannot do: it cannot search for SQL.
- Absurd, right? One of the eary chatbot technologies is called SRAI (Stimulous-R
+ Absurd, right? One of the early chatbot technologies is called SRAI (Stimulus-R
 esponse AI), and the scripting language for SRAI is known as AIML (AI Markup
  Language).
  A snippet of AIML is given below.
@@ -9513,7 +9516,7 @@ statements
 
  which just happen to have the form of queries.
  In the database, these queries are dormant; they are not running, they
- are just sitting there, waiting for thier day in the sun.
+ are just sitting there, waiting for their day in the sun.
  The actual query to be performed looks like this:
 \begin_inset listings
 lstparams "basicstyle={\small\sffamily},tabsize=3"
@@ -9669,7 +9672,7 @@ Types
 \begin_layout Standard
 It was observed above that metatrees have a natural string representation
  as s-expressions.
- Every system that works with s-expressions gives a priviledged interpretation
+ Every system that works with s-expressions gives a privileged interpretation
  to the first word after an open parenthesis.
  In Lisp and Scheme, that first word is an operator.
 \begin_inset Foot
@@ -9677,8 +9680,18 @@ status collapsed
 
 \begin_layout Plain Layout
 See John N.
- Shutt's blog post https://fexpr.blogspot.com/2011/04/fexpr.html for careful
- terminology.
+ Shutt's blog post 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://fexpr.blogspot.com/2011/04/fexpr.html
+\end_layout
+
+\end_inset
+
+ for careful terminology.
 \end_layout
 
 \end_inset
@@ -9705,8 +9718,8 @@ The observational evidence is as follows:
 \end_layout
 
 \begin_layout Itemize
-From the begining, it is noted that there is a distinction between Nodes
- and Links, roughtly analogous to the vertexes and edges of graphs.
+From the beginning, it is noted that there is a distinction between Nodes
+ and Links, roughly analogous to the vertexes and edges of graphs.
  So it seems these are two different types.
 \end_layout
 
@@ -9746,7 +9759,7 @@ The description of the meta-query language introduces a Variable, which
 \end_layout
 
 \begin_layout Itemize
-Similarly, the metaquery langauge introduces a Present Link, which is a
+Similarly, the metaquery language introduces a Present Link, which is a
  kind of a Link, but, again, has special semantics in the context of a query.
 \end_layout
 
@@ -9766,12 +9779,12 @@ For many (but not all) of these Nodes and Links, it became convenient to
  A silly example is the PlusLink: when this is executed, the arguments are
  added together, if the arguments are numeric.
  The C++ class performs this addition.
- Now, it is generally regarded tht C++ classes are types.
+ Now, it is generally regarded that C++ classes are types.
  By extension, PlusLink must also be a type.
 \end_layout
 
 \begin_layout Itemize
-After recognizing that Nodes and Links and thier variations are all types,
+After recognizing that Nodes and Links and their variations are all types,
  it became easy to create a type system: SignatureLink, TypedVariableLink,
  TypeNode, ArrowLink.
  It appears to be entirely consistent and, as a type system, entirely convention
@@ -9795,7 +9808,7 @@ The OpenCog AtomSpace includes all the easy type-theoretical stuff.
 
 \begin_layout Standard
 Ergo, it is natural to take the concept of a metatree, which already distinguish
-es between Node and Link, and recognize that this naturally blossomes into
+es between Node and Link, and recognize that this naturally blossoms into
  a type system.
 \end_layout
 
@@ -9844,7 +9857,7 @@ The second bullet point above idly wondered about a monotyped system, where
  everything is a Link, and Links have a string name.
  This would bring the system closer to a Lisp/Scheme conception of the world.
  Yet, this changes nothing: there is still a need to have variables, as
- well as and, or, not, set, memeber, plus, minus, 
+ well as and, or, not, set, member, plus, minus, 
 \emph on
 etc.
 
@@ -9941,7 +9954,7 @@ product types
 ).
  Function calls have a type signature too, this is the arrow type, pointing
  from the input arguments to the output type.
- The ML, CaML, Haskell, Scala and F# programming languages provide an explict
+ The ML, CaML, Haskell, Scala and F# programming languages provide an explicit
  type system, allowing the programmer to define new types (In OO languages,
  new types can only be defined by defining a new OO class).
 \end_layout
@@ -10095,7 +10108,7 @@ SittingLink
 status collapsed
 
 \begin_layout Plain Layout
-Philosophically, this is a panpsychic view of the world: individual ur-items
+Philosophically, this is a pan-psychic view of the world: individual ur-items
  are meaningless; all meaning comes from the relationships between objects.
 \end_layout
 
@@ -10404,9 +10417,9 @@ make sense
 \begin_inset Quotes erd
 \end_inset
 
- for compiled programming languges.
- The case is different here: with metagraphs, the primary goal is not proramming
- but data representation.
+ for compiled programming languages.
+ The case is different here: with metagraphs, the primary goal is not programmin
+g but data representation.
  Metagraphs don't 
 \begin_inset Quotes eld
 \end_inset
@@ -10651,7 +10664,7 @@ thing
 
 \begin_layout Standard
 This kind of easy reification makes it possible to easily attach complex
- types to type defintions.
+ types to type definitions.
  Returning to the previous example of a '
 \family sans
 CatLink
@@ -11023,7 +11036,7 @@ output
 \end_inset
 
 .
- The rules for allowed connectivity patterns of conectors lie outside of
+ The rules for allowed connectivity patterns of connectors lie outside of
  the definition of individual jigsaw pieces.
  
 \end_layout
@@ -11242,7 +11255,7 @@ https://en.wikipedia.org/wiki/Fexpr
 \end_inset
 
  Modern lisps no longer explicitly support fexprs; an influential paper
- from 1980 labelled them as harmful, and made the argument that macros were
+ from 1980 labeled them as harmful, and made the argument that macros were
  superior.
  
 \end_layout
@@ -11261,7 +11274,7 @@ run once
  Macros run on source expressions, and they expand the source expression
  into something evaluatable.
  That is, macro languages allow the programmer to define a set of rewrite
- rules to transform input syntx trees into output syntax trees.
+ rules to transform input syntax trees into output syntax trees.
  However, conceived of as macros, they can only be run once, during a pre-proces
 sing stage; they cannot be run later, once the resulting program has started
  executing.
@@ -11269,7 +11282,7 @@ sing stage; they cannot be run later, once the resulting program has started
 \end_layout
 
 \begin_layout Standard
-This is in sharp contrst to the needs of predicate logic
+This is in sharp contrast to the needs of predicate logic
 \begin_inset Foot
 status collapsed
 
@@ -11371,7 +11384,7 @@ data processing
 \end_inset
 
  in all of its glorious 1960's generality: performing database queries to
- associate an electric utility customer's account with thier electric usage
+ associate an electric utility customer's account with their electric usage
  for that month, and thier mailing address, and print a bill to be mailed
  to the customer.
  This is, in a sense, quintessential data processing, and central to it
@@ -11471,10 +11484,10 @@ http://maude.cs.illinois.edu/w/index.php/The_Maude_System
 \end_layout
 
 \begin_layout Standard
-What is new here is that, if the metagraphs are reprsented as s-expressions,
+What is new here is that, if the metagraphs are represented as s-expressions,
  some of those s-expressions are potentially evaluatable, and thus lisp-like.
  Unlike conventional lisp, the evaluation system must live in harmony with
- the term rewriting sytem; thus, enabling the evaluation of metatrees seems
+ the term rewriting system; thus, enabling the evaluation of metatrees seems
  to require some sort of clearly defined fexpr or $vau interfaces in the
  evaluator.
 \end_layout
@@ -11806,7 +11819,7 @@ Human-oriented vs.
 \end_layout
 
 \begin_layout Standard
-ProLog is a human-oriented programming langauge.
+ProLog is a human-oriented programming language.
  It is expected that humans are going to write prolog, and thus the language
  features are designed to be easy for humans to manipulate.
  In this sense, it is like almost all programming languages – almost all,
@@ -11814,7 +11827,7 @@ ProLog is a human-oriented programming langauge.
 \end_layout
 
 \begin_layout Standard
-The intermediate languages are not human-orineted, but machine oriented.
+The intermediate languages are not human-oriented, but machine oriented.
  It is not expected that programmers will be writing in intermediate languages,
  no more than they are expected to write in assembly code.
  Intermediate languages are designed to be easy to use by machines: specifically
@@ -11824,7 +11837,7 @@ The intermediate languages are not human-orineted, but machine oriented.
 n, the rearrangement of terms that enables fast assembly? Some compiler
  optimizations can be done directly on the input source: for example, loop
  hoisting.
- Some comiler optimizations can be done directly on the assembly: for example,
+ Some compiler optimizations can be done directly on the assembly: for example,
  peephole optimizations.
  The vast majority of desirable program transformations cannot be done in
  either the source language or the target language.
@@ -11836,7 +11849,7 @@ n, the rearrangement of terms that enables fast assembly? Some compiler
 
 \begin_layout Standard
 It appears that any kind of programming language constructed from raw metatree
- s-expressions is more machine freindly than it is human-freindly.
+ s-expressions is more machine friendly than it is human-friendly.
  The example given earlier:
 \end_layout
 
@@ -11958,7 +11971,7 @@ do as I say, not as I do
 \begin_layout Standard
 To conclude: although some metatrees might be executable or evaluatable,
  and thus constitute a programming language, it does not appear to be a
- language that is particularly human-freindly, at least, not in it's s-expressio
+ language that is particularly human-friendly, at least, not in it's s-expressio
 n representation.
 \end_layout
 
@@ -12063,9 +12076,9 @@ Atomese
 
 \begin_layout Standard
 Almost all of the various ideas articulated in this text have been implemented
- in the OpenCog Atomspace, nominally going under the name of Atomese.
+ in the OpenCog AtomSpace, nominally going under the name of Atomese.
  Historically, it was created to be a knowledge representation system in
- which probabilisitc reasoning could be performed.
+ which probabilistic reasoning could be performed.
  Regular use and the pressures of user demands have forced the sharpening
  of various concepts and features, most of which have been reviewed above.
 \end_layout
@@ -12185,7 +12198,7 @@ The second revision of this text has benefited from the (witting or unwitting)
  helpful input of Amirouche Boubekki, Kino Coursey, John Cowan, Marc Nieper-Wißk
 irchen, Adam Vandervorst and Steven Wiley.
  Absolutely none of this would have been possible without a decade's worth
- of gracious support and tutelege of Ben Goertzel.
+ of gracious support and tutelage of Ben Goertzel.
 \end_layout
 
 \begin_layout Standard
