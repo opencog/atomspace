@@ -97,17 +97,23 @@ Graphs, Metagraphs, RAM, CPU
 
 \begin_layout Author
 Linas Vepštas
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+linasvepstas@gmail.com
 \end_layout
 
-\begin_layout Right Address
-linasvepstas@gmail.com
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
 2 Sept 2020 Version 1.0
-\end_layout
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Date
 22 Nov 2021 Version 2.0
 \end_layout
 
@@ -3423,12 +3429,15 @@ The scale factor
 
 , see 
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
-https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf%27s_law%3
-F
+https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf
+\backslash
+%27s_law
+\backslash
+%3F
 \end_layout
 
 \end_inset
@@ -3436,7 +3445,7 @@ F
  for graphs and discussion.
  For genomics, see 
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
