@@ -9776,10 +9776,90 @@ Similarly, the metaquery language introduces a Present Link, which is a
 In the current OpenCog Atomese system, there are well over a hundred distinct
  Node and Link types, each introduced as a need arose.
  Booleans: AndLink, OrLink, NotLink.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/AndLink
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  Arithmetic: PlusLink, MinusLink, GreaterThanLink.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/PlusLink
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  Set theory: SetLink, MemberLink.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/SetLink
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  Functionals: LambdaLink.
- 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/LambdaLink_and_ScopeLink
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -9796,6 +9876,26 @@ For many (but not all) of these Nodes and Links, it became convenient to
 After recognizing that Nodes and Links and their variations are all types,
  it became easy to create a type system: SignatureLink, TypedVariableLink,
  TypeNode, ArrowLink.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://wiki.opencog.org/w/SignatureLink
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  It appears to be entirely consistent and, as a type system, entirely convention
 al.
 \begin_inset Foot
