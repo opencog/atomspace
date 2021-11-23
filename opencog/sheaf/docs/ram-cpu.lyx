@@ -99,6 +99,10 @@ Graphs, Metagraphs, RAM, CPU
 Linas Vepstas
 \end_layout
 
+\begin_layout Right Address
+linasvepstas@gmail.com
+\end_layout
+
 \begin_layout Date
 2 Sept 2020 Version 1.0
 \end_layout
@@ -6862,7 +6866,7 @@ upwards
 
 .
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 This is the point of the Meijer and Bierman result.
@@ -6910,15 +6914,35 @@ TABLE Schools
 ', examine each school in turn, and then trace downwards from the top, until
  it eventually reaches Rachel, and is able to satisfy this final constraint.
  Table joins are a constraint satisifaction problem.
- Solving constraint satsifaction problems (CSP) is non-trivial; there is
- a vast literature devoted to this, both for the case of general CSP, and
- to the specific case of query plannning.
+ Solving constraint satsifaction problems (CSP) is non-trivial;
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Constraint_satisfaction_problem
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ there is a vast literature devoted to this, both for the case of general
+ CSP, and to the specific case of query plannning.
 \end_layout
 
 \begin_layout Standard
-Why would an SQL engine run this query in an inefficent way? Well, the query
- panner may have decided that it is too expensive to create the dashed-arrow
- indexes.
+Why would an SQL engine run this query in an unexpected or inefficient way?
+ Well, the query panner may have decided that it is too expensive to create
+ the dashed-arrow indexes.
  Without the dashed arrows, one obviously has to start at the top.
  Why would it decide that the dashed arrows are too expensive? Well, it
  might have looked at all the tables, noted that they are all very small,
@@ -6967,7 +6991,7 @@ http://binaryanalysisplatform.github.io/bap/api/odoc/ogre/Ogre/Query/index.html
 \end_inset
 
  The influence of SQL in this query language is clear.
- Interestingly, OGRE was designed to be a dtabase for s-expressions, and,
+ Interestingly, OGRE was designed to be a database for s-expressions, and,
  as we've noted, s-expressions seem to make for an almost ideal representation
  for metatrees.
  So what's the catch? 
@@ -6981,7 +7005,7 @@ Well, the OGRE s-expressions are just that: strings.
  manage the incoming sets for these trees.
  Or rather, there is no particularly compelling reason, until one considers
  the implementation of the 'JOIN' keyword.
- In OGRE, there are no over primary keys, and no foreign keys, so these
+ In OGRE, there are no overt primary keys, and no foreign keys, so these
  need to be generated implicitly, as needed, to perform a query that joins
  together multiple s-expressions.
 \end_layout
@@ -7008,11 +7032,11 @@ status open
 
 \end_inset
 
-That is, the very first word appearing after the opening parenthsis has
+That is, the very first word appearing after the opening parenthesis has
  a special meaning.
  This is entirely conventional: in LISP/Scheme, the first word appearing
  after an opening parenthesis also has a very special significance.
- It is a lambda.
+ It is an operator.
  For our metatrees written as s-expressions, that first word is necessarily
  a Link.
  And so in OGRE, the first word is called the 
@@ -7043,7 +7067,7 @@ proposition
  these are taken to be synonymous.
  In the general sheaf theory, subjects and objects are not synonymous; they
  correspond to different connector types.
- But this is a topic outside of teh scope of the present text.
+ But this is a topic outside of the scope of the present text.
 \end_layout
 
 \end_inset
@@ -7161,9 +7185,9 @@ de facto
 \end_layout
 
 \begin_layout Standard
-The need for explicit declarations, and the explicit identiffication of
- concrete types for fields, suggests that, under the covers, OGRE is building
- up all the machinery needed to perform table joins.
+The need for explicit declarations, and the explicit identification of concrete
+ types for fields, suggests that, under the covers, OGRE is building up
+ all the machinery needed to perform table joins.
  Presumably this means the creation of the dashed-arrow incoming sets that
  are needed for upwards traversals.
  Or perhaps not: maybe the OGRE query planner always initiates queries top-down,
@@ -7705,7 +7729,7 @@ equality is simple
 
 .
  It's hard.
- If you are still not convinced, review the Wikiipedia article on equational
+ If you are still not convinced, review the Wikipedia article on equational
  logic again: 
 \begin_inset Flex URL
 status open
@@ -7763,13 +7787,13 @@ status collapsed
 
 \begin_layout Plain Layout
 Variables, are, however, always named, given a name.
- It is an open question is to how anonymous (unamed) variables might be
- written.
+ It is an open question is to how anonymous (un-named) variables might be
+ written and used.
 \end_layout
 
 \end_inset
 
- There is no explcit need for equality.
+ There is no explicit need for equality.
 \end_layout
 
 \begin_layout Standard
@@ -7807,8 +7831,8 @@ Present
  of free s-expressions.
  The fact that the metaquery is itself a metatree opens the possibility
  of querying for queries.
- This may sound utterly absurd, but is in fact very commonplace in chatbots!
- This is expanded on below.
+ This may sound utterly absurd, but is in fact very commonplace in chatbots
+ and rule engines! This is expanded on below.
 \end_layout
 
 \begin_layout Standard
@@ -8310,8 +8334,8 @@ i.e.
 \end_layout
 
 \begin_layout Standard
-The careful reader may have noticed that the above query only allows Rachel
- to be a student of ASCII.
+The careful reader may have noticed that the above query only returns that
+ Rachel is a student of ASCII.
  The full query, which would also reveal her to be a student of WU, is given
  below.
  The comparable SQL statement is considerably more complex and not given.
@@ -8442,11 +8466,15 @@ Rachel
 
 \end_inset
 
-The above introduces the 'Choice' Link.
+The above introduces the '
+\family sans
+Choice
+\family default
+' Link.
  For the most part, it can be read as a logical-OR of the two predicates
  that it wraps.
- More precisely, it can be used as a menu-choice: pick one or pick the other
- (but not both).
+ More precisely, it denotes a menu-choice: pick one or pick the other (but
+ not both).
  Choice commonly appears as a fragement of intuitionistic logic and of linear
  logic.
 \end_layout
@@ -8457,7 +8485,7 @@ Metatree Query vs.
 \end_layout
 
 \begin_layout Standard
-Since metatrees can be written as s-expresion strings, and since metaqueries
+Since metatrees can be written as s-expression strings, and since metaqueries
  can be likewise, the question arises: can metaquery evaluation be reduced
  to (regex) string matching? The initial example certainly feels like this
  might be possible: the variables are just wild-cards, and everything else
@@ -8468,7 +8496,50 @@ Since metatrees can be written as s-expresion strings, and since metaqueries
 \begin_layout Standard
 This is doubly unfortunate, since pattern matching is well-understood and
  widely developed.
- Besides regex and pcre itself, the `syntax-case` subset of 
+ Besides regex and pcresyntax case scheme
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Perl-compatible regular expressions.
+ See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.pcre.org/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ itself, the `syntax-case` subset
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://www.gnu.org/software/guile/manual/html_node/Syntax-Case.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -8480,6 +8551,48 @@ hygenic macros
  and term rewriting.
  In that direction, most (all?) functional programming languages include
  pattern matchers as a basic utility.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Examples include Racket: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://docs.racket-lang.org/reference/match.html
+\end_layout
+
+\end_inset
+
+ OCaml: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://ocaml.org/manual/patterns.html
+\end_layout
+
+\end_inset
+
+ and Scala: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://docs.scala-lang.org/tour/pattern-matching.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  The well-developed ones provide pattern languages that are quite expressive,
  and the implementations tend to be compact and direct.
 \end_layout
@@ -8547,7 +8660,7 @@ Practical metatree matching needs to provide menu-choice alternatives for
 d must now be placed on a stack).
  So, two issues here.
  First: regexes correspond to finite state machines, whereas stack machines
- corespond to context-free languages.
+ correspond to context-free languages.
  So already, with choice, we've left the (simple, fast, direct) domain of
  regexes and finite state machines.
  Second: if the implementation of the pattern matcher is forcing you to
@@ -8634,6 +8747,8 @@ After reading the above, the reader might feel as if there was a bit of
  Thus, funny business like quotes and lambdas and alpha-rewrites and unordered
  sets must necessarily enter into the picture, and be supportable in the
  query system.
+ Users ask for these things, users want them.
+ You can't say no to users and expect them to come back anyway.
 \end_layout
 
 \begin_layout Standard
@@ -8684,7 +8799,7 @@ Graphs may include equality predicates.
 
 \begin_layout Standard
 A full-fledged query language can include evaluatable predicates to accept
- or reject a paricular grounding.
+ or reject a particular grounding.
  During the analysis phase, these are set aside into a distinct bucket.
  They cannot be grounded (by definition), they can only be evaluated after
  a grounding is found.
@@ -8721,7 +8836,7 @@ less than
 \begin_inset Quotes erd
 \end_inset
 
-, act as a filter on the cartesian product of the components.
+, act as a filter on the Cartesian product of the components.
  Terms such as logical-or act on the disjoint union of the components.
  That is, both pi-type and sigma-type arrangements of disjoint components
  are possible.
@@ -8745,8 +8860,8 @@ Always
 \family default
 ' predicate, required to be present in not just one grounding, but in every
  grounding.
- They resemble evaluatable clauses, but they cannot be evaluated until all
- possible groundings have been obtained.
+ They resemble evaluatable clauses, but they cannot be evaluated until after
+ all possible groundings have been obtained (They can fail early, though.)
 \end_layout
 
 \begin_layout Subsection*
@@ -8762,7 +8877,7 @@ The most basic query planning involves choosing a starting point for a graph
 \end_layout
 
 \begin_layout Standard
-Sometimes, finding a starting point is this way is impossible, because the
+Sometimes, finding a starting point this way is impossible, because the
  query consists entirely of variables.
  In other cases, a query may consist entirely of evaluatable terms, which,
  by definition, are not groundable, but only evaluatable.
@@ -8779,10 +8894,10 @@ lly grounded, and then reassembled with pi-type or sigma-type bridges between
 \begin_layout Standard
 It is advantageous to borrow some ideas from SAT solving, and prune simple
  trees from the query, before performing an exhaustive search of a multiply-conn
-eted tight nucleus.
+ected tight nucleus.
  The pruned trees can be re-attached later.
  Equivalently, they might only need to be pattern-matched once.
- In this case, pruing is equivalent to maintaining a cache of pattern matches
+ In this case, pruning is equivalent to maintaining a cache of pattern matches
  acheived earlier during traversal.
  (That is, a recursive graph walk will typically revisit certain parts of
  the graph.
@@ -8830,7 +8945,7 @@ Well, of course, everything can be encoded as a metagraph.
  42nd one, it seems like overkill to be blocked from doing so by immutability.
  One might like to have something mutable, for this kind of a low-level
  vector.
- Another cost is the weak pointer (the dashe arrow).
+ Another cost is the weak pointer (the dashed arrow).
  There is no particular need to maintain an incoming set for each floating
  point in a list.
  It is unlikely that two different Links will share the same floating point
@@ -8899,9 +9014,9 @@ truth values
 
 .
  Historically, these are crisp true/false values.
- But in Bayesian beleif networks and in Markov logic networks, these valuations
+ But in Bayesian belief networks and in Markov logic networks, these valuations
  are given floating-point probabilites as thier truth values.
- On OpenCog, these were historically called TruthValues, wirtten in CamelCase.
+ On OpenCog, these were historically called TruthValues, written in CamelCase.
  When generalized to arbitrary KVP valuations, they become Values.
  A better name might have been Attributes or Tags, as they are treated as
  ...
@@ -9047,7 +9162,7 @@ I love you
 
 \begin_layout Standard
 What is being done here is a kind of inverted query.
- One is presented with the 'answer', say 
+ One is presented with the 'answer', 
 \emph on
 
 \begin_inset Quotes eld
@@ -9479,7 +9594,7 @@ Dual
 ', to find some candidates, and then one of the candidates is chosen and
  run on a tiny, itsy-bitsy dataset consisting of one sentence.
  Its fast.
- In so far as all of this content is stored as metatrees, all of the prior
+ Insofar as all of this content is stored as metatrees, all of the prior
  considerations about RAM usage, search performance and tree walking apply.
 \end_layout
 
@@ -9625,7 +9740,7 @@ This is eerily similar to atomic physics.
 \end_layout
 
 \begin_layout Itemize
-The description of the meta-query langauge introduces a Variable, which
+The description of the meta-query language introduces a Variable, which
  is obviously a kind of Node, but is distinguished from a conventional Node,
  in that it has special semantics in the context of a query.
 \end_layout
@@ -9636,7 +9751,7 @@ Similarly, the metaquery langauge introduces a Present Link, which is a
 \end_layout
 
 \begin_layout Itemize
-In the current OpenCog Atomese system, there are will over a hundred distinct
+In the current OpenCog Atomese system, there are well over a hundred distinct
  Node and Link types, each introduced as a need arose.
  Booleans: AndLink, OrLink, NotLink.
  Arithmetic: PlusLink, MinusLink, GreaterThanLink.
@@ -9665,7 +9780,7 @@ al.
 status collapsed
 
 \begin_layout Plain Layout
-All the easy type-theoretical stuff is included.
+The OpenCog AtomSpace includes all the easy type-theoretical stuff.
  What's currently missing are type equations, type variables and dependent
  types.
  These are missing mostly because no one has asked for them yet.
@@ -9704,8 +9819,8 @@ compiled
 \end_inset
 
  into the database: they are merely being inserted.
- There is a long-runing REPL loop, and nothing is gained by preventing users
- from defining new types at runtime.
+ There is a long-running REPL loop, and nothing is gained by preventing
+ users from defining new types at runtime.
  Note that this does make the type system clash with that of OCaml, Haskell,
  Scala, all of which deploy a static type system.
  
@@ -9756,7 +9871,48 @@ types
 \begin_inset Quotes erd
 \end_inset
 
- it is meant both the types of computer science, and of type theory.
+ it is meant both the types of computer science,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Type_system
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ and of type theory.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Type_theory
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  In conventional computer programming, ints, floats and strings are types
  (these are the 
 \begin_inset Quotes eld
@@ -9869,6 +10025,37 @@ what the computer programmer is imagining it to be
 \end_inset
 
 .
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Playing a bit fast and loose here: 
+\begin_inset Quotes eld
+\end_inset
+
+denotational semantics
+\begin_inset Quotes erd
+\end_inset
+
+, see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Denotational_semantics
+\end_layout
+
+\end_inset
+
+ is about converting what the programmer is thinking back into mathematical
+ formulas.
+ Computer science, just like math, loves to go meta whenever it can.
+ 
+\end_layout
+
+\end_inset
+
  So, for example, a 
 \begin_inset Quotes eld
 \end_inset
@@ -9934,7 +10121,7 @@ cat
 \family sans
 CatNode
 \family default
-, although the usage woulld appear to change: one would then write '
+, although the usage would appear to change: one would then write '
 \family sans
 (CatNode 
 \begin_inset Quotes eld
@@ -10176,7 +10363,7 @@ PartOfLink
 \family default
 ': holonyms and meronyms, and use those in one's lexical ontology.
  There is freedom in how this can be done; there is nothing in the metatrees
- that is forcing certain types upon the usr, over other types.
+ that is forcing certain types upon the user, over other types.
 \end_layout
 
 \begin_layout Subsection*
@@ -10687,7 +10874,7 @@ That is, the arrow points from a list of the input types to a list of the
 \end_layout
 
 \begin_layout Subsection*
-Jigsaw Puzzle Pieces
+Jigsaw Puzzle Pieces and Sheaves
 \end_layout
 
 \begin_layout Standard
@@ -10696,8 +10883,12 @@ Caution: the idea of Lambdas, and of Arrows, while extremely widespread
  in knowledge representation.
  Even worse: just as fish are unaware of water, most programmers are unaware
  of alternatives to lambdas.
- There is one extremely important alternative, discussed in other texts
- in this series: the jigsaw puzzle piece, and its tab and slot connectors.
+ 
+\end_layout
+
+\begin_layout Standard
+There is one extremely important alternative, discussed in other texts in
+ this series: the jigsaw puzzle piece, and its tab and slot connectors.
  Telegraphically: if one has a function 
 \begin_inset Formula $f\left(x\right)$
 \end_inset
@@ -10978,7 +11169,7 @@ b
 \begin_layout Standard
 As such, some metatrees can serve a dual purpose: both to record syntactic
  structure, and to be executable.
- Perhaps this feels painfully obviois at this point; if this is the case,
+ Perhaps this feels painfully obvious at this point; if this is the case,
  it should be contrasted to the situation of programming in lisp or scheme.
  First of all, in lisp, one is programming, not representing data.
  The source code for lisp programs resides in files, not in databases.
@@ -11002,7 +11193,8 @@ Let's not be silly.
  them inherently evaluatable or executable.
  Indeed, the above fragment is not executable until the variables are bound
  to some values.
- Worse, its ambiguous as to what should happen if a is not grater than b.
+ Worse, its ambiguous as to what should happen if a is not greater than
+ b.
  As a program, it is not really valid.
  As a metatree, it is as good as any other, differing only in having the
  hint of being possibly, potentially evaluatable.
@@ -11178,9 +11370,9 @@ data processing
 \begin_inset Quotes erd
 \end_inset
 
- in all of its glorous 1960's generality: performing database queries to
+ in all of its glorious 1960's generality: performing database queries to
  associate an electric utility customer's account with thier electric usage
- for thatt month, and thier mailing address, and print a bill to be mailed
+ for that month, and thier mailing address, and print a bill to be mailed
  to the customer.
  This is, in a sense, quintessential data processing, and central to it
  is the database holding names, accounts and monthly usages.
@@ -11595,7 +11787,7 @@ compiler optimization
 
 \begin_layout Standard
 Of course, what happens inside a compiler is very narrow, and very carefully
- crafted to suite the needs of the compiler, and nothing more.
+ crafted to suit the needs of the compiler, and nothing more.
  This is a high art that has been honed over many decades.
  Intermediate languages are almost never written to disk, except during
  debugging, when they are presented to the programmer as text strings.
@@ -11723,7 +11915,7 @@ b
 
 \end_inset
 
-is stunningly verbose, as compared to the far more abstract 
+is stunningly verbose, as compared to the far more succinct 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11740,6 +11932,27 @@ if (a > b) return a+b;
 .
  Although humans could write metagraph programs using the s-expression represent
 ation, it would be rather tedious to type up, and rather painful to read.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Heh.
+ In fact, I (we: other users too) write metatree s-expressions daily.
+ Perhaps this is a case of 
+\begin_inset Quotes eld
+\end_inset
+
+do as I say, not as I do
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -11838,10 +12051,10 @@ https://wiki.opencog.org/w/Hyperon:Atomese
  The pattern language can no longer be simple, and worse, the pattern language
  diverges from the source language itself.
  The s-expression form seems to hit a happy medium: the pattern language
- is a valid supset of the whole language.
+ is a valid subset of the whole language.
  It is easy to parse, making it ideal for algorithmic manipulation.
  It is too low-level to make it comfortable for humans; but given that we
- live in a machine age, this is perhaps a not unepected twist.
+ live in a machine age, this is perhaps a not unexpected twist.
 \end_layout
 
 \begin_layout Section*
@@ -11853,8 +12066,8 @@ Almost all of the various ideas articulated in this text have been implemented
  in the OpenCog Atomspace, nominally going under the name of Atomese.
  Historically, it was created to be a knowledge representation system in
  which probabilisitc reasoning could be performed.
- Regular use and the pressures of user demands force the sharpening of various
- concepts and features, most of which have been reviewed above.
+ Regular use and the pressures of user demands have forced the sharpening
+ of various concepts and features, most of which have been reviewed above.
 \end_layout
 
 \begin_layout Standard
@@ -11879,7 +12092,7 @@ Conclusion
 
 \begin_layout Standard
 Several important claims were made here about metagraphs and metagraph stores.
- These are:
+ These were:
 \end_layout
 
 \begin_layout Itemize
