@@ -5561,7 +5561,7 @@ stributed storage; this is the problem of UUID collision.
 Just how big is a 64-bit hash, vs.
  the expression it is standing in for? Well, 64-bits is 8 bytes.
  Suppose that the data that one was storing consisted of English words (there
- are about a million of them, if you includ geographical place names, product
+ are about a million of them, if you include geographical place names, product
  and corporate names, historical events and a smattering of Latin and foreign
  loan-words.) The average length of these is about six letters, thus six
  byes; seven if including the null terminator.
@@ -5598,7 +5598,7 @@ we can't compress; the data lives in memory, not a file!
 \begin_inset Quotes erd
 \end_inset
 
- ah, yes, this is true.
+ Ah, yes, this is true.
  The in-RAM representation is explosively larger than the string s-expression
  form.
  Reviewing the two tables 
@@ -5640,17 +5640,17 @@ n
 (e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
 \family default
 ' is 48 characters: 48 bytes.
- The s-expression representation is far more compact than the in-RAM representat
-ion!
+ The s-expression representation is four times more compact than the in-RAM
+ representation!
 \end_layout
 
 \begin_layout Standard
 Finally, there is the problem of the UUID-to-meta-tree mapping.
  Where is it stored? New meta-trees could be added weeks or months later.
- Is this UUID-to-meta-tree mapping supposed to be live, available on-line
- at any time? What happens if it goes down? How is it kept unique? With
- locks? How many UUID's per second can be issued? What happens if it gets
- corrupted? Who has spare copies? Do byzantine generals show up here? How
+ Is there some UUID-to-meta-tree mapping service, live, available on-line
+ 24x7? What happens if it goes down? How is it kept unique? With locks?
+ How many UUID's per second can be issued? What happens if it gets corrupted?
+ Who has spare copies? Do byzantine generals show up and ruin the day? How
  much storage does this all require?
 \end_layout
 
@@ -5793,22 +5793,23 @@ Yet, oddly, this top-level index/table looks exactly like any other metatree.
 \end_layout
 
 \begin_layout Standard
-Thus, we've identified two fundamentally differrent structures, serving
- different purposes, yet both having the same form.
+Thus, we've identified two fundamentally differrent utilities, serving different
+ purposes, yet both having the same structural form.
  The mutable form is a 'database'.
  The immutable form is the 'data'.
  In all other respects, they are the same.
 \end_layout
 
 \begin_layout Standard
-Jumping ahead, the mutable form has been historically called the 'AtomSpace'.
+Within the OpenCog system, the mutable form has been historically called
+ the 'AtomSpace'.
  It can be stacked and nested and used to form diamond-shaped inheritance
  diagrams, however one wishes.
  The immutable Nodes and Links have been called 'Atoms', as a stand-in term
  for something that can be either a Node or a Link.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Metagraph mutability vs.
  SQL table mutability
 \end_layout
@@ -5845,8 +5846,21 @@ SELECT key FROM employees WHERE name='Agent Smith';
 \end_inset
 
  and present the resulting key to be deleted.
- Yes, of course, this can be done with a single statement; that only hides
- the fact that, without the key, nothing can be done.
+ Yes, of course, this can be done with a single statement: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+DELETE FROM employees WHERE name='Agent Smith';
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ but this only hides the fact that, without the key, nothing can be done.
 \end_layout
 
 \begin_layout Standard
@@ -5857,13 +5871,13 @@ In SQL, effectively all tables have a primary key: it is the master key
 \emph on
 de facto
 \emph default
- UUID of SQL systems, it suffers from all the drawbacks previously hinted
- at.
+ UUID of SQL systems, it suffers from all the UUID drawbacks previously
+ reviewed.
  SQL databases are notoriously hard to shard across multiple network nodes.
  Consistency and atomic updates are hard: there is effectively one centralized
  bottleneck.
- This is the foundation stone for the ACID vs.
- BASE debates.
+ This is the foundation stone on which the ACID vs.
+ BASE debates are built.
 \end_layout
 
 \begin_layout Standard
@@ -5876,7 +5890,6 @@ How does this compare to the one mutable index of all immutable meta-trees?
 If the master index is a hash table or a tree of raw memory pointers, and
  one has the raw pointer to the memory to be deleted, the deletion can be
  immediately and directly performed.
- direct.
  This is analogous to already knowing the primary key of an SQL table row.
 \end_layout
 
@@ -5892,7 +5905,7 @@ If the master index is a hash table or a tree of abstract indicators, and
  what it's Merkle tree hash will be.
  It is not 'unique', in the sense that there might be hash collisions.
  However, for practical use in the database, being collision-free is not
- important; being computable in a decentralized fashion is.
+ so important; being computable in a decentralized fashion is.
  It avoids the UUID/primary-key pitfall.
  This certainly turns the ACID vs.
  BASE debate a bit on it's side.
@@ -5901,7 +5914,27 @@ If the master index is a hash table or a tree of abstract indicators, and
 \end_layout
 
 \begin_layout Itemize
-If the master index is an ordered key-value-store (OKVS, see Wikipedia)
+If the master index is an ordered key-value-store (OKVS)
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Ordered_Key-Value_Store
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  of s-expressions, and one has the s-expression corresponding to the meta-tree
  to be deleted, the deletion can be immediately and directly performed.
  But it is already apparent that it is easy and cheap to compute (in a decentral
@@ -5953,7 +5986,8 @@ As should be clear, there is not really all that much difference here, at
  implementation options for the analagous concept of a primary key: either
  Merkle trees, or s-expressions, or possibly something else.
  From the implementors point of view, this is nice: there are various possible
- implementations.
+ implementations (and they are all hidden from the user! No backwards-compat
+ concerns!)
 \end_layout
 
 \begin_layout Standard
