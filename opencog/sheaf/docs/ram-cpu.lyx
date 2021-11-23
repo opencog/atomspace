@@ -4121,7 +4121,7 @@ NOT
 \end_layout
 
 \begin_layout Standard
-However, in a hypergraph database, just as in a table-based database, there
+However, in a metagraph database, just as in a table-based database, there
  will be certain types of queries that are used a lot, and speeding these
  up through indexing is a key ability.
  How might this work, in practice? Let's examine some queries, and see how
@@ -4223,10 +4223,37 @@ SELECT
  This is necessarily so: one cannot build an index smaller than the number
  of employees: every employee must be in some department, as, conventionally,
  table-driven databases don't have null entries in rows.
- (Well, in practice, they often do; but now imagine the task of finding
- all records with a null value in some column...) Table-based information also
- has some representational difficulties: imagine the case of an employee
- with dashed-line reporting to multiple departments.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Well, in practice, they often do; but now imagine the task of finding all
+ records with a null value in some column...
+\end_layout
+
+\end_inset
+
+ The point of the index with to replace an 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ cpu-time search with an 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ cpu-time search.
+ The price of doing so was an 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ RAM structure.
+\end_layout
+
+\begin_layout Standard
+Table-based information has certain kinds of representational difficulties:
+ imagine the case of an employee with dashed-line reporting to multiple
+ departments.
+ This might motivate one to cast an eye towards graph databases.
 \end_layout
 
 \begin_layout Standard
@@ -4252,7 +4279,7 @@ privileged
  of the department.
  Basically, the vertexes are labeled, thus escaping the overhead of crawling
  through a collection of attributes to find one in particular.
- One also created an unlabeled, attribute-free edge, from the department
+ One also creates an unlabeled, attribute-free edge, from the department
  name back to the full employee record.
  Finding all employees in 
 \begin_inset Quotes eld
@@ -4292,7 +4319,7 @@ sales
 \begin_inset Quotes erd
 \end_inset
 
-, and then trace all outgoing edges to the full record.
+, and then traces all outgoing edges to the full record.
  The graph can be thought of as a table with a special 
 \begin_inset Quotes eld
 \end_inset
@@ -4333,6 +4360,7 @@ status collapsed
 This is not meant to be a psychological assessment; rather it is meant to
  provide a translation between the 'algebraic' form of typed commands sent
  to relational DB's, and an equivalent 'geometric', visual form.
+ It is the denotational semantics of the index.
  The geometric form can be understood as being either metaphorical and abstract,
  or it can be taken literally, as a collection of pointers and the things
  they point to.
@@ -4418,6 +4446,16 @@ ad hoc
 \emph default
 , evolved over the decades and mostly hidden from the user.
  There are no explicit graph-walking directives in SQL.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Aside from table joins; more on that later.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4503,7 +4541,7 @@ de facto
 
 \begin_layout Standard
 The explicit hypergraph representation does cost more than its implicit
- form SQL databases.
+ form in SQL databases.
  An SQL index can be a b-tree or hash table; the only thing that the b-tree/hash
  table needs to store is the row ID.
  For a hypergraph, we have imposed the additional requirement that hypergraphs
@@ -4559,8 +4597,8 @@ Suppose you are clever enough to write deep table joins in SQL.
  performance.
  For large databases, there has been a vast (multi-billion-dollar) investment
  in sophisticated query planning.
- Walking graphs, represented in terms of tables, is not for the faint of
- heart.
+ Walking graphs, represented in terms of tables and indexes, is not for
+ the faint of heart.
 \end_layout
 
 \begin_layout Standard
@@ -4654,8 +4692,27 @@ sales
 \end_inset
 
  comes for free.
- The dominant cost is almost surely the analysis needed to extract the desired
- information from the record attributes.
+ That is, if you have 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+\emph on
+sales
+\family default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, you already have the set 
+\begin_inset Formula $\left\{ R\right\} $
+\end_inset
+
+ and no further lookups are required.
+ The dominant cost is almost surely the procedures needed to extract the
+ desired information from the record attributes.
 \end_layout
 
 \begin_layout Subsection*
@@ -4664,8 +4721,8 @@ Partial indexes and metagraphs
 
 \begin_layout Standard
 The power of partial indexes together with metagraphs begins to reveal itself
- when one considers query and search query optimization.
- This text is long enough, so this will be deferred to a later chapter.
+ when one considers query and search optimization.
+ Some key aspects of this are reviewwed in the next two sections.
 \end_layout
 
 \begin_layout Standard
@@ -4913,7 +4970,7 @@ noprefix "false"
 
 \end_inset
 
-) (that the graph store demands), and the associated edge attributes, one
+) that the graph store demands, and the associated edge attributes, one
  gets the representational compactness of indexes, without paying a high
  price for them.
  The price one does pay (the incoming set of the metagraph link table 
@@ -4942,7 +4999,7 @@ easy
 
  if you are willing to write PL/SQL, or, if your database supports it, then
  embedded Python.
- Otherwise, you have to descend into C/C++ (or your other favorite programming
+ Otherwise, you have to descend into C/C++ (or your favorite programming
  language of choice), and once you are 
 \begin_inset Quotes eld
 \end_inset
@@ -4960,7 +5017,8 @@ easy
 \end_inset
 
 .
- A properly designed graph query system makes graph walks 
+ A properly designed graph query system makes (should make) graph walks
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4969,7 +5027,9 @@ easy
 \end_inset
 
 .
- And, to take one quick pot-shot: GraphQL is not properly designed.
+ A properly-designed metagraph query system makes graph walks invisible
+ (see next section.) And, to take one quick pot-shot: GraphQL is not properly
+ designed.
  It is effectively a query anti-pattern.
  It took what is nice about SQL, but then utterly failed to take into account
  anything and everything that this text is trying to explain.
@@ -5316,7 +5376,39 @@ the same thing
 \end_inset
 
 .
- There is an IETF draft standard for references, but it is not widely used.
+ There is an IETF draft standard for references,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://redoc.ly/docs/resources/ref-guide/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ but it is not widely used.
  Thus, although metatrees can be represented with JSON, some care must be
  taken when parsing them: one must find all repeated objects and understand
  them to be universally unique.
@@ -5442,7 +5534,7 @@ oh, hey, just use universally unique identifiers
 
  (UUID's).
  This is good enough for local address spaces; if nothing else, then an
- ordinary C/C++ pointer is a UUID to the object.
+ ordinary C/C++ pointer is a UUID for the object.
  But, when writing a text string, what UUID shall one use? 
 \end_layout
 
