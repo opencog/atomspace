@@ -293,10 +293,10 @@ EXECUTE_THREADED_LINK <- ORDERED_LINK
 //         ConnectorSeq
 //             Connector
 //                 Lexical "level"
-//                 ConnectorDir "-"
+//                 Direction "-"
 //             Connector
 //                 Lexical "field"
-//                 ConnectorDir "+"
+//                 Direction "+"
 //
 // The above encodes the phrase "level playing field", indicating that
 // "playing" connects to "level" on the left, and to "field" on the
@@ -318,7 +318,8 @@ ANY_NODE <- NODE
 // in a TruthValue (typically a crisp T/F for type specifications.)
 CONNECTOR <- ORDERED_LINK
 
-CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
+DIRECTION_NODE <- LEXICAL_NODE "Direction" // Connector direction
+CONNECTOR_DIR_NODE <- DIRECTION_NODE "ConnectorDir" // Deprecated, use above instead.
 BOND_NODE <- LEXICAL_NODE "Bond"    // A connection type name.
 CONNECTOR_SEQ <- ORDERED_LINK       // Conjoined sequence of connectors
 CONNECTOR_SET <- UNORDERED_LINK     // Unordered conjunction of connectors
