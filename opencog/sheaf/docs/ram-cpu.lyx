@@ -405,7 +405,7 @@ As a conclusion, it is noted that the OpenCog AtomSpace has been the experimenta
 l platform on which all of the above results have been obtained, and embodies
  the most of the ideas presented here.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See 
@@ -1234,6 +1234,8 @@ classical
 
  A straight-forward example can be found in Prolog: in the beginning, there
  are expressions; by means of inference, truth-value labels are infered.
+ The truth values are not a part of the original graph; they live outside
+ of it, as an attribute.
 \end_layout
 
 \begin_layout Standard
@@ -1268,13 +1270,117 @@ In what follows, all data is assumed to live in-RAM; the on-disk representations
  do not concern us.
  One reason for this is that a variety of disk management systems exist,
  and work quite well at abstracting details.
- The earliest such is perhaps the Berkeley DBM, and the Gnu gdbm.
- These have been followed by Google's LevelDB and Facebook's extensions
- RocksDB.
+ The earliest such is perhaps the Berkeley DBM
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Berkeley_DB
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+, and the Gnu gdbm.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://www.gnu.org.ua/software/gdbm/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ These have been followed by Google's LevelDB
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://dbdb.io/db/leveldb
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ and Facebook's extensions RocksDB.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://rocksdb.org/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  It is usually not too hard to take an in-RAM database, and layer it on
  top of one of these systems to obtain a disk-backed database.
  Of course, there are numerous ifs-and-buts, which provide motivations to
  roll-your-own; these will be ignored in this text.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+One must resist one wide-spread and common temptation: layering an in-RAM
+ database on top of another database that is RAM-hungry.
+ This is at best counter-productive: for every byte consumed in one, one
+ risks a byte consumed in the other.
+ As a result, one can only store half as much data, or must purchase twice
+ as much RAM.
+ Despite the self-evidence of these last statements, such a layering is
+ widely recommended, on the basis of the supposed superiority of the lower
+ layer.
+ One must be particularly cautious if the lower layer requires the use of
+ network communications.
+ Networking requires the kernel to become involved, tasking-switching and
+ performing IPC.
+ This can easily become a performance bottleneck.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1289,6 +1395,28 @@ flat
 
  memory topology, where any location in storage can be accessed with the
  same latency as any other.
+ Modern CPU's are all NUMA machines;
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Non-uniform_memory_access
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ it is too much for this text to dive into the issues that these pose.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1691,7 +1819,7 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
-incoming
+outgoing
 \end_layout
 
 \end_inset
@@ -1700,7 +1828,7 @@ incoming
 \begin_inset Text
 
 \begin_layout Plain Layout
-outgoing
+incoming
 \end_layout
 
 \end_inset
@@ -1972,7 +2100,7 @@ hyperedges
 \begin_inset Quotes erd
 \end_inset
 
- can contain more than two vertexes.
+, can contain more than two vertexes.
  That is, the hyperedge, rather than being an ordered pair of vertexes,
  is an ordered list of vertexes.
  The metagraph takes the hypergraph concept one step further: the hyperedge
@@ -2076,7 +2204,7 @@ atoms
 \end_inset
 
  to something that is either a node or a link.
- Links are thus sets of atoms.
+ Links are thus lists of atoms.
 \end_layout
 
 \begin_layout Subsection*
@@ -2665,6 +2793,15 @@ edge.
  This is neither technically challenging nor CPU-intensive: the arity of
  hyperedges is typically small, based on real-world mappings with interesting
  datasets.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+We've worked with natural language, genomics and robotics datasets.
+\end_layout
+
+\end_inset
+
  Thus, the vertex table can take the simpler form
 \end_layout
 
@@ -2861,8 +2998,8 @@ name "hyper vertex table"
 
 \begin_layout Standard
 Note that the vertex table looks a lot like the edge table, the only difference
- being that the vertex-list is an ordered list, while the incoming-set (the
- edge-set) really is a set.
+ being that the vertex-list in the edge table is an ordered list, while
+ the incoming-set (the edge-set) really is a set.
  Effectively, this is because a hypergraph is 
 \begin_inset Quotes eld
 \end_inset
@@ -3166,7 +3303,7 @@ If the only thing that one is storing are hypergraphs, then having a custom
  Does this mean that there's some magic, here? No, not really.
  Every ordinary graph is a special case of a hypergraph, where the hyper-edge
  always has arity two.
- To use an ordinary graph store to record a single edge, we need 
+ To use an ordinary graph-store to record a single edge, we need 
 \begin_inset Formula $3+\left\langle J\right\rangle $
 \end_inset
 
@@ -3218,7 +3355,7 @@ Moving in the opposite direction is much worse: the penalty is
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
- would be around 200
+ would be around 200,
 \begin_inset Foot
 status collapsed
 
@@ -3269,10 +3406,32 @@ The scale factor
 \begin_inset Formula $A\approx20$
 \end_inset
 
-, see https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf%27s
-_law%3F for graphs and discussion.
- For genomics, see https://github.com/linas/biome-distribution/blob/master/paper/
-biome-distributions.pdf where 
+, see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Wikipedia:Does_Wikipedia_traffic_obey_Zipf%27s_law%3
+F
+\end_layout
+
+\end_inset
+
+ for graphs and discussion.
+ For genomics, see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/linas/biome-distribution/blob/master/paper/biome-distributions.
+pdf
+\end_layout
+
+\end_inset
+
+ where 
 \begin_inset Formula $A$
 \end_inset
 
@@ -3285,7 +3444,7 @@ ons for graph stores.
 
 \end_inset
 
-, so we are looking at overheads in the gigabyte range.
+ so we are looking at overheads in the gigabyte range.
  There is a huge cost of jamming a hypergraph into an ordinary graph store.
 \end_layout
 
@@ -3361,7 +3520,7 @@ Link
 \end_inset
 
 .
- As we haven't yet clearly defined a Nod or Link yet, the term 
+ As we haven't yet clearly defined a Node or Link yet, the term 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3374,18 +3533,13 @@ metatree
 
 \end_inset
 
- (later on, metatrees will be called 
-\begin_inset Quotes eld
-\end_inset
-
-Atoms
-\begin_inset Quotes erd
-\end_inset
-
-.) The metatree can be converted to a DAG in two different ways.
+ The metatree can be converted to a DAG in two different ways.
  One way is to collapse the boxes to single points.
  The other way is to dissolve the boxes entirely, and replace a single arrow
  from point-to-box by many arrows, from point to each of the box elements.
+ Neither of these conversions are faithful.
+ The first erases the ordering within the box, while the second erases the
+ grouping that the box provides.
 \end_layout
 
 \begin_layout Standard
@@ -3401,7 +3555,7 @@ noprefix "false"
 \end_inset
 
 ) for the hypergraph, before.
- For this graph, it was
+ For the example metatree, it is
 \end_layout
 
 \begin_layout Standard
@@ -3563,6 +3717,8 @@ name "metagraph node table"
 \begin_layout Standard
 The link table now requires both an outgoing-atom list, and an incoming-link
  set.
+ The incoming set can only consist of links; the outgoing list can consist
+ of either nodes or links.
 \end_layout
 
 \begin_layout Standard
@@ -10922,8 +11078,16 @@ It should be clear that metagraphs in and of themselves are fairly useless
 status collapsed
 
 \begin_layout Plain Layout
-Maude is an example of a term rewriting system disassociated from theorem
- provers, databases and inference engines.
+Maude
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Maude1999"
+literal "false"
+
+\end_inset
+
+ is an example of a term rewriting system disassociated from theorem provers,
+ databases and inference engines.
  See 
 \begin_inset Flex URL
 status open
