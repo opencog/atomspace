@@ -43,7 +43,6 @@
 
 #include <opencog/atomspace/TypeIndex.h>
 
-class AtomSpaceUTest;
 class AtomTableUTest;
 
 namespace opencog
@@ -67,7 +66,6 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
  */
 class AtomSpace : public Atom
 {
-    friend class ::AtomSpaceUTest;   // Needs to touch typeIndex
     friend class ::AtomTableUTest;   // Needs to call getRandom()
 
     // Debug tools
