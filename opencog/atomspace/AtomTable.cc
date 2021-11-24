@@ -301,13 +301,19 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
 
     if (atom != orig) atom->copyValues(orig);
     atom->setAtomSpace(this);
-    atom->install();
-    atom->keep_incoming_set();
-
     typeIndex.insertAtom(atom);
 
     // Unlock, because the signal needs to run unlocked.
     if (do_lock) lck.unlock();
+
+    // This does not need to be locked. this atom will not appear
+    // in the insets of its oset until after install() finishes.
+    // But it is happily in the AtomSpace by now, so that does not
+    // appear to cause any races, that I can tell.
+    // `keep_incoming_set()` must be before `install()` because
+    // the `install()` is what makes the atom visible to other threads.
+    atom->keep_incoming_set();
+    atom->install();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
