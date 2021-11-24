@@ -303,18 +303,25 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     atom->setAtomSpace(this);
     typeIndex.insertAtom(atom);
 
+    atom->keep_incoming_set();
+
     // The lock is protecting the type-index, and we are done with that.
     if (do_lock) lck.unlock();
 
-    // Unlocked operations. This atom will not become visible in other
-    // threads until the `install()` below. It becomes visible when
+    // Unlocked operations. This atom becomes visible to other threads in
+    // two different ways. One way is during the `install()` below, when
     // another thread asks for the inset of one of the atoms in our
-    // oset. As long as we get evrything done before then, we're good.
+    // oset. The other way is when two threads are adding the same atom.
 
+    // Copying the values after them atom is in the atomspace does
+    // introduce a window where the atom has the "wrong" values. But
+    // does this hurt anyone?  Sure, I suppose some user might want an
+    // atomic add-with-values, but is that enough to penalize everyone
+    // else who just want more preallelism?  Hmmm.
     if (atom != orig) atom->copyValues(orig);
-    atom->keep_incoming_set();
 
-    // This makes `atom` visible in other threads. It must be done last.
+    // Similar remarks as above, but for the incoming sets. Except here,
+    // I don't even see an exploitable window.
     atom->install();
 
     // Now that we are completely done, emit the added signal.
