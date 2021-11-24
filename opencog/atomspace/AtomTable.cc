@@ -69,7 +69,7 @@ using namespace opencog;
 
 // ====================================================================
 // Nothing should ever get the uuid of zero. Zero is reserved for
-// "no atomtable" (in the persist code).
+// "no atomspace" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
 void AtomSpace::init(void)
@@ -431,8 +431,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
                  (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
-            // is not in this atomtable, and its not a child of this
-            // atom table.  So flag that as an error; it will assert
+            // is not in this atomspace, and its not a child of this
+            // atomspace.  So flag that as an error; it will assert
             // a few dozen lines later, below.
             AtomSpace* other = his->getAtomSpace();
             if (other and other != this and not other->in_environ(handle)) {
