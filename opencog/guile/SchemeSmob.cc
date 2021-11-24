@@ -73,7 +73,10 @@ void SchemeSmob::init()
 	// have an easy fix: change SCM_SMOB_VALUE_PTR_LOC to use
 	// SCM_SMOB_OBJECT_1_LOC. If it is larger than 24 then you need a
 	// more complex fix.
-	static_assert (sizeof(ValuePtr) == 16, "Unexpected ValuePtr size");
+	static_assert (
+		(sizeof(void*) == 8 and sizeof(ValuePtr) == 16) or
+		(sizeof(void*) == 4 and sizeof(ValuePtr) == 8),
+		"Unexpected ValuePtr size");
 
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
