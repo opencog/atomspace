@@ -61,7 +61,7 @@ public:
         TS_ASSERT( *n == *nb);
 
         UUID uuidb = tlb.addAtom(nb, TLB::INVALID_UUID);
-        printf("expected: %lu got: %lu\n", uuid, uuidb);
+        printf("expected: %zu got: %zu\n", uuid, uuidb);
         TS_ASSERT(uuidb == uuid);
     }
 };

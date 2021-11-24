@@ -69,7 +69,7 @@ using namespace opencog;
 
 // ====================================================================
 // Nothing should ever get the uuid of zero. Zero is reserved for
-// "no atomtable" (in the persist code).
+// "no atomspace" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
 void AtomSpace::init(void)
@@ -318,18 +318,25 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     atom->setAtomSpace(this);
     typeIndex.insertAtom(atom);
 
+    atom->keep_incoming_set();
+
     // The lock is protecting the type-index, and we are done with that.
     if (do_lock) lck.unlock();
 
-    // Unlocked operations. This atom will not become visible in other
-    // threads until the `install()` below. It becomes visible when
+    // Unlocked operations. This atom becomes visible to other threads in
+    // two different ways. One way is during the `install()` below, when
     // another thread asks for the inset of one of the atoms in our
-    // oset. As long as we get evrything done before then, we're good.
+    // oset. The other way is when two threads are adding the same atom.
 
+    // Copying the values after them atom is in the atomspace does
+    // introduce a window where the atom has the "wrong" values. But
+    // does this hurt anyone?  Sure, I suppose some user might want an
+    // atomic add-with-values, but is that enough to penalize everyone
+    // else who just want more preallelism?  Hmmm.
     if (atom != orig) atom->copyValues(orig);
-    atom->keep_incoming_set();
 
-    // This makes `atom` visible in other threads. It must be done last.
+    // Similar remarks as above, but for the incoming sets. Except here,
+    // I don't even see an exploitable window.
     atom->install();
 
     // Now that we are completely done, emit the added signal.
@@ -446,8 +453,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
                  (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
-            // is not in this atomtable, and its not a child of this
-            // atom table.  So flag that as an error; it will assert
+            // is not in this atomspace, and its not a child of this
+            // atomspace.  So flag that as an error; it will assert
             // a few dozen lines later, below.
             AtomSpace* other = his->getAtomSpace();
             if (other and other != this and not other->in_environ(handle)) {

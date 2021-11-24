@@ -560,7 +560,7 @@ public:
 
     void testEvalRemove()
     {
-        // First, seetup the contents, and get all the concept nodes
+        // First, setup the contents, and get all the ConceptNodes
         testEvalAdd();
         HandleSeq hs;
         atomSpace->get_handles_by_type(hs, CONCEPT_NODE);
