@@ -37,9 +37,11 @@ void TypeIndex::resize(void)
 
 bool TypeIndex::contains_duplicate() const
 {
+#if 0
 	for (const AtomSet& atoms : _idx)
 		if (contains_duplicate(atoms))
 			return true;
+#endif
 	return false;
 }
 
@@ -125,7 +127,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 Handle TypeIndex::iterator::operator*(void)
 {
 	if (s == send) return Handle::UNDEFINED;
-	return se->second;
+	return *se;
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

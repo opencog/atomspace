@@ -37,7 +37,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::unordered_multimap<ContentHash, Handle> AtomSet;
+typedef std::unordered_set<Handle> AtomSet;
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -66,33 +66,20 @@ class TypeIndex
 		void insertAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			s.insert({h->get_hash(), h});
+			s.insert(h);
 		}
 		void removeAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			auto range = s.equal_range(h->get_hash());
-			auto bkt = range.first;
-			auto end = range.second;
-			for (; bkt != end; bkt++) {
-				if (*h == *bkt->second) {
-					s.erase(bkt);
-					break;
-				}
-			}
+			s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
 			const AtomSet& s(_idx.at(h->get_type()));
-			auto range = s.equal_range(h->get_hash());
-			auto bkt = range.first;
-			auto end = range.second;
-			for (; bkt != end; bkt++) {
-				if (*h == *bkt->second) /* content-compare */
-					return bkt->second;
-			}
-			return Handle::UNDEFINED;
+			auto iter = s.find(h);
+			if (s.end() == iter) return Handle::UNDEFINED;
+			return *iter;
 		}
 
 		size_t size(Type t) const
@@ -113,13 +100,12 @@ class TypeIndex
 		{
 			for (auto& s : _idx)
 			{
-				for (auto& pr : s)
+				for (auto& h : s)
 				{
-					Handle& atom_to_clear = pr.second;
-					atom_to_clear->_atom_space = nullptr;
+					h->_atom_space = nullptr;
 
 					// We installed the incoming set; we remove it too.
-					atom_to_clear->remove();
+					h->remove();
 				}
 				s.clear();
 			}
