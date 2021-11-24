@@ -266,6 +266,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     // avoiding running the factories a second time. This is, however,
     // potentially buggy, if the user is sneaky and hands us an Atom
     // that should have gone through a factory, but did not.
+    // (We can solve this by setting a factory flag.)
     Handle atom(orig);
     if (atom->is_link()) {
         bool need_copy = false;
@@ -299,20 +300,21 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     else
         atom->unsetRemovalFlag();
 
-    if (atom != orig) atom->copyValues(orig);
     atom->setAtomSpace(this);
     typeIndex.insertAtom(atom);
 
-    // Unlock, because the signal needs to run unlocked.
+    // The lock is protecting the type-index, and we are done with that.
     if (do_lock) lck.unlock();
 
-    // This does not need to be locked. this atom will not appear
-    // in the insets of its oset until after install() finishes.
-    // But it is happily in the AtomSpace by now, so that does not
-    // appear to cause any races, that I can tell.
-    // `keep_incoming_set()` must be before `install()` because
-    // the `install()` is what makes the atom visible to other threads.
+    // Unlocked operations. This atom will not become visible in other
+    // threads until the `install()` below. It becomes visible when
+    // another thread asks for the inset of one of the atoms in our
+    // oset. As long as we get evrything done before then, we're good.
+
+    if (atom != orig) atom->copyValues(orig);
     atom->keep_incoming_set();
+
+    // This makes `atom` visible in other threads. It must be done last.
     atom->install();
 
     // Now that we are completely done, emit the added signal.
