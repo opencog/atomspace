@@ -224,18 +224,8 @@ Handle AtomSpace::get_atom(const Handle& a) const
     return lookupHandle(a);
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
+Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
 {
-    // Can be null, if its a Value
-    if (nullptr == orig) return Handle::UNDEFINED;
-
-    // Is the atom already in this table, or one of its environments?
-    if (not force and in_environ(orig))
-        return orig;
-
-    // Force computation of hash external to the locked section.
-    orig->get_hash();
-
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
@@ -260,6 +250,23 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
             return hcheck;
         }
     }
+    return Handle::UNDEFINED;
+}
+
+Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
+{
+    // Can be null, if its a Value
+    if (nullptr == orig) return Handle::UNDEFINED;
+
+    // Is the atom already in this table, or one of its environments?
+    if (not force and in_environ(orig))
+        return orig;
+
+    // Force computation of hash external to the locked section.
+    orig->get_hash();
+
+    const Handle& hc(check(orig, force, do_lock));
+    if (hc) return hc;
 
     // Make a copy of the atom, if needed. Otherwise, use what we were
     // given. Not making a copy saves a lot of time, especially by
@@ -299,6 +306,14 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     }
     else
         atom->unsetRemovalFlag();
+
+    // Lock before checking to see if this kind of atom is already in
+    // the atomspace.  Lock, to prevent two different threads from
+    // trying to add exactly the same atom.
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
+    const Handle& hch(check(atom, force, false));
+    if (hch) return hch;
 
     atom->setAtomSpace(this);
     typeIndex.insertAtom(atom);

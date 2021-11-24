@@ -132,6 +132,7 @@ class AtomSpace : public Atom
      * atomtable, even if it is already in a parent atomspace.
      */
     Handle add(const Handle&, bool force=false, bool do_lock=true);
+    Handle check(const Handle&, bool force=false, bool do_lock=true);
 
     /**
      * Return a random atom in the AtomTable.
