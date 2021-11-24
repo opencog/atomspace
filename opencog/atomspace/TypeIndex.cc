@@ -35,27 +35,6 @@ void TypeIndex::resize(void)
 	_idx.resize(_num_types + 1);
 }
 
-bool TypeIndex::contains_duplicate() const
-{
-#if 0
-	for (const AtomSet& atoms : _idx)
-		if (contains_duplicate(atoms))
-			return true;
-#endif
-	return false;
-}
-
-bool TypeIndex::contains_duplicate(const AtomSet& atoms) const
-{
-#if 0
-	for (AtomSet::const_iterator i = atoms.begin(); i != atoms.end(); ++i)
-		for (AtomSet::const_iterator j = std::next(i); j != atoms.end(); ++j)
-			if (**i == **j)
-				return true;
-#endif
-	return false;
-}
-
 // ================================================================
 
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const

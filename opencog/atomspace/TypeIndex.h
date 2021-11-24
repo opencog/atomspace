@@ -29,8 +29,6 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
 
-class AtomSpaceUTest;
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -55,8 +53,6 @@ typedef std::unordered_set<Handle> AtomSet;
  */
 class TypeIndex
 {
-	friend class ::AtomSpaceUTest;
-
 	private:
 		std::vector<AtomSet> _idx;
 		size_t _num_types;
@@ -110,11 +106,6 @@ class TypeIndex
 				s.clear();
 			}
 		}
-
-		// Return true if there exists some index containing duplicated
-		// atoms (equal by content). Used during unit tests.
-		bool contains_duplicate() const;
-		bool contains_duplicate(const AtomSet& atoms) const;
 
 		class iterator
 			: public HandleIterator
