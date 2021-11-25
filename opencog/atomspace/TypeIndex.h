@@ -126,30 +126,6 @@ class TypeIndex
 		void get_handles_by_type(HandleSeq&, Type, bool subclass) const;
 		void get_rootset_by_type(HandleSeq&, Type, bool subclass,
 		                         const AtomSpace*) const;
-
-		class iterator
-			: public HandleIterator
-		{
-			friend class TypeIndex;
-			public:
-				iterator(Type, bool);
-				iterator& operator++();
-				iterator& operator++(int);
-				iterator& operator=(iterator);
-				bool operator==(iterator);
-				bool operator!=(iterator);
-				Handle operator*(void);
-			private:
-				Type type;
-				bool subclass;
-				std::vector<AtomSet>::const_iterator s;
-				std::vector<AtomSet>::const_iterator send;
-				Type currtype;
-				AtomSet::const_iterator se;
-		};
-
-		iterator begin(Type, bool) const;
-		iterator end(void) const;
 };
 
 /** @}*/
