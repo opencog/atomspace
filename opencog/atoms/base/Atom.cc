@@ -385,6 +385,23 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
+bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
+{
+    if (nullptr == _incoming_set) return true;
+
+    std::shared_lock<std::shared_mutex> lck (_mtx);
+
+    for (const auto& bucket : _incoming_set->_iset)
+    {
+        for (const WinkPtr& w : bucket.second)
+        {
+            Handle l(w.lock());
+            if (l and (not as or as->in_environ(l))) return false;
+        }
+    }
+    return true;
+}
+
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;

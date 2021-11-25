@@ -426,6 +426,11 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
 
     if (nullptr == handle or handle->isMarkedForRemoval()) return false;
 
+    // User asked for a non-recursive remove, and the
+    // atom is still referenced. So, do nothing.
+    if (not recursive and not handle->isIncomingSetEmpty())
+        return false;
+
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
@@ -453,8 +458,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
         for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
-            DPRINTF("[AtomSpace::extract] incoming set: %s",
-                 (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomspace, and its not a child of this
@@ -474,22 +477,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
                     }
                 }
             }
-        }
-    }
-
-    // The check is done twice: the call to getIncomingSetSize() can
-    // return a non-zero value if the incoming set has weak pointers to
-    // deleted atoms. Thus, a second check is made for strong pointers,
-    // since getIncomingSet() converts weak to strong.
-    if (not recursive and 0 < handle->getIncomingSetSize())
-    {
-        IncomingSet iset(handle->getIncomingSet());
-        if (0 < iset.size())
-        {
-            // User asked for a non-recursive remove, and the
-            // atom is still referenced. So, do nothing.
-            handle->unsetRemovalFlag();
-            return false;
         }
     }
 

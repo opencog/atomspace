@@ -317,6 +317,9 @@ public:
     /// Print all of the key-value pairs.
     std::string valuesToString() const;
 
+    //! Return true if the incoming set is empty.
+    bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
+
     //! Get the size of the incoming set.
     size_t getIncomingSetSize(const AtomSpace* = nullptr) const;
 
