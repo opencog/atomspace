@@ -379,22 +379,10 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
     std::shared_lock<std::shared_mutex> lck(_mtx);
 
-    size_t result = typeIndex.size(type);
-    if (subclass)
-    {
-        // Also count subclasses of this type, if need be.
-        Type ntypes = _nameserver.getNumberOfClasses();
-        for (Type t = ATOM; t<ntypes; t++)
-        {
-            if (t != type and _nameserver.isA(t, type))
-                result += typeIndex.size(t);
-        }
-    }
+    size_t result = typeIndex.size(type, subclass);
 
     for (const Handle& base : _environ)
-    {
         result += AtomSpaceCast(base)->get_num_atoms_of_type(type, subclass);
-    }
 
     return result;
 }

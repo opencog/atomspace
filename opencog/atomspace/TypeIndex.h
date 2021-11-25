@@ -56,6 +56,7 @@ class TypeIndex
 	private:
 		std::vector<AtomSet> _idx;
 		size_t _num_types;
+		NameServer& _nameserver;
 	public:
 		TypeIndex(void);
 		void resize(void);
@@ -78,18 +79,33 @@ class TypeIndex
 			return *iter;
 		}
 
+		// How many atoms are ther of type t?
 		size_t size(Type t) const
 		{
 			const AtomSet& s(_idx.at(t));
 			return s.size();
 		}
 
+		// How many atoms, grand total?
 		size_t size(void) const
 		{
 			size_t cnt = 0;
 			for (const auto& s : _idx)
 				cnt += s.size();
 			return cnt;
+		}
+
+		// How many atoms, of type t, and subclasses also?
+		size_t size(Type type, bool subclass) const
+		{
+			size_t result = size(type);
+			if (not subclass) return result;
+			for (Type t = ATOM; t<_num_types; t++)
+			{
+				if (t != type and _nameserver.isA(t, type))
+					result += size(t);
+			}
+			return result;
 		}
 
 		void clear(void)

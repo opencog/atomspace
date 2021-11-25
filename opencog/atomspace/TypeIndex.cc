@@ -24,7 +24,8 @@
 
 using namespace opencog;
 
-TypeIndex::TypeIndex(void)
+TypeIndex::TypeIndex(void) :
+	_nameserver(nameserver())
 {
 	resize();
 }
