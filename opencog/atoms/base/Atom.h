@@ -138,6 +138,8 @@ protected:
      */
     Atom(Type t)
       : Value(t),
+        _marked_for_removal(false),
+        _checked(false),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     {}
