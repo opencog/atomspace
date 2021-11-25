@@ -427,14 +427,13 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
         return other->extract_atom(handle, recursive);
     }
 
-    // Lock before fetching the incoming set. (Why, exactly??)
-    // Because if multiple threads are trying to delete the same
-    // atom, then ... ???
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-    if (do_lock) lck.lock();
 
+    // This needs to be replaced by an atomic bitflag.
+    if (do_lock) lck.lock();
     if (handle->isMarkedForRemoval()) return false;
     handle->markForRemoval();
+    if (do_lock) lck.unlock();
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -466,8 +465,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
                     if (other != this) {
                         other->extract_atom(his, true);
                     } else {
-                        // Do not lock; we laready have the lock
-                        extract_atom(his, true, false);
+                        extract_atom(his, true);
                     }
                 }
             }
@@ -494,10 +492,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
-    if (do_lock) lck.unlock();
     _removeAtomSignal.emit(handle);
-    if (do_lock) lck.lock();
 
+    if (do_lock) lck.lock();
     typeIndex.removeAtom(handle);
 
     // Remove handle from other incoming sets.
