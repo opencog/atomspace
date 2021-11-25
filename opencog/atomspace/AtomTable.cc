@@ -242,6 +242,7 @@ Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
         // so we won't.
         Handle hcheck(lookupUnlocked(orig));
         if (hcheck) {
+            if (do_lock) lck.unlock();
             hcheck->copyValues(orig);
             return hcheck;
         }
@@ -250,6 +251,7 @@ Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
         // for the atom in this table, and not some other table.
         Handle hcheck(typeIndex.findAtom(orig));
         if (hcheck) {
+            if (do_lock) lck.unlock();
             hcheck->copyValues(orig);
             return hcheck;
         }
