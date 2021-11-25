@@ -426,6 +426,11 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
 
     if (nullptr == handle or handle->isMarkedForRemoval()) return false;
 
+    // User asked for a non-recursive remove, and the
+    // atom is still referenced. So, do nothing.
+    if (not recursive and not handle->isIncomingSetEmpty())
+        return false;
+
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
@@ -437,14 +442,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
         return other->extract_atom(handle, recursive);
     }
 
-    // Lock before fetching the incoming set. (Why, exactly??)
-    // Because if multiple threads are trying to delete the same
-    // atom, then ... ???
-    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-    if (do_lock) lck.lock();
-
-    if (handle->isMarkedForRemoval()) return false;
-    handle->markForRemoval();
+    // If it is already marked, just return.
+    if (handle->markForRemoval()) return false;
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -459,8 +458,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
         for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
-            DPRINTF("[AtomSpace::extract] incoming set: %s",
-                 (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomspace, and its not a child of this
@@ -476,27 +473,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
                     if (other != this) {
                         other->extract_atom(his, true);
                     } else {
-                        // Do not lock; we laready have the lock
-                        extract_atom(his, true, false);
+                        extract_atom(his, true);
                     }
                 }
             }
-        }
-    }
-
-    // The check is done twice: the call to getIncomingSetSize() can
-    // return a non-zero value if the incoming set has weak pointers to
-    // deleted atoms. Thus, a second check is made for strong pointers,
-    // since getIncomingSet() converts weak to strong.
-    if (not recursive and 0 < handle->getIncomingSetSize())
-    {
-        IncomingSet iset(handle->getIncomingSet());
-        if (0 < iset.size())
-        {
-            // User asked for a non-recursive remove, and the
-            // atom is still referenced. So, do nothing.
-            handle->unsetRemovalFlag();
-            return false;
         }
     }
 
@@ -504,17 +484,16 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
-    if (do_lock) lck.unlock();
     _removeAtomSignal.emit(handle);
-    if (do_lock) lck.lock();
-
-    typeIndex.removeAtom(handle);
 
     // Remove handle from other incoming sets.
+    // This can be done outside the locked section.
     handle->remove();
 
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
+    if (do_lock) lck.lock();
+    typeIndex.removeAtom(handle);
     handle->setAtomSpace(nullptr);
-
     return true;
 }
 
