@@ -294,13 +294,16 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     else
         atom->unsetRemovalFlag();
 
+    // Must set atomspace before insertion. This is harmless, because
+    // if someone else raced us and inserted first, this atom will never
+    // be visible.
+    atom->setAtomSpace(this);
+
     // Between the time that we last checked, and here, some other thread
     // may have raced and inserted this atom already. So the insert does
     // have to be an atomic test-n-set.
     Handle oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
-
-    atom->setAtomSpace(this);
 
     atom->keep_incoming_set();
 
