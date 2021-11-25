@@ -224,6 +224,10 @@ Handle AtomSpace::get_atom(const Handle& a) const
     return lookupHandle(a);
 }
 
+/// Helper utility for adding atoms to the atomspace. Checks to see
+/// if the indicated atom already is in the atomspace. If it is, it
+/// returns that atom. Copies over values in the process.  The check
+/// is done under a lock to avoid insertion races.
 Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
 {
     // Lock before checking to see if this kind of atom is already in
@@ -265,6 +269,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     // Force computation of hash external to the locked section.
     orig->get_hash();
 
+    // Check to see if we already have this atom in the atomspace.
     const Handle& hc(check(orig, force, do_lock));
     if (hc) return hc;
 
@@ -310,6 +315,9 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
+    // Yes, we did this check earlier; we have to do it again, under
+    // lock, because some other thread might have added it since we
+    // last checked.
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     const Handle& hch(check(atom, force, false));
