@@ -513,6 +513,10 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // we only want the shallowest state, i.e. the state in *this*
     // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
     // XXX FIXME do this for all UniqueLinks.
+    // XXX Also, a minor bug, not sure if it matters: if parent is set
+    // to true, then any UniqueLinks appearing here and in the parent
+    // will be duplicated repeatedly in the result. Might be nice to
+    // deduplicate, but that would cost CPU time.
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
