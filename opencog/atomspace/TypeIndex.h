@@ -111,7 +111,6 @@ class TypeIndex
 			size_t result = size(type);
 			if (not subclass) return result;
 
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			for (Type t = ATOM; t<_num_types; t++)
 			{
 				if (t != type and _nameserver.isA(t, type))
