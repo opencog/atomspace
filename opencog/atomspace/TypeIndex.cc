@@ -38,6 +38,79 @@ void TypeIndex::resize(void)
 
 // ================================================================
 
+void TypeIndex::get_handles_by_type(HandleSeq& hseq,
+                                    Type type,
+                                    bool subclass) const
+{
+	// Get the initial size of the handles vector.
+	size_t initial_size = hseq.size();
+
+	// Determine the number of atoms we'll be adding.
+	size_t size_of_append = size(type, subclass);
+
+	// Now reserve size for the addition. This is faster for large
+	// append iterations since appends to the list won't require new
+	// allocations and copies whenever the allocated size is exceeded.
+	hseq.reserve(initial_size + size_of_append);
+
+	const AtomSet& s(_idx.at(type));
+	for (const Handle& h : s)
+		hseq.push_back(h);
+
+	// Not subclassing? We are done!
+	if (not subclass) return;
+
+	for (Type t = ATOM; t<_num_types; t++)
+	{
+		if (t == type or not _nameserver.isA(t, type)) continue;
+
+		const AtomSet& s(_idx.at(t));
+		for (const Handle& h : s)
+			hseq.push_back(h);
+	}
+}
+
+// ================================================================
+
+void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
+                                    Type type,
+                                    bool subclass,
+                                    const AtomSpace* cas) const
+{
+	// Get the initial size of the handles vector.
+	size_t initial_size = hseq.size();
+
+	// Determine the number of atoms we'll be adding.
+	size_t size_of_append = size(type, subclass);
+
+	// Now reserve size for the addition. This is faster for large
+	// append iterations since appends to the list won't require new
+	// allocations and copies whenever the allocated size is exceeded.
+	hseq.reserve(initial_size + size_of_append);
+
+	const AtomSet& s(_idx.at(type));
+	for (const Handle& h : s)
+	{
+		if (h->isIncomingSetEmpty(cas))
+			hseq.push_back(h);
+	}
+
+	// Not subclassing? We are done!
+	if (not subclass) return;
+
+	for (Type t = ATOM; t<_num_types; t++)
+	{
+		if (t == type or not _nameserver.isA(t, type)) continue;
+
+		const AtomSet& s(_idx.at(t));
+		for (const Handle& h : s)
+			if (h->isIncomingSetEmpty(cas))
+				hseq.push_back(h);
+	}
+}
+
+// ================================================================
+
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 {
 	iterator it(t, sub);
