@@ -133,10 +133,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
 
 AtomSpace::~AtomSpace()
 {
-    std::unique_lock<std::shared_mutex> lck(_mtx);
-
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
-
     clear_all_atoms();
 }
 
@@ -158,8 +155,6 @@ void AtomSpace::clear_transient()
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomSpace - clear_transient called on non-transient atom table.");
 
-    std::unique_lock<std::shared_mutex> lck(_mtx);
-
     // Clear all the atoms
     clear_all_atoms();
 
@@ -174,7 +169,6 @@ void AtomSpace::clear_all_atoms()
 
 void AtomSpace::clear()
 {
-    std::unique_lock<std::shared_mutex> lck(_mtx);
     clear_all_atoms();
 }
 
@@ -192,7 +186,7 @@ Handle AtomSpace::getHandle(Type t, const HandleSeq&& seq) const
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
-Handle AtomSpace::lookupUnlocked(const Handle& a) const
+Handle AtomSpace::lookupHandle(const Handle& a) const
 {
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
@@ -204,12 +198,6 @@ Handle AtomSpace::lookupUnlocked(const Handle& a) const
     }
 
     return Handle::UNDEFINED;
-}
-
-Handle AtomSpace::lookupHandle(const Handle& a) const
-{
-    std::shared_lock<std::shared_mutex> lck(_mtx);
-    return lookupUnlocked(a);
 }
 
 /// Ask the atom if it belongs to this Atomtable. If so, we're done.
@@ -226,23 +214,16 @@ Handle AtomSpace::get_atom(const Handle& a) const
 
 /// Helper utility for adding atoms to the atomspace. Checks to see
 /// if the indicated atom already is in the atomspace. If it is, it
-/// returns that atom. Copies over values in the process.  The check
-/// is done under a lock to avoid insertion races.
-Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
+/// returns that atom. Copies over values in the process.
+Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    // Lock before checking to see if this kind of atom is already in
-    // the atomspace.  Lock, to prevent two different threads from
-    // trying to add exactly the same atom.
-    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-    if (do_lock) lck.lock();
     if (not force) {
         // If we have it already, return it. If we had a fast and
         // easy COW check, then we could avoid `copyValues()` for
         // read-only atomspaces, and do a COW instead. But we don't,
         // so we won't.
-        Handle hcheck(lookupUnlocked(orig));
+        Handle hcheck(lookupHandle(orig));
         if (hcheck) {
-            if (do_lock) lck.unlock();
             hcheck->copyValues(orig);
             return hcheck;
         }
@@ -251,7 +232,6 @@ Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
         // for the atom in this table, and not some other table.
         Handle hcheck(typeIndex.findAtom(orig));
         if (hcheck) {
-            if (do_lock) lck.unlock();
             hcheck->copyValues(orig);
             return hcheck;
         }
@@ -259,7 +239,7 @@ Handle AtomSpace::check(const Handle& orig, bool force, bool do_lock)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
+Handle AtomSpace::add(const Handle& orig, bool force)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -268,11 +248,11 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     if (not force and in_environ(orig))
         return orig;
 
-    // Force computation of hash external to the locked section.
+    // Force computation of hash.
     orig->get_hash();
 
     // Check to see if we already have this atom in the atomspace.
-    const Handle& hc(check(orig, force, do_lock));
+    const Handle& hc(check(orig, force));
     if (hc) return hc;
 
     // Make a copy of the atom, if needed. Otherwise, use what we were
@@ -299,7 +279,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, force, false));
+                closet.emplace_back(add(h, force));
             }
             atom = createLink(std::move(closet), atom->get_type());
         } else {
@@ -314,24 +294,10 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool do_lock)
     else
         atom->unsetRemovalFlag();
 
-    // Lock before checking to see if this kind of atom is already in
-    // the atomspace.  Lock, to prevent two different threads from
-    // trying to add exactly the same atom.
-    // Yes, we did this check earlier; we have to do it again, under
-    // lock, because some other thread might have added it since we
-    // last checked.
-    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-    if (do_lock) lck.lock();
-    const Handle& hch(check(atom, force, false));
-    if (hch) return hch;
-
     atom->setAtomSpace(this);
     typeIndex.insertAtom(atom);
 
     atom->keep_incoming_set();
-
-    // The lock is protecting the type-index, and we are done with that.
-    if (do_lock) lck.unlock();
 
     // Unlocked operations. This atom becomes visible to other threads in
     // two different ways. One way is during the `install()` below, when
@@ -377,8 +343,6 @@ size_t AtomSpace::get_num_links() const
 
 size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
-    std::shared_lock<std::shared_mutex> lck(_mtx);
-
     size_t result = typeIndex.size(type, subclass);
 
     for (const Handle& base : _environ)
@@ -406,7 +370,7 @@ Handle AtomSpace::getRandom(RandGen *rng) const
     return randy;
 }
 
-bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
+bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 {
     // Make sure the atom is fully resolved before we go about
     // deleting it.
@@ -475,20 +439,16 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
     _removeAtomSignal.emit(handle);
 
     // Remove handle from other incoming sets.
-    // This can be done outside the locked section.
     handle->remove();
 
-    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-    if (do_lock) lck.lock();
-    typeIndex.removeAtom(handle);
     handle->setAtomSpace(nullptr);
+    typeIndex.removeAtom(handle);
     return true;
 }
 
 /// This is the resize callback, when a new type is dynamically added.
 void AtomSpace::typeAdded(Type t)
 {
-    std::unique_lock<std::shared_mutex> lck(_mtx);
     typeIndex.resize();
 }
 
@@ -506,8 +466,6 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
                                     const AtomSpace* cas) const
 {
     if (nullptr == cas) cas = this;
-
-    std::shared_lock<std::shared_mutex> lck(_mtx);
 
     // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
@@ -555,9 +513,7 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 
 /**
  * Returns the set of atoms of a given type, but only if they have
- * and empty outgoing set. This holds the AtomSpace lock for a
- * longer period of time, but wastes less RAM when getting big sets.
- * As a net result, it might run faster, maybe.
+ * and empty outgoing set. 
  *
  * @param The desired type.
  * @param Whether type subclasses should be considered.
@@ -571,8 +527,6 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
 {
     // cut-n-paste of above.
     if (nullptr == cas) cas = this;
-
-    std::shared_lock<std::shared_mutex> lck(_mtx);
 
     // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
