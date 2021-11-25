@@ -45,6 +45,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -411,23 +412,20 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        IncomingSet is(handle->getIncomingSet());
+        HandleSeq is(handle->getIncomingSet());
 
-        IncomingSet::iterator is_it = is.begin();
-        IncomingSet::iterator is_end = is.end();
-        for (; is_it != is_end; ++is_it)
+        for (const Handle& his : is)
         {
-            Handle his(*is_it);
+            AtomSpace* other = his->getAtomSpace();
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomspace, and its not a child of this
             // atomspace.  So flag that as an error; it will assert
             // a few dozen lines later, below.
-            AtomSpace* other = his->getAtomSpace();
-            if (other and other != this and not other->in_environ(handle)) {
-                logger().warn() << "AtomSpace::extract() internal error, "
-                                << "non-DAG membership.";
-            }
+            OC_ASSERT(nullptr == other or other == this or
+                      other->in_environ(handle),
+                "AtomSpace::extract() internal error, non-DAG membership.");
+
             if (not his->isMarkedForRemoval()) {
                 if (other) {
                     if (other != this) {
