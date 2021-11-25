@@ -384,7 +384,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // deleting it.
     Handle handle(get_atom(h));
 
-    if (nullptr == handle or handle->isMarkedForRemoval()) return false;
+    if (nullptr == handle) return false;
 
     // User asked for a non-recursive remove, and the
     // atom is still referenced. So, do nothing.
