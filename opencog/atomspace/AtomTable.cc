@@ -505,52 +505,44 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
-    // Get the initial size of the handles vector.
-    size_t initial_size = hseq.size();
-
-    // Determine the number of atoms we'll be adding.
-    size_t size_of_append = get_num_atoms_of_type(type, subclass);
-
-    // Now reserve size for the addition. This is faster for large
-    // append iterations since appends to the list won't require new
-    // allocations and copies whenever the allocated size is exceeded.
-    hseq.reserve(initial_size + size_of_append);
-
     if (nullptr == cas) cas = this;
 
     std::shared_lock<std::shared_mutex> lck(_mtx);
-    auto tit = typeIndex.begin(type, subclass);
-    auto tend = typeIndex.end();
 
-    // Iterating over tit++ will just iterate over all atoms
-    // of type `type`. That's fine, except for STATE_LINK, where
-    // we only want the shallowest state (which over-rides any
-    // deeper state).
-    // XXX This needs to be done for anything inheriting from
-    // UNIQUE_LINK.
-    if (STATE_LINK == type) {
-        while (tit != tend) {
-            hseq.push_back(StateLinkCast(*tit)->get_link(cas));
-            tit++;
-        }
-    } else if (DEFINE_LINK == type) {
-        while (tit != tend) {
+    // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
+    // we only want the shallowest state, i.e. the state in *this*
+    // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
+    // XXX FIXME do this for all UniqueLinks.
+    if (STATE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hseq.push_back(StateLinkCast(h)->get_link(cas));
+    }
+    else if (DEFINE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
             hseq.push_back(
-                DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
-            tit++;
-        }
-    } else if (TYPED_ATOM_LINK == type) {
-        while (tit != tend) {
+                DefineLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else if (TYPED_ATOM_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
             hseq.push_back(
-                TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
-            tit++;
-        }
-    } else {
-        while (tit != tend) { hseq.push_back(*tit); tit++; }
+                TypedAtomLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else
+    {
+        typeIndex.get_handles_by_type(hseq, type, subclass);
     }
 
     // If an atom is already in the set, it will hide any duplicate
-    // atom in the parent.
+    // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
         for (const Handle& base : _environ)
             AtomSpaceCast(base)->get_handles_by_type(hseq, type, subclass, parent, cas);
@@ -573,41 +565,45 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
                                      bool parent,
                                      const AtomSpace* cas) const
 {
-    std::shared_lock<std::shared_mutex> lck(_mtx);
-    auto tit = typeIndex.begin(type, subclass);
-    auto tend = typeIndex.end();
+    // cut-n-paste of above.
+    if (nullptr == cas) cas = this;
 
-    if (STATE_LINK == type) {
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize(cas))
-                hseq.push_back(
-                    StateLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
-            tit++;
-        }
-    } else if (DEFINE_LINK == type) {
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize(cas))
-                hseq.push_back(
-                    DefineLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
-            tit++;
-        }
-    } else if (TYPED_ATOM_LINK == type) {
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize(cas))
-                hseq.push_back(
-                    TypedAtomLink::get_link(UniqueLinkCast(*tit)->get_alias(), cas));
-            tit++;
-        }
-    } else {
-        while (tit != tend) {
-            if (0 == (*tit)->getIncomingSetSize(cas))
-                hseq.push_back(*tit);
-            tit++;
-        }
+    std::shared_lock<std::shared_mutex> lck(_mtx);
+
+    // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
+    // we only want the shallowest state, i.e. the state in *this*
+    // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
+    // XXX FIXME do this for all UniqueLinks.
+    if (STATE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_rootset_by_type(rawseq, type, subclass, cas);
+        for (const Handle& h : rawseq)
+            hseq.push_back(StateLinkCast(h)->get_link(cas));
+    }
+    else if (DEFINE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_rootset_by_type(rawseq, type, subclass, cas);
+        for (const Handle& h : rawseq)
+            hseq.push_back(
+                DefineLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else if (TYPED_ATOM_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_rootset_by_type(rawseq, type, subclass, cas);
+        for (const Handle& h : rawseq)
+            hseq.push_back(
+                TypedAtomLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else
+    {
+        typeIndex.get_rootset_by_type(hseq, type, subclass, cas);
     }
 
     // If an atom is already in the set, it will hide any duplicate
-    // atom in the parent.
+    // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
         for (const Handle& base : _environ)
             AtomSpaceCast(base)->get_root_set_by_type(hseq, type, subclass, parent, cas);
