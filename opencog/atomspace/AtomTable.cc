@@ -294,8 +294,13 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     else
         atom->unsetRemovalFlag();
 
+    // Between the time that we last checked, and here, some other thread
+    // may have raced and inserted this atom already. So the insert does
+    // have to be an atomic test-n-set.
+    Handle oldh(typeIndex.insertAtom(atom));
+    if (oldh) return oldh;
+
     atom->setAtomSpace(this);
-    typeIndex.insertAtom(atom);
 
     atom->keep_incoming_set();
 

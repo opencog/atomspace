@@ -64,12 +64,19 @@ class TypeIndex
 	public:
 		TypeIndex(void);
 		void resize(void);
-		void insertAtom(const Handle& h)
+
+		// Return a Handle, if it's already in the set.
+		// Else, return nullptr
+		Handle insertAtom(const Handle& h)
 		{
 			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			auto iter = s.find(h);
+			if (s.end() != iter) return *iter;
 			s.insert(h);
+			return Handle::UNDEFINED;
 		}
+
 		void removeAtom(const Handle& h)
 		{
 			std::unique_lock<std::shared_mutex> lck(_mtx);
