@@ -486,15 +486,14 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
     // it needs info that gets blanked out during removal.
     _removeAtomSignal.emit(handle);
 
+    // Remove handle from other incoming sets.
+    // This can be done outside the locked section.
+    handle->remove();
+
     std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     typeIndex.removeAtom(handle);
-
-    // Remove handle from other incoming sets.
-    handle->remove();
-
     handle->setAtomSpace(nullptr);
-
     return true;
 }
 
