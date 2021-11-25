@@ -27,6 +27,7 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <shared_mutex>
@@ -108,9 +109,10 @@ protected:
     //! Sets the AtomSpace in which this Atom is inserted.
     virtual void setAtomSpace(AtomSpace *);
 
-    // Byte of bitflags (each bit is a flag).
-    // Place this first, so that is shares a word with Type.
-    mutable char _flags;
+    // Each atomic_flag chews up a byte.
+    // Place this first, so that these share a word with Type.
+    mutable std::atomic_bool _marked_for_removal;
+    mutable std::atomic_bool _checked;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -136,7 +138,6 @@ protected:
      */
     Atom(Type t)
       : Value(t),
-        _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     {}
@@ -204,16 +205,16 @@ private:
      */
     bool isMarkedForRemoval() const;
 
-    //! Marks the atom for removal.
-    void markForRemoval();
+    //! Marks the atom for removal. Returns old value.
+    bool markForRemoval();
 
-    //! Unsets removal flag.
-    void unsetRemovalFlag();
+    //! Unsets removal flag. Returns old value.
+    bool unsetRemovalFlag();
 
     /** Returns whether this atom is marked checked. */
     bool isChecked() const;
-    void setChecked();
-    void setUnchecked();
+    bool setChecked();
+    bool setUnchecked();
 
 public:
 

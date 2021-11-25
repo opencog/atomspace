@@ -38,15 +38,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-//! Atom flag
-#define FETCHED_RECENTLY        1  //BIT0
-#define MARKED_FOR_REMOVAL      2  //BIT1
-// #define MULTIPLE_TRUTH_VALUES   4  //BIT2
-// #define FIRED_ACTIVATION        8  //BIT3
-// #define HYPOTETHICAL_FLAG       16 //BIT4
-// #define REMOVED_BY_DECAY        32 //BIT5
-#define CHECKED                 64  //BIT6
-
 //#define DPRINTF printf
 #define DPRINTF(...)
 
@@ -252,32 +243,32 @@ std::string Atom::valuesToString() const
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
-    return (_flags & MARKED_FOR_REMOVAL) != 0;
+    return _marked_for_removal.load();
 }
 
-void Atom::unsetRemovalFlag(void)
+bool Atom::unsetRemovalFlag(void)
 {
-    _flags &= ~MARKED_FOR_REMOVAL;
+    return _marked_for_removal.exchange(false);
 }
 
-void Atom::markForRemoval(void)
+bool Atom::markForRemoval(void)
 {
-    _flags |= MARKED_FOR_REMOVAL;
+    return _marked_for_removal.exchange(true);
 }
 
 bool Atom::isChecked() const
 {
-    return (_flags & CHECKED) != 0;
+    return _checked.load();
 }
 
-void Atom::setChecked(void)
+bool Atom::setChecked(void)
 {
-    _flags |= CHECKED;
+    return _checked.exchange(true);
 }
 
-void Atom::setUnchecked(void)
+bool Atom::setUnchecked(void)
 {
-    _flags &= ~CHECKED;
+    return _checked.exchange(false);
 }
 
 // ==============================================================

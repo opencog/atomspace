@@ -427,13 +427,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
         return other->extract_atom(handle, recursive);
     }
 
-    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
-
-    // This needs to be replaced by an atomic bitflag.
-    if (do_lock) lck.lock();
-    if (handle->isMarkedForRemoval()) return false;
-    handle->markForRemoval();
-    if (do_lock) lck.unlock();
+    // If it is already marked, just return.
+    if (handle->markForRemoval()) return false;
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -494,6 +489,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive, bool do_lock)
     // it needs info that gets blanked out during removal.
     _removeAtomSignal.emit(handle);
 
+    std::unique_lock<std::shared_mutex> lck(_mtx, std::defer_lock_t());
     if (do_lock) lck.lock();
     typeIndex.removeAtom(handle);
 
