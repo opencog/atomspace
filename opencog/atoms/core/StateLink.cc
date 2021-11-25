@@ -118,7 +118,7 @@ void StateLink::install()
 
 		// Remove the old StateLink too. It must be no more.
 		// Ths is all happening under a recursive lock. So don't
-		// double-clock.
+		// double-lock.
 		as->extract_atom(defl, true, false);
 		swapped = true;
 	}
