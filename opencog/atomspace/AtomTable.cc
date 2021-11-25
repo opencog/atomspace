@@ -449,8 +449,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Remove handle from other incoming sets.
     handle->remove();
 
-    handle->setAtomSpace(nullptr);
     typeIndex.removeAtom(handle);
+
+    handle->setAtomSpace(nullptr);
     return true;
 }
 
