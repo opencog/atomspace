@@ -295,10 +295,15 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     else
         atom->unsetRemovalFlag();
 
-    // Must set atomspace before insertion. This is harmless, because
-    // if someone else raced us and inserted first, this atom will never
-    // be visible.
+    // Must set atomspace before insertion. This must be done before the
+    // atom becomes visible at the typeIndex insert.  Likewise for setting
+    // up the incoming set.
     atom->setAtomSpace(this);
+    atom->keep_incoming_set();
+
+    // Not entirily critical to copy values before the insert below, but
+    // it is a nice gesture to anyone who expects and atomic atomspace add.
+    if (atom != orig) atom->copyValues(orig);
 
     // Between the time that we last checked, and here, some other thread
     // may have raced and inserted this atom already. So the insert does
@@ -306,22 +311,14 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     Handle oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
 
-    atom->keep_incoming_set();
-
     // Unlocked operations. This atom becomes visible to other threads in
-    // two different ways. One way is during the `install()` below, when
-    // another thread asks for the inset of one of the atoms in our
-    // oset. The other way is when two threads are adding the same atom.
+    // two different ways. One way is the typeIndex insert above, the other
+    // during the `install()` below (when another thread asks for the inset
+    // of one of the atoms in our oset.)
 
-    // Copying the values after them atom is in the atomspace does
-    // introduce a window where the atom has the "wrong" values. But
-    // does this hurt anyone?  Sure, I suppose some user might want an
-    // atomic add-with-values, but is that enough to penalize everyone
-    // else who just want more preallelism?  Hmmm.
-    if (atom != orig) atom->copyValues(orig);
-
-    // Similar remarks as above, but for the incoming sets. Except here,
-    // I don't even see an exploitable window.
+    // Set up the incming set. We could do this before the typeIndex
+    // insert, but it seems harmless, and slightly more efficient to do
+    // it afterwards.  I don't see an exploitable window.
     atom->install();
 
     // Now that we are completely done, emit the added signal.
