@@ -40,6 +40,9 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
+#define INCOMING_SET_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define KVP_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+
 namespace opencog
 {
 typedef std::weak_ptr<Atom> WinkPtr;
@@ -347,7 +350,7 @@ public:
     getIncomingIter(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
-        std::shared_lock<std::shared_mutex> lck(_mtx);
+        INCOMING_SET_LOCK;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
@@ -387,7 +390,7 @@ public:
     getIncomingSetByType(OutputIterator result, Type type) const
     {
         if (nullptr == _incoming_set) return result;
-        std::shared_lock<std::shared_mutex> lck(_mtx);
+        INCOMING_SET_LOCK;
 
         const auto bucket = _incoming_set->_iset.find(type);
         if (bucket == _incoming_set->_iset.cend()) return result;
