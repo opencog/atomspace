@@ -122,7 +122,7 @@ IF(Boost_FOUND_SAVE)
 ENDIF(Boost_FOUND_SAVE)
 
 # ----------------------------------------------------------
-# Needed for unit tests.
+# Optional, but needed for unit tests.
 
 FIND_PACKAGE(Cxxtest)
 IF (CXXTEST_FOUND)
@@ -130,6 +130,17 @@ IF (CXXTEST_FOUND)
 ELSE (CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
 ENDIF (CXXTEST_FOUND)
+
+# ----------------------------------------------------------
+# Optional, uses slightly more efficient replacement for std::set
+
+FIND_PACKAGE(Folly)
+IF (FOLLY_FOUND)
+	MESSAGE(STATUS "Folly found.")
+	SET(HAVE_FOLLY 1)
+ELSE (FOLLY_FOUND)
+	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
+ENDIF (FOLLY_FOUND)
 
 # ----------------------------------------------------------
 # Optional, unused distributed processing framework.
@@ -156,7 +167,7 @@ include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
-# OCaml
+# OCaml (optional; needed for the OCaml bindings.)
 
 FIND_PACKAGE(OCaml)
 IF (OCAML_FOUND)
@@ -165,7 +176,7 @@ IF (OCAML_FOUND)
 ENDIF (OCAML_FOUND)
 
 # ----------------------------------------------------------
-# Glasgow Haskell compiler
+# Glasgow Haskell compiler (Optional; needed for the Haskell bindings)
 
 FIND_PACKAGE(Stack)
 IF (STACK_FOUND)
@@ -192,7 +203,7 @@ ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# Mandatory Postgres
+# Optional Postgres, needed for PostgresStorageNode
 
 FIND_PACKAGE(PGSQL 9.5)
 IF (PGSQL_FOUND)
@@ -426,6 +437,7 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
+SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)

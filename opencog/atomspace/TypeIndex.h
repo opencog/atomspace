@@ -25,7 +25,6 @@
 #include <mutex>
 #include <vector>
 
-// #define HAVE_FOLLY
 #ifdef HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #else

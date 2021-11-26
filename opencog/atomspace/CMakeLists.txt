@@ -1,6 +1,9 @@
 
 # The atom_types.h file is written to the build directory
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+INCLUDE_DIRECTORIES(
+	${CMAKE_BINARY_DIR}
+	${FOLLY_INCLUDE_DIR} # optional replacement for std::set
+)
 
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
@@ -30,7 +33,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
-	# folly
+	${FOLLY_LIBRARIES}  # optional
 )
 
 INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
