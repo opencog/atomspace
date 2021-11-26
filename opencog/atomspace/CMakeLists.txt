@@ -30,6 +30,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
+	# folly
 )
 
 INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
