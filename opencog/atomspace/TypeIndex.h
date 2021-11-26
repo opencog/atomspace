@@ -49,7 +49,7 @@ typedef std::unordered_set<Handle> AtomSet;
 #endif
 
 
-#define LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -83,7 +83,7 @@ class TypeIndex
 		Handle insertAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			LOCK;
+			TYPE_INDEX_LOCK;
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
@@ -93,14 +93,14 @@ class TypeIndex
 		void removeAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			LOCK;
+			TYPE_INDEX_LOCK;
 			s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
 			const AtomSet& s(_idx.at(h->get_type()));
-			LOCK;
+			TYPE_INDEX_LOCK;
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
@@ -110,7 +110,7 @@ class TypeIndex
 		size_t size(Type t) const
 		{
 			const AtomSet& s(_idx.at(t));
-			LOCK;
+			TYPE_INDEX_LOCK;
 			return s.size();
 		}
 
@@ -118,7 +118,7 @@ class TypeIndex
 		size_t size(void) const
 		{
 			size_t cnt = 0;
-			LOCK;
+			TYPE_INDEX_LOCK;
 			for (const auto& s : _idx)
 				cnt += s.size();
 			return cnt;
@@ -140,7 +140,7 @@ class TypeIndex
 
 		void clear(void)
 		{
-			LOCK;
+			TYPE_INDEX_LOCK;
 			for (auto& s : _idx)
 			{
 				for (auto& h : s)
