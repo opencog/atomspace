@@ -34,6 +34,10 @@
 #include <string>
 #include <unordered_set>
 
+#ifdef HAVE_FOLLY
+#include <folly/container/F14Set.h>
+#endif
+
 #include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
@@ -91,8 +95,12 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
+#ifdef HAVE_FOLLY
+typedef folly::F14ValueSet<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+#else
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+#endif
 
 /**
  * Atoms are the basic implementational unit in the system that
