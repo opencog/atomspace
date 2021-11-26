@@ -22,15 +22,19 @@
 #ifndef _OPENCOG_TYPEINDEX_H
 #define _OPENCOG_TYPEINDEX_H
 
+#include <vector>
+
+#define HAVE_FOLLY
+#ifdef HAVE_FOLLY
+#include <folly/container/F14Set.h>
+#else
 #include <mutex>
 #include <set>
-#include <vector>
+#endif
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
-
-#define LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 namespace opencog
 {
@@ -38,7 +42,14 @@ namespace opencog
  *  @{
  */
 
+#ifdef HAVE_FOLLY
+typedef folly::F14ValueSet<Handle> AtomSet;
+// typedef folly::F14NodeSet<Handle> AtomSet;
+#define LOCK
+#else
 typedef std::unordered_set<Handle> AtomSet;
+#define LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#endif
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
