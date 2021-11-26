@@ -30,6 +30,8 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
 
+#define LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -69,8 +71,8 @@ class TypeIndex
 		// Else, return nullptr
 		Handle insertAtom(const Handle& h)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			LOCK;
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
@@ -79,16 +81,15 @@ class TypeIndex
 
 		void removeAtom(const Handle& h)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			LOCK;
 			s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
-
 			const AtomSet& s(_idx.at(h->get_type()));
+			LOCK;
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
@@ -97,16 +98,16 @@ class TypeIndex
 		// How many atoms are ther of type t?
 		size_t size(Type t) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			const AtomSet& s(_idx.at(t));
+			LOCK;
 			return s.size();
 		}
 
 		// How many atoms, grand total?
 		size_t size(void) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			size_t cnt = 0;
+			LOCK;
 			for (const auto& s : _idx)
 				cnt += s.size();
 			return cnt;
@@ -128,7 +129,7 @@ class TypeIndex
 
 		void clear(void)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
+			LOCK;
 			for (auto& s : _idx)
 			{
 				for (auto& h : s)
