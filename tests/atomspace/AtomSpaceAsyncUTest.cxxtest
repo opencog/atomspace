@@ -188,6 +188,45 @@ public:
     }
 
     // =================================================================
+
+    // return true if it looks OK.
+    bool checkOutgoingSet(const Handle& h)
+    {
+        for (const Handle& ho: h->getOutgoingSet())
+        {
+            bool found = false;
+            HandleSeq oset = ho->getIncomingSet();
+            for (const Handle& hi : oset)
+                if (*hi == *h) { found = true; break; }
+            if (not found)
+            {
+                printf("Fail: atom\n%s\nnot in incoming set of\n%s\n",
+                    h->to_string().c_str(), ho->to_string().c_str());
+                TSM_ASSERT("Badly structured incoming set!", found)
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool checkIncoming(Type t)
+    {
+        HandleSeq all;
+        atomSpace->get_handles_by_type(all, t, false);
+        for (const Handle& h : all)
+            checkOutgoingSet(h);
+        return true;
+    }
+
+    bool checkAllIncoming(void)
+    {
+        TypeSet ts = nameserver().getChildrenRecursive(LINK);
+        for (Type t: ts)
+             checkIncoming(t);
+        return true;
+    }
+
+    // =================================================================
     // Test multi-threaded addition of nodes to atomspace.
 
     Type randomType(Type t)
@@ -239,6 +278,8 @@ public:
 
         // we should get num_atoms * n_threads distinct atoms
         TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+
+        checkAllIncoming();
     }
 
     void testThreadedDuplicateAdd()
@@ -254,6 +295,8 @@ public:
 
         // We should get only num_atoms, because all threads are creating duplicates.
         TS_ASSERT_EQUALS(size, num_atoms);
+
+        checkAllIncoming();
     }
 
     // =================================================================
@@ -322,11 +365,9 @@ public:
     void testThreadedSignals()
     {
         // connect signals
-        // int add =
-            atomSpace->atomAddedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
+        atomSpace->atomAddedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
 
-        // int chg =
-            atomSpace->TVChangedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
+        atomSpace->TVChangedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
 
         __totalAdded = 0;
         __totalChanged = 0;
@@ -467,6 +508,7 @@ public:
 
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
         TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads); // lots!
+        checkAllIncoming();
     }
 
     // =================================================================
@@ -521,6 +563,7 @@ public:
         // n_thread, because all threads created duplicate ListLinks,
         // duplicate PredicateNodes, but unique EvaluationLinks.
         TS_ASSERT_EQUALS(size, (n_threads+2)*num_atoms + n_threads);
+        checkAllIncoming();
     }
 
     // =================================================================
