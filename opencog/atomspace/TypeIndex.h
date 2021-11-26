@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_TYPEINDEX_H
 #define _OPENCOG_TYPEINDEX_H
 
+#include <mutex>
 #include <set>
 #include <vector>
 
@@ -57,22 +58,36 @@ class TypeIndex
 		std::vector<AtomSet> _idx;
 		size_t _num_types;
 		NameServer& _nameserver;
+
+		// Single, global mutex for locking the index.
+		mutable std::shared_mutex _mtx;
 	public:
 		TypeIndex(void);
 		void resize(void);
-		void insertAtom(const Handle& h)
+
+		// Return a Handle, if it's already in the set.
+		// Else, return nullptr
+		Handle insertAtom(const Handle& h)
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			auto iter = s.find(h);
+			if (s.end() != iter) return *iter;
 			s.insert(h);
+			return Handle::UNDEFINED;
 		}
+
 		void removeAtom(const Handle& h)
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
 			s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
+
 			const AtomSet& s(_idx.at(h->get_type()));
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
@@ -82,6 +97,7 @@ class TypeIndex
 		// How many atoms are ther of type t?
 		size_t size(Type t) const
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
 			const AtomSet& s(_idx.at(t));
 			return s.size();
 		}
@@ -89,6 +105,7 @@ class TypeIndex
 		// How many atoms, grand total?
 		size_t size(void) const
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
 			size_t cnt = 0;
 			for (const auto& s : _idx)
 				cnt += s.size();
@@ -100,6 +117,7 @@ class TypeIndex
 		{
 			size_t result = size(type);
 			if (not subclass) return result;
+
 			for (Type t = ATOM; t<_num_types; t++)
 			{
 				if (t != type and _nameserver.isA(t, type))
@@ -110,6 +128,7 @@ class TypeIndex
 
 		void clear(void)
 		{
+			std::unique_lock<std::shared_mutex> lck(_mtx);
 			for (auto& s : _idx)
 			{
 				for (auto& h : s)

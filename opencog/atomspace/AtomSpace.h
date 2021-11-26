@@ -25,12 +25,6 @@
 #ifndef _OPENCOG_ATOMSPACE_H
 #define _OPENCOG_ATOMSPACE_H
 
-#include <atomic>
-#include <iostream>
-#include <list>
-#include <set>
-#include <vector>
-
 #include <opencog/util/async_method_caller.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_omp.h>
@@ -82,12 +76,6 @@ class AtomSpace : public Atom
     AtomSpace(const AtomSpace&) = delete;
 
     // --------------------------------------------------
-    // Single, global mutex for locking the index.
-    // Its recursive because we need to lock twice during atom insertion
-    // and removal: we need to keep the index stable while we search
-    // it during add/remove.
-    mutable std::shared_mutex _mtx;
-
     //! Index of atoms.
     TypeIndex typeIndex;
 
@@ -122,7 +110,6 @@ class AtomSpace : public Atom
     Handle getHandle(Type, const std::string&&) const;
     Handle getHandle(Type, const HandleSeq&&) const;
     Handle lookupHandle(const Handle&) const;
-    Handle lookupUnlocked(const Handle&) const;
 
     /**
      * Private: add an atom to the table. This skips the read-only
@@ -131,8 +118,8 @@ class AtomSpace : public Atom
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
      */
-    Handle add(const Handle&, bool force=false, bool do_lock=true);
-    Handle check(const Handle&, bool force=false, bool do_lock=true);
+    Handle add(const Handle&, bool force=false);
+    Handle check(const Handle&, bool force=false);
 
     /**
      * Return a random atom in the AtomTable.
@@ -387,7 +374,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool extract_atom(const Handle&, bool recursive=false, bool do_lock=true);
+    bool extract_atom(const Handle&, bool recursive=false);
 
     bool remove_atom(const Handle& h, bool recursive=false) {
         return extract_atom(h, recursive);
@@ -487,9 +474,7 @@ public:
 
     /**
      * Gets a set of handles that matches with the given type,
-     * but ONLY if they have an empty incoming set! This might
-     * spend more time under the atomtable lock, but should use
-     * less RAM when getting large sets, and thus might be faster.
+     * but ONLY if they have an empty incoming set! 
      *
      * @param hset the HandleSet into which to insert handles.
      * @param The desired type.

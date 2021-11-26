@@ -84,15 +84,13 @@ Atom::~Atom()
     // Disable for now. This assert has never tripped; there
     // seems to be no point to checking it.
 #if 0
-    if (0 < getIncomingSetSize()) {
-        // This can't ever possibly happen. If it does, then there is
-        // some very sick bug with the reference counting that the
-        // shared pointers are doing. (Or someone explcitly called the
-        // destructor! Which they shouldn't do.)
-        OC_ASSERT(0 == getIncomingSet().size(),
-             "Atom deletion failure; incoming set not empty for %s h=%x",
-             nameserver().getTypeName(_type).c_str(), get_hash());
-    }
+    // This can't ever possibly happen. If it does, then there is
+    // some very sick bug with the reference counting that the
+    // shared pointers are doing. (Or someone explcitly called the
+    // destructor! Which they shouldn't do.)
+    OC_ASSERT(0 == getIncomingSet().size(),
+         "Atom deletion failure; incoming set not empty for %s h=%x",
+         nameserver().getTypeName(_type).c_str(), get_hash());
 #endif
     drop_incoming_set();
 }
@@ -302,6 +300,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 /// tracking it.
 void Atom::keep_incoming_set()
 {
+    std::unique_lock<std::shared_mutex> lck (_mtx);
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
 }
@@ -347,9 +346,14 @@ void Atom::remove_atom(const Handle& a)
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
     Type at = a->get_type();
-    auto bucket = _incoming_set->_iset.find(at);
-    if (bucket != _incoming_set->_iset.end())
-        bucket->second.erase(a);
+
+    const auto bucket = _incoming_set->_iset.find(at);
+
+    OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
+    size_t erc = bucket->second.erase(a);
+
+    // Can be zero, if an atom appears more than once.
+    OC_ASSERT(2 > erc, "Unexpected erase count!");
 }
 
 /// Remove old, and add new, atomically, so that every user
