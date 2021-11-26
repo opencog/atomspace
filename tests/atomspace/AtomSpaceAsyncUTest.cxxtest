@@ -188,45 +188,6 @@ public:
     }
 
     // =================================================================
-
-    // return true if it looks OK.
-    bool checkOutgoingSet(const Handle& h)
-    {
-        for (const Handle& ho: h->getOutgoingSet())
-        {
-            bool found = false;
-            HandleSeq oset = ho->getIncomingSet();
-            for (const Handle& hi : oset)
-                if (*hi == *h) { found = true; break; }
-            if (not found)
-            {
-                printf("Fail: atom\n%s\nnot in incoming set of\n%s\n",
-                    h->to_string().c_str(), ho->to_string().c_str());
-                TSM_ASSERT("Badly structured incoming set!", found)
-                return false;
-            }
-        }
-        return true;
-    }
-
-    bool checkIncoming(Type t)
-    {
-        HandleSeq all;
-        atomSpace->get_handles_by_type(all, t, false);
-        for (const Handle& h : all)
-            checkOutgoingSet(h);
-        return true;
-    }
-
-    bool checkAllIncoming(void)
-    {
-        TypeSet ts = nameserver().getChildrenRecursive(LINK);
-        for (Type t: ts)
-             checkIncoming(t);
-        return true;
-    }
-
-    // =================================================================
     // Test multi-threaded addition of nodes to atomspace.
 
     Type randomType(Type t)
@@ -278,8 +239,6 @@ public:
 
         // we should get num_atoms * n_threads distinct atoms
         TS_ASSERT_EQUALS(size, num_atoms * n_threads);
-
-        checkAllIncoming();
     }
 
     void testThreadedDuplicateAdd()
@@ -295,8 +254,6 @@ public:
 
         // We should get only num_atoms, because all threads are creating duplicates.
         TS_ASSERT_EQUALS(size, num_atoms);
-
-        checkAllIncoming();
     }
 
     // =================================================================
@@ -447,6 +404,56 @@ public:
         }
         n_threads = n_threads_save;
         num_atoms = num_atoms_save;
+    }
+
+    // =================================================================
+
+    size_t _nchecks;
+
+    // Verify that h appears in the incoming set of every evey
+    // atom in h's outgoing set.  i.e. that outgoing/incoming
+    // is a symmetric relation.
+    // Return true if it looks OK.
+    bool checkOutgoingSet(const Handle& h)
+    {
+        for (const Handle& ho: h->getOutgoingSet())
+        {
+            bool found = false;
+            HandleSeq oset = ho->getIncomingSet();
+            for (const Handle& hi : oset)
+            {
+                _nchecks ++;
+                if (*hi == *h) { found = true; break; }
+            }
+            if (not found)
+            {
+                printf("Fail: atom\n%s\nnot in incoming set of\n%s\n",
+                    h->to_string().c_str(), ho->to_string().c_str());
+                TSM_ASSERT("Badly structured incoming set!", found)
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool checkIncoming(Type t)
+    {
+        HandleSeq all;
+        atomSpace->get_handles_by_type(all, t, false);
+        for (const Handle& h : all)
+            checkOutgoingSet(h);
+        return true;
+    }
+
+    bool checkAllIncoming(void)
+    {
+        _nchecks = 0;
+        TypeSet ts = nameserver().getChildrenRecursive(LINK);
+        for (Type t: ts)
+             checkIncoming(t);
+
+        printf("Checked %zu outgoing/incoming set matches\n", _nchecks);
+        return true;
     }
 
     // =================================================================
