@@ -63,11 +63,11 @@ struct hashable_weak_ptr : public std::weak_ptr<T>
 		_hash = std::hash<T*>{}(sp.get());
 	}
 
-	std::size_t get_hash() const { return _hash; }
+	std::size_t get_hash() const noexcept { return _hash; }
 
-	// We define operator<() because we use it to costruct operator==()
-	// It might be more efficient to store the unhashed pointer, and use
-	// that for equality compares...
+	// Define operator<() in order to construct operator==()
+	// It might be more efficient to store the unhashed
+	// pointer, and use that for equality compares...
 	friend bool operator<(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
 	{
 		return lhs.owner_before(rhs);
