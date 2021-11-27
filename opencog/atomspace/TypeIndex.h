@@ -25,7 +25,7 @@
 #include <mutex>
 #include <vector>
 
-#ifdef HAVE_FOLLY
+#if HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #else
 #include <set>
@@ -41,7 +41,7 @@ namespace opencog
  *  @{
  */
 
-#ifdef HAVE_FOLLY
+#if HAVE_FOLLY
 typedef folly::F14ValueSet<Handle> AtomSet;
 #else
 typedef std::unordered_set<Handle> AtomSet;
