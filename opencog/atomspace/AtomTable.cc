@@ -305,21 +305,19 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // it is a nice gesture to anyone who expects and atomic atomspace add.
     if (atom != orig) atom->copyValues(orig);
 
+    // Set up the incoming set. We have to do this before the typeIndex
+    // insert, because that is when this atom becomes visible to other
+    // threads. If we do this later, then insertion and deletion race,
+    // specifically in SCMPrimitiveUTest, which trips over the assert
+    // that the incoming set hash bucket hasn't yet been created even
+    // as the atom is being deleted.
+    atom->install();
+
     // Between the time that we last checked, and here, some other thread
     // may have raced and inserted this atom already. So the insert does
     // have to be an atomic test-n-set.
     Handle oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
-
-    // Unlocked operations. This atom becomes visible to other threads in
-    // two different ways. One way is the typeIndex insert above, the other
-    // during the `install()` below (when another thread asks for the inset
-    // of one of the atoms in our oset.)
-
-    // Set up the incming set. We could do this before the typeIndex
-    // insert, but it seems harmless, and slightly more efficient to do
-    // it afterwards.  I don't see an exploitable window.
-    atom->install();
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
