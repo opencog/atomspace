@@ -45,15 +45,16 @@
 
 namespace std {
 
-// The hash of a weak pointer is just the atom type. Actually,
-// it *has* to be the atom type, as otherwise the hash buckets
-// won't be correct, and getIncomingByType() will fail to be fast.
-opencog::Type
+// The hash of a weak pointer should be the hash of the weak pointer
+// control_block. But we do not have access to that. (For glibc, the
+// control block is at __weak_ptr::_M_refcount._M_pi-> or thereabouts,
+// but this is private and implmentation specific.) So what to do?
+// https://stackoverflow.com/questions/70131467/how-to-compute-hash-of-stdweak-ptr
+// Right now, do nothing!
+uint64_t
 hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
 {
-    opencog::Handle h(w.lock());
-    if (nullptr == h) return 0;
-    return h->get_type();
+	OC_ASSERT(0, "Not implemented!");
 }
 
 bool
@@ -146,7 +147,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	// then load-from-file and load-from-network breaks.
 	if (key != truth_key() and *key == *truth_key())
 	{
-		std::unique_lock<std::shared_mutex> lck(_mtx);
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[truth_key()] = value;
 		else
@@ -154,7 +155,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	}
 	else
 	{
-		std::unique_lock<std::shared_mutex> lck(_mtx);
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[key] = value;
 		else
@@ -182,13 +183,13 @@ ValuePtr Atom::getValue(const Handle& key) const
     // then load-from-file and load-from-network breaks.
     if ((key != truth_key()) and (*key == *truth_key()))
     {
-        std::shared_lock<std::shared_mutex> lck(_mtx);
+        KVP_SHARED_LOCK;
         auto pr = _values.find(truth_key());
         if (_values.end() != pr) pap = pr->second;
     }
     else
     {
-        std::shared_lock<std::shared_mutex> lck(_mtx);
+        KVP_SHARED_LOCK;
         auto pr = _values.find(key);
         if (_values.end() != pr) pap = pr->second;
     }
@@ -198,7 +199,7 @@ ValuePtr Atom::getValue(const Handle& key) const
 HandleSet Atom::getKeys() const
 {
     HandleSet keyset;
-    std::shared_lock<std::shared_mutex> lck(_mtx);
+    KVP_SHARED_LOCK;
     for (const auto& pr : _values)
         keyset.insert(pr.first);
 
@@ -300,7 +301,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 /// tracking it.
 void Atom::keep_incoming_set()
 {
-    std::unique_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
 }
@@ -311,7 +312,7 @@ void Atom::keep_incoming_set()
 void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
-    std::unique_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
     // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
@@ -320,7 +321,7 @@ void Atom::drop_incoming_set()
 void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::unique_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
@@ -341,7 +342,7 @@ void Atom::insert_atom(const Handle& a)
 void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::unique_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -352,7 +353,11 @@ void Atom::remove_atom(const Handle& a)
     OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
     size_t erc = bucket->second.erase(a);
 
-    // Can be zero, if an atom appears more than once.
+    // std::set is a "true set", in that it either contains something,
+    // or it does not.  Therefore, the erase count is either 1 (the
+    // atom was found and erased) or 0 (the atom was not found, that's
+    // because it was erased earlier, e.g. it had more than once in the
+    // outgoing set. All other erase counts are ... unexpected.
     OC_ASSERT(2 > erc, "Unexpected erase count!");
 }
 
@@ -362,7 +367,7 @@ void Atom::remove_atom(const Handle& a)
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
-    std::unique_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
@@ -393,7 +398,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return true;
 
-    std::shared_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_SHARED_LOCK;
 
     for (const auto& bucket : _incoming_set->_iset)
     {
@@ -410,7 +415,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    std::shared_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_SHARED_LOCK;
 
     size_t cnt = 0;
     if (as)
@@ -442,7 +447,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
     if (as) {
         // Prevent update of set while a copy is being made.
-        std::shared_lock<std::shared_mutex> lck (_mtx);
+        INCOMING_SHARED_LOCK;
         IncomingSet iset;
         for (const auto& bucket : _incoming_set->_iset)
         {
@@ -457,7 +462,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     }
 
     // Prevent update of set while a copy is being made.
-    std::shared_lock<std::shared_mutex> lck (_mtx);
+    INCOMING_SHARED_LOCK;
     IncomingSet iset;
     for (const auto& bucket : _incoming_set->_iset)
     {
@@ -476,7 +481,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     if (nullptr == _incoming_set) return empty_set;
 
     // Lock to prevent updates of the set of atoms.
-    std::shared_lock<std::shared_mutex> lck(_mtx);
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
@@ -503,7 +508,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
-    std::shared_lock<std::shared_mutex> lck(_mtx);
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return 0;

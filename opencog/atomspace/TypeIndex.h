@@ -23,8 +23,13 @@
 #define _OPENCOG_TYPEINDEX_H
 
 #include <mutex>
-#include <set>
 #include <vector>
+
+#if HAVE_FOLLY
+#include <folly/container/F14Set.h>
+#else
+#include <set>
+#endif
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -36,7 +41,24 @@ namespace opencog
  *  @{
  */
 
+// Facebook Folly
+// https://github.com/facebook/folly/blob/main/folly/container/F14.md
+// promises a faster and more compact hash table. Just two problems:
+// 1) It does not make any difference in the "real world" benchmark
+//    I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
+// 2) It passes all unit tests, but one: sexpr-query-test which
+//    sometimes passes, sometimes fails, because the pattern matcher
+//    sometimes reports the same result twice. Why? I dunno. This
+//    one failure is enough to say "not recommended." I don't need
+//    to be chasing obscure bugs.
+#if HAVE_FOLLY_XXX
+typedef folly::F14ValueSet<Handle> AtomSet;
+#else
 typedef std::unordered_set<Handle> AtomSet;
+#endif
+
+#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -69,8 +91,8 @@ class TypeIndex
 		// Else, return nullptr
 		Handle insertAtom(const Handle& h)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			TYPE_INDEX_UNIQUE_LOCK;
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
@@ -79,16 +101,15 @@ class TypeIndex
 
 		void removeAtom(const Handle& h)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			AtomSet& s(_idx.at(h->get_type()));
+			TYPE_INDEX_UNIQUE_LOCK;
 			s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
-
 			const AtomSet& s(_idx.at(h->get_type()));
+			TYPE_INDEX_SHARED_LOCK;
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
@@ -97,16 +118,16 @@ class TypeIndex
 		// How many atoms are ther of type t?
 		size_t size(Type t) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			const AtomSet& s(_idx.at(t));
+			TYPE_INDEX_SHARED_LOCK;
 			return s.size();
 		}
 
 		// How many atoms, grand total?
 		size_t size(void) const
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
 			size_t cnt = 0;
+			TYPE_INDEX_SHARED_LOCK;
 			for (const auto& s : _idx)
 				cnt += s.size();
 			return cnt;
@@ -128,7 +149,7 @@ class TypeIndex
 
 		void clear(void)
 		{
-			std::unique_lock<std::shared_mutex> lck(_mtx);
+			TYPE_INDEX_UNIQUE_LOCK;
 			for (auto& s : _idx)
 			{
 				for (auto& h : s)

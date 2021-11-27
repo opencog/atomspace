@@ -33,7 +33,7 @@ TypeIndex::TypeIndex(void) :
 void TypeIndex::resize(void)
 {
 	_num_types = nameserver().getNumberOfClasses();
-	std::unique_lock<std::shared_mutex> lck(_mtx);
+	TYPE_INDEX_UNIQUE_LOCK;
 	_idx.resize(_num_types + 1);
 }
 
@@ -54,7 +54,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	std::unique_lock<std::shared_mutex> lck(_mtx);
+	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
 	for (const Handle& h : s)
 		hseq.push_back(h);
@@ -90,7 +90,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	std::unique_lock<std::shared_mutex> lck(_mtx);
+	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
 	for (const Handle& h : s)
 	{
