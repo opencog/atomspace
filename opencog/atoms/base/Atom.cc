@@ -147,7 +147,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	// then load-from-file and load-from-network breaks.
 	if (key != truth_key() and *key == *truth_key())
 	{
-		KVP_LOCK;
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[truth_key()] = value;
 		else
@@ -155,7 +155,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	}
 	else
 	{
-		KVP_LOCK;
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[key] = value;
 		else
@@ -183,13 +183,13 @@ ValuePtr Atom::getValue(const Handle& key) const
     // then load-from-file and load-from-network breaks.
     if ((key != truth_key()) and (*key == *truth_key()))
     {
-        KVP_LOCK;
+        KVP_SHARED_LOCK;
         auto pr = _values.find(truth_key());
         if (_values.end() != pr) pap = pr->second;
     }
     else
     {
-        KVP_LOCK;
+        KVP_SHARED_LOCK;
         auto pr = _values.find(key);
         if (_values.end() != pr) pap = pr->second;
     }
@@ -199,7 +199,7 @@ ValuePtr Atom::getValue(const Handle& key) const
 HandleSet Atom::getKeys() const
 {
     HandleSet keyset;
-    KVP_LOCK;
+    KVP_SHARED_LOCK;
     for (const auto& pr : _values)
         keyset.insert(pr.first);
 
@@ -301,7 +301,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 /// tracking it.
 void Atom::keep_incoming_set()
 {
-    INCOMING_SET_LOCK;
+    INCOMING_UNIQUE_LOCK;
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
 }
@@ -312,7 +312,7 @@ void Atom::keep_incoming_set()
 void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
-    INCOMING_SET_LOCK;
+    INCOMING_UNIQUE_LOCK;
     // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
@@ -321,7 +321,7 @@ void Atom::drop_incoming_set()
 void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    INCOMING_SET_LOCK;
+    INCOMING_UNIQUE_LOCK;
 
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
@@ -342,7 +342,7 @@ void Atom::insert_atom(const Handle& a)
 void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    INCOMING_SET_LOCK;
+    INCOMING_UNIQUE_LOCK;
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -367,7 +367,7 @@ void Atom::remove_atom(const Handle& a)
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
-    INCOMING_SET_LOCK;
+    INCOMING_UNIQUE_LOCK;
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
@@ -398,7 +398,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return true;
 
-    INCOMING_SET_LOCK;
+    INCOMING_SHARED_LOCK;
 
     for (const auto& bucket : _incoming_set->_iset)
     {
@@ -415,7 +415,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    INCOMING_SET_LOCK;
+    INCOMING_SHARED_LOCK;
 
     size_t cnt = 0;
     if (as)
@@ -447,7 +447,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
     if (as) {
         // Prevent update of set while a copy is being made.
-        INCOMING_SET_LOCK;
+        INCOMING_SHARED_LOCK;
         IncomingSet iset;
         for (const auto& bucket : _incoming_set->_iset)
         {
@@ -462,7 +462,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     }
 
     // Prevent update of set while a copy is being made.
-    INCOMING_SET_LOCK;
+    INCOMING_SHARED_LOCK;
     IncomingSet iset;
     for (const auto& bucket : _incoming_set->_iset)
     {
@@ -481,7 +481,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     if (nullptr == _incoming_set) return empty_set;
 
     // Lock to prevent updates of the set of atoms.
-    INCOMING_SET_LOCK;
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
@@ -508,7 +508,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
-    INCOMING_SET_LOCK;
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return 0;

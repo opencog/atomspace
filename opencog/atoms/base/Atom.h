@@ -45,8 +45,10 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#define INCOMING_SET_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define KVP_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
 
 namespace opencog
 {
@@ -361,7 +363,7 @@ public:
     getIncomingIter(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
-        INCOMING_SET_LOCK;
+        INCOMING_SHARED_LOCK;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
@@ -401,7 +403,7 @@ public:
     getIncomingSetByType(OutputIterator result, Type type) const
     {
         if (nullptr == _incoming_set) return result;
-        INCOMING_SET_LOCK;
+        INCOMING_SHARED_LOCK;
 
         const auto bucket = _incoming_set->_iset.find(type);
         if (bucket == _incoming_set->_iset.cend()) return result;
