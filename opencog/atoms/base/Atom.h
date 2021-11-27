@@ -34,9 +34,9 @@
 #include <string>
 #include <unordered_set>
 
-// Can't use this, see below.
-#if XXX_HAVE_FOLLY_XXX
+#if HAVE_FOLLY
 #include <folly/container/F14Set.h>
+#define USE_HASHABLE_WEAK_PTR 1
 #endif
 
 #include <opencog/util/empty_string.h>
@@ -52,7 +52,6 @@
 
 namespace opencog
 {
-#define USE_HASHABLE_WEAK_PTR 1
 #if USE_HASHABLE_WEAK_PTR
 template<class T>
 struct hashable_weak_ptr : public std::weak_ptr<T>
@@ -60,28 +59,42 @@ struct hashable_weak_ptr : public std::weak_ptr<T>
 	hashable_weak_ptr(std::shared_ptr<T>const& sp) :
 		std::weak_ptr<T>(sp)
 	{
-		if(!sp) return;
+		if (!sp) return;
 		_hash = std::hash<T*>{}(sp.get());
 	}
-#if 0
+
+	std::size_t get_hash() const { return _hash; }
+
+	// We define operator<() because we use it to costruct operator==()
+	// It might be more efficient to store the unhashed pointer, and use
+	// that for equality compares...
 	friend bool operator<(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
 	{
 		return lhs.owner_before(rhs);
 	}
-#endif
+	friend bool operator!=(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs<rhs or rhs<lhs;
+	}
+	friend bool operator==(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return not (lhs != rhs);
+	}
 	private:
 		std::size_t _hash = 0;
 };
 
 typedef hashable_weak_ptr<Atom> WinkPtr;
-#else
+
+#else // USE_HASHABLE_WEAK_PTR
 typedef std::weak_ptr<Atom> WinkPtr;
-#endif
+#endif // USE_HASHABLE_WEAK_PTR
 }
 
 namespace std
 {
 
+#if USE_HASHABLE_WEAK_PTR
 template<class T> struct owner_less<opencog::hashable_weak_ptr<T>>
 {
 	bool operator()(const opencog::hashable_weak_ptr<T>& lhs,
@@ -90,6 +103,15 @@ template<class T> struct owner_less<opencog::hashable_weak_ptr<T>>
 		return lhs.owner_before(rhs);
 	}
 };
+
+template<class T> struct hash<opencog::hashable_weak_ptr<T>>
+{
+	std::size_t operator()(const opencog::hashable_weak_ptr<T>& w) const noexcept
+	{
+		return w.get_hash();
+	}
+};
+#endif // USE_HASHABLE_WEAK_PTR
 
 
 } // namespace std
@@ -113,10 +135,10 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#if XXX_HAVE_FOLLY_XXX
-// Can't use this; we don't have a hash for weak_ptr!
+#if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
-typedef folly::F14ValueSet<WinkPtr> WincomingSet;
+// typedef folly::F14ValueSet<WinkPtr> WincomingSet;
+typedef std::unordered_set<WinkPtr> WincomingSet;
 #else
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
