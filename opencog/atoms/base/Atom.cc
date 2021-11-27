@@ -43,39 +43,6 @@
 
 #undef Type
 
-namespace std {
-
-// The hash of a weak pointer should be the hash of the weak pointer
-// control_block. But we do not have access to that. (For glibc, the
-// control block is at __weak_ptr::_M_refcount._M_pi-> or thereabouts,
-// but this is private and implmentation specific.) So what to do?
-// https://stackoverflow.com/questions/70131467/how-to-compute-hash-of-stdweak-ptr
-// Right now, do nothing!
-uint64_t
-hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
-{
-	OC_ASSERT(0, "Not implemented!");
-}
-
-bool
-equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
-                                       const opencog::WinkPtr& rw) const noexcept
-{
-    opencog::Handle hl(lw.lock());
-    opencog::Handle hr(rw.lock());
-    return hl == hr;  /* hang on, should this be content-compare??? */
-}
-
-#if 0
-// Overloading operator<< for Incoming Set
-ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
-{
-    return out << opencog::oc_to_string(iset);
-}
-#endif
-
-} // namespace std
-
 namespace opencog {
 
 Atom::~Atom()

@@ -52,30 +52,45 @@
 
 namespace opencog
 {
+#define USE_HASHABLE_WEAK_PTR 1
+#if USE_HASHABLE_WEAK_PTR
+template<class T>
+struct hashable_weak_ptr : public std::weak_ptr<T>
+{
+	hashable_weak_ptr(std::shared_ptr<T>const& sp) :
+		std::weak_ptr<T>(sp)
+	{
+		if(!sp) return;
+		_hash = std::hash<T*>{}(sp.get());
+	}
+#if 0
+	friend bool operator<(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs.owner_before(rhs);
+	}
+#endif
+	private:
+		std::size_t _hash = 0;
+};
+
+typedef hashable_weak_ptr<Atom> WinkPtr;
+#else
 typedef std::weak_ptr<Atom> WinkPtr;
+#endif
 }
 
 namespace std
 {
 
-// The hash of the weak pointer is just the type of the atom.
-template<> struct hash<opencog::WinkPtr>
+template<class T> struct owner_less<opencog::hashable_weak_ptr<T>>
 {
-    typedef uint64_t result_type;
-    typedef opencog::WinkPtr argument_type;
-    uint64_t operator()(const opencog::WinkPtr& w) const noexcept;
+	bool operator()(const opencog::hashable_weak_ptr<T>& lhs,
+	                const opencog::hashable_weak_ptr<T>& rhs) const noexcept
+	{
+		return lhs.owner_before(rhs);
+	}
 };
 
-// Equality is equality of the underlying atoms. The unordered set
-// uses this to distinguish atoms of the same type.
-template<> struct equal_to<opencog::WinkPtr>
-{
-    typedef bool result_type;
-    typedef opencog::WinkPtr first_argument;
-    typedef opencog::WinkPtr second_argument;
-    bool operator()(const opencog::WinkPtr&,
-                    const opencog::WinkPtr&) const noexcept;
-};
 
 } // namespace std
 
