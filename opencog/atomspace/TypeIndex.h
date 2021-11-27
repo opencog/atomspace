@@ -41,7 +41,17 @@ namespace opencog
  *  @{
  */
 
-#if HAVE_FOLLY
+// Facebook Folly
+// https://github.com/facebook/folly/blob/main/folly/container/F14.md
+// promises a faster and more compact hash table. Just two problems:
+// 1) It does not make any difference in the "real world" benchmark
+//    I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
+// 2) It passes all unit tests, but one: sexpr-query-test which
+//    sometimes passes, sometimes fails, because the pattern matcher
+//    sometimes reports the same result twice. Why? I dunno. This
+//    one failure is enough to say "not recommended." I don't need
+//    to be chasing obscure bugs.
+#if HAVE_FOLLY_XXX
 typedef folly::F14ValueSet<Handle> AtomSet;
 #else
 typedef std::unordered_set<Handle> AtomSet;

@@ -134,14 +134,27 @@ ENDIF (CXXTEST_FOUND)
 # ----------------------------------------------------------
 # Optional, uses slightly more efficient replacement for std::set
 
-FIND_PACKAGE(Folly)
-IF (FOLLY_FOUND)
-	MESSAGE(STATUS "Folly found.")
-	SET(HAVE_FOLLY 1)
-	ADD_DEFINITIONS(-DHAVE_FOLLY)
-ELSE (FOLLY_FOUND)
-	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
-ENDIF (FOLLY_FOUND)
+# Currently disabled. See note in opencog/atomspace/TypeIndex.h
+# It says:
+# Facebook Folly
+# https://github.com/facebook/folly/blob/main/folly/container/F14.md
+# promises a faster and more compact hash table. Just two problems:
+# 1) It does not make any difference in the "real world" benchmark
+#    I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
+# 2) It passes all unit tests, but one: sexpr-query-test which
+#    sometimes passes, sometimes fails, because the pattern matcher
+#    sometimes reports the same result twice. Why? I dunno. This
+#    one failure is enough to say "not recommended." I don't need
+#    to be chasing obscure bugs.
+#
+#FIND_PACKAGE(Folly)
+#IF (FOLLY_FOUND)
+#	MESSAGE(STATUS "Folly found.")
+#	SET(HAVE_FOLLY 1)
+#	ADD_DEFINITIONS(-DHAVE_FOLLY)
+#ELSE (FOLLY_FOUND)
+#	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
+#ENDIF (FOLLY_FOUND)
 
 # ----------------------------------------------------------
 # Optional, unused distributed processing framework.
@@ -438,7 +451,7 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
+# SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
