@@ -34,7 +34,8 @@
 #include <string>
 #include <unordered_set>
 
-#ifdef HAVE_FOLLY
+// Can't use this, see below.
+#if XXX_HAVE_FOLLY_XXX
 #include <folly/container/F14Set.h>
 #endif
 
@@ -58,9 +59,9 @@ namespace std
 // The hash of the weak pointer is just the type of the atom.
 template<> struct hash<opencog::WinkPtr>
 {
-    typedef opencog::Type result_type;
+    typedef uint64_t result_type;
     typedef opencog::WinkPtr argument_type;
-    opencog::Type operator()(const opencog::WinkPtr& w) const noexcept;
+    uint64_t operator()(const opencog::WinkPtr& w) const noexcept;
 };
 
 // Equality is equality of the underlying atoms. The unordered set
@@ -95,8 +96,10 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#ifdef HAVE_FOLLY
-typedef folly::F14ValueSet<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+#if XXX_HAVE_FOLLY_XXX
+// Can't use this; we don't have a hash for weak_ptr!
+// typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
+typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;

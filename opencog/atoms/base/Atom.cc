@@ -45,15 +45,16 @@
 
 namespace std {
 
-// The hash of a weak pointer is just the atom type. Actually,
-// it *has* to be the atom type, as otherwise the hash buckets
-// won't be correct, and getIncomingByType() will fail to be fast.
-opencog::Type
+// The hash of a weak pointer should be the hash of the weak pointer
+// control_block. But we do not have access to that. (For glibc, the
+// control block is at __weak_ptr::_M_refcount._M_pi-> or thereabouts,
+// but this is private and implmentation specific.) So what to do?
+// https://stackoverflow.com/questions/70131467/how-to-compute-hash-of-stdweak-ptr
+// Right now, do nothing!
+uint64_t
 hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
 {
-    opencog::Handle h(w.lock());
-    if (nullptr == h) return 0;
-    return h->get_type();
+	OC_ASSERT(0, "Not implemented!");
 }
 
 bool
@@ -352,7 +353,11 @@ void Atom::remove_atom(const Handle& a)
     OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
     size_t erc = bucket->second.erase(a);
 
-    // Can be zero, if an atom appears more than once.
+    // std::set is a "true set", in that it either contains something,
+    // or it does not.  Therefore, the erase count is either 1 (the
+    // atom was found and erased) or 0 (the atom was not found, that's
+    // because it was erased earlier, e.g. it had more than once in the
+    // outgoing set. All other erase counts are ... unexpected.
     OC_ASSERT(2 > erc, "Unexpected erase count!");
 }
 
