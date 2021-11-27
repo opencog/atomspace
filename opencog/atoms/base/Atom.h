@@ -137,8 +137,7 @@ typedef SigSlot<Handle, Handle> AtomPairSignal;
 
 #if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
-// typedef folly::F14ValueSet<WinkPtr> WincomingSet;
-typedef std::unordered_set<WinkPtr> WincomingSet;
+typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
