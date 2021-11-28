@@ -1,6 +1,6 @@
 
 ADD_LIBRARY (tlb
-	TLB
+	TLB.cc
 )
 
 TARGET_LINK_LIBRARIES(tlb

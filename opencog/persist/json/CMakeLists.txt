@@ -1,10 +1,10 @@
 
 # Generic JSON decoding.
 ADD_LIBRARY (json
-	DecodeJson
-	EncodeJson
-	JSCommands
-	JsonEval
+	DecodeJson.cc
+	EncodeJson.cc
+	JSCommands.cc
+	JsonEval.h
 )
 
 ADD_DEPENDENCIES(json opencog_atom_types)

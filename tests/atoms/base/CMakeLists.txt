@@ -26,8 +26,8 @@ ADD_CUSTOM_TARGET(test_atom_types
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (test-types SHARED
-   test_types
-   TestTypes
+   test_types.h
+   TestTypes.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

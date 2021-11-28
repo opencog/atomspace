@@ -1,10 +1,10 @@
 
 # Generic S-expression decoding.
 ADD_LIBRARY (sexpr
-	AtomSexpr
-	Commands
-	SexprEval
-	ValueSexpr
+	AtomSexpr.cc
+	Commands.cc
+	SexprEval.cc
+	ValueSexpr.cc
 )
 
 ADD_DEPENDENCIES(sexpr opencog_atom_types)
@@ -31,7 +31,7 @@ INSTALL (FILES
 # File-specific code.
 
 ADD_LIBRARY (load_scm
-	fast_load
+	fast_load.cc
 )
 
 TARGET_LINK_LIBRARIES(load_scm
