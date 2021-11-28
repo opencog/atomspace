@@ -34,9 +34,9 @@
 #include <string>
 #include <unordered_set>
 
-// Can't use this, see below.
-#if XXX_HAVE_FOLLY_XXX
+#if HAVE_FOLLY
 #include <folly/container/F14Set.h>
+#define USE_HASHABLE_WEAK_PTR 1
 #endif
 
 #include <opencog/util/empty_string.h>
@@ -52,30 +52,67 @@
 
 namespace opencog
 {
+#if USE_HASHABLE_WEAK_PTR
+template<class T>
+struct hashable_weak_ptr : public std::weak_ptr<T>
+{
+	hashable_weak_ptr(std::shared_ptr<T>const& sp) :
+		std::weak_ptr<T>(sp)
+	{
+		if (!sp) return;
+		_hash = std::hash<T*>{}(sp.get());
+	}
+
+	std::size_t get_hash() const noexcept { return _hash; }
+
+	// Define operator<() in order to construct operator==()
+	// It might be more efficient to store the unhashed
+	// pointer, and use that for equality compares...
+	friend bool operator<(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs.owner_before(rhs);
+	}
+	friend bool operator!=(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs<rhs or rhs<lhs;
+	}
+	friend bool operator==(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return not (lhs != rhs);
+	}
+	private:
+		std::size_t _hash = 0;
+};
+
+typedef hashable_weak_ptr<Atom> WinkPtr;
+
+#else // USE_HASHABLE_WEAK_PTR
 typedef std::weak_ptr<Atom> WinkPtr;
+#endif // USE_HASHABLE_WEAK_PTR
 }
 
 namespace std
 {
 
-// The hash of the weak pointer is just the type of the atom.
-template<> struct hash<opencog::WinkPtr>
+#if USE_HASHABLE_WEAK_PTR
+template<class T> struct owner_less<opencog::hashable_weak_ptr<T>>
 {
-    typedef uint64_t result_type;
-    typedef opencog::WinkPtr argument_type;
-    uint64_t operator()(const opencog::WinkPtr& w) const noexcept;
+	bool operator()(const opencog::hashable_weak_ptr<T>& lhs,
+	                const opencog::hashable_weak_ptr<T>& rhs) const noexcept
+	{
+		return lhs.owner_before(rhs);
+	}
 };
 
-// Equality is equality of the underlying atoms. The unordered set
-// uses this to distinguish atoms of the same type.
-template<> struct equal_to<opencog::WinkPtr>
+template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 {
-    typedef bool result_type;
-    typedef opencog::WinkPtr first_argument;
-    typedef opencog::WinkPtr second_argument;
-    bool operator()(const opencog::WinkPtr&,
-                    const opencog::WinkPtr&) const noexcept;
+	std::size_t operator()(const opencog::hashable_weak_ptr<T>& w) const noexcept
+	{
+		return w.get_hash();
+	}
 };
+#endif // USE_HASHABLE_WEAK_PTR
+
 
 } // namespace std
 
@@ -98,8 +135,7 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#if XXX_HAVE_FOLLY_XXX
-// Can't use this; we don't have a hash for weak_ptr!
+#if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else

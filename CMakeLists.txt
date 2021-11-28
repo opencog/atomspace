@@ -134,8 +134,6 @@ ENDIF (CXXTEST_FOUND)
 # ----------------------------------------------------------
 # Optional, uses slightly more efficient replacement for std::set
 
-# Currently disabled. See note in opencog/atomspace/TypeIndex.h
-# It says:
 # Facebook Folly
 # https://github.com/facebook/folly/blob/main/folly/container/F14.md
 # promises a faster and more compact hash table. Just one problem:
