@@ -59,7 +59,7 @@ private:
 public:
     UseCountUTest()
     {
-        // Current atomspace can to 50K or 100K atoms/sec, so the
+        // Current atomspace can do 50K or 100K atoms/sec, so the
         // below should run for at least 2 to 5 seconds each time.
         n_threads = 20;
         n_removal_threads = 3;
@@ -88,7 +88,7 @@ public:
         //
         //    ListLink
         //        AnchorNode "the anchor"
-        //        ConceptNode "some value"
+        //        ConceptNode "thread k node i"
         //
         for (int i = 0; i < N; i++) {
             std::ostringstream oss;
@@ -110,7 +110,7 @@ public:
         //
         //    ListLink
         //        AnchorNode "the anchor"
-        //        ConceptNode "some value"
+        //        ConceptNode "thread k node i"
         //
 
         while (true)
@@ -150,9 +150,6 @@ public:
         anchor = atomSpace->add_node(ANCHOR_NODE, "*** The Anchor ***");
         __totalAdded++;
 
-        //ImportanceIndex is asynchronos give it some time
-        sleep(1);
-
         long int initial_use_count = AtomPtr(anchor).use_count();
         std::cout << std::endl;
         std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
@@ -174,9 +171,6 @@ public:
 
         // Wait for it all to come together.
         for (std::thread& t : thread_pool) t.join();
-
-        //ImportanceIndex is asynchronos give it some time
-        sleep(1);
 
         long int final_use_count = AtomPtr(anchor).use_count();
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
