@@ -117,7 +117,7 @@ public:
     void atomRemoved1(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atom->getAtomSpace() == atomSpace);
         logger().debug("atomRemoved1: %s", atom->to_string().c_str());
         __testSignalsCounter += 10000;
     }
@@ -125,7 +125,7 @@ public:
     void atomRemoved2(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->get_size() == 1);
+        TS_ASSERT(atom->getAtomSpace() == atomSpace);
         logger().debug("atomRemoved2: %s", atom->to_string().c_str());
         __testSignalsCounter += 100000;
     }

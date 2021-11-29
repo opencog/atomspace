@@ -429,7 +429,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
     }
 
-    // This check avoids a race conditiion with the add() method.
+    // This check avoids a race condition with the add() method.
     // The add() method installs the atom into the incoming set,
     // which makes it visible externally. Another thread looks at
     // that incoming set and finds this atom, and initiates a
@@ -453,10 +453,11 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         return false;
     }
 
-    // Issue the atom removal signal *BEFORE* the atom is actually
-    // removed.  This is needed so that certain subsystems, e.g. the
-    // Agent system activity table, can correctly manage the atom;
-    // it needs info that gets blanked out during removal.
+    // Ideally, the atom removal signal is sent *BEFORE*  the atom is
+    // actually removed. However, due to the race window described
+    // above, this does not seem to be possible. Well, we could send
+    // it, but there would be spurious deliveies when racing.  This
+    // should still be OK, the owning atomspace is still not blanked!
     _removeAtomSignal.emit(handle);
 
     // Remove handle from other incoming sets.
