@@ -404,19 +404,15 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
     if (recursive) {
-        // We need to make a copy of the incoming set because the
-        // recursive call will trash the incoming set when the atom
-        // is removed.
-        HandleSeq is(handle->getIncomingSet());
 
+        HandleSeq is(handle->getIncomingSet());
         for (const Handle& his : is)
         {
             AtomSpace* other = his->getAtomSpace();
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomspace, and its not a child of this
-            // atomspace.  So flag that as an error; it will assert
-            // a few dozen lines later, below.
+            // atomspace.
             OC_ASSERT(nullptr == other or other == this or
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
@@ -441,10 +437,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 
     // Remove handle from other incoming sets.
     handle->remove();
+    handle->setAtomSpace(nullptr);
 
     typeIndex.removeAtom(handle);
 
-    handle->setAtomSpace(nullptr);
     return true;
 }
 
