@@ -429,6 +429,30 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
     }
 
+    // This check avoids a race conditiion with the add() method.
+    // The add() method installs the atom into the incoming set,
+    // which makes it visible externally. Another thread looks at
+    // that incoming set and finds this atom, and initiates a
+    // remove. The remove gets started, and reaches here, before
+    // the adding thread has inserted into the type index. Thus,
+    // the typeIndex remove below does not find it (because it's
+    // not there yet). If we failed to return here, then code
+    // below wipes out the incoming set, while the adder thread
+    // finshes inserting the now-broken atom into the type index!
+    // This can be hit in 1 out of 4 runs of `UseCountUTest`.
+    //
+    // One possibility is a "fix" that introduces new problems:
+    // Alter the add() method to place the atom into the typeIndex
+    // first, and only then update the incoming set. But this seems
+    // to create a new problem: the atom becomes visible as soon as
+    // it's added to the type index, exposing a window where it
+    // breifly has broken incoming set.
+    //
+    if (not typeIndex.removeAtom(handle)) {
+        handle->unsetRemovalFlag();
+        return false;
+    }
+
     // Issue the atom removal signal *BEFORE* the atom is actually
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
@@ -438,8 +462,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Remove handle from other incoming sets.
     handle->remove();
     handle->setAtomSpace(nullptr);
-
-    typeIndex.removeAtom(handle);
 
     return true;
 }

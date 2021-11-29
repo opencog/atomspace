@@ -100,11 +100,11 @@ class TypeIndex
 			return Handle::UNDEFINED;
 		}
 
-		void removeAtom(const Handle& h)
+		bool removeAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
-			s.erase(h);
+			return 1 == s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
