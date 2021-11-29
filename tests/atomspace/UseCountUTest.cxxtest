@@ -52,7 +52,6 @@ private:
     int n_threads;
     int n_removal_threads;
     int num_atoms;
-    bool spinwait;
     std::vector<int> rm_cnt;
     std::vector<int> rm_cycles;
 
@@ -170,6 +169,7 @@ public:
         }
 
         // Wait for it all to come together.
+        // The removal threads are joined last.
         for (std::thread& t : thread_pool) t.join();
 
         long int final_use_count = AtomPtr(anchor).use_count();
