@@ -34,23 +34,28 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-progress-rpt FUNC WHEN TOTAL MSG)
+(define*-public (make-progress-rpt FUNC WHEN TOTAL MSG #:optional HYST)
 "
-  make-progress-rpt FUNC WHEN TOTAL MSG - print progress report.
+  make-progress-rpt FUNC WHEN TOTAL MSG [HYST] - print progress report.
 
   This returns a wrapper around FUNC, so that it calls FUNC whenever
   it is called.
 
   Whenever the number of calls is a multiple of WHEN, a progress
-  report is printed, as given by MSG.
+  report is printed, as given by MSG. If the optional argument HYST
+  is provided, then the progress report is printed only if at least
+  HYST seconds have elapsed.
 
   FUNC should be the function to be called, taking one argument.
   MSG should be a string of the form
      \"Did ~A of ~A in ~A seconds (~A items/sec)\n\"
      The first argument is the message; the second is the TOTAL,
      the third is the elapsed time in seconds, the fourth is the
-     rate, in calls per second.
-  WHEN should be how often to print (modulo)
+     rate, in calls per second. If TOTAL is #f, then this argument
+     is not passed.
+  WHEN should be the number of times that this function is called,
+     between printing of progress reports. It is used to take the
+     modulo of the of the call count.
   TOTAL should be the total number of items to process; it becomes
      the second argument to the MSG. If TOTAL is #f, then it is not
      passed to the MSG for printing.
@@ -63,16 +68,18 @@
 				(set! start-time (- (current-time) 0.00001)))
 			(FUNC item)
 			(if (eqv? 0 (modulo (atomic-inc cnt) WHEN))
-				(let* ((elapsed (- (current-time) start-time))
+				(let* ((now (current-time))
+						(elapsed (- now start-time))
 						(ilapsed (inexact->exact (round elapsed)))
 						(rate (/ (exact->inexact WHEN) elapsed))
 						(irate (inexact->exact (round rate)))
 						(icnt (atomic-box-ref cnt))
 					)
-					(if TOTAL
-						(format #t MSG icnt TOTAL ilapsed irate)
-						(format #t MSG icnt ilapsed irate))
-					(set! start-time (current-time))))))
+					(when (or (not HYST) (<= HYST ilapsed))
+						(if TOTAL
+							(format #t MSG icnt TOTAL ilapsed irate)
+							(format #t MSG icnt ilapsed irate))
+						(set! start-time now))))))
 )
 
 ; ---------------------------------------------------------------------
@@ -96,7 +103,8 @@
 		(define now (current-time))
 		(define diff (- now start-time))
 		; Reset only if the minimum has elapsed.
-		(if (and hysteresis (< hysteresis diff)) (set! start-time now))
+		(if (or (not hysteresis) (<= hysteresis diff))
+			(set! start-time now))
 		diff)
 )
 
