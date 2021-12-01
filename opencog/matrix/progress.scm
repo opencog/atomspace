@@ -9,7 +9,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 atomic))
-; (use-modules (ice-9 threads))
+(use-modules (ice-9 optargs))
 
 ; ---------------------------------------------------------------------
 
@@ -77,20 +77,26 @@
 
 ; ---------------------------------------------------------------------
 
-; Create a timer. The timer returns the number of elapsed seconds
-; since the last call to it.
-;
-; Example usage:
-; (define elapsed-secs (make-elapsed-secs))
-; (sleep 2)
-; (format #t "Seconds since start: ~A\n" (elapsed-secs))
+(define*-public (make-elapsed-secs #:optional hysteresis)
+"
+  make-elapsed-secs [hysteresis]
 
-(define-public (make-elapsed-secs)
+  Create a timer. The timer returns the number of elapsed seconds
+  since the last call to it. If the optional `hysteresis` argument
+  is given, then the timer is not reset until at least that many
+  seconds have passed.
+
+  Example usage:
+  (define elapsed-secs (make-elapsed-secs))
+  (sleep 2)
+  (format #t \"Seconds since start: ~A\n\" (elapsed-secs))
+"
 	(define start-time (current-time))
 	(lambda ()
 		(define now (current-time))
 		(define diff (- now start-time))
-		(set! start-time now)
+		; Reset only if the minimum has elapsed.
+		(if (and hysteresis (< hysteresis diff)) (set! start-time now))
 		diff)
 )
 
