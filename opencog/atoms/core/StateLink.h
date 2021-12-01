@@ -91,6 +91,8 @@ public:
 	 * no such StateLink.
 	 */
 	static Handle get_link(const Handle& alias, const AtomSpace*);
+	static Handle get_link(const Handle& alias)
+	{ return get_link(alias, alias->getAtomSpace()); }
 
 	/**
 	 * Non-static version of the above. Uses `this->get_alias()`
