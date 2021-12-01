@@ -34,6 +34,10 @@
 
 ; ---------------------------------------------------------------------
 
+;; XXX TODO define a new version of this, where TOTAL is an optional
+;; argument. Also WHEN could be optional, too. (i.e. WHEN=1 if not
+;; given. And if WHEN=0, then print only if HYST.) Maybe make these
+;; named arguments ???
 (define*-public (make-progress-rpt FUNC WHEN TOTAL MSG #:optional HYST)
 "
   make-progress-rpt FUNC WHEN TOTAL MSG [HYST] - print progress report.
