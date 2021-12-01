@@ -52,26 +52,26 @@
      rate, in calls per second.
   WHEN should be how often to print (modulo)
   TOTAL should be the total number of items to process; it becomes
-     the second argument to the MSG.
+     the second argument to the MSG. If TOTAL is #f, then it is not
+     passed to the MSG for printing.
 "
-	(let ((func FUNC)
-			(when WHEN)
-			(total TOTAL)
-			(msg MSG)
-			(cnt (make-atomic-box 0))
+	(let ((cnt (make-atomic-box 0))
 			(start-time 0))
 		(lambda (item)
 			; back-date to avoid divide-by-zero
 			(if (eqv? 0 (atomic-box-ref cnt))
 				(set! start-time (- (current-time) 0.00001)))
-			(func item)
-			(if (eqv? 0 (modulo (atomic-inc cnt) when))
+			(FUNC item)
+			(if (eqv? 0 (modulo (atomic-inc cnt) WHEN))
 				(let* ((elapsed (- (current-time) start-time))
 						(ilapsed (inexact->exact (round elapsed)))
-						(rate (/ (exact->inexact when) elapsed))
+						(rate (/ (exact->inexact WHEN) elapsed))
 						(irate (inexact->exact (round rate)))
+						(icnt (atomic-box-ref cnt))
 					)
-					(format #t msg (atomic-box-ref cnt) total ilapsed irate)
+					(if TOTAL
+						(format #t MSG icnt TOTAL ilapsed irate)
+						(format #t MSG icnt ilapsed irate))
 					(set! start-time (current-time))))))
 )
 
