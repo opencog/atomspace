@@ -598,7 +598,7 @@ during the build, will be more precise as to which parts will not be built.
 
 ###### OCaml
 * OCaml bindings (experimental).
-* Optional; almost no existing code makes use of Haskell.
+* Optional; almost no existing code makes use of OCaml.
 * https://www.ocaml.org/ | `apt install ocaml ocaml-findlib`
 
 ###### Postgres
