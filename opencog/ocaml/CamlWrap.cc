@@ -51,7 +51,7 @@ static struct custom_operations opstbl;
 
 static __attribute__ ((constructor)) void init()
 {
-	opstbl.identifier = "Atomese";
+	opstbl.identifier = strdup("Atomese");
 	opstbl.finalize = finalize;
 
 	// XXX FIXME
