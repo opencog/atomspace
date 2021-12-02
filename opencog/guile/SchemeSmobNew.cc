@@ -255,7 +255,10 @@ size_t SchemeSmob::verify_size_t (SCM ssizet, const char *subrname,
 	if (scm_is_false(scm_integer_p(ssizet)))
 		scm_wrong_type_arg_msg(subrname, pos, ssizet, msg);
 
-	return scm_to_size_t(ssizet);
+	// Argh. New scheme won't allow -1 as size_t
+	// but it also doesn't provide a uintmax.
+	// return scm_to_size_t(ssizet);
+	return (size_t) scm_to_long(ssizet);
 }
 
 /**
