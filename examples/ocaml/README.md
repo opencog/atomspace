@@ -35,6 +35,13 @@ $ rlwrap ocaml -I "/usr/local/lib/opencog/ocaml/"
 #use "atomese.ml" ;;
 ```
 
+A third option is to edit `~/.ocamlinit` and add thiese two lines to it:
+```
+#directory "/usr/local/lib/opencog/ocaml/" ;;
+#use "atomese.ml" ;;
+```
+That way, Atomese is always accessible.
+
 After that, each of the examples can be run individually, by loading
 them as `#use "example.ml"`.
 
