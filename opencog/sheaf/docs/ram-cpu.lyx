@@ -7300,7 +7300,7 @@ https://en.wikipedia.org/wiki/Function_type
 
 \begin_layout Standard
 Perhaps the most innovative aspect of the OGRE query language is that it
- is wrapped in a Keliesi triple (a Monad).
+ is wrapped in a Kleisi triple (a Monad).
  Somewhat oddly, though, that monad seems to reinvent some subset of LISP,
  or at least of the SRFI-1 list iterators.
  This is perhaps not entirely unexpected: s-expressions do look like lists,
