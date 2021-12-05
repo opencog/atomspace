@@ -115,6 +115,10 @@ linasvepstas@gmail.com
 \end_inset
 
 22 Nov 2021 Version 2.0
+\begin_inset Newline newline
+\end_inset
+
+5 Dec 2021 Version 2.1
 \end_layout
 
 \begin_layout Abstract
@@ -4810,7 +4814,6 @@ op.
  There is a reason for this dominance, and it is not (just) history.
  The reason is anchored (once again) in table representations, and the presence
  (or rather, lack thereof) of inbuilt indexes in the tables.
- 
 \end_layout
 
 \begin_layout Standard
@@ -4820,6 +4823,75 @@ This is also the place to make a heretical claim: SQL or it's variants (GraphQL,
 NOT
 \emph default
  the best choice for a metagraph query language.
+ The shackles of *QL thinking are remarkably hard to escape.
+ Even the principled, category-theoretic foundtions such as the Functorial
+ Query Language (FQL)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Spivak2014"
+literal "false"
+
+\end_inset
+
+ fail to evade the problems presented here, primarily because it is still
+ table-based at it's heart.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+More will be said about FQL below, because it does do one very important
+ thing: it does describe how one can take a principled approach to the rewriting
+ of tables.
+ When migrating datasets, it is very important to not accidentally corrupt
+ the structures containing the data through poor data migration design (
+\emph on
+e.g.
+
+\emph default
+ by unintentionally dropping columns, or by breaking primary-key-foreign-key
+ constraints, or breaking normalization by duplicting data).
+ A means of performing database schema migrations in an accident-free way
+ is important, and FQL provides that.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The key observation here is that data migration (database schema migration)
+ can be thought of as a form of rewriting.
+ Rather than talking about term rewriting or graph rewriting, it is talking
+ about table rewriting.
+ If we keep the adjoint functors 
+\begin_inset Formula $\Sigma\dashv\Delta\dashv\Pi$
+\end_inset
+
+ of FQL, but discard the SQL tables on which they are founded, it appears
+ that the FQL approach can provide a principled means of rewriting metagraphs,
+ without accidentally corrupting thier contents.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+This can be put in yet another way.
+ The relations between various SQL tables: the schema, can be thought of
+ as a kind of free-form graph, designed by the data architect who built
+ the system.
+ Data migration is the task of taking some existing database, and changing
+ the tables, the schema.
+ Changing the graphical inter-relationships between them: altering, rewriting
+ that graph.
+ Data migration is in fact graph rewriting, but narrrowly conceived.
+ Real-world data migrations for large datasets can take months of planning
+ and involve management reviews; quite remakrable for what should be an
+ easy graph rewrite.
+ The idea of doing this in hours instead of days is radical; the idea of
+ doing this automatically at millisecond speeds is revolutionary.
+ It is this millisecond revolution that is of interest as a foundation for
+ AGI.
+ This text, is, in the end, about graph rewriting as a cornerstone for AGI.
+\end_layout
+
+\end_inset
+
  A better alternative will become clear, once a more careful examination
  is made of the role of indexes in queries.
 \end_layout
@@ -5574,7 +5646,7 @@ normalizes
 \end_inset
 
  and clearly, 
-\begin_inset Formula $O\left(5N\right)\gg O\left(2N\right)+O\left(2N_{D}\right)$
+\begin_inset Formula $5N\gg2N+O\left(2N_{D}\right)$
 \end_inset
 
 .
@@ -12280,6 +12352,57 @@ What is new here is that, if the metagraphs are represented as s-expressions,
  the term rewriting system; thus, enabling the evaluation of metatrees seems
  to require some sort of clearly defined fexpr or $vau interfaces in the
  evaluator.
+\end_layout
+
+\begin_layout Subsection*
+Data Migration and Graph Rewriting
+\end_layout
+
+\begin_layout Standard
+Perhaps one of the finest examples is the Functorial Query Language (FQL)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Spivak2014"
+literal "false"
+
+\end_inset
+
+ and it's implementation.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/CategoricalData
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://www.categoricaldata.net/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ This promises to be a principled extension of relational algebras to a
+ category-theoretical framework (more properly, to a topos).
+ The benefit of this principled approach is that provides a clear framework
+ for transforming data, from one representation to another
 \end_layout
 
 \begin_layout Subsection*
