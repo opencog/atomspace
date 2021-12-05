@@ -1190,17 +1190,17 @@ https://en.wikipedia.org/wiki/Data_type
 
 \end_inset
 
- for a reviw of the more concrete ideas.
+ for a review of the more concrete ideas.
 \end_layout
 
 \end_inset
 
  Much of this text presumes these theoretical foundations are percolating
- in the background, and so a few breif words are in order.
+ in the background, and so a few brief words are in order.
 \end_layout
 
 \begin_layout Standard
-An SQL Table declaration coresponding to the above example is
+An SQL Table declaration corresponding to the above example is
 \end_layout
 
 \begin_layout Standard
@@ -1349,7 +1349,7 @@ Here, and in many subsequent footnotes, the reader will be directed at Wikipedia
  pages.
  This is meant for clarity: if the reader is unfamiliar with a topic or
  phrase, the Wikipedia page provides the requisite details.
- These Wikipedia references are not meant to be handwaving appeals to abstract
+ These Wikipedia references are not meant to be hand-waving appeals to abstract
  concepts: they are meant to provide precise, formal definitions for the
  ideas discussed here.
  The intended sense of the words and concepts brought up here are meant
@@ -1387,7 +1387,7 @@ We want
 \begin_inset Formula $B$
 \end_inset
 
- to be the set of grades they could get; these are not only different setss,
+ to be the set of grades they could get; these are not only different sets,
  but the types of the members of these sets are different.
  This leads to the product type 
 \begin_inset Formula ${\bf A}\times{\bf B}$
@@ -1424,7 +1424,7 @@ tuples
 \end_layout
 
 \begin_layout Standard
-If this starts feeling ciruclar, that is because it is: the SQL statement
+If this starts feeling circular, that is because it is: the SQL statement
  and the C++ class declaration above are both examples of Cartesian products.
  Tuples and records are generically examples of products.
  
@@ -1435,7 +1435,7 @@ Category Theory and Coproducts
 \end_layout
 
 \begin_layout Standard
-We're going to jump the gun a bit, and breifly mention coproducts, as they
+We're going to jump the gun a bit, and briefly mention coproducts, as they
  are dual to products.
 \begin_inset Foot
 status collapsed
@@ -1490,7 +1490,7 @@ https://en.wikipedia.org/wiki/Union_type
 
 \end_inset
 
- In type theory, these are refered to as 
+ In type theory, these are referred to as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1519,7 +1519,7 @@ https://en.wikipedia.org/wiki/Tagged_union
 
 \end_inset
 
- In type theory, these are refered to as the sigma type 
+ In type theory, these are referred to as the sigma type 
 \begin_inset Formula $\Sigma$
 \end_inset
 
@@ -1550,7 +1550,7 @@ https://en.wikipedia.org/wiki/Dependent_type
 
  and in formal logic (set theory) lead to the notion of the sigma-pi hierarchy.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See Wikipedia 
@@ -1621,11 +1621,113 @@ co-
  is prepended to names: thus products are dual to coproducts.
  The coproduct type and the sum type are the same thing.
  Insofar as the product can be drawn as
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-The product and the coproduct, taken together, are often refered to as Algebraic
- Data Types (ADT).
+\align center
+\begin_inset Graphics
+	filename graphics/product.eps
+	width 40col%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+the coproduct can be drawn as 
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/coproduct.eps
+	width 40col%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is common in category theory to leave the dots and arrows unlabeled,
+ as often it is more interesting to just talk about the shapes, rather than
+ the labels.
+ But to make it clear, here is the product type again, with the labels:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/product-students.eps
+	width 40col%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The arrows are the 
+\begin_inset Quotes eld
+\end_inset
+
+canonical projections
+\begin_inset Quotes erd
+\end_inset
+
+ or the 
+\begin_inset Quotes eld
+\end_inset
+
+projection morphisms
+\begin_inset Quotes erd
+\end_inset
+
+ of the product.
+ The union type or coproduct will not be illustrated.
+ The reader is encourages to imagine a C/C++ 
+\family sans
+
+\begin_inset Quotes eld
+\end_inset
+
+union
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ statement and arrange the arrows appropriately.
+\end_layout
+
+\begin_layout Standard
+The product and the coproduct, taken together, are often referred to as
+ Algebraic Data Types (ADT).
 \begin_inset Foot
 status collapsed
 
@@ -1650,10 +1752,38 @@ https://en.wikipedia.org/wiki/Algebraic_data_type
  and backwards.
  These can all be understood in terms of the type-theoretic foundations
  sketched here.
- A more formal presentation of the type theory is defered to a different
+ A more formal presentation of the type theory is deferred to a different
  text in this series, describing the jigsaw puzzle-piece metaphor, and how
  it is used to construct sheaves.
  
+\end_layout
+
+\begin_layout Standard
+Not all of the arrows that will be drawn in the subsequent text can be understoo
+d as category-theoretic arrows.
+ Category theory has some fairly strict ideas about what one can do with
+ arrows, and thus, not every diagram will be a valid category.
+ However, many of them will be.
+ The most important examples of arrows that can be interpreted as category-theor
+etic arrows are the indexes on SQL tables (
+\family sans
+PRIMARY KEY
+\family default
+ and 
+\family sans
+FOREIGN KEY
+\family default
+) and the opposite arrows in noSQL key-value databases.
+ This is gleefully articulated by Meijer and Bierman.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+ We shall need arrows going in both directions in order to perform efficient
+ metagraph queries, to e explained in later sections.
 \end_layout
 
 \begin_layout Subsection*
