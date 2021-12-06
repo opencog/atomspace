@@ -5840,37 +5840,19 @@ literal "false"
 is
 \emph default
  graph rewriting.
- The idea to be examine here is this: If one keeps the adjoint functors
+ The idea to be examined here is this: If one keeps the adjoint functors
  
 \begin_inset Formula $\Sigma\dashv\Delta\dashv\Pi$
 \end_inset
 
- of FQL, but discard the SQL tables on which they are founded, can the FQL
- approach provide a principled means for rewriting graphs? The answer appears
- to hinge on the question of how indexes are maintained.
+ of FQL, but discards the SQL tables on which they are founded, can the
+ FQL approach provide a principled means for rewriting graphs? The answer
+ appears to hinge on the question of how indexes are conceived of within
+ the system, how they are maintained.
  
 \end_layout
 
-\begin_layout Standard
-The relations between various SQL tables: the schema, can be thought of
- as a kind of free-form graph, designed by the data architect who built
- the system.
- Data migration is the task of taking some existing database, and changing
- the tables, the schema.
- Changing the graphical inter-relationships between them: altering, rewriting
- that graph.
- Data migration is in fact graph rewriting, but narrowly conceived.
- Real-world data migrations for large datasets can take months of planning
- and involve management reviews; quite remarkable for what should be an
- easy graph rewrite.
- The idea of doing this in hours instead of days is radical; the idea of
- doing this automatically at millisecond speeds is revolutionary.
- It is this millisecond revolution that is of interest as a foundation for
- AGI.
- This text, is, in the end, about graph rewriting as a cornerstone for AGI.
-\end_layout
-
-\begin_layout Subsection*
+\begin_layout Subsubsection*
 Data Migration and Graph Rewriting
 \end_layout
 
@@ -5907,14 +5889,15 @@ FOREIGN KEY
 \end_layout
 
 \begin_layout Standard
-Well, what is a data migration really, at the most abstract level? It is
- a graph rewrite.
+Well, what is data migration really, at the most abstract level? It is a
+ graph rewrite.
  The initial database design should be understood to be a graph, with the
  various key constraints between tables being the directed edges of the
  graph.
  The revised database design, with its new table schemas, is a different
  graph.
  The goal of the data migration is to rewrite the first graph into the second.
+ Data migration is in fact graph rewriting, but narrowly conceived.
 \end_layout
 
 \begin_layout Standard
@@ -5945,36 +5928,32 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-Moving forward in the domain of knowledge representation requires bridging
+The idea of doing data migrations in hours instead of days is radical; the
+ idea of doing it automatically at millisecond speeds is revolutionary.
+ Moving forward in the domain of knowledge representation requires bridging
  this gap.
- If one has data represented one way, one must be able to transform it into
- a different representation.
- Not only must this be possible, but it must be, in some sense 
-\begin_inset Quotes eld
-\end_inset
-
-easy
-\begin_inset Quotes erd
-\end_inset
-
-.
- Even more: for AGI, it must be fully automated and automatic.
+ If one has data represented one way, one must be able to efficiently, rapidly
+ and easily transform it into a different representation.
+ Even more: for AGI, such rewrites must be fully automated and automatic.
  
 \end_layout
 
 \begin_layout Standard
-To make it easy, one needs to be able to represent the graph rewrites within
- the system itself.
- The metaquery system decribed in the previous section accomplishes this
- (to reiterate: SQL cannot do this: the graph that is the schema of an SQL
- database is not itself stored in a table, nor is it queriable with SQL
- commands.
- The DBA must hand-craft SQL expressions to perform the graph rewrite that
- is a data migration.) 
+To make data migration easy, one needs to be able to represent the graph
+ rewrites within the system itself.
+ Later sections will describe a metaquery system that accomplishes this.
+ This is in contrast to the situation with SQL.
+ The graph that is the schema of an SQL database is not itself stored in
+ a table, nor is it queriable with SQL commands.
+ When a DBA hand-crafts an SQL expression to perform a graph rewrite, they
+ do not store that expression within the database itself; it existists externall
+y, in a distinct location.
+ By working with metagraphs, it turns out that it is not hard to craft a
+ query system in which the queries themselves live as data within the database.
 \end_layout
 
 \begin_layout Standard
-The second part of automating rewrites of knowledge representation schemas
+A second part of automating rewrites of knowledge representation schemas
  is to provide a principled approach.
  One such principled approach can be found in the Functorial Query Language
  (FQL).
@@ -6018,7 +5997,11 @@ https://www.categoricaldata.net/
 
 \end_inset
 
- 
+ This is reviewed next.
+\end_layout
+
+\begin_layout Subsubsection*
+Graph Rewriting and Indexes
 \end_layout
 
 \begin_layout Standard
