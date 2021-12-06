@@ -5,6 +5,9 @@
 \save_transient_properties true
 \origin unavailable
 \textclass article
+\begin_preamble
+\usepackage{tikz-cd}
+\end_preamble
 \use_default_options false
 \begin_modules
 theorems-ams
@@ -1345,12 +1348,8 @@ https://en.wikipedia.org/wiki/Cartesian_product
 \end_inset
 
 .
- 
-\end_layout
-
-\begin_layout Plain Layout
-Here, and in many subsequent footnotes, the reader will be directed at Wikipedia
- pages.
+ Here, and in many subsequent footnotes, the reader will be directed at
+ Wikipedia pages.
  This is meant for clarity: if the reader is unfamiliar with a topic or
  phrase, the Wikipedia page provides the requisite details.
  These Wikipedia references are not meant to be hand-waving appeals to abstract
@@ -1563,7 +1562,11 @@ status open
 
 \begin_layout Plain Layout
 
-https://en.wikipedia.org/wiki/L%C3%A9vy_hierarchy
+https://en.wikipedia.org/wiki/L
+\backslash
+%C3
+\backslash
+%A9vy_hierarchy
 \end_layout
 
 \end_inset
@@ -6170,7 +6173,284 @@ https://en.wikipedia.org/wiki/Forgetful_functor
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
+Two different database instances 
+\begin_inset Formula $I$
+\end_inset
+
+ and 
+\begin_inset Formula $J$
+\end_inset
+
+ (for the same schema 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+) differ by the addition, deletion or modification of rows in various tables.
+ The relationship between them can be phrased as a homomorphism: it maps
+ tables to tables (obviously) and rows to rows.
+ Deleted rows are mapped to the 
+\begin_inset Quotes eld
+\end_inset
+
+empty row
+\begin_inset Quotes erd
+\end_inset
+
+, and modified rows to thier modifications.
+ Added rows are not part of the homomorphism.
+ Since the instances 
+\begin_inset Formula $I$
+\end_inset
+
+ and 
+\begin_inset Formula $J$
+\end_inset
+
+ are both functors 
+\begin_inset Formula $\mathcal{C}\to\mathbf{Set}$
+\end_inset
+
+, the homomorphism between them turns out to be a 
+\begin_inset Quotes eld
+\end_inset
+
+natural transformation
+\begin_inset Quotes erd
+\end_inset
+
  
+\begin_inset Formula $I\Rightarrow J$
+\end_inset
+
+ in that it obeys all of the requirements for being one.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Natural_transformation
+\end_layout
+
+\end_inset
+
+.
+ It is a non-trivial and worthwhile exercise to verify that two different
+ database instances, defined as functors, obey the requirements for being
+ related to one-another as a natural transformation.
+ 
+\end_layout
+
+\end_inset
+
+ This allows the category 
+\begin_inset Formula $\mathcal{C}\mbox{-}\mathbf{Inst}$
+\end_inset
+
+ to be defined, the objects of which are the instances 
+\begin_inset Formula $I$
+\end_inset
+
+, and the morphisms are the natural transformations 
+\begin_inset Formula $I\Rightarrow J$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A schema mapping is a functor 
+\begin_inset Formula $F:\mathcal{C}\to\mathcal{D}$
+\end_inset
+
+ from a database schema 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ to 
+\begin_inset Formula $\mathcal{D}$
+\end_inset
+
+.
+ To be a functor, it must provide maps between the objects of each: 
+\begin_inset Formula $\mathit{tables}\left(\mathcal{C}\right)\to\mathit{tables}\left(\mathcal{D}\right)$
+\end_inset
+
+ and between the morphisms of each: 
+\begin_inset Formula $\mathit{indexes}\left(\mathcal{C}\right)\to\mathit{index\mbox{-}paths}\left(\mathcal{D}\right)$
+\end_inset
+
+.
+ A data migration is then a lifting of this functor 
+\begin_inset Formula $F$
+\end_inset
+
+ to a functor on 
+\begin_inset Formula $\mathcal{C}\mbox{-}\mathbf{Inst}$
+\end_inset
+
+ to 
+\begin_inset Formula $\mathcal{D}\mbox{-}\mathbf{Inst}$
+\end_inset
+
+.
+ The FQL paper points out there is not just one such lifting, but three:
+ a contravariant functor 
+\begin_inset Formula $\Delta_{F}$
+\end_inset
+
+ and it's left and right adjoints 
+\begin_inset Formula $\Sigma_{F}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Pi_{f}$
+\end_inset
+
+.
+ The contravariant functor 
+\begin_inset Formula $\Delta_{F}$
+\end_inset
+
+ is defined by composition with a particular databased instance:
+\begin_inset Formula 
+\begin{align*}
+\Delta_{F}: & \mathcal{C}\mbox{-}\mathbf{Inst}\to\mathcal{D}\mbox{-}\mathbf{Inst}\\
+ & I\mapsto\Delta_{F}I=I\circ F
+\end{align*}
+
+\end_inset
+
+where a specific database instance 
+\begin_inset Formula 
+\[
+I:\mathcal{C}\to\mathbf{Set}
+\]
+
+\end_inset
+
+is mapped to 
+\begin_inset Formula 
+\[
+\Delta_{F}I:F\left(\mathcal{C}\right)\to\mathbf{Set}
+\]
+
+\end_inset
+
+where (of course, by definition) 
+\begin_inset Formula $\mathcal{D}=F\left(\mathcal{C}\right)$
+\end_inset
+
+, and so one can write
+\begin_inset Formula 
+\[
+\Delta_{F}I:\mathcal{D}\to\mathbf{Set}
+\]
+
+\end_inset
+
+This is perhaps clearer with a diagram:
+\begin_inset Formula 
+\[
+\begin{array}{ccc}
+\mathcal{C} & \xrightarrow[\qquad\quad]{F} & \mathcal{D}\\
+ & \Delta_{F}I\searrow & \Bigg\downarrow I\\
+ &  & \mathbf{Set}
+\end{array}
+\]
+
+\end_inset
+
+so
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+[
+\backslash
+begin{tikzcd} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mathcal{C} 
+\backslash
+arrow[r,
+\begin_inset Quotes erd
+\end_inset
+
+F
+\begin_inset Quotes erd
+\end_inset
+
+] 
+\backslash
+arrow[rd,
+\begin_inset Quotes erd
+\end_inset
+
+xx
+\begin_inset Quotes erd
+\end_inset
+
+] & 
+\backslash
+arrow[d, 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+] 
+\backslash
+mathcal{D} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+& 
+\backslash
+mathbf{Set} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tikzcd}
+\backslash
+]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a homomorphism that maps rows to rows
 \end_layout
 
 \begin_layout Standard
