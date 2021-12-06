@@ -5952,8 +5952,12 @@ y, in a distinct location.
  query system in which the queries themselves live as data within the database.
 \end_layout
 
+\begin_layout Subsubsection*
+Graph Rewriting and Indexes
+\end_layout
+
 \begin_layout Standard
-A second part of automating rewrites of knowledge representation schemas
+The second part of automating rewrites of knowledge representation schemas
  is to provide a principled approach.
  One such principled approach can be found in the Functorial Query Language
  (FQL).
@@ -5997,18 +6001,176 @@ https://www.categoricaldata.net/
 
 \end_inset
 
- This is reviewed next.
+ The approach is founded on category theory,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Category_theory
 \end_layout
 
-\begin_layout Subsubsection*
-Graph Rewriting and Indexes
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ and so the remainder of this section will switch to that langauge.
+ The reader unfamiliar with category theory is encouraged to learn it.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A reasonable introduction, adapted for software developers, is 
+\begin_inset Quotes eld
+\end_inset
+
+Category Theory for Programmers
+\begin_inset Quotes erd
+\end_inset
+
+, Bartosz Milewski (2019), available at 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/hmemcpy/milewski-ctfp-pdf
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-This promises to be a principled extension of relational algebras to a category-
-theoretical framework (more properly, to a topos).
- The benefit of this principled approach is that provides a clear framework
- for transforming data, from one representation to another
+Basic definitions are in order.
+ A database schema 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ is a category.
+ The objects of that category are the tables; the morphisms of that category
+ are the indexes.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+More precisely, the category is the database schema; see Wikipedia 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Database_schema
+\end_layout
+
+\end_inset
+
+.
+ This includes not just the tables and the indexes, but also all of the
+ triggers, stored procedures, queues, views and other elements.
+ For simplicity, we consider only the tables as the objects, and the integrity
+ constraints (the indexes) as the morphisms.
+ 
+\end_layout
+
+\end_inset
+
+ For example, given any particular row in some table, the index provides
+ a map from that row to some other row in some other table.
+ It provides the morphism between them.
+ The morphisms are pointer-chases, in that both are composable: given some
+ row, one can chase the pointer to some other row in some other table, and
+ then repeat this again.
+\end_layout
+
+\begin_layout Standard
+An instance of a database is a functor 
+\begin_inset Formula $\mathcal{C}\to\mathbf{Set}$
+\end_inset
+
+.
+ That is, the database schema 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ itself is just the collection of empty tables, and the indexes between
+ them.
+ To populate a database with data, one must specify what goes into it.
+ For example, given a table of employees, there is a corresponding set of
+ employees that go into that table.
+ The mapping is from 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ to 
+\begin_inset Formula $\mathbf{Set}$
+\end_inset
+
+ and not the other way around, because it is 
+\begin_inset Quotes eld
+\end_inset
+
+forgetful
+\begin_inset Quotes erd
+\end_inset
+
+: the morphisms in 
+\begin_inset Formula $\mathbf{Set}$
+\end_inset
+
+ are functions from one set to another, but they do not describe how the
+ individual elements of the set are to be paired up: those relationships
+ are forgotten.
+ All that remains of the database index morphism is the idea that it connected
+ one set to another, without specifying how the elements of the set are
+ connected.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Category_of_sets
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Forgetful_functor
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Standard
