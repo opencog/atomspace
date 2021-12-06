@@ -5818,6 +5818,150 @@ easy
 
 \end_layout
 
+\begin_layout Subsection*
+Data Migration and Graph Rewriting
+\end_layout
+
+\begin_layout Standard
+The concept of data migration in database practice refers to the idea that,
+ after a system architect or data architect has designed some database,
+ and a company has populated that database with millions of records, at
+ the expense of millions of dollars, it is realized that the original design
+ of the database schemas are inadequate to meet future business needs.
+ The data needs to be migrated to a new set of schemas.
+\end_layout
+
+\begin_layout Standard
+It is often the case that the data is so voluminus, and so valuable, that
+ it will take months of system architect effort and weeks of management
+ review before one can press the button and cross one's fingers, hoping
+ that nothing is lost or corrupted.
+ Mistakes are not hard to make: some important 
+\family sans
+PRIMARY KEY
+\family default
+ - 
+\family sans
+FOREIGN KEY
+\family default
+ constraint might be accidentally dropped.
+ Maybe some column will be forgotten about.
+ Maybe normalization will be broken, resulting in duplicated data appearing
+ in multiple tables, with no means of keeping that duplicated data in sync,
+ leading to long-term data rot.
+ It sure would be nice to do data migrations in a less time-consuming, less
+ error prone fashion.
+ This requires a principled approach; but how?
+\end_layout
+
+\begin_layout Standard
+Well, what is a data migration really, at the most abstract level? It is
+ a graph rewrite.
+ The initial database design should be understood to be a graph, with the
+ various key constraints between tables being the directed edges of the
+ graph.
+ The revised database design, with its new table schemas, is a different
+ graph.
+ The goal of the data migration is to rewrite the first graph into the second.
+\end_layout
+
+\begin_layout Standard
+Looked at this way, the sutation is jarring.
+ In the former case, data migration is a difficult, time-consuming manual
+ process playing out at a human timescale.
+ In the later case, any given graph rewriting system or term rewriting system
+ is expected to do it's operations in milliseconds.
+ How is it these two scales are so different? 
+\end_layout
+
+\begin_layout Standard
+Moving forward in the domain of knowledge representation requires bridging
+ this gap.
+ If one has data represented one way, one must be able to transform it into
+ a different representation.
+ Not only must this be possible, but it must be, in some sense 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Even more: for AGI, it must be fully automated and automatic.
+ 
+\end_layout
+
+\begin_layout Standard
+To make it easy, one needs to be able to represent the graph rewrites within
+ the system itself.
+ The metaquery system decribed in the previous section accomplishes this
+ (to reiterate: SQL cannot do this: the graph that is the schema of an SQL
+ database is not itself stored in a table, nor is it queriable with SQL
+ commands.
+ The DBA must hand-craft SQL expressions to perform the graph rewrite that
+ is a data migration.) 
+\end_layout
+
+\begin_layout Standard
+The second part of automating rewrites of knowledge representation schemas
+ is to provide a principled approach.
+ One such principled approach can be found in the Functorial Query Language
+ (FQL).
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Spivak2014"
+literal "false"
+
+\end_inset
+
+ This theoretical development has a working open-source implementation called
+ Categorical Query Language (CQL).
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/CategoricalData
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://www.categoricaldata.net/
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+This promises to be a principled extension of relational algebras to a category-
+theoretical framework (more properly, to a topos).
+ The benefit of this principled approach is that provides a clear framework
+ for transforming data, from one representation to another
+\end_layout
+
+\begin_layout Standard
+but its still tables.
+\end_layout
+
 \begin_layout Section*
 Metatrees and String Representations
 \end_layout
@@ -12352,146 +12496,6 @@ What is new here is that, if the metagraphs are represented as s-expressions,
  the term rewriting system; thus, enabling the evaluation of metatrees seems
  to require some sort of clearly defined fexpr or $vau interfaces in the
  evaluator.
-\end_layout
-
-\begin_layout Subsection*
-Data Migration and Graph Rewriting
-\end_layout
-
-\begin_layout Standard
-The concept of data migration in database practice refers to the idea that,
- after a system architect or data architect has designed some database,
- and a company has populated that database with millions of records, at
- the expense of millions of dollars, it is realized that the original design
- of the database schemas are inadequate to meet future business needs.
- The data needs to be migrated to a new set of schemas.
-\end_layout
-
-\begin_layout Standard
-It is often the case that the data is so voluminus, and so valuable, that
- it will take months of system architect effort and weeks of management
- review before one can press the button and cross one's fingers, hoping
- that nothing is lost or corrupted.
- Mistakes are not hard to make: some important 
-\family sans
-PRIMARY KEY
-\family default
- - 
-\family sans
-FOREIGN KEY
-\family default
- constraint might be accidentally dropped.
- Maybe some column will be forgotten about.
- Maybe normalization will be broken, resulting in duplicated data appearing
- in multiple tables, with no means of keeping that duplicated data in sync,
- leading to long-term data rot.
- It sure would be nice to do data migrations in a less time-consuming, less
- error prone fashion.
- This requires a principled approach; but how?
-\end_layout
-
-\begin_layout Standard
-Well, what is a data migration really, at the most abstract level? It is
- a graph rewrite.
- The initial database design should be understood to be a graph, with the
- various key constraints between tables being the directed edges of the
- graph.
- The revised database design, with its new table schemas, is a different
- graph.
- The goal of the data migration is to rewrite the first graph into the second.
-\end_layout
-
-\begin_layout Standard
-Looked at this way, the sutation is jarring.
- In the former case, data migration is a difficult, time-consuming manual
- process playing out at a human timescale.
- In the later case, any given graph rewriting system or term rewriting system
- is expected to do it's operations in milliseconds.
- How is it these two scales are so different? 
-\end_layout
-
-\begin_layout Standard
-Moving forward in the domain of knowledge representation requires bridging
- this gap.
- If one has data represented one way, one must be able to transform it into
- a different representation.
- Not only must this be possible, but it must be, in some sense 
-\begin_inset Quotes eld
-\end_inset
-
-easy
-\begin_inset Quotes erd
-\end_inset
-
-.
- Even more: for AGI, it must be fully automated and automatic.
- 
-\end_layout
-
-\begin_layout Standard
-To make it easy, one needs to be able to represent the graph rewrites within
- the system itself.
- The metaquery system decribed in the previous section accomplishes this
- (to reiterate: SQL cannot do this: the graph that is the schema of an SQL
- database is not itself stored in a table, nor is it queriable with SQL
- commands.
- The DBA must hand-craft SQL expressions to perform the graph rewrite that
- is a data migration.) 
-\end_layout
-
-\begin_layout Standard
-The second part of automating rewrites of knowledge representation schemas
- is to provide a principled approach.
- One such principled approach can be found in the Functorial Query Language
- (FQL).
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Spivak2014"
-literal "false"
-
-\end_inset
-
- This theoretical development has a working open-source implementation called
- Categorical Query Language (CQL).
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-See 
-\begin_inset Flex URL
-status open
-
-\begin_layout Plain Layout
-
-https://github.com/CategoricalData
-\end_layout
-
-\end_inset
-
- and 
-\begin_inset Flex URL
-status open
-
-\begin_layout Plain Layout
-
-https://www.categoricaldata.net/
-\end_layout
-
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Standard
-This promises to be a principled extension of relational algebras to a category-
-theoretical framework (more properly, to a topos).
- The benefit of this principled approach is that provides a clear framework
- for transforming data, from one representation to another
 \end_layout
 
 \begin_layout Subsection*
