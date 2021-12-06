@@ -4824,7 +4824,7 @@ NOT
 \emph default
  the best choice for a metagraph query language.
  The shackles of *QL thinking are remarkably hard to escape.
- Even the principled, category-theoretic foundtions such as the Functorial
+ Even the principled, category-theoretic foundations such as the Functorial
  Query Language (FQL)
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -4834,64 +4834,8 @@ literal "false"
 \end_inset
 
  fail to evade the problems presented here, primarily because it is still
- table-based at it's heart.
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-More will be said about FQL below, because it does do one very important
- thing: it does describe how one can take a principled approach to the rewriting
- of tables.
- When migrating datasets, it is very important to not accidentally corrupt
- the structures containing the data through poor data migration design (
-\emph on
-e.g.
-
-\emph default
- by unintentionally dropping columns, or by breaking primary-key-foreign-key
- constraints, or breaking normalization by duplicting data).
- A means of performing database schema migrations in an accident-free way
- is important, and FQL provides that.
- 
-\end_layout
-
-\begin_layout Plain Layout
-The key observation here is that data migration (database schema migration)
- can be thought of as a form of rewriting.
- Rather than talking about term rewriting or graph rewriting, it is talking
- about table rewriting.
- If we keep the adjoint functors 
-\begin_inset Formula $\Sigma\dashv\Delta\dashv\Pi$
-\end_inset
-
- of FQL, but discard the SQL tables on which they are founded, it appears
- that the FQL approach can provide a principled means of rewriting metagraphs,
- without accidentally corrupting thier contents.
- 
-\end_layout
-
-\begin_layout Plain Layout
-This can be put in yet another way.
- The relations between various SQL tables: the schema, can be thought of
- as a kind of free-form graph, designed by the data architect who built
- the system.
- Data migration is the task of taking some existing database, and changing
- the tables, the schema.
- Changing the graphical inter-relationships between them: altering, rewriting
- that graph.
- Data migration is in fact graph rewriting, but narrrowly conceived.
- Real-world data migrations for large datasets can take months of planning
- and involve management reviews; quite remakrable for what should be an
- easy graph rewrite.
- The idea of doing this in hours instead of days is radical; the idea of
- doing this automatically at millisecond speeds is revolutionary.
- It is this millisecond revolution that is of interest as a foundation for
- AGI.
- This text, is, in the end, about graph rewriting as a cornerstone for AGI.
-\end_layout
-
-\end_inset
-
+ table-based at it's heart (FQL is reviewed below, to illustrate several
+ problems).
  A better alternative will become clear, once a more careful examination
  is made of the role of indexes in queries.
 \end_layout
@@ -5646,7 +5590,7 @@ normalizes
 \end_inset
 
  and clearly, 
-\begin_inset Formula $5N\gg2N+O\left(2N_{D}\right)$
+\begin_inset Formula $5N\gg2N+2N_{D}$
 \end_inset
 
 .
@@ -5819,6 +5763,114 @@ easy
 \end_layout
 
 \begin_layout Subsection*
+Index Maintenance
+\end_layout
+
+\begin_layout Standard
+Indexes are central to defining the relationships between bits of data.
+ But such relationships cannot stay fixed: as a database is used, reasons
+ are found to add new relationships, and to modify or delete existing relationsh
+ips.
+ Practical issues arise: changes must be made without corrupting existing
+ data or (unintentionally) losing information.
+\end_layout
+
+\begin_layout Standard
+This proves to be a particular challenge to SQL-style databases, and it
+ is educational to review the reasons.
+ In an SQL system, the relationships between bits of data are defined by
+ the initial database architect: the person who first creates the table
+ definitions, the 
+\begin_inset Quotes eld
+\end_inset
+
+database schema
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Changes to those definitions (additions of new tables, the reorganization
+ of columns in existing tables, 
+\emph on
+etc.
+\emph default
+) requires a process of 
+\begin_inset Quotes eld
+\end_inset
+
+data migration
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is conceived in this way, since one is changing not just a table definition,
+ but one is also moving all of the rows in that table.
+ This is a CPU and RAM-consuming process: for tables with millions of rows,
+ or more, this may take hours or days.
+ When migrating datasets, it is very important to not accidentally corrupt
+ the structures containing the data through poor data migration design (
+\emph on
+e.g.
+
+\emph default
+ by unintentionally dropping columns, or by breaking primary-key-foreign-key
+ constraints, or breaking normalization by duplicting data).
+ A means of performing database schema migrations in an accident-free way
+ is important.
+ Defining a principled approach to table rewrites is even better.
+ 
+\end_layout
+
+\begin_layout Standard
+The Functorial Query Language (FQL) provides such a principled approch.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Spivak2014"
+literal "false"
+
+\end_inset
+
+ It is reviewed below.
+ The key observation here will be that data migration (database schema migration
+) can be thought of as a form of rewriting, analogous to the idea of term
+ rewriting or graph rewriting.
+ Looked at more strongly, this is more than an analogy: table rewriting
+ 
+\emph on
+is
+\emph default
+ graph rewriting.
+ The idea to be examine here is this: If one keeps the adjoint functors
+ 
+\begin_inset Formula $\Sigma\dashv\Delta\dashv\Pi$
+\end_inset
+
+ of FQL, but discard the SQL tables on which they are founded, can the FQL
+ approach provide a principled means for rewriting graphs? The answer appears
+ to hinge on the question of how indexes are maintained.
+ 
+\end_layout
+
+\begin_layout Standard
+The relations between various SQL tables: the schema, can be thought of
+ as a kind of free-form graph, designed by the data architect who built
+ the system.
+ Data migration is the task of taking some existing database, and changing
+ the tables, the schema.
+ Changing the graphical inter-relationships between them: altering, rewriting
+ that graph.
+ Data migration is in fact graph rewriting, but narrowly conceived.
+ Real-world data migrations for large datasets can take months of planning
+ and involve management reviews; quite remarkable for what should be an
+ easy graph rewrite.
+ The idea of doing this in hours instead of days is radical; the idea of
+ doing this automatically at millisecond speeds is revolutionary.
+ It is this millisecond revolution that is of interest as a foundation for
+ AGI.
+ This text, is, in the end, about graph rewriting as a cornerstone for AGI.
+\end_layout
+
+\begin_layout Subsection*
 Data Migration and Graph Rewriting
 \end_layout
 
@@ -5866,11 +5918,29 @@ Well, what is a data migration really, at the most abstract level? It is
 \end_layout
 
 \begin_layout Standard
-Looked at this way, the sutation is jarring.
+Looked at this way, the situation is jarring.
  In the former case, data migration is a difficult, time-consuming manual
  process playing out at a human timescale.
  In the later case, any given graph rewriting system or term rewriting system
  is expected to do it's operations in milliseconds.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See, for example, Maude,
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Maude1999"
+literal "false"
+
+\end_inset
+
+ a term rewriting system that stands on it's own, disassociated from any
+ other processing system.
+\end_layout
+
+\end_inset
+
  How is it these two scales are so different? 
 \end_layout
 
