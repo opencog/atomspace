@@ -6358,18 +6358,6 @@ where (of course, by definition)
 \end_inset
 
 This is perhaps clearer with a diagram:
-\begin_inset Formula 
-\[
-\begin{array}{ccc}
-\mathcal{C} & \xrightarrow[\qquad\quad]{F} & \mathcal{D}\\
- & \Delta_{F}I\searrow & \Bigg\downarrow I\\
- &  & \mathbf{Set}
-\end{array}
-\]
-
-\end_inset
-
-so
 \end_layout
 
 \begin_layout Standard
@@ -6401,15 +6389,17 @@ F
 
 ] 
 \backslash
-arrow[rd,
+arrow[dr,
 \begin_inset Quotes erd
 \end_inset
 
-xx
+
+\backslash
+Delta_{F}I
 \begin_inset Quotes erd
 \end_inset
 
-] & 
+'] & 
 \backslash
 arrow[d, 
 \begin_inset Quotes eld
@@ -6450,7 +6440,25 @@ end{tikzcd}
 \end_layout
 
 \begin_layout Standard
-This is a homomorphism that maps rows to rows
+Adjoint tto the functtor delta (see wiki for adjoint) are sigma, pi.
+\end_layout
+
+\begin_layout Standard
+basically, this says 
+\begin_inset Quotes eld
+\end_inset
+
+keep your index categories straight
+\begin_inset Quotes erd
+\end_inset
+
+ this is a fancy way of saying indexes must be mapped in a cohreent fashion,
+ and the requirements of being functors and natural trasnformations forces
+ the consistency during data migration.
+\end_layout
+
+\begin_layout Standard
+Give example of what is happening to the indexes
 \end_layout
 
 \begin_layout Standard
