@@ -6320,7 +6320,7 @@ A schema mapping is a functor
 \begin_inset Formula $\Delta_{F}$
 \end_inset
 
- is defined by composition with a particular databased instance:
+ is defined by composition with a particular database instance:
 \begin_inset Formula 
 \begin{align*}
 \Delta_{F}: & \mathcal{C}\mbox{-}\mathbf{Inst}\to\mathcal{D}\mbox{-}\mathbf{Inst}\\
@@ -6440,29 +6440,76 @@ end{tikzcd}
 \end_layout
 
 \begin_layout Standard
-Adjoint tto the functtor delta (see wiki for adjoint) are sigma, pi.
+Adjoint to the functor 
+\begin_inset Formula $\Delta_{F}$
+\end_inset
+
+ is the left-adjoint functor 
+\begin_inset Formula $\Sigma_{F}\dashv\Delta_{F}$
+\end_inset
+
+, which acts as giver of an initial mapping, and the right adjoint 
+\begin_inset Formula $\Delta_{F}\dashv\Pi_{F}$
+\end_inset
+
+ which provides a terminal mapping.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Adjoint_functors
+\end_layout
+
+\end_inset
+
+.
+ See also 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Initial_and_terminal_objects
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ These two functors then provide an efficient, formulaic way to migrate
+ data from one database schema to another.
 \end_layout
 
 \begin_layout Standard
-basically, this says 
+But what does all this abstract nonsense mean, anyway? Informally, all it
+ is saying is 
 \begin_inset Quotes eld
 \end_inset
 
-keep your index categories straight
+keep your indexes straight, and you'll be OK.
 \begin_inset Quotes erd
 \end_inset
 
- this is a fancy way of saying indexes must be mapped in a cohreent fashion,
- and the requirements of being functors and natural trasnformations forces
- the consistency during data migration.
+ Understanding this is best served by an example.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+A Data Migration Example
 \end_layout
 
 \begin_layout Standard
-Give example of what is happening to the indexes
-\end_layout
-
-\begin_layout Standard
-but its still tables.
+TODO: provide worked example.
+ Conclude: its still tables, in the end.
 \end_layout
 
 \begin_layout Section*
