@@ -5817,7 +5817,7 @@ e.g.
 
 \emph default
  by unintentionally dropping columns, or by breaking primary-key-foreign-key
- constraints, or breaking normalization by duplicting data).
+ constraints, or breaking normalization by duplicating data).
  A means of performing database schema migrations in an accident-free way
  is important.
  Defining a principled approach to table rewrites is even better.
@@ -5825,7 +5825,7 @@ e.g.
 \end_layout
 
 \begin_layout Standard
-The Functorial Query Language (FQL) provides such a principled approch.
+The Functorial Query Language (FQL) provides such a principled approach.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Spivak2014"
@@ -5869,7 +5869,7 @@ The concept of data migration in database practice refers to the idea that,
 \end_layout
 
 \begin_layout Standard
-It is often the case that the data is so voluminus, and so valuable, that
+It is often the case that the data is so voluminous, and so valuable, that
  it will take months of system architect effort and weeks of management
  review before one can press the button and cross one's fingers, hoping
  that nothing is lost or corrupted.
@@ -5949,8 +5949,8 @@ To make data migration easy, one needs to be able to represent the graph
  The graph that is the schema of an SQL database is not itself stored in
  a table, nor is it queriable with SQL commands.
  When a DBA hand-crafts an SQL expression to perform a graph rewrite, they
- do not store that expression within the database itself; it existists externall
-y, in a distinct location.
+ do not store that expression within the database itself; it exists externally,
+ in a distinct location.
  By working with metagraphs, it turns out that it is not hard to craft a
  query system in which the queries themselves live as data within the database.
 \end_layout
@@ -6025,7 +6025,7 @@ https://en.wikipedia.org/wiki/Category_theory
 
 \end_inset
 
- and so the remainder of this section will switch to that langauge.
+ and so the remainder of this section will switch to that language.
  The reader unfamiliar with category theory is encouraged to learn it.
 \begin_inset Foot
 status collapsed
@@ -6200,7 +6200,7 @@ empty row
 \begin_inset Quotes erd
 \end_inset
 
-, and modified rows to thier modifications.
+, and modified rows to their modifications.
  Added rows are not part of the homomorphism.
  Since the instances 
 \begin_inset Formula $I$
@@ -6986,6 +6986,88 @@ We conclude that s-expressions offer a marvelous compact string representation
  Yet one should not be mislead; these are not ordinary s-expressions.
  This will be further amplified below, when considering queries performed
  over s-expressions.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+representation
+\begin_inset Quotes erd
+\end_inset
+
+ is being used here in the formal sense.
+ For example, in group theory, one can talk about a specific group, as a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+thing in itself
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One can also have a 
+\begin_inset Quotes eld
+\end_inset
+
+matrix representation of a group
+\begin_inset Quotes erd
+\end_inset
+
+, which is a collection of matrices that behave the same way as the group.
+ The matrix representation will also have additional properties and relationship
+s that the group does not have.
+ These are termed 
+\begin_inset Quotes eld
+\end_inset
+
+accidental relationships
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise here: there is the metagraph as the 
+\begin_inset Quotes eld
+\end_inset
+
+thing in itself
+\begin_inset Quotes erd
+\end_inset
+
+, and the representation of it as an s-expression.
+ The s-expression has additional aspects to it that the metagraph does not
+ have.
+ Also, the s-expression can also represent other things, completely different
+ things, that are not metagraphs! Similar remarks apply to the graphical
+ drawings: they are not the 
+\begin_inset Quotes eld
+\end_inset
+
+metagraph in itself
+\begin_inset Quotes erd
+\end_inset
+
+, they are a visual representation of it.
+ See Wikipedia, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Representation_(mathematics)
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
