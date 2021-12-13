@@ -115,7 +115,7 @@ PREDICATE_NODE <- NODE
 // *) It fails to handle connector polarities beyond just "input"
 //    and "output". That is, there are more ways of connecting things
 //    than merely saying "outputs are things that can be plugged into
-//    inputs, and thier types must match."
+//    inputs, and their types must match."
 //
 // So... deficient in many ways, but basically, it works for now, and it
 // handles most of the basic cases in a fairly straightforward fashion.
@@ -181,7 +181,7 @@ SET_DIFFERENCE_LINK <- ORDERED_LINK,COLLECTION_LINK
 
 // Set membership. Declaration: individual belongs to set.
 // See also the section of relation-links below (including equality,
-// etc.) Perhaps the defintion of MemberLink and SubsetLink should
+// etc.) Perhaps the definition of MemberLink and SubsetLink should
 // be moved to that section!?
 MEMBER_LINK <- ORDERED_LINK
 
@@ -319,7 +319,7 @@ LEXICAL_NODE <- PREDICATE_NODE
 ANY_NODE <- NODE
 
 // Generic connector. Its a link, because it contains all of the details
-// and restrictions required to define the allowable conections that
+// and restrictions required to define the allowable connections that
 // can be made. The ability for it to mate to something can be encoded
 // in a TruthValue (typically a crisp T/F for type specifications.)
 CONNECTOR <- ORDERED_LINK
@@ -859,7 +859,7 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // except that the formula is in the Atomese, not scheme/python.
 //
 // Its a ScopeLink, because in general it will contain variables that
-// are scoped, bound. The Lambda provides the mechanism to access/sheild
+// are scoped, bound. The Lambda provides the mechanism to access/shield
 // the variables.
 PREDICATE_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
@@ -979,8 +979,8 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 //           Note that ALWAYS_LINK below is the unscoped variant
 //           of this, used in the pattern matcher.
 //
-// At least, that's the fancy defintion. It's not used anywhere. The
-// plain defintion is just the conventional first-order-logic definition.
+// At least, that's the fancy definition. It's not used anywhere. The
+// plain definition is just the conventional first-order-logic definition.
 // Since they have a conventional and well-known meaning, I guess they
 // can stay in the core AtomSpace, as a part of the set of links useful
 // for knowledge representation.
@@ -1014,6 +1014,6 @@ EXECUTION_LINK <- ORDERED_LINK
 ATTRACTION_LINK <- ORDERED_LINK
 
 // Used in the URE unit tests. XXX FIXME the URE unit tests should
-// define thier own custom test types, rather than expecting us to
+// define their own custom test types, rather than expecting us to
 // provide them XXX FIXME
 INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
