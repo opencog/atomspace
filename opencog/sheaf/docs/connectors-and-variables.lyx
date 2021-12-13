@@ -1385,7 +1385,7 @@ Types and fibers
 \end_layout
 
 \begin_layout Standard
-TODO: talk about how vectors can have different indexes of diffferent types
+TODO: talk about how vectors can have different indexes of different types
  on them.
  A prototypical example are the quark wave functions, which have a color
  index, a flavor index, a spin index and a momentum index.
