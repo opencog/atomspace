@@ -356,7 +356,7 @@
   computation will fail, if the marginals have not been stored.
 
   The 'total-count-right is N(*,*) = sum_y N(*,y)
-  Same as above, but does the right-sum last. Should yeild the same
+  Same as above, but does the right-sum last. Should yield the same
   answer, as above, except for rounding errors. Using this method can
   be more convenient, if the right-marginal sums are not available
   (and v.v. if the other marginals are not available.)

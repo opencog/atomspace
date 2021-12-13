@@ -159,8 +159,8 @@ public:
     void clear_transient();
 
     /// Read-only (RO) atomspaces provide protection against update of the
-    /// AtomSpace contents. Atoms in a read-only atomspace canot be
-    /// deleted, nor can thier values (including truthvalues) be changed.
+    /// AtomSpace contents. Atoms in a read-only atomspace cannot be
+    /// deleted, nor can their values (including truthvalues) be changed.
     /// New atoms cannot be added to a read-only atomspace.
     void set_read_only(void);
     void set_read_write(void);
@@ -361,7 +361,7 @@ public:
      * Note that if the recursive flag is set to false, and the atom
      * appears in the incoming set of some other atom, then extraction
      * will fail.  Thus, it is generally recommended that extraction
-     * be recursive, unless you can guarentee that the atom is not in
+     * be recursive, unless you can guarantee that the atom is not in
      * someone else's outgoing set.
      *
      * @param h The Handle of the atom to be removed.

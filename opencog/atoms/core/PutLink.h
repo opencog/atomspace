@@ -35,7 +35,7 @@ namespace opencog
  * The PutLink implements a beta redex; it is similar to an imperative
  * version of MemberLink, with arguments reversed.
  *
- * A beta redex is a concatentation or composition of a combinator, and
+ * A beta redex is a concatenation or composition of a combinator, and
  * a list of arguments.  Typically, the combinator will be a LambdaLink,
  * typically with N declared variables in it. To go with it, the PutLink
  * expects a list of N arguments to be plugged in for these variables.

@@ -40,7 +40,7 @@
 
   Type matcher. Returns true if `LEFT` can mate with `RIGHT`.
   Here, `LEFT` can be a type definition, and `RIGHT` can be
-  another type defintion, or a value.  Mating is possible whenever
+  another type definition, or a value.  Mating is possible whenever
   `LEFT` is broader, less restricitve than `RIGHT`; equivalently
   if `RIGHT` is narrower than 'LEFT`.
 

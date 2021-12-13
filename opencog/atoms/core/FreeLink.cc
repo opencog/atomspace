@@ -37,7 +37,7 @@ FreeLink::FreeLink(const HandleSeq&& oset, Type t)
 	if (not nameserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
-	// Derived classes have thier own init routines.
+	// Derived classes have their own init routines.
 	if (FREE_LINK != t) return;
 	init();
 }

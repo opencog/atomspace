@@ -16,5 +16,5 @@ COG_SIMPLE_STORAGE_NODE <- STORAGE_NODE
 COG_STORAGE_NODE <- STORAGE_NODE
 FILE_STORAGE_NODE <- STORAGE_NODE
 //
-// There is no IPFS_STORAGE_NODE nore DHT_STORAGE_NODE because these
+// There is no IPFS_STORAGE_NODE nor DHT_STORAGE_NODE because these
 // are currently deeply, fundamentally broken. Whoops!

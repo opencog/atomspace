@@ -242,7 +242,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 
 	// And cache it in the file, as well! This caching is compatible
 	// with what `cog-execute-cache!` does. It allows the cached
-	// value to be retreived later, without re-performing the search.
+	// value to be retrieved later, without re-performing the search.
 	storeValue(query, key);
 
 	// If there's a meta-info key, then attach a timestamp. For now,

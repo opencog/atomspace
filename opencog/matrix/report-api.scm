@@ -317,7 +317,7 @@
   rows and columns. The weighted-average is the frequency-weighted
   average: So, for example, if a row is very long, but is very rarely
   seen, then it will not contribute much to the average. See the
-  documentation on `add-report-api` for precise defintions.
+  documentation on `add-report-api` for precise definitions.
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
@@ -685,7 +685,7 @@
   See documentation for `add-report-api` for an explanation of
   what is being printed.
 
-  All information printed by the report is cahced on the wild-card
+  All information printed by the report is cached on the wild-card
   atom.  Thus, for quick peeks into datasets residing on disk, it
   can be convenient to say `(fetch-atom (LLOBJ 'wild-wild))` and
   then printing the report. Careful, though: this fetch may clobber

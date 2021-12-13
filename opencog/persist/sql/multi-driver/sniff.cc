@@ -36,12 +36,12 @@ int atomCompare(Atom *a, Atom *b)
 
     if (a->get_type() != b->get_type())
     {
-        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
+        fprintf(stderr, "Error, type mismatch, a=%d b=%d\n", a->get_type(), b->get_type());
         rc --;
     }
     if (la->get_arity() != lb->get_arity())
     {
-        fprintf(stderr, "Error, arity mis-match, a=%lu b=%lu\n", la->get_arity(), lb->get_arity());
+        fprintf(stderr, "Error, arity mismatch, a=%lu b=%lu\n", la->get_arity(), lb->get_arity());
         rc --;
     }
     if (0 < la->get_arity())
@@ -52,7 +52,7 @@ int atomCompare(Atom *a, Atom *b)
         {
             if (outa[i] != outb[i])
             {
-                fprintf(stderr, "Error, outgoing set mis-match, "
+                fprintf(stderr, "Error, outgoing set mismatch, "
                         "i=%zu a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
                 rc --;
             }

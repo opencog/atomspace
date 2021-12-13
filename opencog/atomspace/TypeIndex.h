@@ -116,7 +116,7 @@ class TypeIndex
 			return *iter;
 		}
 
-		// How many atoms are ther of type t?
+		// How many atoms are there of type t?
 		size_t size(Type t) const
 		{
 			const AtomSet& s(_idx.at(t));

@@ -400,7 +400,7 @@
   recompute new values and marginals for the filtered matrix, then
   set RENAME to #t.
 
-  Precise defintion: Let FMI(x,y) be the (fractional) mutual
+  Precise definition: Let FMI(x,y) be the (fractional) mutual
   information for the pair (x,y) (as returned by the 'pair-fmi method
   on the `add-pair-freq-api` object.)  Pairs are not reported in the
   'left-stars and 'right-stars methods when FMI(x,y) <= FMI-CUT.

@@ -66,7 +66,7 @@ class AtomSpace;
  * to be kept.  This allows atoms to be shared between different
  * atomspaces running in different memory spaces (on different machines
  * in a network cluster): a given atom will have a unique UUID by which
- * it is refered to.
+ * it is referred to.
  *
  * Atomspaces are also issued UUID's. This allows atomspaces to be
  * uniquely identified as well.

@@ -1113,7 +1113,7 @@ bool InitiateSearchMixin::setup_no_search(void)
 ///
 /// This performs the actual search for matching graphs.
 /// This assumes that a list of search starting points have been
-/// set up in the `_search_set`, as well as an approprite root
+/// set up in the `_search_set`, as well as an appropriate root
 /// clause and starting term.
 bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
                                       const std::string dbg_banner)
@@ -1206,7 +1206,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 	#define OMP_PM_PARALLEL 1
 #endif
 #ifdef OMP_PM_PARALLEL
-	// Parallel loop. This requies OpenMP to work.
+	// Parallel loop. This requires OpenMP to work.
 	_recursing = true;
 	_issued_stack.clear();
 	_issued.clear();

@@ -192,7 +192,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 /// walk_tree() performs a kind-of eager-evaluation of function arguments.
 /// The code in here is a mashup of several different ideas that are not
 /// cleanly separated from each other. (XXX FIXME, these need to be
-/// cleanly seprated; its impeding overall clean design/implementation.)
+/// cleanly separated; its impeding overall clean design/implementation.)
 /// Roughly, it goes like so:
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
@@ -327,7 +327,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		    DEFINED_SCHEMA_NODE == expr->getOutgoingAtom(0)->get_type())
 			return expr;
 
-		// Step one: perform variable substituions
+		// Step one: perform variable substitutions
 		Handle hexpr(beta_reduce(expr, ist._varmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
@@ -706,7 +706,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
 	// Make sure that the atom is in an atomspace that is compatible
-	// with the execution environment. When it's not, then bizzare
+	// with the execution environment. When it's not, then bizarre
 	// results happen (e.g. with searches, because the search cannot
 	// find atoms in the correct atomspace.) We do allow, for now,
 	// atoms with null atomspaces; if/when these need to be inserted

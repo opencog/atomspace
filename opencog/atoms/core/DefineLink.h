@@ -51,7 +51,7 @@ namespace opencog
 ///    a name, and then referring to that atom by it's name, later on.
 /// -- Enabling recursion. A definition can occur within itself, and
 ///    can thus specify an infinitely-recursive pattern.  When evaluated
-///    or executed, this inifinite pattern must, of course terminate,
+///    or executed, this infinite pattern must, of course terminate,
 ///    or your code will hang.  Bummer if your code hangs.
 ///
 /// Of the three, the last is the most important, as, right now, there

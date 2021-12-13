@@ -312,7 +312,7 @@
 
   'wild-wild - Same as above, except that this applies matrix-wide.
       This returns the Atom (of type 'pair-type) that holds all
-      information applicable to the matrix, as a whole. Ths includes
+      information applicable to the matrix, as a whole. This includes
       a grand-total count.
 
   'fetch-pairs - Fetch all pairs from an open database.
@@ -347,7 +347,7 @@
 			(LLOBJ 'set-count DONOR rem-cnt)
 		)
 
-		; Return how much was transfered over.
+		; Return how much was transferred over.
 		frac-cnt
 	)
 
@@ -750,10 +750,10 @@
 	(define freq-key (PredicateNode freq-name))
 
 	(define (zero ATOM) (if nothrow 0
-		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\turn `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	(define (plus-inf ATOM) (if nothrow +inf.0
-		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\turn `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (or was not observed) return 0.
@@ -792,10 +792,10 @@
 	(define entropy-key (PredicateNode entr-name))
 
 	(define (ezero ATOM) (if nothrow 0
-		 (error "No such value! Did you forget to compute entropies?\n\tRun `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
+		 (error "No such value! Did you forget to compute entropies?\n\turn `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
 
 	(define (eminus-inf ATOM) (if nothrow -inf.0
-		 (error "No such value! Did you forget to compute entropies?\n\tRun `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
+		 (error "No such value! Did you forget to compute entropies?\n\turn `(batch-all-pair-mi LLOBJ)` to compute them." ATOM)))
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)

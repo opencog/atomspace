@@ -55,7 +55,7 @@ ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 
 bool ScopeLink::skip_init(Type t)
 {
-	// If unquoted_below() returnes true, that means we are quoted,
+	// If unquoted_below() returns true, that means we are quoted,
 	// and so nothing to be done. Skip variable extraction.
 	_quoted = unquoted_below(_outgoing);
 
@@ -308,12 +308,12 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all alpha-
-/// convertable links get exactly the same hash.  To acheive this,
+/// convertible links get exactly the same hash.  To achieve this,
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
 //
 // "Mixing" refers to the idea of combining together two values, such
-// that thier bits are mixed together (in the formal, mathematical
+// that their bits are mixed together (in the formal, mathematical
 // definition, which includes ideas about increasing entropy).  Hash
 // functions are designed to be very good at mixing.
 //
@@ -343,7 +343,7 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 	ContentHash vth = 0;
 	for (const auto& pr : _variables._typemap)
 	{
-		// Semantic equivalance: an untyped variable is
+		// Semantic equivalence: an untyped variable is
 		// equivalent to a typed variable of type "ATOM".
 		if (pr.second->is_untyped()) continue;
 

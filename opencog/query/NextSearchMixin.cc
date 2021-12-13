@@ -129,7 +129,7 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	}
 
 	// Now loop over all for-all clauses.
-	// All variables must neccessarily be grounded at this point.
+	// All variables must necessarily be grounded at this point.
 	for (const PatternTermPtr& root : _pattern->always)
 	{
 		if (_issued.end() != _issued.find(root)) continue;
@@ -207,7 +207,7 @@ Handle InitiateSearchMixin::get_glob_embedding(const GroundingMap& var_grounding
 	// If the glob is in only one clause, there is no connectivity map.
 	if (0 == _pattern->connectivity_map.count(glob)) return glob;
 
-	// Find some clause, any clause at all, containg the glob,
+	// Find some clause, any clause at all, containing the glob,
 	// that has not been grounded so far. We need to do this because
 	// the glob might appear in three clauses, with two of them
 	// grounded by a common term, and the third ungrounded

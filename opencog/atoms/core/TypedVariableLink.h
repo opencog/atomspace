@@ -35,7 +35,7 @@ namespace opencog
 /// The TypedVariableLink is used to attach a name to a type description;
 /// the "name" is usually a VariableNode. Note that this is backwards
 /// from the usual idea of attaching a type specification to a variable:
-/// that is because we want to allow anonymous (unamed) types to be
+/// that is because we want to allow anonymous (unnamed) types to be
 /// used, while, in certain special cases, we need to give names to
 /// those types: the name is the VariableNode.
 ///

@@ -19,7 +19,7 @@
 ; similarity. It is generalized in that it works for N vectors, and not
 ; just two. It is also generalized by replacing the Jaccard "min"
 ; function by a "democratic vote" function, where an item is accepted
-; if it is shared in commmon by a majority.
+; if it is shared in common by a majority.
 ;
 ; ---------------------------------------------------------------------
 
@@ -40,7 +40,7 @@
   Currently, this only provides a generalized Jaccard distance. This
   generalizes the conventional Jaccard distance by replacing the 'min'
   function by a 'democratic vote' function, where an item is accepted
-  if it is shared in commmon by a majority.
+  if it is shared in common by a majority.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let D(x,y) be 1 if N(x,y)>0 and zero otherwise.
@@ -69,7 +69,7 @@
 
   Exchanging rows and columns gives similar definitions.
 
-  A 'noisy' variant is provided, by altering the defintion of a non-zero
+  A 'noisy' variant is provided, by altering the definition of a non-zero
   count. Let N(x,y) be the observed count for the pair (x,y), just as
   before.  Let D(x,y) be 1 if N(x,y)>noise-threshold and zero otherwise.
   This is useful for working with matrices that have low-level junk in

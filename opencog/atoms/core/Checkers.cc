@@ -50,7 +50,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
-		// Checking has to be defered until runtime.
+		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
 		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
@@ -66,7 +66,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		// well, in that case these are interpreted as intersection,
 		// union and complement. Since it cannot inherit from
 		// EVALUATABLE_LINK (cause it's a Node) we have to add it here.
-		// XXX FIXME, this is to be removed, becuase UnionLink,
+		// XXX FIXME, this is to be removed, because UnionLink,
 		// IntersectionLink takes the place of OrLink, AndLink.
 		if (h->is_type(CONCEPT_NODE)) continue;
 
@@ -78,7 +78,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		// Equivalence, Inheritance, Similarity and their subtypes is
 		// currently required by PLN for higher order reasoning. We may
 		// want to forbid it in the future by maybe introducing a
-		// specialized operator to explicitely map the higher order into
+		// specialized operator to explicitly map the higher order into
 		// the lower order but as of today it is required.
 		// XXX FIXME ... Perhaps IntersectionLink, UnionLink will
 		// resolve this?
@@ -102,7 +102,7 @@ bool check_numeric(const Handle& bool_atom)
 		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
-		// Checking has to be defered until runtime.
+		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
 		if (h->is_type(SATISFYING_LINK)) continue;
 		if (EXECUTION_OUTPUT_LINK == t) continue;

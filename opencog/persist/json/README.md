@@ -15,7 +15,7 @@ Status
 Still missing is the ability to update the AtomSpace via JSON, and the
 ability to run arbitrary queries. Adding support for this is **really
 easy**, and just slightly tedious.  The hard part is writing the docs!
-See the neighboring directory `../sexpr/Commands.cc` for explict
+See the neighboring directory `../sexpr/Commands.cc` for explicit
 examples of how to implement what's missing.  Patches are solicited and
 will be accepted.
 
@@ -24,7 +24,7 @@ Network API
 -----------
 The CogServer provides a network API to send/receive Atoms over the
 internet. See https://wiki.opencog.org/w/CogServer It uses the code
-here to provide a newtork interface to the JSON code here.
+here to provide a network interface to the JSON code here.
 
 Examples
 --------

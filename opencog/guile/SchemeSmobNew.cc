@@ -40,7 +40,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// Need to have a newline printed; otherewise
+	// Need to have a newline printed; otherwise
 	// cog-value->list prints badly-formatted grunge.
 	if (not pa->is_atom())
 		return pa->to_string() + "\n";
@@ -56,7 +56,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
-		if (ATOMSPACE == h->get_type())
+		if (ATOM_SPACE == h->get_type())
 			return h->to_short_string();
 
 		h = Handle::UNDEFINED;
@@ -65,7 +65,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 		return "#<Invalid handle>";
 	}
 
-	// Need to have a newline printed; otherewise cog-value->list
+	// Need to have a newline printed; otherwise cog-value->list
 	// prints badly-formatted grunge.
 	return h->to_short_string() + "\n";
 }
@@ -130,7 +130,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	// exceptions to this assumption leads to confusion and
 	// unexpected behavior -- i.e. leads to bugs.
 	if (nullptr == h->getAtomSpace() and
-	    not (ATOMSPACE == h->get_type()))
+	    not (ATOM_SPACE == h->get_type()))
 	{
 		*(SCM_SMOB_VALUE_PTR_LOC(sh)) = nullptr;
 		scm_remember_upto_here_1(sh);
@@ -708,7 +708,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  * Extract the atom from the atomspace, but only if it has no incoming
  * links. Return `SCM_BOOL_T` if the atom was successfully extracted,
  * else return `SCM_BOOL_F`.  This does NOT remove the atom from any
- * attached backing store/persistant storage, only from the (local,
+ * attached backing store/persistent storage, only from the (local,
  * in-RAM) atomspace.
  */
 SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)

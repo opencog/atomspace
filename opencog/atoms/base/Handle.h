@@ -229,7 +229,7 @@ typedef Counter<Handle, double> HandleCounter;
 //! a map from handle to unsigned
 typedef Counter<Handle, unsigned> HandleUCounter;
 
-// A map of variables to thier groundings.  Everyone working with
+// A map of variables to their groundings.  Everyone working with
 // groundings uses this type; changing the type here allows easy
 // comparisons of performance for these two mapping styles.
 // At this time (Dec 2019; gcc-8.3.0) there seems to be no difference

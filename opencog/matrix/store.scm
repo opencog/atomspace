@@ -124,7 +124,7 @@
 				(length all-prs) (elap))
 			(store-pairs all-prs))
 
-		; Store everything, including auxilliaries
+		; Store everything, including auxiliaries
 		(define (store-all)
 			(store-all-wildcards)
 			(store-all-elts)

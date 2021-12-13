@@ -95,7 +95,7 @@ class PythonEval : public GenericEval
         std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
 
-        // Single-threded design.
+        // Single-threaded design.
         static PythonEval* singletonInstance;
 
         // Single, global mutex for serializing access to the atomspace.

@@ -118,7 +118,7 @@ private:
 	 * expression. Return the result of the execution.
 	 *
 	 * That is, perform a beta-reduction (substitution of variables
-	 * by thier values) followed by execution of the resulting tree.
+	 * by their values) followed by execution of the resulting tree.
 	 *
 	 * See also the related function VariableList::substitute(),
 	 * which will simply perform a substitution, without performing

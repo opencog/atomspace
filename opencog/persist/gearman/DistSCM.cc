@@ -83,7 +83,7 @@ void DistSCM::init(void)
 	                        this, "dist-gearman");
 }
 
-/// This method causes all worker threads to return to thier callers
+/// This method causes all worker threads to return to their callers
 /// after completing whatever work they are doing.
 void DistSCM::exit_all_workers(void)
 {
@@ -96,7 +96,7 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 
 #ifdef DEBUG
 	const size_t workload_size = gearman_job_workload_size(job);
-	std::cout << "Dist worker recieved " << workload_size << " bytes" << std::endl;
+	std::cout << "Dist worker received " << workload_size << " bytes" << std::endl;
 	std::cout << "Dist worker job string is " << workload << std::endl;
 #endif
 

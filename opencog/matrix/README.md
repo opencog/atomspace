@@ -10,7 +10,7 @@ paths between a starting point and an end-point, connected by edges
 (one-dimensional links).  Each edge has two end-points: two vertices
 define an edge.
 
-In conventional crisp-logic symbolic AI, these vertexes are either
+In conventional crisp-logic symbolic AI, these vertices are either
 connected, or not; either there is an edge connecting them, or there
 is not.  One assigns true/false values to the edges in a connectivity
 diagram.  In a probabilistic approach, the edges carry weights or
@@ -18,7 +18,7 @@ diagram.  In a probabilistic approach, the edges carry weights or
 
 A collection of edges forms a graph. It can also be thought of forming
 a matrix `M(v,w)` where `v` and `w` are two vertices. An adjacency
-matrix is the matrix `M(v,w)=true` if the vertexes `v` and `w` are
+matrix is the matrix `M(v,w)=true` if the vertices `v` and `w` are
 connected by an edge; otherwise, `M(v,w)=false`. If the graph edges are
 weighted, then `M(v,w)` can be understood to be the weight on that edge.
 Thus, graphs can be represented as matrices, and vice-versa.
@@ -26,7 +26,7 @@ Thus, graphs can be represented as matrices, and vice-versa.
 The matrix representation of a graph simplifies certain types of
 reasoning and inference. For example, backward/forward chaining limited
 to two steps can be understood as just the square of the matrix. That
-is, two vertexes `u` and `w` are connected if and only if
+is, two vertices `u` and `w` are connected if and only if
 ```
     sum_v  M(u,v) M(v,w)
 ```
@@ -58,16 +58,16 @@ github repo. Those systems are heavily reliant on the code here.
 Pairs
 -----
 More generally, there is a generic theme of "pairs of things" that
-are statistically related. These can be pairs of vertexes, or the
-paring of (vertex, nearest-neighbors). For example, the vertexes might
+are statistically related. These can be pairs of vertices, or the
+paring of (vertex, nearest-neighbors). For example, the vertices might
 be words of the English language. The nearest-neighbors might be
-N-grams or skip-grams. The vertexes might be proteins or genes,
+N-grams or skip-grams. The vertices might be proteins or genes,
 and the pairing might be (gene, expressed-protein) or (gene,
-up/down-regulated-reaction). The pairs can be homogenous, such as
-(event, event) pairs, or they can be inhomogenous, such as (cause,
+up/down-regulated-reaction). The pairs can be homogeneous, such as
+(event, event) pairs, or they can be inhomogeneous, such as (cause,
 effect) pairs.
 
-A recurring therem is to obtain and analyze statistics for such pairs,
+A recurring theme is to obtain and analyze statistics for such pairs,
 to correlate them, to classify them, to discriminate among them. In
 these cases, the pairs have some associated weight, frequency or count.
 
@@ -81,9 +81,9 @@ as a matrix. Entries in the matrix are (row, column) pairs.
 
 A prototypical example arising in graph theory is the (vertex,
 nearest-neighbors) pairing. Suppose one has a graph consisting of
-many vertexes of type A (or having "feature" A), and many vertexes of
+many vertices of type A (or having "feature" A), and many vertices of
 type B, C, ... The typical classification problem on such a graph is to
-determine if vertexes of type A are similar to the vertexes of type B.
+determine if vertices of type A are similar to the vertices of type B.
 Each neighborhood of a vertex A is a single component of a vector; all
 such neighborhood defines the vector as a whole. To determine if A and
 B have similar neighborhoods, it suffices to compute either the

@@ -48,7 +48,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	Type valtype = val->get_type();
 	Type dpt = deep->get_type();
 
-	// If it's a user-defined type, replace by it's defintion.
+	// If it's a user-defined type, replace by it's definition.
 	if (DEFINED_TYPE_NODE == dpt)
 	{
 		deep = DefineLink::get_definition(deep);
@@ -76,7 +76,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	else if (TYPE_CO_INH_NODE == dpt)
 	{
 		// Just like above, but in the other direction.
-		// That is, it allows base tyes.
+		// That is, it allows base types.
 		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return nameserver().isA(deeptype, valtype);
 	}
@@ -132,7 +132,7 @@ static bool type_match_rec(const Handle& left_,
 	Handle left(left_);
 	Type ltype = left->get_type();
 
-	// If it's a user-defined type, replace by it's defintion.
+	// If it's a user-defined type, replace by it's definition.
 	if (DEFINED_TYPE_NODE == ltype)
 	{
 		left = DefineLink::get_definition(left);
@@ -168,7 +168,7 @@ static bool type_match_rec(const Handle& left_,
 
 	Handle right(HandleCast(right_));
 
-	// If it's a user-defined type, replace by it's defintion.
+	// If it's a user-defined type, replace by it's definition.
 	if (DEFINED_TYPE_NODE == rtype)
 	{
 		right = DefineLink::get_definition(right);
@@ -207,7 +207,7 @@ static bool type_match_rec(const Handle& left_,
 		return TypeNodeCast(left)->get_kind() == rtype;
 	}
 
-	// Like above but allows derived tyes.
+	// Like above but allows derived types.
 	if (TYPE_INH_NODE == ltype)
 	{
 		return nameserver().isA(rtype, TypeNodeCast(left)->get_kind());

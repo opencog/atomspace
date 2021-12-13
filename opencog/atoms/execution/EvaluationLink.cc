@@ -120,7 +120,7 @@ static void throwSyntaxException(bool silent, const char* message...)
 }
 
 /// Extract a single floating-point double out of an atom, that,
-/// when executed, should yeild a value containing a number.
+/// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
 static double get_numeric_value(AtomSpace* as, bool silent,
                                 Handle h)
@@ -287,7 +287,7 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	if (h0 == h1)
 		return true;
 
-	// Not strictly equal. Are they alpha convertable?
+	// Not strictly equal. Are they alpha convertible?
 	Variables v0, v1;
 	v0.find_variables(h0);
 	v1.find_variables(h1);
@@ -489,7 +489,7 @@ static bool crispy_maybe(AtomSpace* as,
 		// This is subtle, so listen-up: one of the side effects
 		// might involve evaluating some condition, which then pokes
 		// atoms into the atomspace, to signal some event or state.
-		// These cannot be discarded. This is explictly tested by
+		// These cannot be discarded. This is explicitly tested by
 		// SequenceUTest::test_or_put().
 		for (const Handle& term : evelnk->getOutgoingSet())
 			exec_or_eval(as, term, scratch, silent);

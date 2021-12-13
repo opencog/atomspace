@@ -357,7 +357,7 @@ const GlobInterval Variables::get_interval(const Handle& var) const
 
 /* ================================================================= */
 /**
- * Substitute the given arguments for the variables occuring in a tree.
+ * Substitute the given arguments for the variables occurring in a tree.
  * That is, perform beta-reduction.  This is a lot like applying the
  * function `func` to the argument list `args`, except that no actual
  * evaluation is performed; only substitution.

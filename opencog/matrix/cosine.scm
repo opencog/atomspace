@@ -60,7 +60,7 @@
 
   The (weighted) Jaccard distance is defined as one minus the above.
 
-  The above is not an approrpriate distance to use when N is an
+  The above is not an appropriate distance to use when N is an
   observation count. For example, suppose that N(x,b) was a constant
   multiple of N(x,a). The above formula would judge these two vectors
   as being dis-similar, even though for most applications, scaling by

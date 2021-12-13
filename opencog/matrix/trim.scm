@@ -125,7 +125,7 @@
 		(trim-type (star-obj 'left-basis))
 		(trim-type (star-obj 'right-basis))
 
-		; Trimming has commited violence to the matrix. Let it know.
+		; Trimming has committed violence to the matrix. Let it know.
 		(if (OBJ 'provides 'clobber) (OBJ 'clobber))
 
 		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))

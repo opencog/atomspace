@@ -14,7 +14,7 @@
 ; some abitrary scheme object to be associated with it.
 ;
 ; This differs from atomspace values, in several ways:
-; * any arbitary scheme object can be associated with an atom.
+; * any arbitrary scheme object can be associated with an atom.
 ; * these caches are never saved to the database, unlike atom values.
 ; * these caches are anonymous.  You must have a handle to the function
 ;   to make use of them.  They are automatically garbage collected.

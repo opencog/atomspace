@@ -61,7 +61,7 @@ substituting for the variables. Thus, one has:
    graph re-writing.
 
  * The template pattern is specified as a collection of trees; it is
-   the union of these trees that defines the query graph.  The vertexes
+   the union of these trees that defines the query graph.  The vertices
    in the tree are typed (in the Comp-Sci sense of "Type Theory"; they
    are AtomSpace "Atoms"). Thus, each tree can be understood to be a
    "term", in the sense of a "term algebra" (this is a concept from the
@@ -812,7 +812,7 @@ TODO
           (Link (Glob "head") (Foo) (Glob "tail"))
           (Link (Glob "head") (Bar) (Glob "tail"))))
 ```
-   So if the `Foo` clause was matched, the existance of a `Bar` clause
+   So if the `Foo` clause was matched, the existence of a `Bar` clause
    can be trivially verified.
 
  * API change: Instead of returning results wrapped in a huge SetLink,

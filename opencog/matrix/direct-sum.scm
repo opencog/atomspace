@@ -38,7 +38,7 @@
 ; but not both. It is ill-defined if both exist.
 ;
 ; More formally still, calling this thing a "direct sum" is an abuse of
-; the formal defintion of a direct sum. In many ways, it resembles just
+; the formal definition of a direct sum. In many ways, it resembles just
 ; an "ordinary sum" of two matrices. However, because this is enlarging
 ; the set of basis elements, it is not "just" the sum of two matrices.
 ; It is creating a new union type from the types of the two matrices;

@@ -231,7 +231,7 @@ bool AtomSpace::operator==(const Atom& other) const
     // If other points to this, then have equality.
     if (this == &other) return true;
 
-    if (ATOMSPACE != other.get_type()) return false;
+    if (ATOM_SPACE != other.get_type()) return false;
     AtomSpace* asp = (AtomSpace*) &other;
     return compare_atomspaces(*this, *asp, CHECK_VALUES,
             DONT_EMIT_DIAGNOSTICS);
@@ -242,7 +242,7 @@ bool AtomSpace::operator<(const Atom& other) const
     // If other points to this, then have equality.
     if (this == &other) return false;
 
-    if (ATOMSPACE != other.get_type()) return false;
+    if (ATOM_SPACE != other.get_type()) return false;
     AtomSpace* asp = (AtomSpace*) &other;
     return _uuid  < (asp->_uuid);
 }
@@ -395,7 +395,7 @@ Handle AtomSpace::set_value(const Handle& h,
     AtomSpace* has = h->getAtomSpace();
 
     // Hmm. It's kind-of a user-error, if they give us a naked atom.
-    // We could throw here, and force them to fix thier code, or we
+    // We could throw here, and force them to fix their code, or we
     // can silently do what they wanted!? Which will probably expose
     // other hard-to-debug bugs in the user's code ...
     // if (nullptr == has)
@@ -433,7 +433,7 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 {
     AtomSpace* has = h->getAtomSpace();
     // Hmm. It's kind-of a user-error, if they give us a naked atom.
-    // We could throw here, and force them to fix thier code, or we
+    // We could throw here, and force them to fix their code, or we
     // can silently do what they wanted!? Which will probably expose
     // other hard-to-debug bugs in the user's code ...
     // if (nullptr == has)

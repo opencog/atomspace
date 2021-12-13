@@ -87,7 +87,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * the combinatoric explosion of grounding multiple distinct components).
  * If the pattern does contain "virtual" links, then the connected
  * components should be grounded first, and the results then combined
- * by exploring the combinatoric possibilites presented by the virtual
+ * by exploring the combinatoric possibilities presented by the virtual
  * link(s).
  *
  * A side effect of the algorithm is that it sorts the clauses into
@@ -107,7 +107,7 @@ bool is_connected(const Handle& cl, const HandleSet& cur_vars)
 	// The likely case.
 	if (any_unquoted_in_tree(cl, cur_vars)) return true;
 
-	// Unsual case: clause has no variables in it!
+	// Unusual case: clause has no variables in it!
 	// This will connect to anything.
 	if (not contains_atomtype(cl, VARIABLE_NODE) and
 	    not contains_atomtype(cl, GLOB_NODE)) return true;

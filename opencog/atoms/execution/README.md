@@ -54,9 +54,9 @@ A sharper architectural distinction would be nice.
 
 Design complexity
 -----------------
-The design has gotten complex due to some confusion about when exeution
+The design has gotten complex due to some confusion about when execution
 should be done. In simplistic terms, there is confusion between "eager
-execution" and "lazy execution".  Some functions need to execute thier
+execution" and "lazy execution".  Some functions need to execute their
 arguments, before they can do what they do, while others must have
 arguments applying themselves. Others must not, as that would ruin what
 they do.

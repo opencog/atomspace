@@ -70,7 +70,7 @@
   two rows or columns of the LLOBJ.  This API merely provides access
   to values that were previously computed, located as Values attached
   to pairs of Atoms under certain specific keys. This API is meant
-  to simiplify the naming and managment of similarity values.
+  to simiplify the naming and management of similarity values.
 
   The computation of similarities between pairs of rows/columns can be
   performed with the `add-similarity-compute` object.

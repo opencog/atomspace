@@ -21,7 +21,7 @@ Performance
 -----------
 Some ideas for improving execution speed.
 
-* Fuction names are currently stored as strings. These could be
+* Function names are currently stored as strings. These could be
   decoded into SCM or PyObject just once, and cached. To do this,
   we would need to have a GroundedSCMNode and a GroundedPythonNode
   to hold these things.

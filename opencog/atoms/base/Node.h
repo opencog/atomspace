@@ -54,7 +54,7 @@ public:
      *
      * @param Node type
      * @param Node name A reference to a std::string with the name of
-     *                  the node.  Use empty string for unamed node.
+     *                  the node.  Use empty string for unnamed node.
      */
     Node(Type t, const std::string s)
         : Atom(t), _name(std::move(s))

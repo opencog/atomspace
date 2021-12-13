@@ -9,7 +9,7 @@
 ; OVERVIEW
 ; --------
 ; Given a word, and a vector attached to that word, one can compute a
-; symmetric mutual-information (MI) value betweem two words. In the
+; symmetric mutual-information (MI) value between two words. In the
 ; typical example, the vector consists of counts observed on disjuncts
 ; associated to that word (although it could be any vector).
 ;
@@ -57,7 +57,7 @@
 ;
 ; Note that S(u,w) can itself be thought of as a matrix; it is a product
 ; of N times its transpose.  That is, let [N] denote the matrix whose
-; matrix elements are N(w,d), and [S] be thw matrix whose matrix
+; matrix elements are N(w,d), and [S] be the matrix whose matrix
 ; elements are S(u,w). Then one has that
 ;
 ;    [S] = [N][N]^T

@@ -222,7 +222,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		if (2700 < qname.size())
 		{
 			throw IOException(TRACE_INFO,
-				"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+				"Error: do_store_single_atom: Maximum Node name size is 2700.\n");
 		}
 		STMT("name", qname);
 
@@ -249,7 +249,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			if (330 < h->get_arity())
 			{
 				throw IOException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Link size is 330. "
+					"Error: do_store_single_atom: Maximum Link size is 330. "
 					"Atom was: %s\n", h->to_string().c_str());
 			}
 

@@ -41,7 +41,7 @@ namespace opencog
 /// This class is intended to be the base class for DefineLink, which
 /// is used to name things, and StateLink, which is used to maintain
 /// current state. It is also used by TypedAtomLink to ensure that
-/// an atom, if it is typed, has a single, unique type defintion.
+/// an atom, if it is typed, has a single, unique type definition.
 ///
 class UniqueLink : public FreeLink
 {

@@ -11,15 +11,15 @@
 
 ; The guile-2.2 par-for-each implementation sucks, and live-locks
 ; for more than about 4-5 threads, and sometimes with less.
-; The guile-2.9.4 par-for-each implemetation is mostly not insane;
+; The guile-2.9.4 par-for-each implementation is mostly not insane;
 ; however, it appears to offer no speedup whatsoever over
 ; single-threaded operation ... for MI computations. (It does offer
 ; perfect 24x speedup on 24 cores for pattern matching... its unclear
 ; why it fails to speed up MI computations.)  Disable for now, since
 ; none of the matrix code benefits from this.
-; XXX TODO diagnose the root cause and report back to guile devels.
+; XXX TODO diagnose the root cause and report back to guile delves.
 ;
-; As of guile-3.0.1 in Debian stable, manually runnning similarity calcs
+; As of guile-3.0.1 in Debian stable, manually running similarity calcs
 ; in distinct threads offers no speedup over single-threaded perf. That
 ; is, even if we don't use par-for-each and do it manually, there's no
 ; speedup. Why? The C++ atomspace is parallelizable. Maybe there's some

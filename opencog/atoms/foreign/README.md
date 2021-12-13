@@ -9,7 +9,7 @@ the ability to ingest those trees into the AtomSpace, and then print them
 back out, in proper form.
 
 Examples of systems with obvious tree like-structures include JSON, YAML,
-datalog, s-expressions and XML.  Of course, you could map any langauge
+datalog, s-expressions and XML.  Of course, you could map any language
 (including python and java) into trees; just that the above are
 conventionally used to hold some kind of data. The primary reason you
 would want to map such data-holding languages into the AtomSpace would
@@ -32,7 +32,7 @@ This project *might* be able to resolve one sticky aspect of the current
 Atomese design: the problem of embedded Python and scheme code, and,
 more generally, the problem of of executable syntax trees. Right now,
 these are handled in an ad-hoc fashion, case-by-case, with custom code
-and in an interpeted fashion (a REPL loop). If, instead of having a
+and in an interpreted fashion (a REPL loop). If, instead of having a
 hard-coded Atomese PlusLink and GreaterThanLink and so-on, if we could
 just map the native scheme symbols for these (or the native Python
 symbols for these) into Atomese, the results of any queries would then

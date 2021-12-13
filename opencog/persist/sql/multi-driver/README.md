@@ -17,8 +17,8 @@ Some wrappers for storage drivers:
 * `ll-pg-cxx.cc`, `ll-pg-cxx.h` -- LLAPI for PostgreSQL "libpq" driver.
 * `odbcxx.cc`, `odbcxx.h`       -- LLAPI for ODBC driver
 
-Primary database API defintion:
-* `atom.sql`             --  Postgresql Database Table defitions
+Primary database API definition:
+* `atom.sql`             --  Postgresql Database Table definitions
 * `SQLAtomStorage.cc`, `SQLAtomStorage.h` -- Main Class definition
 * `SQLPersistSCM.cc`, `SQLPersistSCM.h`   -- Guile interfaces
 

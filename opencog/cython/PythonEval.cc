@@ -58,7 +58,7 @@ const char* NO_FUNCTION_NAME = "";
  * multi-thread support by grabbing a lock and only allowing just
  * one thread to run at a time.  Our singleton instance mirrors this
  * python limitation.  However, if we could set a per-thread atomspace,
- * then we could maybe still have python be callable in mutiple threads,
+ * then we could maybe still have python be callable in multiple threads,
  * with different atomspaces. Clearly python would become a major
  * bottleneck, but this is why we strongly discourage using python.
  *
@@ -215,7 +215,7 @@ static const char** get_module_paths()
         in_project = true;
     free(cwd);
 
-    // If the currrent working directory is the projet build or source
+    // If the current working directory is the projet build or source
     // directory, then search those first.
     int ip = 0;
     if (in_project) {
@@ -255,7 +255,7 @@ static const char** get_module_paths()
  * python will be able to find a module or not, until it actually does,
  * we have to proceed by trial and error, trying different path
  * combinations, until it finally works.  The sequence of paths
- * that leads to success will then be delcared the official system
+ * that leads to success will then be declared the official system
  * path, henceforth. Woe unto those try to defy the will of the python
  * gods.
  *
@@ -353,7 +353,7 @@ void opencog::global_python_initialize()
     //    Python error :
     //    /usr/lib/python2.7/lib-dynload/datetime.x86_64-linux-gnu.so:
     //    undefined symbol: PyExc_SystemError
-    // Googling for the above error messge reveals that the "feature"
+    // Googling for the above error message reveals that the "feature"
     // is as old as the wind. The solution of using dlopen() is given
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
@@ -400,7 +400,7 @@ void opencog::global_python_initialize()
     try_to_load_modules(get_module_paths());
 
     // Hmm. If the above returned false, we should try a different
-    // permuation of the config paths.  I'm confused, though, different
+    // permutation of the config paths.  I'm confused, though, different
     // users are reporting conflicting symptoms.  What to do?
 
     // Release the GIL, otherwise the Python shell hangs on startup.
@@ -791,7 +791,7 @@ PyObject* PythonEval::find_object(PyObject* pyModule,
 
 /**
  * Get the Python module and/or object and stripped function name, given
- * the identifer of the form '[module.][object.[attribute.]*]function'.
+ * the identifier of the form '[module.][object.[attribute.]*]function'.
  */
 PyObject* PythonEval::get_function(const std::string& moduleFunction)
 {
@@ -1190,7 +1190,7 @@ std::string PythonEval::execute_string(const char* command)
     // when Py_single_input is used.
     //
     // In either case, the pyResult does not have any string
-    // repesentation; using PyObject_Str(pyResult) and then
+    // representation; using PyObject_Str(pyResult) and then
     // PyString_AsString to print it gives "None" in all situations.
     // Because of this, I don't know how to write a valid command
     // interpreter for the python shell ...
@@ -1327,8 +1327,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // assume there will be more input that closes them off.
     {
         size_t open = std::count(part.begin(), part.end(), '(');
-        size_t clos = std::count(part.begin(), part.end(), ')');
-        _paren_count += open - clos;
+        size_t close = std::count(part.begin(), part.end(), ')');
+        _paren_count += open - close;
         if (0 < _paren_count) goto wait_for_more;
     }
 

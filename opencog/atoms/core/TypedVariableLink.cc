@@ -57,7 +57,7 @@ void TypedVariableLink::init()
 	    INTERVAL_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting type defintion, got %s in\n%s",
+			"Expecting type definition, got %s in\n%s",
 				nameserver().getTypeName(dtype).c_str(),
 				to_short_string().c_str());
 
@@ -92,7 +92,7 @@ const GlobInterval TypedVariableLink::default_interval() const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all equivalent
-/// type specifications get exactly the same hash.  To acheive this,
+/// type specifications get exactly the same hash.  To achieve this,
 /// the normalized type specifications are used, rather than the raw
 /// user-specified types. (The static analysis is "normalizing").
 

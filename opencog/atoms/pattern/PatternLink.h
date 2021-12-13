@@ -92,7 +92,7 @@ protected:
 	///
 	/// "virtual" clauses are those that contain virtual links.
 	/// They are always evaluatable, i.e. are usually never found
-	/// in the AtomSpace in thier grounded form. If the only
+	/// in the AtomSpace in their grounded form. If the only
 	/// connection between different parts of the pattern are virtual
 	/// clauses, then the pattern will split into multiple components,
 	/// each of which must be grounded separately, and then assembled
@@ -196,7 +196,7 @@ public:
 
 	static Handle factory(const Handle&);
 
-	// For printing not only the link iteself but all the associated
+	// For printing not only the link itself but all the associated
 	// C++ attributes
 	std::string to_long_string(const std::string& indent) const;
 };

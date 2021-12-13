@@ -72,7 +72,7 @@ void UniqueLink::init(bool allow_open)
 UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
 	: FreeLink(std::move(oset), type)
 {
-	// Derived types have thier own initialization
+	// Derived types have their own initialization
 	if (UNIQUE_LINK != type) return;
 	init(true);
 }

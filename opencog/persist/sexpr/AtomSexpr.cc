@@ -182,7 +182,7 @@ static TruthValuePtr get_stv(const std::string& s,
 /// `(Evaluation (Predicate "blort") (List (Concept "foo") (Concept "bar")))`
 /// will return the corresponding atoms.
 ///
-/// The string to decode is `s`, begining at location `l` and using `r`
+/// The string to decode is `s`, beginning at location `l` and using `r`
 /// as a hint for the end of the expression. The `line_count` is an
 /// optional argument for printing file line-numbers, in case of error.
 ///

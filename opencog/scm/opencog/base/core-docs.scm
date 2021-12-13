@@ -192,7 +192,7 @@
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
-    This does NOT remove the atom from any attached persistant storage.
+    This does NOT remove the atom from any attached persistent storage.
     Use cog-delete! from the (opencog persist) module to remove atoms
     from storage.
 
@@ -242,7 +242,7 @@
     Remove the indicated ATOM, and all atoms that point at it.
     Return #t on success, else return #f if not removed.
 
-    This does NOT remove the atom from any attached persistant storage.
+    This does NOT remove the atom from any attached persistent storage.
     Use cog-delete-recursive! from the (opencog persist) module to
     remove atoms from storage.
 

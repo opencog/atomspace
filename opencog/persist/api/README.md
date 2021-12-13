@@ -27,16 +27,16 @@ The provided functions are:
 * `load-atomspace` --
       Get all Atoms (in the peristant store).
 * `store-atom ATOM` --
-      Put the `ATOM` and all attached Values into the persistant store.
+      Put the `ATOM` and all attached Values into the persistent store.
 * `store-value ATOM KEY` --
-      Put the Value located at `KEY` on `ATOM` into the persistant store.
+      Put the Value located at `KEY` on `ATOM` into the persistent store.
 * `store-atomspace` --
-      Put all of the Atoms into the persistant store.
+      Put all of the Atoms into the persistent store.
 * `barrier` --
       Complete any async, pending load/store operations before
       continuing with the next load/store operation.
 
 Recall that you can always get more information and documentation with
 the `,a` `,apropos` `,d` and `,describe` commands. For example, saying
-`,a fetch` will list all commands with `fetch` in thier name, and 
+`,a fetch` will list all commands with `fetch` in their name, and 
 `,d fetch-incoming-set` will print the full documentation.

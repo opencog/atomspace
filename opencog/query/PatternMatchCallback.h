@@ -49,7 +49,7 @@ class PatternMatchCallback
 		 * is a node from the pattern, and the second
 		 * is a possible solution node from the atomspace.
 		 * Return true if the nodes match, else return
-		 * false. (i.e. return false if mis-match).
+		 * false. (i.e. return false if mismatch).
 		 */
 		virtual bool node_match(const Handle& patt_node,
 		                        const Handle& grnd_node) = 0;
@@ -61,7 +61,7 @@ class PatternMatchCallback
 		 * is a variable from the pattern, and the second
 		 * is a possible solution node from the atomspace.
 		 * Return true if the grouding is acceptable, else
-		 * return false. (i.e. return false if mis-match).
+		 * return false. (i.e. return false if mismatch).
 		 */
 		virtual bool variable_match(const Handle& patt_node,
 		                            const Handle& grnd_node) = 0;
@@ -69,7 +69,7 @@ class PatternMatchCallback
 		/**
 		 * Called when there is a variable in the template
 		 * pattern, but it is not bound into the template
-		 * itself: its just some other variable, not eligable
+		 * itself: its just some other variable, not eligible
 		 * for handling by variable_match() above. This variable
 		 * is possibly free in the template, and it is possibly
 		 * a bound variable that the matcher has stumbled across.
@@ -88,7 +88,7 @@ class PatternMatchCallback
 		 * the pattern, and the second is a possible
 		 * grounding link from the atomspace. Return true
 		 * if the link contents should be compared, else
-		 * return false. (i.e. return false if mis-match).
+		 * return false. (i.e. return false if mismatch).
 		 *
 		 * If true is returned, then the pattern matcher
 		 * will proceed, and will compare the outgoing sets
@@ -160,7 +160,7 @@ class PatternMatchCallback
 		 * Invoked to confirm or deny a candidate grounding for term that
 		 * consistes entirely of connectives and evaluatable terms.
 		 *
-		 * An 'evaluatable term' is any pattern term (term occuring in the
+		 * An 'evaluatable term' is any pattern term (term occurring in the
 		 * search pattern, either a node or link) that was  previously
 		 * declared as 'evaluatable'.  The canonical, default convention
 		 * is that evaluatable terms are any terms that contain a GPN --
@@ -178,7 +178,7 @@ class PatternMatchCallback
 		 * Unlike the other callbacks, this takes arguments in slightly
 		 * different form.  Here, 'eval' is the evaluatable term, and
 		 * 'gnds' contains the currently-proposed grounding for any
-		 * variables occuring within that term. It is a map: the 'key' is
+		 * variables occurring within that term. It is a map: the 'key' is
 		 * either a variable, or another term whose grounding is being
 		 * currently considered, and the 'value' is the proposed
 		 * grounding.
@@ -204,7 +204,7 @@ class PatternMatchCallback
 		 * of the clause, as an intermediate stage for evaluating
 		 * the overall truth value of a solution (grounding).
 		 *
-		 * A clause match has occured if all calls to node_match(),
+		 * A clause match has occurred if all calls to node_match(),
 		 * variable_match(), link_match() and post_link_match() in
 		 * that clause have returned true.
 		 *
@@ -273,7 +273,7 @@ class PatternMatchCallback
 		 *
 		 * Note that this callback may be called multiple times, to report
 		 * the same result.  This can happen, for example, if there are
-		 * mutiple ways for the pattern to match up to the result.
+		 * multiple ways for the pattern to match up to the result.
 		 */
 		virtual bool grounding(const GroundingMap &var_soln,
 		                       const GroundingMap &term_soln) = 0;
@@ -309,7 +309,7 @@ class PatternMatchCallback
 
 		/**
 		 * Called before when the search is started. This gives the system
-		 * a chance to perform neeeded intializations before the actual
+		 * a chance to perform needed intializations before the actual
 		 * search is started.  In principle, this callback is not really
 		 * needed, since the `perform_search()` callback "knows" that the
 		 * search is starting when it is called.  In practice,  the
@@ -385,7 +385,7 @@ class PatternMatchCallback
 		                         const Pattern& pat) = 0;
 
 		/**
-		 * You get to call this, to perform the actual earch.
+		 * You get to call this, to perform the actual search.
 		 */
 		virtual bool satisfy(const PatternLinkPtr&) = 0;
 };

@@ -41,7 +41,7 @@ namespace opencog
  * Delta-reduction can be understood in several ways. From the viewpoint
  * of term-rewriting, or inference or theorem-proving, a delta-reduction
  * is a (usually infinite) set of inference rules for reducing the
- * intial expression to the final expression. From the viewpoint of
+ * initial expression to the final expression. From the viewpoint of
  * proceedural computation, it just means "perform this computation
  * on this input", viz. "execute this function".
  *
@@ -55,7 +55,7 @@ namespace opencog
  * variable declarations in there; that would just be weird and create
  * confusion.  If the arguments to PlusLink happen to include a
  * variable, that variable is necessarily free; thus, this class
- * dervies from FreeLink.
+ * derives from FreeLink.
  *
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.

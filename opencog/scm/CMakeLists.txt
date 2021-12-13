@@ -17,7 +17,7 @@ ADD_GUILE_MODULE (FILES
 )
 
 # Actually, each of these are distinct modules, and really
-# should be listed seperately, one module each. But, as it
+# should be listed separately, one module each. But, as it
 # happens, the ADD_GUILE_MODULE macro still does the right
 # thing for a mass listing like this, so .. OK. Whatever.
 ADD_GUILE_MODULE (FILES

@@ -39,7 +39,7 @@ PutLink::PutLink(const HandleSeq&& oset, Type t)
 
 /// PutLink expects a very strict format: an arity-2 link, with
 /// the first part being a pattern, and the second a list or set
-/// of arguments. If the pattern has N variables, then the seccond
+/// of arguments. If the pattern has N variables, then the second
 /// part must have N arguments.  Furthermore, any type restrictions
 /// on the variables must be satisfied by the arguments.
 ///
@@ -58,7 +58,7 @@ PutLink::PutLink(const HandleSeq&& oset, Type t)
 ///
 /// The below is a handy-dandy easy-to-use form. When it is reduced,
 /// it will result in the creation of a set of reduced forms, not
-/// just one (the two sets haveing the same arity). Unfortunately,
+/// just one (the two sets having the same arity). Unfortunately,
 /// this trick cannot work for N=1 unless the variable is cosntrained
 /// to not be a set.
 ///
@@ -110,7 +110,7 @@ void PutLink::init(void)
 /// check these here.
 void PutLink::static_typecheck_arguments(void)
 {
-	// Cannot typecheck at this pont in time, because the schema
+	// Cannot typecheck at this point in time, because the schema
 	// might not be defined yet...
 	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype)
@@ -294,7 +294,7 @@ static inline Handle expand(const Handle& arg, bool silent)
  * to place into the reduction.  This does make the PutLink
  * resemble function application; however, here, the application
  * is not infinite-recursive; it is only one level deep.  There
- * is just enough execution performed to get the neeed arguments,
+ * is just enough execution performed to get the need arguments,
  * and no more.
  *
  * What this actually does is fairly complex and sophisticated.
@@ -364,7 +364,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Resolve the body, if needed. That is, if the body is
-	// given in a defintion, get that defintion.
+	// given in a definition, get that definition.
 	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
@@ -559,7 +559,7 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	// for someone else.
 	//
 	// This seems less than elegant, but given the way that PutLink is
-	// being used by the URE, this appears to be unavaoidable at this
+	// being used by the URE, this appears to be unavoidable at this
 	// time. Basically, I tried to untangle things, but there are way
 	// too many unit tests that expect the Instantiator to both
 	// beta-reduce and also execute in that tangled way that it does.

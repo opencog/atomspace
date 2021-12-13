@@ -63,7 +63,7 @@
 
 // If CHECK_ATOM_HASH_COLLISION is enabled, uncomment the following to
 // that to abort if a collision is detected. This is an extreme yet
-// convenient way to check whether a collision has occured.
+// convenient way to check whether a collision has occurred.
 // #define HALT_ON_COLLISON
 
 using namespace opencog;
@@ -90,7 +90,7 @@ void AtomSpace::init(void)
  * temporary results during evaluation, pattern matching and inference.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    Atom(ATOMSPACE),
+    Atom(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(transient),
     _transient(transient),
@@ -102,7 +102,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
 }
 
 AtomSpace::AtomSpace(AtomSpacePtr& parent) :
-    Atom(ATOMSPACE),
+    Atom(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
@@ -115,7 +115,7 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
 }
 
 AtomSpace::AtomSpace(const HandleSeq& bases) :
-    Atom(ATOMSPACE),
+    Atom(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
@@ -124,7 +124,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _environ = bases;
     for (const Handle& base : bases)
     {
-        if (not _nameserver.isA(base->get_type(), ATOMSPACE))
+        if (not _nameserver.isA(base->get_type(), ATOM_SPACE))
             throw opencog::RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
     }
@@ -438,7 +438,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // the typeIndex remove below does not find it (because it's
     // not there yet). If we failed to return here, then code
     // below wipes out the incoming set, while the adder thread
-    // finshes inserting the now-broken atom into the type index!
+    // finishes inserting the now-broken atom into the type index!
     // This can be hit in 1 out of 4 runs of `UseCountUTest`.
     //
     // One possibility is a "fix" that introduces new problems:
@@ -446,7 +446,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // first, and only then update the incoming set. But this seems
     // to create a new problem: the atom becomes visible as soon as
     // it's added to the type index, exposing a window where it
-    // breifly has broken incoming set.
+    // briefly has broken incoming set.
     //
     if (not typeIndex.removeAtom(handle)) {
         handle->unsetRemovalFlag();

@@ -77,7 +77,7 @@
  See also: `exec-scm-from-cmd`
 "
 
-	; get-string-all is a new r6rs proceedure, sucks in all bytes until
+	; get-string-all is a new r6rs procedure, sucks in all bytes until
 	; EOF on the port. Seems like TCP/IP ports end up being textual in
 	; guile, and the default r6rs transcoder is UTF8 and so everyone
 	; is happy, these days.  Note: in the good-old bad days, we used

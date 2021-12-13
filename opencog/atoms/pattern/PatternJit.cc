@@ -46,7 +46,7 @@ PatternLinkPtr PatternLink::jit_analyze(void)
 	// We loop here, so that all recursive definitions are expanded
 	// as well.  XXX Except that this is wrong, if any of the
 	// definitions are actually recursive. That is, this will be
-	// an infinite loop if a defintion is self-referencing; so
+	// an infinite loop if a definition is self-referencing; so
 	// really we need to expand, one level at a time, during
 	// evaluation, and only expand if really, really needed. (Which
 	// then brings up ideas like tail recursion, etc.)  Anyway, most

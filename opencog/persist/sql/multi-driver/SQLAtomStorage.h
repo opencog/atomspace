@@ -45,7 +45,7 @@
 
 #include "llapi.h"
 
-// See SQLAtomStorage.cc for extensive explantion of what this
+// See SQLAtomStorage.cc for extensive explanation of what this
 // is and why it has this particular value.
 #define NUM_OMP_THREADS 8
 

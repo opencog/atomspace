@@ -277,9 +277,9 @@ ODBCConnection::exec(const char * buff, bool trial)
     ODBCRecordSet* rs = get_record_set();
     SQLRETURN rc;
 
-    /* ODBC treats the appearence of the question-mark character ? as
+    /* ODBC treats the appearance of the question-mark character ? as
      * something special -- for binding columns, even if you are NOT
-     * actualy binding columns. If it shows up in the query, it will
+     * actually binding columns. If it shows up in the query, it will
      * result in the error message
      * (34) The # of binded parameters < the # of parameter markers;
      * Therefore we scan for and html-escape all question marks.
@@ -396,7 +396,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
         values = new char*[new_ncols];
         vsizes = new int[new_ncols];
 
-        /* intialize */
+        /* initialize */
         for (i = 0; i<new_ncols; i++)
         {
             column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];

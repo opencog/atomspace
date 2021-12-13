@@ -107,7 +107,7 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 
 	if (_runner) return _runner->execute(as, cargs, silent);
 
-	// Unkown proceedure type
+	// Unknown procedure type
 	throw RuntimeException(TRACE_INFO,
 	                       "Cannot evaluate unknown Schema %s",
 	                       to_short_string().c_str());

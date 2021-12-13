@@ -46,7 +46,7 @@ Local subdirectories include:
 Semantics
 ---------
 The correct semantics for the save and restore of values, including
-truth values, can be subtle: during recrusive saves or loads of outgoing
+truth values, can be subtle: during recursive saves or loads of outgoing
 sets, should values be clobbered? Left untouched? Merged?  The various
 possibilities all have different performance implications, as well as
 usability implications. These are discussed in the `README.md` file for

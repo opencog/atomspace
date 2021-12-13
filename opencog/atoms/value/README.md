@@ -47,8 +47,8 @@ expect from a key-value store.
 
 The AtomSpace is a generic graph database that holds Atoms. This is
 because every graph can be decomposed into trees, and because Atoms
-form a tree (with Nodes as leaf vertexes, and Links as interior
-vertexes). There are also many other domain-specific ways of viewing
+form a tree (with Nodes as leaf vertices, and Links as interior
+vertices). There are also many other domain-specific ways of viewing
 Atoms as forming a graph; in all cases, these graphs are held in the
 AtomSpace.
 

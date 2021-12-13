@@ -34,7 +34,7 @@ using namespace opencog;
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
-	// Derived types do thier own validation.
+	// Derived types do their own validation.
 	if (EXECUTION_OUTPUT_LINK != get_type()) return;
 
 	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
@@ -54,7 +54,7 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq&& oset, Type t)
 {
 	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
-		                      "Expection an ExecutionOutputLink!");
+		                      "Exception an ExecutionOutputLink!");
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,

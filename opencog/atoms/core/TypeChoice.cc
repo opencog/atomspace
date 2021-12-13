@@ -245,7 +245,7 @@ void TypeChoice::analyze(Handle anontype)
 	{
 		// This is a work-around to a URE bug. The URE should be
 		// using a SignatureLink, but its not. As a result, it
-		// gets undefined behavior and incorect results. Too bad.
+		// gets undefined behavior and incorrect results. Too bad.
 		// For now, just avoid throwing an exception. XXX FIXME.
 		return;
 	}
@@ -372,7 +372,7 @@ bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all equivalent
-/// type specifications get exactly the same hash.  To acheive this,
+/// type specifications get exactly the same hash.  To achieve this,
 /// the normalized type specifications are used, rather than the raw
 /// user-specified types. (The static analysis is "normalizing").
 

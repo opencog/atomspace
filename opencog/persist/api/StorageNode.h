@@ -193,7 +193,7 @@ public:
 	 * results are returned and placed in the local space.
 	 *
 	 * Only the Atoms that were the result of the search are returned.
-	 * Any Values hanging off those Atoms are not transfered from the
+	 * Any Values hanging off those Atoms are not transferred from the
 	 * remote server to the local AtomSpace.
 	 */
 	Handle fetch_query(const Handle& query, const Handle& key,

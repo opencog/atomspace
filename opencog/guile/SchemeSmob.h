@@ -3,7 +3,7 @@
  *
  * Guile SMOB interface for opencog atoms and truth values.
  * This class implements the actual functions the guile shell invokes
- * when it sees the opencog-specific proceedures.
+ * when it sees the opencog-specific procedures.
  *
  * Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
  *

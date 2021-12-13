@@ -38,7 +38,7 @@ typedef std::set<TypeChoicePtr> TypeChoiceSet;
 
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
-/// is to hold complex type defintions, and to provide operations
+/// is to hold complex type definitions, and to provide operations
 /// on them, such as type-intersection, type-union, filtering and
 /// type validation.
 ///

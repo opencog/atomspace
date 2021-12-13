@@ -98,7 +98,7 @@
 (define-public (gddar x) (gdr (gdr (gar x))) )
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
 
-; A more agressive way of doing the above:
+; A more aggressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
 ; But this would probably lead to various painful debugging situations.
 
@@ -497,7 +497,7 @@
 
   Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
   Starting at the atom 'anchor', chase its incoming links of
-  'link-type', and call proceedure 'proc' on all of the atoms of
+  'link-type', and call procedure 'proc' on all of the atoms of
   type 'endpoint-type' in those links. For example, if 'anchor' is the
   node 'GivenNode \"a\"', and the atomspace contains
 
@@ -761,7 +761,7 @@
 
   Then, given, as input, \"SomeAtom\", this returns a list of the \"OtherAtom\"
 
-  XXX! Caution/error! This implictly assumes that there is only one
+  XXX! Caution/error! This implicitly assumes that there is only one
   such ReferenceLink in the system, total. This is wrong !!!
 
   XXX! You probably want to be using either StateLink or DefineLink
@@ -831,7 +831,7 @@
   one or more elements.  Let the cardinality of s_k be n_k.
   Then this returns a list of n_1 * n_2 *... * n_m tuples.
   where the projection of the coordinate k is an element of s_k.
-  That is, let p_k be the k'th cordinate projection, so that
+  That is, let p_k be the k'th coordinate projection, so that
   p_k [a_1, a_2, ... , a_m] = a_k
 
   Then, if t is a tuple returned by this function, one has that
@@ -999,7 +999,7 @@
     and makes it current.  Thus, all subsequent atom operations will
     create atoms in this new atomspace. To delete it, simply pop it;
     after popping, all of the atoms placed into it will also be
-    deleted (unless they are refered to in some way).
+    deleted (unless they are referred to in some way).
 "
 	(fluid-set! cog-atomspace-stack
 		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))

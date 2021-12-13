@@ -158,7 +158,7 @@ protected:
 	bool _has_choice;
 
 	// True if this is a term that must be present in every successful
-	// patten grounding. There are no groundings at all, unless this
+	// pattern grounding. There are no groundings at all, unless this
 	// term is in each and every one of them. This corresponds to
 	// the ALWAYS_LINK in the default interpretation.
 	bool _is_always;

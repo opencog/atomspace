@@ -470,10 +470,10 @@ C) Nested odometers: that is, combinations of case A) and case B).
    Part of the problem is that we don't known, a priori, whether or
    not there is more than on unordered link, or not, until we hit it.
    If there is more than one, its not immediately obvious if it is a
-   sibiling or a descendant. (Perhaps some of this complexity could
+   sibling or a descendant. (Perhaps some of this complexity could
    be avoided during pattern compilation, i.e. when PatternLink gets
    created: we could analyze the structure up front, and then make
-   use of it during traversal. This is not doen right now (2019).)
+   use of it during traversal. This is not done right now (2019).)
 
 There's a final bit of complexity: we might be hitting unordered links
 for the first time, as we traverse up from below (e.g. by tracing from
@@ -625,7 +625,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		// then we might be the one that went all the way around
 		// first, and we exhausted all permutations. But then
 		// someone else took a step, so we have to go around back
-		// to the begining, and try all over again.
+		// to the beginning, and try all over again.
 		if (_perm_go_around)
 		{
 			// So first, take a look at *all* of the "wheels" in the
@@ -643,7 +643,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 			if (not_done)
 			{
-				// There are more unexplored permuations...
+				// There are more unexplored permutations...
 				DO_LOG({LAZY_LOG_FINE << "GO around " << ptm->to_string();})
 				_perm_go_around = false;
 				_perm_have_more = true;
@@ -742,7 +742,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
 		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
-		// Sort into explict std::less<PatternTermPtr>() order, as
+		// Sort into explicit std::less<PatternTermPtr>() order, as
 		// otherwise std::next_permutation() will miss some perms.
 		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
 		_perm_take_step = false;
@@ -755,8 +755,8 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 		_perm_to_step = ptm;
 
 		// If there are unordered links above us, we need to tell them
-		// about our existance, and let them know that we haven't been
-		// explored yet. We tell them by placing ourselves into thier
+		// about our existence, and let them know that we haven't been
+		// explored yet. We tell them by placing ourselves into their
 		// odometer.
 		if (_perm_podo.find(ptm) == _perm_podo.end())
 			_perm_podo[ptm] = false;
@@ -805,7 +805,7 @@ void PatternMatchEngine::perm_pop(void)
 	POPSTK(_perm_more_stack, _perm_have_more);
 	POPSTK(_perm_breakout_stack, _perm_breakout);
 
-	// XXX should we be clearing ... or poping this flag?
+	// XXX should we be clearing ... or popping this flag?
 	_perm_go_around = false;
 
 	POPSTK(_perm_odo_stack, _perm_odo_state);
@@ -1246,7 +1246,7 @@ bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
 ///
 /// This method wraps the major branch-point of the entire pattern
 /// matching process. Each element of the incoming set is the start of
-/// a different possible branch to be explored; each one might yeild
+/// a different possible branch to be explored; each one might yield
 /// a grounding. Thus, when backtracking, after a failed grounding in
 /// one branch, we backtrack to here, and try another branch. When
 /// backtracking, all state must be popped and pushed again, to enter
@@ -1271,7 +1271,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm` has no
-/// GlobNodes in it. This is a straighforward loop over the incoming
+/// GlobNodes in it. This is a straightforward loop over the incoming
 /// set, and nothing more.
 bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
                                                 const Handle& hg,
@@ -1381,7 +1381,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 
 	// If we are here, then there's at least one (and maybe more)
 	// unordered links, somewhere at this level, next to us or to
-	// the side and below us. Explore all of the differrent possible
+	// the side and below us. Explore all of the different possible
 	// permutations.
 	_perm_breakout = _perm_to_step;
 	bool found = false;
@@ -1408,7 +1408,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 
 /// Same as explore_up_branches(), handles the case where `ptm`
 /// has a GlobNode in it. In this case, we need to loop over the
-/// inconoming, just as above, and also loop over differrent glob
+/// inconoming, just as above, and also loop over different glob
 /// grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
@@ -1495,7 +1495,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 
 // explore_odometer - explore multiple unordered links at once.
 //
-// The core issue adressed here is that there may be lots of
+// The core issue addressed here is that there may be lots of
 // UnorderedLinks below us, and we have to explore all of them.
 // So this tries to advance all of them.
 bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
@@ -1589,7 +1589,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 {
 	// Iterate over different possible choices. At this time, this will
 	// never happen, because the selection of start-terms and joining
-	// terms never selects a term that is embeded inside a Choice. That
+	// terms never selects a term that is embedded inside a Choice. That
 	// is, we never start with a term underneath a Choice, move up,
 	// discover that we are in a Choice, and then have to explore the
 	// other choices. And that's OK, because this avoids complexity.
@@ -2496,8 +2496,8 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 		if (not tree_compare(side, gterm, CALL_SOLN)) return false;
 	}
 
-	// IdenticalLinks are neccessarily evaluatable, and thus are
-	// neccessarily embedded in an evaluatable clause, which we can
+	// IdenticalLinks are necessarily evaluatable, and thus are
+	// necessarily embedded in an evaluatable clause, which we can
 	// evaluate from the top. So pass this on for completion.
 	return clause_accept(clause, grnd);
 }

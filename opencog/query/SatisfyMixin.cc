@@ -184,7 +184,7 @@ class PMCGroundings : public SatisfyMixin
  * have to recurse to the bitter end. This basically prunes the search
  * space. (Similar to how SAT solving works).
  *
- * This perf optimization has not been doen because basically no one
+ * This perf optimization has not been done because basically no one
  * uses the pattern engine to explore large, complex cartesian products
  * in this way.
  */
@@ -263,7 +263,7 @@ bool SatisfyMixin::cartesian_product(
 	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
 	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
-	// We do this recursively, by poping N_m off the back, and calling
+	// We do this recursively, by popping N_m off the back, and calling
 	// ourselves.
 	//
 	// vg and vp will be the collection of all of the different possible
@@ -300,7 +300,7 @@ bool SatisfyMixin::cartesian_product(
 /* ================================================================= */
 /**
  * Ground (solve) a pattern; perform unification. That is, find one
- * or more groundings for the variables occuring in a collection of
+ * or more groundings for the variables occurring in a collection of
  * clauses (a hypergraph). The hypergraph can be thought of as a
  * a 'predicate' which becomes 'true' when a grounding exists.
  *
@@ -411,7 +411,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	//    product. Some clauses, such as GreaterThanLink, when removed,
 	//    result in a graph with multiple disconnected components. In
 	//    this case, the Cartesian product is constructed and then the
-	//    elements of the product are passed through the virutal links,
+	//    elements of the product are passed through the virtual links,
 	//    which produce true/false values which are used to keep/discard
 	//    that particular product. Basically, its just a filter on the
 	//    Cartesian product.

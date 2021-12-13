@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The TimeLink returns a NumberNode holding the current time.
-/// At this time, it takes no argumets.
+/// At this time, it takes no arguments.
 ///
 class TimeLink : public FunctionLink
 {

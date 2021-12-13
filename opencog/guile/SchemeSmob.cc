@@ -106,7 +106,7 @@ void opencog_guile_init(void)
 
 void SchemeSmob::init_smob_type(void)
 {
-	// A SMOB type for everything, incuding Handles/ValuePtrs.
+	// A SMOB type for everything, including Handles/ValuePtrs.
 	// cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (ValuePtr));
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
@@ -119,7 +119,7 @@ void SchemeSmob::init_smob_type(void)
 SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 {
 	// If they're not something we know about, let scheme sort it out.
-	// (Actualy, this should never happen ...)
+	// (Actually, this should never happen ...)
 	if ((not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a)) or
 	    (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, b)))
 		return scm_equal_p(a, b);

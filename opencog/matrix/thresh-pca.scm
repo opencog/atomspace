@@ -34,7 +34,7 @@
 ; Because P is sparse, it makes the most sense to compute the inner sum
 ; "on demand", for only those index values where the outer sum is
 ; non-vanishing. Here, "on-demand" is what scheme (or functional languages
-; in general) excell in: lazy evaluation.  That is, we won't calulate
+; in general) excel in: lazy evaluation.  That is, we won't calculate
 ; anything until you ask for it; and it seems that because P is sparse,
 ; chances are good you'll never ever ask for it.
 ;
@@ -109,7 +109,7 @@
 		; function
 		;     result(y) = sum_x p(x,y) FVEC(x)
 		; As always, this returns the function `result`. Call this
-		; function with an arguement to force the computation to
+		; function with an argument to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
 			(lambda (ITEM)
@@ -298,7 +298,7 @@
 			(/ cnt len)
 		)
 
-		; Likely, I beleive, to get called again, so cache.
+		; Likely, I believe, to get called again, so cache.
 		(define cache-left-unit (make-afunc-cache do-left-unit))
 		(define cache-right-unit (make-afunc-cache do-right-unit))
 

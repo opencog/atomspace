@@ -46,7 +46,7 @@ using namespace opencog;
 #define BUFSZ 120
 /* ================================================================ */
 /**
- * Retreive the incoming set of the indicated atom.
+ * Retrieve the incoming set of the indicated atom.
  */
 void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 {
@@ -83,7 +83,7 @@ void SQLAtomStorage::getIncoming(AtomSpace& table, const char *buff)
 }
 
 /**
- * Retreive the entire incoming set of the indicated atom.
+ * Retrieve the entire incoming set of the indicated atom.
  */
 void SQLAtomStorage::fetchIncomingSet(AtomSpace* table, const Handle& h)
 {
@@ -110,7 +110,7 @@ void SQLAtomStorage::fetchIncomingSet(AtomSpace* table, const Handle& h)
 }
 
 /**
- * Retreive the incoming set of the indicated atom, but only those atoms
+ * Retrieve the incoming set of the indicated atom, but only those atoms
  * of type t.
  */
 void SQLAtomStorage::fetchIncomingByType(AtomSpace* table, const Handle& h, Type t)

@@ -52,7 +52,7 @@ void ArithmeticLink::init(void)
 // ===========================================================
 /// delta_reduce() -- delta-reduce the expression by summing constants, etc.
 ///
-/// Recall the defintion of delta-reduction: it is the replacement of
+/// Recall the definition of delta-reduction: it is the replacement of
 /// functions with values by the value that the function would have.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
@@ -63,7 +63,7 @@ void ArithmeticLink::init(void)
 /// is (Number 4) -- its just a constant.
 ///
 /// The delta-reduct of (FoldLink (VariableNode "$x") (NumberNode 0))
-/// is (VariableNode "$x"), because adding zero to anything yeilds the
+/// is (VariableNode "$x"), because adding zero to anything yields the
 /// thing itself.
 ///
 /// This is certainly NOT a simple, easy-to-maintain way to build a
@@ -125,7 +125,7 @@ Handle ArithmeticLink::reorder(void) const
 		Type htype = h->get_type();
 
 		// Hack for pattern matcher, which returns SetLinks of stuff.
-		// Recurse exacly once.
+		// Recurse exactly once.
 		if (SET_LINK == htype)
 		{
 			for (const Handle& he : h->getOutgoingSet())

@@ -219,9 +219,9 @@ void JoinLink::setup_top_clauses(void)
 			_top_clauses.push_back(clause);
 	}
 
-	// Do any of thes clauses require any of the other variables
+	// Do any of these clauses require any of the other variables
 	// that were specified? If so then we have to burn a fair bit
-	// of extra RAM to keep track of thier groundings. This is
+	// of extra RAM to keep track of their groundings. This is
 	// unpleasant but unavoidable.
 	for (const Handle& tclause : _top_clauses)
 	{
@@ -501,7 +501,7 @@ HandleSet JoinLink::upper_set(AtomSpace* as, bool silent,
 		return containers;
 
 	// The meet link provided us with elements that are "too low",
-	// fail to be joins. Remove them. Ther shouldn't be all that
+	// fail to be joins. Remove them. There shouldn't be all that
 	// many of them; it depends on how the join got written.
 	// Well, this could be rather CPU intensive... there's a lot
 	// of fishing going on here.

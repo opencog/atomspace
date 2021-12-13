@@ -89,7 +89,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 
 	// The exception thrown immediately above will be caught near the
 	// very end of this while-loop. The loop just brings us back to the
-	// begining, with lform set to localpat.
+	// beginning, with lform set to localpat.
 	while (true)
 	{
 		// Wrap the actual satisfier in a try-catch loop. If the pattern

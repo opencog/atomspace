@@ -57,7 +57,7 @@ void PatternLink::common_init(void)
 
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
-	// present in thier literal form.
+	// present in their literal form.
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
 		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
@@ -500,7 +500,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 }
 
 /// Search for any PRESENT_LINK, ABSENT_LINK and CHOICE_LINK's that are
-/// recusively embedded inside some evaluatable clause.  Note these as
+/// recursively embedded inside some evaluatable clause.  Note these as
 /// literal, groundable clauses. `record_literal` does this.
 ///
 /// If there weren't any literal Present, Absent or Choice Links, (i.e.
@@ -510,7 +510,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 ///
 /// What we do here is:
 /// * If a clause is not evaluatable, then assume `Present` was intended.
-/// * If it is antyhing else, assume some later stage will evaluate it.
+/// * If it is anything else, assume some later stage will evaluate it.
 ///
 bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
                                        const TypeSet& connectives,
@@ -545,7 +545,7 @@ bool PatternLink::unbundle_clauses_rec(const PatternTermPtr& term,
 /// whereas SequentialAnd's must be grounded and evaluated sequentially.
 ///
 /// The overall process makes built-in assumptions about using the
-/// TermMatchMixin, which gives the boolean operators thier classical
+/// TermMatchMixin, which gives the boolean operators their classical
 /// logic interpretation. In principle, other interpretations are
 /// possible (e.g. linear logic, or any number of the modal logics),
 /// but these are not currently supported in this code base. Supporting
@@ -751,8 +751,8 @@ bool PatternLink::is_virtual(const Handle& clause)
 	size_t nfree = num_unquoted_unscoped_in_tree(clause, _variables.varset);
 	if (2 > nfree) return false;
 
-	// IdenticalLinks can bridge over thier two sides.
-	// So we treat them as an unsual but not really virtual link.
+	// IdenticalLinks can bridge over their two sides.
+	// So we treat them as an unusual but not really virtual link.
 	if (IDENTICAL_LINK == clause->get_type()) return false;
 
 	size_t nsub = 0;
@@ -829,7 +829,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// Ignore literals inside of Choice and Always; these should have
 	// been handled earlier. Ditto for Present, Absent.
 	// The Sequentials are weird from a search perspective: they appear
-	// (should only appear) in SatisfactionLinks, and have thier own
+	// (should only appear) in SatisfactionLinks, and have their own
 	// distinct logic to them. So if we're inside of one of these,
 	// we drop out. Probably should refactor the code so that we are
 	// not even called for any of these cases.
@@ -864,7 +864,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 		}
 
 		// EvaluationLinks with evaluatable predicates cannot
-		// be found in the AtomSpace. But perhaps thier arguments
+		// be found in the AtomSpace. But perhaps their arguments
 		// might be. So fall through and look at those.
 	}
 
@@ -1012,7 +1012,7 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 	// `add_dummies()` method above. But if we did, it would be
 	// an infinite loop that blows out the stack, because X and Y
 	// are not constrained, and match everything, including the
-	// temorary terms created during search... so we do NOT
+	// temporary terms created during search... so we do NOT
 	// `add_dummies()` this case. See issue #1420 for more.
 	for (const Handle& v : vars)
 	{

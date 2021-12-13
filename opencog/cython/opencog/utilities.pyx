@@ -11,7 +11,7 @@ from opencog.utilities cimport c_load_file
 import warnings
 
 
-# Avoid recursive intialization
+# Avoid recursive initialization
 is_initialized = False
 
 
@@ -27,7 +27,7 @@ def initialize_opencog(AtomSpace atomspace=None):
         warnings.warn("setting default atomspace with initialize_opencog is deprecated,\
                 use set_default_atomspace instead", DeprecationWarning)
         set_default_atomspace(atomspace)
-    # Avoid recursive intialization
+    # Avoid recursive initialization
     global is_initialized
     if is_initialized:
         return

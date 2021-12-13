@@ -259,7 +259,7 @@ bool TermMatchMixin::is_self_ground(const Handle& ptrn,
 	// Unwrap quotations, so that they can be compared properly.
 	if (Quotation::is_quotation_type(ptype))
 	{
-		// Wow, if we are here, and patern==grnd, this must be
+		// Wow, if we are here, and pattern==grnd, this must be
 		// a self-grounding, as I don't believe there is any other
 		// valid way to get to here.
 		if (quotation.consumable(ptype) and ptrn == grnd) return true;
@@ -451,9 +451,9 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
-/* This implements AlwaysLink (the non-scoped vesion of ForAllLink
+/* This implements AlwaysLink (the non-scoped version of ForAllLink
  * used by the pattern matcher.) The AlwaysLink must always be
- * satsifed, every time it is called, from the begining of the
+ * satsifed, every time it is called, from the beginning of the
  * search to the end.  The AlwaysLinks is satsified whenever
  * grnd != null, and otherwise, if fails. That is, if grnd==nullptr
  * then there is some grounding of (all of) the other clauses of
@@ -500,7 +500,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
 	              << gvirt->to_short_string() << std::endl;})
 
-	// At this time, we expect all virutal links to be in one of two
+	// At this time, we expect all virtual links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
 	// EvaluationLinks should have the structure
 	//

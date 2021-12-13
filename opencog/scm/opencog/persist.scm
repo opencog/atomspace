@@ -1,5 +1,5 @@
 ;
-; OpenCog Persistance module
+; OpenCog Persistence module
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
@@ -147,13 +147,13 @@
  fetch-incoming-set ATOM [STORAGE]
 
     Fetch the incoming set of the ATOM from storage. The fetch is
-    NOT recursive.  See `load-referers` for a recursive fetch.
+    NOT recursive.  See `load-referrers` for a recursive fetch.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the fetch. It must be a StorageNode.
 
     See also:
-      `load-referers` to get every graph that contains an Atom.
+      `load-referrers` to get every graph that contains an Atom.
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
@@ -173,7 +173,7 @@
     used as the source of the fetch. It must be a StorageNode.
 
     See also:
-      `load-referers` to get every graph that contains an Atom.
+      `load-referrers` to get every graph that contains an Atom.
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
 "
@@ -285,7 +285,7 @@
     fetch-incoming-set ATOM -- fetch the entire incoming set of ATOM.
     fetch-incoming-by-type ATOM TYPE -- get a subset of the incoming set.
     fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referers ATOM -- get every graph that contains ATOM
+    load-referrers ATOM -- get every graph that contains ATOM
     load-atoms-of-type TYPE -- load only atoms of type TYPE
 "
 	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
@@ -306,7 +306,7 @@
 
     See also:
     store-atom ATOM -- store one ATOM and all of the values on it.
-    store-referers ATOM -- store all graphs that contain ATOM
+    store-referrers ATOM -- store all graphs that contain ATOM
 "
 	(if STORAGE (sn-store-atomspace STORAGE) (dflt-store-atomspace))
 )
@@ -322,9 +322,9 @@
    the AtomSpace. The results will be returned directly and also cached
    at KEY. The QUERY must be either a JoinLink, MeetLink or QueryLink.
 
-   This can be thought of as a generalization of `load-referers`,
+   This can be thought of as a generalization of `load-referrers`,
    `fetch-incoming-set` and `fetch-incoming-by-type`. Thus, the
-   simplest JoinLink is effectively the same thing as `load-referers`,
+   simplest JoinLink is effectively the same thing as `load-referrers`,
    while a JoinLink with a depth of one is the same thing as
    `fetch-incoming-set`, and a JoinLink with a type restriction is the
    same thing as `fetch-incoming-by-type`.
@@ -349,7 +349,7 @@
 
    See also:
      `fetch-incoming-set` to fetch the incoing set of an Atom.
-     `load-referers` to fetch all graphs containing an Atom.
+     `load-referrers` to fetch all graphs containing an Atom.
 "
 	(if (nil? METADATA)
 		(dflt-fetch-query-2args QUERY KEY)
@@ -361,9 +361,9 @@
 )
 
 ; --------------------------------------------------------------------
-(define*-public (store-referers ATOM #:optional (STORAGE #f))
+(define*-public (store-referrers ATOM #:optional (STORAGE #f))
 "
- store-referers ATOM [STORAGE] -- Store all hypergraphs that contain ATOM
+ store-referrers ATOM [STORAGE] -- Store all hypergraphs that contain ATOM
 
     This stores all hypergraphs that the ATOM participates in.
     It does this by recursively exploring the incoming set of the atom.
@@ -371,7 +371,7 @@
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
 
-    See also `load-referers`.
+    See also `load-referrers`.
 "
 	(define (do-store atom)
 		(let ((iset (cog-incoming-set atom)))
@@ -385,9 +385,9 @@
 )
 
 ; --------------------------------------------------------------------
-(define*-public (load-referers ATOM #:optional (STORAGE #f))
+(define*-public (load-referrers ATOM #:optional (STORAGE #f))
 "
- load-referers ATOM [STORAGE] -- Load all graphs that contain ATOM.
+ load-referrers ATOM [STORAGE] -- Load all graphs that contain ATOM.
 
    This loads all hypergraphs that the given ATOM participates in.
    It does this by recursively exploring the incoming set of the atom.
@@ -398,7 +398,7 @@
    See also:
      `fetch-incoming-set` to fetch only the first level above an Atom.
      `fetch-query` to perform a generalized query for holders of an Atom.
-     `store-referers` to store all referers.
+     `store-referrers` to store all referrers.
 "
 	(if (not (null? ATOM))
 		; The fetch-incoming-set function for this is defined to perform
@@ -406,11 +406,11 @@
 		; We do an extra recursion here, in case we were passed a list.
 		(begin
 			(if (pair? ATOM)
-				(for-each load-referers ATOM STORAGE)
+				(for-each load-referrers ATOM STORAGE)
 				(fetch-incoming-set ATOM STORAGE)
 			)
 			(for-each
-				(lambda (atm) (load-referers atm STORAGE))
+				(lambda (atm) (load-referrers atm STORAGE))
 				(cog-incoming-set ATOM))
 		)
 	)

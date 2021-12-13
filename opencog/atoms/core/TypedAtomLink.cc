@@ -52,7 +52,7 @@ void TypedAtomLink::init()
 	    SIGNATURE_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting type defintion, got %s",
+			"Expecting type definition, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
 }

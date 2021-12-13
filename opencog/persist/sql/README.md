@@ -327,10 +327,10 @@ The `foo` database created above can be deleted at the shell prompt:
    $ dropdb foo
 ```
 
-There is currently no way to drop databses from the scheme prompt;
+There is currently no way to drop databases from the scheme prompt;
 this is partly a safety feature (fewer accidents), and partly a
 minimization of complexity. If you need complex database management,
-then you need a database managemenet system. This guile module is
+then you need a database management system. This guile module is
 not a replacement for a full DBMS, nor could it ever be.
 
 Skip ahead to the section [Using the System](#using-the-system)

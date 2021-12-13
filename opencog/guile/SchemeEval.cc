@@ -288,7 +288,7 @@ static void init_only_once(void)
 {
 	if (done_with_init) return;
 
-	// Enter initalization only once. All other threads spin, until
+	// Enter initialization only once. All other threads spin, until
 	// it is completed.
 	//
 	// The first time that guile is initialized, it MUST be done in some
@@ -749,8 +749,8 @@ std::string SchemeEval::do_poll_result()
 		// Hmmm. I guess we could just block on reading the pipe...
 		// unless the eval did not produce any output, in which case
 		// I guess we could ... close and re-open the pipe? Somehow
-		// unblock it?  I dunno. The below curently works, and I'm
-		// loosing interest just right now.
+		// unblock it?  I dunno. The below currently works, and I'm
+		// losing interest just right now.
 		std::unique_lock<std::mutex> lck(_poll_mtx);
 		while (not _eval_done)
 		{
@@ -771,7 +771,7 @@ std::string SchemeEval::do_poll_result()
 	save_rc(SCM_EOL);
 
 	// If we are here, then evaluation is done. Check the various
-	// evalution result flags, etc.
+	// evaluation result flags, etc.
 	_poll_done = true;
 
 	/* An error is thrown if the input expression is incomplete,
@@ -1058,7 +1058,7 @@ static SCM thunk_scm_eval(void * expr)
 /**
  * do_apply_scm -- apply named function func to arguments in ListLink
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
+ * atom handles. This list is unpacked, and then the function func
  * is applied to them. The SCM value returned by the function is returned.
  */
 SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
@@ -1097,10 +1097,10 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
  * apply_v -- apply named function func to arguments in ListLink.
  * Return an OpenCog ValuePtr (Handle, TruthValue or Value).
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
+ * atom handles. This list is unpacked, and then the function func
  * is applied to them. The function is presumed to return pointer
  * to a ProtoAtom [now renamed Value] object. If the function does
- * not return a ProtoAtom, or if n error ocurred during evaluation,
+ * not return a ProtoAtom, or if n error occurred during evaluation,
  * then a C++ exception is thrown.
  */
 ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)

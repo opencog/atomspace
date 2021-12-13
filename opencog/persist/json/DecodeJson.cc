@@ -1,6 +1,6 @@
 /*
  * DecodeJson.cc
- * Decode JSON decribing Atms and Values.
+ * Decode JSON describing Atms and Values.
  *
  * Copyright (c) 2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -106,7 +106,7 @@ std::string Json::get_node_name(const std::string& s,
 /// For example: `{ "type": "Concept", "name": "foo" }`
 /// will return the corresponding atom.
 ///
-/// The string to decode is `s`, begining at location `l` and using `r`
+/// The string to decode is `s`, beginning at location `l` and using `r`
 /// as a hint for the end of the expression.
 ///
 /// XXX FIXME. This is a quick hack. It will be confused be embedded

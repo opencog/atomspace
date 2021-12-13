@@ -59,10 +59,10 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	// In the current C++ code, handles can also be pointers to
-	// values.  Howerver, in the guile wrapper, we expect all
+	// values.  However, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
 	// if you just want Values.
-	if (not (h->is_link() or h->is_node() or (ATOMSPACE == h->get_type())))
+	if (not (h->is_link() or h->is_node() or (ATOM_SPACE == h->get_type())))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
@@ -388,8 +388,8 @@ SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype, SCM aspace)
 /* ============================================================== */
 
 /**
- * Apply proceedure proc to all atoms of type stype
- * If the proceedure returns something other than #f,
+ * Apply procedure proc to all atoms of type stype
+ * If the procedure returns something other than #f,
  * terminate the loop.
  * The `aspace` argument is optional; use it if present, else not.
  */
@@ -413,7 +413,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 		// In case h got removed from the atomspace between
 		// get_handles_by_type call and now. This may happen either
 		// externally or by proc itself (such as cog-extract-recursive)
-		if (not h->getAtomSpace() and not (ATOMSPACE == h->get_type()))
+		if (not h->getAtomSpace() and not (ATOM_SPACE == h->get_type()))
 			continue;
 
 		SCM smob = handle_to_scm(h);

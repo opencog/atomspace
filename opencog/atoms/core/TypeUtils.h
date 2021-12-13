@@ -47,7 +47,7 @@ bool value_is_type(const Handle& type_spec, const ValuePtr& value);
 /**
  * Type matcher. Returns true if `left` can mate with `right`.
  * Here, `left` can be a type definition, and `right` can be
- * another type defintion, or a value.  Mating is possible whenever
+ * another type definition, or a value.  Mating is possible whenever
  * `left` is broader, less restricitve than `right`; equivalently
  * if `right` is narrower than 'left`.
  *

@@ -223,7 +223,7 @@ protected:
         // need to be either hash tables or rb-trees. Scanning for
         // uniqueness in a vector is prohibitavely slow.  Note that
         // incoming sets containing 10K atoms are not unusual, and can
-        // be the source of bottlnecks.  Note that an atomspace can
+        // be the source of bottlenecks.  Note that an atomspace can
         // contain a hundred-million atoms, so the solution has to be
         // small. This rules out using a vector to store the
         // buckets (I tried).

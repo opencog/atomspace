@@ -49,7 +49,7 @@ void FoldLink::init(void)
 // ===============================================================
 
 /// delta_reduce() -- delta-reduce a right-fold by recursively
-/// calling kons.  Recall the defintion of delta-reduction: it is
+/// calling kons.  Recall the definition of delta-reduction: it is
 /// that operation by which a function with arguments is replaced
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.

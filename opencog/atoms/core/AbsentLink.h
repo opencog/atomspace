@@ -49,7 +49,7 @@ namespace opencog
 ///         OtherAtom
 ///
 /// and the copies of the duplicated `SomeAtom` is removed during atom
-/// contruction.
+/// construction.
 ///
 /// Conceptually, the ctor for AbsentLink applies a rule of inference,
 /// called the "Rule of contraction (or idempotency of entailment)"

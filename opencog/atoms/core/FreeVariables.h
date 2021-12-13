@@ -40,7 +40,7 @@ namespace opencog
 /// The FreeVariables struct defines a list of free, untyped variables
 /// "unbundled" from the hypergraph in which they normally occur. The
 /// goal of this structure is to make it easier and faster to work with
-/// VariableNodes in C++; specifically, to find thier locations within
+/// VariableNodes in C++; specifically, to find their locations within
 /// a hypergraph, and to perform beta-substitution (to substitute a
 /// argument for the variable).  This class implements the data that is
 /// used by FreeLink to work with free variables.
@@ -92,7 +92,7 @@ struct FreeVariables : Replacement
 	/// Create an ordered set of the free variables in the given body.
 	///
 	/// By "ordered set" it is meant: a list of variables in a
-	/// cannonical order that is compatible with alpha-equivalence. So
+	/// canonical order that is compatible with alpha-equivalence. So
 	/// that if variables are renamed the order will not be altered in
 	/// a way that modifies the semantics of the scope.
 	///

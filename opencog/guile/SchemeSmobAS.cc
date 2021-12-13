@@ -49,7 +49,7 @@ SCM SchemeSmob::ss_as_p (SCM s)
 	if (nullptr == vp)
 		return SCM_BOOL_F;
 
-	if (ATOMSPACE == vp->get_type())
+	if (ATOM_SPACE == vp->get_type())
 		return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
@@ -61,7 +61,7 @@ SCM SchemeSmob::ss_as_p (SCM s)
 AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 {
 	ValuePtr vp(scm_to_protom(sas));
-	if (nullptr == vp or ATOMSPACE != vp->get_type())
+	if (nullptr == vp or ATOM_SPACE != vp->get_type())
 		return nullptr;
 
 	return (AtomSpace*) vp.get();
@@ -253,7 +253,7 @@ void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
 	// There are weird test-case scenarios where the fluid is not
-	// initalized. Those will crash-n-burn without this test.
+	// initialized. Those will crash-n-burn without this test.
 	if (0x0 == atomspace_fluid) return nullptr;
 
 	SCM ref = scm_fluid_ref(atomspace_fluid);

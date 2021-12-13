@@ -37,9 +37,9 @@ namespace opencog
 /**
  * This class provides a simple, generic interface for communicating
  * Atoms and Values between the local and a remote server (often, a
- * storage or "persistance" server. The general model is that the local
- * AtomSpace is not persistant (it's in RAM, it disappears when the
- * process exits), while the remote server may be persistant (if it is
+ * storage or "persistence" server. The general model is that the local
+ * AtomSpace is not persistent (it's in RAM, it disappears when the
+ * process exits), while the remote server may be persistent (if it is
  * backed to a file or other long-term storage.).
  *
  * This class focuses on "on-demand" atom retrieval, rather than on

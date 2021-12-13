@@ -118,7 +118,7 @@ bool CountTruthValue::operator==(const Value& rhs) const
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
-// because the CountTruthValue usally stores an integer count,
+// because the CountTruthValue usually stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const
