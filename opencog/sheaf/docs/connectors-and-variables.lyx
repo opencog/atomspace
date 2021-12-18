@@ -100,7 +100,7 @@ Linas Vepstas
 \begin_layout Date
 17 December 2021
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Revised version; earlier versions: 2 May 2020; 21 August 2020
@@ -465,6 +465,14 @@ An object is anything that can be the value of a variable, that is, anything
 \end_inset
 
  (Van Inwagen 2002, 180)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Inwagen2002"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1335,6 +1343,358 @@ compositional
  is immaterial: one obtains the same figure, no matter what the sequence.
 \end_layout
 
+\begin_layout Subsubsection*
+Polarity (Sexuality)
+\end_layout
+
+\begin_layout Standard
+The above presentation of the concept of jigsaw pieces is misleading in
+ one important sense, which should be clarified.
+ The jigsaw pieces, as drawn, are explicitly heterosexual (bipolar), in
+ that there are explicit male and female connectors.
+ In general, this need not be the case: one can have monopolar (asexual)
+ connectors, or tri-sexual connectors, or connectors of arbitrary complexity.
+ 
+\end_layout
+
+\begin_layout Standard
+This is worth articulating.
+ In the previous diagram, there was a slot and a tab, which can be indicated
+ as 
+\begin_inset Formula $-$
+\end_inset
+
+ and 
+\begin_inset Formula $+$
+\end_inset
+
+.
+ They had an explicit shape, which we can call 
+\begin_inset Quotes eld
+\end_inset
+
+type A
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A different shape might be called 
+\begin_inset Quotes eld
+\end_inset
+
+type B
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The connection rules are such that 
+\begin_inset Formula $A+$
+\end_inset
+
+ can only connect to 
+\begin_inset Formula $A-$
+\end_inset
+
+ and never to 
+\begin_inset Formula $B+$
+\end_inset
+
+ or 
+\begin_inset Formula $B-$
+\end_inset
+
+.
+ But also, 
+\begin_inset Formula $A+$
+\end_inset
+
+ cannot connect to other 
+\begin_inset Formula $A+$
+\end_inset
+
+'s.
+ This 
+\begin_inset Quotes eld
+\end_inset
+
+makes sense
+\begin_inset Quotes erd
+\end_inset
+
+, and is a desirable property if one is using jigsaw pieces to model beta
+ reduction: a variable of type 
+\begin_inset Formula $A$
+\end_inset
+
+ can only be beta-reduced with a term of type 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ That is, variables are always 
+\begin_inset Formula $-$
+\end_inset
+
+ and those things that can be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ variables are always 
+\begin_inset Formula $+$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+There are other possibilities.
+ The monosexual (monopolar) case would be a connector direction of 
+\begin_inset Formula $*$
+\end_inset
+
+ with a rule that any 
+\begin_inset Formula $A*$
+\end_inset
+
+ can connect to any other connector of type 
+\begin_inset Formula $A*$
+\end_inset
+
+ but never to a connector of type 
+\begin_inset Formula $B*$
+\end_inset
+
+.
+ There is no real analog of this in term algebras: such algebras always
+ make a sharp distinction between variables and constants; yet the monopolar
+ case fails to distinguish these.
+ Connecting two connectors together is still like beta reduction; but the
+ sense of direction is lost.
+\end_layout
+
+\begin_layout Standard
+An example of a trisexual connector would require connectivity rules similar
+ to the following.
+ There are three direction types, 
+\begin_inset Formula $\#$
+\end_inset
+
+, 
+\begin_inset Formula $\$$
+\end_inset
+
+ and 
+\begin_inset Formula $\%$
+\end_inset
+
+ and the rules are that 
+\begin_inset Formula $\$$
+\end_inset
+
+ can connect to # and 
+\begin_inset Formula $\$$
+\end_inset
+
+ can connect to 
+\begin_inset Formula $\%$
+\end_inset
+
+ but 
+\begin_inset Formula $\#$
+\end_inset
+
+ cannot connect to 
+\begin_inset Formula $\%$
+\end_inset
+
+.
+ Nor can 
+\begin_inset Formula $\$$
+\end_inset
+
+ connect to 
+\begin_inset Formula $\$$
+\end_inset
+
+.
+ (Confused? Look at the US keyboard layout: these three keys are in order,
+ with 
+\begin_inset Formula $\$$
+\end_inset
+
+ in the middle.
+ The rule is 
+\begin_inset Quotes eld
+\end_inset
+
+neighbors can connect, but not otherwise
+\begin_inset Quotes erd
+\end_inset
+
+).
+ There are still the connector-shape types 
+\begin_inset Formula $A,B,\cdots$
+\end_inset
+
+ and so we extrapolate that 
+\begin_inset Formula $A\$$
+\end_inset
+
+ can connect to 
+\begin_inset Formula $A\#$
+\end_inset
+
+ and to 
+\begin_inset Formula $A\%$
+\end_inset
+
+ but not to 
+\begin_inset Formula $B\$$
+\end_inset
+
+ or to 
+\begin_inset Formula $B\#$
+\end_inset
+
+ or 
+\begin_inset Formula $B\%$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Neither the monosexual nor the trisexual cases are easy to illustrate in
+ terms of pretty hand-drawn pictures of jigsaw pieces.
+ The strict idea of jigsaw pieces does break down.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Representation of Sexuality
+\end_layout
+
+\begin_layout Standard
+Wandering a bit off-topic, it is worth pointing out that there is a representati
+on theory of the multi-polar direction types in terms of monopolar and bipolar
+ direction types, together with strings of connector-types.
+ 
+\end_layout
+
+\begin_layout Standard
+This is illustrated here.
+ For the connector strings, lower-case letters will be used.
+ For 
+\begin_inset Formula $\#$
+\end_inset
+
+ write the string 
+\begin_inset Formula $r*-$
+\end_inset
+
+ and for 
+\begin_inset Formula $\$$
+\end_inset
+
+ write 
+\begin_inset Formula $rs+$
+\end_inset
+
+ and for 
+\begin_inset Formula $\%$
+\end_inset
+
+ write 
+\begin_inset Formula $*s-$
+\end_inset
+
+.
+ Now the mating rules are these: the wild-card 
+\begin_inset Formula $*$
+\end_inset
+
+ matches any lower-case letter; otherwise lower-case letters must match
+ exactly.
+ As before, 
+\begin_inset Formula $+$
+\end_inset
+
+ can only pair with 
+\begin_inset Formula $-$
+\end_inset
+
+.
+ Thus, 
+\begin_inset Formula $r*-$
+\end_inset
+
+ can mate with 
+\begin_inset Formula $rs+$
+\end_inset
+
+ because the 
+\begin_inset Formula $r$
+\end_inset
+
+ matches, the 
+\begin_inset Formula $*$
+\end_inset
+
+ matches anything, and the 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ will mate.
+ Likewise, 
+\begin_inset Formula $rs+$
+\end_inset
+
+ can mate with 
+\begin_inset Formula $*s-$
+\end_inset
+
+.
+ However, 
+\begin_inset Formula $r*-$
+\end_inset
+
+ and 
+\begin_inset Formula $*s-$
+\end_inset
+
+ cannot mate: although the wild-cards allow this, the poles do not.
+\end_layout
+
+\begin_layout Standard
+This remark was necessary, since Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+literal "false"
+
+\end_inset
+
+ uses this style for indicating connectivity.
+ Capital letters must match exactly; strings of lower-case letters with
+ embedded wild-cards match is the strings match, and the poles match.
+ Thus, the theory can be understood as having bipolar connection directions,
+ with complex string-matching rules, or as simple upper-case types, and
+ multi-sexual connector directions.
+ As per usual, a rigorous mathematical treatment of this representation
+ theory may reveal subtleties beyond what has been said here.
+ Or maybe not.
+ That this string representation is sufficient to represent any kind of
+ sexual mating remains an unproven conjecture at this point.
+\end_layout
+
 \begin_layout Subsection*
 In proof theory:
 \end_layout
@@ -1353,7 +1713,7 @@ context
 \begin_inset Quotes eld
 \end_inset
 
-formula occurance
+formula occurrence
 \begin_inset Quotes erd
 \end_inset
 
@@ -1417,13 +1777,13 @@ special propositional variable
 \end_inset
 
 , sometimes denoted with a star-character.
- The star is outside of the language of predicate logic; it's in the meta-langau
+ The star is outside of the language of predicate logic; it's in the meta-langua
 ge.
  A 
 \begin_inset Quotes eld
 \end_inset
 
-formula occurance
+formula occurrence
 \begin_inset Quotes erd
 \end_inset
 
@@ -1434,7 +1794,7 @@ formula occurance
 \begin_inset Quotes eld
 \end_inset
 
-formula occurance
+formula occurrence
 \begin_inset Quotes erd
 \end_inset
 
@@ -1524,7 +1884,7 @@ These two pieces together constitute the original formula:
 
 \begin_layout Standard
 Drawn assembled like this, this is just the formula.
- Drawn disassembled gives the formula occurance.
+ Drawn disassembled gives the formula occurrence.
 \end_layout
 
 \begin_layout Subsection*
@@ -1532,7 +1892,7 @@ In lambda calculus
 \end_layout
 
 \begin_layout Standard
-The sketch of contexts and formula occurances in proof theory resembles
+The sketch of contexts and formula occurrences in proof theory resembles
  the concept of eta expansion in lambda calculus.
  In lambda calculus, if 
 \begin_inset Formula $f$
@@ -1628,7 +1988,7 @@ In the above, the
 \begin_inset Formula $v_{1}$
 \end_inset
 
- is the expresssion 
+ is the expression 
 \begin_inset Formula $f$
 \end_inset
 
@@ -1771,7 +2131,7 @@ That is,
 \begin_inset Formula $v_{2}$
 \end_inset
 
-, and it takes the helf-edge to indicate that it's type is 
+, and it takes the half-edge to indicate that it's type is 
 \begin_inset Formula $A$
 \end_inset
 
@@ -1829,7 +2189,7 @@ Again, this may seem strange and foreign, which might be clarified with
 \end_layout
 
 \begin_layout Standard
-This time, the connectors have been explicitly labelled with the types.
+This time, the connectors have been explicitly labeled with the types.
  The above is explicitly an instance of the type 
 \begin_inset Formula $A\to B$
 \end_inset
@@ -1844,11 +2204,11 @@ This time, the connectors have been explicitly labelled with the types.
 \end_inset
 
  can be connected there; connecting-together is beta-reduction.
- The open circle labelled with 
+ The open circle labeled with 
 \begin_inset Formula $B$
 \end_inset
 
- denotes that this jigsaw (labelled 
+ denotes that this jigsaw (labeled 
 \begin_inset Formula $f$
 \end_inset
 
@@ -1884,9 +2244,9 @@ In philosophy:
 \end_layout
 
 \begin_layout Standard
-The paradoxes of mereology were touched on in the section onb relational
+The paradoxes of mereology were touched on in the section on relational
  algebras.
- For an extended discussion of the philsophical issues, see the text titiled
+ For an extended discussion of the philosophical issues, see the text titled
  
 \begin_inset Quotes eld
 \end_inset
@@ -1987,7 +2347,7 @@ Why, link-grammar, of course.
  Its a categorial grammar.
  Type theory.
  Pre-group grammar.
- Stay and Baez rosetta stone.
+ Stay and Baez Rosetta stone.
  And
 \end_layout
 
@@ -2067,7 +2427,7 @@ Inductive logic programming
 \end_layout
 
 \begin_layout Standard
-See, for example, the wikipedia article on this.
+See, for example, the Wikipedia article on this.
  The learning of sheaf structure is a generalization of 
 \begin_inset Quotes eld
 \end_inset
@@ -2077,7 +2437,7 @@ inductive logic programming
 \end_inset
 
 , where the specific axioms of logic have been abstracted away.
- More precisely, logic has an explicit directionaly to all of it's rules
+ More precisely, logic has an explicit directionality to all of it's rules
  and axioms; sheaves can not only capture this directional, but they also
  provide a non-directional generalization.
  XXX TODO: this entire paragraph needs to be extended to a full-sized paper.
