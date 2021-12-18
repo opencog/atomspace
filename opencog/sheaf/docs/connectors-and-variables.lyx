@@ -1813,7 +1813,7 @@ Presumably it is self-evident that this resembles the pair of unconnected
 \begin_inset Graphics
 	filename graphics/puzzle-left.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -1838,7 +1838,7 @@ The formula is
 \begin_inset Graphics
 	filename graphics/puzzle-right.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -1875,7 +1875,7 @@ These two pieces together constitute the original formula:
 \begin_inset Graphics
 	filename graphics/puzzle-connected.eps
 	lyxscale 60
-	width 35col%
+	width 23col%
 
 \end_inset
 
@@ -1943,7 +1943,7 @@ Presumably it is self-evident that eta expansion can be understood as jigsaw
 \begin_inset Graphics
 	filename graphics/puzzle-connected.eps
 	lyxscale 60
-	width 35col%
+	width 23col%
 
 \end_inset
 
@@ -1976,7 +1976,7 @@ More precisely, the above shows the expression
 \begin_inset Graphics
 	filename graphics/puzzle-left.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -2009,7 +2009,7 @@ In the above, the
 \begin_inset Graphics
 	filename graphics/puzzle-right.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -2091,7 +2091,7 @@ shadow
 \begin_inset Graphics
 	filename graphics/puzzle-left.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -2115,7 +2115,7 @@ Here is the bound variable
 \begin_inset Graphics
 	filename graphics/puzzle-right.eps
 	lyxscale 60
-	width 25col%
+	width 18col%
 
 \end_inset
 
@@ -2181,7 +2181,7 @@ Again, this may seem strange and foreign, which might be clarified with
 \begin_inset Graphics
 	filename graphics/puzzle-function.eps
 	lyxscale 60
-	width 35col%
+	width 25col%
 
 \end_inset
 
@@ -2428,6 +2428,26 @@ Inductive logic programming
 
 \begin_layout Standard
 See, for example, the Wikipedia article on this.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Inductive_logic_programming
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
  The learning of sheaf structure is a generalization of 
 \begin_inset Quotes eld
 \end_inset
@@ -2795,18 +2815,6 @@ A co-Relational Model of Data for Large Shared Data Banks.
 ACM Databases
 \emph default
  Volume 9, issue 3.
-\end_layout
-
-\begin_layout Itemize
-Wikipedia, 
-\begin_inset Quotes eld
-\end_inset
-
-Inductive Logic Programming
-\begin_inset Quotes erd
-\end_inset
-
-, https://en.wikipedia.org/wiki/Inductive_logic_programming
 \end_layout
 
 \begin_layout Standard
