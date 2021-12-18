@@ -98,12 +98,12 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-21 August 2020
+17 December 2021
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
-Revised version; Earlier version: 2 May 2020
+Revised version; earlier versions: 2 May 2020; 21 August 2020
 \end_layout
 
 \end_inset
@@ -1705,17 +1705,91 @@ shadow
 \end_inset
 
  is the type.
- The matching of the type
+ The matching of the type of the variable, to the type of what can be plugged
+ into the variable, is what the shape of the connector implies.
+ So, again, her e is 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ below, where 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ is understood as the free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ being of type 
+\begin_inset Formula $A$
+\end_inset
+
+: 
 \end_layout
 
 \begin_layout Standard
-This is articulated as follows.
- The function type 
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here is the bound variable 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ which is again of type 
+\begin_inset Formula $A$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That is, 
+\begin_inset Formula $x$
+\end_inset
+
+ itself is just 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+, and it takes the helf-edge to indicate that it's type is 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ The connector itself is the type.
+\end_layout
+
+\begin_layout Standard
+Again, this may seem strange and foreign, which might be clarified with
+ a more complex example.
+ The type constructor 
 \begin_inset Formula $A\to B$
 \end_inset
 
- is a lambda expression, in the sense that given a term 
-\begin_inset Formula $f$
+ constructs functions.
+ it can be understood as a lambda expression, in the sense that given a
+ term 
+\begin_inset Formula $b$
 \end_inset
 
  of type 
@@ -1731,7 +1805,7 @@ This is articulated as follows.
 \end_inset
 
 , then 
-\begin_inset Formula $\lambda x.f(x)$
+\begin_inset Formula $\lambda x.b$
 \end_inset
 
  is a term of type 
@@ -1739,6 +1813,70 @@ This is articulated as follows.
 \end_inset
 
 .
+ How is this to be represented in terms of jigsaws? With the diagram below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-function.eps
+	lyxscale 60
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This time, the connectors have been explicitly labelled with the types.
+ The above is explicitly an instance of the type 
+\begin_inset Formula $A\to B$
+\end_inset
+
+.
+ The open circle with the capital 
+\begin_inset Formula $A$
+\end_inset
+
+ indicates that anything that is of type 
+\begin_inset Formula $A$
+\end_inset
+
+ can be connected there; connecting-together is beta-reduction.
+ The open circle labelled with 
+\begin_inset Formula $B$
+\end_inset
+
+ denotes that this jigsaw (labelled 
+\begin_inset Formula $f$
+\end_inset
+
+) can be plugged into anything that is expecting type 
+\begin_inset Formula $B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The above exercise hopefully shows how connectors can be understood as types.
+ However, the theory of jigsaw pieces is not type theory.
+ The type constructor 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ is explicitly directional, the jigsaw pieces are not: a jigsaw piece that
+ is flipped, rotated, inverted is still a jigsaw piece; functions are always
+ directional.
+ Reversing the arrow gives an inverse function, but an inverse function
+ is still directional, just going the other way.
+ This is in part because type theory is closely tied to the internal language
+ of category theory, which is itself a theory of dots and arrows.
+ By contrast, the jigsaw conception provided here is derived from a graph
+ theory where the directionality of the edges is immaterial, or of secondary
+ importance.
+ 
 \end_layout
 
 \begin_layout Subsection*
