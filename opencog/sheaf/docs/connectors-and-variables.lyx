@@ -1904,7 +1904,7 @@ The sketch of contexts and formula occurrences in proof theory resembles
 
  is it's eta expansion.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See nLab, 
@@ -2067,6 +2067,21 @@ It is tempting to say that the above is just
 \end_inset
 
  is just the two jigsaw pieces, disassembled.
+\end_layout
+
+\begin_layout Standard
+Caution: the above is an analogy, and not a strict equivalence.
+ The expression 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ is not strictly a part of lambda calculus; it is a notational fragment
+ used to indicate variable binding.
+ The jigsw connectors serve two purposes: when connected, they indicate
+ what is connected to what, just as an ordinary graph drawing would do.
+ When disconnected, the jigsaw connectors indicate what can be connected
+ to what: the connectors represent types, the kinds of things that can potential
+ly be connected together.
 \end_layout
 
 \begin_layout Subsection*
@@ -2299,9 +2314,50 @@ Tensors
 \end_layout
 
 \begin_layout Standard
-Much of what has been said above can be made slightly more precise with
- the aid of mathematical notation.
- This is provided in the chapter on tensors; see 
+The idea of jigaw pieces with typed monopolar or bipolar connectors can
+ be modelled by tensors.
+ Thus, connecting two connectors (of matching type) can be understood as
+ contracting a pair of tensor indexes (of the appropriate type).
+ Covariant and contravariant tensor indexes are naturally bipolar (heterosexual)
+ as described above; when the indexes are just 
+\begin_inset Quotes eld
+\end_inset
+
+plain
+\begin_inset Quotes erd
+\end_inset
+
+ indexes, they are monopolar: they can be contracted as long as they are
+ of the same type.
+ Conventional tensors do not have any corresponding notion of multi-sexual
+ connectors, as described above.
+\end_layout
+
+\begin_layout Standard
+The similarity btween tensors and jigsaw pieces is ultimately anchored on
+ just one commonality: it takes two, and exactly two connectors, to connect
+ and form a link.
+ One cannot form a link from zero, onje, three or more connectors.
+ Likewise, tensor indexes contract by pairs: once cannot contract three
+ or more indexes together.
+ There is no loss of generality from this restriction; one emulates multi-index
+ contraction by using diagonal tensors: those whose entries are zero everywhere
+ except on the diagonal.
+ Likewise for the jigsaw conception: if one wishes to connect together three
+ (or more) connectors into one unit, one creates (without loss of generality)
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+diagonal
+\begin_inset Quotes erd
+\end_inset
+
+ jigsaw pieces with three (or more) connectors on it.
+\end_layout
+
+\begin_layout Standard
+A deeper exploration is given in 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2312,7 +2368,7 @@ tensors.pdf
  in this directory.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Subsubsection*
 Types and fibers
 \end_layout
 
@@ -2332,7 +2388,13 @@ Sheaf Axioms
 \end_layout
 
 \begin_layout Standard
-It obeys the sheaf axioms.
+Individual jigsaw pieces, and partially-assembled assemblies obey the sheaf
+ axioms.
+ Roughly speaking, the sheaf axioms just state that two assembled (connected)
+ jigsaw pieces are effectively still a jigsaw piece, in that there are still
+ (unconnected) connectors on it, and that larger assemblies decompose into
+ smaller sub-assemblies that are still consistently assembled according
+ to the connection rules.
  See 
 \begin_inset Quotes eld
 \end_inset
