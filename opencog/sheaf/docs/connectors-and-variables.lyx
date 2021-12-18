@@ -1336,6 +1336,412 @@ compositional
 \end_layout
 
 \begin_layout Subsection*
+In proof theory:
+\end_layout
+
+\begin_layout Standard
+A simple variant of the idea of a jigsaw piece can be found in proof theory,
+ where it is called a 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurance
+\begin_inset Quotes erd
+\end_inset
+
+.
+ See, for example Troelstra & Schwichtenberg, 
+\begin_inset Quotes eld
+\end_inset
+
+Basic Proof Theory
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Troelstra2000"
+literal "false"
+
+\end_inset
+
+ section 1.1.4.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+formula
+\begin_inset Quotes erd
+\end_inset
+
+ with a 
+\begin_inset Quotes eld
+\end_inset
+
+hole cut out of it
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The hole is called a 
+\begin_inset Quotes eld
+\end_inset
+
+placeholder
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+special propositional variable
+\begin_inset Quotes erd
+\end_inset
+
+, sometimes denoted with a star-character.
+ The star is outside of the language of predicate logic; it's in the meta-langau
+ge.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurance
+\begin_inset Quotes erd
+\end_inset
+
+ is a subformula together with a context.
+ Roughly speaking, it is a subformula cut out of a formula, leaving a hole
+ in it's place.
+ That pairing, of a subformula and the place it was cut from, is the 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurance
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Presumably it is self-evident that this resembles the pair of unconnected
+ jigsaw pieces in the diagram above.
+ Perhaps not, so we belabor it.
+ Here is the context:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The formula is 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and the hole is 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+.
+ Here is the subformula: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes eld
+\end_inset
+
+actual
+\begin_inset Quotes erd
+\end_inset
+
+ subformula is 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ but we've drawn a little more, here: the 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is the shadow of the formula from which the subformula as cut.
+ 
+\end_layout
+
+\begin_layout Standard
+These two pieces together constitute the original formula:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-connected.eps
+	lyxscale 60
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Drawn assembled like this, this is just the formula.
+ Drawn disassembled gives the formula occurance.
+\end_layout
+
+\begin_layout Subsection*
+In lambda calculus
+\end_layout
+
+\begin_layout Standard
+The sketch of contexts and formula occurances in proof theory resembles
+ the concept of eta expansion in lambda calculus.
+ In lambda calculus, if 
+\begin_inset Formula $f$
+\end_inset
+
+ is an expression with some free variable in it, then 
+\begin_inset Formula $\lambda x.f(x)$
+\end_inset
+
+ is it's eta expansion.
+ Roughly speaking, this reads as the operation: 
+\begin_inset Quotes eld
+\end_inset
+
+cut out the free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ from 
+\begin_inset Formula $f$
+\end_inset
+
+, leaving a hole, and then mark the location of that hole with a bound variable
+ 
+\begin_inset Formula $x$
+\end_inset
+
+, binding that variable with lambda, so that we know where that hole is.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Presumably it is self-evident that eta expansion can be understood as jigsaw
+ connectors.
+ But then again, it is worth belaboring this point.
+ So here is a diagram showing the expression 
+\begin_inset Formula $f$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-connected.eps
+	lyxscale 60
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+More precisely, the above shows the expression 
+\begin_inset Formula $f$
+\end_inset
+
+ as 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and with 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ being some free variable inside of it.
+ Disconnecting this gives the expression 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above, the 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is the expresssion 
+\begin_inset Formula $f$
+\end_inset
+
+, with the 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ explicitly providing the location of the 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ What is the lambda? Well it is just this, below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is tempting to say that the above is just 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+, but it is actually just a bit more: it is 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ with the shadow of 
+\begin_inset Formula $f$
+\end_inset
+
+ as 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ still visible.
+ The eta expansion 
+\begin_inset Formula $\lambda x.f\left(x\right)$
+\end_inset
+
+ is just the two jigsaw pieces, disassembled.
+\end_layout
+
+\begin_layout Subsection*
+In type theory
+\end_layout
+
+\begin_layout Standard
+The phrase 
+\begin_inset Quotes eld
+\end_inset
+
+shadow of
+\begin_inset Quotes erd
+\end_inset
+
+ in the above text is perhaps disconcerting.
+ This is where type theory can come to the rescue.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+shadow
+\begin_inset Quotes erd
+\end_inset
+
+ is the type.
+ The matching of the type
+\end_layout
+
+\begin_layout Standard
+This is articulated as follows.
+ The function type 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ is a lambda expression, in the sense that given a term 
+\begin_inset Formula $f$
+\end_inset
+
+ of type 
+\begin_inset Formula $B$
+\end_inset
+
+, containing a free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ of type 
+\begin_inset Formula $A$
+\end_inset
+
+, then 
+\begin_inset Formula $\lambda x.f(x)$
+\end_inset
+
+ is a term of type 
+\begin_inset Formula $A\to B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
 In philosophy:
 \end_layout
 
@@ -1903,6 +2309,18 @@ Inductive Logic Programming
 \end_inset
 
 , https://en.wikipedia.org/wiki/Inductive_logic_programming
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
