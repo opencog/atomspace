@@ -1903,6 +1903,34 @@ The sketch of contexts and formula occurrences in proof theory resembles
 \end_inset
 
  is it's eta expansion.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See nLab, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://ncatlab.org/nlab/show/eta-conversion
+\end_layout
+
+\end_inset
+
+ for a reasonable review, or Barndregt for an expanded treatment.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Barendregt1984"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  Roughly speaking, this reads as the operation: 
 \begin_inset Quotes eld
 \end_inset
@@ -2429,7 +2457,7 @@ Inductive logic programming
 \begin_layout Standard
 See, for example, the Wikipedia article on this.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See 
