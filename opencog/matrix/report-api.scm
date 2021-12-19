@@ -431,7 +431,7 @@
 						(sqrt (- lensq sizsq)) 0.0)))))
 
 		; ----------------------------------------------------
-		; Compute and cache the values of the computation with the
+		; Compute and cache the values of the computation where the
 		; report-api can find them.
 
 		(define (cache-total)
