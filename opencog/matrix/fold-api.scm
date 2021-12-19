@@ -296,6 +296,7 @@
 					(Present term-list)))
 
 			(define rowset (cog-value->list (cog-execute! qry)))
+			(cog-extract-recursive! row-var)
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
@@ -316,9 +317,9 @@
 			; desired pairs for us. However, this is problematic for
 			; the direct-sum, where the top query term is a ChoiceLink,
 			; and there is no easy way to get which choice was made!
-			; So we pay a fairly hefty penalty runningthe map immediately
+			; So we pay a fairly hefty penalty running the map immediately
 			; below. It would be better to do it all in the pattern engine.
-			; Even better: run the FUNC on everything return that.
+			; Even better: run the FUNC on everything and return that.
 			; Better still: run the FUNC on the query results, in the C++
 			; code, and not in scheme.
 			(define qry
@@ -327,6 +328,7 @@
 					(Present term-list)))
 
 			(define colset (cog-value->list (cog-execute! qry)))
+			(cog-extract-recursive! col-var)
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
