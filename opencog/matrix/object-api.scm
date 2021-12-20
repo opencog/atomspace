@@ -326,7 +326,8 @@
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	; ACC and DONOR should be two pairs in this matrix.
 	; FRAC should be a numeric fraction, between 0.0 and 1.0.
-	; This is not thread-safe!
+	; XXX This is not thread-safe! TODO: we need an atomic version
+	; of this.
 	(define (move-count ACCUM DONOR FRAC)
 		; Return #t if the count is effectively zero.
 		; Use an epsilon for rounding errors.
