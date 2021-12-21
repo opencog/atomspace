@@ -33,7 +33,7 @@
   names, but it provides matrix-wide averages (i.e. averaged over all
   rows and columns).
 
-  This object fetches precomputed values, fetched from the \"margins\"
+  This object accesses precomputed values, accessed from the \"margins\"
   of the matrix (i.e. attached to the matrix wild-cards.) These marginal
   values must have been previously computed and attached to the wildcards.
   This can be done by saying
@@ -42,7 +42,7 @@
   to work together and complement one-another.
 
   Optional argument ID is #f to use the default value key; otherwise
-  a filtered key is used. That is, the marginals are fetched from a
+  a filtered key is used. That is, the marginals are accessed from a
   default location; however, that location can be changed by specifying
   it with the optional ID argument.
 "
@@ -318,8 +318,8 @@
   method has been invoked, the `(add-support-api)` object can be
   used to access these values.
 
-  In order for 'cache-all to work, the full matrix must available
-  in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
+  In order for 'cache-all to work, the full matrix must available in
+  RAM.  It can be fetched into RAM by calling `(LLOBJ 'fetch-pairs)`.
   After computing the marginals, it is wise to store them back to
   disk. This can be done with `((make-store LLOBJ) 'store-wildcards)`
 
