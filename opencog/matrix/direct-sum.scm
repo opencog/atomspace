@@ -438,9 +438,7 @@
 				((get-all-elts)     get-all-elts)
 				((clobber)          clobber)
 
-				; weird -- returning #f causes learn unit tests to fail!
-				; I don't understand why...
-				(else               #t)
+				(else               #f)
 			))
 
 		; -------------
