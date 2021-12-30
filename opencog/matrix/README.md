@@ -152,8 +152,8 @@ The tools implemented here include:
  * Computing and caching marginal mutual information of pairs.
  * Computing cosine and jaccard similarity between rows or columns.
  * Computing mutual information between rows or columns
-   (as opposed to pairs).
- * Concatenating dissimilar matrices.
+   (as opposed to the MI of pairs).
+ * Concatenating dissimilar matrices ("direct sum").
  * Performing PCA (principal component analysis) in the matrix.
  * Performing cuts, to remove unwanted rows, columns and individual entries.
    This includes both filtering (to hide those entries) and removing
@@ -254,8 +254,8 @@ FAQ
    At this time, the largest Amazon EC2 instances are 256 GBytes.
 
 
-Generic Programming
--------------------
+Generic Programming / Traits
+----------------------------
 In order to perform some sort of generic analysis of the correlation
 of atoms, we need to somehow specify which pairs of atoms are
 the ones to be analyzed. This is done with a minimalist object-oriented
@@ -267,9 +267,11 @@ and provide various reasonable default behaviors for computing the
 various interesting things. If you don't like some particular default,
 you can always overload that particular method to do something
 customized. This OO programming style is called "parametric
-polymorphism".
+polymorphism". It is also seems to go under the name of "traits".
 
 https://en.wikipedia.org/wiki/Parametric_polymorphism
+
+https://en.wikipedia.org/wiki/Trait_(computer_programming)
 
 https://en.wikipedia.org/wiki/Generic_programming
 
