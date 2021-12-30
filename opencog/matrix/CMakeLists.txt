@@ -9,6 +9,7 @@ ADD_GUILE_MODULE (FILES
 	eval-pairs.scm
 	filter.scm
 	fold-api.scm
+	frequency.scm
 	group-similarity.scm
 	loop-api.scm
 	object-api.scm
