@@ -65,7 +65,8 @@
      passed to the MSG for printing.
 "
 	(let ((cnt (make-atomic-box 0))
-			(start-time 0))
+			(start-time 0)
+			(done 0))
 		(lambda (item)
 			; back-date to avoid divide-by-zero
 			(if (eqv? 0 (atomic-box-ref cnt))
@@ -75,15 +76,16 @@
 				(let* ((now (current-time))
 						(elapsed (- now start-time))
 						(ilapsed (inexact->exact (round elapsed)))
-						(rate (/ (exact->inexact WHEN) elapsed))
-						(irate (inexact->exact (round rate)))
 						(icnt (atomic-box-ref cnt))
+						(rate (/ (exact->inexact (- icnt done)) elapsed))
+						(irate (inexact->exact (round rate)))
 					)
 					(when (or (not HYST) (<= HYST ilapsed))
 						(if TOTAL
 							(format #t MSG icnt TOTAL ilapsed irate)
 							(format #t MSG icnt ilapsed irate))
-						(set! start-time now))))))
+						(set! start-time now)
+						(set! done icnt))))))
 )
 
 ; ---------------------------------------------------------------------
