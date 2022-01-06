@@ -93,7 +93,7 @@ std::string LinkValue::to_string(const std::string& indent) const
 	update();
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
-	for (ValuePtr v :_value)
+	for (const ValuePtr& v :_value)
 		rv += v->to_short_string(more_indent) + "\n";
 
 	// Remove trailing newline before writing the last paren
@@ -113,7 +113,7 @@ std::string LinkValue::to_short_string(const std::string& indent) const
 	update();
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	for (ValuePtr v :_value)
+	for (const ValuePtr& v :_value)
 		rv += v->to_short_string(more_indent);
 
 	rv += ")";

@@ -126,8 +126,18 @@ SchemeSmob::scm_to_protom_list (SCM svalue_list)
 		SCM svalue = SCM_CAR(sl);
 
 		if (not scm_is_null(svalue)) {
-			ValuePtr pa(scm_to_protom(svalue));
-			valist.emplace_back(pa);
+
+			// Handle recursively nested lists
+			if (scm_is_pair(svalue)) {
+				std::vector<ValuePtr> vpl = scm_to_protom_list(svalue);
+				valist.reserve(valist.size() + vpl.size());
+				std::move(vpl.begin(), vpl.end(), std::back_inserter(valist));
+			}
+			else
+			{
+				ValuePtr pa(scm_to_protom(svalue));
+				if (pa) valist.emplace_back(pa);
+			}
 		}
 		sl = SCM_CDR(sl);
 	}
