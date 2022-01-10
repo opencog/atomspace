@@ -507,7 +507,7 @@
 		; have been previously computed and cached.  That is, it assumes
 		; that the 'right-wild-count returns a valid value. This value
 		; should be the same as what 'compute-right-count would return.
-		(define (compute-total-count-from-right)
+		(define (compute-total-count-from-left)
 			(fold
 				;;; Use the cached value, equiavalent to this:
 				;;; (lambda (item sum) (+ sum (sum-right-count item)))
@@ -521,7 +521,7 @@
 		; the order in which the sums are performed is distinct, and
 		; thus large differences indicate a bug; small differences are
 		; due to rounding errors.
-		(define (compute-total-count-from-left)
+		(define (compute-total-count-from-right)
 			(fold
 				;;; (lambda (item sum) (+ sum (sum-left-count item)))
 				(lambda (item sum) (+ sum (api-obj 'left-count item)))
@@ -529,14 +529,14 @@
 				(star-obj 'right-basis)))
 
 		; Same as above, but for the support
-		(define (compute-total-support-from-right)
+		(define (compute-total-support-from-left)
 			(fold
 				; (lambda (item sum) (+ sum (get-right-support-size item)))
 				(lambda (item sum) (+ sum (api-obj 'right-support item)))
 				0
 				(star-obj 'left-basis)))
 
-		(define (compute-total-support-from-left)
+		(define (compute-total-support-from-right)
 			(fold
 				; (lambda (item sum) (+ sum (get-left-support-size item)))
 				(lambda (item sum) (+ sum (api-obj 'left-support item)))
