@@ -115,8 +115,11 @@ class BackingStore
 		 * Remove the indicated Atom from the backing store.
 		 * If the recursive flag is set, then incoming set of the Atom
 		 * will also be removed.  If the recursive flag is not set, and
-		 * the Atom has a non-empty incoming set, then the Atom will not
-		 * be removed.
+		 * the Atom has a non-empty incoming set, then this method will
+		 * (usually) not be called.  However, if another thread is adding
+		 * the same Atom at the same time, all bets are off. Thus, the
+		 * behavior of calling this with recursive==false and a non-empty
+		 * incoming set is undefined (and implementation-dependent).
 		 */
 		virtual void removeAtom(const Handle&, bool recursive) = 0;
 

@@ -442,6 +442,14 @@
     removed from that StorageNode; otherwise it will be removed from
     the current StorageNode attached to this thread.
 
+    A word of caution about multi-threaded operation: if one thread is
+    adding atoms, while another thread is removing the *same* atoms at
+    the same time, then these two threads will race. As a result of
+    this racing, there is no gauranteee that the AtomSpace and the
+    attached storage will stay in sync. One or the other might contain
+    Atoms that the other does not.  It is up to you, the user, to avoid
+    this inconsistncy when performing racey inserts/deletes.
+
     Example usage:
        (cog-delete! (Concept \"foo\"))
        (cog-delete! (Concept \"foo\")
@@ -470,6 +478,16 @@
     If the optional STORAGE argument is provided, then it will be
     removed from that StorageNode; otherwise it will be removed from
     the current StorageNode attached to this thread.
+
+    A word of caution about multi-threaded operation: if one thread is
+    adding atoms, while another thread is removing the *same* atoms at
+    the same time, then these two threads will race. As a result of
+    this racing, there is no gauranteee that the AtomSpace and the
+    attached storage will stay in sync. One or the other might contain
+    Atoms that the other does not.  It is up to you, the user, to avoid
+    this inconsistncy when performing racey inserts/deletes.
+
+    See also: cog-delete! and cog-extract-recursive!
 "
 	(if STORAGE (sn-delete-rec ATOM STORAGE)
 		(let ((sn (cog-storage-node)))

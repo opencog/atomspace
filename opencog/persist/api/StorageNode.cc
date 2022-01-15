@@ -72,13 +72,33 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 
 bool StorageNode::remove_atom(Handle h, bool recursive)
 {
-    // Removal of atoms from read-only databases is not allowed.
-    // It is OK to remove atoms from a read-only atomspace, because
-    // it is acting as a cache for the database, and removal is used
-    // used to free up RAM storage.
-    if (not _atom_space->get_read_only())
-        removeAtom(h, recursive);
-    return getAtomSpace()->extract_atom(h, recursive);
+	// Removal is ... tricky. We need to remove Atoms from storage first,
+	// and only then the AtomSpace. We need to do storage first because
+	// storage needs access to the incoming set, and other Atom things,
+	// which get destroyed by the AtomSpace removal. However, we should
+	// remove from storage only if the AtomSpace remove succeeds! The
+	// AtomSpace remove logic is complex, and we cannot replicate it
+	// here. Thus we have a chicken-and-egg situation. The solution used
+	// here is minimalist: do only as much as needed to stay compatible
+	// with the docs.
+	//
+	// Unfortunately, this means the code won't be thread-safe. If one
+	// thread is adding atoms while another is deleting them, we will
+	// easily and rapidly arrive in a situation where the storage and
+	// the AtomSpace are not in sync: they won't have the same Atoms.
+	// This is a Caveat-Emptor situation: its up to the user to solve
+	// these races.
+
+	if (not recursive and not h->isIncomingSetEmpty()) return false;
+
+	// Removal of atoms from read-only databases is not allowed.
+	// It is OK to remove atoms from a read-only AtomSpace, because
+	// it is acting as a cache for the database, and removal is used
+	// used to free up RAM storage.
+	if (not _atom_space->get_read_only())
+		removeAtom(h, recursive);
+
+	return getAtomSpace()->extract_atom(h, recursive);
 }
 
 Handle StorageNode::fetch_atom(const Handle& h)
