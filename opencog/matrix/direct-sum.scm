@@ -265,16 +265,32 @@
 		; Given a pair, find the left element in it.
 		(define (get-pair-left PAIR)
 			(init-a-set)
-			(if (is-from-a? PAIR)
-				(LLA 'left-element PAIR)
-				(LLB 'left-element PAIR)))
+			; If PAIR is a wildcard, then extract the wild-left.
+			; We used disjoint-left to construct it, so use same to test it.
+			(if (and (not disjoint-left)
+					(equal? 'EvaluationLink (cog-type PAIR))
+					(equal? pred-node (cog-outgoing-atom PAIR 0)))
+				(cog-outgoing-atom PAIR 1)
+
+				; It's not a wild-card. Delegate.
+				(if (is-from-a? PAIR)
+					(LLA 'left-element PAIR)
+					(LLB 'left-element PAIR))))
 
 		; Given a pair, find the right element in it.
 		(define (get-pair-right PAIR)
 			(init-a-set)
-			(if (is-from-a? PAIR)
-				(LLA 'right-element PAIR)
-				(LLB 'right-element PAIR)))
+			; If PAIR is a wildcard, then extract the wild-right.
+			; We used disjoint-right to construct it, so use same to test it.
+			(if (and (not disjoint-right)
+					(equal? 'EvaluationLink (cog-type PAIR))
+					(equal? pred-node (cog-outgoing-atom PAIR 0)))
+				(cog-outgoing-atom PAIR 2)
+
+				; It's not a wild-card. Delegate.
+				(if (is-from-a? PAIR)
+					(LLA 'right-element PAIR)
+					(LLB 'right-element PAIR))))
 
 		; Return the count on the pair, if it exists.
 		(define (get-pair-count L-ATOM R-ATOM)
