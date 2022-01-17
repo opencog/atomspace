@@ -614,7 +614,7 @@
 				(elapsed-secs))
 
 			; Totals can only be computed, after above has been cached.
-			(do-left-totals)
+			(do-right-totals)
 
 			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
@@ -639,7 +639,7 @@
 				(elapsed-secs))
 
 			; Totals can only be computed, after above has been cached.
-			(do-right-totals)
+			(do-left-totals)
 
 			(format #t "Finished right totals in ~A secs\n"
 				(elapsed-secs))
