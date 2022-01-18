@@ -23,10 +23,10 @@
 "
   add-pair-freq-api LLOBJ ID - Extend LLOBJ with frequency getters.
 
-  Extend the LLOBJ with additional methods to get and set
-  the observation frequencies, entropies and mutual information.
+  Extend the LLOBJ with additional methods to get and set the
+  observation frequencies, entropies and mutual information.
   Basically, this decorates the class with additional methods
-  that get and set these frequencies and entropies in \"standardized\"
+  that get and set these frequencies and entropies in standardized
   places. Other classes can overload these methods; these just
   provide a reasonable default.
 
@@ -57,7 +57,7 @@
   'pair-fmi PAIR     -- return +log_2 P(x,y) / [P(x,*) P(*,y)]
 
   Note the sign convention for the mutual information - it is PLUS log.
-  This agrees with both Deniz Yuret and with  Wikipedia!
+  This agrees with both Deniz Yuret and with Wikipedia!
 
   In the methods below, ATOM is either the atom x or the atom y.
 
@@ -89,7 +89,6 @@
                      = sum_y P(*,y) MI_left(y)
                      = sum_x P(x,*) MI_right(x)
   should hold, up to rounding errors.
-
 "
 	; ----------------------------------------------------
 	; Key under which the frequency values are stored.
@@ -340,4 +339,156 @@
 )
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+
+;
+; ---------------------------------------------------------------------
+; OVERVIEW
+; --------
+; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
+; actually been observed; that is, N("some-word", "other-word") for the
+; example above.  Properly speaking, this count is conditioned on the
+; LinkGrammarRelationshipNode "ANY", so the correct notation would be
+; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
+; relationship is always assumed to be the same, and is thus dropped.
+; (the relationship is provided through the GET-PAIR function).
+;
+; The mutual information for a pair is defined as follows:  Given
+; two items, wl and wr, define three probabilities:
+;
+;    P(wl,wr) = N(wl,wr) / N(*,*)
+;    P(wl,*)  = N(wl,*)  / N(*,*)
+;    P(*,wr)  = N(*,wr)  / N(*,*)
+;
+; The N(*,*), N(wl,*) and  N(*,wr) are wild-card counts, and are defined
+; to be sums over all observed left and right counts.  That is,
+;
+;    N(wl,*) = Sum_wr N(wl,wr)
+;    N(*,wr) = Sum_wl N(wl,wr)
+;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
+;
+; Given an object containing the raw counts N(wl,wr), these sums are
+; computed by the `add-support-compute` object. Because these take
+; considerable CPU time to compute, the resulting values are cached,
+; and can be obtained with the `add-support-api` object. (This is
+; typical throughout the code: there are pairs of objects, one which
+; computes marginals, and another that accesses the cached values.)
+;
+; ---------------------------------------------------------------------
+;
+(define-public (make-compute-freq LLOBJ)
+"
+  make-compute-freq LLOBJ
+
+  Extend the LLOBJ with additional methods to compute observation
+  frequencies and entropies for pairs, including partial-sum entropies
+  (mutual information) for the left and right side of each pair.
+  This will also cache the results of these computations in a
+  standardized location.
+
+  The LLOBJ must have valid left and right wild-card counts on it.
+  These need to have been previously computed, before methods on
+  this class are called.
+
+  Before using this class, the 'init-freq method must be called,
+  and it must be called *after* a valid wild-wild count is available.
+"
+	; We need 'left-basis, provided by add-pair-stars
+	; We need 'wild-wild-count, provided by add-support-api
+	; We need 'set-left-wild-freq, provided by add-pair-freq-api
+	(let ((llobj LLOBJ)
+			(supobj (add-support-api LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ))
+			(wldobj (add-pair-stars LLOBJ))
+			(tot-cnt #f))
+
+		(define (init)
+			(set! tot-cnt (supobj `wild-wild-count)))
+
+		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
+		; the frequency with which the pair (x,y) is observed. Return
+		; the frequency, or zero, if the pair was never observed.
+		(define (compute-pair-freq PAIR)
+			(/ (llobj 'get-count PAIR) tot-cnt))
+
+		; Compute the left-side wild-card frequency. This is the ratio
+		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
+		(define (compute-left-freq ITEM)
+			(/ (supobj 'left-count ITEM) tot-cnt))
+		(define (compute-right-freq ITEM)
+			(/ (supobj 'right-count ITEM) tot-cnt))
+
+		; Compute and cache the pair frequency.
+		; This returns the atom holding the cached count, thus
+		; making it convenient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-pair-freq PAIR)
+			(define freq (compute-pair-freq PAIR))
+			(if (< 0 freq)
+				(frqobj 'set-pair-freq PAIR freq)
+				'()))
+
+		; Compute and cache the left-side wild-card frequency.
+		; This is unconditional - even if the frequency is zero.
+		(define (cache-left-freq ITEM)
+			(frqobj 'set-left-wild-freq ITEM (compute-left-freq ITEM)))
+
+		(define (cache-right-freq ITEM)
+			(frqobj 'set-right-wild-freq ITEM (compute-right-freq ITEM)))
+
+		; Compute and cache all of the pair frequencies.
+		; This computes P(x,y) for all (x,y)
+		; This returns a count of the pairs.
+		; Also caches the total dimensions of the matrix.
+		(define (cache-all-pair-freqs)
+			(define cnt 0)
+			; The outer-loop.
+			(define (right-loop left-item)
+				(for-each
+					(lambda (pr)
+						(cache-pair-freq pr)
+						(set! cnt (+ cnt 1)))
+					(wldobj 'right-stars left-item)))
+
+			; par-for-each fails massively here in guile-2.9.2
+			(for-each right-loop (wldobj 'left-basis))
+
+			; Return the total.
+			cnt)
+
+		; Compute and cache all of the left-side frequencies.
+		; This computes P(*,y) for all y.
+		; par-for-each fails here in guile-2.9.2
+		(define (cache-all-left-freqs)
+			(for-each cache-left-freq (wldobj 'right-basis)))
+		(define (cache-all-right-freqs)
+			(for-each cache-right-freq (wldobj 'left-basis)))
+
+		(define (cache-all)
+			(cache-all-left-freqs)
+			(cache-all-right-freqs)
+			(cache-all-pair-freqs))
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((init-freq)             (init))
+
+				((compute-pair-freq)     (apply compute-pair-freq args))
+				((compute-left-freq)     (apply compute-left-freq args))
+				((compute-right-freq)    (apply compute-right-freq args))
+
+				((cache-pair-freq)       (apply cache-pair-freq args))
+				((cache-left-freq)       (apply cache-left-freq args))
+				((cache-right-freq)      (apply cache-right-freq args))
+
+				((cache-all-pair-freqs)  (cache-all-pair-freqs))
+				((cache-all-left-freqs)  (cache-all-left-freqs))
+				((cache-all-right-freqs) (cache-all-right-freqs))
+				((cache-all)             (cache-all))
+
+				(else (apply llobj       (cons message args))))
+		))
+)
+
 ; ---------------------------------------------------------------------

@@ -1,8 +1,8 @@
 ;
 ; entropy.scm
 ;
-; Assorted objects for computing (and caching) fractional entropies
-; of pairs.
+; Assorted objects for computing (and caching) frequncies and fractional
+; entropies of pairs.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
