@@ -340,55 +340,42 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-
-;
-; ---------------------------------------------------------------------
-; OVERVIEW
-; --------
-; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
-; actually been observed; that is, N("some-word", "other-word") for the
-; example above.  Properly speaking, this count is conditioned on the
-; LinkGrammarRelationshipNode "ANY", so the correct notation would be
-; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
-; relationship is always assumed to be the same, and is thus dropped.
-; (the relationship is provided through the GET-PAIR function).
-;
-; The mutual information for a pair is defined as follows:  Given
-; two items, wl and wr, define three probabilities:
-;
-;    P(wl,wr) = N(wl,wr) / N(*,*)
-;    P(wl,*)  = N(wl,*)  / N(*,*)
-;    P(*,wr)  = N(*,wr)  / N(*,*)
-;
-; The N(*,*), N(wl,*) and  N(*,wr) are wild-card counts, and are defined
-; to be sums over all observed left and right counts.  That is,
-;
-;    N(wl,*) = Sum_wr N(wl,wr)
-;    N(*,wr) = Sum_wl N(wl,wr)
-;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
-;
-; Given an object containing the raw counts N(wl,wr), these sums are
-; computed by the `add-support-compute` object. Because these take
-; considerable CPU time to compute, the resulting values are cached,
-; and can be obtained with the `add-support-api` object. (This is
-; typical throughout the code: there are pairs of objects, one which
-; computes marginals, and another that accesses the cached values.)
-;
-; ---------------------------------------------------------------------
 ;
 (define-public (make-compute-freq LLOBJ)
 "
-  make-compute-freq LLOBJ
+  make-compute-freq LLOBJ -- compute frequencies and marginals.
 
   Extend the LLOBJ with additional methods to compute observation
-  frequencies and entropies for pairs, including partial-sum entropies
-  (mutual information) for the left and right side of each pair.
-  This will also cache the results of these computations in a
-  standardized location.
+  frequencies (probabilities) and marginal probabilities. The results
+  can be cached so that the `add-pair-freq-api` can access them.
 
-  The LLOBJ must have valid left and right wild-card counts on it.
-  These need to have been previously computed, before methods on
-  this class are called.
+  Given a count N(l,r) of observed occurances for a matrix pair (l,r)
+  == (left,right) == (row,column), the frequency aka 'probability' is
+  defined as
+
+     P(l,r) = N(l,r) / N(*,*)
+
+  where N(*,*) = sum_l sum_r N(l,r) is the grand-total observation count.
+  The marginal probabilities are
+
+      P(l,*)  = N(l,*)  / N(*,*)
+      P(*,r)  = N(*,r)  / N(*,*)
+
+  The N(l,*) and N(*,r) are the marginal counts, sometimes called the
+  'wild-card counts', and are defined as sums over all observed left and
+  right counts.  That is,
+
+      N(l,*) = sum_r N(l,r)
+      N(*,r) = sum_l N(l,r)
+
+  Given an object containing the raw counts `N(l,r)`, the count
+  marginals are computed by the `add-support-compute` object. Because
+  these take considerable CPU time to compute, the resulting values
+  are cached, and can be accessed with the `add-support-api` object.
+
+  This object, `make-compute-freq`, assumes that the count marginals
+  have already been computed; i.e. that LLOBJ has valid left and right
+  wild-card counts on it.
 
   Before using this class, the 'init-freq method must be called,
   and it must be called *after* a valid wild-wild count is available.
