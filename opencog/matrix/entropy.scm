@@ -15,14 +15,14 @@
 (define-public (add-entropy-compute LLOBJ)
 "
   add-entropy-compute LLOBJ - methods for computing and caching
-  the marginal entropy and mutual information (MI).
+  the marginal and total entropy and mutual information (MI).
 
   The object must have valid pair-frequency values and marginals on
   it, accessible via the `add-pair-freq-api` object. These must have
   been previously computed, before this object can be used.
 
-  After caching, the resulting entropy and MI marginals are accessible
-  with the `add-pair-freq-api` object.
+  After caching, the resulting entropy and MI marginals and totals are
+  accessible with the `add-pair-freq-api` object.
 
   The methods on this class are:
   'compute-left-entropy COL -- compute and return the marginal entropy
@@ -52,6 +52,34 @@
 
   'cache-all-marginals     -- Perform all four computations above.
 
+  The above methods concern marginals, and generally require a row or
+  column argument. The methods below compute various grand totals.
+
+  'total-entropy           -- Compute and return the total entropy.
+         This loops over all rows and columns, and computes the sum
+               H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
+                     = sum_x h_left(x)
+                     = sum_y h_right(y)
+         It throws an error if the two are not equal (to within guessed
+         rounding errors.)
+
+  'left-entropy            -- Compute and return the total of the
+         left-marginals. This is the sum
+                H_left = sum_y P(*,y) log_2 P(*,y)
+
+  'right-entropy           -- As above, but on the right.
+
+  'compute-total-mi        -- Compute and return the total MI. This
+         loops over all rows and columns, and computes the sum
+                MI_tot = sum_x sum_y mi(x,y)
+                       = sum_x mi_left(x)
+                       = sum_y mi_right(y)
+         It throws an error if the two are not equal (to within guessed
+         rounding errors.)
+
+  'cache-entropy  -- Compute and cache the three total entropies above.
+  'cache-mi       -- Compute and cache the total MI above.
+
   The cached values are accessible via the standard frequency API.
 "
 	; Need the 'left-stars method, provided by add-pair-stars
@@ -59,6 +87,7 @@
 	;     We don't want it to throw, in case some pair has zero counts.
 	(define star-obj (add-pair-stars LLOBJ))
 	(define frqobj (add-pair-freq-api star-obj #:nothrow #t))
+	(define rptobj (add-report-api star-obj))
 
 	; Compute the left-wild entropy summation:
 	;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -184,6 +213,100 @@
 		(cache-all-right-mi)
 	)
 
+	; ==============================================================
+	; Above, we compute marginals. Below, we compute totals.
+	; ---------------
+
+	(define (left-sum FN)
+		(fold
+			(lambda (right-item sum) (+ sum (FN right-item)))
+			0 (star-obj 'right-basis)))
+
+	(define (right-sum FN)
+		(fold
+			(lambda (left-item sum) (+ sum (FN left-item)))
+			0 (star-obj 'left-basis)))
+
+	; ---------------
+	; Compute the total entropy for the set. This loops over all
+	; rows and columns, and computes the sum
+	;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
+	;         = sum_x h_left(x)
+	;         = sum_y h_right(y)
+	; It throws an error if the two are not equal (to within guessed
+	; rounding errors.)
+	(define (compute-total-entropy)
+		(define lsum (left-sum
+				(lambda (x) (frqobj 'left-wild-entropy x))))
+		(define rsum (right-sum
+				(lambda (x) (frqobj 'right-wild-entropy x))))
+		(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+			(throw 'bad-summation 'compute-total-entropy
+				(format #f
+					"Left and right entropy sums fail to be equal: ~A ~A\n"
+					lsum rsum)))
+		lsum)
+
+	; Compute the left-wildcard partial entropy for the set. This
+	; loops over all left-wildcards, and computes the sum
+	;   H_left = sum_y p(*,y) log_2 p(*,y)
+	; It returns a single numerical value, for the entire set.
+	(define (compute-left-total-marginal-entropy)
+		(left-sum
+			(lambda (x)
+				;; In general pairs can have a zero count,
+				;; and so a minus-inf logarithm. avoid NaN
+				(define lli (frqobj 'left-wild-logli x))
+				(if (finite? lli)
+					(* (frqobj 'left-wild-freq x) lli)
+					0.0))))
+
+	; Compute the right-wildcard partial entropy for the set. This
+	; loops over all right-wildcards, and computes the sum
+	;   H_right = sum_x p(x,*) log_2 p(x,*)
+	; It returns a single numerical value, for the entire set.
+	(define (compute-right-total-marginal-entropy)
+		(right-sum
+			(lambda (x)
+				;; For cross-connectors, the observed count of a
+				;; word inside a connector might be zero, and so
+				;; log probability might be infinite. Avoid that.
+				(define lli (frqobj 'right-wild-logli x))
+				(if (finite? lli)
+					(* (frqobj 'right-wild-freq x) lli)
+					0.0))))
+
+	(define (cache-entropy)
+		(rptobj 'set-entropy
+			(compute-left-total-marginal-entropy)
+			(compute-right-total-marginal-entropy)
+			(compute-total-entropy)))
+
+	; ---------------
+	; Compute the total MI for the set. This loops over all
+	; rows and columns, and computes the sum
+	;   MI_tot = sum_x sum_y mi(x,y)
+	;         = sum_x mi_left(x)
+	;         = sum_y mi_right(y)
+	; It throws an error if the two are not equal (to within guessed
+	; rounding errors.)
+	(define (compute-total-mi)
+		(define lsum (left-sum
+				(lambda (x) (frqobj 'left-wild-mi x))))
+		(define rsum (right-sum
+				(lambda (x) (frqobj 'right-wild-mi x))))
+		(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+			(throw 'bad-summation 'compute-total-mi
+				(format #f
+					"Left and right MI sums fail to be equal: ~A ~A\n"
+					lsum rsum)))
+		lsum)
+
+	(define (cache-mi)
+		(rptobj 'set-mi (compute-total-mi)))
+
+	; ==============================================================
+
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -203,133 +326,18 @@
 			((cache-all-right-mi)      (cache-all-right-mi))
 
 			((cache-all-marginals)     (cache-all))
+
+			; --------------
+			((total-entropy)           (compute-total-entropy))
+			((left-entropy)            (compute-left-total-marginal-entropy))
+			((right-entropy)           (compute-right-total-marginal-entropy))
+			((compute-total-mi)        (compute-total-mi))
+
+			((cache-entropy)           (cache-entropy))
+			((cache-mi)                (cache-mi))
+
 			(else (apply LLOBJ         (cons message args))))
 	)
-)
-
-; ---------------------------------------------------------------------
-
-(define (add-total-entropy-compute LLOBJ)
-"
-  add-total-entropy-compute LLOBJ - methods to compute and cache the
-  partial and total entropies and the total MI.
-
-  Extend the LLOBJ with additional methods to compute the partial and
-  total entropies and MI for the correlation matrix.
-
-  The object must have valid partial sums for the entropy and MI on it,
-  viz, the ones computed by add-entropy-compute, above. These are
-  accessed via the standard frequency-object API. These must have been
-  pre-computed, before this object can be used.
-
-  These methods loop over all rows and columns to compute the total sums.
-"
-	; Need the 'left-basis method, provided by add-pair-stars
-	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let* ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api star-obj))
-			(rptobj (add-report-api star-obj))
-		)
-
-		(define (left-sum FN)
-			(fold
-				(lambda (right-item sum) (+ sum (FN right-item)))
-				0 (star-obj 'right-basis)))
-
-		(define (right-sum FN)
-			(fold
-				(lambda (left-item sum) (+ sum (FN left-item)))
-				0 (star-obj 'left-basis)))
-
-		; ---------------
-		; Compute the total entropy for the set. This loops over all
-		; rows and columns, and computes the sum
-		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
-		;         = sum_x h_left(x)
-		;         = sum_y h_right(y)
-		; It throws an error if the two are not equal (to within guessed
-		; rounding errors.)
-		(define (compute-total-entropy)
-			(define lsum (left-sum
-					(lambda (x) (frqobj 'left-wild-entropy x))))
-			(define rsum (right-sum
-					(lambda (x) (frqobj 'right-wild-entropy x))))
-			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
-				(throw 'bad-summation 'compute-total-entropy
-					(format #f
-						"Left and right entropy sums fail to be equal: ~A ~A\n"
-						lsum rsum)))
-			lsum)
-
-		; Compute the left-wildcard partial entropy for the set. This
-		; loops over all left-wildcards, and computes the sum
-		;   H_left = sum_y p(*,y) log_2 p(*,y)
-		; It returns a single numerical value, for the entire set.
-		(define (compute-left-entropy)
-			(left-sum
-				(lambda (x)
-					;; In general pairs can have a zero count,
-					;; and so a minus-inf logarithm. avoid NaN
-					(define lli (frqobj 'left-wild-logli x))
-					(if (finite? lli)
-						(* (frqobj 'left-wild-freq x) lli)
-						0.0))))
-
-		; Compute the right-wildcard partial entropy for the set. This
-		; loops over all right-wildcards, and computes the sum
-		;   H_right = sum_x p(x,*) log_2 p(x,*)
-		; It returns a single numerical value, for the entire set.
-		(define (compute-right-entropy)
-			(right-sum
-				(lambda (x)
-					;; For cross-connectors, the observed count of a
-					;; word inside a connector might be zero, and so
-					;; log probability might be infinite. Avoid that.
-					(define lli (frqobj 'right-wild-logli x))
-					(if (finite? lli)
-						(* (frqobj 'right-wild-freq x) lli)
-						0.0))))
-
-		(define (cache-entropy)
-			(rptobj 'set-entropy
-				(compute-left-entropy)
-				(compute-right-entropy)
-				(compute-total-entropy)))
-
-		; ---------------
-		; Compute the total MI for the set. This loops over all
-		; rows and columns, and computes the sum
-		;   MI_tot = sum_x sum_y mi(x,y)
-		;         = sum_x mi_left(x)
-		;         = sum_y mi_right(y)
-		; It throws an error if the two are not equal (to within guessed
-		; rounding errors.)
-		(define (compute-total-mi)
-			(define lsum (left-sum
-					(lambda (x) (frqobj 'left-wild-mi x))))
-			(define rsum (right-sum
-					(lambda (x) (frqobj 'right-wild-mi x))))
-			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
-				(throw 'bad-summation 'compute-total-mi
-					(format #f
-						"Left and right MI sums fail to be equal: ~A ~A\n"
-						lsum rsum)))
-			lsum)
-
-		(define (cache-mi)
-			(rptobj 'set-mi (compute-total-mi)))
-
-		; ---------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((total-entropy)         (compute-total-entropy))
-				((left-entropy)          (compute-left-entropy))
-				((right-entropy)         (compute-right-entropy))
-				((cache-entropy)         (cache-entropy))
-				((cache-mi)              (cache-mi))
-			)))
 )
 
 ; ---------------------------------------------------------------------

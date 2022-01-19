@@ -300,9 +300,6 @@
 	; Define the object which will compute row and column subtotals.
 	(define entropy-obj (add-entropy-compute wild-obj))
 
-	; Define the object which will compute total entropy and MI.
-	(define total-obj (add-total-entropy-compute wild-obj))
-
 	; Define the object which will roll up a summary of the supports.
 	(define central-obj (make-central-compute wild-obj))
 
@@ -379,8 +376,8 @@
 	(entropy-obj 'cache-all-right-mi)
 
 	(display "Going to compute the left, right and total entropy.\n")
-	(total-obj 'cache-entropy)
-	(total-obj 'cache-mi)
+	(entropy-obj 'cache-entropy)
+	(entropy-obj 'cache-mi)
 
 	(if DO-STORE (begin
 		(display "Done computing totals; start saving wildcards.\n")

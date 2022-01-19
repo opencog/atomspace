@@ -353,7 +353,7 @@ the partial sums (the "marginals") are cached. The cached values can
 be accessed with the `add-support-api` object.
 
 The `make-compute-freq` class provides methods to compute and cache
-the frequencies `p(x,y)`, `p(*,y)` and `p(x,*)`.  These are cached
+the frequencies `P(x,y)`, `P(*,y)` and `P(x,*)`.  These are cached
 exactly where the `add-pair-freq-api` class, above, can find them.
 
 The `make-batch-mi` class provides methods to compute the fractional
@@ -372,7 +372,7 @@ database, so that these results become available later.
 
 Computing entropy
 -----------------
-The `add-pair-mi-compute` class provides methods to compute the entropy
+The `add-entropy-compute` class provides methods to compute the entropy
 and mutual information of rows and columns: for example, the column
 entropy (or `left-entropy`) `h_left(y) = -sum_x P(x,y) log_2 P(x,y)`
 It also returns the far more interesting 'fractional entropy', given
@@ -381,9 +381,9 @@ also the mutual information `mi_left(y) = sum_x P(x,y) log_2 MI(x,y)`
 where `MI(x,y) = +log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
 MI.
 
-The `add-total-entropy-compute` class provides methods to compute the
-total entropy: `H_tot = sum_x sum_y p(x,y) log_2 p(x,y)` as well as
-the left and right entropies: `H_left = sum_y p(*,y) log_2 p(*,y)`
+Methods are also provided to compute the total entropy:
+`H_tot = sum_x sum_y P(x,y) log_2 P(x,y)` as well as
+the left and right entropies: `H_left = sum_y P(*,y) log_2 P(*,y)`
 and v.v.
 
 Computing similarity measures
