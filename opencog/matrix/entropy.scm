@@ -50,7 +50,7 @@
   'cache-all-left-mi       -- Loop over all columns.
   'cache-all-right-mi      -- Loop over all rows.
 
-  'cache-all-subtotals     -- Perform all four computations above.
+  'cache-all-marginals     -- Perform all four computations above.
 
   The cached values are accessible via the standard frequency API.
 "
@@ -202,7 +202,7 @@
 			((cache-all-left-mi)       (cache-all-left-mi))
 			((cache-all-right-mi)      (cache-all-right-mi))
 
-			((cache-all-subtotals)     (cache-all))
+			((cache-all-marginals)     (cache-all))
 			(else (apply LLOBJ         (cons message args))))
 	)
 )
