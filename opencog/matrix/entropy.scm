@@ -1,8 +1,8 @@
 ;
 ; entropy.scm
 ;
-; Assorted objects for computing (and caching) frequncies and fractional
-; entropies of pairs.
+; Assorted objects for computing (and caching) entropies and marginal
+; entropies of matricies.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -42,9 +42,9 @@
 ; Also -- FYI, we could provide methods to return just the computed
 ; values, without caching them, but I don't see the point of this.
 ;
-(define (add-subtotal-mi-compute LLOBJ)
+(define-public (add-entropy-compute LLOBJ)
 "
-  add-subtotal-mi-compute LLOBJ - methods for computing and caching
+  add-entropy-compute LLOBJ - methods for computing and caching
   the subtotalled MI and entropy of rows and columns.
 
   Extend the LLOBJ with additional methods to compute the one-sided
@@ -222,7 +222,7 @@
   total entropies and MI for the correlation matrix.
 
   The object must have valid partial sums for the entropy and MI on it,
-  viz, the ones computed by add-subtotal-mi-compute, above. These are
+  viz, the ones computed by add-entropy-compute, above. These are
   accessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 

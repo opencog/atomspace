@@ -298,7 +298,7 @@
 	(define batch-mi-obj (make-batch-mi wild-obj))
 
 	; Define the object which will compute row and column subtotals.
-	(define subtotal-obj (add-subtotal-mi-compute wild-obj))
+	(define entropy-obj (add-entropy-compute wild-obj))
 
 	; Define the object which will compute total entropy and MI.
 	(define total-obj (add-total-entropy-compute wild-obj))
@@ -373,10 +373,10 @@
 	)
 
 	(display "Going to do column and row subtotals.\n")
-	(subtotal-obj 'cache-all-left-entropy)
-	(subtotal-obj 'cache-all-right-entropy)
-	(subtotal-obj 'cache-all-left-mi)
-	(subtotal-obj 'cache-all-right-mi)
+	(entropy-obj 'cache-all-left-entropy)
+	(entropy-obj 'cache-all-right-entropy)
+	(entropy-obj 'cache-all-left-mi)
+	(entropy-obj 'cache-all-right-mi)
 
 	(display "Going to compute the left, right and total entropy.\n")
 	(total-obj 'cache-entropy)
