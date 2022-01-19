@@ -38,8 +38,8 @@
                        (Identical to the 'wild-wild-count on the
                        support-api object)
 
-  'left-entropy     -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
-  'right-entropy    -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
+  'left-entropy     -- The sum H_left = -sum_y P(*,y) log_2 P(*,y)
+  'right-entropy    -- The sum H_right = -sum_x P(x,*) log_2 P(x,*)
   'total-entropy    -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
   'total-mi         -- The sum MI = H_tot - H_left - H_right
 

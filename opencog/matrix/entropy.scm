@@ -217,6 +217,7 @@
 	; Above, we compute marginals. Below, we compute totals.
 	; ---------------
 
+	; For pairs (x,y) the left-sum is a sum over y.
 	(define (left-sum FN)
 		(fold
 			(lambda (right-item sum) (+ sum (FN right-item)))
@@ -255,7 +256,7 @@
 		(left-sum
 			(lambda (x)
 				;; In general pairs can have a zero count,
-				;; and so a minus-inf logarithm. avoid NaN
+				;; and so a minus-inf logarithm. Avoid NaN.
 				(define lli (frqobj 'left-wild-logli x))
 				(if (finite? lli)
 					(* (frqobj 'left-wild-freq x) lli)
