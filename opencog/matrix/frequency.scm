@@ -100,10 +100,10 @@
 	(define freq-key (PredicateNode freq-name))
 
 	(define (zero ATOM) (if nothrow 0
-		(error "No such value! Did you forget to compute frequencies?\n\turn `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	(define (plus-inf ATOM) (if nothrow +inf.0
-		(error "No such value! Did you forget to compute frequencies?\n\turn `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
+		(error "No such value! Did you forget to compute frequencies?\n\tRun `((make-compute-freq LLOBJ) 'cache-all)` to compute them." ATOM)))
 
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (or was not observed) return 0.
