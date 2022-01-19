@@ -472,6 +472,7 @@
 		(for-each cache-right-freq (wldobj 'left-basis)))
 
 	(define (cache-all)
+		(init)
 		(cache-all-left-freqs)
 		(cache-all-right-freqs)
 		(cache-all-pair-freqs))
