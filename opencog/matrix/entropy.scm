@@ -18,11 +18,14 @@
   the marginal entropy and mutual information (MI).
 
   The object must have valid pair-frequency values and marginals on
-  it, accessible via the frequency-object API. These must have been
-  previously computed, before this object can be used.
+  it, accessible via the `add-pair-freq-api` object. These must have
+  been previously computed, before this object can be used.
+
+  After caching, the resulting entropy and MI marginals are accessible
+  with the `add-pair-freq-api` object.
 
   The methods on this class are:
-  'compute-left-entropy COL  -- compute and return the marginal entropy
+  'compute-left-entropy COL -- compute and return the marginal entropy
          for COL.  This is the summation
               h_left(y) = -sum_x P(x,y) log_2 P(x,y)
          where y == COL.
@@ -30,17 +33,24 @@
   'compute-right-entropy ROW -- as above, but for ROW == x:
               h_right(x) = -sum_y P(x,y) log_2 P(x,y)
 
-  'compute-left-mi ROW       -- compute the column mi
-	; Compute the left marginal MI:
-	;    mi_left(y) = sum_x P(x,y) log_2 MI(x,y)
-	;
-	; where MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
-  'compute-right-mi       -- compute the row mi
+  'compute-left-mi COL -- compute and return the marginal MI for COL.
+         This is
+               mi_left(y) = sum_x P(x,y) log_2 MI(x,y)
+         where MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
 
-  'cache-left-entropy   -- compute and cache the column entropies
-  'cache-right-entropy  -- compute and cache the row entropies
-  'cache-left-mi        -- compute and cache the column mi
-  'cache-right-mi       -- compute and cache the row mi
+  'compute-right-mi ROW -- as above, but for the ROW.
+
+  'cache-left-entropy COL  -- As above, caching the reults.
+  'cache-right-entropy ROW -- As above.
+  'cache-left-mi COL       -- As above.
+  'cache-right-mi ROW      -- As above.
+
+  'cache-all-left-entropy  -- Loop over all columns.
+  'cache-all-right-entropy -- Loop over all rows.
+  'cache-all-left-mi       -- Loop over all columns.
+  'cache-all-right-mi      -- Loop over all rows.
+
+  'cache-all-subtotals     -- Perform all four computations above.
 
   The cached values are accessible via the standard frequency API.
 "
