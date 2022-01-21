@@ -77,7 +77,7 @@
                     = sum_x P(x,*) H_right(x)
   should hold, up to rounding errors.
 
-  For the below, mi(x,y) = -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
+  For the below, mi(x,y) = P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
 
   'left-wild-mi ATOM   -- return mi_left(y) = sum_x mi(x,y)
   'left-wild-fmi ATOM  -- return MI_left(y) = mi_left(y) / P(*,y)

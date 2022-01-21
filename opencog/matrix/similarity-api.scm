@@ -153,8 +153,8 @@
 		; left and right will be random, depending on the atom hash.
 		; However, it will be consistent within a given session.
 		; Same remarks for the wildcards.
-		(define (get-pair-left PAIR) (gadr PAIR))
-		(define (get-pair-right PAIR) (gddr PAIR))
+		(define (get-pair-left PAIR) (gar PAIR))
+		(define (get-pair-right PAIR) (gdr PAIR))
 		(define (get-wildcard ITEM)
 			(Similarity (AnyNode "wild") ITEM))
 		(define (get-wild-wild)
