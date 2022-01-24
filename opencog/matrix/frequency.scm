@@ -108,19 +108,19 @@
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (or was not observed) return 0.
 	(define (get-freq ATOM)
-		(if (null? ATOM) (zero ATOM)
+		(if (nil? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
 				(if (nil? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
-		(if (null? ATOM) (plus-inf ATOM)
+		(if (nil? ATOM) (plus-inf ATOM)
 			(let ((val (cog-value ATOM freq-key)))
 				(if (nil? val) (plus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
-		(if (null? ATOM) (zero ATOM)
+		(if (nil? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
 				(if (nil? val) (zero ATOM) (cog-value-ref val 2)))))
 
@@ -129,7 +129,8 @@
 	(define (set-freq ATOM FREQ)
 		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 		(define ln2 (* -1.4426950408889634 (log FREQ)))
-		(define ent (* FREQ ln2))
+		; zero log zero is zero, not NaN.  ln2 zero is +inf.0 which is OK.
+		(define ent (if (finite? ln2) (* FREQ ln2) 0))
 		(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
 	; ----------------------------------------------------
@@ -149,7 +150,7 @@
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
-		(if (null? ATOM) (ezero ATOM)
+		(if (nil? ATOM) (ezero ATOM)
 			(let ((val (cog-value ATOM entropy-key)))
 				(if (nil? val) (ezero ATOM) (cog-value-ref val 0)))))
 
@@ -174,7 +175,7 @@
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
-		(if (null? ATOM) (eminus-inf ATOM)
+		(if (nil? ATOM) (eminus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
 				(if (nil? val) (eminus-inf ATOM) (cog-value-ref val 0)))))
 
@@ -183,7 +184,7 @@
 	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
-		(if (null? ATOM) (eminus-inf ATOM)
+		(if (nil? ATOM) (eminus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
 				(if (nil? val) (eminus-inf ATOM) (cog-value-ref val 1)))))
 
@@ -431,9 +432,8 @@
 	; the database. It returns nil if the count was zero.
 	(define (cache-pair-freq PAIR)
 		(define freq (compute-pair-freq PAIR))
-		(if (< 0 freq)
-			(frqobj 'set-pair-freq PAIR freq)
-			#f))
+		(frqobj 'set-pair-freq PAIR freq)
+		(if (< 0 freq) PAIR #f))
 
 	; Compute and cache the left-side wild-card frequency.
 	; This is unconditional - even if the frequency is zero.
