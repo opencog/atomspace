@@ -29,10 +29,6 @@
 #include "AtomSpace.h"
 
 #include <atomic>
-#include <functional>
-#include <iterator>
-#include <mutex>
-#include <set>
 
 #include <stdlib.h>
 
@@ -43,7 +39,6 @@
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/core/TypedAtomLink.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 

@@ -22,6 +22,7 @@
  */
 
 #include <atomic>
+#include <mutex>
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
