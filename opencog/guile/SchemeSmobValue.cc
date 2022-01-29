@@ -120,8 +120,13 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<ValuePtr>
 SchemeSmob::scm_to_protom_list (SCM svalue_list)
 {
-	std::vector<ValuePtr> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<ValuePtr> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
