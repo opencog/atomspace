@@ -162,8 +162,13 @@ SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<std::string>
 SchemeSmob::scm_to_string_list (SCM svalue_list)
 {
-	std::vector<std::string> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<std::string> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
