@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The TypeIntersectionLink link is used to hold a type description; it is
-/// an anonymous (un-named) type that is an intersectino of everything
+/// an anonymous (un-named) type that is an intersection of everything
 /// it holds. It's primary use is for specifying typed glob intervals,
 /// although it is also intended for computing the intersection of types.
 ///
