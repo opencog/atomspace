@@ -100,13 +100,13 @@
 		(for-each
 			(lambda (base)
 				(if (not (KEEP-RIGHT? base))
-					(cog-delete! (star-obj 'left-wild base))))
+					(cog-delete! (star-obj 'left-wildcard base))))
 			(star-obj 'right-basis))
 
 		(for-each
 			(lambda (base)
 				(if (not (KEEP-RIGHT? base))
-					(cog-delete! (star-obj 'right-wild base))))
+					(cog-delete! (star-obj 'right-wildcard base))))
 			(star-obj 'left-basis))
 
 		; Use non-recursive cog-delete! to get rid of basis elements
