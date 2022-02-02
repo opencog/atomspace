@@ -29,20 +29,21 @@
 
   The provided methods are:
 
-  'generic-trim LEFT-BASIS-PRED RIGHT-BASIS-PRED ELEMENT-PRED
-      Remove (delete) Atoms from the AtomSpace that pass the predicates.
-      If storage is connected, then these are removed from storage too.
+  'generic-trim KEEP-LEFT? KEEP-RIGHT? KEEP-ELEMENT?
+      Keep Atoms that pass the predicates; otherwise remove (delete)
+      them.  If storage is connected, then these are removed from
+      storage too.
 
-      LEFT-BASIS-PRED should be a function taking a ROW as an argument;
-      it should return #t if that row is to be deleted, else it returns #f.
+      KEEP-LEFT? should be a function taking a ROW as an argument;
+      it should return #t if that row is to be kept, else it returns #f.
 
-      RIGHT-BASIS-PRED should be a function taking a COL as an argument;
-      it should return #t if that column is to be deleted, else it
+      KEEP-RIGHT? should be a function taking a COL as an argument;
+      it should return #t if that column is to be kept, else it
       returns #f.
 
-      ELEMENT-PRED should be a function taking a matrix element as an
+      KEEP-ELEMENT? should be a function taking a matrix element as an
       argument; it should return #t if that matrix element should be
-      deleted, else it should return #f.
+      kept; else it should return #f.
 
   'subtotal-trim LEFT-CUT RIGHT-CUT PAIR-CUT
       Remove (delete) Atoms from the AtomSpace whose counts are at or
@@ -73,66 +74,56 @@
       to the count.  This is particularly useful when a matrix might
       have only one matrix entry in a given row or column, no matter how
       big the count on that entry may be.
+
+   XXX TODO: This should be designed to call method on the object to
+   perform the deletion, instead of calling cog-delete! directly.  This
+   would allow the object to handle deletions in a custom fashion.
 "
 	(define star-obj (add-pair-stars LLOBJ))
 
-	(define (trim-generic OBJ LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
+	(define (trim-generic OBJ KEEP-LEFT? KEEP-RIGHT? KEEP-ELT?)
 
 		(define elapsed-secs (make-elapsed-secs))
 
-		; After removing pairs, it may now happen that there are left
-		; and right basis elements that are no longer in any pairs.
-		; Remove these too.
-		(define (trim-type BASIS-LIST)
-			(define party (star-obj 'pair-type))
-			(for-each
-				(lambda (base)
-					(if (and (cog-atom? base)
-							(equal? 0 (cog-incoming-size-by-type base party)))
-						(cog-delete! base)))
-				BASIS-LIST))
+		; Walk over the list of all entries and delete them.
+		; Use the non-recursive cog-delete! so that the element
+		; is kept, if its linked by something else.  Caller's
+		; responsibility to handle this.
+		(for-each
+			(lambda (elt)
+				(if (not (KEEP-ELT? elt)) (cog-delete! elt)))
+			(star-obj 'get-all-elts))
 
-		; Walk over the left and right basis.
-		; The use of cog-delete-recursive! may knock out other
-		; elements in the matrix, and so `cog-atom?` is used
-		; to see if that particular entry still exists.
+		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
+
+		; Do the basis only after doing the elements.
+		; Use non-recursive cog-delete! to get rid of basis elements
+		; that are orphaned aftr the above element-loop. Otherwise,
+		; use recursive-delete to force deletion.
 		(for-each
 			(lambda (base)
-				(if (and (cog-atom? base) (not (LEFT-BASIS-PRED base)))
-					(cog-delete-recursive! base)))
-			(star-obj 'left-basis))
-
-		(format #t "Trimmed left basis in ~A seconds.\n" (elapsed-secs))
-
-		(for-each
-			(lambda (base)
-				(if (and (cog-atom? base) (not (RIGHT-BASIS-PRED base)))
+				(if (KEEP-RIGHT? base)
+					(cog-delete! base)
 					(cog-delete-recursive! base)))
 			(star-obj 'right-basis))
 
 		(format #t "Trimmed right basis in ~A seconds.\n" (elapsed-secs))
 
-		; Walk over the list of all entries and just delete them.
 		(for-each
-			(lambda (atom)
-				(if (and (cog-atom? atom) (not (PAIR-PRED atom)))
-					(cog-delete-recursive! atom)))
-			(star-obj 'get-all-elts))
+			(lambda (base)
+				(if (KEEP-LEFT? base)
+					(cog-delete! base)
+					(cog-delete-recursive! base)))
+			(star-obj 'left-basis))
 
-		; After removing pairs, it may now happen that there are left
-		; and right basis elements that are no longer in any pairs.
-		; Remove these too.
-		(trim-type (star-obj 'left-basis))
-		(trim-type (star-obj 'right-basis))
+		(format #t "Trimmed left basis in ~A seconds.\n" (elapsed-secs))
 
 		; Trimming has committed violence to the matrix. Let it know.
 		(if (OBJ 'provides 'clobber) (OBJ 'clobber))
-
-		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
 	)
 
-	(define (generic-trim LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED)
-		(trim-generic star-obj LEFT-BASIS-PRED RIGHT-BASIS-PRED PAIR-PRED))
+	(define (generic-trim KEEP-LEFT? KEEP-RIGHT? KEEP-ELT?)
+		(trim-generic star-obj KEEP-LEFT? KEEP-RIGHT? KEEP-ELT?))
 
 	; ------------------------------------------------------------
 
