@@ -98,7 +98,7 @@
 
 		; Do the basis only after doing the elements.
 		; Use non-recursive cog-delete! to get rid of basis elements
-		; that are orphaned aftr the above element-loop. Otherwise,
+		; that are orphaned after the above element-loop. Otherwise,
 		; use recursive-delete to force deletion.
 		(for-each
 			(lambda (base)
@@ -201,9 +201,6 @@
 			((obj)              "add-trimmer")
 			((base)             LLOBJ)
 
-			; Block anything that might have to be filtered.
-			; For example: 'pair-freq which we don't, can't filter.
-			; Or any of the various subtotals and marginals.
 			(else               (apply LLOBJ (cons message args))))
 	)
 )
