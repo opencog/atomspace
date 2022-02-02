@@ -96,27 +96,26 @@
 
 		(format #t "Trimmed all pairs in ~A seconds.\n" (elapsed-secs))
 
-		; Do the basis only after doing the elements.
-		; Use non-recursive cog-delete! to get rid of basis elements
-		; that are orphaned after the above element-loop. Otherwise,
-		; use recursive-delete to force deletion.
+		; Get rid of the wild-cards associated with each basis elt.
 		(for-each
 			(lambda (base)
-				(if (KEEP-RIGHT? base)
-					(cog-delete! base)
-					(cog-delete-recursive! base)))
+				(if (not (KEEP-RIGHT? base))
+					(cog-delete! (star-obj 'left-wild base))))
 			(star-obj 'right-basis))
 
-		(format #t "Trimmed right basis in ~A seconds.\n" (elapsed-secs))
-
 		(for-each
 			(lambda (base)
-				(if (KEEP-LEFT? base)
-					(cog-delete! base)
-					(cog-delete-recursive! base)))
+				(if (not (KEEP-RIGHT? base))
+					(cog-delete! (star-obj 'right-wild base))))
 			(star-obj 'left-basis))
 
-		(format #t "Trimmed left basis in ~A seconds.\n" (elapsed-secs))
+		; Use non-recursive cog-delete! to get rid of basis elements
+		; that are orphaned after the above element-loop + marginal
+		; deletion.
+		(for-each cog-delete! (star-obj 'right-basis))
+		(for-each cog-delete! (star-obj 'left-basis))
+
+		(format #t "Trimmed marginals+basis in ~A seconds.\n" (elapsed-secs))
 
 		; Trimming has committed violence to the matrix. Let it know.
 		(if (OBJ 'provides 'clobber) (OBJ 'clobber))
