@@ -451,7 +451,7 @@
 			(rpt-obj 'set-size
 				(wild-obj 'left-basis-size)
 				(wild-obj 'right-basis-size)
-				(len-obj 'total-support-left))
+				(len-obj 'total-support-right))
 
 			(rpt-obj 'set-left-norms
 				(get-left-support)
@@ -471,7 +471,7 @@
 			(rpt-obj 'set-size
 				(wild-obj 'left-basis-size)
 				(wild-obj 'right-basis-size)
-				(len-obj 'total-support-right))
+				(len-obj 'total-support-left))
 
 			(rpt-obj 'set-right-norms
 				(get-right-support)
