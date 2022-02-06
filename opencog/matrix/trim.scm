@@ -105,7 +105,7 @@
 
 		(for-each
 			(lambda (base)
-				(if (not (KEEP-RIGHT? base))
+				(if (not (KEEP-LEFT? base))
 					(cog-delete! (star-obj 'right-wildcard base))))
 			(star-obj 'left-basis))
 
