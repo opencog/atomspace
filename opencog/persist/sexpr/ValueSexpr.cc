@@ -149,7 +149,12 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 				if ('"' == c)
 				{
 					++epos;
-					for (; epos < totlen and (stv[epos] != '"' or (stv[epos-1] == '\\')); epos++);
+					// Search for ending quote, advancing past escaped quotes.
+					while (epos < totlen and stv[epos] != '"')
+					{
+						if (stv[epos] == '\\') epos++;
+						epos++;
+					}
 					continue;
 				}
 				if ('(' == c) pcnt ++;
