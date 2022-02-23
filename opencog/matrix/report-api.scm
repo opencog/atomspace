@@ -536,7 +536,7 @@
 
 	(define rpt-obj (add-report-api LLOBJ))
 
-	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
+	(format PORT "Entropy Total: ~7f   Left: ~7f   Right: ~7f\n"
 		(rpt-obj 'total-entropy)
 		(rpt-obj 'left-entropy)
 		(rpt-obj 'right-entropy)
@@ -665,13 +665,14 @@
 			(format PORT "Error: left and right total counts not equal! ~A ~A\n"
 				lobs robs))
 
-		(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
-		(format PORT "Size: ~d non-zero entries of ~d possible\n"
-			lsize tot)
-		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
-			(/ lsize tot) (log2 (/ tot lsize)))
-		(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
-			lobs (/ lobs lsize))
+		(format PORT "Rows: ~d Columns: ~d  == log_2 ~7f x ~7f\n"
+			nrows ncols (log2 nrows) (log2 ncols))
+		(format PORT "Size: ~d  log_2 size: ~7f\n"
+			lsize (log2 lsize))
+		(format PORT "Fraction non-zero: ~9,4g Sparsity: ~7f  Rarity: ~7f\n"
+			(/ lsize tot) (log2 (/ tot lsize)) (log2 (/ lsize (sqrt tot))))
+		(format PORT "Total obs: ~10f  Avg obs/pair: ~7f  log_2 avg: ~7f\n"
+			lobs (/ lobs lsize) (log2 (/ lobs lsize)))
 	)
 )
 
