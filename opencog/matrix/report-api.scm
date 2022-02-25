@@ -536,12 +536,12 @@
 
 	(define rpt-obj (add-report-api LLOBJ))
 
-	(format PORT "Entropy Total: ~7f   Left: ~7f   Right: ~7f\n"
+	(format PORT "Entropy Tot: ~7f  Left: ~7f  Right: ~7f  MI: ~7F\n"
 		(rpt-obj 'total-entropy)
 		(rpt-obj 'left-entropy)
 		(rpt-obj 'right-entropy)
+		(rpt-obj 'total-mi)
 	)
-	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
 )
 
 (define (print-centrality-summary-report LLOBJ PORT)
@@ -711,15 +711,15 @@
 				"No cached matrix data available;\n  run ((add-support-compute LLOBJ) 'cache-all) to make one.\n")
 			#f))
 
-	(print-centrality-summary-report LLOBJ PORT)
-	(print-transpose-summary-report LLOBJ PORT)
-
 	(catch #t
 		(lambda () (print-entropy-summary-report LLOBJ PORT))
 		(lambda (key . args)
 			(format PORT
 				"No MI statistics are present; run compute-mi to get them.\n")
 			#f))
+
+	(print-centrality-summary-report LLOBJ PORT)
+	(print-transpose-summary-report LLOBJ PORT)
 
 	*unspecified*
 )
