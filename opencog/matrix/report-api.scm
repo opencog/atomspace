@@ -615,7 +615,6 @@
 		(set! mtm-entropy
 			(/ (- (log (/ mtm-count (* mtm-support mtm-support)))) (log 2))))
 
-	(format PORT "\n")
 	(if (< 0 mmt-support)
 		(format PORT "MM^T support=~6g count=~6g entropy=~6f\n"
 			mmt-support mmt-count mmt-entropy)
