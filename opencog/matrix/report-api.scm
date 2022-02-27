@@ -718,8 +718,8 @@
 				"No MI statistics are present; run compute-mi to get them.\n")
 			#f))
 
-	(print-centrality-summary-report LLOBJ PORT)
 	(print-transpose-summary-report LLOBJ PORT)
+	(print-centrality-summary-report LLOBJ PORT)
 
 	*unspecified*
 )
