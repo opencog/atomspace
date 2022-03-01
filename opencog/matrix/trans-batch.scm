@@ -155,8 +155,9 @@
 			;	(lambda (key . args)
 			;		(batch-right-support)))
 
-			; No! Do not depend on cached valus!
+			; No! Do not depend on cached values!
 			; This interacts badly with trimming!
+			; Just recompute unconditionally, from scratch.
 			(batch-left-support)
 			(batch-right-support)
 		)
