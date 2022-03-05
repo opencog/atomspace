@@ -46,11 +46,10 @@ void QueryLink::init(void)
 	// If we are quoted, don't bother to try to do anything.
 	if (_quoted) return;
 
-	extract_variables(_outgoing);
-	unbundle_clauses(_body);
-	common_init();
-	setup_components();
 	_pat.redex_name = "anonymous QueryLink";
+	extract_variables(_outgoing);
+
+	init_bottom();
 
 #ifdef QDEBUG
 	logger().fine("Query: %s", to_long_string("").c_str());

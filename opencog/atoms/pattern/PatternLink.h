@@ -147,6 +147,7 @@ protected:
 	void clauses_get_variables(const PatternTermSeq&);
 
 	void init(void);
+	void init_bottom(void);
 	void common_init(void);
 	void disjointed_init(void);
 	void setup_components(void);
