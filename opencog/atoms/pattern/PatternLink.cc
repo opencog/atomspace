@@ -200,11 +200,6 @@ void PatternLink::init_bottom(void)
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
-
-#ifdef QDEBUG
-	debug_log("PatternLink::init()");
-	// logger().fine("Pattern: %s", to_long_string("").c_str());
-#endif
 }
 
 void PatternLink::init(void)
