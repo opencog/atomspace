@@ -184,7 +184,7 @@ void PatternLink::init_bottom(void)
 {
 	// A body that is a ChoiceLink must be treated as a collection of
 	// distinct, unrelated searches; the result is a union of the
-	// results of the parts. Because must users have trouble
+	// results of the parts. Because most users have trouble
 	// distinguishing between menu-choice and logical-or, we will
 	// allow OrLink at the top level, as well. Both of these result
 	// in the SetUnion of the search results. Of course, this only
