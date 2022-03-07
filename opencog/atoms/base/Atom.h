@@ -88,6 +88,7 @@ typedef hashable_weak_ptr<Atom> WinkPtr;
 
 #else // USE_HASHABLE_WEAK_PTR
 
+// See discussion in README, explaining why using a bar pointer is safe.
 #define USE_BARE_BACKPOINTER 1
 #if USE_BARE_BACKPOINTER
 typedef Atom* WinkPtr;

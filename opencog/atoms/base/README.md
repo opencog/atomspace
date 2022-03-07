@@ -34,3 +34,29 @@ runs these validators, before calling the factory itself. This
 validation helps avoid the need to have lots of repetitive checking
 in the constructors for the various C++ atom classes; they also work
 for atoms that do not have any C++ class behind them.
+
+Weak Pointers
+=============
+Handles are reference-counted pointers to Atoms, guaranteeing that the
+memory for an Atom is never released, as long as there is *some* Handle
+pointing to it.  Links are vectors of Handles, and thus for a reference-
+counted tree of all the Atoms underneath.
+
+The Incoming Set points in the *opposite direction*, back up the tree.
+One cannot use a regular "strong" (reference-counted) pointer for this,
+as this would create a loop with a cycle, and thus could never decrement
+itself back down to zero if there are no external references to the cycle.
+
+The conventional wisdom here is to use weak pointers, as these will not
+interfere with reference counting, while stil enabling safe memory access.
+The code for the incoming set was originally written to use weak pointers.
+
+However ... they are not really needed, and, instead, naked, bare pointers
+can be used for the incoming set. This is because the incoming set is
+always valid, when an Atom is in the AtomSpace... because incoming sets
+are kept *only* when an Atom is in an AtomSpace, and are *never* kept when
+an Atom is *not* in an AtomSpace!
+
+The use of naked, bare backpointers in the incoming set allows for faster
+dereferencing, avoiding the lock and the overhead of conveting weak pointers
+into strong pointers. The `#define USE_BARE_BACKPOINTER 1` is set.
