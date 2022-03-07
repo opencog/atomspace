@@ -98,6 +98,12 @@ typedef std::weak_ptr<Atom> WinkPtr;
 #endif // USE_HASHABLE_WEAK_PTR
 }
 
+#if USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP); STMT;
+#else  // USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
+#endif // USE_BARE_BACKPOINTER
+
 namespace std
 {
 
@@ -411,13 +417,7 @@ public:
         {
             for (const WinkPtr& w : bucket.second)
             {
-#if USE_BARE_BACKPOINTER
-                *result = std::static_pointer_cast<Atom>(w);
-                result ++;
-#else //  USE_BARE_BACKPOINTER
-                Handle h(std::static_pointer_cast<Atom>(w.lock()));
-                if (h) { *result = h; result ++; }
-#endif //  USE_BARE_BACKPOINTER
+                WEAKLY_DO(h, w, { *result = h; result ++; })
             }
         }
         return result;
@@ -458,13 +458,7 @@ public:
 
         for (const WinkPtr& w : bucket->second)
         {
-#if USE_BARE_BACKPOINTER
-            *result = std::static_pointer_cast<Atom>(w);
-            result ++;
-#else //  USE_BARE_BACKPOINTER
-            Handle h(std::static_pointer_cast<Atom>(w.lock()));
-            if (h) { *result = h; result ++; }
-#endif //  USE_BARE_BACKPOINTER
+            WEAKLY_DO(h, w, { *result = h; result ++; })
         }
         return result;
     }

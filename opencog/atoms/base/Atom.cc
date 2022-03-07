@@ -361,12 +361,6 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-#if USE_BARE_BACKPOINTER
-	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP); STMT;
-#else  // USE_BARE_BACKPOINTER
-	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
-#endif // USE_BARE_BACKPOINTER
-
 bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return true;
