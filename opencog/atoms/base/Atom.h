@@ -34,7 +34,7 @@
 #include <string>
 #include <unordered_set>
 
-#if HAVE_FOLLY
+#if XHAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
@@ -91,7 +91,7 @@ typedef hashable_weak_ptr<Atom> WinkPtr;
 // See discussion in README, explaining why using a bar pointer is safe.
 #define USE_BARE_BACKPOINTER 1
 #if USE_BARE_BACKPOINTER
-typedef Atom* WinkPtr;
+typedef const Atom* WinkPtr;
 #else // USE_BARE_BACKPOINTER
 typedef std::weak_ptr<Atom> WinkPtr;
 #endif // USE_BARE_BACKPOINTER
@@ -128,13 +128,10 @@ template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 #else // USE_HASHABLE_WEAK_PTR
 
 #if USE_BARE_BACKPOINTER
-
-// Some but not all versions of the compiler require std::owner_less
-// to be explicitly declared.
-template <> struct owner_less<opencog::Atom*>
+template <> struct owner_less<const opencog::Atom*>
 {
-	bool operator()(const opencog::Atom*& lhs,
-	                const opencog::Atom*& rhs) const noexcept
+	bool operator()(const opencog::Atom* const& lhs,
+	                const opencog::Atom* const& rhs) const noexcept
 	{
 		return lhs < rhs;
 	}
@@ -165,7 +162,7 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#if HAVE_FOLLY
+#if XHAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else
