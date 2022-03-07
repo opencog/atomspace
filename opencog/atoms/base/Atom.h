@@ -125,6 +125,22 @@ template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 		return w.get_hash();
 	}
 };
+#else // USE_HASHABLE_WEAK_PTR
+
+#if USE_BARE_BACKPOINTER
+
+// Some but not all versions of the compiler require std::owner_less
+// to be explicitly declared.
+struct owner_less<opencog::Atom*>
+{
+	bool operator()(const opencog::Atom*& lhs,
+	                const opencog::Atom*& rhs) const noexcept
+	{
+		return lhs < rhs;
+	}
+};
+#endif //USE_BARE_BACKPOINTER
+
 #endif // USE_HASHABLE_WEAK_PTR
 
 
