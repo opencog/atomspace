@@ -131,7 +131,7 @@ template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 
 // Some but not all versions of the compiler require std::owner_less
 // to be explicitly declared.
-struct owner_less<opencog::Atom*>
+template <> struct owner_less<opencog::Atom*>
 {
 	bool operator()(const opencog::Atom*& lhs,
 	                const opencog::Atom*& rhs) const noexcept
