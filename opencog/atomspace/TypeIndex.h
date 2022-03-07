@@ -43,7 +43,6 @@ namespace opencog
 
 // Facebook Folly
 // https://github.com/facebook/folly/blob/main/folly/container/F14.md
-// promises a faster and more compact hash table. Just one problem:
 // promises a faster and more compact hash table. Just two problems:
 // 1) It does not make any difference in the "real world" benchmark
 //    I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
