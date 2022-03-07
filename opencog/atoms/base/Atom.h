@@ -87,9 +87,30 @@ struct hashable_weak_ptr : public std::weak_ptr<T>
 typedef hashable_weak_ptr<Atom> WinkPtr;
 
 #else // USE_HASHABLE_WEAK_PTR
+
+// See discussion in README, explaining why using a bare pointer is safe.
+//
+// Based on current measurements (March 2022, benchmark/query-loop/diary.txt)
+// there is no performance advantage to useing bare pointers. In addition,
+// it appears that AtomSpaceAsyncUTest fails, probably due to "trivial"
+// reasons. Thus, there does not seem to be any advantage to enabling bare
+// pointers, and perhaps some minor disadvantages.
+// #define USE_BARE_BACKPOINTER 1
+//
+#if USE_BARE_BACKPOINTER
+typedef const Atom* WinkPtr;
+#else // USE_BARE_BACKPOINTER
 typedef std::weak_ptr<Atom> WinkPtr;
+#endif // USE_BARE_BACKPOINTER
+
 #endif // USE_HASHABLE_WEAK_PTR
 }
+
+#if USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP->get_handle()); STMT;
+#else  // USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
+#endif // USE_BARE_BACKPOINTER
 
 namespace std
 {
@@ -111,6 +132,19 @@ template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 		return w.get_hash();
 	}
 };
+#else // USE_HASHABLE_WEAK_PTR
+
+#if USE_BARE_BACKPOINTER
+template <> struct owner_less<const opencog::Atom*>
+{
+	bool operator()(const opencog::Atom* const& lhs,
+	                const opencog::Atom* const& rhs) const noexcept
+	{
+		return lhs < rhs;
+	}
+};
+#endif //USE_BARE_BACKPOINTER
+
 #endif // USE_HASHABLE_WEAK_PTR
 
 
@@ -404,8 +438,7 @@ public:
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle h(std::static_pointer_cast<Atom>(w.lock()));
-                if (h) { *result = h; result ++; }
+                WEAKLY_DO(h, w, { *result = h; result ++; })
             }
         }
         return result;
@@ -446,8 +479,7 @@ public:
 
         for (const WinkPtr& w : bucket->second)
         {
-            Handle h(std::static_pointer_cast<Atom>(w.lock()));
-            if (h) { *result = h; result ++; }
+            WEAKLY_DO(h, w, { *result = h; result ++; })
         }
         return result;
     }

@@ -256,6 +256,12 @@ void Atom::setAtomSpace(AtomSpace *tb)
 // ==============================================================
 // Incoming set stuff
 
+#if USE_BARE_BACKPOINTER
+	#define GET_PTR(a) a.const_atom_ptr()
+#else // USE_BARE_BACKPOINTER
+	#define GET_PTR(a) a
+#endif // USE_BARE_BACKPOINTER
+
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
 /// is called.  If this atom is added to any links before this call
@@ -298,7 +304,7 @@ void Atom::insert_atom(const Handle& a)
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
     }
-    bucket->second.insert(a);
+    bucket->second.insert(GET_PTR(a));
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
@@ -318,7 +324,7 @@ void Atom::remove_atom(const Handle& a)
     const auto bucket = _incoming_set->_iset.find(at);
 
     OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
-    size_t erc = bucket->second.erase(a);
+    size_t erc = bucket->second.erase(GET_PTR(a));
 
     // std::set is a "true set", in that it either contains something,
     // or it does not.  Therefore, the erase count is either 1 (the
@@ -341,7 +347,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 #endif /* INCOMING_SET_SIGNALS */
     Type ot = old->get_type();
     auto bucket = _incoming_set->_iset.find(ot);
-    bucket->second.erase(old);
+    bucket->second.erase(GET_PTR(old));
 
     Type nt = neu->get_type();
     bucket = _incoming_set->_iset.find(nt);
@@ -351,7 +357,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
                    std::make_pair(nt, WincomingSet()));
         bucket = pr.first;
     }
-    bucket->second.insert(neu);
+    bucket->second.insert(GET_PTR(neu));
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
@@ -371,8 +377,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            Handle l(w.lock());
-            if (l and (not as or as->in_environ(l))) return false;
+            WEAKLY_DO(l, w, { if (not as or as->in_environ(l)) return false; })
         }
     }
     return true;
@@ -391,8 +396,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle l(w.lock());
-                if (l and as->in_environ(l)) cnt++;
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
             }
         }
         return cnt;
@@ -420,9 +424,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle l(w.lock());
-                if (l and as->in_environ(l))
-                    iset.emplace_back(l);
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
             }
         }
         return iset;
@@ -435,8 +437,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            Handle l(w.lock());
-            if (l) iset.emplace_back(l);
+            WEAKLY_DO(l, w, { iset.emplace_back(l); });
         }
     }
     return iset;
@@ -457,17 +458,14 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
-            Handle l(w.lock());
-            if (l and as->in_environ(l))
-                result.emplace_back(l);
+            WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
         }
         return result;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        Handle l(w.lock());
-        if (l) result.emplace_back(l);
+        WEAKLY_DO(l, w, { result.emplace_back(l); })
     }
     return result;
 }
@@ -485,16 +483,14 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
-            Handle l(w.lock());
-            if (l and as->in_environ(l)) cnt++;
+            WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
         }
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        Handle l(w.lock());
-        if (l) cnt++;
+        WEAKLY_DO(l, w, { cnt++; })
     }
     return cnt;
 }
