@@ -100,7 +100,7 @@ typedef std::weak_ptr<Atom> WinkPtr;
 }
 
 #if USE_BARE_BACKPOINTER
-	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP); STMT;
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP->get_handle()); STMT;
 #else  // USE_BARE_BACKPOINTER
 	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
 #endif // USE_BARE_BACKPOINTER
