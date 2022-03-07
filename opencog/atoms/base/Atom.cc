@@ -371,8 +371,13 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
+#if USE_BARE_BACKPOINTER
+            Handle l(w);
+            if (not as or as->in_environ(l)) return false;
+#else // USE_BARE_BACKPOINTER
             Handle l(w.lock());
             if (l and (not as or as->in_environ(l))) return false;
+#endif // USE_BARE_BACKPOINTER
         }
     }
     return true;
@@ -391,8 +396,13 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
+#if USE_BARE_BACKPOINTER
+                Handle l(w);
+                if (as->in_environ(l)) cnt++;
+#else // USE_BARE_BACKPOINTER
                 Handle l(w.lock());
                 if (l and as->in_environ(l)) cnt++;
+#endif // USE_BARE_BACKPOINTER
             }
         }
         return cnt;
@@ -420,9 +430,15 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         {
             for (const WinkPtr& w : bucket.second)
             {
+#if USE_BARE_BACKPOINTER
+                Handle l(w);
+                if (as->in_environ(l))
+                    iset.emplace_back(l);
+#else // USE_BARE_BACKPOINTER
                 Handle l(w.lock());
                 if (l and as->in_environ(l))
                     iset.emplace_back(l);
+#endif // USE_BARE_BACKPOINTER
             }
         }
         return iset;
@@ -435,8 +451,13 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
+#if USE_BARE_BACKPOINTER
+            Handle l(w);
+            iset.emplace_back(l);
+#else // USE_BARE_BACKPOINTER
             Handle l(w.lock());
             if (l) iset.emplace_back(l);
+#endif // USE_BARE_BACKPOINTER
         }
     }
     return iset;
@@ -457,17 +478,28 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
+#if USE_BARE_BACKPOINTER
+            Handle l(w);
+            if (as->in_environ(l))
+                result.emplace_back(l);
+#else // USE_BARE_BACKPOINTER
             Handle l(w.lock());
             if (l and as->in_environ(l))
                 result.emplace_back(l);
+#endif // USE_BARE_BACKPOINTER
         }
         return result;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
+#if USE_BARE_BACKPOINTER
+        Handle l(w);
+        result.emplace_back(l);
+#else // USE_BARE_BACKPOINTER
         Handle l(w.lock());
         if (l) result.emplace_back(l);
+#endif // USE_BARE_BACKPOINTER
     }
     return result;
 }
@@ -485,16 +517,26 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     if (as) {
         for (const WinkPtr& w : bucket->second)
         {
+#if USE_BARE_BACKPOINTER
+            Handle l(w);
+            if (as->in_environ(l)) cnt++;
+#else // USE_BARE_BACKPOINTER
             Handle l(w.lock());
             if (l and as->in_environ(l)) cnt++;
+#endif // USE_BARE_BACKPOINTER
         }
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
+#if USE_BARE_BACKPOINTER
+        Handle l(w);
+        cnt++;
+#else // USE_BARE_BACKPOINTER
         Handle l(w.lock());
         if (l) cnt++;
+#endif // USE_BARE_BACKPOINTER
     }
     return cnt;
 }

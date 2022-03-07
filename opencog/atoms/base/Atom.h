@@ -87,7 +87,14 @@ struct hashable_weak_ptr : public std::weak_ptr<T>
 typedef hashable_weak_ptr<Atom> WinkPtr;
 
 #else // USE_HASHABLE_WEAK_PTR
+
+#define USE_BARE_BACKPOINTER 1
+#if USE_BARE_BACKPOINTER
+typedef Atom* WinkPtr;
+#else // USE_BARE_BACKPOINTER
 typedef std::weak_ptr<Atom> WinkPtr;
+#endif // USE_BARE_BACKPOINTER
+
 #endif // USE_HASHABLE_WEAK_PTR
 }
 
@@ -404,8 +411,13 @@ public:
         {
             for (const WinkPtr& w : bucket.second)
             {
+#if USE_BARE_BACKPOINTER
+                *result = std::static_pointer_cast<Atom>(w);
+                result ++;
+#else //  USE_BARE_BACKPOINTER
                 Handle h(std::static_pointer_cast<Atom>(w.lock()));
                 if (h) { *result = h; result ++; }
+#endif //  USE_BARE_BACKPOINTER
             }
         }
         return result;
@@ -446,8 +458,13 @@ public:
 
         for (const WinkPtr& w : bucket->second)
         {
+#if USE_BARE_BACKPOINTER
+            *result = std::static_pointer_cast<Atom>(w);
+            result ++;
+#else //  USE_BARE_BACKPOINTER
             Handle h(std::static_pointer_cast<Atom>(w.lock()));
             if (h) { *result = h; result ++; }
+#endif //  USE_BARE_BACKPOINTER
         }
         return result;
     }
