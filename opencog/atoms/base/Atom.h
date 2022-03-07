@@ -34,7 +34,7 @@
 #include <string>
 #include <unordered_set>
 
-#if XHAVE_FOLLY
+#if HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
@@ -88,8 +88,15 @@ typedef hashable_weak_ptr<Atom> WinkPtr;
 
 #else // USE_HASHABLE_WEAK_PTR
 
-// See discussion in README, explaining why using a bar pointer is safe.
-#define USE_BARE_BACKPOINTER 1
+// See discussion in README, explaining why using a bare pointer is safe.
+//
+// Based on current measurements (March 2022, benchmark/query-loop/diary.txt)
+// there is no performance advantage to useing bare pointers. In addition,
+// it appears that AtomSpaceAsyncUTest fails, probably due to "trivial"
+// reasons. Thus, there does not seem to be any advantage to enabling bare
+// pointers, and perhaps some minor disadvantages.
+// #define USE_BARE_BACKPOINTER 1
+//
 #if USE_BARE_BACKPOINTER
 typedef const Atom* WinkPtr;
 #else // USE_BARE_BACKPOINTER
@@ -162,7 +169,7 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
-#if XHAVE_FOLLY
+#if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 #else

@@ -57,6 +57,9 @@ always valid, when an Atom is in the AtomSpace... because incoming sets
 are kept *only* when an Atom is in an AtomSpace, and are *never* kept when
 an Atom is *not* in an AtomSpace!
 
-The use of naked, bare backpointers in the incoming set allows for faster
-dereferencing, avoiding the lock and the overhead of conveting weak pointers
-into strong pointers. The `#define USE_BARE_BACKPOINTER 1` is set.
+The use of naked, bare backpointers in the incoming set should have allowed
+for faster dereferencing, avoiding the lock and the overhead of conveting
+weak pointers into strong pointers.  Unfortunately, nothing is gained, as
+the need to convert bare pointers into Handles appears to offset any gains.
+In fact, this conversion might even slow things down slightly.
+The `#define USE_BARE_BACKPOINTER 1` is *NOT* set.
