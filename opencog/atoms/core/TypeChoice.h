@@ -33,7 +33,7 @@ namespace opencog
 
 typedef std::pair<size_t, size_t> GlobInterval;
 class TypeChoice;
-typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
+LINK_PTR_DECL(TypeChoice)
 typedef std::set<TypeChoicePtr> TypeChoiceSet;
 
 /// The TypeChoice link is used to hold a type description; it is
@@ -97,13 +97,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
-static inline TypeChoicePtr TypeChoiceCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypeChoice>(h); }
-static inline TypeChoicePtr TypeChoiceCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypeChoice>(a); }
-
-#define createTypeChoice std::make_shared<TypeChoice>
+#define createTypeChoice CREATE_DECL(TypeChoice)
 
 std::string oc_to_string(const TypeChoiceSet&,
                          const std::string& indent=empty_string);

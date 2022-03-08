@@ -72,13 +72,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<RandomChoiceLink> RandomChoiceLinkPtr;
-static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<RandomChoiceLink>(h); }
-static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<RandomChoiceLink>(a); }
-
-#define createRandomChoiceLink std::make_shared<RandomChoiceLink>
+LINK_PTR_DECL(RandomChoiceLink)
+#define createRandomChoiceLink CREATE_DECL(RandomChoiceLink)
 
 /** @}*/
 }

@@ -200,14 +200,7 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
-#define LINK_PTR_DECL(CNAME)                                \
-    typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
-    static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
-        { return std::dynamic_pointer_cast<CNAME>(h); }     \
-    static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
-        { return std::dynamic_pointer_cast<CNAME>(a); }
-
-#define CREATE_DECL(CNAME)  std::make_shared<CNAME>
+#define LINK_PTR_DECL(CNAME)  ATOM_PTR_DECL(CNAME)
 
 LINK_PTR_DECL(Link);
 
