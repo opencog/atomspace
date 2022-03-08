@@ -53,7 +53,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-NODE_PTR_DEL(GroundedSchemaNode)
+NODE_PTR_DECL(GroundedSchemaNode)
 #define createGroundedSchemaNode CREATE_DECL(GroundedSchemaNode)
 
 /** @}*/

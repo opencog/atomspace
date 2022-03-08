@@ -24,7 +24,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/grounded/GroundedSchemaNode.h>
+#include "GroundedSchemaNode.h"
 #include "LibraryRunner.h"
 #include "PythonRunner.h"
 #include "SCMRunner.h"

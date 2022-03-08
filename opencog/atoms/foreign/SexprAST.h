@@ -57,13 +57,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SexprAST> SexprASTPtr;
-static inline SexprASTPtr SexprASTCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<SexprAST>(h); }
-static inline SexprASTPtr SexprASTCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<SexprAST>(a); }
-
-#define createSexprAST std::make_shared<SexprAST>
+LINK_PTR_DECL(SexprAST)
+#define createSexprAST CREATE_DECL(SexprAST)
 
 /** @}*/
 }
