@@ -39,13 +39,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<AccumulateLink> AccumulateLinkPtr;
-static inline AccumulateLinkPtr AccumulateLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<AccumulateLink>(a); }
-static inline AccumulateLinkPtr AccumulateLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<AccumulateLink>(a); }
-
-#define createAccumulateLink std::make_shared<AccumulateLink>
+LINK_PTR_DECL(AccumulateLink)
+#define createAccumulateLink CREATE_DECL(AccumulateLink)
 
 /** @}*/
 }

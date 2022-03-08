@@ -47,12 +47,7 @@ public:
 	virtual const std::string& get_name() const { return _name; }
 };
 
-typedef std::shared_ptr<ForeignAST> ForeignASTPtr;
-static inline ForeignASTPtr ForeignASTCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ForeignAST>(h); }
-static inline ForeignASTPtr ForeignASTCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<ForeignAST>(a); }
-
+LINK_PTR_DECL(ForeignAST)
 
 template< class... Args >
 Handle createForeignAST( Args&&... args )

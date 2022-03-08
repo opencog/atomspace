@@ -113,13 +113,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<JoinLink> JoinLinkPtr;
-static inline JoinLinkPtr JoinLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<JoinLink>(a); }
-static inline JoinLinkPtr JoinLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<JoinLink>(a); }
-
-#define createJoinLink std::make_shared<JoinLink>
+LINK_PTR_DECL(JoinLink)
+#define createJoinLink CREATE_DECL(JoinLink)
 
 /** @}*/
 }

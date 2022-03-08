@@ -48,13 +48,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<BindLink> BindLinkPtr;
-static inline BindLinkPtr BindLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<BindLink>(a); }
-static inline BindLinkPtr BindLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<BindLink>(a); }
-
-#define createBindLink std::make_shared<BindLink>
+LINK_PTR_DECL(BindLink)
+#define createBindLink CREATE_DECL(BindLink)
 
 /** @}*/
 }

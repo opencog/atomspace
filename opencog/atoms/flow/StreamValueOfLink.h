@@ -47,13 +47,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<StreamValueOfLink> StreamValueOfLinkPtr;
-static inline StreamValueOfLinkPtr StreamValueOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<StreamValueOfLink>(h); }
-static inline StreamValueOfLinkPtr StreamValueOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<StreamValueOfLink>(a); }
-
-#define createStreamValueOfLink std::make_shared<StreamValueOfLink>
+LINK_PTR_DECL(StreamValueOfLink)
+#define createStreamValueOfLink CREATE_DECL(StreamValueOfLink)
 
 /** @}*/
 }

@@ -56,13 +56,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypeIntersectionLink> TypeIntersectionLinkPtr;
-static inline TypeIntersectionLinkPtr TypeIntersectionLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypeIntersectionLink>(h); }
-static inline TypeIntersectionLinkPtr TypeIntersectionLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypeIntersectionLink>(a); }
-
-#define createTypeIntersectionLink std::make_shared<TypeIntersectionLink>
+LINK_PTR_DECL(TypeIntersectionLink)
+#define createTypeIntersectionLink CREATE_DECL(TypeIntersectionLink)
 
 /** @}*/
 }

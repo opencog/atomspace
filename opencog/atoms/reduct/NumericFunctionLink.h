@@ -56,13 +56,8 @@ public:
 	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 };
 
-typedef std::shared_ptr<NumericFunctionLink> NumericFunctionLinkPtr;
-static inline NumericFunctionLinkPtr NumericFunctionLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<NumericFunctionLink>(a); }
-static inline NumericFunctionLinkPtr NumericFunctionLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<NumericFunctionLink>(a); }
-
-#define createNumericFunctionLink std::make_shared<NumericFunctionLink>
+LINK_PTR_DECL(NumericFunctionLink)
+#define createNumericFunctionLink CREATE_DECL(NumericFunctionLink)
 
 /** @}*/
 }

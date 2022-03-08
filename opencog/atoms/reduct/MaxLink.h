@@ -37,13 +37,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<MaxLink> MaxLinkPtr;
-static inline MaxLinkPtr MaxLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<MaxLink>(a); }
-static inline MaxLinkPtr MaxLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<MaxLink>(a); }
-
-#define createMaxLink std::make_shared<MaxLink>
+LINK_PTR_DECL(MaxLink)
+#define createMaxLink CREATE_DECL(MaxLink)
 
 /** @}*/
 }

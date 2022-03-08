@@ -51,11 +51,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ExecuteThreadedLink> ExecuteThreadedLinkPtr;
-static inline ExecuteThreadedLinkPtr ExecuteThreadedLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ExecuteThreadedLink>(a); }
-
-#define createExecuteThreadedLink std::make_shared<ExecuteThreadedLink>
+LINK_PTR_DECL(ExecuteThreadedLink)
+#define createExecuteThreadedLink CREATE_DECL(ExecuteThreadedLink)
 
 /** @}*/
 }

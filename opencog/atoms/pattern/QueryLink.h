@@ -61,13 +61,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<QueryLink> QueryLinkPtr;
-static inline QueryLinkPtr QueryLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<QueryLink>(a); }
-static inline QueryLinkPtr QueryLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<QueryLink>(a); }
-
-#define createQueryLink std::make_shared<QueryLink>
+LINK_PTR_DECL(QueryLink)
+#define createQueryLink CREATE_DECL(QueryLink)
 
 /** @}*/
 }

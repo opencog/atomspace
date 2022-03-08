@@ -99,13 +99,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DefineLink> DefineLinkPtr;
-static inline DefineLinkPtr DefineLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<DefineLink>(h); }
-static inline DefineLinkPtr DefineLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<DefineLink>(a); }
-
-#define createDefineLink std::make_shared<DefineLink>
+LINK_PTR_DECL(DefineLink)
+#define createDefineLink CREATE_DECL(DefineLink)
 
 /** @}*/
 }

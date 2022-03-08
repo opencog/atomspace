@@ -61,13 +61,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ImplicationScopeLink> ImplicationScopeLinkPtr;
-static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ImplicationScopeLink>(h); }
-static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ImplicationScopeLink>(a); }
-
-#define createImplicationScopeLink std::make_shared<ImplicationScopeLink>
+LINK_PTR_DECL(ImplicationScopeLink)
+#define createImplicationScopeLink CREATE_DECL(ImplicationScopeLink)
 
 /** @}*/
 }

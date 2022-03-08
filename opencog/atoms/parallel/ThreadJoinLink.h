@@ -47,11 +47,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ThreadJoinLink> ThreadJoinLinkPtr;
-static inline ThreadJoinLinkPtr ThreadJoinLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ThreadJoinLink>(a); }
-
-#define createThreadJoinLink std::make_shared<ThreadJoinLink>
+LINK_PTR_DECL(ThreadJoinLink)
+#define createThreadJoinLink CREATE_DECL(ThreadJoinLink)
 
 /** @}*/
 }

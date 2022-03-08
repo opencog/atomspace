@@ -63,13 +63,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<UnorderedLink> UnorderedLinkPtr;
-static inline UnorderedLinkPtr UnorderedLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<UnorderedLink>(h); }
-static inline UnorderedLinkPtr UnorderedLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<UnorderedLink>(a); }
-
-#define createUnorderedLink std::make_shared<UnorderedLink>
+LINK_PTR_DECL(UnorderedLink)
+#define createUnorderedLink CREATE_DECL(UnorderedLink)
 
 /** @}*/
 }

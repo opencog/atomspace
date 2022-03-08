@@ -40,13 +40,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<HeavisideLink> HeavisideLinkPtr;
-static inline HeavisideLinkPtr HeavisideLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<HeavisideLink>(a); }
-static inline HeavisideLinkPtr HeavisideLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<HeavisideLink>(a); }
-
-#define createHeavisideLink std::make_shared<HeavisideLink>
+LINK_PTR_DECL(HeavisideLink)
+#define createHeavisideLink CREATE_DECL(HeavisideLink)
 
 /** @}*/
 }

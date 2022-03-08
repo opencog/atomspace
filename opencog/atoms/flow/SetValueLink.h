@@ -49,13 +49,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SetValueLink> SetValueLinkPtr;
-static inline SetValueLinkPtr SetValueLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<SetValueLink>(h); }
-static inline SetValueLinkPtr SetValueLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<SetValueLink>(a); }
-
-#define createSetValueLink std::make_shared<SetValueLink>
+LINK_PTR_DECL(SetValueLink)
+#define createSetValueLink CREATE_DECL(SetValueLink)
 
 /** @}*/
 }

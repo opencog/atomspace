@@ -44,13 +44,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PowLink> PowLinkPtr;
-static inline PowLinkPtr PowLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<PowLink>(a); }
-static inline PowLinkPtr PowLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<PowLink>(a); }
-
-#define createPowLink std::make_shared<PowLink>
+LINK_PTR_DECL(PowLink)
+#define createPowLink CREATE_DECL(PowLink)
 
 /** @}*/
 }

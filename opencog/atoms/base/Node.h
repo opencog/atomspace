@@ -112,11 +112,8 @@ public:
 	virtual bool operator<(const Atom&) const;
 };
 
-typedef std::shared_ptr<Node> NodePtr;
-// static inline NodePtr NodeCast(const Handle& h)
-//    { return std::dynamic_pointer_cast<Node>(AtomCast(h)); }
-static inline NodePtr NodeCast(const AtomPtr& a)
-    { return std::dynamic_pointer_cast<Node>(a); }
+#define NODE_PTR_DECL(CNAME) ATOM_PTR_DECL(CNAME)
+NODE_PTR_DECL(Node)
 
 template< class... Args >
 Handle createNode( Args&&... args )

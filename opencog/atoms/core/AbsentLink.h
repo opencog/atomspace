@@ -76,13 +76,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<AbsentLink> AbsentLinkPtr;
-static inline AbsentLinkPtr AbsentLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<AbsentLink>(h); }
-static inline AbsentLinkPtr AbsentLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<AbsentLink>(a); }
-
-#define createAbsentLink std::make_shared<AbsentLink>
+LINK_PTR_DECL(AbsentLink)
+#define createAbsentLink CREATE_DECL(AbsentLink)
 
 /** @}*/
 }

@@ -55,13 +55,8 @@ public:
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 };
 
-typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;
-static inline ArithmeticLinkPtr ArithmeticLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ArithmeticLink>(a); }
-static inline ArithmeticLinkPtr ArithmeticLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ArithmeticLink>(a); }
-
-#define createArithmeticLink std::make_shared<ArithmeticLink>
+LINK_PTR_DECL(ArithmeticLink)
+#define createArithmeticLink CREATE_DECL(ArithmeticLink)
 
 /** @}*/
 }

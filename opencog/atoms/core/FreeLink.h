@@ -56,13 +56,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<FreeLink> FreeLinkPtr;
-static inline FreeLinkPtr FreeLinkCast(const Handle& h)
-   { return std::dynamic_pointer_cast<FreeLink>(h); }
-static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)
-   { return std::dynamic_pointer_cast<FreeLink>(a); }
-
-#define createFreeLink std::make_shared<FreeLink>
+LINK_PTR_DECL(FreeLink)
+#define createFreeLink CREATE_DECL(FreeLink)
 
 /** @}*/
 }

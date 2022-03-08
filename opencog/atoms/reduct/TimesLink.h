@@ -39,13 +39,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TimesLink> TimesLinkPtr;
-static inline TimesLinkPtr TimesLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<TimesLink>(a); }
-static inline TimesLinkPtr TimesLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<TimesLink>(a); }
-
-#define createTimesLink std::make_shared<TimesLink>
+LINK_PTR_DECL(TimesLink)
+#define createTimesLink CREATE_DECL(TimesLink)
 
 /** @}*/
 }

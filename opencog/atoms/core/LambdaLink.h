@@ -65,13 +65,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;
-static inline LambdaLinkPtr LambdaLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<LambdaLink>(h); }
-static inline LambdaLinkPtr LambdaLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<LambdaLink>(a); }
-
-#define createLambdaLink std::make_shared<LambdaLink>
+LINK_PTR_DECL(LambdaLink)
+#define createLambdaLink CREATE_DECL(LambdaLink)
 
 /** @}*/
 }

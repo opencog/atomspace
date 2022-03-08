@@ -53,13 +53,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<GroundedPredicateNode> GroundedPredicateNodePtr;
-static inline GroundedPredicateNodePtr GroundedPredicateNodeCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<GroundedPredicateNode>(a); }
-static inline GroundedPredicateNodePtr GroundedPredicateNodeCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<GroundedPredicateNode>(a); }
-
-#define createGroundedPredicateNode std::make_shared<GroundedPredicateNode>
+NODE_PTR_DECL(GroundedPredicateNode)
+#define createGroundedPredicateNode CREATE_DECL(GroundedPredicateNode)
 
 /** @}*/
 }

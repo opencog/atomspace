@@ -60,13 +60,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PredicateFormulaLink> PredicateFormulaLinkPtr;
-static inline PredicateFormulaLinkPtr PredicateFormulaLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PredicateFormulaLink>(h); }
-static inline PredicateFormulaLinkPtr PredicateFormulaLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<PredicateFormulaLink>(a); }
-
-#define createPredicateFormulaLink std::make_shared<PredicateFormulaLink>
+LINK_PTR_DECL(PredicateFormulaLink)
+#define createPredicateFormulaLink CREATE_DECL(PredicateFormulaLink)
 
 /** @}*/
 }

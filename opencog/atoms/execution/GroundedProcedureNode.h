@@ -47,11 +47,7 @@ public:
 	virtual ValuePtr execute(AtomSpace*, const Handle&, bool silent=false) = 0;
 };
 
-typedef std::shared_ptr<GroundedProcedureNode> GroundedProcedureNodePtr;
-static inline GroundedProcedureNodePtr GroundedProcedureNodeCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<GroundedProcedureNode>(a); }
-static inline GroundedProcedureNodePtr GroundedProcedureNodeCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<GroundedProcedureNode>(a); }
+NODE_PTR_DECL(GroundedProcedureNode)
 
 /** @}*/
 }

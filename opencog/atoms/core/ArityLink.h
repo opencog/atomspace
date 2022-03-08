@@ -57,13 +57,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ArityLink> ArityLinkPtr;
-static inline ArityLinkPtr ArityLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ArityLink>(h); }
-static inline ArityLinkPtr ArityLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<ArityLink>(a); }
-
-#define createArityLink std::make_shared<ArityLink>
+LINK_PTR_DECL(ArityLink)
+#define createArityLink CREATE_DECL(ArityLink)
 
 /** @}*/
 }

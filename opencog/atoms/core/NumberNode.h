@@ -81,15 +81,11 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<NumberNode> NumberNodePtr;
-static inline NumberNodePtr NumberNodeCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<NumberNode>(h); }
-static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<NumberNode>(a); }
-static inline NumberNodePtr NumberNodeCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<NumberNode>(a); }
+NODE_PTR_DECL(NumberNode)
+#define createNumberNode CREATE_DECL(NumberNode)
 
-#define createNumberNode std::make_shared<NumberNode>
+static inline NumberNodePtr NumberNodeCast(const ValuePtr& vp)
+    { return std::dynamic_pointer_cast<NumberNode>(vp); }
 
 // --------------------
 // Scalar multiplication and addition
