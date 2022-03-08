@@ -37,12 +37,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<MinLink> MinLinkPtr;
-static inline MinLinkPtr MinLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<MinLink>(a); }
-static inline MinLinkPtr MinLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<MinLink>(a); }
-
+LINK_PTR_DECL(MinLink)
 #define createMinLink std::make_shared<MinLink>
 
 /** @}*/

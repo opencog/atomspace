@@ -200,11 +200,16 @@ public:
     virtual bool operator<(const Atom&) const;
 };
 
-typedef std::shared_ptr<Link> LinkPtr;
-static inline LinkPtr LinkCast(const Handle& h)
-    { return std::dynamic_pointer_cast<Link>(h); }
-static inline LinkPtr LinkCast(const AtomPtr& a)
-    { return std::dynamic_pointer_cast<Link>(a); }
+#define LINK_PTR_DECL(CNAME)                                \
+    typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
+    static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
+        { return std::dynamic_pointer_cast<CNAME>(h); }     \
+    static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
+        { return std::dynamic_pointer_cast<CNAME>(a); }
+
+#define CREATE_DECL(CNAME)  std::make_shared<CNAME>
+
+LINK_PTR_DECL(Link);
 
 template< class... Args >
 Handle createLink( Args&&... args )

@@ -96,12 +96,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PutLink> PutLinkPtr;
-static inline PutLinkPtr PutLinkCast(const Handle& h)
-   { return std::dynamic_pointer_cast<PutLink>(h); }
-static inline PutLinkPtr PutLinkCast(const AtomPtr& a)
-   { return std::dynamic_pointer_cast<PutLink>(a); }
-
+LINK_PTR_DECL(PutLink)
 #define createPutLink std::make_shared<PutLink>
 
 /** @}*/

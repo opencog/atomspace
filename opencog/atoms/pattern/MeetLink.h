@@ -47,12 +47,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<MeetLink> MeetLinkPtr;
-static inline MeetLinkPtr MeetLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<MeetLink>(a); }
-static inline MeetLinkPtr MeetLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<MeetLink>(a); }
-
+LINK_PTR_DECL(MeetLink)
 #define createMeetLink std::make_shared<MeetLink>
 
 /** @}*/

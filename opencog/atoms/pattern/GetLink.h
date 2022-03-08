@@ -45,12 +45,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<GetLink> GetLinkPtr;
-static inline GetLinkPtr GetLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<GetLink>(a); }
-static inline GetLinkPtr GetLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<GetLink>(a); }
-
+LINK_PTR_DECL(GetLink)
 #define createGetLink std::make_shared<GetLink>
 
 /** @}*/

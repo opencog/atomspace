@@ -48,12 +48,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SleepLink> SleepLinkPtr;
-static inline SleepLinkPtr SleepLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<SleepLink>(h); }
-static inline SleepLinkPtr SleepLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<SleepLink>(a); }
-
+LINK_PTR_DECL(SleepLink)
 #define createSleepLink std::make_shared<SleepLink>
 
 /** @}*/

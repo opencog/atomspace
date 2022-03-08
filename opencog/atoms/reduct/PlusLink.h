@@ -39,12 +39,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PlusLink> PlusLinkPtr;
-static inline PlusLinkPtr PlusLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<PlusLink>(a); }
-static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<PlusLink>(a); }
-
+LINK_PTR_DECL(PlusLink)
 #define createPlusLink std::make_shared<PlusLink>
 
 /** @}*/

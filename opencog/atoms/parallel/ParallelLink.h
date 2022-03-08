@@ -48,10 +48,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ParallelLink> ParallelLinkPtr;
-static inline ParallelLinkPtr ParallelLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ParallelLink>(a); }
-
+LINK_PTR_DECL(ParallelLink)
 #define createParallelLink std::make_shared<ParallelLink>
 
 /** @}*/

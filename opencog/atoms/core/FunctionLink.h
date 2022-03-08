@@ -78,11 +78,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
-static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
-   { return std::dynamic_pointer_cast<FunctionLink>(h); }
-static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
-   { return std::dynamic_pointer_cast<FunctionLink>(a); }
+LINK_PTR_DECL(FunctionLink)
 static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
 

@@ -76,12 +76,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PresentLink> PresentLinkPtr;
-static inline PresentLinkPtr PresentLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PresentLink>(h); }
-static inline PresentLinkPtr PresentLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<PresentLink>(a); }
-
+LINK_PTR_DECL(PresentLink)
 #define createPresentLink std::make_shared<PresentLink>
 
 /** @}*/

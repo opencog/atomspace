@@ -71,7 +71,7 @@ namespace opencog
 /// virtual links.
 ///
 class PatternLink;
-typedef std::shared_ptr<PatternLink> PatternLinkPtr;
+LINK_PTR_DECL(PatternLink)
 class PatternLink : public PrenexLink
 {
 protected:
@@ -201,11 +201,6 @@ public:
 	// C++ attributes
 	std::string to_long_string(const std::string& indent) const;
 };
-
-static inline PatternLinkPtr PatternLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<PatternLink>(a); }
-static inline PatternLinkPtr PatternLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<PatternLink>(a); }
 
 #define createPatternLink std::make_shared<PatternLink>
 

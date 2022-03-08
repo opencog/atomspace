@@ -76,12 +76,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<MapLink> MapLinkPtr;
-static inline MapLinkPtr MapLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<MapLink>(a); }
-static inline MapLinkPtr MapLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<MapLink>(a); }
-
+LINK_PTR_DECL(MapLink);
 #define createMapLink std::make_shared<MapLink>
 
 /** @}*/

@@ -43,8 +43,6 @@ namespace opencog
 /// edit and create PatternLinks on the fly, thus allowing different
 /// kinds of queries to be generated and run as chaining proceeds.
 ///
-class RewriteLink;
-typedef std::shared_ptr<RewriteLink> RewriteLinkPtr;
 class RewriteLink : public ScopeLink
 {
 protected:
@@ -245,11 +243,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-static inline RewriteLinkPtr RewriteLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<RewriteLink>(h); }
-static inline RewriteLinkPtr RewriteLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<RewriteLink>(a); }
-
+LINK_PTR_DECL(RewriteLink)
 #define createRewriteLink std::make_shared<RewriteLink>
 
 /** @}*/

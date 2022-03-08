@@ -102,12 +102,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypedVariableLink> TypedVariableLinkPtr;
-static inline TypedVariableLinkPtr TypedVariableLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypedVariableLink>(h); }
-static inline TypedVariableLinkPtr TypedVariableLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypedVariableLink>(a); }
-
+LINK_PTR_DECL(TypedVariableLink)
 #define createTypedVariableLink std::make_shared<TypedVariableLink>
 
 /** @}*/

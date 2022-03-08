@@ -133,12 +133,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<CountOfLink> CountOfLinkPtr;
-static inline CountOfLinkPtr CountOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<CountOfLink>(h); }
-static inline CountOfLinkPtr CountOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<CountOfLink>(a); }
-
+LINK_PTR_DECL(CountOfLink)
 #define createCountOfLink std::make_shared<CountOfLink>
 
 /** @}*/

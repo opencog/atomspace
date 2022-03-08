@@ -39,12 +39,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<Log2Link> Log2LinkPtr;
-static inline Log2LinkPtr Log2LinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<Log2Link>(a); }
-static inline Log2LinkPtr Log2LinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<Log2Link>(a); }
-
+LINK_PTR_DECL(Log2Link)
 #define createLog2Link std::make_shared<Log2Link>
 
 /** @}*/

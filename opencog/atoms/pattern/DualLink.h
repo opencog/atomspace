@@ -44,12 +44,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DualLink> DualLinkPtr;
-static inline DualLinkPtr DualLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<DualLink>(a); }
-static inline DualLinkPtr DualLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<DualLink>(a); }
-
+LINK_PTR_DECL(DualLink)
 #define createDualLink std::make_shared<DualLink>
 
 /** @}*/

@@ -36,12 +36,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<MinusLink> MinusLinkPtr;
-static inline MinusLinkPtr MinusLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<MinusLink>(a); }
-static inline MinusLinkPtr MinusLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<MinusLink>(a); }
-
+LINK_PTR_DECL(MinusLink)
 #define createMinusLink std::make_shared<MinusLink>
 
 /** @}*/

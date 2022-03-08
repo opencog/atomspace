@@ -57,12 +57,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;
-static inline DeleteLinkPtr DeleteLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<DeleteLink>(h); }
-static inline DeleteLinkPtr DeleteLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<DeleteLink>(a); }
-
+LINK_PTR_DECL(DeleteLink)
 #define createDeleteLink std::make_shared<DeleteLink>
 
 /** @}*/

@@ -105,12 +105,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<StateLink> StateLinkPtr;
-static inline StateLinkPtr StateLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<StateLink>(h); }
-static inline StateLinkPtr StateLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<StateLink>(a); }
-
+LINK_PTR_DECL(StateLink)
 #define createStateLink std::make_shared<StateLink>
 
 /** @}*/

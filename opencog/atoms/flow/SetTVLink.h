@@ -53,12 +53,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<SetTVLink> SetTVLinkPtr;
-static inline SetTVLinkPtr SetTVLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<SetTVLink>(h); }
-static inline SetTVLinkPtr SetTVLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<SetTVLink>(a); }
-
+LINK_PTR_DECL(SetTVLink)
 #define createSetTVLink std::make_shared<SetTVLink>
 
 /** @}*/

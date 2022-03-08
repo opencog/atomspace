@@ -55,12 +55,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;
-static inline EvaluationLinkPtr EvaluationLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<EvaluationLink>(a); }
-static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<EvaluationLink>(a); }
-
+LINK_PTR_DECL(EvaluationLink)
 #define createEvaluationLink std::make_shared<EvaluationLink>
 
 /** @}*/
