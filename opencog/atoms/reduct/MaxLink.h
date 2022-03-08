@@ -38,7 +38,7 @@ public:
 };
 
 LINK_PTR_DECL(MaxLink)
-#define createMaxLink std::make_shared<MaxLink>
+#define createMaxLink CREATE_DECL(MaxLink)
 
 /** @}*/
 }

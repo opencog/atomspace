@@ -106,7 +106,7 @@ public:
 };
 
 LINK_PTR_DECL(StateLink)
-#define createStateLink std::make_shared<StateLink>
+#define createStateLink CREATE_DECL(StateLink)
 
 /** @}*/
 }

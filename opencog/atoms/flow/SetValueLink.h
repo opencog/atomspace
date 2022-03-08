@@ -50,7 +50,7 @@ public:
 };
 
 LINK_PTR_DECL(SetValueLink)
-#define createSetValueLink std::make_shared<SetValueLink>
+#define createSetValueLink CREATE_DECL(SetValueLink)
 
 /** @}*/
 }

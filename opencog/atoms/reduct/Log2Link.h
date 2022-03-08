@@ -40,7 +40,7 @@ public:
 };
 
 LINK_PTR_DECL(Log2Link)
-#define createLog2Link std::make_shared<Log2Link>
+#define createLog2Link CREATE_DECL(Log2Link)
 
 /** @}*/
 }

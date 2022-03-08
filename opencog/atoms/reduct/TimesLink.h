@@ -40,7 +40,7 @@ public:
 };
 
 LINK_PTR_DECL(TimesLink)
-#define createTimesLink std::make_shared<TimesLink>
+#define createTimesLink CREATE_DECL(TimesLink)
 
 /** @}*/
 }

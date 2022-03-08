@@ -85,7 +85,7 @@ public:
 };
 
 LINK_PTR_DECL(TypedAtomLink)
-#define createTypedAtomLink std::make_shared<TypedAtomLink>
+#define createTypedAtomLink CREATE_DECL(TypedAtomLink)
 
 /** @}*/
 }

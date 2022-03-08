@@ -244,7 +244,7 @@ public:
 };
 
 LINK_PTR_DECL(RewriteLink)
-#define createRewriteLink std::make_shared<RewriteLink>
+#define createRewriteLink CREATE_DECL(RewriteLink)
 
 /** @}*/
 }

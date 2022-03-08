@@ -48,7 +48,7 @@ public:
 };
 
 LINK_PTR_DECL(MeetLink)
-#define createMeetLink std::make_shared<MeetLink>
+#define createMeetLink CREATE_DECL(MeetLink)
 
 /** @}*/
 }

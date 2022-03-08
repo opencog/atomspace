@@ -45,7 +45,7 @@ public:
 };
 
 LINK_PTR_DECL(PowLink)
-#define createPowLink std::make_shared<PowLink>
+#define createPowLink CREATE_DECL(PowLink)
 
 /** @}*/
 }

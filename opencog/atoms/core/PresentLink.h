@@ -77,7 +77,7 @@ public:
 };
 
 LINK_PTR_DECL(PresentLink)
-#define createPresentLink std::make_shared<PresentLink>
+#define createPresentLink CREATE_DECL(PresentLink)
 
 /** @}*/
 }

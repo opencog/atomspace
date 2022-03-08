@@ -49,7 +49,7 @@ public:
 };
 
 LINK_PTR_DECL(CondLink)
-#define createCondLink std::make_shared<CondLink>
+#define createCondLink CREATE_DECL(CondLink)
 
 /** @}*/
 }

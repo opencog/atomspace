@@ -57,7 +57,7 @@ public:
 };
 
 LINK_PTR_DECL(FreeLink)
-#define createFreeLink std::make_shared<FreeLink>
+#define createFreeLink CREATE_DECL(FreeLink)
 
 /** @}*/
 }

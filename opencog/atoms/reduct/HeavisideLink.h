@@ -41,7 +41,7 @@ public:
 };
 
 LINK_PTR_DECL(HeavisideLink)
-#define createHeavisideLink std::make_shared<HeavisideLink>
+#define createHeavisideLink CREATE_DECL(HeavisideLink)
 
 /** @}*/
 }

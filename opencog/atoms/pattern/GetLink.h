@@ -46,7 +46,7 @@ public:
 };
 
 LINK_PTR_DECL(GetLink)
-#define createGetLink std::make_shared<GetLink>
+#define createGetLink CREATE_DECL(GetLink)
 
 /** @}*/
 }

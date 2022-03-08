@@ -49,7 +49,7 @@ public:
 };
 
 LINK_PTR_DECL(SleepLink)
-#define createSleepLink std::make_shared<SleepLink>
+#define createSleepLink CREATE_DECL(SleepLink)
 
 /** @}*/
 }

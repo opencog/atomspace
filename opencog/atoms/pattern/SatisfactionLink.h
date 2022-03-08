@@ -51,7 +51,7 @@ public:
 };
 
 LINK_PTR_DECL(SatisfactionLink)
-#define createSatisfactionLink std::make_shared<SatisfactionLink>
+#define createSatisfactionLink CREATE_DECL(SatisfactionLink)
 
 /** @}*/
 }

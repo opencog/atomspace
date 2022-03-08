@@ -62,7 +62,7 @@ public:
 };
 
 LINK_PTR_DECL(ImplicationScopeLink)
-#define createImplicationScopeLink std::make_shared<ImplicationScopeLink>
+#define createImplicationScopeLink CREATE_DECL(ImplicationScopeLink)
 
 /** @}*/
 }

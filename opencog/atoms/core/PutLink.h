@@ -97,7 +97,7 @@ public:
 };
 
 LINK_PTR_DECL(PutLink)
-#define createPutLink std::make_shared<PutLink>
+#define createPutLink CREATE_DECL(PutLink)
 
 /** @}*/
 }

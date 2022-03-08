@@ -56,7 +56,7 @@ public:
 };
 
 LINK_PTR_DECL(ArithmeticLink)
-#define createArithmeticLink std::make_shared<ArithmeticLink>
+#define createArithmeticLink CREATE_DECL(ArithmeticLink)
 
 /** @}*/
 }

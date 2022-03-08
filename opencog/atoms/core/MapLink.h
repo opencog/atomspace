@@ -77,7 +77,7 @@ public:
 };
 
 LINK_PTR_DECL(MapLink);
-#define createMapLink std::make_shared<MapLink>
+#define createMapLink CREATE_DECL(MapLink)
 
 /** @}*/
 }

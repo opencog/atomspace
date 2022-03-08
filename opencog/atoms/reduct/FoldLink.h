@@ -57,7 +57,7 @@ public:
 };
 
 LINK_PTR_DECL(FoldLink)
-#define createFoldLink std::make_shared<FoldLink>
+#define createFoldLink CREATE_DECL(FoldLink)
 
 /** @}*/
 }

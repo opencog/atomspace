@@ -52,7 +52,7 @@ public:
 };
 
 LINK_PTR_DECL(ExecuteThreadedLink)
-#define createExecuteThreadedLink std::make_shared<ExecuteThreadedLink>
+#define createExecuteThreadedLink CREATE_DECL(ExecuteThreadedLink)
 
 /** @}*/
 }

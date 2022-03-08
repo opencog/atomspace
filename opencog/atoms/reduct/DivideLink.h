@@ -37,7 +37,7 @@ public:
 };
 
 LINK_PTR_DECL(DivideLink)
-#define createDivideLink std::make_shared<DivideLink>
+#define createDivideLink CREATE_DECL(DivideLink)
 
 /** @}*/
 }

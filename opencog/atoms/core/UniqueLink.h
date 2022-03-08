@@ -63,7 +63,7 @@ public:
 };
 
 LINK_PTR_DECL(UniqueLink)
-#define createUniqueLink std::make_shared<UniqueLink>
+#define createUniqueLink CREATE_DECL(UniqueLink)
 
 /** @}*/
 }

@@ -49,7 +49,7 @@ public:
 };
 
 LINK_PTR_DECL(BindLink)
-#define createBindLink std::make_shared<BindLink>
+#define createBindLink CREATE_DECL(BindLink)
 
 /** @}*/
 }

@@ -103,7 +103,7 @@ public:
 };
 
 LINK_PTR_DECL(TypedVariableLink)
-#define createTypedVariableLink std::make_shared<TypedVariableLink>
+#define createTypedVariableLink CREATE_DECL(TypedVariableLink)
 
 /** @}*/
 }

@@ -62,7 +62,7 @@ public:
 };
 
 LINK_PTR_DECL(ExecutionOutputLink)
-#define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
+#define createExecutionOutputLink CREATE_DECL(ExecutionOutputLink)
 
 /** @}*/
 }

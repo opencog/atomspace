@@ -64,7 +64,7 @@ public:
 };
 
 LINK_PTR_DECL(UnorderedLink)
-#define createUnorderedLink std::make_shared<UnorderedLink>
+#define createUnorderedLink CREATE_DECL(UnorderedLink)
 
 /** @}*/
 }

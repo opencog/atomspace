@@ -134,7 +134,7 @@ public:
 };
 
 LINK_PTR_DECL(CountOfLink)
-#define createCountOfLink std::make_shared<CountOfLink>
+#define createCountOfLink CREATE_DECL(CountOfLink)
 
 /** @}*/
 }

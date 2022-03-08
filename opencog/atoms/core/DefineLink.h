@@ -100,7 +100,7 @@ public:
 };
 
 LINK_PTR_DECL(DefineLink)
-#define createDefineLink std::make_shared<DefineLink>
+#define createDefineLink CREATE_DECL(DefineLink)
 
 /** @}*/
 }

@@ -56,7 +56,7 @@ public:
 };
 
 LINK_PTR_DECL(EvaluationLink)
-#define createEvaluationLink std::make_shared<EvaluationLink>
+#define createEvaluationLink CREATE_DECL(EvaluationLink)
 
 /** @}*/
 }

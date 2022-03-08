@@ -45,7 +45,7 @@ public:
 };
 
 LINK_PTR_DECL(DualLink)
-#define createDualLink std::make_shared<DualLink>
+#define createDualLink CREATE_DECL(DualLink)
 
 /** @}*/
 }

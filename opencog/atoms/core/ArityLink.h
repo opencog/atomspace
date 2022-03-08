@@ -58,7 +58,7 @@ public:
 };
 
 LINK_PTR_DECL(ArityLink)
-#define createArityLink std::make_shared<ArityLink>
+#define createArityLink CREATE_DECL(ArityLink)
 
 /** @}*/
 }

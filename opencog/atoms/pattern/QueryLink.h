@@ -62,7 +62,7 @@ public:
 };
 
 LINK_PTR_DECL(QueryLink)
-#define createQueryLink std::make_shared<QueryLink>
+#define createQueryLink CREATE_DECL(QueryLink)
 
 /** @}*/
 }

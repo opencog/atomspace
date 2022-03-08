@@ -40,7 +40,7 @@ public:
 };
 
 LINK_PTR_DECL(AccumulateLink)
-#define createAccumulateLink std::make_shared<AccumulateLink>
+#define createAccumulateLink CREATE_DECL(AccumulateLink)
 
 /** @}*/
 }

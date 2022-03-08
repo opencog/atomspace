@@ -57,7 +57,7 @@ public:
 };
 
 LINK_PTR_DECL(NumericFunctionLink)
-#define createNumericFunctionLink std::make_shared<NumericFunctionLink>
+#define createNumericFunctionLink CREATE_DECL(NumericFunctionLink)
 
 /** @}*/
 }

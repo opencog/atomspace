@@ -48,7 +48,7 @@ public:
 };
 
 LINK_PTR_DECL(ThreadJoinLink)
-#define createThreadJoinLink std::make_shared<ThreadJoinLink>
+#define createThreadJoinLink CREATE_DECL(ThreadJoinLink)
 
 /** @}*/
 }

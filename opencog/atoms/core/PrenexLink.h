@@ -59,7 +59,7 @@ public:
 };
 
 LINK_PTR_DECL(PrenexLink)
-#define createPrenexLink std::make_shared<PrenexLink>
+#define createPrenexLink CREATE_DECL(PrenexLink)
 
 /** @}*/
 }

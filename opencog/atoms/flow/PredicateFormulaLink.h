@@ -61,7 +61,7 @@ public:
 };
 
 LINK_PTR_DECL(PredicateFormulaLink)
-#define createPredicateFormulaLink std::make_shared<PredicateFormulaLink>
+#define createPredicateFormulaLink CREATE_DECL(PredicateFormulaLink)
 
 /** @}*/
 }

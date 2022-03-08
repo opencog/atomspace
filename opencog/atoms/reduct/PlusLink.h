@@ -40,7 +40,7 @@ public:
 };
 
 LINK_PTR_DECL(PlusLink)
-#define createPlusLink std::make_shared<PlusLink>
+#define createPlusLink CREATE_DECL(PlusLink)
 
 /** @}*/
 }

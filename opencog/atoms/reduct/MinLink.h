@@ -38,7 +38,7 @@ public:
 };
 
 LINK_PTR_DECL(MinLink)
-#define createMinLink std::make_shared<MinLink>
+#define createMinLink CREATE_DECL(MinLink)
 
 /** @}*/
 }

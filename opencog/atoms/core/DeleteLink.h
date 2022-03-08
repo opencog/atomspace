@@ -58,7 +58,7 @@ public:
 };
 
 LINK_PTR_DECL(DeleteLink)
-#define createDeleteLink std::make_shared<DeleteLink>
+#define createDeleteLink CREATE_DECL(DeleteLink)
 
 /** @}*/
 }

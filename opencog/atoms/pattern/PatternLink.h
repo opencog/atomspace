@@ -202,7 +202,7 @@ public:
 	std::string to_long_string(const std::string& indent) const;
 };
 
-#define createPatternLink std::make_shared<PatternLink>
+#define createPatternLink CREATE_DECL(PatternLink)
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

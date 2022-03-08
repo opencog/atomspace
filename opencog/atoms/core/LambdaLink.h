@@ -66,7 +66,7 @@ public:
 };
 
 LINK_PTR_DECL(LambdaLink)
-#define createLambdaLink std::make_shared<LambdaLink>
+#define createLambdaLink CREATE_DECL(LambdaLink)
 
 /** @}*/
 }

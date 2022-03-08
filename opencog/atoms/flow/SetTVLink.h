@@ -54,7 +54,7 @@ public:
 };
 
 LINK_PTR_DECL(SetTVLink)
-#define createSetTVLink std::make_shared<SetTVLink>
+#define createSetTVLink CREATE_DECL(SetTVLink)
 
 /** @}*/
 }

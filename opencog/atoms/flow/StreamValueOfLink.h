@@ -48,7 +48,7 @@ public:
 };
 
 LINK_PTR_DECL(StreamValueOfLink)
-#define createStreamValueOfLink std::make_shared<StreamValueOfLink>
+#define createStreamValueOfLink CREATE_DECL(StreamValueOfLink)
 
 /** @}*/
 }

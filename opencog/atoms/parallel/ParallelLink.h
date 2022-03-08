@@ -49,7 +49,7 @@ public:
 };
 
 LINK_PTR_DECL(ParallelLink)
-#define createParallelLink std::make_shared<ParallelLink>
+#define createParallelLink CREATE_DECL(ParallelLink)
 
 /** @}*/
 }

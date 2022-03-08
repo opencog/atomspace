@@ -114,7 +114,7 @@ public:
 };
 
 LINK_PTR_DECL(JoinLink)
-#define createJoinLink std::make_shared<JoinLink>
+#define createJoinLink CREATE_DECL(JoinLink)
 
 /** @}*/
 }

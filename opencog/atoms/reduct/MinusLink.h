@@ -37,7 +37,7 @@ public:
 };
 
 LINK_PTR_DECL(MinusLink)
-#define createMinusLink std::make_shared<MinusLink>
+#define createMinusLink CREATE_DECL(MinusLink)
 
 /** @}*/
 }

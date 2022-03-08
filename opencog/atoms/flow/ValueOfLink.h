@@ -49,7 +49,7 @@ public:
 };
 
 LINK_PTR_DECL(ValueOfLink)
-#define createValueOfLink std::make_shared<ValueOfLink>
+#define createValueOfLink CREATE_DECL(ValueOfLink)
 
 /** @}*/
 }

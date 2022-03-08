@@ -57,7 +57,7 @@ public:
 };
 
 LINK_PTR_DECL(TypeIntersectionLink)
-#define createTypeIntersectionLink std::make_shared<TypeIntersectionLink>
+#define createTypeIntersectionLink CREATE_DECL(TypeIntersectionLink)
 
 /** @}*/
 }

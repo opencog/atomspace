@@ -110,7 +110,7 @@ public:
 };
 
 LINK_PTR_DECL(ScopeLink)
-#define createScopeLink std::make_shared<ScopeLink>
+#define createScopeLink CREATE_DECL(ScopeLink)
 
 /** @}*/
 }
