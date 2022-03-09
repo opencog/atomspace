@@ -251,7 +251,7 @@ Handle RewriteLink::consume_quotations() const
 		// vardecl it means that some quotations are missing. Rather
 		// than adding them we set vardecl to an empty VariableList.
 		if (not vardecl and not get_free_variables(nbody).empty())
-			vardecl = Handle(createVariableList(HandleSeq{}));
+			vardecl = HandleCast(createVariableList(HandleSeq{}));
 	}
 
 	if (vardecl)

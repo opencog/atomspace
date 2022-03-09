@@ -89,7 +89,7 @@ public:
 				"Not a valid typename: '%s'", str.c_str());
 	}
 
-	Type get_kind(void) { return _kind; }
+	Type get_kind(void) const { return _kind; }
 
 	static Handle factory(const Handle&);
 };
