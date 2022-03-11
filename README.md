@@ -558,11 +558,11 @@ Essentially all Linux distributions will provide these packages.
 
 ###### boost
 * C++ utilities package.
-* https://www.boost.org/ | `apt-get install libboost-dev`
+* https://www.boost.org/ | `apt install libboost-dev`
 
 ###### cmake
 * Build management tool; v3.0.2 or higher recommended.
-* https://www.cmake.org/ | `apt-get install cmake3`
+* https://www.cmake.org/ | `apt install cmake3`
 
 ###### cogutil
 * Common OpenCog C++ utilities.
@@ -571,14 +571,14 @@ Essentially all Linux distributions will provide these packages.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 preferred.)
+* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 strongly preferred.)
 * https://www.gnu.org/software/guile/guile.html
-* For Debian/Ubuntu,  `apt-get install guile-2.2-dev`
+* For Debian/Ubuntu,  `apt install guile-3.0-dev`
 
 ###### cxxtest
 * Unit test framework
 * Required for running unit tests. Breaking unit tests is verboten!
-* https://cxxtest.com/ | `apt-get install cxxtest`
+* https://cxxtest.com/ | `apt install cxxtest`
 
 ### Optional Prerequisites
 
@@ -589,7 +589,7 @@ during the build, will be more precise as to which parts will not be built.
 ###### Cython
 * C bindings for Python. (version 0.23 or newer)
 * Recommended, as many users enjoy using python.
-* https://cython.org | `apt-get install cython`
+* https://cython.org | `apt install cython`
 
 ###### Haskell
 * Haskell bindings (experimental).
@@ -604,7 +604,9 @@ during the build, will be more precise as to which parts will not be built.
 ###### Postgres
 * Distributed, multi-client networked storage.
 * Needed for "remembering" between shutdowns (and for distributed AtomSpace)
-* https://postgres.org | `apt-get install postgresql postgresql-client libpq-dev`
+* Optional; The RocksDB backend is recommended. Use the cogserver to get a
+  distributed atomspace.
+* https://postgres.org | `apt install postgresql postgresql-client libpq-dev`
 
 ### Building AtomSpace
 
