@@ -4,7 +4,7 @@ ADD_LIBRARY (json
 	DecodeJson.cc
 	EncodeJson.cc
 	JSCommands.cc
-	JsonEval.h
+	JsonEval.cc
 )
 
 ADD_DEPENDENCIES(json opencog_atom_types)
