@@ -169,6 +169,19 @@
 			(format #t "Elapsed time to load sims: ~A secs\n"
 				(elapsed-secs)))
 
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-similarity-api` object applied to the \"~A\" object.\n"
+"It provides acccess to similarities stored at the \"~A\" key.\n"
+"For more info, use the 'describe method on this object. You can also\n"
+"get at the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+		(LLOBJ 'id) ID))
+
+		(define (describe)
+			(display (procedure-property add-similarity-api 'documentation)))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -193,6 +206,11 @@
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
+
+				((help)           (help))
+				((describe)       (describe))
+				((obj)            "add-similarity-api")
+				((base)           LLOBJ)
 
 				(else (error "Bad method call on similarity API:" message))
 		)))
