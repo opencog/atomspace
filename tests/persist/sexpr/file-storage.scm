@@ -86,3 +86,5 @@
 (delete-file fname)
 
 (test-end tname)
+
+(opencog-test-end)

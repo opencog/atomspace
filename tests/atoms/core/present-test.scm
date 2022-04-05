@@ -55,3 +55,5 @@
 (test-assert "bvnot" (equal? (stv 1 1) (run-bnot-eval Absent "vertebrate")))
 
 (test-end tname)
+
+(opencog-test-end)

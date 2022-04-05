@@ -64,3 +64,5 @@
 			(List (Concept "John"))))))
 
 (test-end tname)
+
+(opencog-test-end)

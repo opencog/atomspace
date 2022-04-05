@@ -106,7 +106,7 @@
 (print-wedglist reverso)
 
 (define w1 (cons 1 (Concept "###LEFT-WALL###")))
-(define w2 (cons 2 (Concept "This")))
+(define w2 (cons 2 (Concept "this")))
 (define w3 (cons 3 (Concept "is")))
 (define w4 (cons 4 (Concept "a")))
 (define w5 (cons 5 (Concept "test")))
@@ -148,3 +148,4 @@
 (test-end reved)
 
 ; ---------------------------------------------------------------
+(opencog-test-end)

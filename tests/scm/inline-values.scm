@@ -56,3 +56,5 @@
 	(equal? (cog-value rli (Predicate "str")) (StringValue "x" "y" "z")))
 
 (test-end tname)
+
+(opencog-test-end)

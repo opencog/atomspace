@@ -66,3 +66,5 @@
 (test-assert "final dot product" (equal? (FloatValue 70) seventy))
 
 (test-end tname)
+
+(opencog-test-end)

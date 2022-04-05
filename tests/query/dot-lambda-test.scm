@@ -51,3 +51,5 @@
 (test-assert "final dot product" (equal? (FloatValue 55) five-five))
 
 (test-end tname)
+
+(opencog-test-end)
