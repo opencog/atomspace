@@ -24,6 +24,24 @@
 ; Twenty of them, the base space first in the list.
 (define space-list (reverse (make-space-list (list base-space) 20)))
 
+; Set a bunch of truth values.
+(define cnt 0)
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+		(Concept "hello" (ctv 1 0 cnt))
+		(set! cnt (+ 1 cnt)))
+	space-list)
 
+; Now verify that the values are as expected
+(set! cnt 0)
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+		; (format #t "Expect: ~A Got: ~A\n" cnt
+      ;   (cog-tv-count (cog-tv (Concept "hello"))))
+
+		(test-equal "count-tv" cnt
+			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
+		(set! cnt (+ 1 cnt)))
+	space-list)
 
 (test-end vstack)
