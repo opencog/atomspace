@@ -163,3 +163,6 @@
 (test-equal "Linear Empty Set" emplin empexp)
 
 (test-end tlinear)
+
+; ---------------------------------------------------------------
+(opencog-test-end)

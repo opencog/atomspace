@@ -23,8 +23,10 @@
     ...
     ...
     (test-end \"Name of the test suite\")
+    ...
+    (opencog-test-end)
 
-  For details on the apis for writing srfi-64 test-suites see
+  For details on the apis for writing srfi-64 test-suites, see
   https://srfi.schemers.org/srfi-64/srfi-64.html
 "
   (define (new-final runner)
@@ -41,4 +43,16 @@
     ; Set the factory for the new runner.
     (test-runner-factory (lambda () runner))
   )
+)
+
+(define (opencog-test-end)
+"
+  opencog-test-end
+
+  Exit guile, setting the exit code to indicate pass/fail.
+"
+
+ ; Failures exited previously; if we are here, everything passed.
+ (display "%%%% Exiting test suite; all tests passed!\n")
+ (exit 0)
 )
