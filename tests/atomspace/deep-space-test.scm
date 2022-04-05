@@ -56,7 +56,7 @@
 (test-end vstack)
 
 ; -------------------------------------------------------------------
-; Check the IncomingSet
+; Check that the IncomingSet behaves as expected.
 
 (define istack "simple incoming stack")
 (test-begin istack)
@@ -81,6 +81,7 @@
 		; Each atomspace should contain just three atoms.
 		(test-equal "atomspace-size" 3 (count-all))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
+		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
 
 		(set! cnt (+ 1 cnt)))
 	space-list)
