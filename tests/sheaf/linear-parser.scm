@@ -153,7 +153,7 @@
 (define empexp (list
 	(mkw 1 (Concept "###LEFT-WALL###") 2 (Concept "this") -inf.0)
 	(mkw 2 (Concept "this") 3 (Concept "is")    -inf.0)
-	(mkw 3 (Concept "is")   7 (Concept "test")  -inf.0)
+	(mkw 3 (Concept "is")   4 (Concept "a")     -inf.0)
 	(mkw 4 (Concept "a")    5 (Concept "kind")  -inf.0)
 	(mkw 5 (Concept "kind") 6 (Concept "of")    -inf.0)
 	(mkw 6 (Concept "of")	7 (Concept "test")  -inf.0)
