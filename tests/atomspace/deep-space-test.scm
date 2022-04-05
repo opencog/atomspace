@@ -8,9 +8,8 @@
 (opencog-test-runner)
 
 ; -------------------------------------------------------------------
-
-(define vstack "simple value stack")
-(test-begin vstack)
+; Common setup, used by all tests.
+; Creates a stack of AtomSpaces, each a child of the last.
 
 (define base-space (cog-atomspace))
 
@@ -24,12 +23,49 @@
 ; Twenty of them, the base space first in the list.
 (define space-list (reverse (make-space-list (list base-space) 20)))
 
-; Set a bunch of truth values.
+; -------------------------------------------------------------------
+; Test to make sure that the same Atom in each AtomSpace has the
+; correct value on that Atom.
+
+(define vstack "simple value stack")
+(test-begin vstack)
+
+; Create on Atom, with different truth values in each space.
 (define cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
 		(Concept "hello" (ctv 1 0 cnt))
 		(set! cnt (+ 1 cnt)))
+	space-list)
+
+; Now verify that the values are as expected.
+(set! cnt 0)
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+		; (format #t "Expect: ~A Got: ~A\n" cnt
+      ;   (cog-tv-count (cog-tv (Concept "hello"))))
+
+		(test-equal "count-tv" cnt
+			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
+
+		; Each atomspace should contain just one atom.
+		(test-equal "atomspace-size" 1 (count-all))
+		(set! cnt (+ 1 cnt)))
+	space-list)
+
+(test-end vstack)
+
+; -------------------------------------------------------------------
+; Check the IncomingSet
+
+(define istack "simple incoming stack")
+(test-begin istack)
+
+; Create a bunch of Links
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+		(List (Concept "hello") (Concept "foo"))
+	)
 	space-list)
 
 ; Now verify that the values are as expected
@@ -41,7 +77,14 @@
 
 		(test-equal "count-tv" cnt
 			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
+
+		; Each atomspace should contain just three atoms.
+		(test-equal "atomspace-size" 3 (count-all))
+		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
+
 		(set! cnt (+ 1 cnt)))
 	space-list)
 
-(test-end vstack)
+(test-end istack)
+
+; -------------------------------------------------------------------
