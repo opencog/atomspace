@@ -32,3 +32,5 @@
 (test-assert "no crash" #t)
 
 (test-end tname)
+
+(opencog-test-end)

@@ -21,3 +21,5 @@
 	(equal? (cog-execute! qry) (Set (Concept "bar"))))
 
 (test-end tname)
+
+(opencog-test-end)

@@ -85,3 +85,5 @@ def foo(atom_a, atom_b) :
 						(Concept "orange"))))))))
 
 (test-end tname)
+
+(opencog-test-end)

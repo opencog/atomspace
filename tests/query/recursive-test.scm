@@ -203,3 +203,5 @@
 			(List	(Concept "mammal") (Concept "vertebrate"))))))
 
 (test-end tname)
+
+(opencog-test-end)

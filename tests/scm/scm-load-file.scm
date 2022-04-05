@@ -47,3 +47,5 @@
 (test-assert "Lexical" (equal? 3 (cog-count-atoms 'Lexical)))
 
 (test-end tname)
+
+(opencog-test-end)

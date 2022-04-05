@@ -46,3 +46,5 @@
 	(equal? (cog-get-atoms 'Concept) (list (ConceptNode "I'm in B"))))
 
 (test-end tname)
+
+(opencog-test-end)

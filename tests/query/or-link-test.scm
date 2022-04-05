@@ -101,3 +101,5 @@
 		(Set (Concept "you") (Concept "me") (Concept "her"))))
 
 (test-end tname)
+
+(opencog-test-end)

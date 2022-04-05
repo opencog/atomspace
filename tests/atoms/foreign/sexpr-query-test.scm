@@ -45,3 +45,5 @@
 	(length (cog-value->list (cog-execute! qry-list)))))
 
 (test-end tname)
+
+(opencog-test-end)

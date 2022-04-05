@@ -14,3 +14,5 @@
 (test-equal "Passing-test" (Node "a") (Node "a"))
 
 (test-end t)
+
+(opencog-test-end)

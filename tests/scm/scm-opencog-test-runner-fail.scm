@@ -14,3 +14,5 @@
 (test-equal "Failing-test" (Node "a") (Link))
 
 (test-end t)
+
+(opencog-test-end)
