@@ -23,24 +23,22 @@
     ...
     ...
     (test-end \"Name of the test suite\")
-    ; Any code written after 'test-end' is called will not be run as
-    ; 'test-end calls 'exit'.
 
   For details on the apis for writing srfi-64 test-suites see
   https://srfi.schemers.org/srfi-64/srfi-64.html
 "
-  (define (new-final)
-    (lambda (runner)
-      ((test-runner-on-final (test-runner-simple)) runner)
-      (display "%%%% Exiting test suite\n")
-      (exit (+ (test-runner-fail-count runner)
-               (test-runner-xfail-count runner)))))
+  (define (new-final runner)
+    ((test-runner-on-final (test-runner-simple)) runner)
+    (let ((tot-fail (+ (test-runner-fail-count runner)
+                       (test-runner-xfail-count runner))))
+      (when (< 0 tot-fail)
+        (display "%%%% Exiting test suite with failures!\n")
+        (exit tot-fail))))
 
   (let ((runner (test-runner-simple)))
-    (test-runner-on-final! runner (new-final))
+    (test-runner-on-final! runner new-final)
 
     ; Set the factory for the new runner.
     (test-runner-factory (lambda () runner))
   )
 )
-
