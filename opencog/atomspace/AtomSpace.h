@@ -486,40 +486,6 @@ public:
                          bool parent=true,
                          const AtomSpace* = nullptr) const;
 
-    /**
-     * Gets a container of handles that matches with the given type
-     * (subclasses optionally).
-     * Caution: this is slower than using get_handles_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.
-     *
-     * Example of call to this method, which would return all entries
-     * in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.get_handles_by_type(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handleset_by_type(OutputIterator result,
-                          Type type,
-                          bool subclass=false,
-                          bool parent=true) const
-    {
-        // Sigh. Copy the handles. This hurts performance.
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-        return std::copy(hset.begin(), hset.end(), result);
-    }
-
     /** Returns a string representation of the AtomSpace. */
     virtual std::string to_string(void) const;
     virtual std::string to_string(const std::string& indent) const;

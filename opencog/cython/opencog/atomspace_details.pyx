@@ -226,7 +226,7 @@ cdef class AtomSpace(Value):
             return None
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.get_handleset_by_type(back_inserter(handle_vector),t,subt)
+        self.atomspace.get_handles_by_type(handle_vector,t,subt)
         return convert_handle_seq_to_python_list(handle_vector)
 
     @classmethod
