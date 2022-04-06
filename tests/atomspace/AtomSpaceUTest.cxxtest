@@ -282,8 +282,11 @@ get_handles_by_name(AtomSpace* as,
                     Type type = NODE,
                     bool subclass = true)
 {
-    if (name.c_str()[0] == 0)
-        return as->get_handleset_by_type(result, type, subclass);
+    if (name.c_str()[0] == 0) {
+        HandleSeq hset;
+        as->get_handles_by_type(hset, type, subclass);
+        return std::copy(hset.begin(), hset.end(), result);
+    }
 
     if (false == subclass) {
         Handle h(as->get_handle(type, name));
