@@ -561,7 +561,7 @@ SchemeSmob::verify_handle_list_msg(SCM satom_list,
                                    const char* msgatm)
 {
 	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusual, but legit.  Allow embedded nulls
+	// (which is rather unusual, but legit.)  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, pos, satom_list, msglst);

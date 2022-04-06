@@ -131,7 +131,10 @@
 
 		; Verify correct membership of the Atoms.
 		(test-equal "membership-gar-oset" space
-			(cog-atomspace (gar local-hello)))
+			(cog-atomspace (gar local-list)))
+
+		(test-equal "membership-local" space
+			(cog-atomspace local-hello))
 
 		(test-equal "membership-hello" space
 			(cog-atomspace (Concept "hello")))

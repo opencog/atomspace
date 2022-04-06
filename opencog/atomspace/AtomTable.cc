@@ -213,23 +213,25 @@ Handle AtomSpace::get_atom(const Handle& a) const
 /// returns that atom. Copies over values in the process.
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    if (not force) {
-        // If we have it already, return it.
-        Handle hcheck(lookupHandle(orig));
-        if (hcheck) {
-            hcheck->copyValues(orig);
-            return hcheck;
-        }
-    } else {
-        // If force-adding, we have to be more careful.  We're looking
-        // for the atom in this table, and not some other table.
-        Handle hcheck(typeIndex.findAtom(orig));
-        if (hcheck) {
-            hcheck->copyValues(orig);
-            return hcheck;
-        }
+    // This is not obvious, and needs an explanation.
+    // * If force-adding, and a version of this atom is already in
+    //   this table, then return that.
+    // * If not force-adding, and this is not a COW atomspace, then
+    //   search for a version of this atom in any parent atomspace.
+    // * If not force-adding, but we have a COW atomspace, then we
+    //   are careful to preserve the outgoing set of links. The user
+    //   may have supplied us with a specific outgoing set, with
+    //   specific membership to specific atomspaces, and we cannot
+    //   just offer up some other outgoing set having different
+    //   membership. This is tested in a unit test.
+    //
+    if (not force and (not _copy_on_write or not orig->is_link())) {
+        // Search recursively.
+        return lookupHandle(orig);
     }
-    return Handle::UNDEFINED;
+
+    // Search locally.
+    return typeIndex.findAtom(orig);
 }
 
 Handle AtomSpace::add(const Handle& orig, bool force)
@@ -243,7 +245,10 @@ Handle AtomSpace::add(const Handle& orig, bool force)
 
     // Check to see if we already have this atom in the atomspace.
     const Handle& hc(check(orig, force));
-    if (hc) return hc;
+    if (hc) {
+        hc->copyValues(orig);
+        return hc;
+    }
 
     // Make a copy of the atom, if needed. Otherwise, use what we were
     // given. Not making a copy saves a lot of time, especially by
