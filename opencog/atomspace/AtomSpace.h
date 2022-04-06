@@ -470,6 +470,13 @@ public:
                         bool parent=true,
                         const AtomSpace* = nullptr) const;
 
+    void
+    get_handles_by_type(HandleSet&,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true,
+                        const AtomSpace* = nullptr) const;
+
     /**
      * Gets a set of handles that matches with the given type,
      * but ONLY if they have an empty incoming set! 

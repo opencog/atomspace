@@ -338,6 +338,18 @@ size_t AtomSpace::get_num_links() const
 
 size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
+    // If the flag is set, we need to deduplicate the atoms,
+    // and then count them.
+    if (_copy_on_write) {
+        HandleSet hset;
+        typeIndex.get_handles_by_type(hset, type, subclass);
+
+        for (const AtomSpacePtr& base : _environ)
+            base->typeIndex.get_handles_by_type(hset, type, subclass);
+
+        return hset.size();
+    }
+
     size_t result = typeIndex.size(type, subclass);
 
     for (const AtomSpacePtr& base : _environ)
@@ -501,6 +513,50 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     if (parent) {
         for (const AtomSpacePtr& base : _environ)
             base->get_handles_by_type(hseq, type, subclass, parent, cas);
+    }
+}
+
+// Same as above, but works with an unordered set, instead of a vector.
+void AtomSpace::get_handles_by_type(HandleSet& hset,
+                                    Type type,
+                                    bool subclass,
+                                    bool parent,
+                                    const AtomSpace* cas) const
+{
+    if (nullptr == cas) cas = this;
+
+    // See the vector version of this codefor documentation.
+    if (STATE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(StateLinkCast(h)->get_link(cas));
+    }
+    else if (DEFINE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(
+                DefineLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else if (TYPED_ATOM_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(
+                TypedAtomLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else
+    {
+        typeIndex.get_handles_by_type(hset, type, subclass);
+    }
+
+    if (parent) {
+        for (const AtomSpacePtr& base : _environ)
+            base->get_handles_by_type(hset, type, subclass, parent, cas);
     }
 }
 

@@ -76,7 +76,7 @@
 			(inexact->exact (cog-tv-count (cog-tv (cog-node 'Concept "hello")))))
 
 		; Each atomspace should contain just one atom.
-;xxx		(test-equal "atomspace-size" 1 (count-all))
+		(test-equal "atomspace-size" 1 (count-all))
 		(set! cnt (+ 1 cnt)))
 	space-list)
 
@@ -99,7 +99,7 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
-;xxx		(test-equal "atomspace-size" 2 (count-all))
+		(test-equal "atomspace-size" 2 (count-all))
 	)
 	space-list)
 
@@ -164,7 +164,7 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
-;xxx		(test-equal "atomspace-size" 2 (count-all))
+		(test-equal "atomspace-size" 2 (count-all))
 	)
 	space-list)
 
@@ -188,8 +188,7 @@
 			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
 
 		; Each atomspace should contain just three atoms.
-;xxx		(test-equal "atomspace-size" 3 (count-all))
-;(format #t "sooo then ~A\n" (cog-incoming-set (cog-node 'Concept "foo")))
+		(test-equal "atomspace-size" 3 (count-all))
 
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
