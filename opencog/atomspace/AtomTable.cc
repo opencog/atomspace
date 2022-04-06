@@ -92,7 +92,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _nameserver(nameserver())
 {
     if (parent)
-        _environ.push_back(HandleCast(parent->shared_from_this()));
+        _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
     init();
 }
 
@@ -104,7 +104,7 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
     _nameserver(nameserver())
 {
     if (nullptr != parent)
-        _environ.push_back(HandleCast(parent));
+        _environ.push_back(parent);
 
     init();
 }
@@ -116,9 +116,9 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _transient(false),
     _nameserver(nameserver())
 {
-    _environ = bases;
     for (const Handle& base : bases)
     {
+        _environ.push_back(AtomSpaceCast(base));
         if (not _nameserver.isA(base->get_type(), ATOM_SPACE))
             throw opencog::RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
@@ -142,7 +142,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ.push_back(HandleCast(parent->shared_from_this()));
+    _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
 }
 
 void AtomSpace::clear_transient()
@@ -187,9 +187,9 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
-    for (const Handle& base: _environ)
+    for (const AtomSpacePtr& base: _environ)
     {
-        const Handle& found = AtomSpaceCast(base)->lookupHandle(a);
+        const Handle& found = base->lookupHandle(a);
         if (found) return found;
     }
 
@@ -345,8 +345,8 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
     size_t result = typeIndex.size(type, subclass);
 
-    for (const Handle& base : _environ)
-        result += AtomSpaceCast(base)->get_num_atoms_of_type(type, subclass);
+    for (const AtomSpacePtr& base : _environ)
+        result += base->get_num_atoms_of_type(type, subclass);
 
     return result;
 }
@@ -523,8 +523,8 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
-        for (const Handle& base : _environ)
-            AtomSpaceCast(base)->get_handles_by_type(hseq, type, subclass, parent, cas);
+        for (const AtomSpacePtr& base : _environ)
+            base->get_handles_by_type(hseq, type, subclass, parent, cas);
     }
 }
 
@@ -580,7 +580,7 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
-        for (const Handle& base : _environ)
-            AtomSpaceCast(base)->get_root_set_by_type(hseq, type, subclass, parent, cas);
+        for (const AtomSpacePtr& base : _environ)
+            base->get_root_set_by_type(hseq, type, subclass, parent, cas);
     }
 }

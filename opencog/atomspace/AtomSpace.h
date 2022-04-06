@@ -88,7 +88,8 @@ class AtomSpace : public Atom
     /// This AtomSpace will behave like the set-union of the base
     /// atomspaces in the `_environ`: it exposes all Atoms in those
     /// bases, plus also anything in this AtomSpace.
-    HandleSeq _environ;
+    // HandleSeq _environ;
+    std::vector<AtomSpacePtr> _environ;
 
     std::string _name;
 

@@ -266,13 +266,17 @@ Arity AtomSpace::get_arity() const
 
 const HandleSeq& AtomSpace::getOutgoingSet() const
 {
-	return _environ;
+	// return _environ;
+	HandleSeq oset;
+	for (const AtomSpacePtr& base: _environ)
+		oset.push_back(HandleCast(base));
+	return oset;
 }
 
 Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
 	if (n <= _environ.size()) return Handle::UNDEFINED;
-	return _environ[n];
+	return HandleCast(_environ[n]);
 }
 
 void AtomSpace::setAtomSpace(AtomSpace* as)
@@ -295,9 +299,9 @@ int AtomSpace::depth(const Handle& atom) const
     if (nullptr == atom) return -1;
     if (atom->getAtomSpace() == this) return 0;
 
-    for (const Handle& base : _environ)
+    for (const AtomSpacePtr& base : _environ)
     {
-        int d = AtomSpaceCast(base)->depth(atom);
+        int d = base->depth(atom);
         if (0 < d) return d+1;
     }
     return -1;
@@ -307,9 +311,9 @@ bool AtomSpace::in_environ(const Handle& atom) const
 {
     if (nullptr == atom) return false;
     if (atom->getAtomSpace() == this) return true;
-    for (const Handle& base : _environ)
+    for (const AtomSpacePtr& base : _environ)
     {
-        if (AtomSpaceCast(base)->in_environ(atom)) return true;
+        if (base->in_environ(atom)) return true;
     }
     return false;
 }
