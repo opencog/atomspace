@@ -534,42 +534,6 @@ public:
         return std::copy(hset.begin(), hset.end(), result);
     }
 
-    /** Calls function 'func' on all atoms */
-    template <typename Function> void
-    foreachHandleByType(Function func,
-                        Type type,
-                        bool subclass=false,
-                        bool parent=true) const
-    {
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-        std::for_each(hset.begin(), hset.end(),
-             [&](const Handle& h)->void {
-                  (func)(h);
-             });
-    }
-
-    template <typename Function> void
-    foreachParallelByType(Function func,
-                        Type type,
-                        bool subclass=false,
-                        bool parent=true) const
-    {
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-
-        // Parallelize, always, no matter what!
-        opencog::setting_omp(opencog::num_threads(), 1);
-
-        OMP_ALGO::for_each(hset.begin(), hset.end(),
-             [&](const Handle& h)->void {
-                  (func)(h);
-             });
-
-        // Reset to default.
-        opencog::setting_omp(opencog::num_threads());
-    }
-
     /** Returns a string representation of the AtomSpace. */
     virtual std::string to_string(void) const;
     virtual std::string to_string(const std::string& indent) const;
