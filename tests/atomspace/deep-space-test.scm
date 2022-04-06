@@ -45,8 +45,12 @@
 		; (format #t "Expect: ~A Got: ~A\n" cnt
       ;   (cog-tv-count (cog-tv (Concept "hello"))))
 
+		; The Atom should belong to this specific atomspace
+		(test-equal "membership" space
+			(cog-atomspace (cog-node 'Concept "hello")))
+
 		(test-equal "count-tv" cnt
-			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
+			(inexact->exact (cog-tv-count (cog-tv (cog-node 'Concept "hello")))))
 
 		; Each atomspace should contain just one atom.
 		(test-equal "atomspace-size" 1 (count-all))
@@ -84,6 +88,17 @@
 		(test-equal "atomspace-size" 3 (count-all))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
+
+		; Verify correct membership of the Atoms.
+		(test-equal "membership-hello" space
+			(cog-atomspace (Concept "hello")))
+
+(format #t "base: ~A\n" (cog-atomspace (cog-node 'Concept "foo")))
+		(test-equal "membership-foo" base-space
+			(cog-atomspace (Concept "foo")))
+
+		(test-equal "membership-link" space
+			(cog-atomspace (car (cog-incoming-set (Concept "hello")))))
 
 		; The incoming sets should be equal.
 		(test-equal
