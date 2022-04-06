@@ -60,8 +60,6 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
  */
 class AtomSpace : public Atom
 {
-    friend class ::AtomTableUTest;   // Needs to call getRandom()
-
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
     static const bool DONT_EMIT_DIAGNOSTICS = false;
@@ -120,12 +118,6 @@ class AtomSpace : public Atom
      */
     Handle add(const Handle&, bool force=false);
     Handle check(const Handle&, bool force=false);
-
-    /**
-     * Return a random atom in the AtomTable.
-     * Used in unit testing only.
-     */
-    Handle getRandom(RandGen* rng) const;
 
     virtual ContentHash compute_hash() const;
 
