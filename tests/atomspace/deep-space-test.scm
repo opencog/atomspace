@@ -126,7 +126,13 @@
 
 		(test-equal "out-equality" local-hello (gar local-list))
 
+		(test-equal "count-tv-out" cnt
+			(inexact->exact (cog-tv-count (cog-tv (gar local-list)))))
+
 		; Verify correct membership of the Atoms.
+		(test-equal "membership-gar-oset" space
+			(cog-atomspace (gar local-hello)))
+
 		(test-equal "membership-hello" space
 			(cog-atomspace (Concept "hello")))
 
