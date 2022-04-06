@@ -41,3 +41,5 @@
 	(not (equal? (cog-tv ca) (cog-tv xca))))
 
 (test-end tname)
+
+(opencog-test-end)

@@ -108,3 +108,5 @@
 			(List (Concept "charlie") (Concept "at home")))))
 
 (test-end tname)
+
+(opencog-test-end)

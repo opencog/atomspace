@@ -27,3 +27,5 @@
 		(string=? rc expected-in-cxxtest)))
 
 (test-end t)
+
+(opencog-test-end)

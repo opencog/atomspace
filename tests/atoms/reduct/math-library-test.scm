@@ -45,3 +45,5 @@
 	(iota 30))
 
 (test-end tname)
+
+(opencog-test-end)

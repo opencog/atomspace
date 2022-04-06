@@ -58,3 +58,5 @@
 	(iota 10))
 
 (test-end tname)
+
+(opencog-test-end)
