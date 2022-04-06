@@ -72,6 +72,27 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	}
 }
 
+// Same as above, except using an unordered set.
+void TypeIndex::get_handles_by_type(HandleSet& hset,
+                                    Type type,
+                                    bool subclass) const
+{
+	TYPE_INDEX_SHARED_LOCK;
+	const AtomSet& s(_idx.at(type));
+	hset.insert(s.begin(), s.end());
+
+	// Not subclassing? We are done!
+	if (not subclass) return;
+
+	for (Type t = ATOM; t<_num_types; t++)
+	{
+		if (t == type or not _nameserver.isA(t, type)) continue;
+
+		const AtomSet& s(_idx.at(t));
+	   hset.insert(s.begin(), s.end());
+	}
+}
+
 // ================================================================
 
 void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
