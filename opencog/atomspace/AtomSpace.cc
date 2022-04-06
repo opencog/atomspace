@@ -284,6 +284,11 @@ void AtomSpace::setAtomSpace(AtomSpace* as)
 }
 
 // ====================================================================
+// XXX FIXME -- The recursive design of the two routines below make
+// them into a bottleneck, when the stack of AtomSpaces exceeds a few
+// hundred. In particular, the recursion is on the C stack, and I don't
+// beleive the compiler has optimized them to be tail-recursive. (If
+// they are tail-recursive, I guess that's OK, eh?)
 
 int AtomSpace::depth(const Handle& atom) const
 {
