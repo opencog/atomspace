@@ -438,9 +438,8 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
-            HandleSet hs;
-            {
             INCOMING_SHARED_LOCK;
+            HandleSet hs;
             for (const auto& bucket : _incoming_set->_iset)
             {
                 for (const WinkPtr& w : bucket.second)
@@ -448,9 +447,11 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
                     WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
                 }
             }
-            }
+
+            // Use lookupHandle to find the shallowest copy.
             IncomingSet iset;
-            iset.assign(hs.begin(), hs.end());
+            for (const Handle& h: hs)
+                iset.push_back(as->lookupHandle(h));
             return iset;
         }
 
@@ -504,8 +505,11 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
                     WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
                 }
             }
+
+            // Use lookupHandle to find the shallowest copy.
             IncomingSet iset;
-            iset.assign(hs.begin(), hs.end());
+            for (const Handle& h: hs)
+                iset.push_back(as->lookupHandle(h));
             return iset;
         }
 
