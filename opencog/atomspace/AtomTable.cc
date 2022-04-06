@@ -214,10 +214,7 @@ Handle AtomSpace::get_atom(const Handle& a) const
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
     if (not force) {
-        // If we have it already, return it. If we had a fast and
-        // easy COW check, then we could avoid `copyValues()` for
-        // read-only atomspaces, and do a COW instead. But we don't,
-        // so we won't.
+        // If we have it already, return it.
         Handle hcheck(lookupHandle(orig));
         if (hcheck) {
             hcheck->copyValues(orig);
@@ -243,9 +240,6 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // Is the atom already in this table, or one of its environments?
     if (not force and in_environ(orig))
         return orig;
-
-    // Force computation of hash.
-    orig->get_hash();
 
     // Check to see if we already have this atom in the atomspace.
     const Handle& hc(check(orig, force));
