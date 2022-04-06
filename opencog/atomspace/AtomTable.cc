@@ -275,7 +275,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, force));
+                closet.emplace_back(add(h, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
         } else {
