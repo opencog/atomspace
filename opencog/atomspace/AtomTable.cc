@@ -517,14 +517,16 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 }
 
 // Same as above, but works with an unordered set, instead of a vector.
-void AtomSpace::get_handles_by_type(HandleSet& hset,
-                                    Type type,
-                                    bool subclass,
-                                    bool parent,
-                                    const AtomSpace* cas) const
+// By working with a set instead of a sequence, there will not be any
+// duplicate atoms due to shadowing of child spaces by parent spaces.
+// However, the returned set is NOT guaranteed to contain the shallowest
+// Atoms! These need to be obtained with a distinct step.
+void AtomSpace::shadow_by_type(HandleSet& hset,
+                               Type type,
+                               bool subclass,
+                               bool parent,
+                               const AtomSpace* cas) const
 {
-    if (nullptr == cas) cas = this;
-
     // See the vector version of this codefor documentation.
     if (STATE_LINK == type)
     {
@@ -556,8 +558,27 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
 
     if (parent) {
         for (const AtomSpacePtr& base : _environ)
-            base->get_handles_by_type(hset, type, subclass, parent, cas);
+            base->shadow_by_type(hset, type, subclass, parent, cas);
     }
+}
+
+void AtomSpace::get_handles_by_type(HandleSet& hset,
+                                    Type type,
+                                    bool subclass,
+                                    bool parent,
+                                    const AtomSpace* cas) const
+{
+    if (_copy_on_write)
+    {
+        HandleSet rawset;
+        shadow_by_type(rawset, type, subclass, parent, cas);
+
+        // Look for the shallowest version of each Atom.
+        for (const Handle& h: rawset)
+            hset.insert(lookupHandle(h));
+        return;
+    }
+    shadow_by_type(hset, type, subclass, parent, cas);
 }
 
 /**

@@ -120,6 +120,12 @@ class AtomSpace : public Atom
 
     virtual ContentHash compute_hash() const;
 
+    // Private helper function.
+    void shadow_by_type(HandleSet&,
+                        Type type,
+                        bool subclass,
+                        bool parent,
+                        const AtomSpace*) const;
 public:
     /**
      * Constructor and destructor for this class.
