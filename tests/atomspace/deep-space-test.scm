@@ -189,8 +189,7 @@
 
 		; Each atomspace should contain just three atoms.
 ;xxx		(test-equal "atomspace-size" 3 (count-all))
-(format #t "raw  ~A\n" (Concept "hello"))
-(format #t "sooo then ~A\n" (cog-incoming-set (cog-node 'Concept "foo")))
+;(format #t "sooo then ~A\n" (cog-incoming-set (cog-node 'Concept "foo")))
 
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
@@ -199,7 +198,6 @@
 		(test-equal "membership-hello" space
 			(cog-atomspace (Concept "hello")))
 
-(format #t "base: ~A\n" (cog-atomspace (cog-node 'Concept "foo")))
 		(test-equal "membership-foo" base-space
 			(cog-atomspace (Concept "foo")))
 

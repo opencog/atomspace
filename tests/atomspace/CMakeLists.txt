@@ -21,3 +21,4 @@ ADD_CXXTEST(RemoveUTest)
 # ADD_CXXTEST(ValuationTableUTest)
 
 ADD_GUILE_TEST(DeepSpace deep-space-test.scm)
+ADD_GUILE_TEST(CoverSpace cover-space-test.scm)

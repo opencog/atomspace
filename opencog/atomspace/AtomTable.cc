@@ -225,6 +225,8 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     //   just offer up some other outgoing set having different
     //   membership. This is tested in a unit test.
     //
+    // XXX This is still not correct. We need a recursive lookup
+    // that respects outgoing set membership.
     if (not force and (not _copy_on_write or not orig->is_link())) {
         // Search recursively.
         return lookupHandle(orig);
