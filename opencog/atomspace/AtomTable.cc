@@ -342,11 +342,7 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
     // and then count them.
     if (_copy_on_write) {
         HandleSet hset;
-        typeIndex.get_handles_by_type(hset, type, subclass);
-
-        for (const AtomSpacePtr& base : _environ)
-            base->typeIndex.get_handles_by_type(hset, type, subclass);
-
+        shadow_by_type(hset, type, subclass, true, this);
         return hset.size();
     }
 
@@ -472,6 +468,19 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 {
     if (nullptr == cas) cas = this;
 
+    // If this is a copy-on-write space, then deduplicate the Atoms,
+    // returning the shallowest version of each Atom.
+    if (_copy_on_write)
+    {
+        HandleSet rawset;
+        shadow_by_type(rawset, type, subclass, parent, cas);
+
+        // Look for the shallowest version of each Atom.
+        for (const Handle& h: rawset)
+            hseq.push_back(lookupHandle(h));
+        return;
+    }
+
     // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
     // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
@@ -479,7 +488,8 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // XXX Also, a minor bug, not sure if it matters: if parent is set
     // to true, then any UniqueLinks appearing here and in the parent
     // will be duplicated repeatedly in the result. Might be nice to
-    // deduplicate, but that would cost CPU time.
+    // deduplicate, but that would cost CPU time. (The copy_on_write
+    // variant immediately above should handle this correctly, I think.)
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
@@ -508,8 +518,6 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
         typeIndex.get_handles_by_type(hseq, type, subclass);
     }
 
-    // If an atom is already in the set, it will hide any duplicate
-    // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
         for (const AtomSpacePtr& base : _environ)
             base->get_handles_by_type(hseq, type, subclass, parent, cas);
@@ -568,6 +576,8 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
+    // If this is a copy-on-write space, then deduplicate the Atoms,
+    // returning the shallowest version of each Atom.
     if (_copy_on_write)
     {
         HandleSet rawset;
@@ -578,6 +588,7 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
             hset.insert(lookupHandle(h));
         return;
     }
+
     shadow_by_type(hset, type, subclass, parent, cas);
 }
 
