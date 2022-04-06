@@ -62,10 +62,12 @@
 (test-begin istack)
 
 ; Create a bunch of Links
+(set! cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
-		(List (Concept "hello") (Concept "foo"))
-	)
+		(cog-set-tv! (List (Concept "hello") (Concept "foo"))
+			(CountTruthValue 1 0 (* cnt 2)))
+		(set! cnt (+ 1 cnt)))
 	space-list)
 
 ; Now verify that the values are as expected
@@ -83,9 +85,20 @@
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
 
+		; The incoming sets should be equal.
+		(test-equal
+			(cog-incoming-set (Concept "hello"))
+			(cog-incoming-set (Concept "foo")))
+
+		; Values on the link should be correct
+		(test-equal "list-tv" (* 2 cnt)
+			(inexact->exact (cog-tv-count (cog-tv
+				(car (cog-incoming-set (Concept "foo")))))))
+
 		(set! cnt (+ 1 cnt)))
 	space-list)
 
 (test-end istack)
 
 ; -------------------------------------------------------------------
+(opencog-test-end)
