@@ -16,12 +16,30 @@
 ; Create a list of atomspaces, each a child of the last.
 (define (make-space-list LST NUM)
 	(if (<= NUM 0) LST
-		(let ((newspace (cog-new-atomspace)))
+		(let ((newspace (cog-new-atomspace (cog-atomspace))))
 			(cog-set-atomspace! newspace)
 			(make-space-list (cons newspace LST) (- NUM 1)))))
 
 ; Twenty of them, the base space first in the list.
 (define space-list (reverse (make-space-list (list base-space) 20)))
+
+; -------------------------------------------------------------------
+; Test to make sure that the created AtomSpace appar in a stack.
+
+(define astack "verify AtomSpace stack")
+(test-begin astack)
+
+; Go back to the begining.
+(cog-set-atomspace! base-space)
+(define curr-space base-space)
+
+(for-each (lambda (space)
+		(test-equal "space-env-size" 1 (length (cog-atomspace-env space)))
+		(test-equal "space-parent" curr-space (car (cog-atomspace-env space)))
+		(set! curr-space (car (cog-atomspace-env space)))
+	)
+	space-list)
+(test-end astack)
 
 ; -------------------------------------------------------------------
 ; Test to make sure that the same Atom in each AtomSpace has the
@@ -65,12 +83,29 @@
 (define istack "simple incoming stack")
 (test-begin istack)
 
+; Make sure that there is a Concept "foo" in the base space.
+(cog-set-atomspace! base-space)
+(Concept "foo")
+
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+
+		; The Atom should belong to this specific atomspace
+		(test-equal "membership" space
+			(cog-atomspace (cog-node 'Concept "hello")))
+
+		(test-equal "atomspace-size" 2 (count-all))
+	)
+	space-list)
+
 ; Create a bunch of Links
 (set! cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
+(format #t "yo ~A\n" (cog-atomspace (cog-node 'Concept "foo")))
 		(cog-set-tv! (List (Concept "hello") (Concept "foo"))
 			(CountTruthValue 1 0 (* cnt 2)))
+(format #t "da ~A\n" (cog-atomspace (Concept "foo")))
 		(set! cnt (+ 1 cnt)))
 	space-list)
 
@@ -86,7 +121,7 @@
 
 		; Each atomspace should contain just three atoms.
 		(test-equal "atomspace-size" 3 (count-all))
-		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
+		(test-equal "incoming-size" 1 (cog-incoming-size (cog-node 'Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))
 
 		; Verify correct membership of the Atoms.
