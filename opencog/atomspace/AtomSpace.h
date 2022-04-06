@@ -60,8 +60,6 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
  */
 class AtomSpace : public Atom
 {
-    friend class ::AtomTableUTest;   // Needs to call getRandom()
-
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
     static const bool DONT_EMIT_DIAGNOSTICS = false;
@@ -120,12 +118,6 @@ class AtomSpace : public Atom
      */
     Handle add(const Handle&, bool force=false);
     Handle check(const Handle&, bool force=false);
-
-    /**
-     * Return a random atom in the AtomTable.
-     * Used in unit testing only.
-     */
-    Handle getRandom(RandGen* rng) const;
 
     virtual ContentHash compute_hash() const;
 
@@ -493,76 +485,6 @@ public:
                          bool subclass=false,
                          bool parent=true,
                          const AtomSpace* = nullptr) const;
-
-    /**
-     * Gets a container of handles that matches with the given type
-     * (subclasses optionally).
-     * Caution: this is slower than using get_handles_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.
-     *
-     * Example of call to this method, which would return all entries
-     * in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.get_handles_by_type(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handleset_by_type(OutputIterator result,
-                          Type type,
-                          bool subclass=false,
-                          bool parent=true) const
-    {
-        // Sigh. Copy the handles. This hurts performance.
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-        return std::copy(hset.begin(), hset.end(), result);
-    }
-
-    /** Calls function 'func' on all atoms */
-    template <typename Function> void
-    foreachHandleByType(Function func,
-                        Type type,
-                        bool subclass=false,
-                        bool parent=true) const
-    {
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-        std::for_each(hset.begin(), hset.end(),
-             [&](const Handle& h)->void {
-                  (func)(h);
-             });
-    }
-
-    template <typename Function> void
-    foreachParallelByType(Function func,
-                        Type type,
-                        bool subclass=false,
-                        bool parent=true) const
-    {
-        HandleSeq hset;
-        get_handles_by_type(hset, type, subclass, parent);
-
-        // Parallelize, always, no matter what!
-        opencog::setting_omp(opencog::num_threads(), 1);
-
-        OMP_ALGO::for_each(hset.begin(), hset.end(),
-             [&](const Handle& h)->void {
-                  (func)(h);
-             });
-
-        // Reset to default.
-        opencog::setting_omp(opencog::num_threads());
-    }
 
     /** Returns a string representation of the AtomSpace. */
     virtual std::string to_string(void) const;

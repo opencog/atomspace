@@ -176,31 +176,6 @@ public:
         doRecursiveAdd(LIST_LINK);
     }
 
-    void testGetRandom()
-    {
-        ostringstream oss;
-        size_t numBuckets = table->get_size() / 10;
-        for (unsigned i=0; i < numBuckets + 10; i++){
-            oss.clear();
-            oss << i;
-            table->add_atom(createNode(NUMBER_NODE, oss.str()));
-        }
-        table->barrier();
-
-        RandGen* rng = new opencog::MT19937RandGen(0);
-        Handle h1 = table->getRandom(rng);
-        Handle h2 = table->getRandom(rng);
-        int tries = 0;
-        while (h1 == h2 && tries < 100) {
-            // getting the same handle 100 times is extremely improbable
-            // whereas one or two in a row may happen once every now and then.
-            Handle h2 = table->getRandom(rng);
-            tries+=1;
-        }
-        TS_ASSERT(h1 != h2);
-        delete rng;
-    }
-
     /* test the fix for the bug triggered whenever we had a link
      * pointing to the same atom twice (or more). */
     void testDoubleLink()
@@ -246,11 +221,11 @@ public:
         Handle lp = createLink(MY_INHERITANCE_LINK, word, sense);
         Handle lh = table->add_atom(lp);
 
-        TS_ASSERT(table->getHandle(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
-        TS_ASSERT(table->getHandle(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);
+        TS_ASSERT(table->get_node(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
+        TS_ASSERT(table->get_node(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);
         HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
-        TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, std::move(os)) != Handle::UNDEFINED);
+        TS_ASSERT(table->get_link(MY_INHERITANCE_LINK, std::move(os)) != Handle::UNDEFINED);
     }
 };

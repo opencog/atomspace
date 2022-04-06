@@ -403,8 +403,8 @@ public:
 		// Create a link
 		Handle h1 = ex1->add_atom(createLink(LIST_LINK, n1, n2));
 
-		std::list<Handle> handle_set;
-		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
+		std::vector<Handle> handle_set;
+		as1.get_handles_by_type(handle_set, ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 
 		AtomSpacePtr ex2 = createAtomSpace(asp2);
@@ -416,7 +416,7 @@ public:
 		h1 = ex2->add_atom(createLink(LIST_LINK, n1, n2));
 
 		handle_set.clear();
-		as1.get_handleset_by_type(back_inserter(handle_set), ATOM, false);
+		as1.get_handles_by_type(handle_set, ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 	}
 

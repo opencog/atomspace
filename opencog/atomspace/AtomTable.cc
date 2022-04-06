@@ -350,25 +350,6 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
     return result;
 }
 
-Handle AtomSpace::getRandom(RandGen *rng) const
-{
-    size_t x = rng->randint(get_size());
-
-    Handle randy(Handle::UNDEFINED);
-
-    // XXX TODO it would be considerably more efficient to go into the
-    // the type index, and decrement x by the size of the index for
-    // each type.  This would speed up the algo by about 100 (by about
-    // the number of types that are in use...).
-    foreachHandleByType(
-        [&](Handle h)->void {
-            if (0 == x) randy = h;
-            x--;
-        },
-        ATOM, true);
-    return randy;
-}
-
 bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 {
     // Make sure the atom is fully resolved before we go about

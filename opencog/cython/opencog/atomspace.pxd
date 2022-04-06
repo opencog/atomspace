@@ -206,7 +206,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         # ==== query methods ====
         # get by type
-        output_iterator get_handleset_by_type(output_iterator, Type t, bint subclass)
+        void get_handles_by_type(vector[cHandle], Type t, bint subclass)
 
         void clear()
         bint extract_atom(cHandle h, bint recursive)
