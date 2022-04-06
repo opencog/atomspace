@@ -108,10 +108,6 @@ class AtomSpace : public Atom
     void init();
     void clear_all_atoms();
 
-    Handle getHandle(Type, const std::string&&) const;
-    Handle getHandle(Type, const HandleSeq&&) const;
-    Handle lookupHandle(const Handle&) const;
-
     /**
      * Private: add an atom to the table. This skips the read-only
      * check. To be used only by the storage nodes.
@@ -395,12 +391,19 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
+     * Find an equivalent Atom that is exactly the same as the arg.
+     * If such an atom is in the AtomSpace, or in any of it's parent
+     * AtomSpaces, return that Atom. Return the shallowest such Atom.
+     */
+    Handle lookupHandle(const Handle&) const;
+
+    /**
      * Get a node from the AtomSpace, if it's in there. If the atom
      * can't be found, Handle::UNDEFINED will be returned.
      *
      * @param t     Type of the node
      * @param str   Name of the node
-    */
+     */
     Handle get_node(Type, std::string&&) const;
     inline Handle get_handle(Type t, std::string str) const {
         return get_node(t, std::move(str));
@@ -415,7 +418,7 @@ public:
      * @param t        Type of the node
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
-    */
+     */
     Handle get_link(Type, HandleSeq&&) const;
     inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));

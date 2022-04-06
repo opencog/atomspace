@@ -246,11 +246,11 @@ public:
         Handle lp = createLink(MY_INHERITANCE_LINK, word, sense);
         Handle lh = table->add_atom(lp);
 
-        TS_ASSERT(table->getHandle(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
-        TS_ASSERT(table->getHandle(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);
+        TS_ASSERT(table->get_node(MY_NUMBER_NODE, "1") != Handle::UNDEFINED);
+        TS_ASSERT(table->get_node(MY_CONCEPT_NODE, "28675194") != Handle::UNDEFINED);
         HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
-        TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, std::move(os)) != Handle::UNDEFINED);
+        TS_ASSERT(table->get_link(MY_INHERITANCE_LINK, std::move(os)) != Handle::UNDEFINED);
     }
 };

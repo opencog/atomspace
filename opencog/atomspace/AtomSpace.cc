@@ -108,12 +108,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         Handle atom_second;
         if (atom_first->is_node())
         {
-            atom_second = space_second.getHandle(atom_first->get_type(),
+            atom_second = space_second.get_node(atom_first->get_type(),
                         std::string(atom_first->get_name()));
         }
         else if (atom_first->is_link())
         {
-            atom_second =  space_second.getHandle(atom_first->get_type(),
+            atom_second =  space_second.get_link(atom_first->get_type(),
                         HandleSeq(atom_first->getOutgoingSet()));
         }
         else
@@ -342,21 +342,23 @@ Handle AtomSpace::add_node(Type t, std::string&& name)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return getHandle(t, std::move(name));
+    if (_read_only)
+        return lookupHandle(createNode(t, std::move(name)));
 
     return add(createNode(t, std::move(name)));
 }
 
 Handle AtomSpace::get_node(Type t, std::string&& name) const
 {
-    return getHandle(t, std::move(name));
+    return lookupHandle(createNode(t, std::move(name)));
 }
 
 Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 {
     // Cannot add atoms to a read-only atomspace. But if it's already
     // in the atomspace, return it.
-    if (_read_only) return getHandle(t, std::move(outgoing));
+    if (_read_only)
+        return lookupHandle(createLink(std::move(outgoing), t));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle h(createLink(std::move(outgoing), t));
@@ -372,7 +374,7 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
 
 Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 {
-    return getHandle(t, std::move(outgoing));
+    return lookupHandle(createLink(std::move(outgoing), t));
 }
 
 ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
