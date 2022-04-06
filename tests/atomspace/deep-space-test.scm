@@ -18,6 +18,7 @@
 	(if (<= NUM 0) LST
 		(let ((newspace (cog-new-atomspace (cog-atomspace))))
 			(cog-set-atomspace! newspace)
+			(cog-atomspace-cow! #t newspace)
 			(make-space-list (cons newspace LST) (- NUM 1)))))
 
 ; Twenty of them, the base space first in the list.
@@ -33,12 +34,14 @@
 (cog-set-atomspace! base-space)
 (define curr-space base-space)
 
+; Verify that each AtomSpace has the previous one as the parent.
 (for-each (lambda (space)
 		(test-equal "space-env-size" 1 (length (cog-atomspace-env space)))
 		(test-equal "space-parent" curr-space (car (cog-atomspace-env space)))
 		(set! curr-space (car (cog-atomspace-env space)))
 	)
-	space-list)
+	; Test all but the first.
+	(cdr space-list))
 (test-end astack)
 
 ; -------------------------------------------------------------------
