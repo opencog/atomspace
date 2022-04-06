@@ -88,9 +88,11 @@ class AtomSpace : public Atom
     /// This AtomSpace will behave like the set-union of the base
     /// atomspaces in the `_environ`: it exposes all Atoms in those
     /// bases, plus also anything in this AtomSpace.
-    // HandleSeq _environ;
+    // Both _environ and _outgoing contain exactly the same pointers;
+    // we keep two distinct lists to avoid the CPU overhead of casting
+    // between the two different pointer types (its significant).
     std::vector<AtomSpacePtr> _environ;
-
+    HandleSeq _outgoing;
     std::string _name;
 
     /** Find out about atom type additions in the NameServer. */
@@ -175,7 +177,7 @@ public:
     /// Transient atomspaces are always COW.
     void set_copy_on_write(void) { _copy_on_write = true; }
     void clear_copy_on_write(void) { _copy_on_write = false; }
-    bool get_copy_on_write(void) { return _copy_on_write; }
+    bool get_copy_on_write(void) const { return _copy_on_write; }
 
     // -------------------------------------------------------
 
