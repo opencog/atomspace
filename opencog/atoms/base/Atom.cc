@@ -387,11 +387,26 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    INCOMING_SHARED_LOCK;
-
-    size_t cnt = 0;
     if (as)
     {
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            INCOMING_SHARED_LOCK;
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            return hs.size();
+        }
+
+        size_t cnt = 0;
+        INCOMING_SHARED_LOCK;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
@@ -402,6 +417,8 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         return cnt;
     }
 
+    size_t cnt = 0;
+    INCOMING_SHARED_LOCK;
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
@@ -417,6 +434,26 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            HandleSet hs;
+            {
+            INCOMING_SHARED_LOCK;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            }
+            IncomingSet iset;
+            iset.assign(hs.begin(), hs.end());
+            return iset;
+        }
+
         // Prevent update of set while a copy is being made.
         INCOMING_SHARED_LOCK;
         IncomingSet iset;
@@ -454,8 +491,25 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
 
-    IncomingSet result;
     if (as) {
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            IncomingSet iset;
+            iset.assign(hs.begin(), hs.end());
+            return iset;
+        }
+
+        IncomingSet result;
         for (const WinkPtr& w : bucket->second)
         {
             WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
@@ -463,6 +517,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
         return result;
     }
 
+    IncomingSet result;
     for (const WinkPtr& w : bucket->second)
     {
         WEAKLY_DO(l, w, { result.emplace_back(l); })
@@ -481,6 +536,20 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     size_t cnt = 0;
 
     if (as) {
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            return hs.size();
+        }
         for (const WinkPtr& w : bucket->second)
         {
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
