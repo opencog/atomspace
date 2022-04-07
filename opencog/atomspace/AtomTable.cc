@@ -125,7 +125,7 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     {
         _environ.push_back(AtomSpaceCast(base));
         if (not _nameserver.isA(base->get_type(), ATOM_SPACE))
-            throw opencog::RuntimeException(TRACE_INFO,
+            throw RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
     }
     init();
@@ -143,7 +143,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
     _copy_on_write = true;
 
     if (not _transient or nullptr == parent)
-        throw opencog::RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
@@ -154,7 +154,7 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 void AtomSpace::clear_transient()
 {
     if (not _transient)
-        throw opencog::RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
                 "AtomSpace - clear_transient called on non-transient atom table.");
 
     // Clear all the atoms
@@ -179,8 +179,11 @@ void AtomSpace::clear()
 /// such an atom is in the table, it is returned, else return nullptr.
 Handle AtomSpace::lookupHandle(const Handle& a) const
 {
-    Handle h(typeIndex.findAtom(a));
-    if (h and not h->isAbsent()) return h;
+    const Handle& h(typeIndex.findAtom(a));
+    if (h) {
+        if (h->isAbsent()) return Handle::UNDEFINED;
+        return h;
+    }
 
     for (const AtomSpacePtr& base: _environ)
     {
@@ -197,8 +200,10 @@ Handle AtomSpace::get_atom(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
-    if (in_environ(a) and not a->isAbsent())
+    if (in_environ(a)) {
+        if (a->isAbsent()) return Handle::UNDEFINED;
         return a;
+    }
 
     return lookupHandle(a);
 }
@@ -211,7 +216,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     // If force-adding, and a version of this atom is already in
     // the local atomspace, then return that. Do not recurse.
     if (force) {
-        Handle hc(typeIndex.findAtom(orig));
+        const Handle& hc(typeIndex.findAtom(orig));
         if (hc and not hc->isAbsent()) return hc;
         return Handle::UNDEFINED;
     }
@@ -236,7 +241,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     // membership of the provided outgoing set. That is, the user will
     // have supplied an explcit outgoing set, with explicit atomspace
     // membership, and we must respect that wish.
-    Handle cand(lookupHandle(orig));
+    const Handle& cand(lookupHandle(orig));
     if (not cand) return Handle::UNDEFINED;
 
     const HandleSeq& oset(orig->getOutgoingSet());
@@ -325,7 +330,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // Between the time that we last checked, and here, some other thread
     // may have raced and inserted this atom already. So the insert does
     // have to be an atomic test-n-set.
-    Handle oldh(typeIndex.insertAtom(atom));
+    const Handle& oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
 
     // Now that we are completely done, emit the added signal.
@@ -376,7 +381,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 {
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    Handle handle(get_atom(h));
+    const Handle& handle(get_atom(h));
 
     if (nullptr == handle) return false;
 
@@ -385,14 +390,25 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     if (not recursive and not handle->isIncomingSetEmpty())
         return false;
 
-    // Perhaps the atom is not in any table? Or at least, not in this
-    // atom table? Its a user-error if the user is trying to extract
-    // atoms that are not in this atomspace, but we're going to be
-    // silent about this error -- it seems pointless to throw.
+    // If the Atom is in some other AtomSpace that is not in our
+    // environment, then it is a user error.
+    // If we are in a COW space, we hide it instead of removing it.
     AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
-        if (not in_environ(handle)) return false;
+        if (not in_environ(handle)) // return false;
+            throw RuntimeException(TRACE_INFO,
+                    "AtomSpace - extracting unknown Atom");
+
+        // If this is a COW space, then force-add it, so that it
+        // can hide the atom in the deeper space.
+        if (_copy_on_write) {
+            const Handle& hide(add(handle, true));
+            hide->setAbsent();
+            return true;
+        }
+
+        // Delegate to the other atomspace for processing.
         return other->extract_atom(handle, recursive);
     }
 
