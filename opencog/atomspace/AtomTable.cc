@@ -92,12 +92,10 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _nameserver(nameserver())
 {
     if (parent) {
-        // It would be nice to set the COW flag by default, for any
-        // Atomspace that sits on top of another one.
-        // _copy_on_write = true;
-        // However the URE ForwardChainerUTest and BackwardChainerUTest
-        // fail if we do this. The root cause of this failure is not
-        // known. Perhaps the URE should be amended to NOT use COW?
+        // Set the COW flag by default, for any Atomspace that sits on
+        // top of another one. This provides a "common-sense" behavior
+        // that most users would expect.
+        _copy_on_write = true;
         _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
         _outgoing.push_back(HandleCast(parent->shared_from_this()));
     }
