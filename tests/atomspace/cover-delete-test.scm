@@ -39,13 +39,35 @@
 (cog-set-atomspace! mid1-space)
 (cog-extract! (Concept "foo"))
 
+(cog-set-atomspace! mid2-space)
+(Concept "foo" (ctv 1 0 5))
+
+(cog-set-atomspace! mid3-space)
+(cog-extract! (Concept "foo"))
+
+(cog-set-atomspace! surface-space)
+(Concept "foo" (ctv 1 0 7))
+
+; -----------------------------------
 ; Should be present in the base space.
 (cog-set-atomspace! base-space)
 (test-assert "base-space" (cog-atom? (cog-node 'Concept "foo")))
+(test-equal "base-tv" 3 (inexact->exact (cog-count (cog-node 'Concept "foo"))))
 
 ; Should be absent in the next level.
 (cog-set-atomspace! mid1-space)
 (test-assert "mid1-space" (nil? (cog-node 'Concept "foo")))
+
+(cog-set-atomspace! mid2-space)
+(test-assert "mid2-space" (cog-atom? (cog-node 'Concept "foo")))
+(test-equal "mid2-tv" 5 (inexact->exact (cog-count (cog-node 'Concept "foo"))))
+
+(cog-set-atomspace! mid3-space)
+(test-assert "mid3-space" (nil? (cog-node 'Concept "foo")))
+
+(cog-set-atomspace! surface-space)
+(test-assert "surface-space" (cog-atom? (cog-node 'Concept "foo")))
+(test-equal "surface-tv" 7 (inexact->exact (cog-count (cog-node 'Concept "foo"))))
 
 (test-end deep-delete)
 
