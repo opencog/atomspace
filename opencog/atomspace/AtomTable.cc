@@ -218,6 +218,13 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     if (not _copy_on_write)
         return lookupHandle(orig);
 
+    // If this is a transient atomspace, then just grab any version
+    // we find. This alters the behavior of glob matching in the
+    // MinerUTest (specifically, test_glob and test_typed_glob).
+    // I'm not sure what the deal is, though, why we need to check.
+    if (_transient)
+        return lookupHandle(orig);
+
     // If its a node, then the shallowest matching node will do.
     if (not orig->is_link())
         return lookupHandle(orig);
