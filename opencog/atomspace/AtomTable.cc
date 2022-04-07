@@ -180,7 +180,7 @@ void AtomSpace::clear()
 Handle AtomSpace::lookupHandle(const Handle& a) const
 {
     Handle h(typeIndex.findAtom(a));
-    if (h) return h;
+    if (h and not h->isAbsent()) return h;
 
     for (const AtomSpacePtr& base: _environ)
     {
@@ -197,7 +197,7 @@ Handle AtomSpace::get_atom(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
-    if (in_environ(a))
+    if (in_environ(a) and not a->isAbsent())
         return a;
 
     return lookupHandle(a);
@@ -210,8 +210,11 @@ Handle AtomSpace::check(const Handle& orig, bool force)
 {
     // If force-adding, and a version of this atom is already in
     // the local atomspace, then return that. Do not recurse.
-    if (force)
-        return typeIndex.findAtom(orig);
+    if (force) {
+        Handle hc(typeIndex.findAtom(orig));
+        if (hc and not hc->isAbsent()) return hc;
+        return Handle::UNDEFINED;
+    }
 
     // If this is not a COW atomspace, then search recursively for
     // some version, any version of this atom in any parent atomspace.
@@ -395,6 +398,13 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 
     // If it is already marked, just return.
     if (handle->markForRemoval()) return false;
+
+    // If we are working in a COW space, don't actually remove the
+    // atom. Just mark it as being absent (invisible).
+    if (_copy_on_write) {
+        handle->setAbsent();
+        return true;
+    }
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set

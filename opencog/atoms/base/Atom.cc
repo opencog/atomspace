@@ -237,6 +237,27 @@ bool Atom::setUnchecked(void)
     return _checked.exchange(false);
 }
 
+bool Atom::isAbsent() const
+{
+    return _absent.load();
+}
+
+/// Marking an Atom as being absent makes it invisible, as if it
+/// were deleted. We reclaim the "impossible-to-access" storage on
+/// it, as well. (Is this really needed? I dunno. Seems like a good
+/// idea.)
+bool Atom::setAbsent(void)
+{
+    KVP_SHARED_LOCK;
+    _values.clear();
+    return _absent.exchange(true);
+}
+
+bool Atom::setPresent(void)
+{
+    return _absent.exchange(false);
+}
+
 // ==============================================================
 
 void Atom::setAtomSpace(AtomSpace *tb)
