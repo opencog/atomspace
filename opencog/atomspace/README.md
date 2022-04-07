@@ -115,6 +115,8 @@ pointers. More about garbage collection below.
 Multiple AtomSpace Design
 -------------------------
 
+**See also the [DeepSpace README](README-DeepSpace.md) for more.**
+
 Overlay AtomSpaces are needed in (at least) these situations:
 
 * Pattern Matching -- Need to hold temporary results computed during
@@ -188,6 +190,8 @@ AV's or both.
 ------
 Conclusion: Design A2 seems like the best, for now.
 
+However, see also the [DeepSpace README](README-DeepSpace.md) for more
+info.
 
 -------------------------
 Garbage Collection Design

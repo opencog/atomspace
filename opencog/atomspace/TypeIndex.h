@@ -164,6 +164,7 @@ class TypeIndex
 		}
 
 		void get_handles_by_type(HandleSeq&, Type, bool subclass) const;
+		void get_handles_by_type(HandleSet&, Type, bool subclass) const;
 		void get_rootset_by_type(HandleSeq&, Type, bool subclass,
 		                         const AtomSpace*) const;
 };

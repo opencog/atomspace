@@ -86,8 +86,11 @@ class AtomSpace : public Atom
     /// This AtomSpace will behave like the set-union of the base
     /// atomspaces in the `_environ`: it exposes all Atoms in those
     /// bases, plus also anything in this AtomSpace.
-    HandleSeq _environ;
-
+    // Both _environ and _outgoing contain exactly the same pointers;
+    // we keep two distinct lists to avoid the CPU overhead of casting
+    // between the two different pointer types (its significant).
+    std::vector<AtomSpacePtr> _environ;
+    HandleSeq _outgoing;
     std::string _name;
 
     /** Find out about atom type additions in the NameServer. */
@@ -105,10 +108,6 @@ class AtomSpace : public Atom
     void init();
     void clear_all_atoms();
 
-    Handle getHandle(Type, const std::string&&) const;
-    Handle getHandle(Type, const HandleSeq&&) const;
-    Handle lookupHandle(const Handle&) const;
-
     /**
      * Private: add an atom to the table. This skips the read-only
      * check. To be used only by the storage nodes.
@@ -121,6 +120,12 @@ class AtomSpace : public Atom
 
     virtual ContentHash compute_hash() const;
 
+    // Private helper function.
+    void shadow_by_type(HandleSet&,
+                        Type type,
+                        bool subclass,
+                        bool parent,
+                        const AtomSpace*) const;
 public:
     /**
      * Constructor and destructor for this class.
@@ -170,7 +175,7 @@ public:
     /// Transient atomspaces are always COW.
     void set_copy_on_write(void) { _copy_on_write = true; }
     void clear_copy_on_write(void) { _copy_on_write = false; }
-    bool get_copy_on_write(void) { return _copy_on_write; }
+    bool get_copy_on_write(void) const { return _copy_on_write; }
 
     // -------------------------------------------------------
 
@@ -386,12 +391,19 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
+     * Find an equivalent Atom that is exactly the same as the arg.
+     * If such an atom is in the AtomSpace, or in any of it's parent
+     * AtomSpaces, return that Atom. Return the shallowest such Atom.
+     */
+    Handle lookupHandle(const Handle&) const;
+
+    /**
      * Get a node from the AtomSpace, if it's in there. If the atom
      * can't be found, Handle::UNDEFINED will be returned.
      *
      * @param t     Type of the node
      * @param str   Name of the node
-    */
+     */
     Handle get_node(Type, std::string&&) const;
     inline Handle get_handle(Type t, std::string str) const {
         return get_node(t, std::move(str));
@@ -406,7 +418,7 @@ public:
      * @param t        Type of the node
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
-    */
+     */
     Handle get_link(Type, HandleSeq&&) const;
     inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));
@@ -459,6 +471,13 @@ public:
      */
     void
     get_handles_by_type(HandleSeq&,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true,
+                        const AtomSpace* = nullptr) const;
+
+    void
+    get_handles_by_type(HandleSet&,
                         Type type,
                         bool subclass=false,
                         bool parent=true,

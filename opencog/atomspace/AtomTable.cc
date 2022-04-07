@@ -91,8 +91,10 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _transient(transient),
     _nameserver(nameserver())
 {
-    if (parent)
-        _environ.push_back(HandleCast(parent->shared_from_this()));
+    if (parent) {
+        _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
+        _outgoing.push_back(HandleCast(parent->shared_from_this()));
+    }
     init();
 }
 
@@ -103,8 +105,10 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
     _transient(false),
     _nameserver(nameserver())
 {
-    if (nullptr != parent)
-        _environ.push_back(HandleCast(parent));
+    if (nullptr != parent) {
+        _environ.push_back(parent);
+        _outgoing.push_back(HandleCast(parent));
+    }
 
     init();
 }
@@ -116,9 +120,10 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _transient(false),
     _nameserver(nameserver())
 {
-    _environ = bases;
+    _outgoing = bases;
     for (const Handle& base : bases)
     {
+        _environ.push_back(AtomSpaceCast(base));
         if (not _nameserver.isA(base->get_type(), ATOM_SPACE))
             throw opencog::RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
@@ -142,7 +147,8 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ.push_back(HandleCast(parent->shared_from_this()));
+    _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
+    _outgoing.push_back(HandleCast(parent->shared_from_this()));
 }
 
 void AtomSpace::clear_transient()
@@ -156,6 +162,7 @@ void AtomSpace::clear_transient()
 
     // Clear the  parent environment and holder atomspace.
     _environ.clear();
+    _outgoing.clear();
 }
 
 void AtomSpace::clear_all_atoms()
@@ -168,18 +175,6 @@ void AtomSpace::clear()
     clear_all_atoms();
 }
 
-Handle AtomSpace::getHandle(Type t, const std::string&& n) const
-{
-    Handle h(createNode(t, std::move(n)));
-    return lookupHandle(h);
-}
-
-Handle AtomSpace::getHandle(Type t, const HandleSeq&& seq) const
-{
-    Handle h(createLink(std::move(seq), t));
-    return lookupHandle(h);
-}
-
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
 Handle AtomSpace::lookupHandle(const Handle& a) const
@@ -187,9 +182,9 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     Handle h(typeIndex.findAtom(a));
     if (h) return h;
 
-    for (const Handle& base: _environ)
+    for (const AtomSpacePtr& base: _environ)
     {
-        const Handle& found = AtomSpaceCast(base)->lookupHandle(a);
+        const Handle& found = base->lookupHandle(a);
         if (found) return found;
     }
 
@@ -213,26 +208,42 @@ Handle AtomSpace::get_atom(const Handle& a) const
 /// returns that atom. Copies over values in the process.
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    if (not force) {
-        // If we have it already, return it. If we had a fast and
-        // easy COW check, then we could avoid `copyValues()` for
-        // read-only atomspaces, and do a COW instead. But we don't,
-        // so we won't.
-        Handle hcheck(lookupHandle(orig));
-        if (hcheck) {
-            hcheck->copyValues(orig);
-            return hcheck;
-        }
-    } else {
-        // If force-adding, we have to be more careful.  We're looking
-        // for the atom in this table, and not some other table.
-        Handle hcheck(typeIndex.findAtom(orig));
-        if (hcheck) {
-            hcheck->copyValues(orig);
-            return hcheck;
-        }
+    // If force-adding, and a version of this atom is already in
+    // the local atomspace, then return that. Do not recurse.
+    if (force)
+        return typeIndex.findAtom(orig);
+
+    // If this is not a COW atomspace, then search recursively for
+    // some version, any version of this atom in any parent atomspace.
+    if (not _copy_on_write)
+        return lookupHandle(orig);
+
+    // If this is a transient atomspace, then just grab any version
+    // we find. This alters the behavior of glob matching in the
+    // MinerUTest (specifically, test_glob and test_typed_glob).
+    // I'm not sure what the deal is, though, why we need to check.
+    if (_transient)
+        return lookupHandle(orig);
+
+    // If its a node, then the shallowest matching node will do.
+    if (not orig->is_link())
+        return lookupHandle(orig);
+
+    // If we have a COW atomspace, then we must respect the atomspace
+    // membership of the provided outgoing set. That is, the user will
+    // have supplied an explcit outgoing set, with explicit atomspace
+    // membership, and we must respect that wish.
+    Handle cand(lookupHandle(orig));
+    if (not cand) return Handle::UNDEFINED;
+
+    const HandleSeq& oset(orig->getOutgoingSet());
+    const HandleSeq& cset(cand->getOutgoingSet());
+    size_t sz = oset.size();
+    for (size_t i=0; i<sz; i++) {
+        if (oset[i]->getAtomSpace() != cset[i]->getAtomSpace())
+            return Handle::UNDEFINED;
     }
-    return Handle::UNDEFINED;
+    return cand;
 }
 
 Handle AtomSpace::add(const Handle& orig, bool force)
@@ -244,12 +255,12 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     if (not force and in_environ(orig))
         return orig;
 
-    // Force computation of hash.
-    orig->get_hash();
-
     // Check to see if we already have this atom in the atomspace.
     const Handle& hc(check(orig, force));
-    if (hc) return hc;
+    if (hc) {
+        hc->copyValues(orig);
+        return hc;
+    }
 
     // Make a copy of the atom, if needed. Otherwise, use what we were
     // given. Not making a copy saves a lot of time, especially by
@@ -275,7 +286,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, force));
+                closet.emplace_back(add(h, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
         } else {
@@ -342,10 +353,18 @@ size_t AtomSpace::get_num_links() const
 
 size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
+    // If the flag is set, we need to deduplicate the atoms,
+    // and then count them.
+    if (_copy_on_write) {
+        HandleSet hset;
+        shadow_by_type(hset, type, subclass, true, this);
+        return hset.size();
+    }
+
     size_t result = typeIndex.size(type, subclass);
 
-    for (const Handle& base : _environ)
-        result += AtomSpaceCast(base)->get_num_atoms_of_type(type, subclass);
+    for (const AtomSpacePtr& base : _environ)
+        result += base->get_num_atoms_of_type(type, subclass);
 
     return result;
 }
@@ -464,6 +483,19 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 {
     if (nullptr == cas) cas = this;
 
+    // If this is a copy-on-write space, then deduplicate the Atoms,
+    // returning the shallowest version of each Atom.
+    if (_copy_on_write)
+    {
+        HandleSet rawset;
+        shadow_by_type(rawset, type, subclass, parent, cas);
+
+        // Look for the shallowest version of each Atom.
+        for (const Handle& h: rawset)
+            hseq.push_back(lookupHandle(h));
+        return;
+    }
+
     // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
     // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
@@ -471,7 +503,8 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // XXX Also, a minor bug, not sure if it matters: if parent is set
     // to true, then any UniqueLinks appearing here and in the parent
     // will be duplicated repeatedly in the result. Might be nice to
-    // deduplicate, but that would cost CPU time.
+    // deduplicate, but that would cost CPU time. (The copy_on_write
+    // variant immediately above should handle this correctly, I think.)
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
@@ -500,12 +533,78 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
         typeIndex.get_handles_by_type(hseq, type, subclass);
     }
 
-    // If an atom is already in the set, it will hide any duplicate
-    // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
-        for (const Handle& base : _environ)
-            AtomSpaceCast(base)->get_handles_by_type(hseq, type, subclass, parent, cas);
+        for (const AtomSpacePtr& base : _environ)
+            base->get_handles_by_type(hseq, type, subclass, parent, cas);
     }
+}
+
+// Same as above, but works with an unordered set, instead of a vector.
+// By working with a set instead of a sequence, there will not be any
+// duplicate atoms due to shadowing of child spaces by parent spaces.
+// However, the returned set is NOT guaranteed to contain the shallowest
+// Atoms! These need to be obtained with a distinct step.
+void AtomSpace::shadow_by_type(HandleSet& hset,
+                               Type type,
+                               bool subclass,
+                               bool parent,
+                               const AtomSpace* cas) const
+{
+    // See the vector version of this codefor documentation.
+    if (STATE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(StateLinkCast(h)->get_link(cas));
+    }
+    else if (DEFINE_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(
+                DefineLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else if (TYPED_ATOM_LINK == type)
+    {
+        HandleSeq rawseq;
+        typeIndex.get_handles_by_type(rawseq, type, subclass);
+        for (const Handle& h : rawseq)
+            hset.insert(
+                TypedAtomLink::get_link(UniqueLinkCast(h)->get_alias(), cas));
+    }
+    else
+    {
+        typeIndex.get_handles_by_type(hset, type, subclass);
+    }
+
+    if (parent) {
+        for (const AtomSpacePtr& base : _environ)
+            base->shadow_by_type(hset, type, subclass, parent, cas);
+    }
+}
+
+void AtomSpace::get_handles_by_type(HandleSet& hset,
+                                    Type type,
+                                    bool subclass,
+                                    bool parent,
+                                    const AtomSpace* cas) const
+{
+    // If this is a copy-on-write space, then deduplicate the Atoms,
+    // returning the shallowest version of each Atom.
+    if (_copy_on_write)
+    {
+        HandleSet rawset;
+        shadow_by_type(rawset, type, subclass, parent, cas);
+
+        // Look for the shallowest version of each Atom.
+        for (const Handle& h: rawset)
+            hset.insert(lookupHandle(h));
+        return;
+    }
+
+    shadow_by_type(hset, type, subclass, parent, cas);
 }
 
 /**
@@ -560,7 +659,7 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
     // If an atom is already in the set, it will hide any duplicate
     // atom in the parent. What??? XXX NOT TRUE FIXME
     if (parent) {
-        for (const Handle& base : _environ)
-            AtomSpaceCast(base)->get_root_set_by_type(hseq, type, subclass, parent, cas);
+        for (const AtomSpacePtr& base : _environ)
+            base->get_root_set_by_type(hseq, type, subclass, parent, cas);
     }
 }

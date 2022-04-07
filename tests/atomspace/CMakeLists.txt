@@ -19,3 +19,6 @@ ADD_CXXTEST(RemoveUTest)
 
 # The ValuationTable is no longer used or even built, so don't test it.
 # ADD_CXXTEST(ValuationTableUTest)
+
+ADD_GUILE_TEST(DeepSpace deep-space-test.scm)
+ADD_GUILE_TEST(CoverSpace cover-space-test.scm)
