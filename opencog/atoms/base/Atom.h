@@ -192,17 +192,18 @@ class Atom
     friend class StateLink;       // Needs to call swap_atom()
 
 protected:
-    //! Sets the AtomSpace in which this Atom is inserted.
-    virtual void setAtomSpace(AtomSpace *);
-
     // Each atomic_flag chews up a byte.
     // Place this first, so that these share a word with Type.
+    mutable std::atomic_bool _absent;
     mutable std::atomic_bool _marked_for_removal;
     mutable std::atomic_bool _checked;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
+
+    //! Sets the AtomSpace in which this Atom is inserted.
+    virtual void setAtomSpace(AtomSpace *);
 
     AtomSpace *_atom_space;
 
@@ -224,6 +225,7 @@ protected:
      */
     Atom(Type t)
       : Value(t),
+        _absent(false),
         _marked_for_removal(false),
         _checked(false),
         _content_hash(Handle::INVALID_HASH),
@@ -287,10 +289,7 @@ protected:
     virtual ContentHash compute_hash() const = 0;
 
 private:
-    /** Returns whether this atom is marked for removal.
-     *
-     * @return Whether this atom is marked for removal.
-     */
+    //! Returns whether this atom is marked for removal.
     bool isMarkedForRemoval() const;
 
     //! Marks the atom for removal. Returns old value.
@@ -303,6 +302,11 @@ private:
     bool isChecked() const;
     bool setChecked();
     bool setUnchecked();
+
+    /** Returns whether this atom is marked absent. */
+    bool isAbsent() const;
+    bool setAbsent();
+    bool setPresent();
 
 public:
 
