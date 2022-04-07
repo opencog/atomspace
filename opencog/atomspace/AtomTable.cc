@@ -390,15 +390,15 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     if (not recursive and not handle->isIncomingSetEmpty())
         return false;
 
-    // If the Atom is in some other AtomSpace that is not in our
-    // environment, then it is a user error.
-    // If we are in a COW space, we hide it instead of removing it.
+    // Atom seems to reside somewhere else.
     AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
-        if (not in_environ(handle)) // return false;
-            throw RuntimeException(TRACE_INFO,
-                    "AtomSpace - extracting unknown Atom");
+        // If the Atom is in some other AtomSpace that is not in our
+        // environment, then it is a user error. ... Except that this
+        // can be hit during multi-threaded racing of add-delete, as
+        // witnessed by UseCountUTest.
+        if (not in_environ(handle)) return false;
 
         // If this is a COW space, then force-add it, so that it
         // can hide the atom in the deeper space.
