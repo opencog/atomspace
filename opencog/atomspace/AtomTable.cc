@@ -208,27 +208,35 @@ Handle AtomSpace::get_atom(const Handle& a) const
 /// returns that atom. Copies over values in the process.
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    // This is not obvious, and needs an explanation.
-    // * If force-adding, and a version of this atom is already in
-    //   this table, then return that.
-    // * If not force-adding, and this is not a COW atomspace, then
-    //   search for a version of this atom in any parent atomspace.
-    // * If not force-adding, but we have a COW atomspace, then we
-    //   are careful to preserve the outgoing set of links. The user
-    //   may have supplied us with a specific outgoing set, with
-    //   specific membership to specific atomspaces, and we cannot
-    //   just offer up some other outgoing set having different
-    //   membership. This is tested in a unit test.
-    //
-    // XXX This is still not correct. We need a recursive lookup
-    // that respects outgoing set membership.
-    if (not force and (not _copy_on_write or not orig->is_link())) {
-        // Search recursively.
-        return lookupHandle(orig);
-    }
+    // If force-adding, and a version of this atom is already in
+    // the local atomspace, then return that. Do not recurse.
+    if (force)
+        return typeIndex.findAtom(orig);
 
-    // Search locally.
-    return typeIndex.findAtom(orig);
+    // If this is not a COW atomspace, then search recursively for
+    // some version, any version of this atom in any parent atomspace.
+    if (not _copy_on_write)
+        return lookupHandle(orig);
+
+    // If its a node, then the shallowest matching node will do.
+    if (not orig->is_link())
+        return lookupHandle(orig);
+
+    // If we have a COW atomspace, then we must respect the atomspace
+    // membership of the provided outgoing set. That is, the user will
+    // have supplied an explcit outgoing set, with explicit atomspace
+    // membership, and we must respect that wish.
+    Handle cand(lookupHandle(orig));
+    if (not cand) return Handle::UNDEFINED;
+
+    const HandleSeq& oset(orig->getOutgoingSet());
+    const HandleSeq& cset(cand->getOutgoingSet());
+    size_t sz = oset.size();
+    for (size_t i=0; i<sz; i++) {
+        if (oset[i]->getAtomSpace() != cset[i]->getAtomSpace())
+            return Handle::UNDEFINED;
+    }
+    return cand;
 }
 
 Handle AtomSpace::add(const Handle& orig, bool force)
