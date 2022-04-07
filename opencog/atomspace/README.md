@@ -166,9 +166,16 @@ Alter the atom's `getIncomingSet()` method, so that it returns not only
 it's own strict incoming set, but also that of any atoms that it's
 hiding. The cost here seems to be minimal.
 
-Add a "masked" bit-flag to the atom, indicating that there's another
-atom in an overlay that is covering it. This can be used to avoid
-traversing covered/masked atoms.
+However, this now presents a problem for traversing back down again:
+following the outgoing set back down will return the atom in the base
+space, and not it's cover. This would require performance-sapping checks
+of atoms in outgoing sets, to always return the version in the current
+atomspace. This cost seems excessive.
+
+#### Design A3)
+Do nothing. This is the easiest to implement: no additional code
+required. User-beware, though. Things might not work as the user
+expects.
 
 ### Design B)
 Each Atom holds an atomspace, key, value triple, so that, to find the
@@ -188,10 +195,9 @@ all existing applications, the majority of atoms have either TV's or
 AV's or both.
 
 ------
-Conclusion: Design A2 seems like the best, for now.
+Conclusion: Design A3 seems like the best, for now. See the
+[DeepSpace README](README-DeepSpace.md) for a mor detailed discussion.
 
-However, see also the [DeepSpace README](README-DeepSpace.md) for more
-info.
 
 -------------------------
 Garbage Collection Design
