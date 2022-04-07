@@ -53,7 +53,7 @@
 (define vstack "simple value stack")
 (test-begin vstack)
 
-; Create on Atom, with different truth values in each space.
+; Create an Atom, with different truth values in each space.
 (define cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
@@ -152,6 +152,17 @@
 
 (define istack "simple incoming stack")
 (test-begin istack)
+
+; Start clean, from scratch
+(for-each cog-atomspace-clear space-list)
+
+; Create an Atom, with different truth values in each space.
+(set! cnt 0)
+(for-each (lambda (space)
+		(cog-set-atomspace! space)
+		(Concept "hello" (ctv 1 0 cnt))
+		(set! cnt (+ 1 cnt)))
+	space-list)
 
 ; Make sure that there is a Concept "foo" in the base space.
 (cog-set-atomspace! base-space)
