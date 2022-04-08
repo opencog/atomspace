@@ -110,6 +110,9 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
     _nameserver(nameserver())
 {
     if (nullptr != parent) {
+        // Set the COW flag by default; it seems like a simpler
+        // default than setting it to be write-through.
+        _copy_on_write = true;
         _environ.push_back(parent);
         _outgoing.push_back(HandleCast(parent));
     }
@@ -132,6 +135,8 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
             throw RuntimeException(TRACE_INFO,
                     "AtomSpace - bases must be AtomSpaces!");
     }
+
+    if (0 < bases.size()) _copy_on_write = true;
     init();
 }
 
