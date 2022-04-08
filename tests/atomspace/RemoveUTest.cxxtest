@@ -45,6 +45,9 @@ public:
 	{
 		asp1 = createAtomSpace();
 		asp2 = createAtomSpace(asp1);
+
+		// Testing is performed on a write-through configuration.
+		asp2->clear_copy_on_write();
 	}
 
 	void tearDown() {}

@@ -52,11 +52,9 @@ in order.
 
 ; Create a covering space
 (define base-space (cog-atomspace))
-(cog-atomspace-cow! #t base-space)
 
 (define cover-space (cog-new-atomspace base-space))
 (cog-set-atomspace! cover-space)
-(cog-atomspace-cow! #t cover-space)
 
 ; Hide the atom "foo" in the base-space.
 (Concept "foo" (ctv 1 0 42))

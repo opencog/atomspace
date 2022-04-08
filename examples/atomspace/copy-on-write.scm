@@ -19,6 +19,23 @@
 ; perform read-write operations) without corrupting the underlying
 ; shared read-only database.
 ;
+; A more advanced use is to use deep stacks of AtomSpaces to hold
+; partial results arising from long computations. These can be thought
+; of as a historical record or a collection of Kripke frames of the
+; calculations, with each level consisting of all changes between that
+; and the previous level: a "changeset", similar to that in git.
+; Multiple branches are also allowed, and so fancy algorithms can
+; perform "many-worlds" computations, and directly compare AtomSpaces
+; in different branches.
+;
+; By default, whenever a new AtomSpace is created as a layer on top of
+; another, it is marked as a copy-on-write space. This flag can be
+; cleared: in this case, the overlay becomes a write-through AtomSpace.
+; Newly-created Atoms will still be created in the overlay, but changes
+; to Values and TruthValues of Atoms in the base space will pass through,
+; to the base space. This demo does not show the write-through ability;
+; the user is encourage to explore this themselves.
+;
 (use-modules (opencog))
 
 ; Create atoms in the base AtomSpace.

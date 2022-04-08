@@ -12,14 +12,12 @@
 ; Creates a stack of AtomSpaces, each a child of the last.
 
 (define base-space (cog-atomspace))
-(cog-atomspace-cow! #t base-space)
 
 ; Create a list of atomspaces, each a child of the last.
 (define (make-space-list LST NUM)
 	(if (<= NUM 0) LST
 		(let ((newspace (cog-new-atomspace (cog-atomspace))))
 			(cog-set-atomspace! newspace)
-			(cog-atomspace-cow! #t newspace)
 			(make-space-list (cons newspace LST) (- NUM 1)))))
 
 ; Twenty of them, the base space first in the list.

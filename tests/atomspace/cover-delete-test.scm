@@ -12,19 +12,10 @@
 ; Common setup, used by all tests.
 
 (define base-space (cog-atomspace))
-(cog-atomspace-cow! #t base-space)
-
 (define mid1-space (cog-new-atomspace base-space))
-(cog-atomspace-cow! #t mid1-space)
-
 (define mid2-space (cog-new-atomspace mid1-space))
-(cog-atomspace-cow! #t mid2-space)
-
 (define mid3-space (cog-new-atomspace mid2-space))
-(cog-atomspace-cow! #t mid3-space)
-
 (define surface-space (cog-new-atomspace mid3-space))
-(cog-atomspace-cow! #t surface-space)
 
 ; ===================================================================
 ; Test that deep deletions work correctly.

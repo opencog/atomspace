@@ -147,6 +147,9 @@ void FiniteStateMachineUTest::test_basic_overlay(void)
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
+	// Testing is peformed in a write-through mode.
+	as->clear_copy_on_write();
+
 	do_test_basic();
 
 	delete eval;
