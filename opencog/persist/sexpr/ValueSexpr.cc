@@ -481,4 +481,45 @@ ValuePtr Sexpr::add_atoms(AtomSpace* as, const ValuePtr& vptr)
 	return as->add_atoms(vptr);
 }
 
+/* ================================================================== */
+// Frame printers. Similar to the Atom printers, except
+// that frames can have both a name, and an outgoing set.
+// At this time, the only Frames are AtomSpaces.
+
+static std::string prt_frame(const Handle& asp)
+{
+	std::stringstream ss;
+	ss << std::quoted(asp->get_name());
+
+	std::string txt = "(" + nameserver().getTypeName(asp->get_type()) + " ";
+	txt += ss.str() + " ";
+	for (const Handle& ho : asp->getOutgoingSet())
+		txt += prt_frame(ho);
+	txt += ")";
+	return txt;
+}
+
+static std::string prt_frame(const AtomSpace* as)
+{
+	std::stringstream ss;
+	ss << std::quoted(as->get_name());
+
+	std::string txt = "(" + nameserver().getTypeName(as->get_type()) + " ";
+	txt += ss.str() + " ";
+	for (const Handle& ho : as->getOutgoingSet())
+		txt += prt_frame(ho);
+	txt += ")";
+	return txt;
+}
+
+std::string Sexpr::encode_frame(const Handle& h)
+{
+	return prt_frame(h);
+}
+
+std::string Sexpr::encode_frame(const AtomSpace* as)
+{
+	return prt_frame(as);
+}
+
 /* ============================= END OF FILE ================= */
