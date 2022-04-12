@@ -77,9 +77,14 @@ FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 // avoid conflict with the python Atom object.
 ATOM <- VALUE
 
+// Frames are experimental: Atoms that are both Nodes and Links,
+// having both a name and an outgoing set. Used as a base class for
+// AtomSpaces. Currently, no other use.
+FRAME <- ATOM
+
 // The AtomSpace is kind of like a Link, kind of like a SetLink, except
 // that it is mutable. The contents of the AtomSpace *can* be changed!
-ATOM_SPACE <- ATOM
+ATOM_SPACE <- FRAME
 
 NODE <- ATOM
 LINK <- ATOM
