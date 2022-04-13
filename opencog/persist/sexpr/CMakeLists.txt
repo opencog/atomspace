@@ -3,6 +3,7 @@
 ADD_LIBRARY (sexpr
 	AtomSexpr.cc
 	Commands.cc
+	FrameSexpr.cc
 	SexprEval.cc
 	ValueSexpr.cc
 )

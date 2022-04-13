@@ -123,7 +123,7 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 /// This function was originally written to allow in-place extraction
 /// of the node name. Unfortunately, node names containing escaped
 /// quotes need to be unescaped, which prevents in-place extraction.
-/// So, instead, this returns the unescaped node name.
+/// So, instead, this returns a copy of the name string.
 std::string Sexpr::get_node_name(const std::string& s,
                                  size_t& l, size_t& r,
                                  Type atype, size_t line_cnt)

@@ -147,6 +147,7 @@ public:
     AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
+    bool is_atom(void) const { return true; }
     UUID get_uuid(void) const { return _uuid; }
 
     /// Transient atomspaces are lighter-weight, faster, but are missing

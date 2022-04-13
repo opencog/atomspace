@@ -65,6 +65,12 @@ public:
 		decode_alist(h, s, junk);
 	}
 
+	static AtomSpace* decode_frame(AtomSpace*, const std::string&, size_t&);
+	static AtomSpace* decode_frame(AtomSpace* as, const std::string& fs) {
+		size_t junk = 0;
+		return decode_frame(as, fs, junk);
+	}
+
 	// -------------------------------------------
 	// API more suitable to very long, file-driven I/O.
 	static int get_next_expr(const std::string&,
@@ -79,6 +85,8 @@ public:
 	static std::string encode_atom(const Handle&);
 	static std::string encode_value(const ValuePtr&);
 	static std::string encode_atom_values(const Handle&);
+	static std::string encode_frame(const Handle&);
+	static std::string encode_frame(const AtomSpace*);
 
 	static std::string dump_atom(const Handle&);
 	static std::string dump_vatom(const Handle&, const Handle&);
