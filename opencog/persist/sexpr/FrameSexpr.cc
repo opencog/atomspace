@@ -59,14 +59,36 @@ std::string Sexpr::encode_frame(const AtomSpace* as)
 /* ================================================================== */
 // Frame decoders. Decode what the above does.
 
+/// Find some AtmSpace (frame) that has the indicated name.
+//
+// XXX TODO FIXME: should also verify that the subspaces match.
+// That is, both the name matches, and also the subframes, too.
+static AtomSpace* find_frame(const std::string& name, AtomSpace* surf)
+{
+	if (0 == name.compare(surf->get_name())) return surf;
+
+	for (const Handle& subf: surf->getOutgoingSet())
+	{
+		AtomSpace* af = find_frame(name, (AtomSpace*) subf.get());
+		if (af) return af;
+	}
+
+	return nullptr;
+}
+
 /// Decode an s-expression that encodes a frame. Search for the result
 /// in the surface frame. If it can be found there, then return a
-/// pointer to it. If not found, throw an exception.  This allows the
-/// caller to figure out what to do... XXX Maybe we should just create
-/// it?
+/// pointer to it. If not found, return a null pointer.
+//
+// XXX FIXME: this performs a lookup by name only. It should probably
+// perform a lookup by inheritance, too. Or maybe that could be provided
+// as a distinct function. Its a bit murky, just right now, what the
+// right thing to to is.
 AtomSpace* Sexpr::decode_frame(AtomSpace* surface,
                                const std::string& sframe, size_t& pos)
 {
+	size_t totlen = sframe.size();
+
 	// Skip past whitespace
 	pos = sframe.find_first_not_of(" \n\t", pos);
 
@@ -78,13 +100,18 @@ AtomSpace* Sexpr::decode_frame(AtomSpace* surface,
 			sframe.substr(pos).c_str());
 
 	// Get the AtomSpace name.
+	vos = sframe.find_first_not_of(" \n\t", vos);
 	if ('"' != sframe[vos])
 		throw SyntaxException(TRACE_INFO, "Badly formatted Frame %s",
 			sframe.substr(pos).c_str());
-printf("duuuude vosv=%s<<\n", sframe.substr(vos).c_str());
 
+	size_t r = totlen;
+	std::string name = get_node_name(sframe, vos, r, FRAME);
 
-	return nullptr;
+	// XXX TODO: verify that the named atomspace has the correct
+	// subframes in it, too...
+
+	return find_frame(name, surface);
 }
 
 /* ============================= END OF FILE ================= */
