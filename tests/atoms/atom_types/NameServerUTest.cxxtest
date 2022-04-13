@@ -50,7 +50,7 @@ public:
             if (t > ATOM) {
                 TS_ASSERT(nameserver().isA(t, NODE) or
                           nameserver().isA(t, LINK) or
-                          nameserver().isA(t, ATOM_SPACE));
+                          nameserver().isA(t, FRAME));
             }
             else {
                 TS_ASSERT(nameserver().isA(t, VALUE));
