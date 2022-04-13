@@ -142,6 +142,15 @@ public:
 	void store_atomspace(void);
 
 	/**
+	 * Return the DAG of all AtomSpaces in the backing store.
+	 * The AtomSpaces themselves will not be populated; use the
+	 * `load_atmspace` method above to accomplish that.
+	 *
+	 * Tghe returned Handle is an AtomSpacePtr to the top of the DAG.
+	 */
+	Handle load_frames(void);
+
+	/**
 	 * Use the backing store to load the entire incoming set of the
 	 * atom.
 	 *

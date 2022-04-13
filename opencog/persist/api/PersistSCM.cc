@@ -72,6 +72,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_load_atomspace, "persist", false);
 	define_scheme_primitive("sn-store-atomspace",
 	             &PersistSCM::sn_store_atomspace, "persist", false);
+	define_scheme_primitive("sn-load-frames",
+	             &PersistSCM::sn_load_frames, "persist", false);
 	define_scheme_primitive("sn-delete",
 	             &PersistSCM::sn_delete, "persist", false);
 	define_scheme_primitive("sn-delete-rec",
@@ -103,6 +105,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_load_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-store-atomspace",
 	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
+	define_scheme_primitive("dflt-load-frames",
+	             &PersistSCM::dflt_load_frames, this, "persist", false);
 	define_scheme_primitive("dflt-delete",
 	             &PersistSCM::dflt_delete, this, "persist", false);
 	define_scheme_primitive("dflt-delete-rec",

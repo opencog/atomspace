@@ -2,7 +2,7 @@
  * Sexpr.h
  * Encoding and Decoding of Atomese in s-expression format.
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2020,2022 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

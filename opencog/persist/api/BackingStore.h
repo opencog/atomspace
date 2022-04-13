@@ -3,7 +3,7 @@
  *
  * Implements an interface class for client-server communitcations.
  *
- * Copyright (C) 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013, 2020, 2022 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -231,11 +231,13 @@ class BackingStore
 		 * of the argument DAG and the in-storage DAG is attempted.
 		 * This merge might result in name of the argument AtomSpace being
 		 * changed!
+		 *
+		 * The returned Handle is an AtomSpacePtr to the top of the DAG.
 		 */
-		virtual AtomSpace* loadFrameDAG(AtomSpace* as = nullptr)
+		virtual Handle loadFrameDAG(AtomSpace* as = nullptr)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
-			// return as;
+			// return as->shared_pointer_from_this();
 		}
 
 		/**
