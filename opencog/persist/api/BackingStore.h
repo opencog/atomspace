@@ -224,6 +224,21 @@ class BackingStore
 		virtual void storeAtomSpace(const AtomSpace*) = 0;
 
 		/**
+		 * Return the DAG of all of the AtomSpaces held in storage.
+		 * If storage holds only one AtomSpace, then the argument is
+		 * returned. If storage holds more than one AtomSpace, and
+		 * the argument is not a null pointer, then an automatic merge
+		 * of the argument DAG and the in-storage DAG is attempted.
+		 * This merge might result in name of the argument AtomSpace being
+		 * changed!
+		 */
+		virtual AtomSpace* loadFrameDAG(AtomSpace* as = nullptr)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+			// return as;
+		}
+
+		/**
 		 * Read-write synchronization barrier.
 		 *
 		 * All writes will be completed before this routine returns.
