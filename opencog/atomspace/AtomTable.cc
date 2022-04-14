@@ -268,6 +268,11 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
 
+    // Atomspaces themselves are now Atoms. So it's not impossible for
+    // someone to try to add them. But we don't actually want that to
+    // happen, at least, not right now.
+    if (ATOM_SPACE == orig->get_type()) return orig;
+
     // Is the atom already in this table, or one of its environments?
     if (not force and in_environ(orig))
         return orig;
