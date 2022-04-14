@@ -280,7 +280,7 @@ const HandleSeq& AtomSpace::getOutgoingSet() const
 
 Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
-	if (n <= _outgoing.size()) return Handle::UNDEFINED;
+	if (_outgoing.size() <= n) return Handle::UNDEFINED;
 	return _outgoing[n];
 }
 
