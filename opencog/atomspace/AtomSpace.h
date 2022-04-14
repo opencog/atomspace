@@ -148,6 +148,8 @@ public:
     ~AtomSpace();
 
     bool is_atom(void) const { return true; }
+    bool is_node(void) const { return true; }
+    bool is_link(void) const { return true; }
     UUID get_uuid(void) const { return _uuid; }
 
     /// Transient atomspaces are lighter-weight, faster, but are missing
