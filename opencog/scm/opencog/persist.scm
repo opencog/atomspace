@@ -32,7 +32,8 @@
 	barrier
 	monitor-storage
 	load-atomspace
-	store-atomspace)
+	store-atomspace
+	load-frames)
 
 ;; -----------------------------------------------------
 ;;
@@ -226,6 +227,11 @@
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
+
+    See also:
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    load-atomspace -- Load all atoms.
+    load-frames -- load DAG of AtomSpaces.
 "
 	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
 		(dflt-load-atoms-of-type TYPE))
@@ -285,8 +291,10 @@
     fetch-incoming-set ATOM -- fetch the entire incoming set of ATOM.
     fetch-incoming-by-type ATOM TYPE -- get a subset of the incoming set.
     fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referrers ATOM -- get every graph that contains ATOM
-    load-atoms-of-type TYPE -- load only atoms of type TYPE
+    load-referrers ATOM -- get every graph that contains ATOM.
+    load-atoms-of-type TYPE -- load only atoms of type TYPE.
+    load-frames -- load DAG of AtomSpaces.
+    store-atomspace -- store all Atoms in the AtomSpace.
 "
 	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
 )
@@ -305,10 +313,33 @@
     used as the target of the store. It must be a StorageNode.
 
     See also:
+    load-atomspace -- load all Atoms in the AtomSpace.
     store-atom ATOM -- store one ATOM and all of the values on it.
-    store-referrers ATOM -- store all graphs that contain ATOM
+    store-referrers ATOM -- store all graphs that contain ATOM.
 "
 	(if STORAGE (sn-store-atomspace STORAGE) (dflt-store-atomspace))
+)
+
+(define*-public (load-frames #:optional (STORAGE #f))
+"
+ load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+
+    This will load the DAG of AtomSpaces held in the storage server to
+    be created. This will only create the AtomSpaces; it will NOT
+    populate them with Atoms. These have to be either fetched in bulk,
+    or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+
+    See also:
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    fetch-query QUERY -- get all Atoms for a given QUERY.
+    load-referrers ATOM -- get every graph that contains ATOM.
+    load-atoms-of-type TYPE -- load only atoms of type TYPE.
+    load-atomspace -- load the entire contents of storage.
+"
+	(if STORAGE (sn-load-frames STORAGE) (dflt-load-frames))
 )
 
 ;

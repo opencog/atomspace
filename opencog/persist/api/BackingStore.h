@@ -3,7 +3,7 @@
  *
  * Implements an interface class for client-server communitcations.
  *
- * Copyright (C) 2009, 2013, 2020 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013, 2020, 2022 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -222,6 +222,23 @@ class BackingStore
 		 * server. This stores all Values as well.
 		 */
 		virtual void storeAtomSpace(const AtomSpace*) = 0;
+
+		/**
+		 * Return the DAG of all of the AtomSpaces held in storage.
+		 * If storage holds only one AtomSpace, then the argument is
+		 * returned. If storage holds more than one AtomSpace, and
+		 * the argument is not a null pointer, then an automatic merge
+		 * of the argument DAG and the in-storage DAG is attempted.
+		 * This merge might result in name of the argument AtomSpace being
+		 * changed!
+		 *
+		 * The returned Handle is an AtomSpacePtr to the top of the DAG.
+		 */
+		virtual Handle loadFrameDAG(AtomSpace* as = nullptr)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+			// return as->shared_pointer_from_this();
+		}
 
 		/**
 		 * Read-write synchronization barrier.

@@ -253,10 +253,19 @@ ContentHash AtomSpace::compute_hash() const
 }
 
 // ====================================================================
+// Provide all of the virtual methods on the base class.
 
 const std::string& AtomSpace::get_name() const
 {
 	return _name;
+}
+
+// In order to restore complex AtomSpace DAG's from storage, we need
+// to be able to set thier names, to match what is in storage. So the
+// name is settable.
+void AtomSpace::set_name(const std::string& newna)
+{
+	_name = newna;
 }
 
 Arity AtomSpace::get_arity() const

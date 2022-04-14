@@ -2,7 +2,7 @@
  * opencog/persist/api/StorageNode.cc
  *
  * Copyright (c) 2008-2010 OpenCog Foundation
- * Copyright (c) 2009,2013,2020 Linas Vepstas
+ * Copyright (c) 2009,2013,2020,2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -204,3 +204,10 @@ void StorageNode::fetch_all_atoms_of_type(Type t)
 {
 	loadType(getAtomSpace(), t);
 }
+
+Handle StorageNode::load_frames(void)
+{
+	return loadFrameDAG(getAtomSpace());
+}
+
+// ====================================================================

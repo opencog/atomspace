@@ -2,7 +2,7 @@
  * FrameSexpr.cc
  * Encode/decode S-Expressions for Atomese Frames (AtomSpaces).
  *
- * Copyright (c) 2021 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2022 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * This program is free software; you can redistribute it and/or modify

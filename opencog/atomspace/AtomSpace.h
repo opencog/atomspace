@@ -200,11 +200,17 @@ public:
      */
     bool in_environ(const Handle& atom) const;
 
+    /* AtomSpaces are Atoms; provide virtual methods of base class. */
     virtual const std::string& get_name() const;
     virtual Arity get_arity() const;
     virtual const HandleSeq& getOutgoingSet() const;
     virtual Handle getOutgoingAtom(Arity) const;
     virtual void setAtomSpace(AtomSpace *);
+
+    /* Restoring complex AtomSpace DAG's from storage requires the
+     * ability to set the AtomSpace name. So we provide this.
+     */
+    void set_name(const std::string&);
 
     /**
      * Compare atomspaces for equality. Useful during testing.
