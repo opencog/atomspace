@@ -28,26 +28,26 @@
 
 using namespace opencog;
 
-// General comments: At this time, the only kinds of "Frames" are
-// AtomSpaces, and so the code below sometimes explcitly works with
-// AtomSpaces.  However, the Frame concept itself is meant to be
-// slightly more general. The idea is that Frames are kind-of-like
-// Nodes, and kind-of-like Links, in that they have a name and also
-// an outgoing set. Unlike Nodes, the name is mutable. Unlike Atoms,
-// Frames are not globally unique (at this time!?).  The general idea
-// is still experimental: it feels like Frames could be more generally
-// useful, but for right now, they are limited to just AtomSpaces.
-//
-// The word "Frame" is meant to invoke the general idea of a "Kripke
-// frame". Its a DAG, a poset (a paritally ordereed set), its commonly
-// "complete", and thus resembles the concept of a frame from pointless
-// topology: i.e. a frames-and-locales style frame. The analogy is
-// imprecise.
-//
-// The word "Frame" is also meant to invoke the idea of a C stackframe,
-// in that the contents of a Frame (the AtomSpace contents) is a
-// collection of all valid Atoms, for that frame. Since its a DAG, the
-// contents depends on all of the earlier frames, too.
+/// General comments: At this time, the only kinds of "Frames" are
+/// AtomSpaces, and so the code below sometimes explcitly works with
+/// AtomSpaces.  However, the Frame concept itself is meant to be
+/// slightly more general. The idea is that Frames are kind-of-like
+/// Nodes, and kind-of-like Links, in that they have a name and also
+/// an outgoing set. Unlike Nodes, the name is mutable. Unlike Atoms,
+/// Frames are not globally unique (at this time!?).  The general idea
+/// is still experimental: it feels like Frames could be more generally
+/// useful, but for right now, they are limited to just AtomSpaces.
+///
+/// The word "Frame" is meant to invoke the general idea of a "Kripke
+/// frame". Its a DAG, a poset (a paritally ordereed set), its commonly
+/// "complete", and thus resembles the concept of a frame from pointless
+/// topology: i.e. a frames-and-locales style frame. The analogy is
+/// imprecise.
+///
+/// The word "Frame" is also meant to invoke the idea of a C stackframe,
+/// in that the contents of a Frame (the AtomSpace contents) is a
+/// collection of all valid Atoms, for that frame. Since its a DAG, the
+/// contents depends on all of the earlier frames, too.
 
 /* ================================================================== */
 // Frame printers. Similar to the Atom printers, except
@@ -143,15 +143,19 @@ Handle Sexpr::decode_frame(const Handle& surface,
 		return find_frame(name, surface);
 	}
 
-	// Are there subframes?
-	size_t l = sframe.find('(', r);
-	if (std::string::npos == l)
+	// Are there subframes? Loop over them.
+	size_t left = sframe.find('(', r);
+
+	HandleSeq oset;
+	while (std::string::npos != left)
 	{
-		AtomSpacePtr asp = createAtomSpace();
-		asp->set_name(name);
-		return HandleCast(asp);
+		Handle frm = decode_frame(surface, sframe.substr(left), left);
+		oset.push_back(frm);
 	}
 
+	AtomSpacePtr asp = createAtomSpace(oset);
+	asp->set_name(name);
+	return HandleCast(asp);
 }
 
 /* ============================= END OF FILE ================= */
