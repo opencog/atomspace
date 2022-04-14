@@ -65,8 +65,8 @@ public:
 		decode_alist(h, s, junk);
 	}
 
-	static AtomSpace* decode_frame(AtomSpace*, const std::string&, size_t&);
-	static AtomSpace* decode_frame(AtomSpace* as, const std::string& fs) {
+	static Handle decode_frame(const Handle&, const std::string&, size_t&);
+	static Handle decode_frame(const Handle& as, const std::string& fs) {
 		size_t junk = 0;
 		return decode_frame(as, fs, junk);
 	}
