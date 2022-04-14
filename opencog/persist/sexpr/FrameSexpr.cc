@@ -107,6 +107,10 @@ static Handle find_frame(const std::string& name, const Handle& surf)
 /// If `surface` is null, then create a DAG of AtomSpaces, matching the
 /// structure in the s-expression `sframe`.
 //
+// XXX FIXME: this is completely broken, if the DAG has loops in it,
+// or if the same atomspace appears in multiple locations in the DAG.
+// Whoooops!
+//
 // XXX FIXME: this performs a lookup by name only. It should probably
 // perform a lookup by inheritance, too. And/or verify that these are
 // consistent.
@@ -135,7 +139,7 @@ Handle Sexpr::decode_frame(const Handle& surface,
 	std::string name = get_node_name(sframe, vos, r, FRAME);
 
 	// If we were given a DAG to search, search it.
-	if (surface)
+	if (surface and 0 < surface->get_arity())
 	{
 		pos = sframe.find(')', r) + 1;
 		// XXX TODO: verify that the named atomspace has the correct
@@ -158,7 +162,16 @@ Handle Sexpr::decode_frame(const Handle& surface,
 	}
 	pos = sframe.find_first_not_of(" \n\t", pos) + 1;
 
-	AtomSpacePtr asp = createAtomSpace(oset);
+	// If there are no children of this frame, and we were given
+	// an atomspace with no children, then assume the intent was for
+	// these two to be one and the same. That is, the given AtomSpace
+	// is meant to be the base of the DAG.
+	AtomSpacePtr asp;
+	if (0 == oset.size() and surface and 0 == surface->get_arity())
+		asp = AtomSpaceCast(surface);
+	else
+		asp = createAtomSpace(oset);
+
 	asp->set_name(name);
 	return HandleCast(asp);
 }
