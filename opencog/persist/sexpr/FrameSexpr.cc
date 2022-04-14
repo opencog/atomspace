@@ -144,14 +144,19 @@ Handle Sexpr::decode_frame(const Handle& surface,
 	}
 
 	// Are there subframes? Loop over them.
+	pos = sframe.find_first_not_of(" \n\t", r);
 	size_t left = sframe.find('(', r);
 
 	HandleSeq oset;
 	while (std::string::npos != left)
 	{
-		Handle frm = decode_frame(surface, sframe.substr(left), left);
+		size_t delta = 0;
+		Handle frm = decode_frame(surface, sframe.substr(left), delta);
 		oset.push_back(frm);
+		pos = left+delta;
+		left = sframe.find('(', pos);
 	}
+	pos = sframe.find_first_not_of(" \n\t", pos) + 1;
 
 	AtomSpacePtr asp = createAtomSpace(oset);
 	asp->set_name(name);

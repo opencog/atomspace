@@ -237,7 +237,7 @@ class BackingStore
 		virtual Handle loadFrameDAG(AtomSpace* as = nullptr)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
-			// return as->shared_pointer_from_this();
+			// return as->shared_from_this();
 		}
 
 		/**
