@@ -117,7 +117,7 @@ static Handle find_frame(const std::string& name, const Handle& surf)
 Handle Sexpr::decode_frame(const Handle& surface,
                            const std::string& sframe, size_t& pos)
 {
-	size_t totlen = sframe.size();
+	if (std::string::npos == pos) return Handle::UNDEFINED;
 
 	// Skip past whitespace
 	pos = sframe.find_first_not_of(" \n\t", pos);
@@ -135,7 +135,7 @@ Handle Sexpr::decode_frame(const Handle& surface,
 		throw SyntaxException(TRACE_INFO, "Badly formatted Frame %s",
 			sframe.substr(pos).c_str());
 
-	size_t r = totlen;
+	size_t r = sframe.size();
 	std::string name = get_node_name(sframe, vos, r, FRAME);
 
 	// If we were given a DAG to search, search it.
@@ -149,28 +149,44 @@ Handle Sexpr::decode_frame(const Handle& surface,
 
 	// Are there subframes? Loop over them.
 	pos = sframe.find_first_not_of(" \n\t", r);
-	size_t left = sframe.find('(', r);
+	size_t left = sframe.find('(', pos);
+	r = sframe.find(')', pos);
 
-	HandleSeq oset;
-	while (std::string::npos != left)
+	if (std::string::npos == r)
+		throw SyntaxException(TRACE_INFO, "Missing close paren: %s",
+			sframe.substr(pos).c_str());
+
+	if (std::string::npos != left and left < r)
 	{
-		size_t delta = 0;
-		Handle frm = decode_frame(surface, sframe.substr(left), delta);
-		oset.push_back(frm);
-		pos = left+delta;
-		left = sframe.find('(', pos);
+		HandleSeq oset;
+		while (std::string::npos != left and left < r)
+		{
+			size_t delta = 0;
+			Handle frm = decode_frame(surface, sframe.substr(left), delta);
+			oset.push_back(frm);
+			pos = left+delta;
+			r = sframe.find(')', pos);
+			left = sframe.find('(', pos);
+		}
+		pos = sframe.find_first_not_of(" \n\t", r);
+		if (std::string::npos != pos) pos++;
+		AtomSpacePtr asp = createAtomSpace(oset);
+		asp->set_name(name);
+		return HandleCast(asp);
 	}
-	pos = sframe.find_first_not_of(" \n\t", pos) + 1;
 
-	// If there are no children of this frame, and we were given
-	// an atomspace with no children, then assume the intent was for
-	// these two to be one and the same. That is, the given AtomSpace
-	// is meant to be the base of the DAG.
+	// If we are here, there are no subframes below us.
+	// Skip past closing paren.
+	pos = r + 1;
+
+	// If we were given an atomspace with no children, then assume the
+	// intent was for these two to be one and the same. That is, the
+	// given AtomSpace is meant to be the base of the DAG.
 	AtomSpacePtr asp;
-	if (0 == oset.size() and surface and 0 == surface->get_arity())
+	if (surface and 0 == surface->get_arity())
 		asp = AtomSpaceCast(surface);
 	else
-		asp = createAtomSpace(oset);
+		asp = createAtomSpace();
 
 	asp->set_name(name);
 	return HandleCast(asp);
