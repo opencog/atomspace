@@ -536,6 +536,8 @@ static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
     { return std::dynamic_pointer_cast<AtomSpace>(a); }
 static inline AtomSpacePtr AtomSpaceCast(AtomSpace* as)
     { return AtomSpaceCast(as->shared_from_this()); }
+static inline Handle HandleCast(AtomSpace* as)
+    { return HandleCast(as->shared_from_this()); }
 
 template< class... Args >
 AtomSpacePtr createAtomSpace( Args&&... args )
