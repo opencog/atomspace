@@ -115,7 +115,8 @@ static Handle find_frame(const std::string& name, const Handle& surf)
 // perform a lookup by inheritance, too. And/or verify that these are
 // consistent.
 Handle Sexpr::decode_frame(const Handle& surface,
-                           const std::string& sframe, size_t& pos)
+                           const std::string& sframe, size_t& pos,
+                           std::map<std::string, Handle>& cache)
 {
 	if (std::string::npos == pos) return Handle::UNDEFINED;
 
@@ -159,25 +160,42 @@ Handle Sexpr::decode_frame(const Handle& surface,
 	if (std::string::npos != left and left < r)
 	{
 		HandleSeq oset;
+		bool setbase = true; // Use the base class at most once.
 		while (std::string::npos != left and left < r)
 		{
 			size_t delta = 0;
-			Handle frm = decode_frame(surface, sframe.substr(left), delta);
+			Handle frm = decode_frame(
+				setbase?surface:Handle::UNDEFINED,
+				sframe.substr(left), delta, cache);
 			oset.push_back(frm);
 			pos = left+delta;
 			r = sframe.find(')', pos);
 			left = sframe.find('(', pos);
+			setbase = false;
 		}
 		pos = sframe.find_first_not_of(" \n\t", r);
 		if (std::string::npos != pos) pos++;
+
+		// See if we already have this space.
+		auto it = cache.find(name);
+		if (it != cache.end())
+			return it->second;
+
 		AtomSpacePtr asp = createAtomSpace(oset);
 		asp->set_name(name);
-		return HandleCast(asp);
+		Handle hasp(HandleCast(asp));
+		cache.insert({name, hasp});
+		return hasp;
 	}
 
 	// If we are here, there are no subframes below us.
 	// Skip past closing paren.
 	pos = r + 1;
+
+	// See if we already have this space.
+	auto it = cache.find(name);
+	if (it != cache.end())
+		return it->second;
 
 	// If we were given an atomspace with no children, then assume the
 	// intent was for these two to be one and the same. That is, the
@@ -189,7 +207,9 @@ Handle Sexpr::decode_frame(const Handle& surface,
 		asp = createAtomSpace();
 
 	asp->set_name(name);
-	return HandleCast(asp);
+	Handle hasp(HandleCast(asp));
+	cache.insert({name, hasp});
+	return hasp;
 }
 
 /* ============================= END OF FILE ================= */

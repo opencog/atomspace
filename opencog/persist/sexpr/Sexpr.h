@@ -65,10 +65,17 @@ public:
 		decode_alist(h, s, junk);
 	}
 
-	static Handle decode_frame(const Handle&, const std::string&, size_t&);
+	static Handle decode_frame(const Handle&, const std::string&, size_t&,
+	                           std::map<std::string, Handle>&);
+	static Handle decode_frame(const Handle& as, const std::string& fs,
+	                           size_t& pos) {
+		std::map<std::string, Handle> cache;
+		return decode_frame(as, fs, pos, cache);
+	}
 	static Handle decode_frame(const Handle& as, const std::string& fs) {
+		std::map<std::string, Handle> cache;
 		size_t junk = 0;
-		return decode_frame(as, fs, junk);
+		return decode_frame(as, fs, junk, cache);
 	}
 
 	// -------------------------------------------
