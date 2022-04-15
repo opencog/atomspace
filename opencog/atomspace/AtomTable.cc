@@ -96,8 +96,8 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
         // top of another one. This provides a "common-sense" behavior
         // that most users would expect.
         _copy_on_write = true;
-        _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
-        _outgoing.push_back(HandleCast(parent->shared_from_this()));
+        _environ.push_back(AtomSpaceCast(parent));
+        _outgoing.push_back(HandleCast(parent));
     }
     init();
 }
@@ -156,8 +156,8 @@ void AtomSpace::ready_transient(AtomSpace* parent)
                 "AtomSpace - ready called on non-transient atom table.");
 
     // Set the new parent environment and holder atomspace.
-    _environ.push_back(AtomSpaceCast(parent->shared_from_this()));
-    _outgoing.push_back(HandleCast(parent->shared_from_this()));
+    _environ.push_back(AtomSpaceCast(parent));
+    _outgoing.push_back(HandleCast(parent));
 }
 
 void AtomSpace::clear_transient()
