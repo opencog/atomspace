@@ -1,6 +1,6 @@
 ;
-; cover-space-test.scm
-; Verify that links are correctly covered/uncovered in deeply nested
+; cover-delete-test.scm
+; Verify that deleted atoms will cover underlying atoms in nested
 ; atomspaces.
 ;
 (use-modules (srfi srfi-1))
