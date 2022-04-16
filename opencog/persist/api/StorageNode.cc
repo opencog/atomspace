@@ -210,4 +210,9 @@ Handle StorageNode::load_frames(void)
 	return loadFrameDAG(getAtomSpace());
 }
 
+void StorageNode::store_frames(const Handle& has)
+{
+	return storeFrameDAG((AtomSpace*)has.get());
+}
+
 // ====================================================================

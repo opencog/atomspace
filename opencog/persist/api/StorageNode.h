@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2015,2020 Linas Vepstas
+ * Copyright (C) 2015,2020,2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -144,11 +144,20 @@ public:
 	/**
 	 * Return the DAG of all AtomSpaces in the backing store.
 	 * The AtomSpaces themselves will not be populated; use the
-	 * `load_atmspace` method above to accomplish that.
+	 * `load_atomspace` method above to accomplish that.
 	 *
-	 * Tghe returned Handle is an AtomSpacePtr to the top of the DAG.
+	 * The returned Handle is an AtomSpacePtr to the top of the DAG.
 	 */
 	Handle load_frames(void);
+
+	/**
+	 * Store the DAG of all AtomSpaces to the backing store.
+	 * The contents of the AtomSpaces themselves will not be stored;
+	 * use the `store_atomspace` method above to accomplish that.
+	 *
+	 * The argument must be an AtomSpacePtr to the top of the DAG.
+	 */
+	void store_frames(const Handle&);
 
 	/**
 	 * Use the backing store to load the entire incoming set of the

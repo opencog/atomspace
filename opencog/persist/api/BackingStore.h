@@ -241,6 +241,14 @@ class BackingStore
 		}
 
 		/**
+		 * Store the DAG of all AtomSpaces lying below the given argument.
+		 */
+		virtual void storeFrameDAG(AtomSpace*)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
 		 * Read-write synchronization barrier.
 		 *
 		 * All writes will be completed before this routine returns.

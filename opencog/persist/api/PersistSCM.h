@@ -2,7 +2,7 @@
  * opencog/persist/api/PersistSCM.h
  *
  * Copyright (c) 2008 by OpenCog Foundation
- * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2008, 2009, 2013, 2015, 2022 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,6 +53,7 @@ private:
 	static void sn_load_atomspace(Handle);
 	static void sn_store_atomspace(Handle);
 	static Handle sn_load_frames(Handle);
+	static void sn_store_frames(Handle, Handle);
 	static bool sn_delete(Handle, Handle);
 	static bool sn_delete_recursive(Handle, Handle);
 	static void sn_barrier(Handle);
@@ -78,6 +79,7 @@ private:
 	void dflt_load_atomspace(void);
 	void dflt_store_atomspace(void);
 	Handle dflt_load_frames(void);
+	void dflt_store_frames(Handle);
 	bool dflt_delete(Handle);
 	bool dflt_delete_recursive(Handle);
 	void dflt_barrier(void);

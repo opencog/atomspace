@@ -2,7 +2,7 @@
  * opencog/persist/api/PersistSCM.cc
  *
  * Copyright (c) 2008 by OpenCog Foundation
- * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2008, 2009, 2013, 2015, 2022 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,6 +74,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_store_atomspace, "persist", false);
 	define_scheme_primitive("sn-load-frames",
 	             &PersistSCM::sn_load_frames, "persist", false);
+	define_scheme_primitive("sn-store-frames",
+	             &PersistSCM::sn_store_frames, "persist", false);
 	define_scheme_primitive("sn-delete",
 	             &PersistSCM::sn_delete, "persist", false);
 	define_scheme_primitive("sn-delete-rec",
@@ -107,6 +109,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_store_atomspace, this, "persist", false);
 	define_scheme_primitive("dflt-load-frames",
 	             &PersistSCM::dflt_load_frames, this, "persist", false);
+	define_scheme_primitive("dflt-store-frames",
+	             &PersistSCM::dflt_store_frames, this, "persist", false);
 	define_scheme_primitive("dflt-delete",
 	             &PersistSCM::dflt_delete, this, "persist", false);
 	define_scheme_primitive("dflt-delete-rec",
@@ -260,6 +264,12 @@ Handle PersistSCM::sn_load_frames(Handle hsn)
 	return stnp->load_frames();
 }
 
+void PersistSCM::sn_store_frames(Handle hsn, Handle has)
+{
+	GET_STNP;
+	stnp->store_frames(has);
+}
+
 bool PersistSCM::sn_delete(Handle h, Handle hsn)
 {
 	GET_STNP;
@@ -367,6 +377,12 @@ Handle PersistSCM::dflt_load_frames(void)
 {
 	CHECK;
 	return _sn->load_frames();
+}
+
+void PersistSCM::dflt_store_frames(Handle has)
+{
+	CHECK;
+	_sn->store_frames(has);
 }
 
 bool PersistSCM::dflt_delete(Handle h)

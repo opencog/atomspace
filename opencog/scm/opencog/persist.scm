@@ -33,7 +33,8 @@
 	monitor-storage
 	load-atomspace
 	store-atomspace
-	load-frames)
+	load-frames
+	store-frames)
 
 ;; -----------------------------------------------------
 ;;
@@ -333,6 +334,7 @@
     used as the source of the load. It must be a StorageNode.
 
     See also:
+    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
     fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
     fetch-query QUERY -- get all Atoms for a given QUERY.
     load-referrers ATOM -- get every graph that contains ATOM.
@@ -340,6 +342,28 @@
     load-atomspace -- load the entire contents of storage.
 "
 	(if STORAGE (sn-load-frames STORAGE) (dflt-load-frames))
+)
+
+(define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
+"
+ store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
+
+    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
+    the storage server.  This will only store the DAG of the AtomSpaces;
+    it will NOT store their contents.  These have to be either stored in
+    bulk, or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also:
+    load-frames -- load the DAG of AtomSpaces from storage.
+    store-atomspace -- store the entire contents of an AtomSpace.
+    store-atom ATOM -- store an individual Atom.
+"
+	(if STORAGE
+		(sn-store-frames ATOMSPACE STORAGE)
+		(dflt-store-frames ATOMSPACE))
 )
 
 ;
