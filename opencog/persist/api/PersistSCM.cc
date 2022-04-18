@@ -189,39 +189,45 @@ bool PersistSCM::connected(Handle hsn)
 Handle PersistSCM::sn_fetch_atom(Handle h, Handle hsn)
 {
 	GET_STNP;
-	return stnp->fetch_atom(h);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-atom");
+	return stnp->fetch_atom(h, as);
 }
 
 Handle PersistSCM::sn_fetch_value(Handle h, Handle key, Handle hsn)
 {
 	GET_STNP;
-	return stnp->fetch_value(h, key);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-value");
+	return stnp->fetch_value(h, key, as);
 }
 
 Handle PersistSCM::sn_fetch_incoming_set(Handle h, Handle hsn)
 {
 	GET_STNP;
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return stnp->fetch_incoming_set(h, false);
+	return stnp->fetch_incoming_set(h, as, false);
 }
 
 Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t, Handle hsn)
 {
 	GET_STNP;
-	return stnp->fetch_incoming_by_type(h, t);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
+	return stnp->fetch_incoming_by_type(h, t, as);
 }
 
 Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
 {
 	GET_STNP;
-	return stnp->fetch_query(query, key, Handle::UNDEFINED, false);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
+	return stnp->fetch_query(query, key, as, Handle::UNDEFINED, false);
 }
 
 Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh, Handle hsn)
 {
 	GET_STNP;
-	return stnp->fetch_query(query, key, meta, fresh);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
+	return stnp->fetch_query(query, key, as, meta, fresh);
 }
 
 /**
@@ -289,7 +295,8 @@ bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
 void PersistSCM::sn_barrier(Handle hsn)
 {
 	GET_STNP;
-	stnp->barrier();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("barrier");
+	stnp->barrier(as);
 }
 
 std::string PersistSCM::sn_monitor(Handle hsn)
@@ -307,39 +314,45 @@ std::string PersistSCM::sn_monitor(Handle hsn)
 Handle PersistSCM::dflt_fetch_atom(Handle h)
 {
 	CHECK;
-	return _sn->fetch_atom(h);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-atom");
+	return _sn->fetch_atom(h, as);
 }
 
 Handle PersistSCM::dflt_fetch_value(Handle h, Handle key)
 {
 	CHECK;
-	return _sn->fetch_value(h, key);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-value");
+	return _sn->fetch_value(h, key, as);
 }
 
 Handle PersistSCM::dflt_fetch_incoming_set(Handle h)
 {
 	CHECK;
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return _sn->fetch_incoming_set(h, false);
+	return _sn->fetch_incoming_set(h, as, false);
 }
 
 Handle PersistSCM::dflt_fetch_incoming_by_type(Handle h, Type t)
 {
 	CHECK;
-	return _sn->fetch_incoming_by_type(h, t);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
+	return _sn->fetch_incoming_by_type(h, t, as);
 }
 
 Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
 {
 	CHECK;
-	return _sn->fetch_query(query, key, Handle::UNDEFINED, false);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
+	return _sn->fetch_query(query, key, as, Handle::UNDEFINED, false);
 }
 
 Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
 	CHECK;
-	return _sn->fetch_query(query, key, meta, fresh);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
+	return _sn->fetch_query(query, key, as, meta, fresh);
 }
 
 /**
@@ -407,7 +420,8 @@ bool PersistSCM::dflt_delete_recursive(Handle h)
 void PersistSCM::dflt_barrier(void)
 {
 	CHECK;
-	_sn->barrier();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("barrier");
+	_sn->barrier(as);
 }
 
 std::string PersistSCM::dflt_monitor(void)
