@@ -172,7 +172,7 @@ public:
 	 * See also `fetch_query` which can be used with a JoinLink to
 	 * obtain a custom-tailored incoming set.
 	 */
-	Handle fetch_incoming_set(const Handle&, AtomSpace* = nullptr, bool=false);
+	Handle fetch_incoming_set(const Handle&, bool = false, AtomSpace* = nullptr);
 
 	/**
 	 * Use the backing store to load the incoming set of the
@@ -216,9 +216,9 @@ public:
 	 * remote server to the local AtomSpace.
 	 */
 	Handle fetch_query(const Handle& query, const Handle& key,
-	                   AtomSpace* = nullptr,
 	                   const Handle& metadata_key = Handle::UNDEFINED,
-	                   bool fresh = false);
+	                   bool fresh = false,
+	                   AtomSpace* = nullptr);
 
 	/**
 	 * Recursively store the atom to the backing store.

@@ -205,7 +205,7 @@ Handle PersistSCM::sn_fetch_incoming_set(Handle h, Handle hsn)
 	GET_STNP;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return stnp->fetch_incoming_set(h, as, false);
+	return stnp->fetch_incoming_set(h, false, as);
 }
 
 Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t, Handle hsn)
@@ -219,7 +219,7 @@ Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
 {
 	GET_STNP;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, as, Handle::UNDEFINED, false);
+	return stnp->fetch_query(query, key, Handle::UNDEFINED, false, as);
 }
 
 Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
@@ -227,7 +227,7 @@ Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
 {
 	GET_STNP;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, as, meta, fresh);
+	return stnp->fetch_query(query, key, meta, fresh, as);
 }
 
 /**
@@ -330,7 +330,7 @@ Handle PersistSCM::dflt_fetch_incoming_set(Handle h)
 	CHECK;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return _sn->fetch_incoming_set(h, as, false);
+	return _sn->fetch_incoming_set(h, false, as);
 }
 
 Handle PersistSCM::dflt_fetch_incoming_by_type(Handle h, Type t)
@@ -344,7 +344,7 @@ Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
 {
 	CHECK;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, as, Handle::UNDEFINED, false);
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, as);
 }
 
 Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
@@ -352,7 +352,7 @@ Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
 {
 	CHECK;
 	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, as, meta, fresh);
+	return _sn->fetch_query(query, key, meta, fresh, as);
 }
 
 /**

@@ -128,8 +128,8 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
 	return lh;
 }
 
-Handle StorageNode::fetch_incoming_set(const Handle& h, AtomSpace* as,
-                                       bool recursive)
+Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive,
+                                       AtomSpace* as)
 {
 	if (nullptr == as) as = getAtomSpace();
 	Handle lh = as->get_atom(h);
@@ -142,7 +142,7 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, AtomSpace* as,
 
 	IncomingSet vh(h->getIncomingSet());
 	for (const Handle& lp : vh)
-		fetch_incoming_set(lp, as, true);
+		fetch_incoming_set(lp, true, as);
 
 	return lh;
 }
@@ -161,8 +161,8 @@ Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t,
 }
 
 Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
-                                AtomSpace* as,
-                                const Handle& metadata, bool fresh)
+                                const Handle& metadata, bool fresh,
+                                AtomSpace* as)
 {
 	// At this time, we restrict queries to be ... queries.
 	Type qt = query->get_type();
