@@ -129,17 +129,17 @@ public:
 	/**
 	 * Use the backing store to load all atoms of the given atom type.
 	 */
-	void fetch_all_atoms_of_type(Type t);
+	void fetch_all_atoms_of_type(Type t, AtomSpace*);
 
 	/**
 	 * Use the backing store to load entire AtomSpace.
 	 */
-	void load_atomspace(void);
+	void load_atomspace(AtomSpace*);
 
 	/**
 	 * Use the backing store to store entire AtomSpace.
 	 */
-	void store_atomspace(void);
+	void store_atomspace(AtomSpace*);
 
 	/**
 	 * Return the DAG of all AtomSpaces in the backing store.

@@ -187,22 +187,22 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 	return lq;
 }
 
-void StorageNode::load_atomspace(void)
+void StorageNode::load_atomspace(AtomSpace* as)
 {
-	loadAtomSpace(getAtomSpace());
+	loadAtomSpace(as);
 }
 
 /**
  * Use the backing store to store entire AtomSpace.
  */
-void StorageNode::store_atomspace(void)
+void StorageNode::store_atomspace(AtomSpace* as)
 {
-	storeAtomSpace(getAtomSpace());
+	storeAtomSpace(as);
 }
 
-void StorageNode::fetch_all_atoms_of_type(Type t)
+void StorageNode::fetch_all_atoms_of_type(Type t, AtomSpace* as)
 {
-	loadType(getAtomSpace(), t);
+	loadType(as, t);
 }
 
 Handle StorageNode::load_frames(void)

@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/guile/SchemeSmob.h>
 #include "PersistSCM.h"
 
 using namespace opencog;
@@ -243,19 +244,22 @@ void PersistSCM::sn_store_value(Handle h, Handle key, Handle hsn)
 void PersistSCM::sn_load_type(Type t, Handle hsn)
 {
 	GET_STNP;
-	stnp->fetch_all_atoms_of_type(t);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
+	stnp->fetch_all_atoms_of_type(t, as);
 }
 
 void PersistSCM::sn_load_atomspace(Handle hsn)
 {
 	GET_STNP;
-	stnp->load_atomspace();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atomspace");
+	stnp->load_atomspace(as);
 }
 
 void PersistSCM::sn_store_atomspace(Handle hsn)
 {
 	GET_STNP;
-	stnp->store_atomspace();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("store-atomspace");
+	stnp->store_atomspace(as);
 }
 
 Handle PersistSCM::sn_load_frames(Handle hsn)
@@ -358,19 +362,22 @@ void PersistSCM::dflt_store_value(Handle h, Handle key)
 void PersistSCM::dflt_load_type(Type t)
 {
 	CHECK;
-	_sn->fetch_all_atoms_of_type(t);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
+	_sn->fetch_all_atoms_of_type(t, as);
 }
 
 void PersistSCM::dflt_load_atomspace(void)
 {
 	CHECK;
-	_sn->load_atomspace();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atomspace");
+	_sn->load_atomspace(as);
 }
 
 void PersistSCM::dflt_store_atomspace(void)
 {
 	CHECK;
-	_sn->store_atomspace();
+	AtomSpace* as = SchemeSmob::ss_get_env_as("store-atomspace");
+	_sn->store_atomspace(as);
 }
 
 Handle PersistSCM::dflt_load_frames(void)
