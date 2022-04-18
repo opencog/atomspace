@@ -119,6 +119,7 @@ void ValueSaveUTest::tearDown(void) {}
 void ValueSaveUTest::kill_data(const StorageNodePtr& store)
 {
 	store->erase();
+	store->barrier();
 }
 
 void ValueSaveUTest::test_odbc_single_atom_save(void)
@@ -305,7 +306,9 @@ void ValueSaveUTest::do_test_single_atom_save()
 	store->barrier();
 
 	// --------------------
+	store->fetch_atom(atom);
 	store->erase();
+	store->close();
 
 	delete as;
 }
