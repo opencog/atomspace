@@ -204,7 +204,7 @@ void StorageNode::fetch_all_atoms_of_type(Type t, AtomSpace* as)
 Handle StorageNode::load_frames(AtomSpace* as)
 {
 	if (nullptr == as) as = getAtomSpace();
-	return loadFrameDAG(getAtomSpace());
+	return loadFrameDAG(as);
 }
 
 void StorageNode::store_frames(const Handle& has)
