@@ -532,7 +532,12 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 
         // Look for the shallowest version of each Atom.
         for (const Handle& h: rawset)
-            hseq.push_back(lookupHandle(h));
+        {
+            // hshallow might be null, if h is mask-deleted
+            // in this AtomSpace (h->isAbsent() == true)
+            const Handle& hshallow(lookupHandle(h));
+            if (hshallow) hseq.push_back(hshallow);
+        }
         return;
     }
 

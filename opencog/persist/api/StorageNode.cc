@@ -49,9 +49,10 @@ std::string StorageNode::monitor(void)
 
 // ====================================================================
 
-void StorageNode::barrier(void)
+void StorageNode::barrier(AtomSpace* as)
 {
-	getAtomSpace()->barrier();
+	if (nullptr == as) as = getAtomSpace();
+	as->barrier();
 }
 
 void StorageNode::store_atom(const Handle& h)
@@ -101,9 +102,10 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
 	return getAtomSpace()->extract_atom(h, recursive);
 }
 
-Handle StorageNode::fetch_atom(const Handle& h)
+Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 {
 	if (nullptr == h) return Handle::UNDEFINED;
+	if (nullptr == as) as = getAtomSpace();
 
 	// Now, get the latest values from the backing store.
 	// The operation here is to CLOBBER the values, NOT to merge them!
@@ -111,62 +113,56 @@ Handle StorageNode::fetch_atom(const Handle& h)
 	// and not to play monkey-shines with them.  If you want something
 	// else, then save the old TV, fetch the new TV, and combine them
 	// with your favorite algo.
-	Handle ah = _atom_space->add_atom(h);
+	Handle ah = as->add_atom(h);
 	if (nullptr == ah) return ah; // if read-only, then cannot update.
 	getAtom(ah);
 	return ah;
 }
 
-Handle StorageNode::fetch_value(const Handle& h, const Handle& key)
+Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
+                                AtomSpace* as)
 {
-	// Make sure we are working with Atoms in this Atomspace.
-	// Not clear if we really have to do this, or if its enough
-	// to just assume  that they are. Could save a few CPU cycles,
-	// here, by trading efficiency for safety.
-	Handle lkey = getAtomSpace()->add_atom(key);
-	Handle lh = getAtomSpace()->add_atom(h);
+	Handle lkey = as->add_atom(key);
+	Handle lh = as->add_atom(h);
 	loadValue(lh, lkey);
 	return lh;
 }
 
-Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive)
+Handle StorageNode::fetch_incoming_set(const Handle& h, bool recursive,
+                                       AtomSpace* as)
 {
-	// Make sure we are working with Atoms in this Atomspace.
-	// Not clear if we really have to do this, or if its enough
-	// to just assume  that they are. Could save a few CPU cycles,
-	// here, by trading efficiency for safety.
-	Handle lh = _atom_space->get_atom(h);
+	if (nullptr == as) as = getAtomSpace();
+	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	fetchIncomingSet(_atom_space, lh);
+	fetchIncomingSet(as, lh);
 
 	if (not recursive) return lh;
 
 	IncomingSet vh(h->getIncomingSet());
 	for (const Handle& lp : vh)
-		fetch_incoming_set(lp, true);
+		fetch_incoming_set(lp, true, as);
 
 	return lh;
 }
 
-Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t)
+Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t,
+                                           AtomSpace* as)
 {
-	// Make sure we are working with Atoms in this Atomspace.
-	// Not clear if we really have to do this, or if its enough
-	// to just assume  that they are. Could save a few CPU cycles,
-	// here, by trading efficiency for safety.
-	Handle lh = _atom_space->get_atom(h);
+	if (nullptr == as) as = getAtomSpace();
+	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
 	// Get everything from the backing store.
-	fetchIncomingByType(getAtomSpace(), lh, t);
+	fetchIncomingByType(as, lh, t);
 
 	return lh;
 }
 
 Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
-							const Handle& metadata, bool fresh)
+                                const Handle& metadata, bool fresh,
+                                AtomSpace* as)
 {
 	// At this time, we restrict queries to be ... queries.
 	Type qt = query->get_type();
@@ -174,39 +170,40 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 		not nameserver().isA(qt, PATTERN_LINK))
 		throw RuntimeException(TRACE_INFO, "Not a Join or Meet!");
 
-	// Make sure we are working with Atoms in this Atomspace.
-	// Not clear if we really have to do this, or if it's enough
-	// to just assume  that they are. Could save a few CPU cycles,
-	// here, by trading efficiency for safety.
-	Handle lkey = getAtomSpace()->add_atom(key);
-	Handle lq = getAtomSpace()->add_atom(query);
+	if (nullptr == as) as = getAtomSpace();
+	Handle lkey = as->add_atom(key);
+	Handle lq = as->add_atom(query);
 	Handle lmeta = metadata;
-	if (Handle::UNDEFINED != lmeta) lmeta = getAtomSpace()->add_atom(lmeta);
+	if (Handle::UNDEFINED != lmeta) lmeta = as->add_atom(lmeta);
 
 	runQuery(lq, lkey, lmeta, fresh);
 	return lq;
 }
 
-void StorageNode::load_atomspace(void)
+void StorageNode::load_atomspace(AtomSpace* as)
 {
-	loadAtomSpace(getAtomSpace());
+	if (nullptr == as) as = getAtomSpace();
+	loadAtomSpace(as);
 }
 
 /**
  * Use the backing store to store entire AtomSpace.
  */
-void StorageNode::store_atomspace(void)
+void StorageNode::store_atomspace(AtomSpace* as)
 {
-	storeAtomSpace(getAtomSpace());
+	if (nullptr == as) as = getAtomSpace();
+	storeAtomSpace(as);
 }
 
-void StorageNode::fetch_all_atoms_of_type(Type t)
+void StorageNode::fetch_all_atoms_of_type(Type t, AtomSpace* as)
 {
-	loadType(getAtomSpace(), t);
+	if (nullptr == as) as = getAtomSpace();
+	loadType(as, t);
 }
 
-Handle StorageNode::load_frames(void)
+Handle StorageNode::load_frames(AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	return loadFrameDAG(getAtomSpace());
 }
 
