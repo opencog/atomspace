@@ -51,6 +51,7 @@ std::string StorageNode::monitor(void)
 
 void StorageNode::barrier(AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	as->barrier();
 }
 
@@ -104,6 +105,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 {
 	if (nullptr == h) return Handle::UNDEFINED;
+	if (nullptr == as) as = getAtomSpace();
 
 	// Now, get the latest values from the backing store.
 	// The operation here is to CLOBBER the values, NOT to merge them!
@@ -129,6 +131,7 @@ Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
 Handle StorageNode::fetch_incoming_set(const Handle& h, AtomSpace* as,
                                        bool recursive)
 {
+	if (nullptr == as) as = getAtomSpace();
 	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
@@ -147,6 +150,7 @@ Handle StorageNode::fetch_incoming_set(const Handle& h, AtomSpace* as,
 Handle StorageNode::fetch_incoming_by_type(const Handle& h, Type t,
                                            AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	Handle lh = as->get_atom(h);
 	if (nullptr == lh) return lh;
 
@@ -166,10 +170,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 		not nameserver().isA(qt, PATTERN_LINK))
 		throw RuntimeException(TRACE_INFO, "Not a Join or Meet!");
 
-	// Make sure we are working with Atoms in this Atomspace.
-	// Not clear if we really have to do this, or if it's enough
-	// to just assume  that they are. Could save a few CPU cycles,
-	// here, by trading efficiency for safety.
+	if (nullptr == as) as = getAtomSpace();
 	Handle lkey = as->add_atom(key);
 	Handle lq = as->add_atom(query);
 	Handle lmeta = metadata;
@@ -181,6 +182,7 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
 
 void StorageNode::load_atomspace(AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	loadAtomSpace(as);
 }
 
@@ -189,16 +191,19 @@ void StorageNode::load_atomspace(AtomSpace* as)
  */
 void StorageNode::store_atomspace(AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	storeAtomSpace(as);
 }
 
 void StorageNode::fetch_all_atoms_of_type(Type t, AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	loadType(as, t);
 }
 
-Handle StorageNode::load_frames(void)
+Handle StorageNode::load_frames(AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	return loadFrameDAG(getAtomSpace());
 }
 

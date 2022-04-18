@@ -98,7 +98,7 @@ public:
 	 * operations have completed.
 	 * NB: at this time, we don't distinguish barrier and flush.
 	 */
-	void barrier(AtomSpace*);
+	void barrier(AtomSpace* = nullptr);
 
 	/**
 	 * Unconditionally fetch an atom from the backingstore.
@@ -113,7 +113,7 @@ public:
 	 * To avoid a fetch if the atom already is in the atomtable, use
 	 * the get_atom() method instead.
 	 */
-	Handle fetch_atom(const Handle&, AtomSpace*);
+	Handle fetch_atom(const Handle&, AtomSpace* = nullptr);
 
 	/**
 	 * Fetch the Value located at `key` on `atom` from the remote
@@ -124,22 +124,23 @@ public:
 	 * This method is more granular than `fetch_atom()`, as it
 	 * operates only on one particular key.
 	 */
-	Handle fetch_value(const Handle& atom, const Handle& key, AtomSpace*);
+	Handle fetch_value(const Handle& atom, const Handle& key,
+	                   AtomSpace* = nullptr);
 
 	/**
 	 * Use the backing store to load all atoms of the given atom type.
 	 */
-	void fetch_all_atoms_of_type(Type t, AtomSpace*);
+	void fetch_all_atoms_of_type(Type t, AtomSpace* = nullptr);
 
 	/**
 	 * Use the backing store to load entire AtomSpace.
 	 */
-	void load_atomspace(AtomSpace*);
+	void load_atomspace(AtomSpace* = nullptr);
 
 	/**
 	 * Use the backing store to store entire AtomSpace.
 	 */
-	void store_atomspace(AtomSpace*);
+	void store_atomspace(AtomSpace* = nullptr);
 
 	/**
 	 * Return the DAG of all AtomSpaces in the backing store.
@@ -148,7 +149,7 @@ public:
 	 *
 	 * The returned Handle is an AtomSpacePtr to the top of the DAG.
 	 */
-	Handle load_frames(void);
+	Handle load_frames(AtomSpace* = nullptr);
 
 	/**
 	 * Store the DAG of all AtomSpaces to the backing store.
@@ -171,7 +172,7 @@ public:
 	 * See also `fetch_query` which can be used with a JoinLink to
 	 * obtain a custom-tailored incoming set.
 	 */
-	Handle fetch_incoming_set(const Handle&, AtomSpace*, bool=false);
+	Handle fetch_incoming_set(const Handle&, AtomSpace* = nullptr, bool=false);
 
 	/**
 	 * Use the backing store to load the incoming set of the
@@ -182,7 +183,7 @@ public:
 	 * See also `fetch_query` which can be used with a JoinLink to
 	 * obtain a custom-tailored incoming set.
 	 */
-	Handle fetch_incoming_by_type(const Handle&, Type, AtomSpace*);
+	Handle fetch_incoming_by_type(const Handle&, Type, AtomSpace* = nullptr);
 
 	/**
 	 * Run the `query` on the remote server, and place the query
@@ -215,7 +216,7 @@ public:
 	 * remote server to the local AtomSpace.
 	 */
 	Handle fetch_query(const Handle& query, const Handle& key,
-	                   AtomSpace*,
+	                   AtomSpace* = nullptr,
 	                   const Handle& metadata_key = Handle::UNDEFINED,
 	                   bool fresh = false);
 
