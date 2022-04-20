@@ -1154,6 +1154,12 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 	}
 
+	if (PRESENT_LINK == t)
+	{
+		ptm->markPresent();
+		return;
+	}
+
 	// If a term is literal then the corresponding pattern term
 	// should be also.
 	if (CHOICE_LINK == t)
@@ -1167,9 +1173,15 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		return;
 	}
 
-	if (PRESENT_LINK == t)
+	// Much like the ChoiceLink above, except that the term itself
+	// cannot be marked as a choice.
+	if (OR_LINK == t)
 	{
-		ptm->markPresent();
+		for (PatternTermPtr& optm: ptm->getOutgoingSet())
+		{
+			if (PRESENT_LINK == optm->getHandle()->get_type())
+				optm->markPresent();
+		}
 		return;
 	}
 
