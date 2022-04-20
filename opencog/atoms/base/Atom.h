@@ -190,6 +190,7 @@ class Atom
     friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
+    friend class StorageNode;     // Needs to call isAbsent()
 
 protected:
     // Each atomic_flag chews up a byte.

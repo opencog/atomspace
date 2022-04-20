@@ -36,6 +36,11 @@ namespace opencog
  */
 class StorageNode : public Node, protected BackingStore
 {
+protected:
+	bool isAbsent(const Handle& h) const { return h->isAbsent(); }
+	bool setAbsent(Handle& h) const { return h->setAbsent(); }
+	bool setPresent(Handle& h) const { return h->setPresent(); }
+
 public:
 	StorageNode(Type, std::string);
 	virtual ~StorageNode();
