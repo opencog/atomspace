@@ -38,8 +38,8 @@ class StorageNode : public Node, protected BackingStore
 {
 protected:
 	bool isAbsent(const Handle& h) const { return h->isAbsent(); }
-	bool setAbsent(Handle& h) const { return h->setAbsent(); }
-	bool setPresent(Handle& h) const { return h->setPresent(); }
+	bool setAbsent(const Handle& h) const { return h->setAbsent(); }
+	bool setPresent(const Handle& h) const { return h->setPresent(); }
 	Handle add_nocheck(AtomSpace* as, const Handle& h) const
 		{ return as->add(h); }
 	void get_absent_atoms(const AtomSpace* as, HandleSeq& missing) const
