@@ -60,6 +60,8 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
  */
 class AtomSpace : public Atom
 {
+    friend class StorageNode;     // Needs to call add() directly.
+
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
     static const bool DONT_EMIT_DIAGNOSTICS = false;
