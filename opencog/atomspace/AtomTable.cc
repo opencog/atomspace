@@ -595,7 +595,7 @@ void AtomSpace::shadow_by_type(HandleSet& hset,
                                bool parent,
                                const AtomSpace* cas) const
 {
-    // See the vector version of this codefor documentation.
+    // See the vector version of this code for documentation.
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
@@ -707,4 +707,18 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
         for (const AtomSpacePtr& base : _environ)
             base->get_root_set_by_type(hseq, type, subclass, parent, cas);
     }
+}
+
+/// Return only those atoms that are marked with the isAbsent() flag.
+/// Used by StorageNodes to maintain correct deletion state.
+void AtomSpace::get_absent_atoms(HandleSeq& missing) const
+{
+    // Place the deepest atoms first. (Recurse first.)
+    for (const AtomSpacePtr& base : _environ)
+        base->get_absent_atoms(missing);
+
+    HandleSeq rawseq;
+    typeIndex.get_handles_by_type(rawseq, ATOM, true);
+    for (const Handle& h: rawseq)
+        if (h->isAbsent()) missing.push_back(h);
 }

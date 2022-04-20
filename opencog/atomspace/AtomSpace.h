@@ -128,6 +128,9 @@ class AtomSpace : public Atom
                         bool subclass,
                         bool parent,
                         const AtomSpace*) const;
+
+    void get_absent_atoms(HandleSeq&) const;
+
 public:
     /**
      * Constructor and destructor for this class.
