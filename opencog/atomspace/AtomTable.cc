@@ -393,11 +393,14 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 
 bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 {
+    if (nullptr == h) return false;
+
     // Make sure the atom is fully resolved before we go about
     // deleting it.
     const Handle& handle(get_atom(h));
 
-    if (nullptr == handle) return false;
+    // Report success if its already gone.
+    if (nullptr == handle) return true;
 
     // User asked for a non-recursive remove, and the
     // atom is still referenced. So, do nothing.
