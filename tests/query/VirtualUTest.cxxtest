@@ -56,7 +56,6 @@ public:
 	void tearDown(void);
 
 	void test_satisfaction(void);
-	void xtest_disjunction(void);
 };
 
 void VirtualUTest::tearDown(void)
@@ -107,24 +106,6 @@ void VirtualUTest::test_satisfaction(void)
 
 	Handle list_two = two_set->getOutgoingAtom(1);
 	TS_ASSERT_EQUALS(mouse, list_two->getOutgoingAtom(0));
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-/*
- * Test disjunction of virtual clauses (including one that is always true)
- */
-void VirtualUTest::xtest_disjunction(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/virtual-disjunction.scm\")");
-
-	Handle result = eval->eval_h("(cog-execute! query)");
-	Handle human = as->add_link(SET_LINK, as->add_node(CONCEPT_NODE, "human"));
-	printf("Expecting human, got %s", result->to_string().c_str());
-
-	TS_ASSERT_EQUALS(result, human);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

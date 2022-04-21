@@ -1061,7 +1061,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
                                            PatternTermPtr& ptm)
 {
 	// `h` is usually the same as `term`, unless there's quotation.
-	Handle h(ptm->getHandle());
+	const Handle& h(ptm->getHandle());
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	// If the current node is a bound variable, store this as a
@@ -1154,6 +1154,12 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 	}
 
+	if (PRESENT_LINK == t)
+	{
+		ptm->markPresent();
+		return;
+	}
+
 	// If a term is literal then the corresponding pattern term
 	// should be also.
 	if (CHOICE_LINK == t)
@@ -1167,11 +1173,23 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		return;
 	}
 
-	if (PRESENT_LINK == t)
+	// Much like the ChoiceLink above, except that the term itself
+	// cannot be marked as a choice.
+	if (OR_LINK == t)
 	{
-		ptm->markPresent();
+		for (PatternTermPtr& optm: ptm->getOutgoingSet())
+		{
+			if (PRESENT_LINK == optm->getHandle()->get_type())
+				optm->markPresent();
+		}
 		return;
 	}
+
+	// Skip the second pass below, when exploring the insides of an
+	// OrLink.  The problem is that add_unaries below will add terms
+	// inside the OrLink as mandatory, when of course, they are not.
+	const Handle& hpnt(parent->getHandle());
+	if (hpnt and OR_LINK == hpnt->get_type()) return;
 
 	// Second pass for evaluatables - this time to mark the left-overs
 	// as literals. We need to do this AFTER recursion, not before.
