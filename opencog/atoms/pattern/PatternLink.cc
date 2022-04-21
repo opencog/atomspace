@@ -1061,7 +1061,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
                                            PatternTermPtr& ptm)
 {
 	// `h` is usually the same as `term`, unless there's quotation.
-	Handle h(ptm->getHandle());
+	const Handle& h(ptm->getHandle());
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	// If the current node is a bound variable, store this as a
@@ -1184,6 +1184,12 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		}
 		return;
 	}
+
+	// Skip the second pass below, when exploring the insides of an
+	// OrLink.  The problem is that add_unaries below will add terms
+	// inside the OrLink as mandatory, when of course, they are not.
+	const Handle& hpnt(parent->getHandle());
+	if (hpnt and OR_LINK == hpnt->get_type()) return;
 
 	// Second pass for evaluatables - this time to mark the left-overs
 	// as literals. We need to do this AFTER recursion, not before.
