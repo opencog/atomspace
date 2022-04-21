@@ -113,6 +113,7 @@ IF (HAVE_GUILE)
 	ADD_GUILE_TEST(OrLinkTest or-link-test.scm)
 	ADD_GUILE_TEST(OrMoreTest or-more-test.scm)
 	ADD_GUILE_TEST(OrBindTest or-bind-test.scm)
+	ADD_GUILE_TEST(OrEvalTest or-eval-test.scm)
 	ADD_GUILE_TEST(QuoteStartTest quote-start-test.scm)
 	ADD_GUILE_TEST(RecursiveTest recursive-test.scm)
 
