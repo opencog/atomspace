@@ -26,6 +26,7 @@
 #define _OPENCOG_STORAGE_NODE_H
 
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/BackingStore.h>
 #include <opencog/persist/storage/storage_types.h>
 
