@@ -835,22 +835,36 @@ TODO
    in a temporary AtomSpace, but this is ... kind-of-ish icky?
    Can we do something nicer, here?
 
-A reading list of ideas
------------------------
-Ideas for future changes, enhancements, redesigns might be stolen from
-these sources:
+Resources
+---------
+A reading list of inspirational systems, which desribe alternative
+ways of looking at the world, and might contain ideas worth stealing.
 
-* [The Kernel Programming Language](http://web.cs.wpi.edu/~jshutt/kernel.html)
-  This is a dialect of Scheme being developed by John N. Shutt. It
+* John N. Shutt, [The Kernel Programming Language](http://web.cs.wpi.edu/~jshutt/kernel.html)
+  This is a dialect of Scheme proposed and developed by John N. Shutt. It
   proposes that lambda can be spilt into two parts: the first part which
   is a "combiner" and a second part which is an "evaluator of arguments".
-  This idea resonates for the query engine, because `class Instantiator`
-  is an uneasy mix of lazy and eager evaluation of arguments, a collection
-  of ad hoc prescriptions to do what seems right on a case-by-case basis.
-  This has always been a bit thorny, a bit of a ball of spaghetti. Similar
-  issues arise in other places where beta reduction is being done. I
-  suspect that something better can be done, but the overall situation
-  remains murky. Keywords: $vau, wrap, unwrap.
+  This idea resonates for the AtomSpace query engine, because
+  `class Instantiator` is an uneasy mix of lazy and eager evaluation of
+  arguments, a collection of ad hoc prescriptions to do what seems
+  right on a case-by-case basis.  This has always been a bit thorny,
+  a bit of a bowl of spaghetti for Atomese. Similar issues arise in
+  other places where beta reduction is being done. I suspect that
+  something better can be done, but the overall situation remains murky.
+  Keywords: $vau, wrap, unwrap.
+
+* [Double Pushout Graph Rewriting](https://en.wikipedia.org/wiki/Double_pushout_graph_rewriting)
+  describes a formal (category-theoretic) form of graph rewriting.
+
+* Roy Overbeek and Jörg Endrullis, [Patch Graph Rewriting](https://link.springer.com/content/pdf/10.1007/978-3-030-51372-6_8.pdf)
+  ICGT 2020, LNCS 12150, pp. 128–145, 2020.
+  Provides an explicit, detailed formal algorithm for graph rewriting.
+  The key idea is the patch graph, which consists of those edges of the
+  host graph that touch the subgraph, but are not part of it.
+
+* Adam Vandervorst, [Hierarchy T](https://github.com/Adam-Vandervorst/HierarchyT)
+  A kind-of competitor to the AtomSpace. Written in C++.
+
 
 Document Status
 ---------------
