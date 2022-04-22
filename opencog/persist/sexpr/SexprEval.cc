@@ -55,6 +55,11 @@ void SexprEval::eval_expr(const std::string &expr)
 		_error_string = ex.what();
 		_caught_error = true;
 	}
+	catch (const std::runtime_error& ex)
+	{
+		_error_string = ex.what();
+		_caught_error = true;
+	}
 }
 
 std::string SexprEval::poll_result()
