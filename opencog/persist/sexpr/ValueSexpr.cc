@@ -272,8 +272,10 @@ void Sexpr::decode_alist(const Handle& atom,
 			Handle hkey = as->add_atom(key);
 			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
+			as->set_value(atom, key, val);
 		}
-		atom->setValue(key, val);
+		else
+			atom->setValue(key, val);
 		pos = alist.find('(', pos);
 	}
 }
@@ -313,8 +315,10 @@ void Sexpr::decode_slist(const Handle& atom,
 			Handle hkey = as->add_atom(key);
 			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
+			as->set_value(atom, key, val);
 		}
-		atom->setValue(key, val);
+		else
+			atom->setValue(key, val);
 		pos = alist.find("(cons ", pos);
 	}
 }

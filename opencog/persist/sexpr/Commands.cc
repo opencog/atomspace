@@ -118,7 +118,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			meta = as->add_atom(meta);
 
 			// XXX Hacky .. store time in float value...
-			query->setValue(meta, createFloatValue((double)time(0)));
+			as->set_value(query, meta, createFloatValue((double)time(0)));
 			if (std::string::npos != cmd.find("#t", pos))
 				force = true;
 		}
@@ -133,7 +133,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			return "#f\n";
 
 		rslt = query->execute();
-		query->setValue(key, rslt);
+		as->set_value(query, key, rslt);
 
 		return Sexpr::encode_value(rslt);
 	}
@@ -276,12 +276,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
 		if (vp)
 			vp = Sexpr::add_atoms(as, vp);
-		atom->setValue(key, vp);
+		as->set_value(atom, key, vp);
 		return "()\n";
 	}
 
 	// -----------------------------------------------
-	// (cog-set-values! (Concpet "foo")
+	// (cog-set-values! (Concept "foo")
 	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
 	{
@@ -301,7 +301,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		Handle ha = as->add_atom(h);
 		if (nullptr == ha) return "()\n"; // read-only atomspace.
 		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
-		ha->setTruthValue(TruthValueCast(tv));
+		as->set_truthvalue(ha, TruthValueCast(tv));
 		return "()\n";
 	}
 
