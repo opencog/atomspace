@@ -36,6 +36,9 @@ class AtomSpace;
 class Commands
 {
 public:
+	Commands(void);
+	~Commands();
+
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only
 	/// supports those commands needed for network I/O of AtomSpace
@@ -63,7 +66,7 @@ public:
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
-	static std::string interpret_command(AtomSpace*, const std::string&);
+	std::string interpret_command(AtomSpace*, const std::string&);
 };
 
 /** @}*/

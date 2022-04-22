@@ -50,6 +50,15 @@ using namespace opencog;
 /// overhead of entry/exit into guile. This works because the cogserver
 /// is guaranteed to send only these commands, and no others.
 //
+
+Commands::Commands(void)
+{
+}
+
+Commands::~Commands()
+{
+}
+
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
