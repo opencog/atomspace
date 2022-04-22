@@ -45,6 +45,7 @@ SexprEval::~SexprEval()
  */
 void SexprEval::eval_expr(const std::string &expr)
 {
+	_caught_error = false;
 	try {
 		std::lock_guard<std::mutex> lock(_mtx);
 		_answer = Commands::interpret_command(_atomspace, expr);
