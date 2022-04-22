@@ -55,9 +55,9 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
 	if (s[l] == ';') { l = r; return 1; }
 
 	if (s[l] != '(')
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unexpected text: >>" + s.substr(l) + "<<");
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %lu Unexpected text: >>%s<<",
+			line_cnt, s.substr(l).c_str());
 
 	size_t p = l;
 	int count = 1;
@@ -139,9 +139,9 @@ std::string Sexpr::get_node_name(const std::string& s,
 	if (typeNode and s[l] == '\'')
 		scm_symbol = true;
 	else if (not typeNode and s[l] != '"')
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %zu Unexpected content: >>%s<< in %s",
+			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
 	l++;
 	size_t p = l;
@@ -168,10 +168,9 @@ static TruthValuePtr get_stv(const std::string& s,
                              size_t l, size_t r, size_t line_cnt)
 {
 	if (s.compare(l, 5, "(stv "))
-		throw std::runtime_error(
-				"Syntax error at line " + std::to_string(line_cnt) +
-				" Unsupported markup: " + s.substr(l, r-l+1) +
-				" in expr: " + s);
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %zu Unexpected markup: >>%s<< in expr %s",
+			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
 	return createSimpleTruthValue(
 				NumberNode::to_vector(s.substr(l+4, r-l-4)));
@@ -254,7 +253,7 @@ Handle Sexpr::decode_atom(const std::string& s,
 
 		return h;
 	}
-	throw std::runtime_error(
-		"Syntax error at line " + std::to_string(line_cnt) +
-		"Got a Value, not supported: " + s);
+	throw SyntaxException(TRACE_INFO,
+		"Syntax error at line %zu Got a Value, not supported: %s",
+		line_cnt, s.c_str());
 }
