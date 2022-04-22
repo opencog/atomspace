@@ -34,7 +34,7 @@ But, first: five things everyone else does:
   regions can be specified, by unifying multiple clauses.
 * Modify searches with conditionals, such as "greater than", and with
   user callbacks into scheme, python or Haskell.
-* Perform graph rewriting: use search results to create new graphs.
+* Perform **graph rewriting**: use search results to create new graphs.
 * Trigger execution of user callbacks... or of executable graphs (as
   explained below).
 
@@ -128,6 +128,18 @@ listed below.  Things are things that no one else does:
   red balls in them. This requires not only finding the baskets, making
   sure they have balls in them, but also testing each and every ball in
   a basket to make sure they are **all** of the same color.
+* **Frames (ChangeSets)**
+  Store a sequence of graph rewrites, changes of values as a single
+  changeset. The database itself is a collection of such changesets or
+  "Frames".  Very roughly, a changeset resembles a git commit, but for
+  the graph database. The word "Frame" is mean to invoke the idea of a
+  stackframe, or a Kripke frame: the graph state, at this moment. By
+  storing frames, it is possible to revert to earlier graph state. It is
+  possible to compare different branches and to explore different
+  rewrite histories starting from the same base graph.  Branches may be
+  merged. This is useful for inference and learning algos, which explore
+  long chains of large, complex graph rewrites.
+
 
 ### What it Isn't
 Newcomers often struggle with the AtomSpace, because they bring
