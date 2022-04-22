@@ -300,15 +300,16 @@ void Sexpr::decode_slist(const Handle& atom,
 			alist.substr(pos).c_str());
 
 	size_t totlen = alist.size();
-	pos = alist.find("(cons ", pos);
-	while (std::string::npos != pos and pos < totlen)
+	size_t nxt = alist.find("(cons ", pos);
+	while (std::string::npos != nxt and nxt < totlen)
 	{
-		pos += 5;
-		pos = alist.find_first_not_of(" \n\t", pos);
-		Handle key(decode_atom(alist, pos));
-		pos++;
-		pos = alist.find_first_not_of(" \n\t", pos);
-		ValuePtr val(decode_value(alist, pos));
+		nxt += 5;
+		nxt = alist.find_first_not_of(" \n\t", nxt);
+		Handle key(decode_atom(alist, nxt));
+		nxt++;
+		nxt = alist.find_first_not_of(" \n\t", nxt);
+		ValuePtr val(decode_value(alist, nxt));
+		pos = nxt + 1;   // move past closing paren of (cons ...)
 		if (as)
 		{
 			// Make sure all atoms have found a nice home.
@@ -319,8 +320,12 @@ void Sexpr::decode_slist(const Handle& atom,
 		}
 		else
 			atom->setValue(key, val);
-		pos = alist.find("(cons ", pos);
+		nxt = alist.find("(cons ", nxt);
 	}
+
+	// Move past closing parent of (alist ...)
+	pos = alist.find(")", pos);
+	pos++;
 }
 
 /* ================================================================== */
