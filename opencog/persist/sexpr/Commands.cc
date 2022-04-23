@@ -298,7 +298,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 				size_t r1 = r;
 				Sexpr::get_next_expr(cmd, l1, r1, 0);
 				if (l1 == r1) break;
-				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
+				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0, _space_map));
 				l = r1 + 1;
 				pos = r1;
 			}

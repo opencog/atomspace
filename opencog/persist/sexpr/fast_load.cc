@@ -37,6 +37,7 @@ using namespace opencog;
 
 Handle opencog::parseStream(std::istream& in, AtomSpace& as)
 {
+    static std::map<std::string, Handle> ascache; // empty, not currently used.
     Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
@@ -70,7 +71,7 @@ Handle opencog::parseStream(std::istream& in, AtomSpace& as)
                 break;
 
             expr_cnt++;
-            h = as.add_atom(Sexpr::decode_atom(expr, l, r, line_cnt));
+            h = as.add_atom(Sexpr::decode_atom(expr, l, r, line_cnt, ascache));
             expr = expr.substr(r + 1);
         }
     }
@@ -98,6 +99,7 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 // The expression is assumed not to contain any newlines!
 Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
 {
+    static std::map<std::string, Handle> ascache; // empty, not currently used.
     size_t l = 0;
     size_t r = expr.length();
     size_t rr = r;
@@ -117,7 +119,7 @@ Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
             throw std::runtime_error(
                 "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
 
-        h = as.add_atom(Sexpr::decode_atom(expr, l, r, 0));
+        h = as.add_atom(Sexpr::decode_atom(expr, l, r, 0, ascache));
         l = r + 1;
         r = rr;
     }

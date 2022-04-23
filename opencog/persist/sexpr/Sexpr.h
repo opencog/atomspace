@@ -40,11 +40,12 @@ public:
 	/// just past the end of the trailing parenthesis.
 	static Handle decode_atom(const std::string& s, size_t& pos)
 	{
+		static std::map<std::string, Handle> cache; // empty, unused.
 		size_t start = pos;
 		size_t end = s.length();
 		get_next_expr(s, start, end, 0);
 		pos = end;
-		return decode_atom(s, start, end, 0);
+		return decode_atom(s, start, end, 0, cache);
 	}
 
 	static Handle decode_atom(const std::string& s) {
@@ -73,7 +74,7 @@ public:
 		return decode_frame(as, fs, pos, cache);
 	}
 	static Handle decode_frame(const Handle& as, const std::string& fs) {
-		std::map<std::string, Handle> cache;
+		static std::map<std::string, Handle> cache; // empty, unused.
 		size_t junk = 0;
 		return decode_frame(as, fs, junk, cache);
 	}
@@ -83,7 +84,8 @@ public:
 	static int get_next_expr(const std::string&,
                             size_t& l, size_t& r, size_t line_cnt);
 	static Handle decode_atom(const std::string& s,
-                             size_t l, size_t r, size_t line_cnt);
+	                          size_t l, size_t r, size_t line_cnt,
+	                          std::map<std::string, Handle>&);
 
 	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
 
