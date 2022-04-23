@@ -35,7 +35,20 @@ class AtomSpace;
 
 class Commands
 {
+private:
+	/// True, if the _space_map below is being used, and AtomSpaces need
+	/// to be sent and received.
+	bool _multi_space;
+
+	/// Map from string AtomSpace names to the matching AtomSpacePtr's
+	std::map<std::string, Handle> _space_map;
+
+	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
+
 public:
+	Commands(void);
+	~Commands();
+
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only
 	/// supports those commands needed for network I/O of AtomSpace
@@ -63,7 +76,11 @@ public:
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
-	static std::string interpret_command(AtomSpace*, const std::string&);
+	std::string interpret_command(AtomSpace*, const std::string&);
+
+	/// If some interpreted command specified an AtomSpace, this
+	/// will be set to that AtomSpace.
+	AtomSpacePtr top_space;
 };
 
 /** @}*/

@@ -29,10 +29,10 @@
 
 using namespace opencog;
 
-SexprEval::SexprEval(AtomSpace* as)
+SexprEval::SexprEval(AtomSpacePtr& asp)
 	: GenericEval()
 {
-	_atomspace = as;
+	_atomspace = asp;
 }
 
 SexprEval::~SexprEval()
@@ -48,7 +48,8 @@ void SexprEval::eval_expr(const std::string &expr)
 	_caught_error = false;
 	try {
 		std::lock_guard<std::mutex> lock(_mtx);
-		_answer = Commands::interpret_command(_atomspace, expr);
+		_answer = _interpreter.interpret_command(
+			(AtomSpace*) _atomspace.get(), expr);
 	}
 	catch (const StandardException& ex)
 	{
@@ -93,9 +94,9 @@ void SexprEval::interrupt(void)
 	_error_string = "Caught interrupt!";
 }
 
-SexprEval* SexprEval::get_evaluator(AtomSpace* as)
+SexprEval* SexprEval::get_evaluator(AtomSpacePtr& asp)
 {
-	static thread_local SexprEval* evaluator = new SexprEval(as);
+	static thread_local SexprEval* evaluator = new SexprEval(asp);
 
 	// The eval_dtor runs when this thread is destroyed.
 	class eval_dtor {

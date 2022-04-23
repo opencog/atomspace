@@ -50,6 +50,34 @@ using namespace opencog;
 /// overhead of entry/exit into guile. This works because the cogserver
 /// is guaranteed to send only these commands, and no others.
 //
+
+Commands::Commands(void)
+{
+	_multi_space = false;
+}
+
+Commands::~Commands()
+{
+}
+
+/// Search for optional AtomSpace argument in `cmd` at `pos`.
+/// If none is found, then return `as`
+AtomSpace*
+Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
+{
+	if (not _multi_space) return as;
+
+	pos = cmd.find_first_not_of(" \n\t", pos);
+	if (0 == cmd.compare(pos, 10, "(AtomSpace"))
+	{
+		_multi_space = true;
+		Handle hasp = Sexpr::decode_frame(
+			HandleCast(top_space), cmd, pos, _space_map);
+		return (AtomSpace*) hasp.get();
+	}
+	return as;
+}
+
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
@@ -70,6 +98,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
+	static const size_t dfine = std::hash<std::string>{}("define");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
@@ -172,11 +201,16 @@ std::string Commands::interpret_command(AtomSpace* as,
 		if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
 			get_subtypes = true;
 
+		// as = get_opt_as(cmd, pos, as);
+
 		std::string rv = "(";
 		HandleSeq hset;
-		as->get_handles_by_type(hset, t, get_subtypes);
+		if (_multi_space and top_space)
+			top_space->get_handles_by_type(hset, t, get_subtypes);
+		else
+			as->get_handles_by_type(hset, t, get_subtypes);
 		for (const Handle& h: hset)
-			rv += Sexpr::encode_atom(h);
+			rv += Sexpr::encode_atom(h, _multi_space);
 		rv += ")";
 		return rv;
 	}
@@ -186,8 +220,11 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incty == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
 		Type t = Sexpr::decode_type(cmd, pos);
+
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSetByType(t))
@@ -202,7 +239,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incom == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSet())
 			alist += Sexpr::encode_atom(hi);
@@ -216,7 +255,10 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (keys == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
+
 		std::string alist = "(";
 		for (const Handle& key : h->getKeys())
 		{
@@ -241,6 +283,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			size_t l = pos+1;
 			size_t r = cmd.size();
 			std::string name = Sexpr::get_node_name(cmd, l, r, t);
+			as = get_opt_as(cmd, r, as);
 			h = as->get_node(t, std::move(name));
 		}
 		else
@@ -257,11 +300,13 @@ std::string Commands::interpret_command(AtomSpace* as,
 				if (l1 == r1) break;
 				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
 				l = r1 + 1;
+				pos = r1;
 			}
+			as = get_opt_as(cmd, pos, as);
 			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()\n";
-		return Sexpr::encode_atom(h);
+		return Sexpr::encode_atom(h, _multi_space);
 	}
 
 	// -----------------------------------------------
@@ -270,10 +315,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle atom = Sexpr::decode_atom(cmd, pos);
-		atom = as->add_atom(atom);
 		Handle key = Sexpr::decode_atom(cmd, ++pos);
-		key = as->add_atom(key);
 		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+
+		as = get_opt_as(cmd, pos, as);
+		atom = as->add_atom(atom);
+		key = as->add_atom(key);
 		if (vp)
 			vp = Sexpr::add_atoms(as, vp);
 		as->set_value(atom, key, vp);
@@ -281,26 +328,36 @@ std::string Commands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// (cog-set-values! (Concept "foo")
+	// (cog-set-values! (Concept "foo") (AtomSpace "foo")
 	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
 		pos++; // skip past close-paren
+
+		// Search for optional AtomSpace argument
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 		Sexpr::decode_slist(h, cmd, pos);
+
 		return "()\n";
 	}
 
 	// -----------------------------------------------
 	// (cog-set-tv! (Concept "foo") (stv 1 0))
+	// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
 	if (settv == act)
 	{
 		pos = epos + 1;
 		Handle h = Sexpr::decode_atom(cmd, pos);
+		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
+
+		// Search for optional AtomSpace argument
+		as = get_opt_as(cmd, pos, as);
+
 		Handle ha = as->add_atom(h);
 		if (nullptr == ha) return "()\n"; // read-only atomspace.
-		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
 		as->set_truthvalue(ha, TruthValueCast(tv));
 		return "()\n";
 	}
@@ -319,6 +376,36 @@ std::string Commands::interpret_command(AtomSpace* as,
 		return Sexpr::encode_value(vp);
 	}
 
+	// -----------------------------------------------
+	// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
+	// Place the current atomspace at the bottom of the hierarchy.
+	if (dfine == act)
+	{
+		_multi_space = true;
+
+		// Extract the symbolic name after the define
+		pos = cmd.find_first_not_of(" \n\t", epos);
+		epos = cmd.find_first_of(" \n\t", pos);
+		// std::string sym = cmd.substr(pos, epos-pos);
+
+		pos = epos+1;
+
+		// Decode the AtomSpace frames
+		AtomSpacePtr asp(AtomSpaceCast(as));
+		Handle hasp = Sexpr::decode_frame(
+			HandleCast(asp), cmd, pos, _space_map);
+		top_space = AtomSpaceCast(hasp);
+
+		// Hacky...
+		// _space_map.insert({sym, top_space});
+
+		return "()\n";
+	}
+
+	// -----------------------------------------------
+
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());
 }
+
+// ===================================================================

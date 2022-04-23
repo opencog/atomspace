@@ -25,7 +25,9 @@
 
 #include <mutex>
 #include <string>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
+#include <opencog/persist/sexpr/Commands.h>
 
 /**
  * The SexprEval class implements a very simple API for s-exprssion
@@ -39,11 +41,12 @@ namespace opencog {
  *  @{
  */
 
-class AtomSpace;
 class SexprEval : public GenericEval
 {
+	friend class SexprShell;  // Cogserver needs to call ctor.
 	private:
-		AtomSpace* _atomspace;
+		AtomSpacePtr _atomspace;
+		Commands _interpreter;
 
 		// poll_result() is called in a different thread
 		// than eval_expr() and the result is that _answer
@@ -51,7 +54,7 @@ class SexprEval : public GenericEval
 		std::mutex _mtx;
 		std::string _answer;
 
-		SexprEval(AtomSpace*);
+		SexprEval(AtomSpacePtr&);
 	public:
 		virtual ~SexprEval();
 
@@ -61,7 +64,11 @@ class SexprEval : public GenericEval
 
 		virtual void interrupt(void);
 
-		static SexprEval* get_evaluator(AtomSpace*);
+		static SexprEval* get_evaluator(AtomSpacePtr&);
+		static SexprEval* get_evaluator(AtomSpace* as) {
+			AtomSpacePtr asp(AtomSpaceCast(as));
+			return get_evaluator(asp); }
+
 };
 
 /** @}*/

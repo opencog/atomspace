@@ -948,28 +948,50 @@
 
 (set-procedure-property! cog-new-atomspace 'documentation
 "
- cog-new-atomspace [ATOMSPACE]
-    Create a new atomspace.  If the optional argument ATOMSPACE
-    is present, then the new atomspace will be an expansion (child)
-    of ATOMSPACE.  AtomSpaces are automatically deleted when no more
-    references to them remain. Returns the new atomspace.
+ cog-new-atomspace [NAME] [ATOMSPACE [ATOMSPACE2 [...]]]
+    Create a new atomspace.  If the optional argument NAME is present,
+    and it is a string, then the new AtomSpace will be given this
+    name. If a list of AtomeSpaces are present, then the new AtomSpace
+    will include these as subframes (subspaces).
+
+    Returns the new atomspace.
+
+    AtomSpaces are automatically deleted when no more references to
+    them remain.
 
     Note that this does NOT set the current atomspace to the new one;
     to do that, you need to use cog-set-atomspace!
+
+    The name of the AtomSpace can be obtained with `cog-name`.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-env -- Get the subspaces.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
+       cog-atomspace-ro! -- Mark the AtomSpace as read-only.
+       cog-atomspace-cow! -- Mark the AtomSpace as copy-on-write.
 ")
 
 (set-procedure-property! cog-atomspace-env 'documentation
 "
  cog-atomspace-env [ATOMSPACE]
-     Return the parent of ATOMSPACE. The ATOMSPACE argument is
-     optional; if not specified, the current atomspace is assumed.
+    Return the parent(s) of ATOMSPACE. The ATOMSPACE argument is
+    optional; if not specified, the current atomspace is assumed.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-uuid 'documentation
 "
  cog-atomspace-uuid [ATOMSPACE]
-     Return the UUID of ATOMSPACE. The ATOMSPACE argument is
-     optional; if not specified, the current atomspace is assumed.
+    Return the UUID of ATOMSPACE. The ATOMSPACE argument is
+    optional; if not specified, the current atomspace is assumed.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-env -- Get the subspaces.
 ")
 
 (set-procedure-property! cog-atomspace-clear 'documentation

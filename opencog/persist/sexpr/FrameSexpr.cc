@@ -53,6 +53,11 @@ using namespace opencog;
 // Frame printers. Similar to the Atom printers, except
 // that frames can have both a name, and an outgoing set.
 // At this time, the only Frames are AtomSpaces.
+//
+// The s-expression has the form
+//    ```(AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))```
+// which indicates an atomspace named "foo" that is layers above two
+// other atomspaces called "bar" and "baz".
 
 static std::string prt_frame(const AtomSpace* as)
 {
@@ -79,13 +84,17 @@ std::string Sexpr::encode_frame(const AtomSpace* as)
 
 /* ================================================================== */
 // Frame decoders. Decode what the above does.
+//
+// An example of an s-expression is
+//    ```(AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))```
+// which indicates an atomspace named "foo" that is layers above two
+// other atomspaces called "bar" and "baz".
 
-/// Find some AtmSpace (frame) that has the indicated name.
+
+/// Find some AtomSpace (frame) that has the indicated name.
 /// Both the argument, and the returned values are preseumed to be
 /// AtomSpacePtr's cast into Handles.
-//
-// XXX TODO FIXME: should also verify that the subspaces match.
-// That is, both the name matches, and also the subframes, too.
+///
 static Handle find_frame(const std::string& name, const Handle& surf)
 {
 	if (0 == name.compare(surf->get_name())) return surf;
@@ -106,14 +115,11 @@ static Handle find_frame(const std::string& name, const Handle& surf)
 ///
 /// If `surface` is null, then create a DAG of AtomSpaces, matching the
 /// structure in the s-expression `sframe`.
-//
-// XXX FIXME: this is completely broken, if the DAG has loops in it,
-// or if the same atomspace appears in multiple locations in the DAG.
-// Whoooops!
-//
-// XXX FIXME: this performs a lookup by name only. It should probably
-// perform a lookup by inheritance, too. And/or verify that these are
-// consistent.
+///
+/// The cache is used to skip parsing of long s-expressions, if the
+/// named AtomSpace is found in the cache. This assumes that all
+/// AtomSpaces have unique names.
+///
 Handle Sexpr::decode_frame(const Handle& surface,
                            const std::string& sframe, size_t& pos,
                            std::map<std::string, Handle>& cache)
@@ -143,8 +149,7 @@ Handle Sexpr::decode_frame(const Handle& surface,
 	if (surface and 0 < surface->get_arity())
 	{
 		pos = sframe.find(')', r) + 1;
-		// XXX TODO: verify that the named atomspace has the correct
-		// subframes in it, too...
+		// Perform a lookup by name only. If found, then return it.
 		return find_frame(name, surface);
 	}
 
