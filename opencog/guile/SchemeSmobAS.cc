@@ -28,14 +28,36 @@ SCM SchemeSmob::make_as(AtomSpace *as)
 /**
  * Create a new atom space.  The parent argument might not
  * be present -- its optional.
+ * If it is present, it might be a list of one or more atomspaces.
+ * If the first in the list is a string, then it is the string name
+ * of the new AtomSpace.
  */
 SCM SchemeSmob::ss_new_as (SCM space_list)
 {
+	// The first item in the list might be the name of the AtomSpace.
+	std::string name;
+	if (not scm_is_null(space_list) and scm_is_pair(space_list))
+	{
+		SCM sname = SCM_CAR(space_list);
+		if (scm_is_string(sname))
+		{
+			char * cname = scm_to_utf8_string(sname);
+			name = cname;
+			free(cname);
+
+			space_list = SCM_CDR(space_list);
+		}
+	}
+
 	HandleSeq spaces;
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
 	AtomSpacePtr as = createAtomSpace(spaces);
+
+	if (0 < name.size())
+		as->set_name(name);
+
 	return protom_to_scm(as);
 }
 
