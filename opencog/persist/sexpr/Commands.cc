@@ -53,6 +53,7 @@ using namespace opencog;
 
 Commands::Commands(void)
 {
+	_multi_space = false;
 	atomspace_ptr = Handle::UNDEFINED;
 }
 
@@ -60,10 +61,13 @@ Commands::~Commands()
 {
 }
 
-/// Search for optional AtomSpace argument
+/// Search for optional AtomSpace argument in `cmd` at `pos`.
+/// If none is found, then return `as`
 AtomSpace*
 Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
 {
+	if (not _multi_space) return as;
+
 	pos = cmd.find_first_not_of(" \n\t", pos);
 	if (0 == cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
 	{
@@ -203,7 +207,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		HandleSeq hset;
 		as->get_handles_by_type(hset, t, get_subtypes);
 		for (const Handle& h: hset)
-			rv += Sexpr::encode_atom(h);
+			rv += Sexpr::encode_atom(h, _multi_space);
 		rv += ")";
 		return rv;
 	}
@@ -299,7 +303,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()\n";
-		return Sexpr::encode_atom(h);
+		return Sexpr::encode_atom(h, _multi_space);
 	}
 
 	// -----------------------------------------------
@@ -374,6 +378,8 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// Place the current atomspace at the bottom of the hierarchy.
 	if (dfine == act)
 	{
+		_multi_space = true;
+
 		// Extract the symbolic name after the define
 		pos = cmd.find_first_not_of(" \n\t", epos);
 		epos = cmd.find_first_of(" \n\t", pos);

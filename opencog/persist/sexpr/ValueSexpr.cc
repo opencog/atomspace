@@ -331,37 +331,46 @@ void Sexpr::decode_slist(const Handle& atom,
 /* ================================================================== */
 // Atom printers that do NOT print associated Values.
 
-static std::string prt_node(const Handle& h)
+static std::string prt_node(const Handle& h, bool multispace)
 {
 	std::stringstream ss;
 	ss << "(" << nameserver().getTypeName(h->get_type())
-		<< " " << std::quoted(h->get_name()) << ")";
+		<< " " << std::quoted(h->get_name());
+
+	if (multispace and h->getAtomSpace())
+		ss << " (AtomSpace \"" << h->getAtomSpace()->get_name() << "\")";
+
+	ss << ")";
 
 	return ss.str();
 }
 
-static std::string prt_atom(const Handle&);
+static std::string prt_atom(const Handle&, bool);
 
-static std::string prt_link(const Handle& h)
+static std::string prt_link(const Handle& h, bool multispace)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
+		txt += prt_atom(ho, multispace);
+
+	if (multispace and h->getAtomSpace())
+		txt += " (AtomSpace \"" + h->getAtomSpace()->get_name() + "\")";
+
 	txt += ")";
 	return txt;
 }
 
-static std::string prt_atom(const Handle& h)
+static std::string prt_atom(const Handle& h, bool multispace)
 {
-	if (h->is_node()) return prt_node(h);
-	return prt_link(h);
+	if (h->is_node()) return prt_node(h, multispace);
+	return prt_link(h, multispace);
 }
 
 /// Convert the Atom into a string. It does NOT print any of the
 /// associated values; use `dump_atom()` to get those.
-std::string Sexpr::encode_atom(const Handle& h)
+std::string Sexpr::encode_atom(const Handle& h, bool multispace)
 {
-	return prt_atom(h);
+	return prt_atom(h, multispace);
 }
 
 /// Convert value (or Atom) into a string.
@@ -381,7 +390,7 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 
 	if (not v->is_atom())
 		return v->to_short_string();
-	return prt_atom(HandleCast(v));
+	return prt_atom(HandleCast(v), false);
 }
 
 /* ================================================================== */
@@ -396,7 +405,7 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
-		rv << "(cons " << prt_atom(k) << encode_value(p) << ")";
+		rv << "(cons " << prt_atom(k, false) << encode_value(p) << ")";
 	}
 	rv << ")";
 	return rv.str();
@@ -423,7 +432,7 @@ static std::string dump_link(const Handle& h)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
+		txt += prt_atom(ho, false);
 
 	if (h->haveValues())
 	{
@@ -456,7 +465,7 @@ static std::string dump_vnode(const Handle& h, const Handle& key)
 
 	ValuePtr p = h->getValue(key);
 	if (nullptr != p)
-		ss << " (alist (cons " << prt_atom(key) << Sexpr::encode_value(p) << ")))";
+		ss << " (alist (cons " << prt_atom(key, false) << Sexpr::encode_value(p) << ")))";
 
 	return ss.str();
 }
@@ -465,11 +474,11 @@ static std::string dump_vlink(const Handle& h, const Handle& key)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
+		txt += prt_atom(ho, false);
 
 	ValuePtr p = h->getValue(key);
 	if (nullptr != p)
-		txt += " (alist (cons " + prt_atom(key) + Sexpr::encode_value(p) + ")))";
+		txt += " (alist (cons " + prt_atom(key, false) + Sexpr::encode_value(p) + ")))";
 
 	return txt;
 }

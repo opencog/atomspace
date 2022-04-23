@@ -64,8 +64,10 @@ class SexprEval : public GenericEval
 		virtual void interrupt(void);
 
 		static SexprEval* get_evaluator(AtomSpacePtr&);
-		static SexprEval* get_evaluator(AtomSpace* as)
-			{ return get_evaluator(AtomSpaceCast(as); }
+		static SexprEval* get_evaluator(AtomSpace* as) {
+			AtomSpacePtr asp(AtomSpaceCast(as));
+			return get_evaluator(asp); }
+
 };
 
 /** @}*/
