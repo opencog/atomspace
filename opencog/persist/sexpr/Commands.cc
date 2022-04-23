@@ -297,9 +297,20 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (svals == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
 		pos++; // skip past close-paren
 		Sexpr::decode_slist(h, cmd, pos);
+
+		// Search for optional AtomSpace argument
+		pos = cmd.find_first_not_of(" \n\t", pos);
+		if (cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
+		{
+			Handle hasp = Sexpr::decode_frame(
+				Handle::UNDEFINED, cmd, pos, _space_map);
+			as = (AtomSpace*) hasp.get();
+		}
+
+		as->add_atom(h);
 		return "()\n";
 	}
 
@@ -347,8 +358,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (frame == act)
 	{
 		pos = 0;
+		AtomSpacePtr asp(AtomSpaceCast(as));
 		atomspace_ptr = Sexpr::decode_frame(
-			AtomSpaceCast(as), cmd, pos, _space_map);
+			HandleCast(asp), cmd, pos, _space_map);
 
 		return "()\n";
 	}
@@ -358,3 +370,5 @@ std::string Commands::interpret_command(AtomSpace* as,
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());
 }
+
+// ===================================================================
