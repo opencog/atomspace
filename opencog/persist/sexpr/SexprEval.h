@@ -43,6 +43,7 @@ namespace opencog {
 
 class SexprEval : public GenericEval
 {
+	friend class SexprShell;  // Cogserver needs to call ctor.
 	private:
 		AtomSpacePtr _atomspace;
 		Commands _interpreter;
