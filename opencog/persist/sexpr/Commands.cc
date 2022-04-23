@@ -68,8 +68,9 @@ Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
 	if (not _multi_space) return as;
 
 	pos = cmd.find_first_not_of(" \n\t", pos);
-	if (0 == cmd.compare(pos, sizeof("(AtomSpace")-1, "(AtomSpace"))
+	if (0 == cmd.compare(pos, 10, "(AtomSpace"))
 	{
+		_multi_space = true;
 		Handle hasp = Sexpr::decode_frame(
 			HandleCast(top_space), cmd, pos, _space_map);
 		return (AtomSpace*) hasp.get();
@@ -327,7 +328,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// (cog-set-values! (Concept "foo")
+	// (cog-set-values! (Concept "foo") (AtomSpace "foo")
 	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
 	{
