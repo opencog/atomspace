@@ -60,6 +60,20 @@ Commands::~Commands()
 {
 }
 
+/// Search for optional AtomSpace argument
+AtomSpace*
+Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
+{
+	pos = cmd.find_first_not_of(" \n\t", pos);
+	if (0 == cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
+	{
+		Handle hasp = Sexpr::decode_frame(
+			Handle::UNDEFINED, cmd, pos, _space_map);
+		return (AtomSpace*) hasp.get();
+	}
+	return as;
+}
+
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
@@ -183,6 +197,8 @@ std::string Commands::interpret_command(AtomSpace* as,
 		if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
 			get_subtypes = true;
 
+		// as = get_opt_as(cmd, pos, as);
+
 		std::string rv = "(";
 		HandleSeq hset;
 		as->get_handles_by_type(hset, t, get_subtypes);
@@ -197,8 +213,11 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incty == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
 		Type t = Sexpr::decode_type(cmd, pos);
+
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSetByType(t))
@@ -213,7 +232,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incom == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSet())
 			alist += Sexpr::encode_atom(hi);
@@ -227,7 +248,10 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (keys == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
+
 		std::string alist = "(";
 		for (const Handle& key : h->getKeys())
 		{
@@ -252,6 +276,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			size_t l = pos+1;
 			size_t r = cmd.size();
 			std::string name = Sexpr::get_node_name(cmd, l, r, t);
+			as = get_opt_as(cmd, r, as);
 			h = as->get_node(t, std::move(name));
 		}
 		else
@@ -268,7 +293,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 				if (l1 == r1) break;
 				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
 				l = r1 + 1;
+				pos = r1;
 			}
+			as = get_opt_as(cmd, pos, as);
 			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()\n";
@@ -281,10 +308,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle atom = Sexpr::decode_atom(cmd, pos);
-		atom = as->add_atom(atom);
 		Handle key = Sexpr::decode_atom(cmd, ++pos);
-		key = as->add_atom(key);
 		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+
+		as = get_opt_as(cmd, pos, as);
+		atom = as->add_atom(atom);
+		key = as->add_atom(key);
 		if (vp)
 			vp = Sexpr::add_atoms(as, vp);
 		as->set_value(atom, key, vp);
@@ -298,19 +327,13 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle h = Sexpr::decode_atom(cmd, pos);
+		h = as->add_atom(h);
 		pos++; // skip past close-paren
 		Sexpr::decode_slist(h, cmd, pos);
 
 		// Search for optional AtomSpace argument
-		pos = cmd.find_first_not_of(" \n\t", pos);
-		if (cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
-		{
-			Handle hasp = Sexpr::decode_frame(
-				Handle::UNDEFINED, cmd, pos, _space_map);
-			as = (AtomSpace*) hasp.get();
-		}
+		// as = get_opt_as(cmd, pos, as);
 
-		as->add_atom(h);
 		return "()\n";
 	}
 
@@ -324,13 +347,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
 
 		// Search for optional AtomSpace argument
-		pos = cmd.find_first_not_of(" \n\t", pos);
-		if (cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
-		{
-			Handle hasp = Sexpr::decode_frame(
-				Handle::UNDEFINED, cmd, pos, _space_map);
-			as = (AtomSpace*) hasp.get();
-		}
+		as = get_opt_as(cmd, pos, as);
 
 		Handle ha = as->add_atom(h);
 		if (nullptr == ha) return "()\n"; // read-only atomspace.
