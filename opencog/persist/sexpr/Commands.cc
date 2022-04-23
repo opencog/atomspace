@@ -94,7 +94,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
-	static const size_t frame = std::hash<std::string>{}("AtomSpace");
+	static const size_t dfine = std::hash<std::string>{}("define");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
@@ -370,14 +370,25 @@ std::string Commands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))
+	// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
 	// Place the current atomspace at the bottom of the hierarchy.
-	if (frame == act)
+	if (dfine == act)
 	{
-		pos = 0;
+		// Extract the symbolic name after the define
+		pos = cmd.find_first_not_of(" \n\t", epos);
+		epos = cmd.find_first_of(" \n\t", pos);
+		// std::string sym = cmd.substr(pos, epos-pos);
+
+		pos = epos+1;
+
+		// Decode the AtomSpace frames
 		AtomSpacePtr asp(AtomSpaceCast(as));
 		atomspace_ptr = Sexpr::decode_frame(
 			HandleCast(asp), cmd, pos, _space_map);
+
+
+		// Hacky...
+		// _space_map.insert({sym, atomspace_ptr});
 
 		return "()\n";
 	}
