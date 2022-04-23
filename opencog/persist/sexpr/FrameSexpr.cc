@@ -53,6 +53,11 @@ using namespace opencog;
 // Frame printers. Similar to the Atom printers, except
 // that frames can have both a name, and an outgoing set.
 // At this time, the only Frames are AtomSpaces.
+//
+// The s-expression has the form
+//    ```(AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))```
+// which indicates an atomspace named "foo" that is layers above two
+// other atomspaces called "bar" and "baz".
 
 static std::string prt_frame(const AtomSpace* as)
 {
@@ -79,6 +84,12 @@ std::string Sexpr::encode_frame(const AtomSpace* as)
 
 /* ================================================================== */
 // Frame decoders. Decode what the above does.
+//
+// An example of an s-expression is
+//    ```(AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))```
+// which indicates an atomspace named "foo" that is layers above two
+// other atomspaces called "bar" and "baz".
+
 
 /// Find some AtmSpace (frame) that has the indicated name.
 /// Both the argument, and the returned values are preseumed to be

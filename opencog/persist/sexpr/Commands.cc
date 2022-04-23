@@ -53,6 +53,7 @@ using namespace opencog;
 
 Commands::Commands(void)
 {
+	atomspace_ptr = Handle::UNDEFINED;
 }
 
 Commands::~Commands()
@@ -79,6 +80,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
+	static const size_t frame = std::hash<std::string>{}("AtomSpace");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
@@ -327,6 +329,19 @@ std::string Commands::interpret_command(AtomSpace* as,
 		ValuePtr vp = atom->getValue(key);
 		return Sexpr::encode_value(vp);
 	}
+
+	// -----------------------------------------------
+	// (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))
+	if (frame == act)
+	{
+		pos = epos + 1;
+		atomspace_ptr = Sexpr::decode_frame(
+			Handle::UNDEFINED, cmd, pos, _space_map);
+
+		return "()\n";
+	}
+
+	// -----------------------------------------------
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());

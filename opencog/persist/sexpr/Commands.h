@@ -35,6 +35,10 @@ class AtomSpace;
 
 class Commands
 {
+private:
+	/// Map from string AtomSpace names to the matching AtomSpacePtr's
+	std::map<std::string, Handle> _space_map;
+
 public:
 	Commands(void);
 	~Commands();
@@ -67,6 +71,10 @@ public:
 	/// nothing else.
 	///
 	std::string interpret_command(AtomSpace*, const std::string&);
+
+	/// If some interpreted command specified an AtomSpace, this
+	/// will be set to that AtomSpace.
+	Handle atomspace_ptr;
 };
 
 /** @}*/
