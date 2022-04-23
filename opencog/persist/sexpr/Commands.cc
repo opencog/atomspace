@@ -54,7 +54,6 @@ using namespace opencog;
 Commands::Commands(void)
 {
 	_multi_space = false;
-	atomspace_ptr = Handle::UNDEFINED;
 }
 
 Commands::~Commands()
@@ -205,7 +204,10 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 		std::string rv = "(";
 		HandleSeq hset;
-		as->get_handles_by_type(hset, t, get_subtypes);
+		if (_multi_space and top_space)
+			top_space->get_handles_by_type(hset, t, get_subtypes);
+		else
+			as->get_handles_by_type(hset, t, get_subtypes);
 		for (const Handle& h: hset)
 			rv += Sexpr::encode_atom(h, _multi_space);
 		rv += ")";
@@ -389,11 +391,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 		// Decode the AtomSpace frames
 		AtomSpacePtr asp(AtomSpaceCast(as));
-		atomspace_ptr = Sexpr::decode_frame(
+		Handle hasp = Sexpr::decode_frame(
 			HandleCast(asp), cmd, pos, _space_map);
+		top_space = AtomSpaceCast(hasp);
 
 		// Hacky...
-		// _space_map.insert({sym, atomspace_ptr});
+		// _space_map.insert({sym, top_space});
 
 		return "()\n";
 	}

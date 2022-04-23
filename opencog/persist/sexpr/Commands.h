@@ -80,7 +80,7 @@ public:
 
 	/// If some interpreted command specified an AtomSpace, this
 	/// will be set to that AtomSpace.
-	Handle atomspace_ptr;
+	AtomSpacePtr top_space;
 };
 
 /** @}*/
