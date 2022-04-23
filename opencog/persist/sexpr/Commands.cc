@@ -386,7 +386,6 @@ std::string Commands::interpret_command(AtomSpace* as,
 		atomspace_ptr = Sexpr::decode_frame(
 			HandleCast(asp), cmd, pos, _space_map);
 
-
 		// Hacky...
 		// _space_map.insert({sym, atomspace_ptr});
 
