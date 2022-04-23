@@ -68,10 +68,10 @@ Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
 	if (not _multi_space) return as;
 
 	pos = cmd.find_first_not_of(" \n\t", pos);
-	if (0 == cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
+	if (0 == cmd.compare(pos, sizeof("(AtomSpace")-1, "(AtomSpace"))
 	{
 		Handle hasp = Sexpr::decode_frame(
-			Handle::UNDEFINED, cmd, pos, _space_map);
+			HandleCast(top_space), cmd, pos, _space_map);
 		return (AtomSpace*) hasp.get();
 	}
 	return as;
@@ -333,12 +333,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle h = Sexpr::decode_atom(cmd, pos);
-		h = as->add_atom(h);
 		pos++; // skip past close-paren
-		Sexpr::decode_slist(h, cmd, pos);
 
 		// Search for optional AtomSpace argument
-		// as = get_opt_as(cmd, pos, as);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
+		Sexpr::decode_slist(h, cmd, pos);
 
 		return "()\n";
 	}
