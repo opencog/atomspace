@@ -188,7 +188,7 @@ static TruthValuePtr get_stv(const std::string& s,
 ///
 Handle Sexpr::decode_atom(const std::string& s,
                           size_t l, size_t r, size_t line_cnt,
-                          std::map<std::string, Handle>& ascache)
+                          std::unordered_map<std::string, Handle>& ascache)
 {
 	TruthValuePtr stv;
 	size_t l1 = l, r1 = r;

@@ -37,7 +37,7 @@ using namespace opencog;
 
 Handle opencog::parseStream(std::istream& in, AtomSpace& as)
 {
-    static std::map<std::string, Handle> ascache; // empty, not currently used.
+    static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     Handle h;
     size_t expr_cnt = 0;
     size_t line_cnt = 0;
@@ -99,7 +99,7 @@ void opencog::load_file(const std::string& fname, AtomSpace& as)
 // The expression is assumed not to contain any newlines!
 Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
 {
-    static std::map<std::string, Handle> ascache; // empty, not currently used.
+    static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     size_t l = 0;
     size_t r = expr.length();
     size_t rr = r;
