@@ -305,13 +305,24 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// (cog-set-tv! (Concept "foo") (stv 1 0))
+	// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
 	if (settv == act)
 	{
 		pos = epos + 1;
 		Handle h = Sexpr::decode_atom(cmd, pos);
+		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
+
+		// Search for optional AtomSpace argument
+		pos = cmd.find_first_not_of(" \n\t", pos);
+		if (cmd.compare(pos, sizeof("(AtomSpace"), "(AtomSpace"))
+		{
+			Handle hasp = Sexpr::decode_frame(
+				Handle::UNDEFINED, cmd, pos, _space_map);
+			as = (AtomSpace*) hasp.get();
+		}
+
 		Handle ha = as->add_atom(h);
 		if (nullptr == ha) return "()\n"; // read-only atomspace.
-		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
 		as->set_truthvalue(ha, TruthValueCast(tv));
 		return "()\n";
 	}
@@ -332,11 +343,12 @@ std::string Commands::interpret_command(AtomSpace* as,
 
 	// -----------------------------------------------
 	// (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz"))
+	// Place the current atomspace at the bottom of the hierarchy.
 	if (frame == act)
 	{
-		pos = epos + 1;
+		pos = 0;
 		atomspace_ptr = Sexpr::decode_frame(
-			Handle::UNDEFINED, cmd, pos, _space_map);
+			AtomSpaceCast(as), cmd, pos, _space_map);
 
 		return "()\n";
 	}
