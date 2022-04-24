@@ -210,6 +210,7 @@ public:
     /* AtomSpaces are Atoms; provide virtual methods of base class. */
     virtual const std::string& get_name() const;
     virtual Arity get_arity() const;
+    virtual size_t size() const { return get_arity(); }
     virtual const HandleSeq& getOutgoingSet() const;
     virtual Handle getOutgoingAtom(Arity) const;
     virtual void setAtomSpace(AtomSpace *);
