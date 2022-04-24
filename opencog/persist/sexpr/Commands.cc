@@ -333,12 +333,15 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (svals == act)
 	{
 		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos);
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 		pos++; // skip past close-paren
 
-		// Search for optional AtomSpace argument
-		as = get_opt_as(cmd, pos, as);
-		h = as->add_atom(h);
+		if (not _multi_space)
+		{
+			// Search for optional AtomSpace argument
+			as = get_opt_as(cmd, pos, as);
+			h = as->add_atom(h);
+		}
 		Sexpr::decode_slist(h, cmd, pos);
 
 		return "()\n";
