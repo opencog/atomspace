@@ -268,12 +268,15 @@ Handle Sexpr::decode_atom(const std::string& s,
 				as = (AtomSpace*) hasp.get();
 				h = as->add_atom(h);
 			}
-			if (0 == s.compare(l2, 7, "(alist "))
-				decode_slist(h, s, l2);
-			else if (as)
-				as->set_truthvalue(h, get_stv(s, l2, r2, line_cnt));
-			else
-				h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+			if (l2 < r2)
+			{
+				if (0 == s.compare(l2, 7, "(alist "))
+					decode_slist(h, s, l2);
+				else if (as)
+					as->set_truthvalue(h, get_stv(s, l2, r2, line_cnt));
+				else
+					h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+			}
 		}
 
 		return h;
