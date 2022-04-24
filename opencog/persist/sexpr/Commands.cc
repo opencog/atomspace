@@ -84,6 +84,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pend the paren, post-pend the space.)
+	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
 	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
@@ -119,6 +120,14 @@ std::string Commands::interpret_command(AtomSpace* as,
 			cmd.c_str());
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
+
+	// -----------------------------------------------
+	// (cog-atomspace)
+	if (space == act)
+	{
+		if (not top_space) return "()\n";
+		return top_space->to_string("");
+	}
 
 	// -----------------------------------------------
 	// (cog-atomspace-clear)
