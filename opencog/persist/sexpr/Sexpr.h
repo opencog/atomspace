@@ -92,6 +92,11 @@ public:
 	static Handle decode_atom(const std::string& s,
 	                          size_t l, size_t r, size_t line_cnt,
 	                          std::unordered_map<std::string, Handle>&);
+	static Handle decode_atom(const std::string& s,
+	                          size_t l, size_t r, size_t line_cnt) {
+		static std::unordered_map<std::string, Handle> unused;
+		return decode_atom(s, l, r, line_cnt, unused);
+	}
 
 	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
 
