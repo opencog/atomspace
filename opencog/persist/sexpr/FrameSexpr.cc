@@ -122,7 +122,7 @@ static Handle find_frame(const std::string& name, const Handle& surf)
 ///
 Handle Sexpr::decode_frame(const Handle& surface,
                            const std::string& sframe, size_t& pos,
-                           std::map<std::string, Handle>& cache)
+                           std::unordered_map<std::string, Handle>& cache)
 {
 	if (std::string::npos == pos) return Handle::UNDEFINED;
 

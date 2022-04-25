@@ -491,7 +491,11 @@ std::string AtomSpace::to_string(void) const
 
 std::string AtomSpace::to_string(const std::string& indent) const
 {
-	return to_short_string(indent);
+	std::string sexpr = indent + "(AtomSpace \"" + _name + "\"";
+	for (const Handle& ho : _outgoing)
+		sexpr += " " + ho->to_string();
+	sexpr += ")";
+	return sexpr;
 }
 
 std::string AtomSpace::to_short_string(const std::string& indent) const

@@ -41,7 +41,7 @@ private:
 	bool _multi_space;
 
 	/// Map from string AtomSpace names to the matching AtomSpacePtr's
-	std::map<std::string, Handle> _space_map;
+	std::unordered_map<std::string, Handle> _space_map;
 
 	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
 

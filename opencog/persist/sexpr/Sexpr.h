@@ -38,13 +38,20 @@ public:
 	/// Decode the s-expression containing an atom, starting at
 	/// location `pos`. Return the Atom, and update `pos` to point
 	/// just past the end of the trailing parenthesis.
-	static Handle decode_atom(const std::string& s, size_t& pos)
+	static Handle decode_atom(const std::string& s, size_t& pos,
+	                          std::unordered_map<std::string, Handle>& cache)
 	{
 		size_t start = pos;
 		size_t end = s.length();
 		get_next_expr(s, start, end, 0);
 		pos = end;
-		return decode_atom(s, start, end, 0);
+		return decode_atom(s, start, end, 0, cache);
+	}
+
+	static Handle decode_atom(const std::string& s, size_t& pos)
+	{
+		static std::unordered_map<std::string, Handle> cache; // empty, unused.
+		return decode_atom(s, pos, cache);
 	}
 
 	static Handle decode_atom(const std::string& s) {
@@ -66,14 +73,14 @@ public:
 	}
 
 	static Handle decode_frame(const Handle&, const std::string&, size_t&,
-	                           std::map<std::string, Handle>&);
+	                           std::unordered_map<std::string, Handle>&);
 	static Handle decode_frame(const Handle& as, const std::string& fs,
 	                           size_t& pos) {
-		std::map<std::string, Handle> cache;
+		std::unordered_map<std::string, Handle> cache;
 		return decode_frame(as, fs, pos, cache);
 	}
 	static Handle decode_frame(const Handle& as, const std::string& fs) {
-		std::map<std::string, Handle> cache;
+		static std::unordered_map<std::string, Handle> cache; // empty, unused.
 		size_t junk = 0;
 		return decode_frame(as, fs, junk, cache);
 	}
@@ -83,7 +90,8 @@ public:
 	static int get_next_expr(const std::string&,
                             size_t& l, size_t& r, size_t line_cnt);
 	static Handle decode_atom(const std::string& s,
-                             size_t l, size_t r, size_t line_cnt);
+	                          size_t l, size_t r, size_t line_cnt,
+	                          std::unordered_map<std::string, Handle>&);
 
 	static ValuePtr add_atoms(AtomSpace*, const ValuePtr&);
 

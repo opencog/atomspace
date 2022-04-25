@@ -47,6 +47,7 @@ static std::string server_prt_link(const Handle& h)
 
 static std::string server_prt_atom(const Handle& h)
 {
+	if (ATOM_SPACE == h->get_type()) return h->to_string();
 	if (h->is_node()) return server_prt_node(h);
 	return server_prt_link(h);
 }

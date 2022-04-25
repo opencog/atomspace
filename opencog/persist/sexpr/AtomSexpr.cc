@@ -33,6 +33,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
 
@@ -186,7 +187,8 @@ static TruthValuePtr get_stv(const std::string& s,
 /// optional argument for printing file line-numbers, in case of error.
 ///
 Handle Sexpr::decode_atom(const std::string& s,
-                          size_t l, size_t r, size_t line_cnt)
+                          size_t l, size_t r, size_t line_cnt,
+                          std::unordered_map<std::string, Handle>& ascache)
 {
 	TruthValuePtr stv;
 	size_t l1 = l, r1 = r;
@@ -195,6 +197,7 @@ Handle Sexpr::decode_atom(const std::string& s,
 	l = r1;
 	if (namer.isLink(atype))
 	{
+		AtomSpace* as = nullptr;
 		HandleSeq outgoing;
 		do {
 			l1 = l;
@@ -214,15 +217,28 @@ Handle Sexpr::decode_atom(const std::string& s,
 			}
 			else
 			{
-				outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
+				if (0 == s.compare(l1, 11, "(AtomSpace "))
+				{
+					Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
+					as = (AtomSpace*) hasp.get();
+				}
+				else
+					outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
 			}
 
 			l = r1 + 1;
 		} while (l < r);
 
 		Handle h(createLink(std::move(outgoing), atype));
+		if (as) h = as->add_atom(h);
 
-		if (stv) h->setTruthValue(stv);
+		if (stv)
+		{
+			if (as)
+				as->set_truthvalue(h, stv);
+			else
+				h->setTruthValue(stv);
+		}
 
 		// alist's occur at the end of the sexpr.
 		if (l1 != r1 and l < r)
@@ -245,10 +261,22 @@ Handle Sexpr::decode_atom(const std::string& s,
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
 		{
-			if (0 == s.compare(l2, 7, "(alist "))
-				decode_slist(h, s, l2);
-			else
-				h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+			AtomSpace* as = nullptr;
+			if (0 == s.compare(l2, 11, "(AtomSpace "))
+			{
+				Handle hasp(decode_frame(Handle::UNDEFINED, s, l2, ascache));
+				as = (AtomSpace*) hasp.get();
+				h = as->add_atom(h);
+			}
+			if (l2 < r2)
+			{
+				if (0 == s.compare(l2, 7, "(alist "))
+					decode_slist(h, s, l2);
+				else if (as)
+					as->set_truthvalue(h, get_stv(s, l2, r2, line_cnt));
+				else
+					h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+			}
 		}
 
 		return h;
