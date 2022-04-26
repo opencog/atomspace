@@ -285,7 +285,7 @@ void SQLAtomStorage::flushStoreQueue()
 	rethrow();
 }
 
-void SQLAtomStorage::barrier()
+void SQLAtomStorage::barrier(AtomSpace* as)
 {
 	flushStoreQueue();
 }

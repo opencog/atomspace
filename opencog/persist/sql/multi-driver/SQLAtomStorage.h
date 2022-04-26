@@ -269,7 +269,7 @@ class SQLAtomStorage : public StorageNode
 		void storeValue(const Handle&, const Handle&);
 		void loadValue(const Handle&, const Handle&);
 		void loadType(AtomSpace*, Type);
-		void barrier();
+		void barrier(AtomSpace* = nullptr);
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
