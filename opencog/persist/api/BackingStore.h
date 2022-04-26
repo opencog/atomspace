@@ -264,7 +264,7 @@ class BackingStore
 		 * depending on how much data was buffered up, and how slow
 		 * the network is.
 		 */
-		virtual void barrier() = 0;
+		virtual void barrier(AtomSpace* = nullptr) = 0;
 
 	protected:
 		/**
