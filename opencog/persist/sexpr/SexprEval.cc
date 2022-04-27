@@ -29,6 +29,9 @@
 
 using namespace opencog;
 
+// Single shared instance holding single shared frame cache.
+Commands SexprEval::_interpreter;
+
 SexprEval::SexprEval(AtomSpacePtr& asp)
 	: GenericEval()
 {

@@ -46,7 +46,11 @@ class SexprEval : public GenericEval
 	friend class SexprShell;  // Cogserver needs to call ctor.
 	private:
 		AtomSpacePtr _atomspace;
-		Commands _interpreter;
+
+		// Static, so that there is a singleton instance shared by
+		// by all threads. Specifically, the frame cache needs to
+		// be shared by all.
+		static Commands _interpreter;
 
 		// poll_result() is called in a different thread
 		// than eval_expr() and the result is that _answer
