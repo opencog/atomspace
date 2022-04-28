@@ -121,7 +121,7 @@ class BackingStore
 		 * behavior of calling this with recursive==false and a non-empty
 		 * incoming set is undefined (and implementation-dependent).
 		 */
-		virtual void removeAtom(const Handle&, bool recursive) = 0;
+		virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) = 0;
 
 		/**
 		 * Store the value located at `key` on `atom` to the remote

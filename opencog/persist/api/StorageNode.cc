@@ -97,7 +97,7 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	// it is acting as a cache for the database, and removal is used
 	// used to free up RAM storage.
 	if (not _atom_space->get_read_only())
-		removeAtom(h, recursive);
+		removeAtom(as, h, recursive);
 
 	return as->extract_atom(h, recursive);
 }

@@ -154,7 +154,7 @@ void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
 			_filename.c_str(), strerror(errno));
 }
 
-void FileStorageNode::removeAtom(const Handle&, bool recursive)
+void FileStorageNode::removeAtom(AtomSpace* as, const Handle&, bool recursive)
 {
 	throw IOException(TRACE_INFO,
 		"FileStorageNode does not support this operation!");
