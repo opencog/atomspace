@@ -91,7 +91,7 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 /// fashion.  It might make sense to create a queue for this, so that
 /// if could run in parallel (in the unusual case that someone has
 /// millions of atoms to delete and is impateint about it...)
-void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
+void SQLAtomStorage::removeAtom(AtomSpace* frm, const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.

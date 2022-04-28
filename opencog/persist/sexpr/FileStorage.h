@@ -58,7 +58,7 @@ class FileStorageNode : public StorageNode
 		void fetchIncomingSet(AtomSpace*, const Handle&);
 		void fetchIncomingByType(AtomSpace*, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
-		void removeAtom(const Handle&, bool recursive);
+		void removeAtom(AtomSpace*, const Handle&, bool recursive);
 		void storeValue(const Handle&, const Handle&);
 		void loadValue(const Handle&, const Handle&);
 		void loadType(AtomSpace*, Type);
