@@ -262,7 +262,7 @@ public:
 	 * @return True if the Atom for the given Handle was successfully
 	 *         removed. False, otherwise.
 	 */
-	bool remove_atom(Handle h, bool recursive=false);
+	bool remove_atom(AtomSpace*, Handle h, bool recursive=false);
 };
 
 typedef std::shared_ptr<StorageNode> StorageNodePtr;

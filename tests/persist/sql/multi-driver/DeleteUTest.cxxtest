@@ -407,11 +407,11 @@ void DeleteUTest::extract_links(int idx, AtomSpace *as)
 // the AtomSpace)
 void DeleteUTest::delete_links(int idx, StorageNodePtr store)
 {
-	store->remove_atom(hl3[idx]);
+	store->remove_atom(_as, hl3[idx]);
 	store->barrier();
-	store->remove_atom(hl2[idx]);
+	store->remove_atom(_as, hl2[idx]);
 	store->barrier();
-	store->remove_atom(hl[idx]);
+	store->remove_atom(_as, hl[idx]);
 	store->barrier();
 }
 
@@ -425,7 +425,7 @@ void DeleteUTest::extract_nodes(int idx, AtomSpace *as)
 // This should delete all the links and one node from storage.
 void DeleteUTest::delete_nodes(int idx, StorageNodePtr store)
 {
-	store->remove_atom(h3[idx], true);
+	store->remove_atom(_as, h3[idx], true);
 	store->barrier();
 }
 

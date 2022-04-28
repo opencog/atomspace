@@ -133,8 +133,8 @@ void BasicDeleteUTest::test_duplicates(void)
 	// Remove the link. Since the link has duplicate atoms
 	// in it, this can cause trouble, depending on how the
 	// incoming set is managed.
-	store->remove_atom(li);
-	as->extract_atom(li);
+	store->remove_atom(as, li);
+	// as->extract_atom(li);
 	TS_ASSERT_EQUALS(as->get_size(), 3);
 
 	store->erase();
@@ -181,8 +181,8 @@ void BasicDeleteUTest::test_recursive(void)
 
 	// Remove (Concept "a"). Since this appears twice, recursion
 	// will hit it twice, in strange ways, and maybe crash.
-	store->remove_atom(ha, true);
-	as->extract_atom(ha);
+	store->remove_atom(as, ha, true);
+	// as->extract_atom(ha);
 
 	printf("Post-delete atomspace size=%lu\n", as->get_size());
 	hset.clear();
@@ -202,8 +202,8 @@ void BasicDeleteUTest::test_recursive(void)
 	store->barrier();
 	TS_ASSERT_EQUALS(as->get_size(), 5);
 
-	store->remove_atom(ha, true);
-	as->extract_atom(ha);
+	store->remove_atom(as, ha, true);
+	// as->extract_atom(ha);
 	TS_ASSERT_EQUALS(as->get_size(), 2);
 
 	// --------------------------------------
@@ -216,8 +216,8 @@ void BasicDeleteUTest::test_recursive(void)
 	store->barrier();
 	TS_ASSERT_EQUALS(as->get_size(), 5);
 
-	store->remove_atom(ha, true);
-	as->extract_atom(ha);
+	store->remove_atom(as, ha, true);
+	// as->extract_atom(ha);
 	TS_ASSERT_EQUALS(as->get_size(), 2);
 
 	// --------------------------------------
@@ -231,8 +231,8 @@ void BasicDeleteUTest::test_recursive(void)
 	store->barrier();
 	TS_ASSERT_EQUALS(as->get_size(), 6);
 
-	store->remove_atom(ha, true);
-	as->extract_atom(ha);
+	store->remove_atom(as, ha, true);
+	// as->extract_atom(ha);
 	TS_ASSERT_EQUALS(as->get_size(), 2);
 
 	// --------------------------------------
@@ -284,8 +284,8 @@ void BasicDeleteUTest::test_key_deletion(void)
 	TS_ASSERT_EQUALS(hs.size(), 3);
 
 	// Remove one of the keys
-	store->remove_atom(kb);
-	as->extract_atom(kb);
+	store->remove_atom(as, kb);
+	// as->extract_atom(kb);
 	TS_ASSERT_EQUALS(as->get_size(), 4);
 
 	// We are done.
@@ -362,8 +362,8 @@ void BasicDeleteUTest::test_key_corruption(void)
 	TS_ASSERT_EQUALS(as->get_size(), 4);
 
 	// Remove the value
-	store->remove_atom(hx);
-	as->extract_atom(hx);
+	store->remove_atom(as, hx);
+	// as->extract_atom(hx);
 	TS_ASSERT_EQUALS(as->get_size(), 3);
 
 	// We are done.
@@ -406,8 +406,8 @@ void BasicDeleteUTest::test_key_corruption(void)
 	TS_ASSERT_EQUALS(as->get_size(), 7);
 
 	// Remove the value .. again
-	store->remove_atom(hx);
-	as->extract_atom(hx);
+	store->remove_atom(as, hx);
+	// as->extract_atom(hx);
 	TS_ASSERT_EQUALS(as->get_size(), 6);
 
 	// We are done.

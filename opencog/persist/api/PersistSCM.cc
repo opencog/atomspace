@@ -283,13 +283,15 @@ void PersistSCM::sn_store_frames(Handle hsn, Handle has)
 bool PersistSCM::sn_delete(Handle h, Handle hsn)
 {
 	GET_STNP;
-	return stnp->remove_atom(h, false);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete!");
+	return stnp->remove_atom(as, h, false);
 }
 
 bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
 {
 	GET_STNP;
-	return stnp->remove_atom(h, true);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
+	return stnp->remove_atom(as, h, true);
 }
 
 void PersistSCM::sn_barrier(Handle hsn)
@@ -408,13 +410,15 @@ void PersistSCM::dflt_store_frames(Handle has)
 bool PersistSCM::dflt_delete(Handle h)
 {
 	CHECK;
-	return _sn->remove_atom(h, false);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete!");
+	return _sn->remove_atom(as, h, false);
 }
 
 bool PersistSCM::dflt_delete_recursive(Handle h)
 {
 	CHECK;
-	return _sn->remove_atom(h, true);
+	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
+	return _sn->remove_atom(as, h, true);
 }
 
 void PersistSCM::dflt_barrier(void)
