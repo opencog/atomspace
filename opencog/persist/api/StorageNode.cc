@@ -71,7 +71,7 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 	storeValue(h, key);
 }
 
-bool StorageNode::remove_atom(Handle h, bool recursive)
+bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 {
 	// Removal is ... tricky. We need to remove Atoms from storage first,
 	// and only then the AtomSpace. We need to do storage first because
@@ -99,7 +99,7 @@ bool StorageNode::remove_atom(Handle h, bool recursive)
 	if (not _atom_space->get_read_only())
 		removeAtom(h, recursive);
 
-	return getAtomSpace()->extract_atom(h, recursive);
+	return as->extract_atom(h, recursive);
 }
 
 Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
