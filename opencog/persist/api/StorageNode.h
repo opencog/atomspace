@@ -263,6 +263,8 @@ public:
 	 *         removed. False, otherwise.
 	 */
 	bool remove_atom(AtomSpace*, Handle h, bool recursive=false);
+	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
+		{ return remove_atom(as.get(), h, recursive); }
 };
 
 typedef std::shared_ptr<StorageNode> StorageNodePtr;
