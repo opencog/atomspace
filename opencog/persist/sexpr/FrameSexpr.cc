@@ -61,15 +61,48 @@ using namespace opencog;
 
 static std::string prt_frame(const AtomSpace* as)
 {
+#ifdef SIMPLE_RECURSIVE_PRINTER
+	std::string txt = "(" + nameserver().getTypeName(as->get_type()) + " ";
+
 	std::stringstream ss;
 	ss << std::quoted(as->get_name());
-
-	std::string txt = "(" + nameserver().getTypeName(as->get_type()) + " ";
 	txt += ss.str() + " ";
+
 	for (const Handle& ho : as->getOutgoingSet())
 		txt += prt_frame((AtomSpace*) ho.get());
+
 	txt += ")";
 	return txt;
+#else // SIMPLE_RECURSIVE_PRINTER
+	// The above implements the basic idea. However, since it is
+	// recursive, it runs out of C stack if the frames are more than
+	// about 9000 deep. So this implements a non-recursive variant for
+	// the most common case: a linear stack.
+
+	std::string txt;
+	size_t cnt = 0;
+	while (true)
+	{
+		cnt++;
+		txt += "(" + nameserver().getTypeName(as->get_type()) + " ";
+		std::stringstream ss;
+		ss << std::quoted(as->get_name());
+		txt += ss.str() + " ";
+
+		if (1 != as->get_arity()) break;
+		as = (AtomSpace*) as->getOutgoingAtom(0).get();
+	}
+
+	// If arity is more than one, recurse.
+	// If zero, we are almost done.
+	for (const Handle& ho : as->getOutgoingSet())
+		txt += prt_frame((AtomSpace*) ho.get());
+
+	// Print all the closing parents from loop above.
+	for (size_t i=0; i<cnt; i++) txt += ")";
+
+	return txt;
+#endif // SIMPLE_RECURSIVE_PRINTER
 }
 
 std::string Sexpr::encode_frame(const Handle& h)
