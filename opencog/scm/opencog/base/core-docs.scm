@@ -1080,12 +1080,20 @@
      parent. (It does not make sense to mark an atomspace as being COW,
      if there is no parent.)
 
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
      COW spaces are useful as temporary or transient AtomSpaces, so that
      scratch calculations and updates can be performed without affecting
      the parent.
 
-     The ATOMSPACE argument is optional; if not specified, the current
-     atomspace is assumed.
+     Long chains of COW spaces can also be used to record a history of
+     changes to Values stored on Atoms. This can be useful in several
+     ways, including backtracking from complex inferences.
+
+     Atoms that are deleted in COW spaces are removed only in that
+     space; they remain in the parent AtomSpaces. They can also be
+     added back in, farther up a stack of spaces.
 
      See also: cog-atomspace-cow?, cog-atomspace-readonly?,
          cog-atomspace-ro! and cog-atomspace-rw!,
