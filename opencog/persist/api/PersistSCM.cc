@@ -268,7 +268,7 @@ void PersistSCM::sn_store_atomspace(Handle hsn)
 	stnp->store_atomspace(as);
 }
 
-Handle PersistSCM::sn_load_frames(Handle hsn)
+HandleSeq PersistSCM::sn_load_frames(Handle hsn)
 {
 	GET_STNP;
 	return stnp->load_frames();
@@ -395,7 +395,7 @@ void PersistSCM::dflt_store_atomspace(void)
 	_sn->store_atomspace(as);
 }
 
-Handle PersistSCM::dflt_load_frames(void)
+HandleSeq PersistSCM::dflt_load_frames(void)
 {
 	CHECK;
 	return _sn->load_frames();

@@ -225,19 +225,14 @@ class BackingStore
 
 		/**
 		 * Return the DAG of all of the AtomSpaces held in storage.
-		 * If storage holds only one AtomSpace, then the argument is
-		 * returned. If storage holds more than one AtomSpace, and
-		 * the argument is not a null pointer, then an automatic merge
-		 * of the argument DAG and the in-storage DAG is attempted.
-		 * This merge might result in name of the argument AtomSpace being
-		 * changed!
 		 *
-		 * The returned Handle is an AtomSpacePtr to the top of the DAG.
+		 * The returned HandleSet consists of AtomSpacePtr's to the
+		 * tops of all of the AtomSpaces in the DAG.
 		 */
-		virtual Handle loadFrameDAG(AtomSpace* as = nullptr)
+		virtual HandleSeq loadFrameDAG(void)
 		{
 			throw IOException(TRACE_INFO, "Not implemented!");
-			// return as->shared_from_this();
+			// return HandleSet();
 		}
 
 		/**
