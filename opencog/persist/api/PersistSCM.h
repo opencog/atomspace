@@ -52,7 +52,7 @@ private:
 	static void sn_load_type(Type, Handle);
 	static void sn_load_atomspace(Handle);
 	static void sn_store_atomspace(Handle);
-	static Handle sn_load_frames(Handle);
+	static HandleSeq sn_load_frames(Handle);
 	static void sn_store_frames(Handle, Handle);
 	static bool sn_delete(Handle, Handle);
 	static bool sn_delete_recursive(Handle, Handle);
@@ -78,7 +78,7 @@ private:
 	void dflt_load_type(Type);
 	void dflt_load_atomspace(void);
 	void dflt_store_atomspace(void);
-	Handle dflt_load_frames(void);
+	HandleSeq dflt_load_frames(void);
 	void dflt_store_frames(Handle);
 	bool dflt_delete(Handle);
 	bool dflt_delete_recursive(Handle);

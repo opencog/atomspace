@@ -154,9 +154,10 @@ public:
 	 * The AtomSpaces themselves will not be populated; use the
 	 * `load_atomspace` method above to accomplish that.
 	 *
-	 * The returned Handle is an AtomSpacePtr to the top of the DAG.
+	 * The returned HandleSeq consists of AtomSpacePtr's to the
+	 * AtomSpaces at the top of the DAG.
 	 */
-	Handle load_frames(AtomSpace* = nullptr);
+	HandleSeq load_frames(void);
 
 	/**
 	 * Store the DAG of all AtomSpaces to the backing store.
