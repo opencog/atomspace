@@ -313,6 +313,13 @@ Handle AtomSpace::add(const Handle& orig, bool force)
             atom->copyValues(orig);
         } else {
             atom->unsetRemovalFlag();
+
+            // If we are shadowing a deeper atom, copy it's values.
+            if (_transient or _copy_on_write)
+            {
+                Handle covered(lookupHandle(atom));
+                if (covered) atom->copyValues(covered);
+            }
         }
     }
     else if (atom->getAtomSpace())
@@ -322,7 +329,16 @@ Handle AtomSpace::add(const Handle& orig, bool force)
         atom->copyValues(orig);
     }
     else
+    {
         atom->unsetRemovalFlag();
+
+        // If we are shadowing a deeper atom, copy it's values.
+        if (_transient or _copy_on_write)
+        {
+            Handle covered(lookupHandle(atom));
+            if (covered) atom->copyValues(covered);
+        }
+    }
 
     // Must set atomspace before insertion. This must be done before the
     // atom becomes visible at the typeIndex insert.  Likewise for setting
