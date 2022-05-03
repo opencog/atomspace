@@ -248,11 +248,10 @@ Handle AtomSpace::check(const Handle& orig, bool force)
 
     // If we have a COW atomspace, then we must respect the atomspace
     // membership of the provided outgoing set. That is, the user will
-    // have supplied an explcit outgoing set, with explicit atomspace
+    // have supplied an explicit outgoing set, with explicit atomspace
     // membership, and we must respect that wish.
     const Handle& cand(lookupHandle(orig));
     if (not cand) return Handle::UNDEFINED;
-
     const HandleSeq& oset(orig->getOutgoingSet());
     const HandleSeq& cset(cand->getOutgoingSet());
     size_t sz = oset.size();
@@ -311,6 +310,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
                 closet.emplace_back(add(h, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
+            atom->copyValues(orig);
         } else {
             atom->unsetRemovalFlag();
         }
@@ -319,6 +319,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     {
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
+        atom->copyValues(orig);
     }
     else
         atom->unsetRemovalFlag();
@@ -328,10 +329,6 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // up the incoming set.
     atom->setAtomSpace(this);
     atom->keep_incoming_set();
-
-    // Not entirily critical to copy values before the insert below, but
-    // it is a nice gesture to anyone who expects and atomic atomspace add.
-    if (atom != orig) atom->copyValues(orig);
 
     // Set up the incoming set. We have to do this before the typeIndex
     // insert, because that is when this atom becomes visible to other
