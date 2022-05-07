@@ -313,6 +313,14 @@
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
 
+    If the current AtomSpace sits on top of a stack of AtomSpaces, then
+    only the shallowest visible Atoms in the current AtomSpace will be
+    stored. Atoms that have been deleted in the current Atomspaces but
+    are present in deeper AtomSpaces will NOT be stored. Values in
+    deeper AtomSpaces that are hidden/changed in the current AtomSpace
+    will NOT be stored. In other words, the only Atoms and Values that
+    are stored are those that are visible in the current AtomSpace.
+
     See also:
     load-atomspace -- load all Atoms in the AtomSpace.
     store-atom ATOM -- store one ATOM and all of the values on it.
