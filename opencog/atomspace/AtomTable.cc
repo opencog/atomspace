@@ -315,8 +315,15 @@ Handle AtomSpace::add(const Handle& orig, bool force)
             // see if we already have this atom in the atomspace.
             const Handle& hc(check(atom, force));
             if (hc) {
-                hc->copyValues(orig);
-                return hc;
+                if (not _copy_on_write or this == hc->getAtomSpace()) {
+                    if (nullptr == orig->getAtomSpace())
+                        hc->copyValues(orig);
+                    return hc;
+                }
+
+                // If we are here, then hc is a deeper atom, and we need
+                // to shadow it, including it's values.
+                atom->copyValues(hc);
             }
 
             // Don't have it. Copy values, and then add it.
