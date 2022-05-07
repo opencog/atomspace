@@ -343,6 +343,13 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     {
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
+
+        // If we are shadowing a deeper atom, copy it's values.
+        if (_transient or _copy_on_write)
+        {
+            Handle covered(lookupHandle(atom));
+            if (covered) atom->copyValues(covered);
+        }
         atom->copyValues(orig);
     }
     else
