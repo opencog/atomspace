@@ -314,55 +314,34 @@ Handle AtomSpace::add(const Handle& orig, bool force)
             // Now that the outgoing set is correct, check again to
             // see if we already have this atom in the atomspace.
             const Handle& hc(check(atom, force));
-            if (hc) {
-                if (not _copy_on_write or this == hc->getAtomSpace()) {
-                    if (nullptr == orig->getAtomSpace())
-                        hc->copyValues(orig);
-                    return hc;
-                }
-
-                // If we are here, then hc is a deeper atom, and we need
-                // to shadow it, including it's values.
-                atom->copyValues(hc);
+            if (hc and (not _copy_on_write or this == hc->getAtomSpace())) {
+                hc->copyValues(orig);
+                return hc;
             }
 
-            // Don't have it. Copy values, and then add it.
-            atom->copyValues(orig);
         } else {
             atom->unsetRemovalFlag();
-
-            // If we are shadowing a deeper atom, copy it's values.
-            if (_transient or _copy_on_write)
-            {
-                Handle covered(lookupHandle(atom));
-                if (covered) atom->copyValues(covered);
-            }
         }
     }
     else if (atom->getAtomSpace())
     {
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
-
-        // If we are shadowing a deeper atom, copy it's values.
-        if (_transient or _copy_on_write)
-        {
-            Handle covered(lookupHandle(atom));
-            if (covered) atom->copyValues(covered);
-        }
-        atom->copyValues(orig);
     }
     else
     {
         atom->unsetRemovalFlag();
-
-        // If we are shadowing a deeper atom, copy it's values.
-        if (_transient or _copy_on_write)
-        {
-            Handle covered(lookupHandle(atom));
-            if (covered) atom->copyValues(covered);
-        }
     }
+
+    // If we are shadowing a deeper atom, copy it's values.
+    if (_transient or _copy_on_write)
+    {
+        Handle covered(lookupHandle(atom));
+        if (covered) atom->copyValues(covered);
+    }
+
+    if (atom != orig)
+        atom->copyValues(orig);
 
     // Must set atomspace before insertion. This must be done before the
     // atom becomes visible at the typeIndex insert.  Likewise for setting
