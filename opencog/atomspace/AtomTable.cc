@@ -310,6 +310,16 @@ Handle AtomSpace::add(const Handle& orig, bool force)
                 closet.emplace_back(add(h, false));
             }
             atom = createLink(std::move(closet), atom->get_type());
+
+            // Now that the outgoing set is correct, check again to
+            // see if we already have this atom in the atomspace.
+            const Handle& hc(check(atom, force));
+            if (hc) {
+                hc->copyValues(orig);
+                return hc;
+            }
+
+            // Don't have it. Copy values, and then add it.
             atom->copyValues(orig);
         } else {
             atom->unsetRemovalFlag();
