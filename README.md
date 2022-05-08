@@ -136,9 +136,10 @@ listed below.  Things are things that no one else does:
   stackframe, or a Kripke frame: the graph state, at this moment. By
   storing frames, it is possible to revert to earlier graph state. It is
   possible to compare different branches and to explore different
-  rewrite histories starting from the same base graph.  Branches may be
-  merged. This is useful for inference and learning algos, which explore
-  long chains of large, complex graph rewrites.
+  rewrite histories starting from the same base graph.  Different
+  branches may be merged, forming a set-union of thier contents. This
+  is useful for inference and learning algos, which explore long chains
+  of large, complex graph rewrites.
 
 
 ### What it Isn't
