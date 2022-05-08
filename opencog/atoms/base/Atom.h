@@ -410,6 +410,10 @@ public:
     /// Print all of the key-value pairs.
     std::string valuesToString() const;
 
+    /// Remove all values. The only anticipated users of this are the
+    // storage backends, manipulating multi-AtomSpace bulk loads.
+    void clearValues();
+
     //! Return true if the incoming set is empty.
     bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
 

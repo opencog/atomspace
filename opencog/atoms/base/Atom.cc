@@ -182,6 +182,12 @@ void Atom::copyValues(const Handle& other)
     }
 }
 
+void Atom::clearValues(void)
+{
+    KVP_UNIQUE_LOCK;
+    _values.clear();
+}
+
 /**
  * Return all of the Values on this Atom, formatted as a scheme
  * association-list. It must have the SRFI-1 a-list format,
@@ -248,7 +254,7 @@ bool Atom::isAbsent() const
 /// idea.)
 bool Atom::setAbsent(void)
 {
-    KVP_SHARED_LOCK;
+    KVP_UNIQUE_LOCK;
     _values.clear();
     return _absent.exchange(true);
 }
