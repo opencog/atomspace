@@ -392,6 +392,7 @@ ADD_CUSTOM_TARGET(cscope
 
 # ===============================================================
 # Packaging
+# XXX FIXME. Packging below is stale/wrong/broken.
 ## Architecture the package is for.
 ## TODO: Will give error on non debian distros, fix it.
 EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
