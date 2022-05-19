@@ -11,7 +11,6 @@ ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(HashMixUTest)
 ADD_CXXTEST(AtomSpaceUTest)
-ADD_CXXTEST(AtomSpaceAsyncUTest)
 ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
 ADD_CXXTEST(COWSpaceUTest)
