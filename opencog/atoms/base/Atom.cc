@@ -77,9 +77,8 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 {
     if (nullptr == newTV) return;
 
-    // We need to guarantee that the signal goes out with the
-    // correct truth value.  That is, another setter could be changing
-    // this, even as we are.  So make a copy, first.
+    // Another setter could be changing this, even as we are.
+    // So make a copy, first.
     TruthValuePtr oldTV(getTruthValue());
 
     // If both old and new are e.g. DEFAULT_TV, then do nothing.
@@ -327,10 +326,6 @@ void Atom::insert_atom(const Handle& a)
         bucket = pr.first;
     }
     bucket->second.insert(GET_PTR(a));
-
-#ifdef INCOMING_SET_SIGNALS
-    _incoming_set->_addAtomSignal(shared_from_this(), a);
-#endif /* INCOMING_SET_SIGNALS */
 }
 
 /// Remove an atom from the incoming set.
@@ -338,9 +333,6 @@ void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
-#ifdef INCOMING_SET_SIGNALS
-    _incoming_set->_removeAtomSignal(shared_from_this(), a);
-#endif /* INCOMING_SET_SIGNALS */
     Type at = a->get_type();
 
     const auto bucket = _incoming_set->_iset.find(at);
@@ -364,9 +356,6 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
 
-#ifdef INCOMING_SET_SIGNALS
-    _incoming_set->_removeAtomSignal(shared_from_this(), old);
-#endif /* INCOMING_SET_SIGNALS */
     Type ot = old->get_type();
     auto bucket = _incoming_set->_iset.find(ot);
     bucket->second.erase(GET_PTR(old));
@@ -380,10 +369,6 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
         bucket = pr.first;
     }
     bucket->second.insert(GET_PTR(neu));
-
-#ifdef INCOMING_SET_SIGNALS
-    _incoming_set->_addAtomSignal(shared_from_this(), neu);
-#endif /* INCOMING_SET_SIGNALS */
 }
 
 void Atom::install() {}

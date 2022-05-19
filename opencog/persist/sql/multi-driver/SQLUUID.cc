@@ -37,35 +37,12 @@ using namespace opencog;
 void SQLAtomStorage::registerWith(AtomSpace* as)
 {
 	_tlbuf.set_resolver(as);
-
-#ifdef NOT_NEEDED_RIGHT_NOW
-	// The goal here is to avoid cluttering the TLB with lots of
-	// extra junk that has been removed from the atomspace. This
-	// can happen in several ways:
-	//
-	// 1) User code adds atoms to the atomspace, saves them to the
-	//	database, then deletes them from the atomspace.  If this is
-	//	done, then pointers to those atoms will continue on, here in
-	//	the TLB, chewing up RAM.
-	// 2) The above happens unintentionally, due to a bug in the code.
-	//
-	// The callback just deletes stuff not in the atomspace, as, chances
-	// are, they'll never be used again.
-	//
-	_extract_sig = as->atomRemovedAtomSignal().connect(
-		std::bind(&SQLAtomStorage::extract_callback, this,
-			std::placeholders::_1));
-#endif // NOT_NEEDED_RIGHT_NOW
 }
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
 	flushStoreQueue();
 	_tlbuf.clear_resolver(as);
-
-#ifdef NOT_NEEDED_RIGHT_NOW
-	_extract_sig.disconnect();
-#endif // NOT_NEEDED_RIGHT_NOW
 }
 
 void SQLAtomStorage::setAtomSpace(AtomSpace* tb)

@@ -362,13 +362,6 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // have to be an atomic test-n-set.
     const Handle& oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
-
-    // Now that we are completely done, emit the added signal.
-    // Don't emit signal until after the indexes are updated!
-    // No don't even bother. This just damages performance,
-    // and no one uses this stuff.
-    // _addAtomSignal.emit(atom);
-
     return atom;
 }
 

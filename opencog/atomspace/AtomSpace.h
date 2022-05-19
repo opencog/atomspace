@@ -44,11 +44,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-typedef SigSlot<const Handle&> AtomSignal;
-typedef SigSlot<const Handle&,
-                const TruthValuePtr&,
-                const TruthValuePtr&> TVCHSigl;
-
 class AtomSpace;
 typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
 
@@ -99,13 +94,6 @@ class AtomSpace : public Atom
     NameServer& _nameserver;
     int addedTypeConnection;
     void typeAdded(Type);
-
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomSignal _removeAtomSignal;
-
-    /** Signal emitted when the TV changes. */
-    TVCHSigl _TVChangedSignal;
 
     void init();
     void clear_all_atoms();
@@ -526,14 +514,6 @@ public:
     virtual std::string to_short_string(const std::string& indent) const;
 
     /* ----------------------------------------------------------- */
-    // ---- Signals
-
-    AtomSignal& atomAddedSignal() { return _addAtomSignal; }
-    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
-
-    /** Provide ability for others to find out about TV changes */
-    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
-
     // Not for public use! Only StorageNodes get to call this!
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
