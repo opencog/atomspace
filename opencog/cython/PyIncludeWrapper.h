@@ -1,7 +1,7 @@
 
 #ifdef HAVE_CYTHON
 
-// XXX Cython currently conflicts with standard C library defintions.
+// XXX Cython currently conflicts with standard C library definitions.
 // The push/pop below should hush it, for now. (needed for cython
 // 0.15.1 and maybe other versions)  FIXME someday...
 #ifdef _GNU_SOURCE

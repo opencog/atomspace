@@ -32,6 +32,8 @@ using namespace opencog;
 class RemoveUTest :  public CxxTest::TestSuite
 {
 private:
+	AtomSpacePtr asp1;
+	AtomSpacePtr asp2;
 
 public:
 	RemoveUTest()
@@ -39,7 +41,14 @@ public:
 		logger().set_print_to_stdout_flag(true);
 	}
 
-	void setUp() {}
+	void setUp()
+	{
+		asp1 = createAtomSpace();
+		asp2 = createAtomSpace(asp1);
+
+		// Testing is performed on a write-through configuration.
+		asp2->clear_copy_on_write();
+	}
 
 	void tearDown() {}
 
@@ -57,8 +66,9 @@ public:
 void RemoveUTest::testSimple()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -79,7 +89,7 @@ void RemoveUTest::testSimple()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Simple removal of hli should leave everything unaffeced.
-	as2.remove_atom(hli);
+	as2.extract_atom(hli);
 
 	TS_ASSERT(as1.get_size() == 2);
 	TS_ASSERT(as2.get_size() == 2);
@@ -99,7 +109,7 @@ void RemoveUTest::testSimple()
 void RemoveUTest::testDangling()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
+	AtomSpace& as1(*asp1.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 
@@ -118,7 +128,7 @@ void RemoveUTest::testDangling()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.remove_atom(hna, true);
+	as1.extract_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
 
@@ -136,8 +146,8 @@ void RemoveUTest::testDangling()
 void RemoveUTest::testRecursive()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -158,7 +168,7 @@ void RemoveUTest::testRecursive()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.remove_atom(hna, true);
+	as1.extract_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
 	TS_ASSERT(as2.get_size() == 1);
@@ -178,8 +188,8 @@ void RemoveUTest::testRecursive()
 void RemoveUTest::testCross()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -200,7 +210,7 @@ void RemoveUTest::testCross()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.remove_atom(hna, true);
+	as1.extract_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 1);
@@ -220,8 +230,8 @@ void RemoveUTest::testCross()
 void RemoveUTest::testReCross()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -242,7 +252,7 @@ void RemoveUTest::testReCross()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hnb should blow away hli.
-	as2.remove_atom(hnb, true);
+	as2.extract_atom(hnb, true);
 
 	TS_ASSERT(as1.get_size() == 1);
 	TS_ASSERT(as2.get_size() == 1);
@@ -262,8 +272,8 @@ void RemoveUTest::testReCross()
 void RemoveUTest::testRepeat()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -285,7 +295,7 @@ void RemoveUTest::testRepeat()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.remove_atom(hna, true);
+	as1.extract_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
 	TS_ASSERT(as2.get_size() == 1);
@@ -310,8 +320,8 @@ void RemoveUTest::testRepeat()
 void RemoveUTest::testHeads()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -346,7 +356,7 @@ void RemoveUTest::testHeads()
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
 	// Recursive removal of hna should blow away hli.
-	as1.remove_atom(hna, true);
+	as1.extract_atom(hna, true);
 
 	TS_ASSERT(as1.get_size() == 1);
 	TS_ASSERT(as2.get_size() == 1);
@@ -366,8 +376,8 @@ void RemoveUTest::testHeads()
 void RemoveUTest::testTails()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace as1;
-	AtomSpace as2(&as1);
+	AtomSpace& as1(*asp1.get());
+	AtomSpace& as2(*asp2.get());
 
 	TS_ASSERT(as1.get_size() == 0);
 	TS_ASSERT(as2.get_size() == 0);
@@ -395,7 +405,7 @@ void RemoveUTest::testTails()
 	TS_ASSERT(as1.get_size() == 6);
 	TS_ASSERT(as2.get_size() == 13);
 
-	as2.remove_atom(hoo, true);
+	as2.extract_atom(hoo, true);
 
 	TS_ASSERT(as1.get_size() == 6);
 	TS_ASSERT(as2.get_size() == 9);

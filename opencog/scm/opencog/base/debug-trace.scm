@@ -5,7 +5,7 @@
 ; The problem addressed here is that lots of scheme code (e.g. the
 ; relex2logic rules) run wrapped in C++ code, and some of that C++
 ; code does not correctly redirect printed output (e.g. the
-; foreward & backward chainers). Rather than fixing this I/O
+; forward & backward chainers). Rather than fixing this I/O
 ; problem, we have a quick hack here: just dump trace messages to a
 ; file.  This is simple, easy, and avoids the complexity of the
 ; opencog logger subsystem.

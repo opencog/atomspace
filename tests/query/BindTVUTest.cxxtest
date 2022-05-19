@@ -33,7 +33,7 @@ using namespace opencog;
 class BindTVUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -43,7 +43,7 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
@@ -51,7 +51,6 @@ public:
 	~BindTVUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -80,7 +79,7 @@ void BindTVUTest::test_single_bindlink(void)
 	eval->eval("(load-from-path \"tests/query/bind-tv.scm\")");
 
 	Handle query = eval->eval_h("query");
-	Handle answers = bindlink(as, query);
+	Handle answers = bindlink(as.get(), query);
 
 	logger().debug() << "answers = " << oc_to_string(answers);
 

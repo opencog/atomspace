@@ -33,7 +33,7 @@ using namespace opencog;
 class EinsteinPuzzle :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace* as;
+		AtomSpacePtr as;
 		SchemeEval* eval;
 
 	public:
@@ -44,7 +44,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 			logger().set_print_to_stdout_flag(true);
 #include "test-types.cc"
 
-			as = new AtomSpace();
+			as = createAtomSpace();
 			eval = new SchemeEval(as);
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 

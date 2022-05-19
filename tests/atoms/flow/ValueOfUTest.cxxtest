@@ -40,7 +40,7 @@ public:
 	void test_basic();
 	void test_basic_value();
 	void test_truth_value();
-	void test_cached_tv();
+	// void test_cached_tv(); disable, see below.
 	void test_times();
 	void test_plus();
 	void test_times_plus();
@@ -154,7 +154,15 @@ void ValueOfUTest::test_truth_value()
 }
 
 // ====================================================================
+
+#ifdef DONT_DO_THIS_TEST
 // Make sure caching works
+
+// I'm disabling this test, because although caching seems like a cool
+// idea, there does not seem to be an practical way for anyone to actually
+// make use of it through any non-C++ API's. Thus, caching is mostly just
+// a CPU-waster. So I disabled caching.
+
 void ValueOfUTest::test_cached_tv()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -194,6 +202,7 @@ void ValueOfUTest::test_cached_tv()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+#endif
 
 // ====================================================================
 // Make sure TimesLink works

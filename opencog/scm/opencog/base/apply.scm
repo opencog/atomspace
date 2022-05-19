@@ -1,5 +1,5 @@
 ; Function to substitute variables by arguments in a given atom or
-; more speficially forAllLink
+; more specifically forAllLink
 ;
 ; Author Nil Geisweiller <ngeiswei@gmail.com>
 ;

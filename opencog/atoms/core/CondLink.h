@@ -48,13 +48,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<CondLink> CondLinkPtr;
-static inline CondLinkPtr CondLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<CondLink>(a); }
-static inline CondLinkPtr CondLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<CondLink>(a); }
-
-#define createCondLink std::make_shared<CondLink>
+LINK_PTR_DECL(CondLink)
+#define createCondLink CREATE_DECL(CondLink)
 
 /** @}*/
 }

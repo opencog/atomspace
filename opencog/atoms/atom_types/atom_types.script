@@ -8,8 +8,6 @@
 // unused!  Be sure to grep for the CamelCase names, to see if they
 // show up elsewhere!
 //
-// Some of them are used by Python PLN code (which also uses the
-// CamelCase names).
 // ===========================================================
 
 // Special type designating that no atom type has been assigned. It is
@@ -69,12 +67,25 @@ EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
-// Base of the atom hierarchy. Atoms are globally unique and persistent
-// and are immutable (unchangeable).
+// Base of the atom hierarchy. Atoms are globally unique; the AtomSpace
+// guarantees that uniqueness. They are persistent; the AtomSpace
+// provides persistence. They are immutable (unchangeable); links and
+// nodes cannot be modified. However, the Values stored on a link/node
+// can be changed!
 //
 // NOTE: ATOM will not have a corresponding python constructor, to
 // avoid conflict with the python Atom object.
 ATOM <- VALUE
+
+// Frames are experimental: Atoms that are both Nodes and Links,
+// having both a name and an outgoing set. Used as a base class for
+// AtomSpaces. Currently, no other use.
+FRAME <- ATOM
+
+// The AtomSpace is kind of like a Link, kind of like a SetLink, except
+// that it is mutable. The contents of the AtomSpace *can* be changed!
+ATOM_SPACE <- FRAME
+
 NODE <- ATOM
 LINK <- ATOM
 
@@ -109,7 +120,7 @@ PREDICATE_NODE <- NODE
 // *) It fails to handle connector polarities beyond just "input"
 //    and "output". That is, there are more ways of connecting things
 //    than merely saying "outputs are things that can be plugged into
-//    inputs, and thier types must match."
+//    inputs, and their types must match."
 //
 // So... deficient in many ways, but basically, it works for now, and it
 // handles most of the basic cases in a fairly straightforward fashion.
@@ -138,7 +149,7 @@ BOOLEAN_LINK <- LINK
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
 // that can evaluate to NumberNodes: viz NumericOutputLinks, or
 // numeric values (derived from FloatValue).
-NUMERIC_LINK <- LINK
+NUMERIC_INPUT_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
@@ -147,22 +158,45 @@ TYPE_INPUT_LINK <- LINK
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_LINK <- LINK
 
+// Alpha-convertible links are those that may have multiple different
+// representations that are alpha-equivalent. This mixin helps checkers
+// know whether they have to explicitly check for alpha-equivalence
+// (e.g. the storage backends)
+ALPHA_CONVERTIBLE_LINK <- LINK
+
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-SET_LINK <- UNORDERED_LINK
-LIST_LINK <- ORDERED_LINK
+// Base class for sets and for operations that return sets.
+COLLECTION_LINK <- LINK
+
+// Plain old list AKA Cartesian product
+LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
+
+// Unordered multi-set (Classical Set-Theory set)
+SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
+
+// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
+// These use probabilistic formulas to compute truth values.
+// See issue opencog/atomspace#2814 for a discussion.
+UNION_LINK <- UNORDERED_LINK,COLLECTION_LINK
+INTERSECTION_LINK <- UNORDERED_LINK,COLLECTION_LINK
+COMPLEMENT_LINK <- UNORDERED_LINK,COLLECTION_LINK
+SET_DIFFERENCE_LINK <- ORDERED_LINK,COLLECTION_LINK
+
+// Set membership. Declaration: individual belongs to set.
+// See also the section of relation-links below (including equality,
+// etc.) Perhaps the definition of MemberLink and SubsetLink should
+// be moved to that section!?
 MEMBER_LINK <- ORDERED_LINK
+
+// Indicates a subset relationship.
+SUBSET_LINK <- ORDERED_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
 // the probability.
 CONTEXT_LINK <- ORDERED_LINK
-
-// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute truth values.
-// UNION_LINK <- OR_LINK
-// INTERSECTION_LINK <- AND_LINK
 
 // Binary-valued (0/1, T/F) Boolean algebra operations and logical
 // constants. These are used by the pattern matcher to compute
@@ -238,14 +272,27 @@ ABSENT_LINK <- PRESENT_LINK
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
 
+// Continuations are used in the Pattern Engine to implement infinite
+// recursion. They currently behave like an explicit declaration of tail
+// recursion.  (Caution: this may be a misleading name for what this
+// link does. I can't think of a better name. TailRecursionLink is not
+// quite the right name either, because the recursion need not be at the
+// tail.)
+CONTINUATION_LINK <- EVALUATABLE_LINK
+
 // ====================================================================
 // Performance scripting links.
+//
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  ThreadJoinLink launches multiple threads, and waits
-// for all of them to return, and then returns the And of their truth
-// values.
+// for all of them to return, and then returns the boolean And of their
+// TruthValues.
 PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 THREAD_JOIN_LINK <- PARALLEL_LINK
+
+// Somewhat like ThreadJoinLink, except that this works with executable,
+// not evaluatable links.
+EXECUTE_THREADED_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Connectors and sections.
@@ -253,14 +300,19 @@ THREAD_JOIN_LINK <- PARALLEL_LINK
 // The generic structure encoded here would be:
 //
 //     Section
-//         Lexical "something"
+//         Lexical "playing"
 //         ConnectorSeq
 //             Connector
-//                 Lexical "it's"
-//                 ConnectorDir "-"
+//                 Lexical "level"
+//                 Direction "-"
 //             Connector
-//                 Lexical "curious"
-//                 ConnectorDir "+"
+//                 Lexical "field"
+//                 Direction "+"
+//
+// The above encodes the phrase "level playing field", indicating that
+// "playing" connects to "level" on the left, and to "field" on the
+// right. In this example, "playing" is the germ; it is at the center
+// of the section.
 //
 // LexicalNode is for anything we keep a table of.
 // It inherits from PredicateNode because it is a kind of predicate:
@@ -271,18 +323,90 @@ LEXICAL_NODE <- PREDICATE_NODE
 // except that it can be "anything" - most importantly, VariableNode.
 ANY_NODE <- NODE
 
-// Generic connector. Its a link, because if contains all of the details
-// and restrictions required to define the allowable conections that
+// Generic connector. Its a link, because it contains all of the details
+// and restrictions required to define the allowable connections that
 // can be made. The ability for it to mate to something can be encoded
 // in a TruthValue (typically a crisp T/F for type specifications.)
 CONNECTOR <- ORDERED_LINK
 
-CONNECTOR_DIR_NODE <- LEXICAL_NODE "ConnectorDir" // Connector direction
+DIRECTION_NODE <- LEXICAL_NODE "Direction" // Connector direction
+CONNECTOR_DIR_NODE <- DIRECTION_NODE "ConnectorDir" // Deprecated, use above instead.
 BOND_NODE <- LEXICAL_NODE "Bond"    // A connection type name.
 CONNECTOR_SEQ <- ORDERED_LINK       // Conjoined sequence of connectors
 CONNECTOR_SET <- UNORDERED_LINK     // Unordered conjunction of connectors
 CONNECTOR_CHOICE <- CHOICE_LINK     // Disjoined set of connectors
 SECTION <- ORDERED_LINK             // Sheaf section, connector set
+
+// Given a Section, the CrossSection reorganizes it so that one of the
+// connectors is now in the center. For the above example, there are two
+// CrossSections, one for each Connector. The CrossSection for "level"
+// is:
+//
+//     CrossSectionLink
+//         LexicalNode "level"
+//         ShapeLink
+//             LexicalNode "playing"
+//             Connector
+//                 AnyNode "$wildcard"
+//                 ConnectorDir "-"
+//             Connector
+//                 Lexical "field"
+//                 ConnectorDir "+"
+//
+// The original germ "playing" is now the head of the shape. The word
+// "level" becomes the germ of the CrossSection. The wild-card indicates
+// which slot the the germ of the CrossSection came from. Thus, the
+// original Section can be obtained from the CrossSection by reinserting
+// the new germ into the wild-card.
+//
+// CrossSections (and Shapes) are useful for computing the similarity
+// between vectors of Sections.
+
+// ShapeLink looks like a "labelled" ConnectorSeq (and so a ConnectorSeq
+// is an "anonymous" shape.)
+SHAPE_LINK <- CONNECTOR_SEQ
+
+// The CrossSection is just a special kind of Section.
+CROSS_SECTION <- SECTION
+
+// ----------
+// The following Atoms are meant to describe "raw data", before that
+// data has been organized with the Connectors and Sections above.
+// Unlike the above, they are not rigorously defined; they're only
+// for making low-level code more organized and easier to read.
+//
+// The general idea is this:
+// * Items are "things" (words, pictures, sounds) being generated by
+//   some data stream.
+// * ItemClasses are classifications of Items (words that are nouns,
+//   pictures of bicycles and road signs)
+// * Tags are names of the data streams (streams of words, pictures)
+//
+// Note that the difference between a type and a set is blurry; so, in a
+// sense Tags and ItemClasses (and sets) are all the "same thing". It's
+// just handy to have these around for different kinds of uses in the
+// code base.
+
+// An ItemNode is used for any "item" or "thing" that we want to track.
+// It's lexical, because, in general, we will be looking it up in some
+// table or dictionary. See issue #2901 for discussion.
+ITEM_NODE <- LEXICAL_NODE
+
+// An ItemClassNode is a name for a collection of Items. Roughly, a
+// collection is a set; this is the name of that set. Set membership
+// is denoted with MemberLink so:
+//      (MemberLink (ItemNode "foo") (ItemClassNode "all foo things"))
+ITEM_CLASS_NODE <- LEXICAL_NODE
+
+// A TagNode is a name for a data stream that is generating Items.
+// Data streams are kind-of-like sets, except that they are constantly
+// popping out more Items, so they're not static or fixed.
+TAG_NODE <- LEXICAL_NODE
+
+// A TagLink is a link between a TagNode and the Item being tagged.
+// The "natural" convention is to make the Tag first, the Item second,
+// and so the order of the arguments is reversed from a MemberLink.
+TAG_LINK <- ORDERED_LINK // <- MEMBER_LINK
 
 // ====================================================================
 // Predicate-logic/lambda-calc/model-theory style links and nodes.
@@ -407,7 +531,7 @@ DEFINE_LINK <- UNIQUE_LINK
 // entry with connector definitions inside of it. Viz, the scope
 // body is the lexical entry, and the variable declarations are the
 // connector declarations.
-SCOPE_LINK <- SECTION
+SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_LINK
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
@@ -528,7 +652,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // correct", but clunkier to the user, so we don't force it.
 // TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
 // See https://en.wikipedia.org/wiki/Union_type
-TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,ALPHA_CONVERTIBLE_LINK
 
 // Type constructor. Forces a set-intersection of all of the type
 // definitions (signatures) that it contains. Useful for computing
@@ -561,7 +685,7 @@ SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 //
 // The inherits from Connector, as it is a special case...
 // The variable name is not lexical -- its a wild-card.
-TYPED_VARIABLE_LINK <- CONNECTOR
+TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position cannot be
@@ -594,6 +718,11 @@ ANCHOR_NODE <- NODE
 // true/false, indicating set membership. For Atomese, the subject
 // classifier is explicitly always a TRUTH_VALUE.
 
+// A generic catch-all equality-relation link. No particular semantics
+// is assigned to this, other than that it relates things that
+// are "similar" in some way.
+SIMILARITY_LINK <- UNORDERED_LINK
+
 // A VirtualLink is equivalent to an EvaluationLink, with a
 // GroundedPredicateNode in it, except that the GPN is "built in".
 // So, for example, GreaterThanLink is equivalent to an EvaluationLink
@@ -613,10 +742,18 @@ ANCHOR_NODE <- NODE
 // In mathematics nomenclature, VirtualLinks are "relations": they are
 // terms that evaluate to crisp true/false values.
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
+
+// Test whether all outgoing atoms are closed, that is do not contain
+// any free variable.
+IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+
+// Test whether all outgoing atoms have a TRUE_TV (resp. FALSE_TV).
+IS_TRUE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+IS_FALSE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
-// arguments; it true only if both sides are the same atom.
+// arguments; it is true only if both sides are the same atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same atom.
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
@@ -657,27 +794,35 @@ FUNCTION_LINK <- FREE_LINK
 // --------------------
 // Arithmetic and number-valued functions
 
+NUMERIC_FUNCTION_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,NUMERIC_INPUT_LINK
+
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_INPUT_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- TIMES_LINK
 
 // Minimum and maxmimum of a set of numbers.
-MIN_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-MAX_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+MIN_LINK <- NUMERIC_FUNCTION_LINK
+MAX_LINK <- NUMERIC_FUNCTION_LINK
 
 // Heaviside step function; same as GreaterThan, but works
 // for vectors, and returns numeric value.
-HEAVISIDE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
+
+// Logarithm base2
+LOG2_LINK <- NUMERIC_FUNCTION_LINK
+
+// Power x**y
+POW_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return uniformly distributed random number between two limits.
-RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return the sum of vector components of a number/float-value.
-ACCUMULATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return arity of the wrapped link. If it's a NumberNode
 // of a value, return the length of the underlying vector.
@@ -719,7 +864,7 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // except that the formula is in the Atomese, not scheme/python.
 //
 // Its a ScopeLink, because in general it will contain variables that
-// are scoped, bound. The Lambda provides the mechanism to access/sheild
+// are scoped, bound. The Lambda provides the mechanism to access/shield
 // the variables.
 PREDICATE_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
@@ -747,7 +892,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
 // by extracting values for a given set of variables.  In many ways,
@@ -787,42 +932,47 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
-// ====================================================================
-//
-// Link to represent the magnitude or the multitude of something,
-// such as 10kg, 10s, $10, etc. (??)
-QUANTITY_LINK <- ORDERED_LINK
+// ==============================================================
+// Foreign abstrast syntax trees (AST's)
+
+// Base class for all foregin (non-atomese) language abstract syntax
+// trees.
+FOREIGN_AST <- LINK
+
+// Abstract syntax trees, in the form of s-expressions
+SEXPR_AST <- FOREIGN_AST
+
+// Storge for guile expressions
+GUILE_AST <- SEXPR_AST
+
+// Storage for JSON.
+JSON_AST <- FOREIGN_AST
+
+// Storage for Python programs
+PYTHON_AST <- FOREIGN_AST
 
 // ==============================================================
-// Assorted PLN link types. Most of these should probably be moved
-// so that they live with PLN, and not here. Why? Because the
-// AtomSpace does not actually need or use these. XXX FIXME.
-
-// Assorted PLN link types.  These are specific to the theory of PLN
-// and the rules it defines for knowledge representation and reasoning.
-// See the book on PLN by Goertzel etal. to understand what these are
-// all about.
+// Assorted miscellaneous link types with an unclear future.
 //
-// The concepts of extension and intension are needed, whenever one
-// has more truth values than simply true and false. These correspond
-// to the sigma and pi types of the Borel hierarchy of set theory.
-// More precisely, they are the left and right adjunctions to the
-// pullback functor of sets over an object -- that is, the pullback
-// functor on the slice category, where the slice is given by a
-// PredicateNode.
-//
-// Some of these have "scope" versions, but I don't understand what
-// these are or why they are needed. That might be a bug(?)
 
-// SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
-// Therefore the later has been removed.
-INHERITANCE_LINK <- ORDERED_LINK
-SUBSET_LINK <- INHERITANCE_LINK
-INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
+// What is this? I dunno.
+DIRECTLY_EVALUATABLE_LINK <- LINK
 
-SIMILARITY_LINK <- UNORDERED_LINK
-EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+// The ImplicationLink and the InheritanceLink ... these are really
+// basic knowledge representation links, and so basically should
+// probably stay in the core AtomSpace. However, they should be
+// described more carefully. Right now, they seem ambiguous.
+
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
+
+// ImplicationScopeLink should be moved to PLN at earliest
+// convenience. XXX FIXME.
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+
+INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
 // Logical quantifiers (adjoints to pullbacks of relations). Both are
 // scoped.
@@ -834,53 +984,41 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 //           Note that ALWAYS_LINK below is the unscoped variant
 //           of this, used in the pattern matcher.
 //
-// ExistsLink is currently defined to return a crisp true/false value,
-// when it is evaluated. It works outside of the pattern engine...
+// At least, that's the fancy definition. It's not used anywhere. The
+// plain definition is just the conventional first-order-logic definition.
+// Since they have a conventional and well-known meaning, I guess they
+// can stay in the core AtomSpace, as a part of the set of links useful
+// for knowledge representation.
 //
-// These are currently a poorly-defined and a messy hash. They could be
-// defined to return (crisp) truth values, or to return satsifying sets.
-//
-// -- PLN uses ForAllLink, but fails to quote it qhen giving it to the
-//    pattern engine. A unit test fails, if we make it actually
-//    evaluatable.
-//
-// -- Lojban uses ExistsLink, but incorrectly (it is unaware that Exists
-//    is scoped.)
-//
-EXISTS_LINK <- SCOPE_LINK,CRISP_OUTPUT_LINK
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
+// In reality, its a mish-mash. Currently, these are used only in unit
+// tests.  They're somwhate poorly defined. They are currently defined
+// to inherit from CollectionLink, thus allowing them to be set-valued,
+// and used in probabilistic contexts.
+FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,COLLECTION_LINK
 
-// Concept constructor
-SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
-
-// Convert predicate into concept
-SATISFYING_SET_LINK <- LINK
-
-// Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK
-INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
-
-EQUIVALENCE_LINK <- UNORDERED_LINK
-INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
-
-// Sugar forms of implication and equivalence links. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
-// for more information
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK
-INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
-
-EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
-INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
-
-// Generic association. Mystery link. What does this do ???
+// These are used only in unit tests, at this point.
+// No clear role assigned, other than that there is some "association"
+// Perhaps this should be a base type for ... some knowledge
+// representation thingy?
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Mystery link used by PLN
+// A relation much stronger than Similarity, and not just EqualLink.
+// Used only in unit tests, at this time.
+EQUIVALENCE_LINK <- UNORDERED_LINK
+
+// A poorly-defined link that is used for something in some way.
+// Seems to be of central importance to the URE, but is not otherwise
+// documented! We define it here, because the URE does not define
+// any custom types itself.
+EXECUTION_LINK <- ORDERED_LINK
+
+// Mystery link used by URE in it's unit tests. It is not documented
+// anywhere that I know of. But since URE does not define it's own
+// custom atom types ... we keep it here, for now. XXX FIXME
 ATTRACTION_LINK <- ORDERED_LINK
 
-// Mystery link. What does this do ??? Can we get rid of it?
-EXECUTION_LINK <- ORDERED_LINK
+// Used in the URE unit tests. XXX FIXME the URE unit tests should
+// define their own custom test types, rather than expecting us to
+// provide them XXX FIXME
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK

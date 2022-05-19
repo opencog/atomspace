@@ -31,7 +31,7 @@ using namespace opencog;
 class VarTypeNot :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval* eval;
 		Handle vscope_good, vscope_bad;
 
@@ -64,7 +64,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 #define al as->add_link
 void VarTypeNot::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 

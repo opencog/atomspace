@@ -48,6 +48,9 @@ public:
 	// Apply formula to arguments.
 	TruthValuePtr apply(AtomSpace*, const HandleSeq&, bool);
 
+	virtual bool is_evaluatable() const { return true; }
+	virtual bool is_executable() const { return true; }
+
 	// Return a pointer to the computed truth value.
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
@@ -57,13 +60,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PredicateFormulaLink> PredicateFormulaLinkPtr;
-static inline PredicateFormulaLinkPtr PredicateFormulaLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PredicateFormulaLink>(h); }
-static inline PredicateFormulaLinkPtr PredicateFormulaLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<PredicateFormulaLink>(a); }
-
-#define createPredicateFormulaLink std::make_shared<PredicateFormulaLink>
+LINK_PTR_DECL(PredicateFormulaLink)
+#define createPredicateFormulaLink CREATE_DECL(PredicateFormulaLink)
 
 /** @}*/
 }

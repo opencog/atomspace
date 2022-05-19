@@ -47,7 +47,6 @@ using namespace opencog;
 class BasicSaveUTest :  public CxxTest::TestSuite
 {
     private:
-        AtomSpace *as;
         std::string uri;
         const char * dbname;
         const char * username;
@@ -68,28 +67,9 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
         BasicSaveUTest(void)
         {
-            try
-            {
-                config().load("atomspace-test.conf");
-            }
-            catch (RuntimeException &e)
-            {
-                std::cerr << e.get_message() << std::endl;
-            }
-
             logger().set_level(Logger::DEBUG);
             logger().set_print_to_stdout_flag(true);
-
-            try {
-                // Get the database logins & etc from the config file.
-                dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-                username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-                passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-            }
-            catch (InvalidParamException &e)
-            {
-                friendlyFailMessage(false);
-            }
+            getDBconfig();
         }
 
         ~BasicSaveUTest()
@@ -102,30 +82,12 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         void setUp(void);
         void tearDown(void);
 
-        void friendlyFailMessage(bool ts)
-        {
-            const char * fail = "The BasicSaveUTest failed.\n"
-                "This is probably because you do not have SQL installed\n"
-                "or configured the way that OpenCog expects.\n\n"
-                "SQL persistance is optional for OpenCog, so if you don't\n"
-                "want it or need it, just ignore this test failure.\n"
-                "Otherwise, please be sure to read opencong/persist/sql/README,\n"
-                "and create/configure the SQL database as described there.\n"
-                "Next, edit lib/atomspace-test.conf appropriately, so as\n"
-                "to indicate the location of your database. If this is\n"
-                "done correctly, then this test will pass.\n";
-
-            if (ts)
-                TS_FAIL(fail);
-            else
-                fprintf(stderr, "%s", fail);
-            exit(1);
-        }
+#include "friendly-fail.h"
 
         SQLAtomStorage *astore;
         void single_atom_save_restore(std::string id);
-        void add_to_table(int, AtomTable *, std::string id);
-        void check_table(int, AtomTable *, std::string id);
+        void add_to_table(int, AtomSpace *, std::string id);
+        void check_table(int, AtomSpace *, std::string id);
 
         void do_test_single_atom(void);
         void do_test_fresh_atom(void);
@@ -145,12 +107,10 @@ class BasicSaveUTest :  public CxxTest::TestSuite
  */
 void BasicSaveUTest::setUp(void)
 {
-    as = new AtomSpace();
 }
 
 void BasicSaveUTest::tearDown(void)
 {
-    delete as;
 }
 
 void BasicSaveUTest::test_odbc_single_atom(void)
@@ -254,8 +214,8 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -304,19 +264,19 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 // ============================================================
 
-void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
+void BasicSaveUTest::add_to_table(int idx, AtomSpace *table, std::string id)
 {
     // Create an atom ...
     n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
     TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 1.0/(100.0+idx)));
     n1[idx]->setTruthValue(stv);
-    n1[idx] = table->add(n1[idx]);
+    n1[idx] = table->add_atom(n1[idx]);
     a1[idx] = n1[idx];
 
     n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
     TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 1.0/(200.0+idx)));
     n2[idx]->setTruthValue(stv2);
-    n2[idx] = table->add(n2[idx]);
+    n2[idx] = table->add_atom(n2[idx]);
     a2[idx] = n2[idx];
 
     // ODBC fails when there is a question mark in the text.
@@ -327,10 +287,10 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv3(SimpleTruthValue::createTV(1.0e33/3.0, (1.0e-30)/(300.0+idx)));
     n3[idx]->setTruthValue(stv3);
-    n3[idx] = table->add(n3[idx]);
+    n3[idx] = table->add_atom(n3[idx]);
     a3[idx] = n3[idx];
 
-    // The NumberNode will go through the AtomTable clone factory
+    // The NumberNode will go through the AtomSpace clone factory
     // and should thus elicit any errors in clone uuid handling.
     char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
     n4[idx] = createNode(NUMBER_NODE, buf);
@@ -338,7 +298,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv4(SimpleTruthValue::createTV((4.0e-200)/9.0, 1.0e40/(400.0+idx)));
     n4[idx]->setTruthValue(stv4);
-    n4[idx] = table->add(n4[idx]);
+    n4[idx] = table->add_atom(n4[idx]);
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
@@ -348,22 +308,22 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(a4[idx]->get_handle());
 
     l[idx] = createLink(hvec, SET_LINK);
-    l[idx] = table->add(l[idx]);
+    l[idx] = table->add_atom(l[idx]);
     al[idx] = l[idx];
 }
 
-void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
+void BasicSaveUTest::check_table(int idx, AtomSpace *table, std::string id)
 {
-    Handle hb1 = table->getHandle(Handle(n1[idx]));
+    Handle hb1 = table->get_atom(Handle(n1[idx]));
     atomCompare(a1[idx], hb1, "check_table hb1");
 
-    Handle hb2 = table->getHandle(Handle(n2[idx]));
+    Handle hb2 = table->get_atom(Handle(n2[idx]));
     atomCompare(a2[idx], hb2, "check_table hb2");
 
-    Handle hb3 = table->getHandle(Handle(n3[idx]));
+    Handle hb3 = table->get_atom(Handle(n3[idx]));
     atomCompare(a3[idx], hb3, "check_table hb3");
 
-    Handle hb4 = table->getHandle(Handle(n4[idx]));
+    Handle hb4 = table->get_atom(Handle(n4[idx]));
     atomCompare(a4[idx], hb4, "check_table hb4");
 
     HandleSeq hvec;
@@ -373,7 +333,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(hb4);
 
     Handle lb(createLink(hvec, SET_LINK));
-    Handle hlb = table->getHandle(lb);
+    Handle hlb = table->get_atom(lb);
     atomCompare(al[idx], hlb, "check_table hlb");
 }
 
@@ -383,12 +343,12 @@ void BasicSaveUTest::do_test_single_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    astore = new SQLAtomStorage();
-    astore->open(uri);
+    astore = new SQLAtomStorage(uri);
+    astore->open();
     if (!astore->connected())
     {
         logger().info("setUp: cannot connect to database");
-        friendlyFailMessage(true);
+        friendlyFailMessage();
         exit(1);
     }
     logger().info("Connecting to \"%s\"", uri.c_str());
@@ -411,11 +371,11 @@ void BasicSaveUTest::do_test_fresh_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
-        logger().debug("single_atom_save_restore: cannot connect to db");
+        logger().debug("test_fresh_atom: cannot connect to db");
         return;
     }
 
@@ -454,15 +414,15 @@ void BasicSaveUTest::do_test_table()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage();
-    store->open(uri);
+    SQLAtomStorage *store = new SQLAtomStorage(uri);
+    store->open();
     if (!store->connected())
     {
         logger().debug("test_table: cannot connect to db");
         return;
     }
 
-    AtomTable *table1 = new AtomTable();
+    AtomSpace *table1 = new AtomSpace();
     int idx = 0;
     add_to_table(idx++, table1, "AA-aa-wow ");
     add_to_table(idx++, table1, "BB-bb-wow ");
@@ -470,19 +430,19 @@ void BasicSaveUTest::do_test_table()
     add_to_table(idx++, table1, "DD-dd-wow ");
     add_to_table(idx++, table1, "EE-ee-wow ");
 
-    store->storeAtomSpace(*table1);
+    store->storeAtomSpace(table1);
     // table1->print();
     delete store;
     delete table1;
 
     // Reopen connection, and load the atom table.
-    store = new SQLAtomStorage();
-    store->open(uri);
+    store = new SQLAtomStorage(uri);
+    store->open();
     TSM_ASSERT("Not connected to database", store->connected());
 
-    AtomTable *table2 = new AtomTable();
+    AtomSpace *table2 = new AtomSpace();
 
-    store->loadAtomSpace(*table2);
+    store->loadAtomSpace(table2);
     store->barrier();
     // table2->print();
 

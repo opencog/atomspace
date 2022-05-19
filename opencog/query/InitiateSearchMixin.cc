@@ -116,7 +116,7 @@ void InitiateSearchMixin::set_pattern(const Variables& vars,
 // size_t& width will be set to the incoming-set size of the thinnest
 //               constant found.
 // The returned value will be the constant at which to start the search.
-// If no constant is found, then the returned value is the undefnied
+// If no constant is found, then the returned value is the undefined
 // handle.
 //
 
@@ -165,7 +165,10 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (ptm->hasEvaluatable())
+	// However, we are allowed to start inside of IdenticalLinks.
+	// XXX TODO We could start inside an evaluatable, but it would
+	// be better to try elsewhere, first. Special-case Identical.
+	if (ptm->hasEvaluatable() and not ptm->isIdentical())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
@@ -191,6 +194,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 
 		if (s)
 		{
+			if (sbr->isIdentical())
+				continue;
+
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
 			if (CHOICE_LINK == t)
@@ -222,6 +228,9 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
  * Iterate over all the clauses, to find the "thinnest" one.
  * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
+ *
+ * An exception: the IdenticalLink can be treated as non-virtual, and we
+ * can begin the search at ne of the terms inside of an IdenticalLink.
  */
 Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
                                           PatternTermPtr& starter_term,
@@ -237,7 +246,7 @@ Handle InitiateSearchMixin::find_thinnest(const PatternTermSeq& clauses,
 	for (const PatternTermPtr& ptm: clauses)
 	{
 		// Cannot start with an evaluatable clause!
-		if (ptm->hasAnyEvaluatable()) continue;
+		if (ptm->hasAnyEvaluatable() and not ptm->isIdentical()) continue;
 
 		_curr_clause = ptm;
 		size_t depth = 0;
@@ -273,10 +282,14 @@ const PatternTermSeq& InitiateSearchMixin::get_clause_list(void)
 	// start searching with an optional clause. But if there ARE
 	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
+	//
+	// FYI, At this time, identities are marked as being evaluatable
+	// (because they can be evaluated) but they also behave like
+	// concrete clauses, since one of their terms may be groundable.
 	bool try_optionals = true;
 	for (const PatternTermPtr& m : _pattern->pmandatory)
 	{
-		if (not m->hasAnyEvaluatable())
+		if (not m->hasAnyEvaluatable() or m->isIdentical())
 		{
 			try_optionals = false;
 			break;
@@ -348,9 +361,18 @@ bool InitiateSearchMixin::setup_neighbor_search(const PatternTermSeq& clauses)
 		Choice ch;
 		ch.clause = bestclause;
 		ch.start_term = _starter_term;
-		// XXX ?? Why incoming set ???
-		ch.search_set = get_incoming_set(best_start,
-		                              _starter_term->getQuote()->get_type());
+
+		// This feels wonky. Is this correct?
+		if (_starter_term->getHandle()->is_link())
+		{
+			// XXX ?? Why incoming set ???
+			ch.search_set = get_incoming_set(best_start,
+			                              _starter_term->getHandle()->get_type());
+		}
+		else
+		{
+			ch.search_set = HandleSeq({best_start});
+		}
 		_start_choices.push_back(ch);
 	}
 	else
@@ -698,19 +720,21 @@ static PatternTermPtr root_of_term(const Handle& term,
 }
 
 // We need to know the term corresponding to the given Handle.
-// It must be some term underneath the root. If it shows up several
-// times, then just take the first occurance...
+// It must be some term underneath the root. Find the shallowest
+// location. Ideally, find a location that is NOT in a ChoiceLink.
+// If this is used in a way such that the handle appears under a
+// ChoiceLink, then an incomplete search will result!  Right now,
+// no unit test triggers this, but its not clear why. XXX FIXME??
+// For this case, use the `term_choices_of_handle` below.
 PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
                                      const PatternTermPtr& root)
 {
 	if (h == root->getQuote()) return root;
-	// if (h == root->getHandle()) return root;
 
 	// Pseudo-but-not-really-breadth-first search.
 	for (const PatternTermPtr& ptm : root->getOutgoingSet())
 	{
 		if (h == ptm->getQuote()) return ptm;
-		// if (h == ptm->getHandle()) return ptm;
 	}
 
 	// If we are here, then recurse.
@@ -721,6 +745,39 @@ PatternTermPtr InitiateSearchMixin::term_of_handle(const Handle& h,
 	}
 	return PatternTerm::UNDEFINED;
 }
+
+// Find all terms under `root` corresponding to the given Handle.
+// This is intended for walking over choices.
+void term_choices_of_handle_rec(const Handle& h,
+                                const PatternTermPtr& root,
+                                PatternTermSeq& seq)
+{
+	// Pseudo-but-not-really-breadth-first search.
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+	{
+		if (h == ptm->getQuote()) seq.push_back(ptm);
+	}
+
+	for (const PatternTermPtr& ptm : root->getOutgoingSet())
+		term_choices_of_handle_rec(h, ptm, seq);
+}
+
+PatternTermSeq
+InitiateSearchMixin::term_choices_of_handle(const Handle& h,
+                                            const PatternTermPtr& root)
+{
+	if (h == root->getQuote())
+		return PatternTermSeq({root});
+
+	// If no choices, then we only need one.
+	if (not root->hasChoice())
+		return PatternTermSeq({term_of_handle(h, root)});
+
+	PatternTermSeq seq;
+	term_choices_of_handle_rec(h, root, seq);
+	return seq;
+}
+
 
 /**
  * Deep types can/should behave a lot like neighbor-search. So try that
@@ -949,9 +1006,10 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
-					_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
 					if (all_clauses_are_evaluatable)
 						_starter_term = term_of_handle(var, cl);
+					else
+						_starter_term = term_of_handle(*fa.least_holders.begin(), cl);
 					count = num;
 					ptypes = typeset;
 					DO_LOG({LAZY_LOG_FINE << "New minimum count of "
@@ -1055,7 +1113,7 @@ bool InitiateSearchMixin::setup_no_search(void)
 ///
 /// This performs the actual search for matching graphs.
 /// This assumes that a list of search starting points have been
-/// set up in the `_search_set`, as well as an approprite root
+/// set up in the `_search_set`, as well as an appropriate root
 /// clause and starting term.
 bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
                                       const std::string dbg_banner)
@@ -1148,7 +1206,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 	#define OMP_PM_PARALLEL 1
 #endif
 #ifdef OMP_PM_PARALLEL
-	// Parallel loop. This requies OpenMP to work.
+	// Parallel loop. This requires OpenMP to work.
 	_recursing = true;
 	_issued_stack.clear();
 	_issued.clear();

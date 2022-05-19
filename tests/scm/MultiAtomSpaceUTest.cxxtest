@@ -30,7 +30,7 @@ using namespace opencog;
 class MultiAtomSpace :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace* main_as;
+	AtomSpacePtr main_as;
 	SchemeEval* evaluator;
 	Handle disorder;
 	Handle disordered;
@@ -70,7 +70,7 @@ public:
  */
 void MultiAtomSpace::setUp(void)
 {
-	main_as = new AtomSpace();
+	main_as = createAtomSpace();
 	evaluator = new SchemeEval(main_as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
@@ -80,7 +80,6 @@ void MultiAtomSpace::tearDown(void)
 {
 	delete evaluator;
 	evaluator = nullptr;
-	delete main_as;
 	main_as = nullptr;
 }
 
@@ -129,8 +128,8 @@ void MultiAtomSpace::test_two_scm(void)
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->get_type());
 
-	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
-	printf ("h2 = %lu %p\n", h2.value(), h2.operator->());
+	printf ("h1 = %llu %p\n", (long long unsigned int) h1.value(), h1.operator->());
+	printf ("h2 = %llu %p\n", (long long unsigned int) h2.value(), h2.operator->());
 
 	// h1 and h2 had better be different.
 	TSM_ASSERT("Wrong handles", h1 != h2);
@@ -146,9 +145,9 @@ void MultiAtomSpace::test_three(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	AtomSpace* as1 = new AtomSpace();
-	AtomSpace* as2 = new AtomSpace();
-	AtomSpace* as3 = new AtomSpace();
+	AtomSpacePtr as1 = createAtomSpace();
+	AtomSpacePtr as2 = createAtomSpace();
+	AtomSpacePtr as3 = createAtomSpace();
 	SchemeEval* ev1 = new SchemeEval(as1);
 	SchemeEval* ev2 = new SchemeEval(as2);
 	SchemeEval* ev3 = new SchemeEval(as3);
@@ -201,9 +200,6 @@ void MultiAtomSpace::test_three(void)
 	delete ev3;
 	delete ev2;
 	delete ev1;
-	delete as3;
-	delete as2;
-	delete as1;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -211,21 +207,21 @@ void MultiAtomSpace::test_load(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	AtomSpace* as1 = new AtomSpace();
-	AtomSpace* as2 = new AtomSpace();
+	AtomSpacePtr as1 = createAtomSpace();
+	AtomSpacePtr as2 = createAtomSpace();
 
 	SchemeEval* ev1 = new SchemeEval(as1);
 	SchemeEval* ev2 = new SchemeEval(as2);
 	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
-	// The below is a complicated multi-atom-space version of part of 
+	// The below is a complicated multi-atom-space version of part of
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...
 	// Increment a count tv in atomspace 1 ---------------------------------
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter1 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter1 = %lu %p\n", counter1.value(), counter1.operator->());
+	printf ("counter1 = %llu %p\n", (long long unsigned int) counter1.value(), counter1.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
@@ -247,7 +243,7 @@ void MultiAtomSpace::test_load(void)
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter2 = ev2->eval_h("counter");
 	CHKEV(ev2);
-	printf ("counter2 = %lu %p\n", counter2.value(), counter2.operator->());
+	printf ("counter2 = %llu %p\n", (long long unsigned int) counter2.value(), counter2.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->get_type());
@@ -266,7 +262,7 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter3 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter3 = %lu %p\n", counter3.value(), counter3.operator->());
+	printf ("counter3 = %llu %p\n", (long long unsigned int) counter3.value(), counter3.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->get_type());
@@ -280,8 +276,6 @@ void MultiAtomSpace::test_load(void)
 
 	delete ev1;
 	delete ev2;
-	delete as1;
-	delete as2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -289,7 +283,7 @@ void MultiAtomSpace::test_load(void)
 void MultiAtomSpace::test_nest(void)
 {
 	main_as->clear();
-	AtomSpace* locas = new AtomSpace(main_as);
+	AtomSpacePtr locas = createAtomSpace(main_as);
 	SchemeEval* lev = new SchemeEval(locas);
 
 	// Push some atoms into the main space
@@ -322,7 +316,6 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Expect atom b in position 1", hb == hl->getOutgoingAtom(1));
 
 	delete lev;
-	delete locas;
 
 	// Above deletion should not affect the main atomspace
 	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->get_size());
@@ -428,7 +421,18 @@ void MultiAtomSpace::test_nest_scm(void)
 }
 
 // Very similar to above, but the al atomspace is specified explicitly
-// as arg.
+// as arg. XXX This is ... broken, because the AtomSpace-as-an-arg
+// was never implemented in the guile wrappers.  Instead, what is
+// actually happening is that a link is being created, with one of
+// the outgoing set being an AtomSpace! Which ... works, because
+// AtomSpaces are now Atoms, and so Links containing them can be
+// created!
+//
+// This is counter to what is currently documented in the scheme API.
+// It is not clear whatt the best strategic design should be: to do
+// what is documented, or to allow AtomSpaces to be stored in Links.
+// So, for now... do nothing.
+//
 void MultiAtomSpace::test_arg_scm(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -461,7 +465,9 @@ void MultiAtomSpace::test_arg_scm(void)
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->get_type());
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->get_type());
 
-	// Create a link in the arg atomspace
+	// Create a link in the arg atomspace. XXX No, that is not what
+	// this does! This creates a link of arity=3, where the 3rd elt
+	// of the outgoing set is an atomspace!
 	Handle hl = evaluator->eval_h(
 		"(ListLink "
 		"	(ConceptNode \"aaa-arg-stuff\")"
@@ -488,7 +494,12 @@ void MultiAtomSpace::test_arg_scm(void)
 	CHKERR;
 	TSM_ASSERT_EQUALS("Expect undefined handle", hnol, Handle::UNDEFINED);
 
-	// The Link should be in the nested atomspace.
+	// The Link should be in the nested atomspace. XXX That is not what
+	// is actually being tested here. Instea, we are testing to see if
+	// the base-space contains a link of arity 3, where the third elt of
+	// the oset is an atomspace! Whoops!  This is certainly NOT what the
+	// documentation says is supposed to happen. But who is right? What
+	// should have happened?
 	Handle hnestl = evaluator->eval_h(
 		"(cog-link 'ListLink "
 		"	(ConceptNode \"aaa-arg-stuff\")"
@@ -496,6 +507,21 @@ void MultiAtomSpace::test_arg_scm(void)
 		"	arg-as)");
 	CHKERR;
 	TSM_ASSERT_EQUALS("Expect list handle", hnestl, hl);
+
+#if 0
+	// The Link should be in the nested atomspace. XXX At least, it
+	// should have been, if that is what the code above was doing.
+	// But that is not what got implemented in the guile wrappers,
+	// and so the test below fails (and is thus stubbed out.) Fixing
+	// this requires a design change, which we may not want to make...
+	Handle hargl = evaluator->eval_h(
+		"(arg-env (lambda ()"
+		"  (cog-link 'ListLink "
+		"	  (ConceptNode \"aaa-arg-stuff\")"
+		"	  (ConceptNode \"bbb-arg-stuff\"))))");
+	CHKERR;
+	TSM_ASSERT_EQUALS("Expect list handle", hargl, hl);
+#endif
 
 	// The Link should STILL NOT be in the primary atomspace.
 	Handle hsil = evaluator->eval_h(

@@ -34,6 +34,9 @@ using namespace opencog;
 Instantiator::Instantiator(AtomSpace* as) : _as(as)
 {}
 
+Instantiator::Instantiator(const AtomSpacePtr& asp) : _as(asp.get())
+{}
+
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
 /// member of the pair is the variable; the second is the value that
@@ -71,6 +74,9 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	Context cp_context = ist._context;
 	for (const Handle& h : expr)
 	{
+		if (nameserver().isA(h->get_type(), EVALUATABLE_LINK))
+			ist._inside_evaluation = true;
+
 		Handle hg(walk_tree(h, ist));
 		ist._context = cp_context;
 		if (hg != h) changed = true;
@@ -186,24 +192,31 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 /// walk_tree() performs a kind-of eager-evaluation of function arguments.
 /// The code in here is a mashup of several different ideas that are not
 /// cleanly separated from each other. (XXX FIXME, these need to be
-/// cleanly seprated; its impeding overall clean design/implementation.)
+/// cleanly separated; its impeding overall clean design/implementation.)
 /// Roughly, it goes like so:
 ///
 /// First, walk downwards to the leaves of the tree. As we return back up,
 /// if any free variables are encountered, then replace those variables
-/// with the groundings held in `varmap`.
+/// with the groundings held in `varmap`. This is basic beta-reduction.
 ///
 /// Second, during the above process, if any executable functions are
 /// encountered, then execute them. This is "eager-execution".  The
 /// results of that execution are plugged into the tree, and so we keep
 /// returning upwards, back to the root.
 ///
-/// The problem with eager execution is that it disallows recursive
+/// One problem with eager execution is that it disallows recursive
 /// functions: if `f(x)` itself calls `f`, then eager execution results
 /// in the infinite loop `f(f(f(f(....))))` that never terminates, the
 /// problem being that any possible termination condition inside of `f`
 /// is never hit. (c.f. The textbook-classic recursive implementation of
 /// factorial.)
+///
+/// Another problem with eager execution is that many Atoms now return
+/// Values when executed. These Values cannot be stored in a HandleSeq.
+/// This makes passing them "upwards", flowing them through the caller
+/// tree problematic.
+///
+/// There does not seem to be any easy way of refactoring this code.
 ///
 /// This can be contrasted with `beta_reduce()` up above, which performs
 /// the substitution only, but does NOT perform an execution at all.
@@ -262,9 +275,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
-		{
 			return walk_tree(DefineLink::get_definition(expr), ist);
-		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
@@ -311,16 +322,18 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		// Step one: perform variable substituions
+		// Avoid infinite recursion expanding Schema inside of PutLinks.
+		if (ist._inside_evaluation and
+		    DEFINED_SCHEMA_NODE == expr->getOutgoingAtom(0)->get_type())
+			return expr;
+
+		// Step one: perform variable substitutions
 		Handle hexpr(beta_reduce(expr, ist._varmap));
 		PutLinkPtr ppp(PutLinkCast(hexpr));
 
 		// Step two: beta-reduce.
+		// Beta reduction of DeleteLink will return a null pointer.
 		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
-
-		// TODO -- Maybe the PutLink should also do everything below,
-		// itself? i.e. we should not have to do the below for it,
-		// right? The right answer is somewhat ... hazy.
 		if (nullptr == red)
 			return red;
 
@@ -329,9 +342,17 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (DONT_EXEC_LINK == red->get_type())
 			return red->getOutgoingAtom(0);
 
+		// In some perfect world, calling execute() on the PutLink
+		// should have been enough. Unfortunately, the PutLinkUTest
+		// has many tests where PutLinks appear at random locations
+		// in non-execuatable contexts, and the only way to find them
+		// and run them is to call walk_tree(). So we must make this
+		// call. Were it not for this, much of this code would simplify.
 		Handle rex(walk_tree(red, ist));
-		if (nullptr == rex)
-			return rex;
+
+		// Rewalk of things returning ValuePtr's and not handles
+		// will look like null pointers. We're done, in this case.
+		if (nullptr == rex) return red;
 
 		// Step four: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
@@ -341,34 +362,19 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// The DontExecLink is a weird hack to halt evaluation.
 		// We unwrap it and throw it away when encountered.
 		// Some long-term fix is needed that avoids this step-four
-		// entirely.
+		// entirely. Wouldn't QuoteLink be better? Why not use QuoteLink?
 		if (SET_LINK == rex->get_type())
 		{
 			HandleSeq unwrap;
 			for (const Handle& plo : rex->getOutgoingSet())
 			{
 				if (DONT_EXEC_LINK == plo->get_type())
-				{
 					unwrap.push_back(plo->getOutgoingAtom(0));
-				}
 				else
-				{
-					try {
-						TruthValuePtr tvp =
-							EvaluationLink::do_evaluate(_as, plo, true);
-						plo->setTruthValue(tvp);
-					}
-					catch (const NotEvaluatableException& ex) {}
 					unwrap.push_back(plo);
-				}
 			}
 			return createLink(std::move(unwrap), SET_LINK);
 		}
-
-		try {
-			EvaluationLink::do_evaluate(_as, rex, true);
-		}
-		catch (const NotEvaluatableException& ex) {}
 		return rex;
 	}
 
@@ -433,24 +439,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		{
 			Type ht = h->get_type();
 			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
-				_as->remove_atom(h, true);
+				_as->extract_atom(h, true);
 		}
 		return Handle::UNDEFINED;
 	}
 
-	// Ideally, we should not evaluate any EvaluatableLinks.
-	// However, some of these may hold embedded executable links
-	// inside of them, which the current unit tests and code
-	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of their
-	// own lazy-evaluation, and so, if evaluation is needed,
-	// it will be triggered by something else. We do, of course,
-	// substitute in for free variables, if any.
-	//
-	// Non-virtual evaluatables fall through and are handled
-	// below.
-	//
-	// if (nameserver().isA(t, EVALUATABLE_LINK)) ... not now...
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
 
@@ -499,9 +492,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.
 	if (PREDICATE_FORMULA_LINK == t)
-	{
 		return expr;
-	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
 	// beta-reduce it, but don't execute it. Consume the DontExecLink.
@@ -566,6 +557,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	Instate ist(varmap);
+	ist._inside_evaluation = false;
 	ist._silent = silent;
 
 	// Since we do not actually instantiate anything, we should not
@@ -638,11 +630,19 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return eolh->execute(_as, silent);
 	}
 
+	// ExecuteThreadedLinks
+	if (EXECUTE_THREADED_LINK == t)
+	{
+		// XXX Don't we need to plug in the vars, first!?
+		// Maybe this is just not tested?
+		return expr->execute(_as, silent);
+	}
+
 	// The thread-links are ambiguously executable/evaluatable.
 	if (nameserver().isA(t, PARALLEL_LINK))
 	{
 		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
+		// Yes, we do, but this is just not tested, right now.
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
 	}
 
@@ -652,6 +652,42 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
 		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+	}
+
+	if (PUT_LINK == t)
+	{
+		// There are vars to be beta-reduced. Reduce them.
+		Handle grounded(walk_tree(expr, ist));
+
+		// (PutLink (DeleteLink ...)) returns nullptr
+		if (nullptr == grounded) return nullptr;
+
+		// Handle the case where (Put (Lambda...)) is being used
+		// for (Query vars body (Put (Lambda ...) query-results))
+		Type lt = expr->getOutgoingAtom(0)->get_type();
+		if (LAMBDA_LINK == lt and grounded->is_executable())
+		{
+			ValuePtr vp(grounded->execute(_as, silent));
+			if (_as and vp->is_atom())
+				return _as->add_atom(HandleCast(vp));
+			return vp;
+		}
+
+		// The walk_tree() code cannot work with executable atoms that
+		// return values when executed. On the other hand, we cannot just
+		// execute indiscriminately, because of complex Quote/Unquote
+		// semantics in walk_tree(). So, for a small handful of links
+		// that we care about, we shall execute by hand. Yes, this is
+		// just more spaghetti code, but I see no other way right now.
+		Type rt = grounded->get_type();
+		if (nameserver().isA(rt, VALUE_OF_LINK) or
+		    nameserver().isA(rt, SET_VALUE_LINK))
+		{
+			return grounded->execute(_as, silent);
+		}
+
+		if (_as) grounded = _as->add_atom(grounded);
+		return grounded;
 	}
 
 	// Instantiate.
@@ -670,7 +706,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 {
 	// Make sure that the atom is in an atomspace that is compatible
-	// with the execution environment. When it's not, then bizzare
+	// with the execution environment. When it's not, then bizarre
 	// results happen (e.g. with searches, because the search cannot
 	// find atoms in the correct atomspace.) We do allow, for now,
 	// atoms with null atomspaces; if/when these need to be inserted
@@ -685,7 +721,9 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// capable of this, yet, but the FunctionLinks all do seem to work.
 	//
 	// if (expr->is_executable())
-	if (nameserver().isA(expr->get_type(), FUNCTION_LINK))
+	if (nameserver().isA(expr->get_type(), FUNCTION_LINK) or
+	    nameserver().isA(expr->get_type(), SATISFYING_LINK) or
+	    nameserver().isA(expr->get_type(), JOIN_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
 		if (vp->is_atom())
@@ -693,9 +731,17 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		return vp;
 	}
 
-	// XXX FIXME, since the variable map is empty, maybe we can do
-	// something more efficient, here?
+	// XXX FIXME, we need to get rid of this call entirely, and just
+	// return expr->execute(_as, silent) instead, like above.
+	// However, assorted parts are still broken and don't work.
 	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
+
+	// PutLink is incompletely evaluated, above. Finish the job here.
+	if (vp and vp->is_atom())
+	{
+		Handle h(HandleCast(vp));
+		if (h->is_executable()) return h->execute();
+	}
 
 	return vp;
 }

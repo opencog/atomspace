@@ -14,9 +14,13 @@ By the end, you will have a very clear idea of what the AtomSpace is!
                   how to search for patterns that fit the data, and
                   how to trigger actions when these are found.
 
-* gearman       - Using `gearman` for simple distributed processing.
+* foreign       - Working with generic abstract syntax trees in the
+                  AtomSpace. It shows how to store json, scheme and
+                  python source code in the AtomSpace, and then search
+                  for, and execute that code. (Experimental, incomplete)
 
 * python        - Python usage examples.
+* ocaml         - OCaml usage examples.
 * haskell       - Haskell usage examples.
 
 * c++           - Example CMakefile and demos for C++ code.

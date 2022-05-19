@@ -31,7 +31,7 @@ using namespace opencog;
 class BuggyEqual :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval* eval;
 
 	public:
@@ -43,7 +43,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 			logger().set_timestamp_flag(false);
 			logger().set_sync_flag(true);
 
-			as = new AtomSpace();
+			as = createAtomSpace();
 			eval = new SchemeEval(as);
 			eval->eval("(use-modules (opencog exec))");
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -52,7 +52,6 @@ class BuggyEqual :  public CxxTest::TestSuite
 		~BuggyEqual()
 		{
 			delete eval;
-			delete as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());

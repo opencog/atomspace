@@ -120,14 +120,29 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<ValuePtr>
 SchemeSmob::scm_to_protom_list (SCM svalue_list)
 {
-	std::vector<ValuePtr> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<ValuePtr> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
 		if (not scm_is_null(svalue)) {
-			ValuePtr pa(scm_to_protom(svalue));
-			valist.emplace_back(pa);
+
+			// Handle recursively nested lists
+			if (scm_is_pair(svalue)) {
+				std::vector<ValuePtr> vpl = scm_to_protom_list(svalue);
+				valist.reserve(valist.size() + vpl.size());
+				std::move(vpl.begin(), vpl.end(), std::back_inserter(valist));
+			}
+			else
+			{
+				ValuePtr pa(scm_to_protom(svalue));
+				if (pa) valist.emplace_back(pa);
+			}
 		}
 		sl = SCM_CDR(sl);
 	}
@@ -152,8 +167,13 @@ SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 std::vector<std::string>
 SchemeSmob::scm_to_string_list (SCM svalue_list)
 {
-	std::vector<std::string> valist;
 	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<std::string> valist;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -343,6 +363,27 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 }
 
 // alist is an association-list of key-value pairs.
+Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
+{
+	Handle atom = h;
+	SCM kvpli = alist;
+	while (scm_is_pair(kvpli))
+	{
+		SCM kvp = SCM_CAR(kvpli);
+
+		if (scm_is_pair(kvp))
+		{
+			Handle key(scm_to_handle(SCM_CAR(kvp)));
+			ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
+			if (key) atom = as->set_value(atom, key, pa);
+		}
+		kvpli = SCM_CDR(kvpli);
+	}
+
+	return atom;
+}
+
+// alist is an association-list of key-value pairs.
 SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 {
 	AtomSpace* as = ss_get_env_as("cog-set-values!");
@@ -352,24 +393,15 @@ SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 		scm_wrong_type_arg_msg("cog-set-values!", 2, alist, "list of key-value pairs");
 
 	Handle oldh = atom;
-	SCM kvpli = alist;
-	while (scm_is_pair(kvpli))
+
+	// Atomspace may be read-only. Respect that.
+	try
 	{
-		SCM kvp = SCM_CAR(kvpli);
-
-		Handle key(scm_to_handle(SCM_CAR(kvp)));
-		ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
-
-		// Atomspace may be read-only. Respect that.
-		try
-		{
-			atom = as->set_value(atom, key, pa);
-		}
-		catch (const std::exception& ex)
-		{
-			throw_exception(ex, "cog-set-values!", satom);
-		}
-		kvpli = SCM_CDR(kvpli);
+		atom = set_values(atom, as, alist);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-values!", satom);
 	}
 
 	// Atomspace may have given us a new atom...
@@ -452,8 +484,8 @@ SCM SchemeSmob::ss_keys_alist (SCM satom)
 
 #define CPPL_TO_SCML(VAL, FN) \
 	SCM list = SCM_EOL; \
-	for (int i = VAL.size()-1; i >= 0; i--) { \
-		SCM smob = FN(VAL[i]); \
+	for (size_t i = VAL.size(); i > 0; i--) { \
+		SCM smob = FN(VAL[i-1]); \
 		list = scm_cons (smob, list); \
 	} \
 	return list;
@@ -509,7 +541,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 {
 	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
-   size_t index = verify_size(sindex, "cog-value-ref", 2);
+	size_t index = verify_size_t(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))
@@ -518,13 +550,13 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 
-	if (STRING_VALUE == t)
+	if (nameserver().isA(t, STRING_VALUE))
 	{
 		const std::vector<std::string>& v = StringValueCast(pa)->value();
 		if (index < v.size()) return scm_from_string(v[index]);
 	}
 
-	if (LINK_VALUE == t)
+	if (nameserver().isA(t, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		if (index < v.size()) return protom_to_scm(v[index]);

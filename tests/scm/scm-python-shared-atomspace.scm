@@ -46,3 +46,5 @@ def foo(atom_a, atom_b):
 	(< (abs (- 0.2 (cog-mean (Concept "Apple")))) 0.00001))
 
 (test-end tname)
+
+(opencog-test-end)

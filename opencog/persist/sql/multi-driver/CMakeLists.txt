@@ -2,23 +2,25 @@
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 ADD_LIBRARY (persist-sql
-	llapi
-	SQLAtomDelete
-	SQLAtomLoad
-	SQLAtomStore
-	SQLAtomStorage
-	SQLBulk
-	SQLSpaces
-	SQLTypeMap
-	SQLValues
-	SQLUUID
-	SQLPersistSCM
+	llapi.cc
+	SQLAtomDelete.cc
+	SQLAtomLoad.cc
+	SQLAtomStore.cc
+	SQLAtomStorage.cc
+	SQLBulk.cc
+	SQLSpaces.cc
+	SQLTypeMap.cc
+	SQLValues.cc
+	SQLUUID.cc
+	SQLPersistSCM.cc
 )
 
 ADD_DEPENDENCIES(persist-sql opencog_atom_types atomspace)
 
 TARGET_LINK_LIBRARIES(persist-sql
-	atomspaceutils
+	persist
+	storage-types
+	tlb
 	atomspace
 )
 
@@ -29,7 +31,7 @@ ENDIF (HAVE_GUILE)
 
 IF (ODBC_FOUND)
 	INCLUDE_DIRECTORIES(${ODBC_INCLUDE_DIRS})
-	ADD_LIBRARY (persist-odbc odbcxx)
+	ADD_LIBRARY (persist-odbc odbcxx.cc)
 	TARGET_LINK_LIBRARIES(persist-odbc ${ODBC_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-odbc)
 
@@ -40,7 +42,7 @@ ENDIF (ODBC_FOUND)
 
 IF (PGSQL_FOUND)
 	INCLUDE_DIRECTORIES(${PGSQL_INCLUDE_DIRS})
-	ADD_LIBRARY (persist-pg ll-pg-cxx)
+	ADD_LIBRARY (persist-pg ll-pg-cxx.cc)
 	TARGET_LINK_LIBRARIES(persist-pg ${PGSQL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-pg)
 

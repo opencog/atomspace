@@ -30,7 +30,7 @@ using namespace opencog;
 class HeavisideUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -39,14 +39,13 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~HeavisideUTest()
 	{
-		delete as;
 		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -82,16 +81,16 @@ void HeavisideUTest::test_heaviside(void)
 	Handle step = eval->eval_h(
 		"(cog-execute! (Heaviside (Number -3 -2 -1 0 1 2 3)))"
 	);
-	printf("expecting step: %s\n", step->to_short_string().c_str());
+	printf("got step: %s\n", step->to_short_string().c_str());
 
-	Handle estep = eval->eval_h("(NumberNode 0 0 0 0 1 1 1)");
+	Handle estep = eval->eval_h("(NumberNode 0 0 0 1 1 1 1)");
 	TS_ASSERT_EQUALS(step, estep);
 
 	// ---------
 	Handle squa = eval->eval_h(
 		"(cog-execute! (Heaviside (Number -1 1 -1 1 -1 1 -3)))"
 	);
-	printf("expecting squa: %s\n", squa->to_short_string().c_str());
+	printf("got squa: %s\n", squa->to_short_string().c_str());
 
 	Handle esqua = eval->eval_h("(NumberNode 0 1 0 1 0 1 0)");
 	TS_ASSERT_EQUALS(squa, esqua);
@@ -111,7 +110,7 @@ void HeavisideUTest::test_infnan(void)
 	Handle inf = eval->eval_h(
 			"(cog-execute! (Heaviside (NumberNode \"inf -inf inf -inf\")))"
 	);
-	printf("expecting inf: %s\n", inf->to_short_string().c_str());
+	printf("got inf: %s\n", inf->to_short_string().c_str());
 
 	Handle einf = eval->eval_h("(NumberNode 1 0 1 0)");
 	TS_ASSERT_EQUALS(inf, einf)
@@ -120,9 +119,9 @@ void HeavisideUTest::test_infnan(void)
 	Handle nan = eval->eval_h(
 			"(cog-execute! (Heaviside (NumberNode \"nan 0 inf 0 -nan\")))"
 	);
-	printf("expecting nan: %s\n", nan->to_short_string().c_str());
+	printf("got nan: %s\n", nan->to_short_string().c_str());
 
-	Handle enan = eval->eval_h("(NumberNode 0 0 1 0 0)");
+	Handle enan = eval->eval_h("(NumberNode 1 1 1 1 0)");
 	TS_ASSERT_EQUALS(nan, enan)
 
 	// ---------
@@ -141,7 +140,7 @@ void HeavisideUTest::test_reduct(void)
 			"(cog-execute! (Heaviside (Plus "
 			"     (NumberNode 3 4  -5 -6) (Variable \"$x\"))))"
 	);
-	printf("expecting var: %s\n", var->to_short_string().c_str());
+	printf("got var: %s\n", var->to_short_string().c_str());
 
 	Handle evar = eval->eval_h(
 			"(cog-execute! (Heaviside (Plus "
@@ -154,7 +153,7 @@ void HeavisideUTest::test_reduct(void)
 			"(cog-execute! (Plus (Heaviside "
 			"     (NumberNode 3 4  -5 -6)) (Number 6 6 11 11)))"
 	);
-	printf("expecting 7/11: %s\n", des->to_short_string().c_str());
+	printf("got 7/11: %s\n", des->to_short_string().c_str());
 
 	Handle edes = eval->eval_h("(NumberNode 7 7 11 11)");
 	TS_ASSERT_EQUALS(des, edes)

@@ -98,7 +98,17 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-2 May 2020
+17 December 2021
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Revised version; earlier versions: 2 May 2020; 21 August 2020
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -455,6 +465,14 @@ An object is anything that can be the value of a variable, that is, anything
 \end_inset
 
  (Van Inwagen 2002, 180)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Inwagen2002"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1326,283 +1344,1087 @@ compositional
 \end_layout
 
 \begin_layout Subsubsection*
+Polarity (Sexuality)
+\end_layout
+
+\begin_layout Standard
+The above presentation of the concept of jigsaw pieces is misleading in
+ one important sense, which should be clarified.
+ The jigsaw pieces, as drawn, are explicitly heterosexual (bipolar), in
+ that there are explicit male and female connectors.
+ In general, this need not be the case: one can have monopolar (asexual)
+ connectors, or tri-sexual connectors, or connectors of arbitrary complexity.
+ 
+\end_layout
+
+\begin_layout Standard
+This is worth articulating.
+ In the previous diagram, there was a slot and a tab, which can be indicated
+ as 
+\begin_inset Formula $-$
+\end_inset
+
+ and 
+\begin_inset Formula $+$
+\end_inset
+
+.
+ They had an explicit shape, which we can call 
+\begin_inset Quotes eld
+\end_inset
+
+type A
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A different shape might be called 
+\begin_inset Quotes eld
+\end_inset
+
+type B
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The connection rules are such that 
+\begin_inset Formula $A+$
+\end_inset
+
+ can only connect to 
+\begin_inset Formula $A-$
+\end_inset
+
+ and never to 
+\begin_inset Formula $B+$
+\end_inset
+
+ or 
+\begin_inset Formula $B-$
+\end_inset
+
+.
+ But also, 
+\begin_inset Formula $A+$
+\end_inset
+
+ cannot connect to other 
+\begin_inset Formula $A+$
+\end_inset
+
+'s.
+ This 
+\begin_inset Quotes eld
+\end_inset
+
+makes sense
+\begin_inset Quotes erd
+\end_inset
+
+, and is a desirable property if one is using jigsaw pieces to model beta
+ reduction: a variable of type 
+\begin_inset Formula $A$
+\end_inset
+
+ can only be beta-reduced with a term of type 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ That is, variables are always 
+\begin_inset Formula $-$
+\end_inset
+
+ and those things that can be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ variables are always 
+\begin_inset Formula $+$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+There are other possibilities.
+ The monosexual (monopolar) case would be a connector direction of 
+\begin_inset Formula $*$
+\end_inset
+
+ with a rule that any 
+\begin_inset Formula $A*$
+\end_inset
+
+ can connect to any other connector of type 
+\begin_inset Formula $A*$
+\end_inset
+
+ but never to a connector of type 
+\begin_inset Formula $B*$
+\end_inset
+
+.
+ There is no real analog of this in term algebras: such algebras always
+ make a sharp distinction between variables and constants; yet the monopolar
+ case fails to distinguish these.
+ Connecting two connectors together is still like beta reduction; but the
+ sense of direction is lost.
+\end_layout
+
+\begin_layout Standard
+An example of a trisexual connector would require connectivity rules similar
+ to the following.
+ There are three direction types, 
+\begin_inset Formula $\#$
+\end_inset
+
+, 
+\begin_inset Formula $\$$
+\end_inset
+
+ and 
+\begin_inset Formula $\%$
+\end_inset
+
+ and the rules are that 
+\begin_inset Formula $\$$
+\end_inset
+
+ can connect to # and 
+\begin_inset Formula $\$$
+\end_inset
+
+ can connect to 
+\begin_inset Formula $\%$
+\end_inset
+
+ but 
+\begin_inset Formula $\#$
+\end_inset
+
+ cannot connect to 
+\begin_inset Formula $\%$
+\end_inset
+
+.
+ Nor can 
+\begin_inset Formula $\$$
+\end_inset
+
+ connect to 
+\begin_inset Formula $\$$
+\end_inset
+
+.
+ (Confused? Look at the US keyboard layout: these three keys are in order,
+ with 
+\begin_inset Formula $\$$
+\end_inset
+
+ in the middle.
+ The rule is 
+\begin_inset Quotes eld
+\end_inset
+
+neighbors can connect, but not otherwise
+\begin_inset Quotes erd
+\end_inset
+
+).
+ There are still the connector-shape types 
+\begin_inset Formula $A,B,\cdots$
+\end_inset
+
+ and so we extrapolate that 
+\begin_inset Formula $A\$$
+\end_inset
+
+ can connect to 
+\begin_inset Formula $A\#$
+\end_inset
+
+ and to 
+\begin_inset Formula $A\%$
+\end_inset
+
+ but not to 
+\begin_inset Formula $B\$$
+\end_inset
+
+ or to 
+\begin_inset Formula $B\#$
+\end_inset
+
+ or 
+\begin_inset Formula $B\%$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Neither the monosexual nor the trisexual cases are easy to illustrate in
+ terms of pretty hand-drawn pictures of jigsaw pieces.
+ The strict idea of jigsaw pieces does break down.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Representation of Sexuality
+\end_layout
+
+\begin_layout Standard
+Wandering a bit off-topic, it is worth pointing out that there is a representati
+on theory of the multi-polar direction types in terms of monopolar and bipolar
+ direction types, together with strings of connector-types.
+ 
+\end_layout
+
+\begin_layout Standard
+This is illustrated here.
+ For the connector strings, lower-case letters will be used.
+ For 
+\begin_inset Formula $\#$
+\end_inset
+
+ write the string 
+\begin_inset Formula $r*-$
+\end_inset
+
+ and for 
+\begin_inset Formula $\$$
+\end_inset
+
+ write 
+\begin_inset Formula $rs+$
+\end_inset
+
+ and for 
+\begin_inset Formula $\%$
+\end_inset
+
+ write 
+\begin_inset Formula $*s-$
+\end_inset
+
+.
+ Now the mating rules are these: the wild-card 
+\begin_inset Formula $*$
+\end_inset
+
+ matches any lower-case letter; otherwise lower-case letters must match
+ exactly.
+ As before, 
+\begin_inset Formula $+$
+\end_inset
+
+ can only pair with 
+\begin_inset Formula $-$
+\end_inset
+
+.
+ Thus, 
+\begin_inset Formula $r*-$
+\end_inset
+
+ can mate with 
+\begin_inset Formula $rs+$
+\end_inset
+
+ because the 
+\begin_inset Formula $r$
+\end_inset
+
+ matches, the 
+\begin_inset Formula $*$
+\end_inset
+
+ matches anything, and the 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ will mate.
+ Likewise, 
+\begin_inset Formula $rs+$
+\end_inset
+
+ can mate with 
+\begin_inset Formula $*s-$
+\end_inset
+
+.
+ However, 
+\begin_inset Formula $r*-$
+\end_inset
+
+ and 
+\begin_inset Formula $*s-$
+\end_inset
+
+ cannot mate: although the wild-cards allow this, the poles do not.
+\end_layout
+
+\begin_layout Standard
+This remark was necessary, since Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+literal "false"
+
+\end_inset
+
+ uses this style for indicating connectivity.
+ Capital letters must match exactly; strings of lower-case letters with
+ embedded wild-cards match is the strings match, and the poles match.
+ Thus, the theory can be understood as having bipolar connection directions,
+ with complex string-matching rules, or as simple upper-case types, and
+ multi-sexual connector directions.
+ As per usual, a rigorous mathematical treatment of this representation
+ theory may reveal subtleties beyond what has been said here.
+ Or maybe not.
+ That this string representation is sufficient to represent any kind of
+ sexual mating remains an unproven conjecture at this point.
+\end_layout
+
+\begin_layout Subsection*
+In proof theory:
+\end_layout
+
+\begin_layout Standard
+A simple variant of the idea of a jigsaw piece can be found in proof theory,
+ where it is called a 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurrence
+\begin_inset Quotes erd
+\end_inset
+
+.
+ See, for example Troelstra & Schwichtenberg, 
+\begin_inset Quotes eld
+\end_inset
+
+Basic Proof Theory
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Troelstra2000"
+literal "false"
+
+\end_inset
+
+ section 1.1.4.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+formula
+\begin_inset Quotes erd
+\end_inset
+
+ with a 
+\begin_inset Quotes eld
+\end_inset
+
+hole cut out of it
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The hole is called a 
+\begin_inset Quotes eld
+\end_inset
+
+placeholder
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+special propositional variable
+\begin_inset Quotes erd
+\end_inset
+
+, sometimes denoted with a star-character.
+ The star is outside of the language of predicate logic; it's in the meta-langua
+ge.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurrence
+\begin_inset Quotes erd
+\end_inset
+
+ is a subformula together with a context.
+ Roughly speaking, it is a subformula cut out of a formula, leaving a hole
+ in it's place.
+ That pairing, of a subformula and the place it was cut from, is the 
+\begin_inset Quotes eld
+\end_inset
+
+formula occurrence
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Presumably it is self-evident that this resembles the pair of unconnected
+ jigsaw pieces in the diagram above.
+ Perhaps not, so we belabor it.
+ Here is the context:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The formula is 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and the hole is 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+.
+ Here is the subformula: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes eld
+\end_inset
+
+actual
+\begin_inset Quotes erd
+\end_inset
+
+ subformula is 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ but we've drawn a little more, here: the 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is the shadow of the formula from which the subformula as cut.
+ 
+\end_layout
+
+\begin_layout Standard
+These two pieces together constitute the original formula:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-connected.eps
+	lyxscale 60
+	width 23col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Drawn assembled like this, this is just the formula.
+ Drawn disassembled gives the formula occurrence.
+\end_layout
+
+\begin_layout Subsection*
+In lambda calculus
+\end_layout
+
+\begin_layout Standard
+The sketch of contexts and formula occurrences in proof theory resembles
+ the concept of eta expansion in lambda calculus.
+ In lambda calculus, if 
+\begin_inset Formula $f$
+\end_inset
+
+ is an expression with some free variable in it, then 
+\begin_inset Formula $\lambda x.f(x)$
+\end_inset
+
+ is it's eta expansion.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See nLab, 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://ncatlab.org/nlab/show/eta-conversion
+\end_layout
+
+\end_inset
+
+ for a reasonable review, or Barndregt for an expanded treatment.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Barendregt1984"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Roughly speaking, this reads as the operation: 
+\begin_inset Quotes eld
+\end_inset
+
+cut out the free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ from 
+\begin_inset Formula $f$
+\end_inset
+
+, leaving a hole, and then mark the location of that hole with a bound variable
+ 
+\begin_inset Formula $x$
+\end_inset
+
+, binding that variable with lambda, so that we know where that hole is.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Presumably it is self-evident that eta expansion can be understood as jigsaw
+ connectors.
+ But then again, it is worth belaboring this point.
+ So here is a diagram showing the expression 
+\begin_inset Formula $f$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-connected.eps
+	lyxscale 60
+	width 23col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+More precisely, the above shows the expression 
+\begin_inset Formula $f$
+\end_inset
+
+ as 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and with 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ being some free variable inside of it.
+ Disconnecting this gives the expression 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above, the 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is the expression 
+\begin_inset Formula $f$
+\end_inset
+
+, with the 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ explicitly providing the location of the 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ What is the lambda? Well it is just this, below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is tempting to say that the above is just 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+, but it is actually just a bit more: it is 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ with the shadow of 
+\begin_inset Formula $f$
+\end_inset
+
+ as 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ still visible.
+ The eta expansion 
+\begin_inset Formula $\lambda x.f\left(x\right)$
+\end_inset
+
+ is just the two jigsaw pieces, disassembled.
+\end_layout
+
+\begin_layout Standard
+Caution: the above is an analogy, and not a strict equivalence.
+ The expression 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ is not strictly a part of lambda calculus; it is a notational fragment
+ used to indicate variable binding.
+ The jigsw connectors serve two purposes: when connected, they indicate
+ what is connected to what, just as an ordinary graph drawing would do.
+ When disconnected, the jigsaw connectors indicate what can be connected
+ to what: the connectors represent types, the kinds of things that can potential
+ly be connected together.
+\end_layout
+
+\begin_layout Subsection*
+In type theory
+\end_layout
+
+\begin_layout Standard
+The phrase 
+\begin_inset Quotes eld
+\end_inset
+
+shadow of
+\begin_inset Quotes erd
+\end_inset
+
+ in the above text is perhaps disconcerting.
+ This is where type theory can come to the rescue.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+shadow
+\begin_inset Quotes erd
+\end_inset
+
+ is the type.
+ The matching of the type of the variable, to the type of what can be plugged
+ into the variable, is what the shape of the connector implies.
+ So, again, her e is 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ below, where 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ is understood as the free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ being of type 
+\begin_inset Formula $A$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-left.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here is the bound variable 
+\begin_inset Formula $\lambda x$
+\end_inset
+
+ which is again of type 
+\begin_inset Formula $A$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-right.eps
+	lyxscale 60
+	width 18col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That is, 
+\begin_inset Formula $x$
+\end_inset
+
+ itself is just 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+, and it takes the half-edge to indicate that it's type is 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ The connector itself is the type.
+\end_layout
+
+\begin_layout Standard
+Again, this may seem strange and foreign, which might be clarified with
+ a more complex example.
+ The type constructor 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ constructs functions.
+ it can be understood as a lambda expression, in the sense that given a
+ term 
+\begin_inset Formula $b$
+\end_inset
+
+ of type 
+\begin_inset Formula $B$
+\end_inset
+
+, containing a free variable 
+\begin_inset Formula $x$
+\end_inset
+
+ of type 
+\begin_inset Formula $A$
+\end_inset
+
+, then 
+\begin_inset Formula $\lambda x.b$
+\end_inset
+
+ is a term of type 
+\begin_inset Formula $A\to B$
+\end_inset
+
+.
+ How is this to be represented in terms of jigsaws? With the diagram below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-function.eps
+	lyxscale 60
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This time, the connectors have been explicitly labeled with the types.
+ The above is explicitly an instance of the type 
+\begin_inset Formula $A\to B$
+\end_inset
+
+.
+ The open circle with the capital 
+\begin_inset Formula $A$
+\end_inset
+
+ indicates that anything that is of type 
+\begin_inset Formula $A$
+\end_inset
+
+ can be connected there; connecting-together is beta-reduction.
+ The open circle labeled with 
+\begin_inset Formula $B$
+\end_inset
+
+ denotes that this jigsaw (labeled 
+\begin_inset Formula $f$
+\end_inset
+
+) can be plugged into anything that is expecting type 
+\begin_inset Formula $B$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The above exercise hopefully shows how connectors can be understood as types.
+ However, the theory of jigsaw pieces is not type theory.
+ The type constructor 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ is explicitly directional, the jigsaw pieces are not: a jigsaw piece that
+ is flipped, rotated, inverted is still a jigsaw piece; functions are always
+ directional.
+ Reversing the arrow gives an inverse function, but an inverse function
+ is still directional, just going the other way.
+ This is in part because type theory is closely tied to the internal language
+ of category theory, which is itself a theory of dots and arrows.
+ By contrast, the jigsaw conception provided here is derived from a graph
+ theory where the directionality of the edges is immaterial, or of secondary
+ importance.
+ 
+\end_layout
+
+\begin_layout Subsection*
 In philosophy:
 \end_layout
 
 \begin_layout Standard
-The paradoxes of mereology were touched on in the previous section: the
- difficulty of defining part-whole relationships in a consistent manner,
- the problem of the existence or non-existence of 
-\begin_inset Quotes eld
-\end_inset
-
-gunk
-\begin_inset Quotes erd
-\end_inset
-
-, and even the puzzles from Ancient Greece (the Ship of Theseus, 
-\emph on
-etc
-\emph default
-.) One proposed solution to these riddles is the notion of 
-\begin_inset Quotes eld
-\end_inset
-
-restricted composition
-\begin_inset Quotes erd
-\end_inset
-
- (see Wikipedia).
- The idea is that 
-\begin_inset Quotes eld
-\end_inset
-
-things
-\begin_inset Quotes erd
-\end_inset
-
- are still composed of 
-\begin_inset Quotes eld
-\end_inset
-
-other things
-\begin_inset Quotes erd
-\end_inset
-
-, but the manner in which these can be composed is restricted.
- The body of ideas is very nearly identical to the concept of sheaves.
- Quoting directly from the Wikipedia article on mereology, we can can learn
- that these are:
-\end_layout
-
-\begin_layout Itemize
-Contact—that a complex object Y is composed of X's if and only if the X's
- are in contact.
+The paradoxes of mereology were touched on in the section on relational
+ algebras.
+ For an extended discussion of the philosophical issues, see the text titled
  
-\emph on
-viz.
- 
-\emph default
-seeds attach only if they can be connected.
-\end_layout
-
-\begin_layout Itemize
-Fastenation—the X's compose a complex Y if and only if the X's are fastened.
- 
-\emph on
-viz.
-
-\emph default
- seeds attach only if the connectors allow mating.
- Once mated, they are fastened together.
-\end_layout
-
-\begin_layout Itemize
-Cohesion—the X's compose a complex Y if and only if the X's cohere (cannot
- be pulled apart or moved in relation to each other without breaking).
- The point of connectors is that they are not meant to be pulled apart,
- once mated.
- Insofar as the above abstract definition of a sheaf failed to appeal to
- and forced order of the connectors, or to the length of the edges, the
- concept of 
 \begin_inset Quotes eld
 \end_inset
 
-movement
+Mereology and Postmodernism
 \begin_inset Quotes erd
 \end_inset
 
- remains incomplete
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-This can be repaired in a variety of ways.
- In practical applications, it is convenient to order the edges, and to
- give them weights.
- These weights can sometimes act as distances, e.g.
- in 
-\begin_inset Formula $N$
-\end_inset
-
--dimensional space.
- Furthermore, the branch of mathematics known as 
+, in 
 \begin_inset Quotes eld
 \end_inset
 
-algebraic topology
+mereology.pdf
 \begin_inset Quotes erd
 \end_inset
 
- is very highly developed, and can provide very explicit and concrete statements
- about the structure of space.
- For example, the dimensionality of the embedding of the network is given
- by the degree of the largest simplicial complex in the network.
+ in this directory.
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Fusion—the X's compose a complex Y if and only if the X's are fused (fusion
- is when the X's are joined together such that there is no boundary).
- Connectors, once connected, serve no further purpose, and are discarded.
- What mattered was the bond that was made.
- In this sense, the bonds are the fusion of connectors.
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-This is remeniscent of Derridas statement that 
-\begin_inset Quotes eld
-\end_inset
-
-deconstruction is not analysis
-\begin_inset Quotes erd
-\end_inset
-
-.
- One cannot break up meaning into atomic parts; there are no self-sufficient
- atomic parts of meaning.
- Meaning derives only from the fusion of words into text and into language.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-Brutal Composition—"It's just the way things are." There is no true, nontrivial,
- and finitely long answer.
+\begin_layout Section*
+Tensors
 \end_layout
 
 \begin_layout Standard
-The last point is perhaps the most interesting notion coming out of restricted
- composition.
- It is not an ingredient, it is rather a consequence.
- If one abandons the explicit DAGs of partial orders, one then also abandons
- the notion of logical predicates and truth assignments.
- One no longer arranges logical connectives into a tree structure, or even
- into Horn clauses.
- The network, rather, represents things 
+The idea of jigaw pieces with typed monopolar or bipolar connectors can
+ be modelled by tensors.
+ Thus, connecting two connectors (of matching type) can be understood as
+ contracting a pair of tensor indexes (of the appropriate type).
+ Covariant and contravariant tensor indexes are naturally bipolar (heterosexual)
+ as described above; when the indexes are just 
 \begin_inset Quotes eld
 \end_inset
 
-as they are
+plain
 \begin_inset Quotes erd
 \end_inset
 
-.
- This is not to deny predicate logic, or Boolean satisfiability: these are
- tremendously useful concepts.
- Rather, this is to avoid the symbol grounding problem (ref Wikipedia, again).
- By discarding the arrow from 
-\begin_inset Quotes eld
-\end_inset
-
-signifier
-\begin_inset Quotes erd
-\end_inset
-
- to 
-\begin_inset Quotes eld
-\end_inset
-
-significand
-\begin_inset Quotes erd
-\end_inset
-
-, one can no longer peer into the gaping chasm of the question 
-\begin_inset Quotes eld
-\end_inset
-
-what does this symbol mean?
-\begin_inset Quotes erd
-\end_inset
-
-
+ indexes, they are monopolar: they can be contracted as long as they are
+ of the same type.
+ Conventional tensors do not have any corresponding notion of multi-sexual
+ connectors, as described above.
 \end_layout
 
 \begin_layout Standard
-This is very much in line with theories of postmodernism and deconstruction
- evident in the works of Derrida,
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-The différance of Derrida can be seen as a rejection of the linguistic equivalen
-t of mereological nihilism: there is no infinite regression of looking up
- the meanings of words in a dictionary.
-\end_layout
-
-\end_inset
-
- Deleuze, Lyotard.
- There is no difference between appearance and true form; the difference
- is undecidable.
- The constructed network of connections and relations is all there is.
-\end_layout
-
-\begin_layout Standard
-In the following sections, the sheaf construction will be used as a tool
- to create A(G)I representations of reality.
- Whether the constructed network is an accurate representation of reality
- is undecidable, and this is true even in a narrow formal sense.
- Famously, it is known that the question of whether two different presentations
- of a (group-theoretical) group refer to the same group is undecidable,
- in the computational sense: there is no algorithm, guaranteed to terminate
- in finite time, that is capable of making this decision.
- This is the undecidability problem in group theory.
- That this result carries over into the fullness of a network built from
- a sheaf should come as no surprise: the presentation of a group is little
- more than a certain collection of labeled vertexes and edges (the group
- elements and the group operations) and decidability requires the graph-rewritin
-g of these into a different form.
- There are no graph rewrite rules that can always bring two different presentati
-ons into normal form.
- Oddly enough, such 
+The similarity btween tensors and jigsaw pieces is ultimately anchored on
+ just one commonality: it takes two, and exactly two connectors, to connect
+ and form a link.
+ One cannot form a link from zero, onje, three or more connectors.
+ Likewise, tensor indexes contract by pairs: once cannot contract three
+ or more indexes together.
+ There is no loss of generality from this restriction; one emulates multi-index
+ contraction by using diagonal tensors: those whose entries are zero everywhere
+ except on the diagonal.
+ Likewise for the jigsaw conception: if one wishes to connect together three
+ (or more) connectors into one unit, one creates (without loss of generality)
+ a 
 \begin_inset Quotes eld
 \end_inset
 
-received wisdom
+diagonal
 \begin_inset Quotes erd
 \end_inset
 
- from mathematics can be used as a foundational cornerstone for post-modernism.
- This is unexpected.
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-Despite this, sheaves are still somehow fundamentally 
-\begin_inset Quotes eld
-\end_inset
-
-structuralist
-\begin_inset Quotes erd
-\end_inset
-
-, not post-structuralist.
- The bonds are relational, in the end.
- There is always still a predicate: either an edge exists, or it doesn't.
- To every graph there is a corresponding adjacency matrix, populated with
- zeroes and ones.
- Fortunetly, one can wriggle ones way out if this, by assigning numerical
- weights to edges, making some probable and some improbable.
- Whether true and false can be replaced by a subobject classifier in this
- context is perhaps a step too far, but perhaps also an interesting step.
-\end_layout
-
-\end_inset
-
-
+ jigsaw pieces with three (or more) connectors on it.
 \end_layout
 
 \begin_layout Standard
-A more explicit bridge can be constructed via linguistics, as follows.
+A deeper exploration is given in 
+\begin_inset Quotes eld
+\end_inset
+
+tensors.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
+\end_layout
+
+\begin_layout Subsubsection*
+Types and fibers
+\end_layout
+
+\begin_layout Standard
+TODO: talk about how vectors can have different indexes of different types
+ on them.
+ A prototypical example are the quark wave functions, which have a color
+ index, a flavor index, a spin index and a momentum index.
+\end_layout
+
+\begin_layout Standard
+Follow outline given in email.
+\end_layout
+
+\begin_layout Section*
+Sheaf Axioms
+\end_layout
+
+\begin_layout Standard
+Individual jigsaw pieces, and partially-assembled assemblies obey the sheaf
+ axioms.
+ Roughly speaking, the sheaf axioms just state that two assembled (connected)
+ jigsaw pieces are effectively still a jigsaw piece, in that there are still
+ (unconnected) connectors on it, and that larger assemblies decompose into
+ smaller sub-assemblies that are still consistently assembled according
+ to the connection rules.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf-axioms.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
+\end_layout
+
+\begin_layout Section*
+Learning
+\end_layout
+
+\begin_layout Standard
+Searching, parsing and learning are closely related.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+learning.pdf
+\begin_inset Quotes erd
+\end_inset
+
+ in this directory.
+\end_layout
+
+\begin_layout Section*
+Applications
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1615,16 +2437,8 @@ Why, link-grammar, of course.
  Its a categorial grammar.
  Type theory.
  Pre-group grammar.
- Stay and Baez rosetta stone.
+ Stay and Baez Rosetta stone.
  And
-\end_layout
-
-\begin_layout Subsubsection*
-Sheaf Axioms:
-\end_layout
-
-\begin_layout Standard
-It obeys the sheaf axioms.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1636,7 +2450,7 @@ Inference, theorem proving, planning, constraint satisfaction.
 \end_layout
 
 \begin_layout Standard
-The planning aspect is that one cann arrange a collection of unconnected
+The planning aspect is that one can arrange a collection of unconnected
  connectors at one end (the starting state) and another at the other end
  (the goal state) and build a bridge between the two.
 \end_layout
@@ -1652,7 +2466,7 @@ Conclusions:
 \begin_layout Standard
 There is no such thing as non-fiction; all writing is fundamentally fictional
  at it's root.
- The only way to be non-fictional is to be quarks and spacetime, the universe
+ The only way to be non-fictional is to be quarks and space-time, the universe
  itself.
 \end_layout
 
@@ -1685,7 +2499,7 @@ Yet, despite these problems, there is a way forward in relationships, without
  insisting on cause and effect, premise and inference, (Bayesian) prior
  and deduction.
  Directionality can be useful, but it is an infelicity, a trap with yawning
- abysses of doundational problems, not the least of which is the concept
+ abysses of foundational problems, not the least of which is the concept
  of 
 \begin_inset Quotes eld
 \end_inset
@@ -1696,6 +2510,47 @@ well-foundedness
 
  itself.
  Restricted compositionality is more powerful and more general.
+\end_layout
+
+\begin_layout Subsubsection*
+Inductive logic programming
+\end_layout
+
+\begin_layout Standard
+See, for example, the Wikipedia article on this.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://en.wikipedia.org/wiki/Inductive_logic_programming
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ The learning of sheaf structure is a generalization of 
+\begin_inset Quotes eld
+\end_inset
+
+inductive logic programming
+\begin_inset Quotes erd
+\end_inset
+
+, where the specific axioms of logic have been abstracted away.
+ More precisely, logic has an explicit directionality to all of it's rules
+ and axioms; sheaves can not only capture this directional, but they also
+ provide a non-directional generalization.
+ XXX TODO: this entire paragraph needs to be extended to a full-sized paper.
 \end_layout
 
 \begin_layout Section*
@@ -1724,7 +2579,7 @@ The Atomese Type System
 The existing Atomese type system is an extensible system of types usually
  defined at compile time.
  Although new types can be added at run-time, it is usually useful to have
- a coresponding object-oriented class definition for each type, so that
+ a corresponding object-oriented class definition for each type, so that
  the types can 
 \begin_inset Quotes eld
 \end_inset
@@ -1733,7 +2588,7 @@ do things
 \begin_inset Quotes erd
 \end_inset
 
- (be evaulatable, perform numeric operations, perform i/o operations, etc.)
+ (be evaluatable, perform numeric operations, perform i/o operations, etc.)
  As a result, the type hierarchy is somewhat limited and fairly rigid.
  Although there are more than 100 different types in use in the current
  system, only a handful of these are relevant to the current discussion.
@@ -1864,7 +2719,7 @@ Atom
 Atom
 \noun default
  is globally unique (within an AtomSpace), a more accurate conceptual visualizat
-ion is that of a rhizome or woolen felt, as differrent trees typically share
+ion is that of a rhizome or woolen felt, as different trees typically share
  the same branches.
  In the following, s-expressions will be used to write down trees.
 \end_layout
@@ -1933,7 +2788,7 @@ Concept
 \noun on
 ConceptNode
 \noun default
- being one of the many predefined types in the sytem.
+ being one of the many predefined types in the system.
  The 
 \noun on
 TypeNode
@@ -2052,14 +2907,16 @@ ACM Databases
  Volume 9, issue 3.
 \end_layout
 
-\begin_layout Itemize
-Van Inwagen, P.
- (2002).
- “The Number of Things.” 
-\emph on
-Philosophical Issues
-\emph default
- 12 pp.176–196.
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body

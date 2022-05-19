@@ -53,13 +53,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<GroundedSchemaNode> GroundedSchemaNodePtr;
-static inline GroundedSchemaNodePtr GroundedSchemaNodeCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<GroundedSchemaNode>(a); }
-static inline GroundedSchemaNodePtr GroundedSchemaNodeCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<GroundedSchemaNode>(a); }
-
-#define createGroundedSchemaNode std::make_shared<GroundedSchemaNode>
+NODE_PTR_DECL(GroundedSchemaNode)
+#define createGroundedSchemaNode CREATE_DECL(GroundedSchemaNode)
 
 /** @}*/
 }

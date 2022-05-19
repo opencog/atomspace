@@ -18,8 +18,8 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+#include <opencog/persist/tlb/TLB.h>
 
 using namespace opencog;
 
@@ -36,12 +36,12 @@ int atomCompare(Atom *a, Atom *b)
 
     if (a->get_type() != b->get_type())
     {
-        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
+        fprintf(stderr, "Error, type mismatch, a=%d b=%d\n", a->get_type(), b->get_type());
         rc --;
     }
     if (la->get_arity() != lb->get_arity())
     {
-        fprintf(stderr, "Error, arity mis-match, a=%lu b=%lu\n", la->get_arity(), lb->get_arity());
+        fprintf(stderr, "Error, arity mismatch, a=%lu b=%lu\n", la->get_arity(), lb->get_arity());
         rc --;
     }
     if (0 < la->get_arity())
@@ -52,7 +52,7 @@ int atomCompare(Atom *a, Atom *b)
         {
             if (outa[i] != outb[i])
             {
-                fprintf(stderr, "Error, outgoing set mis-match, "
+                fprintf(stderr, "Error, outgoing set mismatch, "
                         "i=%zu a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
                 rc --;
             }
@@ -124,7 +124,7 @@ void single_atom_test(std::string id)
     delete store;
 }
 
-void add_to_table(AtomTable *table, std::string id)
+void add_to_table(AtomSpace *table, std::string id)
 {
     // Create an atom ... 
     Atom *a = new Node(SCHEMA_NODE, id + "fromNode");
@@ -172,7 +172,7 @@ int main ()
              // "postgres:///opencog_test?user=opencog_tester&host=localhost");
              "postgres:///opencog_test?user=opencog_tester&password=cheese");
 
-    AtomTable *table = new AtomTable();
+    AtomSpace *table = new AtomSpace();
     store->load(*table);
 
     printf("Printing table:\n");
@@ -215,7 +215,7 @@ int main ()
 #if 0
     SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
 
-    AtomTable *table = new AtomTable();
+    AtomSpace *table = new AtomSpace();
     add_to_table(table, "aaa ");
     add_to_table(table, "bbb ");
     add_to_table(table, "ccc ");

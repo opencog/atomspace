@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The TypeIntersectionLink link is used to hold a type description; it is
-/// an anonymous (un-named) type that is an intersectino of everything
+/// an anonymous (un-named) type that is an intersection of everything
 /// it holds. It's primary use is for specifying typed glob intervals,
 /// although it is also intended for computing the intersection of types.
 ///
@@ -56,13 +56,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypeIntersectionLink> TypeIntersectionLinkPtr;
-static inline TypeIntersectionLinkPtr TypeIntersectionLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypeIntersectionLink>(h); }
-static inline TypeIntersectionLinkPtr TypeIntersectionLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypeIntersectionLink>(a); }
-
-#define createTypeIntersectionLink std::make_shared<TypeIntersectionLink>
+LINK_PTR_DECL(TypeIntersectionLink)
+#define createTypeIntersectionLink CREATE_DECL(TypeIntersectionLink)
 
 /** @}*/
 }

@@ -28,7 +28,7 @@ Atom creation can be as simple as the following example:
    (ReferenceLink (stv 0.987 0.234)
        (ConceptNode "dog-instance-1") (WordNode "dog"))
 ```
-which creates a link connnecting a concept node and a word node, having
+which creates a link connecting a concept node and a word node, having
 a simple truth value. Any valid node or link name can be used in this way.
 
 A number of utilities and handy functions can be found in the directory
@@ -186,12 +186,12 @@ interface.
           )
 
 
-=== cog-delete atom ===
+=== cog-extract atom ===
       Delete the indicated atom, but only if it has no incoming links.
 
       Returns #t if the atom was deleted, else returns #f if not deleted.
 
-=== cog-delete-recursive atom ===
+=== cog-extract-recursive atom ===
       Delete the indicated atom, and all atoms that point at it.
 
       Both functions return #t on success, else they return #f.
@@ -199,9 +199,9 @@ interface.
 
       Example:
          ; Define two nodes and a link between them:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-node 'ConceptNode "def"))
-         guile> (define l (cog-new-link 'Link x y))
+         guile> (define x (ConceptNode "abc"))
+         guile> (define y (ConceptNode "def"))
+         guile> (define l (Link x y))
 
          ; Verify that there's an atom called x:
          guile> x
@@ -212,12 +212,12 @@ interface.
 
          ; Try to delete x. This should fail, since there's a link
          ; containing x.
-         guile> (cog-delete x)
+         guile> (cog-extract x)
          #f
 
          ; Delete x, and everything pointing to it. This should delete
          ; both x, and the link l.
-         guile> (cog-delete-recursive x)
+         guile> (cog-extract-recursive x)
          #t
 
          ; Verify that the link l is gone:
@@ -238,7 +238,7 @@ interface.
 
       Example:
          ; Define a node
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define x (ConceptNode "abc"))
          guile> (define y (+ 2 2))
          guile> (cog-atom? x)
          #t
@@ -254,8 +254,8 @@ interface.
 
       Example:
          ; Define a node and a link
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-link 'ListLink x))
+         guile> (define x (ConceptNode "abc"))
+         guile> (define y (ListLink x))
          guile> (cog-node? x)
          #t
          guile> (cog-node? y)
@@ -270,8 +270,8 @@ interface.
 
       Example:
          ; Define a node and a link
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-link 'ListLink x))
+         guile> (define x (ConceptNode "abc"))
+         guile> (define y (ListLink x))
          guile> (cog-link? x)
          #f
          guile> (cog-link? y)
@@ -284,7 +284,7 @@ interface.
 
       Example:
          ; Define a node
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define x (ConceptNode "abc"))
          guile> (cog-name x)
          "abc"
 
@@ -294,7 +294,7 @@ interface.
 
       Example:
          ; Define a node
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define x (ConceptNode "abc"))
          guile> (cog-type x)
          ConceptNode
          guile> (eq? 'ConceptNode (cog-type x))
@@ -304,10 +304,10 @@ interface.
       Return the arity of the atom.
 
       Example:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
+         guile> (define x (ConceptNode "abc"))
          guile> (cog-arity x)
          0
-         guile> (define l (cog-new-link 'Link x x x))
+         guile> (define l (Link x x x))
          guile> (cog-arity l)
          3
 
@@ -319,9 +319,9 @@ interface.
 
       Example:
          ; Define two nodes and a link between them:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-node 'ConceptNode "def"))
-         guile> (define l (cog-new-link 'Link x y))
+         guile> (define x (ConceptNode "abc"))
+         guile> (define y (ConceptNode "def"))
+         guile> (define l (Link x y))
 
          ; Get the incoming sets of nodes x and y (which is the link l):
          guile> (cog-incoming-set x)
@@ -353,75 +353,29 @@ interface.
          #t
 
 
-=== cog-atom handle ===
-      Reference the atom identified by the integer-valued handle
-
 === cog-handle atom ===
-      Return the handle (which is an integer) of the atom
+      Return a 64-bit hash of the atom. This can be used in hashing
+      functions.
 
       It may be useful to remember that scheme indicates hexadecimal
       numbers by preceeding them with #x, and so, for example,
       (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
 
       Example:
-         ; Create two atoms, and get thier handles:
-         guile> (define x (cog-new-node 'ConceptNode "abc"))
-         guile> (define y (cog-new-node 'ConceptNode "def"))
+         ; Create two atoms, and get their handles:
+         guile> (define x (ConceptNode "abc"))
+         guile> (define y (ConceptNode "def"))
          guile> (cog-handle x)
-         113
+         999732144055296198
          guile> (cog-handle y)
-         114
-
-         ; Get the atom corresponding to handle number 114
-         guile> (cog-atom 114)
-         (ConceptNode "abc")
-
-         ; Verify that handles are truly integers
-         guile> (integer? x)
-         #f
-         guile> (integer? (cog-handle x))
-         #t
-
-
-=== cog-new-stv mean confidence ===
-      Create a SimpleTruthValue with the given mean and confidence.
-      Unlike atoms, truth values are ephemeral: they are automatically
-      garbage-collected when no longer needed.
-
-      Throws errors if mean and confidence are not floating-point
-      values.
-      Example:
-          ; Create a new simple truth value:
-          guile> (cog-new-stv 0.7 0.9)
-
-=== cog-new-ctv mean confidence count ===
-      Create a CountTruthValue with the given mean, confidence and count.
-      Unlike atoms, truth values are ephemeral: they are automatically
-      garbage-collected when no longer needed.
-
-      Throws errors if mean, confidence and count are not floating-point
-      values.
-      Example:
-          ; Create a new count truth value:
-          guile> (cog-new-ctv 0.7 0.9 44.0)
-
-=== cog-new-itv lower upper confidence ===
-      Create an IndefiniteTruthValue with the given lower, upper and confidence.
-      Unlike atoms, truth values are ephemeral: they are automatically
-      garbage-collected when no longer needed.
-
-      Throws errors if lower, upper and confidence are not floating-point
-      values.
-      Example:
-          ; Create a new indefinite truth value:
-          guile> (cog-new-itv 0.7 0.9 0.6)
+         7856230993510549357
 
 === cog-tv? exp ===
       Return #t if exp is a truth value, else return #f
 
       Example:
          ; Define a simple truth value
-         guile> (define x (cog-new-stv 0.7 0.9))
+         guile> (define x (SimpleTruthValue 0.7 0.9))
          guile> (define y (+ 2 2))
          guile> (cog-tv? x)
          #t
@@ -434,8 +388,8 @@ interface.
       Example:
          ; Define a node
          guile> (define x
-                   (cog-new-node 'ConceptNode "abc"
-                      (cog-new-stv 0.2 0.5)))
+                   (ConceptNode "abc"
+                      (SimpleTruthValue 0.2 0.5)))
          guile> (cog-tv x)
          (stv 0.2 0.5)
          guile> (cog-tv? (cog-tv x))
@@ -446,10 +400,10 @@ interface.
 
       Example:
          ; Define a node
-         guile> (define x (cog-new-node 'ConceptNode "def"))
+         guile> (define x (ConceptNode "def"))
          guile> (cog-tv x)
          (stv 0 0)
-         guile> (cog-set-tv! x (cog-new-stv 0.9 0.8))
+         guile> (cog-set-tv! x (SimpleTruthValue 0.9 0.8))
          (ConceptNode "def" (stv 0.9 0.8))
          guile> (cog-tv x)
          (stv 0.9 0.8)
@@ -521,7 +475,7 @@ interface.
           #t
 
 === cog-map-type proc type ===
-      Call proceedure proc for each atom in the atomspace that is of
+      Call procedure proc for each atom in the atomspace that is of
       type type. If proc returns any value other than #f, then the
       iteration is terminated.  Note that this iterates only over the
       given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
@@ -565,7 +519,7 @@ in a list.
   (define (killall lst)
      (if (null? lst)
          '()
-         (cons (cog-delete (car lst))
+         (cons (cog-extract (car lst))
                (killall (cdr lst)))))
 
 

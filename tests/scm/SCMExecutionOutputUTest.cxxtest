@@ -33,7 +33,7 @@ using namespace opencog;
 class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -80,7 +80,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 void SCMExecutionOutputUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 	eval->eval("(use-modules (opencog exec))");
 }
@@ -89,7 +89,6 @@ void SCMExecutionOutputUTest::tearDown(void)
 {
 	delete eval;
 	eval = NULL;
-	delete as;
 }
 
 #define CHKEV(ev) \
@@ -521,7 +520,7 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	CHKEV(eval);
 
 	// When evaluated, this one should be false.
-	tv = EvaluationLink::do_evaluate(as, boolex);
+	tv = EvaluationLink::do_evaluate(as.get(), boolex);
 	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.001);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

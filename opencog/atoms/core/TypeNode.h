@@ -89,18 +89,13 @@ public:
 				"Not a valid typename: '%s'", str.c_str());
 	}
 
-	Type get_kind(void) { return _kind; }
+	Type get_kind(void) const { return _kind; }
 
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypeNode> TypeNodePtr;
-static inline TypeNodePtr TypeNodeCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypeNode>(h); }
-static inline TypeNodePtr TypeNodeCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypeNode>(a); }
-
-#define createTypeNode std::make_shared<TypeNode>
+NODE_PTR_DECL(TypeNode)
+#define createTypeNode CREATE_DECL(TypeNode)
 
 /** @}*/
 }

@@ -35,15 +35,28 @@ class AtomSpace;
 
 class Commands
 {
+private:
+	/// True, if the _space_map below is being used, and AtomSpaces need
+	/// to be sent and received.
+	bool _multi_space;
+
+	/// Map from string AtomSpace names to the matching AtomSpacePtr's
+	std::unordered_map<std::string, Handle> _space_map;
+
+	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
+
 public:
+	Commands(void);
+	~Commands();
+
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only
 	/// supports those commands needed for network I/O of AtomSpace
 	/// contents (The cogserver uses this to provide peer AtomSpace
 	/// network services). The goal is to provide much higher
 	/// performance than what is possible through the guile interfaces.
-   ///
-   /// The supported commands are:
+	///
+	/// The supported commands are:
 	///    cog-atomspace-clear
 	///    cog-execute-cache!
 	///    cog-extract!
@@ -59,11 +72,15 @@ public:
 	///    cog-set-tv!
 	///    cog-value
    ///
-   /// They MUST appear only once in the string, at the very begining,
+	/// They MUST appear only once in the string, at the very beginning,
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
-	static std::string interpret_command(AtomSpace*, const std::string&);
+	std::string interpret_command(AtomSpace*, const std::string&);
+
+	/// If some interpreted command specified an AtomSpace, this
+	/// will be set to that AtomSpace.
+	AtomSpacePtr top_space;
 };
 
 /** @}*/

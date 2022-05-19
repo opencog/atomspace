@@ -29,19 +29,19 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 // Test quotations.
 //
 class QuotationUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 
 public:
-	QuotationUTest() : _eval(&_as)
+	QuotationUTest() :_asp(createAtomSpace()), _eval(_asp)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -70,7 +70,7 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(&_as);
+	Instantiator inst(_asp.get());
 	Handle and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
 		result = HandleCast(inst.execute(and_sha_abs)),
 		expected = and_sha_abs;
@@ -107,7 +107,7 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(&_as);
+	Instantiator inst(_asp.get());
 	Handle quoted_lambda = _eval.eval_h("quoted-lambda"),
 		result = HandleCast(inst.execute(quoted_lambda)),
 		expected = quoted_lambda;

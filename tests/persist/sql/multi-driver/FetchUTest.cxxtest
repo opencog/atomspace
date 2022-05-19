@@ -55,7 +55,7 @@ class FetchUTest :  public CxxTest::TestSuite
 		const char * passwd;
 		std::string sql_open;
 
-		AtomSpace *_as;
+		AtomSpacePtr _as;
 		SchemeEval *eval;
 
 	public:
@@ -72,20 +72,7 @@ class FetchUTest :  public CxxTest::TestSuite
 		void tearDown(void);
 		void kill_data(void);
 
-		void friendlyFailMessage()
-		{
-			TS_FAIL("The FetchUTest failed.\n"
-				"This is probably because you do not have SQL installed\n"
-				"or configured the way that OpenCog expects.\n\n"
-				"SQL persistance is optional for OpenCog, so if you don't\n"
-				"want it or need it, just ignore this test failure.\n"
-				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
-				"and create/configure the SQL database as described there.\n"
-				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
-				"to indicate the location of your database. If this is\n"
-				"done correctly, then this test will pass.\n");
-			exit(1);
-		}
+#include "friendly-fail.h"
 
 		void atomCompare(AtomPtr, AtomPtr, std::string);
 		void test_stuff(void);
@@ -94,37 +81,20 @@ class FetchUTest :  public CxxTest::TestSuite
 
 FetchUTest::FetchUTest(void)
 {
-	try
-	{
-		config().load("atomspace-test.conf");
-	}
-	catch (RuntimeException &e)
-	{
-		std::cerr << e.get_message() << std::endl;
-	}
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
-	try {
-		// Get the database logins & etc from the config file.
-		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+	getDBconfig();
 
-		// use postgres preferentially, unless its missing.
+	// Use postgres preferentially, unless its missing.
 #ifdef HAVE_ODBC_STORAGE
-		uri = mkuri("odbc", dbname, username, passwd);
+	uri = mkuri("odbc", dbname, username, passwd);
 #endif
 #ifdef HAVE_PGSQL_STORAGE
-		uri = mkuri("postgres", dbname, username, passwd);
+	uri = mkuri("postgres", dbname, username, passwd);
 #endif
 
-		sql_open = "(sql-open \"" + uri + "\")\n";
-	}
-	catch (InvalidParamException &e)
-	{
-		friendlyFailMessage();
-	}
+	sql_open = "(sql-open \"" + uri + "\")\n";
 }
 
 /*
@@ -132,7 +102,7 @@ FetchUTest::FetchUTest(void)
  */
 void FetchUTest::setUp(void)
 {
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	kill_data();
 
@@ -142,7 +112,6 @@ void FetchUTest::setUp(void)
 
 void FetchUTest::tearDown(void)
 {
-	delete _as;
 	// kill_data();
 }
 
@@ -150,8 +119,8 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	SQLAtomStorage* astore = new SQLAtomStorage();
-	astore->open(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -232,8 +201,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
@@ -263,8 +231,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 
@@ -304,11 +271,10 @@ void FetchUTest::test_readonly(void)
 	eval->eval("(store-atomspace)");
 	eval->eval("(sql-close)");
 
-	delete _as;
-	_as = new AtomSpace();
-	_as->set_read_only();
+	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
+	_as->set_read_only();
 
 	// Despite the AtomSpace being readonly, we should still be
 	// able to load atoms from the database.
@@ -342,20 +308,20 @@ void FetchUTest::test_readonly(void)
 	TS_ASSERT((*tv) == (*etv));
 
 	// Should be possible to extract, even though its read-only
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 	eval->eval(R"((cog-extract! (Concept "AAA")))");
 	eval->eval(R"((cog-extract! (Concept "BBB")))");
-	TS_ASSERT(1 == _as->get_size());
+	TS_ASSERT(2 == _as->get_size());
 
 	// And re-load them again.
 	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
 	eval->eval("(barrier)");
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 
 	TS_ASSERT(true == _as->get_read_only());
 	Handle d = _as->add_node(CONCEPT_NODE, "barfoo");
 	TS_ASSERT(d == nullptr);
-	TS_ASSERT(3 == _as->get_size());
+	TS_ASSERT(4 == _as->get_size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

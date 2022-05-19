@@ -193,6 +193,8 @@ void TypeChoice::analyze(Handle anontype)
 		Type vt = TypeNodeCast(anontype)->get_kind();
 		const TypeSet& ts = nameserver().getChildrenRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
+		if (ATOM != vt and VALUE != vt)
+			_simple_typeset.insert(vt);
 		return;
 	}
 
@@ -203,6 +205,8 @@ void TypeChoice::analyze(Handle anontype)
 		if (ATOM == vt or VALUE == vt) return;
 		const TypeSet& ts = nameserver().getParentsRecursive(vt);
 		_simple_typeset.insert(ts.begin(), ts.end());
+		if (ATOM != vt and VALUE != vt)
+			_simple_typeset.insert(vt);
 		return;
 	}
 
@@ -241,7 +245,7 @@ void TypeChoice::analyze(Handle anontype)
 	{
 		// This is a work-around to a URE bug. The URE should be
 		// using a SignatureLink, but its not. As a result, it
-		// gets undefined behavior and incorect results. Too bad.
+		// gets undefined behavior and incorrect results. Too bad.
 		// For now, just avoid throwing an exception. XXX FIXME.
 		return;
 	}
@@ -276,6 +280,16 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 bool TypeChoice::is_untyped(bool glob) const
 {
 	return _is_untyped and _glob_interval == default_interval(glob);
+}
+
+/// Return true if the type is a plain-old conventional type:
+/// A single TypeNode or perhaps a TypeChoice, and nothing more
+/// complicated.
+bool TypeChoice::is_simple(void) const
+{
+	return
+		0 == _deep_typeset.size() and
+		0 == _sect_typeset.size();
 }
 
 /* ================================================================= */
@@ -358,7 +372,7 @@ bool TypeChoice::is_nonglob_type(const ValuePtr& vp) const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all equivalent
-/// type specifications get exactly the same hash.  To acheive this,
+/// type specifications get exactly the same hash.  To achieve this,
 /// the normalized type specifications are used, rather than the raw
 /// user-specified types. (The static analysis is "normalizing").
 

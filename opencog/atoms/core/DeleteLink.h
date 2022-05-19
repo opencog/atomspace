@@ -51,16 +51,14 @@ public:
 	DeleteLink(const DeleteLink&) = delete;
 	DeleteLink& operator=(const DeleteLink&) = delete;
 
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace*, bool);
+
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;
-static inline DeleteLinkPtr DeleteLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<DeleteLink>(h); }
-static inline DeleteLinkPtr DeleteLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<DeleteLink>(a); }
-
-#define createDeleteLink std::make_shared<DeleteLink>
+LINK_PTR_DECL(DeleteLink)
+#define createDeleteLink CREATE_DECL(DeleteLink)
 
 /** @}*/
 }

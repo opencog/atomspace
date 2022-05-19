@@ -1,5 +1,5 @@
 /*
- * Present.cc
+ * PresentLink.cc
  *
  * Copyright (C) 2017 Linas Vepstas
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/mt19937ar.h>
-
+#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "PresentLink.h"
 
 using namespace opencog;
@@ -67,6 +67,22 @@ PresentLink::PresentLink(const HandleSeq&& oset, Type t)
 	}
 
 	init();
+}
+
+/// Return true, if all of the outgoing set is present in the
+/// indicated AtomSpace. It only makes sense to call this if
+/// the current "this" pointer is not in any AtomSpace.
+TruthValuePtr PresentLink::evaluate(AtomSpace* as, bool silent)
+{
+	if (nullptr == as) return TruthValue::FALSE_TV();
+
+	for (const Handle& h : _outgoing)
+	{
+		Handle maybe(as->get_atom(h));
+		if (nullptr == maybe) return TruthValue::FALSE_TV();
+	}
+
+	return TruthValue::TRUE_TV();
 }
 
 // ---------------------------------------------------------------

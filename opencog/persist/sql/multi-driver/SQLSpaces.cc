@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -32,31 +32,30 @@
 using namespace opencog;
 
 /* ================================================================== */
-/* AtomTable UUID stuff */
-void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
+/* AtomSpace UUID stuff */
+void SQLAtomStorage::store_atomtable_id(const AtomSpace& at)
 {
 	UUID tab_id = at.get_uuid();
 	if (table_id_cache.count(tab_id)) return;
 
 	table_id_cache.insert(tab_id);
 
-	// Get the parent table as well.
-	UUID parent_id = 1;
-	AtomTable *env = at.get_environ();
-	if (env)
+	// Get the parent tables as well.
+	for (const Handle& h : at.getOutgoingSet())
 	{
-		parent_id = env->get_uuid();
-		store_atomtable_id(*env);
-	}
+		AtomSpacePtr asp(AtomSpaceCast(h));
+		store_atomtable_id(* ((AtomSpace*) (asp.get())));
 
+		UUID parent_id = asp->get_uuid();
 #define BUFSZ 80
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
-		tab_id, parent_id);
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+			tab_id, parent_id);
 
-	Response rp(conn_pool);
-	rp.exec(buff);
+		Response rp(conn_pool);
+		rp.exec(buff);
+	}
 }
 
 /* ============================= END OF FILE ================= */

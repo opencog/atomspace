@@ -87,7 +87,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * the combinatoric explosion of grounding multiple distinct components).
  * If the pattern does contain "virtual" links, then the connected
  * components should be grounded first, and the results then combined
- * by exploring the combinatoric possibilites presented by the virtual
+ * by exploring the combinatoric possibilities presented by the virtual
  * link(s).
  *
  * A side effect of the algorithm is that it sorts the clauses into
@@ -99,6 +99,22 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * trivially just the very next clause in the connected set.  Of
  * course, users will typically never specify clauses in such order.
  */
+
+// A clause is connected if any of the `cur_vars` appear in the clause.
+// If the clause has NO variables, then its connected to anything.
+bool is_connected(const Handle& cl, const HandleSet& cur_vars)
+{
+	// The likely case.
+	if (any_unquoted_in_tree(cl, cur_vars)) return true;
+
+	// Unusual case: clause has no variables in it!
+	// This will connect to anything.
+	if (not contains_atomtype(cl, VARIABLE_NODE) and
+	    not contains_atomtype(cl, GLOB_NODE)) return true;
+
+	return false;
+}
+
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& components,
@@ -117,24 +133,20 @@ void get_connected_components(const HandleSet& vars,
 		{
 			bool extended = false;
 
-			// Which component might this possibly belong to??? Try them all.
+			// Which component might this clause possibly belong to?
+			// Try them all.
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
 				HandleSet& cur_vars(component_vars[i]);
-				// If clause cl is connected to this component, then
-				// add it to this component. (Its connected if any of
-				// the `cur_vars` appear in the clause). Alternately,
-				// if the clause has NO variables, just jam it into the
-				// first component.
-				if (any_unquoted_in_tree(cl, cur_vars) or
-				    (not contains_atomtype(cl, VARIABLE_NODE) and
-				     not contains_atomtype(cl, GLOB_NODE)))
+				// If clause cl is connected to this component,
+				// then add it to this component.
+				if (is_connected(cl, cur_vars))
 				{
-					// Extend the component
+					// Extend this component
 					components[i].emplace_back(cl);
 
-					// Add to the varset cache for that component.
+					// Add to the varset cache for this component.
 					FindAtoms fv(vars);
 					fv.search_set(cl);
 					for (const Handle& v : fv.varset) cur_vars.insert(v);
@@ -179,11 +191,11 @@ void get_bridged_components(const HandleSet& vars,
 {
 	HandleSeq nonopts;
 	for (const PatternTermPtr& ptm: prsnts)
-		nonopts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		nonopts.emplace_back(ptm->getQuote());
 
 	HandleSeq opts;
 	for (const PatternTermPtr& ptm: absnts)
-		opts.emplace_back(ptm->isQuoted() ? ptm->getQuote() : ptm->getHandle());
+		opts.emplace_back(ptm->getQuote());
 
 	if (0 == opts.size())
 	{

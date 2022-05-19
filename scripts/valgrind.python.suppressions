@@ -1,0 +1,233 @@
+# Invalid read of size 4
+{
+   <py_free>
+   Memcheck:Addr4
+   fun:PyObject_Free
+   ...
+}
+# Use of uninitialised value of size 8
+{
+   <py_free_val8>
+   Memcheck:Value8
+   fun:PyObject_Free
+   ...
+}
+{
+   <py_free_cond>
+   Memcheck:Cond
+   fun:PyObject_Free
+   ...
+}
+# Realloc stuff
+{
+   <py_realloc_addr>
+   Memcheck:Addr4
+   fun:PyObject_Realloc
+   ...
+}
+{
+   <py_realloc>
+   Memcheck:Value8
+   fun:PyObject_Realloc
+   ...
+}
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <py_realloc_cond>
+   Memcheck:Cond
+   fun:PyObject_Realloc
+   ...
+}
+#
+# -----------------------------------------------------------
+# All new all improved python3 stuff
+{
+   <py3_framex>
+   Memcheck:Cond
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_framex>
+   Memcheck:Addr4
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_framex>
+   Memcheck:Value8
+   ...
+   fun:PyEval_EvalFrameEx
+   ...
+}
+{
+   <py3_malloc>
+   Memcheck:Addr4
+   ...
+   fun:_PyObject_GC_Malloc
+   ...
+}
+{
+   <py3_string>
+   Memcheck:Addr4
+   ...
+   fun:PyRun_StringFlags
+   ...
+}
+{
+   <py3_frozen>
+   Memcheck:Cond
+   ...
+   fun:PyImport_ImportFrozenModuleObject
+   ...
+}
+{
+   <py3_frozen>
+   Memcheck:Addr4
+   ...
+   fun:PyImport_ImportFrozenModuleObject
+   ...
+}
+# -----------------------------------------------------------
+# New in python3
+
+# Invalid read of size 4
+{
+   <py3_object_free>
+   Memcheck:Addr4
+   ...
+   fun:PyObject_Free
+   ...
+}
+{
+   <py3_finalize>
+   Memcheck:Addr4
+   ...
+   fun:Py_FinalizeEx
+   ...
+}
+{
+   <py3_invalid_mem_free>
+   Memcheck:Addr4
+   fun:PyMem_Free
+   ...
+}
+{
+   <py3_invalid_arenafree>
+   Memcheck:Addr4
+   ...
+   fun:PyArena_Free
+   ...
+}
+{
+   <py3_invalid_reallo>
+   Memcheck:Addr4
+   fun:PyMem_Realloc
+   ...
+}
+{
+   <py3_invalid_eval>
+   Memcheck:Addr4
+   ...
+   fun:PyEval_EvalCode
+   ...
+}
+{
+   <py3_invalid_main>
+   Memcheck:Addr4
+   ...
+   fun:Py_RunMain
+   ...
+}
+{
+   <py3_invalid_evalframe>
+   Memcheck:Addr4
+   ...
+   fun:_PyEval_EvalFrameDefault
+   ...
+}
+{
+   <py3_setstring>
+   Memcheck:Addr4
+   ...
+   fun:PyDict_SetItemString
+   ...
+}
+{
+   <py3_errdisp>
+   Memcheck:Addr4
+   ...
+   fun:PyErr_Display
+   ...
+}
+# Use of uninitialised value of size 4
+{
+   <py_free_val4>
+   Memcheck:Value4
+   fun:free
+   fun:PyMem_Free
+   ...
+}
+{
+   <py_use_obj_val4>
+   Memcheck:Value4
+   fun:PyObject_Free
+   ...
+}
+{
+   <py_use_vect_val4>
+   Memcheck:Value4
+   ...
+   fun:_PyBytes_Resize
+   ...
+}
+# Use of uninitialised value of size 4
+{
+   <py_memfree_val4>
+   Memcheck:Value4
+   fun:PyMem_Free
+   ...
+}
+{
+   <py_memreoa_val4>
+   Memcheck:Value4
+   fun:PyMem_Realloc
+   ...
+}
+{
+   <py_use_frame_default4>
+   Memcheck:Value4
+   ...
+   fun:_PyEval_EvalFrameDefault
+   ...
+}
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <py_free_cond>
+   Memcheck:Cond
+   fun:PyMem_Free
+   ...
+}
+{
+   <py_free_cond>
+   Memcheck:Cond
+   fun:PyMem_Realloc
+   ...
+}
+{
+   <py_use_cond_resizeval4>
+   Memcheck:Cond
+   ...
+   fun:_PyBytes_Resize
+   ...
+}
+{
+   <py_frame_default4>
+   Memcheck:Cond
+   ...
+   fun:_PyEval_EvalFrameDefault
+   ...
+}
+#

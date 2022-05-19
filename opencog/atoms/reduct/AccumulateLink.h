@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_ACCUMULATE_LINK_H
 #define _OPENCOG_ACCUMULATE_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 
 namespace opencog
 {
@@ -21,7 +21,7 @@ namespace opencog
  * The AccumulateLink implements a sum over a numeric series.
  *    (Accumulate (Number a b c))  is just a+b+c.
  */
-class AccumulateLink : public FunctionLink
+class AccumulateLink : public NumericFunctionLink
 {
 protected:
 	void init(void);
@@ -39,13 +39,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<AccumulateLink> AccumulateLinkPtr;
-static inline AccumulateLinkPtr AccumulateLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<AccumulateLink>(a); }
-static inline AccumulateLinkPtr AccumulateLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<AccumulateLink>(a); }
-
-#define createAccumulateLink std::make_shared<AccumulateLink>
+LINK_PTR_DECL(AccumulateLink)
+#define createAccumulateLink CREATE_DECL(AccumulateLink)
 
 /** @}*/
 }

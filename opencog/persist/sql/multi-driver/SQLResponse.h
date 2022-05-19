@@ -30,7 +30,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "llapi.h"
 #include "SQLAtomStorage.h"
@@ -161,7 +161,7 @@ class SQLAtomStorage::Response
 			return true;
 		}
 
-		AtomTable *table;
+		AtomSpace *table;
 		SQLAtomStorage *store;
 		bool load_all_atoms_cb(void)
 		{
@@ -180,7 +180,7 @@ class SQLAtomStorage::Response
 				PseudoPtr p(store->makeAtom(*this, uuid));
 
 				Handle atom(store->get_recursive_if_not_exists(p));
-				Handle h(table->add(atom, false));
+				Handle h(table->storage_add_nocheck(atom));
 
 				// Force resolution in TLB, so that later removes work.
 				store->_tlbuf.addAtom(h, uuid);
@@ -205,14 +205,14 @@ class SQLAtomStorage::Response
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
 				h = store->get_recursive_if_not_exists(p);
-				h = table->add(h, false);
+				h = table->storage_add_nocheck(h);
 				store->_tlbuf.addAtom(h, uuid);
 			}
 			else
 			{
 				// In case it's still in the TLB, but was
 				// previously removed from the atomspace.
-				h = table->add(h, false);
+				h = table->storage_add_nocheck(h);
 			}
 
 			// Clobber all values, including truth values.
@@ -341,21 +341,21 @@ class SQLAtomStorage::Response
 				// Try really hard to stick the key into a table.
 				// XXX This is potentially broken, as no other code
 				// ever verifies that the key gets inserted into some
-				// table.  The correct fix is to add AtomTable as a
+				// table.  The correct fix is to add AtomSpace as a
 				// part of the BackingStore API. XXX TODO FIXME.
-				if (table) hkey = table->add(hkey, false);
-				else if (atom->getAtomTable())
-					hkey = atom->getAtomTable()->add(hkey, false);
+				if (table) hkey = table->storage_add_nocheck(hkey);
+				else if (atom->getAtomSpace())
+					hkey = atom->getAtomSpace()->storage_add_nocheck(hkey);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 
 			// The below usually triggers only on tvpred,
 			// and so we could save some CPU cycles by handling
 			// tvpred earlier, and avoiding this check.
-			if (nullptr == hkey->getAtomTable() and
-			    nullptr != atom->getAtomTable())
+			if (nullptr == hkey->getAtomSpace() and
+			    nullptr != atom->getAtomSpace())
 			{
-				hkey = atom->getAtomTable()->add(hkey, false);
+				hkey = atom->getAtomSpace()->storage_add_nocheck(hkey);
 				store->_tlbuf.addAtom(hkey, key);
 			}
 

@@ -11,7 +11,7 @@ from opencog.type_constructors import *
 from opencog.scheme_wrapper import scheme_eval_v
 
 atomspace = AtomSpace()
-set_type_ctor_atomspace(atomspace)
+set_default_atomspace(atomspace)
 
 a = FloatValue([1.0, 2.0, 3.0])
 b = FloatValue([1.0, 2.0, 3.0])

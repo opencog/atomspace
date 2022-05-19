@@ -34,7 +34,8 @@
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/storage/storage_types.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -56,7 +57,8 @@ using namespace opencog;
 /* ================================================================ */
 // Constructors
 
-SQLAtomStorage::SQLAtomStorage(void) :
+SQLAtomStorage::SQLAtomStorage(const std::string uri) :
+	StorageNode(POSTGRES_STORAGE_NODE, uri),
 	_tlbuf(&_uuid_manager),
 	_uuid_manager("uuid_pool"),
 	_vuid_manager("vuid_pool"),
@@ -96,11 +98,10 @@ SQLAtomStorage::~SQLAtomStorage()
 /* ================================================================ */
 // Connections and opening
 
-void SQLAtomStorage::enlarge_conn_pool(int delta)
+void SQLAtomStorage::enlarge_conn_pool(int delta, const char* uri)
 {
 	if (0 >= delta) return;
 
-	const char * uri = _uri.c_str();
 	for (int i=0; i<delta; i++)
 	{
 		LLConnection* db_conn = nullptr;
@@ -132,11 +133,15 @@ void SQLAtomStorage::close_conn_pool()
 	_initial_conn_pool_size = 0;
 }
 
-void SQLAtomStorage::connect(std::string uris)
+// Public function
+void SQLAtomStorage::connect(void)
 {
-	_uri = uris;
-	const char * uri = uris.c_str();
+	connect(_name.c_str());
+}
 
+// Private internal-use-only
+void SQLAtomStorage::connect(const char * uri)
+{
 	_use_libpq = (0 == strncmp(uri, "postgres", 8));
 	_use_odbc = (0 == strncmp(uri, "odbc", 4));
 
@@ -147,7 +152,7 @@ void SQLAtomStorage::connect(std::string uris)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
 	if (0 == _initial_conn_pool_size)
-		enlarge_conn_pool(NUM_WB_QUEUES + 2);
+		enlarge_conn_pool(NUM_WB_QUEUES + 2, uri);
 
 	if (!connected()) return;
 
@@ -155,9 +160,9 @@ void SQLAtomStorage::connect(std::string uris)
 	get_server_version();
 }
 
-void SQLAtomStorage::open(std::string uri)
+void SQLAtomStorage::open(void)
 {
-	connect(uri);
+	connect();
 
 	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
@@ -190,7 +195,7 @@ void SQLAtomStorage::open(std::string uri)
 // #define NUM_OMP_THREADS 8
 
 	// minus 2 because we had a +2 in connect();
-	enlarge_conn_pool(NUM_OMP_THREADS - 2);
+	enlarge_conn_pool(NUM_OMP_THREADS - 2, _name.c_str());
 
 	if (!connected()) return;
 
@@ -280,7 +285,7 @@ void SQLAtomStorage::flushStoreQueue()
 	rethrow();
 }
 
-void SQLAtomStorage::barrier()
+void SQLAtomStorage::barrier(AtomSpace* as)
 {
 	flushStoreQueue();
 }
@@ -296,8 +301,10 @@ void SQLAtomStorage::rename_tables(void)
 	rp.exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 }
 
-void SQLAtomStorage::create_database(std::string uri)
+void SQLAtomStorage::create_database(void)
 {
+	const std::string& uri(_name);
+
 	// Parse the URI and make a valiant attempt to extract a
 	// database name from it. This ignores any usernames or
 	// passwords that might follow the database name.
@@ -321,7 +328,7 @@ void SQLAtomStorage::create_database(std::string uri)
 	// We need a temporary, administrative connection, to create
 	// the database.  Let's assume the user has admin access; if
 	// not, then libpq will deliver an error.
-	connect(server);
+	connect(server.c_str());
 	if (!connected())
 		throw IOException(TRACE_INFO, "Error: cannot connect to '%s'",
 		                  server.c_str());
@@ -338,7 +345,7 @@ void SQLAtomStorage::create_database(std::string uri)
 	close_conn_pool();
 
 	// Now reconnect, and create the tables.
-	connect(uri);
+	connect();
 	create_tables();
 }
 
@@ -467,7 +474,7 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
-	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
+	printf("sql-stats: Currently open URI: %s\n", _name.c_str());
 	time_t now = time(0);
 	// ctime returns string with newline at end of it.
 	printf("sql-stats: Time since stats reset=%lu secs, at %s",
@@ -597,5 +604,7 @@ void SQLAtomStorage::print_stats(void)
 	printf("sql-stats: %zu of %lu reserved uuids used (%f pct)\n",
 	       used, mad, frac);
 }
+
+DEFINE_NODE_FACTORY(PostgresStorageNode, POSTGRES_STORAGE_NODE)
 
 /* ============================= END OF FILE ================= */

@@ -39,13 +39,13 @@
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspaceutils/TLB.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "llapi.h"
 
-// See SQLAtomStorage.cc for extensive explantion of what this
+// See SQLAtomStorage.cc for extensive explanation of what this
 // is and why it has this particular value.
 #define NUM_OMP_THREADS 8
 
@@ -55,29 +55,30 @@ namespace opencog
  *  @{
  */
 
-class SQLAtomStorage : public BackingStore
+class SQLAtomStorage : public StorageNode
 {
 	private:
 		// Pool of shared connections
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
-		void enlarge_conn_pool(int);
+		void enlarge_conn_pool(int, const char*);
 		void close_conn_pool(void);
 
 		// Utility for handling responses (on stack).
 		class Response;
 
-		std::string _uri;
 		bool _use_libpq;
 		bool _use_odbc;
 		int _server_version;
 		void get_server_version(void);
 
+		void connect(const char *);
+
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
 		// convert from sql UUID to the actual UUID.
 		std::set<UUID> table_id_cache;
-		void store_atomtable_id(const AtomTable&);
+		void store_atomtable_id(const AtomSpace&);
 
 		// ---------------------------------------------
 		// Fetching of atoms.
@@ -103,7 +104,7 @@ class SQLAtomStorage : public BackingStore
 		int getMaxObservedHeight(void);
 		int max_height;
 
-		void getIncoming(AtomTable&, const char *);
+		void getIncoming(AtomSpace&, const char *);
 		// --------------------------
 		// Storing of atoms
 		std::mutex _store_mutex;
@@ -188,6 +189,10 @@ class SQLAtomStorage : public BackingStore
 		UUID_manager _uuid_manager;
 		UUID_manager _vuid_manager;
 
+		void registerWith(AtomSpace*);
+		void unregisterWith(AtomSpace*);
+		virtual void setAtomSpace(AtomSpace *);
+
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
@@ -236,37 +241,40 @@ class SQLAtomStorage : public BackingStore
 		void rethrow(void);
 
 	public:
-		SQLAtomStorage(void);
-		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying
-		SQLAtomStorage& operator=(const SQLAtomStorage&) = delete; // disable assignment
+		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
-		void open(std::string uri);
-		void connect(std::string uri);
+		void open(void);
+		void close(void) { barrier(); /* FIXME we should do more */ }
+		void connect(void);
 		bool connected(void); // connection to DB is alive
 
-		void create_database(std::string uri); // create the database
+		void create_database(void); // create the database
 		void kill_data(void);       // destroy DB contents
 		void clear_cache(void);     // clear out the TLB.
 
-		void registerWith(AtomSpace*);
-		void unregisterWith(AtomSpace*);
+		void create(void) { create_database(); }
+		void destroy(void) { kill_data(); /* TODO also delete the db */ }
+		void erase(void) { kill_data(); }
+
 		void extract_callback(const AtomPtr&);
 		int _extract_sig;
 
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
-		void getIncomingSet(AtomTable&, const Handle&);
-		void getIncomingByType(AtomTable&, const Handle&, Type t);
+		void fetchIncomingSet(AtomSpace*, const Handle&);
+		void fetchIncomingByType(AtomSpace*, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
-		void removeAtom(const Handle&, bool recursive);
-		void loadType(AtomTable&, Type);
-		void barrier();
+		void removeAtom(AtomSpace*, const Handle&, bool recursive);
+		void storeValue(const Handle&, const Handle&);
+		void loadValue(const Handle&, const Handle&);
+		void loadType(AtomSpace*, Type);
+		void barrier(AtomSpace* = nullptr);
 		void flushStoreQueue();
 
 		// Large-scale loads and saves
-		void loadAtomSpace(AtomTable &); // Load entire contents of DB
-		void storeAtomSpace(const AtomTable &); // Store all of AtomTable
+		void loadAtomSpace(AtomSpace*); // Load entire contents of DB
+		void storeAtomSpace(const AtomSpace*); // Store all of AtomSpace
 
 		// Debugging and performance monitoring
 		void print_stats(void);
@@ -274,6 +282,26 @@ class SQLAtomStorage : public BackingStore
 		void set_hilo_watermarks(int, int);
 		void set_stall_writers(bool);
 };
+
+class PostgresStorageNode : public SQLAtomStorage
+{
+	public:
+		PostgresStorageNode(Type t, const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{}
+		PostgresStorageNode(const std::string&& uri) :
+			SQLAtomStorage(std::move(uri))
+		{}
+		static Handle factory(const Handle&);
+};
+
+typedef std::shared_ptr<PostgresStorageNode> PostgresStorageNodePtr;
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(const Handle& h)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(h); }
+static inline PostgresStorageNodePtr PostgresStorageNodeCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<PostgresStorageNode>(a); }
+
+#define createPostgresStorageNode std::make_shared<PostgresStorageNode>
 
 
 /** @}*/

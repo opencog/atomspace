@@ -48,13 +48,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ValueOfLink> ValueOfLinkPtr;
-static inline ValueOfLinkPtr ValueOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ValueOfLink>(h); }
-static inline ValueOfLinkPtr ValueOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ValueOfLink>(a); }
-
-#define createValueOfLink std::make_shared<ValueOfLink>
+LINK_PTR_DECL(ValueOfLink)
+#define createValueOfLink CREATE_DECL(ValueOfLink)
 
 /** @}*/
 }

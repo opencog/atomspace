@@ -23,8 +23,8 @@
 
     OpenCog offers its own random generator singleton (defined in
     cogutil) to have a central point of control (random seed, etc)
-    which can make it easier to achieve reproducability. Note that
-    it is neither guarantied nor even desirable that all components
+    which can make it easier to achieve reproducibility. Note that
+    it is neither guaranteed nor even desirable that all components
     use OpenCog's random generator. However for those that do, such
     a binding is provided.
 ")
@@ -42,8 +42,8 @@
 
     OpenCog offers its own random generator singleton (defined in
     cogutil) to have a central point of control (random seed, etc)
-    which can make it easier to achieve reproducability. Note that
-    it is neither guarantied nor even desirable that all components
+    which can make it easier to achieve reproducibility. Note that
+    it is neither guaranteed nor even desirable that all components
     use OpenCog's random generator. However for those that do, such
     a binding is provided.
 ")
@@ -60,8 +60,8 @@
 
     OpenCog offers its own random generator singleton (defined in
     cogutil) to have a central point of control (random seed, etc)
-    which can make it easier to achieve reproducability. Note that
-    it is neither guarantied nor even desirable that all components
+    which can make it easier to achieve reproducibility. Note that
+    it is neither guaranteed nor even desirable that all components
     use OpenCog's random generator. However for those that do, such
     a binding is provided.
 ")

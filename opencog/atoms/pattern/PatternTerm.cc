@@ -28,11 +28,13 @@ PatternTerm::PatternTerm(void)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
+	  _is_identical(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
 	  _is_absent(false),
 	  _is_choice(false),
+	  _has_choice(false),
 	  _is_always(false)
 {}
 
@@ -49,11 +51,13 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
+	  _is_identical(false),
 	  _has_any_unordered_link(false),
 	  _is_literal(false),
 	  _is_present(false),
 	  _is_absent(false),
 	  _is_choice(false),
+	  _has_choice(false),
 	  _is_always(false)
 {
 	Type t = h->get_type();
@@ -226,6 +230,14 @@ void PatternTerm::markVirtual()
 	_is_virtual = true;
 }
 
+void PatternTerm::markIdentical()
+{
+	// If quoted, it cannot be evaluated.
+	if (isQuoted()) return;
+
+	_is_identical = true;
+}
+
 // ==============================================================
 
 void PatternTerm::addUnorderedLink()
@@ -288,6 +300,15 @@ void PatternTerm::markChoice()
 	{
 		if (not ptm->isPresent()) ptm->markLiteral();
 	}
+
+	// Everything above holds a Choice.
+	_has_choice = true;
+	PatternTermPtr pnt = _parent;
+	while (pnt and pnt->_handle)
+	{
+		pnt->_has_choice = true;
+		pnt = pnt->_parent;
+	}
 }
 
 // ==============================================================
@@ -317,22 +338,24 @@ std::string PatternTerm::to_short_string(const std::string& sep) const
 std::string PatternTerm::flag_string() const
 {
 	std::string str;
-	if (isQuoted()) str += "Q: ";
+	if (isQuoted()) str += "QUOTED!: ";
 	if (_has_any_bound_var) str += "HABV: ";
 	if (_has_bound_var) str += "HBV: ";
 	if (_is_bound_var) str += "BV: ";
 	if (_has_any_globby_var) str += "HAGV: ";
 	if (_has_globby_var) str += "HGV: ";
 	if (_is_globby_var) str += "GV: ";
-	if (_has_any_evaluatable) str += "EE: ";
+	if (_has_any_evaluatable) str += "HE: ";
 	if (_has_evaluatable) str += "E: ";
 	if (_is_virtual) str += "V: ";
+	if (_is_identical) str += "I: ";
 	if (_has_any_unordered_link) str += "U: ";
 	if (_is_literal) str += "L: ";
 	if (_is_present) str += "P: ";
 	if (_is_absent) str += "A: ";
 	if (_is_choice) str += "C: ";
-	if (_is_always) str += "AW: ";
+	if (_has_choice) str += "HC: ";
+	if (_is_always) str += "ALW: ";
 	str += _handle->id_to_string();
 	return str;
 }
@@ -364,8 +387,8 @@ std::string PatternTerm::to_full_string(const std::string& indent) const
 
 	std::string str = indent;
 	std::string more_indent = indent + "  "; // two spaces
-	str += "(" + nameserver().getTypeName(getQuote()->get_type());
-	str += "\t\t; " + flag_string() + "\n";
+	str += "(" + nameserver().getTypeName(getHandle()->get_type());
+	str += "\t; " + flag_string() + "\n";
 	for (const PatternTermPtr& ptm: getOutgoingSet())
 	{
 		if (str.back() == ')') str += "\n";

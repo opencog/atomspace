@@ -53,7 +53,7 @@ struct Replacement
 	typedef std::map<Handle, unsigned int> IndexMap;
 
 	/// Walk the tree given in the first argument, and replace
-	/// any atoms that occur in the map by thier mapped value.
+	/// any atoms that occur in the map by their mapped value.
 	/// It has the name "nocheck" because no type-checking is
 	/// performed before replacement.
 	static Handle replace_nocheck(const Handle&, const HandleMap&);

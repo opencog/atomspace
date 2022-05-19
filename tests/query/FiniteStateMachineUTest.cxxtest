@@ -29,7 +29,7 @@ using namespace opencog;
 class FiniteStateMachineUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace* as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -38,7 +38,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -48,7 +48,6 @@ public:
 	~FiniteStateMachineUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -143,16 +142,18 @@ void FiniteStateMachineUTest::test_basic_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
+
+	// Testing is peformed in a write-through mode.
+	as->clear_copy_on_write();
 
 	do_test_basic();
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 

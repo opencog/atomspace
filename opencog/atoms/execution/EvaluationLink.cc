@@ -3,23 +3,42 @@
  *
  * Copyright (C) 2009, 2013, 2014, 2015 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <thread>
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/PredicateFormulaLink.h>
+#include <opencog/atoms/parallel/ParallelLink.h>
+#include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -101,38 +120,13 @@ static void throwSyntaxException(bool silent, const char* message...)
 }
 
 /// Extract a single floating-point double out of an atom, that,
-/// when executed, should yeild a value containing a number.
+/// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
 static double get_numeric_value(AtomSpace* as, bool silent,
                                 Handle h)
 {
-	Type t = h->get_type();
-	if (DEFINED_SCHEMA_NODE == t)
-	{
-		h = DefineLink::get_definition(h);
-		t = h->get_type();
-	}
-
-	ValuePtr pap(h);
-	if (h->is_executable())
-	{
-		pap = h->execute(as, silent);
-		t = pap->get_type();
-
-		// Pattern matching hack. The pattern matcher returns sets of
-		// atoms; if that set contains a single number, then unwrap it.
-		// See issue #1502 which proposes to eliminate this SetLink hack.
-		if (SET_LINK == t)
-		{
-			h = HandleCast(pap);
-			if (1 != h->get_arity())
-				throw SyntaxException(TRACE_INFO,
-					"Don't know how to unwrap this: %s",
-					h->to_string().c_str());
-			pap = h->getOutgoingAtom(0);
-			t = pap->get_type();
-		}
-	}
+	ValuePtr pap(NumericFunctionLink::get_value(as, silent, h));
+	Type t = pap->get_type();
 
 	if (NUMBER_NODE == t)
 	{
@@ -167,6 +161,38 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 	double v1 = get_numeric_value(as, silent, oset[1]);
 
 	return (v0 > v1);
+}
+
+/// Perform a IsClosed check
+static bool is_outgoing_closed(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	return std::all_of(oset.begin(), oset.end(),
+	                   [](const Handle& o) { return is_closed(o); });
+}
+
+/// Perform the IsTrueLink check
+static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
+{
+	// Truth values are always relative to the AtomSpace the Atom is in.
+	// So make sure that the Atom is in the AtomSpace.
+	Handle hs(scratch->add_atom(h));
+	const HandleSeq& oset = hs->getOutgoingSet();
+	return std::all_of(oset.begin(), oset.end(),
+		[](const Handle& o)
+			{ return *o->getTruthValue() == *TruthValue::TRUE_TV(); });
+}
+
+/// Perform the IsFalseLink check
+static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
+{
+	// Truth values are always relative to the AtomSpace the Atom is in.
+	// So make sure that the Atom is in the AtomSpace.
+	Handle hs(scratch->add_atom(h));
+	const HandleSeq& oset = hs->getOutgoingSet();
+	return std::all_of(oset.begin(), oset.end(),
+		[](const Handle& o)
+			{ return *o->getTruthValue() == *TruthValue::FALSE_TV(); });
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,
@@ -261,7 +287,7 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 	if (h0 == h1)
 		return true;
 
-	// Not strictly equal. Are they alpha convertable?
+	// Not strictly equal. Are they alpha convertible?
 	Variables v0, v1;
 	v0.find_variables(h0);
 	v1.find_variables(h1);
@@ -388,35 +414,6 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
-static void thread_eval(AtomSpace* as,
-                        const Handle& evelnk, AtomSpace* scratch,
-                        bool silent)
-{
-	try
-	{
-		EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
-	}
-	catch (const std::exception& ex)
-	{
-		logger().warn("Caught exception in thread:\n%s", ex.what());
-	}
-}
-
-static void thread_eval_tv(AtomSpace* as,
-                           const Handle& evelnk, AtomSpace* scratch,
-                           bool silent, TruthValuePtr* tv,
-                           std::exception_ptr* returned_ex)
-{
-	try
-	{
-		*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
-	}
-	catch (const std::exception& ex)
-	{
-		*returned_ex = std::current_exception();
-	}
-}
-
 static TruthValuePtr bool_to_tv(bool truf)
 {
 	if (truf) return TruthValue::TRUE_TV();
@@ -492,7 +489,7 @@ static bool crispy_maybe(AtomSpace* as,
 		// This is subtle, so listen-up: one of the side effects
 		// might involve evaluating some condition, which then pokes
 		// atoms into the atomspace, to signal some event or state.
-		// These cannot be discarded. This is explictly tested by
+		// These cannot be discarded. This is explicitly tested by
 		// SequenceUTest::test_or_put().
 		for (const Handle& term : evelnk->getOutgoingSet())
 			exec_or_eval(as, term, scratch, silent);
@@ -575,6 +572,9 @@ static bool crispy_maybe(AtomSpace* as,
 	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
+	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
+	if (IS_TRUE_LINK == t) return is_outgoing_true(scratch, evelnk);
+	if (IS_FALSE_LINK == t) return is_outgoing_false(scratch, evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
@@ -583,41 +583,13 @@ static bool crispy_maybe(AtomSpace* as,
 	// Multi-threading primitives
 	if (THREAD_JOIN_LINK == t)
 	{
-		const HandleSeq& oset = evelnk->getOutgoingSet();
-		size_t arity = oset.size();
-		std::vector<TruthValuePtr> tvp(arity);
-
-		// Create a collection of joinable threads.
-		std::vector<std::thread> thread_set;
-		std::exception_ptr ex;
-		for (size_t i=0; i<arity; i++)
-		{
-			thread_set.push_back(std::thread(&thread_eval_tv,
-				as, oset[i], scratch, silent, &tvp[i], &ex));
-		}
-
-		// Wait for it all to come together.
-		for (std::thread& t : thread_set) t.join();
-
-		// Were there any exceptions? If so, rethrow.
-		if (ex) std::rethrow_exception(ex);
-
-		// Return the logical-AND of the returned truth values
-		for (const TruthValuePtr& tv: tvp)
-		{
-			if (0.5 > tv->get_mean())
-				return false;
-		}
-		return true;
+		ThreadJoinLinkPtr tjlp = ThreadJoinLinkCast(evelnk);
+		return tjlp->evaluate(as, silent, scratch);
 	}
 	else if (PARALLEL_LINK == t)
 	{
-		// Create and detach threads; return immediately.
-		for (const Handle& h : evelnk->getOutgoingSet())
-		{
-			std::thread thr(&thread_eval, as, h, scratch, silent);
-			thr.detach();
-		}
+		ParallelLinkPtr plp = ParallelLinkCast(evelnk);
+		plp->evaluate(as, silent, scratch);
 		return true;
 	}
 
@@ -746,7 +718,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		// Treat LambdaLink as if it were a PutLink -- perform
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -763,7 +735,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (LAMBDA_LINK == pntype)
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct = lam->beta_reduce(cargs);
+		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
@@ -773,6 +745,16 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
 		Handle args(createLink(std::move(cargs), LIST_LINK));
 		return TruthValueCast(gpn->execute(as, args, silent));
+	}
+
+	// If it's evaluatable, assume it has some free variables.
+	// Use the LambdaLink to find those variables (via FreeLink)
+	// and then reduce it.
+	if (nameserver().isA(pntype, EVALUATABLE_LINK))
+	{
+		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
 
 	if (silent)
@@ -814,7 +796,14 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->get_type() == PREDICATE_NODE)
+		{
+			// If its not in any atomspace, well, we need to have
+			// it somewhere, to get an accurate TV value. We add
+			// it to scratch, just in case it's not in the base as.
+			if (as and as != evelnk->getAtomSpace())
+				return scratch->add_atom(evelnk)->getTruthValue();
 			return evelnk->getTruthValue();
+		}
 
 		HandleSeq args;
 		if (LIST_LINK == sna.at(1)->get_type())
@@ -886,38 +875,9 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (// Links that evaluate to themselves
-		INHERITANCE_LINK == t or
-		IMPLICATION_LINK == t or
-		EXECUTION_LINK == t
-		)
-	{
-		return evelnk->getTruthValue();
-	}
-	else if (PREDICATE_FORMULA_LINK == t)
-	{
-		return evelnk->evaluate(scratch, silent);
-	}
 	else if (DYNAMIC_FORMULA_LINK == t)
 	{
 		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
-	}
-	else if (TRUTH_VALUE_OF_LINK == t)
-	{
-		// If the truth value of the link is being requested,
-		// then ... compute the truth value, on the fly!
-		Handle ofatom = evelnk->getOutgoingAtom(0);
-		TruthValuePtr tvp;
-		if (nameserver().isA(ofatom->get_type(), EVALUATABLE_LINK))
-			tvp = EvaluationLink::do_eval_scratch(as,
-		                  ofatom, scratch, silent);
-		else
-			tvp = ofatom->getTruthValue();
-
-		// Cache the computed truth value...
-		// This seems like an OK idea, do users use it?
-		evelnk->setTruthValue(tvp);
-		return tvp;
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
@@ -929,6 +889,15 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 			                    HandleCast(pap), scratch, silent);
 
 		return TruthValueCast(pap);
+	}
+	else if (evelnk->is_evaluatable())
+	{
+		return evelnk->evaluate(scratch, silent);
+	}
+	else if ( // Links that evaluate to themselves
+		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
+	{
+		return evelnk->getTruthValue();
 	}
 
 	try_crispy = true;

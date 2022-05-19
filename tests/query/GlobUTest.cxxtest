@@ -29,7 +29,7 @@ using namespace opencog;
 class GlobUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -38,7 +38,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -49,7 +49,6 @@ public:
 	~GlobUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -394,13 +393,23 @@ void GlobUTest::test_glob_unorder(void)
 	printf("unorder %s\n", unorder->to_string().c_str());
 	TS_ASSERT_EQUALS(1, unorder->get_arity());
 
-	Handle response = eval->eval_h(
+	// 32-bit and 64-bit hashes differ because std::hash() returns
+	// size_t As a result, the order is randomly reversed. Hack
+	// around this inconsistency. Also, changing the type hierarchy
+	// can also affect the hash value.  So try both permutations.
+	Handle response1 = eval->eval_h(
 		"(SetLink"
 		"  (ListLink"
 		"    (ConceptNode \"honeydew\")"
 		"    (ConceptNode \"lime\")))"
 	);
-	TS_ASSERT_EQUALS(unorder, response);
+	Handle response2 = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"lime\")"
+		"    (ConceptNode \"honeydew\")))"
+	);
+	TS_ASSERT((unorder == response1) or (unorder == response2));
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

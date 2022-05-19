@@ -35,7 +35,7 @@ namespace opencog
 /// The TypedVariableLink is used to attach a name to a type description;
 /// the "name" is usually a VariableNode. Note that this is backwards
 /// from the usual idea of attaching a type specification to a variable:
-/// that is because we want to allow anonymous (unamed) types to be
+/// that is because we want to allow anonymous (unnamed) types to be
 /// used, while, in certain special cases, we need to give names to
 /// those types: the name is the VariableNode.
 ///
@@ -102,13 +102,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypedVariableLink> TypedVariableLinkPtr;
-static inline TypedVariableLinkPtr TypedVariableLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypedVariableLink>(h); }
-static inline TypedVariableLinkPtr TypedVariableLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypedVariableLink>(a); }
-
-#define createTypedVariableLink std::make_shared<TypedVariableLink>
+LINK_PTR_DECL(TypedVariableLink)
+#define createTypedVariableLink CREATE_DECL(TypedVariableLink)
 
 /** @}*/
 }

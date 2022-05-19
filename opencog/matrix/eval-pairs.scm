@@ -91,6 +91,8 @@
 
 		; Get the observational count on ATOM.
 		(define (get-count ATOM) (cog-count ATOM))
+		(define (set-count ATOM CNT)
+			(cog-set-tv! ATOM (CountTruthValue 1 0 CNT)))
 
 		(define (get-left-type) LEFT-TYPE)
 		(define (get-right-type) RIGHT-TYPE)
@@ -151,10 +153,10 @@
 		; fetch-all-pairs -- fetch all counts for atom pairs
 		; from the currently-open database.
 		(define (fetch-all-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(fetch-incoming-set PRED-NODE)
 			(format #t "Elapsed time to load pairs: ~A secs\n"
-				(- (current-time) start-time))
+				(elapsed-secs))
 		)
 
 		; Delete the pairs from the atomspace AND the database.
@@ -162,14 +164,14 @@
 		; deleted; if any are hiding in the database, they will not be
 		; touched.
 		(define (delete-all-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(for-each (lambda (PAIR) (cog-delete-recursive! (gdr PAIR)))
 				(cog-incoming-set PRED-NODE))
 			(cog-delete! PRED-NODE)
 			(cog-delete! ANY-LEFT)
 			(cog-delete! ANY-RIGHT)
 			(format #t "Elapsed time to delete pairs: ~A secs\n"
-				(- (current-time) start-time))
+				(elapsed-secs))
 		)
 
       ;-------------------------------------------
@@ -227,13 +229,14 @@
 					((pair-count)       get-pair-count)
 					((get-pair)         get-pair)
 					((get-count)        get-count)
+					((set-count)        set-count)
 					((make-pair)        make-pair)
 					((left-element)     get-left-element)
 					((right-element)    get-right-element)
 					((left-wildcard)    get-left-wildcard)
 					((right-wildcard)   get-right-wildcard)
 					((wild-wild)        get-wild-wild)
-					((all-pairs)        get-all-pairs)
+					((get-all-elts)     get-all-pairs)
 					((fetch-pairs)      fetch-all-pairs)
 					((delete-pairs)     delete-all-pairs)
 					((provides)         (lambda (symb) #f))

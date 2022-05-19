@@ -14,7 +14,7 @@
 ; some abitrary scheme object to be associated with it.
 ;
 ; This differs from atomspace values, in several ways:
-; * any arbitary scheme object can be associated with an atom.
+; * any arbitrary scheme object can be associated with an atom.
 ; * these caches are never saved to the database, unlike atom values.
 ; * these caches are anonymous.  You must have a handle to the function
 ;   to make use of them.  They are automatically garbage collected.
@@ -101,6 +101,35 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (make-once-predicate)
+"
+  make-once-predicate - create a fast only-once predicate.
+
+  This returns a function - a predicate - that will return #t if the
+  Atom passed as a argument has been seen before. Otherwise it will
+  return #f.  This is useful for performing an operation only once on
+  any given atom.
+
+  Example usage:
+     (define done-already? (make-once-predicate))
+     (done-already? (Concept \"C\"))
+     => #f
+     (done-already? (Concept \"C\"))
+     => #t
+"
+   ; Define the local hash table we will use.
+   (define cache (make-hash-table))
+
+	; Return #t if the atom is already in the hash table.
+	; If its not in the table, put it in.
+   (lambda (ITEM)
+		(define done (hashx-ref atom-hash atom-assoc cache ITEM))
+		(if (not done) (hashx-set! atom-hash atom-assoc cache ITEM #t))
+		done)
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (make-atom-set)
 "
   make-atom-set - Return a function that can hold set of atoms.
@@ -152,12 +181,8 @@
 "
   delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-duplicates`, but is faster.
-
-  This will usually be faster than calling `delete-duplicates` whenever
-  the ATOM-LIST is large (probably when its longer than 10 atoms long??)
+  This does the same thing as srfi-1 `delete-duplicates`, but is faster.
 "
-
 	(define atom-set (make-atom-set))
 	(for-each atom-set ATOM-LIST)
 	(atom-set #f)
@@ -169,20 +194,9 @@
 "
   remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-dup-atoms` but is slower(?)
-
-  This will usually be faster than calling `delete-duplicates` whenever
-  the ATOM-LIST is large (probably when its longer than 10 atoms long??)
+  This does the same thing as srfi-1 `delete-duplicates` but is faster.
 "
-
-	; Sort first, and then filter.
-	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
-	(if (null? sorted-atoms) '()
-		(fold
-			(lambda (ATM LST)
-				(if (equal? ATM (car LST)) LST (cons ATM LST)))
-			(list (car sorted-atoms))
-			(cdr sorted-atoms)))
+	(delete-dup-atoms ATOM-LIST)
 )
 
 ; ---------------------------------------------------------------------

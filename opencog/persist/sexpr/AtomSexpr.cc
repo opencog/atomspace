@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iomanip>
 #include <stdexcept>
 #include <string>
 
@@ -32,6 +33,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
 
@@ -51,23 +53,23 @@ int Sexpr::get_next_expr(const std::string& s, size_t& l, size_t& r,
 	if (l == r) return 0;
 
 	// Ignore comment lines.
-	if (s[l] == ';') { r = l; return 1; }
+	if (s[l] == ';') { l = r; return 1; }
 
 	if (s[l] != '(')
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unexpected text: >>" + s.substr(l) + "<<");
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %lu Unexpected text: >>%s<<",
+			line_cnt, s.substr(l).c_str());
 
 	size_t p = l;
 	int count = 1;
 	bool quoted = false;
 	do {
 		p++;
-		if (s[p] == '"')
-		{
-			if (0 < p and s[p - 1] != '\\')
-				quoted = !quoted;
-		}
+
+		// Skip over any escapes
+		if (s[p] == '\\') { p ++; continue; }
+
+		if (s[p] == '"') quoted = !quoted;
 		else if (quoted) continue;
 		else if (s[p] == '(') count++;
 		else if (s[p] == ')') count--;
@@ -118,11 +120,19 @@ static Type get_typename(const std::string& s, size_t& l, size_t& r,
 /// If the node is a Type node, then `l` points at the first
 /// non-whitespace character of the type name and `r` points to the next
 /// opening parenthesis.
-static void get_node_name(const std::string& s, size_t& l, size_t& r,
-                          size_t line_cnt, bool typeNode = false)
+///
+/// This function was originally written to allow in-place extraction
+/// of the node name. Unfortunately, node names containing escaped
+/// quotes need to be unescaped, which prevents in-place extraction.
+/// So, instead, this returns a copy of the name string.
+std::string Sexpr::get_node_name(const std::string& s,
+                                 size_t& l, size_t& r,
+                                 Type atype, size_t line_cnt)
 {
 	// Advance past whitespace.
 	while (l < r and (s[l] == ' ' or s[l] == '\t' or s[l] == '\n')) l++;
+
+	bool typeNode = namer.isA(atype, TYPE_NODE);
 
 	// Scheme strings start and end with double-quote.
 	// Scheme symbols start with single-quote.
@@ -130,9 +140,9 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
 	if (typeNode and s[l] == '\'')
 		scm_symbol = true;
 	else if (not typeNode and s[l] != '"')
-		throw std::runtime_error(
-			"Syntax error at line " + std::to_string(line_cnt) +
-			" Unexpected content: >>" + s.substr(l, r-l+1) + "<< in " + s);
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %zu Unexpected content: >>%s<< in %s",
+			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
 	l++;
 	size_t p = l;
@@ -141,6 +151,17 @@ static void get_node_name(const std::string& s, size_t& l, size_t& r,
 	else
 		for (; p < r and (s[p] != '"' or ((0 < p) and (s[p - 1] == '\\'))); p++);
 	r = p;
+
+	// We use std::quoted() to unescape embedded quotes.
+	// Unescaping works ONLY if the leading character is a quote!
+	// So readjust left and right to pick those up.
+	if ('"' == s[l-1]) l--; // grab leading quote, for std::quoted().
+	if ('"' == s[r]) r++;   // step past trailing quote.
+	std::stringstream ss;
+	std::string name;
+	ss << s.substr(l, r-l);
+	ss >> std::quoted(name);
+	return name;
 }
 
 /// Extract SimpleTruthValue and return that, else throw an error.
@@ -148,10 +169,9 @@ static TruthValuePtr get_stv(const std::string& s,
                              size_t l, size_t r, size_t line_cnt)
 {
 	if (s.compare(l, 5, "(stv "))
-		throw std::runtime_error(
-				"Syntax error at line " + std::to_string(line_cnt) +
-				" Unsupported markup: " + s.substr(l, r-l+1) +
-				" in expr: " + s);
+		throw SyntaxException(TRACE_INFO,
+			"Syntax error at line %zu Unexpected markup: >>%s<< in expr %s",
+			line_cnt, s.substr(l, r-l+1).c_str(), s.c_str());
 
 	return createSimpleTruthValue(
 				NumberNode::to_vector(s.substr(l+4, r-l-4)));
@@ -162,20 +182,22 @@ static TruthValuePtr get_stv(const std::string& s,
 /// `(Evaluation (Predicate "blort") (List (Concept "foo") (Concept "bar")))`
 /// will return the corresponding atoms.
 ///
-/// The string to decode is `s`, begining at location `l` and using `r`
+/// The string to decode is `s`, beginning at location `l` and using `r`
 /// as a hint for the end of the expression. The `line_count` is an
 /// optional argument for printing file line-numbers, in case of error.
 ///
 Handle Sexpr::decode_atom(const std::string& s,
-                          size_t l, size_t r, size_t line_cnt)
+                          size_t l, size_t r, size_t line_cnt,
+                          std::unordered_map<std::string, Handle>& ascache)
 {
+	TruthValuePtr stv;
 	size_t l1 = l, r1 = r;
 	Type atype = get_typename(s, l1, r1, line_cnt);
 
 	l = r1;
 	if (namer.isLink(atype))
 	{
-		TruthValuePtr tvp;
+		AtomSpace* as = nullptr;
 		HandleSeq outgoing;
 		do {
 			l1 = l;
@@ -184,16 +206,44 @@ Handle Sexpr::decode_atom(const std::string& s,
 			if (l1 == r1) break;
 
 			// Atom names never start with lower-case.
-			if ('s' == s[l1+1])
-				tvp = get_stv(s, l1, r1, line_cnt);
+			// We allow (stv nn nn) to occur in the middle of a long
+			// sexpr, because apparently some users (agi-bio) do that.
+			if (islower(s[l1+1]))
+			{
+				if ('s' == s[l1+1])  // 0 == s.compare(l1, 5, "(stv ")
+					stv = get_stv(s, l1, r1, line_cnt);
+				else
+					break;
+			}
 			else
-				outgoing.push_back(decode_atom(s, l1, r1, line_cnt));
+			{
+				if (0 == s.compare(l1, 11, "(AtomSpace "))
+				{
+					Handle hasp(decode_frame(Handle::UNDEFINED, s, l1, ascache));
+					as = (AtomSpace*) hasp.get();
+				}
+				else
+					outgoing.push_back(decode_atom(s, l1, r1, line_cnt, ascache));
+			}
 
 			l = r1 + 1;
 		} while (l < r);
 
 		Handle h(createLink(std::move(outgoing), atype));
-		if (tvp) h->setTruthValue(tvp);
+		if (as) h = as->add_atom(h);
+
+		if (stv)
+		{
+			if (as)
+				as->set_truthvalue(h, stv);
+			else
+				h->setTruthValue(stv);
+		}
+
+		// alist's occur at the end of the sexpr.
+		if (l1 != r1 and l < r)
+			decode_slist(h, s, l1);
+
 		return h;
 	}
 	else
@@ -201,23 +251,37 @@ Handle Sexpr::decode_atom(const std::string& s,
 	{
 		l1 = l;
 		r1 = r;
-		size_t l2;
-		get_node_name(s, l1, r1, line_cnt, namer.isA(atype, TYPE_NODE));
-		l2 = r1;
-		if ('"' == s[l2]) l2++; // step past trailing quote.
+		const std::string name = get_node_name(s, l1, r1, atype, line_cnt);
 
-		const std::string name = s.substr(l1, r1-l1);
 		Handle h(createNode(atype, std::move(name)));
 
 		// There might be an stv in the content. Handle it.
+		size_t l2 = r1;
 		size_t r2 = r;
 		get_next_expr(s, l2, r2, line_cnt);
 		if (l2 < r2)
-			h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+		{
+			AtomSpace* as = nullptr;
+			if (0 == s.compare(l2, 11, "(AtomSpace "))
+			{
+				Handle hasp(decode_frame(Handle::UNDEFINED, s, l2, ascache));
+				as = (AtomSpace*) hasp.get();
+				h = as->add_atom(h);
+			}
+			if (l2 < r2)
+			{
+				if (0 == s.compare(l2, 7, "(alist "))
+					decode_slist(h, s, l2);
+				else if (as)
+					as->set_truthvalue(h, get_stv(s, l2, r2, line_cnt));
+				else
+					h->setTruthValue(get_stv(s, l2, r2, line_cnt));
+			}
+		}
 
 		return h;
 	}
-	throw std::runtime_error(
-		"Syntax error at line " + std::to_string(line_cnt) +
-		"Got a Value, not supported: " + s);
+	throw SyntaxException(TRACE_INFO,
+		"Syntax error at line %zu Got a Value, not supported: %s",
+		line_cnt, s.c_str());
 }

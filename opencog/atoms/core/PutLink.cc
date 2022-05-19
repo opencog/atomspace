@@ -39,7 +39,7 @@ PutLink::PutLink(const HandleSeq&& oset, Type t)
 
 /// PutLink expects a very strict format: an arity-2 link, with
 /// the first part being a pattern, and the second a list or set
-/// of arguments. If the pattern has N variables, then the seccond
+/// of arguments. If the pattern has N variables, then the second
 /// part must have N arguments.  Furthermore, any type restrictions
 /// on the variables must be satisfied by the arguments.
 ///
@@ -58,7 +58,7 @@ PutLink::PutLink(const HandleSeq&& oset, Type t)
 ///
 /// The below is a handy-dandy easy-to-use form. When it is reduced,
 /// it will result in the creation of a set of reduced forms, not
-/// just one (the two sets haveing the same arity). Unfortunately,
+/// just one (the two sets having the same arity). Unfortunately,
 /// this trick cannot work for N=1 unless the variable is cosntrained
 /// to not be a set.
 ///
@@ -110,7 +110,7 @@ void PutLink::init(void)
 /// check these here.
 void PutLink::static_typecheck_arguments(void)
 {
-	// Cannot typecheck at this pont in time, because the schema
+	// Cannot typecheck at this point in time, because the schema
 	// might not be defined yet...
 	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype)
@@ -257,12 +257,18 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 }
 
 // If arg is executable, then run it, and unwrap the set link, too.
-// We unwrap the SetLinks cause that is what GetLinks return.
+// We unwrap the SetLinks because that is what GetLinks return.
 static inline Handle expand(const Handle& arg, bool silent)
 {
 	Handle result(arg);
 	if (arg->is_executable())
-		result = HandleCast(arg->execute());
+	{
+		ValuePtr vp = arg->execute();
+		if (LINK_VALUE == vp->get_type())
+			result = createLink(LinkValueCast(vp)->to_handle_seq(), SET_LINK);
+		else if (vp->is_atom())
+			result = HandleCast(vp);
+	}
 
 	if (SET_LINK == result->get_type())
 	{
@@ -288,7 +294,7 @@ static inline Handle expand(const Handle& arg, bool silent)
  * to place into the reduction.  This does make the PutLink
  * resemble function application; however, here, the application
  * is not infinite-recursive; it is only one level deep.  There
- * is just enough execution performed to get the neeed arguments,
+ * is just enough execution performed to get the need arguments,
  * and no more.
  *
  * What this actually does is fairly complex and sophisticated.
@@ -341,10 +347,13 @@ Handle PutLink::do_reduce(void) const
 	Handle args(_arguments);
 	ValuePtr vargs(_arguments);
 
-	// There is no eager execution of arguments, before performing
-	// the reduction ... with one exception. If the argument is a
-	// MeetLink, we perform the search to find what to plug in.
-	if (nameserver().isA(_arguments->get_type(), MEET_LINK))
+	// Most arguments can be executed (should be executed) before
+	// reduction. This includes queries and functions; failing to
+	// do so can result in unintended infinite loops. Examples
+	// include MeetLinks, which are run, to determine what to plug in.
+	Type t = _arguments->get_type();
+	if (nameserver().isA(t, SATISFYING_LINK) or
+	    nameserver().isA(t, FUNCTION_LINK))
 	{
 		vargs = _arguments->execute();
 		if (nullptr == vargs)
@@ -355,7 +364,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Resolve the body, if needed. That is, if the body is
-	// given in a defintion, get that defintion.
+	// given in a definition, get that definition.
 	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
@@ -537,7 +546,37 @@ Handle PutLink::do_reduce(void) const
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 {
 	_silent = silent;
+
+	// The do_reduce() function performs the beta-reduction only. We
+	// could also execute the reults of that reduction (it does seem to
+	// make sense...) except that it causes trouble. The problem is that
+	// the PutLinkUTest places PutLinks deep into non-executable
+	// structures, and it expects them to be reduced. It is able to do
+	// this with `Instantiator::walk_tree()`, and that's fine, except
+	// that `walk_tree()` works only with Handles, and not Values.
+	// So we cannot execute anything that returns a Value. So we may
+	// as well not execute anything at all, and leave that decision
+	// for someone else.
+	//
+	// This seems less than elegant, but given the way that PutLink is
+	// being used by the URE, this appears to be unavoidable at this
+	// time. Basically, I tried to untangle things, but there are way
+	// too many unit tests that expect the Instantiator to both
+	// beta-reduce and also execute in that tangled way that it does.
+#if 1
 	return do_reduce();
+#else
+	Handle h(do_reduce());
+	Type t = h->get_type();
+	if (not h->is_executable() or
+	    nameserver().isA(t, VALUE_OF_LINK) or
+	    nameserver().isA(t, SET_VALUE_LINK) or
+	    (DONT_EXEC_LINK == t))
+	{
+		return h;
+	}
+	return h->execute(as, silent);
+#endif
 }
 
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)

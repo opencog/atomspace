@@ -29,13 +29,13 @@
 
 using namespace opencog;
 
-#define al as.add_link
-#define an as.add_node
+#define al as->add_link
+#define an as->add_node
 
 class UnquoteUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpacePtr as;
 	Handle X, Y, var_decl, A, B;
 
 public:
@@ -44,6 +44,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
+		as = createAtomSpace();
 	}
 
 	void setUp();
@@ -70,7 +71,7 @@ void UnquoteUTest::setUp(void)
 
 void UnquoteUTest::tearDown(void)
 {
-	as.clear();
+	as->clear();
 }
 
 /*
@@ -89,7 +90,7 @@ void UnquoteUTest::test_list(void)
 	                       al(UNQUOTE_LINK, Y))));
 	Handle pat = al(GET_LINK, var_decl, body);
 
-	Handle result = satisfying_set(&as, pat);
+	Handle result = satisfying_set(as, pat);
 	Handle expected = al(SET_LINK, simple_list);
 
 	logger().fine() << "result = " << result->to_string();
@@ -117,7 +118,7 @@ void UnquoteUTest::test_and_1(void)
 	Handle rewrite = al(AND_LINK, X, Y);
 	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
 
-	Handle result = bindlink(&as, pat);
+	Handle result = bindlink(as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
 	logger().debug() << "result = " << result->to_string();
@@ -146,7 +147,7 @@ void UnquoteUTest::test_and_2(void)
 	Handle rewrite = body;
 	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
 
-	Handle result = bindlink(&as, pat);
+	Handle result = bindlink(as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
 	logger().debug() << "result = " << result->to_string();
@@ -175,7 +176,7 @@ void UnquoteUTest::test_rewrite(void)
 	                          al(LIST_LINK, X, Y))));
 	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
 
-	Handle result = bindlink(&as, pat);
+	Handle result = bindlink(as, pat);
 	Handle expected = al(SET_LINK,
 	                     al(EXECUTION_OUTPUT_LINK,
 	                        an(GROUNDED_SCHEMA_NODE, "hs: foo"),

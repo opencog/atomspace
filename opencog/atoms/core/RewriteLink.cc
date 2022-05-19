@@ -251,7 +251,7 @@ Handle RewriteLink::consume_quotations() const
 		// vardecl it means that some quotations are missing. Rather
 		// than adding them we set vardecl to an empty VariableList.
 		if (not vardecl and not get_free_variables(nbody).empty())
-			vardecl = Handle(createVariableList(HandleSeq{}));
+			vardecl = HandleCast(createVariableList(HandleSeq{}));
 	}
 
 	if (vardecl)
@@ -300,11 +300,11 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 		// any quotation or special executable links is clearly
 		// useless, regardless of whether it has been determined
 		// needless or not.
-		if (is_closed(child) and
+		if (not contains_atomtype(child, UNQUOTE_LINK) and
 		    not contains_atomtype(child, PUT_LINK) and
 		    not contains_atomtype(child, QUOTE_LINK) and
-		    not contains_atomtype(child, UNQUOTE_LINK) and
-		    not contains_atomtype(child, LOCAL_QUOTE_LINK))
+		    not contains_atomtype(child, LOCAL_QUOTE_LINK) and
+		    is_closed(child))
 		{
 			return consume_quotations(variables, child,
 			                          quotation, needless_quotation,
@@ -442,7 +442,7 @@ bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
 		    vdt == VARIABLE_NODE or
 		    vdt == TYPED_VARIABLE_LINK) {
 			Variables local_vars = VariableList(vardecl).get_variables();
-			return variables.are_in_varset(local_vars.varset);
+			return variables.varset_includes(local_vars.varset);
 		}
 	}
 	return false;

@@ -30,6 +30,7 @@
 #include <sstream>
 #include <cstddef>
 #include <libguile.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
@@ -158,12 +159,15 @@ class SchemeEval : public GenericEval
 
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
+		static void set_scheme_as(AtomSpacePtr&);
 
 		SchemeEval(AtomSpace* = NULL);
+		SchemeEval(AtomSpacePtr&);
 		~SchemeEval();
 
 		// Return per-thread, per-atomspace singleton
 		static SchemeEval* get_evaluator(AtomSpace* = NULL);
+		static SchemeEval* get_evaluator(AtomSpacePtr&);
 
 		// The async-output interface.
 		void begin_eval(void);

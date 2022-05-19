@@ -9,13 +9,13 @@
 ; OVERVIEW
 ; --------
 ; Given a word, and a vector attached to that word, one can compute a
-; symmetric mutual-information (MI) value betweem two words. In the
+; symmetric mutual-information (MI) value between two words. In the
 ; typical example, the vector consists of counts observed on disjuncts
 ; associated to that word (although it could be any vector).
 ;
 ; This file precomputes the various partial sums (marginals) that occur
 ; in the definition of the symmetric MI.  It assumes that the vectors
-; (i.e. observation counts) are in an SQL database; it fetches those,
+; (i.e. observation counts) are in an open database; it fetches those,
 ; computes the assorted marginals, and writes those marginals back to
 ; disk. Specifically, the marginals are those needed for the
 ; `transpose-api`, which is used to compute the symmetric MI.
@@ -57,7 +57,7 @@
 ;
 ; Note that S(u,w) can itself be thought of as a matrix; it is a product
 ; of N times its transpose.  That is, let [N] denote the matrix whose
-; matrix elements are N(w,d), and [S] be thw matrix whose matrix
+; matrix elements are N(w,d), and [S] be the matrix whose matrix
 ; elements are S(u,w). Then one has that
 ;
 ;    [S] = [N][N]^T
@@ -115,10 +115,6 @@
 		; -------------
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-left-support)
-			; The shape-objects need to have the stars created, before
-			; they can be used.
-			(if (LLOBJ 'provides 'make-left-stars)
-				(LLOBJ 'make-left-stars))
 
 			; 'mmt-marginals loops over 'left-basis and for each
 			; of those, loops over 'right-duals and calls 'left-count
@@ -132,10 +128,6 @@
 
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-right-support)
-			; The shape-objects need to have the stars created, before
-			; they can be used.
-			(if (LLOBJ 'provides 'make-right-stars)
-				(LLOBJ 'make-right-stars))
 
 			(scomp-obj 'all-right-marginals)
 			(centr-obj 'cache-right)
@@ -149,19 +141,25 @@
 		; that the one that mmt doesn't need is fast to compute! So do
 		; them both.
 		(define (setup-supports)
-			; If left supports have not yet been computed, then
-			; do so now. We can tell if they have been, by simply
-			; accessing a quantity we expect to have already.
-			(catch #t (lambda () (support-obj 'total-support-left))
-				(lambda (key . args)
-					(batch-left-support)))
+			;; If left supports have not yet been computed, then
+			;; do so now. We can tell if they have been, by simply
+			;; accessing a quantity we expect to have already.
+			;(catch #t (lambda () (support-obj 'total-support-left))
+			;	(lambda (key . args)
+			;		(batch-left-support)))
 
-			; If right supports have not yet been computed, then
-			; do so now. We can tell if they have been, by simply
-			; accessing a quantity we expect to have already.
-			(catch #t (lambda () (support-obj 'total-support-right))
-				(lambda (key . args)
-					(batch-right-support)))
+			;; If right supports have not yet been computed, then
+			;; do so now. We can tell if they have been, by simply
+			;; accessing a quantity we expect to have already.
+			;(catch #t (lambda () (support-obj 'total-support-right))
+			;	(lambda (key . args)
+			;		(batch-right-support)))
+
+			; No! Do not depend on cached values!
+			; This interacts badly with trimming!
+			; Just recompute unconditionally, from scratch.
+			(batch-left-support)
+			(batch-right-support)
 		)
 
 		; -------------
@@ -188,6 +186,9 @@
 			(display "Done computing and saving sum_x N(x,y) N(x,*)\n")
 		)
 
+		(define (describe)
+			(display (procedure-property batch-transpose 'documentation)))
+
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
@@ -196,6 +197,11 @@
 				((right-marginals) (batch-right-support))
 				((mmt-marginals)   (batch-mmt-marginals))
 				((mtm-marginals)   (batch-mtm-marginals))
+				((clobber)         (support-obj 'clobber))
+				((help)            (describe))
+				((describe)        (describe))
+				((obj)             "batch-transpose")
+				((base)            LLOBJ)
 				(else              (apply LLOBJ (cons message args))))
 			)))
 

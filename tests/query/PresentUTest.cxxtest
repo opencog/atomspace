@@ -32,7 +32,7 @@ using namespace opencog;
 class PresentUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -41,7 +41,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -51,7 +51,6 @@ public:
 	~PresentUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -62,6 +61,7 @@ public:
 
 	void test_literal(void);
 	void test_virtual(void);
+	void test_monotonicity(void);
 };
 
 void PresentUTest::tearDown(void)
@@ -109,6 +109,30 @@ void PresentUTest::test_virtual(void)
 	Handle query = eval->eval_h("query");
 	Handle results = HandleCast(query->execute());
 	Handle expected = al(SET_LINK, an(CONCEPT_NODE, "OK"));
+
+	printf("Expecting: %s\n", expected->to_string().c_str());
+	printf("Got: %s\n", results->to_string().c_str());
+	TS_ASSERT_EQUALS(results, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test the monotonicity of PresentLink.  This is for issue
+ * https://github.com/opencog/atomspace/issues/2886
+ * (This turned out to be an unbalanced-quotation issue.)
+ */
+void PresentUTest::test_monotonicity(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/present-monotonicity.scm\")");
+
+	Handle query = eval->eval_h("query");
+	Handle results = HandleCast(query->execute());
+	Handle P = an(PREDICATE_NODE, "P");
+	Handle Q = an(PREDICATE_NODE, "Q");
+	Handle expected = al(SET_LINK, al(LIST_LINK, P, Q));
 
 	printf("Expecting: %s\n", expected->to_string().c_str());
 	printf("Got: %s\n", results->to_string().c_str());

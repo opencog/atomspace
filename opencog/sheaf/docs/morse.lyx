@@ -1,0 +1,650 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\usepackage{slashed}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "cmtt" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Morse Theory and Modal Logic
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+28 August 2021
+\end_layout
+
+\begin_layout Abstract
+Probabilistic inference has issues with combinatoric explosion: if some
+ premise is very unlikely, but still has a probability greater than zero,
+ then the consequences of that premise must be explored.
+ This makes practical algorithms for probabilistic inference computationally
+ difficult.
+\end_layout
+
+\begin_layout Abstract
+This text proposes that perhaps ideas from Morse theory (and perhaps Floer
+ homology) can be mashed up with modal logic to obtain insights that might
+ make probailistic computations easier.
+\end_layout
+
+\begin_layout Abstract
+At this time, this text is little more than a collection of definitions
+ and some very basic sketches of some ideas.
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+This text combines three distinct mathematical topics with which the reader
+ might not be familiar with, and so a short sketch seems called for.
+\end_layout
+
+\begin_layout Subsubsection*
+Probabilistic Logic
+\end_layout
+
+\begin_layout Standard
+Here, 
+\begin_inset Quotes eld
+\end_inset
+
+probabilistic logic
+\begin_inset Quotes erd
+\end_inset
+
+ is used as an umbrella term for any kind of inference system that does
+ not use crisp true/false logic.
+ This includes Bayesian inference, Markovian models, fuzzy logic, possibility
+ logic, systems such as Ben Goertzel's Probabilistic Logic Networks (PLN)
+ or Pei Wang's Non-axiomatic Reasoning System (NARS).
+ These are all conventional reasoning systems, in that they start with some
+ sets of facts, to which are assigned one or more floating point numbers,
+ and a collection of inference rules, which can combine facts to form new
+ facts.
+ The floating point numbers typically range from zero to one, and are interprete
+d as a liklihood or possibility; in the case of PLN, there is a second number,
+ the confidence.
+\end_layout
+
+\begin_layout Subsubsection*
+Morse Theory
+\end_layout
+
+\begin_layout Standard
+Morse theory is conventionally a branch of Riemanian geometry, used to explore
+ the shapes of Riemannian manifolds by assigning a single real number to
+ each point in the manifold.
+ Here, it will be used as an inspiration for a similar idea in the domain
+ of logical inference.
+ The key point of inspiration is that of the 
+\begin_inset Quotes eld
+\end_inset
+
+critical point
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Consider starting with a collection of assertions, each assigned some probabilit
+y, and a collection of inference rules, that take as input a few of the
+ assertions and generate a new statement, assigned some probability which
+ is obtained from some formula associated with that particular inference
+ rule.
+ One can imagine this system to be 
+\begin_inset Quotes eld
+\end_inset
+
+stable
+\begin_inset Quotes erd
+\end_inset
+
+ if the outcomes don't change much under small perturbations of the assigned
+ probabilities, and 
+\begin_inset Quotes eld
+\end_inset
+
+unstable
+\begin_inset Quotes erd
+\end_inset
+
+ if they vary wildly.
+\end_layout
+
+\begin_layout Standard
+This can be made more concrete is several ways.
+ One way is to pick a probability 
+\begin_inset Formula $p$
+\end_inset
+
+ and to reject all inferences that have a probability of less than 
+\begin_inset Formula $p.$
+\end_inset
+
+ That is, if an inference is unlikely, it is taken to be false, or impossible.
+ As 
+\begin_inset Formula $p$
+\end_inset
+
+ is varied from 0.0 to 1.0, clearly more and more inferences will be rejected,
+ and the grand total number of inferences possible is a discontinuous function
+ of 
+\begin_inset Formula $p.$
+\end_inset
+
+ Those values 
+\begin_inset Formula $p$
+\end_inset
+
+ where the number of inferences change are refered to as the 
+\begin_inset Quotes eld
+\end_inset
+
+critical points
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Observe that there are manifold-like surfaces in this system.
+ That is, each input premise 
+\begin_inset Formula $i$
+\end_inset
+
+ has it's own distinct probability 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+, and the probability of any conclusion is some complicated (real-valued)
+ function of the 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+.
+ This function is almost-everywhere continuous and almost-everywhere smooth
+ (for most 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ reasoning systems).
+\end_layout
+
+\begin_layout Standard
+A geometric character arises from the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+confluence
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Term rewriting systems are generically 
+\begin_inset Quotes eld
+\end_inset
+
+confluent
+\begin_inset Quotes erd
+\end_inset
+
+, in that the same inference can be reached via multiple paths.
+ This suggests the possibility of homologies or homological arguments being
+ applied to collections of inference chains.
+ This is clouded by the fact that some inference chains can be homotopic,
+ and others are not.
+ A more precise articulation requires the use of concepts such as 
+\begin_inset Quotes eld
+\end_inset
+
+Scott continuity
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Scott topology
+\begin_inset Quotes erd
+\end_inset
+
+ (see Wikipedia) and homotopy type theory (see the HoTT book).
+ Inspirationally, one can think of a particular inference chain as a kind
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+geodesic
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Confluence is the convergence of multiple inference chains on the same
+ location, resembling the convergence of geodesics at a critical point in
+ conventional Morse theory.
+\end_layout
+
+\begin_layout Standard
+Of course, the goal here is to convert these inspirational observations
+ into practical tools that could be deployed to control inference in practical
+ situations.
+ An example might be the use of a SAT solver (these are very fast) to prune
+ the inference problem to a manageable size, and then restore the probabilistic
+ formulas at each step.
+ This vaguely resembles some of the workings used in Satisfiability Modulo
+ Theories (SMT) technologies.
+\end_layout
+
+\begin_layout Subsubsection*
+Modal Logic
+\end_layout
+
+\begin_layout Standard
+The act of inference can be considered to be a special case of modal logic.
+ To hand-wave a bit: if it is possible to make an inference, then that inference
+ belongs to a 
+\begin_inset Quotes eld
+\end_inset
+
+possible world
+\begin_inset Quotes erd
+\end_inset
+
+, and that possible world is 
+\begin_inset Quotes eld
+\end_inset
+
+accessible
+\begin_inset Quotes erd
+\end_inset
+
+ from the premises.
+ If an inference occurs in every accessible world, then it is a 
+\begin_inset Quotes eld
+\end_inset
+
+neccessary inference
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That is, modal logic provides the vocabulary for discussing the invariant
+ properties of the graphical network of logical inferences.
+\end_layout
+
+\begin_layout Standard
+The introduction of probabilistic inference alters the structure and interpretat
+ion of 
+\begin_inset Quotes eld
+\end_inset
+
+possible
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+necessary
+\begin_inset Quotes erd
+\end_inset
+
+, as possible worlds can be assigned probabilisitic values, and accessibility
+ relations alter probabilities.
+ Whether or not a particular accessibility relation exists becomes dependent
+ on the Morse cutoff.
+ Again, the 
+\begin_inset Quotes eld
+\end_inset
+
+critical points
+\begin_inset Quotes erd
+\end_inset
+
+ are those cutoffs where accessibility relations appear or disappear.
+\end_layout
+
+\begin_layout Standard
+The use of modal logic does not offer much beyond the core Morse-theoretic
+ insight, above.
+ What it does offer is some vocabulary and a viewpoint 
+\begin_inset Quotes eld
+\end_inset
+
+from above
+\begin_inset Quotes erd
+\end_inset
+
+ into the inference proccess: it offers a way of thinking about the global
+ structure of inference.
+\end_layout
+
+\begin_layout Subsection*
+Now what?
+\end_layout
+
+\begin_layout Standard
+Great! Some terms have been defined, an an inspirational idea has been sketched.
+ Now what? Well, that's it, for now.
+ You are on your own.
+ Converting this inspiration into something usable is the hard part, eh?
+\end_layout
+
+\begin_layout Section*
+Clarifications and Remarks
+\end_layout
+
+\begin_layout Standard
+Some clarifications and remarks are in order.
+\end_layout
+
+\begin_layout Description
+Axioms This text will mostly avoid the term 
+\begin_inset Quotes eld
+\end_inset
+
+axiom
+\begin_inset Quotes erd
+\end_inset
+
+, and use the term 
+\begin_inset Quotes eld
+\end_inset
+
+assumption
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+fact
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+statement
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+evidence
+\begin_inset Quotes erd
+\end_inset
+
+ in it's place.
+ This is for several reasons.
+ In conventional mathematial logic, one distinguishes between logical and
+ non-logical axioms.
+ An example of a logical axiom might be 
+\begin_inset Formula $A\rightarrow\left(B\rightarrow A\right)$
+\end_inset
+
+, whereas an example of a non-logical axiom is 
+\begin_inset Formula $a+b=b+a$
+\end_inset
+
+.
+ Neither of these seem appropriate when one falters into the domain of natural
+ language and common sense, where axioms take the form 
+\begin_inset Formula $\vdash likes\left(John,baseball\right).$
+\end_inset
+
+ which is to be read 
+\begin_inset Quotes eld
+\end_inset
+
+It is true that John likes baseball
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Even this is wrong: probabilistic logics make statements such as 
+\begin_inset Quotes eld
+\end_inset
+
+there is a probability of 0.9 that John likes baseball
+\begin_inset Quotes erd
+\end_inset
+
+ which is in turn an oversimplification of possible world-model statements
+ beleif system (epistemic logic): 
+\begin_inset Quotes eld
+\end_inset
+
+based on the evidence at hand, you and I beleive that John likes baseball,
+ probably.
+\begin_inset Quotes erd
+\end_inset
+
+ To call such complex statements 
+\begin_inset Quotes eld
+\end_inset
+
+axioms
+\begin_inset Quotes erd
+\end_inset
+
+ seems strange.
+ (We are already getting tangled here: the above is framed as an inference:
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+evidence
+\begin_inset Quotes erd
+\end_inset
+
+ is that 
+\begin_inset Quotes eld
+\end_inset
+
+John talks about baseball a lot
+\begin_inset Quotes erd
+\end_inset
+
+, from which we infer that he likes it.
+ Or rather, 
+\begin_inset Quotes eld
+\end_inset
+
+you and I have heard a rumour that John talks about baseball a lot
+\begin_inset Quotes erd
+\end_inset
+
+ which only moves us further from the axiomatic foundations of truth into
+ the domain of sense-perception and world-model building.)
+\end_layout
+
+\begin_layout Description
+Entailment The use of the word 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+, and the turnstile symbol 
+\begin_inset Formula $\vdash$
+\end_inset
+
+ should generally be understood to be in the sense of 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic consequence
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic entailment.
+ This is because, in the current context, it's difficult to build up enough
+ of a mechanism to define models, in the model-theoretic sense, or of interpreta
+tions.
+ There is not (yet?) enough machinery present to define 
+\begin_inset Quotes eld
+\end_inset
+
+semantic entailment
+\begin_inset Quotes erd
+\end_inset
+
+ (the double-turnstile symbol 
+\begin_inset Formula $\models$
+\end_inset
+
+.) More broadly, 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+ is a property of the logic system in use, and most probabilistic logics
+ do not have entailment in them, 
+\emph on
+per se
+\emph default
+.
+ For example, in Bayesian inference, one does not normally speak of 
+\begin_inset Quotes eld
+\end_inset
+
+entailment
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Neither does one in probabilistic programming, even if its in the form
+ of probabilistic lambda calculus.
+ Thus, entailment is used only loosely here, as a stand-in for more specific
+ types of probabilistic relations in the probabilistic logic being contemplated.
+\end_layout
+
+\begin_layout Description
+Inference The rules of inference are meant to be taken as distinct from
+ implication and entailment.
+\end_layout
+
+\begin_layout Section*
+The End
+\end_layout
+
+\begin_layout Standard
+That's all for now.
+\end_layout
+
+\end_body
+\end_document

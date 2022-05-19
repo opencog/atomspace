@@ -18,7 +18,7 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in PostgreSQL.
+* Storing the AtomSpace in RocksDB, PostgreSQL or plain-text files.
 * Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
@@ -28,7 +28,8 @@ typically encountered:
 Most of the querying and pattern matching examples are in the
 [**pattern-matcher**](../pattern-matcher) folder. Once you've gotten
 a good idea of the basics from the demos here, go and explore the
-examples there.
+examples there. Return to the advanced examples here after exploring
+the pattern engine.
 
 Introductory Examples
 ---------------------
@@ -52,11 +53,12 @@ first).
 * `formulas.scm`       -- Representing arithmetic and computing Values.
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
+* `multi-space.scm`    -- Using multiple AtomSpaces at once.
 
-There is an important collection of demos in the
+After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
 demos are vital for understanding how to to be effective in writing
-queries and formulating rules.
+queries and formulating rules.  Then return to the advanced demos below.
 
 Advanced Demos
 --------------
@@ -69,11 +71,17 @@ be effective.
 * `logging.scm`        -- Using the cogutils logger.
 * `python.scm`         -- Mixing Python and Scheme together.
 * `execute.scm`        -- Callbacks written in python or scheme.
+* `threaded.scm`       -- Multi-threading in Atomese.
 * `parallel.scm`       -- Multi-threading in Atomese.
 * `except.scm`         -- Throwing and catching exceptions.
-* `persistence-sql.scm`-- Layering the AtomSpace on a "real" database.
-* `distributed-sql.scm`-- Distributed AtomSpace on multiple network nodes.
+* `persist-file.scm`   -- Dump and load Atoms to a plain-text file.
+* `persist-store.scm`  -- StorageNode API to a plain-text file.
+* `persistence.scm`    -- StorageNode API to an SQL database.
+* `persist-query.scm`  -- Fetching sets of Atoms with queries.
+* `persist-multi.scm`  -- Work with multiple databases/servers at once.
+* `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
+* `frame.scm`          -- Using StateLink in overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
 
 Documentation
@@ -161,9 +169,15 @@ everything else depends on.
 (use-modules (opencog atom-types))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+(use-modules (opencog matrix))
 (use-modules (opencog persist))
+(use-modules (opencog persist-cog))
+(use-modules (opencog persist-file))
+(use-modules (opencog persist-rocks))
 (use-modules (opencog persist-sql))
-(use-modules (opencog ure))
+(use-modules (opencog python))
+(use-modules (opencog sheaf))
+(use-modules (opencog test-runner))
 (use-modules (opencog type-utils))
 ```
 
@@ -171,14 +185,30 @@ There are other modules provided in other projects and repos. Here is
 a reasonably up-to-date list of modules provided by OpenCog:
 ```
 (use-modules (opencog agi-bio))
+(use-modules (opencog asmoses))
+(use-modules (opencog attention))
 (use-modules (opencog attention-bank))
+(use-modules (opencog bioscience))
 (use-modules (opencog cogserver))
+(use-modules (opencog generate))
 (use-modules (opencog ghost))
+(use-modules (opencog learn))
+(use-modules (opencog miner))
+(use-modules (opencog nlp))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 (use-modules (opencog nlp fuzzy))
 (use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
+(use-modules (opencog nlp microplanning))
 (use-modules (opencog nlp relex2logic))
 (use-modules (opencog nlp sureal))
+(use-modules (opencog octomap))
+(use-modules (opencog openpsi))
+(use-modules (opencog reduct))
+(use-modules (opencog pln))
+(use-modules (opencog spacetime))
+(use-modules (opencog ure))
+(use-modules (opencog vision))
 ```

@@ -1,9 +1,9 @@
 ;
 ; similarity-api.scm
 ;
-; Provide framework to fetch/store similarity values.
+; Provide framework to compute and hold similarity values.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017,2021 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -15,8 +15,8 @@
 ; control pretty quickly.
 ;
 ; Two things are provided below. First, an API to set and get
-; similarities.  Specifically, it provides an API for storing
-; similarities as Values in the atomspace. This not only avoids
+; similarities.  Specifically, it provides an API for holding
+; similarities as Values in the AtomSpace. This not only avoids
 ; recomputation, but also allows them to be persisted in the database.
 ;
 ; The second tool provided is a batch-compute function, that will
@@ -29,7 +29,7 @@
 ;
 ; It is assumed that similarity scores are symmetric, so that exchanging
 ; left and right give the same answer.  Thus, an UnorderedLink is best
-; for storing the pair. Specifically, the SimilarityLink.  So,
+; for holding the pair. Specifically, the SimilarityLink.  So,
 ;
 ;    SimilarityLink
 ;        Atom "this"
@@ -42,7 +42,7 @@
 ;        Atom "this"
 ;
 ; are both exactly the same atom. The actual similarity values are
-; stored as Values on these atoms.  The specific key used to store
+; held as Values on these atoms.  The specific key used to hold
 ; the value depends on the arguments the API is given; by default,
 ; the (Predicate "*-Cosine Sim Key-*") is used; if the underlying
 ; matrix is filtered, then a filter-name-dependent key is used.
@@ -61,30 +61,50 @@
 ;
 ; Extend the LLOBJ with additional methods to access similarity scores.
 ;
-(define*-public (add-similarity-api LLOBJ MTM?
+(define*-public (add-similarity-api LLOBJ
 	#:optional
+	(MTM? #f)
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f)))
 "
-  add-similarity-api - Add API to access similarity values between
-  rows or columns of the LLOBJ.  This API merely provides access to
-  values that were previously computed, located as Values attached
-  to pairs of Atoms under certain specific keys. That means that this
-  API is appropriate for working with similarity values that were
-  stored in a database.
+  add-similarity-api - Add an API to access similarity values between
+  two rows or columns of the LLOBJ.  This API merely provides access
+  to values that were previously computed, located as Values attached
+  to pairs of Atoms under certain specific keys. This API is meant
+  to simiplify the naming and management of similarity values.
 
-  The 'set-pair-similarity method is used to set a value.
-  The 'pair-similarity method is used to fetch it.
+  The computation of similarities between pairs of rows/columns can be
+  performed with the `add-similarity-compute` object.
 
-  This creates a new NON-sparse matrix that can be understood as a
-  kind-of matrix product of LLOBJ with it's transpose.
+  Arguments:
+  LLOBJ -- the matrix whose rows or columns will be compared.
 
+  Optional arguments:
+  MTM? -- If set to #t, then columns will be compared, else rows.
+      If not specified, defaults to #f (rows are compared.)
+
+  ID -- String used to generate a unique access key. The actual
+      similarity values are held under a key generated using this
+      string. If not specified, this defaults to the string returned
+      by `(LLOBJ 'id)`.
+
+  Provided methods:
+  'set-pair-similarity PAIR VALUE -- Attach VALUE to PAIR. It is
+      assumed that PAIR is a SimilarityLink (holding a pair of rows
+      or columns).  The VALUE can be any Atomese Value; most users
+      will use the FloatValue, but it can be anything.
+
+  'pair-similarity PAIR -- Return the Value attached to PAIR.
+
+  One may think of this object in either of two different ways. One
+  way is to think of it as an easy way to get row or column
+  similarities. Another way is to think of it as defining a new matrix
+  that is a product of LLOBJ with its transpose.  The product is not
+  to conventional dot-product, but rather the similarity metric.
   If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
-  matrix-transpose.
-
-  If the optional argument ID is present, it is used to construct the
-  key under which the similarity scores are accessed.  This is needed
-  if the similarity scores are not the default cosine similarity scores.
+  matrix-transpose. Fun fact: taking a more formal approach means
+  that the similarity metric can be thought of as a true metric,
+  used for raising and lowering covariant or contravariant indexes.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
@@ -104,28 +124,63 @@
 
 		(define pair-sim-type 'SimilarityLink)
 
+		(define (get-pair L-ATOM R-ATOM)
+			(cog-link pair-sim-type L-ATOM R-ATOM))
+
+		(define (make-pair L-ATOM R-ATOM)
+			(SimilarityLink L-ATOM R-ATOM))
+
 		(define sim-key (PredicateNode
 			(if ID
 				(string-append "*-SimKey " ID)
-				"*-Cosine Sim Key-*")))
+				"*-Similarity Key-*")))
 
 		; Return the precomputed similarity value on ATOM
 		; This returns the Value on the atom, and not a number!
 		(define (get-sim ATOM)
-			(if (null? ATOM) '()
+			(if (nil? ATOM) #f
 				(cog-value ATOM sim-key)))
 
+		(define (get-pair-sim A B) (get-sim (get-pair A B)))
+
 		; Save a precomputed similarity on ATOM. The SIM should be a
-		; Value, e.g. a FloatValue.
+		; Value, e.g. a FloatValue. If SIM if #f then any existing
+		; value is removed.
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key SIM))
 
+		; Since SimilarityLink is an UnorderedLink, the ordering of
+		; left and right will be random, depending on the atom hash.
+		; However, it will be consistent within a given session.
+		; Same remarks for the wildcards.
+		(define (get-pair-left PAIR) (gar PAIR))
+		(define (get-pair-right PAIR) (gdr PAIR))
+		(define (get-wildcard ITEM)
+			(Similarity (AnyNode "wild") ITEM))
+		(define (get-wild-wild)
+			(Similarity (AnyNode "wild") (AnyNode "wild")))
+
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
+		; XXX FIXME This is disasterously wrong, if the database contains
+		; similarities for several different kinds of matrices in it!!
 		(define (fetch-sim-pairs)
-			(define start-time (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(load-atoms-of-type pair-sim-type)
 			(format #t "Elapsed time to load sims: ~A secs\n"
-				(- (current-time) start-time)))
+				(elapsed-secs)))
+
+		(define (help)
+			(format #t
+				(string-append
+"This is the `add-similarity-api` object applied to the \"~A\" object.\n"
+"It provides acccess to similarities stored at the \"~A\" key.\n"
+"For more info, use the 'describe method on this object. You can also\n"
+"get at the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+		(LLOBJ 'id) ID))
+
+		(define (describe)
+			(display (procedure-property add-similarity-api 'documentation)))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -134,12 +189,29 @@
 				((left-type)      item-type)
 				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
+				((get-pair)       (apply get-pair args))
+				((make-pair)      (apply make-pair args))
+				((get-count)      (apply get-sim args))
+				((set-count)      (apply set-sim args))
+				((pair-count)     (apply get-pair-sim args))
+				((left-element)   (apply get-pair-left args))
+				((right-element)  (apply get-pair-right args))
+				((left-wildcard)  (apply get-wildcard args))
+				((right-wildcard) (apply get-wildcard args))
+				((wild-wild)      (get-wild-wild))
+
 				((fetch-pairs)    (fetch-sim-pairs))
+				((provides)       #f)
+				((filters?)       #f)
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
 
-				; (else             (apply LLOBJ (cons message args)))
+				((help)           (help))
+				((describe)       (describe))
+				((obj)            "add-similarity-api")
+				((base)           LLOBJ)
+
 				(else (error "Bad method call on similarity API:" message))
 		)))
 )
@@ -150,38 +222,81 @@
 ; Extend the LLOBJ with additional methods to batch-compute similarity
 ; scores.
 ;
-(define*-public (batch-similarity LLOBJ MTM?
+(define*-public (batch-similarity LLOBJ SIM-FUN
 	#:optional
+	(MTM? #f)
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
-	(CUTOFF 0.1)
-	(SIM-FUN
-		(let ((acc (add-pair-cosine-compute LLOBJ)))
-			(if MTM?
-				(lambda (x y) (acc 'left-cosine x y))
-				(lambda (x y) (acc 'right-cosine x y)))))
 	)
 "
-  batch-similarity - Add API to batch-compute similarity values between
-  rows or columns of the LLOBJ.  By default, the cosine similarity is
-  computed, unless some alternate function is specified in the ctor.
+  batch-similarity LLOBJ [MTM? ID CUTOFF SIM-FUN] - bulk computation.
+
+  This adds an API for bulk computing and holding similarity values
+  between two rows or columns of the LLOBJ. The computed similarity values
+  will be saved in the AtomSpace via the `add-similarity-api` object.
 
   Batching is EXTREMELY CPU-intensive.  A typical run will take days or
   a week or more, even for modest-sized datasets. It will also blow up
   memory usage, since a SimilarityLink and also an atom Value is created
-  for each pair of atoms. For N=1000, this means N^2=one million
+  for each pair of atoms. For N = 1000, this means N(N+1)/2 = 500K
   SimilarityLinks and values. This might require a few GBytes of RAM.
 
-  This creates a new NON-sparse matrix that can be understood as a
-  kind-of matrix product of LLOBJ with it's transpose.
+  This assumes that the support for each row or column has been
+  previously computed (using the `add-support-api` object).  The
+  support is needed to determine which rows/columns have the highest
+  ranking.
 
-  If MTM? is #t, then the similarity matrix is the product M^T M
-  for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
-  matrix-transpose.
+  This assumes that the similarity metric is symmetric; that is,
+  exchanging the two items in the pair give the same results. In
+  other words, it is assumed that `(SIM-FUN A B)` and `(SIM-FUN B A)`
+  return the same value.  This also assumes that the self-similarity
+  of an item is non-trivial, so that `(SIM-FUN A A)` depends on `A`,
+  and so it will loop over the diagonal entries as well.
+
+  Arguments:
+  LLOBJ -- The matrix whose rows or columns will be compared.
+
+  SIM-FUN -- Function taking two arguments, both rows or columns, as
+      appropriate, and returning a single Value. This is the function
+      that will be called to compute the similarity between two rows
+      or columns.
+
+  Optional arguments:
+  MTM? -- If set to #t then columns will be compared, else rows.
+      If not specified, defaults to #f (compares rows.)
+
+  ID -- named location where the similarity values should be stored.
+
+  This creates a new NON-sparse matrix that can be understood as a
+  matrix product of LLOBJ with it's transpose. The product is not
+  the conventional dot-product, but rather is that defined by the
+  SIM-FUN.  If MTM? is #t, then the similarity matrix is the product
+  M^T M for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is
+  the matrix-transpose.
+
+  Methods provided:
+  'batch-compute N -- Compute the similarity for the top-ranked N
+     rows or columns in the matrix. Ranking is obtained by looking
+     at the count on the support object for the row/column. A total
+     of N(N+1)/2 similarity values will be computed, including the
+     similarity for pairs along the diagonal. (Some kinds of similarity
+     have non-trivial values along the diagonal.) The similarity is
+     assumed to be symmetric; thus only the lower triangle is computed.
+
+  'batch-list LIST -- Compute the similarity between all pairs in the
+     LIST.  Thus, if the length of LIST is N, then N(N+1)/2 similarity
+     values will be computed, including those along the diagonal. The
+     similarity is assumed to be symmetric; thus only the lower triangle
+     is computed.
+
+  'compute-similarity A B -- Return the similarity between A and B
+     (which are both either rows or columns). If the value has been
+     previously computed, then that value is returned. If not, then
+     it is computed by calling `SIM-FUN A B` and storing the result
+     with the `add-similarity-api` object.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
 			(simobj (add-similarity-api wldobj MTM? ID))
-			(pair-sim-type (simobj 'pair-type))
 			(compcnt 0)  ; number computed
 			(savecnt 0)  ; number saved
 		)
@@ -191,21 +306,22 @@
 		; compute it. If the computed value is greater than CUTOFF,
 		; then cache it in the atomspace.
 		(define (compute-sim A B)
-			(define mpr (cog-link pair-sim-type A B))
-			(define prs (simobj 'pair-similarity mpr))
-			(if (not (null? prs))
-				(cog-value-ref prs 0)
+			(define mpr (simobj 'get-pair A B))
+			(define existing-sim (simobj 'pair-similarity mpr))
+			(if (not (nil? existing-sim))
+				existing-sim
 				(let ((simv (SIM-FUN A B)))
 					(set! compcnt (+ compcnt 1))
-					; If we already have a similarity link for this object,
-					; go ahead and use it. Otherwise, save the similarity
-					; value only if it is greater than the cutoff.
-					(if (or (not (null? mpr)) (<= CUTOFF simv))
-						(begin
-							(set! savecnt (+ savecnt 1))
-							(simobj 'set-pair-similarity
-								(cog-new-link pair-sim-type A B)
-									(FloatValue simv))))
+					(when simv
+						(set! savecnt (+ savecnt 1))
+						(simobj 'set-pair-similarity
+							(simobj 'make-pair A B) simv))
+
+					; If there's some existing Similarity pair,
+					; but the computed similarity is bad, then
+					; clobber the existing value.
+					(if (and (not simv) (not (nil? mpr)))
+						(simobj 'set-pair-similarity mpr #f))
 					simv)))
 
 		; Compute and cache the similarity between the ITEM, and the
@@ -227,20 +343,20 @@
 		(define (batch-sim-pairs ITEM-LIST)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1))) ; number of pairs todo
+			(define tot (* 0.5 len (+ len 1))) ; number of pairs todo
 			(define done 0)      ; items done
 			(define prevcomp 0)  ; pairs computed
-			(define start (current-time))
-			(define prevelap 0.0) ; previous elapsed time.
+			(define elapsed-secs (make-elapsed-secs))
 
 			(define (do-one-and-rpt ITM-LST)
-				(batch-simlist (car ITM-LST) (cdr ITM-LST))
-				(set! done (+  done 1))
+				; Reverse, so that we work from the diagonal, outwards.
+				(define rev-lst (reverse ITM-LST))
+				(batch-simlist (car rev-lst) rev-lst)
+				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 10))
-					(let* ((elapsed (- (current-time) start))
-							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(nprdone (- tot togo))  ; number of pairs done
-							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
+					(let* ((elapsed (- (elapsed-secs) 1.0e-6))
+							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
+							(rate (/ (- compcnt prevcomp) elapsed))
 						)
 
 						; Frac is the percentage fraction that had
@@ -248,7 +364,7 @@
 						; Rate is the rate of computing pairs, whether
 						; or not they are actually saved.
 						(format #t
-							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
+							 "Done ~A/~A Frac=~,2f% Time: ~,1f Done: ~,1f% Rate=~,2f prs/sec (~,2f sec/pr)\n"
 							done len
 							(* 100.0 (/ savecnt nprdone))
 							elapsed
@@ -256,50 +372,50 @@
 							rate
 							(/ 1.0 rate)
 						)
-						(set! prevelap (- elapsed 1.0e-6))
 						(set! prevcomp compcnt)
 				)))
 
-			; tail-recursive list-walker.
-			(define (make-pairs ITM-LST)
-				(if (not (null? ITM-LST))
-					(begin
-						(do-one-and-rpt ITM-LST)
-						(make-pairs (cdr ITM-LST)))))
 
-			; Reset the states, before restarting
+			; Reset the stats, before restarting
 			(set! compcnt 0)
 			(set! savecnt 0)
-			(make-pairs ITEM-LIST)
+			(for-each
+				(lambda (n) (do-one-and-rpt (take ITEM-LIST n)))
+				(iota (length ITEM-LIST) 1))
 		)
 
 		; Loop over the entire list of items, and compute similarity
 		; scores for them.  Hacked parallel version.
 		; XXX FIXME -- due to guile locking flakiness, setting NTHREADS
-		; to any vaue bigger than 3 results in a net slow-down, and even
+		; to any value bigger than 3 results in a net slow-down, and even
 		; for NTHREADS=3, it can be pretty bad suckage, as the system
 		; starts thrashing due to some kind of live-lock like thing.
+		; The root cause for this is unclear. It may be thrashing on the
+		; locks in the AtomSpace. The current guile bindings hit the
+		; AtomSpace surprisingly often. See issue #2553 for a possible
+		; solution.
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1)))
+			(define tot (* 0.5 len (+ len 1)))
 			(define done 0)
 			(define prevcomp 0)  ; pairs computed
-			(define start (current-time))
-			(define prevelap 0.0)
+			(define elapsed-secs (make-elapsed-secs))
 
 			(define (do-one-and-rpt ITM-LST)
+				; Reverse, so that we work from the diagonal, outwards.
+				(define rev-lst (reverse ITM-LST))
+				(batch-simlist (car rev-lst) rev-lst)
 				; These sets are not thread-safe but I don't care.
-				(batch-simlist (car ITM-LST) (cdr ITM-LST))
+				; XXX this is easy to fix, just use atomic boxes.
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
-					(let* ((elapsed (- (current-time) start))
-							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(nprdone (- tot togo))
-							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
+					(let* ((elapsed (- (elapsed-secs) 1.0e-6))
+							(nprdone (* 0.5 done (+ done 1))) ; number of pairs done
+							(rate (/ (- compcnt prevcomp) elapsed))
 							)
 						(format #t
-							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
+							 "Done ~A/~A Frac=~,2f% Time: ~,1f Done: ~,1f% Rate=~,2f prs/sec (~,2f sec/pr)\n"
 							done len
 							(* 100.0 (/ (* NTHREADS savecnt) nprdone))
 							elapsed
@@ -307,29 +423,20 @@
 							rate
 							(/ 1.0 rate)
 						)
-						(set! prevelap (- elapsed 1.0e-6))
 						(set! prevcomp compcnt)
 					)))
-
-			; tail-recursive list-walker.
-			(define (make-pairs ITM-LST)
-				(if (not (null? ITM-LST))
-					(begin
-						(do-one-and-rpt ITM-LST)
-						(if (< NTHREADS (length ITM-LST))
-							(make-pairs (drop ITM-LST NTHREADS))))))
-
-			; thread launcher
-			(define (launch ITM-LST CNT)
-				(if (< 0 CNT)
-					(begin
-						(call-with-new-thread (lambda () (make-pairs ITM-LST)))
-						(launch (cdr ITM-LST) (- CNT 1)))))
 
 			; Reset the states, before restarting
 			(set! compcnt 0)
 			(set! savecnt 0)
-			(launch ITEM-LIST NTHREADS)
+			(for-each
+				(lambda (thnum)
+					(call-with-new-thread
+						(lambda ()
+							(for-each
+								(lambda (n) (do-one-and-rpt (take ITEM-LIST n)))
+								(iota (length ITEM-LIST) thnum NTHREADS)))))
+				(iota NTHREADS 1))
 
 			(format #t "Started ~d threads\n" NTHREADS)
 		)
@@ -354,7 +461,13 @@
 
 		; Loop over the top-N most frequent basis elements
 		(define (batch TOP-N)
-			(define top-items (take (get-sorted-basis) TOP-N))
+			(define elapsed (make-elapsed-secs))
+			(define sbase (get-sorted-basis))
+			(define nbase (length sbase))
+			; `take` fails if asked to take more than length of list.
+			(define num (if (< TOP-N nbase) TOP-N nbase))
+			(define top-items (take sbase num))
+			(format #t "Obtained top ~A items in ~A secs\n" num (elapsed))
 			(batch-sim-pairs top-items))
 
 		; Loop over the top-N most frequent basis elements
@@ -372,6 +485,7 @@
 				((compute-similarity)  (apply compute-sim args))
 				((batch-compute)       (apply batch args))
 				((parallel-batch)      (apply para-batch args))
+				((batch-list)          (apply batch-sim-pairs args))
 
 				(else                  (apply LLOBJ (cons message args)))
 		)))

@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
@@ -35,6 +36,34 @@ HandleSeq LinkValue::to_handle_seq(void) const
 	{
 		if (v->is_atom())
 			hs.push_back(HandleCast(v));
+
+		// Recursively convert any value lists into atom lists
+		else if (nameserver().isA(v->get_type(), LINK_VALUE))
+		{
+			HandleSeq hsr(LinkValueCast(v)->to_handle_seq());
+			Handle h(createLink(std::move(hsr), LIST_LINK));
+			hs.push_back(h);
+		}
+	}
+	return hs;
+}
+
+HandleSet LinkValue::to_handle_set(void) const
+{
+	update();
+	HandleSet hs;
+	for (const ValuePtr& v : _value)
+	{
+		if (v->is_atom())
+			hs.insert(HandleCast(v));
+
+		// Recursively convert any value lists into atom lists
+		else if (nameserver().isA(v->get_type(), LINK_VALUE))
+		{
+			HandleSeq hsr(LinkValueCast(v)->to_handle_seq());
+			Handle h(createLink(std::move(hsr), LIST_LINK));
+			hs.insert(h);
+		}
 	}
 	return hs;
 }
@@ -64,7 +93,7 @@ std::string LinkValue::to_string(const std::string& indent) const
 	update();
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
-	for (ValuePtr v :_value)
+	for (const ValuePtr& v :_value)
 		rv += v->to_short_string(more_indent) + "\n";
 
 	// Remove trailing newline before writing the last paren
@@ -84,7 +113,7 @@ std::string LinkValue::to_short_string(const std::string& indent) const
 	update();
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	for (ValuePtr v :_value)
+	for (const ValuePtr& v :_value)
 		rv += v->to_short_string(more_indent);
 
 	rv += ")";

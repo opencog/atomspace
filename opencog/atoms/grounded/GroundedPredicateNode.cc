@@ -113,7 +113,7 @@ static void throwSyntaxException(bool silent, const char* message...)
 // ----------------------------------------------------------
 
 /// Extract a single floating-point double out of an atom, that,
-/// when executed, should yeild a value containing a number.
+/// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
 static double get_numeric_value(AtomSpace* as, bool silent,
                                 Handle h)
@@ -244,7 +244,7 @@ ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
 		return CastToValue(TruthValue::TRUE_TV());
 	}
 
-	// Unkown proceedure type.
+	// Unknown procedure type.
 	throw RuntimeException(TRACE_INFO,
 	     "Cannot evaluate unknown GroundedPredicateNode: %s",
 	      schema.c_str());

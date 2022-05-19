@@ -22,7 +22,7 @@
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 using namespace opencog;
 namespace opencog {
@@ -82,7 +82,7 @@ void UuidSCM::init(void)
 	// resolvers for nested atomspaces. But for now, no one uses this so
 	// what the heck. I'm gonna punt. XXX FIXME.
 	AtomSpace* as = SchemeSmob::ss_get_env_as("uuid");
-	_tlb.set_resolver(&as->get_atomtable());
+	_tlb.set_resolver(as);
 
 	define_scheme_primitive("cog-add-uuid",
 		&UuidSCM::add_atom, this, "uuid");

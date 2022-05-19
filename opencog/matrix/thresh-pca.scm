@@ -34,7 +34,7 @@
 ; Because P is sparse, it makes the most sense to compute the inner sum
 ; "on demand", for only those index values where the outer sum is
 ; non-vanishing. Here, "on-demand" is what scheme (or functional languages
-; in general) excell in: lazy evaluation.  That is, we won't calulate
+; in general) excel in: lazy evaluation.  That is, we won't calculate
 ; anything until you ask for it; and it seems that because P is sparse,
 ; chances are good you'll never ever ask for it.
 ;
@@ -109,7 +109,7 @@
 		; function
 		;     result(y) = sum_x p(x,y) FVEC(x)
 		; As always, this returns the function `result`. Call this
-		; function with an arguement to force the computation to
+		; function with an argument to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
 			(lambda (ITEM)
@@ -135,7 +135,7 @@
 		; Caution: it's time-consuming, because it runs over the
 		; entire left-dimension, when it's invoked.
 		(define (left-norm FVEC)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sumsq
 				(fold
 					(lambda (item sum)
@@ -143,11 +143,11 @@
 						(+ sum (* val val)))
 					0
 					(star-obj 'left-basis)))
-			(format #t "left-norm took ~d seconds\n" (- (current-time) start))
+			(format #t "left-norm took ~d seconds\n" (elapsed-secs))
 			(sqrt sumsq))
 
 		(define (right-norm FVEC)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sumsq
 				(fold
 					(lambda (item sum)
@@ -155,7 +155,7 @@
 						(+ sum (* val val)))
 					0
 					(star-obj 'right-basis)))
-			(format #t "right-norm took ~d seconds\n" (- (current-time) start))
+			(format #t "right-norm took ~d seconds\n" (elapsed-secs))
 			(sqrt sumsq))
 
 		; --------------------
@@ -210,7 +210,7 @@
 		; --------------------
 		; Print the top-K values of the vector
 		(define (print-fvec FVEC K BASIS)
-			(define start (current-time))
+			(define elapsed-secs (make-elapsed-secs))
 			(define sorted-vals
 				(sort
 					(get-fvec FVEC BASIS)
@@ -219,7 +219,7 @@
 			(for-each
 				(lambda (item) (format #t "~A\n" item))
 				(take sorted-vals K))
-			(format #t "get-fvec took ~d seconds\n" (- (current-time) start))
+			(format #t "get-fvec took ~d seconds\n" (elapsed-secs))
 		)
 
 		(define (left-print FVEC K) (print-fvec FVEC K 'left-basis))
@@ -298,7 +298,7 @@
 			(/ cnt len)
 		)
 
-		; Likely, I beleive, to get called again, so cache.
+		; Likely, I believe, to get called again, so cache.
 		(define cache-left-unit (make-afunc-cache do-left-unit))
 		(define cache-right-unit (make-afunc-cache do-right-unit))
 

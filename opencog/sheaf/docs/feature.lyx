@@ -1,0 +1,1022 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass amsart
+\begin_preamble
+\usepackage{url} 
+
+  \definecolor{docnotelinkcolor}{rgb}{0,0,0.4}
+\end_preamble
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Feature Vectors
+\end_layout
+
+\begin_layout Date
+11 November 2017
+\end_layout
+
+\begin_layout Subsection*
+What is a vector? 
+\end_layout
+
+\begin_layout Standard
+Consider the corpus 
+\begin_inset Quotes eld
+\end_inset
+
+the dog chased the cat
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat chased the mouse
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the dog chased the squirrel
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the dog killed the chicken
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat killed the mouse
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat chased the cockroach
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are multiple stalks, here, but the ones of interest are the one for
+ the dog:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased the cat
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased the squirrel
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog killed the chicken
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+and the stalk for the cat:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the dog chased the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased the mouse
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat killed the mouse
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased the cockroach
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One old approach to data mining is to trim these down to 3-grams, and then
+ compare them as feature vectors.
+ These 3-gram feature vector for the dog is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="3">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 2 observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog killed 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+and the 3-gram stalk for the cat is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+chased the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 2 observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat killed 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These are now explicitly vectors, as the addition of the observation count
+ makes them so.
+ The vertical alignment reminds us that they are also still stalks, and
+ that the vector comes from collocations.
+ 
+\end_layout
+
+\begin_layout Standard
+Recall how a vector is defined.
+ One writes a vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ as a sum over basis elements 
+\begin_inset Formula $\hat{e}_{i}$
+\end_inset
+
+with (usually real-number) coefficients 
+\begin_inset Formula $a_{i}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\vec{v}=\sum_{i}a_{i}\hat{e}_{i}
+\]
+
+\end_inset
+
+The basis elements 
+\begin_inset Formula $\hat{e}_{i}$
+\end_inset
+
+ are unit-length vectors.
+ Another common notation is the bra-ket notation, which says the same thing,
+ but in a different way:
+\begin_inset Formula 
+\[
+\vec{v}=\sum_{i}a_{i}\left|i\right\rangle 
+\]
+
+\end_inset
+
+The bra-ket notation is slightly easier to use for this example.
+ The above 3-gram collocations can be written as vectors.
+ The one for dog would be 
+\begin_inset Formula 
+\[
+\overrightarrow{dog}=2\left|the\;*\;chased\right\rangle +\left|the\;*\;killed\right\rangle 
+\]
+
+\end_inset
+
+while the one for cat would be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{cat}=\left|chased\;the\;*\right\rangle +2\left|the\;*\;chased\right\rangle +\left|the\;*\;killed\right\rangle 
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $*$
+\end_inset
+
+ here is the wild-card; it indicates where 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ should go, but it also indicates how the basis vectors should be treated:
+ the wild-card helps establish that dogs and cats are similar.
+ The basis vectors indicate how dot products can be taken.
+ Recall the defintion of a dot-product (the inner product).
+ For 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ as above, and 
+\begin_inset Formula $\vec{w}=\sum_{i}b_{i}\hat{e}_{i}$
+\end_inset
+
+, one has that
+\begin_inset Formula 
+\[
+\vec{v}\cdot\vec{w}=\sum_{i}\sum_{j}a_{i}b_{j}\hat{e}_{i}\cdot\hat{e_{j}}=\sum_{i}\sum_{j}a_{i}b_{j}\delta_{ij}=\sum_{i}a_{i}b_{i}
+\]
+
+\end_inset
+
+where the Kronecker delta was used in the middle term:
+\begin_inset Formula 
+\[
+\delta_{ij}=\begin{cases}
+1 & \mbox{if }i=j\\
+0 & \mbox{if }i\ne j
+\end{cases}
+\]
+
+\end_inset
+
+Thus, the inner prioduct of 
+\begin_inset Formula $\overrightarrow{cat}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{dog}$
+\end_inset
+
+ can be computed:
+\begin_inset Formula 
+\[
+\overrightarrow{cat}\cdot\overrightarrow{dog}=0\cdot1+2\cdot2+1\cdot1=5
+\]
+
+\end_inset
+
+One common way to express the similarity of 
+\begin_inset Formula $\overrightarrow{cat}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{dog}$
+\end_inset
+
+ is to compute the cosine similarity.
+ The angle 
+\begin_inset Formula $\theta$
+\end_inset
+
+ between two vectors is given by
+\begin_inset Formula 
+\[
+\cos\theta=\vec{v}\cdot\vec{w}/\left|\vec{v}\right|\left|\vec{w}\right|
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left|\vec{v}\right|$
+\end_inset
+
+ is the length of 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $\left|\overrightarrow{cat}\right|=\sqrt{6}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left|\overrightarrow{dog}\right|=\sqrt{5}$
+\end_inset
+
+ one finds that 
+\begin_inset Formula 
+\[
+\cos\theta=\frac{5}{\sqrt{30}}\approx0.913
+\]
+
+\end_inset
+
+That is, dogs and cats really are similar.
+ 
+\end_layout
+
+\begin_layout Standard
+If one was working with a dependency parse, as opposed to 3-grams, and if
+ one used the Frobenius algebra notation such as that used by Kartsaklis
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2014"
+literal "true"
+
+\end_inset
+
+, then one would write the basis elements as a peculiar kind of tensor,
+ and one might arrive at an expression roughly of the form 
+\begin_inset Formula 
+\[
+\overline{dog}=2\left(\overleftarrow{the}\otimes\overrightarrow{chased}\right)+1\left(\overleftarrow{the}\otimes\overrightarrow{killed}\right)
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\overline{cat}=\left(\overleftarrow{chased}\otimes\overleftarrow{the}\right)+2\left(\overleftarrow{the}\otimes\overrightarrow{chased}\right)+1\left(\overleftarrow{the}\otimes\overrightarrow{killed}\right)
+\]
+
+\end_inset
+
+Ignoring the differnces in notation (ignoring that the quantities in parenthesis
+ are tensors), one clearly can see that these are still feature vectors.
+ Focusing on the vector aspect only, these represent the same information
+ as the 3-gram feature vectors.
+ They're the same thing.
+ The difference between them is that the bra-ket notation was used for the
+ 3-grams, while the tensor notation was used for the dependency parse.
+ The feature vectors can also be written using the link-grammar-inspired
+ notation: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+dog: [the- & chased+]2 or [the- & killed+]1;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+cat: [chased- & the-]1 or [the- & chased+]2 or [the- & killed+]1;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The notation is different, the meaning is the same.
+ The above gives two feature vectors, one for dog, and one for cat.
+ The fact that they just happen to look identical to the 3-gram feature
+ vectors is only because a link-grammar parse of such short phrases look
+ a lot like ordinary 3-grams.
+ For more complex sentences, the 3-gram approach, and the dependency-parse
+ approach give different feature vectors.
+ The concept of feature vectors remain the same.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -41,13 +41,11 @@ namespace opencog
 /// free variables, these are then bound.
 ///
 /// This class does little other than to check for the above-described
-/// format, and unpacke the variable decalrations, if present; it will
+/// format, and unpack the variable declarations, if present; it will
 /// throw an error if the variables are somehow ill-formed. As usual,
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
 ///
-class ScopeLink;
-typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 class ScopeLink : public Link
 {
 protected:
@@ -58,6 +56,8 @@ protected:
 
 	/// Variables bound in the body.
 	Variables _variables;
+
+	bool _quoted;
 
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
@@ -109,12 +109,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ScopeLink>(h); }
-static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
-
-#define createScopeLink std::make_shared<ScopeLink>
+LINK_PTR_DECL(ScopeLink)
+#define createScopeLink CREATE_DECL(ScopeLink)
 
 /** @}*/
 }

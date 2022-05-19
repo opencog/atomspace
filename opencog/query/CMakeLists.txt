@@ -1,6 +1,7 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
+	ContinuationMixin.cc
 	InitiateSearchMixin.cc
 	NextSearchMixin.cc
 	PatternMatchEngine.cc
@@ -13,6 +14,9 @@ ADD_LIBRARY(query-engine
 
 # Optionally enable debug logging for the pattern matcher.
 # TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DQDEBUG=1)
+
+# Optionally enable multi-threaded pattern matcher. Experimental.
+# TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DUSE_THREADED_PATTERN_ENGINE=1)
 
 ADD_DEPENDENCIES(query-engine
 	opencog_atom_types
@@ -27,6 +31,7 @@ INSTALL (TARGETS query-engine
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	ContinuationMixin.h
 	Implicator.h
 	InitiateSearchMixin.h
 	PatternMatchCallback.h

@@ -80,7 +80,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
 ;
@@ -181,13 +181,14 @@
 				(lambda (rght) (LLOBJ 'get-pair LEFTY rght))
 				TUPLE))
 
-		(define (get-right-tuple RIGHTY TUPLE)
+		(define (get-right-tuple ROW-TUPLE COL)
 			(map
-				(lambda (left) (LLOBJ 'get-pair left RIGHTY))
-				TUPLE))
+				(lambda (row) (LLOBJ 'get-pair row COL))
+				ROW-TUPLE))
 
 		; ---------------
 		; Expects TUPLE to be a scheme list of items of 'right-type.
+		; That is, TUPLE is a list of columns.
 		; Returns a list of tuples of the left-stars appropriate for
 		; that TUPLE.  The left-star tuples are "aligned", so that
 		; that within one tuple, all pairs have exactly the same
@@ -215,16 +216,17 @@
 		; will be the typical case: the intersection will be typically
 		; non-empty, and the union will typically be strictly larger.
 
-		(define (left-star-union TUPLE)
+		(define (left-star-union COL-TUPLE)
 			(map
-				(lambda (lefty) (get-left-tuple lefty TUPLE))
-				(get-left-union TUPLE)))
+				(lambda (lefty) (get-left-tuple lefty COL-TUPLE))
+				(get-left-union COL-TUPLE)))
 
-		; Same as above, but for the right
-		(define (right-star-union TUPLE)
+		; Same as above, but for the right. ROW-TUPLE is a list of rows.
+		; `get-right-union` returns a set of columns.
+		(define (right-star-union ROW-TUPLE)
 			(map
-				(lambda (righty) (get-right-tuple righty TUPLE))
-				(get-right-union TUPLE)))
+				(lambda (col) (get-right-tuple ROW-TUPLE col))
+				(get-right-union ROW-TUPLE)))
 
 		; ---------------
 		; Given a TUPLE of pairs, return a single number.
@@ -256,6 +258,117 @@
 				((provides)        (apply provides args))
 				(else              (apply LLOBJ (cons message args))))
 			)))
+
+; ---------------------------------------------------------------------
+;
+(define*-public (add-fast-math LLOBJ FUNC #:optional
+	(GET-CNT 'get-count))
+"
+  add-fast-math LLOBJ FUNC - Fast version of `add-tuple-math`
+
+  See `add-tuple-math` for details. This is much faster, as it uses
+  the pattern engine to find tuples. It is limited, though: it will
+  only return intersections!  This is sufficient for taking products
+  but is not enough for sums.
+
+  For example, given two columns [y,z], the 'left-stars method
+  will return the set
+
+     { [(x,y), (x,z)] | both (x,y) and (x,z) are present in
+                       the atomspace. }
+"
+	(let ((star-obj (add-pair-stars LLOBJ))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
+		)
+		; ---------------
+		(define (thunk-type TY) (if (symbol? TY) (TypeNode TY) TY))
+
+		; ---------------
+		(define (left-star-intersect COL-TUPLE)
+			(define row-var (uniquely-named-variable)) ; shared rows
+			(define row-type (thunk-type (LLOBJ 'left-type)))
+			(define term-list
+				(map (lambda (COL) (LLOBJ 'make-pair row-var COL)) COL-TUPLE))
+
+			(define qry
+				(Meet
+					(TypedVariable row-var row-type)
+					(Present term-list)))
+
+			(define rowset (cog-value->list (cog-execute! qry)))
+			(cog-extract-recursive! row-var)
+
+			; Convert what the pattern engine returned to
+			; a list of scheme lists.
+			(map
+				(lambda (ROW)
+					(map (lambda (COL) (LLOBJ 'make-pair ROW COL)) COL-TUPLE))
+				rowset)
+		)
+
+		; ---------------
+		(define (right-star-intersect ROW-TUPLE)
+			(define col-var (uniquely-named-variable)) ; shared cols
+			(define col-type (thunk-type (LLOBJ 'right-type)))
+			(define term-list
+				(map (lambda (ROW) (LLOBJ 'make-pair ROW col-var)) ROW-TUPLE))
+
+			; XXX TODO -- It is MUCH faster to have the qry create the
+			; desired pairs for us. However, this is problematic for
+			; the direct-sum, where the top query term is a ChoiceLink,
+			; and there is no easy way to get which choice was made!
+			; So we pay a fairly hefty penalty running the map immediately
+			; below. It would be better to do it all in the pattern engine.
+			; Even better: run the FUNC on everything and return that.
+			; Better still: run the FUNC on the query results, in the C++
+			; code, and not in scheme.
+			(define qry
+				(Meet
+					(TypedVariable col-var col-type)
+					(Present term-list)))
+
+			(define colset (cog-value->list (cog-execute! qry)))
+			(cog-extract-recursive! col-var)
+
+			; Convert what the pattern engine returned to
+			; a list of scheme lists.
+			(map
+				(lambda (COL)
+					(map (lambda (ROW) (LLOBJ 'make-pair ROW COL)) ROW-TUPLE))
+				colset)
+		)
+
+		; ---------------
+		; Given a TUPLE of pairs, return a single number.
+		; The FUNC is applied to reduce the counts on each pair
+		; in the tuple down to just one number.
+		(define (get-func-count TUPLE)
+			(apply FUNC
+				(map
+					(lambda (pr) (if (null? pr) 0 (get-cnt pr)))
+					TUPLE)))
+
+		; ---------------
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((left-stars)  left-star-intersect)
+				((right-stars) right-star-intersect)
+				((get-count)   get-func-count)
+				(else          (LLOBJ 'provides meth))))
+
+		; ---------------
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-stars)      (apply left-star-intersect args))
+				((right-stars)     (apply right-star-intersect args))
+				((get-count)       (apply get-func-count args))
+				((provides)        (apply provides args))
+				(else              (apply LLOBJ (cons message args)))))
+	)
+)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

@@ -61,7 +61,7 @@ substituting for the variables. Thus, one has:
    graph re-writing.
 
  * The template pattern is specified as a collection of trees; it is
-   the union of these trees that defines the query graph.  The vertexes
+   the union of these trees that defines the query graph.  The vertices
    in the tree are typed (in the Comp-Sci sense of "Type Theory"; they
    are AtomSpace "Atoms"). Thus, each tree can be understood to be a
    "term", in the sense of a "term algebra" (this is a concept from the
@@ -803,6 +803,18 @@ it is supported.
 
 TODO
 ----
+ * Performance: If all variables in a clause have been grounded, then
+   there is no need to explore the clause; we only need to plug the
+   variables in, and see if the corresponding link exists. The
+   prototypical case for this is
+```
+      (Get (And
+          (Link (Glob "head") (Foo) (Glob "tail"))
+          (Link (Glob "head") (Bar) (Glob "tail"))))
+```
+   So if the `Foo` clause was matched, the existence of a `Bar` clause
+   can be trivially verified.
+
  * API change: Instead of returning results wrapped in a huge SetLink,
    the results should be returned, linked to some anchor. Huge SetLinks
    suck. There's an open github issue for this: issue #1502.
@@ -823,9 +835,36 @@ TODO
    in a temporary AtomSpace, but this is ... kind-of-ish icky?
    Can we do something nicer, here?
 
- * AtomSpaces are done wrong. Grounding should always be performed
-   in the same AtomSpace that the BindLink is in.  Thus should be fetched
-   directly from the bind-link, and not passed as a third-party parameter.
+Resources
+---------
+A reading list of inspirational systems, which desribe alternative
+ways of looking at the world, and might contain ideas worth stealing.
+
+* John N. Shutt, [The Kernel Programming Language](http://web.cs.wpi.edu/~jshutt/kernel.html)
+  This is a dialect of Scheme proposed and developed by John N. Shutt. It
+  proposes that lambda can be spilt into two parts: the first part which
+  is a "combiner" and a second part which is an "evaluator of arguments".
+  This idea resonates for the AtomSpace query engine, because
+  `class Instantiator` is an uneasy mix of lazy and eager evaluation of
+  arguments, a collection of ad hoc prescriptions to do what seems
+  right on a case-by-case basis.  This has always been a bit thorny,
+  a bit of a bowl of spaghetti for Atomese. Similar issues arise in
+  other places where beta reduction is being done. I suspect that
+  something better can be done, but the overall situation remains murky.
+  Keywords: $vau, wrap, unwrap.
+
+* [Double Pushout Graph Rewriting](https://en.wikipedia.org/wiki/Double_pushout_graph_rewriting)
+  describes a formal (category-theoretic) form of graph rewriting.
+
+* Roy Overbeek and Jörg Endrullis, [Patch Graph Rewriting](https://link.springer.com/content/pdf/10.1007/978-3-030-51372-6_8.pdf)
+  ICGT 2020, LNCS 12150, pp. 128–145, 2020.
+  Provides an explicit, detailed formal algorithm for graph rewriting.
+  The key idea is the patch graph, which consists of those edges of the
+  host graph that touch the subgraph, but are not part of it.
+
+* Adam Vandervorst, [Hierarchy T](https://github.com/Adam-Vandervorst/HierarchyT)
+  A kind-of competitor to the AtomSpace. Written in C++.
+
 
 Document Status
 ---------------

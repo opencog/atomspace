@@ -33,7 +33,7 @@ using namespace opencog;
 class PredicateFormulaUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -42,7 +42,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -52,7 +52,6 @@ public:
 	~PredicateFormulaUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -104,8 +103,24 @@ void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
 	TSM_ASSERT_EQUALS("Expect list", hget, ans);
 
 	// ------------------
+	get = eval->eval_v("(cog-execute! qe2i)");
+	printf("Got qe2i: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
 	get = eval->eval_v("(cog-execute! qe3)");
 	printf("Got qe3: %s\n", get->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
+	hget = LinkValueCast(get)->to_handle_seq();
+	TSM_ASSERT_EQUALS("Expect list", hget, ans);
+
+	// ------------------
+	get = eval->eval_v("(cog-execute! qe3i)");
+	printf("Got qe3i: %s\n", get->to_string().c_str());
 
 	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
 	hget = LinkValueCast(get)->to_handle_seq();
@@ -166,6 +181,16 @@ void PredicateFormulaUTest::test_accept(void)
 	HandleSeq hget(lget->to_handle_seq());
 	TSM_ASSERT_EQUALS("Expect one answer", hget.size(), 1);
 	TSM_ASSERT_EQUALS("Expect list", hget[0], ans);
+
+	// ------------------
+	ValuePtr geti = eval->eval_v("(cog-execute! qi-basic)");
+	printf("Got basic-i: %s\n", geti->to_string().c_str());
+
+	TS_ASSERT(nameserver().isA(geti->get_type(), LINK_VALUE));
+	LinkValuePtr lgeti(LinkValueCast(geti));
+	HandleSeq hgeti(lgeti->to_handle_seq());
+	TSM_ASSERT_EQUALS("Expect one answer", hgeti.size(), 1);
+	TSM_ASSERT_EQUALS("Expect list", hgeti[0], ans);
 
 	// Run the rest of the test.
 	do_predicate_test({ans});

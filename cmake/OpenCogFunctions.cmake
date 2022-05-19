@@ -1,5 +1,5 @@
 
 # Backwards-compatibility wrapper
-INCLUDE(OpenCogMacros)
+INCLUDE(OpenCogAtomTypes)
 INCLUDE(OpenCogGuile)
 INCLUDE(OpenCogCython)

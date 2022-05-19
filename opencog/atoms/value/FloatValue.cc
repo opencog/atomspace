@@ -234,7 +234,7 @@ std::vector<double> opencog::times(const std::vector<double>& fva,
 
 /// Vector (point-wise) division
 /// The shorter vector is assumed to be one-padded.
-/// If the shorter vecotr has length one, assume its a scalar.
+/// If the shorter vector has length one, assume its a scalar.
 /// See comments on times() above about scalars.
 std::vector<double> opencog::divide(const std::vector<double>& fva,
                                     const std::vector<double>& fvb)

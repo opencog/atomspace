@@ -1,5 +1,5 @@
 ;
-; OpenCog Persistance module
+; OpenCog Persistence module
 ; Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
@@ -11,8 +11,14 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-persist "libpersist") "opencog_persist_init")
 
+(include-from-path "opencog/persist/types/storage_types.scm")
+
 ; This avoids complaints, when the docs are set, below.
 (export
+	cog-open
+	cog-close
+	cog-connected?
+	cog-storage-node
 	fetch-atom
 	fetch-value
 	fetch-incoming-set
@@ -21,114 +27,256 @@
 	store-atom
 	store-value
 	load-atoms-of-type
+	cog-delete!
+	cog-delete-recursive!
 	barrier
+	monitor-storage
 	load-atomspace
-	store-atomspace)
+	store-atomspace
+	load-frames
+	store-frames)
 
 ;; -----------------------------------------------------
 ;;
-
-(set-procedure-property! fetch-atom 'documentation
+(set-procedure-property! cog-open 'documentation
 "
- fetch-atom ATOM
+ cog-open STORAGE-ATOM
+
+    Open a connection to the indicated STORAGE-ATOM. An open connection
+    allows Atoms to be sent/received along this connection.
+
+    Examples:
+       (cog-open (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-open (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-open (CogserverStorage \"cog://localhost:17001\"))
+
+    See also:
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+")
+
+(set-procedure-property! cog-close 'documentation
+"
+ cog-close STORAGE-ATOM
+
+    Close an open connection to the indicated STORAGE-ATOM. Closing the
+    connection disables further communication on the connection. The
+    STORAGE-ATOM indicates which connection to close.
+
+    Examples:
+       (cog-close (PostgresStorage \"postgres:///example-db?user=foo&password=bar\"))
+       (cog-close (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-close (CogserverStorage \"cog://localhost:17001\"))
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+")
+
+(set-procedure-property! cog-connected? 'documentation
+"
+ cog-connected? STORAGE-ATOM
+
+    Return #t if there is an open connection to STORAGE-ATOM.
+    Connections are opened with `cog-open` and closed with `cog-close`.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-storage-node` to obtain the current connection.
+       `monitor-storage` to print connection information.
+")
+
+(set-procedure-property! cog-storage-node 'documentation
+"
+ cog-storage-node
+
+    Return the currently open StorageNode. Returns an invalid handle
+	 if the previously-open StorageNode was closed.  If there are
+    multiple open connections, this will return only the first one
+    to have been opened. If it has been closed, this will return
+    an invalid handle, even if others may have been opened later.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `monitor-storage` to print connection information.
+")
+
+(define*-public (fetch-atom ATOM #:optional (STORAGE #f))
+"
+ fetch-atom ATOM [STORAGE]
 
     Fetch all of the Values on the indicated ATOM from storage.
     This updates (clobbers) all of the values in the atomspace,
     and replaces them with the ones fetched from storage.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
+
     See also:
        `fetch-value` to get only one Value.
        `store-atom` to store all Values.
-")
-
-(set-procedure-property! fetch-value 'documentation
 "
- fetch-value ATOM KEY
+	(if STORAGE (sn-fetch-atom ATOM STORAGE) (dflt-fetch-atom ATOM))
+)
+
+(define*-public (fetch-value ATOM KEY #:optional (STORAGE #f))
+"
+ fetch-value ATOM KEY [STORAGE]
 
     Fetch from storage the Value located at KEY on ATOM.
     This updates (clobbers) any current Value stored at KEY,
     replacing it with the one fetched from storage.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
+
     See also:
        `fetch-atom` to get all Values.
        `store-value` to store only one Value.
-")
-
-(set-procedure-property! fetch-incoming-set 'documentation
 "
- fetch-incoming-set ATOM
+	(if STORAGE (sn-fetch-value ATOM KEY STORAGE) (dflt-fetch-value ATOM KEY))
+)
+
+(define*-public (fetch-incoming-set ATOM #:optional (STORAGE #f))
+"
+ fetch-incoming-set ATOM [STORAGE]
 
     Fetch the incoming set of the ATOM from storage. The fetch is
-    NOT recursive.  See `load-referers` for a recursive fetch.
+    NOT recursive.  See `load-referrers` for a recursive fetch.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
 
     See also:
-      `load-referers` to get every graph that contains an Atom.
+      `load-referrers` to get every graph that contains an Atom.
       `fetch-incoming-by-type` to fetch a subset of a given type.
       `fetch-query` to fetch a query-defined collection of Atoms.
-")
-
-(set-procedure-property! fetch-incoming-by-type 'documentation
 "
- fetch-incoming-by-type ATOM TYPE
+	(if STORAGE (sn-fetch-incoming-set ATOM STORAGE)
+		(dflt-fetch-incoming-set ATOM))
+)
+
+(define*-public (fetch-incoming-by-type ATOM TYPE #:optional (STORAGE #f))
+"
+ fetch-incoming-by-type ATOM TYPE [STORAGE]
 
     Fetch those links of the incoming set of ATOM that are of type TYPE.
     This is a more limited fetch than the one done by `fetch-incoming-set`
     and can be useful when the incoming set is large.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the fetch. It must be a StorageNode.
+
     See also:
-      `load-referers` to get every graph that contains an Atom.
+      `load-referrers` to get every graph that contains an Atom.
       `fetch-incoming-set` to fetch all of the incoming set.
       `fetch-query` to fetch a query-defined collection of Atoms.
-")
-
-(set-procedure-property! store-atom 'documentation
 "
- store-atom ATOM
+	(if STORAGE (sn-fetch-incoming-by-type TYPE STORAGE)
+		(dflt-fetch-incoming-by-type ATOM TYPE))
+)
+
+(define*-public (store-atom ATOM #:optional (STORAGE #f))
+"
+ store-atom ATOM [STORAGE]
 
     Store indicated ATOM, and all of its associated keys and values,
     to storage. This updates (clobbers) the values previously held
     in storage, replacing them by the values in the atomspace.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
     See also:
        `store-value` to store just one Value.
        `fetch-atom` to fetch all Values on an Atom.
-")
-
-(set-procedure-property! store-value 'documentation
 "
- store-value ATOM KEY
+	(if STORAGE (sn-store-atom ATOM STORAGE) (dflt-store-atom ATOM))
+)
+
+(define*-public (store-value ATOM KEY #:optional (STORAGE #f))
+"
+ store-value ATOM KEY [STORAGE]
 
     Store the Value located at KEY on ATOM. This updates (clobbers)
     the Value previously held in storage, replacing it by the Value
     in the atomspace.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
     See also:
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
-")
-
-(set-procedure-property! load-atoms-of-type 'documentation
 "
- load-atoms-of-type TYPE
+	(if STORAGE (sn-store-value ATOM KEY STORAGE) (dflt-store-value ATOM KEY))
+)
+
+(define*-public (load-atoms-of-type TYPE #:optional (STORAGE #f))
+"
+ load-atoms-of-type TYPE [STORAGE]
 
     Fetch atoms of the given TYPE from storage. This fetches the
     atoms, and all the associated values attached to them.
-")
 
-(set-procedure-property! barrier 'documentation
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+
+    See also:
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    load-atomspace -- Load all atoms.
+    load-frames -- load DAG of AtomSpaces.
 "
- barrier
+	(if STORAGE (sn-load-atoms-of-type TYPE STORAGE)
+		(dflt-load-atoms-of-type TYPE))
+)
+
+(define*-public (barrier #:optional (STORAGE #f))
+"
+ barrier [STORAGE]
 
     Block (do not return to the caller) until the storage write queues
     are empty. Just because the atomspace write queues are empty, it
     does not mean that the data was actually written to disk. It merely
     means that the atomspace, as a client of the storage server, has
     given them to the server.
-")
 
-(set-procedure-property! load-atomspace 'documentation
+    If the optional STORAGE argument is provided, then the barrier will
+    be applied to it. It must be a StorageNode.
 "
- load-atomspace - load all atoms from storage.
+	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
+)
+
+(define*-public (monitor-storage #:optional (STORAGE #f))
+"
+ monitor-storage [STORAGE]
+
+    Return a string containing storage performance monitoring and
+    debugging information. To display the string in a properly
+    formatted fashion, say `(display (monitor-storeage))`.
+
+    If the optional STORAGE argument is provided, then the statistics
+    will be printed for that Node. It must be a StorageNode.
+
+    See also:
+       `cog-open` to open a connection.
+       `cog-close` to close a connection.
+       `cog-connected?` to obtain the connection status.
+       `cog-storage-node` to obtain the current connection.
+"
+	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
+)
+
+(define*-public (load-atomspace #:optional (STORAGE #f))
+"
+ load-atomspace [STORAGE] - load all atoms from storage.
 
     This will cause ALL of the atoms in the open storage server to be
     loaded into the current AtomSpace. This can be a very time-consuming
@@ -136,18 +284,25 @@
     atoms; there are several ways to fetch subsets of atoms, or even one
     at a time, when needed.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+
     See also:
     fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
     fetch-incoming-set ATOM -- fetch the entire incoming set of ATOM.
     fetch-incoming-by-type ATOM TYPE -- get a subset of the incoming set.
     fetch-query QUERY -- get all Atoms for a given QUERY.
-    load-referers ATOM -- get every graph that contains ATOM
-    load-atoms-of-type TYPE -- load only atoms of type TYPE
-")
-
-(set-procedure-property! store-atomspace 'documentation
+    load-referrers ATOM -- get every graph that contains ATOM.
+    load-atoms-of-type TYPE -- load only atoms of type TYPE.
+    load-frames -- load DAG of AtomSpaces.
+    store-atomspace -- store all Atoms in the AtomSpace.
 "
- store-atomspace - Store all atoms in the AtomSpace to storage.
+	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
+)
+
+(define*-public (store-atomspace #:optional (STORAGE #f))
+"
+ store-atomspace [STORAGE] - Store all atoms in the AtomSpace to storage.
 
     This will dump the ENTIRE contents of the current AtomSpace to the
     the currently-open storage.  Depending on the size of the AtomSpace,
@@ -155,25 +310,84 @@
     is rarely required, as individual atoms can always be stored, one
     at a time.
 
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    If the current AtomSpace sits on top of a stack of AtomSpaces, then
+    only the shallowest visible Atoms in the current AtomSpace will be
+    stored. Atoms that have been deleted in the current Atomspaces but
+    are present in deeper AtomSpaces will NOT be stored. Values in
+    deeper AtomSpaces that are hidden/changed in the current AtomSpace
+    will NOT be stored. In other words, the only Atoms and Values that
+    are stored are those that are visible in the current AtomSpace.
+
     See also:
+    load-atomspace -- load all Atoms in the AtomSpace.
     store-atom ATOM -- store one ATOM and all of the values on it.
-    store-referers ATOM -- store all graphs that contain ATOM
-")
+    store-referrers ATOM -- store all graphs that contain ATOM.
+"
+	(if STORAGE (sn-store-atomspace STORAGE) (dflt-store-atomspace))
+)
+
+(define*-public (load-frames #:optional (STORAGE #f))
+"
+ load-frames [STORAGE] - load the DAG of AtomSpaces from storage.
+
+    This will load the DAG of AtomSpaces held in the storage server to
+    be created. This will only create the AtomSpaces; it will NOT
+    populate them with Atoms. These have to be either fetched in bulk,
+    or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the source of the load. It must be a StorageNode.
+
+    See also:
+    store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
+    fetch-atom ATOM -- fetch an individual ATOM, and all Values on it.
+    fetch-query QUERY -- get all Atoms for a given QUERY.
+    load-referrers ATOM -- get every graph that contains ATOM.
+    load-atoms-of-type TYPE -- load only atoms of type TYPE.
+    load-atomspace -- load the entire contents of storage.
+"
+	(if STORAGE (sn-load-frames STORAGE) (dflt-load-frames))
+)
+
+(define*-public (store-frames ATOMSPACE #:optional (STORAGE #f))
+"
+ store-frames ATOMSPACE [STORAGE] - store the DAG of AtomSpaces to storage.
+
+    This will store the DAG of AtomSpaces at ATOMSPACE and below, to
+    the storage server.  This will only store the DAG of the AtomSpaces;
+    it will NOT store their contents.  These have to be either stored in
+    bulk, or individually, using the usual methods.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also:
+    load-frames -- load the DAG of AtomSpaces from storage.
+    store-atomspace -- store the entire contents of an AtomSpace.
+    store-atom ATOM -- store an individual Atom.
+"
+	(if STORAGE
+		(sn-store-frames ATOMSPACE STORAGE)
+		(dflt-store-frames ATOMSPACE))
+)
 
 ;
 ; --------------------------------------------------------------------
 (define*-public (fetch-query QUERY KEY
-	#:optional (METADATA '()) (FRESH #f))
+	#:optional (METADATA '()) (FRESH #f) (STORAGE #f))
 "
- fetch-query QUERY KEY [METADATA [FRESH]]
+ fetch-query QUERY KEY [METADATA [FRESH]] [STORAGE]
 
    Perform the QUERY at the storage server, and load the results into
    the AtomSpace. The results will be returned directly and also cached
    at KEY. The QUERY must be either a JoinLink, MeetLink or QueryLink.
 
-   This can be thought of as a generalization of `load-referers`,
+   This can be thought of as a generalization of `load-referrers`,
    `fetch-incoming-set` and `fetch-incoming-by-type`. Thus, the
-   simplest JoinLink is effectively the same thing as `load-referers`,
+   simplest JoinLink is effectively the same thing as `load-referrers`,
    while a JoinLink with a depth of one is the same thing as
    `fetch-incoming-set`, and a JoinLink with a type restriction is the
    same thing as `fetch-incoming-by-type`.
@@ -198,27 +412,34 @@
 
    See also:
      `fetch-incoming-set` to fetch the incoing set of an Atom.
-     `load-referers` to fetch all graphs containing an Atom.
+     `load-referrers` to fetch all graphs containing an Atom.
 "
 	(if (nil? METADATA)
-		(fetch-query-2args QUERY KEY)
-		(fetch-query-4args QUERY KEY METADATA FRESH))
+		(dflt-fetch-query-2args QUERY KEY)
+		(if (cog-subtype? METADATA 'StorageNode)
+			(sn-fetch-query-2args QUERY KEY METADATA)
+			(if STORAGE
+				(sn-fetch-query-4args QUERY KEY METADATA FRESH STORAGE)
+				(dflt-fetch-query-4args QUERY KEY METADATA FRESH))))
 )
 
 ; --------------------------------------------------------------------
-(define-public (store-referers ATOM)
+(define*-public (store-referrers ATOM #:optional (STORAGE #f))
 "
- store-referers ATOM -- Store all hypergraphs that contain ATOM
+ store-referrers ATOM [STORAGE] -- Store all hypergraphs that contain ATOM
 
-   This stores all hypergraphs that the ATOM participates in.
-   It does this by recursively exploring the incoming set of the atom.
+    This stores all hypergraphs that the ATOM participates in.
+    It does this by recursively exploring the incoming set of the atom.
 
-   See also `load-referers`.
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also `load-referrers`.
 "
 	(define (do-store atom)
 		(let ((iset (cog-incoming-set atom)))
 			(if (null? iset)
-				(store-atom atom)
+				(store-atom atom STORAGE)
 				(for-each do-store iset)
 			)
 		)
@@ -227,17 +448,20 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (load-referers ATOM)
+(define*-public (load-referrers ATOM #:optional (STORAGE #f))
 "
- load-referers ATOM -- Load (from storage) all graphs that contain ATOM.
+ load-referrers ATOM [STORAGE] -- Load all graphs that contain ATOM.
 
    This loads all hypergraphs that the given ATOM participates in.
    It does this by recursively exploring the incoming set of the atom.
 
+   If the optional STORAGE argument is provided, then it will be
+   used as the source of the load. It must be a StorageNode.
+
    See also:
      `fetch-incoming-set` to fetch only the first level above an Atom.
      `fetch-query` to perform a generalized query for holders of an Atom.
-     `store-referers` to store all referers.
+     `store-referrers` to store all referrers.
 "
 	(if (not (null? ATOM))
 		; The fetch-incoming-set function for this is defined to perform
@@ -245,12 +469,94 @@
 		; We do an extra recursion here, in case we were passed a list.
 		(begin
 			(if (pair? ATOM)
-				(for-each load-referers ATOM)
-				(fetch-incoming-set ATOM)
+				(for-each load-referrers ATOM STORAGE)
+				(fetch-incoming-set ATOM STORAGE)
 			)
-			(for-each load-referers (cog-incoming-set ATOM))
+			(for-each
+				(lambda (atm) (load-referrers atm STORAGE))
+				(cog-incoming-set ATOM))
 		)
 	)
+)
+
+; --------------------------------------------------------------------
+; Renamed functions
+(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
+(define-public (cog-delete-recursive ATOM)
+	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
+
+
+(define*-public (cog-delete! ATOM #:optional (STORAGE #f))
+"
+ cog-delete! ATOM [STORAGE]
+    Remove the indicated ATOM, but only if it has no incoming links.
+    If it has incoming links, the remove fails.  If storage is attached,
+    the ATOM is also removed from the storage.
+
+    Returns #t if the atom was removed, else returns #f if not removed.
+
+    Use cog-extract! to remove from the AtomSpace only, leaving storage
+    unaffected.
+
+    Use cog-delete-recursive! to force removal of this atom, together
+    with any links that might be holding this atom.
+
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
+
+    A word of caution about multi-threaded operation: if one thread is
+    adding atoms, while another thread is removing the *same* atoms at
+    the same time, then these two threads will race. As a result of
+    this racing, there is no gauranteee that the AtomSpace and the
+    attached storage will stay in sync. One or the other might contain
+    Atoms that the other does not.  It is up to you, the user, to avoid
+    this inconsistncy when performing racey inserts/deletes.
+
+    Example usage:
+       (cog-delete! (Concept \"foo\"))
+       (cog-delete! (Concept \"foo\")
+              (RocksStorage \"rocks:///tmp/my-rocks-db\"))
+       (cog-delete! (Concept \"foo\")
+              (PostgresStorage \"postgres://USER:PASSWORD@HOST/DBNAME\"))
+       (cog-delete! (Concept \"foo\")
+              (CogStorage \"cog://cogserver.example.com\"))
+
+"
+	(if STORAGE (sn-delete ATOM STORAGE)
+		(let ((sn (cog-storage-node)))
+			(if (and sn (cog-connected? sn))
+				(dflt-delete ATOM)
+				(cog-extract! ATOM))))
+)
+
+(define*-public (cog-delete-recursive! ATOM #:optional (STORAGE #f))
+"
+ cog-delete-recursive! ATOM [STORAGE]
+    Remove the indicated ATOM, and all atoms that point at it.
+    If storage is attached, the ATOM is also removed from storage.
+
+    Return #t on success, else return #f if not removed.
+
+    If the optional STORAGE argument is provided, then it will be
+    removed from that StorageNode; otherwise it will be removed from
+    the current StorageNode attached to this thread.
+
+    A word of caution about multi-threaded operation: if one thread is
+    adding atoms, while another thread is removing the *same* atoms at
+    the same time, then these two threads will race. As a result of
+    this racing, there is no gauranteee that the AtomSpace and the
+    attached storage will stay in sync. One or the other might contain
+    Atoms that the other does not.  It is up to you, the user, to avoid
+    this inconsistncy when performing racey inserts/deletes.
+
+    See also: cog-delete! and cog-extract-recursive!
+"
+	(if STORAGE (sn-delete-rec ATOM STORAGE)
+		(let ((sn (cog-storage-node)))
+			(if (and sn (cog-connected? sn))
+				(dflt-delete-rec ATOM)
+				(cog-extract-recursive! ATOM))))
 )
 
 ; --------------------------------------------------------------------

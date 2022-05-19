@@ -3,7 +3,7 @@
  *
  * Guile SMOB interface for opencog atoms and truth values.
  * This class implements the actual functions the guile shell invokes
- * when it sees the opencog-specific proceedures.
+ * when it sees the opencog-specific procedures.
  *
  * Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -53,16 +53,14 @@ class SchemeSmob
 {
 	friend class SchemeEval;
 	friend class PrimitiveEnviron;
-	template<typename R, typename T, class... Args> friend class SchemePrimitive;
-	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
-
+	template<class... Args> friend class SchemeArgConverters;
+	friend class SchemeReturnConverters;
 	friend class LoggerSCM;
 
 private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_AS,         // atom spaces
 		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
 	};
@@ -83,8 +81,9 @@ private:
 
 	static int print_misc(SCM, SCM, scm_print_state *);
 	static SCM equalp_misc(SCM, SCM);
-	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
+
+	static bool scm_is_protom(SCM);
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ValuePtr&);
@@ -99,13 +98,13 @@ private:
 	// Value, atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
 	static SCM ss_new_atom(SCM, SCM);
+	static SCM ss_new_ast(SCM, SCM);
+	static Handle h_from_ast(Type, bool, SCM);
 	static SCM ss_atom(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
 	static SCM ss_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
-	static SCM ss_delete(SCM, SCM);
-	static SCM ss_delete_recursive(SCM, SCM);
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_value_p(SCM);
@@ -113,6 +112,7 @@ private:
 	static SCM ss_node_p(SCM);
 	static SCM ss_link_p(SCM);
 	static SCM _radix_ten;
+	static SCM _alist;
 
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
@@ -141,10 +141,10 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
-	static SCM ss_incoming_set(SCM);
-	static SCM ss_incoming_size(SCM);
-	static SCM ss_incoming_by_type(SCM, SCM);
-	static SCM ss_incoming_size_by_type(SCM, SCM);
+	static SCM ss_incoming_set(SCM, SCM);
+	static SCM ss_incoming_size(SCM, SCM);
+	static SCM ss_incoming_by_type(SCM, SCM, SCM);
+	static SCM ss_incoming_size_by_type(SCM, SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
 	static SCM ss_outgoing_by_type(SCM, SCM);
 	static SCM ss_outgoing_atom(SCM, SCM);
@@ -178,11 +178,7 @@ private:
 	static SCM ss_as_mark_cow(SCM, SCM);
 	static SCM ss_as_cow_p(SCM);
 	static SCM make_as(AtomSpace *);
-	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);
-	static std::mutex as_mtx;
-	static std::map<AtomSpace*, int> deleteable_as;
-	static void as_ref_count(SCM, AtomSpace *);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
@@ -195,6 +191,7 @@ private:
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
+	static Handle set_values(const Handle&, AtomSpace*, SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
@@ -213,20 +210,22 @@ private:
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
+	static HandleSeq verify_handle_list_msg (SCM, const char*,
+	                                         int, const char*,  const char*);
 	static HandleSeq verify_handle_list (SCM, const char *,
-	                                               int pos = 1);
+	                                     int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
-	                                               int pos = 1);
+	                                              int pos = 1);
 	static std::vector<ValuePtr> verify_protom_list (SCM, const char *,
-	                                               int pos = 1);
+	                                                 int pos = 1);
 	static std::vector<std::string> verify_string_list (SCM, const char *,
-	                                               int pos = 1);
+	                                                    int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "integer");
-	static size_t verify_size (SCM, const char *, int pos = 1,
-	                           const char *msg = "size integer");
+	static size_t verify_size_t (SCM, const char *, int pos = 1,
+	                             const char *msg = "integer size_t");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);
@@ -242,11 +241,12 @@ public:
 	// This allows other users to get the atomspace that scheme is
 	// using.
 	static AtomSpace* ss_get_env_as(const char *);
-public:
-
-	// Utility printing functions
-	static std::string as_to_string(const AtomSpace *);
 };
+
+// This assumes that sizeof(ValuePtr) == 16. If it ever changes
+// to 24, then this macro has to be changed to SCM_SMOB_OBJECT_1_LOC
+// and if it ever gets larger than 24, then we are SOL.
+#define SCM_SMOB_VALUE_PTR_LOC(x) ((ValuePtr*) SCM_SMOB_OBJECT_2_LOC(x))
 
 /** @}*/
 } // namespace opencog

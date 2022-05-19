@@ -120,150 +120,6 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; A progress report utility.
-; The wraps the FUNC function, and prints a progress report MSG
-; every WHEN calls to FUNC.
-; FUNC should be the function to be called, taking one argument.
-; MSG should be a string of the form
-;    "Did ~A of ~A in ~A seconds (~A items/sec)\n"
-; WHEN should be how often to print (modulo)
-; TOTAL should be the total number of items to process.
-
-(define (make-progress-rpt FUNC WHEN TOTAL MSG)
-	(let ((func FUNC)
-			(when WHEN)
-			(total TOTAL)
-			(msg MSG)
-			(cnt 0)
-			(start-time 0))
-		(lambda (item)
-			; back-date to avoid divide-by-zero
-			(if (eqv? 0 cnt) (set! start-time (- (current-time) 0.00001)))
-			(func item)
-			(set! cnt (+ 1 cnt))
-			(if (eqv? 0 (modulo cnt when))
-				(let* ((elapsed (- (current-time) start-time))
-						(ilapsed (inexact->exact (round elapsed)))
-						(rate (/ (exact->inexact when) elapsed))
-						(irate (inexact->exact (round rate)))
-					)
-					(format #t msg cnt total ilapsed irate)
-					(set! start-time (current-time))))))
-)
-
-; ---------------------------------------------------------------------
-;
-(define-public (make-compute-freq LLOBJ)
-"
-  make-compute-freq LLOBJ
-
-  Extend the LLOBJ with additional methods to compute observation
-  frequencies and entropies for pairs, including partial-sum entropies
-  (mutual information) for the left and right side of each pair.
-  This will also cache the results of these computations in a
-  standardized location.
-
-  The LLOBJ must have valid left and right wild-card counts on it.
-  These need to have been previously computed, before methods on
-  this class are called.
-
-  Before using this class, the 'init-freq method must be called,
-  and it must be called *after* a valid wild-wild count is available.
-"
-	; We need 'left-basis, provided by add-pair-stars
-	; We need 'wild-wild-count, provided by add-support-api
-	; We need 'set-left-wild-freq, provided by add-pair-freq-api
-	(let ((llobj LLOBJ)
-			(supobj (add-support-api LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ))
-			(wldobj (add-pair-stars LLOBJ))
-			(tot-cnt #f))
-
-		(define (init)
-			(set! tot-cnt (supobj `wild-wild-count)))
-
-		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
-		; the frequency with which the pair (x,y) is observed. Return
-		; the frequency, or zero, if the pair was never observed.
-		(define (compute-pair-freq PAIR)
-			(/ (llobj 'get-count PAIR) tot-cnt))
-
-		; Compute the left-side wild-card frequency. This is the ratio
-		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
-		(define (compute-left-freq ITEM)
-			(/ (supobj 'left-count ITEM) tot-cnt))
-		(define (compute-right-freq ITEM)
-			(/ (supobj 'right-count ITEM) tot-cnt))
-
-		; Compute and cache the pair frequency.
-		; This returns the atom holding the cached count, thus
-		; making it convenient to persist (store) this cache in
-		; the database. It returns nil if the count was zero.
-		(define (cache-pair-freq PAIR)
-			(define freq (compute-pair-freq PAIR))
-			(if (< 0 freq)
-				(frqobj 'set-pair-freq PAIR freq)
-				'()))
-
-		; Compute and cache the left-side wild-card frequency.
-		; This is unconditional - even if the frequency is zero.
-		(define (cache-left-freq ITEM)
-			(frqobj 'set-left-wild-freq ITEM (compute-left-freq ITEM)))
-
-		(define (cache-right-freq ITEM)
-			(frqobj 'set-right-wild-freq ITEM (compute-right-freq ITEM)))
-
-		; Compute and cache all of the pair frequencies.
-		; This computes P(x,y) for all (x,y)
-		; This returns a count of the pairs.
-		; Also caches the total dimensions of the matrix.
-		(define (cache-all-pair-freqs)
-			(define cnt 0)
-			; The outer-loop.
-			(define (right-loop left-item)
-				(for-each
-					(lambda (pr)
-						(cache-pair-freq pr)
-						(set! cnt (+ cnt 1)))
-					(wldobj 'right-stars left-item)))
-
-			; par-for-each fails massively here in guile-2.9.2
-			(for-each right-loop (wldobj 'left-basis))
-
-			; Return the total.
-			cnt)
-
-		; Compute and cache all of the left-side frequencies.
-		; This computes P(*,y) for all y.
-		; par-for-each fails here in guile-2.9.2
-		(define (cache-all-left-freqs)
-			(for-each cache-left-freq (wldobj 'right-basis)))
-		(define (cache-all-right-freqs)
-			(for-each cache-right-freq (wldobj 'left-basis)))
-
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((init-freq)             (init))
-
-				((compute-pair-freq)     (apply compute-pair-freq args))
-				((compute-left-freq)     (apply compute-left-freq args))
-				((compute-right-freq)    (apply compute-right-freq args))
-
-				((cache-pair-freq)       (apply cache-pair-freq args))
-				((cache-left-freq)       (apply cache-left-freq args))
-				((cache-right-freq)      (apply cache-right-freq args))
-
-				((cache-all-pair-freqs)  (cache-all-pair-freqs))
-				((cache-all-left-freqs)  (cache-all-left-freqs))
-				((cache-all-right-freqs) (cache-all-right-freqs))
-
-				(else (apply llobj       (cons message args))))
-		))
-)
-
-; ---------------------------------------------------------------------
 ;
 ; Extend the LLOBJ with additional methods to compute the mutual
 ; information of all pairs; each pair is then tagged with the resulting
@@ -301,19 +157,7 @@
 			; progress stats
 			(define cnt-pairs (make-atomic-box 0))
 			(define cnt-lefties (make-atomic-box 0))
-
-			; Atomic increment of counter.
-			(define (atomic-inc ctr)
-				(define old (atomic-box-ref ctr))
-				(define new (+ 1 old))
-				(define swp (atomic-box-compare-and-swap! ctr old new))
-				(if (= old swp) new (atomic-inc ctr)))
-
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+			(define elapsed-secs (make-elapsed-secs))
 
 			(define cnt-start 0)
 			(define (elapsed-count cnt)
@@ -395,124 +239,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
-(define-public (make-store LLOBJ)
-"
-  make-store -- Extend the LLOBJ with additional methods to store
-  the left and right wild-card values. The primary utility of this
-  class is that it prints a progress report. Its really just a fancy
-  wrapper around store-atom, which does the actual work.
-
-  The provided methods are:
-  'store-left-marginals - Store all of the left (row) marginal atoms,
-       and all of the values attached to them. This also stores the
-       wild-wild atom as well.
-
-  'store-right-marginals - Store all of the right (column) marginal
-       atoms, and all of the values attached to them. This also stores
-       the wild-wild atom as well.
-
-  'store-wildcards - Store both left and right marginals.
-
-  'store-all-elts - Store all non-marginal matrix entries (and the
-       attached values, of course).
-
-  'store-all - Store everything pertaining to the matrix: the marginals,
-       the matrix entries, and any 'auxilliary' Atoms, if any (that is,
-       call the 'store-aux method on the LLOBJ).
-
-  'store-pairs - Store the provided list of Atoms.
-"
-	(define start-time (current-time))
-	(define (elapsed-secs)
-		(define diff (- (current-time) start-time))
-		(set! start-time (current-time))
-		diff)
-
-	(define (store-list XLATE all-atoms CNT MSG)
-		(define num-prs (length all-atoms))
-
-		; Create a wrapper around `store-atom` that prints a progress
-		; report.  The problem is that millions of pairs may need to be
-		; stored, and this just takes a long time.
-		(define store-rpt
-			(make-progress-rpt store-atom CNT num-prs
-				(string-append
-					"Stored ~A of ~A " MSG " in ~d secs (~A pairs/sec)\n")))
-
-		(define (xlate atom) (store-rpt (XLATE atom)))
-
-		; Reset the timer.
-		(elapsed-secs)
-
-		(maybe-par-for-each
-			(lambda (atom) (if (not (null? atom)) (xlate atom)))
-			all-atoms)
-
-		(format #t "Done storing ~A ~A in ~A secs\n"
-			num-prs MSG (elapsed-secs)))
-
-	; We need 'left-basis, provided by add-pair-stars
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ)))
-
-		; Store all the wild-card atoms; these are exactly the ones
-		; obtained from the object, via the left and right basis.
-		(define (store-left-wildcards)
-			; Store the wild-wild-card atom, first.
-			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
-			(store-list
-				(lambda (x) (llobj 'left-wildcard x))
-				(star-obj 'right-basis)
-				40000 "left-wilds"))
-
-		(define (store-right-wildcards)
-			; Store the wild-wild-card atom, first.
-			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
-			(store-list
-				(lambda (x) (llobj 'right-wildcard x))
-				(star-obj 'left-basis)
-				40000 "right-wilds"))
-
-		(define (store-all-wildcards)
-			(store-left-wildcards)
-			(store-right-wildcards))
-
-		; Store the list of given pairs.
-		(define (store-pairs all-pairs)
-			(store-list (lambda (x) x) all-pairs 100000 "pairs"))
-
-		; Store all elements in the matrix.
-		(define (store-all-elts)
-			(store-pairs (star-obj 'get-all-elts)))
-
-		; Store everything, including auxilliaries
-		(define (store-all)
-			(store-all-wildcards)
-			(store-all-elts)
-			; Not every LLOBJ will have a store-aux,
-			; so ignore any error from calling it.
-			(catch #t (lambda () (LLOBJ 'store-aux))
-				(lambda (key . args) #f))
-		)
-
-		; ------------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((store-left-marginals) (store-left-wildcards))
-				((store-right-marginals)(store-right-wildcards))
-				((store-wildcards)      (store-all-wildcards))
-				((store-all-elts)       (store-all-elts))
-				((store-pairs)          (apply store-pairs args))
-				((store-all)            (store-all))
-				(else                   (apply llobj (cons message args))))
-		))
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -555,12 +281,8 @@
   open database. If the optional argument DO-STORE is set to #f, then
   the storage will not be performed.
 "
-	(define overall-start-time (current-time))
-	(define start-time (current-time))
-	(define (elapsed-secs)
-		(define diff (- (current-time) start-time))
-		(set! start-time (current-time))
-		diff)
+	(define overall-time (make-elapsed-secs))
+	(define elapsed-secs (make-elapsed-secs))
 
 	; Decorate the object with methods that provide wild-cards.
 	; All the others get to work off of the basis cached by this one.
@@ -576,10 +298,7 @@
 	(define batch-mi-obj (make-batch-mi wild-obj))
 
 	; Define the object which will compute row and column subtotals.
-	(define subtotal-obj (add-subtotal-mi-compute wild-obj))
-
-	; Define the object which will compute total entropy and MI.
-	(define total-obj (add-total-entropy-compute wild-obj))
+	(define entropy-obj (add-entropy-compute wild-obj))
 
 	; Define the object which will roll up a summary of the supports.
 	(define central-obj (make-central-compute wild-obj))
@@ -611,7 +330,7 @@
 		((add-support-api OBJ) 'total-count-left)
 		((add-support-api OBJ) 'total-count-right))
 
-	; May as well get the support avarages out of the way, too.
+	; May as well get the support averages out of the way, too.
 	(central-obj 'cache-left)
 	(central-obj 'cache-right)
 
@@ -651,14 +370,14 @@
 	)
 
 	(display "Going to do column and row subtotals.\n")
-	(subtotal-obj 'cache-all-left-entropy)
-	(subtotal-obj 'cache-all-right-entropy)
-	(subtotal-obj 'cache-all-left-mi)
-	(subtotal-obj 'cache-all-right-mi)
+	(entropy-obj 'cache-all-left-entropy)
+	(entropy-obj 'cache-all-right-entropy)
+	(entropy-obj 'cache-all-left-mi)
+	(entropy-obj 'cache-all-right-mi)
 
 	(display "Going to compute the left, right and total entropy.\n")
-	(total-obj 'cache-entropy)
-	(total-obj 'cache-mi)
+	(entropy-obj 'cache-entropy)
+	(entropy-obj 'cache-mi)
 
 	(if DO-STORE (begin
 		(display "Done computing totals; start saving wildcards.\n")
@@ -666,7 +385,7 @@
 		(display "Done computing totals.\n"))
 
 	(format #t "Finished with MI computations; this took ~5f hours.\n"
-		(/ (- (current-time) overall-start-time) 3600.0))
+		(/ (overall-time) 3600.0))
 )
 
 ; ---------------------------------------------------------------------

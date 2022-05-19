@@ -58,13 +58,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;
-static inline PrenexLinkPtr PrenexLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PrenexLink>(h); }
-static inline PrenexLinkPtr PrenexLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<PrenexLink>(a); }
-
-#define createPrenexLink std::make_shared<PrenexLink>
+LINK_PTR_DECL(PrenexLink)
+#define createPrenexLink CREATE_DECL(PrenexLink)
 
 /** @}*/
 }

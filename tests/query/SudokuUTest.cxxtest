@@ -31,7 +31,7 @@ using namespace opencog;
 class SudokuPuzzle :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace* as;
+		AtomSpacePtr as;
 		SchemeEval* eval;
 
 	public:
@@ -42,7 +42,7 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			logger().set_print_to_stdout_flag(true);
 #include "test-types.cc"
 
-			as = new AtomSpace();
+			as = createAtomSpace();
 			eval = new SchemeEval(as);
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -52,7 +52,6 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 		~SudokuPuzzle()
 		{
 			delete eval;
-			delete as;
 
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())

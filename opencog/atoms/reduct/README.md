@@ -39,7 +39,7 @@ you to about 20K formulas/second.  The code here is much faster.
 Although multiplying numbers here is 100x faster than calling the guile
 or cython interpreters, it is also 100x slower than native CPU insns.
 In some future implementation, the formulas would be compiled down to
-bytecode of some kind. Maybe the JVM, but maybe also GNU Lightening.
+bytecode of some kind. Maybe the JVM, but maybe also GNU Lightning.
 
 The code here also implements term reduction. It is very ad-hoc. It
 works, it's awkward, its hard to write, its not easy to extend. The

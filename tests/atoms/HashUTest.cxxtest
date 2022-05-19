@@ -31,8 +31,8 @@
 
 using namespace opencog;
 
-#define an _as.add_node
-#define al _as.add_link
+#define an _asp->add_node
+#define al _asp->add_link
 
 // Test Atom::compute_hash(), in particular whether 2 different atoms
 // have different hashes. Atom hash collisions are impossible to
@@ -41,11 +41,11 @@ using namespace opencog;
 class HashUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 
 public:
-	HashUTest() : _eval(&_as)
+	HashUTest() : _asp(createAtomSpace()), _eval(_asp)
 	{
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);

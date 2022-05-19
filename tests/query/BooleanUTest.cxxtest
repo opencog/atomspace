@@ -30,7 +30,7 @@ using namespace opencog;
 class BooleanUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 
 		Handle clauses, implicand, his_a, hberlin, hcity;
 
@@ -70,11 +70,10 @@ class BooleanUTest :  public CxxTest::TestSuite
 
 void BooleanUTest::tearDown(void)
 {
-	delete as;
 }
 void BooleanUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 
 	// Create a clauses and implicand links that will be tested.
 	clauses =

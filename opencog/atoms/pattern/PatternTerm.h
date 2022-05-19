@@ -121,6 +121,10 @@ protected:
 	// In general, these bridge across components.
 	bool _is_virtual;
 
+	// This term is the IdenticalLink (or can be treated as an
+	// IdenticalLink). This can be used as a transitive assignment.
+	bool _is_identical;
+
 	// True if any pattern subtree rooted in this tree node contains
 	// an unordered link. Trees without any unordered links can be
 	// searched in a straight-forward manner; those with them need to
@@ -151,9 +155,10 @@ protected:
 	// interpretation; it can also be an OR_LINK when that OR_LINK
 	// is in a boolean evaluatable context.
 	bool _is_choice;
+	bool _has_choice;
 
 	// True if this is a term that must be present in every successful
-	// patten grounding. There are no groundings at all, unless this
+	// pattern grounding. There are no groundings at all, unless this
 	// term is in each and every one of them. This corresponds to
 	// the ALWAYS_LINK in the default interpretation.
 	bool _is_always;
@@ -191,19 +196,20 @@ public:
 	bool isQuoted() const { return _quotation.is_quoted(); }
 
 	void markLiteral();
-	bool isLiteral() const { return _is_literal; }
+	bool isLiteral() const noexcept { return _is_literal; }
 
 	void markPresent();
-	bool isPresent() const { return _is_present; }
+	bool isPresent() const noexcept { return _is_present; }
 
 	void markAbsent();
-	bool isAbsent() const { return _is_absent; }
+	bool isAbsent() const noexcept { return _is_absent; }
 
 	void markChoice();
-	bool isChoice() const { return _is_choice; }
+	bool isChoice() const noexcept { return _is_choice; }
+	bool hasChoice() const noexcept { return _has_choice; }
 
 	void markAlways();
-	bool isAlways() const { return _is_always; }
+	bool isAlways() const noexcept { return _is_always; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
@@ -222,10 +228,19 @@ public:
 	void markVirtual();
 	bool isVirtual() const noexcept { return _is_virtual; }
 
+	void markIdentical();
+	bool isIdentical() const noexcept { return _is_identical; }
+
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
 	bool isUnorderedLink() const noexcept { return _handle->is_unordered_link(); }
 	bool isLink() const noexcept { return _handle->is_link(); }
+
+	bool contained_in(const std::vector<PatternTermPtr>& vect) {
+		for (const PatternTermPtr& itm : vect)
+			if (itm->_handle == _handle) return true; // XXX maybe quote?
+		return false;
+	}
 
 	bool operator==(const PatternTerm&);
 

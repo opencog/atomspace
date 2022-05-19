@@ -47,6 +47,7 @@ static std::string server_prt_link(const Handle& h)
 
 static std::string server_prt_atom(const Handle& h)
 {
+	if (ATOM_SPACE == h->get_type()) return h->to_string();
 	if (h->is_node()) return server_prt_node(h);
 	return server_prt_link(h);
 }
@@ -98,12 +99,6 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 	switch (misctype)
 	{
-		case COG_AS:
-		{
-			std::string str(as_to_string((AtomSpace *) SCM_SMOB_DATA(node)));
-			scm_remember_upto_here_1(node);
-			return str;
-		}
 		case COG_LOGGER:
 		{
 			std::string str(logger_to_string((Logger *) SCM_SMOB_DATA(node)));

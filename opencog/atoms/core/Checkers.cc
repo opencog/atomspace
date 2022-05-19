@@ -50,7 +50,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
-		// Checking has to be defered until runtime.
+		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
 		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
@@ -60,13 +60,15 @@ bool check_evaluatable(const Handle& bool_atom)
 		// Allow conjunction, disjunction and negation of
 		// predicates. Since it cannot inherit from EVALUATABLE_LINK
 		// (cause it's a Node) we have to add it here.
-		if (PREDICATE_NODE == t) continue;
+		if (h->is_type(PREDICATE_NODE)) continue;
 
 		// Allow conjunction, disjunction and negation of concepts as
 		// well, in that case these are interpreted as intersection,
 		// union and complement. Since it cannot inherit from
 		// EVALUATABLE_LINK (cause it's a Node) we have to add it here.
-		if (CONCEPT_NODE == t) continue;
+		// XXX FIXME, this is to be removed, because UnionLink,
+		// IntersectionLink takes the place of OrLink, AndLink.
+		if (h->is_type(CONCEPT_NODE)) continue;
 
 		// Fucking quote links. I hate those with a passion.
 		if (QUOTE_LINK == t) continue;
@@ -76,14 +78,16 @@ bool check_evaluatable(const Handle& bool_atom)
 		// Equivalence, Inheritance, Similarity and their subtypes is
 		// currently required by PLN for higher order reasoning. We may
 		// want to forbid it in the future by maybe introducing a
-		// specialized operator to explicitely map the higher order into
+		// specialized operator to explicitly map the higher order into
 		// the lower order but as of today it is required.
-		if (h->is_type(INHERITANCE_LINK) or
-		    h->is_type(SIMILARITY_LINK) or
-		    h->is_type(IMPLICATION_LINK) or
-		    h->is_type(EQUIVALENCE_LINK) or
+		// XXX FIXME ... Perhaps IntersectionLink, UnionLink will
+		// resolve this?
+		if (h->is_type(SIMILARITY_LINK) or
 		    h->is_type(MEMBER_LINK))
 			continue;
+
+		// This is used by PLN to avoid type-checking.
+		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
 	}
@@ -98,9 +102,9 @@ bool check_numeric(const Handle& bool_atom)
 		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
-		// Checking has to be defered until runtime.
+		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
-		if (GET_LINK == t) continue;
+		if (h->is_type(SATISFYING_LINK)) continue;
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
 		if (VARIABLE_NODE == t) continue;
@@ -145,6 +149,6 @@ bool check_type_ctors(const Handle& bool_atom)
 static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(BOOLEAN_LINK, check_evaluatable);
-	classserver().addValidator(NUMERIC_LINK, check_numeric);
+	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
 	classserver().addValidator(TYPE_INPUT_LINK, check_type_ctors);
 }

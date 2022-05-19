@@ -37,53 +37,11 @@
 #include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
-
-//! Atom flag
-#define FETCHED_RECENTLY        1  //BIT0
-#define MARKED_FOR_REMOVAL      2  //BIT1
-// #define MULTIPLE_TRUTH_VALUES   4  //BIT2
-// #define FIRED_ACTIVATION        8  //BIT3
-// #define HYPOTETHICAL_FLAG       16 //BIT4
-// #define REMOVED_BY_DECAY        32 //BIT5
-#define CHECKED                 64  //BIT6
 
 //#define DPRINTF printf
 #define DPRINTF(...)
 
 #undef Type
-
-namespace std {
-
-// The hash of a weak pointer is just the atom type. Actually,
-// it *has* to be the atom type, as otherwise the hash buckets
-// won't be correct, and getIncomingByType() will fail to be fast.
-opencog::Type
-hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
-{
-    opencog::Handle h(w.lock());
-    if (nullptr == h) return 0;
-    return h->get_type();
-}
-
-bool
-equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
-                                       const opencog::WinkPtr& rw) const noexcept
-{
-    opencog::Handle hl(lw.lock());
-    opencog::Handle hr(rw.lock());
-    return hl == hr;  /* hang on, should this be content-compare??? */
-}
-
-#if 0
-// Overloading operator<< for Incoming Set
-ostream& operator<<(ostream& out, const opencog::IncomingSet& iset)
-{
-    return out << opencog::oc_to_string(iset);
-}
-#endif
-
-} // namespace std
 
 namespace opencog {
 
@@ -94,15 +52,13 @@ Atom::~Atom()
     // Disable for now. This assert has never tripped; there
     // seems to be no point to checking it.
 #if 0
-    if (0 < getIncomingSetSize()) {
-        // This can't ever possibly happen. If it does, then there is
-        // some very sick bug with the reference counting that the
-        // shared pointers are doing. (Or someone explcitly called the
-        // destructor! Which they shouldn't do.)
-        OC_ASSERT(0 == getIncomingSet().size(),
-             "Atom deletion failure; incoming set not empty for %s h=%x",
-             nameserver().getTypeName(_type).c_str(), get_hash());
-    }
+    // This can't ever possibly happen. If it does, then there is
+    // some very sick bug with the reference counting that the
+    // shared pointers are doing. (Or someone explcitly called the
+    // destructor! Which they shouldn't do.)
+    OC_ASSERT(0 == getIncomingSet().size(),
+         "Atom deletion failure; incoming set not empty for %s h=%x",
+         nameserver().getTypeName(_type).c_str(), get_hash());
 #endif
     drop_incoming_set();
 }
@@ -134,13 +90,6 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
     setValue (truth_key(), ValueCast(newTV));
-
-    // Do not emit signals. This does nothing at all except damage
-    // performance. No one uses this stuff.
-    //if (_atom_space != nullptr) {
-    //    TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
-    //    tvch.emit(get_handle(), oldTV, newTV);
-    //}
 }
 
 TruthValuePtr Atom::getTruthValue() const
@@ -160,7 +109,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	// then load-from-file and load-from-network breaks.
 	if (key != truth_key() and *key == *truth_key())
 	{
-		std::lock_guard<std::mutex> lck(_mtx);
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[truth_key()] = value;
 		else
@@ -168,7 +117,7 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	}
 	else
 	{
-		std::lock_guard<std::mutex> lck(_mtx);
+		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
 			_values[key] = value;
 		else
@@ -196,13 +145,13 @@ ValuePtr Atom::getValue(const Handle& key) const
     // then load-from-file and load-from-network breaks.
     if ((key != truth_key()) and (*key == *truth_key()))
     {
-        std::lock_guard<std::mutex> lck(_mtx);
+        KVP_SHARED_LOCK;
         auto pr = _values.find(truth_key());
         if (_values.end() != pr) pap = pr->second;
     }
     else
     {
-        std::lock_guard<std::mutex> lck(_mtx);
+        KVP_SHARED_LOCK;
         auto pr = _values.find(key);
         if (_values.end() != pr) pap = pr->second;
     }
@@ -212,7 +161,7 @@ ValuePtr Atom::getValue(const Handle& key) const
 HandleSet Atom::getKeys() const
 {
     HandleSet keyset;
-    std::lock_guard<std::mutex> lck(_mtx);
+    KVP_SHARED_LOCK;
     for (const auto& pr : _values)
         keyset.insert(pr.first);
 
@@ -226,6 +175,12 @@ void Atom::copyValues(const Handle& other)
     {
         setValue(k, other->getValue(k));
     }
+}
+
+void Atom::clearValues(void)
+{
+    KVP_UNIQUE_LOCK;
+    _values.clear();
 }
 
 /**
@@ -255,32 +210,53 @@ std::string Atom::valuesToString() const
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
-    return (_flags & MARKED_FOR_REMOVAL) != 0;
+    return _marked_for_removal.load();
 }
 
-void Atom::unsetRemovalFlag(void)
+bool Atom::unsetRemovalFlag(void)
 {
-    _flags &= ~MARKED_FOR_REMOVAL;
+    return _marked_for_removal.exchange(false);
 }
 
-void Atom::markForRemoval(void)
+bool Atom::markForRemoval(void)
 {
-    _flags |= MARKED_FOR_REMOVAL;
+    return _marked_for_removal.exchange(true);
 }
 
 bool Atom::isChecked() const
 {
-    return (_flags & CHECKED) != 0;
+    return _checked.load();
 }
 
-void Atom::setChecked(void)
+bool Atom::setChecked(void)
 {
-    _flags |= CHECKED;
+    return _checked.exchange(true);
 }
 
-void Atom::setUnchecked(void)
+bool Atom::setUnchecked(void)
 {
-    _flags &= ~CHECKED;
+    return _checked.exchange(false);
+}
+
+bool Atom::isAbsent() const
+{
+    return _absent.load();
+}
+
+/// Marking an Atom as being absent makes it invisible, as if it
+/// were deleted. We reclaim the "impossible-to-access" storage on
+/// it, as well. (Is this really needed? I dunno. Seems like a good
+/// idea.)
+bool Atom::setAbsent(void)
+{
+    KVP_UNIQUE_LOCK;
+    _values.clear();
+    return _absent.exchange(true);
+}
+
+bool Atom::setPresent(void)
+{
+    return _absent.exchange(false);
 }
 
 // ==============================================================
@@ -299,13 +275,14 @@ void Atom::setAtomSpace(AtomSpace *tb)
     _atom_space = tb;
 }
 
-AtomTable* Atom::getAtomTable() const
-{
-    return &(_atom_space->_atom_table);
-}
-
 // ==============================================================
 // Incoming set stuff
+
+#if USE_BARE_BACKPOINTER
+	#define GET_PTR(a) a.const_atom_ptr()
+#else // USE_BARE_BACKPOINTER
+	#define GET_PTR(a) a
+#endif // USE_BARE_BACKPOINTER
 
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
@@ -319,6 +296,7 @@ AtomTable* Atom::getAtomTable() const
 /// tracking it.
 void Atom::keep_incoming_set()
 {
+    INCOMING_UNIQUE_LOCK;
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
 }
@@ -329,7 +307,7 @@ void Atom::keep_incoming_set()
 void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
     // _incoming_set->_iset.clear();
     _incoming_set = nullptr;
 }
@@ -338,7 +316,7 @@ void Atom::drop_incoming_set()
 void Atom::insert_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 
     Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
@@ -348,7 +326,7 @@ void Atom::insert_atom(const Handle& a)
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
     }
-    bucket->second.insert(a);
+    bucket->second.insert(GET_PTR(a));
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
@@ -359,14 +337,23 @@ void Atom::insert_atom(const Handle& a)
 void Atom::remove_atom(const Handle& a)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
     Type at = a->get_type();
-    auto bucket = _incoming_set->_iset.find(at);
-    if (bucket != _incoming_set->_iset.end())
-        bucket->second.erase(a);
+
+    const auto bucket = _incoming_set->_iset.find(at);
+
+    OC_ASSERT(bucket != _incoming_set->_iset.end(), "No bucket!");
+    size_t erc = bucket->second.erase(GET_PTR(a));
+
+    // std::set is a "true set", in that it either contains something,
+    // or it does not.  Therefore, the erase count is either 1 (the
+    // atom was found and erased) or 0 (the atom was not found, that's
+    // because it was erased earlier, e.g. it had more than once in the
+    // outgoing set. All other erase counts are ... unexpected.
+    OC_ASSERT(2 > erc, "Unexpected erase count!");
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -375,14 +362,14 @@ void Atom::remove_atom(const Handle& a)
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
     if (nullptr == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_mtx);
+    INCOMING_UNIQUE_LOCK;
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
     Type ot = old->get_type();
     auto bucket = _incoming_set->_iset.find(ot);
-    bucket->second.erase(old);
+    bucket->second.erase(GET_PTR(old));
 
     Type nt = neu->get_type();
     bucket = _incoming_set->_iset.find(nt);
@@ -392,7 +379,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
                    std::make_pair(nt, WincomingSet()));
         bucket = pr.first;
     }
-    bucket->second.insert(neu);
+    bucket->second.insert(GET_PTR(neu));
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
@@ -402,27 +389,58 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
 void Atom::install() {}
 void Atom::remove() {}
 
-size_t Atom::getIncomingSetSize(AtomSpace* as) const
+bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
+{
+    if (nullptr == _incoming_set) return true;
+
+    INCOMING_SHARED_LOCK;
+
+    for (const auto& bucket : _incoming_set->_iset)
+    {
+        for (const WinkPtr& w : bucket.second)
+        {
+            WEAKLY_DO(l, w, { if (not as or as->in_environ(l)) return false; })
+        }
+    }
+    return true;
+}
+
+size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    std::lock_guard<std::mutex> lck (_mtx);
-
-    size_t cnt = 0;
     if (as)
     {
-        const AtomTable *atab = &as->get_atomtable();
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            INCOMING_SHARED_LOCK;
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            return hs.size();
+        }
+
+        size_t cnt = 0;
+        INCOMING_SHARED_LOCK;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle l(w.lock());
-                if (l and atab->in_environ(l)) cnt++;
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
             }
         }
         return cnt;
     }
 
+    size_t cnt = 0;
+    INCOMING_SHARED_LOCK;
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
@@ -432,77 +450,111 @@ size_t Atom::getIncomingSetSize(AtomSpace* as) const
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet(AtomSpace* as) const
+IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            INCOMING_SHARED_LOCK;
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+
+            // Use lookupHandle to find the shallowest copy.
+            IncomingSet iset;
+            for (const Handle& h: hs)
+                iset.push_back(as->lookupHandle(h));
+            return iset;
+        }
+
         // Prevent update of set while a copy is being made.
-        std::lock_guard<std::mutex> lck (_mtx);
+        INCOMING_SHARED_LOCK;
         IncomingSet iset;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle l(w.lock());
-                if (l and atab->in_environ(l))
-                    iset.emplace_back(l);
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
             }
         }
         return iset;
     }
 
     // Prevent update of set while a copy is being made.
-    std::lock_guard<std::mutex> lck (_mtx);
+    INCOMING_SHARED_LOCK;
     IncomingSet iset;
     for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
         {
-            Handle l(w.lock());
-            if (l) iset.emplace_back(l);
+            WEAKLY_DO(l, w, { iset.emplace_back(l); });
         }
     }
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, AtomSpace* as) const
+IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
     // Lock to prevent updates of the set of atoms.
-    std::lock_guard<std::mutex> lck(_mtx);
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
 
-    IncomingSet result;
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+
+            // Use lookupHandle to find the shallowest copy.
+            IncomingSet iset;
+            for (const Handle& h: hs)
+                iset.push_back(as->lookupHandle(h));
+            return iset;
+        }
+
+        IncomingSet result;
         for (const WinkPtr& w : bucket->second)
         {
-            Handle l(w.lock());
-            if (l and atab->in_environ(l))
-                result.emplace_back(l);
+            WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
         }
         return result;
     }
 
+    IncomingSet result;
     for (const WinkPtr& w : bucket->second)
     {
-        Handle l(w.lock());
-        if (l) result.emplace_back(l);
+        WEAKLY_DO(l, w, { result.emplace_back(l); })
     }
     return result;
 }
 
-size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
+size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
-    std::lock_guard<std::mutex> lck(_mtx);
+    INCOMING_SHARED_LOCK;
 
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return 0;
@@ -510,19 +562,30 @@ size_t Atom::getIncomingSetSizeByType(Type type, AtomSpace* as) const
     size_t cnt = 0;
 
     if (as) {
-        const AtomTable *atab = &as->get_atomtable();
+        // If the _copy_on_write flag is set, we need to
+        // deduplicate the incoming set.
+        if (as->get_copy_on_write())
+        {
+            HandleSet hs;
+            for (const auto& bucket : _incoming_set->_iset)
+            {
+                for (const WinkPtr& w : bucket.second)
+                {
+                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+                }
+            }
+            return hs.size();
+        }
         for (const WinkPtr& w : bucket->second)
         {
-            Handle l(w.lock());
-            if (l and atab->in_environ(l)) cnt++;
+            WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
         }
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
     {
-        Handle l(w.lock());
-        if (l) cnt++;
+        WEAKLY_DO(l, w, { cnt++; })
     }
     return cnt;
 }
@@ -531,7 +594,7 @@ std::string Atom::id_to_string() const
 {
     std::stringstream ss;
     ss << "[" << std::hex << get_hash() << "][";
-    if (_atom_space) ss << _atom_space->_atom_table.get_uuid();
+    if (_atom_space) ss << _atom_space->get_uuid();
     else ss << "-1";
     ss << "]";
     return ss.str();

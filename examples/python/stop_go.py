@@ -29,7 +29,7 @@ log.info("Starting the stop-go demo")
 
 # The atomspace where everything will live.
 atomspace = AtomSpace()
-set_type_ctor_atomspace(atomspace)
+set_default_atomspace(atomspace)
 
 
 # The callback counts the number fo red and green lights.
@@ -98,5 +98,6 @@ satisfaction_handle = SatisfactionLink(
 # Perform the actual satisfiability search.
 result = execute_atom(atomspace, satisfaction_handle)
 
+print("Satisfaction query result:", result)
 print("Number of green lights:",  green)
 print("Number of red lights:",  red)

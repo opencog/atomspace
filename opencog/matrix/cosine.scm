@@ -2,7 +2,7 @@
 ; cosine.scm
 ;
 ; Define API for computing the cosine and jaccard distances between two
-; rows or columns of a sparse matrix.
+; rows or columns of a sparse matrix. See also `group-similarity.scm`.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -18,10 +18,10 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-pair-cosine-compute LLOBJ
+(define*-public (add-similarity-compute LLOBJ
 	#:optional (GET-CNT 'get-count))
 "
-  add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
+  add-similarity-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products, cosine angles and jaccard distances between two
   rows or columns of the LLOBJ sparse matrix.
 
@@ -50,21 +50,87 @@
       left-length(y) = sqrt sum_x N(x,y) N(x,y)
                      = sqrt left-prod(y,y)
 
-  Jaccard:
-  --------
-  The Jaccard similarity can be defined as one minus the Jaccard
-  similarity, which is defined as
+  Jaccard (Ruzicka):
+  ------------------
+  The (weighted) Jaccard similarity, also called the Ruzicka similarity,
+  is defined as
 
-      left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
-               sum_x max (N(x,y), N(x,z))
+      left-jacc-sim(a,b) = sum_x min (N(x,a), N(x,b)) /
+               sum_x max (N(x,a), N(x,b))
 
-  Overlap:
-  --------
+  The (weighted) Jaccard distance is defined as one minus the above.
+
+  The above is not an appropriate distance to use when N is an
+  observation count. For example, suppose that N(x,b) was a constant
+  multiple of N(x,a). The above formula would judge these two vectors
+  as being dis-similar, even though for most applications, scaling by
+  a constant would be considered to be irrelevant.
+
+  By default, the value used for N(x,a) is provided by the 'get-count
+  method. It can be over-ridden with the GET-COUNT method.
+
+  Note: The API methods return the distance, not the similarity!
+
+  Conditional Jaccard:
+  --------------------
+  The Jaccard distance gives an awkward result if the two count vectors
+  are colinear but of different lengths. For most problems considered
+  here, colinear count vectors should be considered to be equal. Thus,
+  a normalized version is defined below. The normalization is to use
+  the conditional probability instead of the count. (Normalization by
+  Euclidean length does not make sense for counts).
+
+  The conditional probability is then defined as
+       p(x|a) = N(x,a) / N(*,a)
+
+  The conditional similarity is defined as
+
+      left-cond-jacc-sim(a,b) = sum_x min (p(x|a), p(x|b)) /
+               sum_x max (p(x|a), p(x|b))
+
+  The distance is one minus the similarity; the methods return the
+  distance, not the similarity!
+
+  Probability Jaccard:
+  --------------------
+  The above conditional form of the similarity is not quite appropriate
+  for true probabilities: it exhibits some discontinuities and
+  non-uniformities. The reciprocal of a sum over reciprocals provides
+  the ideal, maximally consistent form (according to Wikipedia.)
+
+  The Proability-Jaccard distance can be defined as one minus the
+  Probability-Jaccard similarity. The later is defined as
+
+      left-prjacc-sim(a,b) = sum_x
+             [sum_y max {N(y,a)/N(x,a), N(y,b)/N(x,b) }]^-1
+         = sum_x
+             [sum_y max {p(y|a)/p(x|a), p(y|b)/p(x|b) }]^-1
+
+  Note the x sum is a sum over reciprocals of a sum.  This form is
+  discussed in greater detail in Wikipedia; it has the advantage of
+  providing 'maximally consistent sampling'. Its appropriate for the
+  case where the counts really are meant to be interpreted as providing
+  probabilistic frequencies.
+
+  The implementation provided here is rather slow, as it does not make
+  use of cached values. In particular, is is a LOT slower than any of
+  the other methods, especially when the vectors are large.
+
+  The distance is one minus the similarity; the methods return the
+  distance, not the similarity!
+
+  Overlap (Jaccard):
+  ------------------
   The overlap similarity simply counts how many common non-zero entries
   are shared in common between two rows or columns.  That is, it is
 
       left-overlap(y,z) = sum_x (0 < N(x,y)) * (0 < N(x,z)) /
                sum_x (0 < N(x,y) + N(x,z))
+
+  It is the same thing as the (unweighted) Jaccard similarity, where each
+  point is given exactly the same weight (zero or non-zero). That is,
+  the overlap similarity is the same thing as the original, simplest
+  definition of the Jaccard distance.
 
   Arguments:
   ----------
@@ -86,7 +152,7 @@
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj  (add-support-compute star-obj GET-CNT))
 			(prod-obj  (add-support-compute
-				(add-tuple-math star-obj * GET-CNT)))
+				(add-fast-math star-obj * GET-CNT)))
 			(min-obj   (add-support-compute
 				(add-tuple-math star-obj min GET-CNT)))
 			(max-obj   (add-support-compute
@@ -94,7 +160,7 @@
 			(either-obj   (add-support-compute
 				(add-tuple-math star-obj either GET-CNT)))
 			(both-obj   (add-support-compute
-				(add-tuple-math star-obj both GET-CNT)))
+				(add-fast-math star-obj both GET-CNT)))
 		)
 
 		; -------------
@@ -148,6 +214,33 @@
 		)
 
 		; -------------
+		; Return the conditional jaccard distance
+		; IDX is a row or a column
+		; METH is either 'left-count or 'right-count
+		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		(define (compute-cond-jacc-dist IDX-A IDX-B METH)
+			(define osum-A (/ 1.0 (supp-obj METH IDX-A)))
+			(define osum-B (/ 1.0 (supp-obj METH IDX-B)))
+			(define (pmin x y)
+				(min (* x osum-A) (* y osum-B)))
+			(define (pmax x y)
+				(max (* x osum-A) (* y osum-B)))
+			(define pmin-obj (add-support-compute
+				(add-tuple-math star-obj pmin GET-CNT)))
+			(define pmax-obj (add-support-compute
+				(add-tuple-math star-obj pmax GET-CNT)))
+			(define j-min (pmin-obj METH (list IDX-A IDX-B)))
+			(define j-max (pmax-obj METH (list IDX-A IDX-B)))
+			(- 1.0 (/ j-min j-max))
+		)
+
+		(define (compute-left-cond-jacc-dist COL-A COL-B)
+			(compute-cond-jacc-dist COL-A COL-B 'left-count))
+
+		(define (compute-right-cond-jacc-dist ROW-A ROW-B)
+			(compute-cond-jacc-dist ROW-A ROW-B 'right-count))
+
+		; -------------
 		; Return the left-overlap similarity
 		(define (compute-left-overlap-sim COL-A COL-B)
 			(define left-eith (either-obj 'left-count (list COL-A COL-B)))
@@ -163,6 +256,48 @@
 		)
 
 		; -------------
+		; Return the probability-jaccard distance
+		; IDX is a row or a column
+		; METH is either 'left-count or 'right-count
+		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		(define (compute-prob-jaccard-dist IDX-A IDX-B METH)
+
+			; Given weights `weig-a` and `weig-b` take the sum of the
+			; maxes of the two rows, weighted by the weights.
+			(define (weighted-max weig-a weig-b)
+				(define (wmax a b)
+					(max (* a weig-a) (* b weig-b)))
+				(define wmax-obj
+					(add-support-compute
+						(add-tuple-math star-obj wmax GET-CNT)))
+				(wmax-obj METH (list IDX-A IDX-B)))
+
+			; Given two numbers, compute the denominator of the
+			; prob-jaccard sum. The tuple math object iterates
+			; over the union, so we have to manually reject counts
+			; where one is zero (i.e. to get the intersection)
+			(define (denom na nb)
+				(if (and (< 0.0 na) (< 0.0 nb))
+					(/ 1.0 (weighted-max (/ 1.0 na) (/ 1.0 nb)))
+					0.0))
+
+			; Use the tuple math object to run over both rows
+			(define pjac-obj
+				(add-support-compute
+					(add-tuple-math star-obj denom GET-CNT)))
+
+			(- 1.0 (pjac-obj METH (list IDX-A IDX-B)))
+		)
+
+		; Return the left-probability-jaccard distance
+		(define (compute-left-prob-jaccard-dist COL-A COL-B)
+			(compute-prob-jaccard-dist COL-A COL-B 'left-count))
+
+		; Return the right-probability-jaccard distance
+		(define (compute-right-prob-jaccard-dist COL-A COL-B)
+			(compute-prob-jaccard-dist COL-A COL-B 'right-count))
+
+		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -172,6 +307,10 @@
 				((right-cosine)    (apply compute-right-cosine args))
 				((left-jaccard)    (apply compute-left-jaccard-dist args))
 				((right-jaccard)   (apply compute-right-jaccard-dist args))
+				((left-prjaccard)  (apply compute-left-prob-jaccard-dist args))
+				((right-prjaccard) (apply compute-right-prob-jaccard-dist args))
+				((left-cond-jacc)  (apply compute-left-cond-jacc-dist args))
+				((right-cond-jacc) (apply compute-right-cond-jacc-dist args))
 				((left-overlap)    (apply compute-left-overlap-sim args))
 				((right-overlap)   (apply compute-right-overlap-sim args))
 				(else              (apply LLOBJ (cons message args))))

@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_HEAVISIDE_LINK_H
 #define _OPENCOG_HEAVISIDE_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 
 namespace opencog
 {
@@ -22,7 +22,7 @@ namespace opencog
  * than" on a component-by-component level. That is,
  *    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
  */
-class HeavisideLink : public FunctionLink
+class HeavisideLink : public NumericFunctionLink
 {
 protected:
 	void init(void);
@@ -40,13 +40,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<HeavisideLink> HeavisideLinkPtr;
-static inline HeavisideLinkPtr HeavisideLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<HeavisideLink>(a); }
-static inline HeavisideLinkPtr HeavisideLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<HeavisideLink>(a); }
-
-#define createHeavisideLink std::make_shared<HeavisideLink>
+LINK_PTR_DECL(HeavisideLink)
+#define createHeavisideLink CREATE_DECL(HeavisideLink)
 
 /** @}*/
 }

@@ -40,7 +40,7 @@ namespace opencog
 /// The FreeVariables struct defines a list of free, untyped variables
 /// "unbundled" from the hypergraph in which they normally occur. The
 /// goal of this structure is to make it easier and faster to work with
-/// VariableNodes in C++; specifically, to find thier locations within
+/// VariableNodes in C++; specifically, to find their locations within
 /// a hypergraph, and to perform beta-substitution (to substitute a
 /// argument for the variable).  This class implements the data that is
 /// used by FreeLink to work with free variables.
@@ -75,24 +75,24 @@ struct FreeVariables : Replacement
 	bool is_identical(const FreeVariables& other) const;
 
 	/// Return true if variable `var` is in this variableset.
-	bool is_in_varset(const Handle& v) const;
+	bool varset_contains(const Handle& var) const;
 
 	/// Return true if all variables within the given range is in
 	/// varset.
 	template<typename It>
-	bool are_in_varset(It from, It to) const {
+	bool varset_includes(It from, It to) const {
 		return std::all_of(from, to, [&](const Handle& v)
-		                   { return is_in_varset(v); });
+		                   { return varset_contains(v); });
 	}
 	template <typename C>
-	bool are_in_varset(const C& c) const {
-		return are_in_varset(c.begin(), c.end());
+	bool varset_includes(const C& c) const {
+		return varset_includes(c.begin(), c.end());
 	}
 
 	/// Create an ordered set of the free variables in the given body.
 	///
 	/// By "ordered set" it is meant: a list of variables in a
-	/// cannonical order that is compatible with alpha-equivalence. So
+	/// canonical order that is compatible with alpha-equivalence. So
 	/// that if variables are renamed the order will not be altered in
 	/// a way that modifies the semantics of the scope.
 	///

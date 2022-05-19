@@ -130,7 +130,7 @@ MapLink::MapLink(const HandleSeq&& oset, Type t)
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
 /// If a variable in `termpat` corresponds with a variable in `ground`,
-/// then add that correspondance pair to `valmap`. Type-checking is
+/// then add that correspondence pair to `valmap`. Type-checking is
 /// performed during the match-up, so if the variable type does not
 /// match the ground type, false is returned.  False is also returned
 /// if the trees miscompare in other ways (mismatched link arity,

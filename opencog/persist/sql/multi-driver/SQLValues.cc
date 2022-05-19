@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <iomanip>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -71,16 +73,27 @@ std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
 
 std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
 {
+	const char delim {'\\'};
+	const char escape {'\\'};
 	bool not_first = false;
-	std::string str = "\'{";
+	std::stringstream ss;
+	ss << "E\'{";
 	for (const std::string& v : svle->value())
 	{
-		if (not_first) str += ", ";
+		if (not_first) ss << ", ";
 		not_first = true;
-		str += v;
+
+		// Ugh. Escape the quotes, and then double the backslashes.
+		// I tried to use postgres double-dollar escapes, but could
+		// not get it to work.
+		std::stringstream esc, bak;
+		esc << std::quoted(v);
+		bak << std::quoted(esc.str(), delim, escape);
+		std::string backback = bak.str();
+		ss << backback.substr(1, backback.length()-2);
 	}
-	str += "}\'";
-	return str;
+	ss << "}\'";
+	return ss.str();
 }
 
 std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
@@ -184,7 +197,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
-	UUID kuid;
+	UUID kuid = TLB::INVALID_UUID;
 	{
 		// We must make sure the key is in the database BEFORE it
 		// is used in any valuation; else a 'foreign key constraint'
@@ -192,11 +205,26 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		// the store completes, before some other thread gets its
 		// fingers on the key.
 		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
-		kuid = check_uuid(key);
+		try {
+			kuid = check_uuid(key);
+		} catch (const NotFoundException& ex) {}
 		if (TLB::INVALID_UUID == kuid)
 		{
 			do_store_atom(key);
-			kuid = get_uuid(key);
+			kuid = check_uuid(key);
+		}
+	}
+
+	UUID auid = TLB::INVALID_UUID;
+	{
+		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+		try {
+			auid = check_uuid(atom);
+		} catch (const NotFoundException& ex) {}
+		if (TLB::INVALID_UUID == auid)
+		{
+			do_store_atom(atom);
+			auid = check_uuid(atom);
 		}
 	}
 
@@ -204,7 +232,6 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
 	char aidbuff[BUFSZ];
-	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted first,
@@ -239,6 +266,35 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
+	else
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// Store the Atom first.
+		Handle vato = HandleCast(pap);
+		UUID uuid = TLB::INVALID_UUID;
+		{
+			std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+			try {
+				uuid = check_uuid(vato);
+			} catch (const NotFoundException& ex) {}
+			if (TLB::INVALID_UUID == uuid)
+			{
+				do_store_atom(vato);
+				uuid = check_uuid(vato);
+			}
+		}
+
+		// Double-duty -- re-use the linkvalue field for solo atoms.
+		// This is kind-of cheating but I don't want to change
+		// the table schema.
+		char uidbuff[BUFSZ];
+		snprintf(uidbuff, BUFSZ, "\'{%lu}\'", uuid);
+		STMT("linkvalue", uidbuff);
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"Unsupported value type=%d %s", vtype,
+			nameserver().getTypeName(vtype).c_str());
 
 	std::string insert = cols + vals + coda;
 
@@ -298,6 +354,35 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
+	else
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// Store the Atom first.
+		Handle vato = HandleCast(pap);
+		UUID uuid = TLB::INVALID_UUID;
+		{
+			std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+			try {
+				uuid = check_uuid(vato);
+			} catch (const NotFoundException& ex) {}
+			if (TLB::INVALID_UUID == uuid)
+			{
+				do_store_atom(vato);
+				uuid = check_uuid(vato);
+			}
+		}
+
+		// Double-duty -- re-use the linkvalue field for solo atoms.
+		// This is kind-of cheating but I don't want to change
+		// the table schema.
+		char uidbuff[BUFSZ];
+		snprintf(uidbuff, BUFSZ, "\'{%lu}\'", uuid);
+		STMT("linkvalue", uidbuff);
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"Unsupported value type=%d %s", vtype,
+			nameserver().getTypeName(vtype).c_str());
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
@@ -333,34 +418,58 @@ ValuePtr SQLAtomStorage::doGetValue(const char * buff)
 /// fetch is performed.
 ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 {
-	// Convert from databasse type to C++ runtime type
+	// Convert from database type to C++ runtime type
 	Type vtype = loading_typemap[rp.vtype];
 
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
+	// or, when there are embeddd quotes:
+	// {aaa,"bb\"bb\"bb","ccc\"{,}\"ccc ccc"}
 	// Split it along the commas.
 	if (vtype == STRING_VALUE)
 	{
 		std::vector<std::string> strarr;
 		char *s = strdup(rp.strval);
-		char *p = s;
+		char* p = s;
 		if (p and *p == '{') p++;
 		while (p)
 		{
-			if (*p == '}' or *p == '\0') break;
-			// String terminates at comma or close-brace.
-			char * c = strchr(p, ',');
-			if (c) *c = 0;
-			else c = strchr(p, '}');
-			if (c) *c = 0;
+			if ('}' == *p or '\0' == *p) break;
 
-			// Wipe out quote marks
-			if (*p == '"') p++;
-			if (c and *(c-1) == '"') *(c-1) = 0;
+			// Advance past escaped quotes.
+			if ('"' == *p)
+			{
+				p++;
+				char* a = p;
+				char* q = p;
+				while (true)
+				{
+					if ('"' == *p and '\\' != *(p-1)) break;
+					*q = *p;
+					p++;
+					// Drop backslashes
+					if ('\\' != *q or '"' != *p) q++;
+				}
+				*q = 0;
+				strarr.emplace_back(a);
+				p++;
+				if (',' == *p) p++;
+			}
+			else
+			{
+				// String terminates at comma or close-brace.
+				char * c = strchr(p, ',');
+				if (c) *c = 0;
+				else c = strchr(p, '}');
+				if (c) *c = 0;
+				else
+					throw IOException(TRACE_INFO,
+						"Malformed value list=%s", s);
 
-			strarr.emplace_back(p);
-			p = c;
-			p++;
+				strarr.emplace_back(p);
+				p = c;
+				p++;
+			}
 		}
 		free(s);
 		return createStringValue(strarr);
@@ -399,6 +508,13 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 			if (*p == '}' or *p == '\0') break;
 			VUID vu = atol(p);
 			ValuePtr pap = getValue(vu);
+
+			// XXX FIXME. If the VUID is an Atom, and that Atom was
+			// deleted, then pap will be a nullptr. This invalidates
+			// the whole thing, so we return null. it would be nice
+			// if there was some more cnsistent way to handle this...
+			if (nullptr == pap) return nullptr;
+
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -406,7 +522,36 @@ ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 		return createLinkValue(lnkarr);
 	}
 
-	throw IOException(TRACE_INFO, "Unexpected value type=%d", rp.vtype);
+	// Well, it could be an atom!
+	if (nameserver().isA(vtype, ATOM))
+	{
+		// We are storing atom UUID's in the linkvalue field.
+		// Yes this is a cheat ...
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		UUID uid = atol(p);
+
+		// Perhaps we have it already!?
+		Handle h(_tlbuf.getAtom(uid));
+		if (h) return h;
+
+		PseudoPtr psu(petAtom(uid));
+
+		// XXX FIXME. If the Atom was deleted, then we've got
+		// a dangling reference to it, that we cannot resolve.
+		// This is actually a bug in the deletion code, but it
+		// is painful to fix. Given that it's been 5+ years,
+		// and no one has tripped over this before, I'm just
+		// gonna punt on this. Look at deleteSingleAtom() for
+		// more info.
+		if (nullptr == psu) return nullptr;
+
+		Handle ha(get_recursive_if_not_exists(psu));
+		return ha;
+	}
+
+	throw IOException(TRACE_INFO,
+		"Unexpected value type=%d->%d", rp.vtype, vtype);
 	return nullptr;
 }
 
@@ -474,6 +619,44 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	rp.table = nullptr;
 	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
 	rp.atom = nullptr;
+}
+
+void SQLAtomStorage::loadValue(const Handle& atom, const Handle& key)
+{
+	rethrow();
+	if (nullptr == atom) return;
+	try
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+			get_uuid(key), get_uuid(atom));
+
+		Response rp(conn_pool);
+		rp.exec(buff);
+
+		rp.store = this;
+		rp.atom = atom;
+		rp.table = nullptr;
+		rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
+		rp.atom = nullptr;
+	}
+	catch (const NotFoundException& ex) {}
+}
+
+void SQLAtomStorage::storeValue(const Handle& atom, const Handle& key)
+{
+	rethrow();
+	if (nullptr == atom) return;
+
+	ValuePtr pap = atom->getValue(key);
+	if (nullptr == pap)
+	{
+		deleteValuation(key, atom);
+		return;
+	}
+
+	storeValuation(key, atom, pap);
 }
 
 /* ============================= END OF FILE ================= */

@@ -72,7 +72,7 @@ class GenericEval
 		}
 
 		/**
-		 * Return true if an error occured during the evaluation of the expression
+		 * Return true if an error occurred during the evaluation of the expression
 		 */
 		virtual bool eval_error(void)
 		{

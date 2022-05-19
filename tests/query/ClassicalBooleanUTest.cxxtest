@@ -34,7 +34,7 @@ using namespace opencog;
 class ClassicalBooleanUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -46,14 +46,13 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(false);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~ClassicalBooleanUTest()
 	{
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -117,7 +116,7 @@ void ClassicalBooleanUTest::test_double_clause(void)
 /*
  * Test negative single-clause boolean constructions.
  * These have no positive clauses, and so should return the empty set.
- * Unlike the above, the universe is never exampled.
+ * Unlike the above, the universe is never examined.
  */
 void ClassicalBooleanUTest::test_single_clause(void)
 {

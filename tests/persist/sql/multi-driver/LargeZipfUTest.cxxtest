@@ -22,8 +22,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
-#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -61,23 +61,10 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		void tearDown(void);
 		void kill_data(void);
 
-		void friendlyFailMessage()
-		{
-			TS_FAIL("The LargeZipfTest failed.\n"
-				"This is probably because you do not have SQL installed\n"
-				"or configured the way that OpenCog expects.\n\n"
-				"SQL persistance is optional for OpenCog, so if you don't\n"
-				"want it or need it, just ignore this test failure.\n"
-				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
-				"and create/configure the SQL database as described there.\n"
-				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
-				"to indicate the location of your database. If this is\n"
-				"done correctly, then this test will pass.\n");
-			exit(1);
-		}
+#include "friendly-fail.h"
 
 		int filler_up(AtomSpace *);
-		void fetch_space(AtomSpace *);
+		void fetch_space(AtomSpace *, StorageNodePtr);
 		void check_space(AtomSpace *, std::string dbgmsg);
 		void check_empty(AtomSpace *);
 		void atomCompare(AtomPtr, AtomPtr, std::string);
@@ -89,28 +76,11 @@ class LargeZipfTest :  public CxxTest::TestSuite
 
 LargeZipfTest:: LargeZipfTest(void)
 {
-	try
-	{
-		config().load("atomspace-test.conf");
-	}
-	catch (RuntimeException &e)
-	{
-		std::cerr << e.get_message() << std::endl;
-	}
 	// logger().set_level(Logger::DEBUG);
 	logger().set_level(Logger::INFO);
 	logger().set_print_to_stdout_flag(true);
 
-	try {
-		// Get the database logins & etc from the config file.
-		dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
-		username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
-		passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
-	}
-	catch (InvalidParamException &e)
-	{
-		friendlyFailMessage();
-	}
+	getDBconfig();
 }
 
 /*
@@ -138,8 +108,8 @@ void LargeZipfTest::kill_data(void)
 #if HAVE_PGSQL_STORAGE
 	if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
-	SQLAtomStorage* astore = new SQLAtomStorage();
-	astore->open(uri);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
+	astore->open();
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -205,20 +175,20 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 // ============================================================
 
-void LargeZipfTest::fetch_space(AtomSpace *space)
+void LargeZipfTest::fetch_space(AtomSpace* space, StorageNodePtr store)
 {
 	for (int w=0; w<NWORDS; w++)
 	{
 		Handle h = space->add_node(hword[w]->get_type(),
 		                  std::move(std::string(hword[w]->get_name())));
-		space->fetch_atom(h); // get the TV
+		store->fetch_atom(h); // get the TV
 	}
 
 	for (int p=0; p<npairs; p++)
 	{
 		Handle h = space->add_link(hpair[p]->get_type(),
 		                  std::move(HandleSeq(hpair[p]->getOutgoingSet())));
-		space->fetch_atom(h); // get the TV
+		store->fetch_atom(h); // get the TV
 	}
 }
 
@@ -336,15 +306,15 @@ void LargeZipfTest::do_test_atomspace(void)
 
 	kill_data();
 
-	SQLPersistSCM* _pm = new SQLPersistSCM(_as);
-	TSM_ASSERT("Persist Module not loaded", _pm);
+	Handle hsn = _as->add_node(POSTGRES_STORAGE_NODE, std::string(uri));
+	StorageNodePtr store = StorageNodeCast(hsn);
 
 	try {
-		_pm->do_open(uri);
+		store->open();
 	}
 	catch (RuntimeException &e)
 	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		logger().info("setUp: SQL cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	};
@@ -356,26 +326,34 @@ void LargeZipfTest::do_test_atomspace(void)
 	check_space(_as, "verify-add");
 
 	/* Push all atoms out to the SQL DB */
-	_as->store_atomspace();
+	store->store_atomspace();
 
 	/* Extract atoms from the AtomSpace. This does not delete them from
 	 * the SQL storage, though; to do that, they must be deleted, not
 	 * extracted.
 	 */
-	_as->barrier();
+	store->barrier();
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
+	/* The clear above removed the node. Lets add it back in. */
+	hsn = _as->add_atom(hsn);
+	store = StorageNodeCast(hsn);
+
 	/* Verify that the atoms can still be fetched from storage. */
-	fetch_space(_as);
+	fetch_space(_as, store);
 	check_space(_as, "verify-fetch");
 
 	/* Do it again, for good luck.  */
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
+	/* The clear above removed the node. Lets add it back in. */
+	hsn = _as->add_atom(hsn);
+	store = StorageNodeCast(hsn);
+
 	/* Verify that the atoms can still be fetched from storage. */
-	fetch_space(_as);
+	fetch_space(_as, store);
 	check_space(_as, "ver-again");
 
 	/* Kill data for good */
@@ -387,9 +365,8 @@ void LargeZipfTest::do_test_atomspace(void)
 	check_empty(_as);
 
 	/* Orderly shutdown avoids warning in Postgres log file. */
-	_pm->do_close();
+	store->close();
 
-	delete _pm;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

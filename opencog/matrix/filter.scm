@@ -76,6 +76,11 @@
 
   The RENAME argument should be #f or #t, it is used to determine how
   other API's generate predicate keys to obtain values.
+
+  The filtered matrix may contain empty rows or columns! This can
+  occur when the PAIR-PRED removes everything in a row or column,
+  but the other predicates do not. These can be removed by applying
+  the `add-zero-filter` object afterwards.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis #f)
@@ -85,7 +90,7 @@
 			(all-elts #f)
 		)
 
-		; Cache the result of filtering basuis elements
+		; Cache the result of filtering basis elements
 		(define cache-left-pred (make-afunc-cache LEFT-BASIS-PRED))
 		(define cache-right-pred (make-afunc-cache RIGHT-BASIS-PRED))
 
@@ -115,6 +120,17 @@
 		(define (get-right-size)
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
+
+		; Invalidate all the caches, and pass the clober down to the
+		; stars.
+		(define (clobber)
+			(stars-obj 'clobber)
+			(set! l-basis #f)
+			(set! r-basis #f)
+			(set! l-size 0)
+			(set! r-size 0)
+			(set! all-elts #f)
+		)
 
 		; ---------------
 		; Return only those duals that pass the cutoffs.
@@ -226,6 +242,7 @@
 				((left-duals)       cache-left-duals)
 				((right-duals)      cache-right-duals)
 				((get-all-elts)     get-all-elts)
+				((clobber)          clobber)
 				(else               (LLOBJ 'provides meth))))
 
 		; -------------
@@ -246,6 +263,7 @@
 				((get-count)        (apply get-count args))
 				((get-pair-count)   (apply get-pair-count args))
 				((get-all-elts)     (get-all-elts))
+				((clobber)          (clobber))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 
@@ -266,7 +284,7 @@
 				; Or any of the various subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!"
-						 message))))
+						message))))
 		)))
 
 ; ---------------------------------------------------------------------
@@ -340,6 +358,12 @@
 			LEFT-CUT RIGHT-CUT PAIR-CUT))
 
 	; ---------------
+	; Filtering will fail, if the support has not been computed yet.
+	; Check this now, and throw an error in this situation. Accessing
+	; the total will cause an error to be throw, with a helpful message.
+	(sup-obj 'total-support-left)
+
+	; ---------------
 	(add-generic-filter stars-obj
 		left-basis-pred right-basis-pred pair-pred id-str RENAME)
 )
@@ -376,7 +400,7 @@
   recompute new values and marginals for the filtered matrix, then
   set RENAME to #t.
 
-  Precise defintion: Let FMI(x,y) be the (fractional) mutual
+  Precise definition: Let FMI(x,y) be the (fractional) mutual
   information for the pair (x,y) (as returned by the 'pair-fmi method
   on the `add-pair-freq-api` object.)  Pairs are not reported in the
   'left-stars and 'right-stars methods when FMI(x,y) <= FMI-CUT.

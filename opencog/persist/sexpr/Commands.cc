@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include <functional>
+#include <iomanip>
 #include <string>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -37,12 +38,53 @@
 
 using namespace opencog;
 
+/// The cogserver provides a network API to send/receive Atoms over
+/// the internet. The actual API is that of the StorageNode (see the
+/// wiki page https://wiki.opencog.org/w/StorageNode for details.)
+/// The cogserver supports the full `StorageNode` API, and it uses
+/// the code in this directory in order to make it fast.
+///
+/// To aid in performance, a very special set of about 15 scheme
+/// functions have been hard-coded in C++, in the static function
+/// `Commands::interpret_command()` below.  The goal is to avoid the
+/// overhead of entry/exit into guile. This works because the cogserver
+/// is guaranteed to send only these commands, and no others.
+//
+
+Commands::Commands(void)
+{
+	_multi_space = false;
+}
+
+Commands::~Commands()
+{
+}
+
+/// Search for optional AtomSpace argument in `cmd` at `pos`.
+/// If none is found, then return `as`
+AtomSpace*
+Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
+{
+	if (not _multi_space) return as;
+
+	pos = cmd.find_first_not_of(" \n\t", pos);
+	if (0 == cmd.compare(pos, 10, "(AtomSpace"))
+	{
+		_multi_space = true;
+		Handle hasp = Sexpr::decode_frame(
+			HandleCast(top_space), cmd, pos, _space_map);
+		return (AtomSpace*) hasp.get();
+	}
+	return as;
+}
+
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
-	// are collisions, pre-pent the paren, post-pend the space.)
+	// are collisions, pre-pend the paren, post-pend the space.)
+	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
 	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
@@ -57,6 +99,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
+	static const size_t dfine = std::hash<std::string>{}("define");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
@@ -79,6 +122,14 @@ std::string Commands::interpret_command(AtomSpace* as,
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
 	// -----------------------------------------------
+	// (cog-atomspace)
+	if (space == act)
+	{
+		if (not top_space) return "()\n";
+		return top_space->to_string("");
+	}
+
+	// -----------------------------------------------
 	// (cog-atomspace-clear)
 	if (clear == act)
 	{
@@ -92,20 +143,20 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (cache == act)
 	{
 		pos = epos + 1;
-		Handle query = Sexpr::decode_atom(cmd, pos);
+		Handle query = Sexpr::decode_atom(cmd, pos, _space_map);
 		query = as->add_atom(query);
-		Handle key = Sexpr::decode_atom(cmd, ++pos);
+		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
 		key = as->add_atom(key);
 
 		bool force = false;
 		pos = cmd.find_first_of('(', pos);
 		if (std::string::npos != pos)
 		{
-			Handle meta = Sexpr::decode_atom(cmd, pos);
+			Handle meta = Sexpr::decode_atom(cmd, pos, _space_map);
 			meta = as->add_atom(meta);
 
 			// XXX Hacky .. store time in float value...
-			query->setValue(meta, createFloatValue((double)time(0)));
+			as->set_value(query, meta, createFloatValue((double)time(0)));
 			if (std::string::npos != cmd.find("#t", pos))
 				force = true;
 		}
@@ -120,7 +171,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			return "#f\n";
 
 		rslt = query->execute();
-		query->setValue(key, rslt);
+		as->set_value(query, key, rslt);
 
 		return Sexpr::encode_value(rslt);
 	}
@@ -130,7 +181,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (extra == act)
 	{
 		pos = epos + 1;
-		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 		if (nullptr == h) return "#t\n";
 		if (as->extract_atom(h, false)) return "#t\n";
 		return "#f\n";
@@ -141,7 +192,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (recur == act)
 	{
 		pos = epos + 1;
-		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 		if (nullptr == h) return "#t\n";
 		if (as->extract_atom(h, true)) return "#t\n";
 		return "#f\n";
@@ -159,11 +210,16 @@ std::string Commands::interpret_command(AtomSpace* as,
 		if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
 			get_subtypes = true;
 
+		// as = get_opt_as(cmd, pos, as);
+
 		std::string rv = "(";
-		HandleSet hset;
-		as->get_handleset_by_type(hset, t, get_subtypes);
+		HandleSeq hset;
+		if (_multi_space and top_space)
+			top_space->get_handles_by_type(hset, t, get_subtypes);
+		else
+			as->get_handles_by_type(hset, t, get_subtypes);
 		for (const Handle& h: hset)
-			rv += Sexpr::encode_atom(h);
+			rv += Sexpr::encode_atom(h, _multi_space);
 		rv += ")";
 		return rv;
 	}
@@ -173,8 +229,11 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incty == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 		Type t = Sexpr::decode_type(cmd, pos);
+
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSetByType(t))
@@ -189,7 +248,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (incom == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
 		std::string alist = "(";
 		for (const Handle& hi : h->getIncomingSet())
 			alist += Sexpr::encode_atom(hi);
@@ -203,7 +264,10 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (keys == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+		as = get_opt_as(cmd, pos, as);
+		h = as->add_atom(h);
+
 		std::string alist = "(";
 		for (const Handle& key : h->getKeys())
 		{
@@ -225,9 +289,11 @@ std::string Commands::interpret_command(AtomSpace* as,
 		Handle h;
 		if (node == act)
 		{
-			pos = cmd.find('"', pos+1) + 1;
-			size_t nos = cmd.find('"', pos);
-			h = as->get_node(t, cmd.substr(pos, nos-pos));
+			size_t l = pos+1;
+			size_t r = cmd.size();
+			std::string name = Sexpr::get_node_name(cmd, l, r, t);
+			as = get_opt_as(cmd, r, as);
+			h = as->get_node(t, std::move(name));
 		}
 		else
 		if (link == act)
@@ -241,13 +307,15 @@ std::string Commands::interpret_command(AtomSpace* as,
 				size_t r1 = r;
 				Sexpr::get_next_expr(cmd, l1, r1, 0);
 				if (l1 == r1) break;
-				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0));
+				outgoing.push_back(Sexpr::decode_atom(cmd, l1, r1, 0, _space_map));
 				l = r1 + 1;
+				pos = r1;
 			}
+			as = get_opt_as(cmd, pos, as);
 			h = as->get_link(t, std::move(outgoing));
 		}
 		if (nullptr == h) return "()\n";
-		return Sexpr::encode_atom(h);
+		return Sexpr::encode_atom(h, _multi_space);
 	}
 
 	// -----------------------------------------------
@@ -255,39 +323,54 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (stval == act)
 	{
 		pos = epos + 1;
-		Handle atom = Sexpr::decode_atom(cmd, pos);
-		atom = as->add_atom(atom);
-		Handle key = Sexpr::decode_atom(cmd, ++pos);
-		key = as->add_atom(key);
+		Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
+		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
 		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+
+		as = get_opt_as(cmd, pos, as);
+		atom = as->add_atom(atom);
+		key = as->add_atom(key);
 		if (vp)
 			vp = Sexpr::add_atoms(as, vp);
-		atom->setValue(key, vp);
+		as->set_value(atom, key, vp);
 		return "()\n";
 	}
 
 	// -----------------------------------------------
-	// (cog-set-values! (Concpet "foo")
-	//     (list (cons (Predicate "bar") (stv 0.9 0.8)) ...))
+	// (cog-set-values! (Concept "foo") (AtomSpace "foo")
+	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
 	if (svals == act)
 	{
 		pos = epos + 1;
-		Handle h = as->add_atom(Sexpr::decode_atom(cmd, pos));
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 		pos++; // skip past close-paren
+
+		if (not _multi_space)
+		{
+			// Search for optional AtomSpace argument
+			as = get_opt_as(cmd, pos, as);
+			h = as->add_atom(h);
+		}
 		Sexpr::decode_slist(h, cmd, pos);
+
 		return "()\n";
 	}
 
 	// -----------------------------------------------
 	// (cog-set-tv! (Concept "foo") (stv 1 0))
+	// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
 	if (settv == act)
 	{
 		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos);
+		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
+
+		// Search for optional AtomSpace argument
+		as = get_opt_as(cmd, pos, as);
+
 		Handle ha = as->add_atom(h);
 		if (nullptr == ha) return "()\n"; // read-only atomspace.
-		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
-		ha->setTruthValue(TruthValueCast(tv));
+		as->set_truthvalue(ha, TruthValueCast(tv));
 		return "()\n";
 	}
 
@@ -296,15 +379,45 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (value == act)
 	{
 		pos = epos + 1;
-		Handle atom = Sexpr::decode_atom(cmd, pos);
+		Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
 		atom = as->add_atom(atom);
-		Handle key = Sexpr::decode_atom(cmd, ++pos);
+		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
 		key = as->add_atom(key);
 
 		ValuePtr vp = atom->getValue(key);
 		return Sexpr::encode_value(vp);
 	}
 
+	// -----------------------------------------------
+	// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
+	// Place the current atomspace at the bottom of the hierarchy.
+	if (dfine == act)
+	{
+		_multi_space = true;
+
+		// Extract the symbolic name after the define
+		pos = cmd.find_first_not_of(" \n\t", epos);
+		epos = cmd.find_first_of(" \n\t", pos);
+		// std::string sym = cmd.substr(pos, epos-pos);
+
+		pos = epos+1;
+
+		// Decode the AtomSpace frames
+		AtomSpacePtr asp(AtomSpaceCast(as));
+		Handle hasp = Sexpr::decode_frame(
+			HandleCast(asp), cmd, pos, _space_map);
+		top_space = AtomSpaceCast(hasp);
+
+		// Hacky...
+		// _space_map.insert({sym, top_space});
+
+		return "()\n";
+	}
+
+	// -----------------------------------------------
+
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());
 }
+
+// ===================================================================

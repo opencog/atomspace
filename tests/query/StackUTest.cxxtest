@@ -34,7 +34,7 @@ using namespace opencog;
 class StackUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		Handle svar, wvar;
 		Handle p1, p2;
 		Handle anch;
@@ -124,11 +124,10 @@ class TestPMCB :
 #define al as->add_link
 void StackUTest::tearDown(void)
 {
-	delete as;
 }
 void StackUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 
 	// Create an implication link that will be tested.
 	p1 = al(ORDERED_LINK,
@@ -189,7 +188,7 @@ void StackUTest::test_stack(void)
 	preds.push_back(p1);
 	preds.push_back(p2);
 
-	TestPMCB pmcb(as);
+	TestPMCB pmcb(as.get());
 	pmcb.anch = anch;
 	match(pmcb, vars, preds);
 

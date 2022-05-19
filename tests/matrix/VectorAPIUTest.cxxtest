@@ -35,7 +35,7 @@ using namespace std;
 class VectorAPIUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -62,6 +62,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 
 	void test_basic(void);
 	void test_marginals(void);
+	void test_fast(void);
 	void test_cosines(void);
 	void xtest_dynamic(void);
 	void test_fold(void);
@@ -88,12 +89,15 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
 	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
 
+#define CHKCMP(MSG,X,Y) \
+	CHKFLT(MSG, X, atof(Y.c_str()))
+
 /*
  * This is called once before each test, for each test (!!)
  */
 void VectorAPIUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
@@ -135,7 +139,7 @@ void VectorAPIUTest::test_basic(void)
 	CHKERR;
 
 	std::string tru = eval->eval("(eq? 'WordNode (bapi 'left-type))");
-	printf ("Got >>>%s", tru.c_str());
+	printf ("L Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval("(eq? 'WordNode (bapi 'right-type))");
@@ -149,8 +153,8 @@ void VectorAPIUTest::test_basic(void)
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval(
-		"(equal? 3.0 (bapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
-	printf ("Got >>>%s", tru.c_str());
+		"(equal? 3.0 (sapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
+	printf ("P Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -397,6 +401,65 @@ void VectorAPIUTest::test_marginals(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 #endif // HAVE_SQL_STORAGE
+}
+
+// ====================================================================
+
+void VectorAPIUTest::test_fast(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num, nut, nuf;
+	num = eval->eval("(cosi 'right-product (Word \"table\") (Word \"dog\"))");
+	nut = eval->eval("(prod-t 'right-count (list (Word \"table\") (Word \"dog\")))");
+	nuf = eval->eval("(prod-f 'right-count (list (Word \"table\") (Word \"dog\")))");
+
+	CHKCMP("tuple-product(table,dog)", num, nut);
+	CHKCMP("fast-product (table,dog)", num, nuf);
+	// --------------
+
+	num = eval->eval("(cosi 'right-product (Word \"chicken\") (Word \"dog\"))");
+	nut = eval->eval("(prod-t 'right-count (list (Word \"chicken\") (Word \"dog\")))");
+	nuf = eval->eval("(prod-f 'right-count (list (Word \"chicken\") (Word \"dog\")))");
+
+	CHKCMP("tuple-product(chicken,dog)", num, nut);
+	CHKCMP("fast-product (chicken,dog)", num, nuf);
+	// --------------
+
+	num = eval->eval("(cosi 'right-product (Word \"table\") (Word \"chicken\"))");
+	nut = eval->eval("(prod-t 'right-count (list (Word \"table\") (Word \"chicken\")))");
+	nuf = eval->eval("(prod-f 'right-count (list (Word \"table\") (Word \"chicken\")))");
+
+	CHKCMP("tuple-product(table,chicken)", num, nut);
+	CHKCMP("fast-product (table,chicken)", num, nuf);
+	// --------------
+
+#define LEFT_PROD(A,B)\
+	num = eval->eval("(cosi 'left-product (Word \"" A "\") (Word \"" B "\"))");\
+	nut = eval->eval("(prod-t 'left-count (list (Word \"" A "\") (Word \"" B "\")))");\
+	nuf = eval->eval("(prod-f 'left-count (list (Word \"" A "\") (Word \"" B "\")))");\
+	CHKCMP("tuple-product(" A "," B ")", num, nut);\
+	CHKCMP("fast-product (" A "," B ")", num, nuf);
+
+	LEFT_PROD("wings", "wings")
+	LEFT_PROD("wings", "eyes")
+	LEFT_PROD("wings", "legs")
+	LEFT_PROD("wings", "snouts")
+
+	LEFT_PROD("eyes", "eyes")
+	LEFT_PROD("eyes", "legs")
+	LEFT_PROD("eyes", "snouts")
+
+	LEFT_PROD("legs", "legs")
+	LEFT_PROD("legs", "snouts")
+
+	LEFT_PROD("snouts", "snouts")
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ====================================================================

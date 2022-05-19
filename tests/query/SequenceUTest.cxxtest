@@ -30,7 +30,7 @@ using namespace opencog;
 class SequenceUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -39,14 +39,13 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~SequenceUTest()
 	{
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -93,7 +92,7 @@ void SequenceUTest::test_sequence(void)
 		caught_exception = true;
 	}
 	TS_ASSERT_EQUALS(true, caught_exception);
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 
 	// This should not throw any exceptions.
 	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (traffic-lights))");

@@ -19,7 +19,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <iomanip>
+
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 // Installed into opencog/persist/file/fast_load.h
 // but this wants the source location, not the install.
@@ -38,17 +42,20 @@ public:
         logger().set_print_to_stdout_flag(true);
     }
 
-    void setUp() {}
+    void setUp() { _as.clear(); }
 
     void tearDown() {}
 
     void test_expr_parse();
+    void test_quoted_node();
     void test_pattern_parse();
     void test_dense_parse();
     void test_dense_loop();
     void test_value();
     void test_value_mix();
     void test_null_value();
+    void test_escapes();
+    void test_stv_in_middle();
 };
 
 // Test parseExpression
@@ -62,6 +69,28 @@ void FastLoadUTest::test_expr_parse()
 
     TS_ASSERT_EQUALS(5, _as.get_size());
     TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test parseExpression
+void FastLoadUTest::test_quoted_node()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::stringstream ss;
+    ss << "(Concept " << std::quoted(R"("f""o"""o"!!!"")") << ")";
+    std::string in = ss.str();
+    printf("Input string %s\n", in.c_str());
+
+    Handle h = parseExpression(in, _as);
+    printf("Parsed Atom h=%s\n", h->to_short_string().c_str());
+
+    Handle expected = _as.get_node(CONCEPT_NODE, R"("f""o"""o"!!!"")");
+    TS_ASSERT (expected != nullptr);
+
+    printf("Got %s\n", expected->to_short_string().c_str());
+    TS_ASSERT_EQUALS(h, expected);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -217,6 +246,96 @@ void FastLoadUTest::test_null_value()
 
     TS_ASSERT_EQUALS(vp, nullptr);
     TS_ASSERT_EQUALS(pos, 2);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test parseExpression
+void FastLoadUTest::test_escapes()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in = R"((List (Concept "Zek.\\") (Concept "Planet")))";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    Handle h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(3, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\n\r\a\b\"") (Concept "Planet")))";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(5, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\t\v\f\"") (Concept "Planet"))   )";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(7, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\"\b\a\"") (Concept "Planet")); backspace bell)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(9, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\t;;(\a)\"") (Concept "Planet")) ; what)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(11, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    in = R"((List (Concept "Zek.\\;\"\t\"\b\a\"") (Concept "Planet")) (Concept "more") ; more more)";
+    printf("Going to parse >>%s<<\n", in.c_str());
+
+    h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(12, _as.get_size());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, h->get_type());
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// agi-bio apparently places stv's in the moddle of links
+// test fix for issue #2847
+void FastLoadUTest::test_stv_in_middle()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string in =
+        "(Implication (stv 0.9 1)"
+        "   (Concept \"f3\" (stv 0.4 1))"
+        "   (Concept \"f4\" (stv 0.3 1)))";
+
+    Handle h = parseExpression(in, _as);
+
+    TS_ASSERT_EQUALS(3, _as.get_size());
+    TS_ASSERT_EQUALS(2, h->getOutgoingSet().size());
+
+    // Verify the right TV was extracted.
+    TruthValuePtr stv = h->getTruthValue();
+    TruthValuePtr estv = createSimpleTruthValue(0.9, 1);
+    TS_ASSERT (*stv == *estv);
+
+    HandleSeq oset = h->getOutgoingSet();
+    TS_ASSERT_EQUALS(oset[0]->get_type(), CONCEPT_NODE);
+    TS_ASSERT_EQUALS(oset[1]->get_type(), CONCEPT_NODE);
+
+    estv = createSimpleTruthValue(0.4, 1);
+    TS_ASSERT (*estv == *oset[0]->getTruthValue());
+
+    estv = createSimpleTruthValue(0.3, 1);
+    TS_ASSERT (*estv == *oset[1]->getTruthValue());
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -23,6 +23,8 @@
  */
 
 #include <sstream>
+#include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/Atom.h>
 #include "Quotation.h"
 
 namespace opencog {
@@ -70,10 +72,60 @@ void Quotation::update(Type t)
 	_local_quote = is_unquoted and LOCAL_QUOTE_LINK == t;
 
 	// Increment or decrement quotation level if locally unquoted
-	if (is_locally_unquoted) {
+	if (is_locally_unquoted)
+	{
 		if (QUOTE_LINK == t) _quotation_level++;
-	    else if (UNQUOTE_LINK == t) _quotation_level--;
+		else if (UNQUOTE_LINK == t)
+		{
+			// Well, it would make sense to check for unbalanced quotes,
+			// in theory. In practice, QuoteUTest builds a weird unbalanced
+			// quote, on purpose. Enabling the exception also causes half
+			// the URE unit tests to fail. So this strict check is disabled.
+#ifdef STRICT_QUOTATION_LEVEL
+			if (0 == _quotation_level)
+				throw RuntimeException(TRACE_INFO, "Unbalanced quotes!");
+#endif
+			_quotation_level--;
+		}
     }
+}
+
+// This does what `class Quotation`, but in reverse. Given some
+// some Atom `h`, return true if there are more Unquotes below than
+// quotes, from which we infer that `h` must be in a quoted context.
+static bool unquoted_below_rec(const Handle& h, bool skip, bool skiplo)
+{
+	Type t = h->get_type();
+	if (nameserver().isA(t, NODE)) return false;
+
+	if (UNQUOTE_LINK == t)
+	{
+		if (not skip and not skiplo) return true;
+		skip = false;
+		skiplo = false;
+	}
+	else if (QUOTE_LINK == t)
+		skip = true;
+	else if (LOCAL_QUOTE_LINK == t)
+		skiplo = true;
+
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		if (unquoted_below_rec(ho, skip, skiplo)) return true;
+	}
+	return false;
+}
+
+bool unquoted_below(const Handle& h)
+{
+	return unquoted_below_rec(h, false, false);
+}
+
+bool unquoted_below(const HandleSeq& hs)
+{
+	for (const Handle& h: hs)
+		if (unquoted_below_rec(h, false, false)) return true;
+	return false;
 }
 
 bool Quotation::operator<(const Quotation& quotation) const

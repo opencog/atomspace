@@ -19,11 +19,11 @@ using namespace opencog;
 class FormulaUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 
 public:
-	FormulaUTest() : _eval(&_as)
+	FormulaUTest() : _asp(createAtomSpace()), _eval(_asp)
 	{
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);

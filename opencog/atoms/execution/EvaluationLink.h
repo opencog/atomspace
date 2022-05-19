@@ -8,6 +8,7 @@
 #ifndef _OPENCOG_EVALUATION_LINK_H
 #define _OPENCOG_EVALUATION_LINK_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
@@ -38,6 +39,12 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
 
+	static TruthValuePtr do_evaluate(const AtomSpacePtr& asp, const Handle& h,
+	                                 bool silent=false)
+	{
+		return do_evaluate(asp.get(), h, silent);
+	}
+
 	static bool crisp_evaluate(AtomSpace*, const Handle&,
 	                           bool silent=false);
 	static bool crisp_eval_scratch(AtomSpace* main,
@@ -48,13 +55,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;
-static inline EvaluationLinkPtr EvaluationLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<EvaluationLink>(a); }
-static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<EvaluationLink>(a); }
-
-#define createEvaluationLink std::make_shared<EvaluationLink>
+LINK_PTR_DECL(EvaluationLink)
+#define createEvaluationLink CREATE_DECL(EvaluationLink)
 
 /** @}*/
 }

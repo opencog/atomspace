@@ -1,0 +1,25 @@
+//
+// Script for automatic "storage atom type" generation. This defines
+// a collection of types suitable for defining distributed storage
+// interconnects.
+//
+// The base type for all storage nodes. Seems like BondNode is a
+// suitable base, I guess .. !?
+STORAGE_NODE <- BOND_NODE
+//
+// Specific storage nodes. Most of these are implemented in other git
+// repos, and not here. Look for git repos called "atomspace-xxx" for
+// approrpiate values of "xxx".
+POSTGRES_STORAGE_NODE <- STORAGE_NODE
+FILE_STORAGE_NODE <- STORAGE_NODE
+
+// Mono is a single-atomspace version of Rocks.
+MONO_STORAGE_NODE <- STORAGE_NODE
+ROCKS_STORAGE_NODE <- STORAGE_NODE
+
+// Both Cog's implement network storage to CogServer.
+COG_SIMPLE_STORAGE_NODE <- STORAGE_NODE
+COG_STORAGE_NODE <- STORAGE_NODE
+//
+// There is no IPFS_STORAGE_NODE nor DHT_STORAGE_NODE because these
+// are currently deeply, fundamentally broken. Whoops!

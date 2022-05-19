@@ -27,11 +27,17 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <atomic>
 #include <functional>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_set>
+
+#if HAVE_FOLLY
+#include <folly/container/F14Set.h>
+#define USE_HASHABLE_WEAK_PTR 1
+#endif
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
@@ -39,32 +45,108 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
+#define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+#define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+
 namespace opencog
 {
+#if USE_HASHABLE_WEAK_PTR
+template<class T>
+struct hashable_weak_ptr : public std::weak_ptr<T>
+{
+	hashable_weak_ptr(std::shared_ptr<T>const& sp) :
+		std::weak_ptr<T>(sp)
+	{
+		if (!sp) return;
+		_hash = std::hash<T*>{}(sp.get());
+	}
+
+	std::size_t get_hash() const noexcept { return _hash; }
+
+	// Define operator<() in order to construct operator==()
+	// It might be more efficient to store the unhashed
+	// pointer, and use that for equality compares...
+	friend bool operator<(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs.owner_before(rhs);
+	}
+	friend bool operator!=(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return lhs<rhs or rhs<lhs;
+	}
+	friend bool operator==(hashable_weak_ptr const& lhs, hashable_weak_ptr const& rhs)
+	{
+		return not (lhs != rhs);
+	}
+	private:
+		std::size_t _hash = 0;
+};
+
+typedef hashable_weak_ptr<Atom> WinkPtr;
+
+#else // USE_HASHABLE_WEAK_PTR
+
+// See discussion in README, explaining why using a bare pointer is safe.
+//
+// Based on current measurements (March 2022, benchmark/query-loop/diary.txt)
+// there is no performance advantage to useing bare pointers. In addition,
+// it appears that AtomSpaceAsyncUTest fails, probably due to "trivial"
+// reasons. Thus, there does not seem to be any advantage to enabling bare
+// pointers, and perhaps some minor disadvantages.
+// #define USE_BARE_BACKPOINTER 1
+//
+#if USE_BARE_BACKPOINTER
+typedef const Atom* WinkPtr;
+#else // USE_BARE_BACKPOINTER
 typedef std::weak_ptr<Atom> WinkPtr;
+#endif // USE_BARE_BACKPOINTER
+
+#endif // USE_HASHABLE_WEAK_PTR
 }
+
+#if USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP->get_handle()); STMT;
+#else  // USE_BARE_BACKPOINTER
+	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
+#endif // USE_BARE_BACKPOINTER
 
 namespace std
 {
 
-// The hash of the weak pointer is just the type of the atom.
-template<> struct hash<opencog::WinkPtr>
+#if USE_HASHABLE_WEAK_PTR
+template<class T> struct owner_less<opencog::hashable_weak_ptr<T>>
 {
-    typedef opencog::Type result_type;
-    typedef opencog::WinkPtr argument_type;
-    opencog::Type operator()(const opencog::WinkPtr& w) const noexcept;
+	bool operator()(const opencog::hashable_weak_ptr<T>& lhs,
+	                const opencog::hashable_weak_ptr<T>& rhs) const noexcept
+	{
+		return lhs.owner_before(rhs);
+	}
 };
 
-// Equality is equality of the underlying atoms. The unordered set
-// uses this to distinguish atoms of the same type.
-template<> struct equal_to<opencog::WinkPtr>
+template<class T> struct hash<opencog::hashable_weak_ptr<T>>
 {
-    typedef bool result_type;
-    typedef opencog::WinkPtr first_argument;
-    typedef opencog::WinkPtr second_argument;
-    bool operator()(const opencog::WinkPtr&,
-                    const opencog::WinkPtr&) const noexcept;
+	std::size_t operator()(const opencog::hashable_weak_ptr<T>& w) const noexcept
+	{
+		return w.get_hash();
+	}
 };
+#else // USE_HASHABLE_WEAK_PTR
+
+#if USE_BARE_BACKPOINTER
+template <> struct owner_less<const opencog::Atom*>
+{
+	bool operator()(const opencog::Atom* const& lhs,
+	                const opencog::Atom* const& rhs) const noexcept
+	{
+		return lhs < rhs;
+	}
+};
+#endif //USE_BARE_BACKPOINTER
+
+#endif // USE_HASHABLE_WEAK_PTR
+
 
 } // namespace std
 
@@ -76,7 +158,6 @@ namespace opencog
  */
 
 class AtomSpace;
-class AtomTable;
 
 //! arity of Links, represented as size_t to match outcoming set limit
 typedef std::size_t Arity;
@@ -88,8 +169,13 @@ typedef std::size_t Arity;
 typedef HandleSeq IncomingSet;
 typedef SigSlot<Handle, Handle> AtomPairSignal;
 
+#if HAVE_FOLLY
+// typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
+typedef folly::F14ValueSet<WinkPtr> WincomingSet;
+#else
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+#endif
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -100,28 +186,25 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 class Atom
     : public Value
 {
-    friend class AtomTable;       // Needs to call MarkedForRemoval()
-    friend class AtomSpace;       // Needs to call getAtomTable()
+    friend class AtomSpace;       // Needs to setChecked
     friend class TypeIndex;       // Needs to clear _atom_space
     friend class Link;            // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
-    friend class SQLAtomStorage;  // Needs to call getAtomTable()
-    friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
+    friend class StorageNode;     // Needs to call isAbsent()
 
 protected:
-    //! Sets the AtomSpace in which this Atom is inserted.
-    virtual void setAtomSpace(AtomSpace *);
-
-    //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const;
-
-    // Byte of bitflags (each bit is a flag).
-    // Place this first, so that is shares a word with Type.
-    mutable char _flags;
+    // Each atomic_flag chews up a byte.
+    // Place this first, so that these share a word with Type.
+    mutable std::atomic_bool _absent;
+    mutable std::atomic_bool _marked_for_removal;
+    mutable std::atomic_bool _checked;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
+
+    //! Sets the AtomSpace in which this Atom is inserted.
+    virtual void setAtomSpace(AtomSpace *);
 
     AtomSpace *_atom_space;
 
@@ -133,7 +216,7 @@ protected:
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // kind-of fat.
-    mutable std::mutex _mtx;
+    mutable std::shared_mutex _mtx;
 
     /**
      * Constructor for this class. Protected; no user should call this
@@ -143,7 +226,9 @@ protected:
      */
     Atom(Type t)
       : Value(t),
-        _flags(0),
+        _absent(false),
+        _marked_for_removal(false),
+        _checked(false),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     {}
@@ -175,7 +260,7 @@ protected:
         // need to be either hash tables or rb-trees. Scanning for
         // uniqueness in a vector is prohibitavely slow.  Note that
         // incoming sets containing 10K atoms are not unusual, and can
-        // be the source of bottlnecks.  Note that an atomspace can
+        // be the source of bottlenecks.  Note that an atomspace can
         // contain a hundred-million atoms, so the solution has to be
         // small. This rules out using a vector to store the
         // buckets (I tried).
@@ -205,22 +290,24 @@ protected:
     virtual ContentHash compute_hash() const = 0;
 
 private:
-    /** Returns whether this atom is marked for removal.
-     *
-     * @return Whether this atom is marked for removal.
-     */
+    //! Returns whether this atom is marked for removal.
     bool isMarkedForRemoval() const;
 
-    //! Marks the atom for removal.
-    void markForRemoval();
+    //! Marks the atom for removal. Returns old value.
+    bool markForRemoval();
 
-    //! Unsets removal flag.
-    void unsetRemovalFlag();
+    //! Unsets removal flag. Returns old value.
+    bool unsetRemovalFlag();
 
     /** Returns whether this atom is marked checked. */
     bool isChecked() const;
-    void setChecked();
-    void setUnchecked();
+    bool setChecked();
+    bool setUnchecked();
+
+    /** Returns whether this atom is marked absent. */
+    bool isAbsent() const;
+    bool setAbsent();
+    bool setPresent();
 
 public:
 
@@ -240,6 +327,24 @@ public:
     ///
     /// If a crypto hash was ever needed, the IPLD hash format would
     /// be recommended.  See https://ipld.io/ for details.
+    ///
+    /// This hash is NOT stable against modifications of the type
+    /// inheritance hierarchy! Changing the type hierarchy might
+    /// change the hash, because it will assign a different numeric
+    /// value to to the type, which is used in computing the hash.
+    /// (this could be avoided by using the string name of the type.)
+    ///
+    /// This hash is NOT stable against different-sized address spaces,
+    /// or even different C++ libraries! That is because it uses the
+    /// `std::hash()` function to compute string hashes, and this gives
+    /// different answers on 32-bit and 64-bit arches. This could be
+    /// fixed by using our own, private string hash function.
+    ///
+    /// It might be nice to have a hash that is stable against both of
+    /// these changes, as it would then enable the comparison of hashes
+    /// in a distributed atomspace network. But no one needs this, for
+    /// now. (There's no code that sends hashes over the network, or
+    /// stores them in a file.)
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
@@ -305,8 +410,15 @@ public:
     /// Print all of the key-value pairs.
     std::string valuesToString() const;
 
+    /// Remove all values. The only anticipated users of this are the
+    // storage backends, manipulating multi-AtomSpace bulk loads.
+    void clearValues();
+
+    //! Return true if the incoming set is empty.
+    bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
+
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize(AtomSpace* = nullptr) const;
+    size_t getIncomingSetSize(const AtomSpace* = nullptr) const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms
@@ -317,7 +429,7 @@ public:
     //! That is, this call returns the incoming set as it was at the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSet(const AtomSpace* = nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -327,16 +439,15 @@ public:
     //! that were actually part of the incoming set at the time of
     //! the call to this function.
     template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result) const
+    getIncomingIter(OutputIterator result) const
     {
         if (nullptr == _incoming_set) return result;
-        std::lock_guard<std::mutex> lck(_mtx);
+        INCOMING_SHARED_LOCK;
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle h(std::static_pointer_cast<Atom>(w.lock()));
-                if (h) { *result = h; result ++; }
+                WEAKLY_DO(h, w, { *result = h; result ++; })
             }
         }
         return result;
@@ -370,24 +481,23 @@ public:
     getIncomingSetByType(OutputIterator result, Type type) const
     {
         if (nullptr == _incoming_set) return result;
-        std::lock_guard<std::mutex> lck(_mtx);
+        INCOMING_SHARED_LOCK;
 
         const auto bucket = _incoming_set->_iset.find(type);
         if (bucket == _incoming_set->_iset.cend()) return result;
 
         for (const WinkPtr& w : bucket->second)
         {
-            Handle h(std::static_pointer_cast<Atom>(w.lock()));
-            if (h) { *result = h; result ++; }
+            WEAKLY_DO(h, w, { *result = h; result ++; })
         }
         return result;
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type, AtomSpace* = nullptr) const;
+    IncomingSet getIncomingSetByType(Type, const AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type, AtomSpace* = nullptr) const;
+    size_t getIncomingSetSizeByType(Type type, const AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
@@ -427,6 +537,15 @@ public:
     /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
 };
+
+#define ATOM_PTR_DECL(CNAME)                                \
+    typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
+    static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
+        { return std::dynamic_pointer_cast<CNAME>(h); }     \
+    static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
+        { return std::dynamic_pointer_cast<CNAME>(a); }
+
+#define CREATE_DECL(CNAME)  std::make_shared<CNAME>
 
 static inline AtomPtr AtomCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<Atom>(pa); }

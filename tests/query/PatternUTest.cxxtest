@@ -42,7 +42,7 @@ using namespace opencog;
 class PatternUTest: public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 
 		// These handles are documented below.
 		Handle hconst_1;
@@ -81,12 +81,11 @@ class PatternUTest: public CxxTest::TestSuite
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 #include "test-types.cc"
-			as = new AtomSpace();
+			as = createAtomSpace();
 		}
 
 		~PatternUTest()
 		{
-			delete as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -218,7 +217,7 @@ void PatternUTest::setUp(void)
 	// create a confounding link, like above, but different
 	Handle hwrong = an(CONCEPT_NODE, "incorrect solution concept node");
 
-	al(ASSOCIATIVE_LINK, hconst_1, hwrong);
+	al(SIMILARITY_LINK, hconst_1, hwrong);
 
 	// Create a standard-format opencog predicate
 	hitem_1 = an(CONCEPT_NODE, "concept kanjiru 1");
@@ -253,7 +252,7 @@ void PatternUTest::test_simple_link(void)
 	HandleSeq preds;
 	preds.push_back(he);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find only one solution.
@@ -262,8 +261,8 @@ void PatternUTest::test_simple_link(void)
 	TSM_ASSERT("incorrect predicate", hpred_1a == pmcb.preds[he]);
 
 	// Remove garbage, just in case ...
-	as->remove_atom(he);
-	as->remove_atom(hvar);
+	as->extract_atom(he);
+	as->extract_atom(hvar);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -307,7 +306,7 @@ void PatternUTest::test_two_links(void)
 	preds.push_back(hl1);
 	preds.push_back(hl2);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find two solutions:
@@ -366,7 +365,7 @@ void PatternUTest::test_eval(void)
 	HandleSeq preds;
 	preds.push_back(heval);
 
-	PMCB pmcb(as);
+	PMCB pmcb(as.get());
 	match(pmcb, vars, preds);
 
 	// Should find one solution
@@ -446,10 +445,10 @@ void PatternUTest::test_implication(void)
 
 	Handle hpa = al(PARSE_LINK, h2);
 
-	imply(as, han, hpa);
+	imply(as.get(), han, hpa);
 
 	// Remove the parse link, so that the other one is easier to find.
-	as->remove_atom(hpa);
+	as->extract_atom(hpa);
 
 	// At this point, the AtomSpace should contain a structure
 	// that looks like the below. Look for it.
@@ -460,7 +459,7 @@ void PatternUTest::test_implication(void)
 	// Be sure to explicitly check that we got hitem_2 as the result
 
 	HandleSeq ret;
-	as->get_handles_by_type(back_inserter(ret), PARSE_LINK);
+	as->get_handles_by_type(ret, PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	if (0 < ret.size())

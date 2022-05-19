@@ -33,12 +33,12 @@ namespace opencog
 
 typedef std::pair<size_t, size_t> GlobInterval;
 class TypeChoice;
-typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
+LINK_PTR_DECL(TypeChoice)
 typedef std::set<TypeChoicePtr> TypeChoiceSet;
 
 /// The TypeChoice link is used to hold a type description; it is
 /// the most general anonymous (un-named) type. It's main usefulness
-/// is to hold complex type defintions, and to provide operations
+/// is to hold complex type definitions, and to provide operations
 /// on them, such as type-intersection, type-union, filtering and
 /// type validation.
 ///
@@ -78,6 +78,8 @@ public:
 	// The default interval for glob matching.
 	static const GlobInterval default_interval(bool);
 
+	bool is_simple(void) const;
+
 	bool is_globby(void) const;
 	bool is_lower_bound(size_t) const;
 	bool is_upper_bound(size_t) const;
@@ -95,13 +97,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TypeChoice> TypeChoicePtr;
-static inline TypeChoicePtr TypeChoiceCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TypeChoice>(h); }
-static inline TypeChoicePtr TypeChoiceCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TypeChoice>(a); }
-
-#define createTypeChoice std::make_shared<TypeChoice>
+#define createTypeChoice CREATE_DECL(TypeChoice)
 
 std::string oc_to_string(const TypeChoiceSet&,
                          const std::string& indent=empty_string);

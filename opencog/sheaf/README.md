@@ -1,6 +1,6 @@
 
-Sheafs and Network Inference
-============================
+Sheafs and Graph/Network Inference
+==================================
 This directory provides two sets of tools. One set, the "sheaves",
 provides a simple and easy API for working with graphs. The second
 toolset extracts graphical relationships from linear data, via an MST
@@ -52,6 +52,28 @@ Diagrammatic illustrations of jig-saw puzzle-pieces can be found here:
 
 A more formal technique for visualizing connected edges in a monoidal or
 tensor category is the [string diagram](https://ncatlab.org/nlab/show/string+diagram).
+
+Some of the mathematical foundations can be understood by noticing that
+a [pregroup grammar](https://en.wikipedia.org/wiki/Pregroup_grammar) is
+effectively the same thing as Link Grammar, where the left-right
+relations such as S/VP and S\NP are replaced by type symbols
+(type-theoretic types). The pregroup grammar also provides a good
+working example of a monoidal category that is NOT left-right symmetric.
+This is important, because the monoidal categories that describe tensors
+and Hilbert spaces and "quantum mechanics" and "linear logic" are all
+left-right symmetric. This is why some people think that language looks
+like "quantum", and is also why they're right, but not quite.
+
+The "sheaves" here are exactly the same ones as in "sheaf theory", that
+branch of mathematics encountered in algebraic topology. Formally, the
+"puzzle pieces" assemble in such a way that the axioms of a (pre)-sheaf
+are obeyed.
+
+The earliest reference to this collection of ideas (of linguistics as
+type-theoretic algebraic objects with sheaf-like, monoidal properties)
+appears in the book
+[*"Algebraic Linguistics; Analytical Models"*](https://monoskop.org/images/2/26/Marcus_Solomon_editor_Algebraic_Linguistics_Analytical_Models_1967.pdf),
+from 1967, by Solomon Marcus (published by Elsevier).
 
 
 Sections in Atomese

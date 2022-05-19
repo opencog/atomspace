@@ -40,17 +40,25 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
+	// _quoted is true, that means we are inside a quote,
+	// and so nothing to be done. Skip variable extraction.
+	if (_quoted) return;
 	extract_variables(_outgoing);
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 	: Link({vars, body}, SCOPE_LINK)
 {
+	_quoted = unquoted_below(_outgoing);
 	init();
 }
 
 bool ScopeLink::skip_init(Type t)
 {
+	// If unquoted_below() returns true, that means we are quoted,
+	// and so nothing to be done. Skip variable extraction.
+	_quoted = unquoted_below(_outgoing);
+
 	// Type must be as expected.
 #if 0
 	// ScopeLinks are created directly in unit tests, so this safety
@@ -90,9 +98,11 @@ ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
 ///
 void ScopeLink::extract_variables(const HandleSeq& oset)
 {
-	if (oset.size() == 0)
+	size_t sz = oset.size();
+	if (0 == sz)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a non-empty outgoing set.");
+			"Expecting an outgoing set size of at least one; got %s",
+			to_short_string().c_str());
 
 	Type decls = oset.at(0)->get_type();
 
@@ -115,6 +125,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	    // declaration, that is if the Scope has only one argument.
 	    (VARIABLE_NODE != decls or oset.size() == 1) and
 	    TYPED_VARIABLE_LINK != decls and
+	    ANCHOR_NODE != decls and
 	    GLOB_NODE != decls)
 	{
 		_body = oset[0];
@@ -132,16 +143,23 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		return;
 	}
 
-	size_t sz = oset.size();
-	if (sz < 1)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an outgoing set size of at least one; got %s",
-			to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration. JoinLinks need not have a body.
 	_vardecl = oset[0];
-	if (2 <= sz) _body = oset[1];
+
+	if (2 <= sz)
+	{
+		_body = oset[1];
+
+		// If the user is using an AnchorNode, but not otherwise specifying
+		// variables, we have to fish them out of the body.
+		if (ANCHOR_NODE == decls)
+		{
+			_variables.find_variables(_body);
+			return;
+		}
+	}
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
@@ -290,12 +308,12 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all alpha-
-/// convertable links get exactly the same hash.  To acheive this,
+/// convertible links get exactly the same hash.  To achieve this,
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
 //
 // "Mixing" refers to the idea of combining together two values, such
-// that thier bits are mixed together (in the formal, mathematical
+// that their bits are mixed together (in the formal, mathematical
 // definition, which includes ideas about increasing entropy).  Hash
 // functions are designed to be very good at mixing.
 //
@@ -307,6 +325,9 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 
 ContentHash ScopeLink::compute_hash() const
 {
+	// If we are quoted, skip the complicated computations.
+	if (_quoted) return Link::compute_hash();
+
 	return scope_hash(_variables.index);
 }
 
@@ -322,7 +343,7 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 	ContentHash vth = 0;
 	for (const auto& pr : _variables._typemap)
 	{
-		// Semantic equivalance: an untyped variable is
+		// Semantic equivalence: an untyped variable is
 		// equivalent to a typed variable of type "ATOM".
 		if (pr.second->is_untyped()) continue;
 
@@ -332,6 +353,10 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 
 	// As to not mix together VariableList and VariableSet
 	fnv1a_hash(hsh, _variables._ordered);
+
+	// If there's an AnchorNode, hash that too.
+	if (_variables._anchor)
+		fnv1a_hash(hsh, _variables._anchor->get_hash());
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;

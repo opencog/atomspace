@@ -31,7 +31,7 @@ using namespace opencog;
 class MatchLink :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		Handle untyped_link_match, typed_link_match, untyped_any_match;
 		Handle typed_memb_link_match, typed_pet_node_match;
 
@@ -68,7 +68,7 @@ class MatchLink :  public CxxTest::TestSuite
 
 void MatchLink::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 
 	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");

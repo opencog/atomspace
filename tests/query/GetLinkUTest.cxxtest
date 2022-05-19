@@ -36,7 +36,7 @@ using namespace opencog;
 class GetLinkUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -48,7 +48,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -57,7 +57,6 @@ public:
 
 	~GetLinkUTest()
 	{
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -495,7 +494,7 @@ void GetLinkUTest::test_embed_vardels(void)
 #define REVERSE 1
 #if REVERSE
 	// Oh dear ... the embeded declarations end up unordered, which
-	// hoses the Getlink we are testing. Whatever, hack aroudn this.
+	// hoses the Getlink we are testing. Whatever, hack around this.
 	hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"human\") (ConceptNode \"Ben\"))"
@@ -525,20 +524,26 @@ void GetLinkUTest::test_embed_vardels(void)
 
 	// ----------------------
 	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
-#if REVERSE
-	hans = eval->eval_h(
+
+	// 32-bit and 64-bit hashes differ because std::hash() returns size_t
+	// As a result, the order is randomly reversed. Hack around this
+	// inconsistency. Also: the hash depends on the the number of types
+	// that appear before SetLink, because the type number is hashed in.
+	// Thus, changing the type hierarchy changes the hash. So, to make
+	// this work, we look for either answer.
+	Handle hans1 = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
-#else
-	hans = eval->eval_h(
+	Handle hans2 = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
-#endif
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Expected this: %s\n", hans1->to_string().c_str());
+	printf("or maybe this: %s\n", hans2->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding",
+		(hans1 == hgnd) or (hans2 == hgnd));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

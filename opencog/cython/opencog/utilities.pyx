@@ -1,16 +1,17 @@
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
-from opencog.atomspace cimport AtomSpace, Atom, TruthValue
+from libcpp.set cimport set as cpp_set
+from opencog.atomspace cimport AtomSpace, Atom, TruthValue, Value
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factory
 
 from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
-from opencog.utilities cimport load_file as c_load_file
+from opencog.utilities cimport c_load_file
 import warnings
 
 
-# Avoid recursive intialization
+# Avoid recursive initialization
 is_initialized = False
 
 
@@ -26,7 +27,7 @@ def initialize_opencog(AtomSpace atomspace=None):
         warnings.warn("setting default atomspace with initialize_opencog is deprecated,\
                 use set_default_atomspace instead", DeprecationWarning)
         set_default_atomspace(atomspace)
-    # Avoid recursive intialization
+    # Avoid recursive initialization
     global is_initialized
     if is_initialized:
         return
@@ -109,12 +110,31 @@ def get_default_atomspace():
     """
     Get default atomspace
     """
-    return AtomSpace_factory(get_context_atomspace())
+    cdef cAtomSpace * context = get_context_atomspace()
+    if context is NULL:
+        return None
+    return AtomSpace_factory(context)
 
 
 def pop_default_atomspace():
     return AtomSpace_factory(pop_context_atomspace())
 
+
 def load_file(path, AtomSpace atomspace):
     cdef string p = path.encode('utf-8')
     c_load_file(p, deref(atomspace.atomspace))
+
+
+def is_closed(Atom atom):
+    """
+    Return True iff the atom is closed, that is does not contain free variables.
+    """
+    return c_is_closed(atom.get_c_handle())
+
+
+def get_free_variables(Atom atom):
+    """
+    Return the list of free variables in a given atom.
+    """
+    cdef cpp_set[cHandle] variables = c_get_free_variables(atom.get_c_handle())
+    return [create_python_value_from_c_value(<cValuePtr&> h) for h in variables]

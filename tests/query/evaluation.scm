@@ -1,5 +1,7 @@
 ;
 ; Basic unit testing for different ways of nesting evaluatable links.
+; This uses `IdenticalLink` for all testing. See `eval-equal.scm` for
+; a version that uses `EqualLink`.
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))

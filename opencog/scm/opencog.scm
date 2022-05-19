@@ -1,8 +1,8 @@
 ;
-; Main OpenCog guile module
+; Main Atomese guile module
 ;
 ; When this module is loaded from the guile prompt, it sets up all of
-; the opencog infrastructure, including a default atomspace.
+; the Atomese infrastructure, including a default AtomSpace.
 ;
 ; To use, say this from the guile prompt:
 ; (use-modules (opencog))
@@ -40,8 +40,6 @@ cog-atomspace-uuid
 cog-confidence
 cog-count
 cog-count-atoms
-cog-delete!
-cog-delete-recursive!
 cog-extract!
 cog-extract-recursive!
 cog-get-subtypes
@@ -91,6 +89,13 @@ cog-value->list
 cog-value-ref
 )
 
+; Print C++ exceptions so that they are readable.
+(define (cpp-exception-printer port key args default-printer)
+	(format port "Atomspace C++ exception:\n~A\n" args))
+
+; set-exception-printer! is exposed by ice-9/boot-9
+(set-exception-printer! 'C++-EXCEPTION cpp-exception-printer)
+
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
 ; in guile-2.1 that causes this to be collected, anyway.  Its as if
@@ -115,12 +120,12 @@ cog-value-ref
 
 ; Renamed functions
 (define-public (cog-as ATOM) "See cog-atomspace" (cog-atomspace ATOM))
-(define-public (cog-delete ATOM) "See cog-delete!" (cog-delete! ATOM))
-(define-public (cog-delete-recursive ATOM)
-	"See cog-delete-recursive!" (cog-delete-recursive! ATOM))
 (define-public (cog-extract ATOM) "See cog-extract!" (cog-extract! ATOM))
 (define-public (cog-extract-recursive ATOM)
 	"See cog-extract-recursive!" (cog-extract-recursive! ATOM))
+
+; A very special association-list ctor.
+(define-public (alist . x) (list 'alist x))
 
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")

@@ -41,13 +41,14 @@ namespace opencog
 /// This class is intended to be the base class for DefineLink, which
 /// is used to name things, and StateLink, which is used to maintain
 /// current state. It is also used by TypedAtomLink to ensure that
-/// an atom, if it is typed, has a single, unique type defintion.
+/// an atom, if it is typed, has a single, unique type definition.
 ///
 class UniqueLink : public FreeLink
 {
 protected:
 	void init(bool);
-	static Handle get_unique(const Handle&, Type, bool);
+	static Handle get_unique_nt(const Handle&, Type, bool, const AtomSpace*);
+	static Handle get_unique(const Handle&, Type, bool, const AtomSpace*);
 
 public:
 	UniqueLink(const HandleSeq&&, Type=UNIQUE_LINK);
@@ -61,13 +62,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<UniqueLink> UniqueLinkPtr;
-static inline UniqueLinkPtr UniqueLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<UniqueLink>(h); }
-static inline UniqueLinkPtr UniqueLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<UniqueLink>(a); }
-
-#define createUniqueLink std::make_shared<UniqueLink>
+LINK_PTR_DECL(UniqueLink)
+#define createUniqueLink CREATE_DECL(UniqueLink)
 
 /** @}*/
 }

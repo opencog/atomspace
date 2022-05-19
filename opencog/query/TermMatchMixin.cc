@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atomspace/Transient.h>
 
 #include "TermMatchMixin.h"
 
@@ -39,81 +40,6 @@ using namespace opencog;
 #else
 #define DO_LOG(STUFF)
 #endif
-
-/* ======================================================== */
-// Cache for temp (transient) atomsapaces.  The evaluation of
-// expressions during pattern matching requires having a temporary
-// atomspace, treated as a scratch space to hold temporary results.
-// These are then discarded, after the match is confirmed or denied.
-// The issue is that creating an atomspace is CPU-intensive, so its
-// cheaper to just have a cache of empty atomspaces, hanging around,
-// and ready to go. The code in this section implements this.
-
-const bool TRANSIENT_SPACE = true;
-const int MAX_CACHED_TRANSIENTS = 8;
-
-// Allocated storage for the transient atomspace cache static variables.
-std::mutex TermMatchMixin::s_transient_cache_mutex;
-std::vector<AtomSpace*> TermMatchMixin::s_transient_cache;
-
-AtomSpace* TermMatchMixin::grab_transient_atomspace(AtomSpace* parent)
-{
-	AtomSpace* transient_atomspace = nullptr;
-
-	// See if the cache has one...
-	if (s_transient_cache.size() > 0)
-	{
-		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
-
-		// Check to make sure the cache still has one now that we have
-		// the mutex.
-		if (s_transient_cache.size() > 0)
-		{
-			// Pop the last transient atomspace off the cache stack.
-			transient_atomspace = s_transient_cache.back();
-			s_transient_cache.pop_back();
-
-			// Ready it for the new parent atomspace.
-			transient_atomspace->ready_transient(parent);
-		}
-	}
-
-	// If we didn't get one from the cache, then create a new one.
-	if (!transient_atomspace)
-		transient_atomspace = new AtomSpace(parent, TRANSIENT_SPACE);
-
-	return transient_atomspace;
-}
-
-void TermMatchMixin::release_transient_atomspace(AtomSpace* atomspace)
-{
-	bool atomspace_cached = false;
-
-	// If the cache is not full...
-	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
-	{
-		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
-
-		// Check it again since we only now have the mutex locked.
-		if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
-		{
-			// Clear this transient atomspace.
-			atomspace->clear_transient();
-
-			// Place this transient into the cache.
-			s_transient_cache.push_back(atomspace);
-
-			// The atomspace has been cached.
-			atomspace_cached = true;
-		}
-	}
-
-	// If we didn't cache the atomspace, then delete it.
-	if (!atomspace_cached)
-		delete atomspace;
-}
 
 /* ======================================================== */
 
@@ -196,7 +122,7 @@ bool TermMatchMixin::scope_match(const Handle& npat_h,
 {
 	// If there are scoped vars, then accept anything that is
 	// alpha-equivalent. (i.e. equivalent after alpha-conversion)
-	if (_pat_bound_vars and _pat_bound_vars->is_in_varset(npat_h))
+	if (_pat_bound_vars and _pat_bound_vars->varset_contains(npat_h))
 	{
 		bool aok = _pat_bound_vars->is_alpha_convertible(npat_h,
 		                  nsoln_h, *_gnd_bound_vars);
@@ -333,7 +259,7 @@ bool TermMatchMixin::is_self_ground(const Handle& ptrn,
 	// Unwrap quotations, so that they can be compared properly.
 	if (Quotation::is_quotation_type(ptype))
 	{
-		// Wow, if we are here, and patern==grnd, this must be
+		// Wow, if we are here, and pattern==grnd, this must be
 		// a self-grounding, as I don't believe there is any other
 		// valid way to get to here.
 		if (quotation.consumable(ptype) and ptrn == grnd) return true;
@@ -525,9 +451,9 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
-/* This implements AlwaysLink (the non-scoped vesion of ForAllLink
+/* This implements AlwaysLink (the non-scoped version of ForAllLink
  * used by the pattern matcher.) The AlwaysLink must always be
- * satsifed, every time it is called, from the begining of the
+ * satsifed, every time it is called, from the beginning of the
  * search to the end.  The AlwaysLinks is satsified whenever
  * grnd != null, and otherwise, if fails. That is, if grnd==nullptr
  * then there is some grounding of (all of) the other clauses of
@@ -549,6 +475,12 @@ IncomingSet TermMatchMixin::get_incoming_set(const Handle& h, Type t)
 	return h->getIncomingSetByType(t, _as);
 }
 
+Handle TermMatchMixin::get_link(const Handle& hg,
+                                Type t, HandleSeq&& oset)
+{
+	return _as->get_link(t, std::move(oset));
+}
+
 /* ======================================================== */
 
 /// Evaluation of the link requires working with an atomspace of
@@ -568,7 +500,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
 	              << gvirt->to_short_string() << std::endl;})
 
-	// At this time, we expect all virutal links to be in one of two
+	// At this time, we expect all virtual links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
 	// EvaluationLinks should have the structure
 	//

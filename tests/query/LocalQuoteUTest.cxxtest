@@ -29,13 +29,13 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _as->add_link
+#define an _as->add_node
 
 class LocalQuoteUTest: public CxxTest::TestSuite
 {
 private:
-    AtomSpace _as;
+    AtomSpacePtr _as;
 
 	Handle X, P, Q, P_X, Q_X, forall,
 		VT, vardecl_var, body_var, rewrite_var,
@@ -48,6 +48,7 @@ public:
 	    logger().set_level(Logger::DEBUG);
 	    logger().set_print_to_stdout_flag(true);
 	    logger().set_timestamp_flag(false);
+       _as = createAtomSpace();
     }
 
     void setUp();
@@ -92,7 +93,7 @@ void LocalQuoteUTest::test_get()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(&_as, forall_get),
+	Handle result = satisfying_set(_as, forall_get),
 	    expected = al(SET_LINK, al(LIST_LINK, X, P_X));
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -115,7 +116,7 @@ void LocalQuoteUTest::test_put()
 		vardecl = al(TYPED_VARIABLE_LINK, X, CT),
 		put = al(PUT_LINK, al(LAMBDA_LINK, vardecl, body), A);
 
-	Instantiator inst(&_as);
+	Instantiator inst(_as.get());
 	Handle putted = HandleCast(inst.execute(put));
 	Handle expected = al(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
@@ -152,7 +153,7 @@ void LocalQuoteUTest::test_put()
 // 	                 al(TYPED_VARIABLE_LINK, X, CT), P_X, Q_X);
 
 // 	// Result
-// 	Handle result = bindlink(&_as, bl),
+// 	Handle result = bindlink(_as, bl),
 // 		expected = al(SET_LINK,
 // 		              al(BIND_LINK,
 // 		                 al(TYPED_VARIABLE_LINK,

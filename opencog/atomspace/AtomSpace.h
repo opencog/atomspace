@@ -1,9 +1,9 @@
 /*
  * opencog/atomspace/AtomSpace.h
  *
- * Copyright (C) 2008-2011 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2015-2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,39 +25,42 @@
 #ifndef _OPENCOG_ATOMSPACE_H
 #define _OPENCOG_ATOMSPACE_H
 
-#include <list>
-
+#include <opencog/util/async_method_caller.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/oc_omp.h>
+#include <opencog/util/RandGen.h>
+#include <opencog/util/sigslot.h>
+
+#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/BackingStore.h>
+#include <opencog/atomspace/TypeIndex.h>
 
-class BasicSaveUTest;
+class AtomTableUTest;
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
+typedef SigSlot<const Handle&> AtomSignal;
+typedef SigSlot<const Handle&,
+                const TruthValuePtr&,
+                const TruthValuePtr&> TVCHSigl;
+
+class AtomSpace;
+typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
+
 /**
- * The AtomSpace class exposes the public API of the OpenCog AtomSpace
- *
- * @code
- *  // Create an atomspace
- *  AtomSpace atomspace;
- * @endcode
+ * This class provides mechanisms to store atoms and keep indices for
+ * efficient lookups. It implements the local storage data structure of
+ * OpenCog. It contains methods to add and remove atoms, as well as to
+ * retrieve specific sets according to different criteria.
  */
-class AtomSpace
+class AtomSpace : public Atom
 {
-    friend class Atom;               // Needs to call get_atomtable()
-    friend class BackingStore;
-    friend class IPFSAtomStorage;    // Needs to call get_atomtable()
-    friend class SQLAtomStorage;     // Needs to call get_atomtable()
-    friend class UuidSCM;            // Needs to call get_atomtable()
-    friend class ::AtomTableUTest;
-    friend class ::AtomSpaceUTest;
-    friend class ::BasicSaveUTest;   // Needs to call get_atomtable()
+    friend class StorageNode;     // Needs to call add() directly.
 
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
@@ -72,31 +75,87 @@ class AtomSpace
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
-    AtomTable _atom_table;
+    // --------------------------------------------------
+    //! Index of atoms.
+    TypeIndex typeIndex;
 
-    /**
-     * Used to fetch atoms from disk.
-     */
-    BackingStore* _backing_store;
-
-    AtomTable& get_atomtable(void) { return _atom_table; }
-
+    UUID _uuid;
     bool _read_only;
     bool _copy_on_write;
-protected:
+    bool _transient;
+
+    /// Base AtomSpaces wrapped by this space. Empty if top-level.
+    /// This AtomSpace will behave like the set-union of the base
+    /// atomspaces in the `_environ`: it exposes all Atoms in those
+    /// bases, plus also anything in this AtomSpace.
+    // Both _environ and _outgoing contain exactly the same pointers;
+    // we keep two distinct lists to avoid the CPU overhead of casting
+    // between the two different pointer types (its significant).
+    std::vector<AtomSpacePtr> _environ;
+    HandleSeq _outgoing;
+    std::string _name;
+
+    /** Find out about atom type additions in the NameServer. */
+    NameServer& _nameserver;
+    int addedTypeConnection;
+    void typeAdded(Type);
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
+
+    void init();
+    void clear_all_atoms();
 
     /**
-     * Register a provider of backing storage.
+     * Private: add an atom to the table. This skips the read-only
+     * check. To be used only by the storage nodes.
+     *
+     * The `force` flag forces the addition of this atom into the
+     * atomtable, even if it is already in a parent atomspace.
      */
-    void registerBackingStore(BackingStore*);
-    void unregisterBackingStore(BackingStore*);
+    Handle add(const Handle&, bool force=false);
+    Handle check(const Handle&, bool force=false);
+
+    virtual ContentHash compute_hash() const;
+
+    // Private helper function.
+    void shadow_by_type(HandleSet&,
+                        Type type,
+                        bool subclass,
+                        bool parent,
+                        const AtomSpace*) const;
+
+    void get_absent_atoms(HandleSeq&) const;
 
 public:
-    bool isAttachedToBackingStore();
-
-public:
-    AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
+    /**
+     * Constructor and destructor for this class.
+     *
+     * An AtomSpace can have one or more base AtomSpaces; the created
+     * AtomSpace will behave like the union of the component AtomSpaces.
+     * The created AtomSpace essentially "yokes together" the base
+     * AtomSpaces. Atoms are NOT copied, unless the base spaces are
+     * read-only, in which case a copy-on-write is performed.
+     *
+     * If 'transient' is true, then the resulting AtomSpace is operates
+     * in a copy-on-write mode, suitable for holding temporary, scratch
+     * results (e.g. for evaluation or inference.) Transient AtomSpaces
+     * should have a parent which holds the actual Atoms being worked
+     * with. See COW below.
+     */
+    AtomSpace(AtomSpace* base=nullptr, bool transient=false);
+    AtomSpace(AtomSpacePtr&);
+    AtomSpace(const HandleSeq&);
     ~AtomSpace();
+
+    bool is_atom(void) const { return true; }
+    bool is_node(void) const { return true; }
+    bool is_link(void) const { return true; }
+    UUID get_uuid(void) const { return _uuid; }
 
     /// Transient atomspaces are lighter-weight, faster, but are missing
     /// some features. They are used during pattern matching, to hold
@@ -105,33 +164,61 @@ public:
     void clear_transient();
 
     /// Read-only (RO) atomspaces provide protection against update of the
-    /// AtomSpace contents. Atoms in a read-only atomspace canot be
-    /// deleted, nor can thier values (including truthvalues) be changed.
+    /// AtomSpace contents. Atoms in a read-only atomspace cannot be
+    /// deleted, nor can their values (including truthvalues) be changed.
     /// New atoms cannot be added to a read-only atomspace.
     void set_read_only(void);
     void set_read_write(void);
     bool get_read_only(void) { return _read_only; }
 
-    /// Copy-on-write (COW) atomspaces provide protection against the
-    /// update of the parent atomspace. When an atomspace is marked COW,
-    /// it behaves as if it is read-write, but the parent is read-only.
-    /// This is convenient for creating temporary atomspaces, wherein
-    /// updates will not trash the parent. Transient atomspaces are
-    /// always COW.
+    /// Copy-on-write (COW) atomspaces protect base atomspaces from
+    /// being damaged by updates to this atomspace. COW only makes
+    /// sense if this atomspace has underlying base atomspaces;
+    /// otherwise its a no-op.
+    ///
+    /// When an atomspace is marked COW, it behaves as if the base is
+    /// read-only, so that any changes to TruthValues and other Values
+    /// affect this atomspace only. This is convenient for creating
+    /// temporary atomspaces, wherein updates will not trash the base.
+    /// Transient atomspaces are always COW.
     void set_copy_on_write(void) { _copy_on_write = true; }
     void clear_copy_on_write(void) { _copy_on_write = false; }
-    bool get_copy_on_write(void) { return _copy_on_write; }
+    bool get_copy_on_write(void) const { return _copy_on_write; }
 
-    /// Get the environment that this atomspace was created in.
-    AtomSpace* get_environ() const {
-        AtomTable* env = _atom_table.get_environ();
-        if (env) return env->getAtomSpace();
-        return nullptr;
-    }
+    // -------------------------------------------------------
 
-    bool in_environ(const Handle& h) const {
-        return _atom_table.in_environ(h);
-    }
+    /**
+     * Return the depth of the Atom, relative to this AtomSpace.
+     * The depth is zero, if the Atom is in this table; it is one
+     * if it is in the parent, and so on. It is -1 if it is not
+     * in the chain.
+     */
+    int depth(const Handle& atom) const;
+
+    /**
+     * Return true if the atom is in this atomtable, or if it is
+     * in the environment of this atomtable.
+     *
+     * This is provided in the header file, so that it gets inlined
+     * into Atom.cc, where the incoming link is fetched.  This helps
+     * avoid what would otherwise be a circular dependency between
+     * shared libraries. Yes, this is kind-of hacky, but its the
+     * simplest fix for just right now.
+     */
+    bool in_environ(const Handle& atom) const;
+
+    /* AtomSpaces are Atoms; provide virtual methods of base class. */
+    virtual const std::string& get_name() const;
+    virtual Arity get_arity() const;
+    virtual size_t size() const { return get_arity(); }
+    virtual const HandleSeq& getOutgoingSet() const;
+    virtual Handle getOutgoingAtom(Arity) const;
+    virtual void setAtomSpace(AtomSpace *);
+
+    /* Restoring complex AtomSpace DAG's from storage requires the
+     * ability to set the AtomSpace name. So we provide this.
+     */
+    void set_name(const std::string&);
 
     /**
      * Compare atomspaces for equality. Useful during testing.
@@ -144,19 +231,31 @@ public:
     bool operator!=(const AtomSpace& other) const;
 
     /**
+     * Perform a content-based comparison of two AtomSpaces.
+     * Wrapper around above.
+     */
+    virtual bool operator==(const Atom&) const;
+
+    /** Ordering operator for AtomSpaces. */
+    virtual bool operator<(const Atom&) const;
+
+    /**
      * Return the number of atoms contained in the space.
      */
-    inline size_t get_size() const { return _atom_table.getSize(); }
-    inline size_t get_num_nodes() const { return _atom_table.getNumNodes(); }
-    inline size_t get_num_links() const { return _atom_table.getNumLinks(); }
-    inline size_t get_num_atoms_of_type(Type type, bool subclass=false) const
-        { return _atom_table.getNumAtomsOfType(type, subclass); }
-    inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
+    size_t get_size() const;
+    size_t get_num_nodes() const;
+    size_t get_num_links() const;
+    size_t get_num_atoms_of_type(Type type, bool subclass=false) const;
 
-    //! Clear the atomspace, extract all atoms. Does NOT clear the
-    //! attached backingstore.
-    void clear()
-        { _atom_table.clear(); }
+    //! Clear the atomspace, extract all atoms.
+    void clear();
+
+    /**
+     * Read-write synchronization barrier fence.  When called, this
+     * will not return until all the atoms previously added to the
+     * atomspace have been fully inserted.
+     */
+    void barrier(void);
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
@@ -179,7 +278,7 @@ public:
     }
 
     /**
-     * Add a link to the Atom Table. If the atom already exists, then
+     * Add a link to the AtomSpace. If the atom already exists, then
      * that is returned.
      *
      * @param t         Type of the link
@@ -256,188 +355,26 @@ public:
     ValuePtr add_atoms(const ValuePtr&);
 
     /**
-     * Make sure all atom writes have completed, before returning.
-     * This only has an effect when the atomspace is backed by some
-     * sort of storage, or is sending atoms to some remote location
-     * asynchronously. This simply guarantees that the asynch
-     * operations have completed.
-     * NB: at this time, we don't distinguish barrier and flush.
-     */
-    void barrier(void) {
-        _atom_table.barrier();
-        if (_backing_store) _backing_store->barrier();
-    }
-
-    /**
-     * Unconditionally fetch an atom from the backingstore.
-     *
-     * If there is no backingstore, then Handle::UNDEFINED is returned.
-     * If the atom is found in the backingstore, then it is placed in
-     * the atomtable before returning.  If the atom is already in the
-     * atomtable, and is also found in the backingstore, then all of
-     * the values on the atom are updated from the database. (Values
-     * not in the database are not touched).
-     *
-     * To avoid a fetch if the atom already is in the atomtable, use
-     * the get_atom() method instead.
-     */
-    Handle fetch_atom(const Handle&);
-
-    /**
-     * Get an atom from the AtomTable. If the atom is not there, then
+     * Get an atom from the AtomSpace. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
-
-    /**
-     * Fetch the Value located at `key` on `atom` from the remote
-     * server, and attach it to `key` on this `atom`.  If the remote
-     * server does not have a value at `key`, then the local value
-     * at `key` (if any) will be deleted.
-     *
-     * This method is more granular than `fetch_atom()`, as it
-     * operates only on one particular key.
-     */
-    Handle fetch_value(const Handle& atom, const Handle& key);
-
-    /**
-     * Use the backing store to load all atoms of the given atom type.
-     */
-    void fetch_all_atoms_of_type(Type t) {
-        if (nullptr == _backing_store)
-            throw RuntimeException(TRACE_INFO, "No backing store");
-        _backing_store->loadType(_atom_table, t);
-    }
-
-    /**
-     * Use the backing store to load entire AtomSpace.
-     */
-    void load_atomspace(void) {
-        if (nullptr == _backing_store)
-            throw RuntimeException(TRACE_INFO, "No backing store");
-        _backing_store->loadAtomSpace(_atom_table);
-    }
-
-    /**
-     * Use the backing store to store entire AtomSpace.
-     */
-    void store_atomspace(void) {
-        if (nullptr == _backing_store)
-            throw RuntimeException(TRACE_INFO, "No backing store");
-        _backing_store->storeAtomSpace(_atom_table);
-    }
-
-    /**
-     * Use the backing store to load the entire incoming set of the
-     * atom.
-     *
-     * If the flag is true, then the load is done recursively.
-     * This method queries the backing store to obtain all atoms that
-     * contain this one in their outgoing sets. All of these atoms are
-     * then loaded into this atomtable/atomspace.
-     *
-     * See also `fetch_query` which can be used with a JoinLink to
-     * obtain a custom-tailored incoming set.
-     */
-    Handle fetch_incoming_set(const Handle&, bool=false);
-
-    /**
-     * Use the backing store to load the incoming set of the
-     * atom, but only those atoms of the given type.
-     * The fetch is not recursive; that is, only the immediate,
-     * single-level incoming set is fetched.
-     *
-     * See also `fetch_query` which can be used with a JoinLink to
-     * obtain a custom-tailored incoming set.
-     */
-    Handle fetch_incoming_by_type(const Handle&, Type);
-
-    /**
-     * Run the `query` on the remote server, and place the query
-     * results onto the `key`, both locally, and remotely.
-     * The `query` must be either a JoinLink, MeetLink or QueryLink.
-     *
-     * Because MeetLinks and QueryLinks can be cpu-intensive, not
-     * all backends will honor this request. (JoinLinks will be
-     * honored, in general; they can be thought of as a generalized
-     * incoming set, and are much faster to process.) Backends are
-     * free to return previously-cached results for the search,
-     * rather than running a fresh search. If the flag `fresh` is
-     * set to `true`, then the server may interpret this as a
-     * request to perform a fresh search.  It is not required to
-     * honor this request.
-     *
-     * If the `metadata_key` is provided, then metadata about the
-     * search is returned. This may include a time-stamp indicating
-     * when the search was last performed. If the search was refused,
-     * a value indicating that will be returned.  The metadata is
-     * intended to allow the receiver (i.e the user of this local
-     * AtomSpace) what to do next.
-     *
-     * Note that the remote server may periodically purge search
-     * results to save on storage usage. This is why the search
-     * results are returned and placed in the local space.
-     *
-     * Only the Atoms that were the result of the search are returned.
-     * Any Values hanging off those Atoms are not transfered from the
-     * remote server to the local AtomSpace.
-     */
-    Handle fetch_query(const Handle& query, const Handle& key,
-                       const Handle& metadata_key = Handle::UNDEFINED,
-                       bool fresh = false);
-
-    /**
-     * Recursively store the atom to the backing store.
-     * I.e. if the atom is a link, then store all of the atoms
-     * in its outgoing set as well, recursively.
-     */
-    void store_atom(const Handle& h);
-
-    /**
-     * Store the Value located at `key` on `atom` to the remote
-     * server. If the `atom` does not yet exist on the remote
-     * server, it is created there.  This method is more granular
-     * than `store_attom` above, as it works with only one value,
-     * instead of all of them.
-     *
-     * Note that Values can be deleted merely by having a null
-     * value hanging on that key.
-     */
-    void store_value(const Handle& atom, const Handle& key);
+    Handle get_atom(const Handle&) const;
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom
      * from the (local, in-RAM) AtomSpace (in this process); any copies
-     * of the atom in persistent storage orin other address spaces are
-     * unaffected.  To also delete from persistant storage, use the
-     * remove_atom() method. Of course, the AtomSpace must be connected
-     * to storage in order for remove_atom() to reach out that far; if
-     * the AtomSpace is not connected to a backend, there is no
-     * difference between remove and extract.
+     * of the atom in persistent storage or in other address spaces are
+     * unaffected.
      *
      * The atom itself remains valid as long as there are Handles
      * that reference it; the RAM associated with the atom is
      * freed only when the last reference goes away.
      *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag. If the flag is set,
-     *       then this atom, and *everything* that points to it will
-     *       be removed from the atomspace.  This can cause a large
-     *       cascade of removals!  If the flag is not set, then the
-     *       atom will be removed only if its incoming set is empty.
-     *       By default, recursion is disabled.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
-     */
-    bool extract_atom(Handle h, bool recursive=false) {
-        return 0 < _atom_table.extract(h, recursive).size();
-    }
-
-    /**
-     * Removes an atom from the atomspace, and any attached storage.
-     * The atom remains valid as long as there are Handles that
-     * reference it; it is deleted only when the last reference
-     * goes away.
+     * Note that if the recursive flag is set to false, and the atom
+     * appears in the incoming set of some other atom, then extraction
+     * will fail.  Thus, it is generally recommended that extraction
+     * be recursive, unless you can guarantee that the atom is not in
+     * someone else's outgoing set.
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag. If the flag is set,
@@ -449,7 +386,11 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool remove_atom(Handle h, bool recursive=false);
+    bool extract_atom(const Handle&, bool recursive=false);
+
+    bool remove_atom(const Handle& h, bool recursive=false) {
+        return extract_atom(h, recursive);
+    }
 
     /**
      * Set the Value on the atom, performing necessary permissions
@@ -465,33 +406,34 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
-     * Get a node from the AtomTable, if it's in there. If its not found
-     * in the AtomTable, and there's a backing store, then the atom will
-     * be fetched from the backingstore (and added to the AtomTable). If
-     * the atom can't be found in either place, Handle::UNDEFINED will be
-     * returned.
+     * Find an equivalent Atom that is exactly the same as the arg.
+     * If such an atom is in the AtomSpace, or in any of it's parent
+     * AtomSpaces, return that Atom. Return the shallowest such Atom.
+     */
+    Handle lookupHandle(const Handle&) const;
+
+    /**
+     * Get a node from the AtomSpace, if it's in there. If the atom
+     * can't be found, Handle::UNDEFINED will be returned.
      *
      * @param t     Type of the node
      * @param str   Name of the node
-    */
+     */
     Handle get_node(Type, std::string&&) const;
     inline Handle get_handle(Type t, std::string str) const {
         return get_node(t, std::move(str));
     }
 
     /**
-     * Get a link from the AtomTable, if it's in there. If its not found
-     * in the AtomTable, and there's a backing store, then the atom will
-     * be fetched from the backingstore (and added to the AtomTable). If
-     * the atom can't be found in either place, Handle::UNDEFINED will be
-     * returned.
+     * Get a link from the AtomSpace, if it's in there. If the atom
+     * can't be found, Handle::UNDEFINED will be returned.
      *
      * See also the get_atom() method.
      *
      * @param t        Type of the node
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
-    */
+     */
     Handle get_link(Type, HandleSeq&&) const;
     inline Handle get_link(Type t, const Handle& ha) const {
         return get_link(t, HandleSeq({ha}));
@@ -524,7 +466,7 @@ public:
      * (any) atomspace; else return false.
      */
     bool is_valid_handle(const Handle& h) const {
-        return (nullptr != h) and (h->getAtomTable() != nullptr);
+        return (nullptr != h) and (h->getAtomSpace() != nullptr);
     }
 
     /**
@@ -542,22 +484,27 @@ public:
      *         atomSpace.get_handlset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_handleset_by_type(HandleSet& hset,
-                               Type type,
-                               bool subclass=false) const
-    {
-        return _atom_table.getHandleSetByType(hset, type, subclass);
-    }
+    void
+    get_handles_by_type(HandleSeq&,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true,
+                        const AtomSpace* = nullptr) const;
+
+    void
+    get_handles_by_type(HandleSet&,
+                        Type type,
+                        bool subclass=false,
+                        bool parent=true,
+                        const AtomSpace* = nullptr) const;
 
     /**
      * Gets a set of handles that matches with the given type,
-     * but ONLY if they have an empty incoming set! This might
-     * spend more time under the atomtable lock, but should use
-     * less RAM when getting large sets, and thus might be faster.
+     * but ONLY if they have an empty incoming set! 
      *
      * @param hset the HandleSet into which to insert handles.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
      *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
@@ -566,100 +513,43 @@ public:
      *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
-    void get_rootset_by_type(HandleSet& hset,
-                             Type type,
-                             bool subclass=false) const
-    {
-        return _atom_table.getRootSetByType(hset, type, subclass);
-    }
+    void
+    get_root_set_by_type(HandleSeq&,
+                         Type type,
+                         bool subclass=false,
+                         bool parent=true,
+                         const AtomSpace* = nullptr) const;
 
-    /**
-     * Gets a sequence of handles that matches with the given type
-     * (subclasses optionally).
-     * Caution: this is slower than using get_handleset_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * Example of call to this method, which would return all ConceptNodes
-     * in the AtomSpace:
-     * @code
-     *         HandleSeq atoms;
-     *         atomSpace.get_handle_by_type(atoms, CONCEPT_NODE);
-     * @endcode
-     */
-    void get_handles_by_type(HandleSeq& appendToHandles,
-                             Type type,
-                             bool subclass=false) const
-    {
-        // Get the initial size of the handles vector.
-        size_t initial_size = appendToHandles.size();
-
-        // Determine the number of atoms we'll be adding.
-        size_t size_of_append = _atom_table.getNumAtomsOfType(type, subclass);
-
-        // Now reserve size for the addition. This is faster for large
-        // append iterations since appends to the list won't require new
-        // allocations and copies whenever the allocated size is exceeded.
-        appendToHandles.reserve(initial_size + size_of_append);
-
-        // Now defer to the output iterator call, eating the return.
-        get_handles_by_type(back_inserter(appendToHandles), type, subclass);
-    }
-
-    /**
-     * Gets a container of handles that matches with the given type
-     * (subclasses optionally).
-     * Caution: this is slower than using get_handleset_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.
-     *
-     * Example of call to this method, which would return all entries
-     * in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.get_handles_by_type(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handles_by_type(OutputIterator result,
-                        Type type,
-                        bool subclass=false) const
-    {
-        return _atom_table.getHandlesByType(result, type, subclass);
-    }
-
-    /**
-     * Convert the atomspace into a string
-     */
-    std::string to_string() const;
+    /** Returns a string representation of the AtomSpace. */
+    virtual std::string to_string(void) const;
+    virtual std::string to_string(const std::string& indent) const;
+    virtual std::string to_short_string(const std::string& indent) const;
 
     /* ----------------------------------------------------------- */
     // ---- Signals
 
-    AtomSignal& atomAddedSignal()
-    {
-        return _atom_table.atomAddedSignal();
-    }
-    AtomSignal& atomRemovedSignal()
-    {
-        return _atom_table.atomRemovedSignal();
-    }
-    TVCHSigl& TVChangedSignal()
-    {
-        return _atom_table.TVChangedSignal();
-    }
+    AtomSignal& atomAddedSignal() { return _addAtomSignal; }
+    AtomSignal& atomRemovedSignal() { return _removeAtomSignal; }
+
+    /** Provide ability for others to find out about TV changes */
+    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
+
+    // Not for public use! Only StorageNodes get to call this!
+    Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
+
+static inline AtomSpacePtr AtomSpaceCast(const ValuePtr& a)
+    { return std::dynamic_pointer_cast<AtomSpace>(a); }
+static inline AtomSpacePtr AtomSpaceCast(AtomSpace* as)
+    { return AtomSpaceCast(as->shared_from_this()); }
+static inline Handle HandleCast(AtomSpace* as)
+    { return HandleCast(as->shared_from_this()); }
+
+template< class... Args >
+AtomSpacePtr createAtomSpace( Args&&... args )
+{
+   return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
+}
 
 /** @}*/
 } // namespace opencog

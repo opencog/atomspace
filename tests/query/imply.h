@@ -47,6 +47,10 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	Handle gl = as->add_link(LIST_LINK, std::move(hlist));
 	return gl;
 }
+static inline Handle imply(AtomSpacePtr as, Handle hclauses, Handle himplicand)
+{
+	return imply(as.get(), hclauses, himplicand);
+}
 
 /**
  * Pattern Matcher. Just run the matcher against the indicated
@@ -65,9 +69,19 @@ static inline Handle bindlink(AtomSpace* as,
 {
 	return HandleCast(hlink->execute(as));
 }
+static inline Handle bindlink(AtomSpacePtr as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return bindlink(as.get(), hlink, foo);
+}
 
 static inline Handle satisfying_set(AtomSpace* as,
                           const Handle& hlink, size_t foo=0)
 {
 	return HandleCast(hlink->execute(as));
+}
+static inline Handle satisfying_set(AtomSpacePtr as,
+                          const Handle& hlink, size_t foo=0)
+{
+	return satisfying_set(as.get(), hlink, foo);
 }

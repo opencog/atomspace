@@ -38,7 +38,6 @@ namespace opencog
  *  @{
  */
 
-class SQLBackingStore;
 class SQLPersistSCM
 {
 private:
@@ -46,7 +45,7 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    SQLAtomStorage *_backing;
+    PostgresStorageNodePtr _storage;
     AtomSpace *_as;
 
 public:

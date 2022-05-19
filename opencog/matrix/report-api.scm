@@ -38,8 +38,8 @@
                        (Identical to the 'wild-wild-count on the
                        support-api object)
 
-  'left-entropy     -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
-  'right-entropy    -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
+  'left-entropy     -- The sum H_left = -sum_y P(*,y) log_2 P(*,y)
+  'right-entropy    -- The sum H_right = -sum_x P(x,*) log_2 P(x,*)
   'total-entropy    -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
   'total-mi         -- The sum MI = H_tot - H_left - H_right
 
@@ -317,7 +317,7 @@
   rows and columns. The weighted-average is the frequency-weighted
   average: So, for example, if a row is very long, but is very rarely
   seen, then it will not contribute much to the average. See the
-  documentation on `add-report-api` for precise defintions.
+  documentation on `add-report-api` for precise definitions.
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
@@ -431,22 +431,27 @@
 						(sqrt (- lensq sizsq)) 0.0)))))
 
 		; ----------------------------------------------------
-		; Compute and cache the values of the computation with the
+		; Compute and cache the values of the computation where the
 		; report-api can find them.
 
-		(define (cache-left)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
-
+		(define (cache-total)
 			; Note that total-support-left should equal
 			; 'total-support-right, up to round-off errors.
 			(rpt-obj 'set-size
 				(wild-obj 'left-basis-size)
 				(wild-obj 'right-basis-size)
 				(len-obj 'total-support-left))
+		)
+
+		(define (cache-left)
+			(define elapsed-secs (make-elapsed-secs))
+
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-right))
 
 			(rpt-obj 'set-left-norms
 				(get-left-support)
@@ -459,18 +464,14 @@
 		)
 
 		(define (cache-right)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+			(define elapsed-secs (make-elapsed-secs))
 
 			; Note that total-support-left should equal
 			; 'total-support-right, up to round-off errors.
 			(rpt-obj 'set-size
 				(wild-obj 'left-basis-size)
 				(wild-obj 'right-basis-size)
-				(len-obj 'total-support-right))
+				(len-obj 'total-support-left))
 
 			(rpt-obj 'set-right-norms
 				(get-right-support)
@@ -516,6 +517,7 @@
 				((right-rms-count)   (get-right-rms-count))
 				((cache-left)        (cache-left))
 				((cache-right)       (cache-right))
+				((cache-total)       (cache-total))
 				((cache-all)         (cache-all))
 
 				((help)              (help))
@@ -534,15 +536,15 @@
 
 	(define rpt-obj (add-report-api LLOBJ))
 
-	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
+	(format PORT "Entropy Tot: ~7f  Left: ~7f  Right: ~7f  MI: ~7F\n"
 		(rpt-obj 'total-entropy)
 		(rpt-obj 'left-entropy)
 		(rpt-obj 'right-entropy)
+		(rpt-obj 'total-mi)
 	)
-	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
 )
 
-(define (print-support-summary-report LLOBJ PORT)
+(define (print-centrality-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
 	(define ls
@@ -580,7 +582,7 @@
 
 	; Print nothing, if neither rows nor columns available
 	(if (not (or ls rs))
-		(format PORT "No support statistics are present. Use make-central-compute to get them.\n")
+		(format PORT "No support statistics are present;\n   run `((make-central-compute LLOBJ) 'cache-all)` to get them.\n")
 		(begin
 
 	(format PORT "\n")
@@ -613,7 +615,6 @@
 		(set! mtm-entropy
 			(/ (- (log (/ mtm-count (* mtm-support mtm-support)))) (log 2))))
 
-	(format PORT "\n")
 	(if (< 0 mmt-support)
 		(format PORT "MM^T support=~6g count=~6g entropy=~6f\n"
 			mmt-support mmt-count mmt-entropy)
@@ -625,42 +626,53 @@
 		(format PORT "No M^TM data present\n"))
 )
 
-(define* (do-print-report LLOBJ PORT)
+(define (print-basic-summary-report LLOBJ PORT)
+"
+  Print only the most basic report. Requires that the support
+  was previously computed, with ((add-support-compute LLOBJ) 'cache-all)
+"
 	(define (log2 x) (/ (log x) (log 2)))
 
-	(define rpt-obj (add-report-api LLOBJ))
 	(define sup-obj (add-support-api LLOBJ))
 
-	(define size (rpt-obj 'num-pairs))
-	(define nrows (rpt-obj 'left-dim))
-	(define ncols (rpt-obj 'right-dim))
-	(define tot (* nrows ncols))
-	(define obs (sup-obj 'wild-wild-count))
+	; (sup-obj 'left-dim) is exactly the same as (LLOBJ 'left-basis-size)
+	; but is much much faster, because the cached marginal value is used.
+	; On large datasets, triggering (LLOBJ 'left-basis-size) can take
+	; tens of minutes and many gigabytes of RAM. Downside is that we
+	; won't print the dimensions, or the sparsify, if the cached values
+	; are not present.
+	(let* ((nrows (sup-obj 'left-dim))
+			(ncols (sup-obj 'right-dim))
+			(tot (* nrows ncols))
+			(lsize (sup-obj 'total-support-left))
+			(rsize (sup-obj 'total-support-right))
+			(nlsize (inexact->exact (round lsize)))
+			(nrsize (inexact->exact (round rsize)))
+			(lobs (sup-obj 'total-count-left))
+			(robs (sup-obj 'total-count-right))
+			(nlobs (inexact->exact (round lobs)))
+			(nrobs (inexact->exact (round robs))))
 
-	(format PORT "Summary Report for Correlation Matrix ~A\n"
-		(LLOBJ 'name))
-	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
-		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
-	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
+		; lsize should equal rsize should equal (sup-obj 'num-pairs)
+		; should equal (length (LLOBJ 'get-all-pairs)).
+		(if (not (equal? nlsize nrsize))
+			(format PORT "Error: left and right total pairs not equal! ~A ~A\n"
+				lsize rsize))
 
-	(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
+		; lobs should equal robs should equal (sup-obj 'wild-wild-count)
+		(if (not (equal? nlobs nrobs))
+			(format PORT "Error: left and right total counts not equal! ~A ~A\n"
+				lobs robs))
 
-	(format PORT "Size: ~d non-zero entries of ~d possible\n"
-		size tot)
-	(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
-		(/ size tot) (log2 (/ tot size)))
-	(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
-		obs (/ obs size))
-
-	(catch #t
-		(lambda () (print-entropy-summary-report LLOBJ PORT))
-		(lambda (key . args)
-			(format PORT
-				"No MI statistics are present; run compute-mi to get them.\n")
-			#f))
-
-	(print-support-summary-report LLOBJ PORT)
-	(print-transpose-summary-report LLOBJ PORT)
+		(format PORT "Rows: ~d Columns: ~d  == log_2 ~7f x ~7f\n"
+			nrows ncols (log2 nrows) (log2 ncols))
+		(format PORT "Size: ~d  log_2 size: ~7f\n"
+			lsize (log2 lsize))
+		(format PORT "Fraction non-zero: ~9,4g Sparsity: ~7f  Rarity: ~7f\n"
+			(/ lsize tot) (log2 (/ tot lsize)) (log2 (/ lsize (sqrt tot))))
+		(format PORT "Total obs: ~10f  Avg obs/pair: ~7f  log_2 avg: ~7f\n"
+			lobs (/ lobs lsize) (log2 (/ lobs lsize)))
+	)
 )
 
 (define*-public (print-matrix-summary-report LLOBJ
@@ -672,13 +684,43 @@
 
   See documentation for `add-report-api` for an explanation of
   what is being printed.
+
+  All information printed by the report is cached on the wild-card
+  atom.  Thus, for quick peeks into datasets residing on disk, it
+  can be convenient to say `(fetch-atom (LLOBJ 'wild-wild))` and
+  then printing the report. Careful, though: this fetch may clobber
+  recently recomputed data that has not yet been stored!
 "
+
+	; All data needed for this report is hanging off of just one Atom.
+	; Make sure that Atom is in memory. Uhh no, because this may clobber
+	; the content that is in RAM!  Youch!
+	; (fetch-atom (LLOBJ 'wild-wild))
+
+	(format PORT "Summary Report for Correlation Matrix ~A\n"
+		(LLOBJ 'name))
+	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
+		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
+	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
+
 	(catch #t
-		(lambda () (do-print-report LLOBJ PORT))
+		(lambda () (print-basic-summary-report LLOBJ PORT))
 		(lambda (key . args)
 			(format PORT
-				"No cached matrix data available;\n  run ((make-central-compute LLOBJ) 'cache-all) to make one.\n")
+				"No cached matrix data available;\n  run ((add-support-compute LLOBJ) 'cache-all) to make one.\n")
 			#f))
+
+	(catch #t
+		(lambda () (print-entropy-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No MI statistics are present; run compute-mi to get them.\n")
+			#f))
+
+	(print-transpose-summary-report LLOBJ PORT)
+	(print-centrality-summary-report LLOBJ PORT)
+
+	*unspecified*
 )
 
 ; ---------------------------------------------------------------------

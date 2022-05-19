@@ -30,9 +30,7 @@
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/query/InitiateSearchMixin.h>
-#include <opencog/query/TermMatchMixin.h>
-#include <opencog/query/SatisfyMixin.h>
+#include <opencog/query/ContinuationMixin.h>
 
 namespace opencog {
 
@@ -48,9 +46,7 @@ namespace opencog {
  */
 
 class Satisfier :
-	public InitiateSearchMixin,
-	public TermMatchMixin,
-	public SatisfyMixin
+	public ContinuationMixin
 {
 	public: // Arghhh. OpenPsi accesses these directly...
 		Handle _pattern_body;
@@ -58,8 +54,7 @@ class Satisfier :
 
 	public:
 		Satisfier(AtomSpace* as) :
-			InitiateSearchMixin(as),
-			TermMatchMixin(as),
+			ContinuationMixin(as),
 			_result(TruthValue::FALSE_TV()) {}
 
 		DECLARE_PE_MUTEX;
@@ -71,8 +66,7 @@ class Satisfier :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			InitiateSearchMixin::set_pattern(vars, pat);
-			TermMatchMixin::set_pattern(vars, pat);
+			ContinuationMixin::set_pattern(vars, pat);
 			_have_variables = not vars.varseq.empty();
 			_pattern_body = pat.body;
 		}
@@ -102,20 +96,17 @@ class Satisfier :
  */
 
 class SatisfyingSet :
-	public InitiateSearchMixin,
-	public TermMatchMixin,
-	public SatisfyMixin
+	public ContinuationMixin
 {
 	protected:
 		AtomSpace* _as;
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
-		HandleSet _satisfying_set;
 		QueueValuePtr _result_queue;
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			InitiateSearchMixin(as), TermMatchMixin(as),
+			ContinuationMixin(as),
 			_as(as), max_results(SIZE_MAX) {}
 
 		size_t max_results;
@@ -124,8 +115,7 @@ class SatisfyingSet :
 		                         const Pattern& pat)
 		{
 			_varseq = vars.varseq;
-			InitiateSearchMixin::set_pattern(vars, pat);
-			TermMatchMixin::set_pattern(vars, pat);
+			ContinuationMixin::set_pattern(vars, pat);
 		}
 
 		// Return true if a satisfactory grounding has been

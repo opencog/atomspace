@@ -61,13 +61,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;
-static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ExecutionOutputLink>(a); }
-static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ExecutionOutputLink>(a); }
-
-#define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
+LINK_PTR_DECL(ExecutionOutputLink)
+#define createExecutionOutputLink CREATE_DECL(ExecutionOutputLink)
 
 /** @}*/
 }

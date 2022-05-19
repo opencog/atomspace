@@ -122,7 +122,7 @@ IF(Boost_FOUND_SAVE)
 ENDIF(Boost_FOUND_SAVE)
 
 # ----------------------------------------------------------
-# Needed for unit tests.
+# Optional, but needed for unit tests.
 
 FIND_PACKAGE(Cxxtest)
 IF (CXXTEST_FOUND)
@@ -132,12 +132,30 @@ ELSE (CXXTEST_FOUND)
 ENDIF (CXXTEST_FOUND)
 
 # ----------------------------------------------------------
+# Optional, uses slightly more efficient replacement for std::set
+
+# Facebook Folly
+# https://github.com/facebook/folly/blob/main/folly/container/F14.md
+# promises a faster and more compact hash table. Just one problem:
+# It does not make any difference in the "real world" benchmark
+# I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
+#
+FIND_PACKAGE(Folly)
+IF (FOLLY_FOUND)
+	MESSAGE(STATUS "Folly found.")
+	SET(HAVE_FOLLY 1)
+	ADD_DEFINITIONS(-DHAVE_FOLLY)
+ELSE (FOLLY_FOUND)
+	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
+ENDIF (FOLLY_FOUND)
+
+# ----------------------------------------------------------
 # Optional, unused distributed processing framework.
 
 FIND_PACKAGE(LibGearman)
-ADD_DEFINITIONS(-DHAVE_GEARMAN)
 IF(GEARMAN_FOUND)
 	SET(HAVE_GEARMAN 1)
+	ADD_DEFINITIONS(-DHAVE_GEARMAN)
 	SET(GEARMAN_DIR_MESSAGE "Gearman found.")
 ELSE (GEARMAN_FOUND)
 	SET(HAVE_GEARMAN 0)
@@ -146,18 +164,26 @@ ENDIF(GEARMAN_FOUND)
 MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# This is required for Guile, Python
-
+# Find Guile
 include(OpenCogFindGuile)
 
+# ----------------------------------------------------------
 # By default, this uses Python3.
 # To use Python2 only, run the following in the build directory:
 # rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
-
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
-# Glasgow Haskell compiler
+# OCaml (optional; needed for the OCaml bindings.)
+
+FIND_PACKAGE(OCaml)
+IF (OCAML_FOUND)
+	ADD_DEFINITIONS(-DHAVE_OCAML)
+	SET(HAVE_OCAML 1)
+ENDIF (OCAML_FOUND)
+
+# ----------------------------------------------------------
+# Glasgow Haskell compiler (Optional; needed for the Haskell bindings)
 
 FIND_PACKAGE(Stack)
 IF (STACK_FOUND)
@@ -184,7 +210,7 @@ ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# Mandatory Postgres
+# Optional Postgres, needed for PostgresStorageNode
 
 FIND_PACKAGE(PGSQL 9.5)
 IF (PGSQL_FOUND)
@@ -238,9 +264,12 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 	${Boost_INCLUDE_DIRS} ${COGUTIL_INCLUDE_DIR})
 
 # Macros that define how atom types get declared.
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogAtomTypes.cmake")
+
+# Macros for building language-specific objects.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogCython.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogGuile.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogOCaml.cmake")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -363,6 +392,7 @@ ADD_CUSTOM_TARGET(cscope
 
 # ===============================================================
 # Packaging
+# XXX FIXME. Packging below is stale/wrong/broken.
 ## Architecture the package is for.
 ## TODO: Will give error on non debian distros, fix it.
 EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
@@ -415,12 +445,14 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
+# SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
+SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
-SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
+SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
 SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
-SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
+SUMMARY_ADD("Postgres StorageNode" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

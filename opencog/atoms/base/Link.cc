@@ -28,7 +28,6 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/AtomTable.h>
 
 #include "Link.h"
 
@@ -170,7 +169,7 @@ bool Link::operator<(const Atom& other) const
 ContentHash Link::compute_hash() const
 {
 	// 1<<44 - 377 is prime
-	ContentHash hsh = ((1UL<<44) - 377) * get_type();
+	ContentHash hsh = ((1ULL<<44) - 377) * get_type();
 	for (const Handle& h: _outgoing)
 	{
 		hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
@@ -184,7 +183,7 @@ ContentHash Link::compute_hash() const
 	}
 
 	// Links will always have the MSB set.
-	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
 	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;

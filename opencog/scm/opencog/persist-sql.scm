@@ -15,7 +15,7 @@
 (set-procedure-property! sql-clear-cache 'documentation
 "
  sql-clear-cache - clear the TLB of cached data
-    This will free up RAM, maybe a lot, dependeing on how many atoms
+    This will free up RAM, maybe a lot, depending on how many atoms
     are in the cache. The cost of doing this is that some operations
     on atoms will no longer be cached, and will need to go to the
     database to fetch contents, potentially impacting performance.
@@ -42,7 +42,7 @@
  sql-create URL - Create and initialize a new database,
     Create the database encoded in the URL, and initialize it for
     holding AtomSpace data. This assumes that the user has database
-    creation priviledges; otherwise an error will be thrown.
+    creation privileges; otherwise an error will be thrown.
 
     Currently, the ONLY supported URL formats are:
        postgres:///DBNAME

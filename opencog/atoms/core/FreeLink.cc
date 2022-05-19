@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/Quotation.h>
 #include "FreeLink.h"
 
 using namespace opencog;
@@ -36,7 +37,7 @@ FreeLink::FreeLink(const HandleSeq&& oset, Type t)
 	if (not nameserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
-	// Derived classes have thier own init routines.
+	// Derived classes have their own init routines.
 	if (FREE_LINK != t) return;
 	init();
 }
@@ -45,6 +46,7 @@ FreeLink::FreeLink(const HandleSeq&& oset, Type t)
 
 void FreeLink::init(void)
 {
+	if (unquoted_below(_outgoing)) return;
 	_vars.find_variables(_outgoing, true);
 }
 

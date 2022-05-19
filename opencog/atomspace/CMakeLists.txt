@@ -2,10 +2,15 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
+# Optional replacement for std::set
+IF (HAVE_FOLLY)
+	INCLUDE_DIRECTORIES(${FOLLY_INCLUDE_DIR})
+ENDIF (HAVE_FOLLY)
+
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomTable.cc
-	BackingStore.cc
+	Transient.cc
 	TypeIndex.cc
 )
 
@@ -21,7 +26,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
-	container
+	join
 	pattern
 	grounded
 	execution
@@ -32,14 +37,17 @@ TARGET_LINK_LIBRARIES(atomspace
 	${COGUTIL_LIBRARY}
 )
 
+IF (HAVE_FOLLY)
+	TARGET_LINK_LIBRARIES(atomspace ${FOLLY_LIBRARIES})
+ENDIF (HAVE_FOLLY)
+
 INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
 	AtomSpace.h
-	AtomTable.h
-	BackingStore.h
+	Transient.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

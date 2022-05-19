@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -94,6 +95,10 @@ class PMCGroundings : public SatisfyMixin
 		{
 			return _cb.get_incoming_set(h, t);
 		}
+		Handle get_link(const Handle& hg, Type t, HandleSeq&& oset)
+		{
+			return _cb.get_link(hg, t, std::move(oset));
+		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
 		void next_connections(const GroundingMap& var_grounding)
@@ -141,24 +146,49 @@ class PMCGroundings : public SatisfyMixin
 };
 
 /**
- * Recursive evaluator/grounder/unifier of virtual link types.
+ * Loop over all groundings in all components of the pattern. That is,
+ * given an ordered list of N sets, create a Cartesian product over that
+ * list, by choosing one element from each set, and creating a tuple of
+ * length N. The final Cartesian product is a set of all of these
+ * tuples.  Note that there is a potential combinatorial explosion here,
+ * as the total size is the product of the sizes of each of the
+ * component.
+ *
+ * The loop is implemented recursively: The first set is expanded, then
+ * the second set, etc. and so we recurse to depth N. Only at this
+ * deepest call does a single tuple become available.
+ *
+ * During this expansion, filtering is applied. The filters (if any)
+ * are called 'virtual links'. The prototypical example is the
+ * GreaterThanLink. The virtual links return a true/false value, when
+ * applied to the tuple (or to the currently-available fragment of the
+ * tuple), thus accepting/rejecting that tuple.
+ *
  * The virtual links are in 'virtuals', a partial set of groundings
  * are in 'var_gnds' and 'term_gnds', and a collection of possible
  * groundings for disconnected graph components are in 'comp_var_gnds'
  * and 'comp_term_gnds'.
  *
- * Notes below explain the recursive step: how the various disconnected
- * components are brought together into a candidate grounding. That
- * candidate is then run through each of the virtual links.  If these
- * accept the grounding, then the callback is called to make the final
- * determination.
- *
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
  *
  * Return false if no solution is found, true otherwise.
+ * (As always, 'false' means 'search some more' and 'true' means 'halt'.
+ *
+ * XXX FIXME: A major performance optimization is possible, to handle
+ * the truly explosive combinatorial case. The optimization is to first
+ * locate all of the variables in the virtual clauses, and perform the
+ * recursion in the order of these variables. Once all of the variables
+ * in a particular virtual clause have been found, that clause can be
+ * evaluated on the spot. If it rejects the match, then one does not
+ * have to recurse to the bitter end. This basically prunes the search
+ * space. (Similar to how SAT solving works).
+ *
+ * This perf optimization has not been done because basically no one
+ * uses the pattern engine to explore large, complex cartesian products
+ * in this way.
  */
-bool SatisfyMixin::recursive_virtual(
+bool SatisfyMixin::cartesian_product(
             const HandleSeq& virtuals,
             const PatternTermSeq& absents,
             const GroundingMap& var_gnds,
@@ -233,7 +263,7 @@ bool SatisfyMixin::recursive_virtual(
 	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
 	// N_0 * N_1 * N_2 * ... N_m possible combinations of groundings.
-	// We do this recursively, by poping N_m off the back, and calling
+	// We do this recursively, by popping N_m off the back, and calling
 	// ourselves.
 	//
 	// vg and vp will be the collection of all of the different possible
@@ -258,7 +288,7 @@ bool SatisfyMixin::recursive_virtual(
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
-		bool accept = recursive_virtual(virtuals, absents, rvg, rpg,
+		bool accept = cartesian_product(virtuals, absents, rvg, rpg,
 		                                comp_var_gnds, comp_term_gnds);
 
 		// Halt recursion immediately if match is accepted.
@@ -270,7 +300,7 @@ bool SatisfyMixin::recursive_virtual(
 /* ================================================================= */
 /**
  * Ground (solve) a pattern; perform unification. That is, find one
- * or more groundings for the variables occuring in a collection of
+ * or more groundings for the variables occurring in a collection of
  * clauses (a hypergraph). The hypergraph can be thought of as a
  * a 'predicate' which becomes 'true' when a grounding exists.
  *
@@ -348,7 +378,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// in a direct fashion.
 	if (num_comps <= 1)
 	{
-		jit->debug_log();
+		jit->debug_log("SatisfyMixin::satisfy()");
 
 		bool found = start_search();
 		if (found) return found;
@@ -363,17 +393,30 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		return found;
 	}
 
-	// If we are here, then we've got a knot in the center of it all.
-	// Removing the virtual clauses from the hypergraph typically causes
-	// the hypergraph to fall apart into multiple components, (i.e. none
-	// are connected to one another). The virtual clauses tie all of
-	// these back together into a single connected graph.
+	// If we are here, then we have a multi-component graph. These
+	// occur in several different ways. These are:
 	//
-	// There are several solution strategies possible at this point.
-	// The one that we will pursue, for now, is to first ground all of
-	// the distinct components individually, and then run each possible
-	// grounding combination through the virtual link, for the final
-	// accept/reject determination.
+	// 1) OrLink. Each of components in the OrLink must be individually
+	//    grounded. The final set of results is a set-union of each.
+	// 2) Cartesian product of multiple disconnected graph components.
+	//    This is a surprisingly common search (the URE loves to do this)
+	//    The product is product of groundings found in each of the
+	//    components. If there are zero groundings in any component, then
+	//    the product is necessarily the empty set (and so halts further
+	//    search.) A (combinatorially explosive!) loop will then loop
+	//    over the product, passing each combination to the rewrite
+	//    mixin. (The URE typically assembles some deduction in that
+	//    final rewrite.)
+	// 3) Virtual clauses. This is a special case of the Cartesian
+	//    product. Some clauses, such as GreaterThanLink, when removed,
+	//    result in a graph with multiple disconnected components. In
+	//    this case, the Cartesian product is constructed and then the
+	//    elements of the product are passed through the virtual links,
+	//    which produce true/false values which are used to keep/discard
+	//    that particular product. Basically, its just a filter on the
+	//    Cartesian product.
+	//
+	// And so, we start grounding the components.
 
 	const HandleSeq& virts = jit->get_virtual();
 
@@ -381,7 +424,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	size_t num_virts = virts.size();
 	if (logger().is_fine_enabled())
 	{
-		logger().fine("VIRTUAL PATTERN: ====== "
+		logger().fine("MULTI-COMPONENT PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n",
 		              num_comps, num_virts);
 		logger().fine("Virtuals are:");
@@ -395,6 +438,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	}
 #endif
 
+	Type patty = pat.body->get_type();
+	bool have_orlink = (OR_LINK == patty) or (CHOICE_LINK == patty);
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
 	const HandleSeq& comp_patterns = jit->get_component_patterns();
@@ -428,16 +473,12 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		}
 		else
 		{
-			// If there is no solution for one component, then no need
-			// to try to solve the other components, their product
-			// will have no solution.
-			if (gcb._term_groundings.empty()) {
 #ifdef QDEBUG
-				logger().fine("No solution for this component. "
-				              "Abort search as no product solution may exist.");
+			logger().fine("Found %lu groundings for component %lu",
+				gcb._term_groundings.size(), i+1);
 #endif
+			if (not have_orlink and gcb._term_groundings.empty())
 				return false;
-			}
 
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
@@ -448,17 +489,42 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	// We need to reset it.
 	set_pattern(vars, pat);
 
-	// And now, try grounding each of the virtual clauses.
+	// ---------------------------------------------------
+	// OK we've grounded all the components.
+	// Now its time to reassemble them.
+	// In the case of OrLink, the final result is just the set-union
+	// of the groundings delivered by the individual components.
+	if (have_orlink)
+	{
+		OC_ASSERT(0 == virts.size(), "Not expecting virtuals here!");
+		bool done = start_search();
+		if (done) return done;
+		for (size_t i = 0; i < num_comps; i++)
+		{
+			for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
+			{
+				bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
+				if (done) return done;
+			}
+		}
+		return search_finished(false);
+	}
+
+	// ---------------------------------------------------
+	// If we are here, we have to deal with the Cartesian product.
+	// Loop over everything in that product, and filter it through
+	// the virtual clauses (if any).
 #ifdef QDEBUG
-	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
-	              << "num comp=" << comp_var_gnds.size()
+	LAZY_LOG_FINE << "BEGIN cartesian recursion on virtual clausess:"
+	              << " ==========="
+	              << " num comp=" << comp_var_gnds.size()
 	              << " num virts=" << num_virts;
 #endif
 	GroundingMap empty_vg;
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
-	done = recursive_virtual(virts, pat.absents,
+	done = cartesian_product(virts, pat.absents,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
 	done = search_finished(done);

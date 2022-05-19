@@ -30,13 +30,13 @@
 
 using namespace opencog;
 
-#define al as.add_link
-#define an as.add_node
+#define al as->add_link
+#define an as->add_node
 
 class TypeChoiceUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpacePtr as;
 	Handle X, Y, Z, type_choice_decl,
 		connected_pattern, disconnected_pattern,
 		predicate, lambda, implication;
@@ -46,6 +46,7 @@ public:
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		as = createAtomSpace();
 	}
 
 	~TypeChoiceUTest()
@@ -65,7 +66,7 @@ public:
 
 void TypeChoiceUTest::tearDown(void)
 {
-	as.clear();
+	as->clear();
 }
 
 void TypeChoiceUTest::setUp(void)
@@ -119,7 +120,7 @@ void TypeChoiceUTest::test_connected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(&as, connected_pattern);
+	Handle result = satisfying_set(as, connected_pattern);
 	Handle expected = al(SET_LINK, al(LIST_LINK, predicate, lambda));
 
 	logger().debug() << "result = " << result->to_string();
@@ -135,7 +136,7 @@ void TypeChoiceUTest::test_disconnected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(&as, disconnected_pattern);
+	Handle result = satisfying_set(as, disconnected_pattern);
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK, lambda, predicate),
 	                     al(LIST_LINK, predicate, predicate),
@@ -236,7 +237,7 @@ void TypeChoiceUTest::test_forall()
 		                      forall_candidate_vardecl,
 		                      forall_candidate_body);
 
-	Handle result = satisfying_set(&as, forall_instantiation_get);
+	Handle result = satisfying_set(as, forall_instantiation_get);
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK,
 	                        forall_candidate_vardecl,

@@ -36,11 +36,15 @@ namespace opencog
 /// that atom in the first position.  Adding another StateLink with
 /// the same first-atom causes the previous StateLink to be removed!
 ///
-/// This class is intended for holding single-valued state in a safe,
-/// automated fashion. Of course, a user can also store unique state
-/// simply by being careful to delete the old state after adding the
-/// new state; but this can be error prone.  Thus link type provides
-/// convenience and safety.
+/// This class is intended for holding single-valued state in a
+/// thread-safe, fully-automated fashion. Of course, a user can also
+/// store unique state simply by being careful to delete the old state
+/// after adding the new state; but this would not be thread-safe.
+///
+/// By "thread-safe", it is meant that any other thread observing the
+/// AtomSpace will only see one StateLink: either the old one, or the
+/// new one; they will never see two StateLinks, and they will never
+/// see zero StateLinks.
 ///
 class StateLink : public UniqueLink
 {
@@ -72,7 +76,9 @@ public:
 	 *
 	 * return <body>. Throws exception if there is no such StateLink.
 	 */
-	static Handle get_state(const Handle& alias);
+	static Handle get_state(const Handle& alias, const AtomSpace*);
+	static Handle get_state(const Handle& alias)
+	{ return get_state(alias, alias->getAtomSpace()); }
 
 	/**
 	 * Given a Handle pointing to <name> in
@@ -84,18 +90,23 @@ public:
 	 * return the whole StateLink. Throws exception if there is
 	 * no such StateLink.
 	 */
-	static Handle get_link(const Handle& alias);
+	static Handle get_link(const Handle& alias, const AtomSpace*);
+	static Handle get_link(const Handle& alias)
+	{ return get_link(alias, alias->getAtomSpace()); }
+
+	/**
+	 * Non-static version of the above. Uses `this->get_alias()`
+	 * and then tries to find the appropriate closed link.
+	 * Unlike the above, it won't throw, if not found. Instead,
+	 * it will just return `this`.
+	 */
+	Handle get_link(const AtomSpace*);
 
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<StateLink> StateLinkPtr;
-static inline StateLinkPtr StateLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<StateLink>(h); }
-static inline StateLinkPtr StateLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<StateLink>(a); }
-
-#define createStateLink std::make_shared<StateLink>
+LINK_PTR_DECL(StateLink)
+#define createStateLink CREATE_DECL(StateLink)
 
 /** @}*/
 }

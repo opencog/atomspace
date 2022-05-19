@@ -61,8 +61,8 @@ namespace opencog {
 /// any purpose.
 ///
 /// After search_set() is called, the set of target atoms that were found
-/// can be retreived from the public member `varset`.  The set of links
-/// that had one of these targets occuring somewhere, anywhere, within
+/// can be retrieved from the public member `varset`.  The set of links
+/// that had one of these targets occurring somewhere, anywhere, within
 /// them is in the public member `holders`. This includes the holders of
 /// holders, etc, all the way up to the very top.  The `least_holders`
 /// member will contain only those links that contain a target in their
@@ -285,6 +285,8 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
  */
 bool any_free_in_tree(const Handle& tree,
                       const HandleSet& atoms);
+bool any_free_in_tree(const Handle& tree,
+                      const HandleSeq& atoms);
 
 /**
  * Return how many of the indicated atoms occur somewhere in

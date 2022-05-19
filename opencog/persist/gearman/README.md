@@ -6,7 +6,7 @@ Under the covers, it uses Gearman to perform the distribution.
 
 ## Overview
 AtomSpace scheme users can distribute the evaluation of scheme code
-across multiple systems using the Gearman distributed job contol
+across multiple systems using the Gearman distributed job control
 system.  Jobs are defined by writing (short) scheme programs, which
 are sent to the Gearman workers.  Results are communicated back as
 scheme strings.
@@ -18,7 +18,7 @@ general framework.
 As currently implemented, this is a half-baked, incomplete, and mostly
 untested idea.
 
-* There is no job management and no network control.  Currenly,
+* There is no job management and no network control.  Currently,
   there is no way for scheme job servers to be started on remote
   machines. Servers have to be started and managed by hand.
 

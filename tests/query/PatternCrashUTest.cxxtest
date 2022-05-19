@@ -35,7 +35,7 @@ using namespace opencog;
 class PatternCrashUTest: public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *_as;
+		AtomSpacePtr _as;
 		SchemeEval *_eval;
 
 	public:
@@ -45,14 +45,13 @@ class PatternCrashUTest: public CxxTest::TestSuite
 #undef DEBUG
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
-			_as = new AtomSpace();
+			_as = createAtomSpace();
 			_eval = new SchemeEval(_as);
 		}
 
 		~PatternCrashUTest()
 		{
 			delete _eval;
-			delete _as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -272,7 +271,7 @@ void PatternCrashUTest::test_one_thing(void)
 	Handle hpattern = _as->add_atom(createPatternLink(htarget_vardecl, htarget));
 
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
-	PMCB pmcb(_as);
+	PMCB pmcb(_as.get());
 
 	logger().debug("Before Pattern Matching");
 
@@ -294,7 +293,7 @@ void PatternCrashUTest::test_empty_vars(void)
 	logger().debug("Before Pattern Matching");
 
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
-	PMCB pmcb(_as);
+	PMCB pmcb(_as.get());
 	pmcb.satisfy(sl);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

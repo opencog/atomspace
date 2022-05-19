@@ -34,7 +34,7 @@ void TypedVariableLink::init()
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting atom and type specification; got %s",
-			to_string().c_str());
+			to_short_string().c_str());
 
 	// Type-check. This is ... kind of a pointless restriction,
 	// except that pretty much everything else expects variables
@@ -57,7 +57,7 @@ void TypedVariableLink::init()
 	    INTERVAL_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting type defintion, got %s in\n%s",
+			"Expecting type definition, got %s in\n%s",
 				nameserver().getTypeName(dtype).c_str(),
 				to_short_string().c_str());
 
@@ -92,7 +92,7 @@ const GlobInterval TypedVariableLink::default_interval() const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all equivalent
-/// type specifications get exactly the same hash.  To acheive this,
+/// type specifications get exactly the same hash.  To achieve this,
 /// the normalized type specifications are used, rather than the raw
 /// user-specified types. (The static analysis is "normalizing").
 
@@ -147,9 +147,13 @@ std::string TypedVariableLink::to_string(const std::string& indent) const
 {
 	std::string str = Link::to_string(indent);
 
-	str += "\n" + indent;
-	str += "; _typech:\n";
-	str += _typech->to_string(indent + ";" + OC_TO_STRING_INDENT);
+	// Avoid printing confusing garbage for the simple case.
+	if (not _typech->is_simple())
+	{
+		str += "\n" + indent;
+		str += "; _typech:\n";
+		str += _typech->to_string(indent + ";" + OC_TO_STRING_INDENT);
+	}
 
 	return str;
 }

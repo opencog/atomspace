@@ -30,7 +30,7 @@ using namespace opencog;
 class EvaluationUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace* as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -40,14 +40,13 @@ public:
 		logger().set_print_to_stdout_flag(true);
 		logger().set_sync_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 	}
 
 	~EvaluationUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -67,6 +66,9 @@ public:
 	void test_eval_overlay(void);
 	void test_logic_overlay(void);
 	void test_varval_overlay(void);
+
+	void test_eval_equal(void);
+	void test_logic_equal(void);
 
 	void test_lambda(void);
 };
@@ -218,8 +220,8 @@ void EvaluationUTest::test_eval_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -227,7 +229,6 @@ void EvaluationUTest::test_eval_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 
@@ -242,8 +243,8 @@ void EvaluationUTest::test_logic_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -251,7 +252,6 @@ void EvaluationUTest::test_logic_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
 
@@ -266,8 +266,8 @@ void EvaluationUTest::test_varval_overlay(void)
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
-	AtomSpace* save = as;
-	as = new AtomSpace(as);
+	AtomSpacePtr save = as;
+	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
 	eval = new SchemeEval(as);
 
@@ -275,9 +275,30 @@ void EvaluationUTest::test_varval_overlay(void)
 
 	delete eval;
 	eval = seval;
-	delete as;
 	as = save;
 	as->set_read_write();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Identical to test_eval_rw, except it uses EqualLink not IdenticalLink
+void EvaluationUTest::test_eval_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/eval-equal.scm\")");
+	do_test_eval();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Identical to test_logic_rw, except it uses EqualLink not IdenticalLink
+void EvaluationUTest::test_logic_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/eval-equal.scm\")");
+	do_test_logic();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -129,7 +129,7 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	}
 
 	// Now loop over all for-all clauses.
-	// All variables must neccessarily be grounded at this point.
+	// All variables must necessarily be grounded at this point.
 	for (const PatternTermPtr& root : _pattern->always)
 	{
 		if (_issued.end() != _issued.find(root)) continue;
@@ -207,7 +207,7 @@ Handle InitiateSearchMixin::get_glob_embedding(const GroundingMap& var_grounding
 	// If the glob is in only one clause, there is no connectivity map.
 	if (0 == _pattern->connectivity_map.count(glob)) return glob;
 
-	// Find some clause, any clause at all, containg the glob,
+	// Find some clause, any clause at all, containing the glob,
 	// that has not been grounded so far. We need to do this because
 	// the glob might appear in three clauses, with two of them
 	// grounded by a common term, and the third ungrounded
@@ -261,7 +261,10 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// Make a list of the as-yet ungrounded variables.
 	HandleSet ungrounded_vars;
 
-	// Grounded variables ordered by the size of their grounding incoming set
+	// Grounded variables ordered by the size of their grounding
+	// incoming set. Ideally, we should look only at the incoming
+	// set that matches the type of the parent term. But for now,
+	// this simpler code is good enough. XXX FIXME someday?
 	std::multimap<std::size_t, Handle> thick_vars;
 
 	for (const Handle &v : _variables->varset)
@@ -378,10 +381,14 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	}
 	else
 	{
-		Choice ch;
-		ch.clause = unsolved_clause;
-		ch.start_term = term_of_handle(joint, unsolved_clause);
-		_next_choices.emplace_back(ch);
+		PatternTermSeq stseq = term_choices_of_handle(joint, unsolved_clause);
+		for (const PatternTermPtr& stm : stseq)
+		{
+			Choice ch;
+			ch.clause = unsolved_clause;
+			ch.start_term = stm;
+			_next_choices.emplace_back(ch);
+		}
 	}
 	return true;
 }

@@ -184,72 +184,6 @@
         )
 ")
 
-(set-procedure-property! cog-delete! 'documentation
-"
- cog-delete! ATOM [ATOMSPACE]
-    Remove the indicated ATOM, but only if it has no incoming links.
-    If it has incoming links, the remove fails.  If storage is attached,
-    the ATOM is also removed from the storage.
-
-    Returns #t if the atom was removed, else returns #f if not removed.
-
-    Use cog-extract! to remove from the AtomSpace only, leaving storage
-    unaffected.
-
-    Use cog-delete-recursive! to force removal of this atom, together
-    with any links that might be holding this atom.
-
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
-
-    Example:
-       ; Define two nodes and a link between them:
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (Concept \"def\"))
-       guile> (define l (Link x y))
-
-       ; Verify that there's an atom called x:
-       guile> x
-       (ConceptNode \"abc\")
-
-       ; Try to delete x. This should fail, since there's a link
-       ; containing x.
-       guile> (cog-delete! x)
-       #f
-
-       ; Delete x, and everything pointing to it. This should delete
-       ; both x, and the link l.
-       guile> (cog-delete-recursive! x)
-       #t
-
-       ; Verify that the link l is gone:
-       guile> l
-       Invalid handle
-
-       ; Verify that the node x is gone:
-       guile> x
-       Invalid handle
-
-       ; Verify that the node y still exists:
-       guile> y
-       (ConceptNode \"def\")
-")
-
-(set-procedure-property! cog-delete-recursive! 'documentation
-"
- cog-delete-recursive! ATOM [ATOMSPACE]
-    Remove the indicated ATOM, and all atoms that point at it.
-    If SQL or other data storage is attached, the ATOM is also removed
-    from the storage.
-
-    Return #t on success, else return #f if not removed.
-
-    If the optional ATOMSPACE argument is provided, then the ATOM is
-    removed from that AtomSpace; otherwise, it is removed from the
-    current AtomSpace for this thread.
-")
-
 (set-procedure-property! cog-extract! 'documentation
 "
  cog-extract! ATOM [ATOMSPACE]
@@ -258,8 +192,9 @@
 
     Returns #t if the atom was removed, else returns #f if not removed.
 
-    This does NOT remove the atom from any attached storage (e.g. SQL
-    storage).  Use cog-delete! to remove from atoms from storage.
+    This does NOT remove the atom from any attached persistent storage.
+    Use cog-delete! from the (opencog persist) module to remove atoms
+    from storage.
 
     Use cog-extract-recursive! to force removal of this atom, together
     with any links that might be holding this atom.
@@ -307,13 +242,15 @@
     Remove the indicated ATOM, and all atoms that point at it.
     Return #t on success, else return #f if not removed.
 
-    The atom is NOT removed from SQL or other attached data storage.
-    If you need to delete from storage, use cog-delete! and
-    cog-delete-recursive!.
+    This does NOT remove the atom from any attached persistent storage.
+    Use cog-delete-recursive! from the (opencog persist) module to
+    remove atoms from storage.
 
     If the optional ATOMSPACE argument is provided, then the ATOM is
     removed from that AtomSpace; otherwise, it is removed from the
     current AtomSpace for this thread.
+
+    See also: cog-extract!
 ")
 
 (set-procedure-property! cog-atom? 'documentation
@@ -605,7 +542,9 @@
   Example usage:
      (cog-inc-count! (Concept \"Answer\") 42.0)
 
-  See also: cog-inc-value! for a generic version
+  See also:
+      cog-count to fetch the current count
+      cog-inc-value! for a generic version
 ")
 
 (set-procedure-property! cog-inc-value! 'documentation
@@ -635,6 +574,8 @@
  cog-mean ATOM
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-confidence, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-confidence 'documentation
@@ -642,6 +583,8 @@
  cog-confidence ATOM
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-count, cog-tv
 ")
 
 (set-procedure-property! cog-count 'documentation
@@ -649,6 +592,8 @@
  cog-count ATOM
     Return the `count` of the TruthValue on ATOM. This is a single
     floating point-number.
+
+    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
 ")
 
 ; ===================================================================
@@ -666,6 +611,8 @@
        (stv 0.2 0.5)
        guile> (cog-tv? (cog-tv x))
        #t
+
+    See also: cog-set-tv!
 ")
 
 (set-procedure-property! cog-set-tv! 'documentation
@@ -689,6 +636,8 @@
  cog-tv-mean TV
     Return the `mean` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-mean
 ")
 
 (set-procedure-property! cog-tv-confidence 'documentation
@@ -696,6 +645,8 @@
  cog-tv-confidence TV
     Return the `confidence` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-confidence
 ")
 
 (set-procedure-property! cog-tv-count 'documentation
@@ -703,6 +654,8 @@
  cog-tv-count TV
     Return the `count` of the TruthValue TV. This is a single
     floating point-number.
+
+    See also: cog-count
 ")
 
 ; ===================================================================
@@ -790,6 +743,15 @@
     If it is #f or the empty list '(), then the KEY is removed from
     the atom.
 
+    This returns either ATOM or a copy of ATOM with the new value. If
+    the current AtomSpace is a copy-on-write (COW) AtomSpace, and ATOM
+    lies in some other space below the current space, then a copy of
+    ATOM will be made and placed in the current space.  This copy will
+    have the new VALUE, while the value on the input ATOM will be
+    unchanged.  COW spaces are commonly used with underlying read-only
+    spaces, or with long stacks (DAG's) of AtomSpaces (Frames) recording
+    a history of value changes.
+
     Example:
        guile> (cog-set-value!
                  (Concept \"abc\") (Predicate \"key\")
@@ -802,7 +764,11 @@
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        #f
 
-    See also: cog-set-values! ATOM ALIST - set multiple values.
+    See also:
+       cog-set-values! ATOM ALIST - Set multiple values.
+       cog-new-atomspace - Create a new AtomSpace
+       cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
+       cog-atomspace-ro! - Mark AtomSpace as read-only.
 ")
 
 (set-procedure-property! cog-set-values! 'documentation
@@ -830,7 +796,20 @@
                     (cons (Predicate \"key2\") #f)))
        guile> (cog-keys->alist (Concept \"abc\"))
 
-    See also: cog-set-value! ATOM KEY VALUE - set a single value
+    This returns either ATOM or a copy of ATOM with the new value. If
+    the current AtomSpace is a copy-on-write (COW) AtomSpace, and ATOM
+    lies in some other space below the current space, then a copy of
+    ATOM will be made and placed in the current space.  This copy will
+    have the new VALUE, while the value on the input ATOM will be
+    unchanged.  COW spaces are commonly used with underlying read-only
+    spaces, or with long stacks (DAG's) of AtomSpaces (Frames) recording
+    a history of value changes.
+
+    See also:
+       cog-set-values! ATOM ALIST - Set multiple values.
+       cog-new-atomspace - Create a new AtomSpace
+       cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
+       cog-atomspace-ro! - Mark AtomSpace as read-only.
 ")
 
 (set-procedure-property! cog-value? 'documentation
@@ -962,6 +941,10 @@
   Example usage:
      (display (cog-count-atoms 'Concept))
   will display a count of all atoms of type 'Concept
+
+  See also:
+     cog-get-atoms -- return a list of all atoms of a given type.
+     cog-report-counts -- return a report of counts of all atom types.
 ")
 
 (set-procedure-property! cog-atomspace 'documentation
@@ -991,28 +974,50 @@
 
 (set-procedure-property! cog-new-atomspace 'documentation
 "
- cog-new-atomspace [ATOMSPACE]
-    Create a new atomspace.  If the optional argument ATOMSPACE
-    is present, then the new atomspace will be an expansion (child)
-    of ATOMSPACE.  AtomSpaces are automatically deleted when no more
-    references to them remain. Returns the new atomspace.
+ cog-new-atomspace [NAME] [ATOMSPACE [ATOMSPACE2 [...]]]
+    Create a new atomspace.  If the optional argument NAME is present,
+    and it is a string, then the new AtomSpace will be given this
+    name. If a list of AtomeSpaces are present, then the new AtomSpace
+    will include these as subframes (subspaces).
+
+    Returns the new atomspace.
+
+    AtomSpaces are automatically deleted when no more references to
+    them remain.
 
     Note that this does NOT set the current atomspace to the new one;
     to do that, you need to use cog-set-atomspace!
+
+    The name of the AtomSpace can be obtained with `cog-name`.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-env -- Get the subspaces.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
+       cog-atomspace-ro! -- Mark the AtomSpace as read-only.
+       cog-atomspace-cow! -- Mark the AtomSpace as copy-on-write.
 ")
 
 (set-procedure-property! cog-atomspace-env 'documentation
 "
  cog-atomspace-env [ATOMSPACE]
-     Return the parent of ATOMSPACE. The ATOMSPACE argument is
-     optional; if not specified, the current atomspace is assumed.
+    Return the parent(s) of ATOMSPACE. The ATOMSPACE argument is
+    optional; if not specified, the current atomspace is assumed.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-uuid 'documentation
 "
  cog-atomspace-uuid [ATOMSPACE]
-     Return the UUID of ATOMSPACE. The ATOMSPACE argument is
-     optional; if not specified, the current atomspace is assumed.
+    Return the UUID of ATOMSPACE. The ATOMSPACE argument is
+    optional; if not specified, the current atomspace is assumed.
+
+    See also:
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-env -- Get the subspaces.
 ")
 
 (set-procedure-property! cog-atomspace-clear 'documentation
@@ -1075,12 +1080,20 @@
      parent. (It does not make sense to mark an atomspace as being COW,
      if there is no parent.)
 
+     The ATOMSPACE argument is optional; if not specified, the current
+     atomspace is assumed.
+
      COW spaces are useful as temporary or transient AtomSpaces, so that
      scratch calculations and updates can be performed without affecting
      the parent.
 
-     The ATOMSPACE argument is optional; if not specified, the current
-     atomspace is assumed.
+     Long chains of COW spaces can also be used to record a history of
+     changes to Values stored on Atoms. This can be useful in several
+     ways, including backtracking from complex inferences.
+
+     Atoms that are deleted in COW spaces are removed only in that
+     space; they remain in the parent AtomSpaces. They can also be
+     added back in, farther up a stack of spaces.
 
      See also: cog-atomspace-cow?, cog-atomspace-readonly?,
          cog-atomspace-ro! and cog-atomspace-rw!,

@@ -30,17 +30,17 @@
 
 using namespace opencog;
 
-#define al as.add_link
-#define an as.add_node
+#define al as->add_link
+#define an as->add_node
 
 class DontExecUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpacePtr as;
 	SchemeEval eval;
 
 public:
-	DontExecUTest() : eval(&as)
+	DontExecUTest() : as(createAtomSpace()), eval(as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_sync_flag(true);
@@ -132,7 +132,7 @@ void DontExecUTest::test_DontExecLink_consumption()
 	eval.eval("(load-from-path \"tests/query/dont-exec.scm\")");
 
 	Handle bl = eval.eval_h("bl");
-	Handle result = bindlink(&as, bl);
+	Handle result = bindlink(as, bl);
 	Handle simple_bl = eval.eval_h("simple-bl");
 	Handle expected = al(SET_LINK, al(DONT_EXEC_LINK, simple_bl));
 

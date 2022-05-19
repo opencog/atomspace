@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -36,7 +36,7 @@ using namespace opencog;
 
 void SQLAtomStorage::registerWith(AtomSpace* as)
 {
-	_tlbuf.set_resolver(&as->get_atomtable());
+	_tlbuf.set_resolver(as);
 
 #ifdef NOT_NEEDED_RIGHT_NOW
 	// The goal here is to avoid cluttering the TLB with lots of
@@ -56,20 +56,29 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 		std::bind(&SQLAtomStorage::extract_callback, this,
 			std::placeholders::_1));
 #endif // NOT_NEEDED_RIGHT_NOW
-
-	BackingStore::registerWith(as);
 }
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
-	BackingStore::unregisterWith(as);
-
 	flushStoreQueue();
-	_tlbuf.clear_resolver(&as->get_atomtable());
+	_tlbuf.clear_resolver(as);
 
 #ifdef NOT_NEEDED_RIGHT_NOW
 	_extract_sig.disconnect();
 #endif // NOT_NEEDED_RIGHT_NOW
+}
+
+void SQLAtomStorage::setAtomSpace(AtomSpace* tb)
+{
+	if (tb == _atom_space) return;
+
+	// XXX FIXME ... I don't get it .. stubbing out the two lines
+	// below does not seem to affect the outcome of the unit tests.
+	// But I'm pretty sure they are needed, so ???
+	if (tb) registerWith(tb);
+	else unregisterWith(_atom_space);
+
+	Atom::setAtomSpace(tb);
 }
 
 void SQLAtomStorage::extract_callback(const AtomPtr& atom)
@@ -81,10 +90,15 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 /// Return the UUID of the handle, if it is known.
 /// If the handle is in the database, then the correct UUID is returned.
 /// If the handle is NOT in the database, this returns the invalid UUID.
+///
+/// FYI, this can also throw, because doGetLink() can throw, if one of
+/// the Atoms in the Link is missing. So, really, this and get_uuid()
+/// should be merged back into one. XXX FIXME.
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Optimize for bulk stores. That is, we know for a fact that
 	// the database cannot possibly contain this atom yet, so do
@@ -101,11 +115,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	{
 		dbh = doGetLink(h->get_type(), h->getOutgoingSet());
 	}
-	// If it was found in the database, then the TLB got updated.
-	if (dbh) return _tlbuf.getUUID(h);
 
-	// If it was not found in the database, then say so.
-	return TLB::INVALID_UUID;
+	// If it was found in the database, then the TLB got updated.
+	// If it was not found, we might still be recreating a
+	// a previously known atom, and so should reuse that uuid.
+	return _tlbuf.getUUID(h);
 }
 
 /// Return the UUID of the handle, if it is known, else throw exception.
@@ -114,7 +128,8 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 UUID SQLAtomStorage::get_uuid(const Handle& h)
 {
 	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return uuid;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return uuid;
 
 	// Throw a silent exception; don't clutter log-files with this!
 	throw NotFoundException(TRACE_INFO, "");

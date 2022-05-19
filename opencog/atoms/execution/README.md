@@ -36,50 +36,40 @@ Some vocabulary:
   it's return value. There are black-box and clear-box variants of
   these.
 
-The distinction between execution and evaluation is artificial, but
-is motivated by the design of the atom-type hierarchy.  At some
-abstract level, the two are the same thing; we just use the word
-'evaluation' only when talking about functions that return TV's, and
-'execution' when talking about functions that return atoms.
+The distinction between execution and evaluation is a historical
+artifact, dating back to when TruthValues had an elevated, special
+meaning in the type hierarchy. This is now gone, and, for the most part,
+execution and evaluation could be the same thing.
 
 This distinction is slowly being erased, on an as-needed, as-possible
 basis.  We are doing itt slowly because it is not always immediately
 clear exactly how to do this correctly.
 
+However: there is a distinction between evaluations that return crisp
+true-false values, vs. other values. For performance reasons, we want to
+always represent crisp true-false values with c++ booleans, so that the
+code runs fast. Currently, this is done in an ad hoc manner, as needed.
+A sharper architectural distinction would be nice.
+
 
 Design complexity
 -----------------
-The design has gotten complex due to multiple reasons.  But first,
-here is why execution is complex:
+The design has gotten complex due to some confusion about when execution
+should be done. In simplistic terms, there is confusion between "eager
+execution" and "lazy execution".  Some functions need to execute their
+arguments, before they can do what they do, while others must have
+arguments applying themselves. Others must not, as that would ruin what
+they do.
 
-* Execution must be done recursively, starting at the leafs.
-  That is, most (but not all) functions require the function
-  arguments to be in their final reduced 'value' form, before
-  the function can be executed.  That is, execution does NOT
-  commute with substitution.
+Substitution does not commute with execution. During substitution,
+values need to be pasted into locations where variables stood. Of
+course, bound variables and quoted variables cannot be substituted.
 
-* Substitution has to be done recursively, but with care: Not all
-  variables are free; not all variables are bound. Thus, for example,
-  the PutLink has two parts: all variables in the body of the PutLink
-  are bound, but all variables in the value-list are free.  Thus,
-  if there is variable substitution outside of PutLink, only the
-  free variables can be substituted!
+The handling of DeleteLink poses a challenge. If the result of
+substitution into a DeleteLink results in a fully grounded (fully
+closed) DeleteLink, the result (and anything that contains that result)
+cannot be placed into the AtomSpace.
 
-* The beta reduction of PutLink does commute with execution.
-  That is, execution can be performed either before or after
-  beta reduction. It is easier to handle execution of e.g.
-  DeleteLink's, if execution is done before beta reduction.
-
-* The execution of the DeleteLink cannot be done by itself, i.e.
-  by it's own execute() method. This is because fully grounded
-  (fully closed) DeleteLinks are forbidden, and cannot be inserted
-  into the AtomSpace: thus, deletion needs to happen outside of
-  its own execute() method.  This could be avoided if the AtomSpace
-  told the atom when it was being inserted, but, right now, the
-  AtomSpace does not send an "insert" message to the atoms being
-  inserted.
-
-* Execution is (almost always?) done in a "lazy" or delayed fashion.
 
 Performance
 -----------

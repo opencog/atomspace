@@ -98,7 +98,7 @@
 (define-public (gddar x) (gdr (gdr (gar x))) )
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
 
-; A more agressive way of doing the above:
+; A more aggressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
 ; But this would probably lead to various painful debugging situations.
 
@@ -242,7 +242,10 @@
      (display (cog-get-atoms 'Atom #t))
   will return and display all atoms in the AtomSpace.
 
-  See also: cog-get-all-roots to get only the roots.
+  See also:
+     cog-get-all-roots -- get only the roots.
+     cog-count-atoms -- count atoms of a given type.
+     cog-report-counts -- provide a report of the different atom types.
 "
 	(let ((lst '()))
 		(define (mklist atom)
@@ -258,31 +261,6 @@
 )
 
 ; -----------------------------------------------------------------------
-(define* (traverse-roots func ATOMSPACE)
-"
-  traverse-roots -- Applies func to every root atom in the atomspace.
-
-  The root atoms are those, which have no incoming atoms, located
-  in the atomspace or its ancestors (i.e. visible from the atomspace).
-"
-	; A list of the atomspace and all parents
-	(define atomspace-and-parents
-		(unfold null? identity cog-atomspace-env ATOMSPACE))
-
-	; Is the atom in any of the atomspaces?
-	(define (is-visible? atom)
-		(member (cog-as atom) atomspace-and-parents))
-
-	(define (apply-if-root h)
-		(if (not (any is-visible? (cog-incoming-set h)))
-			(func h))
-		#f)
-
-	(for-each
-		(lambda (ty) (cog-map-type apply-if-root ty ATOMSPACE))
-		(cog-get-types))
-)
-; -----------------------------------------------------------------------
 (define*-public (cog-prt-atomspace #:optional (ATOMSPACE (cog-atomspace)))
 "
   cog-prt-atomspace [ATOMSPACE] -- Prints all atoms in the atomspace
@@ -295,8 +273,23 @@
   somewhere underneath these top-most atoms.
 
   This is equivalent to `(display (cog-get-all-roots))`.
+
+  To dump large atomspaces to a file, use `FileStorageNode`. For example:
+     (use-modules (opencog persist-file))
+     (define fsn (FileStorageNode \"/tmp/bigspace.scm\"))
+     (cog-open fsn)
+     (store-atomspace fsn)
+     (cog-close fsn)
 "
-	(traverse-roots display ATOMSPACE)
+	(define (prt-atom h)
+		; Print only the top-level atoms.
+		(if (null? (cog-incoming-set h ATOMSPACE))
+			(display h))
+		#f)
+
+	(for-each
+		(lambda (ty) (cog-map-type prt-atom ty ATOMSPACE))
+		(cog-get-types))
 )
 
 ; -----------------------------------------------------------------------
@@ -313,10 +306,15 @@
 
   See also: cog-get-atoms, cog-get-root
 "
-  (define roots '())
-  (define (cons-roots x) (set! roots (cons x roots)))
-  (traverse-roots cons-roots ATOMSPACE)
-  roots
+	(define roots '())
+	(define (cons-roots x)
+		(if (null? (cog-incoming-set x ATOMSPACE))
+			(set! roots (cons x roots)))
+		#f)
+	(for-each
+		(lambda (ty) (cog-map-type cons-roots ty ATOMSPACE))
+		(cog-get-types))
+	roots
 )
 
 ; -----------------------------------------------------------------------
@@ -499,7 +497,7 @@
 
   Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
   Starting at the atom 'anchor', chase its incoming links of
-  'link-type', and call proceedure 'proc' on all of the atoms of
+  'link-type', and call procedure 'proc' on all of the atoms of
   type 'endpoint-type' in those links. For example, if 'anchor' is the
   node 'GivenNode \"a\"', and the atomspace contains
 
@@ -763,7 +761,7 @@
 
   Then, given, as input, \"SomeAtom\", this returns a list of the \"OtherAtom\"
 
-  XXX! Caution/error! This implictly assumes that there is only one
+  XXX! Caution/error! This implicitly assumes that there is only one
   such ReferenceLink in the system, total. This is wrong !!!
 
   XXX! You probably want to be using either StateLink or DefineLink
@@ -833,7 +831,7 @@
   one or more elements.  Let the cardinality of s_k be n_k.
   Then this returns a list of n_1 * n_2 *... * n_m tuples.
   where the projection of the coordinate k is an element of s_k.
-  That is, let p_k be the k'th cordinate projection, so that
+  That is, let p_k be the k'th coordinate projection, so that
   p_k [a_1, a_2, ... , a_m] = a_k
 
   Then, if t is a tuple returned by this function, one has that
@@ -1001,7 +999,7 @@
     and makes it current.  Thus, all subsequent atom operations will
     create atoms in this new atomspace. To delete it, simply pop it;
     after popping, all of the atoms placed into it will also be
-    deleted (unless they are refered to in some way).
+    deleted (unless they are referred to in some way).
 "
 	(fluid-set! cog-atomspace-stack
 		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))

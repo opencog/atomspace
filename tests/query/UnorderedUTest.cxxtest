@@ -17,7 +17,7 @@ using namespace opencog;
 class UnorderedUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		Handle pair;
 		Handle disorder;
 		Handle disordered;
@@ -86,7 +86,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 #define al as->add_link
 void UnorderedUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 

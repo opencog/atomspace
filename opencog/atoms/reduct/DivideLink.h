@@ -36,13 +36,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<DivideLink> DivideLinkPtr;
-static inline DivideLinkPtr DivideLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<DivideLink>(a); }
-static inline DivideLinkPtr DivideLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<DivideLink>(a); }
-
-#define createDivideLink std::make_shared<DivideLink>
+LINK_PTR_DECL(DivideLink)
+#define createDivideLink CREATE_DECL(DivideLink)
 
 /** @}*/
 }

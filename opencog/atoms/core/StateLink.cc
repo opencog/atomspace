@@ -53,9 +53,9 @@ StateLink::StateLink(const Handle& name, const Handle& defn)
  * This will be the second atom of some StateLink, where
  * `alias` is the first.
  */
-Handle StateLink::get_state(const Handle& alias)
+Handle StateLink::get_state(const Handle& alias, const AtomSpace* as)
 {
-	Handle uniq(get_unique(alias, STATE_LINK, true));
+	Handle uniq(get_unique(alias, STATE_LINK, true, as));
 	return uniq->getOutgoingAtom(1);
 }
 
@@ -63,9 +63,17 @@ Handle StateLink::get_state(const Handle& alias)
  * Get the link associated with the alias.  This will be the StateLink
  * which has `alias` as the first member of the outgoing set.
  */
-Handle StateLink::get_link(const Handle& alias)
+Handle StateLink::get_link(const Handle& alias, const AtomSpace* as)
 {
-	return get_unique(alias, STATE_LINK, true);
+	return get_unique(alias, STATE_LINK, true, as);
+}
+
+/// Return this if not found.
+Handle StateLink::get_link(const AtomSpace* as)
+{
+	Handle shallowest(get_unique_nt(_outgoing[0], STATE_LINK, true, as));
+	if (shallowest) return shallowest;
+	return get_handle();
 }
 
 void StateLink::install()
@@ -109,7 +117,7 @@ void StateLink::install()
 		_outgoing[1]->insert_atom(new_state);
 
 		// Remove the old StateLink too. It must be no more.
-		as->remove_atom(defl, true);
+		as->extract_atom(defl, true);
 		swapped = true;
 	}
 

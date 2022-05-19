@@ -104,7 +104,7 @@ private:
 	bool _choose_next;
 
 	// -------------------------------------------
-	// Unordered Link suppoprt
+	// Unordered Link support
 	// Very similar to ChoiceLink state management.
 	typedef PatternTermSeq Permutation;
 	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
@@ -256,6 +256,8 @@ private:
 	                           const PatternTermPtr&);
 	bool explore_clause_evaluatable(const PatternTermPtr&, const Handle&,
 	                                const PatternTermPtr&);
+	bool explore_clause_identical(const PatternTermPtr&, const Handle&,
+	                              const PatternTermPtr&);
 	bool explore_term_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,

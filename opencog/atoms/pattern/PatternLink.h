@@ -71,7 +71,7 @@ namespace opencog
 /// virtual links.
 ///
 class PatternLink;
-typedef std::shared_ptr<PatternLink> PatternLinkPtr;
+LINK_PTR_DECL(PatternLink)
 class PatternLink : public PrenexLink
 {
 protected:
@@ -79,15 +79,20 @@ protected:
 	Pattern _pat;
 
 	/// The graph components. Set by validate_clauses().
-	/// "fixed" clauses are clauses that must be literally present
-	/// in order to be satisfied. Fixed clauses are never virtual
-	/// or evaluatable. They are a subset of the mandatory clauses.
-	/// They are a subset of the literal clauses (as some literal
-	/// clauses appear in ChoiceLinks/OrLinks.)
+	///
+	/// The `_fixed` field is used as a temporary, to accumulate terms
+	/// that can be used to determine graph connectivity. For the most
+	/// part, they consist of terms that must be literally present in
+	/// order to be satisfied. With the exception of IdenticalLink, the
+	/// fixed clauses are never virtual or evaluatable. (Identical links
+	/// never split graph connecivity, as one 'side' can always be traced
+	/// into the other.)
+	///
+	/// The `_fixed` field is cleared after connectivity is determined.
 	///
 	/// "virtual" clauses are those that contain virtual links.
 	/// They are always evaluatable, i.e. are usually never found
-	/// in the AtomSpace in thier grounded form. If the only
+	/// in the AtomSpace in their grounded form. If the only
 	/// connection between different parts of the pattern are virtual
 	/// clauses, then the pattern will split into multiple components,
 	/// each of which must be grounded separately, and then assembled
@@ -113,6 +118,7 @@ protected:
 	void pin_term_recursive(const PatternTermPtr&,
 	                        const PatternTermPtr&);
 
+	void record_mandatory(const PatternTermPtr&);
 	bool record_literal(const PatternTermPtr&, bool reverse=false);
 	void unbundle_clauses(const Handle& body);
 	bool unbundle_clauses_rec(const PatternTermPtr&,
@@ -127,6 +133,8 @@ protected:
 
 	void locate_cacheable(const PatternTermSeq& clauses);
 
+	bool need_dummies(const PatternTermPtr&);
+	bool add_unaries(const PatternTermPtr&);
 	void add_dummies(const PatternTermPtr&);
 
 	void make_connectivity_map(void);
@@ -139,7 +147,9 @@ protected:
 	void clauses_get_variables(const PatternTermSeq&);
 
 	void init(void);
+	void init_bottom(void);
 	void common_init(void);
+	void disjointed_init(void);
 	void setup_components(void);
 
 protected:
@@ -183,21 +193,16 @@ public:
 	// Return the list virtual clauses we are holding.
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	void debug_log(void) const;
+	void debug_log(std::string) const;
 
 	static Handle factory(const Handle&);
 
-	// For printing not only the link iteself but all the associated
+	// For printing not only the link itself but all the associated
 	// C++ attributes
 	std::string to_long_string(const std::string& indent) const;
 };
 
-static inline PatternLinkPtr PatternLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<PatternLink>(a); }
-static inline PatternLinkPtr PatternLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<PatternLink>(a); }
-
-#define createPatternLink std::make_shared<PatternLink>
+#define createPatternLink CREATE_DECL(PatternLink)
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

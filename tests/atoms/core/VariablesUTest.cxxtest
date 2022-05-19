@@ -35,7 +35,7 @@ using namespace opencog;
 class VariablesUTest : public CxxTest::TestSuite
 {
 private:
-	Handle A, B, W, X, Y, Z, G1, G2, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
+	Handle A, B, N, DPN, W, X, Y, Z, G1, G2, NT, PNT, CNT, NTI, DPTCI, LLT, LTI;
 
 	AtomSpace _as;
 
@@ -48,6 +48,8 @@ public:
 
 		A = an(CONCEPT_NODE, "A");
 		B = an(CONCEPT_NODE, "B");
+		N = an(NODE, "N");
+		DPN = an(DEFINED_PREDICATE_NODE, "DPN");
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
 		Z = an(VARIABLE_NODE, "$Z");
@@ -90,11 +92,14 @@ public:
 	void test_find_variables_mixed_9();
 	void test_find_variables_mixed_10();
 	void test_find_variables_mixed_11();
+	void test_find_variables_alt_as();
 
 	void test_is_type_1();
 	void test_is_type_2();
 	void test_is_type_3();
 	void test_is_type_4();
+	void test_is_type_5();
+	void test_is_type_6();
 
 	void test_substitute_nocheck_scope();
 };
@@ -558,7 +563,7 @@ void VariablesUTest::test_find_variables_mixed_2()
 	// IntensionalSimilarityLink type.
 	Handle body = al(AND_LINK,
 	                 al(SUBSET_LINK, X, Y),
-	                 al(INTENSIONAL_INHERITANCE_LINK, Y, X));
+	                 al(INHERITANCE_LINK, Y, X));
 	Variables vars;
 	vars.find_variables(body);
 	HandleSeq varseq = vars.varseq;
@@ -837,6 +842,31 @@ void VariablesUTest::test_find_variables_mixed_11()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void VariablesUTest::test_find_variables_alt_as()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure that variables coming from another atomspace are
+	// treated equally.  That is body should have variables X, Y, Z,
+	// without duplicates.
+	AtomSpace _alt_as;
+	Handle altX = _alt_as.add_node(VARIABLE_NODE, "$X");
+	Handle body = al(LIST_LINK,
+	                 al(INHERITANCE_LINK, X, Y),
+	                 al(INHERITANCE_LINK, Z, altX));
+	Variables vars;
+	vars.find_variables(body);
+	HandleSeq varseq = vars.varseq;
+	HandleSeq expect{X, Y, Z};
+
+	logger().debug() << "varseq = " << oc_to_string(varseq);
+	logger().debug() << "expect = " << oc_to_string(expect);
+
+	TS_ASSERT_EQUALS(varseq, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void VariablesUTest::test_is_type_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -934,6 +964,62 @@ void VariablesUTest::test_is_type_4()
 
 	TS_ASSERT(is_x);
 	TS_ASSERT(is_y);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_is_type_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, X, NTI),
+	                    al(TYPED_VARIABLE_LINK, Y, DPTCI));
+
+	Variables v1(vardecl);
+
+	bool is_x_n = v1.is_type(X, N);
+	bool is_x_cn = v1.is_type(X, A);
+	bool is_y_dpn = v1.is_type(Y, DPN);
+	bool is_y_n = v1.is_type(Y, N);
+
+	TS_ASSERT( is_x_n);
+	TS_ASSERT( is_x_cn);
+	TS_ASSERT(is_y_dpn);
+	TS_ASSERT(is_y_n);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void VariablesUTest::test_is_type_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK, G1,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "1"),
+	                             an(NUMBER_NODE, "1")),
+	                          NTI)),
+	                    al(TYPED_VARIABLE_LINK, G2,
+	                       al(TYPE_INTERSECTION_LINK,
+	                          al(INTERVAL_LINK,
+	                             an(NUMBER_NODE, "1"),
+	                             an(NUMBER_NODE, "1")),
+	                          DPTCI)));
+
+	Variables v1(vardecl);
+
+	bool is_g1_n = v1.is_type(G1, al(LIST_LINK, N));
+	bool is_g1_cn = v1.is_type(G1, al(LIST_LINK, A));
+	bool is_g2_dpn = v1.is_type(G2, al(LIST_LINK, DPN));
+	bool is_g2_n = v1.is_type(G2, al(LIST_LINK, N));
+
+	TS_ASSERT(is_g1_n);
+	TS_ASSERT(is_g1_cn);
+	TS_ASSERT(is_g2_dpn);
+	TS_ASSERT(is_g2_n);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -29,7 +29,7 @@ using namespace opencog;
 class DefinedSchemaUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -40,7 +40,7 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 		eval->eval("(load-from-path \"tests/atoms/execution/defined-schema.scm\")");
@@ -49,7 +49,6 @@ public:
 	~DefinedSchemaUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());

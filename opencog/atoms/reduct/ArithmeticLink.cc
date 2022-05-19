@@ -52,7 +52,7 @@ void ArithmeticLink::init(void)
 // ===========================================================
 /// delta_reduce() -- delta-reduce the expression by summing constants, etc.
 ///
-/// Recall the defintion of delta-reduction: it is the replacement of
+/// Recall the definition of delta-reduction: it is the replacement of
 /// functions with values by the value that the function would have.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
@@ -63,7 +63,7 @@ void ArithmeticLink::init(void)
 /// is (Number 4) -- its just a constant.
 ///
 /// The delta-reduct of (FoldLink (VariableNode "$x") (NumberNode 0))
-/// is (VariableNode "$x"), because adding zero to anything yeilds the
+/// is (VariableNode "$x"), because adding zero to anything yields the
 /// thing itself.
 ///
 /// This is certainly NOT a simple, easy-to-maintain way to build a
@@ -125,7 +125,7 @@ Handle ArithmeticLink::reorder(void) const
 		Type htype = h->get_type();
 
 		// Hack for pattern matcher, which returns SetLinks of stuff.
-		// Recurse exacly once.
+		// Recurse exactly once.
 		if (SET_LINK == htype)
 		{
 			for (const Handle& he : h->getOutgoingSet())
@@ -157,38 +157,6 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
-ValuePtr ArithmeticLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
-{
-	if (DEFINED_SCHEMA_NODE == vptr->get_type())
-	{
-		vptr = DefineLink::get_definition(HandleCast(vptr));
-	}
-	while (vptr->is_atom())
-	{
-		Handle h(HandleCast(vptr));
-		if (not h->is_executable()) break;
-
-		ValuePtr red(h->execute(as, silent));
-
-		// It would probably be better to throw a silent exception, here?
-		if (nullptr == red) return vptr;
-		if (*red == *vptr) return vptr;
-		vptr = red;
-	}
-
-	// The FunctionLink might be a GetLink, which returns a SetLink
-	// of results. If the SetLink is wrapping only one value, then
-	// unwrap it and return that value.
-	if (SET_LINK == vptr->get_type())
-	{
-		Handle setl(HandleCast(vptr));
-		if (1 == setl->get_arity())
-			vptr = setl->getOutgoingAtom(0);
-	}
-	return vptr;
-}
-
-// ===========================================================
 /// execute() -- Execute the expression
 ValuePtr ArithmeticLink::execute(AtomSpace* as, bool silent)
 {

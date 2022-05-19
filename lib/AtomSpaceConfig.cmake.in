@@ -31,12 +31,12 @@ set(ATOMSPACE_atomcore_LIBRARY atomcore)
 set(ATOMSPACE_atomflow_LIBRARY atomflow)
 set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atomspace_LIBRARY atomspace)
-set(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils)
 set(ATOMSPACE_atomtypes_LIBRARY atom_types)
 set(ATOMSPACE_clearbox_LIBRARY clearbox)
-set(ATOMSPACE_container_LIBRARY container)
 set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_grounded_LIBRARY grounded)
+set(ATOMSPACE_join_LIBRARY join)
+set(ATOMSPACE_json_LIBRARY json)
 set(ATOMSPACE_pattern_LIBRARY pattern)
 set(ATOMSPACE_load_scm_LIBRARY load_scm)
 set(ATOMSPACE_persist_LIBRARY persist)
@@ -51,16 +51,16 @@ set(ATOMSPACE_LIBRARIES
 	atombase
 	atomcore
 	atomflow
-	atomspaceutils
 	truthvalue
 	clearbox
-	container
+	join
 	pattern
 	load_scm
 	persist
 	query-engine
 	execution
 	grounded
+	json
 	sexpr
 	smob
 	atomspace

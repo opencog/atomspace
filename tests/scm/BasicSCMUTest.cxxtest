@@ -44,7 +44,7 @@ using namespace std;
 class BasicSCMUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *eval;
 
 	public:
@@ -109,7 +109,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
  */
 void BasicSCMUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
@@ -370,7 +370,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	check_tv(h, mslow, cslow);
 
 	// remove Node so we can redo the test
-	as->remove_atom(h);
+	as->extract_atom(h);
 }
 
 void BasicSCMUTest::test_truth_value(void)
@@ -528,7 +528,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
-	as->get_handles_by_type(back_inserter(links), type, true);
+	as->get_handles_by_type(links, type, true);
 	//printf("Number of links found: %d\n",links.size());
 	for (const Handle& h: links)
 		check_tv(h, truth, conf);
@@ -653,7 +653,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
-	as->get_handles_by_type(back_inserter(links), type, true);
+	as->get_handles_by_type(links, type, true);
 	//printf("Number of links found: %d\n",links.size());
 	for (const Handle& h: links)
 		check_tv(h, 1.0, 0.0); // DEFAULT_TV is true with no confidence

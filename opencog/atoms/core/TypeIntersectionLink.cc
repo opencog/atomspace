@@ -116,7 +116,9 @@ void TypeIntersectionLink::analyze(Handle anontype, bool& touched)
 	if (TYPE_INH_NODE == t)
 	{
 		Type vt = TypeNodeCast(anontype)->get_kind();
-		const TypeSet& ts = nameserver().getChildrenRecursive(vt);
+		TypeSet ts(nameserver().getChildrenRecursive(vt));
+		if (ATOM != vt and VALUE != vt)
+			ts.insert(vt);
 		_simple_typeset = set_intersection(_simple_typeset, ts);
 		return;
 	}
@@ -129,7 +131,8 @@ void TypeIntersectionLink::analyze(Handle anontype, bool& touched)
 			_simple_typeset.clear();
 			return;
 		}
-		const TypeSet& ts = nameserver().getParentsRecursive(vt);
+		TypeSet ts(nameserver().getParentsRecursive(vt));
+		ts.insert(vt);
 		_simple_typeset = set_intersection(_simple_typeset, ts);
 		return;
 	}

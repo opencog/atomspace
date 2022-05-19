@@ -145,7 +145,7 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// "B" and "C". But a side-by-side comparison here
 	// only compares their nodes at the same position
 	// (i.e. A-$x, B-A, C-$y), and decide whether to
-	// reject it when there is a mis-match. As a result
+	// reject it when there is a mismatch. As a result
 	// a lot of candidates that we are expecting are
 	// rejected...
 	// And the reason of going to fuzzy_match is that

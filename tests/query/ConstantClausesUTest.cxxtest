@@ -29,18 +29,18 @@
 using namespace std;
 using namespace opencog;
 
-#define al as.add_link
-#define an as.add_node
+#define al as->add_link
+#define an as->add_node
 
 class ConstantClausesUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpacePtr as;
 	SchemeEval eval;
 	Handle A, B, C, AB, IdAA, P, Q, X, LP, LQ;
 
 public:
-	ConstantClausesUTest() : eval(&as)
+	ConstantClausesUTest() : as(createAtomSpace()), eval(as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
@@ -79,7 +79,7 @@ public:
 
 void ConstantClausesUTest::tearDown()
 {
-	as.clear();
+	as->clear();
 }
 
 void ConstantClausesUTest::setUp()
@@ -103,7 +103,7 @@ void ConstantClausesUTest::test_constant_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, A, B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -116,7 +116,7 @@ void ConstantClausesUTest::test_constant_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, AB, C),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -129,7 +129,7 @@ void ConstantClausesUTest::test_constant_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, AB, A), C),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -143,7 +143,7 @@ void ConstantClausesUTest::test_evaluatable_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, IdAA, B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -157,7 +157,7 @@ void ConstantClausesUTest::test_evaluatable_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(NOT_LINK, IdAA), B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -171,7 +171,7 @@ void ConstantClausesUTest::test_evaluatable_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, IdAA, al(NOT_LINK, IdAA)), B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -185,7 +185,7 @@ void ConstantClausesUTest::test_constant_evaluatable_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, B);
 	printf("  Found : %s\n", result->to_string().c_str());
 	printf("Expected: %s\n", expected->to_string().c_str());
@@ -201,7 +201,7 @@ void ConstantClausesUTest::test_constant_evaluatable_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -216,8 +216,11 @@ void ConstantClausesUTest::test_constant_evaluatable_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK);
+	printf("Bindlink: %s\n", bl->to_string().c_str());
+	printf("  Found : %s\n", result->to_string().c_str());
+	printf("Expected: %s\n", expected->to_string().c_str());
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -400,7 +403,7 @@ void ConstantClausesUTest::test_complex()
 		"  )"
 		"  (ConceptNode \"B\")"
 		")");
-	Handle result = bindlink(&as, bl);
+	Handle result = bindlink(as, bl);
 	Handle expected = al(SET_LINK, B);
 
 	TS_ASSERT_EQUALS(result, expected);
@@ -417,13 +420,13 @@ void ConstantClausesUTest::test_complex()
 void ConstantClausesUTest::test_constant_pattern()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace derived_as(&as);
-	Handle DA = derived_as.add_node(CONCEPT_NODE, "DA"),
-		DB = derived_as.add_node(CONCEPT_NODE, "DB"),
-		bl = derived_as.add_link(BIND_LINK,
-		                         derived_as.add_link(INHERITANCE_LINK, DA, DB),
+	AtomSpacePtr derived_as(as);
+	Handle DA = derived_as->add_node(CONCEPT_NODE, "DA"),
+		DB = derived_as->add_node(CONCEPT_NODE, "DB"),
+		bl = derived_as->add_link(BIND_LINK,
+		                         derived_as->add_link(INHERITANCE_LINK, DA, DB),
 		                         DB),
-		result = bindlink(&as, bl),
+		result = bindlink(as, bl),
 		expected = al(SET_LINK, DB);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -458,7 +461,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	eval.eval("(load-from-path \"blair-witch.scm\")");
 
 	Handle query = eval.eval_h("find-something");
-	Handle result = bindlink(&as, query);
+	Handle result = bindlink(as, query);
 	Handle expected = al(SET_LINK, A);
 
 	logger().debug() << "y result = " << oc_to_string(result);
@@ -467,7 +470,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	TS_ASSERT_EQUALS(result, expected);
 
 	query = eval.eval_h("find-nothing"),
-	result = bindlink(&as, query),
+	result = bindlink(as, query),
 	expected = al(SET_LINK);
 
 	logger().debug() << "n result = " << oc_to_string(result);
@@ -486,7 +489,7 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 	eval.eval("(load-from-path \"constant-scope.scm\")");
 
 	Handle query = eval.eval_h("query"),
-		result = satisfying_set(&as, query),
+		result = satisfying_set(as, query),
 		expected = eval.eval_h("expected");
 	HandleSet results(result->getOutgoingSet().begin(),
 	                  result->getOutgoingSet().end()),

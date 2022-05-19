@@ -43,11 +43,13 @@ void QueryLink::init(void)
 			"Expecting a QueryLink, got %s", tname.c_str());
 	}
 
-	extract_variables(_outgoing);
-	unbundle_clauses(_body);
-	common_init();
-	setup_components();
+	// If we are quoted, don't bother to try to do anything.
+	if (_quoted) return;
+
 	_pat.redex_name = "anonymous QueryLink";
+	extract_variables(_outgoing);
+
+	init_bottom();
 
 #ifdef QDEBUG
 	logger().fine("Query: %s", to_long_string("").c_str());
@@ -169,7 +171,21 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 
 	Implicator impl(as);
 	impl.implicand = this->get_implicand();
-	impl.satisfy(PatternLinkCast(get_handle()));
+
+	try
+	{
+		impl.satisfy(PatternLinkCast(get_handle()));
+	}
+	catch(const StandardException& ex)
+	{
+		std::string msg =
+			"Exception during execution of pattern\n";
+		msg += to_string();
+		msg += "\nException was:\n";
+		msg += ex.get_message();
+		ex.set_message(msg.c_str());
+		throw;
+	}
 
 	// If we got a non-empty answer, just return it.
 	QueueValuePtr qv(impl.get_result_queue());

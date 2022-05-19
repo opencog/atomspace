@@ -65,7 +65,7 @@ struct Pattern
 	///          ConceptNode "$x"
 	///
 	/// We need to keep a map from atoms and clauses to the list of
-	/// distinct atom occurences. Each distinct occurance is referenced
+	/// distinct atom occurrences. Each distinct occurrence is referenced
 	/// with a PatternTerm.  Each PatternTerm corresponds to a unique
 	/// position in the pattern. Thus, for each Atom, and each clause,
 	/// there is at least one, and maybe more PatternTerms. This
@@ -95,7 +95,7 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
-	/// Evaluatable terms are those that need to be evalutated to
+	/// Evaluatable terms are those that need to be evaluated to
 	/// find out if they hold true. For example, GreaterThanLink,
 	/// and anything with a GroundedPredicateNode (GPN) in them.
 	bool have_evaluatables;

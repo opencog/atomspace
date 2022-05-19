@@ -34,7 +34,7 @@ using namespace opencog;
 class DisconnectedUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval* eval;
 
 	public:
@@ -69,7 +69,7 @@ class DisconnectedUTest :  public CxxTest::TestSuite
 #define al as->add_link
 void DisconnectedUTest::setUp(void)
 {
-	as = new AtomSpace();
+	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -79,7 +79,6 @@ void DisconnectedUTest::setUp(void)
 
 void DisconnectedUTest::tearDown(void)
 {
-	delete as;
 }
 
 /*

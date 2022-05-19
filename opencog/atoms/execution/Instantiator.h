@@ -75,8 +75,8 @@ private:
 		 * Consuming quotation should only take place when this is called
 		 * by a pattern matcher function, such as BindLink, GetLink and
 		 * PutLink, etc, as part of the substitution mechanics. Otherwise,
-		 * consuming quotes systematically may changes the semantics of
-		 * the program. This flag is here properly control that.
+		 * consuming quotes systematically may change the semantics of
+		 * the program. This flag is here to properly control that.
 		 */
 		bool _consume_quotations;
 
@@ -90,6 +90,21 @@ private:
 		 */
 		bool _needless_quotation;
 
+		/**
+		 * Avoid infinite recursion by not expanding DefineLinks
+		 * inside of evaluatable links. That is, expansion of a
+		 * DefineLink is normally done eagerly, except inside an
+		 * evaluatable context, when it might result in an infinite
+		 * loop. In such a case, expansion shoul proceed only if
+		 * evaluation proceeds up to that point. For example,
+		 * (Define (DefinedSchema "foo") (SequentialAnd
+		 *     (SomePred) (Put (DefinedSchema "foo") (List ..))))
+		 * is an inf loop if expanded eagerly, but, when evaluated,
+		 * could terminate after finite steps, if (SomePred) evaluates
+		 * to false.
+		 */
+		bool _inside_evaluation;
+
 		/** Avoid infinite recursion. */
 		bool _halt;
 
@@ -98,17 +113,12 @@ private:
 	};
 
 	/**
-	 * Recursively walk a tree starting with the root of the
-	 * hypergraph to instantiate (typically an ExecutionOutputLink).
+	 * Recursively walk a tree starting with the root, plugging in
+	 * variables from the `_varmap`, and executing the resulting
+	 * expression. Return the result of the execution.
 	 *
-	 * Return the current result of the execution. If the node is an
-	 * ExecutionOutputLink then it returns the final result. If the
-	 * node is another list (typically a ListLink) it returns a copy
-	 * of it, replacing the variables in its outgoing by their
-	 * respective groundings.
-	 *
-	 * See comments in the C++ code for a better explanation of
-	 * what this function actually does.
+	 * That is, perform a beta-reduction (substitution of variables
+	 * by their values) followed by execution of the resulting tree.
 	 *
 	 * See also the related function VariableList::substitute(),
 	 * which will simply perform a substitution, without performing
@@ -139,6 +149,7 @@ private:
 
 public:
 	Instantiator(AtomSpace* as);
+	Instantiator(const AtomSpacePtr&);
 
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,

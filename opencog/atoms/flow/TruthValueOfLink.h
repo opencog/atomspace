@@ -41,6 +41,8 @@ public:
 	TruthValueOfLink(const TruthValueOfLink &) = delete;
 	TruthValueOfLink operator=(const TruthValueOfLink &) = delete;
 
+	virtual bool is_evaluatable() const { return true; }
+
 	// Return a pointer to the truth value for the wrapped atom.
 	virtual TruthValuePtr evaluate(AtomSpace*, bool);
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
@@ -50,13 +52,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<TruthValueOfLink> TruthValueOfLinkPtr;
-static inline TruthValueOfLinkPtr TruthValueOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<TruthValueOfLink>(h); }
-static inline TruthValueOfLinkPtr TruthValueOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<TruthValueOfLink>(a); }
-
-#define createTruthValueOfLink std::make_shared<TruthValueOfLink>
+LINK_PTR_DECL(TruthValueOfLink)
+#define createTruthValueOfLink CREATE_DECL(TruthValueOfLink)
 
 // ====================================================================
 
@@ -77,13 +74,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<StrengthOfLink> StrengthOfLinkPtr;
-static inline StrengthOfLinkPtr StrengthOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<StrengthOfLink>(h); }
-static inline StrengthOfLinkPtr StrengthOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<StrengthOfLink>(a); }
-
-#define createStrengthOfLink std::make_shared<StrengthOfLink>
+LINK_PTR_DECL(StrengthOfLink)
+#define createStrengthOfLink CREATE_DECL(StrengthOfLink)
 
 // ====================================================================
 
@@ -104,13 +96,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ConfidenceOfLink> ConfidenceOfLinkPtr;
-static inline ConfidenceOfLinkPtr ConfidenceOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ConfidenceOfLink>(h); }
-static inline ConfidenceOfLinkPtr ConfidenceOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ConfidenceOfLink>(a); }
-
-#define createConfidenceOfLink std::make_shared<ConfidenceOfLink>
+LINK_PTR_DECL(ConfidenceOfLink)
+#define createConfidenceOfLink CREATE_DECL(ConfidenceOfLink)
 
 // ====================================================================
 
@@ -131,13 +118,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<CountOfLink> CountOfLinkPtr;
-static inline CountOfLinkPtr CountOfLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<CountOfLink>(h); }
-static inline CountOfLinkPtr CountOfLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<CountOfLink>(a); }
-
-#define createCountOfLink std::make_shared<CountOfLink>
+LINK_PTR_DECL(CountOfLink)
+#define createCountOfLink CREATE_DECL(CountOfLink)
 
 /** @}*/
 }

@@ -1,7 +1,7 @@
 /*
- * SchemeSmob.c
+ * SchemeSmob.cc
  *
- * Scheme small objects (SMOBS) for opencog -- core functions.
+ * Scheme small objects (SMOBS) for the AtomSpace -- core functions.
  *
  * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  *
@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
@@ -52,6 +53,7 @@ using namespace opencog;
 scm_t_bits SchemeSmob::cog_misc_tag;
 std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
 SCM SchemeSmob::_radix_ten;
+SCM SchemeSmob::_alist;
 
 void SchemeSmob::init()
 {
@@ -67,6 +69,15 @@ void SchemeSmob::init()
 		return;
 	}
 
+	// If this assert triggers for you, e.g. because it is 24, then you
+	// have an easy fix: change SCM_SMOB_VALUE_PTR_LOC to use
+	// SCM_SMOB_OBJECT_1_LOC. If it is larger than 24 then you need a
+	// more complex fix.
+	static_assert (
+		(sizeof(void*) == 8 and sizeof(ValuePtr) == 16) or
+		(sizeof(void*) == 4 and sizeof(ValuePtr) == 8),
+		"Unexpected ValuePtr size");
+
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
 	scm_c_use_module("opencog");
@@ -74,6 +85,7 @@ void SchemeSmob::init()
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 	_radix_ten = scm_from_int8(10);
+	_alist = scm_from_utf8_symbol("alist");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
@@ -94,7 +106,8 @@ void opencog_guile_init(void)
 
 void SchemeSmob::init_smob_type(void)
 {
-	// A SMOB type for everything, incuding atoms.
+	// A SMOB type for everything, including Handles/ValuePtrs.
+	// cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (ValuePtr));
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
@@ -106,8 +119,9 @@ void SchemeSmob::init_smob_type(void)
 SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 {
 	// If they're not something we know about, let scheme sort it out.
-	// (Actualy, this should never happen ...)
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a))
+	// (Actually, this should never happen ...)
+	if ((not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a)) or
+	    (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, b)))
 		return scm_equal_p(a, b);
 
 	// If the types don't match, they can't be equal.
@@ -121,16 +135,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		default: // Should never happen.
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
-		case COG_AS:
-		{
-			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
-			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			/* Just a simple pointer comparison */
-			if (as == bs) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
+
 		case COG_LOGGER:
 		{
 			Logger* al = (Logger *) SCM_SMOB_DATA(a);
@@ -153,16 +158,28 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		}
 		case COG_PROTOM:
 		{
-			ValuePtr* av = (ValuePtr *) SCM_SMOB_DATA(a);
-			ValuePtr* bv = (ValuePtr *) SCM_SMOB_DATA(b);
+			ValuePtr* av = SCM_SMOB_VALUE_PTR_LOC(a);
+			ValuePtr* bv = SCM_SMOB_VALUE_PTR_LOC(b);
 			scm_remember_upto_here_1(a);
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
-			if (*av == *bv) return SCM_BOOL_T;
-			if (**av == **bv) return SCM_BOOL_T;
+			if (av->get() == bv->get()) return SCM_BOOL_T;
+			if (av->get() == nullptr or bv->get() == nullptr) return SCM_BOOL_F;
+			if (**av == **bv) return SCM_BOOL_T; // content-compare!
 			return SCM_BOOL_F;
 		}
 	}
+}
+
+/* ============================================================== */
+
+/// Return true if s is the scm representation of an Atom or Value
+bool SchemeSmob::scm_is_protom(SCM s)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return false;
+
+	return COG_PROTOM == SCM_SMOB_FLAGS(s);
 }
 
 /* ============================================================== */
@@ -262,14 +279,12 @@ void SchemeSmob::register_procs()
 
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
+	register_proc("cog-new-ast",           1, 0, 1, C(ss_new_ast));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
 	register_proc("cog-atom",              1, 0, 1, C(ss_atom));
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
-	register_proc("cog-delete!",           1, 0, 1, C(ss_delete));
-	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
-	register_proc("cog-delete-recursive!", 1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
 
@@ -300,10 +315,10 @@ void SchemeSmob::register_procs()
 	register_proc("cog-number",            1, 0, 0, C(ss_number));
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
-	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
-	register_proc("cog-incoming-size",     1, 0, 0, C(ss_incoming_size));
-	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
-	register_proc("cog-incoming-size-by-type", 2, 0, 0, C(ss_incoming_size_by_type));
+	register_proc("cog-incoming-set",      1, 1, 0, C(ss_incoming_set));
+	register_proc("cog-incoming-size",     1, 1, 0, C(ss_incoming_size));
+	register_proc("cog-incoming-by-type",  2, 1, 0, C(ss_incoming_by_type));
+	register_proc("cog-incoming-size-by-type", 2, 1, 0, C(ss_incoming_size_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
@@ -325,7 +340,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-tv-merge-hi-conf",  2, 0, 0, C(ss_tv_merge_hi_conf));
 
 	// Atom Spaces
-	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
+	register_proc("cog-new-atomspace",     0, 0, 1, C(ss_new_as));
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));

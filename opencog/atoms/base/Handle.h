@@ -58,7 +58,7 @@ namespace opencog
 typedef size_t UUID;
 
 //! ContentHash == 64-bit hash of an Atom.
-typedef size_t ContentHash;
+typedef uint64_t ContentHash;
 
 class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
@@ -229,7 +229,7 @@ typedef Counter<Handle, double> HandleCounter;
 //! a map from handle to unsigned
 typedef Counter<Handle, unsigned> HandleUCounter;
 
-// A map of variables to thier groundings.  Everyone working with
+// A map of variables to their groundings.  Everyone working with
 // groundings uses this type; changing the type here allows easy
 // comparisons of performance for these two mapping styles.
 // At this time (Dec 2019; gcc-8.3.0) there seems to be no difference
@@ -252,6 +252,11 @@ bool content_eq(const opencog::HandleSet& lhs,
 
 bool content_eq(const opencog::HandleSetSeq& lhs,
                 const opencog::HandleSetSeq& rhs);
+
+//! Check if hs contains h using content_eq as equality.  hs is not
+//! assumed to be sorted, thus the complexity is up to linear with the
+//! size hs.
+bool content_contains(const opencog::HandleSeq& hs, const opencog::Handle& h);
 
 struct content_based_atom_ptr_less
 {
@@ -300,7 +305,8 @@ static inline std::string operator+ (const char *lhs, Handle h)
 {
     std::string rhs = lhs;
     char buff[25];
-    snprintf(buff, 24, "%lu)", h.value());
+    // The cast to (unsigned long long) is for 32-bit arches
+    snprintf(buff, 24, "%llu)", (unsigned long long) h.value());
     return rhs + buff;
 }
 
@@ -308,7 +314,8 @@ static inline std::string operator+ (const char *lhs, Handle h)
 static inline std::string operator+ (const std::string &lhs, Handle h)
 {
     char buff[25];
-    snprintf(buff, 24, "%lu)", h.value());
+    // The cast to (unsigned long long) is for 32-bit arches
+    snprintf(buff, 24, "%llu)", (unsigned long long) h.value());
     return lhs + buff;
 }
 

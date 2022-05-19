@@ -43,17 +43,22 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
     # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap)
-    instance.owns_atomspace = False
     return instance
 
-cdef class AtomSpace:
+cdef AtomSpace_factoid(cValuePtr to_wrap):
+    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
+    instance.asp = to_wrap
+    instance.atomspace = <cAtomSpace*> to_wrap.get()
+    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get())
+    return instance
+
+cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
-    #cdef bint owns_atomspace
     #cdef object parent_atomspace
 
-    def __cinit__(self):
-        self.owns_atomspace = False
+    #def __cinit__(self):
+    #    self.owns_atomspace = False
 
     # A tacky hack to pass in a pointer to an atomspace from C++-land.
     # basically, pass an int, and cast it to the C++ pointer.  This
@@ -61,18 +66,11 @@ cdef class AtomSpace:
     # about it.  But I can't find any better way.
     def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
-            self.atomspace = new cAtomSpace()
-            self.owns_atomspace = True
+            self.asp = createAtomSpace(<cAtomSpace*> NULL)
+            self.atomspace = <cAtomSpace*> self.asp.get()
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
-            self.owns_atomspace = False
         self.parent_atomspace = parent
-
-    def __dealloc__(self):
-        if self.owns_atomspace:
-            if self.atomspace:
-                del self.atomspace
-        self.parent_atomspace = None
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -169,7 +167,7 @@ cdef class AtomSpace:
         if self.atomspace == NULL:
             return None
         cdef bint recurse = recursive
-        return self.atomspace.remove_atom(deref(atom.handle),recurse)
+        return self.atomspace.extract_atom(deref(atom.handle),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
@@ -204,7 +202,6 @@ cdef class AtomSpace:
         """ Description of the atomspace """
         return ("<Atomspace\n" +
                 "   addr: " + hex(<long>self.atomspace) + "\n"
-                "   owns: " + str(self.owns_atomspace) + ">\n"
                )
 
     def __len__(self):
@@ -229,7 +226,7 @@ cdef class AtomSpace:
             return None
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
+        self.atomspace.get_handles_by_type(handle_vector,t,subt)
         return convert_handle_seq_to_python_list(handle_vector)
 
     @classmethod
@@ -269,7 +266,7 @@ cdef class AtomSpace:
         return result != result.UNDEFINED
 
 
-cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+cdef api object py_atomspace(cAtomSpace* c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
@@ -278,10 +275,9 @@ cdef api object py_atom(const cHandle& h):
     return atom
 
 def create_child_atomspace(object atomspace):
-    cdef cAtomSpace * child = new cAtomSpace((<AtomSpace>(atomspace)).atomspace)
-    cdef AtomSpace result = AtomSpace_factory(child)
-    result.owns_atomspace = True
+    cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef AtomSpace result = AtomSpace_factoid(asp)
     result.parent_atomspace = atomspace
     return result
 
-
+# ====================== end of file ============================

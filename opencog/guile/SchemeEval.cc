@@ -27,12 +27,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 
 #include <cstddef>
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
 
+#include <opencog/util/platform.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
@@ -270,6 +272,7 @@ static volatile bool done_with_init = false;
 static void immortal_thread(void)
 {
 	scm_with_guile(c_wrap_init_only_once, NULL);
+	set_thread_name("atoms:immortal");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
@@ -285,7 +288,7 @@ static void init_only_once(void)
 {
 	if (done_with_init) return;
 
-	// Enter initalization only once. All other threads spin, until
+	// Enter initialization only once. All other threads spin, until
 	// it is completed.
 	//
 	// The first time that guile is initialized, it MUST be done in some
@@ -306,6 +309,14 @@ SchemeEval::SchemeEval(AtomSpace* as)
 {
 	init_only_once();
 	_atomspace = as;
+
+	scm_with_guile(c_wrap_init, this);
+}
+
+SchemeEval::SchemeEval(AtomSpacePtr& as)
+{
+	init_only_once();
+	_atomspace = (AtomSpace*) as.get();
 
 	scm_with_guile(c_wrap_init, this);
 }
@@ -401,6 +412,45 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	{
 		free(restr);
 		return SCM_CAR(throw_args);
+	}
+
+	// If the user types (quit) or (exit) at the cogserver shell, we will
+	// end up here. That's because (quit) (exit) and (exit 42) all get
+	// converted into (throw 'quit (list 42)). We have two choices:
+	// Rethrow this to the main guile shell, or just exit(). Now, in
+	// guile-3.0, the (throw 'quit) just turns into an exit(), so it
+	// mostly doesn't matter what we do (although guile allows (quit #t)
+	// which means exit(0) and I don't want to futz with this trivia.)
+	// However, we do one important thing: the guile repl loop does
+	// mess with the termios settings and mangles the shell. So we
+	// do a minimalist `stty sane` here.
+	if (0 == strcmp(restr, "quit"))
+	{
+		logger().info("[SchemeEval]: exit\n");
+
+		struct termios tio;
+		tcgetattr (STDIN_FILENO, &tio);
+
+		tio.c_iflag = tio.c_iflag | ICRNL;
+		tio.c_iflag = tio.c_iflag | IXON;
+		tio.c_iflag = tio.c_iflag | IUTF8;
+
+		tio.c_lflag = tio.c_lflag | ISIG;
+		tio.c_lflag = tio.c_lflag | ICANON;
+		tio.c_lflag = tio.c_lflag | ECHO;
+
+		tcsetattr(STDIN_FILENO, TCSADRAIN, &tio);
+
+		scm_throw(scm_from_utf8_symbol("quit"), throw_args);
+
+		// The above should not return.  It should have done this:
+		if (SCM_EOL == throw_args) exit(0);
+		exit(scm_to_int(scm_car(throw_args)));
+
+		// r7rs allows (quit #t) which means exit(0) and (quit #f)
+		// which means exit(1) but we are not going to futz with this.
+		// Because the throw above should not return.
+		exit(1);
 	}
 
 	// If it's not a read error, and it's not flow-control,
@@ -699,8 +749,8 @@ std::string SchemeEval::do_poll_result()
 		// Hmmm. I guess we could just block on reading the pipe...
 		// unless the eval did not produce any output, in which case
 		// I guess we could ... close and re-open the pipe? Somehow
-		// unblock it?  I dunno. The below curently works, and I'm
-		// loosing interest just right now.
+		// unblock it?  I dunno. The below currently works, and I'm
+		// losing interest just right now.
 		std::unique_lock<std::mutex> lck(_poll_mtx);
 		while (not _eval_done)
 		{
@@ -721,7 +771,7 @@ std::string SchemeEval::do_poll_result()
 	save_rc(SCM_EOL);
 
 	// If we are here, then evaluation is done. Check the various
-	// evalution result flags, etc.
+	// evaluation result flags, etc.
 	_poll_done = true;
 
 	/* An error is thrown if the input expression is incomplete,
@@ -1008,7 +1058,7 @@ static SCM thunk_scm_eval(void * expr)
 /**
  * do_apply_scm -- apply named function func to arguments in ListLink
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
+ * atom handles. This list is unpacked, and then the function func
  * is applied to them. The SCM value returned by the function is returned.
  */
 SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
@@ -1027,9 +1077,9 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 
 		// Iterate in reverse, because cons chains in reverse.
 		size_t sz = oset.size();
-		for (int i=sz-1; i>=0; i--)
+		for (size_t i=sz; i>0; i--)
 		{
-			SCM sh = SchemeSmob::handle_to_scm(oset[i]);
+			SCM sh = SchemeSmob::handle_to_scm(oset[i-1]);
 			expr = scm_cons(sh, expr);
 		}
 	}
@@ -1047,10 +1097,10 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
  * apply_v -- apply named function func to arguments in ListLink.
  * Return an OpenCog ValuePtr (Handle, TruthValue or Value).
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
+ * atom handles. This list is unpacked, and then the function func
  * is applied to them. The function is presumed to return pointer
  * to a ProtoAtom [now renamed Value] object. If the function does
- * not return a ProtoAtom, or if n error ocurred during evaluation,
+ * not return a ProtoAtom, or if n error occurred during evaluation,
  * then a C++ exception is thrown.
  */
 ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
@@ -1079,7 +1129,10 @@ ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 	_hargs = nullptr;
 
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "Unable to apply `%s` to\n%s\n%s",
+			func.c_str(),
+			(nullptr == varargs) ? "(nullptr)" : varargs->to_string().c_str(),
+			_error_msg.c_str());
 
 	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
@@ -1173,6 +1226,11 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 	return evaluator;
 }
 
+SchemeEval* SchemeEval::get_evaluator(AtomSpacePtr& as)
+{
+	return get_evaluator((AtomSpace*) as.get());
+}
+
 /* ============================================================== */
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
@@ -1190,6 +1248,11 @@ void* SchemeEval::c_wrap_set_atomspace(void * vas)
 void SchemeEval::set_scheme_as(AtomSpace* as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as);
+}
+
+void SchemeEval::set_scheme_as(AtomSpacePtr& as)
+{
+	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 
 void SchemeEval::init_scheme(void)

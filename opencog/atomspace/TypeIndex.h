@@ -22,14 +22,18 @@
 #ifndef _OPENCOG_TYPEINDEX_H
 #define _OPENCOG_TYPEINDEX_H
 
-#include <set>
+#include <mutex>
 #include <vector>
+
+#if HAVE_FOLLY
+#include <folly/container/F14Set.h>
+#else
+#include <set>
+#endif
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
-
-class AtomSpaceUTest;
 
 namespace opencog
 {
@@ -37,7 +41,24 @@ namespace opencog
  *  @{
  */
 
-typedef std::unordered_multimap<ContentHash, Handle> AtomSet;
+// Facebook Folly
+// https://github.com/facebook/folly/blob/main/folly/container/F14.md
+// promises a faster and more compact hash table. Just two problems:
+// 1) It does not make any difference in the "real world" benchmark
+//    I tried (the `bio-loop3.scm` benchmark from opencog/benchmark)
+// 2) It passes all unit tests, but one: sexpr-query-test which
+//    sometimes passes, sometimes fails, because the pattern matcher
+//    sometimes reports the same result twice. Why? I dunno. This
+//    one failure is enough to say "not recommended." I don't need
+//    to be chasing obscure bugs.
+#if HAVE_FOLLY_XXX
+typedef folly::F14ValueSet<Handle> AtomSet;
+#else
+typedef std::unordered_set<Handle> AtomSet;
+#endif
+
+#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -55,104 +76,97 @@ typedef std::unordered_multimap<ContentHash, Handle> AtomSet;
  */
 class TypeIndex
 {
-	friend class ::AtomSpaceUTest;
-
 	private:
 		std::vector<AtomSet> _idx;
 		size_t _num_types;
+		NameServer& _nameserver;
+
+		// Single, global mutex for locking the index.
+		mutable std::shared_mutex _mtx;
 	public:
 		TypeIndex(void);
 		void resize(void);
-		void insertAtom(const Handle& h)
+
+		// Return a Handle, if it's already in the set.
+		// Else, return nullptr
+		Handle insertAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			s.insert({h->get_hash(), h});
+			TYPE_INDEX_UNIQUE_LOCK;
+			auto iter = s.find(h);
+			if (s.end() != iter) return *iter;
+			s.insert(h);
+			return Handle::UNDEFINED;
 		}
-		void removeAtom(const Handle& h)
+
+		bool removeAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			auto range = s.equal_range(h->get_hash());
-			auto bkt = range.first;
-			auto end = range.second;
-			for (; bkt != end; bkt++) {
-				if (*h == *bkt->second) {
-					s.erase(bkt);
-					break;
-				}
-			}
+			TYPE_INDEX_UNIQUE_LOCK;
+			return 1 == s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
 			const AtomSet& s(_idx.at(h->get_type()));
-			auto range = s.equal_range(h->get_hash());
-			auto bkt = range.first;
-			auto end = range.second;
-			for (; bkt != end; bkt++) {
-				if (*h == *bkt->second) /* content-compare */
-					return bkt->second;
-			}
-			return Handle::UNDEFINED;
+			TYPE_INDEX_SHARED_LOCK;
+			auto iter = s.find(h);
+			if (s.end() == iter) return Handle::UNDEFINED;
+			return *iter;
 		}
 
+		// How many atoms are there of type t?
 		size_t size(Type t) const
 		{
 			const AtomSet& s(_idx.at(t));
+			TYPE_INDEX_SHARED_LOCK;
 			return s.size();
 		}
 
+		// How many atoms, grand total?
 		size_t size(void) const
 		{
 			size_t cnt = 0;
+			TYPE_INDEX_SHARED_LOCK;
 			for (const auto& s : _idx)
 				cnt += s.size();
 			return cnt;
 		}
 
+		// How many atoms, of type t, and subclasses also?
+		size_t size(Type type, bool subclass) const
+		{
+			size_t result = size(type);
+			if (not subclass) return result;
+
+			for (Type t = ATOM; t<_num_types; t++)
+			{
+				if (t != type and _nameserver.isA(t, type))
+					result += size(t);
+			}
+			return result;
+		}
+
 		void clear(void)
 		{
+			TYPE_INDEX_UNIQUE_LOCK;
 			for (auto& s : _idx)
 			{
-				for (auto& pr : s)
+				for (auto& h : s)
 				{
-					Handle& atom_to_clear = pr.second;
-					atom_to_clear->_atom_space = nullptr;
+					h->_atom_space = nullptr;
 
 					// We installed the incoming set; we remove it too.
-					atom_to_clear->remove();
+					h->remove();
 				}
 				s.clear();
 			}
 		}
 
-		// Return true if there exists some index containing duplicated
-		// atoms (equal by content). Used during unit tests.
-		bool contains_duplicate() const;
-		bool contains_duplicate(const AtomSet& atoms) const;
-
-		class iterator
-			: public HandleIterator
-		{
-			friend class TypeIndex;
-			public:
-				iterator(Type, bool);
-				iterator& operator++();
-				iterator& operator++(int);
-				iterator& operator=(iterator);
-				bool operator==(iterator);
-				bool operator!=(iterator);
-				Handle operator*(void);
-			private:
-				Type type;
-				bool subclass;
-				std::vector<AtomSet>::const_iterator s;
-				std::vector<AtomSet>::const_iterator send;
-				Type currtype;
-				AtomSet::const_iterator se;
-		};
-
-		iterator begin(Type, bool) const;
-		iterator end(void) const;
+		void get_handles_by_type(HandleSeq&, Type, bool subclass) const;
+		void get_handles_by_type(HandleSet&, Type, bool subclass) const;
+		void get_rootset_by_type(HandleSeq&, Type, bool subclass,
+		                         const AtomSpace*) const;
 };
 
 /** @}*/

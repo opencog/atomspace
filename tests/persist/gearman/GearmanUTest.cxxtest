@@ -36,17 +36,16 @@ using namespace opencog;
 class GearmanUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
+		AtomSpacePtr as;
 		SchemeEval *evl,*evl2;
 	public:
 		GearmanUTest(void)
 		{
-			as = new AtomSpace();
+			as = createAtomSpace();
 		}
 
 		~GearmanUTest()
 		{
-			delete as;
 		}
 		void setUp(void);
 		static void worker_thread(GearmanUTest* dt);

@@ -1,0 +1,989 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Topological Spaces and Sheaf Axioms
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+29 August 2020
+\end_layout
+
+\begin_layout Abstract
+This chapter presents the conventional (pre-)sheaf axioms and then demonstrates
+ how these describe the graphical/tensor structures that are the primary
+ topic of this series of chapters.
+\end_layout
+
+\begin_layout Abstract
+This is a part of a sequence of articles exploring inter-related ideas;
+ it is meant to provide details for a broader context.
+ The current working title for the broader text is 
+\begin_inset Quotes eld
+\end_inset
+
+Connectors and Variables
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Pre-sheaves
+\end_layout
+
+\begin_layout Standard
+This text reviews the concept of a pre-sheaves and sheaves, starting from
+ the conventional definition, and then demonstrating how this applies to
+ the system of knowledge representation being developed in these texts.
+ It is primarily an exercise in examining the axioms using different kinds
+ of notation, as notational differences appear to present one of the primary
+ stumbling blocks to the development of AGI.
+\end_layout
+
+\begin_layout Standard
+The conventional definition of a (pre-)sheaf begins as follows: Let 
+\begin_inset Formula $X$
+\end_inset
+
+ be a topological space and let 
+\begin_inset Formula $C$
+\end_inset
+
+ be a category.
+ A presheaf 
+\begin_inset Formula $F$
+\end_inset
+
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+ is a functor with values in 
+\begin_inset Formula $C$
+\end_inset
+
+ having a certain set of properties ...
+ (to be reviewed below).
+ The conception of 
+\begin_inset Quotes eld
+\end_inset
+
+seeds
+\begin_inset Quotes erd
+\end_inset
+
+ being advanced here play the role of a topological space; this is the primary
+ driver of much of the mathematical machinery.
+ Thus, the re review here starts with topological spaces.
+\end_layout
+
+\begin_layout Subsection*
+Topological space
+\end_layout
+
+\begin_layout Standard
+Let's review the conventional definition of a topological space.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This entire section painfully belabors something that is relatively obvious
+ to those who know algebraic topology: it is describing something very much
+ like a 
+\begin_inset Quotes eld
+\end_inset
+
+simplicial complex
+\begin_inset Quotes erd
+\end_inset
+
+, and points out that it is a topological space.
+ Perhaps we could go farther: describe the analog of 
+\begin_inset Quotes eld
+\end_inset
+
+CW-complexes
+\begin_inset Quotes erd
+\end_inset
+
+, by describing gluing and a weak topology.
+ Yet there are differences: the connectors on seeds are typed, whereas the
+ vertexes of simplicial complexes are simply-typed.
+ The seeds also resemble dual-graphs, in that the connectors connect up
+ neighbors, and so denote where two things come together at a boundary.
+ So we cannot just make this jump, as simplicial complexes are almost but
+ not quite the correct concept.
+ It would also put too great a burden on the reader to tell them that they
+ must first study algebraic topology.
+ The goals here are entirely different: the goals are to gain insight into
+ knowledge representation and AGI.
+\end_layout
+
+\end_inset
+
+ During the review, keep in mind the conception of 
+\begin_inset Quotes eld
+\end_inset
+
+seeds
+\begin_inset Quotes erd
+\end_inset
+
+, as presented earlier.
+ As a reminder, here are diagrams of a single seed, a pair of connected
+ seeds, and a hedge-hog: four interconnected seeds.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/seed-unlabelled.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 15col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/seeds-two.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\begin_inset space \hspace{}
+\length 15col%
+\end_inset
+
+
+\begin_inset Graphics
+	filename graphics/hedgehog.eps
+	lyxscale 60
+	width 15col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These begin to look like the open sets of a topology, if one considers the
+ open circles to be the 
+\begin_inset Quotes eld
+\end_inset
+
+open
+\begin_inset Quotes erd
+\end_inset
+
+ boundary of the set, and the black circles to be the interior.
+ The primary conceptual issue is that topologies are conventionally framed
+ in terms of 
+\begin_inset Quotes eld
+\end_inset
+
+sets
+\begin_inset Quotes erd
+\end_inset
+
+, which then presumes 
+\begin_inset Quotes eld
+\end_inset
+
+set theory
+\begin_inset Quotes erd
+\end_inset
+
+ underneath it all.
+ And yet nothing about a single seed looks particularly set-like.
+ Yes, the middle diagram above is obviously a 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of two seeds, and the diagram on the right is the 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of four seeds.
+ But they are not sets.
+\end_layout
+
+\begin_layout Standard
+No matter.
+ A topology is defined in terms of a collection of axioms, and one should
+ argue that anything obeying those axioms is a topology, irregardless of
+ whether the underlying objects are actually sets, or not.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In a certain sense, this is preciely what the Yoneda lemma states.
+ But that sense is 
+\begin_inset Quotes eld
+\end_inset
+
+sideways
+\begin_inset Quotes erd
+\end_inset
+
+ from the direction we wish to travel in.
+ The Yoneda lemma is also sufficently abstract that it cannot be made a
+ pre-requisite to understanding this text.
+ It does, however, provide the sign-post to a 
+\begin_inset Quotes eld
+\end_inset
+
+classical
+\begin_inset Quotes erd
+\end_inset
+
+ formalization of the discussion here.
+\end_layout
+
+\end_inset
+
+ What are the axioms of a topology? Let's quote directly from Wikipedia,
+ again: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+A topological space is an ordered pair 
+\begin_inset Formula $\left(X,\tau\right)$
+\end_inset
+
+, where 
+\begin_inset Formula $X$
+\end_inset
+
+ is a set and 
+\begin_inset Formula $\tau$
+\end_inset
+
+ is a collection of subsets of 
+\begin_inset Formula $X$
+\end_inset
+
+, satisfying the following axioms:...
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the current context, the goal is to cross out the word 
+\begin_inset Quotes eld
+\end_inset
+
+set
+\begin_inset Quotes erd
+\end_inset
+
+ and replace it by 
+\begin_inset Quotes eld
+\end_inset
+
+hedgehog
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+mesh
+\begin_inset Quotes erd
+\end_inset
+
+ (the diagram above shows four interconnected seeds; in general it could
+ be a mesh of trillions, or even an infinite mesh.
+ An infinite mesh might be countable, if it was constructed recusively,
+ or even uncountable, if one is willing to entertain a mesh that interconnects
+ elements in a Cantor set.) One point to be careful about, in this analogy:
+ here, 
+\begin_inset Formula $X$
+\end_inset
+
+ is meant to be the fully-assembled mesh; it is NOT a collection of seeds!
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Of course, 
+\begin_inset Formula $X$
+\end_inset
+
+ could be just a collection of seeds, if that is the topological space that
+ one wished to work with; but that would be a very special case, and not
+ the general case.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's continue:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+The empty set and 
+\begin_inset Formula $X$
+\end_inset
+
+ itself belong to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Of course: the empty seed is just nothing at all: the seed with no connectors,
+ and no center.
+ And sure, let us assign the the hedgehog to 
+\begin_inset Formula $\tau.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Any arbitrary (finite or infinite) union of members of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ still belongs to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Of course, although one must be careful in reading the word 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+, here.
+ There are two warring senses.
+ In one sense, the word 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ can be taken to mean 
+\begin_inset Quotes eld
+\end_inset
+
+the connection or connecting-together of two or more seeds, if they are
+ connectable
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is meant to be the re-gluing together of pieces of a mesh that were
+ cut out: if one takes some scissors, and cuts out pieces from the mesh,
+ and then joins them back together again, it is still a sub-portion of the
+ mesh.
+ In the other sense, the union is a disjoint union: supposed the two scissored
+ pieces of the mesh were far apart from each other.
+ One is then left with a 
+\emph on
+set
+\emph default
+ of two pieces, that cannot be joined together.
+ This is still a union.
+ If one carefully examines the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ in conventional set theory, it 
+\emph on
+always
+\emph default
+ means 
+\begin_inset Quotes eld
+\end_inset
+
+glue them together if you can
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Take, for example, a Venn diagram shown to elementary-school students:
+ the union is always the gluing-together, the overlapping bits being the
+ joint.
+ The overlapping bits are mashed together: this is the 
+\begin_inset Quotes eld
+\end_inset
+
+union
+\begin_inset Quotes erd
+\end_inset
+
+ of set theory: it is a gluing-together of the common, shared parts.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph on
+The intersection of any finite number of members of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ still belongs to 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The reader was already invited to think of taking scissors to the mesh
+ to disconnect it, and also of gluing together pieces.
+ How, exactly, can the word 
+\begin_inset Quotes eld
+\end_inset
+
+intersection
+\begin_inset Quotes erd
+\end_inset
+
+ be interpreted? The intent is that it be read in the intuitively-obvious
+ sense.
+ If we have two fragments of a mesh, and they have points and links in common,
+ then the intersection are those points and links that are in common between
+ those two fragments.
+ Cut edges then become open connectors: as always, a connector is a 
+\begin_inset Quotes eld
+\end_inset
+
+half-edge
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+The elements of 
+\begin_inset Formula $\tau$
+\end_inset
+
+ are called 
+\series bold
+\shape italic
+\emph default
+open sets
+\series default
+\shape default
+\emph on
+ and the collection 
+\begin_inset Formula $\tau$
+\end_inset
+
+ is called a 
+\series bold
+\shape slanted
+topology
+\series default
+\shape default
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+.
+\emph default
+
+\begin_inset Quotes eld
+\end_inset
+
+ That is the conclusion, with emphasis in the orginal.
+\end_layout
+
+\begin_layout Standard
+It would appear that a mesh: that is, a graph whose edges can be scissored
+ into half-edges aka connectors forms a topology, in that it obeys the axioms
+ of a topology (ignoring the fact that hedge-hogs are not actually sets).
+ This is meant to be self-evident, so that it becomes straight-forward to
+ develop notational devices.
+ For example, given a hedgehog 
+\begin_inset Formula $U,$
+\end_inset
+
+the boundary 
+\begin_inset Formula $\partial U$
+\end_inset
+
+ of 
+\begin_inset Formula $U$
+\end_inset
+
+ is the collection of connectors on 
+\begin_inset Formula $U$
+\end_inset
+
+ that have not been connected up, yet.
+ The interior then are the vertexes that are fully connected (and so also,
+ the edges connecting them.)
+\end_layout
+
+\begin_layout Subsubsection*
+Non-topological concerns
+\end_layout
+
+\begin_layout Standard
+Of course, the mesh is a fair bit richer than the set: the edges are meant
+ to be typed, whereas in set theory, all sets have the same type: set theory
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+simply typed
+\begin_inset Quotes erd
+\end_inset
+
+, there is only one type, and that is the type of the set.
+\end_layout
+
+\begin_layout Standard
+Sets, as commonly presented in textbooks on general topology, are all about
+ uncountable collections of 
+\begin_inset Quotes eld
+\end_inset
+
+points
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The imposition of uncountablility leads to a wide variety of careful distinctio
+ns, e.g.
+ between Hausdorf spaces, which behave in a generally intuitive fashion,
+ and other spaces, which often do not.
+ In the current texts, the number of connectors is meant to be finite, or
+ at least always countable.
+ The size of the graph is meant to be finite, or at most recursively infinite.
+ Expanding beyond this would, of course, lead to a wild bestiary of strange
+ things.
+\end_layout
+
+\begin_layout Standard
+Another, more arcance distinction is that between Boolean algebras and Heyting
+ algebras, which is foundational for the category of Frames and Locales,
+ which in turn form the basic examples for Topoi.
+\end_layout
+
+\begin_layout Standard
+If one cuts up a graph into disjoint, unconnected parts, by cutting a collection
+ of edges, then by naive reasoning, the cut edges belong to neither the
+ one nor the other subgraph.
+ Thus, applying naive notions about cutting result in an algebra of graphs
+ that is not a Boolean algebra: the cut edges are neither in the set, nor
+ in its complement.
+ The sophisticated way of tackling this is with the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+Subobject Classifier
+\begin_inset Quotes erd
+\end_inset
+
+, which, for Boolean algebras, just boils down to the ordinary membership
+ predicates: functions that take a value in 
+\begin_inset Formula $2=\left\{ 0,1\right\} =\left\{ F,T\right\} $
+\end_inset
+
+.
+ Either something belongs or doesn't.
+ It is, or it ain't.
+ The subobject classifer is conceptually heavyweight, though.
+ The whole point of having half-edges is that it is conceptually simple.
+ A jigsaw-puzzle piece with unconnected tabs is a 
+\begin_inset Quotes eld
+\end_inset
+
+thing
+\begin_inset Quotes erd
+\end_inset
+
+, and there is no particular problem of asking whether the unconnected tabs
+ belong to it, or to it's set-complelement.
+\end_layout
+
+\begin_layout Standard
+TODO: Refining the discussion of Frames and Locales, as it applies to the
+ jigsaw-puzzle metaphor, is arguably an important pre-requiste for the discussio
+n of pre-sheaves and sheaves.
+ However, this is held off until later, as the level of abstraction is more
+ demanding.
+\end_layout
+
+\begin_layout Subsubsection*
+Topological conclusions
+\end_layout
+
+\begin_layout Standard
+At any rate, the goal here would seem to have been met: meshes can be made
+ to look like a topology.
+ This means that many of the mechanisms and concepts intended for topologies
+ can be carried forward, transported and applied to meshes.
+\end_layout
+
+\begin_layout Subsection*
+Presheaf axioms
+\end_layout
+
+\begin_layout Standard
+The conventional definition begins as follows.
+ Let 
+\begin_inset Formula $X$
+\end_inset
+
+ be a topological space and let 
+\begin_inset Formula $C$
+\end_inset
+
+ be a category.
+ A presheaf 
+\begin_inset Formula $F$
+\end_inset
+
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+ is a functor with values in 
+\begin_inset Formula $C$
+\end_inset
+
+ having the following properties (quoted from Wikipedia):
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For each open set 
+\begin_inset Formula $U$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+, there corresponds an object 
+\begin_inset Formula $F\left(U\right)$
+\end_inset
+
+ in 
+\begin_inset Formula $C$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For each inclusion of open sets 
+\begin_inset Formula $V\subseteq U$
+\end_inset
+
+, there is a corresponding morphism 
+\begin_inset Formula $\mbox{res}_{V,U}:F\left(U\right)\to F\left(V\right)$
+\end_inset
+
+ in the category 
+\begin_inset Formula $C$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+For every open set 
+\begin_inset Formula $U$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+, the restriction morphism 
+\begin_inset Formula $\mbox{res}_{U,U}:F\left(U\right)\to F\left(U\right)$
+\end_inset
+
+ is the identity morphism on 
+\begin_inset Formula $F\left(U\right)$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+If we have three open sets 
+\begin_inset Formula $W\subseteq V\subseteq U$
+\end_inset
+
+, then the composite 
+\begin_inset Formula $\mbox{res}_{W,V}\circ\mbox{res}_{V,U}$
+\end_inset
+
+ equals 
+\begin_inset Formula $\mbox{res}_{W,U}$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These are rather abstract statements; before they can be given a concrete
+ meaning, an exploration of what the category 
+\begin_inset Formula $C$
+\end_inset
+
+ might be is required.
+ Since, again, the task at hand is that of providing meaning, the category
+ 
+\begin_inset Formula $C$
+\end_inset
+
+ can be taken to be 
+\begin_inset Quotes eld
+\end_inset
+
+the category of meanings
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But what is a meaning? To prevent the discussion from devolving into abstract
+ nonsense, it is best to make 
+\begin_inset Formula $C$
+\end_inset
+
+ concrete.
+\end_layout
+
+\begin_layout Standard
+To that end, a suitable example might be the vectorial/tensorial meanings
+ provided by word-sense disambiguation (
+\emph on
+e.g.
+
+\emph default
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+Mihalcea algorithm
+\begin_inset Quotes erd
+\end_inset
+
+), or the compositional concept of meaning that is commonly invoked in artificia
+l neural nets (
+\emph on
+e.g.
+
+\emph default
+ Skipgram models of language.)
+\end_layout
+
+\begin_layout Standard
+To recap these two different models of meaning ...
+ (is this wise here or does this belong in a different chapter?)
+\end_layout
+
+\begin_layout Standard
+TODO this section is obviously, wildly incomplete.
+ This needs to be started with a realistic non-abstract example.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

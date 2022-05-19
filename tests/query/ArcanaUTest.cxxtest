@@ -30,7 +30,7 @@ using namespace opencog;
 class ArcanaUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as;
+	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
@@ -39,7 +39,7 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		as = new AtomSpace();
+		as = createAtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -50,7 +50,6 @@ public:
 	~ArcanaUTest()
 	{
 		delete eval;
-		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -89,7 +88,7 @@ void ArcanaUTest::test_repeats(void)
 	eval->eval("(load-from-path \"tests/query/arcana-repeat.scm\")");
 
 	Handle same = eval->eval_h("(cog-execute! (repeat-same))");
-	printf("same, num solutions=%lu\n", getarity(same));
+	printf("same, num solutions=%zu\n", getarity(same));
 	TS_ASSERT_EQUALS(1, getarity(same));
 
 	Handle diff = eval->eval_h("(cog-execute! (repeat-different))");
@@ -110,16 +109,16 @@ void ArcanaUTest::test_repeats(void)
 	TS_ASSERT_EQUALS(true, pass);
 
 	Handle d3d = eval->eval_h("(cog-execute! (repeat-diff-thrice))");
-	printf("d3d, num solutions=%lu\n", getarity(d3d));
+	printf("d3d, num solutions=%zu\n", getarity(d3d));
 	TS_ASSERT(1 <= getarity(d3d));
 	TS_ASSERT(getarity(d3d) <= 3);
 
 	Handle thrice = eval->eval_h("(cog-execute! (repeat-thrice))");
-	printf("thrice, num solutions=%lu\n", getarity(thrice));
+	printf("thrice, num solutions=%zu\n", getarity(thrice));
 	TS_ASSERT_EQUALS(1, getarity(thrice));
 
 	Handle once = eval->eval_h("(cog-execute! (repeat-once))");
-	printf("once, num solutions=%lu\n", getarity(once));
+	printf("once, num solutions=%zu\n", getarity(once));
 	TS_ASSERT_EQUALS(1, getarity(once));
 
 	// ----
@@ -222,7 +221,7 @@ void ArcanaUTest::test_numeric(void)
 	Handle sl = eval->eval_h("(StateLink"
 	                         "   (SchemaNode \"start-interaction-timestamp\")"
 	                         "   (TimeLink))");
-	Instantiator(as).execute(sl);
+	Instantiator(as.get()).execute(sl);
   
 	TruthValuePtr too_soon = eval->eval_tv(
 		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");

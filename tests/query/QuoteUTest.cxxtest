@@ -35,7 +35,7 @@ using namespace opencog;
 class QuoteUTest: public CxxTest::TestSuite
 {
 private:
-    AtomSpace* as;
+    AtomSpacePtr as;
     SchemeEval* eval;
 
 public:
@@ -45,7 +45,7 @@ public:
         logger().set_print_to_stdout_flag(true);
         logger().set_timestamp_flag(false);
 
-        as = new AtomSpace();
+        as = createAtomSpace();
         eval = new SchemeEval(as);
         eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -53,7 +53,6 @@ public:
 
     ~QuoteUTest()
     {
-        delete as;
         delete eval;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -258,7 +257,7 @@ void QuoteUTest::test_impossible(void)
 
     Handle imp = eval->eval_h("imp");
 
-    TruthValuePtr tv = imp->evaluate(as);
+    TruthValuePtr tv = imp->evaluate(as.get());
 
     // Mostly we expect the above to not throw or assert.
     // Getting back false tv (no groundings at all) is a bonus.
@@ -388,7 +387,7 @@ void QuoteUTest::test_quote_scope(void)
     TS_ASSERT_EQUALS(1, hs.size());
 
     Handle ex = eval->eval_h("expect");
-    TS_ASSERT_EQUALS(ex, hs[0]);
+    TS_ASSERT_EQUALS(ex, as->add_atom(hs[0]));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

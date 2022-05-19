@@ -129,7 +129,7 @@ To summarize, there are four basic recursive methods:
 
  * tree_compare(), which recursively compares a term in the pattern
    to a proposed grounding. It moves "downwards" in the two trees;
-   it only calls itself, and terminates on match or mis-match.
+   it only calls itself, and terminates on match or mismatch.
 
  * explore_up_branches() and do_term_up(), which alternately call each
    other, moving up the pattern tree and it's matching tree.
@@ -146,7 +146,7 @@ To summarize, there are four basic recursive methods:
 
 State, Stack and Backtracking
 -----------------------------
-At each stage of the exploration, a mis-match may be declared. In
+At each stage of the exploration, a mismatch may be declared. In
 this case, the interlocking nested recursive routines then return
 back to the most recent branchpoint. This return is called
 "backtracking".  The "branchpoint" is a location where there existed

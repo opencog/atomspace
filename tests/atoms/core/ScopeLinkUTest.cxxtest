@@ -32,22 +32,23 @@
 
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define al _asp->add_link
+#define an _asp->add_node
 
 // Test ScopeLink.
 //
 class ScopeLinkUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpacePtr _asp;
 	SchemeEval _eval;
 	Handle X, Y, Z, S, T, P, Q, CT;
 
 public:
-	ScopeLinkUTest() : _eval(&_as)
+	ScopeLinkUTest() : _asp(createAtomSpace()), _eval(_asp)
 	{
 		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::DEBUG);
 
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
@@ -78,6 +79,7 @@ public:
 	void test_get_variables_4();
 	void test_get_variables_5();
 	void test_get_variables_6();
+	void test_get_variables_7();
 
 	void test_rand_alpha_conversion();
 	void test_names_alpha_conversion();
@@ -360,7 +362,7 @@ void ScopeLinkUTest::test_get_variables_5()
 	Handle sc_vardecl = sc->get_vardecl();
 
 	printf("Got vardecl %s\n", oc_to_string(re_vardecl).c_str());
-	printf("Excepted vardecl %s\n", oc_to_string(sc_vardecl).c_str());	
+	printf("Excepted vardecl %s\n", oc_to_string(sc_vardecl).c_str());
 
 	TS_ASSERT(content_eq(re_vardecl, sc_vardecl));
 
@@ -389,6 +391,37 @@ void ScopeLinkUTest::test_get_variables_6()
 
 	// Test that variables are in canonical order
 	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_7()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Given a body with variables from different atomspaces check that
+	// the variable list is non redundant.
+	AtomSpacePtr alt_as(_asp);
+#define alt_al alt_as->add_link
+#define alt_an alt_as->add_node
+	Handle altU = alt_an(VARIABLE_NODE, "$U");
+	Handle altV = alt_an(VARIABLE_NODE, "$V");
+	Handle U = an(VARIABLE_NODE, "$U");
+	Handle V = an(VARIABLE_NODE, "$V");
+	Handle vardecl = al(VARIABLE_SET, U, V);
+	Handle ante = al(SIMILARITY_LINK, U, V);
+	Handle cnse = alt_al(INHERITANCE_LINK, altU, altV);
+	Handle sch = alt_al(IMPLICATION_SCOPE_LINK, vardecl, ante, cnse);
+#undef alt_al
+#undef alt_an
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	HandleSeq result = sc->get_variables().varseq;
+	logger().debug() << "Got " << oc_to_string(result);
+
+	// Test that there are no redundant variables (only U and V)
+	TS_ASSERT_EQUALS(result.size(), 2);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -455,7 +488,7 @@ void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
 		              al(AND_LINK, Y), al(OR_LINK, Y));
 
 	BindLinkPtr bl(BindLinkCast(hbl));
-	Handle result_wo_vardecl = _as.add_atom(bl->alpha_convert({Y}));
+	Handle result_wo_vardecl = _asp->add_atom(bl->alpha_convert({Y}));
 
 	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
 	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);

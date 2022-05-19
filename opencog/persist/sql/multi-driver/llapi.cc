@@ -39,9 +39,9 @@
 
 #include <stdio.h>
 
+#include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 
 #include "llapi.h"
 
@@ -49,6 +49,7 @@
 
 LLConnection::LLConnection(void)
 {
+    opencog::set_thread_name("atoms:pgconn");
     is_connected = false;
 }
 

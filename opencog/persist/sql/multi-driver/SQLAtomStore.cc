@@ -26,7 +26,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -117,6 +117,12 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 		if (not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 	}
+	catch (const NotFoundException& ex)
+	{
+		// No-op. This happens when atoms stores and atom deletes are
+		// racing with each-other. Provoked by MultiDeleteUTest.
+		// get_uuid() is throwing, because the atom has been deleted.
+	}
 	catch (...)
 	{
 		_async_write_queue_exception = std::current_exception();
@@ -136,7 +142,9 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 bool SQLAtomStorage::not_yet_stored(const Handle& h)
 {
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
-	return TLB::INVALID_UUID == _tlbuf.getUUID(h);
+	UUID uuid = _tlbuf.getUUID(h);
+	return (TLB::INVALID_UUID == uuid) and
+	       (Handle::UNDEFINED == _tlbuf.getAtom(uuid));
 }
 
 /**
@@ -151,10 +159,11 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::unique_lock<std::mutex> create_lock(_store_mutex);
 
 	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return;
+	if ((TLB::INVALID_UUID != uuid) and
+	    (Handle::UNDEFINED != _tlbuf.getAtom(uuid))) return;
 
-	// If it was not found, then issue a brand-spankin new UUID.
-	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	// Make sure the Atom in the the TLB.
+	uuid = _tlbuf.addAtom(h, uuid);
 
 	std::string uuidbuff = std::to_string(uuid);
 
@@ -213,7 +222,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		if (2700 < qname.size())
 		{
 			throw IOException(TRACE_INFO,
-				"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+				"Error: do_store_single_atom: Maximum Node name size is 2700.\n");
 		}
 		STMT("name", qname);
 
@@ -240,7 +249,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			if (330 < h->get_arity())
 			{
 				throw IOException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Link size is 330. "
+					"Error: do_store_single_atom: Maximum Link size is 330. "
 					"Atom was: %s\n", h->to_string().c_str());
 			}
 
@@ -265,7 +274,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	}
 	catch (const SilentException& ex)
 	{
-		_tlbuf.removeAtom(uuid);
+		_tlbuf.purgeAtom(uuid);
 		create_lock.unlock();
 		do_store_single_atom(h, aheight);
 	}

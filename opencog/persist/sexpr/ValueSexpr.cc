@@ -20,9 +20,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <iomanip>
+
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/ValueFactory.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Sexpr.h"
@@ -31,7 +35,7 @@ using namespace opencog;
 
 /* ================================================================== */
 /**
- * Look for a type name, either of the form "ConceptNode" (wwith quotes)
+ * Look for a type name, either of the form "ConceptNode" (with quotes)
  * or 'ConceptNode (symbol) starting at location `pos` in `tna`.
  * Return the type and update `pos` to point after the typename.
  */
@@ -140,6 +144,19 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 			while (0 < pcnt and epos < totlen)
 			{
 				char c = stv[++epos];
+
+				// Advance past escaped quotes.
+				if ('"' == c)
+				{
+					++epos;
+					// Search for ending quote, advancing past escaped quotes.
+					while (epos < totlen and stv[epos] != '"')
+					{
+						if (stv[epos] == '\\') epos++;
+						epos++;
+					}
+					continue;
+				}
 				if ('(' == c) pcnt ++;
 				else if (')' == c) pcnt--;
 			}
@@ -172,23 +189,44 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 		return valueserver().create(vtype, fv);
 	}
 
-	// XXX FIXME this mishandles escaped quotes
+	// Unescape escaped quotes
 	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		std::vector<std::string> sv;
-		size_t epos = stv.find(')', vos+1);
-		if (std::string::npos == epos)
-			throw SyntaxException(TRACE_INFO,
-				"Malformed StringValue: %s", stv.substr(pos).c_str());
-		while (vos < epos)
+		size_t p = vos+1;
+
+		// p is pointing to the opening quote.
+		while ('"' == stv[p])
 		{
-			vos = stv.find('\"', vos);
-			if (std::string::npos == vos) break;
-			size_t evos = stv.find('\"', vos+1);
-			sv.push_back(stv.substr(vos+1, evos-vos-1));
-			vos = evos+1;
+			size_t e = p + 1;
+
+			// Search for ending quote, advancing past escaped quotes.
+			while (e < totlen and stv[e] != '"')
+			{
+				if (stv[e] == '\\') e++;
+				e++;
+			}
+			e++; // Now e points just past the close-quote.
+			if (totlen <= e)
+				throw SyntaxException(TRACE_INFO,
+					"Malformed StringValue: %s", stv.substr(vos).c_str());
+
+			// Unescape quotes in the string.
+			std::stringstream ss;
+			std::string val;
+			ss << stv.substr(p, e-p);
+			ss >> quoted(val);
+			sv.push_back(val);
+
+			// Skip past whitespace
+			p = stv.find_first_not_of(" \n\t", e);
 		}
-		pos = epos + 1;
+		if (')' != stv[p])
+			throw SyntaxException(TRACE_INFO,
+				"Missing closing paren at %zu (after %zu strings) in StringValue: %s",
+				p, sv.size(), stv.substr(vos).c_str());
+
+		pos = ++p;
 		return valueserver().create(vtype, sv);
 	}
 
@@ -234,8 +272,10 @@ void Sexpr::decode_alist(const Handle& atom,
 			Handle hkey = as->add_atom(key);
 			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
+			as->set_value(atom, key, val);
 		}
-		atom->setValue(key, val);
+		else
+			atom->setValue(key, val);
 		pos = alist.find('(', pos);
 	}
 }
@@ -245,7 +285,7 @@ void Sexpr::decode_alist(const Handle& atom,
 /**
  * Decode a Valuation association list.
  * This list has the format
- * (list (cons KEY VALUE)(cons KEY2 VALUE2)...)
+ *    (alist (cons KEY VALUE)(cons KEY2 VALUE2)...)
  * Store the results as values on the atom.
  */
 void Sexpr::decode_slist(const Handle& atom,
@@ -255,61 +295,82 @@ void Sexpr::decode_slist(const Handle& atom,
 
 	pos = alist.find_first_not_of(" \n\t", pos);
 	if (std::string::npos == pos) return;
-	if (alist.compare(pos, 5, "(list"))
+	if (alist.compare(pos, 6, "(alist"))
 		throw SyntaxException(TRACE_INFO, "Badly formed alist: %s",
 			alist.substr(pos).c_str());
 
 	size_t totlen = alist.size();
-	pos = alist.find("(cons ", pos);
-	while (std::string::npos != pos and pos < totlen)
+	size_t nxt = alist.find("(cons ", pos);
+	while (std::string::npos != nxt and nxt < totlen)
 	{
-		pos += 5;
-		pos = alist.find_first_not_of(" \n\t", pos);
-		Handle key(decode_atom(alist, pos));
-		pos++;
-		pos = alist.find_first_not_of(" \n\t", pos);
-		ValuePtr val(decode_value(alist, pos));
+		nxt += 5;
+		nxt = alist.find_first_not_of(" \n\t", nxt);
+		Handle key(decode_atom(alist, nxt));
+		nxt++;
+		nxt = alist.find_first_not_of(" \n\t", nxt);
+		ValuePtr val(decode_value(alist, nxt));
+		pos = nxt + 1;   // move past closing paren of (cons ...)
 		if (as)
 		{
 			// Make sure all atoms have found a nice home.
 			Handle hkey = as->add_atom(key);
 			if (hkey) key = hkey; // might be null, if `as` is read-only
 			val = add_atoms(as, val);
+			as->set_value(atom, key, val);
 		}
-		atom->setValue(key, val);
-		pos = alist.find("(cons ", pos);
+		else
+			atom->setValue(key, val);
+		nxt = alist.find("(cons ", nxt);
 	}
+
+	// Move past closing parent of (alist ...)
+	pos = alist.find(")", pos);
+	pos++;
 }
 
 /* ================================================================== */
+// Atom printers that do NOT print associated Values.
 
-static std::string prt_node(const Handle& h)
+static std::string prt_node(const Handle& h, bool multispace)
 {
-	std::string txt = "(" + nameserver().getTypeName(h->get_type())
-		+ " \"" + h->get_name() + "\")";
-	return txt;
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name());
+
+	if (multispace and h->getAtomSpace())
+		ss << " (AtomSpace \"" << h->getAtomSpace()->get_name() << "\")";
+
+	ss << ")";
+
+	return ss.str();
 }
 
-static std::string prt_atom(const Handle&);
+static std::string prt_atom(const Handle&, bool);
 
-static std::string prt_link(const Handle& h)
+static std::string prt_link(const Handle& h, bool multispace)
 {
 	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
 	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
+		txt += prt_atom(ho, multispace);
+
+	if (multispace and h->getAtomSpace())
+		txt += " (AtomSpace \"" + h->getAtomSpace()->get_name() + "\")";
+
 	txt += ")";
 	return txt;
 }
 
-static std::string prt_atom(const Handle& h)
+static std::string prt_atom(const Handle& h, bool multispace)
 {
-	if (h->is_node()) return prt_node(h);
-	return prt_link(h);
+	if (h->is_node()) return prt_node(h, multispace);
+	return prt_link(h, multispace);
 }
 
-std::string Sexpr::encode_atom(const Handle& h)
+/// Convert the Atom into a string. It does NOT print any of the
+/// associated values; use `dump_atom()` to get those.
+std::string Sexpr::encode_atom(const Handle& h, bool multispace)
 {
-	return prt_atom(h);
+	return prt_atom(h, multispace);
 }
 
 /// Convert value (or Atom) into a string.
@@ -320,15 +381,16 @@ std::string Sexpr::encode_value(const ValuePtr& v)
 
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{
-		// The FloatValue to_string() print prints out a high-precision
+		// The FloatValue to_string() method prints out a high-precision
 		// form of the value, as compared to SimpleTruthValue, which
 		// only prints 6 digits and breaks the unit tests.
 		FloatValuePtr fv(FloatValueCast(v));
 		return fv->FloatValue::to_string();
 	}
+
 	if (not v->is_atom())
 		return v->to_short_string();
-	return prt_atom(HandleCast(v));
+	return prt_atom(HandleCast(v), false);
 }
 
 /* ================================================================== */
@@ -339,14 +401,93 @@ std::string Sexpr::encode_atom_values(const Handle& h)
 {
 	std::stringstream rv;
 
-	rv << "(list ";
+	rv << "(alist ";
 	for (const Handle& k: h->getKeys())
 	{
 		ValuePtr p = h->getValue(k);
-		rv << "(cons " << prt_atom(k) << encode_value(p) + ")";
+		rv << "(cons " << prt_atom(k, false) << encode_value(p) << ")";
 	}
 	rv << ")";
 	return rv.str();
+}
+
+/* ================================================================== */
+// Atom printers that encode ALL associated Values.
+
+static std::string dump_node(const Handle& h)
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name());
+
+	if (h->haveValues())
+		ss << " " << Sexpr::encode_atom_values(h);
+
+	ss << ")";
+
+	return ss.str();
+}
+
+static std::string dump_link(const Handle& h)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += prt_atom(ho, false);
+
+	if (h->haveValues())
+	{
+		txt += " ";
+		txt += Sexpr::encode_atom_values(h);
+	}
+
+	txt += ")";
+	return txt;
+}
+
+/// Print the Atom, and all of the values attached to it.
+/// Similar to `encode_atom()`, except that it also prints the values.
+/// Values on going Atoms in a Link are NOT dumped!
+/// This is in order to avoid duplication.
+std::string Sexpr::dump_atom(const Handle& h)
+{
+	if (h->is_node()) return dump_node(h);
+	return dump_link(h);
+}
+
+/* ================================================================== */
+// Atom printers that encode only one associated Value.
+
+static std::string dump_vnode(const Handle& h, const Handle& key)
+{
+	std::stringstream ss;
+	ss << "(" << nameserver().getTypeName(h->get_type())
+		<< " " << std::quoted(h->get_name());
+
+	ValuePtr p = h->getValue(key);
+	if (nullptr != p)
+		ss << " (alist (cons " << prt_atom(key, false) << Sexpr::encode_value(p) << ")))";
+
+	return ss.str();
+}
+
+static std::string dump_vlink(const Handle& h, const Handle& key)
+{
+	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
+	for (const Handle& ho : h->getOutgoingSet())
+		txt += prt_atom(ho, false);
+
+	ValuePtr p = h->getValue(key);
+	if (nullptr != p)
+		txt += " (alist (cons " + prt_atom(key, false) + Sexpr::encode_value(p) + ")))";
+
+	return txt;
+}
+
+/// Print the Atom, and just one of the values attached to it.
+std::string Sexpr::dump_vatom(const Handle& h, const Handle& key)
+{
+	if (h->is_node()) return dump_vnode(h, key);
+	return dump_vlink(h, key);
 }
 
 /* ================================================================== */

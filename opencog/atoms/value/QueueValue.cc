@@ -88,6 +88,21 @@ void QueueValue::update() const
 
 // ==============================================================
 
+bool QueueValue::operator==(const Value& other) const
+{
+	// Derived classes use this, so use get_type()
+	if (get_type() != other.get_type()) return false;
+
+	if (this == &other) return true;
+
+	if (not is_closed()) return false;
+	if (not ((const QueueValue*) &other)->is_closed()) return false;
+
+	return LinkValue::operator==(other);
+}
+
+// ==============================================================
+
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(QUEUE_VALUE,
                      createQueueValue, std::vector<ValuePtr>)

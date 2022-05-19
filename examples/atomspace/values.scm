@@ -22,12 +22,13 @@
 ; Values (such as TruthValues) live in a per-Atom key-value database.
 ; Given any Atom, and a Key, you can get the Value attached there.
 ; Given any Atom, Key and Value, you can quickly swap the new value for
-; the old. Here's what you cannot do:
+; the old. Here's what you cannot do (see, however, footnote at bottom):
 ;
 ; 1) Use GetLink or BindLink to search for Values
 ; 2) Use PutLink to create new Values
-; 3) Store them in the Atomspace for later retrieval. (but you can
-;    store the Atom attache there; the Value will ride with it.)
+; 3) Store them in the Atomspace for later retrieval. (But you do
+;    store the Atom that serves as the anchor for the Value; the Value
+;    will ride with it.)
 ;
 ; Values and Atoms do share a common type system: one can work with
 ; Value types in the same was as with Atom types. This includes using
@@ -106,6 +107,12 @@
 (cog-tv a)
 (equal? (cog-value a ktv) (cog-tv a))
 
+; ----------------------------------------------------------------
+; If you have the Attention module built and installed, you can
+; use AttentionValues.  If you don't, then the rest of this demo
+; won't work.  That's OK; AttentionValues ar optional.
+(use-modules (opencog attention-bank))
+
 ; Truth Values are values, just like the rest. So are Attention Values:
 (define l2 (LinkValue
   (stv 0.1 0.2) (stv 0.3 0.4) (Concept "foobar") (av 3 2 1) (av 4 5 0)))
@@ -114,7 +121,6 @@
 (cog-value a k2)
 
 ; Attention values are stored under a special key as well:
-(use-modules (opencog attentionbank))
 (cog-set-av! a (av 3 2 1))
 (cog-keys a)
 
@@ -123,3 +129,44 @@
 (cog-value a kav)
 (cog-av a)
 (equal? (cog-value a kav) (cog-av a))
+
+; That's all for this demo. Thanks for paying attention!
+; ----------------------------------------------------------------
+; * Footnote:
+;
+; Well, you can search for values, if you are clever. Here's how.
+; You could, for example, say:
+(cog-set-value! (Concept "Fido the Dog")
+   (Predicate "weight_in_kg") (FloatValue 12.5))
+;
+; and then search for it:
+(use-modules (opencog exec))
+(cog-execute!
+   (Get
+      (GreaterThan
+         (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+         (Number "10"))))
+;
+; The problem here is that this search will examine *every* Atom in the
+; AtomSpace, looking to see if they have the key "weight_in_kg" on it,
+; (and if the value is more than 10). Keys are NOT automatically
+; indexed. This is done to save space (RAM) and time (CPU). If you want
+; this search to run rapidly, you can build your own index:
+(Member (Concept "Fido the Dog") (Concept "things that have weight"))
+;
+; and then sharply constrain the search:
+(cog-execute!
+   (Get
+      (And
+         (Member (Variable "dog_node") (Concept "things that have weight"))
+         (GreaterThan
+            (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+            (Number "10")))))
+;
+; The above will only look at Atoms that have a weight. One can go
+; farther, and write:
+(Member (Concept "Fido the Dog") (Concept "things that weigh more than 10 kg"))
+;
+; It is up to you to maintain these structures, if you want them and can
+; use them. The AtomSpace does not keep these automatically, because it
+; cannot guess what you want.

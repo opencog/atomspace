@@ -43,6 +43,7 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
+
 public:
 	ArithmeticLink(const HandleSeq&&, Type=ARITHMETIC_LINK);
 
@@ -52,17 +53,10 @@ public:
 	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);
 	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
-
-	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 };
 
-typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;
-static inline ArithmeticLinkPtr ArithmeticLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<ArithmeticLink>(a); }
-static inline ArithmeticLinkPtr ArithmeticLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<ArithmeticLink>(a); }
-
-#define createArithmeticLink std::make_shared<ArithmeticLink>
+LINK_PTR_DECL(ArithmeticLink)
+#define createArithmeticLink CREATE_DECL(ArithmeticLink)
 
 /** @}*/
 }

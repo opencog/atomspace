@@ -37,8 +37,6 @@ namespace opencog
  * http://en.wikipedia.org/wiki/Fold_(higher-order_function)
  * for a general discussion.
  */
-class FoldLink;
-typedef std::shared_ptr<FoldLink> FoldLinkPtr;
 class FoldLink : public FunctionLink
 {
 protected:
@@ -58,12 +56,8 @@ public:
    virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 };
 
-static inline FoldLinkPtr FoldLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<FoldLink>(a); }
-static inline FoldLinkPtr FoldLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<FoldLink>(a); }
-
-#define createFoldLink std::make_shared<FoldLink>
+LINK_PTR_DECL(FoldLink)
+#define createFoldLink CREATE_DECL(FoldLink)
 
 /** @}*/
 }

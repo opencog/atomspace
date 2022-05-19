@@ -59,10 +59,10 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	// In the current C++ code, handles can also be pointers to
-	// values.  Howerver, in the guile wrapper, we expect all
+	// values.  However, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
 	// if you just want Values.
-	if (not (h->is_link() or h->is_node()))
+	if (not (h->is_link() or h->is_node() or (ATOM_SPACE == h->get_type())))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
@@ -111,9 +111,8 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	Arity ari = 0;
 	if (h->is_link()) ari = h->get_arity();
 
-	/* Arity is currently an unsigned short */
-	SCM sari = scm_from_ushort(ari);
-	return sari;
+	/* Arity is size_t */
+	return scm_from_size_t(ari);
 }
 
 /* ============================================================== */
@@ -214,7 +213,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	Handle h = verify_handle(satom, "cog-inc-value!");
 	Handle key = verify_handle(skey, "cog-inc-value!", 2);
 	double cnt = verify_real(scnt, "cog-inc-value!", 3);
-	int ref = verify_int(sref, "cog-inc-value!", 4);
+	size_t ref = verify_size_t(sref, "cog-inc-value!", 4);
 
 	std::vector<double> new_value;
 
@@ -226,7 +225,7 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	{
 		FloatValuePtr fv(FloatValueCast(v));
 		new_value = fv->value();
-		if (new_value.size() <= (size_t) ref) new_value.resize(ref+1, 0.0);
+		if (new_value.size() <= ref) new_value.resize(ref+1, 0.0);
 	}
 	else
 	{
@@ -254,9 +253,9 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size(); i > 0; i--)
 	{
-		SCM smob = handle_to_scm(oset[i]);
+		SCM smob = handle_to_scm(oset[i-1]);
 		list = scm_cons (smob, list);
 	}
 
@@ -278,10 +277,10 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
-	for (int i = oset.size()-1; i >= 0; i--)
+	for (size_t i = oset.size(); i > 0; i--)
 	{
-		if (oset[i]->get_type() != t) continue;
-		SCM smob = handle_to_scm(oset[i]);
+		if (oset[i-1]->get_type() != t) continue;
+		SCM smob = handle_to_scm(oset[i-1]);
 		list = scm_cons (smob, list);
 	}
 
@@ -295,7 +294,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
+	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
 
 	if (not h->is_link()) return SCM_EOL;
 
@@ -309,11 +308,13 @@ SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 /**
  * Convert the incoming set of an atom into a list; return the list.
  */
-SCM SchemeSmob::ss_incoming_set (SCM satom)
+SCM SchemeSmob::ss_incoming_set (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-set");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-set");
 
 	// This reverses the order of the incoming set, but so what ...
 	SCM head = SCM_EOL;
@@ -331,12 +332,14 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 /**
  * Convert the incoming set of an atom into a list; return the list.
  */
-SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
+SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
 	Type t = verify_type(stype, "cog-incoming-by-type", 2);
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-by-type");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-by-type");
 
 	IncomingSet iset = h->getIncomingSetByType(t, as);
 	SCM head = SCM_EOL;
@@ -353,10 +356,12 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 /**
  * Return the length (size) of the incoming set of an atom.
  */
-SCM SchemeSmob::ss_incoming_size (SCM satom)
+SCM SchemeSmob::ss_incoming_size (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size");
-	AtomSpace* as = ss_get_env_as("cog-incoming-size");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-size");
 
 	size_t sz = h->getIncomingSetSize(as);
 	return scm_from_size_t(sz);
@@ -367,12 +372,15 @@ SCM SchemeSmob::ss_incoming_size (SCM satom)
  * Return the length (size) of the incoming set of type stype
  * of the atom.
  */
-SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
+SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
 	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
 
-	AtomSpace* as = ss_get_env_as("cog-incoming-size-by-type");
+	AtomSpace* as = ss_to_atomspace(aspace);
+	if (nullptr == as)
+		as = ss_get_env_as("cog-incoming-size-by-type");
+
 	size_t sz = h->getIncomingSetSizeByType(t, as);
 	return scm_from_size_t(sz);
 }
@@ -380,8 +388,8 @@ SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype)
 /* ============================================================== */
 
 /**
- * Apply proceedure proc to all atoms of type stype
- * If the proceedure returns something other than #f,
+ * Apply procedure proc to all atoms of type stype
+ * If the procedure returns something other than #f,
  * terminate the loop.
  * The `aspace` argument is optional; use it if present, else not.
  */
@@ -394,8 +402,8 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 		atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
-	HandleSet hset;
-	atomspace->get_handleset_by_type(hset, t);
+	HandleSeq hset;
+	atomspace->get_handles_by_type(hset, t);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.
@@ -405,7 +413,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 		// In case h got removed from the atomspace between
 		// get_handles_by_type call and now. This may happen either
 		// externally or by proc itself (such as cog-extract-recursive)
-		if (not h->getAtomSpace())
+		if (not h->getAtomSpace() and not (ATOM_SPACE == h->get_type()))
 			continue;
 
 		SCM smob = handle_to_scm(h);

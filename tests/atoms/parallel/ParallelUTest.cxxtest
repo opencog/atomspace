@@ -1,0 +1,236 @@
+/*
+ * tests/atoms/parallel/ParallelUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <time.h>
+#include <sys/time.h>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#ifndef __APPLE__
+  #define ATOM_SLEEP(x,y) clock_nanosleep(CLOCK_REALTIME, 0, x, y)
+#else
+  #define ATOM_SLEEP(x,y) nanosleep(x, y)
+#endif
+
+using namespace opencog;
+
+class ParallelUTest: public CxxTest::TestSuite
+{
+private:
+    AtomSpacePtr as;
+    SchemeEval* eval;
+
+    int robustSleep(int secs);
+
+public:
+    ParallelUTest(void)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+
+        as = createAtomSpace();
+        eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+    }
+
+    ~ParallelUTest()
+    {
+        delete eval;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_parallel(void);
+    void test_join(void);
+    void test_throw(void);
+};
+
+void ParallelUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void ParallelUTest::setUp(void)
+{
+    as->clear();
+}
+
+/*
+ * Use clock_nanosleep() to repeatedly attempt to sleep until the desired
+ * number of seconds is past, in spite of signal interrupts.
+ */
+int ParallelUTest::robustSleep(int secs)
+{
+    struct timespec request, remain;
+    int e;
+    request.tv_sec = secs;
+    request.tv_nsec = 0;
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+
+    while ((e = ATOM_SLEEP(&request, &remain)) != 0) {
+        gettimeofday(&tv, nullptr);
+        double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+        printf("Slept for %.4f secs so far\n", now - start);
+        if (e == EINTR) {
+            printf("Interrupt. %ld.%09ld secs remain\n", remain.tv_sec, remain.tv_nsec);
+            request = remain;
+        }
+        else {
+            return e;
+        }
+    }
+
+    return e;
+}
+
+/*
+ * ParallelLink unit test.
+ */
+void ParallelUTest::test_parallel(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
+
+    // The scheme variable nnn should increment by one after 1, 3 and 5
+    // seconds. If we check at 0, 2, 4, 6 seconds, we should get a clear
+    // eye for the measurement.  Note that, on a busy system, these
+    // timing windows can fail, if the OS muffs the sleeps.  Which does
+    // seem to happen; see bug #517 on github.
+    eval->eval_tv("(cog-evaluate! pllel)");
+
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+
+    std::string str = eval->eval("nnn");
+    printf("0-count = %s\n", str.c_str());
+    int cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 0);
+    int e = robustSleep(2);
+
+    gettimeofday(&tv, nullptr);
+    double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+    printf("After first sleep (exit %d) %.4f secs past\n", e, now - start);
+
+    str = eval->eval("nnn");
+    printf("1-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 1);
+    e = robustSleep(2);
+
+    gettimeofday(&tv, nullptr);
+    now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+    printf("After second sleep (exit %d) %.4f secs past\n", e, now - start);
+
+    str = eval->eval("nnn");
+    printf("2-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 2);
+    e = robustSleep(2);
+
+    gettimeofday(&tv, nullptr);
+    now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+    printf("After third sleep (exit %d) %.4f secs past\n", e, now - start);
+
+    str = eval->eval("nnn");
+    printf("3-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 3);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ThreadJoinLink unit test.
+ */
+void ParallelUTest::test_join(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
+
+    eval->eval("(set! nnn 0)");
+
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+
+    // This should take exactly 5 seconds to run.
+    // In particular, this thread should be blocked for 5 seconds.
+    TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! wait)");
+
+    gettimeofday(&tv, nullptr);
+    double end = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+    double elapsed = end - start;
+    printf("elapsed time = %f seconds\n", elapsed);
+    // This would rarely fail with a more strict check, so it's been
+    // relaxed for now.
+    TS_ASSERT_LESS_THAN(elapsed, 5.5);
+    TS_ASSERT_LESS_THAN(4.5, elapsed);
+
+    // The scheme variable nnn should get incremented twice (not three
+    // times); the middle SequentialAnd has a False in it, so the middle
+    // increment should not happen.
+    std::string str = eval->eval("nnn");
+    printf("2-count = %s\n", str.c_str());
+    int cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 2);
+
+    // The ThreadJoin is an AndLink...
+    double mean = tvp->get_mean();
+    TS_ASSERT_LESS_THAN(mean, 0.5);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ParallelLink, ThreadJoinLink exceptions
+ */
+void ParallelUTest::test_throw(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
+    TS_ASSERT_THROWS_NOTHING(eval->eval_tv("(cog-evaluate!  pllel-bad)"));
+    TS_ASSERT_EQUALS(false, eval->eval_error());
+
+    TS_ASSERT_THROWS_ANYTHING(eval->eval_tv("(cog-evaluate! wait-bad)"));
+    TS_ASSERT_EQUALS(true, eval->eval_error());
+
+    TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute!  pllel-bad)"));
+    TS_ASSERT_EQUALS(false, eval->eval_error());
+
+    TS_ASSERT_THROWS_ANYTHING(eval->eval_v("(cog-execute! wait-bad)"));
+    TS_ASSERT_EQUALS(true, eval->eval_error());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}

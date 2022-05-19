@@ -6,9 +6,13 @@ OpenCog AtomSpace
 The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
 database, an associated query engine and graph-re-writing system,
 and a rule-driven inferencing engine that can apply and manipulate
-sequences of rules to perform reasoning. It is a layer that sits
-on top of ordinary distributed (graph) databases, providing a large
-variety of advanced features not otherwise available.
+sequences of rules to perform reasoning. It is a kind of in-RAM
+generalized hypergraph (metagraph) database. Metagraphs offer more
+efficient, more flexible and more powerful ways of representing
+graphs: [a metagraph store is literally just-plain better than a
+graph store.](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+On top of this, the Atomspace provides a large variety of advanced
+features not available anywhere else.
 
 The AtomSpace is a platform for building Artificial General Intelligence
 (AGI) systems. It provides the central knowledge representation component
@@ -16,8 +20,8 @@ for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
 
-Data as Graphs
-==============
+Data as MetaGraphs
+==================
 It is now commonplace to represent data as graphs; there are more graph
 databases than you can shake a stick at. What makes the AtomSpace
 different? A dozen features that no other graph DB does, or has even
@@ -30,11 +34,18 @@ But, first: five things everyone else does:
   regions can be specified, by unifying multiple clauses.
 * Modify searches with conditionals, such as "greater than", and with
   user callbacks into scheme, python or Haskell.
-* Perform graph rewriting: use search results to create new graphs.
+* Perform **graph rewriting**: use search results to create new graphs.
 * Trigger execution of user callbacks... or of executable graphs (as
   explained below).
 
-Things that no one else does:
+A key difference: the AtomSpace is a metagraph store, not a graph store.
+Metagraphs can efficiently represent graphs, but not the other way around.
+This is carefully explained
+[here,](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+which also gives a precise definition of what a metagraph is, and how it
+is related to a graph.  As a side-effect, metagraphs open up many
+possibilities not available to ordinary graph databases. These are
+listed below.  Things are things that no one else does:
 * **Search queries are graphs.**
   (The API to the [pattern engine](https://wiki.opencog.org/w/Pattern_engine)
   is a graph.) That is, every query, every search is also a graph. That
@@ -117,6 +128,107 @@ Things that no one else does:
   red balls in them. This requires not only finding the baskets, making
   sure they have balls in them, but also testing each and every ball in
   a basket to make sure they are **all** of the same color.
+* **Frames (ChangeSets)**
+  Store a sequence of graph rewrites, changes of values as a single
+  changeset. The database itself is a collection of such changesets or
+  "Frames".  Very roughly, a changeset resembles a git commit, but for
+  the graph database. The word "Frame" is mean to invoke the idea of a
+  stackframe, or a Kripke frame: the graph state, at this moment. By
+  storing frames, it is possible to revert to earlier graph state. It is
+  possible to compare different branches and to explore different
+  rewrite histories starting from the same base graph.  Different
+  branches may be merged, forming a set-union of thier contents. This
+  is useful for inference and learning algos, which explore long chains
+  of large, complex graph rewrites.
+
+
+### What it Isn't
+Newcomers often struggle with the AtomSpace, because they bring
+preconceived notions of what they think it should be, and its not that.
+So, a few things it is not.
+
+* **It's not JSON.**  So JSON is a perfectly good way of representing
+  structured data. JSON records data as `key:value` pairs, arranged
+  hierarchically, with braces, or as lists, with square brackets.
+  The AtomSpace is similar, except that there are no keys! The
+  AtomSpace still organizes data hierarchically, and provides lists,
+  but all entries are anonymous, nameless. Why? There are performance
+  (CPU and RAM usage) and other design tradeoffs in not using explicit
+  named keys in the data structure. You can still have named values;
+  it is just that they are not required. There are several different
+  ways of importing JSON data into the AtomSpace. If your mental model
+  of "data" is JSON, then you will be confused by the AtomSpace.
+
+* **It's not SQL. It's also not noSQL**. Databases from 50 years ago
+  organized structured data into tables, where the `key` is the label
+  of a column, and different `values` sit in different rows. This is
+  more efficient than JSON, if you have many rows: you don't have to
+  store the same key over and over again, for each row. Of course,
+  tabular data is impractical if you have zillions of tables, each with
+  only one or two rows. That's one reason why JSON was invented.
+  The AtomSpace was designed to store *unstructured* data. You can
+  still store structured data in it; there are several different ways
+  of importing tabular data into the AtomSpace. If your mental model
+  of "data" is structured data, then you will be confused by the AtomSpace.
+
+* **It's not a vertex+edge store**. (Almost?) all graph databases
+  decompose graphs into lists of vertexes and edges. This is just fine,
+  if you don't use complex algorithms. The problem with this storage
+  format is locality: graph traversal becomes a game of repeatedly
+  looking up a specific vertex and then, a specific edge, each located
+  in a large table of vertexes and edges. This is non-local; it
+  requires large indexes on those tables (requires a lot of RAM),
+  and the lookups are CPU consuming. Graph traversal can be a
+  bottleneck. The AtomSpace avoids much of this overhead by using
+  (hyper-/meta-)graphs. This enables more effective and simpler
+  traversal algorithms, which in turn allows more sophisticated
+  search features to be implemented.  If your mental model of
+  graph data is lists of vertexes and edges, then you will be confused
+  by the AtomSpace.
+
+**What is it, then?** Most simply, the AtomSpace stores immutable,
+globally unique, [typed](https://en.wikipedia.org/wiki/Type_theory)
+[s-expressions.](https://en.wikipedia.org/wiki/S-expression) The types
+can be thought of as being like object-oriented classes, and many (not
+all) Atom types do have a corresponding C++ class. Each s-expression is
+called "an Atom". Each Atom is globally unique: there is only one copy,
+ever, of any given s-expression (Atom). It's almost just that simple,
+with only one little twist: a (mutable) key-value database is attached
+to each Atom. Atoms can be used to define (hyper-/meta-)graphs. It's fun
+to think of these graphs as defining "plumbing"; whereas the Values
+stored in the associated key-value database is like the "fluid" in
+these pipes.
+
+The AtomSpace borrows ideas and concepts from many different systems,
+including ideas from JSON, SQL and graph stores. The goal of the
+AtomSpace is to be general: to allow you to work with whatever style
+of data you want: structured or unstructured. As graphs, as tables,
+as objects. As lambda expressions, as abstract syntax trees, as
+prolog-like logical statements.  A place to store relational data
+obeying some relational algebra. As a place to store ontologies or
+mereologies or taxonomies. A place for syntactic (BNF-style)
+productions or constraints or RDF/OWL-style schemas.
+In a mix of declarative, procedural and functional styles.
+The AtomSpace is meant to allow general knowledge representation,
+in any format.
+
+The "special extra twist" of immutable graphs decorated with mutable
+values resembles a corresponding idea in logic: the split between
+logical statements, and the truth values (valuations) attached to them.
+This is useful not only for logic, but also for specifying data
+processing pipelines: the graph specifies the pipeline; the values are
+what flow through that pipeline. The graph is the "code"; the values
+are the data that the code acts on.
+
+All this means that the AtomSpace is different and unusual.
+It might be a bit outside of the comfort zone for most programmers.
+It doesn't have API's that are instantly recognizable to users of
+these other systems. There is a challenging learning curve involved.
+We're sorry about that: if you have ideas for better API's that
+would allow the AtomSpace to look more conventional, and be less
+intimidating to most programmers, then contact us!
+
+### Status and Invitation
 
 As it turns out, knowledge representation is hard, and so the AtomSpace
 has been (and continues to be) a platform for active scientific research
@@ -330,7 +442,7 @@ you; in fact, if you are good at any of these ... we want you. Bad.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
 * GPU processing pipelines, lighting-shading pipelines, CUDA, OpenCL.
-* Dataflow in GPU's for neural bets.
+* Dataflow in GPU's for neural networks.
 
 Basically, Atomese is a mash-up of ideas taken from all of the above
 fields.  It's kind-of trying to do and be all of these, all at once,
@@ -352,35 +464,34 @@ Key Development Goals
 Looking ahead, some key major projects.
 
 ### Distributed Processing
-One of the major development goals for the 2019-2021 time frame
+One of the development goals for the 2021-2023 time frame
 is to gain experience with distributed data processing. Currently,
-the AtomSpace uses Postgres to provide distributed, scalable
-storage. We're also talking about porting to Apache Ignite, or
-possibly some other graph database, such as Redis, Riak or Grakn,
-all of which also support scalable, distributed storage.
+one can build simple distributed networks of AtomSpaces, by using
+the [**StorageNode**](https://wiki.opencog.org/w/StorageNode) to
+specify a remote AtomSpace. However, it is up to you as to what
+kinds of data these AtomSpace exchange with one-another. There
+are no pre-configured, suggested communications styles.
 
-However, despite the fact that Postgres is already distributed,
-and fairly scalable, none of the actual users of the AtomSpace
-use it in it's distributed mode. Exactly why this is the case
-remains unclear: is it the difficulty of managing a distributed
-Postgres database? (I guess you have to be a good DB Admin to
-know how to do this?) Is it the programming API offered by the
-AtomSpace?  Maybe it's not yet urgent for them?  Would rebasing
-on a non-SQL database (such as Ignite, Riak, Redis or Grakn) make
-this easier and simpler?  This is quite unclear, and quite unknown
-at this stage.
+### Cross-system Bridges
+Because the AtomSpace can hold many different representatioinal
+styles, it is relatively easy to import data into the AtomSpace.
+The low-brow way to do this is to write a script file that imports
+the data. This is fine, but leads to data management issues: who's
+got the master copy?
 
-If a port to one of the distributed graph databases is undertaken,
-there are several implementation issues that need to be cleared
-up.  One is to eliminate many usages of SetLink (
-[Issues #1502](https://github.com/opencog/atomspace/issues/1502)
-and [#1507](https://github.com/opencog/atomspace/issues/1507) ).
-Another is to change the AtomTable API to look like a bunch
-of MemberLink's.  (Currently, the AtomTable conceptually looks and
-behaves like a large set, which makes scaling and distribution
-harder than it could be). How to transform the AtomTable into a bunch
-of MemberLinks without blowing up RAM usage or hurting performance
-is unclear.
+The goal of data bridges is to create new Atoms that allow live
+access into other online systems. For example, if an SQL database
+holds a table of `(name, address, phone-number)`, it should be
+possible to map this into the AtomSpace, such that updates not
+only alter the SQL table, live and on line, but also such that
+a query performed on the AtomSpace side translates into a query on
+the SQL database side. This is not hard to do, but no one's done it
+yet.
+
+Similarly, a live online bridge between the AtomSpace and popular
+graph databases should also be possible. It's not clear if this
+should use the [StorageNode](https://wiki.opencog.org/w/StorageNode)
+API mentioned above, or if it needs something else.
 
 
 ### Exploring Values
@@ -396,9 +507,20 @@ some important design decisions to be made. Developers have not begun
 to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
-2020-2024 time-frame. See the
+2021-2024 time-frame. See the
 [value flows](https://blog.opencog.org/2020/04/08/value-flows/) blog
 entry.
+
+A particularly important first step would be to build interfaces
+between values and an audio DSP framework. This would allow AtomSpace
+structures to control audio processing, thus enabling (for example)
+sound recognition (do I hear clapping? Cheers? Boos?) without having
+to hard-code a "cheer recognizer". This opens the door to using machine
+learning to learn how to detect different kinds of audio events.
+
+There is no particular need to limit oneself to audio: other kinds
+of data is possible (*e.g.* exploring the syntactic, hierarchical
+part-whole structure in images) but audio is perhaps easier!?
 
 
 ### Sheaf theory
@@ -449,11 +571,11 @@ Essentially all Linux distributions will provide these packages.
 
 ###### boost
 * C++ utilities package.
-* https://www.boost.org/ | `apt-get install libboost-dev`
+* https://www.boost.org/ | `apt install libboost-dev`
 
 ###### cmake
 * Build management tool; v3.0.2 or higher recommended.
-* https://www.cmake.org/ | `apt-get install cmake3`
+* https://www.cmake.org/ | `apt install cmake3`
 
 ###### cogutil
 * Common OpenCog C++ utilities.
@@ -462,14 +584,14 @@ Essentially all Linux distributions will provide these packages.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 preferred.)
+* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 strongly preferred.)
 * https://www.gnu.org/software/guile/guile.html
-* For Debian/Ubuntu,  `apt-get install guile-2.2-dev`
+* For Debian/Ubuntu,  `apt install guile-3.0-dev`
 
 ###### cxxtest
 * Unit test framework
 * Required for running unit tests. Breaking unit tests is verboten!
-* https://cxxtest.com/ | `apt-get install cxxtest`
+* https://cxxtest.com/ | `apt install cxxtest`
 
 ### Optional Prerequisites
 
@@ -480,17 +602,24 @@ during the build, will be more precise as to which parts will not be built.
 ###### Cython
 * C bindings for Python. (version 0.23 or newer)
 * Recommended, as many users enjoy using python.
-* https://cython.org | `apt-get install cython`
+* https://cython.org | `apt install cython`
 
 ###### Haskell
 * Haskell bindings (experimental).
 * Optional; almost no existing code makes use of Haskell.
 * https://www.haskell.org/
 
+###### OCaml
+* OCaml bindings (experimental).
+* Optional; almost no existing code makes use of OCaml.
+* https://www.ocaml.org/ | `apt install ocaml ocaml-findlib`
+
 ###### Postgres
 * Distributed, multi-client networked storage.
 * Needed for "remembering" between shutdowns (and for distributed AtomSpace)
-* https://postgres.org | `apt-get install postgresql postgresql-client libpq-dev`
+* Optional; The RocksDB backend is recommended. Use the cogserver to get a
+  distributed atomspace.
+* https://postgres.org | `apt install postgresql postgresql-client libpq-dev`
 
 ### Building AtomSpace
 
@@ -548,7 +677,7 @@ Writing Atomese
 Atomese -- that is -- all of the different Atom types, can be thought
 of as the primary API to the AtomSpace.  Atoms can, of course, be
 created and manipulated with Atomese; but, in practice, programmers
-will work with either scheme (guile), python, C++ or haskell.
+will work with either Scheme (guile), Python, C++, OCaml or Haskell.
 
 The simplest, most complete and extensive interface to Atoms and the
 Atomspace is via scheme, and specifically, the GNU Guile scheme

@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
+	AbsentLink.cc
 	ArityLink.cc
 	Checkers.cc
 	CondLink.cc
@@ -22,7 +23,6 @@ ADD_LIBRARY (atomcore
 	PutLink.cc
 	Quotation.cc
 	RandomChoice.cc
-	RandomNumber.cc
 	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
@@ -55,6 +55,7 @@ INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	AbsentLink.h
 	ArityLink.h
 	CondLink.h
 	Context.h
@@ -72,7 +73,6 @@ INSTALL (FILES
 	PutLink.h
 	Quotation.h
 	RandomChoice.h
-	RandomNumber.h
 	Replacement.h
 	RewriteLink.h
 	ScopeLink.h

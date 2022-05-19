@@ -11,14 +11,20 @@ using namespace opencog;
 int main()
 {
 	// Create a new AtomSpace.
-	AtomSpace* as = new AtomSpace();
+	AtomSpacePtr as = createAtomSpace();
 
 	// Create a ConceptNode Atom, place it in the AtomSpace.
-	as->add_atom(Concept("foobar"));
+	Handle h = as->add_atom(Concept("foobar"));
+
+	// Print it, take a look:
+	printf("The new Atom is %s\n\n", h->to_short_string().c_str());
+
+	// A more verbose print:
+	printf("The new Atom and its hash: %s\n\n", h->to_string().c_str());
 
 	// Print the atomspace contents.
 	// Note that the unique Atom ID's (64-bit hashes) are printed.
-	printf("So far its this: %s\n", as->to_string().c_str());
+	printf("The AtomSpace contains this:\n%s\n", as->to_string().c_str());
 
 	// Create an EvaluationLink Atom, place it in the AtomSpace.
 	as->add_atom(
@@ -28,5 +34,5 @@ int main()
 				Concept("foo"),
 				Concept("bar"))));
 
-	printf("Now it is this: %s\n", as->to_string().c_str());
+	printf("Now the AtomSpace contains this:\n%s\n", as->to_string().c_str());
 }

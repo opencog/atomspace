@@ -24,6 +24,7 @@
  */
 
 #include <opencog/util/algorithm.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
@@ -223,7 +224,7 @@ HandleSeq VarScraper::sorted_free_variables_ordered_outgoing(
 		HandleSeq fvs_n;
 		std::copy_if(fvs.begin(), fvs.end(), std::back_inserter(fvs_n),
 		             [&res](const Handle& var) {
-			             return std::find(res.begin(), res.end(), var) == res.end();
+			             return not content_contains(res, var);
 		             });
 
 		// Concatenate
@@ -389,7 +390,7 @@ bool FreeVariables::is_identical(const FreeVariables& other) const
 	return true;
 }
 
-bool FreeVariables::is_in_varset(const Handle& v) const
+bool FreeVariables::varset_contains(const Handle& v) const
 {
 	return varset.end() != varset.find(v);
 }
@@ -444,7 +445,10 @@ void FreeVariables::erase(const Handle& var)
 
 	// Remove from varseq and update all arguments in the subsequent
 	// index as they have changed.
-	auto it = std::find(varseq.begin(), varseq.end(), var);
+	auto content_eq_var = [&var](const Handle& h) {
+		return content_eq(var, h);
+	};
+	auto it = std::find_if(varseq.begin(), varseq.end(), content_eq_var);
 	if (it != varseq.end()) {
 		it = varseq.erase(it);
 		for (; it != varseq.end(); ++it)
@@ -490,6 +494,10 @@ std::string FreeVariables::to_string(const std::string& indent) const
 	// Varseq
 	ss << indent << "varseq:" << std::endl
 	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT) << std::endl;
+
+	// Varset
+	ss << indent << "varset:" << std::endl
+	   << oc_to_string(varset, indent + OC_TO_STRING_INDENT) << std::endl;
 
 	// index
 	ss << indent << "index:" << std::endl

@@ -29,7 +29,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -42,12 +42,43 @@ using namespace opencog;
 
 void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 {
-	// The uuid is the PRIMARY KEY so below shou;ld be fast...
 	char buff[BUFSZ];
+
+	// The Atom being deleted might be a foreign key in the valuations
+	// table. So clobber all of those...
+	// XXX We have not index on this, so it will be slow.
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Valuations WHERE key = %lu;", uuid);
+	rp.exec(buff);
+
+#if UGLY_AND_UNDESIRED
+	// This is commented out because I'm not sure of what to do.
+	// This is a complex problem. We have two choices: walk the
+	// values table, (this is a recursive walk), find all atoms
+	// in it, and clobber them. Alternately, we can do nothing,
+	// here, just leave the Atoms, where they will sit, forever.
+	// Handle the failed restore elsewhere.
+
+	// Argh. It might be a value or a valuation.
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Valuations WHERE linkvalue = \'{%lu}\';", uuid);
+	rp.exec(buff);
+
+	// Yikes! This is wrong, because it might be recursively embedded
+	// deep down in some structure! This will cause a crash! The user
+	// will be unhappy! FIXME! (OK, its been like five years and no
+	// one has ever done this before, and its late at night...)
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Values WHERE linkvalue = \'{%lu}\';", uuid);
+	rp.exec(buff);
+#endif
+
+	// The uuid is the PRIMARY KEY so below should be fast...
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
 
 	rp.exec(buff);
+
 	_num_atom_deletes++;
 }
 
@@ -60,7 +91,7 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 /// fashion.  It might make sense to create a queue for this, so that
 /// if could run in parallel (in the unusual case that someone has
 /// millions of atoms to delete and is impateint about it...)
-void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
+void SQLAtomStorage::removeAtom(AtomSpace* frm, const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.

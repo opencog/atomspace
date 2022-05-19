@@ -204,7 +204,7 @@ public:
         std::cout << "eval_res:" << std::endl << eval_res << std::endl;
 
 #ifdef HAVE_GUILE
-        AtomSpace * as = new AtomSpace();
+        AtomSpacePtr as = createAtomSpace();
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
@@ -240,7 +240,6 @@ public:
                 );
         error = scheme->eval_error();
         scheme->clear_pending();
-        delete as;
         TSM_ASSERT("Failed cog-evaluate!", !error);
 #endif // HAVE_GUILE
     }

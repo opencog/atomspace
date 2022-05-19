@@ -56,13 +56,8 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<VariableSet> VariableSetPtr;
-static inline VariableSetPtr VariableSetCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<VariableSet>(h); }
-static inline VariableSetPtr VariableSetCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<VariableSet>(a); }
-
-#define createVariableSet std::make_shared<VariableSet>
+LINK_PTR_DECL(VariableSet)
+#define createVariableSet CREATE_DECL(VariableSet)
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

@@ -115,7 +115,7 @@ bool ProbabilisticTruthValue::operator==(const Value& rhs) const
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
-// because the ProbabilisticTruthValue usally stores an integer count,
+// because the ProbabilisticTruthValue usually stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr ProbabilisticTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const

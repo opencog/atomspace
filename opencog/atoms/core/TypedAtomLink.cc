@@ -52,7 +52,7 @@ void TypedAtomLink::init()
 	    SIGNATURE_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting type defintion, got %s",
+			"Expecting type definition, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
 }
@@ -74,10 +74,15 @@ TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
  * This will be the second atom of some TypedAtomLink, where
  * `atom` is the first.
  */
-Handle TypedAtomLink::get_type(const Handle& atom)
+Handle TypedAtomLink::get_type(const Handle& atom, const AtomSpace* as)
 {
-	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
+	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false, as));
 	return uniq->getOutgoingAtom(1);
+}
+
+Handle TypedAtomLink::get_link(const Handle& atom, const AtomSpace* as)
+{
+	return get_unique(atom, TYPED_ATOM_LINK, false, as);
 }
 
 DEFINE_LINK_FACTORY(TypedAtomLink, TYPED_ATOM_LINK);

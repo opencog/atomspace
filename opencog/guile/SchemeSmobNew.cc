@@ -14,6 +14,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/foreign/ForeignAST.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -39,10 +40,10 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// Need to have a newline printed; otherewise
+	// Need to have a newline printed; otherwise
 	// cog-value->list prints badly-formatted grunge.
 	if (not pa->is_atom())
-		return pa->to_short_string() + "\n";
+		return pa->to_string() + "\n";
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
@@ -55,13 +56,16 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
+		if (ATOM_SPACE == h->get_type())
+			return h->to_string();
+
 		h = Handle::UNDEFINED;
-		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
+		*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
 		scm_remember_upto_here_1(node);
 		return "#<Invalid handle>";
 	}
 
-	// Need to have a newline printed; otherewise cog-value->list
+	// Need to have a newline printed; otherwise cog-value->list
 	// prints badly-formatted grunge.
 	return h->to_short_string() + "\n";
 }
@@ -82,13 +86,10 @@ SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
 	if (nullptr == pa) return SCM_BOOL_F;
 
-	// Use new so that the smart pointer increments!
-	ValuePtr* pap = new ValuePtr(pa);
-	scm_gc_register_allocation(sizeof(pa));
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, pap);
+	SCM smob = scm_new_double_smob(cog_misc_tag, 0,0,0);
 	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
+	*(SCM_SMOB_VALUE_PTR_LOC(smob)) = pa;
+
 	return smob;
 }
 
@@ -109,9 +110,7 @@ ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
 		return nullptr;
 
-	ValuePtr pv(*((ValuePtr *) SCM_SMOB_DATA(sh)));
-	scm_remember_upto_here_1(sh);
-	return pv;
+	return *(SCM_SMOB_VALUE_PTR_LOC(sh));
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
@@ -130,9 +129,10 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	// designed so that all atoms are in atomspaces, and any
 	// exceptions to this assumption leads to confusion and
 	// unexpected behavior -- i.e. leads to bugs.
-	if (nullptr == h->getAtomSpace())
+	if (nullptr == h->getAtomSpace() and
+	    not (ATOM_SPACE == h->get_type()))
 	{
-		*((Handle *) SCM_SMOB_DATA(sh)) = Handle::UNDEFINED;
+		*(SCM_SMOB_VALUE_PTR_LOC(sh)) = nullptr;
 		scm_remember_upto_here_1(sh);
 		return Handle::UNDEFINED;
 	}
@@ -247,6 +247,21 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 }
 
 /**
+ * Check that the argument is a size_t, else throw errors.
+ */
+size_t SchemeSmob::verify_size_t (SCM ssizet, const char *subrname,
+                                  int pos, const char * msg)
+{
+	if (scm_is_false(scm_integer_p(ssizet)))
+		scm_wrong_type_arg_msg(subrname, pos, ssizet, msg);
+
+	// Argh. New scheme won't allow -1 as size_t
+	// but it also doesn't provide a uintmax.
+	// return scm_to_size_t(ssizet);
+	return (size_t) scm_to_long(ssizet);
+}
+
+/**
  * Check that the argument is convertible to a real, else throw errors.
  * Return as a float.
  */
@@ -260,26 +275,13 @@ double SchemeSmob::verify_real (SCM sreal, const char *subrname,
 }
 
 /**
- * Check that the argument is an int, else throw errors.
- * Use C++ casting to convert the int to size_t. Return the size_t.
- */
-size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
-                                int pos, const char * msg)
-{
-	if (scm_is_false(scm_integer_p(sint)))
-		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
-
-	return (size_t) scm_to_int(sint);
-}
-
-/**
  * Check that the argument is a string, else throw errors.
  * Return the string, in C.
  */
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
                                        int pos, const char * msg)
 {
-	if (scm_is_false(scm_string_p(sname)))
+	if (not scm_is_string(sname))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
 	char * cname = scm_to_utf8_string(sname);
@@ -346,7 +348,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	std::string name;
-	if (nameserver().isA(t, NUMBER_NODE)) {
+	if (nameserver().isA(t, NUMBER_NODE))
+	{
 		std::vector<double> vec;
 		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
@@ -387,12 +390,29 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
+		// This is a try-catch block, in case the AtomSpace is read-only.
 		Handle h(atomspace->add_node(t, std::move(name)));
 
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist) and
+			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
+			{
+				set_values(h, atomspace, SCM_CADR(slist));
+			}
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
 		return handle_to_scm(h);
@@ -434,52 +454,163 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 }
 
 /* ============================================================== */
+/*
+ * Helper function: a new AST, of named type stype, and string name sname
+ */
+Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
+{
+	// Recurse the quoted list
+	if (scm_is_pair(sexpr))
+	{
+		HandleSeq oset;
+		do
+		{
+			oset.emplace_back(h_from_ast(t, true, SCM_CAR(sexpr)));
+			sexpr = SCM_CDR(sexpr);
+		} while (scm_is_pair(sexpr));
+
+		return createForeignAST(std::move(oset), t);
+	}
+
+	std::string name;
+	if (scm_is_string(sexpr))
+	{
+		char * cname = scm_to_utf8_string(sexpr);
+		if (rec) name = "\"";
+		name += cname;
+		if (rec) name += "\"";
+		free(cname);
+	}
+	else if (scm_is_symbol(sexpr))
+	{
+		sexpr = scm_symbol_to_string(sexpr);
+		char * cname = scm_to_utf8_string(sexpr);
+		name = cname;
+		free(cname);
+	}
+	else
+	{
+		// It might be an embedded VariableNode.
+		Handle h(scm_to_handle(sexpr));
+		if (h) return h;
+
+		scm_wrong_type_arg_msg("cog-new-ast", 2, sexpr,
+			"expecting symbol, string or Atom");
+	}
+
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
+	try
+	{
+		// Create the AST
+		return HandleCast(createForeignAST(t, name));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sexpr);
+	}
+	return Handle(); // not reached
+}
+
+/**
+ * Create a new AST, of named type stype, and string name sname
+ */
+SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
+{
+	Type t = verify_type(stype, "cog-new-ast", 1);
+	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
+
+	// Try-catch, for two reasons:
+	// 1) Invalid syntax of the AST.
+	// 2) The AtomSpace may be read-only.
+	try
+	{
+		// Create the AST. Unwrap singleton stringss, so they
+		// don't get confused by recursive constructions.
+		Handle h;
+		if (scm_is_pair(sexpr) and
+		    scm_is_null(SCM_CDR(sexpr)) and
+		    (scm_is_string(SCM_CAR(sexpr)) or
+		     scm_equal_p(scm_sym_quote, SCM_CAR(sexpr)))
+		)
+			h = atomspace->add_atom(h_from_ast(t, false, SCM_CAR(sexpr)));
+		else
+			h = atomspace->add_atom(h_from_ast(t, false, sexpr));
+		return handle_to_scm(h);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-ast", sexpr);
+	}
+
+	scm_remember_upto_here_1(sexpr);
+	return SCM_EOL;
+}
+
+/* ============================================================== */
 
 /**
  * Convert argument into a list of handles.
  */
 HandleSeq
-SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
+SchemeSmob::verify_handle_list_msg(SCM satom_list,
+                                   const char* subrname,
+                                   int pos,
+                                   const char* msglst,
+                                   const char* msgatm)
 {
 	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusual, but legit.  Allow embedded nulls
+	// (which is rather unusual, but legit.)  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
-		scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
+		scm_wrong_type_arg_msg(subrname, pos, satom_list, msglst);
 
 	HandleSeq outgoing_set;
 	SCM sl = satom_list;
 	pos = 2;
-	while (scm_is_pair(sl)) {
+	while (scm_is_pair(sl))
+	{
 		SCM satom = SCM_CAR(sl);
 
 		// Verify that the contents of the list are actual atoms.
 		Handle h(scm_to_handle(satom));
-		if (h) {
+		if (h)
+		{
 			outgoing_set.emplace_back(h);
 		}
-		else if (scm_is_pair(satom) and !scm_is_null(satom_list)) {
-			// Allow lists to be specified: e.g.
-			// (cog-new-link 'ListLink (list x y z))
-			// Do this via a recursive call, flattening nested lists
-			// as we go along.
-			const HandleSeq &oset =
-				verify_handle_list(satom, subrname, pos);
-			HandleSeq::const_iterator it;
-			for (it = oset.begin(); it != oset.end(); ++it) {
-				outgoing_set.emplace_back(*it);
+		else if (scm_is_pair(satom) and
+		         not scm_is_null(satom_list))
+		{
+			// Ignore alists of key-value pairs. For example
+			//   (List (Concept "foo")
+			//      (alist (cons (Predicate "key") (StringValue "bar"))))
+			if (not scm_to_bool(scm_equal_p(_alist, SCM_CAR(satom))))
+			{
+				// Allow lists to be specified: e.g.
+				// (cog-new-link 'ListLink (list x y z))
+				// Do this via a recursive call, flattening nested lists
+				// as we go along. The URE does this a lot.
+				const HandleSeq &oset =
+					verify_handle_list(satom, subrname, pos);
+				HandleSeq::const_iterator it;
+				for (it = oset.begin(); it != oset.end(); ++it) {
+					outgoing_set.emplace_back(*it);
+				}
 			}
 		}
-		else if (scm_is_null(satom)) {
+		else if (scm_is_null(satom))
+		{
 			// No-op, just ignore.
 		}
-		else {
+		else
+		{
 			// Its legit to have embedded truth values, just skip them.
 			if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, satom)) {
 				// If its not an atom, and its not a truth value, and
 				// its not an attention value, and its not an atomspace,
 				// then whatever it is, its bad.
-				scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
+				scm_wrong_type_arg_msg(subrname, pos, satom, msgatm);
 			}
 		}
 		sl = SCM_CDR(sl);
@@ -487,6 +618,13 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 	}
 
 	return outgoing_set;
+}
+
+HandleSeq
+SchemeSmob::verify_handle_list(SCM satom_list, const char * subrname, int pos)
+{
+	return verify_handle_list_msg(satom_list, subrname, pos,
+		 "a list of Atoms", "an OpenCog Atom");
 }
 
 /**
@@ -499,19 +637,34 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
 		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 
-		// Fish out a truth value, if its there.
-		if (h)
+		if (nullptr == h) return handle_to_scm(h);
+
+		// Look for "stv" and so on.
+		const TruthValuePtr tv(get_tv_from_list(satom_list));
+		if (tv) h = atomspace->set_truthvalue(h, tv);
+
+		// Are there any keys?
+		// Expecting an association list of key-value pairs, e.g.
+		//    (alist (cons (Predicate "p") (FloatValue 1 2 3)))
+		// which we will staple onto the atom.
+		// Oddly, though, it shows up as a list inside a list.
+		SCM kv_pairs = satom_list;
+		while (scm_is_pair(kv_pairs))
 		{
-			const TruthValuePtr tv(get_tv_from_list(satom_list));
-			if (tv) h = atomspace->set_truthvalue(h, tv);
+			SCM slist = SCM_CAR(kv_pairs);
+			if (scm_is_pair(slist) and
+			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
+			{
+				set_values(h, atomspace, SCM_CADR(slist));
+			}
+			kv_pairs = SCM_CDR(kv_pairs);
 		}
 
 		return handle_to_scm(h);
@@ -536,8 +689,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
-	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
+	AtomSpace* atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
@@ -553,68 +705,10 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 /* ============================================================== */
 /**
- * Delete the atom, but only if it has no incoming links.
- * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
- * This deletes the atom from both the atomspace, and any attached
- * backing store; thus deletion is permanent!
- */
-SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
-{
-	Handle h = verify_handle(satom, "cog-delete!");
-
-	// It can happen that the atom has already been deleted, but we're
-	// still holding on to a pointer to it.  This is rare... but possible.
-	// So don't crash when it happens. XXX Is it really possible? How?
-	if (NULL == h.operator->()) return SCM_BOOL_F;
-
-	// The remove will fail/log warning if the incoming set isn't null.
-	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
-
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete!");
-
-	// AtomSpace::removeAtom() returns true if atom was deleted,
-	// else returns false
-	bool rc = atomspace->remove_atom(h, false);
-
-	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
-	scm_remember_upto_here_1(satom);
-
-	// rc should always be true at this point ...
-	if (rc) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
-/**
- * Delete the atom, and everything pointing to it.
- * This deletes the atom from both the atomspace, and any attached
- * backing store; thus deletion is permanent!
- */
-SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
-{
-	Handle h = verify_handle(satom, "cog-delete-recursive!");
-
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive!");
-
-	bool rc = atomspace->remove_atom(h, true);
-
-	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
-	scm_remember_upto_here_1(satom);
-
-	if (rc) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
-/**
  * Extract the atom from the atomspace, but only if it has no incoming
  * links. Return `SCM_BOOL_T` if the atom was successfully extracted,
  * else return `SCM_BOOL_F`.  This does NOT remove the atom from any
- * attached backing store/persistant storage, only from the (local,
+ * attached backing store/persistent storage, only from the (local,
  * in-RAM) atomspace.
  */
 SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
@@ -632,7 +726,7 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 	bool rc = atomspace->extract_atom(h, false);
 
 	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
 	scm_remember_upto_here_1(satom);
 
 	// rc should always be true at this point ...
@@ -656,7 +750,7 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 	bool rc = atomspace->extract_atom(h, true);
 
 	// Clobber the handle, too.
-	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
 	scm_remember_upto_here_1(satom);
 
 	if (rc) return SCM_BOOL_T;

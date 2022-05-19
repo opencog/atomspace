@@ -34,6 +34,11 @@ cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
         Type getType(string typename)
         string getTypeName(Type t)
         Type getNumberOfClasses()
+
+        bint beginTypeDecls(const char* module)
+        void endTypeDecls() 
+        Type declType(const Type parent, const string& name)
+
     cdef cNameServer nameserver()
 
 cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
@@ -117,7 +122,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
-        output_iterator getIncomingSet(output_iterator)
+        output_iterator getIncomingIter(output_iterator)
 
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
@@ -126,6 +131,10 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         cpp_set[cHandle] getKeys()
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
+
+        string to_string()
+        string to_short_string()
+        string id_to_string()
 
         # Conditionally-valid methods. Not defined for all atoms.
         string get_name()
@@ -149,8 +158,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         cHandle(const cHandle&)
 
         cAtom* atom_ptr()
-        string to_string()
-        string to_short_string()
 
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
@@ -180,9 +187,6 @@ cdef vector[cHandle] atom_list_to_vector(list lst);
 # AtomSpace
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
-        cAtomSpace()
-        cAtomSpace(cAtomSpace * parent)
-
         cHandle add_atom(cHandle handle) except +
 
         cHandle xadd_node(Type t, string s) except +
@@ -202,18 +206,21 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         # ==== query methods ====
         # get by type
-        output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
+        void get_handles_by_type(vector[cHandle], Type t, bint subclass)
 
         void clear()
-        bint remove_atom(cHandle h, bint recursive)
+        bint extract_atom(cHandle h, bint recursive)
+
+    cdef cValuePtr createAtomSpace(cAtomSpace *parent)
 
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
+cdef AtomSpace_factoid(cValuePtr to_wrap)
 
 
-cdef class AtomSpace:
+cdef class AtomSpace(Value):
+    cdef cValuePtr asp
     cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
     cdef object parent_atomspace
 
 

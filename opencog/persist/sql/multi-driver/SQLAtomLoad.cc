@@ -29,7 +29,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/persist/tlb/TLB.h>
 
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
@@ -176,16 +176,9 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 		return _tlbuf.getAtom(uuid);
 
 	// If the outgoing set is not yet known, then the link
-	// itself cannot possibly be known.
-	std::string ostr;
-	try
-	{
-		ostr = oset_to_string(hseq);
-	}
-	catch (const NotFoundException& ex)
-	{
-		return Handle();
-	}
+	// itself cannot possibly be known. The oset_to_string()
+	// will throw; users must catch.
+	std::string ostr(oset_to_string(hseq));
 
 	// If we don't know it, then go get it's UUID.
 	setup_typemap();
@@ -212,9 +205,16 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 {
 	rethrow();
-	Handle hg(doGetLink(t, hs));
-	if (hg) get_atom_values(hg);
-	return hg;
+	try
+	{
+		Handle hg(doGetLink(t, hs));
+		get_atom_values(hg);
+		return hg;
+	}
+	catch (const NotFoundException& ex)
+	{
+		return Handle::UNDEFINED;
+	}
 }
 
 /**
@@ -256,7 +256,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 		}
 	}
 
-	// Give the atom the correct UUID. The AtomTable will need this.
+	// Give the atom the correct UUID. The AtomSpace will need this.
 	atom->type = realtype;
 	atom->uuid = uuid;
 
