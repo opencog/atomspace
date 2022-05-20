@@ -167,7 +167,6 @@ typedef std::size_t Arity;
 //! O(1) performance. Note that sometimes incoming sets can be huge,
 //! millions of atoms.
 typedef HandleSeq IncomingSet;
-typedef SigSlot<Handle, Handle> AtomPairSignal;
 
 #if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
@@ -265,15 +264,6 @@ protected:
         // small. This rules out using a vector to store the
         // buckets (I tried).
         std::map<Type, WincomingSet> _iset;
-
-#ifdef INCOMING_SET_SIGNALS
-        // Some people want to know if the incoming set has changed...
-        // However, these make the atom quite fat, so this is disabled
-        // just right now. If users really start clamoring, then we can
-        // turn this on.
-        AtomPairSignal _addAtomSignal;
-        AtomPairSignal _removeAtomSignal;
-#endif /* INCOMING_SET_SIGNALS */
     };
     typedef std::shared_ptr<InSet> InSetPtr;
     InSetPtr _incoming_set;

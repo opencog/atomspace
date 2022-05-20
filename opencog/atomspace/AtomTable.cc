@@ -362,11 +362,6 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // have to be an atomic test-n-set.
     const Handle& oldh(typeIndex.insertAtom(atom));
     if (oldh) return oldh;
-
-    // Now that we are completely done, emit the added signal.
-    // Don't emit signal until after the indexes are updated!
-    _addAtomSignal.emit(atom);
-
     return atom;
 }
 
@@ -506,13 +501,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         handle->unsetRemovalFlag();
         return false;
     }
-
-    // Ideally, the atom removal signal is sent *BEFORE*  the atom is
-    // actually removed. However, due to the race window described
-    // above, this does not seem to be possible. Well, we could send
-    // it, but there would be spurious deliveies when racing.  This
-    // should still be OK, the owning atomspace is still not blanked!
-    _removeAtomSignal.emit(handle);
 
     // Remove handle from other incoming sets.
     handle->remove();
