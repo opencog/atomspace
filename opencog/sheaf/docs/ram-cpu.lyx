@@ -1970,6 +1970,22 @@ e.g.
  complex attribute systems attached to each edge/vertex.
 \end_layout
 
+\begin_layout Subsubsection*
+Related Work
+\end_layout
+
+\begin_layout Standard
+See also Grainger et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Grainger2016"
+literal "false"
+
+\end_inset
+
+ for a description of a dynamic edge-vertex database with inverted indexes.
+\end_layout
+
 \begin_layout Section*
 Representing Graphs in RAM
 \end_layout
