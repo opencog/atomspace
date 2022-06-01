@@ -21,6 +21,7 @@
  */
 
 #include <iomanip>
+#include <sstream>
 
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
