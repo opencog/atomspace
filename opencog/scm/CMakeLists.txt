@@ -16,18 +16,44 @@ ADD_GUILE_MODULE (FILES
 	DEPENDS opencog_atom_types
 )
 
-# Actually, each of these are distinct modules, and really
-# should be listed separately, one module each. But, as it
-# happens, the ADD_GUILE_MODULE macro still does the right
-# thing for a mass listing like this, so .. OK. Whatever.
+# Each of the files below are distinct modules. They need to be
+# compiled seperately.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/query.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/uuid.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 )
