@@ -5,6 +5,7 @@
 (define-module (opencog sheaf))
 
 (use-modules (opencog))
+(use-modules (ice-9 format))
 
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
