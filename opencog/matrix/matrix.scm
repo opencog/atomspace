@@ -7,6 +7,7 @@
 
 ; ---------------------------------------------------------
 ; Common configuration
+(use-modules (ice-9 format))
 (use-modules (ice-9 threads))
 
 ; The guile-2.2 par-for-each implementation sucks, and live-locks
