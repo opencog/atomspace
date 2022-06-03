@@ -53,7 +53,7 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
             "has not been added as a dependency using the keyword "
             "argument 'DEPENDS'")
     ELSEIF(FILE_GENERATED AND SCM_DEPENDS)
-        ADD_DEPENDENCIES(${TARGET_NAME} ${SCM_DEPENDS})
+        ADD_DEPENDENCIES(${COPY_TARGET_NAME} ${SCM_DEPENDS})
         SET(FULL_DIR_PATH "/${DIR_PATH}/")
     ELSE()
         MESSAGE(FATAL_ERROR "${FILE_PATH} file does not exist in "
@@ -80,8 +80,8 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3})
 
     IF (SCM_MODULE)
-        SET(MODULE_NAME SCM_MODULE)
-        SET(MODULE_NAME SCM_MODULE PARENT_SCOPE)
+        SET(MODULE_NAME ${SCM_MODULE})
+        SET(MODULE_NAME ${SCM_MODULE} PARENT_SCOPE)
     ENDIF()
     IF (NOT MODULE_NAME)
         SET(MODULE_NAME "opencog")
@@ -109,7 +109,7 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} -E make_directory ${FILE_BUILD_PATH})
 
-    ADD_CUSTOM_COMMAND(TARGET ${TARGET_NAME} PRE_BUILD
+    ADD_CUSTOM_COMMAND(TARGET ${COPY_TARGET_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy "${FULL_DIR_PATH}/${FILE_NAME}"
              "${FILE_BUILD_PATH}/${FILE_NAME}")
 
@@ -139,9 +139,9 @@ FUNCTION(ADD_GUILE_MODULE)
   # as to be able to run scheme unit-tests without having to run
   # 'make install'. The tilde ~ occurs in package management (Debian).
   STRING(REGEX REPLACE "[/~]" "_" _TARGET_NAME_SUFFIX ${CMAKE_CURRENT_SOURCE_DIR})
-  SET(TARGET_NAME "COPY_TO_LOAD_PATH_IN_BUILD_DIR_FROM_${_TARGET_NAME_SUFFIX}")
-  IF (NOT (TARGET ${TARGET_NAME}))
-    ADD_CUSTOM_TARGET(${TARGET_NAME} ALL)
+  SET(COPY_TARGET_NAME "COPY_TO_LOAD_PATH_IN_BUILD_DIR_FROM_${_TARGET_NAME_SUFFIX}")
+  IF (NOT (TARGET ${COPY_TARGET_NAME}))
+    ADD_CUSTOM_TARGET(${COPY_TARGET_NAME} ALL)
   ENDIF()
 
   IF(HAVE_GUILE)
@@ -155,12 +155,13 @@ FUNCTION(ADD_GUILE_MODULE)
     # NOTE:  The keyword arguments 'FILES' and
     # 'MODULE_DESTINATION' are required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
-        # FILE_PATH is used for variable name because files in
-        # sub-directories may be passed.
 
 # Arghhh FILE TOUCH first appears in version 3.12.0
 # Everyone else is screwed.  Well, that explains a lot.
 if(${CMAKE_VERSION} VERSION_GREATER "3.11.0")
+
+        # FILE_PATH is used for variable name because files in
+        # sub-directories may be passed.
         FOREACH(FILE_PATH ${SCM_FILES})
 
             PROCESS_MODULE_STRUCTURE(${FILE_PATH})
