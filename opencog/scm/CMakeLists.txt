@@ -16,6 +16,24 @@ ADD_GUILE_MODULE (FILES
 	DEPENDS opencog_atom_types
 )
 
+# -----
+# Compile the main opencog module.
+SET(MODULE_NAME "opencog")
+SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
+
+ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
+	DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
+
+ADD_CUSTOM_COMMAND(
+	OUTPUT ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+	COMMAND guild compile
+	        ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
+	        -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
+	COMMENT "Compiling ${MODULE_NAME}.scm"
+	VERBATIM)
+
+# -----
 # Each of the files below are distinct modules. They need to be
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
