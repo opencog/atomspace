@@ -156,6 +156,11 @@ FUNCTION(ADD_GUILE_MODULE)
     # 'MODULE_DESTINATION' are required.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
 
+        # The SCM module is given by the name of the first file
+        # in the list.
+        LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
+        STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
+
 # Arghhh FILE TOUCH first appears in version 3.12.0
 # Everyone else is screwed.  Well, that explains a lot.
 if(${CMAKE_VERSION} VERSION_GREATER "3.11.0")
