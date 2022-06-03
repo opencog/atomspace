@@ -92,12 +92,7 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     ENDIF()
 
     # Set the install path.
-    IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
-        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}")
-    ELSE()
-        SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}")
-    ENDIF()
-
+    SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}")
     SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}" PARENT_SCOPE)
 
     # Copy files into the build directory, mirroring the install
