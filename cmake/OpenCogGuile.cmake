@@ -29,6 +29,15 @@ IF (NOT DEFINED GUILE_SITE_DIR)
 ENDIF()
 ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 
+IF (NOT DEFINED GUILE_CCACHE_DIR)
+    IF(HAVE_GUILE)
+        EXECUTE_PROCESS(COMMAND guile -c "(display (cadr %load-compiled-path))"
+            OUTPUT_VARIABLE GUILE_CCACHE_DIR
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF()
+ENDIF()
+# ADD_DEFINITIONS(-DGUILE_CCACHE_DIR="${GUILE_CCACHE_DIR}")
+
 SET(GUILE_BIN_DIR "${CMAKE_BINARY_DIR}/opencog/scm")
 
 # -------------------------------------------------------------------

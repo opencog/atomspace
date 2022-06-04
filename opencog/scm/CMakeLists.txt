@@ -20,7 +20,7 @@ ADD_GUILE_MODULE (FILES
 # Compile the main opencog module.
 SET(MODULE_NAME "opencog")
 SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
-SET(FILE_INSTALL_PATH ${GUILE_SITE_DIR})
+SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR})
 SET(SCM_FILES
 	opencog.scm
 	opencog/base/apply.scm
@@ -48,7 +48,7 @@ ADD_CUSTOM_COMMAND(
 
 INSTALL(
 	FILES ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	DESTINATION ${FILE_INSTALL_PATH})
+	DESTINATION ${GO_INSTALL_PATH})
 
 # -----
 # Each of the files below are distinct modules. They need to be
