@@ -29,6 +29,11 @@ IF (NOT DEFINED GUILE_SITE_DIR)
 ENDIF()
 ADD_DEFINITIONS(-DGUILE_SITE_DIR="${GUILE_SITE_DIR}")
 
+# Location of complied scheme files (*.go files) that the guile loader
+# will search when looking for modules. Used in Makefiles to install
+# the *.go files. Typical location is /usr/local/lib/guile/3.0/site-cache
+# or similar. Over-ride by using
+# `cmake -DGUILE_CCACHE_DIR=...`.
 IF (NOT DEFINED GUILE_CCACHE_DIR)
     IF(HAVE_GUILE)
         EXECUTE_PROCESS(COMMAND guile -c "(display (cadr %load-compiled-path))"

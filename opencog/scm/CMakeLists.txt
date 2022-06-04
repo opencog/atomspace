@@ -33,6 +33,8 @@ SET(SCM_FILES
 	opencog/base/types.scm
 	opencog/base/utilities.scm)
 
+# TODO: move this and the rest to `cmake/OpenCogGuile.cmake` and
+# enable it for all guile modules.
 ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
 	DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go
 	DEPENDS opencog_atom_types)
