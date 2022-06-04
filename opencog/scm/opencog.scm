@@ -25,7 +25,7 @@
 	(begin
 		(load-from-path "opencog/as-config.scm")
 		(add-to-load-path opencog-ext-path-smob)
-		)
+		))
 
 (load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
