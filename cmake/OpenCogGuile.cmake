@@ -163,6 +163,7 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
                 ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
                 -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
                 -L ${CMAKE_CURRENT_SOURCE_DIR}
+                -L ${FILE_BUILD_PATH}
         DEPENDS ${MODULE_FILES}
         COMMENT "Compiling ${MODULE_NAME}.scm"
         VERBATIM)
