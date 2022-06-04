@@ -210,6 +210,11 @@ FUNCTION(ADD_GUILE_MODULE)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
+    # The SCM module is given by the name of the first file
+    # in the list.
+    LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
+    STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
+
     IF(NOT DEFINED SCM_MODULE_DESTINATION)
         GET_FILENAME_COMPONENT(DIR_PATH ${SCM_MODULE} DIRECTORY)
         SET(SCM_MODULE_DESTINATION ${GUILE_SITE_DIR}/${DIR_PATH})
@@ -217,11 +222,6 @@ FUNCTION(ADD_GUILE_MODULE)
 
     # The keyword argument 'FILES' is required.
     IF(DEFINED SCM_FILES)
-
-        # The SCM module is given by the name of the first file
-        # in the list.
-        LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
-        STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
 
         # If the COMPILE keyword is set, then compile the module into
         # module.go RTL bytecode.

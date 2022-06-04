@@ -12,7 +12,6 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/tv.scm
 	opencog/base/types.scm
 	opencog/base/utilities.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}"
 	DEPENDS opencog_atom_types
 	COMPILE
 )
@@ -21,49 +20,41 @@ ADD_GUILE_MODULE (FILES
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/query.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/uuid.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
@@ -72,14 +63,12 @@ ADD_GUILE_MODULE (FILES
 # In other words, the persist module is badly broken.
 ADD_GUILE_MODULE (FILES
 	opencog/persist.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	DEPENDS storage_types
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/persist-file.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 	COMPILE
 )
 
@@ -89,7 +78,6 @@ ADD_GUILE_MODULE (FILES
 IF (HAVE_GEARMAN)
 	ADD_GUILE_MODULE (FILES
 		opencog/dist-gearman.scm
-		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 		COMPILE
 	)
 ENDIF (HAVE_GEARMAN)
@@ -97,7 +85,6 @@ ENDIF (HAVE_GEARMAN)
 IF (HAVE_SQL_STORAGE)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
-		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 		COMPILE
 	)
 ENDIF (HAVE_SQL_STORAGE)
@@ -105,7 +92,6 @@ ENDIF (HAVE_SQL_STORAGE)
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
-		MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog"
 		COMPILE
 	)
 ENDIF (HAVE_CYTHON)
