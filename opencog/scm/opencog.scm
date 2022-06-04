@@ -58,6 +58,7 @@ cog-link?
 cog-map-type
 cog-mean
 cog-name
+cog-new-ast
 cog-new-atom
 cog-new-atomspace
 cog-new-link
