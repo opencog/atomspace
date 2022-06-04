@@ -138,8 +138,11 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
     SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR})
 
+    # Strip out slashes in the module name.
+    STRING(REPLACE "/" "_" PHONY_TARGET ${MODULE_NAME})
+
     # Create a phony target so that users can reference it directly.
-    ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
+    ADD_CUSTOM_TARGET(${PHONY_TARGET}_go ALL
         DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
 
     # Remainder of the arguments is a list of dependencies.
@@ -218,7 +221,9 @@ FUNCTION(ADD_GUILE_MODULE)
         # module.go RTL bytecode.
         IF (${SCM_COMPILE})
             COMPILE_MODULE(${SCM_MODULE} ${SCM_FILES})
-            ADD_DEPENDENCIES(${SCM_MODULE}_go ${SCM_DEPENDS})
+            IF(${SCM_DEPENDS})
+                ADD_DEPENDENCIES(${SCM_MODULE}_go ${SCM_DEPENDS})
+            ENDIF()
         ENDIF()
 
 # Arghhh FILE TOUCH first appears in version 3.12.0
