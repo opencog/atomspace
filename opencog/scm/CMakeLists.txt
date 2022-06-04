@@ -18,7 +18,8 @@ ADD_GUILE_MODULE (FILES
 
 # -----
 # Compile the main opencog module.
-SET(SCM_FILES
+# First arg is the module name. Remaining args are the dependencies.
+COMPILE_MODULE(opencog
 	opencog.scm
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
@@ -30,10 +31,8 @@ SET(SCM_FILES
 	opencog/base/types.scm
 	opencog/base/utilities.scm)
 
-# TODO: move this and the rest to `cmake/OpenCogGuile.cmake` and
-# enable it for all guile modules.
-
-COMPILE_MODULE("opencog" ${SCM_FILES})
+# Do NOT attempt to build the module, before the atom types have been
+# created.
 ADD_DEPENDENCIES(opencog_go opencog_atom_types)
 
 # -----
