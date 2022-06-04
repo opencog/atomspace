@@ -208,9 +208,12 @@ FUNCTION(ADD_GUILE_MODULE)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
-    # NOTE:  The keyword arguments 'FILES' and
-    # 'MODULE_DESTINATION' are required.
-    IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
+    IF(NOT DEFINED SCM_MODULE_DESTINATION)
+        SET(SCM_MODULE_DESTINATION ${GUILE_SITE_DIR})
+    ENDIF()
+
+    # The keyword argument 'FILES' is required.
+    IF(DEFINED SCM_FILES)
 
         # The SCM module is given by the name of the first file
         # in the list.
