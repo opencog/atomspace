@@ -21,6 +21,17 @@ ADD_GUILE_MODULE (FILES
 SET(MODULE_NAME "opencog")
 SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
 SET(FILE_INSTALL_PATH ${GUILE_SITE_DIR})
+SET(SCM_FILES
+	opencog.scm
+	opencog/base/apply.scm
+	opencog/base/atom-cache.scm
+	opencog/base/core-docs.scm
+	opencog/base/debug-trace.scm
+	opencog/base/file-utils.scm
+	opencog/base/repl-shell.scm
+	opencog/base/tv.scm
+	opencog/base/types.scm
+	opencog/base/utilities.scm)
 
 ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
 	DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
@@ -30,7 +41,8 @@ ADD_CUSTOM_COMMAND(
 	COMMAND guild compile
 	        ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
 	        -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
+	# DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
+	DEPENDS ${SCM_FILES}
 	COMMENT "Compiling ${MODULE_NAME}.scm"
 	VERBATIM)
 
