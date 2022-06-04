@@ -221,8 +221,12 @@ FUNCTION(ADD_GUILE_MODULE)
         # module.go RTL bytecode.
         IF (${SCM_COMPILE})
             COMPILE_MODULE(${SCM_MODULE} ${SCM_FILES})
+
             IF(${SCM_DEPENDS})
-                ADD_DEPENDENCIES(${SCM_MODULE}_go ${SCM_DEPENDS})
+                # Strip out slashes in the module name.
+                STRING(REPLACE "/" "_" PHONY_TARGET ${SCM_MODULE})
+
+                ADD_DEPENDENCIES(${PHONY_TARGET}_go ${SCM_DEPENDS})
             ENDIF()
         ENDIF()
 
