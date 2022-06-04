@@ -15,7 +15,14 @@
 
 (define-module (opencog))
 
-(use-modules (opencog as-config))
+; When compiling this file, before any install has been made, a call to
+; (use-modules (opencog as-config))
+; will fail because (duh) it's not isntalled. So, instead, we manually
+; hunt for it, and use the loclal build version.  This is yet another
+; hairy hack needed to be able to run unit tests without installing.
+(if (resolve-module (list 'opencog 'as-config) #:ensure #f)
+	(use-modules (opencog as-config))
+	(load-from-path "opencog/as-config.scm"))
 
 (load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
