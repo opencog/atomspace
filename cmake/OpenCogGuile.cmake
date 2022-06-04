@@ -191,6 +191,9 @@ ENDFUNCTION(COMPILE_MODULE)
 #   file in the file-list) will be compiled into guile RTL bytecode,
 #   and installed into the guile bytecode cache location.
 #
+# XXX FIXME-BUG: The compiled module is not installed in the correct
+# location, if the MODULE_DESTINATION is non-trivial (non-default).
+#
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the
   # current source directory to the build directory. This is done so
