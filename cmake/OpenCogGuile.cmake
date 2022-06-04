@@ -156,7 +156,7 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
         COMMAND guild compile
                 ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
                 -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-                -L ${FILE_BUILD_PATH}
+                -L ${CMAKE_CURRENT_SOURCE_DIR}
         DEPENDS ${MODULE_FILES}
         COMMENT "Compiling ${MODULE_NAME}.scm"
         VERBATIM)
