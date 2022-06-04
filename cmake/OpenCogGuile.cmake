@@ -137,8 +137,14 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 FUNCTION(COMPILE_MODULE MODULE_NAME)
     SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
 
+    # Set the install path for the compiled file. Do some guess-work
+    # to handle the most common case. The guesswork fails, if the
+    # modules is more than two deep e.g `(opencog foo bar)` XXX FIXME
     GET_FILENAME_COMPONENT(DIR_PATH ${MODULE_NAME} DIRECTORY)
     SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/${DIR_PATH})
+    IF ((${DIR_PATH}x STREQUAL x) AND (NOT (${MODULE_NAME} STREQUAL opencog)))
+        SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/opencog)
+    ENDIF()
 
     # Strip out slashes in the module name.
     STRING(REPLACE "/" "_" PHONY_TARGET ${MODULE_NAME})
@@ -190,9 +196,6 @@ ENDFUNCTION(COMPILE_MODULE)
 # COMPILE: Optional keyword. If present, the module file (the first
 #   file in the file-list) will be compiled into guile RTL bytecode,
 #   and installed into the guile bytecode cache location.
-#
-# XXX FIXME-BUG: The compiled module is not installed in the correct
-# location, if the MODULE_DESTINATION is non-trivial (non-default).
 #
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the
