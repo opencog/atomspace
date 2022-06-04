@@ -18,9 +18,6 @@ ADD_GUILE_MODULE (FILES
 
 # -----
 # Compile the main opencog module.
-SET(MODULE_NAME "opencog")
-SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
-SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR})
 SET(SCM_FILES
 	opencog.scm
 	opencog/base/apply.scm
@@ -35,24 +32,9 @@ SET(SCM_FILES
 
 # TODO: move this and the rest to `cmake/OpenCogGuile.cmake` and
 # enable it for all guile modules.
-ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
-	DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	DEPENDS opencog_atom_types)
 
-ADD_CUSTOM_COMMAND(
-	OUTPUT ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	COMMAND guild compile
-	        ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
-	        -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	        -L ${FILE_BUILD_PATH}
-	# DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
-	DEPENDS ${SCM_FILES}
-	COMMENT "Compiling ${MODULE_NAME}.scm"
-	VERBATIM)
-
-INSTALL(
-	FILES ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-	DESTINATION ${GO_INSTALL_PATH})
+COMPILE_MODULE("opencog" ${SCM_FILES})
+ADD_DEPENDENCIES(opencog_go opencog_atom_types)
 
 # -----
 # Each of the files below are distinct modules. They need to be

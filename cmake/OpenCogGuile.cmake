@@ -129,6 +129,33 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
 
 ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
+# -------------------------------------------------------------------
+#
+# This compiles a guile module. Arguments are the module name, and
+# a list of all the files in the module.
+FUNCTION(COMPILE_MODULE MODULE_NAME SCM_FILES)
+    SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
+    SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR})
+
+    ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
+        DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
+
+    ADD_CUSTOM_COMMAND(
+        OUTPUT ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+        COMMAND guild compile
+                ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
+                -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+                -L ${FILE_BUILD_PATH}
+        DEPENDS ${SCM_FILES}
+        COMMENT "Compiling ${MODULE_NAME}.scm"
+        VERBATIM)
+
+    INSTALL(
+        FILES ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+        DESTINATION ${GO_INSTALL_PATH})
+
+ENDFUNCTION(COMPILE_MODULE)
+
 # ---------------------------------------------------------------------
 # When building, all files specifed are are copied to
 # '${CMAKE_BINARY_DIR}/opencog/scm' following the same file tree
