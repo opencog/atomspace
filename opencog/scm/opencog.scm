@@ -22,7 +22,10 @@
 ; hairy hack needed to be able to run unit tests without installing.
 (if (resolve-module (list 'opencog 'as-config) #:ensure #f)
 	(use-modules (opencog as-config))
-	(load-from-path "opencog/as-config.scm"))
+	(begin
+		(load-from-path "opencog/as-config.scm")
+		(add-to-load-path opencog-ext-path-smob)
+		)
 
 (load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
