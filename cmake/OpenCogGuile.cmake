@@ -167,9 +167,9 @@ ENDFUNCTION(COMPILE_MODULE)
 # '${CMAKE_BINARY_DIR}/opencog/scm' following the same file tree
 # as will be installed (to /usr/local/share/guile/site/3.0/opencog)
 #
-# It has three keyword arguments
+# It has four keyword arguments
 #
-# FILES: List of files to be installed/copied
+# FILES: List of files to be installed/copied.
 #
 # MODULE_DESTINATION: The absolute path where the files associated
 #   with the module are installed, with the exception of the
@@ -177,9 +177,15 @@ ENDFUNCTION(COMPILE_MODULE)
 #   MODULE_FILE, is inferred from this argument, even if it is the
 #   only file to be installed.
 #
-# DEPENDS: The name of a target that generates a scheme file that is
-# to be installed. This is an optional argument required only for
-# generated files.
+# DEPENDS: Optional argument. A list of any targets that must be built
+#   before the module can be built. A typical use is to make sure that
+#   the `atom_types.scm` file is created first, before building this
+#   module.
+#
+# COMPILE: Optional keyword. If present, the module file (the first
+#   file in the file-list) will be compiled into guile RTL bytecode,
+#   and installed into the guile bytecode cache location.
+#
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the
   # current source directory to the build directory. This is done so
@@ -193,7 +199,7 @@ FUNCTION(ADD_GUILE_MODULE)
 
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
-    SET(options "")  # This is used only as a place-holder
+    SET(options COMPILE)
     SET(oneValueArgs MODULE_DESTINATION MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
@@ -207,6 +213,13 @@ FUNCTION(ADD_GUILE_MODULE)
         # in the list.
         LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
         STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
+
+        # If the COMPILE keyword is set, then compile the module into
+        # module.go RTL bytecode.
+        IF (${SCM_COMPILE})
+            COMPILE_MODULE(${SCM_MODULE} ${SCM_FILES})
+            ADD_DEPENDENCIES(${SCM_MODULE}_go ${SCM_DEPENDS})
+        ENDIF()
 
 # Arghhh FILE TOUCH first appears in version 3.12.0
 # Everyone else is screwed.  Well, that explains a lot.

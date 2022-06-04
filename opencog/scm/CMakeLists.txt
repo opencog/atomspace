@@ -14,28 +14,9 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/utilities.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}"
 	DEPENDS opencog_atom_types
+	COMPILE
 )
 
-# -----
-# Compile the main opencog module.
-# First arg is the module name. Remaining args are the dependencies.
-COMPILE_MODULE(opencog
-	opencog.scm
-	opencog/base/apply.scm
-	opencog/base/atom-cache.scm
-	opencog/base/core-docs.scm
-	opencog/base/debug-trace.scm
-	opencog/base/file-utils.scm
-	opencog/base/repl-shell.scm
-	opencog/base/tv.scm
-	opencog/base/types.scm
-	opencog/base/utilities.scm)
-
-# Do NOT attempt to build the module, before the atom types have been
-# created.
-ADD_DEPENDENCIES(opencog_go opencog_atom_types)
-
-# -----
 # Each of the files below are distinct modules. They need to be
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
