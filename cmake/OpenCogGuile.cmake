@@ -136,11 +136,29 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 # module (so that a recompile is forced, whenever a depedency changes).
 FUNCTION(COMPILE_MODULE MODULE_NAME)
     SET(FILE_BUILD_PATH ${GUILE_BIN_DIR})
-    SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR})
+
+    # Set the install path for the compiled file. Do some guess-work
+    # to handle the most common case. The guesswork fails, if the
+    # modules is more than two deep e.g `(opencog foo bar)` XXX FIXME
+    GET_FILENAME_COMPONENT(DIR_PATH ${MODULE_NAME} DIRECTORY)
+    SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/${DIR_PATH})
+    IF ((${DIR_PATH}x STREQUAL x) AND (NOT (${MODULE_NAME} STREQUAL opencog)))
+        SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/opencog)
+    ENDIF()
+
+    # Strip out slashes in the module name.
+    STRING(REPLACE "/" "_" PHONY_TARGET ${MODULE_NAME})
 
     # Create a phony target so that users can reference it directly.
-    ADD_CUSTOM_TARGET(${MODULE_NAME}_go ALL
+    ADD_CUSTOM_TARGET(${PHONY_TARGET}_go ALL
         DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
+
+    # Add a dependency on the base atomspace module, byt default.
+    # That is, opencog.go *must* be built before anything else,
+    # as otherwise, there will be build errors.
+    IF (NOT (${MODULE_NAME} STREQUAL opencog))
+        ADD_DEPENDENCIES(${PHONY_TARGET}_go opencog_go)
+    ENDIF()
 
     # Remainder of the arguments is a list of dependencies.
     SET(MODULE_FILES ${ARGN})
@@ -151,6 +169,7 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
         COMMAND guild compile
                 ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
                 -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
+                -L ${CMAKE_CURRENT_SOURCE_DIR}
                 -L ${FILE_BUILD_PATH}
         DEPENDS ${MODULE_FILES}
         COMMENT "Compiling ${MODULE_NAME}.scm"
@@ -167,9 +186,9 @@ ENDFUNCTION(COMPILE_MODULE)
 # '${CMAKE_BINARY_DIR}/opencog/scm' following the same file tree
 # as will be installed (to /usr/local/share/guile/site/3.0/opencog)
 #
-# It has three keyword arguments
+# It has four keyword arguments
 #
-# FILES: List of files to be installed/copied
+# FILES: List of files to be installed/copied.
 #
 # MODULE_DESTINATION: The absolute path where the files associated
 #   with the module are installed, with the exception of the
@@ -177,9 +196,15 @@ ENDFUNCTION(COMPILE_MODULE)
 #   MODULE_FILE, is inferred from this argument, even if it is the
 #   only file to be installed.
 #
-# DEPENDS: The name of a target that generates a scheme file that is
-# to be installed. This is an optional argument required only for
-# generated files.
+# DEPENDS: Optional argument. A list of any targets that must be built
+#   before the module can be built. A typical use is to make sure that
+#   the `atom_types.scm` file is created first, before building this
+#   module.
+#
+# COMPILE: Optional keyword. If present, the module file (the first
+#   file in the file-list) will be compiled into guile RTL bytecode,
+#   and installed into the guile bytecode cache location.
+#
 FUNCTION(ADD_GUILE_MODULE)
   # Define the target that will be used to copy scheme files in the
   # current source directory to the build directory. This is done so
@@ -193,20 +218,37 @@ FUNCTION(ADD_GUILE_MODULE)
 
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
-    SET(options "")  # This is used only as a place-holder
+    SET(options COMPILE)
     SET(oneValueArgs MODULE_DESTINATION MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
-    # NOTE:  The keyword arguments 'FILES' and
-    # 'MODULE_DESTINATION' are required.
-    IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
+    # The SCM module is given by the name of the first file
+    # in the list.
+    LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
+    STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
 
-        # The SCM module is given by the name of the first file
-        # in the list.
-        LIST(GET SCM_FILES 0 SCM_MODULE_FILE)
-        STRING(REPLACE ".scm" "" SCM_MODULE ${SCM_MODULE_FILE})
+    IF(NOT DEFINED SCM_MODULE_DESTINATION)
+        GET_FILENAME_COMPONENT(DIR_PATH ${SCM_MODULE} DIRECTORY)
+        SET(SCM_MODULE_DESTINATION ${GUILE_SITE_DIR}/${DIR_PATH})
+    ENDIF()
+
+    # The keyword argument 'FILES' is required.
+    IF(DEFINED SCM_FILES)
+
+        # If the COMPILE keyword is set, then compile the module into
+        # module.go RTL bytecode.
+        IF (${SCM_COMPILE})
+            COMPILE_MODULE(${SCM_MODULE} ${SCM_FILES})
+
+            IF(DEFINED SCM_DEPENDS)
+                # Strip out slashes in the module name.
+                STRING(REPLACE "/" "_" PHONY_TARGET ${SCM_MODULE})
+
+                ADD_DEPENDENCIES(${PHONY_TARGET}_go ${SCM_DEPENDS})
+            ENDIF()
+        ENDIF()
 
 # Arghhh FILE TOUCH first appears in version 3.12.0
 # Everyone else is screwed.  Well, that explains a lot.
