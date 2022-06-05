@@ -153,6 +153,13 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     ADD_CUSTOM_TARGET(${PHONY_TARGET}_go ALL
         DEPENDS ${FILE_BUILD_PATH}/${MODULE_NAME}.go)
 
+    # Add a dependency on the base atomspace module, byt default.
+    # That is, opencog.go *must* be built before anything else,
+    # as otherwise, there will be build errors.
+    IF (NOT (${MODULE_NAME} STREQUAL opencog))
+        ADD_DEPENDENCIES(${PHONY_TARGET}_go opencog_go)
+    ENDIF()
+
     # Remainder of the arguments is a list of dependencies.
     SET(MODULE_FILES ${ARGN})
 

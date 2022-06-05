@@ -20,49 +20,46 @@ ADD_GUILE_MODULE (FILES
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
-	DEPENDS opencog_go exec
+	DEPENDS exec
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
-	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
-	DEPENDS opencog_go logger
+	DEPENDS logger
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
-	DEPENDS opencog_go randgen
+	DEPENDS randgen
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/query.scm
-	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
-	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
-	DEPENDS opencog_go type-utils
+	DEPENDS type-utils
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/uuid.scm
-	DEPENDS opencog_go guile-uuid
+	DEPENDS guile-uuid
 	COMPILE
 )
 
@@ -77,7 +74,7 @@ ADD_GUILE_MODULE (FILES
 
 ADD_GUILE_MODULE (FILES
 	opencog/persist-file.scm
-	DEPENDS opencog_go persist-file
+	DEPENDS persist-file
 	COMPILE
 )
 
@@ -87,7 +84,7 @@ ADD_GUILE_MODULE (FILES
 IF (HAVE_GEARMAN)
 	ADD_GUILE_MODULE (FILES
 		opencog/dist-gearman.scm
-		DEPENDS opencog_go dist-gearman
+		DEPENDS dist-gearman
 		COMPILE
 	)
 ENDIF (HAVE_GEARMAN)
@@ -95,7 +92,7 @@ ENDIF (HAVE_GEARMAN)
 IF (HAVE_SQL_STORAGE)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
-		DEPENDS opencog_go persist-sql
+		DEPENDS persist-sql
 		COMPILE
 	)
 ENDIF (HAVE_SQL_STORAGE)
@@ -103,7 +100,7 @@ ENDIF (HAVE_SQL_STORAGE)
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
-		DEPENDS opencog_go PythonSCM
+		DEPENDS PythonSCM
 		COMPILE
 	)
 ENDIF (HAVE_CYTHON)

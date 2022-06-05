@@ -7,6 +7,5 @@ ADD_GUILE_MODULE (FILES
 	sections.scm
 	vo-graph.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/sheaf"
-	DEPENDS opencog_go
 	COMPILE
 )
