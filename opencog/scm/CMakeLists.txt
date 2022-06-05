@@ -71,12 +71,13 @@ ADD_GUILE_MODULE (FILES
 # In other words, the persist module is badly broken.
 ADD_GUILE_MODULE (FILES
 	opencog/persist.scm
-	DEPENDS storage_types
+	DEPENDS storage_types persist
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/persist-file.scm
+	DEPENDS opencog_go persist-file
 	COMPILE
 )
 
@@ -86,6 +87,7 @@ ADD_GUILE_MODULE (FILES
 IF (HAVE_GEARMAN)
 	ADD_GUILE_MODULE (FILES
 		opencog/dist-gearman.scm
+		DEPENDS opencog_go dist-gearman
 		COMPILE
 	)
 ENDIF (HAVE_GEARMAN)
@@ -93,6 +95,7 @@ ENDIF (HAVE_GEARMAN)
 IF (HAVE_SQL_STORAGE)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
+		DEPENDS opencog_go persist-sql
 		COMPILE
 	)
 ENDIF (HAVE_SQL_STORAGE)
@@ -100,6 +103,7 @@ ENDIF (HAVE_SQL_STORAGE)
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
+		DEPENDS opencog_go PythonSCM
 		COMPILE
 	)
 ENDIF (HAVE_CYTHON)
