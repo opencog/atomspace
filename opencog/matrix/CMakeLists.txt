@@ -24,5 +24,6 @@ ADD_GUILE_MODULE (FILES
 	trans-batch.scm
 	trim.scm
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/matrix"
+	DEPENDS opencog_go
 	COMPILE
 )
