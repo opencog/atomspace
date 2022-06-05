@@ -12,7 +12,7 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/tv.scm
 	opencog/base/types.scm
 	opencog/base/utilities.scm
-	DEPENDS opencog_atom_types
+	DEPENDS opencog_atom_types smob
 	COMPILE
 )
 
@@ -20,41 +20,49 @@ ADD_GUILE_MODULE (FILES
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
+	DEPENDS opencog_go exec
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
+	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
+	DEPENDS opencog_go logger
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
+	DEPENDS opencog_go randgen
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/query.scm
+	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
+	DEPENDS opencog_go
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
+	DEPENDS opencog_go type-utils
 	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/uuid.scm
+	DEPENDS opencog_go guile-uuid
 	COMPILE
 )
 

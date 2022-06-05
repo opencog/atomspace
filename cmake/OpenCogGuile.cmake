@@ -235,7 +235,7 @@ FUNCTION(ADD_GUILE_MODULE)
         IF (${SCM_COMPILE})
             COMPILE_MODULE(${SCM_MODULE} ${SCM_FILES})
 
-            IF(${SCM_DEPENDS})
+            IF(DEFINED SCM_DEPENDS)
                 # Strip out slashes in the module name.
                 STRING(REPLACE "/" "_" PHONY_TARGET ${SCM_MODULE})
 
