@@ -97,7 +97,8 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 		+ nameserver().getTypeName(v->get_type()) + "\",\n"
 		+ idt + "\"value\": [";
 
-	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
+	Type typ = v->get_type();
+	if (nameserver().isA(typ, FLOAT_VALUE))
 	{
 		// The FloatValue to_string() method prints out a high-precision
 		// form of the value, as compared to SimpleTruthValue, which
@@ -109,6 +110,20 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 		{
 			if (not first) txt += ", ";
 			txt += std::to_string(d);
+			first = false;
+		}
+	}
+
+	else
+	if (nameserver().isA(typ, STRING_VALUE))
+	{
+		StringValuePtr sv(StringValueCast(v));
+		const std::vector<std::string>& sl = sv->value();
+		bool first = true;
+		for (std::string s : sl)
+		{
+			if (not first) txt += ", ";
+			txt += "\" + s + "\""; // TODO escape quotes
 			first = false;
 		}
 	}
