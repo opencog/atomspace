@@ -120,10 +120,14 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 		StringValuePtr sv(StringValueCast(v));
 		const std::vector<std::string>& sl = sv->value();
 		bool first = true;
-		for (std::string s : sl)
+		for (const std::string& s : sl)
 		{
 			if (not first) txt += ", ";
-			txt += "\" + s + "\""; // TODO escape quotes
+
+			// Escape quotes
+			std::stringstream ss;
+			ss << std::quoted(s);
+			txt += ss.str();
 			first = false;
 		}
 	}
