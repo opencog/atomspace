@@ -132,6 +132,25 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 		}
 	}
 
+	else
+	if (nameserver().isA(typ, LINK_VALUE))
+	{
+		LinkValuePtr lv(LinkValueCast(v));
+		const std::vector<ValuePtr>& ll = lv->value();
+		bool first = true;
+		for (const ValuePtr& vp : ll)
+		{
+			if (not first) txt += ", ";
+			txt += encode_value(vp);
+			first = false;
+		}
+	}
+
+	else
+	{
+		txt += "Error: don't know how to print this";
+	}
+
 	txt += "]}";
 	return txt;
 }
