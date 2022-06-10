@@ -2,7 +2,7 @@
  * DecodeJson.cc
  * Decode JSON describing Atoms and Values.
  *
- * Copyright (c) 2019 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2019, 2022 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,6 +34,11 @@
 #include "Json.h"
 
 using namespace opencog;
+
+// This does NOT use any external JSON decoder libraries because those
+// libs don't really make anything simpler, and also we don't need most
+// of the features that they offer, and also I don't want more
+// dependencies in the AtomSpace.
 
 /* ================================================================== */
 /**
@@ -109,12 +114,6 @@ std::string Json::get_node_name(const std::string& s,
 /// The string to decode is `s`, beginning at location `l` and using `r`
 /// as a hint for the end of the expression.
 ///
-/// XXX FIXME. This is a quick hack. It will be confused be embedded
-/// quotes n stuff. This does NOT use any external JSON decoder
-/// libraries because those libs don't really make anything simpler,
-/// and also we don't need most of the features that they offer, and
-/// also I don't want more dependencies in the AtomSpace.
-///
 Handle Json::decode_atom(const std::string& s,
                          size_t& l, size_t& r)
 {
@@ -171,6 +170,73 @@ Handle Json::decode_atom(const std::string& s,
 		}
 
 		return createLink(std::move(hs), t);
+	}
+
+	return Handle::UNDEFINED;
+}
+
+/* ================================================================== */
+
+/// Convert an Atomese JSON expression into a C++ Value.
+/// For example: `{ "type": "FloatValue", "value": [1, 2, 3] }`
+/// will return the corresponding ValuePtr.
+///
+/// The string to decode is `s`, beginning at location `l` and using `r`
+/// as a hint for the end of the expression.
+///
+ValuePtr Json::decode_value(const std::string& s,
+                            size_t& lo, size_t& ro)
+{
+	size_t l = lo;
+	l = s.find("{", l);
+	if (std::string::npos == l) return nullptr;
+
+	size_t tpos = s.find("\"type\":", l);
+	if (std::string::npos == tpos) return nullptr;
+	tpos += 7;  // skip past "type":
+
+	Type t = NOTYPE;
+	try {
+		t = Json::decode_type(s, tpos);
+	}
+	catch(...) {
+		return nullptr;
+	}
+
+	if (nameserver().isA(t, ATOM))
+	{
+		return decode_atom(s, lo, ro);
+	}
+
+	if (nameserver().isA(t, FLOAT_VALUE))
+	{
+		size_t opos = s.find("\"value\":", l);
+		if (std::string::npos == opos) return nullptr;
+		opos += 8;  // skip past "value":
+
+		l = s.find("{", opos);
+
+		std::vector<double> vd;
+
+		size_t r = ro;
+		while (std::string::npos != r)
+		{
+printf("duuude double at >>%s<<\n", s.substr(l).c_str());
+			std::stringstream ss;
+			double d;
+			ss >> d;
+printf("duuude got d=%g\n", d);
+			vd.push_back(d);
+
+			// Look for the comma
+			l = s.find(",", r);
+			if (std::string::npos == l) break;
+			l ++;
+		}
+
+		lo = l;
+		ro = r;
+		return createFloatValue(std::move(vd));
 	}
 
 	return Handle::UNDEFINED;

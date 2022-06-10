@@ -2,7 +2,7 @@
  * JSCommands.cc
  * Fast command interpreter for basic JSON AtomSpace commands.
  *
- * Copyright (C) 2020, 2021 Linas Vepstas
+ * Copyright (C) 2020, 2021, 2022 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -323,7 +323,11 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		if (nullptr == h) return "false";
 
-		pos = epos;
+printf("duuude post decode= %lu %lu >>%s<<\n", pos, epos, cmd.substr(pos).c_str());
+		// The key follows the first comma.
+		pos = cmd.find_first_of(",", epos);
+		if (std::string::npos == pos) return "false";
+		pos++;
 		epos = cmd.size();
 printf("duuude kleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 		Handle k = Json::decode_atom(cmd, pos, epos);
@@ -331,7 +335,10 @@ printf("duuude kleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 
 		k = as->get_atom(k);
 
-		pos = epos;
+		// The value follows the next comma.
+		pos = cmd.find_first_of(",", epos);
+		if (std::string::npos == pos) return "false";
+		pos++;
 		epos = cmd.size();
 printf("duuude vleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 		ValuePtr v = Json::decode_value(cmd, pos, epos);
