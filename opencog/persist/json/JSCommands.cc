@@ -59,8 +59,9 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
 	static const size_t makea = std::hash<std::string>{}("makeAtom");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
-	static const size_t gtval = std::hash<std::string>{}("getValues");
 	static const size_t gettv = std::hash<std::string>{}("getTV");
+	static const size_t settv = std::hash<std::string>{}("setTV");
+	static const size_t gtval = std::hash<std::string>{}("getValues");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -302,6 +303,42 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		alist += Json::encode_value(ValueCast(h->getTruthValue()));
 		alist += "}]\n";
 		return alist;
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.setTV({ "type": "ConceptNode", "name": "foo",
+	//     "key": { "type": "PredicateNode", "name": "keewee" },
+	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
+	if (settv == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "false";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "false";
+
+		pos = epos;
+		epos = cmd.size();
+printf("duuude kleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
+		Handle k = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == k) return "false";
+
+		k = as->get_atom(k);
+
+		pos = epos;
+		epos = cmd.size();
+printf("duuude vleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
+		ValuePtr v = Json::decode_value(cmd, pos, epos);
+		if (nullptr == v) return "false";
+
+		h->setValue(k, v);
+		return "true";
 	}
 
 	// -----------------------------------------------
