@@ -56,6 +56,7 @@ AtomSpace.haveLink("List", [{"type": "Concept", "name": "foo"}]) // Nope.
 AtomSpace.haveLink("List", [{"type": "Concept", "name": "foo"}, {"type": "Concept", "name": "bar"}]) // Yes.
 AtomSpace.haveAtom({"type": "List", "outgoing":[{"type": "Concept", "name": "foo"}, {"type": "Concept", "name": "bar"}]}) // Yes
 AtomSpace.haveAtom({"type": "List", "outgoing":[{"type": "Concept", "name": "ding"}, {"type": "Concept", "name": "dong"}]}) // No
+AtomSpace.haveAtom({"type": "Concept", "name": "foo"}) // Yes
 AtomSpace.getIncoming({"type": "Concept", "name": "foo"}) // Incoming set
 AtomSpace.getIncoming({"type": "Concept", "name": "foo"}, "List") // OK
 AtomSpace.getIncoming({"type": "Concept", "name": "foo"}, "EvaluationLink") // Empty
@@ -79,6 +80,12 @@ json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
       "type": "ConceptNode",
       "name": "bar"
     }]}]
+```
+
+Other commands include:
+* Create an Atom. Returns `true` if successful, else `false`.
+```
+AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
 ```
 
 JavaScript API

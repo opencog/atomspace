@@ -1,6 +1,6 @@
 /*
  * DecodeJson.cc
- * Decode JSON describing Atms and Values.
+ * Decode JSON describing Atoms and Values.
  *
  * Copyright (c) 2019 Linas Vepstas <linas@linas.org>
  * SPDX-License-Identifier: AGPL-3.0-or-later

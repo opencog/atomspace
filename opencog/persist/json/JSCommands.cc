@@ -57,6 +57,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t haven = std::hash<std::string>{}("haveNode");
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
+	static const size_t makea = std::hash<std::string>{}("makeAtom");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
 
@@ -194,6 +195,24 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (nullptr == h) return "false\n";
 
 		h = as->get_atom(h);
+
+		if (nullptr == h) return "false\n";
+		return "true\n";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
+	if (makea == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "false\n";
+
+		h = as->add_atom(h);
 
 		if (nullptr == h) return "false\n";
 		return "true\n";
