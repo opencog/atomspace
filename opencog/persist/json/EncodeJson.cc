@@ -80,11 +80,22 @@ std::string Json::encode_atom(const Handle& h, const std::string& indent)
 	return prt_atom(h, indent);
 }
 
+/* ================================================================== */
+// Same as above, for for printing values.
+
 /// Convert value (or Atom) into a string.
 std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 {
 	// Empty values are used to erase keys from atoms.
 	if (nullptr == v) return "false";
+
+	if (v->is_atom())
+		return prt_atom(HandleCast(v));
+
+	std::string idt = indent + "  ";
+	std::string txt = indent + "{\n" + idt + "\"type\": \""
+		+ nameserver().getTypeName(v->get_type()) + "\",\n"
+		+ idt + "\"value\": [";
 
 	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
 	{
@@ -92,12 +103,18 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 		// form of the value, as compared to SimpleTruthValue, which
 		// only prints 6 digits and breaks the unit tests.
 		FloatValuePtr fv(FloatValueCast(v));
-		return fv->FloatValue::to_string();
+		const std::vector<double>& fl = fv->value();
+		bool first = true;
+		for (double d : fl)
+		{
+			if (not first) txt += ", ";
+			txt += std::to_string(d);
+			first = false;
+		}
 	}
 
-	if (not v->is_atom())
-		return v->to_short_string();
-	return prt_atom(HandleCast(v));
+	txt += "]}";
+	return txt;
 }
 
 /* ================================================================== */
