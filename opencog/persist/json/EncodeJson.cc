@@ -161,15 +161,21 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 /// association list.
 std::string Json::encode_atom_values(const Handle& h)
 {
+	if (nullptr == h) return "[]\n";
 	std::stringstream rv;
 
-	rv << "(alist ";
-	for (const Handle& k: h->getKeys())
+	rv << "[\n";
+	bool first = true;
+	for (const Handle& key: h->getKeys())
 	{
-		ValuePtr p = h->getValue(k);
-		rv << "(cons " << prt_atom(k) << encode_value(p) << ")";
+		if (not first) { rv << ",\n"; } else { first = false; }
+		rv << "  {\n";
+		rv << "    \"key\": " << encode_atom(key, "    ") << ",\n";
+		rv << "    \"value\": ";
+		ValuePtr p = h->getValue(key);
+		rv << encode_value(p, "    ") << "}";
 	}
-	rv << ")";
+	rv << "]\n";
 	return rv.str();
 }
 

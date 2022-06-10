@@ -279,20 +279,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		h = as->get_atom(h);
 
-		if (nullptr == h) return "[]\n";
-
-		bool first = true;
-		std::string alist = "[\n";
-		for (const Handle& key : h->getKeys())
-		{
-			if (not first) { alist += ",\n"; } else { first = false; }
-			alist += "  {\n";
-			alist += "    \"key\": " + Json::encode_atom(key, "    ") + ",\n";
-			alist += "    \"value\": ";
-			alist += Json::encode_value(h->getValue(key), "    ") + "}";
-		}
-		alist += "]\n";
-		return alist;
+		return Json::encode_atom_values(h);
 	}
 
 	// -----------------------------------------------
