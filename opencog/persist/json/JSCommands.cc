@@ -60,6 +60,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t makea = std::hash<std::string>{}("makeAtom");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
+	static const size_t gettv = std::hash<std::string>{}("getTV");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -291,6 +292,28 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 			alist += Json::encode_value(h->getValue(key), "    ") + "}";
 		}
 		alist += "]\n";
+		return alist;
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
+	if (gettv == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "[]\n";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "[]\n";
+
+		std::string alist = "[{ \"value\": \n";
+		alist += Json::encode_value(ValueCast(h->getTruthValue()));
+		alist += "}]\n";
 		return alist;
 	}
 

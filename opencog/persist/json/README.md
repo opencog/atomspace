@@ -88,6 +88,11 @@ Other commands include:
 AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
 ```
 
+* Get the TruthValue on Atom. Returns the value.
+```
+AtomSpace.getTV({"type": "Concept", "name": "foo"})
+```
+
 JavaScript API
 --------------
 Version 0.0.0 of a JavaScript API for this thing can be found at
