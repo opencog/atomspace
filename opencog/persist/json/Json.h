@@ -58,23 +58,11 @@ public:
 	static ValuePtr decode_value(const std::string&, size_t&, size_t&);
 	static Type decode_type(const std::string& s, size_t& pos);
 
-#if NOT_IMPLEMENTED_YET
-	static void decode_slist(const Handle&, const std::string&, size_t&);
-	static void decode_alist(const Handle&, const std::string&, size_t&);
-	static void decode_alist(const Handle& h, const std::string& s) {
-		size_t junk = 0;
-		decode_alist(h, s, junk);
-	}
-#endif // NOT_IMPLEMENTED_YET
-
 	// -------------------------------------------
 	// Encoding functions
 	static std::string encode_atom(const Handle&, const std::string& = "");
 	static std::string encode_value(const ValuePtr&, const std::string& = "");
 	static std::string encode_atom_values(const Handle&);
-
-	static std::string dump_atom(const Handle&);
-	static std::string dump_vatom(const Handle&, const Handle&);
 };
 
 /** @}*/
