@@ -92,17 +92,16 @@ AtomSpace.getTV({"type": "Concept", "name": "foo"})
 ```
 * Set the TruthValue on Atom. Returns true if successful, else false.
 ```
-AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "value": {
-"type": "SimpleTruthValue", "value": [0.3, 0.4] } } )
+AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "value": { "type": "SimpleTruthValue", "value": [0.3, 0.4] } } )
 ```
 
 * Set arbitrary Value on Atom. Returns true if successful, else false.
 ```
-AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "keewee" }, "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
+AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "keewee" }, "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
 
-AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "strkey" }, "value": { "type": "StringValue", "value": ["a", "b", "c, \"d\", e"] } } )
+AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "strkey" }, "value": { "type": "StringValue", "value": ["a", "b", "c, \"d\", e"] } } )
 
-AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type":
+AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type":
 "PredicateNode", "name": "linky" }, "value": { "type": "LinkValue", "value": [
 { "type": "FloatValue", "value": [4, 5, 6] },
 { "type": "StringValue", "value": ["g", "h", "i, \"j\", k"] },

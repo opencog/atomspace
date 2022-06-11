@@ -324,7 +324,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ValuePtr v = Json::decode_value(cmd, pos, epos);
 		if (nullptr == v) return "false";
 
-		h->setValue(k, v);
+		as->set_value(h, k, v);
 		return "true";
 	}
 
@@ -375,7 +375,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		ValuePtr v = Json::decode_value(cmd, pos, epos);
 		if (nullptr == v) return "false";
 
-		h->setTruthValue(TruthValueCast(v));
+printf("duuude tv=%s\n", v->to_string().c_str());
+		as->set_truthvalue(h, TruthValueCast(v));
 		return "true";
 	}
 
