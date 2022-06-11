@@ -108,11 +108,16 @@ AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type":
 { "type": "CountTruthValue", "value": [7, 8, 9] } } } )
 ```
 
+* Get base and derived types.
+```
+AtomSpace.getSubTypes("Link")
+AtomSpace.getSuperTypes("ListLink")
+```
+
 Unimplemented commands:
-* List types
-* Set multiple values at once
-* run generic queries
-* get incoming by type
+* Set multiple values at once -- this would be a nice-to-have utility.
+* Get Incoming set by Type
+* Run generic queries
 
 General Limitations
 -------------------

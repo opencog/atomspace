@@ -54,6 +54,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, just prepend a dot?)
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
+	static const size_t gtsub = std::hash<std::string>{}("getSubTypes");
+	static const size_t gtsup = std::hash<std::string>{}("getSuperTypes");
 	static const size_t haven = std::hash<std::string>{}("haveNode");
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
@@ -79,6 +81,66 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (std::string::npos == epos) return reterr(cmd);
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
+
+	// -----------------------------------------------
+	// Get subtypes of the named type.
+	// AtomSpace.getSubTypes("Link")
+	if (gtsub == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		Type t = NOTYPE;
+		try {
+			t = Json::decode_type(cmd, pos);
+		}
+		catch(...) {
+			return "Unknown type: " + cmd.substr(pos);
+		}
+
+		std::vector<Type> vect;
+		nameserver().getChildren(t, std::back_inserter(vect));
+
+		std::string rv = "[";
+		bool first = true;
+		for (const Type& tc: vect)
+		{
+			if (not first) { rv += ", "; } else { first = false; }
+			rv += nameserver().getTypeName(tc);
+		}
+		rv += "]\n";
+		return rv;
+	}
+
+	// -----------------------------------------------
+	// Get supertypes of the named type.
+	// AtomSpace.getSuperTypes("ListLink")
+	if (gtsup == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		Type t = NOTYPE;
+		try {
+			t = Json::decode_type(cmd, pos);
+		}
+		catch(...) {
+			return "Unknown type: " + cmd.substr(pos);
+		}
+
+		std::vector<Type> vect;
+		nameserver().getParents(t, std::back_inserter(vect));
+
+		std::string rv = "[";
+		bool first = true;
+		for (const Type& tc: vect)
+		{
+			if (not first) { rv += ", "; } else { first = false; }
+			rv += nameserver().getTypeName(tc);
+		}
+		rv += "]\n";
+		return rv;
+	}
 
 	// -----------------------------------------------
 	// AtomSpace.getAtoms("Node", true)
