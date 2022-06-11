@@ -70,6 +70,13 @@ static std::string reterr(const std::string& cmd)
 	h = as->add_atom(h); \
 	if (nullptr == h) return "false\n";
 
+#define GET_VALUE \
+	pos = cmd.find("\"value\":", pos); \
+	if (std::string::npos == pos) return "false"; \
+	pos += 8; \
+	epos = cmd.size(); \
+	ValuePtr v = Json::decode_value(cmd, pos, epos); \
+	if (nullptr == v) return "false";
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
@@ -321,13 +328,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		pos = cmd.find(',', epos);
 		if (std::string::npos == pos) return "false";
 
-		// The value comes next.
-		pos = cmd.find("\"value\":", pos);
-		if (std::string::npos == pos) return "false";
-		pos += 8;
-		epos = cmd.size();
-		ValuePtr v = Json::decode_value(cmd, pos, epos);
-		if (nullptr == v) return "false";
+		GET_VALUE;
 
 		as->set_value(h, k, v);
 		return "true";
@@ -353,14 +354,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		ADD_ATOM;
-
-		// The value comes next.
-		pos = cmd.find("\"value\":", pos);
-		if (std::string::npos == pos) return "false";
-		pos += 8;
-		epos = cmd.size();
-		ValuePtr v = Json::decode_value(cmd, pos, epos);
-		if (nullptr == v) return "false";
+		GET_VALUE;
 
 		as->set_truthvalue(h, TruthValueCast(v));
 		return "true";
