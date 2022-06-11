@@ -2,7 +2,7 @@
  * JSCommands.cc
  * Fast command interpreter for basic JSON AtomSpace commands.
  *
- * Copyright (C) 2020, 2021 Linas Vepstas
+ * Copyright (C) 2020, 2021, 2022 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -43,6 +43,52 @@ static std::string reterr(const std::string& cmd)
 	return "JSON/JavaScript function not supported: >>" + cmd + "<<\n";
 }
 
+// Common boilerplate
+#define CHK_CMD \
+	pos = cmd.find_first_of("(", epos); \
+	if (std::string::npos == pos) return reterr(cmd); \
+	pos++; \
+	epos = cmd.size();
+
+#define GET_TYPE \
+	Type t = NOTYPE; \
+	try { \
+		t = Json::decode_type(cmd, pos); \
+	} catch(...) { \
+		return "Unknown type: " + cmd.substr(pos); \
+	}
+
+#define GET_ATOM(rv) \
+	Handle h = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == h) return rv; \
+	h = as->get_atom(h); \
+	if (nullptr == h) return rv;
+
+#define ADD_ATOM \
+	Handle h = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == h) return "false\n"; \
+	h = as->add_atom(h); \
+	if (nullptr == h) return "false\n";
+
+#define GET_KEY \
+	pos = cmd.find("\"key\":", epos); \
+	if (std::string::npos == pos) return "false"; \
+	pos += 6; \
+	epos = cmd.size(); \
+	Handle k = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == k) return "false"; \
+	k = as->add_atom(k); \
+	pos = cmd.find(',', epos); \
+	if (std::string::npos == pos) return "false";
+
+#define GET_VALUE \
+	pos = cmd.find("\"value\":", pos); \
+	if (std::string::npos == pos) return "false"; \
+	pos += 8; \
+	epos = cmd.size(); \
+	ValuePtr v = Json::decode_value(cmd, pos, epos); \
+	if (nullptr == v) return "false";
+
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
 /// s-expression API, but is more convenient for web developers.
@@ -54,11 +100,18 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, just prepend a dot?)
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
+	static const size_t gtsub = std::hash<std::string>{}("getSubTypes");
+	static const size_t gtsup = std::hash<std::string>{}("getSuperTypes");
 	static const size_t haven = std::hash<std::string>{}("haveNode");
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
+	static const size_t makea = std::hash<std::string>{}("makeAtom");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
+	static const size_t gettv = std::hash<std::string>{}("getTV");
+	static const size_t settv = std::hash<std::string>{}("setTV");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
+	static const size_t stval = std::hash<std::string>{}("setValue");
+	static const size_t execu = std::hash<std::string>{}("execute");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -77,19 +130,55 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
 
 	// -----------------------------------------------
+	// Get subtypes of the named type.
+	// AtomSpace.getSubTypes("Link")
+	if (gtsub == act)
+	{
+		CHK_CMD;
+		GET_TYPE;
+
+		std::vector<Type> vect;
+		nameserver().getChildren(t, std::back_inserter(vect));
+
+		std::string rv = "[";
+		bool first = true;
+		for (const Type& tc: vect)
+		{
+			if (not first) { rv += ", "; } else { first = false; }
+			rv += nameserver().getTypeName(tc);
+		}
+		rv += "]\n";
+		return rv;
+	}
+
+	// -----------------------------------------------
+	// Get supertypes of the named type.
+	// AtomSpace.getSuperTypes("ListLink")
+	if (gtsup == act)
+	{
+		CHK_CMD;
+		GET_TYPE;
+
+		std::vector<Type> vect;
+		nameserver().getParents(t, std::back_inserter(vect));
+
+		std::string rv = "[";
+		bool first = true;
+		for (const Type& tc: vect)
+		{
+			if (not first) { rv += ", "; } else { first = false; }
+			rv += nameserver().getTypeName(tc);
+		}
+		rv += "]\n";
+		return rv;
+	}
+
+	// -----------------------------------------------
 	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		CHK_CMD;
+		GET_TYPE;
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
 		bool get_subtypes = true;
@@ -115,22 +204,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode("Concept", "foo")
 	if (haven == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		CHK_CMD;
+		GET_TYPE;
 
 		if (not nameserver().isA(t, NODE))
 			return "Type is not a Node type: " + cmd.substr(epos);
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
-		epos = cmd.size();
 		std::string name = Json::get_node_name(cmd, pos, epos);
 		Handle h = as->get_node(t, std::move(name));
 
@@ -142,22 +222,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
 	if (havel == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		CHK_CMD;
+		GET_TYPE;
 
 		if (not nameserver().isA(t, LINK))
 			return "Type is not a Link type: " + cmd.substr(epos);
 
 		pos = cmd.find_first_not_of(", \n\t", pos);
-		epos = cmd.size();
 
 		HandleSeq hs;
 
@@ -185,17 +256,17 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveAtom({ "type": "ConceptNode", "name": "foo"})
 	if (havea == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
+		GET_ATOM("false\n");
+		return "true\n";
+	}
 
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "false\n";
+	// -----------------------------------------------
+	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
+	if (makea == act)
+	{
+		CHK_CMD;
+		ADD_ATOM;
 		return "true\n";
 	}
 
@@ -203,17 +274,8 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
 	if (gtinc == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "[]\n";
+		CHK_CMD;
+		GET_ATOM("[]\n");
 
 		Type t = NOTYPE;
 		pos = cmd.find(",", epos);
@@ -249,30 +311,63 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getValues({ "type": "ConceptNode", "name": "foo"})
 	if (gtval == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
+		GET_ATOM("[]\n");
+		return Json::encode_atom_values(h);
+	}
 
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
+	// -----------------------------------------------
+	// AtomSpace.setValue({ "type": "ConceptNode", "name": "foo",
+	//     "key": { "type": "PredicateNode", "name": "keewee" },
+	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
+	if (stval == act)
+	{
+		CHK_CMD;
+		ADD_ATOM;
+		GET_KEY;
+		GET_VALUE;
 
-		h = as->get_atom(h);
+		as->set_value(h, k, v);
+		return "true";
+	}
 
-		if (nullptr == h) return "[]\n";
+	// -----------------------------------------------
+	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
+	if (gettv == act)
+	{
+		CHK_CMD;
+		GET_ATOM("[]\n");
 
-		bool first = true;
-		std::string alist = "[\n";
-		for (const Handle& key : h->getKeys())
-		{
-			if (not first) { alist += ",\n"; } else { first = false; }
-			alist += "  {\n";
-			alist += "    \"key\": " + Json::encode_atom(key, "    ") + ",\n";
-			alist += "    \"value\": ";
-			alist += Json::encode_value(h->getValue(key), "    ") + "}";
-		}
-		alist += "]\n";
+		std::string alist = "[{ \"value\": \n";
+		alist += Json::encode_value(ValueCast(h->getTruthValue()));
+		alist += "}]\n";
 		return alist;
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.setTV({ "type": "ConceptNode", "name": "foo",
+	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
+	if (settv == act)
+	{
+		CHK_CMD;
+		ADD_ATOM;
+		GET_VALUE;
+
+		as->set_truthvalue(h, TruthValueCast(v));
+		return "true";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.execute({ "type": "PlusLink", "outgoing":
+	//     [{ "type": "NumberNode", "value": "2" },
+	//      { "type": "NumberNode", "value": "2" }] })
+	if (execu == act)
+	{
+		CHK_CMD;
+		ADD_ATOM;
+
+		ValuePtr vp = h->execute();
+		return Json::encode_value(vp);
 	}
 
 	// -----------------------------------------------

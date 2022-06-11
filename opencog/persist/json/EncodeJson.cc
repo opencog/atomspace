@@ -80,24 +80,79 @@ std::string Json::encode_atom(const Handle& h, const std::string& indent)
 	return prt_atom(h, indent);
 }
 
+/* ================================================================== */
+// Same as above, for for printing values.
+
 /// Convert value (or Atom) into a string.
 std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 {
 	// Empty values are used to erase keys from atoms.
 	if (nullptr == v) return "false";
 
-	if (nameserver().isA(v->get_type(), FLOAT_VALUE))
+	if (v->is_atom())
+		return prt_atom(HandleCast(v));
+
+	std::string idt = indent + "  ";
+	std::string txt = indent + "{\n" + idt + "\"type\": \""
+		+ nameserver().getTypeName(v->get_type()) + "\",\n"
+		+ idt + "\"value\": [";
+
+	Type typ = v->get_type();
+	if (nameserver().isA(typ, FLOAT_VALUE))
 	{
 		// The FloatValue to_string() method prints out a high-precision
 		// form of the value, as compared to SimpleTruthValue, which
 		// only prints 6 digits and breaks the unit tests.
 		FloatValuePtr fv(FloatValueCast(v));
-		return fv->FloatValue::to_string();
+		const std::vector<double>& fl = fv->value();
+		bool first = true;
+		for (double d : fl)
+		{
+			if (not first) txt += ", ";
+			txt += std::to_string(d);
+			first = false;
+		}
 	}
 
-	if (not v->is_atom())
-		return v->to_short_string();
-	return prt_atom(HandleCast(v));
+	else
+	if (nameserver().isA(typ, STRING_VALUE))
+	{
+		StringValuePtr sv(StringValueCast(v));
+		const std::vector<std::string>& sl = sv->value();
+		bool first = true;
+		for (const std::string& s : sl)
+		{
+			if (not first) txt += ", ";
+
+			// Escape quotes
+			std::stringstream ss;
+			ss << std::quoted(s);
+			txt += ss.str();
+			first = false;
+		}
+	}
+
+	else
+	if (nameserver().isA(typ, LINK_VALUE))
+	{
+		LinkValuePtr lv(LinkValueCast(v));
+		const std::vector<ValuePtr>& ll = lv->value();
+		bool first = true;
+		for (const ValuePtr& vp : ll)
+		{
+			if (not first) txt += ", ";
+			txt += encode_value(vp);
+			first = false;
+		}
+	}
+
+	else
+	{
+		txt += "Error: don't know how to print this";
+	}
+
+	txt += "]}";
+	return txt;
 }
 
 /* ================================================================== */
@@ -106,95 +161,22 @@ std::string Json::encode_value(const ValuePtr& v, const std::string& indent)
 /// association list.
 std::string Json::encode_atom_values(const Handle& h)
 {
+	if (nullptr == h) return "[]\n";
 	std::stringstream rv;
 
-	rv << "(alist ";
-	for (const Handle& k: h->getKeys())
+	rv << "[\n";
+	bool first = true;
+	for (const Handle& key: h->getKeys())
 	{
-		ValuePtr p = h->getValue(k);
-		rv << "(cons " << prt_atom(k) << encode_value(p) << ")";
+		if (not first) { rv << ",\n"; } else { first = false; }
+		rv << "  {\n";
+		rv << "    \"key\": " << encode_atom(key, "    ") << ",\n";
+		rv << "    \"value\": ";
+		ValuePtr p = h->getValue(key);
+		rv << encode_value(p, "    ") << "}";
 	}
-	rv << ")";
+	rv << "]\n";
 	return rv.str();
-}
-
-/* ================================================================== */
-// Atom printers that encode ALL associated Values.
-
-static std::string dump_node(const Handle& h)
-{
-	std::stringstream ss;
-	ss << "(" << nameserver().getTypeName(h->get_type())
-		<< " " << std::quoted(h->get_name());
-
-	if (h->haveValues())
-		ss << " " << Json::encode_atom_values(h);
-
-	ss << ")";
-
-	return ss.str();
-}
-
-static std::string dump_link(const Handle& h)
-{
-	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
-	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
-
-	if (h->haveValues())
-	{
-		txt += " ";
-		txt += Json::encode_atom_values(h);
-	}
-
-	txt += ")";
-	return txt;
-}
-
-/// Print the Atom, and all of the values attached to it.
-/// Similar to `encode_atom()`, except that it also prints the values.
-/// Values on going Atoms in a Link are NOT dumped!
-/// This is in order to avoid duplication.
-std::string Json::dump_atom(const Handle& h)
-{
-	if (h->is_node()) return dump_node(h);
-	return dump_link(h);
-}
-
-/* ================================================================== */
-// Atom printers that encode only one associated Value.
-
-static std::string dump_vnode(const Handle& h, const Handle& key)
-{
-	std::stringstream ss;
-	ss << "(" << nameserver().getTypeName(h->get_type())
-		<< " " << std::quoted(h->get_name());
-
-	ValuePtr p = h->getValue(key);
-	if (nullptr != p)
-		ss << " (alist (cons " << prt_atom(key) << Json::encode_value(p) << ")))";
-
-	return ss.str();
-}
-
-static std::string dump_vlink(const Handle& h, const Handle& key)
-{
-	std::string txt = "(" + nameserver().getTypeName(h->get_type()) + " ";
-	for (const Handle& ho : h->getOutgoingSet())
-		txt += prt_atom(ho);
-
-	ValuePtr p = h->getValue(key);
-	if (nullptr != p)
-		txt += " (alist (cons " + prt_atom(key) + Json::encode_value(p) + ")))";
-
-	return txt;
-}
-
-/// Print the Atom, and just one of the values attached to it.
-std::string Json::dump_vatom(const Handle& h, const Handle& key)
-{
-	if (h->is_node()) return dump_vnode(h, key);
-	return dump_vlink(h, key);
 }
 
 /* ============================= END OF FILE ================= */
