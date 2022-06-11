@@ -186,7 +186,7 @@ std::string Json::encode_type_list(const std::vector<Type>& tlist)
 	for (const Type& t: tlist)
 	{
 		if (not first) { rv += ", "; } else { first = false; }
-		rv += nameserver().getTypeName(t);
+		rv += "\"" + nameserver().getTypeName(t) + "\"";
 	}
 	rv += "]\n";
 	return rv;
