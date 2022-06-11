@@ -82,6 +82,11 @@ json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
 
 ### Other commands
 These include:
+* Get JSON interface version
+```
+AtomSpace.version()
+```
+
 * Create an Atom. Returns `true` if successful, else `false`.
 ```
 AtomSpace.makeAtom({"type": "Concept", "name": "foo"})

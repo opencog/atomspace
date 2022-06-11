@@ -99,6 +99,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, just prepend a dot?)
+	static const size_t versn = std::hash<std::string>{}("version");
 	static const size_t gtatm = std::hash<std::string>{}("getAtoms");
 	static const size_t gtsub = std::hash<std::string>{}("getSubTypes");
 	static const size_t gtsup = std::hash<std::string>{}("getSuperTypes");
@@ -128,6 +129,15 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (std::string::npos == epos) return reterr(cmd);
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
+
+	// -----------------------------------------------
+	// Get version
+	// AtomSpace.version()
+	if (versn == act)
+	{
+		CHK_CMD;
+		return "0.9";
+	}
 
 	// -----------------------------------------------
 	// Get subtypes of the named type.
