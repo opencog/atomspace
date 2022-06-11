@@ -11,13 +11,11 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.8.0.** There is just enough here to be usable for basic things.
-Still missing is the ability to update the AtomSpace via JSON, and the
-ability to run arbitrary queries. Adding support for this is **really
-easy**, and just slightly tedious.  The hard part is writing the docs!
-See the neighboring directory `../sexpr/Commands.cc` for explicit
-examples of how to implement what's missing.  Patches are solicited and
-will be accepted.
+**Version 0.9.0.** There is just enough here to be usable for basic things.
+Several convenience calls are missing, as well as the ability to run
+arbitrary queries. Adding support for this is **really easy**, and just
+slightly tedious.  The hard part is writing the docs!
+Patches are solicited and will be accepted.
 
 
 Network API
@@ -110,6 +108,21 @@ AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type":
 { "type": "StringValue", "value": ["g", "h", "i, \"j\", k"] },
 { "type": "CountTruthValue", "value": [7, 8, 9] } } } )
 ```
+
+Unimplemented commands:
+* List types
+* Set multiple values at once
+* run generic queries
+* get incoming by type
+
+General Limitations
+-------------------
+At this time, the JSON parsing is simplistic, and possibly buggy. The
+following limitations apply:
+* There must not be any newlines in the data sent to the server;
+  commands must be on one line.
+* The order of the tags must be as documented above. So, for example,
+  to specity an Atom, the Atom type must come first.
 
 
 JavaScript API
