@@ -43,6 +43,13 @@ static std::string reterr(const std::string& cmd)
 	return "JSON/JavaScript function not supported: >>" + cmd + "<<\n";
 }
 
+// Common boilerplate
+#define CHK_CMD \
+	pos = cmd.find_first_of("(", epos); \
+	if (std::string::npos == pos) return reterr(cmd); \
+	pos++; \
+	epos = cmd.size();
+
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
 /// s-expression API, but is more convenient for web developers.
@@ -88,9 +95,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSubTypes("Link")
 	if (gtsub == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
+		CHK_CMD;
 		Type t = NOTYPE;
 		try {
 			t = Json::decode_type(cmd, pos);
@@ -118,9 +123,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getSuperTypes("ListLink")
 	if (gtsup == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
+		CHK_CMD;
 		Type t = NOTYPE;
 		try {
 			t = Json::decode_type(cmd, pos);
@@ -147,9 +150,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getAtoms("Node", true)
 	if (gtatm == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
+		CHK_CMD;
 		Type t = NOTYPE;
 		try {
 			t = Json::decode_type(cmd, pos);
@@ -182,9 +183,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveNode("Concept", "foo")
 	if (haven == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
+		CHK_CMD;
 		Type t = NOTYPE;
 		try {
 			t = Json::decode_type(cmd, pos);
@@ -209,9 +208,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveLink("List", [{ "type": "ConceptNode", "name": "foo"}])
 	if (havel == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
+		CHK_CMD;
 		Type t = NOTYPE;
 		try {
 			t = Json::decode_type(cmd, pos);
@@ -252,10 +249,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.haveAtom({ "type": "ConceptNode", "name": "foo"})
 	if (havea == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "false\n";
@@ -270,10 +264,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.makeAtom({ "type": "ConceptNode", "name": "foo"})
 	if (makea == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "false\n";
@@ -288,10 +279,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getIncoming({ "type": "ConceptNode", "name": "foo"})
 	if (gtinc == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "[]\n";
@@ -334,16 +322,12 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getValues({ "type": "ConceptNode", "name": "foo"})
 	if (gtval == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "[]\n";
 
 		h = as->get_atom(h);
-
 		return Json::encode_atom_values(h);
 	}
 
@@ -353,10 +337,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
 	if (stval == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "false";
@@ -395,10 +376,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
 	if (gettv == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "[]\n";
@@ -418,10 +396,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
 	if (settv == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "false";
@@ -448,10 +423,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	//      { "type": "NumberNode", "value": "2" }] })
 	if (execu == act)
 	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
+		CHK_CMD;
 
 		Handle h = Json::decode_atom(cmd, pos, epos);
 		if (nullptr == h) return "false";
