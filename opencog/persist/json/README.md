@@ -114,10 +114,21 @@ AtomSpace.getSubTypes("Link")
 AtomSpace.getSuperTypes("ListLink")
 ```
 
+* Execute an executable Atom
+```
+AtomSpace.execute({ "type": "PlusLink",
+    "outgoing":
+        [{ "type": "NumberNode", "value": "2" },
+         { "type": "NumberNode", "value": "2" }] })
+```
+
+
 Unimplemented commands:
+* Get Incoming set by Type -- this save a lot of I/O for many cases.
 * Set multiple values at once -- this would be a nice-to-have utility.
-* Get Incoming set by Type
-* Run generic queries
+* StorageNode API -- for generic dataset access.
+* Extract and Delete atoms
+* Wrapper for cog-evaluate!
 
 General Limitations
 -------------------
