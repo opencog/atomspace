@@ -254,16 +254,18 @@ ValuePtr Json::decode_value(const std::string& s,
 		while (std::string::npos != l)
 		{
 			l++;
-printf("duuude l=%lu str=%s<<\n", l, s.substr(l).c_str());
-			r = s.find_first_of(",]", l); // XXX this is broken
-			if (std::string::npos == r) break;
 			std::stringstream ss;
-			ss << s.substr(l, r-l);
+			ss << s.substr(l);
 			std::string uq;
 			ss >> std::quoted(uq);
-printf("duuude quno=%s<<\n", uq.substr(l).c_str());
 			vs.push_back(uq);
 
+			// Step past the closing quote.
+			r = l + uq.size() + 2;
+
+			// Get to the next elt
+			r = s.find_first_of(",]", r);
+			if (std::string::npos == r) break;
 			if (']' == s[r]) break;
 			l = r;
 		}
