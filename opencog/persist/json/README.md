@@ -63,7 +63,7 @@ AtomSpace.getValues({ "type": "Concept", "name": "foo"})  // All values
 AtomSpace.getValues({ "type": "Concept", "name": "bar"})  // All values
 ```
 
-Example output:
+### Example output:
 ```
 json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
 
@@ -80,7 +80,8 @@ json> AtomSpace.getIncoming({"type": "Concept", "name": "foo"})
     }]}]
 ```
 
-Other commands include:
+### Other commands
+These include:
 * Create an Atom. Returns `true` if successful, else `false`.
 ```
 AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
@@ -118,17 +119,29 @@ AtomSpace.getSuperTypes("ListLink")
 ```
 AtomSpace.execute({ "type": "PlusLink",
     "outgoing":
-        [{ "type": "NumberNode", "value": "2" },
-         { "type": "NumberNode", "value": "2" }] })
+        [{ "type": "NumberNode", "name": "2" },
+         { "type": "NumberNode", "name": "2" }] })
 ```
 
 
-Unimplemented commands:
+### Unimplemented Commands
 * Get Incoming set by Type -- this save a lot of I/O for many cases.
 * Set multiple values at once -- this would be a nice-to-have utility.
-* StorageNode API -- for generic dataset access.
-* Extract and Delete atoms
+* Extract atoms
 * Wrapper for cog-evaluate!
+
+### General Access
+To make the AtomSpace generically usable, even more is needed.
+Frequently-used functions include the following:
+
+* StorageNode API -- for generic dataset access.
+* Run arbitrary scheme, python
+
+Should the above be added to the JSON API? Probably not. This starts to
+make the JSON API to look more and more like a JavaScript API. The
+correct answer would be to bite the bullet, and create an actual
+JavaScript API, and also a cogserver plugin that provides network access
+to it.
 
 General Limitations
 -------------------
