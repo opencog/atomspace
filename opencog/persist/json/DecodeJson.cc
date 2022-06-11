@@ -237,7 +237,7 @@ ValuePtr Json::decode_value(const std::string& s,
 
 		r = s.find("}", r);
 		ro = r;
-		return createFloatValue(std::move(vd));
+		return valueserver().create(t, std::move(vd));
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))
@@ -272,7 +272,7 @@ ValuePtr Json::decode_value(const std::string& s,
 
 		r = s.find("}", r);
 		ro = r;
-		return createStringValue(std::move(vs));
+		return valueserver().create(t, std::move(vs));
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
@@ -301,7 +301,7 @@ ValuePtr Json::decode_value(const std::string& s,
 
 		r = s.find("}", r);
 		ro = r;
-		return createLinkValue(std::move(vv));
+		return valueserver().create(t, std::move(vv));
 	}
 
 	return nullptr;
