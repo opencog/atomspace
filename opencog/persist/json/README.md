@@ -92,6 +92,13 @@ AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
 ```
 AtomSpace.getTV({"type": "Concept", "name": "foo"})
 ```
+* Set the TruthValue on Atom. Returns true if successful, else false.
+```
+AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "keewee" }, "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
+
+AtomSpace.setTV({ "type": "ConceptNode", "name": "foo", "key": { "type": "PredicateNode", "name": "strkey" }, "value": { "type": "StringValue", "value": ["a", "b", "c, \"d\", e"] } } )
+```
+
 
 JavaScript API
 --------------

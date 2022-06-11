@@ -240,6 +240,39 @@ ValuePtr Json::decode_value(const std::string& s,
 		return createFloatValue(std::move(vd));
 	}
 
+	if (nameserver().isA(t, STRING_VALUE))
+	{
+		l = tpos;
+		size_t opos = s.find("\"value\":", l);
+		if (std::string::npos == opos) return nullptr;
+		opos += 8;  // skip past "value":
+
+		l = s.find("[", opos);
+
+		size_t r = ro;
+		std::vector<std::string> vs;
+		while (std::string::npos != l)
+		{
+			l++;
+printf("duuude l=%lu str=%s<<\n", l, s.substr(l).c_str());
+			r = s.find_first_of(",]", l); // XXX this is broken
+			if (std::string::npos == r) break;
+			std::stringstream ss;
+			ss << s.substr(l, r-l);
+			std::string uq;
+			ss >> std::quoted(uq);
+printf("duuude quno=%s<<\n", uq.substr(l).c_str());
+			vs.push_back(uq);
+
+			if (']' == s[r]) break;
+			l = r;
+		}
+
+		r = s.find("}", r);
+		ro = r;
+		return createStringValue(std::move(vs));
+	}
+
 	return Handle::UNDEFINED;
 }
 
