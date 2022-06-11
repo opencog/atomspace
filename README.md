@@ -267,6 +267,8 @@ repos, including:
   (tinycog repo)
 * [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
   (as-moses repo)
+* [JSON, Python, Scheme network interfaces](https://github.com/opencog/cogserver)
+  (cogserver repo)
 
 
 Examples, Documentation, Blog
