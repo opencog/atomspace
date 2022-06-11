@@ -141,7 +141,8 @@ Handle Json::decode_atom(const std::string& s,
 		apos = s.find_first_not_of(" \n\t", apos);
 		std::string name = Json::get_node_name(s, apos, r);
 
-		r = s.find("}", r); // Move past the closing paren
+		r = s.find_first_of(",}", r); // Move past the closing paren
+		r++;
 		return createNode(t, std::move(name));
 	}
 

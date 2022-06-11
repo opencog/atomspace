@@ -323,22 +323,25 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		if (nullptr == h) return "false";
 
-printf("duuude post decode= %lu %lu >>%s<<\n", pos, epos, cmd.substr(pos).c_str());
-		// The key follows the first comma.
-		pos = cmd.find_first_of(",", epos);
+		// The key follows the name.
+		pos = cmd.find("\"key\":", epos);
 		if (std::string::npos == pos) return "false";
-		pos++;
+		pos += 6;
 		epos = cmd.size();
-printf("duuude kleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 		Handle k = Json::decode_atom(cmd, pos, epos);
+printf("duuude key= %p rem= %lu %lu %s\n", k.get(), pos, epos, cmd.substr(epos).c_str());
 		if (nullptr == k) return "false";
 
-		k = as->get_atom(k);
+		k = as->add_atom(k);
 
-		// The value follows the next comma.
-		pos = cmd.find_first_of(",", epos);
+		// Skip past a comma
+		pos = cmd.find(',', epos);
 		if (std::string::npos == pos) return "false";
-		pos++;
+
+		// The value comes next.
+		pos = cmd.find("\"value\":", pos);
+		if (std::string::npos == pos) return "false";
+		pos += 8;
 		epos = cmd.size();
 printf("duuude vleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 		ValuePtr v = Json::decode_value(cmd, pos, epos);
