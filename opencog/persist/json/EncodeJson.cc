@@ -179,4 +179,17 @@ std::string Json::encode_atom_values(const Handle& h)
 	return rv.str();
 }
 
+std::string Json::encode_type_list(const std::vector<Type>& tlist)
+{
+	std::string rv = "[";
+	bool first = true;
+	for (const Type& t: tlist)
+	{
+		if (not first) { rv += ", "; } else { first = false; }
+		rv += nameserver().getTypeName(t);
+	}
+	rv += "]\n";
+	return rv;
+}
+
 /* ============================= END OF FILE ================= */

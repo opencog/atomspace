@@ -149,16 +149,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		std::vector<Type> vect;
 		nameserver().getChildren(t, std::back_inserter(vect));
-
-		std::string rv = "[";
-		bool first = true;
-		for (const Type& tc: vect)
-		{
-			if (not first) { rv += ", "; } else { first = false; }
-			rv += nameserver().getTypeName(tc);
-		}
-		rv += "]\n";
-		return rv;
+		return Json::encode_type_list(vect);
 	}
 
 	// -----------------------------------------------
@@ -171,16 +162,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		std::vector<Type> vect;
 		nameserver().getParents(t, std::back_inserter(vect));
-
-		std::string rv = "[";
-		bool first = true;
-		for (const Type& tc: vect)
-		{
-			if (not first) { rv += ", "; } else { first = false; }
-			rv += nameserver().getTypeName(tc);
-		}
-		rv += "]\n";
-		return rv;
+		return Json::encode_type_list(vect);
 	}
 
 	// -----------------------------------------------

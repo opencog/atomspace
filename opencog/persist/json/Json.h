@@ -63,6 +63,7 @@ public:
 	static std::string encode_atom(const Handle&, const std::string& = "");
 	static std::string encode_value(const ValuePtr&, const std::string& = "");
 	static std::string encode_atom_values(const Handle&);
+	static std::string encode_type_list(const std::vector<Type>&);
 };
 
 /** @}*/
