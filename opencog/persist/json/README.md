@@ -129,6 +129,7 @@ AtomSpace.execute({ "type": "PlusLink",
 * Set multiple values at once -- this would be a nice-to-have utility.
 * Extract atoms
 * Wrapper for cog-evaluate!
+* Multiple AtomSpace support
 
 ### General Access
 To make the AtomSpace generically usable, even more is needed.
