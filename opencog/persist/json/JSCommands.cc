@@ -70,6 +70,17 @@ static std::string reterr(const std::string& cmd)
 	h = as->add_atom(h); \
 	if (nullptr == h) return "false\n";
 
+#define GET_KEY \
+	pos = cmd.find("\"key\":", epos); \
+	if (std::string::npos == pos) return "false"; \
+	pos += 6; \
+	epos = cmd.size(); \
+	Handle k = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == k) return "false"; \
+	k = as->add_atom(k); \
+	pos = cmd.find(',', epos); \
+	if (std::string::npos == pos) return "false";
+
 #define GET_VALUE \
 	pos = cmd.find("\"value\":", pos); \
 	if (std::string::npos == pos) return "false"; \
@@ -313,21 +324,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		ADD_ATOM;
-
-		// The key follows the name.
-		pos = cmd.find("\"key\":", epos);
-		if (std::string::npos == pos) return "false";
-		pos += 6;
-		epos = cmd.size();
-		Handle k = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == k) return "false";
-
-		k = as->add_atom(k);
-
-		// Skip past a comma
-		pos = cmd.find(',', epos);
-		if (std::string::npos == pos) return "false";
-
+		GET_KEY;
 		GET_VALUE;
 
 		as->set_value(h, k, v);
