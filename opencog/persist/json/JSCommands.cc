@@ -329,7 +329,6 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		pos += 6;
 		epos = cmd.size();
 		Handle k = Json::decode_atom(cmd, pos, epos);
-printf("duuude key= %p rem= %lu %lu %s\n", k.get(), pos, epos, cmd.substr(epos).c_str());
 		if (nullptr == k) return "false";
 
 		k = as->add_atom(k);
@@ -343,7 +342,6 @@ printf("duuude key= %p rem= %lu %lu %s\n", k.get(), pos, epos, cmd.substr(epos).
 		if (std::string::npos == pos) return "false";
 		pos += 8;
 		epos = cmd.size();
-printf("duuude vleft= %lu %lu %s\n", pos, epos, cmd.substr(pos).c_str());
 		ValuePtr v = Json::decode_value(cmd, pos, epos);
 		if (nullptr == v) return "false";
 

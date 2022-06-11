@@ -211,31 +211,31 @@ ValuePtr Json::decode_value(const std::string& s,
 
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
+		l = tpos;
 		size_t opos = s.find("\"value\":", l);
 		if (std::string::npos == opos) return nullptr;
 		opos += 8;  // skip past "value":
 
-		l = s.find("{", opos);
-
-		std::vector<double> vd;
+		l = s.find("[", opos);
 
 		size_t r = ro;
-		while (std::string::npos != r)
+		std::vector<double> vd;
+		while (std::string::npos != l)
 		{
-printf("duuude double at >>%s<<\n", s.substr(l).c_str());
+			l++;
+			r = s.find_first_of(",]", l);
+			if (std::string::npos == r) break;
 			std::stringstream ss;
+			ss << s.substr(l, r-l);
 			double d;
 			ss >> d;
-printf("duuude got d=%g\n", d);
 			vd.push_back(d);
 
-			// Look for the comma
-			l = s.find(",", r);
-			if (std::string::npos == l) break;
-			l ++;
+			if (']' == s[r]) break;
+			l = r;
 		}
 
-		lo = l;
+		r = s.find("}", r);
 		ro = r;
 		return createFloatValue(std::move(vd));
 	}
