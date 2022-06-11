@@ -50,6 +50,15 @@ static std::string reterr(const std::string& cmd)
 	pos++; \
 	epos = cmd.size();
 
+#define GET_TYPE \
+	Type t = NOTYPE; \
+	try { \
+		t = Json::decode_type(cmd, pos); \
+	} catch(...) { \
+		return "Unknown type: " + cmd.substr(pos); \
+	}
+
+
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
 /// s-expression API, but is more convenient for web developers.
@@ -96,13 +105,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtsub == act)
 	{
 		CHK_CMD;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		GET_TYPE;
 
 		std::vector<Type> vect;
 		nameserver().getChildren(t, std::back_inserter(vect));
@@ -124,13 +127,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtsup == act)
 	{
 		CHK_CMD;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		GET_TYPE;
 
 		std::vector<Type> vect;
 		nameserver().getParents(t, std::back_inserter(vect));
@@ -151,13 +148,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtatm == act)
 	{
 		CHK_CMD;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		GET_TYPE;
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
 		bool get_subtypes = true;
@@ -184,19 +175,12 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (haven == act)
 	{
 		CHK_CMD;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		GET_TYPE;
 
 		if (not nameserver().isA(t, NODE))
 			return "Type is not a Node type: " + cmd.substr(epos);
 
 		pos = cmd.find_first_not_of(",) \n\t", pos);
-		epos = cmd.size();
 		std::string name = Json::get_node_name(cmd, pos, epos);
 		Handle h = as->get_node(t, std::move(name));
 
@@ -209,19 +193,12 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (havel == act)
 	{
 		CHK_CMD;
-		Type t = NOTYPE;
-		try {
-			t = Json::decode_type(cmd, pos);
-		}
-		catch(...) {
-			return "Unknown type: " + cmd.substr(pos);
-		}
+		GET_TYPE;
 
 		if (not nameserver().isA(t, LINK))
 			return "Type is not a Link type: " + cmd.substr(epos);
 
 		pos = cmd.find_first_not_of(", \n\t", pos);
-		epos = cmd.size();
 
 		HandleSeq hs;
 
