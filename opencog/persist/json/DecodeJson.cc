@@ -301,7 +301,7 @@ ValuePtr Json::decode_value(const std::string& s,
 
 		r = s.find("}", r);
 		ro = r;
-		return createLinkValue(std::move(vs));
+		return createLinkValue(std::move(vv));
 	}
 
 	return nullptr;

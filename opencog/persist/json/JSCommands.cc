@@ -62,6 +62,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t gettv = std::hash<std::string>{}("getTV");
 	static const size_t settv = std::hash<std::string>{}("setTV");
 	static const size_t gtval = std::hash<std::string>{}("getValues");
+	static const size_t stval = std::hash<std::string>{}("setValue");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
@@ -284,32 +285,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
-	if (gettv == act)
-	{
-		pos = cmd.find_first_of("(", epos);
-		if (std::string::npos == pos) return reterr(cmd);
-		pos++;
-		epos = cmd.size();
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "[]\n";
-
-		std::string alist = "[{ \"value\": \n";
-		alist += Json::encode_value(ValueCast(h->getTruthValue()));
-		alist += "}]\n";
-		return alist;
-	}
-
-	// -----------------------------------------------
-	// AtomSpace.setTV({ "type": "ConceptNode", "name": "foo",
+	// AtomSpace.setValue({ "type": "ConceptNode", "name": "foo",
 	//     "key": { "type": "PredicateNode", "name": "keewee" },
 	//     "value": { "type": "FloatValue", "value": [1, 2, 3] } } )
-	if (settv == act)
+	if (stval == act)
 	{
 		pos = cmd.find_first_of("(", epos);
 		if (std::string::npos == pos) return reterr(cmd);
@@ -346,6 +325,57 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		if (nullptr == v) return "false";
 
 		h->setValue(k, v);
+		return "true";
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.getTV({ "type": "ConceptNode", "name": "foo"})
+	if (gettv == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "[]\n";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "[]\n";
+
+		std::string alist = "[{ \"value\": \n";
+		alist += Json::encode_value(ValueCast(h->getTruthValue()));
+		alist += "}]\n";
+		return alist;
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.setTV({ "type": "ConceptNode", "name": "foo",
+	//     "value": { "type": "SimpleTruthValue", "value": [0.2, 0.3] } } )
+	if (settv == act)
+	{
+		pos = cmd.find_first_of("(", epos);
+		if (std::string::npos == pos) return reterr(cmd);
+		pos++;
+		epos = cmd.size();
+
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "false";
+
+		h = as->get_atom(h);
+
+		if (nullptr == h) return "false";
+
+		// The value comes next.
+		pos = cmd.find("\"value\":", pos);
+		if (std::string::npos == pos) return "false";
+		pos += 8;
+		epos = cmd.size();
+		ValuePtr v = Json::decode_value(cmd, pos, epos);
+		if (nullptr == v) return "false";
+
+		h->setTruthValue(TruthValueCast(v));
 		return "true";
 	}
 
