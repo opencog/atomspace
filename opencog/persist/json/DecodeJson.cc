@@ -275,7 +275,36 @@ ValuePtr Json::decode_value(const std::string& s,
 		return createStringValue(std::move(vs));
 	}
 
-	return Handle::UNDEFINED;
+	if (nameserver().isA(t, LINK_VALUE))
+	{
+		l = tpos;
+		size_t opos = s.find("\"value\":", l);
+		if (std::string::npos == opos) return nullptr;
+		opos += 8;  // skip past "value":
+
+		l = s.find("[", opos);
+
+		size_t r = ro;
+		std::vector<ValuePtr> vv;
+		while (std::string::npos != l)
+		{
+			l++;
+			ValuePtr vp = decode_value(s, l, r);
+			vv.push_back(vp);
+
+			// Get to the next elt
+			r = s.find_first_of(",]", r);
+			if (std::string::npos == r) break;
+			if (']' == s[r]) break;
+			l = r;
+		}
+
+		r = s.find("}", r);
+		ro = r;
+		return createLinkValue(std::move(vs));
+	}
+
+	return nullptr;
 }
 
 /* ============================= END OF FILE ================= */
