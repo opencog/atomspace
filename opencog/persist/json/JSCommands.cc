@@ -305,7 +305,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (stval == act)
 	{
 		CHK_CMD;
-		GET_ATOM("false");
+		ADD_ATOM;
 
 		// The key follows the name.
 		pos = cmd.find("\"key\":", epos);
@@ -352,7 +352,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (settv == act)
 	{
 		CHK_CMD;
-		GET_ATOM("false");
+		ADD_ATOM;
 
 		// The value comes next.
 		pos = cmd.find("\"value\":", pos);
