@@ -58,6 +58,18 @@ static std::string reterr(const std::string& cmd)
 		return "Unknown type: " + cmd.substr(pos); \
 	}
 
+#define GET_ATOM(rv) \
+	Handle h = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == h) return rv; \
+	h = as->get_atom(h); \
+	if (nullptr == h) return rv;
+
+#define ADD_ATOM \
+	Handle h = Json::decode_atom(cmd, pos, epos); \
+	if (nullptr == h) return "false\n"; \
+	h = as->add_atom(h); \
+	if (nullptr == h) return "false\n";
+
 
 /// The cogserver provides a network API to send/receive Atoms, encoded
 /// as JSON, over the internet. This is NOT as efficient as the
@@ -227,13 +239,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (havea == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "false\n";
+		GET_ATOM("false\n");
 		return "true\n";
 	}
 
@@ -242,13 +248,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (makea == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false\n";
-
-		h = as->add_atom(h);
-
-		if (nullptr == h) return "false\n";
+		ADD_ATOM;
 		return "true\n";
 	}
 
@@ -257,13 +257,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtinc == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "[]\n";
+		GET_ATOM("[]\n");
 
 		Type t = NOTYPE;
 		pos = cmd.find(",", epos);
@@ -300,11 +294,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gtval == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
-
-		h = as->get_atom(h);
+		GET_ATOM("[]\n");
 		return Json::encode_atom_values(h);
 	}
 
@@ -315,13 +305,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (stval == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "false";
+		GET_ATOM("false");
 
 		// The key follows the name.
 		pos = cmd.find("\"key\":", epos);
@@ -354,13 +338,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (gettv == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "[]\n";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "[]\n";
+		GET_ATOM("[]\n");
 
 		std::string alist = "[{ \"value\": \n";
 		alist += Json::encode_value(ValueCast(h->getTruthValue()));
@@ -374,13 +352,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (settv == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false";
-
-		h = as->get_atom(h);
-
-		if (nullptr == h) return "false";
+		GET_ATOM("false");
 
 		// The value comes next.
 		pos = cmd.find("\"value\":", pos);
@@ -401,18 +373,10 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (execu == act)
 	{
 		CHK_CMD;
-
-		Handle h = Json::decode_atom(cmd, pos, epos);
-		if (nullptr == h) return "false";
-
-		h = as->add_atom(h);
-
-		if (nullptr == h) return "false";
+		ADD_ATOM;
 
 		ValuePtr vp = h->execute();
-		std::string txt = Json::encode_value(vp);
-
-		return txt;
+		return Json::encode_value(vp);
 	}
 
 	// -----------------------------------------------
