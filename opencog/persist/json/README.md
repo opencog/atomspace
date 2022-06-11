@@ -125,7 +125,6 @@ AtomSpace.execute({ "type": "PlusLink",
 
 
 ### Unimplemented Commands
-* Get Incoming set by Type -- this save a lot of I/O for many cases.
 * Set multiple values at once -- this would be a nice-to-have utility.
 * Extract atoms
 * Wrapper for cog-evaluate!
