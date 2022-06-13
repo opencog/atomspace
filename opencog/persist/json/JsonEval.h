@@ -30,8 +30,8 @@
 /**
  * The JsonEval class implements a very simple API for Javascript
  * evaluation.  It supports just enough commands to allow AtomSpaces
- * and portions there-of to be easily transported across the network.
- * It is used by the CogServer, and the atomsspace-js network backend.
+ * and portions thereof to be easily transported across the network.
+ * It is used by the CogServer, and the atomspace-js network backend.
  */
 
 namespace opencog {
