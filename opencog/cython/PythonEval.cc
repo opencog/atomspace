@@ -85,6 +85,8 @@ PythonEval::PythonEval()
         throw RuntimeException(TRACE_INFO,
             "Can't create more than one PythonEval singleton instance!");
     }
+
+    _eval_done = true;
     _paren_count = 0;
     // Initialize Python objects and imports.
     //
