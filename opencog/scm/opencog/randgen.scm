@@ -10,6 +10,12 @@
 (use-modules (opencog as-config))
 (load-extension (string-append opencog-ext-path-exec "librandgen") "opencog_randgen_init")
 
+(export
+	cog-randgen-set-seed!
+	cog-randgen-randint
+	cog-randgen-randfloat
+)
+
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-randgen-set-seed! 'documentation
 "
