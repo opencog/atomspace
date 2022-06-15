@@ -26,6 +26,7 @@
 
 #include <dlfcn.h>
 #include <unistd.h>
+#include <chrono>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/scope_exit.hpp>
@@ -44,6 +45,7 @@
 #include "opencog/atomspace_api.h"
 
 using namespace opencog;
+using namespace std::chrono_literals;
 
 #ifdef __APPLE__
   #define secure_getenv getenv
@@ -1169,6 +1171,14 @@ bool PythonEval::check_for_error()
     std::string error_string = build_python_error_message(NO_FUNCTION_NAME);
     _input_line = "";
     PyErr_Clear();
+
+    // Let the shell know what is going on.
+    _caught_error = true;
+    _error_string = error_string;
+    _pending_input = false;
+    _result = "";
+    _eval_done = true;
+    _wait_done.notify_all();
     throw RuntimeException(TRACE_INFO, "%s", error_string.c_str());
 }
 
@@ -1405,16 +1415,18 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
 std::string PythonEval::poll_result()
 {
-    if (not _eval_done)
+    // We don't have a real need to lock anything here; we're just
+    // using this as a hack, so that the condition variable will
+    // wake us up. The goal here is to block when there's no output
+    // to be reported. We're doing this in a spinloop, because sometimes
+    // ... I dunno, the cogserver hangs ... here ... !? Something's
+    // buggy.
+    std::unique_lock<std::mutex> lck(_poll_mtx);
+    while (not _eval_done)
     {
-        // We don't have a real need to lock anything here; we're just
-        // using this as a hack, so that the condition variable will
-        // wake us up. The goal here is to block when there's no output
-        // to be reported.
-        auto evdone = [&](void) { return _eval_done; };
-        std::unique_lock<std::mutex> lck(_poll_mtx);
-        _wait_done.wait(lck, evdone);
+        _wait_done.wait_for(lck, 100ms);
     }
+    lck.unlock();
 
     std::string r = _capture_stdout + _result;
 
