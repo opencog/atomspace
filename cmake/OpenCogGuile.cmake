@@ -109,13 +109,11 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_PATH)
     IF ("${MODULE_NAME}.scm" STREQUAL "${FILE_NAME}")
         SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_FILE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_FILE_DIR_PATH}"
-            PARENT_SCOPE
-        )
+            PARENT_SCOPE)
     ELSE()
         SET(FILE_BUILD_PATH "${GUILE_BIN_DIR}/${MODULE_DIR_PATH}")
         SET(FILE_INSTALL_PATH "${GUILE_SITE_DIR}/${MODULE_DIR_PATH}"
-            PARENT_SCOPE
-        )
+            PARENT_SCOPE)
     ENDIF()
 
     # Copy files into the build directory, mirroring the install
@@ -278,6 +276,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.11.0")
                  MESSAGE(\"-- Touch: ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm\")
                  MESSAGE(\"-- Newer: ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}\")
                  FILE(TOUCH ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm)
+                 FILE(TOUCH ${GUILE_BIN_DIR}/${MODULE_NAME}.go)
               ENDIF()
             ")
 
