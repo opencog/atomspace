@@ -139,9 +139,9 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     # to handle the most common case. The guesswork fails, if the
     # modules is more than two deep e.g `(opencog foo bar)` XXX FIXME
     GET_FILENAME_COMPONENT(DIR_PATH ${MODULE_NAME} DIRECTORY)
-    SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/${DIR_PATH})
+    SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/${DIR_PATH} PARENT_SCOPE)
     IF ((${DIR_PATH}x STREQUAL x) AND (NOT (${MODULE_NAME} STREQUAL opencog)))
-        SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/opencog)
+        SET(GO_INSTALL_PATH ${GUILE_CCACHE_DIR}/opencog PARENT_SCOPE)
     ENDIF()
 
     # Strip out slashes in the module name.
@@ -172,10 +172,6 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
         DEPENDS ${MODULE_FILES}
         COMMENT "Compiling ${MODULE_NAME}.scm"
         VERBATIM)
-
-    INSTALL(
-        FILES ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-        DESTINATION ${GO_INSTALL_PATH})
 
 ENDFUNCTION(COMPILE_MODULE)
 
@@ -300,6 +296,15 @@ endif()
             INSTALL (FILES ${FILE_PATH}
                      DESTINATION ${FILE_INSTALL_PATH})
         ENDFOREACH()
+
+        # Install the compiled code only after the above, so that
+        # the timestamp on the module.go file is newer than the
+        # timestamp on the module.scm file.
+        IF (${SCM_COMPILE})
+            INSTALL(
+                FILES ${GUILE_BIN_DIR}/${MODULE_NAME}.go
+                DESTINATION ${GO_INSTALL_PATH})
+        ENDIF()
 
     ELSE()
         IF(NOT DEFINED SCM_FILES)
