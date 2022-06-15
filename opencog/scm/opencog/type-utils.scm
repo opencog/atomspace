@@ -30,8 +30,8 @@
   (searching).
 
   Example:
-      (cog-value-is-type? (Type 'ConceptNode) (Concept "foo"))
-      (cog-value-is-type? (Type 'PredicateNode) (Concept "foo"))
+      (cog-value-is-type? (Type 'ConceptNode) (Concept \"foo\"))
+      (cog-value-is-type? (Type 'PredicateNode) (Concept \"foo\"))
 ")
 
 (set-procedure-property! cog-type-match? 'documentation
