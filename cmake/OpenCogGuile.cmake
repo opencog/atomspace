@@ -272,9 +272,6 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.11.0")
                  MESSAGE(\"-- Touch: ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm\")
                  MESSAGE(\"-- Newer: ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_PATH}\")
                  FILE(TOUCH ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm)
-                 IF (${SCM_COMPILE})
-                     FILE(TOUCH ${GUILE_BIN_DIR}/${MODULE_NAME}.go)
-                 ENDIF ()
               ENDIF()
             ")
 
@@ -301,6 +298,9 @@ endif()
         # the timestamp on the module.go file is newer than the
         # timestamp on the module.scm file.
         IF (${SCM_COMPILE})
+            INSTALL(CODE "
+                FILE(TOUCH ${GUILE_BIN_DIR}/${MODULE_NAME}.go)
+            ")
             INSTALL(
                 FILES ${GUILE_BIN_DIR}/${MODULE_NAME}.go
                 DESTINATION ${GO_INSTALL_PATH})
