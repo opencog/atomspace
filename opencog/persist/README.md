@@ -27,20 +27,27 @@ Local subdirectories include:
 
 * sexpr    -- Read and write Atomese s-expression as UTF-8 strings.
               Includes utilities to read files, and dump Atomspace
-              contents to files or guile ports.
+              contents to files or guile ports. The cogserver uses
+              this for network-distributed AtomSpaces.
 
-* sql      -- Postgres, for now. Works well for most uses -- with caveats.
-              Mostly, it's slow, running at approx 3K Atoms/sec. Note
-              that multiple AtomSpaces can attach to a single Postgres
-              server, and thus they can share Atoms over the network in
-              this fashion.  Note that it is almost certanily faster (?)
-              to use `atomspace-cog` for sharing Atoms over the network.
+* sql      -- Postgres, for now. Works OK for most uses -- with caveats.
+              Mostly, it's slow, running 3x slower than the RocksDB
+              backend. It also fails to support some newer AtomSpace
+              features. It really needs to rewritten from scratch.
+              The best rewrite would start with the RocksDB backend,
+              and port it to Postgres.
+
+* sql      -- The only "good thing" about the Postgres backend is that
+              multiple networked machines can attach to a single Postgres
+              server, and thus they can share Atoms via Postgres. So,
+              simple distributed operation.
 
 * tlb      -- Implements a table that issues a unique integer ID for an
               Atom. Useful, if you think your code needs to substitute
               integer ID's for Atoms. Note that doing this consumes both
               RAM, to store the table, and CPU, to perform lookup. So it
-              is probably not a good idea, in general.
+              is probably not a good idea, in general. But if you really
+              really need this, well, here it is.
 
 
 Semantics
@@ -52,6 +59,9 @@ possibilities all have different performance implications, as well as
 usability implications. These are discussed in the `README.md` file for
 the SQL implementation, and semantics are explicitly tested in the SQL
 unit tests.
+
+Right now, you are provided with mechanism, not policy. You have the
+tools, and you can implement whatever policy you want.
 
 
 Future directions:
