@@ -71,7 +71,8 @@ public:
 	///    cog-set-values!
 	///    cog-set-tv!
 	///    cog-value
-   ///
+	///    ping
+	///
 	/// They MUST appear only once in the string, at the very beginning,
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.

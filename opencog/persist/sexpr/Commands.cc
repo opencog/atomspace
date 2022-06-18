@@ -231,6 +231,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+		pos++; // step past close-paren
 		Type t = Sexpr::decode_type(cmd, pos);
 
 		as = get_opt_as(cmd, pos, as);
