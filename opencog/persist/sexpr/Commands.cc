@@ -100,7 +100,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
 	static const size_t value = std::hash<std::string>{}("cog-value");
 	static const size_t dfine = std::hash<std::string>{}("define");
-	static const size_t ping = std::hash<std::string>{}("ping");
+	static const size_t ping = std::hash<std::string>{}("ping)");
 
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
