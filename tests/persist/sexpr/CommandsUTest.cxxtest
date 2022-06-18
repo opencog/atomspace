@@ -74,7 +74,7 @@ void CommandsUTest::test_node()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	as->add_node(CONCEPT_NODE, "foo");
 	out = com.interpret_command(as.get(), in);
@@ -100,7 +100,7 @@ void CommandsUTest::test_node_quoted()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->add_node(CONCEPT_NODE, R"("f""o"""o"!!!"")");
 	printf("Added atom %s\n", h->to_short_string().c_str());
@@ -133,7 +133,7 @@ void CommandsUTest::test_link()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	as->add_link(LIST_LINK, ca, cb);
 
@@ -158,7 +158,7 @@ void CommandsUTest::test_set_tv()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(1, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
@@ -191,7 +191,7 @@ void CommandsUTest::test_set_value()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
@@ -222,7 +222,7 @@ void CommandsUTest::test_set_value_quoted()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(2, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
@@ -327,7 +327,7 @@ void CommandsUTest::test_set_values()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(5, as->get_size());
-	TS_ASSERT(0 == out.compare("()\n"));
+	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
@@ -399,7 +399,7 @@ void CommandsUTest::test_extract()
 	Commands com;
 	std::string out = com.interpret_command(as.get(), in);
 	printf("Got %s\n", out.c_str());
-	TS_ASSERT(0 == out.compare("#f\n"));
+	TS_ASSERT(0 == out.compare("#f"));
 
 	Handle ax = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(a == ax);
@@ -408,7 +408,7 @@ void CommandsUTest::test_extract()
 
 	out = com.interpret_command(as.get(), in);
 	printf("Got %s\n", out.c_str());
-	TS_ASSERT(0 == out.compare("#t\n"));
+	TS_ASSERT(0 == out.compare("#t"));
 
 	ax = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr == ax);
