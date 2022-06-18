@@ -53,6 +53,11 @@ void SexprEval::eval_expr(const std::string &expr)
 		std::lock_guard<std::mutex> lock(_mtx);
 		_answer = _interpreter.interpret_command(
 			(AtomSpace*) _atomspace.get(), expr);
+
+		// CogStorageNode expects all responses to be terminated
+		// by exactly one newline char. It is the end-of-message
+		// marker.
+		_answer += "\n";
 	}
 	catch (const StandardException& ex)
 	{

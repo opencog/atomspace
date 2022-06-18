@@ -126,7 +126,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// (cog-atomspace)
 	if (space == act)
 	{
-		if (not top_space) return "()\n";
+		if (not top_space) return "()";
 		return top_space->to_string("");
 	}
 
@@ -135,7 +135,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 	if (clear == act)
 	{
 		as->clear();
-		return "#t\n";
+		return "#t";
 	}
 
 	// -----------------------------------------------
@@ -169,7 +169,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		Type qt = query->get_type();
 		if (not nameserver().isA(qt, PATTERN_LINK) and
 		    not nameserver().isA(qt, JOIN_LINK))
-			return "#f\n";
+			return "#f";
 
 		rslt = query->execute();
 		as->set_value(query, key, rslt);
@@ -183,9 +183,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
-		if (nullptr == h) return "#t\n";
-		if (as->extract_atom(h, false)) return "#t\n";
-		return "#f\n";
+		if (nullptr == h) return "#t";
+		if (as->extract_atom(h, false)) return "#t";
+		return "#f";
 	}
 
 	// -----------------------------------------------
@@ -194,9 +194,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 	{
 		pos = epos + 1;
 		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
-		if (nullptr == h) return "#t\n";
-		if (as->extract_atom(h, true)) return "#t\n";
-		return "#f\n";
+		if (nullptr == h) return "#t";
+		if (as->extract_atom(h, true)) return "#t";
+		return "#f";
 	}
 
 	// -----------------------------------------------
@@ -241,7 +241,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		for (const Handle& hi : h->getIncomingSetByType(t))
 			alist += Sexpr::encode_atom(hi);
 
-		alist += ")\n";
+		alist += ")";
 		return alist;
 	}
 
@@ -257,7 +257,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		for (const Handle& hi : h->getIncomingSet())
 			alist += Sexpr::encode_atom(hi);
 
-		alist += ")\n";
+		alist += ")";
 		return alist;
 	}
 
@@ -276,7 +276,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			alist += "(" + Sexpr::encode_atom(key) + " . ";
 			alist += Sexpr::encode_value(h->getValue(key)) + ")";
 		}
-		alist += ")\n";
+		alist += ")";
 		return alist;
 	}
 
@@ -316,7 +316,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 			as = get_opt_as(cmd, pos, as);
 			h = as->get_link(t, std::move(outgoing));
 		}
-		if (nullptr == h) return "()\n";
+		if (nullptr == h) return "()";
 		return Sexpr::encode_atom(h, _multi_space);
 	}
 
@@ -335,7 +335,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		if (vp)
 			vp = Sexpr::add_atoms(as, vp);
 		as->set_value(atom, key, vp);
-		return "()\n";
+		return "()";
 	}
 
 	// -----------------------------------------------
@@ -355,7 +355,7 @@ std::string Commands::interpret_command(AtomSpace* as,
 		}
 		Sexpr::decode_slist(h, cmd, pos);
 
-		return "()\n";
+		return "()";
 	}
 
 	// -----------------------------------------------
@@ -371,9 +371,9 @@ std::string Commands::interpret_command(AtomSpace* as,
 		as = get_opt_as(cmd, pos, as);
 
 		Handle ha = as->add_atom(h);
-		if (nullptr == ha) return "()\n"; // read-only atomspace.
+		if (nullptr == ha) return "()"; // read-only atomspace.
 		as->set_truthvalue(ha, TruthValueCast(tv));
-		return "()\n";
+		return "()";
 	}
 
 	// -----------------------------------------------
@@ -413,14 +413,14 @@ std::string Commands::interpret_command(AtomSpace* as,
 		// Hacky...
 		// _space_map.insert({sym, top_space});
 
-		return "()\n";
+		return "()";
 	}
 
 	// -----------------------------------------------
 	// (ping) -- network ping
 	if (ping == act)
 	{
-		return "()\n";
+		return "()";
 	}
 
 	// -----------------------------------------------
