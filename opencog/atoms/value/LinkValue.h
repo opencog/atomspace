@@ -73,6 +73,8 @@ public:
 typedef std::shared_ptr<LinkValue> LinkValuePtr;
 static inline LinkValuePtr LinkValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<LinkValue>(a); }
+static inline const ValuePtr ValueCast(const LinkValuePtr& lv)
+	{ return std::shared_ptr<Value>(lv, (Value*) lv.get()); }
 
 template<typename ... Type>
 static inline std::shared_ptr<LinkValue> createLinkValue(Type&&... args) {
