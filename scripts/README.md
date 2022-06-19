@@ -10,11 +10,11 @@ How to use Valgrind suppressions
 Using valgrind with opencog can be tricky, because many spurious messages
 are created.  These can be suppressed with suppression files, like so:
 ```
-valgrind --suppressions=../lib/valgrind.guile.suppressions      \
-         --suppressions=../lib/valgrind.python.suppressions     \
-         --suppressions=../lib/valgrind.boost.suppressions      \
-         --suppressions=../lib/valgrind.logger.suppressions     \
-         --suppressions=../lib/valgrind.link-grammar.suppressions  \
+valgrind --suppressions=../scripts/valgrind.guile.suppressions      \
+         --suppressions=../scripts/valgrind.python.suppressions     \
+         --suppressions=../scripts/valgrind.boost.suppressions      \
+         --suppressions=../scripts/valgrind.logger.suppressions     \
+         --suppressions=../scripts/valgrind.link-grammar.suppressions  \
     <program_to_debug>
 ```
 where `<program_to_debug>` is probably `opencog/server/cogserver`
