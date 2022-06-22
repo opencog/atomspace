@@ -298,12 +298,13 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
 {
 	Handle h = verify_handle(satom, "cog-new-atom");
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-atom");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-new-atom");
 
 	try
 	{
-		return handle_to_scm(atomspace->add_atom(h));
+		return handle_to_scm(asp->add_atom(h));
 	}
 	catch (const std::exception& ex)
 	{
@@ -322,12 +323,13 @@ SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 {
 	Handle h = verify_handle(satom, "cog-atom");
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-atom");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atom");
 
 	try
 	{
-		return handle_to_scm(atomspace->get_atom(h));
+		return handle_to_scm(asp->get_atom(h));
 	}
 	catch (const std::exception& ex)
 	{
@@ -384,20 +386,21 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		name = verify_string (sname, "cog-new-node", 2,
 			"string name for the node");
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-new-node");
 
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
 		// This is a try-catch block, in case the AtomSpace is read-only.
-		Handle h(atomspace->add_node(t, std::move(name)));
+		Handle h(asp->add_node(t, std::move(name)));
 
 		if (nullptr == h) return handle_to_scm(h);
 
 		// Look for "stv" and so on.
 		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-		if (tv) h = atomspace->set_truthvalue(h, tv);
+		if (tv) h = asp->set_truthvalue(h, tv);
 
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
@@ -410,7 +413,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 			if (scm_is_pair(slist) and
 			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
 			{
-				set_values(h, atomspace, SCM_CADR(slist));
+				set_values(h, asp, SCM_CADR(slist));
 			}
 			kv_pairs = SCM_CDR(kv_pairs);
 		}
@@ -438,16 +441,17 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	std::string name = verify_string (sname, "cog-node", 2,
 									"string name for the node");
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	Handle h(atomspace->get_node(t, std::string(name)));
+	Handle h(asp->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h = atomspace->set_truthvalue(h, tv);
+	if (tv) h = asp->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -519,7 +523,7 @@ Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
 {
 	Type t = verify_type(stype, "cog-new-ast", 1);
-	AtomSpace* atomspace = ss_get_env_as("cog-new-ast");
+	const AtomSpacePtr& atomspace = ss_get_env_as("cog-new-ast");
 
 	// Try-catch, for two reasons:
 	// 1) Invalid syntax of the AST.
@@ -637,7 +641,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
-	AtomSpace* atomspace = ss_get_env_as("cog-new-link");
+	const AtomSpacePtr& atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
@@ -689,7 +693,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
-	AtomSpace* atomspace = ss_get_env_as("cog-link");
+	const AtomSpacePtr& atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
@@ -718,12 +722,13 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 	// The extract will fail/log warning if the incoming set isn't null.
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract!");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-extract!");
 
 	// AtomSpace::extract_atom() returns true if atom was extracted,
 	// else returns false
-	bool rc = atomspace->extract_atom(h, false);
+	bool rc = asp->extract_atom(h, false);
 
 	// Clobber the handle, too.
 	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
@@ -744,10 +749,11 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 {
 	Handle h = verify_handle(satom, "cog-extract-recursive!");
 
-	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive!");
+	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-extract-recursive!");
 
-	bool rc = atomspace->extract_atom(h, true);
+	bool rc = asp->extract_atom(h, true);
 
 	// Clobber the handle, too.
 	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;

@@ -82,7 +82,15 @@ SCM SchemeSmob::ss_as_p (SCM s)
 
 const AtomSpacePtr& SchemeSmob::ss_to_atomspace(SCM sas)
 {
-	return AtomSpaceCast(scm_to_protom(sas));
+	static AtomSpacePtr nullasp;
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sas))
+		return nullasp;
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
+	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
+		return nullasp;
+
+	return *(SCM_SMOB_AS_PTR_LOC(sas));
 }
 
 /* ============================================================== */
@@ -293,17 +301,18 @@ const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
  * Return the atomspace if found, else return null.
  * Throw errors if the list is not stictly just key-value pairs.
  */
-AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
+const AtomSpacePtr& SchemeSmob::get_as_from_list(SCM slist)
 {
 	while (scm_is_pair(slist))
 	{
 		SCM sval = SCM_CAR(slist);
 		const AtomSpacePtr& asp = ss_to_atomspace(sval);
-		if (asp) return asp.get();
+		if (asp) return asp;
 		slist = SCM_CDR(slist);
 	}
 
-	return NULL;
+	static AtomSpacePtr nullasp;
+	return nullasp;
 }
 
 /* ===================== END OF FILE ============================ */

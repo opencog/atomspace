@@ -190,8 +190,8 @@ private:
 	static std::string protom_to_server_string(SCM);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
-	static AtomSpace* get_as_from_list(SCM);
-	static Handle set_values(const Handle&, AtomSpace*, SCM);
+	static const AtomSpacePtr& get_as_from_list(SCM);
+	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
@@ -247,6 +247,7 @@ public:
 // to 24, then this macro has to be changed to SCM_SMOB_OBJECT_1_LOC
 // and if it ever gets larger than 24, then we are SOL.
 #define SCM_SMOB_VALUE_PTR_LOC(x) ((ValuePtr*) SCM_SMOB_OBJECT_2_LOC(x))
+#define SCM_SMOB_AS_PTR_LOC(x) ((AtomSpacePtr*) SCM_SMOB_OBJECT_2_LOC(x))
 
 /** @}*/
 } // namespace opencog
