@@ -569,7 +569,7 @@ void MultiAtomSpace::test_as_of_atom_scm(void)
 	std::string rs = evaluator->eval("(load-from-path \"tests/scm/as-of-atom.scm\")");
 	logger().debug() << "rs = " << rs;
 	Handle A = evaluator->eval_h("A");
-	AtomSpace* A_as = evaluator->eval_as("A-as");
+	AtomSpacePtr A_as = evaluator->eval_as("A-as");
 
 	TS_ASSERT_DIFFERS(A, Handle::UNDEFINED);
 	TS_ASSERT_DIFFERS(A_as, nullptr);
