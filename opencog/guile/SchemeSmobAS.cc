@@ -90,7 +90,11 @@ const AtomSpacePtr& SchemeSmob::ss_to_atomspace(SCM sas)
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
 		return nullasp;
 
-	return *(SCM_SMOB_AS_PTR_LOC(sas));
+	const AtomSpacePtr& asp = *(SCM_SMOB_AS_PTR_LOC(sas));
+	if (ATOM_SPACE != asp->get_type())
+		return nullasp;
+
+	return asp;
 }
 
 /* ============================================================== */
