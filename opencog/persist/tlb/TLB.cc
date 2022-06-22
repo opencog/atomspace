@@ -221,6 +221,7 @@ void TLB::purgeAtom(UUID uuid)
     auto pr = _uuid_map.find(uuid);
     if (_uuid_map.end() == pr) return;
 
+    Handle h = pr->second;
     _uuid_map.erase(uuid);
-    _handle_map.erase(pr->second);
+    _handle_map.erase(h);
 }
