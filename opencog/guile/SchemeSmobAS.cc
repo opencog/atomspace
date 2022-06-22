@@ -19,9 +19,9 @@ using namespace opencog;
 /**
  * Create SCM object wrapping the atomspace.
  */
-SCM SchemeSmob::make_as(AtomSpace *as)
+SCM SchemeSmob::make_as(const AtomSpacePtr& asp)
 {
-	return protom_to_scm(as->shared_from_this());
+	return protom_to_scm(asp);
 }
 
 /* ============================================================== */
@@ -80,24 +80,20 @@ SCM SchemeSmob::ss_as_p (SCM s)
 /* ============================================================== */
 /* Cast SCM to atomspace */
 
-AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
+const AtomSpacePtr& SchemeSmob::ss_to_atomspace(SCM sas)
 {
-	ValuePtr vp(scm_to_protom(sas));
-	if (nullptr == vp or ATOM_SPACE != vp->get_type())
-		return nullptr;
-
-	return (AtomSpace*) vp.get();
+	return AtomSpaceCast(scm_to_protom(sas));
 }
 
 /* ============================================================== */
 
 AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	if (nullptr == as)
 		scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
 
-	return as;
+	return asp.get();
 }
 
 /* ============================================================== */
@@ -106,10 +102,10 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_as_uuid(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-uuid");
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-uuid");
 
-	UUID uuid = as->get_uuid();
+	UUID uuid = asp->get_uuid();
 	scm_remember_upto_here_1(sas);
 
 	return scm_from_ulong(uuid);
@@ -121,10 +117,10 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
  */
 SCM SchemeSmob::ss_as_env(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-env");
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-env");
 
-	const HandleSeq& oset = as->getOutgoingSet();
+	const HandleSeq& oset = asp->getOutgoingSet();
 	SCM list = SCM_EOL;
 	for (size_t i = oset.size(); i > 0; i--)
 	{
@@ -142,11 +138,11 @@ SCM SchemeSmob::ss_as_env(SCM sas)
  */
 SCM SchemeSmob::ss_as_readonly_p(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	scm_remember_upto_here_1(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-readonly?");
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-readonly?");
 
-	if (as->get_read_only()) return SCM_BOOL_T;
+	if (asp->get_read_only()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
@@ -156,9 +152,9 @@ SCM SchemeSmob::ss_as_readonly_p(SCM sas)
  */
 SCM SchemeSmob::ss_as_cow_p(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	scm_remember_upto_here_1(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-cow?");
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-cow?");
 
 	if (as->get_copy_on_write()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
@@ -172,33 +168,33 @@ SCM SchemeSmob::ss_as_cow_p(SCM sas)
  */
 SCM SchemeSmob::ss_as_mark_readonly(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	scm_remember_upto_here_1(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-ro!");
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-ro!");
 
-	as->set_read_only();
+	asp->set_read_only();
 	return SCM_BOOL_T;
 }
 
 SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	scm_remember_upto_here_1(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-rw!");
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-rw!");
 
-	as->set_read_write();
+	asp->set_read_write();
 	return SCM_BOOL_T;
 }
 
 SCM SchemeSmob::ss_as_mark_cow(SCM scow, SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
 	scm_remember_upto_here_1(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-cow!");
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-cow!");
 
 	bool cow = scm_to_bool(scow);
-	if (cow) as->set_copy_on_write();
-	else as->clear_copy_on_write();
+	if (cow) asp->set_copy_on_write();
+	else asp->clear_copy_on_write();
 	return SCM_BOOL_T;
 }
 
@@ -208,10 +204,10 @@ SCM SchemeSmob::ss_as_mark_cow(SCM scow, SCM sas)
  */
 SCM SchemeSmob::ss_as_clear(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as) as = ss_get_env_as("cog-atomspace-clear");
+	const AtomSpacePtr& asp = ss_to_atomspace(sas);
+	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-clear");
 
-	as->clear();
+	asp->clear();
 
 	scm_remember_upto_here_1(sas);
 	return SCM_BOOL_T;
@@ -227,14 +223,14 @@ SCM SchemeSmob::ss_as(SCM slist)
 	// If no argument, then return the current AtomSpace.
 	if (scm_is_null(slist))
 	{
-		AtomSpace* as = ss_get_env_as("cog-atomspace");
-		return as ? make_as(as) : SCM_EOL;
+		const AtomSpacePtr& asp = ss_get_env_as("cog-atomspace");
+		return asp ? make_as(asp) : SCM_EOL;
 	}
 
 	SCM satom = scm_car(slist);
 	Handle h(verify_handle(satom, "cog-atomspace"));
 	AtomSpace* as = h->getAtomSpace();
-	return as ? make_as(as) : SCM_EOL;
+	return as ? make_as(as->make_shared_from_this()) : SCM_EOL;
 }
 
 /* ============================================================== */
@@ -249,7 +245,7 @@ SCM SchemeSmob::atomspace_fluid;
  */
 SCM SchemeSmob::ss_set_as (SCM new_as)
 {
-	AtomSpace* nas = ss_to_atomspace(new_as);
+	const AtomSpacePtr& nas = ss_to_atomspace(new_as);
 	if (!nas)
 		return SCM_BOOL_F;
 
@@ -267,22 +263,23 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
  * thread, so that different threads can use different atomspaces,
  * all at the same time.
  */
-void SchemeSmob::ss_set_env_as(AtomSpace *nas)
+void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 {
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }
 
-AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
+const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
 {
 	// There are weird test-case scenarios where the fluid is not
 	// initialized. Those will crash-n-burn without this test.
-	if (0x0 == atomspace_fluid) return nullptr;
+	static AtomSpacePtr nullasp;
+	if (0x0 == atomspace_fluid) return nullasp;
 
 	SCM ref = scm_fluid_ref(atomspace_fluid);
-	AtomSpace* as = ss_to_atomspace(ref);
+	const AtomSpacePtr& asp = ss_to_atomspace(ref);
 	// if (nullptr == as)
 	//	scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
-	return as;
+	return asp;
 }
 
 /* ============================================================== */
@@ -297,8 +294,8 @@ AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
 	while (scm_is_pair(slist))
 	{
 		SCM sval = SCM_CAR(slist);
-		AtomSpace* as = ss_to_atomspace(sval);
-		if (as) return as;
+		const AtomSpacePtr& asp = ss_to_atomspace(sval);
+		if (asp) return asp.get();
 		slist = SCM_CDR(slist);
 	}
 

@@ -58,28 +58,32 @@ FunctionWrap::FunctionWrap(ValuePtr (p)(AtomSpace*, const Handle&),
 Handle FunctionWrap::as_wrapper_h_h(Handle h)
 {
 	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
+	AtomSpace* as = asp.get();
 	return _func_h_ah(as, h);
 }
 
 Handle FunctionWrap::as_wrapper_h_hz(Handle h, size_t sz)
 {
 	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
+	AtomSpace* as = asp.get();
 	return _func_h_ahz(as, h, sz);
 }
 
 TruthValuePtr FunctionWrap::as_wrapper_p_h(Handle h)
 {
 	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
+	AtomSpace* as = asp.get();
 	return _pred_ah(as, h);
 }
 
 ValuePtr FunctionWrap::as_wrapper_v_h(Handle h)
 {
 	// XXX we should also allow opt-args to be a list of handles
-	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
+	AtomSpace* as = asp.get();
 	return _proto_ah(as, h);
 }
 
