@@ -90,8 +90,8 @@ void SQLPersistSCM::do_open(const std::string& uri)
              "sql-open: Error: Already connected to a database!");
 
     // Unconditionally use the current atomspace, until the next close.
-    AtomSpace *as = SchemeSmob::ss_get_env_as("sql-open");
-    if (nullptr != as) _as = as;
+    const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("sql-open");
+    if (nullptr != asp) _as = asp.get();
 
     if (nullptr == _as)
         throw RuntimeException(TRACE_INFO,

@@ -130,7 +130,7 @@ class SchemeEval : public GenericEval
 		// Apply function to arguments, returning Handle or TV
 		Handle _hargs;
 		ValuePtr _retval;
-		AtomSpace* _retas;
+		AtomSpacePtr _retas;
 		SCM do_apply_scm(const std::string& func, const Handle& varargs);
 		static void * c_wrap_apply_v(void *);
 
@@ -149,7 +149,7 @@ class SchemeEval : public GenericEval
 		static std::string prt(SCM);
 
 		static void * c_wrap_set_atomspace(void *);
-		AtomSpace* _atomspace;
+		AtomSpacePtr _atomspace;
 		int _gc_ctr;
 		bool _in_eval;
 
@@ -166,8 +166,8 @@ class SchemeEval : public GenericEval
 		~SchemeEval();
 
 		// Return per-thread, per-atomspace singleton
-		static SchemeEval* get_evaluator(AtomSpace* = NULL);
-		static SchemeEval* get_evaluator(AtomSpacePtr&);
+		static SchemeEval* get_evaluator(AtomSpace*);
+		static SchemeEval* get_evaluator(const AtomSpacePtr&);
 
 		// The async-output interface.
 		void begin_eval(void);
@@ -194,7 +194,7 @@ class SchemeEval : public GenericEval
 		TruthValuePtr eval_tv(const std::stringstream& ss) { return eval_tv(ss.str()); }
 
 		// Evaluate expression, returning AtomSpace.
-		AtomSpace* eval_as(const std::string&);
+		AtomSpacePtr eval_as(const std::string&);
 
 		// Apply expression to args, returning Handle or TV
 		virtual ValuePtr apply_v(const std::string& func, Handle varargs);

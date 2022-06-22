@@ -173,13 +173,13 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 	gearman_function_t worker_fn = gearman_function_create(worker_function);
 
 	// Get the atomspace for this thread.
-	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("start-work-handler");
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("start-work-handler");
 
 	rc = gearman_worker_define_function(worker,
 	                                    gearman_literal_param("make_call"),
 	                                    worker_fn,
 	                                    0,
-	                                    atomspace);
+	                                    asp.get());
 
 	if (gearman_failed(rc))
 	{

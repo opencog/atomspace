@@ -177,8 +177,8 @@ private:
 	static SCM ss_as_readonly_p(SCM);
 	static SCM ss_as_mark_cow(SCM, SCM);
 	static SCM ss_as_cow_p(SCM);
-	static SCM make_as(AtomSpace *);
-	static AtomSpace* ss_to_atomspace(SCM);
+	static SCM make_as(const AtomSpacePtr&);
+	static const AtomSpacePtr& ss_to_atomspace(SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
@@ -190,8 +190,8 @@ private:
 	static std::string protom_to_server_string(SCM);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
-	static AtomSpace* get_as_from_list(SCM);
-	static Handle set_values(const Handle&, AtomSpace*, SCM);
+	static const AtomSpacePtr& get_as_from_list(SCM);
+	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
@@ -231,7 +231,7 @@ private:
 	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;
-	static void ss_set_env_as(AtomSpace *);
+	static void ss_set_env_as(const AtomSpacePtr&);
 
 	SchemeSmob();
 public:
@@ -240,13 +240,14 @@ public:
 
 	// This allows other users to get the atomspace that scheme is
 	// using.
-	static AtomSpace* ss_get_env_as(const char *);
+	static const AtomSpacePtr& ss_get_env_as(const char *);
 };
 
 // This assumes that sizeof(ValuePtr) == 16. If it ever changes
 // to 24, then this macro has to be changed to SCM_SMOB_OBJECT_1_LOC
 // and if it ever gets larger than 24, then we are SOL.
 #define SCM_SMOB_VALUE_PTR_LOC(x) ((ValuePtr*) SCM_SMOB_OBJECT_2_LOC(x))
+#define SCM_SMOB_AS_PTR_LOC(x) ((AtomSpacePtr*) SCM_SMOB_OBJECT_2_LOC(x))
 
 /** @}*/
 } // namespace opencog

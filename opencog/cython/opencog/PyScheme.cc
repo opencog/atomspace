@@ -123,9 +123,9 @@ AtomSpace* opencog::eval_scheme_as(const std::string &s)
 	do_init();
 	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
 	evaluator->clear_pending();
-	AtomSpace* as = evaluator->eval_as(s);
+	const AtomSpacePtr& asp = evaluator->eval_as(s);
 
-	if (nullptr == as)
+	if (nullptr == asp)
 		throw RuntimeException(TRACE_INFO,
 		       "Python-Scheme Wrapper: Null atomspace for '%s'", s.c_str());
 
@@ -133,7 +133,7 @@ AtomSpace* opencog::eval_scheme_as(const std::string &s)
 		throw RuntimeException(TRACE_INFO,
 		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
 
-	return as;
+	return asp.get();
 #else // HAVE_GUILE
 	return nullptr;
 #endif // HAVE_GUILE

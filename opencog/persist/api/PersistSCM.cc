@@ -189,45 +189,45 @@ bool PersistSCM::connected(Handle hsn)
 Handle PersistSCM::sn_fetch_atom(Handle h, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-atom");
-	return stnp->fetch_atom(h, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-atom");
+	return stnp->fetch_atom(h, asp.get());
 }
 
 Handle PersistSCM::sn_fetch_value(Handle h, Handle key, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-value");
-	return stnp->fetch_value(h, key, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-value");
+	return stnp->fetch_value(h, key, asp.get());
 }
 
 Handle PersistSCM::sn_fetch_incoming_set(Handle h, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return stnp->fetch_incoming_set(h, false, as);
+	return stnp->fetch_incoming_set(h, false, asp.get());
 }
 
 Handle PersistSCM::sn_fetch_incoming_by_type(Handle h, Type t, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
-	return stnp->fetch_incoming_by_type(h, t, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
+	return stnp->fetch_incoming_by_type(h, t, asp.get());
 }
 
 Handle PersistSCM::sn_fetch_query2(Handle query, Handle key, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, Handle::UNDEFINED, false, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
+	return stnp->fetch_query(query, key, Handle::UNDEFINED, false, asp.get());
 }
 
 Handle PersistSCM::sn_fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return stnp->fetch_query(query, key, meta, fresh, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
+	return stnp->fetch_query(query, key, meta, fresh, asp.get());
 }
 
 /**
@@ -250,22 +250,22 @@ void PersistSCM::sn_store_value(Handle h, Handle key, Handle hsn)
 void PersistSCM::sn_load_type(Type t, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	stnp->fetch_all_atoms_of_type(t, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atoms-of-type");
+	stnp->fetch_all_atoms_of_type(t, asp.get());
 }
 
 void PersistSCM::sn_load_atomspace(Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atomspace");
-	stnp->load_atomspace(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
+	stnp->load_atomspace(asp.get());
 }
 
 void PersistSCM::sn_store_atomspace(Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("store-atomspace");
-	stnp->store_atomspace(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
+	stnp->store_atomspace(asp.get());
 }
 
 HandleSeq PersistSCM::sn_load_frames(Handle hsn)
@@ -283,22 +283,22 @@ void PersistSCM::sn_store_frames(Handle hsn, Handle has)
 bool PersistSCM::sn_delete(Handle h, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete!");
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete!");
 	return stnp->remove_atom(as, h, false);
 }
 
 bool PersistSCM::sn_delete_recursive(Handle h, Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
 	return stnp->remove_atom(as, h, true);
 }
 
 void PersistSCM::sn_barrier(Handle hsn)
 {
 	GET_STNP;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("barrier");
-	stnp->barrier(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("barrier");
+	stnp->barrier(asp.get());
 }
 
 std::string PersistSCM::sn_monitor(Handle hsn)
@@ -316,45 +316,45 @@ std::string PersistSCM::sn_monitor(Handle hsn)
 Handle PersistSCM::dflt_fetch_atom(Handle h)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-atom");
-	return _sn->fetch_atom(h, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-atom");
+	return _sn->fetch_atom(h, asp.get());
 }
 
 Handle PersistSCM::dflt_fetch_value(Handle h, Handle key)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-value");
-	return _sn->fetch_value(h, key, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-value");
+	return _sn->fetch_value(h, key, asp.get());
 }
 
 Handle PersistSCM::dflt_fetch_incoming_set(Handle h)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-set");
 	// The "false" flag here means that the fetch is NOT recursive.
-	return _sn->fetch_incoming_set(h, false, as);
+	return _sn->fetch_incoming_set(h, false, asp.get());
 }
 
 Handle PersistSCM::dflt_fetch_incoming_by_type(Handle h, Type t)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
-	return _sn->fetch_incoming_by_type(h, t, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-incoming-by-type");
+	return _sn->fetch_incoming_by_type(h, t, asp.get());
 }
 
 Handle PersistSCM::dflt_fetch_query2(Handle query, Handle key)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, asp.get());
 }
 
 Handle PersistSCM::dflt_fetch_query4(Handle query, Handle key,
                                 Handle meta, bool fresh)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("fetch-query");
-	return _sn->fetch_query(query, key, meta, fresh, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("fetch-query");
+	return _sn->fetch_query(query, key, meta, fresh, asp.get());
 }
 
 /**
@@ -377,22 +377,22 @@ void PersistSCM::dflt_store_value(Handle h, Handle key)
 void PersistSCM::dflt_load_type(Type t)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	_sn->fetch_all_atoms_of_type(t, as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atoms-of-type");
+	_sn->fetch_all_atoms_of_type(t, asp.get());
 }
 
 void PersistSCM::dflt_load_atomspace(void)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("load-atomspace");
-	_sn->load_atomspace(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
+	_sn->load_atomspace(asp.get());
 }
 
 void PersistSCM::dflt_store_atomspace(void)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("store-atomspace");
-	_sn->store_atomspace(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
+	_sn->store_atomspace(asp.get());
 }
 
 HandleSeq PersistSCM::dflt_load_frames(void)
@@ -410,22 +410,22 @@ void PersistSCM::dflt_store_frames(Handle has)
 bool PersistSCM::dflt_delete(Handle h)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete!");
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete!");
 	return _sn->remove_atom(as, h, false);
 }
 
 bool PersistSCM::dflt_delete_recursive(Handle h)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("cog-delete-recursive!");
 	return _sn->remove_atom(as, h, true);
 }
 
 void PersistSCM::dflt_barrier(void)
 {
 	CHECK;
-	AtomSpace* as = SchemeSmob::ss_get_env_as("barrier");
-	_sn->barrier(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("barrier");
+	_sn->barrier(asp.get());
 }
 
 std::string PersistSCM::dflt_monitor(void)

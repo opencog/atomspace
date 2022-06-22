@@ -81,8 +81,8 @@ void PersistFileSCM::init(void)
 
 void PersistFileSCM::load_file(const std::string& path)
 {
-	AtomSpace *as = SchemeSmob::ss_get_env_as("load-file");
-	opencog::load_file(path, *as);
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("load-file");
+	opencog::load_file(path, *as.get());
 }
 
 void opencog_persist_file_init(void)

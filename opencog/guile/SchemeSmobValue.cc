@@ -251,15 +251,15 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		// XXX FIXME... at this time, nodes have a single name.
 		SCM sname = SCM_CAR(svalue_list);
 		std::string name = verify_string(sname, "cog-new-value", 2);
-		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
-		return atomspace->add_node(t, std::move(name));
+		const AtomSpacePtr& asp = ss_get_env_as("cog-new-value");
+		return asp->add_node(t, std::move(name));
 	}
 
 	if (nameserver().isA(t, LINK))
 	{
 		HandleSeq oset = verify_handle_list(svalue_list, "cog-new-value", 2);
-		AtomSpace* atomspace = ss_get_env_as("cog-new-value");
-		return atomspace->add_link(t, std::move(oset));
+		const AtomSpacePtr& asp = ss_get_env_as("cog-new-value");
+		return asp->add_link(t, std::move(oset));
 	}
 
 	scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "value type");
@@ -349,10 +349,10 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 
 	// Note that pa might be a null pointer, if svalue is '() or #f
 	// In this case, the key is removed.
-	AtomSpace* as = ss_get_env_as("cog-set-value!");
+	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value!");
 	try
 	{
-		Handle newh = as->set_value(atom, key, pa);
+		Handle newh = asp->set_value(atom, key, pa);
 		if (atom == newh) return satom;
 		return handle_to_scm(newh);
 	}
@@ -363,7 +363,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 }
 
 // alist is an association-list of key-value pairs.
-Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
+Handle SchemeSmob::set_values(const Handle& h, const AtomSpacePtr& asp, SCM alist)
 {
 	Handle atom = h;
 	SCM kvpli = alist;
@@ -375,7 +375,7 @@ Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
 		{
 			Handle key(scm_to_handle(SCM_CAR(kvp)));
 			ValuePtr pa(scm_to_protom(SCM_CDR(kvp)));
-			if (key) atom = as->set_value(atom, key, pa);
+			if (key) atom = asp->set_value(atom, key, pa);
 		}
 		kvpli = SCM_CDR(kvpli);
 	}
@@ -386,7 +386,7 @@ Handle SchemeSmob::set_values(const Handle& h, AtomSpace* as, SCM alist)
 // alist is an association-list of key-value pairs.
 SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 {
-	AtomSpace* as = ss_get_env_as("cog-set-values!");
+	const AtomSpacePtr& asp = ss_get_env_as("cog-set-values!");
 
 	Handle atom(verify_handle(satom, "cog-set-values!", 1));
 	if (not scm_is_true(scm_list_p(alist)))
@@ -397,7 +397,7 @@ SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
 	// Atomspace may be read-only. Respect that.
 	try
 	{
-		atom = set_values(atom, as, alist);
+		atom = set_values(atom, asp, alist);
 	}
 	catch (const std::exception& ex)
 	{

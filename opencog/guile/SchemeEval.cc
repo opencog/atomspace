@@ -308,15 +308,20 @@ static void init_only_once(void)
 SchemeEval::SchemeEval(AtomSpace* as)
 {
 	init_only_once();
-	_atomspace = as;
+
+	// If it is coming from the pool, the as will be null.
+	if (as)
+		_atomspace = AtomSpaceCast(as->shared_from_this());
+	else
+		_atomspace = nullptr;
 
 	scm_with_guile(c_wrap_init, this);
 }
 
-SchemeEval::SchemeEval(AtomSpacePtr& as)
+SchemeEval::SchemeEval(AtomSpacePtr& asp)
 {
 	init_only_once();
-	_atomspace = (AtomSpace*) as.get();
+	_atomspace = asp;
 
 	scm_with_guile(c_wrap_init, this);
 }
@@ -620,7 +625,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	// Set the execution environment atomspace (i.e. for this thread)
 	// to the evaluator _atomspace variable.
-	AtomSpace* saved_as = nullptr;
+	AtomSpacePtr saved_as;
 	if (_atomspace)
 	{
 		saved_as = SchemeSmob::ss_get_env_as("do_eval");
@@ -828,14 +833,14 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	per_thread_init();
 
 	// Set per-thread atomspace variable in the execution environment.
-	AtomSpace* saved_as = NULL;
+	AtomSpacePtr saved_as;
 	if (_atomspace)
 	{
 		saved_as = SchemeSmob::ss_get_env_as("do_scm_eval");
 		if (saved_as != _atomspace)
 			SchemeSmob::ss_set_env_as(_atomspace);
 		else
-			saved_as = NULL;
+			saved_as = nullptr;
 	}
 
 	// If we are running from the cogserver shell, capture all output
@@ -1006,7 +1011,7 @@ ValuePtr SchemeEval::eval_v(const std::string &expr)
  * If an evaluation error occurs, an exception is thrown, and the stack
  * trace is logged to the log file.
  */
-AtomSpace* SchemeEval::eval_as(const std::string &expr)
+AtomSpacePtr SchemeEval::eval_as(const std::string &expr)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -1190,9 +1195,9 @@ static void return_to_pool(SchemeEval* ev)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
+SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
 {
-	static thread_local std::map<AtomSpace*,SchemeEval*> issued;
+	static thread_local std::map<AtomSpacePtr,SchemeEval*> issued;
 
 	// The eval_dtor runs when this thread is destroyed.
 	class eval_dtor {
@@ -1209,26 +1214,33 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 				// calling delete will lead to a crash in c_wrap_finish().
 				// It would be nice if we got called before guile did, but
 				// there is no way in TLS to control execution order...
-				evaluator->_atomspace = NULL;
+				evaluator->_atomspace = nullptr;
 				return_to_pool(evaluator);
 			}
 		}
 	};
 	static thread_local eval_dtor killer;
 
-	auto ev = issued.find(as);
+	auto ev = issued.find(asp);
 	if (ev != issued.end())
 		return ev->second;
 
 	SchemeEval* evaluator = get_from_pool();
-	evaluator->_atomspace = as;
-	issued[as] = evaluator;
+	evaluator->_atomspace = asp;
+	issued[asp] = evaluator;
 	return evaluator;
 }
 
-SchemeEval* SchemeEval::get_evaluator(AtomSpacePtr& as)
+SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
-	return get_evaluator((AtomSpace*) as.get());
+	// A null AtomSpace is passed from the cython initialization
+	// code. That code scramble to create an AtomSpace, after
+	// guile is initialized.
+	static AtomSpacePtr nullasp;
+	if (nullptr == as) return get_evaluator(nullasp);
+
+	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
+	return get_evaluator(asp);
 }
 
 /* ============================================================== */
@@ -1236,7 +1248,8 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpacePtr& as)
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {
 	AtomSpace* as = (AtomSpace*) vas;
-	SchemeSmob::ss_set_env_as(as);
+	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
+	SchemeSmob::ss_set_env_as(asp);
 	return vas;
 }
 
