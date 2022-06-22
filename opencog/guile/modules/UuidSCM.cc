@@ -81,8 +81,8 @@ void UuidSCM::init(void)
 	// atomspaces, and really, we should have nested hierarchical TLB
 	// resolvers for nested atomspaces. But for now, no one uses this so
 	// what the heck. I'm gonna punt. XXX FIXME.
-	AtomSpace* as = SchemeSmob::ss_get_env_as("uuid");
-	_tlb.set_resolver(as);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("uuid");
+	_tlb.set_resolver(asp.get());
 
 	define_scheme_primitive("cog-add-uuid",
 		&UuidSCM::add_atom, this, "uuid");

@@ -46,7 +46,7 @@ private:
     void init(void);
 
     PostgresStorageNodePtr _storage;
-    AtomSpace *_as;
+    AtomSpace* _as;
 
 public:
     SQLPersistSCM(AtomSpace*);
