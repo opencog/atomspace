@@ -312,13 +312,13 @@ SCM SchemeSmob::ss_incoming_set (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-incoming-set");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-incoming-set");
 
 	// This reverses the order of the incoming set, but so what ...
 	SCM head = SCM_EOL;
-	IncomingSet iset = h->getIncomingSet(asp);
+	IncomingSet iset = h->getIncomingSet(asp.get());
 	for (const Handle& l : iset)
 	{
 		SCM smob = handle_to_scm(l);
@@ -337,11 +337,11 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype, SCM aspace)
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
 	Type t = verify_type(stype, "cog-incoming-by-type", 2);
 
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-incoming-by-type");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-incoming-by-type");
 
-	IncomingSet iset = h->getIncomingSetByType(t, asp);
+	IncomingSet iset = h->getIncomingSetByType(t, asp.get());
 	SCM head = SCM_EOL;
 	for (const Handle& ih : iset)
 	{
@@ -359,11 +359,11 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype, SCM aspace)
 SCM SchemeSmob::ss_incoming_size (SCM satom, SCM aspace)
 {
 	Handle h = verify_handle(satom, "cog-incoming-size");
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-incoming-size");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-incoming-size");
 
-	size_t sz = h->getIncomingSetSize(asp);
+	size_t sz = h->getIncomingSetSize(asp.get());
 	return scm_from_size_t(sz);
 }
 
@@ -377,11 +377,11 @@ SCM SchemeSmob::ss_incoming_size_by_type (SCM satom, SCM stype, SCM aspace)
 	Handle h = verify_handle(satom, "cog-incoming-size-by-type");
 	Type t = verify_type(stype, "cog-incoming-size-by-type", 2);
 
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-incoming-size-by-type");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-incoming-size-by-type");
 
-	size_t sz = h->getIncomingSetSizeByType(t, asp);
+	size_t sz = h->getIncomingSetSizeByType(t, asp.get());
 	return scm_from_size_t(sz);
 }
 
@@ -397,9 +397,9 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype, SCM aspace)
 {
 	Type t = verify_type (stype, "cog-map-type");
 
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-map-type");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
 	HandleSeq hset;
@@ -534,9 +534,9 @@ SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 {
 	Type t = verify_type(stype, "cog-count-atoms");
 
-	const AtomSpacePtr& asp = ss_to_atomspace(aspace);
-	if (nullptr == asp)
-		asp = ss_get_env_as("cog-count-atoms");
+	const AtomSpacePtr& asg = ss_to_atomspace(aspace);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-count-atoms");
 
 	size_t cnt = asp->get_num_atoms_of_type(t);
 	return scm_from_size_t(cnt);

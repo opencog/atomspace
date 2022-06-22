@@ -90,7 +90,7 @@ const AtomSpacePtr& SchemeSmob::ss_to_atomspace(SCM sas)
 AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 {
 	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	if (nullptr == as)
+	if (nullptr == asp)
 		scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
 
 	return asp.get();
@@ -102,8 +102,9 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_as_uuid(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-uuid");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-uuid");
 
 	UUID uuid = asp->get_uuid();
 	scm_remember_upto_here_1(sas);
@@ -117,8 +118,9 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
  */
 SCM SchemeSmob::ss_as_env(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-env");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-env");
 
 	const HandleSeq& oset = asp->getOutgoingSet();
 	SCM list = SCM_EOL;
@@ -138,9 +140,10 @@ SCM SchemeSmob::ss_as_env(SCM sas)
  */
 SCM SchemeSmob::ss_as_readonly_p(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-readonly?");
 	scm_remember_upto_here_1(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-readonly?");
 
 	if (asp->get_read_only()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
@@ -152,11 +155,11 @@ SCM SchemeSmob::ss_as_readonly_p(SCM sas)
  */
 SCM SchemeSmob::ss_as_cow_p(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	scm_remember_upto_here_1(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-cow?");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-cow?");
 
-	if (as->get_copy_on_write()) return SCM_BOOL_T;
+	if (asp->get_copy_on_write()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
@@ -168,9 +171,9 @@ SCM SchemeSmob::ss_as_cow_p(SCM sas)
  */
 SCM SchemeSmob::ss_as_mark_readonly(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	scm_remember_upto_here_1(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-ro!");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-ro!");
 
 	asp->set_read_only();
 	return SCM_BOOL_T;
@@ -178,9 +181,9 @@ SCM SchemeSmob::ss_as_mark_readonly(SCM sas)
 
 SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	scm_remember_upto_here_1(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-rw!");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-rw!");
 
 	asp->set_read_write();
 	return SCM_BOOL_T;
@@ -188,9 +191,9 @@ SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
 
 SCM SchemeSmob::ss_as_mark_cow(SCM scow, SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	scm_remember_upto_here_1(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-cow!");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-cow!");
 
 	bool cow = scm_to_bool(scow);
 	if (cow) asp->set_copy_on_write();
@@ -204,8 +207,9 @@ SCM SchemeSmob::ss_as_mark_cow(SCM scow, SCM sas)
  */
 SCM SchemeSmob::ss_as_clear(SCM sas)
 {
-	const AtomSpacePtr& asp = ss_to_atomspace(sas);
-	if (nullptr == asp) asp = ss_get_env_as("cog-atomspace-clear");
+	const AtomSpacePtr& asg = ss_to_atomspace(sas);
+	const AtomSpacePtr& asp = asg ? asg :
+		ss_get_env_as("cog-atomspace-clear");
 
 	asp->clear();
 
@@ -230,7 +234,7 @@ SCM SchemeSmob::ss_as(SCM slist)
 	SCM satom = scm_car(slist);
 	Handle h(verify_handle(satom, "cog-atomspace"));
 	AtomSpace* as = h->getAtomSpace();
-	return as ? make_as(as->make_shared_from_this()) : SCM_EOL;
+	return as ? make_as(AtomSpaceCast(as->shared_from_this())) : SCM_EOL;
 }
 
 /* ============================================================== */
