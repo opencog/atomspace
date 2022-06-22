@@ -721,10 +721,11 @@ void PatternLink::validate_variables(HandleSet& vars,
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
+			Handle tmp(v);
 			vars.erase(v);
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
-			   v->to_short_string().c_str());
+			   tmp->to_short_string().c_str());
 		}
 	}
 }
