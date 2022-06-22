@@ -1233,7 +1233,12 @@ SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
 
 SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 {
-	OC_ASSERT(as, "Expected aan AtomSpace");
+	// A null AtomSpace is passed from the cython initialization
+	// code. That code scramble to create an AtomSpace, after
+	// guile is initialized.
+	static AtomSpacePtr nullasp;
+	if (nullptr == as) return get_evaluator(nullasp);
+
 	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
 	return get_evaluator(asp);
 }
