@@ -308,7 +308,12 @@ static void init_only_once(void)
 SchemeEval::SchemeEval(AtomSpace* as)
 {
 	init_only_once();
-	_atomspace = AtomSpaceCast(as->shared_from_this());
+
+	// If it is coming from the pool, the as will be null.
+	if (as)
+		_atomspace = AtomSpaceCast(as->shared_from_this());
+	else
+		_atomspace = nullptr;
 
 	scm_with_guile(c_wrap_init, this);
 }
