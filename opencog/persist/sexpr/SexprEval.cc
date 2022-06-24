@@ -36,6 +36,7 @@ SexprEval::SexprEval(AtomSpacePtr& asp)
 	: GenericEval()
 {
 	_atomspace = asp;
+	_interpreter.set_base_space(asp);
 }
 
 SexprEval::~SexprEval()
@@ -51,8 +52,7 @@ void SexprEval::eval_expr(const std::string &expr)
 	_caught_error = false;
 	try {
 		std::lock_guard<std::mutex> lock(_mtx);
-		_answer = _interpreter.interpret_command(
-			(AtomSpace*) _atomspace.get(), expr);
+		_answer = _interpreter.interpret_command(expr);
 
 		// CogStorageNode expects all responses to be terminated
 		// by exactly one newline char. It is the end-of-message

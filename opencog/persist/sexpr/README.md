@@ -117,8 +117,8 @@ Here's an example of reading back what was stored above:
 ```
 
 
-Network API
------------
+Network API, Command Dispatching
+--------------------------------
 The CogServer provides a network API to send/receive Atoms over the
 internet. The actual API is that of the StorageNode (see the wiki page
 https://wiki.opencog.org/w/StorageNode for details.) The cogserver
@@ -130,3 +130,24 @@ have been hard-coded in C++. These are implemented in `Commands.cc`
 The goal is to avoid the overhead of entry/exit into guile. This works
 because the cogserver is guaranteed to send only these commands, and no
 others.
+
+Network-distributed AtomSpaces need to have proxy agents that know what
+to do with the data being passed around.  Besides just workig with the
+attached AtomSpace, maybe something more needs to be done: maybe data
+needs to be written to or read from disk. The proxy agent determines
+what is to be done.
+
+To implement the proxy, one needs to intercept network commands, as they
+come in. This spot is the `interpret_command()` method in `Commands.cc`.
+The `class Command` maintains a table of functions to be called, one for
+each network command.  By altering this table and installing command
+handlers other than the default handlers, the proxy agent can respond
+in some custom fashion.
+
+For example, if the CogServer receives a command to put an Atom into the
+AtomSpace, it can then immediately push it out to any open `StorageNode`s,
+for example, to disk storage. This becomes an easy way to implement a
+write-through proxy, which just listens to connections on the net, and,
+whenever it receives some Atom, it just pushes it to disk.`
+
+For details, see https://github.com/opencog/atomspace-agents
