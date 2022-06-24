@@ -1,0 +1,97 @@
+/*
+ * DispatchUTest.cxxtest
+ *
+ * Copyright (c) 2022 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <iomanip>
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+
+#include "opencog/persist/sexpr/Commands.h"
+
+using namespace opencog;
+
+class MyDispatch : public Commands
+{
+public:
+	MyDispatch();
+   std::string my_node(const std::string&);
+};
+
+MyDispatch::MyDispatch(void)
+{
+	using namespace std::placeholders;  // for _1, _2, _3...
+	Meth f = std::bind(&MyDispatch::my_node, this, _1);
+	install_handler("cog-node", f);
+}
+
+std::string MyDispatch::my_node(const std::string& arg)
+{
+	std::string rv = cog_node(arg);
+
+	return "foobar" + rv;
+}
+
+class DispatchUTest : public CxxTest::TestSuite
+{
+	private:
+		AtomSpacePtr as;
+
+	public:
+		DispatchUTest()
+		{
+			logger().set_print_to_stdout_flag(true);
+			as = createAtomSpace();
+		}
+
+		void setUp() { as->clear(); }
+		void tearDown() {}
+
+		void test_overload();
+};
+
+// Test cog-node
+void DispatchUTest::test_overload()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string in = R"((cog-node 'Concept "foo"))";
+
+	MyDispatch com;
+	com.set_base_space(as);
+	std::string out = com.interpret_command(in);
+	printf("Got %s\n", out.c_str());
+
+	TS_ASSERT_EQUALS(0, as->get_size());
+	TS_ASSERT(0 == out.compare("foobar()"));
+
+	as->add_node(CONCEPT_NODE, "foo");
+	out = com.interpret_command(in);
+	printf("Got >>%s<<\n", out.c_str());
+	TS_ASSERT_EQUALS(1, as->get_size());
+	TS_ASSERT(0 == out.compare("foobar(ConceptNode \"foo\")"));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

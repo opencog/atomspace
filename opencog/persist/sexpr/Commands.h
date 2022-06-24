@@ -23,6 +23,7 @@
 #ifndef _COMMANDS_H
 #define _COMMANDS_H
 
+#include <functional>
 #include <string>
 
 namespace opencog
@@ -44,7 +45,7 @@ protected:
 	std::unordered_map<std::string, Handle> _space_map;
 
 	/// Map to dispatch table
-	typedef std::string (Commands::*Meth)(const std::string&);
+	typedef std::function<std::string (const std::string&)> Meth;
 	std::unordered_map<size_t, Meth> _dispatch_map;
 
 	AtomSpace* get_opt_as(const std::string&, size_t&);
@@ -114,6 +115,8 @@ public:
 	std::string cog_value(const std::string&);
 	std::string cog_define(const std::string&);
 	std::string cog_ping(const std::string&);
+
+	void install_handler(const std::string&, Meth);
 };
 
 /** @}*/
