@@ -63,6 +63,7 @@ Commands::Commands(void)
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
 	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
+
 	static const size_t gtatm = std::hash<std::string>{}("cog-get-atoms");
 	static const size_t incty = std::hash<std::string>{}("cog-incoming-by-type");
 	static const size_t incom = std::hash<std::string>{}("cog-incoming-set");
@@ -70,17 +71,34 @@ Commands::Commands(void)
 	static const size_t link = std::hash<std::string>{}("cog-link");
 	static const size_t node = std::hash<std::string>{}("cog-node");
 
+	static const size_t stval = std::hash<std::string>{}("cog-set-value!");
+	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
+	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
+	static const size_t value = std::hash<std::string>{}("cog-value");
+	static const size_t dfine = std::hash<std::string>{}("define");
+	static const size_t ping = std::hash<std::string>{}("ping)");
+
+
+	// Hash map to loop up method to call
 	_dispatch_map.insert({space, &Commands::cog_atomspace});
 	_dispatch_map.insert({clear, &Commands::cog_atomspace_clear});
 	_dispatch_map.insert({cache, &Commands::cog_execute_cache});
 	_dispatch_map.insert({extra, &Commands::cog_extract});
 	_dispatch_map.insert({recur, &Commands::cog_extract_recursive});
+
 	_dispatch_map.insert({gtatm, &Commands::cog_get_atoms});
 	_dispatch_map.insert({incty, &Commands::cog_incoming_by_type});
 	_dispatch_map.insert({incom, &Commands::cog_incoming_set});
 	_dispatch_map.insert({keys, &Commands::cog_keys_alist});
 	_dispatch_map.insert({link, &Commands::cog_link});
 	_dispatch_map.insert({node, &Commands::cog_node});
+
+	_dispatch_map.insert({stval, &Commands::cog_set_value});
+	_dispatch_map.insert({svals, &Commands::cog_set_values});
+	_dispatch_map.insert({settv, &Commands::cog_set_tv});
+	_dispatch_map.insert({value, &Commands::cog_value});
+	_dispatch_map.insert({dfine, &Commands::cog_define});
+	_dispatch_map.insert({ping, &Commands::cog_ping});
 }
 
 void Commands::set_base_space(const AtomSpacePtr& asp)
@@ -285,6 +303,7 @@ std::string Commands::cog_node(const std::string& cmd)
 	return Sexpr::encode_atom(h, _multi_space);
 }
 
+// -----------------------------------------------
 // (cog-link 'ListLink (Atom) (Atom) (Atom))
 std::string Commands::cog_link(const std::string& cmd)
 {
@@ -311,16 +330,113 @@ std::string Commands::cog_link(const std::string& cmd)
 	return Sexpr::encode_atom(h, _multi_space);
 }
 
+// -----------------------------------------------
+// (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
+std::string Commands::cog_set_value(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
+	Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
+	ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+
+	AtomSpace* as = get_opt_as(cmd, pos);
+	atom = as->add_atom(atom);
+	key = as->add_atom(key);
+	if (vp)
+		vp = Sexpr::add_atoms(as, vp);
+	as->set_value(atom, key, vp);
+	return "()";
+}
+
+// -----------------------------------------------
+// (cog-set-values! (Concept "foo") (AtomSpace "foo")
+//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
+std::string Commands::cog_set_values(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+	pos++; // skip past close-paren
+
+	if (not _multi_space)
+	{
+		// Search for optional AtomSpace argument
+		AtomSpace* as = get_opt_as(cmd, pos);
+		h = as->add_atom(h);
+	}
+	Sexpr::decode_slist(h, cmd, pos);
+
+	return "()";
+}
+
+// -----------------------------------------------
+// (cog-set-tv! (Concept "foo") (stv 1 0))
+// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
+std::string Commands::cog_set_tv(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
+	ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
+
+	// Search for optional AtomSpace argument
+	AtomSpace* as = get_opt_as(cmd, pos);
+
+	Handle ha = as->add_atom(h);
+	if (nullptr == ha) return "()"; // read-only atomspace.
+	as->set_truthvalue(ha, TruthValueCast(tv));
+	return "()";
+}
+
+// -----------------------------------------------
+// (cog-value (Concept "foo") (Predicate "key"))
+std::string Commands::cog_value(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
+	atom = _base_space->add_atom(atom);
+	Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
+	key = _base_space->add_atom(key);
+
+	ValuePtr vp = atom->getValue(key);
+	return Sexpr::encode_value(vp);
+}
+
+// -----------------------------------------------
+// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
+// Place the current atomspace at the bottom of the hierarchy.
+std::string Commands::cog_define(const std::string& cmd)
+{
+	_multi_space = true;
+
+	// Extract the symbolic name after the define
+	size_t pos = 0;
+	pos = cmd.find_first_not_of(" \n\t", pos);
+	size_t epos = cmd.find_first_of(" \n\t", pos);
+	// std::string sym = cmd.substr(pos, epos-pos);
+
+	pos = epos+1;
+
+	// Decode the AtomSpace frames
+	Handle hasp = Sexpr::decode_frame(
+		HandleCast(_base_space), cmd, pos, _space_map);
+	top_space = AtomSpaceCast(hasp);
+
+	// Hacky...
+	// _space_map.insert({sym, top_space});
+
+	return "()";
+}
+
+// -----------------------------------------------
+// (ping) -- network ping
+std::string Commands::cog_ping(const std::string& cmd)
+{
+	return "()";
+}
+
+// -----------------------------------------------
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
-	static const size_t stval = std::hash<std::string>{}("cog-set-value!");
-	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
-	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
-	static const size_t value = std::hash<std::string>{}("cog-value");
-	static const size_t dfine = std::hash<std::string>{}("define");
-	static const size_t ping = std::hash<std::string>{}("ping)");
-
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");
 	if (std::string::npos == pos) return "";
@@ -340,119 +456,14 @@ std::string Commands::interpret_command(AtomSpace* as,
 			cmd.c_str());
 
 	// Look up the method to call, based on the hash of the command string.
-	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
-	const auto& disp = _dispatch_map.find(act);
+	size_t action = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
+	const auto& disp = _dispatch_map.find(action);
 
 	if (_dispatch_map.end() != disp)
 	{
 		pos = cmd.find_first_not_of(" \n\t", epos);
 		return (this->*(disp->second))(cmd.substr(pos));
 	}
-
-	// -----------------------------------------------
-	// (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-	if (stval == act)
-	{
-		pos = epos + 1;
-		Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
-		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
-		ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
-
-		as = get_opt_as(cmd, pos);
-		atom = as->add_atom(atom);
-		key = as->add_atom(key);
-		if (vp)
-			vp = Sexpr::add_atoms(as, vp);
-		as->set_value(atom, key, vp);
-		return "()";
-	}
-
-	// -----------------------------------------------
-	// (cog-set-values! (Concept "foo") (AtomSpace "foo")
-	//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
-	if (svals == act)
-	{
-		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
-		pos++; // skip past close-paren
-
-		if (not _multi_space)
-		{
-			// Search for optional AtomSpace argument
-			as = get_opt_as(cmd, pos);
-			h = as->add_atom(h);
-		}
-		Sexpr::decode_slist(h, cmd, pos);
-
-		return "()";
-	}
-
-	// -----------------------------------------------
-	// (cog-set-tv! (Concept "foo") (stv 1 0))
-	// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
-	if (settv == act)
-	{
-		pos = epos + 1;
-		Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
-		ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
-
-		// Search for optional AtomSpace argument
-		as = get_opt_as(cmd, pos);
-
-		Handle ha = as->add_atom(h);
-		if (nullptr == ha) return "()"; // read-only atomspace.
-		as->set_truthvalue(ha, TruthValueCast(tv));
-		return "()";
-	}
-
-	// -----------------------------------------------
-	// (cog-value (Concept "foo") (Predicate "key"))
-	if (value == act)
-	{
-		pos = epos + 1;
-		Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
-		atom = as->add_atom(atom);
-		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
-		key = as->add_atom(key);
-
-		ValuePtr vp = atom->getValue(key);
-		return Sexpr::encode_value(vp);
-	}
-
-	// -----------------------------------------------
-	// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
-	// Place the current atomspace at the bottom of the hierarchy.
-	if (dfine == act)
-	{
-		_multi_space = true;
-
-		// Extract the symbolic name after the define
-		pos = cmd.find_first_not_of(" \n\t", epos);
-		epos = cmd.find_first_of(" \n\t", pos);
-		// std::string sym = cmd.substr(pos, epos-pos);
-
-		pos = epos+1;
-
-		// Decode the AtomSpace frames
-		AtomSpacePtr asp(AtomSpaceCast(as));
-		Handle hasp = Sexpr::decode_frame(
-			HandleCast(asp), cmd, pos, _space_map);
-		top_space = AtomSpaceCast(hasp);
-
-		// Hacky...
-		// _space_map.insert({sym, top_space});
-
-		return "()";
-	}
-
-	// -----------------------------------------------
-	// (ping) -- network ping
-	if (ping == act)
-	{
-		return "()";
-	}
-
-	// -----------------------------------------------
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());

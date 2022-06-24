@@ -52,9 +52,9 @@ protected:
 	/// AtomSpace to which all commands apply.
 	AtomSpacePtr _base_space;
 
-	/// If some interpreted command specified an AtomSpace, this
-	/// will be set to that AtomSpace.
-	// XXX FIXME is this really neededd???
+	/// If AtomSpace frames are in use, this points at the top-most
+	/// frame. It is needed so that the automatic use-counting does
+	/// not free the frame immediattely after it is created.
 	AtomSpacePtr top_space;
 
 public:
@@ -99,13 +99,20 @@ public:
 	std::string cog_execute_cache(const std::string&);
 	std::string cog_extract(const std::string&);
 	std::string cog_extract_recursive(const std::string&);
+
 	std::string cog_get_atoms(const std::string&);
 	std::string cog_incoming_by_type(const std::string&);
 	std::string cog_incoming_set(const std::string&);
 	std::string cog_keys_alist(const std::string&);
 	std::string cog_link(const std::string&);
 	std::string cog_node(const std::string&);
-	// std::string cog_(const std::string&);
+
+	std::string cog_set_value(const std::string&);
+	std::string cog_set_values(const std::string&);
+	std::string cog_set_tv(const std::string&);
+	std::string cog_value(const std::string&);
+	std::string cog_define(const std::string&);
+	std::string cog_ping(const std::string&);
 };
 
 /** @}*/
