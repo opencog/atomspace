@@ -78,27 +78,28 @@ Commands::Commands(void)
 	static const size_t dfine = std::hash<std::string>{}("define");
 	static const size_t ping = std::hash<std::string>{}("ping)");
 
+	using namespace std::placeholders;  // for _1, _2, _3...
 
-	// Hash map to loop up method to call
-	_dispatch_map.insert({space, &Commands::cog_atomspace});
-	_dispatch_map.insert({clear, &Commands::cog_atomspace_clear});
-	_dispatch_map.insert({cache, &Commands::cog_execute_cache});
-	_dispatch_map.insert({extra, &Commands::cog_extract});
-	_dispatch_map.insert({recur, &Commands::cog_extract_recursive});
+	// Hash map to look up method to call
+	_dispatch_map.insert({space, std::bind(&Commands::cog_atomspace, this, _1)});
+	_dispatch_map.insert({clear, std::bind(&Commands::cog_atomspace_clear, this, _1)});
+	_dispatch_map.insert({cache, std::bind(&Commands::cog_execute_cache, this, _1)});
+	_dispatch_map.insert({extra, std::bind(&Commands::cog_extract, this, _1)});
+	_dispatch_map.insert({recur, std::bind(&Commands::cog_extract_recursive, this, _1)});
 
-	_dispatch_map.insert({gtatm, &Commands::cog_get_atoms});
-	_dispatch_map.insert({incty, &Commands::cog_incoming_by_type});
-	_dispatch_map.insert({incom, &Commands::cog_incoming_set});
-	_dispatch_map.insert({keys, &Commands::cog_keys_alist});
-	_dispatch_map.insert({link, &Commands::cog_link});
-	_dispatch_map.insert({node, &Commands::cog_node});
+	_dispatch_map.insert({gtatm, std::bind(&Commands::cog_get_atoms, this, _1)});
+	_dispatch_map.insert({incty, std::bind(&Commands::cog_incoming_by_type, this, _1)});
+	_dispatch_map.insert({incom, std::bind(&Commands::cog_incoming_set, this, _1)});
+	_dispatch_map.insert({keys, std::bind(&Commands::cog_keys_alist, this, _1)});
+	_dispatch_map.insert({link, std::bind(&Commands::cog_link, this, _1)});
+	_dispatch_map.insert({node, std::bind(&Commands::cog_node, this, _1)});
 
-	_dispatch_map.insert({stval, &Commands::cog_set_value});
-	_dispatch_map.insert({svals, &Commands::cog_set_values});
-	_dispatch_map.insert({settv, &Commands::cog_set_tv});
-	_dispatch_map.insert({value, &Commands::cog_value});
-	_dispatch_map.insert({dfine, &Commands::cog_define});
-	_dispatch_map.insert({ping, &Commands::cog_ping});
+	_dispatch_map.insert({stval, std::bind(&Commands::cog_set_value, this, _1)});
+	_dispatch_map.insert({svals, std::bind(&Commands::cog_set_values, this, _1)});
+	_dispatch_map.insert({settv, std::bind(&Commands::cog_set_tv, this, _1)});
+	_dispatch_map.insert({value, std::bind(&Commands::cog_value, this, _1)});
+	_dispatch_map.insert({dfine, std::bind(&Commands::cog_define, this, _1)});
+	_dispatch_map.insert({ping, std::bind(&Commands::cog_ping, this, _1)});
 }
 
 Commands::~Commands()
@@ -277,7 +278,7 @@ std::string Commands::cog_incoming_set(const std::string& cmd)
 // (cog-keys->alist (Concept "foo"))
 std::string Commands::cog_keys_alist(const std::string& cmd)
 {
-	size_t pos;
+	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
@@ -467,7 +468,8 @@ std::string Commands::interpret_command(const std::string& cmd)
 	if (_dispatch_map.end() != disp)
 	{
 		pos = cmd.find_first_not_of(" \n\t", epos);
-		return (this->*(disp->second))(cmd.substr(pos));
+		Meth f = disp->second;
+		return f(cmd.substr(pos));
 	}
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
