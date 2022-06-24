@@ -57,8 +57,15 @@ Commands::Commands(void)
 
 	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
 	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
+	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
+	static const size_t extra = std::hash<std::string>{}("cog-extract!");
+	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
+
 	_dispatch_map.insert({space, &Commands::cog_atomspace});
 	_dispatch_map.insert({clear, &Commands::cog_atomspace_clear});
+	_dispatch_map.insert({cache, &Commands::cog_execute_cache});
+	_dispatch_map.insert({extra, &Commands::cog_extract});
+	_dispatch_map.insert({recur, &Commands::cog_extract_recursive});
 }
 
 void Commands::set_base_space(const AtomSpacePtr& asp)
@@ -88,6 +95,7 @@ Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
 	return as;
 }
 
+// -----------------------------------------------
 // (cog-atomspace)
 std::string Commands::cog_atomspace(const std::string& arg)
 {
@@ -95,11 +103,73 @@ std::string Commands::cog_atomspace(const std::string& arg)
 	return top_space->to_string("");
 }
 
+// -----------------------------------------------
 // (cog-atomspace-clear)
 std::string Commands::cog_atomspace_clear(const std::string& arg)
 {
 	_base_space->clear();
 	return "#t";
+}
+
+// -----------------------------------------------
+// (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
+// This is complicated, and subject to change...
+std::string Commands::cog_execute_cache(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle query = Sexpr::decode_atom(cmd, pos, _space_map);
+	query = _base_space->add_atom(query);
+	Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
+	key = _base_space->add_atom(key);
+
+	bool force = false;
+	pos = cmd.find_first_of('(', pos);
+	if (std::string::npos != pos)
+	{
+		Handle meta = Sexpr::decode_atom(cmd, pos, _space_map);
+		meta = _base_space->add_atom(meta);
+
+		// XXX Hacky .. store time in float value...
+		_base_space->set_value(query, meta, createFloatValue((double)time(0)));
+		if (std::string::npos != cmd.find("#t", pos))
+			force = true;
+	}
+	ValuePtr rslt = query->getValue(key);
+	if (nullptr != rslt and not force)
+		return Sexpr::encode_value(rslt);
+
+	// For now, prevent general execution.
+	Type qt = query->get_type();
+	if (not nameserver().isA(qt, PATTERN_LINK) and
+	    not nameserver().isA(qt, JOIN_LINK))
+		return "#f";
+
+	rslt = query->execute();
+	_base_space->set_value(query, key, rslt);
+
+	return Sexpr::encode_value(rslt);
+}
+
+// -----------------------------------------------
+// (cog-extract! (Concept "foo"))
+std::string Commands::cog_extract(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
+	if (nullptr == h) return "#t";
+	if (_base_space->extract_atom(h, false)) return "#t";
+	return "#f";
+}
+
+// -----------------------------------------------
+// (cog-extract-recursive! (Concept "foo"))
+std::string Commands::cog_extract_recursive(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
+	if (nullptr == h) return "#t";
+	if (_base_space->extract_atom(h, true)) return "#t";
+	return "#f";
 }
 
 std::string Commands::interpret_command(AtomSpace* as,
@@ -108,9 +178,6 @@ std::string Commands::interpret_command(AtomSpace* as,
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pend the paren, post-pend the space.)
-	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
-	static const size_t extra = std::hash<std::string>{}("cog-extract!");
-	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
 	static const size_t gtatm = std::hash<std::string>{}("cog-get-atoms");
 	static const size_t incty = std::hash<std::string>{}("cog-incoming-by-type");
 	static const size_t incom = std::hash<std::string>{}("cog-incoming-set");
@@ -143,67 +210,6 @@ std::string Commands::interpret_command(AtomSpace* as,
 			cmd.c_str());
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
-
-	// -----------------------------------------------
-	// (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
-	// This is complicated, and subject to change...
-	if (cache == act)
-	{
-		pos = epos + 1;
-		Handle query = Sexpr::decode_atom(cmd, pos, _space_map);
-		query = as->add_atom(query);
-		Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
-		key = as->add_atom(key);
-
-		bool force = false;
-		pos = cmd.find_first_of('(', pos);
-		if (std::string::npos != pos)
-		{
-			Handle meta = Sexpr::decode_atom(cmd, pos, _space_map);
-			meta = as->add_atom(meta);
-
-			// XXX Hacky .. store time in float value...
-			as->set_value(query, meta, createFloatValue((double)time(0)));
-			if (std::string::npos != cmd.find("#t", pos))
-				force = true;
-		}
-		ValuePtr rslt = query->getValue(key);
-		if (nullptr != rslt and not force)
-			return Sexpr::encode_value(rslt);
-
-		// For now, prevent general execution.
-		Type qt = query->get_type();
-		if (not nameserver().isA(qt, PATTERN_LINK) and
-		    not nameserver().isA(qt, JOIN_LINK))
-			return "#f";
-
-		rslt = query->execute();
-		as->set_value(query, key, rslt);
-
-		return Sexpr::encode_value(rslt);
-	}
-
-	// -----------------------------------------------
-	// (cog-extract! (Concept "foo"))
-	if (extra == act)
-	{
-		pos = epos + 1;
-		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
-		if (nullptr == h) return "#t";
-		if (as->extract_atom(h, false)) return "#t";
-		return "#f";
-	}
-
-	// -----------------------------------------------
-	// (cog-extract-recursive! (Concept "foo"))
-	if (recur == act)
-	{
-		pos = epos + 1;
-		Handle h = as->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
-		if (nullptr == h) return "#t";
-		if (as->extract_atom(h, true)) return "#t";
-		return "#f";
-	}
 
 	// -----------------------------------------------
 	// (cog-get-atoms 'Node #t)

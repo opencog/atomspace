@@ -96,6 +96,9 @@ public:
 
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
+	std::string cog_execute_cache(const std::string&);
+	std::string cog_extract(const std::string&);
+	std::string cog_extract_recursive(const std::string&);
 };
 
 /** @}*/
