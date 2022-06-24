@@ -33,6 +33,24 @@
 
 using namespace opencog;
 
+class MyDispatch : public Commands
+{
+public:
+	MyDispatch();
+   std::string my_node(const std::string&);
+}
+
+MyDispatch::MyDispatch(void)
+{
+}
+
+std::string MyDispatch::my_node(const std::string& arg)
+{
+	cog_node(arg);
+
+	return "foobar " + arg;
+}
+
 class DispatchUTest : public CxxTest::TestSuite
 {
 	private:

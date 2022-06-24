@@ -101,13 +101,19 @@ Commands::Commands(void)
 	_dispatch_map.insert({ping, &Commands::cog_ping});
 }
 
+Commands::~Commands()
+{
+}
+
 void Commands::set_base_space(const AtomSpacePtr& asp)
 {
 	_base_space = asp;
 }
 
-Commands::~Commands()
+void Commands::install_handler(const std::string& idstr, Meth handler)
 {
+	size_t idhash = std::hash<std::string>{}(idstr);
+	_dispatch_map.insert_or_assign({idhash, handler});
 }
 
 /// Search for optional AtomSpace argument in `cmd` at `pos`.

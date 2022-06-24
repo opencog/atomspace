@@ -114,6 +114,8 @@ public:
 	std::string cog_value(const std::string&);
 	std::string cog_define(const std::string&);
 	std::string cog_ping(const std::string&);
+
+	void install_handler(const std::string&, Meth);
 };
 
 /** @}*/
