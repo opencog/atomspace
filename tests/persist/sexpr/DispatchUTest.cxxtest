@@ -42,14 +42,16 @@ public:
 
 MyDispatch::MyDispatch(void)
 {
-	install_handler("cog-node", &MyDispatch::my_node);
+	using namespace std::placeholders;  // for _1, _2, _3...
+	Meth f = std::bind(&MyDispatch::my_node, this, _1);
+	install_handler("cog-node", f);
 }
 
 std::string MyDispatch::my_node(const std::string& arg)
 {
-	cog_node(arg);
+	std::string rv = cog_node(arg);
 
-	return "foobar " + arg;
+	return "foobar" + rv;
 }
 
 class DispatchUTest : public CxxTest::TestSuite
@@ -83,13 +85,13 @@ void DispatchUTest::test_overload()
 	printf("Got %s\n", out.c_str());
 
 	TS_ASSERT_EQUALS(0, as->get_size());
-	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT(0 == out.compare("foobar()"));
 
 	as->add_node(CONCEPT_NODE, "foo");
 	out = com.interpret_command(in);
 	printf("Got >>%s<<\n", out.c_str());
 	TS_ASSERT_EQUALS(1, as->get_size());
-	TS_ASSERT(0 == out.compare("(ConceptNode \"foo\")"));
+	TS_ASSERT(0 == out.compare("foobar(ConceptNode \"foo\")"));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
