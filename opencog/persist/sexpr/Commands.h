@@ -47,7 +47,7 @@ protected:
 	typedef std::string (Commands::*Meth)(const std::string&);
 	std::unordered_map<size_t, Meth> _dispatch_map;
 
-	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
+	AtomSpace* get_opt_as(const std::string&, size_t&);
 
 	/// AtomSpace to which all commands apply.
 	AtomSpacePtr _base_space;
@@ -99,6 +99,13 @@ public:
 	std::string cog_execute_cache(const std::string&);
 	std::string cog_extract(const std::string&);
 	std::string cog_extract_recursive(const std::string&);
+	std::string cog_get_atoms(const std::string&);
+	std::string cog_incoming_by_type(const std::string&);
+	std::string cog_incoming_set(const std::string&);
+	std::string cog_keys_alist(const std::string&);
+	std::string cog_link(const std::string&);
+	std::string cog_node(const std::string&);
+	// std::string cog_(const std::string&);
 };
 
 /** @}*/
