@@ -209,7 +209,15 @@ std::string Commands::interpret_command(AtomSpace* as,
 		throw SyntaxException(TRACE_INFO, "Not a command: %s",
 			cmd.c_str());
 
+	// Look up the method to call, based on the hash of the command string.
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
+	const auto& disp = _dispatch_map.find(act);
+
+	if (_dispatch_map.end() != disp)
+	{
+		pos = cmd.find_first_not_of(" \n\t", epos);
+		return (this->*(disp->second))(cmd.substr(pos));
+	}
 
 	// -----------------------------------------------
 	// (cog-get-atoms 'Node #t)
