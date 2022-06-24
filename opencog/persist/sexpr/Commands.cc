@@ -271,7 +271,7 @@ std::string Commands::cog_incoming_set(const std::string& cmd)
 // (cog-keys->alist (Concept "foo"))
 std::string Commands::cog_keys_alist(const std::string& cmd)
 {
-	size_t pos;
+	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
