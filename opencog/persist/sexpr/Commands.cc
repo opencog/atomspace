@@ -434,8 +434,7 @@ std::string Commands::cog_ping(const std::string& cmd)
 }
 
 // -----------------------------------------------
-std::string Commands::interpret_command(AtomSpace* as,
-                                        const std::string& cmd)
+std::string Commands::interpret_command(const std::string& cmd)
 {
 	// Find the command and dispatch
 	size_t pos = cmd.find_first_not_of(" \n\t");

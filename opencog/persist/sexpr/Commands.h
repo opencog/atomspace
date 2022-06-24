@@ -92,8 +92,9 @@ public:
 	/// and they MUST be followed by valid Atomese s-expressions, and
 	/// nothing else.
 	///
-	std::string interpret_command(AtomSpace*, const std::string&);
+	std::string interpret_command(const std::string&);
 
+	/// Methods that implement each of the interpreted commands, above.
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
 	std::string cog_execute_cache(const std::string&);
