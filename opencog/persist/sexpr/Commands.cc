@@ -61,6 +61,11 @@ Commands::Commands(void)
 	_dispatch_map.insert({clear, &Commands::cog_atomspace_clear});
 }
 
+void Commands::set_base_space(const AtomSpacePtr& asp)
+{
+	_base_space = asp;
+}
+
 Commands::~Commands()
 {
 }
@@ -93,7 +98,7 @@ std::string Commands::cog_atomspace(const std::string& arg)
 // (cog-atomspace-clear)
 std::string Commands::cog_atomspace_clear(const std::string& arg)
 {
-	// as->clear();
+	_base_space->clear();
 	return "#t";
 }
 

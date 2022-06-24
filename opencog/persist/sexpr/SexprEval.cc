@@ -36,6 +36,7 @@ SexprEval::SexprEval(AtomSpacePtr& asp)
 	: GenericEval()
 {
 	_atomspace = asp;
+	_interpreter.set_base_space(asp);
 }
 
 SexprEval::~SexprEval()

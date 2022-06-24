@@ -49,9 +49,20 @@ protected:
 
 	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
 
+	/// AtomSpace to which all commands apply.
+	AtomSpacePtr _base_space;
+
+	/// If some interpreted command specified an AtomSpace, this
+	/// will be set to that AtomSpace.
+	// XXX FIXME is this really neededd???
+	AtomSpacePtr top_space;
+
 public:
 	Commands(void);
 	~Commands();
+
+	// Indicate which AtomSpace to use
+	void set_base_space(const AtomSpacePtr&);
 
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only
@@ -82,10 +93,6 @@ public:
 	/// nothing else.
 	///
 	std::string interpret_command(AtomSpace*, const std::string&);
-
-	/// If some interpreted command specified an AtomSpace, this
-	/// will be set to that AtomSpace.
-	AtomSpacePtr top_space;
 
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
