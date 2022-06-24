@@ -113,7 +113,7 @@ void Commands::set_base_space(const AtomSpacePtr& asp)
 void Commands::install_handler(const std::string& idstr, Meth handler)
 {
 	size_t idhash = std::hash<std::string>{}(idstr);
-	_dispatch_map.insert_or_assign({idhash, handler});
+	_dispatch_map.insert_or_assign(idhash, handler);
 }
 
 /// Search for optional AtomSpace argument in `cmd` at `pos`.
