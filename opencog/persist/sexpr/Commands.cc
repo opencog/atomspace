@@ -54,6 +54,11 @@ using namespace opencog;
 Commands::Commands(void)
 {
 	_multi_space = false;
+
+	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
+	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
+	_dispatch_map.insert({space, &Commands::cog_atomspace});
+	_dispatch_map.insert({clear, &Commands::cog_atomspace_clear});
 }
 
 Commands::~Commands()
@@ -78,14 +83,26 @@ Commands::get_opt_as(const std::string& cmd, size_t& pos, AtomSpace* as)
 	return as;
 }
 
+// (cog-atomspace)
+std::string Commands::cog_atomspace(const std::string& arg)
+{
+	if (not top_space) return "()";
+	return top_space->to_string("");
+}
+
+// (cog-atomspace-clear)
+std::string Commands::cog_atomspace_clear(const std::string& arg)
+{
+	// as->clear();
+	return "#t";
+}
+
 std::string Commands::interpret_command(AtomSpace* as,
                                         const std::string& cmd)
 {
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pend the paren, post-pend the space.)
-	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
-	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
 	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
 	static const size_t extra = std::hash<std::string>{}("cog-extract!");
 	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
@@ -121,22 +138,6 @@ std::string Commands::interpret_command(AtomSpace* as,
 			cmd.c_str());
 
 	size_t act = std::hash<std::string>{}(cmd.substr(pos, epos-pos));
-
-	// -----------------------------------------------
-	// (cog-atomspace)
-	if (space == act)
-	{
-		if (not top_space) return "()";
-		return top_space->to_string("");
-	}
-
-	// -----------------------------------------------
-	// (cog-atomspace-clear)
-	if (clear == act)
-	{
-		as->clear();
-		return "#t";
-	}
 
 	// -----------------------------------------------
 	// (cog-execute-cache! (GetLink ...) (Predicate "key") ...)

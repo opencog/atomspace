@@ -35,13 +35,17 @@ class AtomSpace;
 
 class Commands
 {
-private:
+protected:
 	/// True, if the _space_map below is being used, and AtomSpaces need
 	/// to be sent and received.
 	bool _multi_space;
 
 	/// Map from string AtomSpace names to the matching AtomSpacePtr's
 	std::unordered_map<std::string, Handle> _space_map;
+
+	/// Map to dispatch table
+	typedef std::string (Commands::*Meth)(const std::string&);
+	std::unordered_map<size_t, Meth> _dispatch_map;
 
 	AtomSpace* get_opt_as(const std::string&, size_t&, AtomSpace*);
 
@@ -82,6 +86,9 @@ public:
 	/// If some interpreted command specified an AtomSpace, this
 	/// will be set to that AtomSpace.
 	AtomSpacePtr top_space;
+
+	std::string cog_atomspace(const std::string&);
+	std::string cog_atomspace_clear(const std::string&);
 };
 
 /** @}*/
