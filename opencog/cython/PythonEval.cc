@@ -1181,7 +1181,7 @@ bool PythonEval::check_for_error()
     _result = "";
     _eval_done = true;
     _wait_done.notify_all();
-    throw RuntimeException(TRACE_INFO, "%s", error_string.c_str());
+    throw SilentException();
 }
 
 // ===================================================================
@@ -1316,8 +1316,10 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     std::string res;
     try {
         res = execute_script(expr);
-    } catch (const RuntimeException& ex) {
+    } catch (const SilentException&) {
         res = _error_string;
+    } catch (const RuntimeException& ex) {
+        res = ex.what();
     }
     return res;
 }
