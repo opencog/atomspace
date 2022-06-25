@@ -100,7 +100,7 @@ SET(Boost_USE_MULTITHREADED ON)
 SET(MIN_BOOST 1.46)
 
 # Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS filesystem system)
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS system)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
@@ -423,7 +423,6 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-2.2-dev (>= 2.2.2)"
 	"python3-dev (>= 3.6.7)"
-	"libboost-filesystem-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
 	"libpq-dev (>=9.3.24)"
