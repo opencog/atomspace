@@ -1318,8 +1318,6 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
         res = execute_script(expr);
     } catch (const SilentException&) {
         res = _error_string;
-    } catch (const RuntimeException& ex) {
-        res = ex.what();
     }
     return res;
 }
