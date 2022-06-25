@@ -1437,6 +1437,7 @@ std::string PythonEval::poll_result()
     }
     lck.unlock();
 
+    if (0 == _result.compare("None")) _result.clear();
     std::string r = _capture_stdout + _result;
 
     // Add the missing newline
