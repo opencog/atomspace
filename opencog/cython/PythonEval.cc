@@ -1268,7 +1268,7 @@ std::string PythonEval::execute_script(const std::string& script)
     // was an error.
     std::string rc = execute_string(script.c_str());
 
-    if (check_for_error()) rc += _error_string;
+    check_for_error();
     return rc;
 }
 
@@ -1313,7 +1313,12 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
         close(pipefd[0]);
     } BOOST_SCOPE_EXIT_END
 
-    std::string res = execute_script(expr);
+    std::string res;
+    try {
+        res = execute_script(expr);
+    } catch (const RuntimeException& ex) {
+        res = _error_string;
+    }
     return res;
 }
 
