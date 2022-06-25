@@ -73,6 +73,9 @@ class SexprEval : public GenericEval
 			AtomSpacePtr asp(AtomSpaceCast(as));
 			return get_evaluator(asp); }
 
+		void install_handler(const std::string& cmd, Commands::Meth impl) {
+			_interpreter.install_handler(cmd, impl);
+		}
 };
 
 /** @}*/

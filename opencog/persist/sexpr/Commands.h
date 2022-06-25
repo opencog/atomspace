@@ -36,6 +36,9 @@ class AtomSpace;
 
 class Commands
 {
+public:
+	typedef std::function<std::string (const std::string&)> Meth;
+
 protected:
 	/// True, if the _space_map below is being used, and AtomSpaces need
 	/// to be sent and received.
@@ -45,7 +48,6 @@ protected:
 	std::unordered_map<std::string, Handle> _space_map;
 
 	/// Map to dispatch table
-	typedef std::function<std::string (const std::string&)> Meth;
 	std::unordered_map<size_t, Meth> _dispatch_map;
 
 	AtomSpace* get_opt_as(const std::string&, size_t&);
