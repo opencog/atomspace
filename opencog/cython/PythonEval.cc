@@ -718,8 +718,10 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
 
         else if ('.' == pathString[0]) {
-            std::filesystem::path base(getcwd(NULL, 0));
-            auto pypath = std::filesystem::canonical(pathString, base);
+            std::string base = getcwd(NULL, 0);
+            base += '/';
+            base += pathString;
+            auto pypath = std::filesystem::canonical(base);
             loadmod_prep(pypath.string(), NULL);
             continue;
 
