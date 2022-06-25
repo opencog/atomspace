@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/files.h>
@@ -83,10 +83,10 @@ int load_scm_file_relative (AtomSpace& as, const std::string& filename,
 
     int rc = 2;
     for (const std::string& search_path : search_paths) {
-        boost::filesystem::path modulePath(search_path);
+        std::filesystem::path modulePath(search_path);
         modulePath /= filename;
         logger().fine("Searching path %s", modulePath.string().c_str());
-        if (boost::filesystem::exists(modulePath)) {
+        if (std::filesystem::exists(modulePath)) {
             rc = load_scm_file(as, modulePath.string());
             if (0 == rc) {
                 logger().info("Loaded %s", modulePath.string().c_str());

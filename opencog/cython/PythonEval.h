@@ -41,12 +41,11 @@
 #include "PyIncludeWrapper.h"
 
 #include <condition_variable>
+#include <filesystem>
 #include <map>
 #include <mutex>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem/operations.hpp>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -69,10 +68,10 @@ class PythonEval : public GenericEval
         void initialize_python_objects_and_imports(void);
 
         // Module utility functions
-        void import_module( const boost::filesystem::path &file,
-                            PyObject* pyFromList);
-        void add_module_directory(const boost::filesystem::path &directory);
-        void add_module_file(const boost::filesystem::path &file);
+        void import_module(const std::filesystem::path &file,
+                           PyObject* pyFromList);
+        void add_module_directory(const std::filesystem::path &directory);
+        void add_module_file(const std::filesystem::path &file);
         void add_modules_from_path(std::string path);
         void add_modules_from_abspath(std::string path);
 

@@ -27,8 +27,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <chrono>
+#include <filesystem>
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/scope_exit.hpp>
 
 #include <opencog/util/exceptions.h>
@@ -559,7 +559,7 @@ void PythonEval::add_to_sys_path(std::string path)
 
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
-void PythonEval::import_module(const boost::filesystem::path &file,
+void PythonEval::import_module(const std::filesystem::path &file,
                                PyObject* pyFromList)
 {
     // The pyFromList parameter corresponds to what would appear in
@@ -606,19 +606,19 @@ void PythonEval::import_module(const boost::filesystem::path &file,
 * Add all the .py files in the given directory as modules to __main__ and
 * keep the references in a dictionary (this->modules)
 */
-void PythonEval::add_module_directory(const boost::filesystem::path &directory)
+void PythonEval::add_module_directory(const std::filesystem::path &directory)
 {
-    typedef std::vector<boost::filesystem::path> PathList;
+    typedef std::vector<std::filesystem::path> PathList;
     PathList files;
     PathList pyFiles;
 
     // Loop over the files in the directory looking for Python files.
-    copy(boost::filesystem::directory_iterator(directory),
-         boost::filesystem::directory_iterator(), back_inserter(files));
+    copy(std::filesystem::directory_iterator(directory),
+         std::filesystem::directory_iterator(), back_inserter(files));
 
     for (auto filepath: files)
     {
-        if (filepath.extension() == boost::filesystem::path(".py"))
+        if (filepath.extension() == std::filesystem::path(".py"))
             pyFiles.push_back(filepath);
     }
 
@@ -649,7 +649,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 * Add the .py file in the given path as a module to __main__ and add the
 * reference to the dictionary (this->modules)
 */
-void PythonEval::add_module_file(const boost::filesystem::path &file)
+void PythonEval::add_module_file(const std::filesystem::path &file)
 {
     // Add this file's parent path to sys.path so Python imports
     // can find it.
@@ -718,8 +718,10 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
 
         else if ('.' == pathString[0]) {
-            boost::filesystem::path base(getcwd(NULL, 0));
-            auto pypath = boost::filesystem::canonical(pathString, base);
+            std::string base = getcwd(NULL, 0);
+            base += '/';
+            base += pathString;
+            auto pypath = std::filesystem::canonical(base);
             loadmod_prep(pypath.string(), NULL);
             continue;
 
