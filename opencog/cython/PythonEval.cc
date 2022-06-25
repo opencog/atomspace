@@ -1444,7 +1444,7 @@ std::string PythonEval::poll_result()
     if (0 < _result.size()) r += "\n";
 
     // Report the error string too, but only the first time.
-    if (_caught_error) r = _capture_stdout + _error_string + "\n";
+    if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
 
     _result.clear();
     _capture_stdout.clear();
