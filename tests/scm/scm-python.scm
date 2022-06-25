@@ -13,12 +13,13 @@
 
 ; Python print itself evaluates to 'None'. But before that, it
 ; prints stuff to stdout, which we expect to see.
-(define expected "Hello world\n 4\nNone\n")
+(define expected "Hello world\n 4\n")
 
 ; CxxTest steals away stdout, and eats the result of the print
 ; statement. So if we are running this test in the CxxTest harness
 ; then there's no "Hello world" (but if you run it by hand, there is.)
-(define expected-in-cxxtest "None\n")
+; (define expected-in-cxxtest "None\n")  ; None is no longer returned!
+(define expected-in-cxxtest "")
 
 (format #t "python-eval returned this: >>~A<<\n" rc)
 

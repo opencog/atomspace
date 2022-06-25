@@ -1181,7 +1181,7 @@ bool PythonEval::check_for_error()
     _result = "";
     _eval_done = true;
     _wait_done.notify_all();
-    throw RuntimeException(TRACE_INFO, "%s", error_string.c_str());
+    throw SilentException();
 }
 
 // ===================================================================
@@ -1268,7 +1268,7 @@ std::string PythonEval::execute_script(const std::string& script)
     // was an error.
     std::string rc = execute_string(script.c_str());
 
-    if (check_for_error()) rc += _error_string;
+    check_for_error();
     return rc;
 }
 
@@ -1313,7 +1313,12 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
         close(pipefd[0]);
     } BOOST_SCOPE_EXIT_END
 
-    std::string res = execute_script(expr);
+    std::string res;
+    try {
+        res = execute_script(expr);
+    } catch (const SilentException&) {
+        res = _error_string;
+    }
     return res;
 }
 
@@ -1430,13 +1435,15 @@ std::string PythonEval::poll_result()
     }
     lck.unlock();
 
+    if (0 == _result.compare("None")) _result.clear();
     std::string r = _capture_stdout + _result;
 
     // Add the missing newline
     if (0 < _result.size()) r += "\n";
 
     // Report the error string too, but only the first time.
-    if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
+    // Except this is already reported, when the exception is caught ...
+    // if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
 
     _result.clear();
     _capture_stdout.clear();
