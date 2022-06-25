@@ -1317,7 +1317,7 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     try {
         res = execute_script(expr);
     } catch (const SilentException&) {
-        // res = _error_string;
+        res = _error_string;
     } catch (const RuntimeException& ex) {
         res = ex.what();
     }
@@ -1444,7 +1444,8 @@ std::string PythonEval::poll_result()
     if (0 < _result.size()) r += "\n";
 
     // Report the error string too, but only the first time.
-    if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
+    // Except this is already reported, when the exception is caught ...
+    // if (_caught_error and 0 < _result.size()) r += _error_string + "\n";
 
     _result.clear();
     _capture_stdout.clear();
