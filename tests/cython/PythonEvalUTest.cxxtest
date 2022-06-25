@@ -184,8 +184,10 @@ public:
         PythonEval::create_singleton_instance();
         PythonEval* python = &PythonEval::instance();
 
-        TS_ASSERT_THROWS(std::string eval_res = python->eval(
-                    "from opencog.atomspace import vsfvkdfjnv\n"), RuntimeException);
+        // No. Throwing messes up the cogserver.  Just report this as
+        // an ordinary syntax error.
+        //TS_ASSERT_THROWS(std::string eval_res = python->eval(
+        //            "from opencog.atomspace import vsfvkdfjnv\n"), RuntimeException);
 
         // Define python functions for use by scheme.
         std::string eval_res = python->eval(
