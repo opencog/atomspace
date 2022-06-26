@@ -1,9 +1,20 @@
+StorageNode API
+---------------
+Provides a C++ interface for access to (disk, network) AtomSpace storage.
+
+### TODO
+* Add a read-only flag, to see if the storage node is not writable.
+  (This is a small task. Just do it.) Users, such as the write-thru
+  proxy, want to know if a StorageNode is read-only, and so can avoid
+  sending it writes.
+
+* Maybe all space-frame support should be handled by the StorageNode?
+  Right now, space-frame support is ad-hoc, in `Commands.cc` and in
+  to RocksStorageNode. It probably needs to be generic!?
+
 Persist Guile API
 -----------------
-
-Provides a scheme module for the generic persistence API. This API
-is compatible with anything that uses the generic "backend" API in
-the atomspace. (So far, this is only the SQL backend).
+Provides a scheme module for the generic persistence API.
 
 To use:
 ```
