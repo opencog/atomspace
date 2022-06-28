@@ -229,9 +229,11 @@ public:
 	                   AtomSpace* = nullptr);
 
 	/**
-	 * Recursively store the atom to the backing store.
-	 * I.e. if the atom is a link, then store all of the atoms
-	 * in its outgoing set as well, recursively.
+	 * Recursively store the Atom to the backing store.
+	 * I.e. if the Atom is a Link, then store all of the Atoms
+	 * in its outgoing set as well, recursively. Store all Keys
+	 * and Values attached to the Atom (but not for any Atoms in
+	 * it outgoing set; the store of Values is NOT recursive!)
 	 */
 	void store_atom(const Handle& h);
 
