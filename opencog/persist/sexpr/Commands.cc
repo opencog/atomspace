@@ -467,9 +467,11 @@ std::string Commands::interpret_command(const std::string& cmd)
 
 	if (_dispatch_map.end() != disp)
 	{
-		pos = cmd.find_first_not_of(" \n\t", epos);
 		Meth f = disp->second;
-		return f(cmd.substr(pos));
+		pos = cmd.find_first_not_of(" \n\t", epos);
+		if (cmd.npos != pos)
+			return f(cmd.substr(pos));
+		return f(""); // no arguments available.
 	}
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
