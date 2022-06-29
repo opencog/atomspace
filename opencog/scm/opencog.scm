@@ -91,6 +91,7 @@ cog-tv-merge
 cog-tv-merge-hi-conf
 cog-type
 cog-type->int
+cog-update-value!
 cog-value
 cog-value?
 cog-value->list

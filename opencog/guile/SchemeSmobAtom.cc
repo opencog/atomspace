@@ -174,8 +174,8 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	}
 }
 
-// Increment the count, keeping mean and confidence as-is.
-// Converts existing truth value to a CountTruthValue.
+/// Increment the count, keeping mean and confidence as-is.
+/// Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 {
 	Handle h = verify_handle(satom, "cog-inc-count!");
@@ -189,11 +189,11 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 }
 
 /* ============================================================== */
-// Increment the count of some generic FloatValue.
-// Just like ss_inc_count but generic.
-// key == key for value
-// cnt == how much to increment
-// ref == list-ref, which location to increment.
+/// Increment the count of some generic FloatValue.
+/// Just like ss_inc_count but generic.
+/// key == key for value
+/// cnt == how much to increment
+/// ref == list-ref, which location to increment.
 SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 {
 	Handle h = verify_handle(satom, "cog-inc-value!");
@@ -207,6 +207,32 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 
 	const AtomSpacePtr& asp = ss_get_env_as("cog-inc-value!");
 	Handle ha(asp->increment_count(h, key, delta));
+	if (ha == h)
+		return satom;
+	return handle_to_scm(ha);
+}
+
+/* ============================================================== */
+
+/// Generic atomic read-modify-write update
+SCM SchemeSmob::ss_update_value (SCM satom, SCM skey, SCM sdelta)
+{
+	Handle h = verify_handle(satom, "cog-update-value!");
+	Handle key = verify_handle(skey, "cog-update-value!", 2);
+	ValuePtr vp = verify_protom(sdelta, "cog-update-value!", 3);
+
+	// Only FloatValues are supported at this time.
+	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+	{
+		static std::exception ex = RuntimeException(TRACE_INFO,
+			"Expecting a FloatValue!");
+		throw_exception(ex, "cog-update-value!", sdelta);
+	}
+
+	FloatValuePtr fvp = FloatValueCast(vp);
+
+	const AtomSpacePtr& asp = ss_get_env_as("cog-update-value!");
+	Handle ha(asp->increment_count(h, key, fvp->value()));
 	if (ha == h)
 		return satom;
 	return handle_to_scm(ha);

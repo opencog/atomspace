@@ -543,8 +543,9 @@
      (cog-inc-count! (Concept \"Answer\") 42.0)
 
   See also:
-      cog-count to fetch the current count
-      cog-inc-value! for a generic version
+      cog-count -- Fetch the current count.
+      cog-inc-value! -- Increment an arbitrary FloatValue.
+      cog-update-value! -- A generic atomic read-modify-write.
 ")
 
 (set-procedure-property! cog-inc-value! 'documentation
@@ -560,13 +561,18 @@
   created. If the existing FloatValue is too short, it is extended
   until it is at least (REF+1) in length.
 
+  To increment several locations at once, use the cog-update-value!
+  function.
+
   Example usage:
      (cog-inc-value!
          (Concept \"Question\")
          (Predicate \"Answer\")
          42.0  0)
 
-  See also: cog-inc-count! for a version that increments the count TV.
+  See also:
+      cog-inc-count! -- Increment the CountTruthValue.
+      cog-update-value! -- A generic atomic read-modify-write.
 ")
 
 (set-procedure-property! cog-mean 'documentation
@@ -765,10 +771,34 @@
        #f
 
     See also:
-       cog-set-values! ATOM ALIST - Set multiple values.
+       cog-update-value! - Perform an atomic read-modify-write
+       cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
-       cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
+       cog-atomspace-cow! - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
+")
+
+(set-procedure-property! cog-update-value! 'documentation
+"
+ cog-update-value! ATOM KEY DELTA
+    Perform an atomic read-modify-write update of the value at KEY
+    on ATOM, using DELTA to modify the original value.
+
+    At this time, the only updates that are implemented are the
+    increment of floating-point Values, such as FloatValues and
+    TruthValues. The intended use is for the safe update of counts
+    from multiple threads.
+
+    This function is similar to the `cog-inc-value!` function, except
+    that it allows a full-vector update. When DELTA is a vector, with
+    multiple non-zero entries, all of them are added to the matching
+    entries in the Value at KEY. This is a vector-increment.
+
+    See also:
+       cog-inc-count! -- Increment a CountTruthValue
+       cog-inc-value! -- Increment a generic FloatValue
+       cog-set-value! -- Set a single value.
+       cog-set-values! -- Set multiple values.
 ")
 
 (set-procedure-property! cog-set-values! 'documentation

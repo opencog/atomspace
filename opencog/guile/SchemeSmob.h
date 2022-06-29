@@ -128,6 +128,7 @@ private:
 	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
+	static SCM ss_update_value(SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
