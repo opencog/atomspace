@@ -460,15 +460,15 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 // Copy-on-write for incrementing truth values.
 Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
 {
-	#define INC_TV(atom) atm->incrementCountTV(cnt);
-	COWBOY_CODE(SET_TV);
+	#define INC_TV(atm) atm->incrementCountTV(cnt);
+	COWBOY_CODE(INC_TV);
 }
 
 Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
                                   const std::vector<double>& count)
 {
 	#define INCR_CNT(atm) atm->incrementCount(key, count);
-	COWBOY_CODE(SET_TV);
+	COWBOY_CODE(INCR_CNT);
 }
 
 std::string AtomSpace::to_string(void) const

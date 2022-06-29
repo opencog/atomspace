@@ -178,8 +178,6 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 // Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 {
-	static std::mutex count_mtx;
-
 	Handle h = verify_handle(satom, "cog-inc-count!");
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
@@ -198,33 +196,17 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 // ref == list-ref, which location to increment.
 SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 {
-	static std::mutex incr_mtx;
-
 	Handle h = verify_handle(satom, "cog-inc-value!");
 	Handle key = verify_handle(skey, "cog-inc-value!", 2);
 	double cnt = verify_real(scnt, "cog-inc-value!", 3);
 	size_t ref = verify_size_t(sref, "cog-inc-value!", 4);
 
-	std::vector<double> new_value;
-
-	// Lock so that count updates are atomic!
-	std::lock_guard<std::mutex> lck(incr_mtx);
-
-	ValuePtr v = h->getValue(key);
-	if (nullptr != v and FLOAT_VALUE == v->get_type())
-	{
-		FloatValuePtr fv(FloatValueCast(v));
-		new_value = fv->value();
-		if (new_value.size() <= ref) new_value.resize(ref+1, 0.0);
-	}
-	else
-	{
-		new_value.resize(ref+1, 0.0);
-	}
-	new_value[ref] += cnt;
+	std::vector<double> delta;
+	delta.resize(ref+1, 0.0);
+	delta[ref] = cnt;
 
 	const AtomSpacePtr& asp = ss_get_env_as("cog-inc-value!");
-	Handle ha(asp->set_value(h, key, createFloatValue(new_value)));
+	Handle ha(asp->increment_count(h, key, delta));
 	if (ha == h)
 		return satom;
 	return handle_to_scm(ha);
