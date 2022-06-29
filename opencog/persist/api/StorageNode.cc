@@ -71,6 +71,29 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 	storeValue(h, key);
 }
 
+void StorageNode::update_value(const Handle& h, const Handle& key,
+                               const ValuePtr& value)
+{
+	if (_atom_space->get_read_only())
+		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
+	if (nullptr == value) return;
+	Type vt = value->get_type();
+	if (not nameserver().isA(vt, FLOAT_VALUE))
+		throw RuntimeException(TRACE_INFO, "Can only update FloatValues!");
+
+	const FloatValuePtr& fv = FloatValueCast(value);
+	incrementCount(h, key, fv->value());
+}
+
+void StorageNode::update_count(const Handle& h, double count)
+{
+	if (_atom_space->get_read_only())
+		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
+	incrementCountTV(h, count);
+}
+
 bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 {
 	// Removal is ... tricky. We need to remove Atoms from storage first,

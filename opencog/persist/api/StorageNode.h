@@ -250,6 +250,30 @@ public:
 	void store_value(const Handle& atom, const Handle& key);
 
 	/**
+	 * Update the Value located at `key` on `atom` at the remote
+	 * server, incorporating a delta-change `delta`. This is an
+	 * atomic read-modify-write update at the server end. The goal
+	 * of this method is to allow multiple clients perform delta
+	 * changes to values, without race conditions.
+	 *
+	 * At this time, the only supported updates are increments of
+	 * counts: i.e. incremenets of FloatValues. Perhaps other kinds
+	 * of updates might be implemented in the future?
+	 *
+	 * If the `atom` does not yet exist on the remote server, it is
+	 * created there.
+	 */
+	void update_value(const Handle& atom, const Handle& key,
+	                  const ValuePtr& delta);
+
+	/**
+	 * Same as above, but for a CountTruthValue only.
+	 * XXX This might be a bad idea; CountTruthValues should
+	 * probably be made obsolete!?
+	 */
+	void update_count(const Handle& atom, double);
+
+	/**
 	 * Removes an atom from the atomspace, and any attached storage.
 	 * The atom remains valid as long as there are Handles that
 	 * reference it; it is deleted only when the last reference
