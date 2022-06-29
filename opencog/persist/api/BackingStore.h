@@ -139,6 +139,29 @@ class BackingStore
 		}
 
 		/**
+		 * Increment the count on the CountTruthValue. The increment is
+		 * done atomically, so that different writers do not race with a
+		 * read-modify-write operation. The count on the local atom is
+		 * updated with the new count; however, it might not reflect the
+		 * true count at the remote destination, if there are other writers.
+		 * Thus, it behaves like storeValue() above: if there are other
+		 * writers, this backend is not automatically aware of those updates.
+		 */
+		virtual void incrementCountTV(const Handle& atom, double delta)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
+		 * Same as above, but for generic FloatValues.
+		 */
+		virtual void incrementCount(const Handle& atom, const Handle& key,
+		                            const std::vector<double>& delta)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
 		 * Fetch the Value located at `key` on `atom` from the remote
 		 * server, and place it on `key` on `atom` in this AtomSpace.
 		 *
