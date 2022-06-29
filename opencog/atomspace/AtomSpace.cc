@@ -486,6 +486,7 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
 {
     AtomSpace* has = h->getAtomSpace();
+    // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
     // a copy of the atom, and then set the value.
     // If this is a COW space, then always copy, no matter what.
@@ -504,6 +505,36 @@ Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
         }
     } else {
         h->incrementCountTV(cnt);
+        return h;
+    }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "TruthValue not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
+}
+
+Handle AtomSpace::increment_count(const Handle&, const Handle& key,
+                                  const std::vector<double>& count)
+{
+    AtomSpace* has = h->getAtomSpace();
+    // If the atom is in a read-only atomspace (i.e. if the parent
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
+            // Copy the atom into this atomspace
+            Handle copy(add(h, true));
+            copy->incrementCount(key, count);
+            return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->incrementCount(key, count);
+            return h;
+        }
+    } else {
+        h->incrementCount(key, count);
         return h;
     }
     throw opencog::RuntimeException(TRACE_INFO,

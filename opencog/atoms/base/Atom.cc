@@ -100,20 +100,17 @@ TruthValuePtr Atom::getTruthValue() const
 
 TruthValuePtr Atom::incrementCountTV(double cnt)
 {
-	ValuePtr pap;
+	double mean = 1.0;
+	double conf = 0.0;
 
 	// Lock so that count updates are atomic!
 	KVP_UNIQUE_LOCK;
 
 	auto pr = _values.find(truth_key());
-	if (_values.end() != pr) pap = pr->second;
-
-	double mean = 1.0;
-	double conf = 0.0;
-	if (nullptr != pap)
+	if (_values.end() != pr)
 	{
-		const TruthValuePtr& tvp = TruthValueCast(pap);
-		if (COUNT_TRUTH_VALUE == pap->get_type())
+		const TruthValuePtr& tvp = TruthValueCast(pr->second);
+		if (COUNT_TRUTH_VALUE == tvp->get_type())
 			cnt += tvp->get_count();
 		mean = tvp->get_mean();
 		conf = tvp->get_confidence();
@@ -164,8 +161,6 @@ ValuePtr Atom::getValue(const Handle& key) const
     // the multi-threaded async atom store in the SQL peristance backend.
     // Furthermore, we must make a copy while holding the lock! Got that?
 
-    ValuePtr pap;
-
     // This is rather irritating, but we fake it for the
     // PredicateNode "*-TruthValueKey-*" because if we don't
     // then load-from-file and load-from-network breaks.
@@ -173,15 +168,47 @@ ValuePtr Atom::getValue(const Handle& key) const
     {
         KVP_SHARED_LOCK;
         auto pr = _values.find(truth_key());
-        if (_values.end() != pr) pap = pr->second;
+        if (_values.end() != pr) return pr->second;
     }
     else
     {
         KVP_SHARED_LOCK;
         auto pr = _values.find(key);
-        if (_values.end() != pr) pap = pr->second;
+        if (_values.end() != pr) return pr->second;
     }
-    return pap;
+
+    return ValuePtr();
+}
+
+ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& count)
+{
+	std::vector<double> new_value;
+
+	KVP_SHARED_LOCK;
+
+	// Find the existing value, if it is there.
+	auto pr = _values.find(key);
+	if (_values.end() != pr)
+	{
+		const ValuePtr& pap = pr->second;
+		if (FLOAT_VALUE == pap->get_type())
+		{
+			FloatValuePtr fv(FloatValueCast(pap));
+			new_value = fv->value();
+		}
+	}
+
+	// Increment the existing value (or create a new one).
+	size_t cntsz = count.size();
+	if (new_value.size() <= cntsz)
+		new_value.resize(cntsz, 0.0);
+	for (size_t i=0; i<cntsz; i++)
+		new_value[i] += count[i];
+
+	// Set the new value.
+	ValuePtr nv = createFloatValue(new_value);
+	_values[key] = nv;
+	return nv;
 }
 
 HandleSet Atom::getKeys() const

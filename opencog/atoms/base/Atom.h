@@ -389,7 +389,7 @@ public:
     /// Get value at `key` for this atom.
     ValuePtr getValue(const Handle& key) const;
     /// Increment a generic FloatValue.
-    ValuePtr incrementCount(const Handle& key, const std::vector<double>);
+    ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
