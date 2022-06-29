@@ -64,8 +64,6 @@ Atom::~Atom()
 }
 
 // ==============================================================
-// Whole lotta truthiness going on here.  Does it really need to be
-// this complicated!?
 
 static const Handle& truth_key(void)
 {
@@ -96,6 +94,26 @@ TruthValuePtr Atom::getTruthValue() const
     ValuePtr pap(getValue(truth_key()));
     if (nullptr == pap) return TruthValue::DEFAULT_TV();
     return TruthValueCast(pap);
+}
+
+TruthValuePtr Atom::incrementCount(double cnt) const
+{
+	ValuePtr pap;
+
+	// Lock so that count updates are atomic!
+	KVP_UNIQUE_LOCK;
+
+	auto pr = _values.find(truth_key());
+	if (_values.end() != pr) pap = pr->second;
+
+	if (nullptr != pap and COUNT_TRUTH_VALUE == pap->get_type())
+		cnt += TruthValueCast(pap)->get_count();
+
+	TruthValuePtr newTV = CountTruthValue::createTV(
+		tv->get_mean(), tv->get_confidence(), cnt);
+
+	_values[truth_key()] = ValueCast(newTV);
+	return newTV;
 }
 
 // ==============================================================
