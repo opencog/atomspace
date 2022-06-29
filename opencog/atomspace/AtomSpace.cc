@@ -403,83 +403,72 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     return vptr;
 }
 
+// COW == Copy On Write
+#define COWBOY_CODE(DO_STUFF)                                            \
+    AtomSpace* has = h->getAtomSpace();                                  \
+                                                                         \
+    /* Hmm. It's kind-of a user-error, if they give us a naked atom.  */ \
+    /* We could throw here, and force them to fix their code, or we   */ \
+    /* can silently do what they wanted!? Which will probably expose  */ \
+    /* other hard-to-debug bugs in the user's code ...                */ \
+    /* if (nullptr == has)                                            */ \
+    /*     throw opencog::RuntimeException(TRACE_INFO,                */ \
+    /*            "Your atom is needs to be placed in an atomspace!") */ \
+                                                                         \
+    /* If the atom is in a read-only atomspace (i.e. if the parent    */ \
+    /* is read-only) and this atomspace is read-write, then make      */ \
+    /* a copy of the atom, and then set the value.                    */ \
+    /* If this is a COW space, then always copy, no matter what.      */ \
+    if (nullptr == has or has->_read_only or _copy_on_write) {           \
+        if (has != this and (_copy_on_write or not _read_only)) {        \
+            /* Copy the atom into this atomspace                      */ \
+            Handle copy(add(h, true));                                   \
+            DO_STUFF(copy);                                              \
+            return copy;                                                 \
+        }                                                                \
+                                                                         \
+        /* No copy needed. Safe to just update.                       */ \
+        if (has == this and not _read_only) {                            \
+            DO_STUFF(h);                                                 \
+            return h;                                                    \
+        }                                                                \
+    } else {                                                             \
+        DO_STUFF(h);                                                     \
+        return h;                                                        \
+    }                                                                    \
+    throw opencog::RuntimeException(TRACE_INFO,                          \
+         "Value not changed; AtomSpace is readonly");                    \
+    return Handle::UNDEFINED;
+
+
 // Copy-on-write for setting values.
 Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
                             const ValuePtr& value)
 {
-    AtomSpace* has = h->getAtomSpace();
-
-    // Hmm. It's kind-of a user-error, if they give us a naked atom.
-    // We could throw here, and force them to fix their code, or we
-    // can silently do what they wanted!? Which will probably expose
-    // other hard-to-debug bugs in the user's code ...
-    // if (nullptr == has)
-    //     throw opencog::RuntimeException(TRACE_INFO,
-    //            "Your atom is needs to be placed in an atomspace!")
-
-    // If the atom is in a read-only atomspace (i.e. if the parent
-    // is read-only) and this atomspace is read-write, then make
-    // a copy of the atom, and then set the value.
-    // If this is a COW space, then always copy, no matter what.
-    if (nullptr == has or has->_read_only or _copy_on_write) {
-        if (has != this and (_copy_on_write or not _read_only)) {
-            // Copy the atom into this atomspace
-            Handle copy(add(h, true));
-            copy->setValue(key, value);
-            return copy;
-        }
-
-        // No copy needed. Safe to just update.
-        if (has == this and not _read_only) {
-            h->setValue(key, value);
-            return h;
-        }
-    } else {
-        h->setValue(key, value);
-        return h;
-    }
-    throw opencog::RuntimeException(TRACE_INFO,
-         "Value not changed; AtomSpace is readonly");
-    return Handle::UNDEFINED;
+   #define SETV(atm) atm->setValue(key, value);
+	COWBOY_CODE(SETV);
 }
 
 // Copy-on-write for setting truth values.
 Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 {
-    AtomSpace* has = h->getAtomSpace();
-    // Hmm. It's kind-of a user-error, if they give us a naked atom.
-    // We could throw here, and force them to fix their code, or we
-    // can silently do what they wanted!? Which will probably expose
-    // other hard-to-debug bugs in the user's code ...
-    // if (nullptr == has)
-    //     throw opencog::RuntimeException(TRACE_INFO,
-    //            "Your atom is needs to be placed in an atomspace!")
+   #define SET_TV(atm) atm->setTruthValue(tvp);
+	COWBOY_CODE(SET_TV);
+}
 
-    // If the atom is in a read-only atomspace (i.e. if the parent
-    // is read-only) and this atomspace is read-write, then make
-    // a copy of the atom, and then set the value.
-    // If this is a COW space, then always copy, no matter what.
-    if (nullptr == has or has->_read_only or _copy_on_write) {
-        if (has != this and (_copy_on_write or not _read_only)) {
-            // Copy the atom into this atomspace
-            Handle copy(add(h, true));
-            copy->setTruthValue(tvp);
-            return copy;
-        }
+// Copy-on-write for incrementing truth values.
+Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
+{
+	#define INC_TV(atm) atm->incrementCountTV(cnt);
+	COWBOY_CODE(INC_TV);
+}
 
-        // No copy needed. Safe to just update.
-        if (has == this and not _read_only) {
-            h->setTruthValue(tvp);
-            return h;
-        }
-    } else {
-        h->setTruthValue(tvp);
-        return h;
-    }
-    throw opencog::RuntimeException(TRACE_INFO,
-         "TruthValue not changed; AtomSpace is readonly");
-    return Handle::UNDEFINED;
+Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
+                                  const std::vector<double>& count)
+{
+	#define INCR_CNT(atm) atm->incrementCount(key, count);
+	COWBOY_CODE(INCR_CNT);
 }
 
 std::string AtomSpace::to_string(void) const

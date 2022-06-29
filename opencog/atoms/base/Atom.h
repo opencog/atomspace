@@ -380,10 +380,16 @@ public:
     //! Sets the TruthValue object of the atom.
     void setTruthValue(const TruthValuePtr&);
 
+    /// Increment the CountTruthValue atomically.
+    /// Return the new TruthValue
+    TruthValuePtr incrementCountTV(double);
+
     /// Associate `value` to `key` for this atom.
     void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
     ValuePtr getValue(const Handle& key) const;
+    /// Increment a generic FloatValue.
+    ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
