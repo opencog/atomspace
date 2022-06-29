@@ -67,6 +67,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_store_atom, "persist", false);
 	define_scheme_primitive("sn-store-value",
 	             &PersistSCM::sn_store_value, "persist", false);
+	define_scheme_primitive("sn-update-value",
+	             &PersistSCM::sn_update_value, "persist", false);
 	define_scheme_primitive("sn-load-atoms-of-type",
 	             &PersistSCM::sn_load_type, "persist", false);
 	define_scheme_primitive("sn-load-atomspace",
@@ -102,6 +104,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_store_atom, this, "persist", false);
 	define_scheme_primitive("dflt-store-value",
 	             &PersistSCM::dflt_store_value, this, "persist", false);
+	define_scheme_primitive("dflt-update-value",
+	             &PersistSCM::dflt_update_value, this, "persist", false);
 	define_scheme_primitive("dflt-load-atoms-of-type",
 	             &PersistSCM::dflt_load_type, this, "persist", false);
 	define_scheme_primitive("dflt-load-atomspace",
@@ -247,6 +251,12 @@ void PersistSCM::sn_store_value(Handle h, Handle key, Handle hsn)
 	stnp->store_value(h, key);
 }
 
+void PersistSCM::sn_update_value(Handle h, Handle key, ValuePtr delta, Handle hsn)
+{
+	GET_STNP;
+	stnp->update_value(h, key, delta);
+}
+
 void PersistSCM::sn_load_type(Type t, Handle hsn)
 {
 	GET_STNP;
@@ -372,6 +382,12 @@ void PersistSCM::dflt_store_value(Handle h, Handle key)
 {
 	CHECK;
 	_sn->store_value(h, key);
+}
+
+void PersistSCM::dflt_update_value(Handle h, Handle key, ValuePtr delta)
+{
+	CHECK;
+	_sn->update_value(h, key, delta);
 }
 
 void PersistSCM::dflt_load_type(Type t)

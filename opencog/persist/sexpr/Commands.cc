@@ -394,14 +394,41 @@ std::string Commands::cog_set_tv(const std::string& cmd)
 }
 
 // -----------------------------------------------
+// (cog-update-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
+std::string Commands::cog_update_value(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
+	Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
+	ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
+
+	AtomSpace* as = get_opt_as(cmd, pos);
+	atom = as->add_atom(atom);
+	key = as->add_atom(key);
+
+	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+		return "()";
+
+	FloatValuePtr fvp = FloatValueCast(vp);
+	as->increment_count(atom, key, fvp->value());
+
+	// Return the new value. XXX Why? This just wastes CPU?
+	// ValuePtr vp = atom->getValue(key);
+	// return Sexpr::encode_value(vp);
+	return "()";
+}
+
+// -----------------------------------------------
 // (cog-value (Concept "foo") (Predicate "key"))
 std::string Commands::cog_value(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
-	atom = _base_space->add_atom(atom);
 	Handle key = Sexpr::decode_atom(cmd, ++pos, _space_map);
-	key = _base_space->add_atom(key);
+
+	AtomSpace* as = get_opt_as(cmd, pos);
+	atom = as->add_atom(atom);
+	key = as->add_atom(key);
 
 	ValuePtr vp = atom->getValue(key);
 	return Sexpr::encode_value(vp);

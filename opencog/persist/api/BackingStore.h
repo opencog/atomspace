@@ -139,6 +139,24 @@ class BackingStore
 		}
 
 		/**
+		 * Perform an atomic read-modify-write of the Value located at
+		 * `key` on `atom`.  The existing Value at that location is
+		 * modified by `delta`. The goal of this method is to provide
+		 * an atomic operation for that multiple racing updators can
+		 * safely use.
+		 *
+		 * At this time, the only workable/working updates are the atomic
+		 * increment of FloatValues (usually, of CountTruthValues). The
+		 * API here is generic, though, so can be used to provide other
+		 * kinds of atomic delta-changes.
+		 */
+		virtual void updateValue(const Handle& atom, const Handle& key,
+		                         const ValuePtr& delta)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
 		 * Fetch the Value located at `key` on `atom` from the remote
 		 * server, and place it on `key` on `atom` in this AtomSpace.
 		 *

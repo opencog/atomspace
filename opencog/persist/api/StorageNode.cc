@@ -71,6 +71,15 @@ void StorageNode::store_value(const Handle& h, const Handle& key)
 	storeValue(h, key);
 }
 
+void StorageNode::update_value(const Handle& h, const Handle& key,
+                               const ValuePtr& delta)
+{
+	if (_atom_space->get_read_only())
+		throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
+	updateValue(h, key, delta);
+}
+
 bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 {
 	// Removal is ... tricky. We need to remove Atoms from storage first,
