@@ -186,6 +186,13 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 
 	KVP_SHARED_LOCK;
 
+	// XXX FIXME. The code below should be changed to do
+	// if (nameserver().isA(vt, FLOAT_VALUE))
+	// and then to use a factory to create a new value of
+	// the same type... we're not doing this right now, because
+	// it's not obvious how the derived types should respond to
+	// an increment request. More work would need to be done here.
+
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
 	if (_values.end() != pr)
