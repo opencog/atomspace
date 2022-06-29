@@ -267,13 +267,6 @@ public:
 	                  const ValuePtr& delta);
 
 	/**
-	 * Same as above, but for a CountTruthValue only.
-	 * XXX This might be a bad idea; CountTruthValues should
-	 * probably be made obsolete!?
-	 */
-	void update_count(const Handle& atom, double);
-
-	/**
 	 * Removes an atom from the atomspace, and any attached storage.
 	 * The atom remains valid as long as there are Handles that
 	 * reference it; it is deleted only when the last reference
