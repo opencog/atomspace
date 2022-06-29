@@ -26,6 +26,7 @@
 	fetch-query
 	store-atom
 	store-value
+	update-value
 	load-atoms-of-type
 	cog-delete!
 	cog-delete-recursive!
@@ -213,10 +214,36 @@
     used as the target of the store. It must be a StorageNode.
 
     See also:
+       `update-value` to perform an atomic read-modify-write.
        `store-atom` to store all values on an Atom.
        `fetch-value` to fetch just one Value.
 "
 	(if STORAGE (sn-store-value ATOM KEY STORAGE) (dflt-store-value ATOM KEY))
+)
+
+(define*-public (update-value ATOM KEY DELTA #:optional (STORAGE #f))
+"
+ update-value ATOM KEY DELTA [STORAGE]
+
+    Update the Value located at KEY on ATOM, folding in DELTA. This
+    performs an atomic read-modify-write of the Value located at KEY.
+
+    At this time, the only implemented updates are atomic increments
+    of floating-point values stored in a FloatValue or in a TruthValue.
+    The intended use is to allow lots of clients to simultaneously
+    update counts on ATOM, without having them clobber each-other with
+    a non-atomic update.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the store. It must be a StorageNode.
+
+    See also:
+       `store-value` to store a single value on an Atom.
+       `store-atom` to store all values on an Atom.
+       `fetch-value` to fetch just one Value.
+"
+	(if STORAGE (sn-update-value ATOM KEY DELTA STORAGE)
+		(dflt-update-value ATOM KEY DELTA))
 )
 
 (define*-public (load-atoms-of-type TYPE #:optional (STORAGE #f))
