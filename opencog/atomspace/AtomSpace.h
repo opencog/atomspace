@@ -394,6 +394,17 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
+     * Increment the count on a CountTrutheValue, or increment the count
+     * on a general Value. The increment is performed atomically, so that
+     * there are no races in the update. Atomspaces that are read-only, COW,
+     * or frames are handled as described above, for `set_value()`.
+     *
+     * If the atom is copied, then the copy is returned.
+     */
+    Handle increment_count(const Handle&, const Handle& key, const std::vector<double>&);
+    Handle increment_countTV(const Handle&, double);
+
+    /**
      * Find an equivalent Atom that is exactly the same as the arg.
      * If such an atom is in the AtomSpace, or in any of it's parent
      * AtomSpaces, return that Atom. Return the shallowest such Atom.

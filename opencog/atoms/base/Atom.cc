@@ -35,6 +35,8 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -96,7 +98,7 @@ TruthValuePtr Atom::getTruthValue() const
     return TruthValueCast(pap);
 }
 
-TruthValuePtr Atom::incrementCount(double cnt) const
+TruthValuePtr Atom::incrementCountTV(double cnt)
 {
 	ValuePtr pap;
 
@@ -106,11 +108,18 @@ TruthValuePtr Atom::incrementCount(double cnt) const
 	auto pr = _values.find(truth_key());
 	if (_values.end() != pr) pap = pr->second;
 
-	if (nullptr != pap and COUNT_TRUTH_VALUE == pap->get_type())
-		cnt += TruthValueCast(pap)->get_count();
+	double mean = 1.0;
+	double conf = 0.0;
+	if (nullptr != pap)
+	{
+		const TruthValuePtr& tvp = TruthValueCast(pap);
+		if (COUNT_TRUTH_VALUE == pap->get_type())
+			cnt += tvp->get_count();
+		mean = tvp->get_mean();
+		conf = tvp->get_confidence();
+	}
 
-	TruthValuePtr newTV = CountTruthValue::createTV(
-		tv->get_mean(), tv->get_confidence(), cnt);
+	TruthValuePtr newTV = CountTruthValue::createTV(mean, conf, cnt);
 
 	_values[truth_key()] = ValueCast(newTV);
 	return newTV;
