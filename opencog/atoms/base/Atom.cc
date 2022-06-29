@@ -183,22 +183,17 @@ ValuePtr Atom::getValue(const Handle& key) const
 ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& count)
 {
 	std::vector<double> new_value;
+	Type vt = FLOAT_VALUE;
 
 	KVP_SHARED_LOCK;
-
-	// XXX FIXME. The code below should be changed to do
-	// if (nameserver().isA(vt, FLOAT_VALUE))
-	// and then to use a factory to create a new value of
-	// the same type... we're not doing this right now, because
-	// it's not obvious how the derived types should respond to
-	// an increment request. More work would need to be done here.
 
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
 	if (_values.end() != pr)
 	{
 		const ValuePtr& pap = pr->second;
-		if (FLOAT_VALUE == pap->get_type())
+		vt = pap->get_type();
+		if (nameserver().isA(vt, FLOAT_VALUE))
 		{
 			FloatValuePtr fv(FloatValueCast(pap));
 			new_value = fv->value();
@@ -213,7 +208,12 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 		new_value[i] += count[i];
 
 	// Set the new value.
-	ValuePtr nv = createFloatValue(new_value);
+	ValuePtr nv;
+	if (nameserver().isA(vt, TRUTH_VALUE))
+		nv = ValueCast(TruthValue::factory(vt, new_value));
+	else
+		nv = createFloatValue(new_value);
+
 	_values[key] = nv;
 	return nv;
 }
