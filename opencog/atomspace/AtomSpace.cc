@@ -482,6 +482,35 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
     return Handle::UNDEFINED;
 }
 
+// Copy-on-write for incrementing truth values.
+Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
+{
+    AtomSpace* has = h->getAtomSpace();
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    // If this is a COW space, then always copy, no matter what.
+    if (nullptr == has or has->_read_only or _copy_on_write) {
+        if (has != this and (_copy_on_write or not _read_only)) {
+            // Copy the atom into this atomspace
+            Handle copy(add(h, true));
+            copy->incrementCountTV(cnt);
+            return copy;
+        }
+
+        // No copy needed. Safe to just update.
+        if (has == this and not _read_only) {
+            h->incrementCountTV(cnt);
+            return h;
+        }
+    } else {
+        h->incrementCountTV(cnt);
+        return h;
+    }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "TruthValue not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
+}
+
 std::string AtomSpace::to_string(void) const
 {
 	std::stringstream ss;

@@ -183,18 +183,8 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	Handle h = verify_handle(satom, "cog-inc-count!");
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
-	// Lock so that count updates are atomic!
-	std::lock_guard<std::mutex> lck(count_mtx);
-	TruthValuePtr tv = h->getTruthValue();
-	if (COUNT_TRUTH_VALUE == tv->get_type())
-	{
-		cnt += tv->get_count();
-	}
-	tv = CountTruthValue::createTV(
-		tv->get_mean(), tv->get_confidence(), cnt);
-
 	const AtomSpacePtr& asp = ss_get_env_as("cog-inc-count!");
-	Handle ha(asp->set_truthvalue(h, tv));
+	Handle ha(asp->increment_countTV(h, cnt));
 	if (ha == h)
 		return satom;
 	return handle_to_scm(ha);
