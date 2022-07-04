@@ -384,6 +384,8 @@ Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
 
 ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
 {
+    if (nullptr == vptr) return vptr;
+
     Type t = vptr->get_type();
     if (nameserver().isA(t, ATOM))
     {
