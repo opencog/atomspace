@@ -178,12 +178,7 @@ std::string Commands::cog_execute_cache(const std::string& cmd)
 	if (nullptr != rslt and not force)
 		return Sexpr::encode_value(rslt);
 
-	// For now, prevent general execution.
-	Type qt = query->get_type();
-	if (not nameserver().isA(qt, PATTERN_LINK) and
-	    not nameserver().isA(qt, JOIN_LINK))
-		return "#f";
-
+	// Runn the query.
 	rslt = query->execute();
 	_base_space->set_value(query, key, rslt);
 
