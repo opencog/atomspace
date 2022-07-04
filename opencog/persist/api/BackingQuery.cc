@@ -40,6 +40,14 @@
 namespace opencog
 {
 
+// Three callbacks are defined below, all called `class BackingFoo...`.
+// These are used during pattern matching, so that when the pattern
+// query is performed in the local atomspace, it is supplied with the
+// correct set of atoms to crawl over, supplied by the storage node.
+// Most typically, during the crawl, the incoming set of an Atom is
+// needed; these will go and get that incoming set from storage,
+// whenever the crawler asks for it.
+
 // Callback for QueryLinks
 class BackingImplicator : public Implicator
 {
@@ -157,10 +165,10 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 ///
 /// For the "remote storage" case, the below is much closer to ideal.
 /// Asking users to "do it themselves" for the remote case is
-/// inefficient. The query is computed on the remote server, and is
-/// shipped to the local server. The "do-it-yourself" cases would then
-/// ship the query results back to the server... which is a pointless
-/// waste of network bandwidth and risks extra latency.
+/// inefficient. The query is computed on the remote server, and the
+/// result is shipped to the local server. The "do-it-yourself" cases
+/// would then ship the query results back to the server... which is
+/// a pointless waste of network bandwidth and risks extra latency.
 ///
 /// So, I'm thinking, ... Maybe we need two versions of this: a cached
 /// and a non-cached API... or maybe one more flag-- an "always cache
@@ -191,6 +199,14 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	// Still no luck. Bummer. Perform the query.
 	AtomSpace* as = query->getAtomSpace();
 
+	// Special-case handling for Query, Meet and Join links. When
+	// these are executed, they are executed in the *local* AtomSpace.
+	// The pattern engine does a graph crawl, and as it crawls, it
+	// needs things like the incoming set of assorted Atoms. This
+	// incoming set is typically *not* in the local AtomSpace; but it
+	// is in storage. Thus, the imcoming set must be fetched from
+	// storage, before the graph craw can continue. The
+	// `class  BackingImplicator` and related classes do this fetch.
 	Type qt = query->get_type();
 	ValuePtr qv;
 	if (nameserver().isA(qt, QUERY_LINK))
@@ -222,17 +238,15 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
 		release_transient_atomspace(tas);
 	}
-	else if (nameserver().isA(qt, FUNCTION_LINK))
+	else if (query->is_executable())
 	{
 		AtomSpace* tas = grab_transient_atomspace(as);
-
 		qv = query->execute(tas);
 		release_transient_atomspace(tas);
 	}
-	else if (nameserver().isA(qt, EVALUATABLE_LINK))
+	else if (query->is_evaluatable())
 	{
 		AtomSpace* tas = grab_transient_atomspace(as);
-
 		qv = ValueCast(query->evaluate(tas));
 		release_transient_atomspace(tas);
 	}
