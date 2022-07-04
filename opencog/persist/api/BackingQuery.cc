@@ -174,15 +174,6 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 void BackingStore::runQuery(const Handle& query, const Handle& key,
                             const Handle& meta, bool fresh)
 {
-	Type qt = query->get_type();
-	if (not nameserver().isA(qt, MEET_LINK) and
-	    not nameserver().isA(qt, QUERY_LINK) and
-	    not nameserver().isA(qt, JOIN_LINK))
-	{
-		throw IOException(TRACE_INFO,
-			"For now, only Meet, Join and Query are supported!");
-	}
-
 	if (not fresh)
 	{
 		// Return cached value, by default.
@@ -200,6 +191,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	// Still no luck. Bummer. Perform the query.
 	AtomSpace* as = query->getAtomSpace();
 
+	Type qt = query->get_type();
 	ValuePtr qv;
 	if (nameserver().isA(qt, QUERY_LINK))
 	{
@@ -228,6 +220,20 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		BackingJoinCallback rjcb(this, tas);
 
 		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
+		release_transient_atomspace(tas);
+	}
+	else if (nameserver().isA(qt, FUNCTION_LINK))
+	{
+		AtomSpace* tas = grab_transient_atomspace(as);
+
+		qv = query->execute(tas);
+		release_transient_atomspace(tas);
+	}
+	else if (nameserver().isA(qt, EVALUATABLE_LINK))
+	{
+		AtomSpace* tas = grab_transient_atomspace(as);
+
+		qv = ValueCast(query->evaluate(tas));
 		release_transient_atomspace(tas);
 	}
 	else

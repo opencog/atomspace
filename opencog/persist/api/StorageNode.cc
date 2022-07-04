@@ -173,10 +173,12 @@ Handle StorageNode::fetch_query(const Handle& query, const Handle& key,
                                 const Handle& metadata, bool fresh,
                                 AtomSpace* as)
 {
-	// At this time, we restrict queries to be ... queries.
+	// Queries can be anything executable or evaluatable.
 	Type qt = query->get_type();
 	if (not nameserver().isA(qt, JOIN_LINK) and
-		not nameserver().isA(qt, PATTERN_LINK))
+		not nameserver().isA(qt, PATTERN_LINK) and
+		not nameserver().isA(qt, FUNCTION_LINK) and
+		not nameserver().isA(qt, EVALUATABLE_LINK))
 		throw RuntimeException(TRACE_INFO, "Not a Join or Meet!");
 
 	if (nullptr == as) as = getAtomSpace();
