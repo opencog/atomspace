@@ -31,11 +31,11 @@
 #include <fstream>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/sexpr/Sexpr.h>
 #include <opencog/persist/storage/storage_types.h>
 
 #include "fast_load.h"
 #include "FileStorage.h"
-#include "Sexpr.h"
 
 using namespace opencog;
 

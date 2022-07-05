@@ -21,10 +21,7 @@ cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog"
     void c_clear_context "opencog::clear_context" ();
 
 
-# Its located in "opencog/persist/sexpr/" in the source tree,
-# but is installed to "opencog/persist/file/". Cython wants the
-# source location, not the install location.
-cdef extern from "opencog/persist/sexpr/fast_load.h" namespace "opencog":
+cdef extern from "opencog/persist/file/fast_load.h" namespace "opencog":
     void c_load_file "opencog::load_file" (const string path, cAtomSpace & atomspace);
 
 
