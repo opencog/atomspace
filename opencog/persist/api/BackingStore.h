@@ -171,7 +171,7 @@ class BackingStore
 		/**
 		 * Run the `query` on the remote server, and place the results
 		 * at `key` on the Atom `query`, both locally, and remotely.
-		 * The `query` must be either a JoinLink, MeetLink or QueryLink.
+		 * The `query` can be any executable or evaluatable Atom.
 		 *
 		 * It is intended that remote servers will usually cache the
 		 * query results at `key`, and so future requests for the same
@@ -203,18 +203,6 @@ class BackingStore
 		 * Only the Atoms that were the result of the search are returned.
 		 * Any Values hanging off those Atoms are not transferred from
 		 * the remote server to the local AtomSpace.
-		 *
-		 * FYI Design Note: in principle, I suppose that we could have
-		 * this method run any atom that has an `execute()` method on
-		 * it. At this time, this is not allowed, for somewhat vague
-		 * and arbitrary reasons: (1) we do not want to DDOS the remote
-		 * server with heavy CPU processing demands (you can use the
-		 * CogServer directly, if you want to do that). We also want to
-		 * limit the amount of complexity that the server implementation
-		 * must provide. For example, there's a slim chance that traditional
-		 * SQL and GraphQL servers might be able to support some of the
-		 * simpler queries.  If you want full-function hypergraph query,
-		 * just use the CogServer directly.
 		 */
 		virtual void runQuery(const Handle& query, const Handle& key,
 		                      const Handle& metadata_key = Handle::UNDEFINED,

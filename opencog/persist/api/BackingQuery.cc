@@ -40,6 +40,14 @@
 namespace opencog
 {
 
+// Three callbacks are defined below, all called `class BackingFoo...`.
+// These are used during pattern matching, so that when the pattern
+// query is performed in the local atomspace, it is supplied with the
+// correct set of atoms to crawl over, supplied by the storage node.
+// Most typically, during the crawl, the incoming set of an Atom is
+// needed; these will go and get that incoming set from storage,
+// whenever the crawler asks for it.
+
 // Callback for QueryLinks
 class BackingImplicator : public Implicator
 {
@@ -130,6 +138,10 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// only those atoms that satisfy the query. (i.e. load them into the
 /// AtomSpace.)
 ///
+/// This provides a default implementation suitable for StorageNodes
+/// that fetch Atoms from "local" hard-drive storage. It is not suitable
+/// for "remote" networked StorageNodes.
+///
 /// This is currently experimental, and subject to change.
 ///
 /// The thing I don't like about this is the caching design...
@@ -138,7 +150,8 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// easily enough, but have a high cost of shipping them (i.e. over the
 /// network). The "local" backends have a low or zero cost of shipping
 /// Atoms; the main bottleneck is just obtaining the Atoms in  the first
-/// place.  The caching needs of these two backends differ.
+/// place (from the "local" hard drive).  The caching needs of these two
+/// backends differ.
 ///
 /// The caching currently works as follows:
 /// On the first call, the query is performed, and the resulting Atoms
@@ -155,16 +168,21 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// bothersome, if the user didn't need that, and was just wanted
 /// throw-away results.
 ///
-/// For the "remote storage" case, the below is much closer to ideal.
-/// Asking users to "do it themselves" for the remote case is
-/// inefficient. The query is computed on the remote server, and is
-/// shipped to the local server. The "do-it-yourself" cases would then
-/// ship the query results back to the server... which is a pointless
-/// waste of network bandwidth and risks extra latency.
+/// For the "remote storage" case, the caching idea is much closer to
+/// a desirable ideal. Asking users to "do it themselves" for the remote
+/// case is inefficient. The query is computed on the remote server, and
+/// the result is shipped to the local server. The "do-it-yourself" cases
+/// would then ship the query results back to the server... which is
+/// a pointless waste of network bandwidth and risks extra latency.
 ///
-/// So, I'm thinking, ... Maybe we need two versions of this: a cached
-/// and a non-cached API... or maybe one more flag-- an "always cache
-/// remotely" flag...
+/// However, (1) remote storage will NOT use the code here; instead, on
+/// the client side, it will send a message to the server.  Also (2) it
+/// seems like a better design would be to implement caching as a
+/// storage policy (as described in the
+/// https://github.com/opencog/atomspace-agents project), rather than
+/// here, in the BackingStore API.
+///
+/// So, I'm thinking, just get rid of the caching specification ...
 ///
 /// See also the notes about meta-information. It's currently
 /// implemented to be compatible with what `cog-execute-cache!` does.
@@ -174,15 +192,6 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 void BackingStore::runQuery(const Handle& query, const Handle& key,
                             const Handle& meta, bool fresh)
 {
-	Type qt = query->get_type();
-	if (not nameserver().isA(qt, MEET_LINK) and
-	    not nameserver().isA(qt, QUERY_LINK) and
-	    not nameserver().isA(qt, JOIN_LINK))
-	{
-		throw IOException(TRACE_INFO,
-			"For now, only Meet, Join and Query are supported!");
-	}
-
 	if (not fresh)
 	{
 		// Return cached value, by default.
@@ -200,6 +209,15 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	// Still no luck. Bummer. Perform the query.
 	AtomSpace* as = query->getAtomSpace();
 
+	// Special-case handling for Query, Meet and Join links. When
+	// these are executed, they are executed in the *local* AtomSpace.
+	// The pattern engine does a graph crawl, and as it crawls, it
+	// needs things like the incoming set of assorted Atoms. This
+	// incoming set is typically *not* in the local AtomSpace; but it
+	// is in storage. Thus, the imcoming set must be fetched from
+	// storage, before the graph craw can continue. The
+	// `class  BackingImplicator` and related classes do this fetch.
+	Type qt = query->get_type();
 	ValuePtr qv;
 	if (nameserver().isA(qt, QUERY_LINK))
 	{
@@ -228,6 +246,18 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		BackingJoinCallback rjcb(this, tas);
 
 		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
+		release_transient_atomspace(tas);
+	}
+	else if (query->is_executable())
+	{
+		AtomSpace* tas = grab_transient_atomspace(as);
+		qv = query->execute(tas);
+		release_transient_atomspace(tas);
+	}
+	else if (query->is_evaluatable())
+	{
+		AtomSpace* tas = grab_transient_atomspace(as);
+		qv = ValueCast(query->evaluate(tas));
 		release_transient_atomspace(tas);
 	}
 	else
