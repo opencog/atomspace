@@ -38,6 +38,7 @@ class FileStorageNode : public StorageNode
 	private:
 		std::string _filename;
 		FILE* _fh;
+		bool _already_loaded;
 
 	public:
 		FileStorageNode(Type t, const std::string& uri);
