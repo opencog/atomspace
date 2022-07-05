@@ -27,7 +27,6 @@
 
 using namespace opencog;
 
-
 HandleSeq LinkValue::to_handle_seq(void) const
 {
 	update();

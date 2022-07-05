@@ -552,6 +552,9 @@ static inline AtomPtr AtomCast(const Handle& h)
 static inline Handle HandleCast(const ValuePtr& pa)
     { return Handle(AtomCast(pa)); }
 
+static inline ValuePtr ValueCast(const Handle& h)
+    { return std::dynamic_pointer_cast<Value>(h); }
+
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 // The reason indent is not an optional argument with default is

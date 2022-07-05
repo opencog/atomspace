@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -54,6 +54,14 @@ public:
 	LinkValue(const ValueSet& vset)
 		: Value(LINK_VALUE)
 	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
+
+	LinkValue(const HandleSeq& hseq)
+		: Value(LINK_VALUE)
+	{ for (const Handle& h: hseq) _value.emplace_back(h); }
+
+	LinkValue(const HandleSet& hset)
+		: Value(LINK_VALUE)
+	{ for (const Handle& h: hset) _value.emplace_back(h); }
 
 	virtual ~LinkValue() {}
 
