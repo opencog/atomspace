@@ -138,6 +138,10 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// only those atoms that satisfy the query. (i.e. load them into the
 /// AtomSpace.)
 ///
+/// This provides a default implementation suitable for StorageNodes
+/// that fetch Atoms from "local" hard-drive storage. It is not suitable
+/// for "remote" networked StorageNodes.
+///
 /// This is currently experimental, and subject to change.
 ///
 /// The thing I don't like about this is the caching design...
@@ -146,7 +150,8 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// easily enough, but have a high cost of shipping them (i.e. over the
 /// network). The "local" backends have a low or zero cost of shipping
 /// Atoms; the main bottleneck is just obtaining the Atoms in  the first
-/// place.  The caching needs of these two backends differ.
+/// place (from the "local" hard drive).  The caching needs of these two
+/// backends differ.
 ///
 /// The caching currently works as follows:
 /// On the first call, the query is performed, and the resulting Atoms
@@ -163,16 +168,21 @@ IncomingSet BackingJoinCallback::get_incoming_set(const Handle& h)
 /// bothersome, if the user didn't need that, and was just wanted
 /// throw-away results.
 ///
-/// For the "remote storage" case, the below is much closer to ideal.
-/// Asking users to "do it themselves" for the remote case is
-/// inefficient. The query is computed on the remote server, and the
-/// result is shipped to the local server. The "do-it-yourself" cases
+/// For the "remote storage" case, the caching idea is much closer to
+/// a desirable ideal. Asking users to "do it themselves" for the remote
+/// case is inefficient. The query is computed on the remote server, and
+/// the result is shipped to the local server. The "do-it-yourself" cases
 /// would then ship the query results back to the server... which is
 /// a pointless waste of network bandwidth and risks extra latency.
 ///
-/// So, I'm thinking, ... Maybe we need two versions of this: a cached
-/// and a non-cached API... or maybe one more flag-- an "always cache
-/// remotely" flag...
+/// However, (1) remote storage will NOT use the code here; instead, on
+/// the client side, it will send a message to the server.  Also (2) it
+/// seems like a better design would be to implement caching as a
+/// storage policy (as described in the
+/// https://github.com/opencog/atomspace-agents project), rather than
+/// here, in the BackingStore API.
+///
+/// So, I'm thinking, just get rid of the caching specification ...
 ///
 /// See also the notes about meta-information. It's currently
 /// implemented to be compatible with what `cog-execute-cache!` does.
