@@ -64,8 +64,18 @@ Right now, you are provided with mechanism, not policy. You have the
 tools, and you can implement whatever policy you want.
 
 
-Future directions:
-------------------
+TODO
+----
+Create a `ProxyBackingStore` and/or `ProxyStorageNode` that implements
+various different kinds of storage policies. This includes:
+* Multiplexing reads & writes to other backends.
+* Providing an expiring cache (old atomspace contents are cleared out
+  and thus are re-fetched as needed, else the cache is used.)
+* Providing non-trivial data access authorization, including read-only
+  access.
+
+Future directions
+-----------------
 To understand the future directions for the (distributed) atomspace
 and its relation to storage, read the "Big Graph Anti-Pattern" blog
 post: https://blog.blazegraph.com/?p=628
