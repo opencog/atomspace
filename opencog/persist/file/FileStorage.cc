@@ -93,6 +93,10 @@ void FileStorageNode::open(void)
 	_already_loaded = false;
 	_fh = fopen(_filename.c_str(), "a+");
 
+	// If we get a "Permission denied", then try again in read-only mode.
+	if (nullptr == _fh and (EPERM == errno or EACCES == errno))
+		_fh = fopen(_filename.c_str(), "r");
+
 	if (nullptr == _fh)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode cannot open %s: %s",
