@@ -29,9 +29,9 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/sexpr/Sexpr.h>
 
 #include "fast_load.h"
-#include "Sexpr.h"
 
 using namespace opencog;
 

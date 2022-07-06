@@ -31,17 +31,18 @@
 #include <fstream>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/sexpr/Sexpr.h>
 #include <opencog/persist/storage/storage_types.h>
 
 #include "fast_load.h"
 #include "FileStorage.h"
-#include "Sexpr.h"
 
 using namespace opencog;
 
 FileStorageNode::FileStorageNode(Type t, const std::string& uri)
 	: StorageNode(t, uri)
 {
+	_already_loaded = false;
 	_fh = nullptr;
 
 	_filename = get_name();
@@ -88,7 +89,13 @@ void FileStorageNode::open(void)
 	if (_fh)
 		throw IOException(TRACE_INFO,
 		"FileStorageNode %s is already open!", _filename.c_str());
+
+	_already_loaded = false;
 	_fh = fopen(_filename.c_str(), "a+");
+
+	// If we get a "Permission denied", then try again in read-only mode.
+	if (nullptr == _fh and (EPERM == errno or EACCES == errno))
+		_fh = fopen(_filename.c_str(), "r");
 
 	if (nullptr == _fh)
 		throw IOException(TRACE_INFO,
@@ -100,6 +107,7 @@ void FileStorageNode::close(void)
 {
 	if (_fh) fclose(_fh);
 	_fh = nullptr;
+	_already_loaded = false;
 }
 
 bool FileStorageNode::connected(void)
@@ -126,16 +134,22 @@ Handle FileStorageNode::getLink(Type, const HandleSeq&)
 	return Handle::UNDEFINED;
 }
 
-void FileStorageNode::fetchIncomingSet(AtomSpace*, const Handle&)
+void FileStorageNode::fetchIncomingSet(AtomSpace* as, const Handle&)
 {
-	throw IOException(TRACE_INFO,
-		"FileStorageNode does not support this operation!");
+	// Fake it.
+	return loadAtomSpace(as);
+
+	// throw IOException(TRACE_INFO,
+	//	"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::fetchIncomingByType(AtomSpace*, const Handle&, Type t)
+void FileStorageNode::fetchIncomingByType(AtomSpace* as, const Handle&, Type)
 {
-	throw IOException(TRACE_INFO,
-		"FileStorageNode does not support this operation!");
+	// Fake it.
+	return loadAtomSpace(as);
+
+	// throw IOException(TRACE_INFO,
+	//	"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::storeAtom(const Handle& h, bool synchronous)
@@ -182,10 +196,13 @@ void FileStorageNode::loadValue(const Handle&, const Handle&)
 		"FileStorageNode does not support this operation!");
 }
 
-void FileStorageNode::loadType(AtomSpace*, Type)
+void FileStorageNode::loadType(AtomSpace* as, Type)
 {
-	throw IOException(TRACE_INFO,
-		"FileStorageNode does not support this operation!");
+	// Fake it.
+	return loadAtomSpace(as);
+
+	// throw IOException(TRACE_INFO,
+	//	"FileStorageNode does not support this operation!");
 }
 
 void FileStorageNode::storeAtomSpace(const AtomSpace* table)
@@ -209,6 +226,9 @@ void FileStorageNode::storeAtomSpace(const AtomSpace* table)
 
 void FileStorageNode::loadAtomSpace(AtomSpace* table)
 {
+	// Avoid reading twice.
+	if (_already_loaded) return;
+
 	// Check to see if it's connected, and then ignore the file handle.
 	if (not connected())
 		throw IOException(TRACE_INFO,
@@ -221,6 +241,8 @@ void FileStorageNode::loadAtomSpace(AtomSpace* table)
 
 	parseStream(stream, *table);
 	stream.close();
+
+	_already_loaded = true;
 }
 
 DEFINE_NODE_FACTORY(FileStorageNode, FILE_STORAGE_NODE)

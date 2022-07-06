@@ -38,6 +38,7 @@ class FileStorageNode : public StorageNode
 	private:
 		std::string _filename;
 		FILE* _fh;
+		bool _already_loaded;
 
 	public:
 		FileStorageNode(Type t, const std::string& uri);
@@ -71,14 +72,8 @@ class FileStorageNode : public StorageNode
 		static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<FileStorageNode> FileStorageNodePtr;
-static inline FileStorageNodePtr FileStorageNodeCast(const Handle& h)
-   { return std::dynamic_pointer_cast<FileStorageNode>(h); }
-static inline FileStorageNodePtr FileStorageNodeCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<FileStorageNode>(a); }
-
-#define createFileStorageNode std::make_shared<FileStorageNode>
-
+NODE_PTR_DECL(FileStorageNode)
+#define createFileStorageNode CREATE_DECL(FileStorageNode)
 
 /** @}*/
 } // namespace opencog

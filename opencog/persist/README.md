@@ -17,6 +17,11 @@ Local subdirectories include:
               for RocksDB and one that allows AtomSpaces to trade
               Atoms over the network.)
 
+* file     -- Read and write files containing Atomese s-expressions.
+              Provides both a `FileStorageNode`, and also some utilities
+              to read files, and dump Atomspace contents to files or
+              guile ports (without having to use `StorageNode`s.)
+
 * gearman  -- Experimental support for distributed operation, using
               GearMan. Unused, unsupported, deprecated, more or less.
               If you are interested in this, contact the mailing list.
@@ -25,10 +30,10 @@ Local subdirectories include:
               web applications. Note, however, the `sexpr` interface
               is superior for performance and function.
 
-* sexpr    -- Read and write Atomese s-expression as UTF-8 strings.
-              Includes utilities to read files, and dump Atomspace
-              contents to files or guile ports. The cogserver uses
-              this for network-distributed AtomSpaces.
+* sexpr    -- Read and write Atomese s-expressions as UTF-8 strings.
+              Used both by the `FileStorageNode` and by `CogStorageNode`,
+              which works in conjunction with the CogServer to provide
+              network-distributed AtomSpaces.
 
 * sql      -- Postgres, for now. Works OK for most uses -- with caveats.
               Mostly, it's slow, running 3x slower than the RocksDB

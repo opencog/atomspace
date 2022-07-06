@@ -24,11 +24,8 @@
 
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-
-// Installed into opencog/persist/file/fast_load.h
-// but this wants the source location, not the install.
-#include "opencog/persist/sexpr/fast_load.h"
-#include "opencog/persist/sexpr/Sexpr.h"
+#include <opencog/persist/file/fast_load.h>
+#include <opencog/persist/sexpr/Sexpr.h>
 
 using namespace opencog;
 
