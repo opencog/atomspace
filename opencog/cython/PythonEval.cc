@@ -386,7 +386,11 @@ void opencog::global_python_initialize()
 
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#else
+        // gstate = PyGILState_Ensure();
+#endif
 
         // Many python libraries (e.g. ROS) expect sys.argv to be set.
         // So, avoid the error print, and let them know who we are.

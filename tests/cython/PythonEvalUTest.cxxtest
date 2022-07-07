@@ -37,10 +37,12 @@ public:
 
         // Start up Python.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#endif
 
         // Release the GIL.
-        PyEval_ReleaseLock();
+        // PyEval_ReleaseLock();
 
         // Stop Python.
         Py_Finalize();
@@ -49,10 +51,12 @@ public:
 
         // Start up Python.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#endif
 
         // Release the GIL.
-        PyEval_ReleaseLock();
+        // PyEval_ReleaseLock();
 
         // Stop Python.
         Py_Finalize();
@@ -61,10 +65,12 @@ public:
 
         // Start up Python.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#endif
 
         // Release the GIL.
-        PyEval_ReleaseLock();
+        // PyEval_ReleaseLock();
 
         // Stop Python.
         Py_Finalize();
@@ -80,7 +86,9 @@ public:
 
         // Get the system path object.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#endif
 
         PyRun_SimpleString(
                     "import sys\n"
@@ -110,12 +118,14 @@ public:
         // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
         // Py_DECREF(pySysPath);
 
-        PyEval_ReleaseLock();
+        // PyEval_ReleaseLock();
         Py_Finalize();
 
         // Get it again
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
+#endif
 
         PyRun_SimpleString(
                     "import sys\n"
@@ -126,7 +136,7 @@ public:
         // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
         // Py_DECREF(pySysPath);
 
-        PyEval_ReleaseLock();
+        // PyEval_ReleaseLock();
         Py_Finalize();
 
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys() DONE");
