@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-Handle opencog::parseStream(std::istream& in, AtomSpace& as)
+Handle opencog::parseStream(std::istream& in, AtomSpacePtr asp)
 {
     static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     Handle h;
@@ -71,7 +71,7 @@ Handle opencog::parseStream(std::istream& in, AtomSpace& as)
                 break;
 
             expr_cnt++;
-            h = as.add_atom(Sexpr::decode_atom(expr, l, r, line_cnt, ascache));
+            h = asp->add_atom(Sexpr::decode_atom(expr, l, r, line_cnt, ascache));
             expr = expr.substr(r + 1);
         }
     }
@@ -84,20 +84,20 @@ Handle opencog::parseStream(std::istream& in, AtomSpace& as)
 }
 
 /// load_file -- load the given file into the given AtomSpace.
-void opencog::load_file(const std::string& fname, AtomSpace& as)
+void opencog::load_file(const std::string& fname, AtomSpacePtr asp)
 {
     std::ifstream f(fname);
     if (not f.is_open())
         throw std::runtime_error("Cannot find file >>" + fname + "<<");
 
-    parseStream(f, as);
+    parseStream(f, asp);
     
     f.close();
 }
 
 // Parse an Atomese string expression and return a Handle to the parsed atom
 // The expression is assumed not to contain any newlines!
-Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
+Handle opencog::parseExpression(const std::string& expr, AtomSpacePtr asp)
 {
     static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     size_t l = 0;
@@ -119,7 +119,7 @@ Handle opencog::parseExpression(const std::string& expr, AtomSpace &as)
             throw std::runtime_error(
                 "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
 
-        h = as.add_atom(Sexpr::decode_atom(expr, l, r, 0, ascache));
+        h = asp->add_atom(Sexpr::decode_atom(expr, l, r, 0, ascache));
         l = r + 1;
         r = rr;
     }
