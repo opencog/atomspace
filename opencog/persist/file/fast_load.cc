@@ -29,6 +29,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/persist/sexpr/Commands.h>
 #include <opencog/persist/sexpr/Sexpr.h>
 
 #include "fast_load.h"
@@ -37,6 +38,8 @@ using namespace opencog;
 
 Handle opencog::parseStream(std::istream& in, AtomSpacePtr asp)
 {
+    Commands cmd;
+    cmd.set_base_space(asp);
     static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     Handle h;
     size_t expr_cnt = 0;
@@ -71,7 +74,22 @@ Handle opencog::parseStream(std::istream& in, AtomSpacePtr asp)
                 break;
 
             expr_cnt++;
-            h = asp->add_atom(Sexpr::decode_atom(expr, l, r, line_cnt, ascache));
+
+            // At this point, we expect to either have a declaration
+            // of an Atom e.g. `(ConceptNode "foo")` or we have a
+            // command e.g. `(cog-set-value! (Concept "foo") ...`.
+            // If its a command, the `Sexpr::decode_atom()` will throw
+            // a SyntaxException, and so we try again, hoping for a
+            // command.
+            try
+            {
+                h = asp->add_atom(Sexpr::decode_atom(expr, l, r, line_cnt, ascache));
+            }
+            catch (const SyntaxException& ex)
+            {
+                cmd.interpret_command(expr.substr(l));
+            }
+
             expr = expr.substr(r + 1);
         }
     }
@@ -118,8 +136,8 @@ Handle opencog::parseExpression(const std::string& expr, AtomSpacePtr asp)
         if (0 < pcount)
             throw std::runtime_error(
                 "Unbalanced parenthesis >>" + expr.substr(r) + "<<");
-
         h = asp->add_atom(Sexpr::decode_atom(expr, l, r, 0, ascache));
+
         l = r + 1;
         r = rr;
     }
