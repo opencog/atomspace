@@ -91,7 +91,7 @@
 \begin_body
 
 \begin_layout Title
-Combinatory Categorial Grammar and Link Grammar
+Combinatory Categorial Grammar and Link Grammar are Equivalent
 \end_layout
 
 \begin_layout Author
@@ -103,7 +103,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-This is a short, informal note explaining how 
+This is a short, semi-formal note explaining how 
 \begin_inset CommandInset href
 LatexCommand href
 name "Combinatory Categorial Grammar"
@@ -122,7 +122,7 @@ literal "false"
 \end_inset
 
  (LG) are equivalent.
- Covers basic ideas from proof theory, type theory, and the 
+ It covers some basic ideas from proof theory, type theory, and the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1220,27 +1220,27 @@ status open
 
 \begin_layout Plain Layout
 
-               +--------S-----+
+                     +--------S-----+
 \end_layout
 
 \begin_layout Plain Layout
 
-               |              |
+                     |              |
 \end_layout
 
 \begin_layout Plain Layout
 
-  +--N--+--NP--+--NP--+       |
+        +--N--+--NP--+--NP--+       |
 \end_layout
 
 \begin_layout Plain Layout
 
-  |     |      |      |       |
+        |     |      |      |       |
 \end_layout
 
 \begin_layout Plain Layout
 
- the   dog    bit   John  RIGHT-WALL
+       the   dog    bit   John  RIGHT-WALL
 \end_layout
 
 \begin_layout Plain Layout
@@ -1253,12 +1253,11 @@ status open
 \end_layout
 
 \begin_layout Standard
+\noindent
 where an extra jigsaw piece 
 \family typewriter
-\size large
 RIGHT-WALL: S-
 \family default
-\size default
  was introduced, so as to keep all connectors fully connected.
  The above works.
  It is not the perfered LG parse for the current English langauge dictionary.
@@ -1277,27 +1276,27 @@ status open
 
 \begin_layout Plain Layout
 
-    +-------->WV------->+
+           +-------->WV------->+
 \end_layout
 
 \begin_layout Plain Layout
 
-    +---->Wd-----+      |
+           +---->Wd-----+      |
 \end_layout
 
 \begin_layout Plain Layout
 
-    |      +Ds**c+-Ss*s-+--Os*e-+
+           |      +Ds**c+-Ss*s-+--Os*e-+
 \end_layout
 
 \begin_layout Plain Layout
 
-    |      |     |      |       |
+           |      |     |      |       |
 \end_layout
 
 \begin_layout Plain Layout
 
-LEFT-WALL the   dog    bit    John
+       LEFT-WALL the   dog    bit    John
 \end_layout
 
 \begin_layout Plain Layout
@@ -1310,25 +1309,20 @@ LEFT-WALL the   dog    bit    John
 \end_layout
 
 \begin_layout Standard
+\noindent
 The link types are obviously more complex.
  Note also the present of a cycle (the triangle, whose edges are 
 \family typewriter
-\size large
 WV
 \family default
-\size default
 , 
 \family typewriter
-\size large
 Wd
 \family default
-\size default
  and 
 \family typewriter
-\size large
 Ss*s
 \family default
-\size default
 .) Note the presence of several directed connectors.
  The complex upper-case/lower-case link types are an example of 
 \begin_inset Quotes eld
@@ -1343,11 +1337,11 @@ sexuality
 \end_layout
 
 \begin_layout Standard
-Wait, what? Sloppy and uncareful? If we are careful, and don't gloss any
- plus and minus signs, then the following derivation results:
+*** Wait, what? Sloppy and uncareful? If we are careful, and don't gloss
+ any plus and minus signs, then the following derivation results:
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>\qquad\dfrac{\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+\;\&\;NP\!-}>}{NP\!-\;\&\;S\!+\;\&\;NP\!-}\mbox{fail !!}
+\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>\qquad\dfrac{\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+\;\&\;NP\!-}>}{NP\!-\;\&\;S\!+\;\&\;NP\!-}\mbox{ fail !!}
 \]
 
 \end_inset
@@ -1382,7 +1376,7 @@ The naive translation of the above to LG derivations reveals two bugs in
  the above:
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{fail !}
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{ fail !}
 \]
 
 \end_inset
@@ -1398,7 +1392,7 @@ It should have been this:
 
 \end_inset
 
-This revised form then translates as: 
+This corrected form then translates as: 
 \begin_inset Formula 
 \[
 \dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N\!+}\qquad\dfrac{\text{dog}}{NP\!+\;\&\;N\!-}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+}>
@@ -1454,6 +1448,64 @@ The root cause of both of these bugs was a failure to attend the polarity
  These bugs can only be resolved by taking care to distinguish between types
  and sexualities (polaritites, here, since the sexualities here are heterosexual.
 ) More on sexuality, shortly.
+\end_layout
+
+\begin_layout Standard
+There is yett another infelicity in the Wikipedia article.
+ It currently states:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\emph on
+The sentence "the dog bit John" has a number of different possible proofs.
+ Below are a few of them.
+ The variety of proofs demonstrates the fact that in CCG, sentences don't
+ have a single structure, as in other models of grammar.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+This is misleading.
+ Two different derivation trees are presented.
+ The ultimate parse is identical.
+ This phenomenon is commonly treated in textbooks on proof theory: two different
+ proofs have proof trees that appear to be different, but can be rearranged
+ by homotopic deformations into one-another.
+ That is, there is a Scott-continous deformation, refering to the Scott
+ topology that conventionally applied to proofs/programs.
+ How can contiuous transformations be spotted? Next section!
 \end_layout
 
 \begin_layout Subsection*
