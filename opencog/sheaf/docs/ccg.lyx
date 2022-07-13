@@ -137,7 +137,7 @@ sexuality
 \end_layout
 
 \begin_layout Section*
-A question posed on Discord
+A Question posed on a Discord chat channel
 \end_layout
 
 \begin_layout Standard
@@ -202,12 +202,6 @@ cally expressive grammar formalism.
 \emph on
 I talked to its inventor last week (who has since moved on to do learning
  in linguistics) and it was really interesting — Today at 9:31 AM 
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-឵឵ 
 \end_layout
 
 \begin_layout Section*
@@ -313,7 +307,7 @@ Jigsaw Pieces
 \begin_layout Standard
 \align block
 Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
- pieces.
+ pieces:
 \end_layout
 
 \begin_layout Standard
@@ -321,7 +315,7 @@ Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
 \begin_inset Graphics
 	filename graphics/link-grammar.png
 	lyxscale 60
-	scale 80
+	width 100col%
 
 \end_inset
 
@@ -329,15 +323,248 @@ Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
 \end_layout
 
 \begin_layout Standard
-Now, look at that CCG wikipedia article, you see this inference rule:
+Now, look at that CCG Wikipedia article, you see this inference rule:
+\begin_inset Formula 
+\[
+\frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Image The above says "if you have a jigsaw called alpha and it has connector
- of type X on left and type Y on right, and if you have jigsaw beta with
- a connector Y, you can connect the two Y's together, to yield a combined
- jigsaw alphabeta having only one unconnected connector X." The > is the
- rule name which implicitly states that second Y is actually left-pointing.
+This says that (roughly speaking) "if you have a jigsaw called alpha and
+ it has connector of type 
+\begin_inset Formula $X$
+\end_inset
+
+ on left and type 
+\begin_inset Formula $Y$
+\end_inset
+
+ on right, and if you have jigsaw beta with a connector 
+\begin_inset Formula $Y$
+\end_inset
+
+, you can connect the two 
+\begin_inset Formula $Y$
+\end_inset
+
+'s together, to yield a combined jigsaw alphabeta having only one unconnected
+ connector 
+\begin_inset Formula $X$
+\end_inset
+
+." 
+\end_layout
+
+\begin_layout Standard
+Lets now try to be more precise.
+ This inference rule uses conventional proof-theory style notation.
+ The horizontal line is the defines the inference to be done.
+ Above the line are the inputs, below the line are the outputs.
+ The greek letters 
+\begin_inset Formula $\alpha,\beta$
+\end_inset
+
+ are terms, and the roman letters 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are types.
+ The colon indicates a term-type pairing, so that 
+\begin_inset Formula $\beta:Y$
+\end_inset
+
+ is a term of type 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ The slash 
+\begin_inset Formula $/$
+\end_inset
+
+ and the backslash 
+\begin_inset Formula $\backslash$
+\end_inset
+
+ are type constructors, so that 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are simple types, and 
+\begin_inset Formula $X/Y$
+\end_inset
+
+ is a compound type, constructed from the two simpler types.
+ The 
+\begin_inset Formula $>$
+\end_inset
+
+ is just a label for the rule; it has no syntactic role.
+\end_layout
+
+\begin_layout Standard
+The Wikipedia article calls these inference rules 
+\begin_inset Quotes eld
+\end_inset
+
+combinators
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Above is one 
+\begin_inset Quotes eld
+\end_inset
+
+application combinator
+\begin_inset Quotes erd
+\end_inset
+
+; there is also a second rule: 
+\begin_inset Formula 
+\[
+\frac{\beta:Y\quad\alpha:X\backslash Y}{\beta\alpha:X}<
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Lets rewrite these two rewrite rules in LG notation.
+ They would be
+\begin_inset Formula 
+\[
+\frac{\alpha:\left(X\!\!*\;\;\&\;\;Y\!+\right)\quad\beta:Y\!-}{\alpha\beta:X\!*}>
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\frac{\beta:Y\!+\quad\alpha:\left(X\!\!*\;\;\&\;\;Y\!-\right)}{\beta\alpha:X\!*}<
+\]
+
+\end_inset
+
+Here, the 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are the LG types, called 
+\begin_inset Quotes eld
+\end_inset
+
+link types
+\begin_inset Quotes erd
+\end_inset
+
+ in the literature.
+ The 
+\begin_inset Formula $Y\!+$
+\end_inset
+
+ and 
+\begin_inset Formula $Y\!-$
+\end_inset
+
+ are called 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+: they are jigsaw-puzzle-piece tabs, as-yet unconnected.
+ When they do connect, they are called a 
+\begin_inset Quotes eld
+\end_inset
+
+link
+\begin_inset Quotes erd
+\end_inset
+
+, and thus the name 
+\begin_inset Quotes eld
+\end_inset
+
+Link Grammar
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ are the 
+\begin_inset Quotes eld
+\end_inset
+
+connector directions
+\begin_inset Quotes erd
+\end_inset
+
+: they specify in which direction a connector can connect: to the right
+ or to the left.
+ The 
+\begin_inset Formula $*$
+\end_inset
+
+ is a directional wild-card, saying that 
+\begin_inset Formula $X\!*$
+\end_inset
+
+ can be either 
+\begin_inset Formula $X\!+$
+\end_inset
+
+ or 
+\begin_inset Formula $X\!-$
+\end_inset
+
+.
+ This just helps us write only two inference rules, instead of four of them.
+\end_layout
+
+\begin_layout Standard
+So what are these two inference rules really saying? Well, its almost trivial:
+ they're just saying 
+\begin_inset Quotes eld
+\end_inset
+
+connectable connectors can connect, if the connector types are identical,
+ and the sexuality of the connectors is opposite.
+\begin_inset Quotes erd
+\end_inset
+
+ Let's cement the obvious.
+ Here's the first inference rule, in pictures: 
+\end_layout
+
+\begin_layout Standard
+xxxx
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $>$
+\end_inset
+
+ label is the rule name which implicitly states that second Y is actually
+ left-pointing.
  The horizontal bar is just conventional proof-theory notation for a rewrite
  rule (or inference rule).
  All inference rules are instructions on how to connect (or disconnect)
@@ -345,7 +572,11 @@ Image The above says "if you have a jigsaw called alpha and it has connector
  All proof-theoretical inference rules are always jigsaw pieces.
  All of them, without any exceptions, for any type of logic (not just CCG).
  This is "trivial" because its just a notational thing.
- Here's a more complex example: Image The article calls this a "Type-raising
+ 
+\end_layout
+
+\begin_layout Standard
+Here's a more complex example: Image The article calls this a "Type-raising
  combinator".
  It just says that if you have a jigsaw piece called alpha, you can cut
  it into two different jigsaw pieces (but leave them assembled) having the
