@@ -331,7 +331,9 @@ Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
 \end_layout
 
 \begin_layout Standard
-Now, look at that CCG Wikipedia article, you see this inference rule:
+\align left
+Now, lets look at that CCG Wikipedia article.
+ You can find this inference rule:
 \begin_inset Formula 
 \[
 \frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
@@ -559,11 +561,51 @@ connectable connectors can connect, if the connector types are identical,
 \end_inset
 
  Let's cement the obvious.
- Here's the first inference rule, in pictures: 
+ Here's the first combinator, in pictures: 
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-xxxx
+\align center
+\begin_inset Graphics
+	filename graphics/LG-inference.eps
+	lyxscale 60
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the above, 
+\begin_inset Formula $X\!-$
+\end_inset
+
+ was depicted.
+ What is this picture saying? The obvious: when you combine tems 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+ the result is a single term 
+\begin_inset Formula $\alpha\beta$
+\end_inset
+
+ and it is convenient to not draw, to ignore, to pretend that the link 
+\begin_inset Formula $Y$
+\end_inset
+
+ joing these two pieces as disappeared.
+ In other words, a partially-assembled jigsaw puzzle behaves exacly like
+ a single jigsaw peice.
+ 
 \end_layout
 
 \begin_layout Standard
