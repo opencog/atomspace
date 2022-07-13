@@ -205,7 +205,7 @@ I talked to its inventor last week (who has since moved on to do learning
 \end_layout
 
 \begin_layout Section*
-The reply
+My reply
 \end_layout
 
 \begin_layout Standard
@@ -222,17 +222,25 @@ As far as I can tell, all of the different (formal) grammar formalisms are
 e.g.
 
 \emph default
- HPSG) one can convert that into a different formalism (
+ constituency grammars, CG) one can convert that into a different formalism
+ (
 \emph on
 e.g.
 
 \emph default
- DG) by applying a purely automatic transformation.
+ dependency grammars, DG) by applying a purely automatic transformation
+ on the grammar specifications.
+ No hand-waving is required, nor any metaphysics: a machine can convert
+ DG into CG and 
+\emph on
+vice versa
+\emph default
+, and that machine is rather simple.
 \end_layout
 
 \begin_layout Standard
-Somewhere, there is a nice paper that explains how to convert between DG
- and HPSG and back.
+Somewhere out there is a nice paper that explains how to convert between
+ DG and CG and back.
  It provides a simple algo to do this.
  Sadly, I have misplaced the reference.
 \end_layout
@@ -275,7 +283,7 @@ S- & O+
 \family default
 \size default
  (verb taking subject and object) and one can march down the list this way.
- 
+ The goal of this PDF is to make the above statement precise.
 \end_layout
 
 \begin_layout Standard
