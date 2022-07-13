@@ -103,7 +103,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-This is a short, informal note explaining how Combinatory Categorial Grammar
+This is a short, informal note explaining how 
 \begin_inset CommandInset href
 LatexCommand href
 name "Combinatory Categorial Grammar"
@@ -112,7 +112,7 @@ literal "false"
 
 \end_inset
 
- and Link Grammar
+ (CCG) and 
 \begin_inset CommandInset href
 LatexCommand href
 name "Link Grammar"
@@ -121,11 +121,23 @@ literal "false"
 
 \end_inset
 
- are equivalent.
+ (LG) are equivalent.
+ Covers basic ideas from proof theory, type theory, and the 
+\begin_inset Quotes eld
+\end_inset
+
+sexuality
+\begin_inset Quotes erd
+\end_inset
+
+ of type combinators.
+ The key idea is that type theory must be combined with connector sexuality
+ in order to get a fully general framework encompassing proof theory and
+ inference in logic.
 \end_layout
 
 \begin_layout Section*
-An informal chat
+A question posed on Discord
 \end_layout
 
 \begin_layout Standard
@@ -189,40 +201,143 @@ cally expressive grammar formalism.
 
 \emph on
 I talked to its inventor last week (who has since moved on to do learning
- in linguistics) and it was really interesting — Today at 9:31 AM ឵឵ 
+ in linguistics) and it was really interesting — Today at 9:31 AM 
 \end_layout
 
 \begin_layout Standard
-So, there's this thing about grammars you should know 🙂 CCG provides one
- example ...
- It seems like all the different grammar formalisms are inter-convertible
- into one-another, by purely algorithmic means.
- I failed to keep a reference to a nice paper that explained how to convert
- between DG and HPSG's and back, using some simple algo.
- I looked at CCG many years ago, and from what I could tell, for each and
- every CCG "(compound) type", one has an equivalent LG link type, and vice
- versa.
- So e.g.
- the compound type NP/N is the same thing as the LG D+ link (determiner)
- type and (S
+
+\emph on
+឵឵ 
+\end_layout
+
+\begin_layout Section*
+The reply
+\end_layout
+
+\begin_layout Standard
+To open, there's this thing about grammars that you should know.
+ 
+\end_layout
+
+\begin_layout Standard
+As far as I can tell, all of the different (formal) grammar formalisms are
+ inter-convertible into one-another, by purely algorithmic means.
+ That is, given the collection of symbols and rules that are used to define
+ one formalism (
+\emph on
+e.g.
+
+\emph default
+ HPSG) one can convert that into a different formalism (
+\emph on
+e.g.
+
+\emph default
+ DG) by applying a purely automatic transformation.
+\end_layout
+
+\begin_layout Standard
+Somewhere, there is a nice paper that explains how to convert between DG
+ and HPSG and back.
+ It provides a simple algo to do this.
+ Sadly, I have misplaced the reference.
+\end_layout
+
+\begin_layout Subsection*
+CCG is Equivalent to LG
+\end_layout
+
+\begin_layout Standard
+I looked at CCG many years ago, and from what I could tell, for each and
+ every CCG compound type, one has an equivalent LG link type, and 
+\emph on
+vice versa
+\emph default
+.
+ For example, the compound type 
+\family sans
+\shape italic
+NP/N
+\family default
+\shape default
+ is the same thing as the LG 
+\family typewriter
+\size large
+D+
+\family default
+\size default
+ link (determiner) type and 
+\family sans
+\shape italic
+(S
 \backslash
-NP)/NP is the just the LG S- & O+ (verb taking subject and object) and you
- can march down the list this way.
- It's mildly confusing, because it seems like the compound type NP/N might
- be encoding some kind of structure that the single-letter, single-type
- D+ is not ...
+NP)/NP
+\family default
+\shape default
+ is the just the LG 
+\family typewriter
+\size large
+S- & O+
+\family default
+\size default
+ (verb taking subject and object) and one can march down the list this way.
+ 
+\end_layout
+
+\begin_layout Standard
+At first, it's mildly confusing, because it seems like the compound type
+ 
+\family sans
+\shape italic
+NP/N
+\family default
+\shape default
+ might be encoding some kind of structure that the single-letter, single-type
+ 
+\family typewriter
+\size large
+D+
+\family default
+\size default
+ is not ...
  but, actually, no, that is incorrect.
  The CCG notation is not actually "more atomic" or "more compositional"
  than the LG notation.
- To understand this, a slight shift in point-of-view...
- This can be seen in a different way.
- Recall how I talk about "jigsaw pieces" all the time? So, look at that
- CCG wikipedia article, you see this: Image The above says "if you have
- a jigsaw called alpha and it has connector of type X on left and type Y
- on right, and if you have jigsaw beta with a connector Y, you can connect
- the two Y's together, to yield a combined jigsaw alphabeta having only
- one unconnected connector X." The > is the rule name which implicitly states
- that second Y is actually left-pointing.
+ To understand this, one must slightly shift one's point-of-view.
+\end_layout
+
+\begin_layout Subsection*
+Jigsaw Pieces
+\end_layout
+
+\begin_layout Standard
+\align block
+Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
+ pieces.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/link-grammar.png
+	lyxscale 60
+	scale 80
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, look at that CCG wikipedia article, you see this inference rule:
+\end_layout
+
+\begin_layout Standard
+Image The above says "if you have a jigsaw called alpha and it has connector
+ of type X on left and type Y on right, and if you have jigsaw beta with
+ a connector Y, you can connect the two Y's together, to yield a combined
+ jigsaw alphabeta having only one unconnected connector X." The > is the
+ rule name which implicitly states that second Y is actually left-pointing.
  The horizontal bar is just conventional proof-theory notation for a rewrite
  rule (or inference rule).
  All inference rules are instructions on how to connect (or disconnect)
