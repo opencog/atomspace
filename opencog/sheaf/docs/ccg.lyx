@@ -451,7 +451,7 @@ Lets rewrite these two rewrite rules in LG notation.
  They would be
 \begin_inset Formula 
 \[
-\frac{\alpha:\left(X\!\!*\;\;\&\;\;Y\!+\right)\quad\beta:Y\!-}{\alpha\beta:X\!*}>
+\frac{\alpha:\left(X\!\!-\;\;\&\;\;Y\!+\right)\quad\beta:Y\!-}{\alpha\beta:X\!-}>
 \]
 
 \end_inset
@@ -459,7 +459,7 @@ Lets rewrite these two rewrite rules in LG notation.
 and 
 \begin_inset Formula 
 \[
-\frac{\beta:Y\!+\quad\alpha:\left(X\!\!*\;\;\&\;\;Y\!-\right)}{\beta\alpha:X\!*}<
+\frac{\beta:Y\!+\quad\alpha:\left(X\!\!+\;\;\&\;\;Y\!-\right)}{\beta\alpha:X\!+}<
 \]
 
 \end_inset
@@ -529,24 +529,45 @@ connector directions
 
 : they specify in which direction a connector can connect: to the right
  or to the left.
- The 
-\begin_inset Formula $*$
+ 
+\end_layout
+
+\begin_layout Standard
+The ampersand 
+\begin_inset Formula $\&$
 \end_inset
 
- is a directional wild-card, saying that 
-\begin_inset Formula $X\!*$
+ is a 
+\begin_inset Quotes eld
 \end_inset
 
- can be either 
-\begin_inset Formula $X\!+$
+kind of
+\begin_inset Quotes erd
 \end_inset
 
- or 
+ type constructor.
+ Given two connectors, say, 
 \begin_inset Formula $X\!-$
 \end_inset
 
+ and 
+\begin_inset Formula $Y\!+$
+\end_inset
+
+ it creates a new type (more precisely, a 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw
+\begin_inset Quotes erd
+\end_inset
+
+) 
+\begin_inset Formula $X\!-\;\&\;Y\!+$
+\end_inset
+
 .
- This just helps us write only two inference rules, instead of four of them.
+ This can be made more precise, in an upcoming section.
 \end_layout
 
 \begin_layout Standard
@@ -561,7 +582,8 @@ connectable connectors can connect, if the connector types are identical,
 \end_inset
 
  Let's cement the obvious.
- Here's the first combinator, in pictures: 
+ Here's the first combinator, using the same diagramatic representation
+ as in the original 1991 Link Grammar paper: 
 \begin_inset VSpace defskip
 \end_inset
 
@@ -606,6 +628,553 @@ For the above,
  In other words, a partially-assembled jigsaw puzzle behaves exacly like
  a single jigsaw peice.
  
+\end_layout
+
+\begin_layout Subsection*
+The CCG Compostion Combinators
+\end_layout
+
+\begin_layout Standard
+For completeness, the remaining CCG combinators should be treated as well.
+ Here's a side-by-side Rosetta Stone of the two composition combinators.
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CCG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LG
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X/Y\quad\beta:Y/Z}{\alpha\beta:X/Z}B_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!-\;\&\;Y\!+\quad\beta:Y\!-\;\&\;Z\!+}{\alpha\beta:X\!-\;\&\;Z\!+}B_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\beta:Y\backslash Z\quad\alpha:X\backslash Y}{\beta\alpha:X\backslash Z}B_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\beta:Y\!+\;\&\;Z\!-\quad\alpha:X\!+\;\&\;Y\!-}{\beta\alpha:X\!+\;\&\;Z\!-}B_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Clearly, they just specify how to connect compound connectors.
+\end_layout
+
+\begin_layout Subsection*
+The CCG Type-raising Combinators
+\end_layout
+
+\begin_layout Standard
+The last pair of combinators are the type-raising combinators.
+ These are 
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CCG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LG
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\[
+\frac{\alpha:X}{\alpha:T/\left(T\backslash X\right)}T_{>}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!-}{\alpha:T\!-\;\&\;T\!+\;\&\;X\!-}T_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula 
+\[
+\frac{\alpha:X}{\alpha:T\backslash\left(T/X\right)}T_{<}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!+}{\alpha:T\!+\;\&\;T\!-\;\&\;X\!+}T_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The interpretation of these two rules is that, given a single (assembled)
+ jigsaw 
+\begin_inset Formula $X$
+\end_inset
+
+, cut it into two (disassemble it) such that the new connectors are of type
+ 
+\begin_inset Formula $T$
+\end_inset
+
+ (and they are no longer connected).
+ 
+\end_layout
+
+\begin_layout Standard
+There seems to be a slight awkwardness, as the earlier combinators could
+ be easily understood by thinking only about simple types.
+ By contrast, the CCG requires a more complex explanation:
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\emph on
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Quotes eld
+\end_inset
+
+The type-raising combinators, often denoted as 
+\begin_inset Formula $T_{>}$
+\end_inset
+
+ for forward type-raising and 
+\begin_inset Formula $T_{<}$
+\end_inset
+
+ for backward type-raising, take argument types (usually primitive types)
+ to functor types, which take as their argument the functors that, before
+ type-raising, would have taken them as arguments.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Phew.
+ That's a mouthful, when all that is really being said is 
+\begin_inset Quotes eld
+\end_inset
+
+disconnect
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+cut into pieces
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A bit more on why and how this extra complexity arises, shortly below.
+\end_layout
+
+\begin_layout Subsection*
+Proof Theory
 \end_layout
 
 \begin_layout Standard
