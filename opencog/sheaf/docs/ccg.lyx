@@ -205,7 +205,7 @@ I talked to its inventor last week (who has since moved on to do learning
 \end_layout
 
 \begin_layout Section*
-My reply
+The Nature of Grammar
 \end_layout
 
 \begin_layout Standard
@@ -331,8 +331,18 @@ Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
 \end_layout
 
 \begin_layout Standard
+\noindent
 \align left
-Now, lets look at that CCG Wikipedia article.
+The above diagram is taken from the original 1991 paper presenting Link
+ Grammar.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991"
+literal "false"
+
+\end_inset
+
+ Now, lets look at that CCG Wikipedia article.
  You can find this inference rule:
 \begin_inset Formula 
 \[
@@ -345,6 +355,7 @@ Now, lets look at that CCG Wikipedia article.
 \end_layout
 
 \begin_layout Standard
+\noindent
 This says that (roughly speaking) "if you have a jigsaw called alpha and
  it has connector of type 
 \begin_inset Formula $X$
@@ -401,7 +412,16 @@ Lets now try to be more precise.
 \begin_inset Formula $\backslash$
 \end_inset
 
- are type constructors, so that 
+ are 
+\begin_inset CommandInset href
+LatexCommand href
+name "type constructors"
+target "https://en.wikipedia.org/wiki/Type_constructor"
+literal "false"
+
+\end_inset
+
+, so that 
 \begin_inset Formula $X,Y$
 \end_inset
 
@@ -418,7 +438,7 @@ Lets now try to be more precise.
 \end_layout
 
 \begin_layout Standard
-The Wikipedia article calls these inference rules 
+The CCG Wikipedia article calls these inference rules 
 \begin_inset Quotes eld
 \end_inset
 
@@ -898,11 +918,7 @@ LG
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula 
-\[
-\frac{\alpha:X}{\alpha:T/\left(T\backslash X\right)}T_{>}
-\]
-
+\begin_inset Formula $\frac{\alpha:X}{\alpha:T/\left(T\backslash X\right)}T_{>}$
 \end_inset
 
 
@@ -988,11 +1004,7 @@ LG
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula 
-\[
-\frac{\alpha:X}{\alpha:T\backslash\left(T/X\right)}T_{<}
-\]
-
+\begin_inset Formula $\frac{\alpha:X}{\alpha:T\backslash\left(T/X\right)}T_{<}$
 \end_inset
 
 
@@ -1174,7 +1186,212 @@ cut into pieces
 \end_layout
 
 \begin_layout Subsection*
+An Example
+\end_layout
+
+\begin_layout Standard
+The Wikipedia article includes an example of two different proofs (two different
+ derivation trees) of the same sentence.
+ Here's one:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{NP/N}\qquad\dfrac{\text{dog}}{N}}{NP}>\qquad\dfrac{\dfrac{\text{bit}}{(S\backslash NP)/NP}\qquad\dfrac{\text{John}}{NP}}{S\backslash NP}>}{S}<
+\]
+
+\end_inset
+
+ Here it is, translated to the LG derivation rules:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{NP\!+\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!+}>\qquad\dfrac{\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+\;\&\;NP\!-}>}{S\!+}<
+\]
+
+\end_inset
+
+This is perhaps hard to read? The conventional LG notation for this derivation
+ would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+               +--------S-----+
+\end_layout
+
+\begin_layout Plain Layout
+
+               |              |
+\end_layout
+
+\begin_layout Plain Layout
+
+  +--N--+--NP--+--NP--+       |
+\end_layout
+
+\begin_layout Plain Layout
+
+  |     |      |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+ the   dog    bit   John  RIGHT-WALL
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+where an extra jigsaw piece 
+\family typewriter
+\size large
+RIGHT-WALL: S-
+\family default
+\size default
+ was introduced, so as to keep all connectors fully connected.
+ The above works.
+ It is not the perfered LG parse for the current English langauge dictionary.
+ That would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    +-------->WV------->+
+\end_layout
+
+\begin_layout Plain Layout
+
+    +---->Wd-----+      |
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      +Ds**c+-Ss*s-+--Os*e-+
+\end_layout
+
+\begin_layout Plain Layout
+
+    |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+LEFT-WALL the   dog    bit    John
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+The link types are obviously more complex.
+ Note also the present of a cycle (the triangle, whose edges are 
+\family typewriter
+\size large
+WV
+\family default
+\size default
+, 
+\family typewriter
+\size large
+Wd
+\family default
+\size default
+ and 
+\family typewriter
+\size large
+Ss*s
+\family default
+\size default
+.) Note the presence of several directed connectors.
+ The complex upper-case/lower-case link types are an example of 
+\begin_inset Quotes eld
+\end_inset
+
+sexuality
+\begin_inset Quotes erd
+\end_inset
+
+; see next section.
+ 
+\end_layout
+
+\begin_layout Standard
+The CCG article also gives an alternative derivation:
+\end_layout
+
+\begin_layout Subsection*
+Conclusion
+\end_layout
+
+\begin_layout Standard
+In conclusion: CCG is equivalent to LG.
+ It should be cler that CCG uses a far more awkward notation (the proof-theoreti
+cal inference-bar notation).
+ Awkwardness matters, because concepts like link-crossing and Dick Hudson's
+ "landmark transitivity" becomes very hard to talk about in CCG.
+\end_layout
+
+\begin_layout Section*
 Proof Theory
+\end_layout
+
+\begin_layout Standard
+Although the presentation above focused on CCG, and LG, the concept of inference
+ rules as being certain peculiar kinds of rewrite rules is not new.
+ Lets take a look at the 
+\begin_inset Quotes eld
+\end_inset
+
+standard form
+\begin_inset Quotes erd
+\end_inset
+
+ of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "inference rule"
+target "https://en.wikipedia.org/wiki/Rule_of_inference"
+literal "false"
+
+\end_inset
+
+, taken from Wikipedia:
+\begin_inset Formula 
+\begin{align*}
+{\mbox{Premise \#1}\atop \mbox{Premise \#2}}\\
+\cdots\qquad\\
+\frac{\mbox{Premise \#n}}{\mbox{Conclusion}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is, oddly enough, just another jigsaw.
+ Let's be painfully clear, by actually drawing it:
 \end_layout
 
 \begin_layout Standard
@@ -1195,15 +1412,7 @@ The
 \end_layout
 
 \begin_layout Standard
-Here's a more complex example: Image The article calls this a "Type-raising
- combinator".
- It just says that if you have a jigsaw piece called alpha, you can cut
- it into two different jigsaw pieces (but leave them assembled) having the
- internal jigsaw connector being of type T.
- The other rule: Image says "the same thing", except this time, the polarity
- of the jigsaw tab is reversed (the male/female tab markings on the jigsaw
- are swapped).
- You have two "type raising combinators" because there are two ways of creating
+You have two "type raising combinators" because there are two ways of creating
  complex types, with / and with 
 \backslash
  and so (in CCG) the jigsaw connectors are hetero-sexual.
@@ -1231,6 +1440,18 @@ on with a weird notation.
  So they've painted themselves into a corner, before they've even gotten
  out of the gate.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
