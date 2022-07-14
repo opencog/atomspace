@@ -1105,7 +1105,7 @@ The interpretation of these two rules is that, given a single (assembled)
 \begin_layout Standard
 There seems to be a slight awkwardness, as the earlier combinators could
  be easily understood by thinking only about simple types.
- By contrast, the CCG requires a more complex explanation:
+ By contrast, the type-raising combinator requires a more complex explanation:
 \end_layout
 
 \begin_layout Standard
@@ -1128,7 +1128,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -1187,7 +1187,20 @@ An Sloppy Example
 \begin_layout Standard
 The Wikipedia article includes an example of two different proofs (two different
  derivation trees) of the same sentence.
- Here's one:
+ The sentence is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the dog bit John
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Here's one derivation tree:
 \begin_inset Formula 
 \[
 \dfrac{\dfrac{\dfrac{\text{the}}{NP/N}\qquad\dfrac{\text{dog}}{N}}{NP}>\qquad\dfrac{\dfrac{\text{bit}}{(S\backslash NP)/NP}\qquad\dfrac{\text{John}}{NP}}{S\backslash NP}>}{S}<
@@ -1195,7 +1208,7 @@ The Wikipedia article includes an example of two different proofs (two different
 
 \end_inset
 
- If we are sloppy and uncareful ***, we find that the translated LG derivation
+ If we are sloppy and uncareful ***, we find the translated LG derivation
  rules:
 \begin_inset Formula 
 \[
@@ -1380,7 +1393,7 @@ The naive translation of the above to LG derivations reveals two bugs in
  the above:
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{ fail !}
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&\;NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{ fail !}
 \]
 
 \end_inset
@@ -1468,6 +1481,11 @@ The root cause of both of these bugs was a failure to attend the polarity
  More on sexuality, shortly.
  If the above analysis seems incorrect, muddled or confused, or anchored
  in in misinterpretation, please keep reading.
+ Its resolved in a subsequent section.
+\end_layout
+
+\begin_layout Subsection*
+Homotopic Equivalence
 \end_layout
 
 \begin_layout Standard
@@ -1612,8 +1630,9 @@ The
 \end_inset
 
  is the conclusion.
- These are drawn as it they're typed; the type assignments are just illustrative
-; what matters in this picture are the directionalities: there are 
+ These are drawn as if they're typed.
+ The jigsaw connector shapes are just illustrative; what matters in this
+ picture are the connector directionalities: there are 
 \begin_inset Formula $n$
 \end_inset
 
@@ -1622,7 +1641,7 @@ The
 \begin_inset Formula $n$
 \end_inset
 
-inputs ...
+ inputs ...
  in practical applications, inference rules behave as if they were lambdas.
  The central point being made here is that the input-to-output connections
  are heterosexual.
@@ -1643,8 +1662,8 @@ plugged into
 \end_inset
 
  conclusions.
- There only one possible direction: only conclusions can be plugged into
- premises.
+ There is only one possible direction: conclusions can be plugged into premises,
+ and nothing more.
  
 \end_layout
 
@@ -1659,7 +1678,7 @@ All proof-theoretical inference rules are always jigsaw pieces.
 \end_layout
 
 \begin_layout Standard
-Alternative notations used to write inference rules, however, is interesting.
+Alternative notations used to write inference rules, however, are interesting.
  One common form appearing in many computer-science settings is 
 \begin_inset Formula 
 \[
@@ -1668,6 +1687,26 @@ X_{1}\wedge X_{2}\wedge\cdots\wedge X_{n}\to Y
 
 \end_inset
 
+The wedges obviously denote 
+\begin_inset Quotes eld
+\end_inset
+
+conjunction
+\begin_inset Quotes erd
+\end_inset
+
+, but the semantics of the 
+\begin_inset Formula $X_{k}$
+\end_inset
+
+ can be left wonderfully imprecise: are these boolean variables? Predicates?
+ Or just terms of some sort? It doesn't much matter: the meaning of the
+ wedge is say that all of these presmises must be present and (perhaps)
+ satsified.
+ 
+\end_layout
+
+\begin_layout Standard
 The LG notation for this is 
 \begin_inset Formula 
 \[
@@ -1676,6 +1715,18 @@ X_{1}\!-\;\&\;X_{2}\!-\;\&\;\cdots\;\&\;X_{n}\!-\;\&\;Y\!+
 
 \end_inset
 
+One reason for writing the ampersand instead of a wedge is simply that the
+ American keyboard does not have a wedge symbol on it, and LG dictionaries
+ must be typed in by hand.
+ The 
+\begin_inset Formula $X_{k}$
+\end_inset
+
+ are LG link types.
+ The are not variables, they are not type-variables; they are types.
+\end_layout
+
+\begin_layout Standard
 In tensor algebras, one would write
 \begin_inset Formula 
 \[
@@ -1705,7 +1756,65 @@ In quantum mechanics, one uses the bra-ket notation:
 \end_layout
 
 \begin_layout Standard
-One must be careful, though; the last three forms can be beguilingly misleading.
+The tensor operator 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ is a kind-of conjunction, in that it states that all of the indicated terms
+ must be present.
+ It is also more: tensors can be assigned numeric values, and so 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ implies a certain kind of linearity on how tensors are composed from lower-rank
+ tensors.
+ Together with disjunction 
+\begin_inset Formula $\oplus$
+\end_inset
+
+ and co-muliplication, it forms a tensor algebra.
+ There is a corresponding logic, called 
+\begin_inset Quotes eld
+\end_inset
+
+linear logic
+\begin_inset Quotes erd
+\end_inset
+
+ (
+\begin_inset Quotes eld
+\end_inset
+
+linear
+\begin_inset Quotes erd
+\end_inset
+
+ because 
+\begin_inset Quotes eld
+\end_inset
+
+linear algebra
+\begin_inset Quotes erd
+\end_inset
+
+).
+ This is intersting because linear logic describes mutexes and semaphores
+ in computing, as well as vending machines.
+ Notable in the present context is that Link Grammar is a fragment of linear
+ logic.
+ Disconnecting connectors (the 
+\begin_inset Quotes eld
+\end_inset
+
+type-raising combinator
+\begin_inset Quotes erd
+\end_inset
+
+) appears to correspond to comultiplication.
+\end_layout
+
+\begin_layout Standard
+One must be careful, though; the tensor forms can be beguilingly misleading.
  Tensor algebras are (dagger) symmetric, and thus have only one type constructor.
  In linguistics, there are two type constructors, which go to the left and
  the right, because the left-right distinction matters in linguistics.
@@ -1730,8 +1839,15 @@ In CCG, there are two "type raising combinators"
  because in linguistics, word order matters.
  Nouns appearing to the left of a verb are subjects; nouns appearing on
  the right are objects.
- Link Grammar accomplishes the left-right distinction with the + and - connector
- directions.
+ Link Grammar accomplishes the left-right distinction with the 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ connector directions.
  This is, in general, sufficient for linearly-ordered sequences of words.
  
 \end_layout
@@ -2384,7 +2500,12 @@ The definition of CCG involved seemingly mono-sexed types, and two type
  open a bigger question: what is the formal interplay between type constructors
  and sexuality? It seems that the one can be traded for the other, but the
  mechanics of this in a general setting are not clear.
- 
+\end_layout
+
+\begin_layout Standard
+Also unclear is the interpretation of the CCG type-raising combinator.
+ Does it perhaps correspond to comultiplication in a tensor algebra? Perhaps,
+ but the details remain to be articulated.
 \end_layout
 
 \begin_layout Section*
