@@ -1433,6 +1433,16 @@ One of the two bugs is the same as the earlier one.
 \end_layout
 
 \begin_layout Standard
+If this analysis seems incorrect, muddled or confused, or anchored in in
+ misinterpretation, that's OK.
+ Don't give up; it's complicated.
+ A deeper analysis will be presented in the section on connector sexuality.
+ In short, the default presentation of CCG assumes monosexual types (types
+ without the +/- directional markup), but this will be seen to not be enough.
+ 
+\end_layout
+
+\begin_layout Standard
 The root cause of both of these bugs was a failure to attend the polarity
  that is implied by the type constructors 
 \begin_inset Formula $/$
@@ -1448,10 +1458,12 @@ The root cause of both of these bugs was a failure to attend the polarity
  These bugs can only be resolved by taking care to distinguish between types
  and sexualities (polaritites, here, since the sexualities here are heterosexual.
 ) More on sexuality, shortly.
+ If the above analysis seems incorrect, muddled or confused, or anchored
+ in in misinterpretation, please keep reading.
 \end_layout
 
 \begin_layout Standard
-There is yett another infelicity in the Wikipedia article.
+There is yet another infelicity in the Wikipedia article.
  It currently states:
 \begin_inset VSpace defskip
 \end_inset
@@ -1460,6 +1472,7 @@ There is yett another infelicity in the Wikipedia article.
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Box Frameless
 position "t"
 hor_pos "c"
@@ -1476,7 +1489,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -1514,7 +1527,14 @@ Conclusion
 
 \begin_layout Standard
 In conclusion: CCG is equivalent to LG.
- It should be cler that CCG uses a far more awkward notation (the proof-theoreti
+ The inference rules of CCG are merely rules for how to join together connectors.
+ Two rules connect simple types to compount types; two more rules connect
+ compount types, and the final two rules show how to disassemble connections
+ (equivalently, to create unconnected pairs).
+\end_layout
+
+\begin_layout Standard
+It should be clear that CCG uses a far more awkward notation (the proof-theoreti
 cal inference-bar notation).
  Awkwardness matters, because concepts like link-crossing and Dick Hudson's
  "landmark transitivity" becomes very hard to talk about in CCG.
@@ -1563,20 +1583,75 @@ This is, oddly enough, just another jigsaw.
 \end_layout
 
 \begin_layout Standard
-The 
-\begin_inset Formula $>$
+\align center
+\begin_inset Graphics
+	filename graphics/inference.eps
+	lyxscale 50
+	width 50col%
+
 \end_inset
 
- label is the rule name which implicitly states that second Y is actually
- left-pointing.
- The horizontal bar is just conventional proof-theory notation for a rewrite
- rule (or inference rule).
- All inference rules are instructions on how to connect (or disconnect)
- jigsaw connectors.
- All proof-theoretical inference rules are always jigsaw pieces.
- All of them, without any exceptions, for any type of logic (not just CCG).
- This is "trivial" because its just a notational thing.
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $X_{k}$
+\end_inset
+
+ are the premises, the 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the conclusion.
+ These are drawn as it they're typed; the type assignments are just illustrative
+; what matters in this picture are the directionalities: there are 
+\begin_inset Formula $n$
+\end_inset
+
+ inputs and one output.
+ Structurally, this has the form of a lambda combinator, having 
+\begin_inset Formula $n$
+\end_inset
+
+inputs ...
+ in practical applications, inference rules behave as if they were lambdas.
+ The central point being made here is that the input-to-output connections
+ are heterosexual.
+ Permises cannot be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ premises; conclusions cannot be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ conclusions.
+ There only one possible direction: only conclusions can be plugged into
+ premises.
  
+\end_layout
+
+\begin_layout Standard
+All proof-theoretical inference rules are always jigsaw pieces.
+ All of them, without any exceptions.
+ This holds for any type of logic: classical, predicate, intuistionistic,
+ modal, linear logic.
+ This observation is "trivial" because its effectively just a notational
+ thing.
+ 
+\end_layout
+
+\begin_layout Subsection*
+xxxx
 \end_layout
 
 \begin_layout Standard
