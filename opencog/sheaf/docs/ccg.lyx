@@ -1787,13 +1787,23 @@ The rules for joining together LG connectors state that
 \begin_layout Standard
 Mono-sexual connectors are those for which there is only one connector type.
  It can be denoted simply by *, or not at all (by just dropping the concept).
- In a monotyped system, all relations are necessarily homosexual, as there
+ In a monosexual system, all relations are necessarily homosexual, as there
  is only one sex.
 \end_layout
 
 \begin_layout Standard
 Jigsaws can in general have monosexual connectors, or trisexual connectors,
  or other arbitrarily complex rules.
+ If calling this 
+\begin_inset Quotes eld
+\end_inset
+
+sex
+\begin_inset Quotes erd
+\end_inset
+
+ seems odd, take a look at fungi, molds, mushrooms.
+ Some have dozens of sexes, with complex mating rules!
 \end_layout
 
 \begin_layout Subsection*
@@ -2009,7 +2019,11 @@ func(int x)
 x
 \family default
  is actually connector.
- It obviously has the type 
+ Obviously, 
+\family typewriter
+x
+\family default
+ has the type 
 \family typewriter
 int
 \family default
@@ -2022,8 +2036,10 @@ input
 \end_inset
 
 .
- The connector rules that connections can only be heterosexual are obvious:
- you can connect an output to an input, and that is it.
+ There is an implicit connector rule that states that connections can only
+ be heterosexual.
+ The rule is implcit because it's obvious: you can connect an output to
+ an input, and that is it.
  You cannot connect two inputs, you cannot connect two outputs.
  Duhh.
  Any dummy knows this.
@@ -2035,7 +2051,7 @@ Now it is time to slap one's forehead.
 \begin_inset Formula $X$
 \end_inset
 
- what they really mean is that something is a connector, and that connector
+, what they really mean is that something is a connector, and that connector
  has a type of 
 \begin_inset Formula $X$
 \end_inset
@@ -2057,6 +2073,23 @@ output
 \end_inset
 
 , which is always obvious from context.
+ In software development, when people say 
+\begin_inset Quotes eld
+\end_inset
+
+type
+\begin_inset Quotes erd
+\end_inset
+
+, they often mean 
+\begin_inset Quotes eld
+\end_inset
+
+connector
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection*
