@@ -201,7 +201,8 @@ cally expressive grammar formalism.
 
 \emph on
 I talked to its inventor last week (who has since moved on to do learning
- in linguistics) and it was really interesting — Today at 9:31 AM 
+ in linguistics) and it was really interesting — Today at 9:31 AM 13 July
+ 2022
 \end_layout
 
 \begin_layout Section*
@@ -1677,16 +1678,21 @@ Transitive verbs can be written in either of two forms:
 \begin_inset Formula $(S/NP)\backslash NP$
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Enumerate
 Transitive verbs only have one form, but an associativity rule provides
- homotopic equivalence
+ homotopic equivalence.
 \end_layout
 
 \begin_layout Enumerate
-The equivalence between LG and CCG is a false mirage.
+The equivalence between LG and CCG is a false mirage; the proposed fixes
+ must be rejected, and the use of the 
+\begin_inset Formula $T_{<}$
+\end_inset
+
+ rule is just fine, as it stands.
 \end_layout
 
 \begin_layout Standard
@@ -1806,7 +1812,24 @@ This is misleading.
  by homotopic deformations into one-another.
  That is, there is a Scott-continuous deformation, referring to the Scott
  topology that conventionally applied to proofs/programs.
- How can continuous transformations be spotted? Next section!
+ 
+\end_layout
+
+\begin_layout Standard
+How can continuous transformations be spotted? This is out of bounds for
+ the current text; however, a taste of that flavor can be gotten from the
+ associativity inference rule, above.
+ Roughly speaking, one proceeds at a meta level, by indicating when two
+ inferences are equivalent, effectively by an associativity (meta-)rule.
+\end_layout
+
+\begin_layout Subsection*
+Type-Raising and Link Crossing
+\end_layout
+
+\begin_layout Standard
+The fix proposed above elminates the use of the type-raising rule.
+ it's an interesting rule, but is it really needed, linguistically speaking?
 \end_layout
 
 \begin_layout Subsection*
@@ -2628,66 +2651,6 @@ The story does not end there; lets leave off with some hazy futuristic scifi:
  But it does move in that direction.
  What more is needed to obtain a fully-accurate type-theoretic model of
  chemistry?
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-Appendix A
-\end_layout
-
-\begin_layout Standard
-Since the title of this paper makes the rather sweeping statement that CCG
- 
-\begin_inset Quotes eld
-\end_inset
-
-is equivalent
-\begin_inset Quotes erd
-\end_inset
-
- to LG, some additional remarks seem to be in order.
- What was actually supplied were equivalent combinators for eliminating
- and introducing types (connecors).
- The type-raising combinator is unusual, from the LG point of view, and
- it's intended use is even more unusual.
-\end_layout
-
-\begin_layout Standard
-Returning to the correct example, a portion of it reads:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N\!+}\qquad\dfrac{\text{dog}}{NP\!+\;\&\;N\!-}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}B_{>}
-\]
-
-\end_inset
-
-This presents a bit of an issue for LG, as the reduction 
-\begin_inset Formula $B_{>}$
-\end_inset
-
- requires the simultaneous elimination of two connector pairs: 
-\begin_inset Formula $S\!+\;\&\;NP\!+$
-\end_inset
-
- aganist 
-\begin_inset Formula $S\!+\;\&\;NP\!-$
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
