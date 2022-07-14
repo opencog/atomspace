@@ -1622,7 +1622,71 @@ Equivalence, or Not?
 \end_layout
 
 \begin_layout Standard
-The 
+In order to preserve the equivalence of CCG and LG by means of the straight-forw
+ard translation of the inference rules, two changes had to be made to the
+ second example: The use of the type-raising rule 
+\begin_inset Formula $T_{<}$
+\end_inset
+
+ had to be abandoned, and the form for the verb had to be changed into
+\begin_inset Formula 
+\[
+\dfrac{\text{bit}}{(S/NP)\backslash NP}
+\]
+
+\end_inset
+
+which is 
+\emph on
+not
+\emph default
+ the same form as that in first example.
+ 
+\end_layout
+
+\begin_layout Standard
+Is this too much to ask for? Is it OK to say that, sometimes transitive
+ verbs have the form 
+\begin_inset Formula $(S\backslash NP)/NP$
+\end_inset
+
+ and sometimes they have the form 
+\begin_inset Formula $(S/NP)\backslash NP$
+\end_inset
+
+? Certainly LG doesn't care: LG just provides one connector going left,
+ to the subject of the verb, and another going right, to the object.
+ To support two homotopic parse trees in CCG, should there be one more inference
+ rule, say, for example, an associativity rule:
+\begin_inset Formula 
+\[
+\dfrac{\alpha:(X\backslash T)/T}{\alpha:(X/T)\backslash T}\text{Assoc.}
+\]
+
+\end_inset
+
+One has three possibilities, then: 
+\end_layout
+
+\begin_layout Enumerate
+Transitive verbs can be written in either of two forms: 
+\begin_inset Formula $(S\backslash NP)/NP$
+\end_inset
+
+ or 
+\begin_inset Formula $(S/NP)\backslash NP$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Transitive verbs only have one form, but an associativity rule provides
+ homotopic equivalence
+\end_layout
+
+\begin_layout Enumerate
+The equivalence between LG and CCG is a false mirage.
 \end_layout
 
 \begin_layout Standard
