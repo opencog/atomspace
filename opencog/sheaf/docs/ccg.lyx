@@ -2094,7 +2094,15 @@ In fact, the mono-sexed types, when used with the two combinators and with
 \end_inset
 
 ), and the previously implicit directional attachements were made explicitly
- visible with + and -.
+ visible with 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -2222,13 +2230,40 @@ NP/D
  The road to hell is indeed paved with Chomskian gold.
 \end_layout
 
-\begin_layout Standard
-T
+\begin_layout Subsection*
+Type constructors
 \end_layout
 
 \begin_layout Standard
-And that's not all.
- Note that CCG had
+The definition of CCG involved seemingly mono-sexed types, and two type
+ constructors 
+\begin_inset Formula $/$
+\end_inset
+
+ and 
+\begin_inset Formula $\backslash$
+\end_inset
+
+.
+ The definition of LG involves heterosexual types, with connector directions
+ 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ and a single type constructor 
+\begin_inset Formula $\&$
+\end_inset
+
+.
+ This text has exposed the relationships between these two, but it leaves
+ open a bigger question: what is the formal interplay between type constructors
+ and sexuality? It seems that the one can be traded for the other, but the
+ mechanics of this in a general setting are not clear.
+ 
 \end_layout
 
 \begin_layout Section*
