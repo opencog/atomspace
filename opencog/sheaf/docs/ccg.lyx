@@ -1,0 +1,2355 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\usepackage{slashed}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "cmtt" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Combinatory Categorial Grammar and Link Grammar are Equivalent
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+13 July 2022
+\end_layout
+
+\begin_layout Abstract
+This is a short, semi-formal note explaining how 
+\begin_inset CommandInset href
+LatexCommand href
+name "Combinatory Categorial Grammar"
+target "https://en.wikipedia.org/wiki/Combinatory_categorial_grammar"
+literal "false"
+
+\end_inset
+
+ (CCG) and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar"
+target "https://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf"
+literal "false"
+
+\end_inset
+
+ (LG) are equivalent.
+ It covers some basic ideas from proof theory, type theory, and the 
+\begin_inset Quotes eld
+\end_inset
+
+sexuality
+\begin_inset Quotes erd
+\end_inset
+
+ of type combinators.
+ The key idea that exposed is that type theory must be combined with connector
+ sexuality in order to get a fully general framework encompassing proof
+ theory, inference in logic and linguistics.
+\end_layout
+
+\begin_layout Section*
+A Question posed on a Discord chat channel
+\end_layout
+
+\begin_layout Standard
+@Adam Vandervorst asks: 
+\emph on
+Does anyone here know about 
+\begin_inset Newline newline
+\end_inset
+
+https://en.wikipedia.org/wiki/Combinatory_categorial_grammar?
+\emph default
+ 
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Doublebox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+(
+\emph on
+from Wikipedia
+\emph default
+) Combinatory categorial grammar (CCG) is an efficiently parsable, yet linguisti
+cally expressive grammar formalism.
+ It has a transparent interface between surface syntax and underlying semantic
+ representation, including predicate–argument structure, quantification
+ and information structure.
+ The formalism generates constituency-based structures (as...
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\emph on
+I talked to its inventor last week (who has since moved on to do learning
+ in linguistics) and it was really interesting — Today at 9:31 AM 
+\end_layout
+
+\begin_layout Section*
+The Nature of Grammar
+\end_layout
+
+\begin_layout Standard
+To open, there's this thing about grammars that you should know.
+ 
+\end_layout
+
+\begin_layout Standard
+As far as I can tell, all of the different (formal) grammar formalisms are
+ inter-convertible into one-another, by purely algorithmic means.
+ That is, given the collection of symbols and rules that are used to define
+ one formalism (
+\emph on
+e.g.
+
+\emph default
+ constituency grammars, CG) one can convert that into a different formalism
+ (
+\emph on
+e.g.
+
+\emph default
+ dependency grammars, DG) by applying a purely automatic transformation
+ on the grammar specifications.
+ No hand-waving is required, nor any metaphysics: a machine can convert
+ DG into CG and 
+\emph on
+vice versa
+\emph default
+, and that machine is rather simple.
+\end_layout
+
+\begin_layout Standard
+Somewhere out there is a nice paper that explains how to convert between
+ DG and CG and back.
+ It provides a simple algo to do this.
+ Sadly, I have misplaced the reference.
+\end_layout
+
+\begin_layout Subsection*
+CCG is Equivalent to LG
+\end_layout
+
+\begin_layout Standard
+I looked at CCG many years ago, and from what I could tell, for each and
+ every CCG compound type, one has an equivalent LG link type, and 
+\emph on
+vice versa
+\emph default
+.
+ For example, the compound type 
+\family sans
+\shape italic
+NP/N
+\family default
+\shape default
+ is the same thing as the LG 
+\family typewriter
+\size large
+D+
+\family default
+\size default
+ link (determiner) type and 
+\family sans
+\shape italic
+(S
+\backslash
+NP)/NP
+\family default
+\shape default
+ is the just the LG 
+\family typewriter
+\size large
+S- & O+
+\family default
+\size default
+ (verb taking subject and object) and one can march down the list this way.
+ The goal of this PDF is to make the above statement precise.
+\end_layout
+
+\begin_layout Standard
+At first, it's mildly confusing, because it seems like the compound type
+ 
+\family sans
+\shape italic
+NP/N
+\family default
+\shape default
+ might be encoding some kind of structure that the single-letter, single-type
+ 
+\family typewriter
+\size large
+D+
+\family default
+\size default
+ is not ...
+ but, actually, no, that is incorrect.
+ The CCG notation is not actually "more atomic" or "more compositional"
+ than the LG notation.
+ To understand this, one must slightly shift one's point-of-view.
+\end_layout
+
+\begin_layout Subsection*
+Jigsaw Pieces
+\end_layout
+
+\begin_layout Standard
+\align block
+Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
+ pieces:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/link-grammar.png
+	lyxscale 60
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align left
+The above diagram is taken from the original 1991 paper presenting Link
+ Grammar.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991"
+literal "false"
+
+\end_inset
+
+ Now, lets look at that CCG Wikipedia article.
+ You can find this inference rule:
+\begin_inset Formula 
+\[
+\frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+This says that (roughly speaking) "if you have a jigsaw called alpha and
+ it has connector of type 
+\begin_inset Formula $X$
+\end_inset
+
+ on left and type 
+\begin_inset Formula $Y$
+\end_inset
+
+ on right, and if you have jigsaw beta with a connector 
+\begin_inset Formula $Y$
+\end_inset
+
+, you can connect the two 
+\begin_inset Formula $Y$
+\end_inset
+
+'s together, to yield a combined jigsaw alphabeta having only one unconnected
+ connector 
+\begin_inset Formula $X$
+\end_inset
+
+." 
+\end_layout
+
+\begin_layout Standard
+Lets now try to be more precise.
+ This inference rule uses conventional proof-theory style notation.
+ The horizontal line is the defines the inference to be done.
+ Above the line are the inputs, below the line are the outputs.
+ The Greek letters 
+\begin_inset Formula $\alpha,\beta$
+\end_inset
+
+ are terms, and the Latin letters 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are types.
+ The colon indicates a term-type pairing, so that 
+\begin_inset Formula $\beta:Y$
+\end_inset
+
+ is a term of type 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ The slash 
+\begin_inset Formula $/$
+\end_inset
+
+ and the backslash 
+\begin_inset Formula $\backslash$
+\end_inset
+
+ are 
+\begin_inset CommandInset href
+LatexCommand href
+name "type constructors"
+target "https://en.wikipedia.org/wiki/Type_constructor"
+literal "false"
+
+\end_inset
+
+, so that 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are simple types, and 
+\begin_inset Formula $X/Y$
+\end_inset
+
+ is a compound type, constructed from the two simpler types.
+ The 
+\begin_inset Formula $>$
+\end_inset
+
+ is just a label for the rule; it has no syntactic role.
+\end_layout
+
+\begin_layout Standard
+The CCG Wikipedia article calls these inference rules 
+\begin_inset Quotes eld
+\end_inset
+
+combinators
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Above is one 
+\begin_inset Quotes eld
+\end_inset
+
+application combinator
+\begin_inset Quotes erd
+\end_inset
+
+; there is also a second rule: 
+\begin_inset Formula 
+\[
+\frac{\beta:Y\quad\alpha:X\backslash Y}{\beta\alpha:X}<
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Lets rewrite these two rewrite rules in LG notation.
+ They would be
+\begin_inset Formula 
+\[
+\frac{\alpha:\left(X\!\!-\;\;\&\;\;Y\!+\right)\quad\beta:Y\!-}{\alpha\beta:X\!-}>
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\frac{\beta:Y\!+\quad\alpha:\left(X\!\!+\;\;\&\;\;Y\!-\right)}{\beta\alpha:X\!+}<
+\]
+
+\end_inset
+
+Here, the 
+\begin_inset Formula $X,Y$
+\end_inset
+
+ are the LG types, called 
+\begin_inset Quotes eld
+\end_inset
+
+link types
+\begin_inset Quotes erd
+\end_inset
+
+ in the literature.
+ The 
+\begin_inset Formula $Y\!+$
+\end_inset
+
+ and 
+\begin_inset Formula $Y\!-$
+\end_inset
+
+ are called 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+: they are jigsaw-puzzle-piece tabs, as-yet unconnected.
+ When they do connect, they are called a 
+\begin_inset Quotes eld
+\end_inset
+
+link
+\begin_inset Quotes erd
+\end_inset
+
+, and thus the name 
+\begin_inset Quotes eld
+\end_inset
+
+Link Grammar
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ are the 
+\begin_inset Quotes eld
+\end_inset
+
+connector directions
+\begin_inset Quotes erd
+\end_inset
+
+: they specify in which direction a connector can connect: to the right
+ or to the left.
+ 
+\end_layout
+
+\begin_layout Standard
+The ampersand 
+\begin_inset Formula $\&$
+\end_inset
+
+ is a 
+\begin_inset Quotes eld
+\end_inset
+
+kind of
+\begin_inset Quotes erd
+\end_inset
+
+ type constructor.
+ Given two connectors, say, 
+\begin_inset Formula $X\!-$
+\end_inset
+
+ and 
+\begin_inset Formula $Y\!+$
+\end_inset
+
+ it creates a new type (more precisely, a 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw
+\begin_inset Quotes erd
+\end_inset
+
+) 
+\begin_inset Formula $X\!-\;\&\;Y\!+$
+\end_inset
+
+.
+ This can be made more precise, in an upcoming section.
+\end_layout
+
+\begin_layout Standard
+So what are these two inference rules really saying? Well, its almost trivial:
+ they're just saying 
+\begin_inset Quotes eld
+\end_inset
+
+connectable connectors can connect, if the connector types are identical,
+ and the sexuality of the connectors is opposite.
+\begin_inset Quotes erd
+\end_inset
+
+ Let's cement the obvious.
+ Here's the first combinator, using the same diagrammatic representation
+ as in the original 1991 Link Grammar paper: 
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/LG-inference.eps
+	lyxscale 60
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+What is this picture saying? The obvious: when you combine terms 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and 
+\begin_inset Formula $\beta$
+\end_inset
+
+ the result is a single term 
+\begin_inset Formula $\alpha\beta$
+\end_inset
+
+ and it is convenient to not draw, to ignore, to pretend that the link 
+\begin_inset Formula $Y$
+\end_inset
+
+ joinning these two pieces as disappeared.
+ In other words, a partially-assembled jigsaw puzzle behaves exactly like
+ a single jigsaw piece.
+ 
+\end_layout
+
+\begin_layout Subsection*
+The CCG Composition Combinators
+\end_layout
+
+\begin_layout Standard
+For completeness, the remaining CCG combinators should be treated as well.
+ Here's a side-by-side Rosetta Stone of the two composition combinators.
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CCG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LG
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X/Y\quad\beta:Y/Z}{\alpha\beta:X/Z}B_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!-\;\&\;Y\!+\quad\beta:Y\!-\;\&\;Z\!+}{\alpha\beta:X\!-\;\&\;Z\!+}B_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\beta:Y\backslash Z\quad\alpha:X\backslash Y}{\beta\alpha:X\backslash Z}B_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\beta:Y\!+\;\&\;Z\!-\quad\alpha:X\!+\;\&\;Y\!-}{\beta\alpha:X\!+\;\&\;Z\!-}B_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Clearly, they just specify how to connect compound connectors.
+\end_layout
+
+\begin_layout Subsection*
+The CCG Type-raising Combinators
+\end_layout
+
+\begin_layout Standard
+The last pair of combinators are the type-raising combinators.
+ These are 
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CCG
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LG
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X}{\alpha:T/\left(T\backslash X\right)}T_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!-}{\alpha:T\!-\;\&\;T\!+\;\&\;X\!-}T_{>}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X}{\alpha:T\backslash\left(T/X\right)}T_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="center" valignment="middle" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{\alpha:X\!+}{\alpha:T\!+\;\&\;T\!-\;\&\;X\!+}T_{<}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The interpretation of these two rules is that, given a single (assembled)
+ jigsaw 
+\begin_inset Formula $X$
+\end_inset
+
+, cut it into two (disassemble it) such that the new connectors are of type
+ 
+\begin_inset Formula $T$
+\end_inset
+
+ (and they are no longer connected).
+ 
+\end_layout
+
+\begin_layout Standard
+There seems to be a slight awkwardness, as the earlier combinators could
+ be easily understood by thinking only about simple types.
+ By contrast, the CCG requires a more complex explanation:
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\emph on
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Quotes eld
+\end_inset
+
+The type-raising combinators, often denoted as 
+\begin_inset Formula $T_{>}$
+\end_inset
+
+ for forward type-raising and 
+\begin_inset Formula $T_{<}$
+\end_inset
+
+ for backward type-raising, take argument types (usually primitive types)
+ to functor types, which take as their argument the functors that, before
+ type-raising, would have taken them as arguments.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Phew.
+ That's a mouthful, when all that is really being said is 
+\begin_inset Quotes eld
+\end_inset
+
+disconnect
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+cut into pieces
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A bit more on why and how this extra complexity arises, shortly below.
+\end_layout
+
+\begin_layout Subsection*
+An Sloppy Example
+\end_layout
+
+\begin_layout Standard
+The Wikipedia article includes an example of two different proofs (two different
+ derivation trees) of the same sentence.
+ Here's one:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{NP/N}\qquad\dfrac{\text{dog}}{N}}{NP}>\qquad\dfrac{\dfrac{\text{bit}}{(S\backslash NP)/NP}\qquad\dfrac{\text{John}}{NP}}{S\backslash NP}>}{S}<
+\]
+
+\end_inset
+
+ If we are sloppy and uncareful ***, we find that the translated LG derivation
+ rules:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{NP\!+\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!+}>\qquad\dfrac{\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+\;\&\;NP\!-}>}{S\!+}<
+\]
+
+\end_inset
+
+This is perhaps hard to read? The conventional LG notation for this derivation
+ would be:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+                     +--------S-----+
+\end_layout
+
+\begin_layout Plain Layout
+
+                     |              |
+\end_layout
+
+\begin_layout Plain Layout
+
+        +--N--+--NP--+--NP--+       |
+\end_layout
+
+\begin_layout Plain Layout
+
+        |     |      |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+       the   dog    bit   John  RIGHT-WALL
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+where an extra jigsaw piece 
+\family typewriter
+RIGHT-WALL: S-
+\family default
+ was introduced, so as to keep all connectors fully connected.
+ The above works.
+ It is not the preferred LG parse for the current English language dictionary.
+ That would be:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+           +-------->WV------->+
+\end_layout
+
+\begin_layout Plain Layout
+
+           +---->Wd-----+      |
+\end_layout
+
+\begin_layout Plain Layout
+
+           |      +Ds**c+-Ss*s-+--Os*e-+
+\end_layout
+
+\begin_layout Plain Layout
+
+           |      |     |      |       |
+\end_layout
+
+\begin_layout Plain Layout
+
+       LEFT-WALL the   dog    bit    John
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+The link types are obviously more complex.
+ Note also the present of a cycle (the triangle, whose edges are 
+\family typewriter
+WV
+\family default
+, 
+\family typewriter
+Wd
+\family default
+ and 
+\family typewriter
+Ss*s
+\family default
+.) Note the presence of several directed connectors.
+ The complex upper-case/lower-case link types are an example of 
+\begin_inset Quotes eld
+\end_inset
+
+sexuality
+\begin_inset Quotes erd
+\end_inset
+
+; see next section.
+ 
+\end_layout
+
+\begin_layout Subsection*
+A Less Sloppy Example
+\end_layout
+
+\begin_layout Standard
+*** Wait, what? Sloppy and uncareful? If we are careful, and don't gloss
+ any plus and minus signs, then the following derivation results:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>\qquad\dfrac{\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+\;\&\;NP\!-}>}{NP\!-\;\&\;S\!+\;\&\;NP\!-}\mbox{ fail !!}
+\]
+
+\end_inset
+
+This reveals a bug in the Wikipedia article derivation.
+ It should have been:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\text{the}}{N}\qquad\dfrac{\text{dog}}{NP\backslash N}}{NP}<\qquad\dfrac{\dfrac{\text{bit}}{(S\backslash NP)/NP}\qquad\dfrac{\text{John}}{NP}}{S\backslash NP}>}{S}<
+\]
+
+\end_inset
+
+This is provides a hint as to why LG might actually be better than CCG:
+ it's easier to spot bugs.
+ We live in an era of compilers and debuggers; yet hand-writing expressions
+ is error prone.
+\end_layout
+
+\begin_layout Standard
+The CCG article also gives an alternative derivation for the sentence, but
+ it is also buggy.
+ The article currently states:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP/N}\qquad\dfrac{\text{dog}}{N}}{NP}>}{S/(S\backslash NP)}T_{>}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}\qquad\dfrac{\text{John}}{NP}}{S}>
+\]
+
+\end_inset
+
+The naive translation of the above to LG derivations reveals two bugs in
+ the above:
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{ fail !}
+\]
+
+\end_inset
+
+It should have been this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N}\qquad\dfrac{\text{dog}}{NP\backslash N}}{NP}<}{S\backslash(S/NP)}T_{<}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}\qquad\dfrac{\text{John}}{NP}}{S}>
+\]
+
+\end_inset
+
+This corrected form then translates as: 
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N\!+}\qquad\dfrac{\text{dog}}{NP\!+\;\&\;N\!-}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+}>
+\]
+
+\end_inset
+
+One of the two bugs is the same as the earlier one.
+ The second bug is more subtle: it was a misapplication of the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule.
+ The two premises of the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule must necessarily have inverted polarities; the Wikipedia article gives
+ them the same polarity, and then cancels them out.
+ To be explicit: the compound type 
+\begin_inset Formula $(S\backslash NP)$
+\end_inset
+
+ cannot be canceled against another 
+\begin_inset Formula $(S\backslash NP)$
+\end_inset
+
+ in the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule.
+ It must be canceled against 
+\begin_inset Formula $(S/NP)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If this analysis seems incorrect, muddled or confused, or anchored in in
+ misinterpretation, that's OK.
+ Don't give up; it's complicated.
+ A deeper analysis will be presented in the section on connector sexuality.
+ In short, the default presentation of CCG assumes mono-sexual types (types
+ without the 
+\begin_inset Formula $+/-$
+\end_inset
+
+ directional markup), but this will be seen to not be enough.
+ 
+\end_layout
+
+\begin_layout Standard
+The root cause of both of these bugs was a failure to attend the polarity
+ that is implied by the type constructors 
+\begin_inset Formula $/$
+\end_inset
+
+ and 
+\begin_inset Formula $\backslash$
+\end_inset
+
+.
+ These type constructors build compound types with an implicit polarity;
+ the failure to write it down leads to interpretational issues.
+ These bugs can only be resolved by taking care to distinguish between types
+ and sexualities (polarities, here, since the sexualities here are heterosexual.)
+ More on sexuality, shortly.
+ If the above analysis seems incorrect, muddled or confused, or anchored
+ in in misinterpretation, please keep reading.
+\end_layout
+
+\begin_layout Standard
+There is yet another infelicity in the Wikipedia article.
+ It currently states:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+The sentence "the dog bit John" has a number of different possible proofs.
+ Below are a few of them.
+ The variety of proofs demonstrates the fact that in CCG, sentences don't
+ have a single structure, as in other models of grammar.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+This is misleading.
+ Two different derivation trees are presented.
+ The ultimate parse is identical.
+ This phenomenon is commonly treated in textbooks on proof theory: two different
+ proofs have proof trees that appear to be different, but can be rearranged
+ by homotopic deformations into one-another.
+ That is, there is a Scott-continuous deformation, referring to the Scott
+ topology that conventionally applied to proofs/programs.
+ How can continuous transformations be spotted? Next section!
+\end_layout
+
+\begin_layout Subsection*
+Conclusion
+\end_layout
+
+\begin_layout Standard
+In conclusion: CCG is equivalent to LG.
+ The inference rules of CCG are merely rules for how to join together connectors.
+ Two rules connect simple types to compound types; two more rules connect
+ compound types, and the final two rules show how to disassemble connections
+ (equivalently, to create unconnected pairs).
+\end_layout
+
+\begin_layout Standard
+It should be clear that CCG uses a far more awkward notation (the proof-theoreti
+cal inference-bar notation).
+ Awkwardness matters, because concepts like link-crossing and Dick Hudson's
+ "landmark transitivity" becomes very hard to talk about in CCG.
+\end_layout
+
+\begin_layout Section*
+Proof Theory
+\end_layout
+
+\begin_layout Standard
+Although the presentation above focused on CCG, and LG, the concept of inference
+ rules as being certain peculiar kinds of rewrite rules is not new.
+ Lets take a look at the 
+\begin_inset Quotes eld
+\end_inset
+
+standard form
+\begin_inset Quotes erd
+\end_inset
+
+ of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "inference rule"
+target "https://en.wikipedia.org/wiki/Rule_of_inference"
+literal "false"
+
+\end_inset
+
+, taken from Wikipedia:
+\begin_inset Formula 
+\begin{align*}
+{\mbox{Premise \#1}\atop \mbox{Premise \#2}}\\
+\cdots\qquad\\
+\frac{\mbox{Premise \#n}}{\mbox{Conclusion}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is, oddly enough, just another jigsaw.
+ Let's be painfully clear, by actually drawing it:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/inference.eps
+	lyxscale 50
+	width 15col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Formula $X_{k}$
+\end_inset
+
+ are the premises, the 
+\begin_inset Formula $Y$
+\end_inset
+
+ is the conclusion.
+ These are drawn as it they're typed; the type assignments are just illustrative
+; what matters in this picture are the directionalities: there are 
+\begin_inset Formula $n$
+\end_inset
+
+ inputs and one output.
+ Structurally, this has the form of a lambda combinator, having 
+\begin_inset Formula $n$
+\end_inset
+
+inputs ...
+ in practical applications, inference rules behave as if they were lambdas.
+ The central point being made here is that the input-to-output connections
+ are heterosexual.
+ Premises cannot be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ premises; conclusions cannot be 
+\begin_inset Quotes eld
+\end_inset
+
+plugged into
+\begin_inset Quotes erd
+\end_inset
+
+ conclusions.
+ There only one possible direction: only conclusions can be plugged into
+ premises.
+ 
+\end_layout
+
+\begin_layout Standard
+All proof-theoretical inference rules are always jigsaw pieces.
+ All of them, without any exceptions.
+ This holds for any type of logic: classical, predicate, intuitionist, modal,
+ linear logic.
+ This observation is "trivial" because its effectively just a notational
+ thing.
+ 
+\end_layout
+
+\begin_layout Standard
+Alternative notations used to write inference rules, however, is interesting.
+ One common form appearing in many computer-science settings is 
+\begin_inset Formula 
+\[
+X_{1}\wedge X_{2}\wedge\cdots\wedge X_{n}\to Y
+\]
+
+\end_inset
+
+The LG notation for this is 
+\begin_inset Formula 
+\[
+X_{1}\!-\;\&\;X_{2}\!-\;\&\;\cdots\;\&\;X_{n}\!-\;\&\;Y\!+
+\]
+
+\end_inset
+
+In tensor algebras, one would write
+\begin_inset Formula 
+\[
+X_{1}^{*}\otimes X_{2}^{*}\otimes\cdots\otimes X_{n}^{*}\otimes Y
+\]
+
+\end_inset
+
+where the * denotes the (contravariant) dual.
+ In index notation, this would be written as 
+\begin_inset Formula 
+\[
+T_{\alpha\beta\cdots\mu}^{\quad\quad\nu}
+\]
+
+\end_inset
+
+In quantum mechanics, one uses the bra-ket notation: 
+\begin_inset Formula 
+\[
+\left|X_{1}\right\rangle \otimes\left|X_{2}\right\rangle \otimes\cdots\otimes\left|X_{n}\right\rangle \left\langle Y\right|
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+One must be careful, though; the last three forms can be beguilingly misleading.
+ Tensor algebras are (dagger) symmetric, and thus have only one type constructor.
+ In linguistics, there are two type constructors, which go to the left and
+ the right, because the left-right distinction matters in linguistics.
+\end_layout
+
+\begin_layout Section*
+Connector Sexuality
+\end_layout
+
+\begin_layout Standard
+In CCG, there are two "type raising combinators" 
+\begin_inset Formula $\backslash$
+\end_inset
+
+ and 
+\begin_inset Formula $/$
+\end_inset
+
+ because in linguistics, word order matters.
+ Nouns appearing to the left of a verb are subjects; nouns appearing on
+ the right are objects.
+ Link Grammar accomplishes the left-right distinction with the + and - connector
+ directions.
+ This is, in general, sufficient for linearly-ordered sequences of words.
+ 
+\end_layout
+
+\begin_layout Standard
+The rules for joining together LG connectors state that 
+\begin_inset Formula $+$
+\end_inset
+
+ can only be attached to 
+\begin_inset Formula $-$
+\end_inset
+
+.
+ One can never attach 
+\begin_inset Formula $+$
+\end_inset
+
+ to 
+\begin_inset Formula $+$
+\end_inset
+
+ or 
+\begin_inset Formula $-$
+\end_inset
+
+ to 
+\begin_inset Formula $-$
+\end_inset
+
+.
+ In this sense, the connection rules are heterosexual.
+ This is also the conventional mechanism for lambda calculus, and of function
+ calls: one can plug earlier outputs into new inputs.
+ One can take a number 42 and plug it into 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ to get 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+ but one cannot plug 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ into 42.
+ Nor 42 into 42, for that matter.
+ Function calls are also heterosexual (and almost always typed, except for
+ simply-typed lambda calculus).
+\end_layout
+
+\begin_layout Standard
+Mono-sexual connectors are those for which there is only one connector type.
+ It can be denoted simply by *, or not at all (by just dropping the concept).
+ In a monotyped system, all relations are necessarily homosexual, as there
+ is only one sex.
+\end_layout
+
+\begin_layout Standard
+Jigsaws can in general have monosexual connectors, or trisexual connectors,
+ or other arbitrarily complex rules.
+\end_layout
+
+\begin_layout Subsection*
+Trisexuality
+\end_layout
+
+\begin_layout Standard
+An example of trisexual connectors would be the set 
+\begin_inset Formula 
+\[
+\left\{ A\!a,A\!b,A\!c,B\!a,B\!b,B\!c\right\} 
+\]
+
+\end_inset
+
+with the connection rules that upper-case letters must match, while lower-case
+ letters must be different.
+ In this case, there are three sexes 
+\begin_inset Formula $a,b,c$
+\end_inset
+
+ instead of two 
+\begin_inset Formula $+-$
+\end_inset
+
+, but the rules still demand heterosexuality between the connector 
+\begin_inset Quotes eld
+\end_inset
+
+directions
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+One can enliven the situation by introducing * as a direction wild-card.
+ Thus, * can mate with *, or with any of the sexes 
+\begin_inset Formula $a,b,c$
+\end_inset
+
+.
+ So for example, 
+\begin_inset Formula $A\!b$
+\end_inset
+
+ can attach to 
+\begin_inset Formula $A\!*$
+\end_inset
+
+, or any of the other 
+\begin_inset Formula $A$
+\end_inset
+
+'s; just not to another 
+\begin_inset Formula $A\!b$
+\end_inset
+
+.
+ Likewise 
+\begin_inset Formula $B\!*$
+\end_inset
+
+ cannot attach to any of the 
+\begin_inset Formula $A$
+\end_inset
+
+'s, because the uppercase letters denote type, and you cannot mix these.
+\end_layout
+
+\begin_layout Subsection*
+The fundamental need for connectors
+\end_layout
+
+\begin_layout Standard
+We now come to perhaps the most subtle point of this.
+ It's subtle because its blaringly, forehead-slappingly obvious.
+ It's so obvious that, in fact, it will shoot right by, if you are not paying
+ attention.
+\end_layout
+
+\begin_layout Standard
+It is this: in almost all conventional, day-to-day usage of types, when
+ someone says 
+\begin_inset Quotes eld
+\end_inset
+
+this is a type
+\begin_inset Quotes erd
+\end_inset
+
+, half the time, they really mean 
+\begin_inset Quotes eld
+\end_inset
+
+this is a connector
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Connectors are implicitly present almost everywhere; their use is rampant,
+ and the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+direction
+\begin_inset Quotes erd
+\end_inset
+
+ is never mentioned, because it is almost always obvious from context.
+ One could say that type theory and computer programming suffer from 
+\begin_inset Quotes eld
+\end_inset
+
+systemic hetero-sexism
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+normative heterosexuality
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Consider programming in C, C++ or Java.
+ Three basic types are 
+\family typewriter
+int
+\family default
+, 
+\family typewriter
+float
+\family default
+ and 
+\family typewriter
+string
+\family default
+.
+ Duhh.
+ Function calls have 
+\begin_inset Quotes eld
+\end_inset
+
+signatures
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\emph on
+e.g.
+
+\emph default
+ 
+\family typewriter
+int func(int x)
+\family default
+.
+ What is the number 42? Obviously, its an 
+\family typewriter
+int
+\family default
+, and obviously you can plug it into 
+\family typewriter
+int func(int x)
+\family default
+, so that 
+\family typewriter
+func(42)
+\family default
+ is syntactically valid (in C, C++, Java) but 
+\family typewriter
+42(func)
+\family default
+ is obviously syntactic nonsense.
+ No one ever needs to explain this.
+\end_layout
+
+\begin_layout Standard
+It would be strange and bizarre to explain that 42 is actually a 
+\begin_inset Quotes eld
+\end_inset
+
+connector
+\begin_inset Quotes erd
+\end_inset
+
+, having type 
+\family typewriter
+int
+\family default
+ and direction 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise, in 
+\family typewriter
+func(int x)
+\family default
+, the 
+\family typewriter
+x
+\family default
+ is actually connector.
+ It obviously has the type 
+\family typewriter
+int
+\family default
+, but it also has the direction of 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The connector rules that connections can only be heterosexual are obvious:
+ you can connect an output to an input, and that is it.
+ You cannot connect two inputs, you cannot connect two outputs.
+ Duhh.
+ Any dummy knows this.
+\end_layout
+
+\begin_layout Standard
+Now it is time to slap one's forehead.
+ About half the time when someone says something is of type 
+\begin_inset Formula $X$
+\end_inset
+
+ what they really mean is that something is a connector, and that connector
+ has a type of 
+\begin_inset Formula $X$
+\end_inset
+
+ and a direction of either 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+, which is always obvious from context.
+\end_layout
+
+\begin_layout Subsection*
+Normative Heterosexuality
+\end_layout
+
+\begin_layout Standard
+The reason for my belaboring this 
+\begin_inset Quotes eld
+\end_inset
+
+normative heterosexuality
+\begin_inset Quotes erd
+\end_inset
+
+ is that sometimes, it gets you into trouble.
+ When CCG writes the inference rule
+\begin_inset Formula 
+\[
+\frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
+\]
+
+\end_inset
+
+the types 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ were implicitly mono-sexual.
+ They were taken to have no directional information, and all left-right
+ distinctions in the grammar emerged from the two type constructors 
+\begin_inset Formula $/$
+\end_inset
+
+ and 
+\begin_inset Formula $\backslash$
+\end_inset
+
+.
+ Superficially, this seems all fine and correct, although ambiguous associative
+ situations arise, which can be resolved by using parenthesis.
+ Thus, associative expressions such as 
+\begin_inset Formula $X\backslash\left(Y/Z\right)$
+\end_inset
+
+ and the algebra of CCG types is a non-associative algebra (the locations
+ of the parenthesis matter).
+\end_layout
+
+\begin_layout Standard
+In fact, the mono-sexed types, when used with the two combinators and with
+ the parenthesis, provides a golden path to hell.
+ This doesn't become apparent until one starts tripping over buggy expressions.
+ The two example sentences contained three bugs, grand total.
+ These bugs were not visible until the placeholders 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ were reinterpreted as connectors (with types 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+), and the previously implicit directional attachments were made explicitly
+ visible with 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Constituency and Dependency
+\end_layout
+
+\begin_layout Standard
+Wait! It gets even worse!
+\end_layout
+
+\begin_layout Standard
+The reason for the first bug was a slavish adherence to the conventions
+ of olde-fashioned constituency grammar.
+ The inherited tradition is that 
+\family sans
+N
+\family default
+ denotes a noun, and 
+\family sans
+NP
+\family default
+ is a noun phrase.
+ When one writes 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+The dog bit John
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, it is clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is an 
+\family sans
+NP
+\family default
+, and its also clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is not 
+\family sans
+N
+\family default
+, and that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\family sans
+N
+\family default
+.
+ Thus, one is forced into assigning 
+\family sans
+NP/N
+\family default
+ to the determiner.
+ But this is an error! Knowing even a little of dependency grammar would
+ have exposed the error: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+D
+\family default
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+N
+\family default
+ (if it stands alone) or 
+\family sans
+NP/D
+\family default
+ (if its a noun taking a determiner).
+ But conventional constituency grammars rarely if ever bother with issuing
+ a distinct type for determiners, and thus we arrive at a basic markup error.
+ The road to hell is indeed paved with Chomskian gold.
+\end_layout
+
+\begin_layout Subsection*
+Type constructors
+\end_layout
+
+\begin_layout Standard
+The definition of CCG involved seemingly mono-sexed types, and two type
+ constructors 
+\begin_inset Formula $/$
+\end_inset
+
+ and 
+\begin_inset Formula $\backslash$
+\end_inset
+
+.
+ The definition of LG involves heterosexual types, with connector directions
+ 
+\begin_inset Formula $+$
+\end_inset
+
+ and 
+\begin_inset Formula $-$
+\end_inset
+
+ and a single type constructor 
+\begin_inset Formula $\&$
+\end_inset
+
+.
+ This text has exposed the relationships between these two, but it leaves
+ open a bigger question: what is the formal interplay between type constructors
+ and sexuality? It seems that the one can be traded for the other, but the
+ mechanics of this in a general setting are not clear.
+ 
+\end_layout
+
+\begin_layout Section*
+Conclusion
+\end_layout
+
+\begin_layout Standard
+The lesson for today: CCG is equivalent to LG.
+ More or less.
+ We glossed over or completely ignored many of the finer points of LG.
+ No doubt, many important aspects of CCG were omitted as well.
+ Yet, the basic jigsaw structure of CCG was exposed in the plainest way.
+\end_layout
+
+\begin_layout Standard
+The meta-lesson for today: Jigsaws are fundamental for describing a vast
+ class of mathematical and linguistic phenomena.
+ Jigsaws have types (the types of the connectors) and the connectors have
+ "sexuality" (usually heterosexual, for most applications).
+ 
+\end_layout
+
+\begin_layout Standard
+The story does not end there; lets leave off with some hazy futuristic scifi:
+ to infinity and beyond! Consider chemical bonds.
+ Two atoms can bond to one-another, using ionic bonds, molecular bonds,
+ hydrogen bonds and van der Waals bonds.
+ In this sense, molecules are clearly jigsaw pieces, having connectors on
+ them.
+ The type+direction theory outlined so far is not quite sufficient to properly
+ describe chemistry.
+ But it does move in that direction.
+ What more is needed to obtain a fully-accurate type-theoretic model of
+ chemistry?
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
