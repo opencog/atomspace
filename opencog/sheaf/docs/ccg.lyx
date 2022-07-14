@@ -91,7 +91,7 @@
 \begin_body
 
 \begin_layout Title
-Combinatory Categorial Grammar and Link Grammar are Equivalent
+Combinatory Categorial Grammar and Link Grammar are (Almost) Equivalent
 \end_layout
 
 \begin_layout Author
@@ -99,7 +99,7 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-13 July 2022
+Updated 14 July 2022
 \end_layout
 
 \begin_layout Abstract
@@ -121,7 +121,7 @@ literal "false"
 
 \end_inset
 
- (LG) are equivalent.
+ (LG) are (almost) equivalent.
  It covers some basic ideas from proof theory, type theory, and the 
 \begin_inset Quotes eld
 \end_inset
@@ -246,7 +246,7 @@ Somewhere out there is a nice paper that explains how to convert between
 \end_layout
 
 \begin_layout Subsection*
-CCG is Equivalent to LG
+CCG is (Almost) Equivalent to LG
 \end_layout
 
 \begin_layout Standard
@@ -1378,6 +1378,180 @@ This is provides a hint as to why LG might actually be better than CCG:
  is error prone.
 \end_layout
 
+\begin_layout Subsection*
+Constituency and Dependency
+\end_layout
+
+\begin_layout Standard
+The reason for this bug appears to be a slavish adherence to the conventions
+ of olde-fashioned constituency grammar.
+ The inherited tradition is that 
+\family sans
+N
+\family default
+ denotes a noun, and 
+\family sans
+NP
+\family default
+ is a noun phrase.
+ When one writes 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+The dog bit John
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, it is clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is an 
+\family sans
+NP
+\family default
+, and its also clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is not 
+\family sans
+N
+\family default
+, and that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\family sans
+N
+\family default
+.
+ Thus, one is forced into assigning 
+\family sans
+NP/N
+\family default
+ to the determiner.
+ But this is an error!
+\end_layout
+
+\begin_layout Standard
+The markup 
+\family sans
+NP/N
+\family default
+ is saying that the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is a noun-phrase, and it's just missing a noun before it becomes a complete
+ 
+\family sans
+NP
+\family default
+.
+ Do you really want to give such a primal ascendency to the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+? It makes it the head of a head phrase.
+ Hard to imagine that determiners are head words.
+\end_layout
+
+\begin_layout Standard
+Knowing even a little of dependency grammar would have exposed the error:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+D
+\family default
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+N
+\family default
+ (if it stands alone) or 
+\family sans
+NP
+\backslash
+D
+\family default
+ (if its a noun taking a determiner).
+ But conventional constituency grammars rarely if ever bother with issuing
+ a distinct type for determiners, and thus we arrive at a basic markup error.
+ The road to hell is indeed paved with Chomskian gold.
+\end_layout
+
+\begin_layout Subsection*
+Another
+\end_layout
+
 \begin_layout Standard
 The CCG article also gives an alternative derivation for the sentence, but
  it is also buggy.
@@ -2293,180 +2467,6 @@ In fact, the mono-sexed types, when used with the two combinators and with
 \end_layout
 
 \begin_layout Subsection*
-Constituency and Dependency
-\end_layout
-
-\begin_layout Standard
-Wait! It gets even worse!
-\end_layout
-
-\begin_layout Standard
-The reason for the first bug was a slavish adherence to the conventions
- of olde-fashioned constituency grammar.
- The inherited tradition is that 
-\family sans
-N
-\family default
- denotes a noun, and 
-\family sans
-NP
-\family default
- is a noun phrase.
- When one writes 
-\emph on
-
-\begin_inset Quotes eld
-\end_inset
-
-The dog bit John
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
-, it is clear that 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the dog
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- is an 
-\family sans
-NP
-\family default
-, and its also clear that 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- is not 
-\family sans
-N
-\family default
-, and that 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-dog
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- is 
-\family sans
-N
-\family default
-.
- Thus, one is forced into assigning 
-\family sans
-NP/N
-\family default
- to the determiner.
- But this is an error!
-\end_layout
-
-\begin_layout Standard
-The markup 
-\family sans
-NP/N
-\family default
- is saying that the word 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- is a noun-phrase, and it's just missing a noun before it becomes a complete
- 
-\family sans
-NP
-\family default
-.
- Do you really want to give such a primal ascendency to the word 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
-? It makes it the head of a head phrase.
- Hard to imagine that determiners are head words.
-\end_layout
-
-\begin_layout Standard
-Knowing even a little of dependency grammar would have exposed the error:
- 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- should have been 
-\family sans
-D
-\family default
- and 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-dog
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- should have been 
-\family sans
-N
-\family default
- (if it stands alone) or 
-\family sans
-NP
-\backslash
-D
-\family default
- (if its a noun taking a determiner).
- But conventional constituency grammars rarely if ever bother with issuing
- a distinct type for determiners, and thus we arrive at a basic markup error.
- The road to hell is indeed paved with Chomskian gold.
-\end_layout
-
-\begin_layout Subsection*
 Type constructors vs.
  Sexuality
 \end_layout
@@ -2540,6 +2540,66 @@ The story does not end there; lets leave off with some hazy futuristic scifi:
  But it does move in that direction.
  What more is needed to obtain a fully-accurate type-theoretic model of
  chemistry?
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Appendix A
+\end_layout
+
+\begin_layout Standard
+Since the title of this paper makes the rather sweeping statement that CCG
+ 
+\begin_inset Quotes eld
+\end_inset
+
+is equivalent
+\begin_inset Quotes erd
+\end_inset
+
+ to LG, some additional remarks seem to be in order.
+ What was actually supplied were equivalent combinators for eliminating
+ and introducing types (connecors).
+ The type-raising combinator is unusual, from the LG point of view, and
+ it's intended use is even more unusual.
+\end_layout
+
+\begin_layout Standard
+Returning to the correct example, a portion of it reads:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N\!+}\qquad\dfrac{\text{dog}}{NP\!+\;\&\;N\!-}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}B_{>}
+\]
+
+\end_inset
+
+This presents a bit of an issue for LG, as the reduction 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ requires the simultaneous elimination of two connector pairs: 
+\begin_inset Formula $S\!+\;\&\;NP\!+$
+\end_inset
+
+ aganist 
+\begin_inset Formula $S\!+\;\&\;NP\!-$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
