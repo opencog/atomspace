@@ -1587,7 +1587,7 @@ This is, oddly enough, just another jigsaw.
 \begin_inset Graphics
 	filename graphics/inference.eps
 	lyxscale 50
-	width 50col%
+	width 15col%
 
 \end_inset
 
@@ -1651,7 +1651,7 @@ All proof-theoretical inference rules are always jigsaw pieces.
 \end_layout
 
 \begin_layout Subsection*
-xxxx
+Sexuality
 \end_layout
 
 \begin_layout Standard
@@ -1663,25 +1663,13 @@ You have two "type raising combinators" because there are two ways of creating
  general).
  CCG only needs two, because of an old thing in linguistics about word-order
  in linear sentences.
- In conclusion: CCG is equivalent to LG.
- It uses a far more awkward notation (the proof-theoretical inference-bar
- notation).
- Awkwardness matters, because concepts like link-crossing and Dick Hudson's
- "landmark transitivity" becomes very hard to talk about in CCG.
- linas — Today at 10:16 AM The meta-lesson: jigsaws have types (the types
- of the connectors) and the connectors have "sexuality" (usually heterosexual,
+ 
+\end_layout
+
+\begin_layout Standard
+— Today at 10:16 AM The meta-lesson: jigsaws have types (the types of the
+ connectors) and the connectors have "sexuality" (usually heterosexual,
  for most applications).
- linas — Today at 10:25 AM My quick-and-dirty critique of Ben's TrueAI/Hyperion/
-MeTTA work is that they are just re-inventing lambda calculus and term unificati
-on with a weird notation.
- The (= A B) is just a lambda.
- The problem here is that (a) lambdas are always heterosexual, and this
- prevents useful kinds of rewrites, and (b) lambdas cannot encompass many
- types of logics, e.g.
- the linear logics (aka the quantum logics), and any of the modal logics,
- any of the Kripke-Joyal systems.
- So they've painted themselves into a corner, before they've even gotten
- out of the gate.
  
 \end_layout
 
