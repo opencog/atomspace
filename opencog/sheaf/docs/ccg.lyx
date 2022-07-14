@@ -1618,7 +1618,7 @@ inputs ...
  in practical applications, inference rules behave as if they were lambdas.
  The central point being made here is that the input-to-output connections
  are heterosexual.
- Permises cannot be 
+ Premises cannot be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1650,20 +1650,192 @@ All proof-theoretical inference rules are always jigsaw pieces.
  
 \end_layout
 
-\begin_layout Subsection*
-Sexuality
+\begin_layout Standard
+Alternative notations used to write inference rules, however, is interesting.
+ One common form appearing in many computer-science settings is 
+\begin_inset Formula 
+\[
+X_{1}\wedge X_{2}\wedge\cdots\wedge X_{n}\to Y
+\]
+
+\end_inset
+
+The LG notation for this is 
+\begin_inset Formula 
+\[
+X_{1}\!-\;\&\;X_{2}\!-\;\&\;\cdots\;\&\;X_{n}\!-\;\&\;Y\!+
+\]
+
+\end_inset
+
+In tensor algebras, one would write
+\begin_inset Formula 
+\[
+X_{1}^{*}\otimes X_{2}^{*}\otimes\cdots\otimes X_{n}^{*}\otimes Y
+\]
+
+\end_inset
+
+where the * denotes the (contravariant) dual.
+ In index notation, this would be written as 
+\begin_inset Formula 
+\[
+T_{\alpha\beta\cdots\mu}^{\quad\quad\nu}
+\]
+
+\end_inset
+
+One must be carful, though; the last two forms can be beguiliingly mislead.
+ Tensor algebras are (dagger) symmetric, and thus have only one type constructor.
+ In linguistics, there are two type constructors, which go to the left and
+ the right, because the left-right distinction matters in linguistics.
+\end_layout
+
+\begin_layout Section*
+Connector Sexuality
 \end_layout
 
 \begin_layout Standard
-You have two "type raising combinators" because there are two ways of creating
- complex types, with / and with 
-\backslash
- and so (in CCG) the jigsaw connectors are hetero-sexual.
- (Jigsaws can be monosexual, trisexual, and all kinds of weird things in
- general).
- CCG only needs two, because of an old thing in linguistics about word-order
- in linear sentences.
+In CCG, there are two "type raising combinators" 
+\begin_inset Formula $\backslash$
+\end_inset
+
+ and 
+\begin_inset Formula $/$
+\end_inset
+
+ because in linguistics, word order matters.
+ Nouns appearing to the left of a verb are subjects; nouns appearing on
+ the right are objects.
+ Link Grammar accomplishes the left-right distinction with the + and - connector
+ directions.
+ This is, in general, sufficient for linearly-ordered sequences of words.
  
+\end_layout
+
+\begin_layout Standard
+The rules for joining together LG connectors state that + can only be attached
+ to -.
+ One can never attach + to + or - to -.
+ In this sense, the connection rules are hetrosexual.
+ This is also the conventional mechanism for lambda calculus, and of function
+ calls: one can plug earlier outputs into new inputs.
+ One can take a number 42 and plug it into 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ to get 
+\begin_inset Formula $f\left(42\right)$
+\end_inset
+
+ but one cannot plug 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ into 42.
+ Nor 42 into 42, for that matter.
+ Function calls are also heterosexual (and almost always typed, except for
+ simply-typed lambda calculus).
+\end_layout
+
+\begin_layout Standard
+Monotyped connectors are those for which there is only one connector type.
+ It can be denoted simply by *, or not at all (by just dropping the concept).
+ In a monotyped system, all relations are necessarily homosexual, as there
+ is only one sex.
+\end_layout
+
+\begin_layout Standard
+Jigsaws can in general have monotyped connectors, or trisexual connector,
+ or other arbitrarily complex rules.
+\end_layout
+
+\begin_layout Subsection*
+Trisexuality
+\end_layout
+
+\begin_layout Standard
+An example of trisexual connectors would be the set 
+\begin_inset Formula 
+\[
+\left\{ A\!a,A\!b,A\!c,B\!a,B\!b,B\!c\right\} 
+\]
+
+\end_inset
+
+with the connection rules that upper-case letters must match, while lower-case
+ letters must be different.
+ In this case, there are three sexes 
+\begin_inset Formula $a,b,c$
+\end_inset
+
+ instead of two 
+\begin_inset Formula $+-$
+\end_inset
+
+, but the rules still demand heterosexuality between the connector 
+\begin_inset Quotes eld
+\end_inset
+
+directions
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+One can enliven the situation by introducing * as a direction wild-card.
+ Thus, * can mate with *, or with any of the sexes 
+\begin_inset Formula $a,b,c$
+\end_inset
+
+.
+ So for example, 
+\begin_inset Formula $A\!b$
+\end_inset
+
+ can attach to 
+\begin_inset Formula $A\!*$
+\end_inset
+
+, or any of the other 
+\begin_inset Formula $A$
+\end_inset
+
+'s; just not to another 
+\begin_inset Formula $A\!b$
+\end_inset
+
+.
+ Likewise 
+\begin_inset Formula $B\!*$
+\end_inset
+
+ cannot attach to any of the 
+\begin_inset Formula $A$
+\end_inset
+
+'s, because the uppercase letters denote type, and you cannot mix these.
+\end_layout
+
+\begin_layout Subsection*
+The fundamental need for connectors
+\end_layout
+
+\begin_layout Standard
+We now come to perhaps the most subtle point of this.
+ It's subtle because its blaringly, forehead-slappingly obvious.
+ It's so obvious that, in fact, it will shoot right by, if you are not paying
+ attention.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Section*
+Conclusion
 \end_layout
 
 \begin_layout Standard
