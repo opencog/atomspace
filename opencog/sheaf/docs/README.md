@@ -38,3 +38,10 @@ There are several files here:
    storing graphs, than graph databases are. The representational
    differences are minor, but the side effects are major. This is a
    pre-req for understanding sheaf stores.
+
+* The [ccg.pdf](ccg.pdf) file demonstrates that Combinatorial Categorial
+  Grammars (CCG) are equivalent to Link Grammars (LG). This also
+  provides a practical example of how connector sexuality can be used to
+  resolve real-world interpretational problems in computational
+  linguistics. The most interesting question it poses is about the
+  relationship between connector sexuality and type constructors.
