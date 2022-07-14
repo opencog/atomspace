@@ -1613,7 +1613,36 @@ This translates into:
 \end_inset
 
 But this also is buggy.
- What's the issue here?
+ There appears to be a surplus of 
+\family sans
+S
+\family default
+'s as the result of the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule.
+ We can get rid of the excess by writing getting rid of the 
+\begin_inset Formula $T_{<}$
+\end_inset
+
+ inference, and writing
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\text{the dog}}{NP\!+}<\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}<
+\]
+
+\end_inset
+
+Working backwards to CCG, this would be
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\text{the dog}}{NP}<\qquad\dfrac{\text{bit}}{(S/NP)\backslash NP}}{S/NP}<
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
