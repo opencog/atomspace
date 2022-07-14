@@ -131,9 +131,9 @@ sexuality
 \end_inset
 
  of type combinators.
- The key idea is that type theory must be combined with connector sexuality
- in order to get a fully general framework encompassing proof theory and
- inference in logic.
+ The key idea that exposed is that type theory must be combined with connector
+ sexuality in order to get a fully general framework encompassing proof
+ theory, inference in logic and linguistics.
 \end_layout
 
 \begin_layout Section*
@@ -141,7 +141,7 @@ A Question posed on a Discord chat channel
 \end_layout
 
 \begin_layout Standard
-@Adam asks: 
+@Adam Vandervorst asks: 
 \emph on
 Does anyone here know about 
 \begin_inset Newline newline
@@ -1181,7 +1181,7 @@ cut into pieces
 \end_layout
 
 \begin_layout Subsection*
-An Example
+An Sloppy Example
 \end_layout
 
 \begin_layout Standard
@@ -1334,6 +1334,10 @@ sexuality
 
 ; see next section.
  
+\end_layout
+
+\begin_layout Subsection*
+A Less Sloppy Example
 \end_layout
 
 \begin_layout Standard
@@ -2052,6 +2056,10 @@ output
 , which is always obvious from context.
 \end_layout
 
+\begin_layout Subsection*
+Normative Heterosexuality
+\end_layout
+
 \begin_layout Standard
 The reason for my belaboring this 
 \begin_inset Quotes eld
@@ -2062,7 +2070,7 @@ normative heterosexuality
 \end_inset
 
  is that sometimes, it gets you into trouble.
- When CCG write the inference rule
+ When CCG writes the inference rule
 \begin_inset Formula 
 \[
 \frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
@@ -2130,6 +2138,10 @@ In fact, the mono-sexed types, when used with the two combinators and with
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection*
+Constituency and Dependency
 \end_layout
 
 \begin_layout Standard
@@ -2215,7 +2227,7 @@ NP/N
 \family default
  to the determiner.
  But this is an error! Knowing even a little of dependency grammar would
- have expose the error: 
+ have exposed the error: 
 \begin_inset Quotes eld
 \end_inset
 
