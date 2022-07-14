@@ -1549,12 +1549,12 @@ D
 \end_layout
 
 \begin_layout Subsection*
-Another
+Not Quite Equivalent
 \end_layout
 
 \begin_layout Standard
-The CCG article also gives an alternative derivation for the sentence, but
- it is also buggy.
+The CCG article also gives an alternative derivation for the sentence.
+ It illustrates that LG and CCG are not quite equivalent.
  The article currently states:
 \begin_inset Formula 
 \[
@@ -1563,8 +1563,12 @@ The CCG article also gives an alternative derivation for the sentence, but
 
 \end_inset
 
-The naive translation of the above to LG derivations reveals two bugs in
- the above:
+The translation of the above to LG derivations reveals an issue, appearantly
+ with the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule:
 \begin_inset Formula 
 \[
 \dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{NP\!-\;\&\;N\!+}\qquad\dfrac{\text{dog}}{N\!-}}{NP\!-}>}{S\!-\;\&\;S\!+\;\&\;NP\!-}T_{>}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!-\;\&\;S\!-\;\&\;NP\!-\;\&\;S\!+\;\&\;NP\!-}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{XXX}\mbox{ fail !}
@@ -1572,27 +1576,48 @@ The naive translation of the above to LG derivations reveals two bugs in
 
 \end_inset
 
-It should have been this:
+After glossing over the issue with the 
+\family sans
+NP
+\family default
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, I wrote down a quick knee-jerk fix, claiming that it should have been
+ this:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N}\qquad\dfrac{\text{dog}}{NP\backslash N}}{NP}<}{S\backslash(S/NP)}T_{<}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}\qquad\dfrac{\text{John}}{NP}}{S}>
+\dfrac{\dfrac{\dfrac{\dfrac{\text{the dog}}{NP}<}{S\backslash(S/NP)}T_{<}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}\qquad\dfrac{\text{John}}{NP}}{S}>
 \]
 
 \end_inset
 
-This corrected form then translates as: 
+This translates into: 
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\dfrac{\dfrac{\dfrac{\text{the}}{N\!+}\qquad\dfrac{\text{dog}}{NP\!+\;\&\;N\!-}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+}>
+\dfrac{\dfrac{\dfrac{\dfrac{\text{the dog}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;S\!-\;\&\;S\!+\;\&\;NP\!+}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+}\text{ still failing!}
 \]
 
 \end_inset
 
-One of the two bugs is the same as the earlier one.
- The second bug is more subtle: it was a misapplication of the 
+But this also is buggy.
+ What's the issue here?
+\end_layout
+
+\begin_layout Standard
+The second bug is more subtle: it was a misapplication of the 
 \begin_inset Formula $B_{>}$
 \end_inset
 
