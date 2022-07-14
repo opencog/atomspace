@@ -2422,7 +2422,7 @@ func(int x)
 \family typewriter
 x
 \family default
- is actually connector.
+ is actually a connector.
  Obviously, 
 \family typewriter
 x
