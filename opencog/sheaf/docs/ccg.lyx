@@ -1831,7 +1831,262 @@ We now come to perhaps the most subtle point of this.
 \end_layout
 
 \begin_layout Standard
+It is this: in almost all conventional, day-to-day usage of types, when
+ someone says 
+\begin_inset Quotes eld
+\end_inset
 
+this is a type
+\begin_inset Quotes erd
+\end_inset
+
+, half the time, they really mean 
+\begin_inset Quotes eld
+\end_inset
+
+this is a connector
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Connectors are implcitly present almost everywhere; thier use is rampant,
+ and the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+direction
+\begin_inset Quotes erd
+\end_inset
+
+ is never mentioned, because it is almost always obvious from context.
+ One could say that type theory and computer programing suffer from 
+\begin_inset Quotes eld
+\end_inset
+
+systemic hetero-sexism
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+normative heterosexuality
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Consider programming in C, C++ or Java.
+ Three basic types are 
+\family typewriter
+int
+\family default
+, 
+\family typewriter
+float
+\family default
+ and 
+\family typewriter
+string
+\family default
+.
+ Duhh.
+ Function calls have 
+\begin_inset Quotes eld
+\end_inset
+
+signatures
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\emph on
+e.g.
+
+\emph default
+ 
+\family typewriter
+int func(int x)
+\family default
+.
+ What is the number 42? Obviously, its an 
+\family typewriter
+int
+\family default
+, and obviously you can plut it into 
+\family typewriter
+int func(int x)
+\family default
+, so that 
+\family typewriter
+func(42)
+\family default
+ is syntactically valid (in C, C++, Java) but 
+\family typewriter
+42(func)
+\family default
+ is obviously syntactic nonsense.
+ No one ever needs to explain this.
+\end_layout
+
+\begin_layout Standard
+It would be strange and bizarre to explain that 42 is actually a 
+\begin_inset Quotes eld
+\end_inset
+
+connector
+\begin_inset Quotes erd
+\end_inset
+
+, having type 
+\family typewriter
+int
+\family default
+ and direction 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise, in 
+\family typewriter
+func(int x)
+\family default
+, the 
+\family typewriter
+x
+\family default
+ is actually connector.
+ It obviouosly has the type 
+\family typewriter
+int
+\family default
+, but it also has the direction of 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The connector rules that connections can only be heterosexual are obvious:
+ you can connect an output to an input, and that is it.
+ You cannot connect two inputs, you cannot connect two outputs.
+ Duhh.
+ Any dummy knows this.
+\end_layout
+
+\begin_layout Standard
+Now it is time to slap one's forehead.
+ About half the time when someone says something is of type 
+\begin_inset Formula $X$
+\end_inset
+
+ what they really mean is that something is a connector, and that connector
+ has a type of 
+\begin_inset Formula $X$
+\end_inset
+
+ and a direction of either 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+, which is always obvious from context.
+\end_layout
+
+\begin_layout Standard
+The reason for my belaboring this 
+\begin_inset Quotes eld
+\end_inset
+
+normative heterosexuality
+\begin_inset Quotes erd
+\end_inset
+
+ is that sometimes, it gets you into trouble.
+ When CCG write the inference rule
+\begin_inset Formula 
+\[
+\frac{\alpha:X/Y\quad\beta:Y}{\alpha\beta:X}>
+\]
+
+\end_inset
+
+the types 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ were implcitly monosexual.
+ They were taken to have no directional information, and all left-right
+ distinctions in the grammar emerged from the two type constructors 
+\begin_inset Formula $/$
+\end_inset
+
+ and 
+\begin_inset Formula $\backslash$
+\end_inset
+
+.
+ Superficially, this seems all fine and correct, although ambiguouus associative
+ situations arise, which can be resolved by using parenthesis.
+ Thus, associative expressions such as 
+\begin_inset Formula $X\backslash\left(Y/Z\right)$
+\end_inset
+
+ and the algebra of CCG types is a non-associative algebra (the locations
+ of the parentheis matter).
+\end_layout
+
+\begin_layout Standard
+In fact, the mono-sexed types, when used with the two combinators and with
+ the parenthesis, provides a golden path to hell.
+ This doesn't become apparent until one starts tripping over buggy expressions.
+ The two example sentences contained three bugs, grand total.
+ These bugs were not visible until the placeholders 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ were reinterpreted as connectors (with types 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+), and the previously implicit directional attachements were made explicitly
+ visible with + and -.
+\end_layout
+
+\begin_layout Standard
+Wait! It gets even worse!
 \end_layout
 
 \begin_layout Section*
