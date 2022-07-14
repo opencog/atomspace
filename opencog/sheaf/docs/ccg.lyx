@@ -640,7 +640,7 @@ What is this picture saying? The obvious: when you combine terms
 \begin_inset Formula $Y$
 \end_inset
 
- joinning these two pieces as disappeared.
+ joining these two pieces as disappeared.
  In other words, a partially-assembled jigsaw puzzle behaves exactly like
  a single jigsaw piece.
  
@@ -1487,7 +1487,7 @@ the
 NP
 \family default
 .
- Do you really want to give such a primal ascendency to the word 
+ Do you really want to give such a primal ascendancy to the word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1564,7 +1564,7 @@ The CCG article also gives an alternative derivation for the sentence.
 
 \end_inset
 
-Translating this to into the LG combinator form reveals an issue, appearantly
+Translating this to into the LG combinator form reveals an issue, apparently
  with the 
 \begin_inset Formula $B_{>}$
 \end_inset
@@ -1577,7 +1577,7 @@ Translating this to into the LG combinator form reveals an issue, appearantly
 
 \end_inset
 
-There does not appear to be any fix for this, while continuting to employ
+There does not appear to be any fix for this, while continuing to employ
  the 
 \begin_inset Formula $B_{>}$
 \end_inset
@@ -1698,7 +1698,7 @@ The equivalence between LG and CCG is a false mirage; the proposed fixes
 \begin_layout Standard
 Hard-core adherents to CCG may opt for the third case, and live in denial.
  But careful if you chose this option: it is glossing over a deeper interpretati
-onal issue cnocerning types, connectors and connector sexuality.
+onal issue concerning types, connectors and connector sexuality.
  This is delved into much greater detail in an upcoming section.
  The crux is that in many situations, when people say 
 \begin_inset Quotes eld
@@ -1716,7 +1716,7 @@ connector
 \begin_inset Quotes erd
 \end_inset
 
-, but leave the conector direction (polarity, sexuality) 
+, but leave the connector direction (polarity, sexuality) 
 \begin_inset Formula $+/-$
 \end_inset
 
@@ -1729,7 +1729,7 @@ connector
  directional markup), and makes implicit assumptions about polarity, left
  to the reader to infer from context.
  This is dangerous: leaving implicit, unstated conventions to the reader
- to blithly assume is just asking for trouble.
+ to blithely assume is just asking for trouble.
  I think we've found trouble, here.
 \end_layout
 
@@ -1828,12 +1828,12 @@ Status of the Type-Raising Combinator
 \end_layout
 
 \begin_layout Standard
-The fix proposed above elminates the use of the type-raising rule.
+The fix proposed above eliminates the use of the type-raising rule.
  It's an interesting rule, but is it really needed, linguistically speaking?
- LG does not explictly have such a rule; if more connectors are needed on
- some particular grammatical class, one can simply put them there.
+ LG does not explicitly have such a rule; if more connectors are needed
+ on some particular grammatical class, one can simply put them there.
  The status of the type-raising combinator is now unclear, in light of the
- above expostion.
+ above exposition.
 \end_layout
 
 \begin_layout Subsection*
@@ -1990,8 +1990,7 @@ conjunction
 
  can be left wonderfully imprecise: are these boolean variables? Predicates?
  Or just terms of some sort? It doesn't much matter: the meaning of the
- wedge is say that all of these presmises must be present and (perhaps)
- satsified.
+ wedge is say that all of these premises must be present and (perhaps) satisfied.
  
 \end_layout
 
@@ -2024,7 +2023,7 @@ X_{1}^{*}\otimes X_{2}^{*}\otimes\cdots\otimes X_{n}^{*}\otimes Y
 
 \end_inset
 
-where the * denotes the (contravariant) dual.
+where the * denotes the (contra-variant) dual.
  In index notation, this would be written as 
 \begin_inset Formula 
 \[
@@ -2061,7 +2060,7 @@ The tensor operator
 \begin_inset Formula $\oplus$
 \end_inset
 
- and co-muliplication, it forms a tensor algebra.
+ and comultiplication, it forms a tensor algebra.
  There is a corresponding logic, called 
 \begin_inset Quotes eld
 \end_inset
@@ -2087,7 +2086,7 @@ linear algebra
 \end_inset
 
 ).
- This is intersting because linear logic describes mutexes and semaphores
+ This is interesting because linear logic describes mutexes and semaphores
  in computing, as well as vending machines.
  Notable in the present context is that Link Grammar is a fragment of linear
  logic.
@@ -2443,7 +2442,7 @@ input
 .
  There is an implicit connector rule that states that connections can only
  be heterosexual.
- The rule is implcit because it's obvious: you can connect an output to
+ The rule is implicit because it's obvious: you can connect an output to
  an input, and that is it.
  You cannot connect two inputs, you cannot connect two outputs.
  Duhh.
