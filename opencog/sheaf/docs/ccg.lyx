@@ -1690,17 +1690,41 @@ The equivalence between LG and CCG is a false mirage.
 \end_layout
 
 \begin_layout Standard
-If this analysis seems incorrect, muddled or confused, or anchored in in
- misinterpretation, that's OK.
- Don't give up; it's complicated.
- A deeper analysis will be presented in the section on connector sexuality.
- In short, the default presentation of CCG assumes mono-sexual types (types
- without the 
+Hard-core adherents to CCG may opt for the third case, and live in denial.
+ But careful if you chose this option: it is glossing over a deeper interpretati
+onal issue cnocerning types, connectors and connector sexuality.
+ This is delved into much greater detail in an upcoming section.
+ The crux is that in many situations, when people say 
+\begin_inset Quotes eld
+\end_inset
+
+type
+\begin_inset Quotes erd
+\end_inset
+
+, they really mean 
+\begin_inset Quotes eld
+\end_inset
+
+connector
+\begin_inset Quotes erd
+\end_inset
+
+, but leave the conector direction (polarity, sexuality) 
 \begin_inset Formula $+/-$
 \end_inset
 
- directional markup), but this will be seen to not be enough.
- 
+ implicit, deducible from context.
+ The default presentation of CCG assumes mono-sexual types (types without
+ the 
+\begin_inset Formula $+/-$
+\end_inset
+
+ directional markup), and makes implicit assumptions about polarity, left
+ to the reader to infer from context.
+ This is dangerous: leaving implicit, unstated conventions to the reader
+ to blithly assume is just asking for trouble.
+ I think we've found trouble, here.
 \end_layout
 
 \begin_layout Standard
@@ -1719,9 +1743,7 @@ The root cause of both of these bugs was a failure to attend the polarity
  These bugs can only be resolved by taking care to distinguish between types
  and sexualities (polarities, here, since the sexualities here are heterosexual.)
  More on sexuality, shortly.
- If the above analysis seems incorrect, muddled or confused, or anchored
- in in misinterpretation, please keep reading.
- Its resolved in a subsequent section.
+ 
 \end_layout
 
 \begin_layout Subsection*
