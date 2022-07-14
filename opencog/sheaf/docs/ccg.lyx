@@ -1824,12 +1824,16 @@ How can continuous transformations be spotted? This is out of bounds for
 \end_layout
 
 \begin_layout Subsection*
-Type-Raising and Link Crossing
+Status of the Type-Raising Combinator 
 \end_layout
 
 \begin_layout Standard
 The fix proposed above elminates the use of the type-raising rule.
- it's an interesting rule, but is it really needed, linguistically speaking?
+ It's an interesting rule, but is it really needed, linguistically speaking?
+ LG does not explictly have such a rule; if more connectors are needed on
+ some particular grammatical class, one can simply put them there.
+ The status of the type-raising combinator is now unclear, in light of the
+ above expostion.
 \end_layout
 
 \begin_layout Subsection*
@@ -2611,12 +2615,6 @@ The definition of CCG involved seemingly mono-sexed types, and two type
  open a bigger question: what is the formal interplay between type constructors
  and sexuality? It seems that the one can be traded for the other, but the
  mechanics of this in a general setting are not clear.
-\end_layout
-
-\begin_layout Standard
-Also unclear is the interpretation of the CCG type-raising combinator.
- Does it perhaps correspond to comultiplication in a tensor algebra? Perhaps,
- but the details remain to be articulated.
 \end_layout
 
 \begin_layout Section*
