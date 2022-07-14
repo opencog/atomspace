@@ -91,7 +91,7 @@
 \begin_body
 
 \begin_layout Title
-Combinatory Categorial Grammar and Link Grammar are (Almost) Equivalent
+Combinatory Categorial Grammar and Link Grammar are Equivalent
 \end_layout
 
 \begin_layout Author
@@ -121,7 +121,7 @@ literal "false"
 
 \end_inset
 
- (LG) are (almost) equivalent.
+ (LG) are equivalent.
  It covers some basic ideas from proof theory, type theory, and the 
 \begin_inset Quotes eld
 \end_inset
@@ -246,7 +246,7 @@ Somewhere out there is a nice paper that explains how to convert between
 \end_layout
 
 \begin_layout Subsection*
-CCG is (Almost) Equivalent to LG
+CCG is Equivalent to LG
 \end_layout
 
 \begin_layout Standard
@@ -1549,12 +1549,12 @@ D
 \end_layout
 
 \begin_layout Subsection*
-Not Quite Equivalent
+A Second Example
 \end_layout
 
 \begin_layout Standard
 The CCG article also gives an alternative derivation for the sentence.
- It illustrates that LG and CCG are not quite equivalent.
+ It is also problematic.
  The article currently states:
 \begin_inset Formula 
 \[
@@ -1563,7 +1563,7 @@ The CCG article also gives an alternative derivation for the sentence.
 
 \end_inset
 
-The translation of the above to LG derivations reveals an issue, appearantly
+Translating this to into the LG combinator form reveals an issue, appearantly
  with the 
 \begin_inset Formula $B_{>}$
 \end_inset
@@ -1576,65 +1576,37 @@ The translation of the above to LG derivations reveals an issue, appearantly
 
 \end_inset
 
-After glossing over the issue with the 
-\family sans
-NP
-\family default
- 
-\begin_inset Quotes eld
-\end_inset
-
-
-\emph on
-the dog
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
-, I wrote down a quick knee-jerk fix, claiming that it should have been
- this:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\dfrac{\dfrac{\dfrac{\dfrac{\text{the dog}}{NP}<}{S\backslash(S/NP)}T_{<}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}\qquad\dfrac{\text{John}}{NP}}{S}>
-\]
-
-\end_inset
-
-This translates into: 
-\begin_inset Formula 
-\[
-\dfrac{\dfrac{\dfrac{\dfrac{\text{the dog}}{NP\!+}<}{S\!+\;\&\;S\!-\;\&\;NP\!+}T_{<}\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;S\!-\;\&\;S\!+\;\&\;NP\!+}B_{>}\qquad\dfrac{\text{John}}{NP\!-}}{S\!+}\text{ still failing!}
-\]
-
-\end_inset
-
-But this also is buggy.
- There appears to be a surplus of 
-\family sans
-S
-\family default
-'s as the result of the 
+There does not appear to be any fix for this, while continuting to employ
+ the 
 \begin_inset Formula $B_{>}$
 \end_inset
 
  rule.
- We can get rid of the excess by writing getting rid of the 
+ We can get rid of the excess of 
+\family sans
+S
+\family default
+'s by writing getting rid of the 
 \begin_inset Formula $T_{<}$
 \end_inset
 
- inference, and writing
+ inference, and replacing the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ inference by 
+\begin_inset Formula $<$
+\end_inset
+
+ and so writing
 \begin_inset Formula 
 \[
-\dfrac{\dfrac{\text{the dog}}{NP\!+}<\qquad\dfrac{\text{bit}}{S\!+\;\&\;NP\!-\;\&\;NP\!+}}{S\!+\;\&\;NP\!+}<
+\dfrac{\dfrac{\text{the dog}}{NP\!+}<\qquad\dfrac{\text{bit}}{S\!-\;\&\;NP\!+\;\&\;NP\!-}}{S\!-\;\&\;NP\!+}<
 \]
 
 \end_inset
 
-Working backwards to CCG, this would be
+Working backwards to get the CCG form, this becomes
 \begin_inset Formula 
 \[
 \dfrac{\dfrac{\text{the dog}}{NP}<\qquad\dfrac{\text{bit}}{(S/NP)\backslash NP}}{S/NP}<
@@ -1642,39 +1614,15 @@ Working backwards to CCG, this would be
 
 \end_inset
 
+From this point, the rest of the derivation can go through, as before.
+\end_layout
 
+\begin_layout Subsection*
+Equivalence, or Not?
 \end_layout
 
 \begin_layout Standard
-The second bug is more subtle: it was a misapplication of the 
-\begin_inset Formula $B_{>}$
-\end_inset
-
- rule.
- The two premises of the 
-\begin_inset Formula $B_{>}$
-\end_inset
-
- rule must necessarily have inverted polarities; the Wikipedia article gives
- them the same polarity, and then cancels them out.
- To be explicit: the compound type 
-\begin_inset Formula $(S\backslash NP)$
-\end_inset
-
- cannot be canceled against another 
-\begin_inset Formula $(S\backslash NP)$
-\end_inset
-
- in the 
-\begin_inset Formula $B_{>}$
-\end_inset
-
- rule.
- It must be canceled against 
-\begin_inset Formula $(S/NP)$
-\end_inset
-
-.
+The 
 \end_layout
 
 \begin_layout Standard
