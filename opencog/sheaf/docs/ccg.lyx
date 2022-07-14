@@ -1685,7 +1685,19 @@ T_{\alpha\beta\cdots\mu}^{\quad\quad\nu}
 
 \end_inset
 
-One must be carful, though; the last two forms can be beguiliingly mislead.
+In quantum mechanics, one uses the bra-ket notation: 
+\begin_inset Formula 
+\[
+\left|X_{1}\right\rangle \otimes\left|X_{2}\right\rangle \otimes\cdots\otimes\left|X_{n}\right\rangle \left\langle Y\right|
+\]
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+One must be carful, though; the last three forms can be beguilingly misleading.
  Tensor algebras are (dagger) symmetric, and thus have only one type constructor.
  In linguistics, there are two type constructors, which go to the left and
  the right, because the left-right distinction matters in linguistics.
@@ -2089,15 +2101,168 @@ In fact, the mono-sexed types, when used with the two combinators and with
 Wait! It gets even worse!
 \end_layout
 
+\begin_layout Standard
+The reason for the first bug was a slavish adherence to the conventions
+ of olde-fashioned constituency grammar.
+ The inherited tradition is that 
+\family sans
+N
+\family default
+ denotes a noun, and 
+\family sans
+NP
+\family default
+ is a noun phrase.
+ When one writes 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+The dog bit John
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, it is clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is an 
+\family sans
+NP
+\family default
+, and its also clear that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is not 
+\family sans
+N
+\family default
+, and that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\family sans
+N
+\family default
+.
+ Thus, one is forced into assigning 
+\family sans
+NP/N
+\family default
+ to the determiner.
+ But this is an error! Knowing even a little of dependency grammar would
+ have expose the error: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+D
+\family default
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+dog
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ should have been 
+\family sans
+N
+\family default
+ (if it stands alone) or 
+\family sans
+NP/D
+\family default
+ (if its a noun taking a determiner).
+ But conventional constituency grammars rarely if ever bother with issueing
+ a distinct type for determiners, and thus we arrive at a basic markup error.
+ The road to hell is indeed paved with Chomskian gold.
+\end_layout
+
+\begin_layout Standard
+T
+\end_layout
+
+\begin_layout Standard
+And that's not all.
+ Note that CCG had
+\end_layout
+
 \begin_layout Section*
 Conclusion
 \end_layout
 
 \begin_layout Standard
-— Today at 10:16 AM The meta-lesson: jigsaws have types (the types of the
- connectors) and the connectors have "sexuality" (usually heterosexual,
- for most applications).
+The lesson for today: CCG is equivalent to LG.
+ More or less.
+ We glossed over or completely ignored many of the finer points of LG.
+ No doubt, many important aspects of CCG were omitted as well.
+ Yet, the basic jigsaw structure of CCG was exposed in the plainest way.
+\end_layout
+
+\begin_layout Standard
+The meta-lesson for today: Jigsaws are fundamental for describing a vast
+ class of mathematical and linguistic phenomena.
+ Jigsaws have types (the types of the connectors) and the connectors have
+ "sexuality" (usually heterosexual, for most applications).
  
+\end_layout
+
+\begin_layout Standard
+The story does not end there; lets leave off with some hazy futuristic scifi:
+ to infinity and beyond! Consider chemical bonds.
+ Two atoms can bond to one-another, using ionic bonds, molecular bonds,
+ hydrogen bonds and van der Waals bonds.
+ In this sense, molecules are clearly jigsaw pieces, having connectors on
+ them.
+ The type+direction theory outlined so far is not quite sufficient to properly
+ describe chemsitry.
+ But it does move in that direction.
+ What more is needed to obtain a fully-accurate type-theoretic model of
+ chemistry?
 \end_layout
 
 \begin_layout Standard
