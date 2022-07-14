@@ -1709,6 +1709,9 @@ One must be careful, though; the last three forms can be beguilingly misleading.
  Tensor algebras are (dagger) symmetric, and thus have only one type constructor.
  In linguistics, there are two type constructors, which go to the left and
  the right, because the left-right distinction matters in linguistics.
+ This is a source of confusion that hasn't been (in my mind) fully and clearly
+ resolved.
+ There's a further note on this at the end.
 \end_layout
 
 \begin_layout Section*
@@ -2226,8 +2229,51 @@ N
 NP/N
 \family default
  to the determiner.
- But this is an error! Knowing even a little of dependency grammar would
- have exposed the error: 
+ But this is an error!
+\end_layout
+
+\begin_layout Standard
+The markup 
+\family sans
+NP/N
+\family default
+ is saying that the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is a noun-phrase, and it's just missing a noun before it becomes a complete
+ 
+\family sans
+NP
+\family default
+.
+ Do you really want to give such a primal ascendency to the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+? It makes it the head of a head phrase.
+ Hard to imagine that determiners are head words.
+\end_layout
+
+\begin_layout Standard
+Knowing even a little of dependency grammar would have exposed the error:
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2261,7 +2307,9 @@ N
 \family default
  (if it stands alone) or 
 \family sans
-NP/D
+NP
+\backslash
+D
 \family default
  (if its a noun taking a determiner).
  But conventional constituency grammars rarely if ever bother with issuing
@@ -2270,7 +2318,8 @@ NP/D
 \end_layout
 
 \begin_layout Subsection*
-Type constructors
+Type constructors vs.
+ Sexuality
 \end_layout
 
 \begin_layout Standard
