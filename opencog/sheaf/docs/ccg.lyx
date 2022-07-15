@@ -1991,17 +1991,237 @@ Moving in the opposite direction, from LG to CCG, is less obvious.
 \end_layout
 
 \begin_layout Subsection*
-Type-Raising and Link Corssing.
+Type-Raising and Link Crossing 
+\end_layout
+
+\begin_layout Standard
+The fix proposed to the example above eliminates the use of the type-raising
+ rule.
+ It's an interesting rule, but when is it actually needed, linguistically
+ speaking? LG does not explicitly have such a rule; if more connectors are
+ needed on some particular grammatical class, one can simply put them there.
+ What is the linguistic significance of the type-raising combinator? The
+ answer is that it enables link corssing.
+\end_layout
+
+\begin_layout Standard
+LG has a global rule, and that is that all parse graphs must be planar.
+ In other words, two links may not cross.
+ There are a number of reasons for this global rule:
+\end_layout
+
+\begin_layout Enumerate
+Linguists have determined that most languages do not need parses that involve
+ link-crossing.
+ There are exceptions (Finnish, Turkish?, ...) but these seem rare.
+\end_layout
+
+\begin_layout Enumerate
+Studies in psycholinguistics shows that sentences with crossing links are
+ more difficult to comprehend.
+ Humans take longer to understand such sentences.
+\end_layout
+
+\begin_layout Enumerate
+The planar constraint enables certain kinds of parsing algorithms that are
+ not possible for the general non-planar case.
+ Those algorithms run several orders of magnitude faster, on ordinary-sized
+ sentences.
+ This has a practical impact on real-world software.
+\end_layout
+
+\begin_layout Enumerate
+Despite a global planarity constraint, there is a work-around: with appropriate
+ connectors, one link can be passed through another.
+ The trick is similar to that of drawing non-planar electric circuits on
+ a flat sheet of paper: one simply draws 
+\begin_inset Quotes eld
+\end_inset
+
+hops
+\begin_inset Quotes erd
+\end_inset
+
+ where they are needed.
+\end_layout
+
+\begin_layout Enumerate
+This is a good thing, because for English, there are examples where crossing
+ links are appropriate and needed.
+\end_layout
+
+\begin_layout Standard
+Some examples:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+An easy book to read
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ requires the links 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+an—book
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+easy—to
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+; these cross.
+ (It is the reading that is easy, not the book.)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph on
+It was announced that remains have been found of the ark of the covenant.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ requires links 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+that—have
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ which crosses 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+remains—of
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
  
 \end_layout
 
 \begin_layout Standard
-The fix proposed above eliminates the use of the type-raising rule.
- It's an interesting rule, but is it really needed, linguistically speaking?
- LG does not explicitly have such a rule; if more connectors are needed
- on some particular grammatical class, one can simply put them there.
- The status of the type-raising combinator is now unclear, in light of the
- above exposition.
+In the face of the planarity constraint, link crossings can be engineered
+ in LG by designing jumpig connectors.
+ Suppose a link of type D connecting 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+an—book
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ has to cross a link of type T connecting 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+easy—to
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Then one invents new link-types Dl and Dr (left and right) and for 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+ one writes the dict entry 
+\begin_inset Quotes eld
+\end_inset
+
+easy: Al- & B+ & Ar+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Diagramatically:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+               +-----T----+
+\end_layout
+
+\begin_layout Plain Layout
+
+        +--Dl--+--Dr--+   |
+\end_layout
+
+\begin_layout Plain Layout
+
+        |      |      |   |
+\end_layout
+
+\begin_layout Plain Layout
+
+       an    easy   book to read
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+asdfasf
 \end_layout
 
 \begin_layout Subsection*
