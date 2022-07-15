@@ -1217,7 +1217,8 @@ cut into pieces
 \end_inset
 
 .
- A bit more on why and how this extra complexity arises, shortly below.
+ An extensive discussion on the linguistic interpretation and linguistic
+ utility of type-raising is given in a longer section, below.
 \end_layout
 
 \begin_layout Subsection*
@@ -1697,10 +1698,18 @@ Is this too much to ask for? Is it OK to say that, sometimes transitive
 ? Certainly LG doesn't care: LG just provides one connector going left,
  to the subject of the verb, and another going right, to the object.
  To support two homotopic parse trees in CCG, should there be one more inference
- rule, say, for example, an associativity rule:
+ rule, say, for example, a limited associativity rule:
 \begin_inset Formula 
 \[
-\dfrac{\alpha:(X\backslash T)/T}{\alpha:(X/T)\backslash T}\text{Assoc.}
+\dfrac{\alpha:(X\backslash T)/T}{\alpha:(X/T)\backslash T}\text{WAssoc.}
+\]
+
+\end_inset
+
+or even a broad one:
+\begin_inset Formula 
+\[
+\dfrac{\alpha:(X\backslash Y)/Z}{\alpha:(X/Z)\backslash Y}\text{SAssoc.}
 \]
 
 \end_inset
@@ -1964,20 +1973,20 @@ Moving in the opposite direction, from LG to CCG, is less obvious.
  The LG disjuncts do have an algebraic property that must be respected:
  LG connectors are commutative, when the polarities differ.
  For example, 
-\begin_inset Formula $X\!+\;\&\;Y\,-=Y\!-\;\&\;X\,+$
+\begin_inset Formula $\left(X\!+\;\&\;Y\,-\right)=\left(Y\!-\;\&\;X\,+\right)$
 \end_inset
 
 .
  Yet the mapping from LG to CCG is that 
-\begin_inset Formula $X\!+\;\&\;Y\,-\mapsto X\backslash Y$
+\begin_inset Formula $\left(X\!+\;\&\;Y\,-\right)\mapsto X\backslash Y$
 \end_inset
 
  whereas 
-\begin_inset Formula $Y\!-\;\&\;X\,+\mapsto Y/X$
+\begin_inset Formula $\left(Y\!-\;\&\;X\,+\right)\mapsto Y/X$
 \end_inset
 
-, and thee two are inequivalent in CCG.
- In either case, 
+, and the two are inequivalent in CCG.
+ In either case, in CCG, 
 \begin_inset Formula $Y$
 \end_inset
 
@@ -1988,6 +1997,26 @@ Moving in the opposite direction, from LG to CCG, is less obvious.
  connects to the right.
  Perhaps the resulting language (the free object) is exactly the same, but
  this is not immediately obvious.
+ 
+\end_layout
+
+\begin_layout Standard
+In essence, LG doesn't care about the order in which connectors are connected
+ during parsing, while CCG does.
+ In CCG, when connectors are joined in a different order, a different derivation
+ tree results.
+ It is reasonable to argue that these two should be homotopic, and that
+ there should not exist an obstruction preventing connection sequence reordering.
+ To repeat: 
+\begin_inset Formula $\left(X\!+\;\&\;Y\,-\right)=\left(Y\!-\;\&\;X\,+\right)$
+\end_inset
+
+ is a statement about Scott-continuity.
+ Can we treat equality as equivalence? That is, is the free theory of CCG
+ modulo commutativity equivalent to the free theory of LG? I think so, because
+ that is how the free object works, in general, when one has modulo constraints
+ that commute with the homomorphism.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -2000,8 +2029,9 @@ The fix proposed to the example above eliminates the use of the type-raising
  It's an interesting rule, but when is it actually needed, linguistically
  speaking? LG does not explicitly have such a rule; if more connectors are
  needed on some particular grammatical class, one can simply put them there.
- What is the linguistic significance of the type-raising combinator? The
- answer is that it enables link crossing.
+ What is the linguistic significance of the type-raising combinator? How
+ does it impact the equivalence of CCG to LG? The answer to these questions
+ is that it enables link crossing, and equivalence is preserved.
 \end_layout
 
 \begin_layout Standard
@@ -2131,7 +2161,31 @@ remains—of
 \end_inset
 
 .
- 
+ (The head verb of the subordinate verb phrase is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+have
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and therefore 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+that
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ must link to the head.)
 \end_layout
 
 \begin_layout Standard
