@@ -206,6 +206,35 @@ I talked to its inventor last week (who has since moved on to do learning
 \end_layout
 
 \begin_layout Section*
+Prelude
+\end_layout
+
+\begin_layout Standard
+The difference between physicists and mathematicians is that the physicists
+ don't sweat the details.
+ They get to say things like 
+\begin_inset Quotes eld
+\end_inset
+
+ah, whatever, I get the general idea, let's just assume this is right, and
+ proceed, and see where we get.
+\begin_inset Quotes erd
+\end_inset
+
+ Losing months to prove a minor detail that seemed like it was right all
+ along is just ...
+ a loss of time.
+ Physicists focus on those details that seem to be wrong or inconclusive.
+ That's where you dig for gold.
+\end_layout
+
+\begin_layout Standard
+This paper is a physics paper, not a math paper.
+ I beleive everything in it is absolutely correct; however, there are no
+ formal proofs here.
+\end_layout
+
+\begin_layout Section*
 The Nature of Grammar
 \end_layout
 
@@ -244,6 +273,15 @@ Somewhere out there is a nice paper that explains how to convert between
  DG and CG and back.
  It provides a simple algo to do this.
  Sadly, I have misplaced the reference.
+ A paper by Xia and Palmer
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Xia2001"
+literal "false"
+
+\end_inset
+
+ is not quite as extensive, but gives a flavor of the idea.
 \end_layout
 
 \begin_layout Subsection*
@@ -1810,6 +1848,13 @@ This is misleading.
  This phenomenon is commonly treated in textbooks on proof theory: two different
  proofs have proof trees that appear to be different, but can be rearranged
  by homotopic deformations into one-another.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Troelstra2000"
+literal "false"
+
+\end_inset
+
  That is, there is a Scott-continuous deformation, referring to the Scott
  topology that conventionally applied to proofs/programs.
  
@@ -1821,6 +1866,93 @@ How can continuous transformations be spotted? This is out of bounds for
  associativity inference rule, above.
  Roughly speaking, one proceeds at a meta level, by indicating when two
  inferences are equivalent, effectively by an associativity (meta-)rule.
+\end_layout
+
+\begin_layout Subsection*
+Free Object Lemma
+\end_layout
+
+\begin_layout Standard
+Are the mappings of the six combinators sufficient to prove equivalence?
+ In category theory, there is a lemma, we'll call it the 
+\begin_inset Quotes eld
+\end_inset
+
+free object lemma
+\begin_inset Quotes erd
+\end_inset
+
+ here, that says homomorphisms extend 
+\begin_inset Quotes eld
+\end_inset
+
+trivially
+\begin_inset Quotes erd
+\end_inset
+
+ to free objects.
+ That is, if one has a homomorphism 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ and 
+\begin_inset Formula $F\left(A\right)$
+\end_inset
+
+ is the 
+\begin_inset CommandInset href
+LatexCommand href
+name "free object"
+target "https://en.wikipedia.org/wiki/Free_object"
+literal "false"
+
+\end_inset
+
+ on 
+\begin_inset Formula $A$
+\end_inset
+
+, the the homomorphism extends to 
+\begin_inset Formula $F\left(A\right)\to F\left(B\right)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In the present case, the mapping 
+\begin_inset Formula $A\to B$
+\end_inset
+
+ is the mapping of the six combinators.
+ We haven't really 
+\begin_inset Quotes eld
+\end_inset
+
+proven
+\begin_inset Quotes erd
+\end_inset
+
+ that the mapping is truly a homomorphism, preserving all algebraic properties
+ of the combinators.
+ Instead, we did a hand-wavey 
+\begin_inset Quotes eld
+\end_inset
+
+see this makes perfect sense
+\begin_inset Quotes erd
+\end_inset
+
+ kind of argument.
+ Is this enough? Can something more rigorous be presented?
+\end_layout
+
+\begin_layout Standard
+The second part of applying this lemma is to confirm that CCG really is
+ the free object of the six combinators.
+ I beleive the answer is yes; that there are not any further constraints
+ on combining the combinators: all possible combinations are valid.
 \end_layout
 
 \begin_layout Subsection*
