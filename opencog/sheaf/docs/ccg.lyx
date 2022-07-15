@@ -130,10 +130,11 @@ sexuality
 \begin_inset Quotes erd
 \end_inset
 
- of type combinators.
- The key idea that exposed is that type theory must be combined with connector
+ in type combinators.
+ The key idea exposed is that type theory must be combined with connector
  sexuality in order to get a fully general framework encompassing proof
- theory, inference in logic and linguistics.
+ theory, logical inference, and linguistics that is also free of ambiguities
+ and implicit assumptions.
 \end_layout
 
 \begin_layout Section*
@@ -1701,7 +1702,7 @@ Is this too much to ask for? Is it OK to say that, sometimes transitive
  rule, say, for example, a limited associativity rule:
 \begin_inset Formula 
 \[
-\dfrac{\alpha:(X\backslash T)/T}{\alpha:(X/T)\backslash T}\text{WAssoc.}
+\dfrac{\alpha:(X\backslash T)/T}{\alpha:(X/T)\backslash T}\text{ WAssoc.}
 \]
 
 \end_inset
@@ -1709,7 +1710,7 @@ Is this too much to ask for? Is it OK to say that, sometimes transitive
 or even a broad one:
 \begin_inset Formula 
 \[
-\dfrac{\alpha:(X\backslash Y)/Z}{\alpha:(X/Z)\backslash Y}\text{SAssoc.}
+\dfrac{\alpha:(X\backslash Y)/Z}{\alpha:(X/Z)\backslash Y}\text{ SAssoc.}
 \]
 
 \end_inset
