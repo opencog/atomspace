@@ -2001,7 +2001,7 @@ The fix proposed to the example above eliminates the use of the type-raising
  speaking? LG does not explicitly have such a rule; if more connectors are
  needed on some particular grammatical class, one can simply put them there.
  What is the linguistic significance of the type-raising combinator? The
- answer is that it enables link corssing.
+ answer is that it enables link crossing.
 \end_layout
 
 \begin_layout Standard
@@ -2137,7 +2137,11 @@ remains—of
 \begin_layout Standard
 In the face of the planarity constraint, link crossings can be engineered
  in LG by designing jumpig connectors.
- Suppose a link of type D connecting 
+ Suppose a link of type 
+\family typewriter
+D
+\family default
+ connecting 
 \emph on
 
 \begin_inset Quotes eld
@@ -2149,7 +2153,11 @@ an—book
 \begin_inset Quotes erd
 \end_inset
 
- has to cross a link of type T connecting 
+ has to cross a link of type 
+\family typewriter
+T
+\family default
+ connecting 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2162,7 +2170,15 @@ easy—to
 \end_inset
 
 .
- Then one invents new link-types Dl and Dr (left and right) and for 
+ Then one invents new link-types 
+\family typewriter
+Dl
+\family default
+ and 
+\family typewriter
+Dr
+\family default
+ (left and right) and for 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2174,12 +2190,16 @@ easy
 \begin_inset Quotes eld
 \end_inset
 
-easy: Al- & B+ & Ar+
+
+\family typewriter
+easy: Dl- & T+ & Dr+
+\family default
+;
 \begin_inset Quotes erd
 \end_inset
 
 .
- Diagramatically:
+ Diagramatically, this works out as:
 \end_layout
 
 \begin_layout Standard
@@ -2221,7 +2241,102 @@ status open
 \end_layout
 
 \begin_layout Standard
-asdfasf
+LG could have a rule (but it doesn't) that could globally enable link-crossing,
+ in all cases.
+ It would take any dictionary entry 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+word: X+
+\family default
+;
+\begin_inset Quotes erd
+\end_inset
+
+ and convert it to the entry 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+word: X+ or (Yl- & X+ & Yr+
+\family default
+);
+\begin_inset Quotes erd
+\end_inset
+
+ for any link types 
+\family typewriter
+X
+\family default
+ and 
+\family typewriter
+Y
+\family default
+.
+ It does not have such a global rule, because of the reasons spelled out
+ above: in practice, link-crossings are rare, and, as a general rule, one
+ wants to tightly control them.
+ Some link types can be allowed to cross, others can be prohibited.
+ One might even want to control which type is the crosser: in the above
+ example, it could have been arranged so that the 
+\family typewriter
+T
+\family default
+ link splits in two, instead of the 
+\family typewriter
+D
+\family default
+ link.
+\end_layout
+
+\begin_layout Standard
+Hopefully, the above discussion has made clear what the type raising combinator
+ really is: it is a link-crossing enabler.
+ That is, the rule
+\begin_inset Formula 
+\[
+\frac{\alpha:X}{\alpha:T/\left(T\backslash X\right)}T_{>}
+\]
+
+\end_inset
+
+says, in plain terms: 
+\begin_inset Quotes eld
+\end_inset
+
+given any connector to type 
+\family sans
+X
+\family default
+, keep the 
+\family sans
+X
+\family default
+, but surround it by two new connectors, one linking to the left, and one
+ linking to the right.
+ The two new connectors must have exactly the same type 
+\family sans
+T
+\family default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ Just to hammer this home, here it is again, as an LG rule:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\alpha:X\!-}{\alpha:T\!-\;\&\;T\!+\;\&\;X\!-}T_{>}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
