@@ -232,6 +232,7 @@ ah, whatever, I get the general idea, let's just assume this is right, and
 This paper is a physics paper, not a math paper.
  I beleive everything in it is absolutely correct; however, there are no
  formal proofs here.
+ There are proofs in here, they're just not formal.
 \end_layout
 
 \begin_layout Section*
@@ -1882,7 +1883,7 @@ free object lemma
 \begin_inset Quotes erd
 \end_inset
 
- here, that says homomorphisms extend 
+, that says homomorphisms extend 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1945,18 +1946,53 @@ see this makes perfect sense
 \end_inset
 
  kind of argument.
- Is this enough? Can something more rigorous be presented?
+ Is this enough? Are there any algebraic properties of the six CCG combinators
+ that I've missed? I don't think so...
+ they don't seem to have any algebraic properties...
 \end_layout
 
 \begin_layout Standard
 The second part of applying this lemma is to confirm that CCG really is
  the free object of the six combinators.
- I beleive the answer is yes; that there are not any further constraints
- on combining the combinators: all possible combinations are valid.
+ I beleive the answer is yes.
+ There are not any further constraints on combining the combinators: all
+ possible combinations are valid.
+\end_layout
+
+\begin_layout Standard
+Moving in the opposite direction, from LG to CCG, is less obvious.
+ The LG disjuncts do have an algebraic property that must be respected:
+ LG connectors are commutative, when the polarities differ.
+ For example, 
+\begin_inset Formula $X\!+\;\&\;Y\,-=Y\!-\;\&\;X\,+$
+\end_inset
+
+.
+ Yet the mapping from LG to CCG is that 
+\begin_inset Formula $X\!+\;\&\;Y\,-\mapsto X\backslash Y$
+\end_inset
+
+ whereas 
+\begin_inset Formula $Y\!-\;\&\;X\,+\mapsto Y/X$
+\end_inset
+
+, and thee two are inequivalent in CCG.
+ In either case, 
+\begin_inset Formula $Y$
+\end_inset
+
+ connects to the left, and 
+\begin_inset Formula $X$
+\end_inset
+
+ connects to the right.
+ Perhaps the resulting language (the free object) is exactly the same, but
+ this is not immediately obvious.
 \end_layout
 
 \begin_layout Subsection*
-Status of the Type-Raising Combinator 
+Type-Raising and Link Corssing.
+ 
 \end_layout
 
 \begin_layout Standard
