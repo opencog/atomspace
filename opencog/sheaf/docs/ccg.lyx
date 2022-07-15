@@ -2136,24 +2136,8 @@ remains—of
 
 \begin_layout Standard
 In the face of the planarity constraint, link crossings can be engineered
- in LG by designing jumpig connectors.
+ in LG by designing jumping connectors.
  Suppose a link of type 
-\family typewriter
-D
-\family default
- connecting 
-\emph on
-
-\begin_inset Quotes eld
-\end_inset
-
-an—book
-\emph default
-
-\begin_inset Quotes erd
-\end_inset
-
- has to cross a link of type 
 \family typewriter
 T
 \family default
@@ -2169,37 +2153,45 @@ easy—to
 \begin_inset Quotes erd
 \end_inset
 
-.
- Then one invents new link-types 
+ has to cross a link of type 
 \family typewriter
-Dl
+D
 \family default
- and 
-\family typewriter
-Dr
-\family default
- (left and right) and for 
+ connecting 
+\emph on
+
 \begin_inset Quotes eld
 \end_inset
 
-easy
+an—book
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
- one writes the dict entry 
+.
+ Then one invents new link-types 
+\family typewriter
+Tl
+\family default
+ and 
+\family typewriter
+Tr
+\family default
+ (left and right) and a dict entry 
 \begin_inset Quotes eld
 \end_inset
 
 
 \family typewriter
-easy: Dl- & T+ & Dr+
+book: Tl- & D- & Tr+
 \family default
 ;
 \begin_inset Quotes erd
 \end_inset
 
 .
- Diagramatically, this works out as:
+ Diagrammatically, this works out as:
 \end_layout
 
 \begin_layout Standard
@@ -2213,22 +2205,22 @@ status open
 
 \begin_layout Plain Layout
 
-               +-----T----+
+        +-------D-----+
 \end_layout
 
 \begin_layout Plain Layout
 
-        +--Dl--+--Dr--+   |
+        |      +--Tl--+--Tr--+
 \end_layout
 
 \begin_layout Plain Layout
 
-        |      |      |   |
+        |      |      |      |
 \end_layout
 
 \begin_layout Plain Layout
 
-       an    easy   book to read
+       an    easy   book    to read
 \end_layout
 
 \begin_layout Plain Layout
@@ -2283,17 +2275,17 @@ Y
  One might even want to control which type is the crosser: in the above
  example, it could have been arranged so that the 
 \family typewriter
-T
+D
 \family default
  link splits in two, instead of the 
 \family typewriter
-D
+T
 \family default
  link.
 \end_layout
 
 \begin_layout Standard
-Hopefully, the above discussion has made clear what the type raising combinator
+Hopefully, the above discussion has made clear what the type-raising combinator
  really is: it is a link-crossing enabler.
  That is, the rule
 \begin_inset Formula 
@@ -2336,7 +2328,37 @@ T
 
 \end_inset
 
+and, since connectors of opposite polarity commute in LG, this could be
+ written as
+\begin_inset Formula 
+\[
+\frac{\alpha:X\!-}{\alpha:T\!-\;\&\;X\!-\;\&\;T\!+}T_{>}
+\]
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Again, LG eschews such a rule, except for a certain limited set of types
+ 
+\family sans
+T
+\family default
+.
+ How should the CCG type-raising combinators be understood? Are they combinator
+ classes, with one such combinatory for any and every type 
+\family sans
+T
+\family default
+, or is the intent to limit it to only certain types 
+\family sans
+T
+\family default
+? If the former, then LG and CCG are not equivalent, since LG does not include
+ such a global rule.
+ If the later, then yes, the two grammars remain equivalent.
 \end_layout
 
 \begin_layout Subsection*
@@ -2355,7 +2377,7 @@ In conclusion: CCG is equivalent to LG.
 It should be clear that CCG uses a far more awkward notation (the proof-theoreti
 cal inference-bar notation).
  Awkwardness matters, because concepts like link-crossing and Dick Hudson's
- "landmark transitivity" becomes very hard to talk about in CCG.
+ "landmark transitivity" become hard to talk about in CCG.
 \end_layout
 
 \begin_layout Section*
