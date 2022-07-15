@@ -2054,8 +2054,8 @@ Studies in psycholinguistics shows that sentences with crossing links are
 \end_layout
 
 \begin_layout Enumerate
-The planar constraint enables certain kinds of parsing algorithms that are
- not possible for the general non-planar case.
+The planarity constraint enables certain kinds of parsing algorithms that
+ are not possible for the general non-planar case.
  Those algorithms run several orders of magnitude faster, on ordinary-sized
  sentences.
  This has a practical impact on real-world software.
@@ -2403,7 +2403,7 @@ T
 \family default
 .
  How should the CCG type-raising combinators be understood? Are they combinator
- classes, with one such combinatory for any and every type 
+ classes, with one such combinator for any and every type 
 \family sans
 T
 \family default
