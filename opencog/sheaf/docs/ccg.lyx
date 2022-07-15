@@ -906,7 +906,8 @@ LG
 \end_layout
 
 \begin_layout Standard
-Clearly, they just specify how to connect compound connectors.
+Clearly, they just specify how to connect single connectors on compound
+ jigsaws.
 \end_layout
 
 \begin_layout Subsection*
@@ -1657,6 +1658,153 @@ Working backwards to get the CCG form, this becomes
 \end_inset
 
 From this point, the rest of the derivation can go through, as before.
+\end_layout
+
+\begin_layout Subsection*
+Primitive Types vs.
+ Compound Types
+\end_layout
+
+\begin_layout Standard
+A closer look at the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule reveals an issue with the LG mapping.
+ The rule is this:
+\begin_inset Formula 
+\[
+\frac{\alpha:X/Y\quad\beta:Y/Z}{\alpha\beta:X/Z}B_{>}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the original LG mapping, the type 
+\begin_inset Formula $Y$
+\end_inset
+
+ was taken to be a primitive type.
+ It would be one of the inbuilt types of the system, and not one that was
+ constructed by means of type constructors.
+ Yet, in the second example, 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ is being applied with 
+\begin_inset Formula $Y=(S\backslash NP)$
+\end_inset
+
+ with is a compound type, not a primitive type.
+ Perhaps the translation to LG was flawed? Lets look at it again.
+ The relevant part is
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\text{the dog}}{S/(S\backslash NP)}\qquad\dfrac{\text{bit}}{(S\backslash NP)/NP}}{S/NP}B_{>}
+\]
+
+\end_inset
+
+and so perhaps the translation should have been 
+\begin_inset Formula 
+\[
+\dfrac{\dfrac{\text{the dog}}{S\!-\;\&\;(S\backslash NP)\!+}\qquad\dfrac{\text{bit}}{(S\backslash NP)\!-\;\&\;NP\!+}}{S\!-\;\&\;NP\!+}B_{>}
+\]
+
+\end_inset
+
+and 
+\emph on
+now
+\emph default
+ the two compound types can connect to one another, correctly.
+ Does this insight provide the correct LG mapping, finally? Well it depends...
+\end_layout
+
+\begin_layout Standard
+One possibility is to create a brand-new primitive LG type, call it 
+\begin_inset Formula $SU$
+\end_inset
+
+ for 
+\begin_inset Quotes eld
+\end_inset
+
+subject
+\begin_inset Quotes erd
+\end_inset
+
+, and employ the mapping 
+\begin_inset Formula 
+\[
+(S\backslash NP)\mapsto SU
+\]
+
+\end_inset
+
+and then the above translation goes through perfectly well, and the 
+\begin_inset Formula $B_{>}$
+\end_inset
+
+ rule can be kept as-is.
+\end_layout
+
+\begin_layout Standard
+Another possibility is to attempt to work with the compound type.
+ This will not work, and here's why.
+ The LG mapping is 
+\begin_inset Formula 
+\[
+(S\backslash NP)\mapsto S\!+\;\&\;NP\!-
+\]
+
+\end_inset
+
+and so perhaps one could in infer that 
+\begin_inset Formula 
+\[
+(S\backslash NP)\!-\mapsto S\!-\;\&\;NP\!+
+\]
+
+\end_inset
+
+But this will not work, because writing 
+\begin_inset Formula $S\!+\;\&\;NP\!-$
+\end_inset
+
+ to the left of 
+\begin_inset Formula $S\!-\;\&\;NP\!+$
+\end_inset
+
+ does not allow it to be contracted.
+ The 
+\begin_inset Formula $S$
+\end_inset
+
+ parts can be contracted, because 
+\begin_inset Formula $S\!+$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $S\!-$
+\end_inset
+
+ but the 
+\begin_inset Formula $NP$
+\end_inset
+
+parts cannot be contracted – they are facing away from each other.
+\end_layout
+
+\begin_layout Standard
+To conclude: the mappings from the six CCG combinators to the equivalent
+ LG combinators work if they are also supplemented with additional mappings
+ from compound CCG types to primitive LG types.
+ If they are not supplemented, then inference paths that require compound
+ types to appear in the combinators must be avoided.
 \end_layout
 
 \begin_layout Subsection*
