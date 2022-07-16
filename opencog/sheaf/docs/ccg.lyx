@@ -686,6 +686,22 @@ What is this picture saying? The obvious: when you combine terms
  
 \end_layout
 
+\begin_layout Standard
+In the above, the type 
+\begin_inset Formula $Y$
+\end_inset
+
+ is meant to be understood as a primitive type, an ur-type belonging to
+ the theory.
+ The situation for types 
+\begin_inset Formula $Y$
+\end_inset
+
+ that are compond types, built with type constructors, requires a bit of
+ finesse.
+ This is discussed further below, after the examples.
+\end_layout
+
 \begin_layout Subsection*
 The CCG Composition Combinators
 \end_layout
@@ -1698,8 +1714,8 @@ In the original LG mapping, the type
 \begin_inset Formula $Y=(S\backslash NP)$
 \end_inset
 
- with is a compound type, not a primitive type.
- Perhaps the translation to LG was flawed? Lets look at it again.
+ which is a compound type, not a primitive type.
+ Perhaps the translation to LG was flawed? Let's look at it again.
  The relevant part is
 \begin_inset Formula 
 \[
@@ -1745,7 +1761,7 @@ subject
 
 \end_inset
 
-and then the above translation goes through perfectly well, and the 
+Then the above translation goes through perfectly well, and the 
 \begin_inset Formula $B_{>}$
 \end_inset
 
@@ -1813,8 +1829,13 @@ Equivalence, or Not?
 
 \begin_layout Standard
 In order to preserve the equivalence of CCG and LG by means of the straight-forw
-ard translation of the inference rules, two changes had to be made to the
- second example: The use of the type-raising rule 
+ard translation of the inference rules, (
+\emph on
+i.e.
+
+\emph default
+ avoiding the compound types) two changes had to be made to the second example:
+ The use of the type-raising rule 
 \begin_inset Formula $T_{<}$
 \end_inset
 
@@ -1863,7 +1884,7 @@ or even a broad one:
 
 \end_inset
 
-One has three possibilities, then: 
+One has four possibilities, then: 
 \end_layout
 
 \begin_layout Enumerate
@@ -1890,6 +1911,11 @@ The equivalence between LG and CCG is a false mirage; the proposed fixes
 \end_inset
 
  rule is just fine, as it stands.
+\end_layout
+
+\begin_layout Enumerate
+The equivalence between LG and CCG is true, but an LG primitive type has
+ to be introduced for any CCG compound type appearing in a reduction.
 \end_layout
 
 \begin_layout Standard
@@ -2071,7 +2097,7 @@ literal "false"
 \begin_inset Formula $A$
 \end_inset
 
-, the the homomorphism extends to 
+, then the homomorphism extends to 
 \begin_inset Formula $F\left(A\right)\to F\left(B\right)$
 \end_inset
 
@@ -2104,9 +2130,25 @@ see this makes perfect sense
 \end_inset
 
  kind of argument.
- Is this enough? Are there any algebraic properties of the six CCG combinators
- that I've missed? I don't think so...
- they don't seem to have any algebraic properties...
+ Is this enough? Well, for the CCG primitive types, there does not seem
+ to be any further structure or algebraic properties to consider, and so
+ the presented mapping is trivially a homomorphism.
+ For the case where compound types appear in the combinators, we've discovered,
+ by way of example, that each CCG compound type must be mapped to a new
+ LG primitive type, before it can be properly reduced (connected).
+ In other words, compound types in CCG do have non-trivial algebraic properties,
+ and these must be 
+\begin_inset Quotes eld
+\end_inset
+
+forgotten
+\begin_inset Quotes erd
+\end_inset
+
+ with the mapping.
+ Exercise left to the reader to restate the same thing, using the forgetful
+ functor.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2114,7 +2156,7 @@ The second part of applying this lemma is to confirm that CCG really is
  the free object of the six combinators.
  I beleive the answer is yes.
  There are not any further constraints on combining the combinators: all
- possible combinations are valid.
+ possible syntactically-valid combinations are valid.
 \end_layout
 
 \begin_layout Standard
