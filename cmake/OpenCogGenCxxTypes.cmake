@@ -85,10 +85,10 @@ ENDMACRO()
 # Print out the C++ definitions
 MACRO(OPENCOG_CXX_WRITE_DEFS)
 
-	IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+	IF (NOT TYPE STREQUAL "NOTYPE")
 		FILE(APPEND "${TMPHDR_FILE}" "extern opencog::Type ${TYPE};\n")
 		FILE(APPEND "${DEFINITIONS_FILE}"  "opencog::Type opencog::${TYPE};\n")
-	ELSE (NOT "${TYPE}" STREQUAL "NOTYPE")
+	ELSE (NOT TYPE STREQUAL "NOTYPE")
 		FILE(APPEND "${TMPHDR_FILE}"
 			"#ifndef _OPENCOG_NOTYPE_\n"
 			"#define _OPENCOG_NOTYPE_\n"
@@ -96,7 +96,7 @@ MACRO(OPENCOG_CXX_WRITE_DEFS)
 			"static const opencog::Type ${TYPE}=((Type) -1);\n"
 			"#endif // _OPENCOG_NOTYPE_\n"
 		)
-	ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+	ENDIF (NOT TYPE STREQUAL "NOTYPE")
 
 	IF (ISNODE STREQUAL "NODE" AND
 		NOT SHORT_NAME STREQUAL "" AND
@@ -138,20 +138,20 @@ MACRO(OPENCOG_CXX_WRITE_DEFS)
 		FOREACH (PARENT_TYPE ${PARENT_TYPES})
 			# Skip inheritance of the special "notype" class; we could move
 			# this test up but it was left here for simplicity's sake
-			IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+			IF (NOT TYPE STREQUAL "NOTYPE")
 				FILE(APPEND "${INHERITANCE_FILE}"
 					"opencog::${TYPE} = ${CLASSSERVER_REFERENCE}"
 					"declType(opencog::${PARENT_TYPE}, \"${TYPE_NAME}\");\n"
 				)
-			ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+			ENDIF (NOT TYPE STREQUAL "NOTYPE")
 		ENDFOREACH (PARENT_TYPE)
 	ELSE (PARENT_TYPES)
-		IF (NOT "${TYPE}" STREQUAL "NOTYPE")
+		IF (NOT TYPE STREQUAL "NOTYPE")
 			FILE(APPEND "${INHERITANCE_FILE}"
 				"opencog::${TYPE} = ${CLASSSERVER_REFERENCE}"
 				"declType(opencog::${TYPE}, \"${TYPE_NAME}\");\n"
 			)
-		ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
+		ENDIF (NOT TYPE STREQUAL "NOTYPE")
 	ENDIF (PARENT_TYPES)
 ENDMACRO(OPENCOG_CXX_WRITE_DEFS)
 
