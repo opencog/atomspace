@@ -77,6 +77,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_odo_equ_pred(void);
 		void test_odo_equal(void);
 		void test_odo_couplayer(void);
+		void test_glob(void);
 };
 
 /*
@@ -728,3 +729,26 @@ void UnorderedUTest::test_odo_couplayer(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ================================================================
+
+// Unordered links with a glob in it
+void UnorderedUTest::test_glob(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-glob.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 1 solution
+	// In the buggy case, this hits an info loop.
+	result = eval->eval_h("(cog-execute! est)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
