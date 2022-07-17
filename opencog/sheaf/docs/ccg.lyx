@@ -1146,18 +1146,25 @@ LG
 \end_layout
 
 \begin_layout Standard
-The interpretation of these two rules is that, given a single (assembled)
- jigsaw 
+The interpretation of these two rules is that, given a connector 
 \begin_inset Formula $X$
 \end_inset
 
-, cut it into two (disassemble it) such that the new connectors are of type
- 
+, leave it alone, but also create a matching set of new connectors.
+ The goal of these new connectors is allow a type 
 \begin_inset Formula $T$
 \end_inset
 
- (and they are no longer connected).
- 
+ to come in on one side, and leave at the other; they form a pass-through,
+ a tunnel for the type 
+\begin_inset Formula $T$
+\end_inset
+
+ to scoot by 
+\begin_inset Formula $X$
+\end_inset
+
+, leaving both types unaffected, untouched.
 \end_layout
 
 \begin_layout Standard
@@ -1222,7 +1229,7 @@ Phew.
 \begin_inset Quotes eld
 \end_inset
 
-disconnect
+create a pass-through
 \begin_inset Quotes erd
 \end_inset
 
@@ -1230,13 +1237,44 @@ disconnect
 \begin_inset Quotes eld
 \end_inset
 
-cut into pieces
+create a bridge/tunnel
 \begin_inset Quotes erd
 \end_inset
 
 .
- An extensive discussion on the linguistic interpretation and linguistic
- utility of type-raising is given in a longer section, below.
+ The type-raising rule might seem a bit mysterious at first: where did 
+\begin_inset Formula $T$
+\end_inset
+
+ come from, and what does it have to do with 
+\begin_inset Formula $X$
+\end_inset
+
+? This metaphor answers this question: 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $T$
+\end_inset
+
+ are not related; 
+\begin_inset Formula $T$
+\end_inset
+
+ flies in out of the blue, on one side, and departs on the other.
+ The two types never interacted.
+ A better name for this might have been 
+\begin_inset Quotes eld
+\end_inset
+
+type-crossing combinator
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A longer discussion on the linguistic interpretation and linguistic utility
+ of type-crossing is given in a later section, below.
 \end_layout
 
 \begin_layout Subsection*
