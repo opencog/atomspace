@@ -65,12 +65,18 @@ cdef class Value:
     def short_string(self):
         return self.get_c_value_ptr().get().to_short_string().decode('UTF-8')
 
+    # long_string() provides the atom, together with the hash, and
+    # the AtomSpace that the atom belongs to. This is perhaps more
+    # than what the typical python user might want. So use the short
+    # string when printing.  This still prints in scheme format, BTW ...
     def __str__(self):
         if self.is_atom():
            return self.short_string()
         return self.long_string()
 
     def __repr__(self):
+        if self.is_atom():
+           return self.short_string()
         return self.long_string()
 
     def __richcmp__(self, other, op):
