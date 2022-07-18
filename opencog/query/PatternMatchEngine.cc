@@ -1734,8 +1734,23 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
-	// XXX Temporary hack ...
-	return explore_unordered_branches(ptm, hg, clause);
+	// XXX TODO FIXME. The ptm needs to be decomposed into connected
+	// components. Then every possble permutation of these connected
+	// components must be walked over. For now, we assume only one.
+	do
+	{
+		// If the pattern was satisfied, then we are done for good.
+		if (explore_single_branch(ptm, hg, clause))
+			return true;
+
+		logmsg("Step to next sparse greedy");
+
+		// If we are here, there was no match.
+		// On the next go-around, take a step.
+	}
+	while (false);
+
+	return false;
 }
 
 /// explore_type_branches -- perform exploration of alternatives.
