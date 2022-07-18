@@ -543,25 +543,19 @@ printf("duuude elim says that %d\n", match);
 bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
                                      const Handle& hg)
 {
-	const Handle& hp = ptm->getHandle();
-	if (not match)
-	{
-		_pmc.post_link_mismatch(hp, hg);
-		return false;
-	}
-
-	// If we've found a grounding, lets see if the
+	// If we've found a grounding, let's see if the
 	// post-match callback likes this grounding.
-	match = _pmc.post_link_match(hp, hg);
+	const Handle& hp = ptm->getHandle();
+	bool match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
 	// Find the glob node, again
 	PatternTermPtr glob;
-	for (const PatternTermPtr& osp : ptm->getOutgoingSet())
+	for (const PatternTermPtr& otp : ptm->getOutgoingSet())
 	{
-		if (GLOB_NODE == osp[i]->getHandle()->get_type())
+		if (GLOB_NODE == otp->getHandle()->get_type())
 		{
-			glob = osp[i];
+			glob = otp;
 			break;
 		}
 	}
@@ -606,7 +600,8 @@ printf("duuude enter elim patsi=%lu\n", osp.size());
 	PatternTermSeq csp = osp;
 	csp.pop_back();
 
-	for (const Handle& hog : osg)
+	bool found_at_least_one = false;
+	for (const Handle& hog : hg->getOutgoingSet())
 	{
 		solution_push();
 		bool match = tree_compare(pto, hog, CALL_ELIM);
@@ -615,10 +610,17 @@ printf("duuude enter elim patsi=%lu\n", osp.size());
 printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
 			bool rest = elim_compare(ptm, hg, csp);
 printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str());
+			if (rest) found_at_least_one = true;
 		}
 		solution_pop();
 	}
 
+	// Nothing above worked.
+	if (not found_at_least_one)
+	{
+		const Handle& hp = ptm->getHandle();
+		_pmc.post_link_mismatch(hp, hg);
+	}
 	return false;
 }
 
