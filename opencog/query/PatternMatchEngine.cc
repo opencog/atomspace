@@ -506,7 +506,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	           "Impossible situation! BUG!");
 
 	// Place the parent unordered link ("podo") where the child
-	// unordered link can find it. save the old parent on stack.
+	// unordered link can find it. Save the old parent on stack.
 	PermOdo save_podo = _perm_podo;
 	_perm_podo = _perm_odo;
 
@@ -526,9 +526,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	{
 		num_perms = facto(mutation.size());
 		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
-		              "take_step=%d have_more=%d\n",
+		              "take_step=%d have_more=%d step_this=%d\n",
 		              _perm_count[ptm] + 1, num_perms,
-		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
+		              ptm->to_string().c_str(), _perm_take_step,
+		              _perm_have_more, ptm == _perm_to_step);
 	}
 #endif
 	do
