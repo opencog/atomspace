@@ -1108,6 +1108,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 /// Compare the outgoing sets of two trees side-by-side, where
 /// the pattern is unordered and contains at least one GlobNode.
 /// See `explore_sparse_branches()` for more info.
+/// Conceptually similar to `unordered_compare()` or `glob_compare()`
+/// in that we have a particular compare state that should be used
+/// when the comparison is performed.
 bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
                                         const Handle& hg)
 {
@@ -1120,9 +1123,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
 	if (osg_size < osp_size-1) return false;
-
-printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
-printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
 
 	// Find the glob in the pattern.
 	// XXX TODO move this to PatternTerm
@@ -1141,13 +1141,14 @@ printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
 
 	// Verify that the glob size bounds are correct.
 	size_t glsz = osg_size - osp_size + 1;
-printf("duuude glob size must be=%lu\n", glsz);
 	const Handle& gloh(glob->getHandle());
 	if (not _variables->is_lower_bound(gloh, glsz))
 		return false;
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
+printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
+printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
 	bool match = elim_compare(ptm, hg, pats);
 
 printf("duuude elim says that %d\n", match);
@@ -1221,10 +1222,9 @@ bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
 	{
 		if (gnds.end() != gnds.find(otg)) continue;
 		rest.push_back(otg);
-printf("duuude yaye >>>>>>>>>>>ungroudned =%s\n", otg->to_short_string().c_str());
 	}
 
-	Handle glp(createLink(std::move(rest), LIST_LINK));
+	Handle glp(createLink(std::move(rest), UNORDERED_LINK));
 	var_grounding[glob->getHandle()] = glp;
 
 	// If we've found a grounding, record it.
