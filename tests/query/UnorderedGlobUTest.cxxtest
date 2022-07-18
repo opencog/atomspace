@@ -78,11 +78,18 @@ void UnorderedGlobUTest::test_glob(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 1 solution
-	// In the buggy case, this hits an info loop.
+	// In the buggy case, this hits an infinite loop.
 	result = eval->eval_h("(cog-execute! est)");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 2 solutions
+	result = eval->eval_h("(cog-execute! palin)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
