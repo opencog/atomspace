@@ -230,6 +230,7 @@ private:
 	typedef enum {
 		CALL_ORDER,
 		CALL_GLOB,
+		CALL_ELIM,
 		CALL_UNORDER,
 		CALL_PRESENT,
 		CALL_CHOICE,
@@ -248,6 +249,9 @@ private:
 	bool sparse_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
+	bool elim_compare(const PatternTermPtr&, const Handle&,
+	                  const PatternTermSeq&);
+	bool record_elim(const PatternTermPtr&, const Handle&);
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions

@@ -1106,12 +1106,132 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 /* ======================================================== */
 
 /// Compare the outgoing sets of two trees side-by-side, where
-/// the pattern contains at least one GlobNode.
+/// the pattern is unordered and contains at least one GlobNode.
+/// See `explore_sparse_branches()` for more info.
 bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
                                         const Handle& hg)
 {
-	OC_ASSERT(false, "Not implemented!");
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
+
+	// Fuzzy compares are not supported. hg MUST have an arity at
+	// least as big as the pattern, minus one, because glob might
+	// be empty. Exact glob size bound checked shortly below.
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+	if (osg_size < osp_size-1) return false;
+
+printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
+printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
+
+	// Find the glob in the pattern.
+	// XXX TODO move this to PatternTerm
+	PatternTermPtr glob;
+	PatternTermSeq pats;
+	for (size_t i = 0; i< osp_size; i++)
+	{
+		Type pty = osp[i]->getHandle()->get_type();
+		if (GLOB_NODE == pty)
+		{
+			glob = osp[i];
+			continue;
+		}
+		pats.push_back(osp[i]);
+	}
+
+	// Verify that the glob size bounds are correct.
+	size_t glsz = osg_size - osp_size + 1;
+printf("duuude glob size must be=%lu\n", glsz);
+	const Handle& gloh(glob->getHandle());
+	if (not _variables->is_lower_bound(gloh, glsz))
+		return false;
+	if (not _variables->is_upper_bound(gloh, glsz))
+		return false;
+
+	bool match = elim_compare(ptm, hg, pats);
+
+printf("duuude elim says that %d\n", match);
+	return match;
+}
+
+bool PatternMatchEngine::elim_compare(const PatternTermPtr& ptm,
+                                      const Handle& hg,
+                                      const PatternTermSeq& osp)
+{
+printf("duuude enter elim patsi=%lu\n", osp.size());
+	if (0 == osp.size())
+		return record_elim(ptm, hg);
+
+	PatternTermPtr pto = osp.back();
+	PatternTermSeq csp = osp;
+	csp.pop_back();
+
+	for (const Handle& hog : hg->getOutgoingSet())
+	{
+		bool match = tree_compare(pto, hog, CALL_ELIM);
+		if (match)
+		{
+printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
+			bool rest = elim_compare(ptm, hg, csp);
+printf("duuude rest reports %d\n", rest);
+			if (rest) return true;
+		}
+	}
+
+	// Nothing above worked.
+	const Handle& hp = ptm->getHandle();
+	_pmc.post_link_mismatch(hp, hg);
 	return false;
+}
+
+/// Looks like we have a successful unordered glob match.
+/// Do the final checks, and record the solution.
+bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
+                                     const Handle& hg)
+{
+	// If we've found a grounding, let's see if the
+	// post-match callback likes this grounding.
+	const Handle& hp = ptm->getHandle();
+	bool match = _pmc.post_link_match(hp, hg);
+	if (not match) return false;
+
+	// Find the glob node, again
+	PatternTermPtr glob;
+	for (const PatternTermPtr& otp : ptm->getOutgoingSet())
+	{
+		if (GLOB_NODE == otp->getHandle()->get_type())
+		{
+			glob = otp;
+			break;
+		}
+	}
+
+	// Everything in osg that did NOT show up in the pattern
+	// must necessarily be a part of the glob.
+	HandleSet gnds;
+	for (const PatternTermPtr& otp: ptm->getOutgoingSet())
+	{
+		const Handle& gnd = var_grounding[otp->getHandle()];
+		if (gnd)
+			gnds.insert(gnd);
+	}
+
+	HandleSeq rest;
+	for (const Handle& otg: hg->getOutgoingSet())
+	{
+		if (gnds.end() != gnds.find(otg)) continue;
+		rest.push_back(otg);
+printf("duuude yaye >>>>>>>>>>>ungroudned =%s\n", otg->to_short_string().c_str());
+	}
+
+	Handle glp(createLink(std::move(rest), LIST_LINK));
+	var_grounding[glob->getHandle()] = glp;
+
+	// If we've found a grounding, record it.
+	record_grounding(ptm, hg);
+
+printf("duuude doen whith elim -----------------\n");
+	return true;
 }
 
 /* ======================================================== */
