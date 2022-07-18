@@ -1110,7 +1110,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
 {
 return false;
-	if (_sparse_state.end() == _sparse_state.find(ptm))
+	if (_sparse_glob.end() == _sparse_glob.find(ptm))
 		return false;
 	return true;
 }
@@ -1120,10 +1120,17 @@ PatternMatchEngine::curr_select(const PatternTermPtr& ptm)
 {
 	auto ss = _sparse_state.find(ptm);
 	OC_ASSERT(_sparse_state.end() != ss, "Internal Error!");
-
 	return ss->second;
 }
 
+PatternTermSeq PatternMatchEngine::curr_sparse_term(const PatternTermPtr& ptm)
+{
+	auto st = _sparse_term.find(ptm);
+	OC_ASSERT(_sparse_term.end() != st, "Internal Error!");
+	return st->second;
+}
+
+/// Initialize the selection odometer for the first time.
 bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
                                       const Handle& hg)
 {
@@ -1197,46 +1204,43 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	bool match = setup_select(ptm, hg);
 	if (not match) return false;
 
-	// _sparse_state lets use resume where we last left off.
-	// Permutation mutation = curr_perm(ptm, hg);
-return false;
-
 printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
 printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
-	// bool match = elim_compare(ptm, hg, pats);
 
-printf("duuude elim says that %d\n", match);
-	return match;
-}
+	// _sparse_state lets use resume where we last left off.
+	Selection select = curr_select(ptm);
+	const PatternTermSeq& pats = curr_sparse_term(ptm);
 
-bool PatternMatchEngine::elim_compare(const PatternTermPtr& ptm,
-                                      const Handle& hg,
-                                      const PatternTermSeq& osp)
-{
-printf("duuude enter elim patsi=%lu\n", osp.size());
-	if (0 == osp.size())
-		return record_elim(ptm, hg);
+	const HandleSeq& osg = hg->getOutgoingSet();
+	int szg = (int) osg.size();
 
-	PatternTermPtr pto = osp.back();
-	PatternTermSeq csp = osp;
-	csp.pop_back();
-
-	for (const Handle& hog : hg->getOutgoingSet())
+	for (size_t i=0; i< pats.size(); i++)
 	{
-		bool match = tree_compare(pto, hog, CALL_ELIM);
-		if (match)
+		const PatternTermPtr& pto = pats[i];
+		int ig = select[i];
+		if (-1 != ig)
 		{
-printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
-			bool rest = elim_compare(ptm, hg, csp);
-printf("duuude rest reports %d\n", rest);
-			if (rest) return true;
+			var_grounding[pto->getHandle()] = osg[ig];
+			continue;
 		}
-	}
 
-	// Nothing above worked.
-	const Handle& hp = ptm->getHandle();
-	_pmc.post_link_mismatch(hp, hg);
-	return false;
+		for (int ig = 0; ig < szg; ig++)
+		{
+			const Handle& hog = osg[i];
+			bool match = tree_compare(pto, hog, CALL_ELIM);
+			if (match)
+			{
+				select[i] = ig;
+				var_grounding[pto->getHandle()] = osg[ig];
+printf("duuude term %lu grounded at %d\n", i, ig);
+				break;
+			}
+		}
+		if (ig >= szg) return false;
+	}
+printf("duude found grounding for them all\n");
+
+	return true;
 }
 
 /// Looks like we have a successful unordered glob match.

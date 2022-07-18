@@ -176,7 +176,7 @@ private:
 	bool setup_select(const PatternTermPtr&, const Handle&);
 	Selection curr_select(const PatternTermPtr&);
 	Handle curr_sparse_glob(const PatternTermPtr&);
-	SparseTerm curr_sparse_term(const PatternTermPtr&);
+	PatternTermSeq curr_sparse_term(const PatternTermPtr&);
 	bool have_select(const PatternTermPtr&);
 
 	// --------------------------------------------
@@ -267,8 +267,6 @@ private:
 	bool sparse_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
-	bool elim_compare(const PatternTermPtr&, const Handle&,
-	                  const PatternTermSeq&);
 	bool record_elim(const PatternTermPtr&, const Handle&);
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
