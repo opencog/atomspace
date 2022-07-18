@@ -549,6 +549,24 @@ printf("duuude elim says that %d\n", match);
 
 	// Everything in osg that did NOT show up in the pattern
 	// must necessarily be a part of the glob.
+	HandleSet gnds;
+	for (const PatternTermPtr& otp: osp)
+	{
+		const Handle& gnd = var_grounding[otp->getHandle()];
+		if (gnd)
+			gnds.insert(gnd);
+	}
+
+	HandleSeq rest;
+	for (const Handle& otg: osg)
+	{
+		if (gnds.end() != gnds.find(otg)) continue;
+		rest.push_back(otg);
+printf("duuude yaye ungroudned =%s\n", otg->to_short_string().c_str());
+	}
+
+	Handle glp(createLink(std::move(rest), LIST_LINK));
+	var_grounding[glob->getHandle()] = glp;
 
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
