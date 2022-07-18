@@ -1104,6 +1104,17 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 }
 
 /* ======================================================== */
+
+/// Compare the outgoing sets of two trees side-by-side, where
+/// the pattern contains at least one GlobNode.
+bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
+                                        const Handle& hg)
+{
+	OC_ASSERT(false, "Not implemented!");
+	return false;
+}
+
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -1213,6 +1224,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
+	// If ptm is unordered and has a glob in it, then a sparse compare.
+	if (ptm->hasGlobbyVar())
+		return sparse_compare(ptm, hg);
+
+	// No glob vars in ptm. There might still be some deeper in.
 	return unorder_compare(ptm, hg);
 }
 
@@ -1598,8 +1614,8 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
-	OC_ASSERT(false, "Not implemented!");
-	return false;
+	// XXX Temporary hack ...
+	return explore_unordered_branches(ptm, hg, clause);
 }
 
 /// explore_type_branches -- perform exploration of alternatives.
