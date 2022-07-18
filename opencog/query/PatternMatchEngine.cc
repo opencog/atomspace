@@ -1105,15 +1105,43 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 /* ======================================================== */
 
-/// Compare the outgoing sets of two trees side-by-side, where
-/// the pattern is unordered and contains at least one GlobNode.
-/// See `explore_sparse_branches()` for more info.
-/// Conceptually similar to `unordered_compare()` or `glob_compare()`
-/// in that we have a particular compare state that should be used
-/// when the comparison is performed.
-bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
-                                        const Handle& hg)
+/// Return true if there are more sparse selections to explore.
+/// Else return false.
+bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
 {
+return false;
+	if (_sparse_state.end() == _sparse_state.find(ptm))
+		return false;
+	return true;
+}
+
+Selection PatternMatchEngine::curr_select(const PatternTermPtr& ptm)
+{
+	auto ss = _sparse_state.find(ptm);
+	if (_sparse_state.end() == ss)
+	{
+	}
+}
+
+bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
+                                      const Handle& hg)
+{
+	auto ss = _sparse_glob.find(ptm);
+	if (_sparse_state.end() != ss)
+		return true;
+
+	// If there's no glob, then we are starting from scratch.
+	// Set things up.
+	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SELECT sparse term="
+	                      << ptm->to_string();})
+
+	// XXX TODO The logic here should be updated to resemble that
+	// in curr_perm(), which deals correctly with nested permutations
+	// of unordered patterns. For just right now, we are not
+	// implementing nested sparse links, mostly because I'm too lazy
+	// to write the unit tests. Sorry!  The fix is easy, though: do
+	// what `curr_perm()` does.
+
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	const HandleSeq& osg = hg->getOutgoingSet();
 
@@ -1124,8 +1152,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	size_t osp_size = osp.size();
 	if (osg_size < osp_size-1) return false;
 
-	// Find the glob in the pattern.
-	// XXX TODO move this to PatternTerm
+	// Find the glob in the pattern, and everything else.
 	PatternTermPtr glob;
 	PatternTermSeq pats;
 	for (size_t i = 0; i< osp_size; i++)
@@ -1147,9 +1174,31 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
+	_sparse_glob.insert({ptm, glob});
+	_sparse_term.insert({ptm, pats});
+
+	return true;
+}
+
+/// Compare the outgoing sets of two trees side-by-side, where
+/// the pattern is unordered and contains at least one GlobNode.
+/// See `explore_sparse_branches()` for more info.
+/// Conceptually similar to `unordered_compare()` or `glob_compare()`
+/// in that we have a particular compare state that should be used
+/// when the comparison is performed.
+bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
+                                        const Handle& hg)
+{
+	bool match = setup_select(ptm, hg);
+	if (not match) return false;
+
+	// _sparse_state lets use resume where we last left off.
+	// Permutation mutation = curr_perm(ptm, hg);
+return false;
+
 printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
 printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
-	bool match = elim_compare(ptm, hg, pats);
+	// bool match = elim_compare(ptm, hg, pats);
 
 printf("duuude elim says that %d\n", match);
 	return match;
@@ -1748,7 +1797,7 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
 	}
-	while (false);
+	while (have_select(ptm));
 
 	return false;
 }

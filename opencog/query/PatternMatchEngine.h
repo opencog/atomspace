@@ -90,7 +90,7 @@ private:
 
 	// -------------------------------------------
 	// ChoiceLink state management
-	// Very similar to permutation state management.
+	// Similar to permutation state management.
 	typedef std::map<PatternTermPtr, size_t> ChoiceState;
 
 	ChoiceState _choice_state;
@@ -105,7 +105,7 @@ private:
 
 	// -------------------------------------------
 	// Unordered Link support
-	// Very similar to ChoiceLink state management.
+	// Similar to ChoiceLink state management.
 	typedef PatternTermSeq Permutation;
 	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
 	typedef std::map<PatternTermPtr, int> PermCount;
@@ -160,6 +160,24 @@ private:
 	// (As of Dec 2019, using gcc-8.3.0 and glibc-2.28)
 	std::map<PatternTermSeq, GlobState> _glob_state;
 	// std::unordered_map<PatternTermSeq, GlobState> _glob_state;
+
+	// --------------------------------------------
+	// Sparse matching state management
+	// Similar to choice, unordered and glob state management.
+	typedef std::vector<int> Selection;
+	typedef std::map<PatternTermPtr, Selection> SparseState; // alt: ChoiceState
+	typedef std::map<PatternTermPtr, Handle> SparseGlob;
+	typedef std::map<PatternTermPtr, PatternTermSeq> SparseTerm;
+
+	SparseState _sparse_state;
+	SparseGlob _sparse_glob;
+	SparseTerm _sparse_term;
+
+	bool setup_select(const PatternTermPtr&, const Handle&);
+	Selection curr_select(const PatternTermPtr&);
+	Handle curr_sparse_glob(const PatternTermPtr&);
+	SparseTerm curr_sparse_term(const PatternTermPtr&);
+	bool have_select(const PatternTermPtr&);
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
