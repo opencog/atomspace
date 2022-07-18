@@ -247,9 +247,11 @@ private:
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool glob_uno_compare(const PatternTermPtr&, const Handle&);
-	bool elim_compare(const PatternTermSeq&, const HandleSeq&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
+	bool elim_compare(const PatternTermPtr&, const Handle&,
+	                  const PatternTermSeq&);
+	bool record_elim(const PatternTermPtr&, const Handle&);
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions

@@ -532,9 +532,17 @@ printf("duuude glob size must be=%lu\n", glsz);
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-	bool match = elim_compare(pats, osg);
+	bool match = elim_compare(ptm, hg, pats);
 
 printf("duuude elim says that %d\n", match);
+	return match;
+}
+
+/// Looks like we have a successful unordered glob match.
+/// Do the final checks, and record the solution.
+bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
+                                     const Handle& hg)
+{
 	const Handle& hp = ptm->getHandle();
 	if (not match)
 	{
@@ -547,10 +555,21 @@ printf("duuude elim says that %d\n", match);
 	match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
+	// Find the glob node, again
+	PatternTermPtr glob;
+	for (const PatternTermPtr& osp : ptm->getOutgoingSet())
+	{
+		if (GLOB_NODE == osp[i]->getHandle()->get_type())
+		{
+			glob = osp[i];
+			break;
+		}
+	}
+
 	// Everything in osg that did NOT show up in the pattern
 	// must necessarily be a part of the glob.
 	HandleSet gnds;
-	for (const PatternTermPtr& otp: osp)
+	for (const PatternTermPtr& otp: ptm->getOutgoingSet())
 	{
 		const Handle& gnd = var_grounding[otp->getHandle()];
 		if (gnd)
@@ -558,7 +577,7 @@ printf("duuude elim says that %d\n", match);
 	}
 
 	HandleSeq rest;
-	for (const Handle& otg: osg)
+	for (const Handle& otg: hg->getOutgoingSet())
 	{
 		if (gnds.end() != gnds.find(otg)) continue;
 		rest.push_back(otg);
@@ -575,31 +594,32 @@ printf("duuude doen whith elim %d\n", match);
 	return true;
 }
 
-bool PatternMatchEngine::elim_compare(const PatternTermSeq& osp,
-                                      const HandleSeq& osg)
+bool PatternMatchEngine::elim_compare(const PatternTermPtr& ptm,
+                                      const Handle& hg,
+                                      const PatternTermSeq& osp)
 {
 printf("duuude enter elim patsi=%lu\n", osp.size());
-	if (0 == osp.size()) return true;
+	if (0 == osp.size())
+		return record_elim(ptm, hg);
 
-	PatternTermPtr ptm = osp.back();
+	PatternTermPtr pto = osp.back();
 	PatternTermSeq csp = osp;
 	csp.pop_back();
 
-	for (const Handle& hg : osg)
+	for (const Handle& hog : osg)
 	{
-		bool match = tree_compare(ptm, hg, CALL_ELIM);
+		solution_push();
+		bool match = tree_compare(pto, hog, CALL_ELIM);
 		if (match)
 		{
 printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
-			bool rest = elim_compare(csp, osg);
+			bool rest = elim_compare(ptm, hg, csp);
 printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str());
-			if (not rest) return false;
 		}
+		solution_pop();
 	}
 
-	// If we got to here, then the above loop terminated with
-	// at least one good match. So return true in that case.
-	return true;
+	return false;
 }
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
