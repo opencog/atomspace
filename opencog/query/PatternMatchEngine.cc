@@ -511,7 +511,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	_perm_podo = _perm_odo;
 
 	// _perm_state lets use resume where we last left off.
-	Permutation mutation = curr_perm(ptm, hg);
+	Permutation mutation = curr_perm(ptm);
 
 	// Likewise, pick up the odometer state where we last left off.
 	if (_perm_odo_state.find(ptm) != _perm_odo_state.end())
@@ -733,8 +733,7 @@ take_next_step:
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
 PatternMatchEngine::Permutation
-PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
-                              const Handle& hg)
+PatternMatchEngine::curr_perm(const PatternTermPtr& ptm)
 {
 	auto ps = _perm_state.find(ptm);
 	if (_perm_state.end() == ps)
@@ -768,8 +767,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 
 /// Return true if there are more permutations to explore.
 /// Else return false.
-bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
-                                   const Handle& hg)
+bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm)
 {
 	if (_perm_state.end() == _perm_state.find(ptm))
 		return false;
@@ -1551,7 +1549,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 		_perm_take_step = true;
 		_perm_have_more = false;
 	}
-	while (have_perm(ptm, hg));
+	while (have_perm(ptm));
 
 	_perm_take_step = false;
 	_perm_have_more = false;

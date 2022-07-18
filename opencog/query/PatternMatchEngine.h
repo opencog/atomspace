@@ -113,8 +113,8 @@ private:
 	typedef std::map<PatternTermPtr, PermOdo> PermOdoState;
 
 	PermState _perm_state;
-	Permutation curr_perm(const PatternTermPtr&, const Handle&);
-	bool have_perm(const PatternTermPtr&, const Handle&);
+	Permutation curr_perm(const PatternTermPtr&);
+	bool have_perm(const PatternTermPtr&);
 
 	// Iteration control for unordered links. Branchpoint advances
 	// whenever take_step is set to true.
