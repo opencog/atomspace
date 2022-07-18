@@ -495,6 +495,46 @@ the stack are explored first, before those lower in the stack.
 bool PatternMatchEngine::glob_uno_compare(const PatternTermPtr& ptm,
                                           const Handle& hg)
 {
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
+
+	// Fuzzy compares are not supported. hg MUST have an arity at
+	// least as big as the pattern, minus one, because glob might
+	// be empty. Exact glob size bound checked later.
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+	if (osg_size < osp_size-1) return false;
+
+printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
+printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
+
+	// Find the glob in the pattern.
+	// XXX TODO move this to PatternTerm
+	PatternTermPtr glob;
+	PatternTermSeq pats;
+	for (size_t i = 0; i< osp_size; i++)
+	{
+		Type pty = osp[i]->getHandle()->get_type();
+		if (GLOB_NODE == pty)
+		{
+			glob = osp[i];
+			continue;
+		}
+		pats.push_back(osp[i]);
+printf ("duuude i=%lu pat=%s\n", i,
+osp[i]->getHandle()->to_string().c_str());
+	}
+
+	// Verify that the glob size bounds are correct.
+	size_t glsz = osg_size - osp_size + 1;
+printf("duuude glsz=%lu\n", glsz);
+	const Handle& gloh(glob->getHandle());
+	if (not _variables->is_lower_bound(gloh, glsz))
+		return false;
+	if (not _variables->is_upper_bound(gloh, glsz))
+		return false;
+
+printf("duuude survived. rest=%lu\n", pats.size());
 	OC_ASSERT(true, "Not implemented!");
 	return false;
 }
