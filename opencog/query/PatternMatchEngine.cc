@@ -609,8 +609,9 @@ printf("duuude enter elim patsi=%lu\n", osp.size());
 		{
 printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
 			bool rest = elim_compare(ptm, hg, csp);
-printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str());
+printf("duuude rest reports %d\n", rest);
 			if (rest) found_at_least_one = true;
+// solution_drop();  else pop...
 		}
 		solution_pop();
 	}
