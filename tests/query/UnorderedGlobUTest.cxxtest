@@ -1,0 +1,90 @@
+/*
+ * tests/query/UnorderedGlobUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014, 2022 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+
+#include "test-types.h"
+
+using namespace opencog;
+
+class UnorderedGlobUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpacePtr as;
+
+	public:
+
+		UnorderedGlobUTest(void)
+		{
+			logger().set_level(Logger::DEBUG);
+			// logger().set_level(Logger::FINE);
+			logger().set_print_to_stdout_flag(true);
+			logger().set_timestamp_flag(false);
+			logger().set_sync_flag(true);
+#include "test-types.cc"
+		}
+
+		~UnorderedGlobUTest()
+		{
+			logger().info("Completed running UnorderedGlobUTest");
+
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+			else
+			{
+				logger().info("UnorderedGlobUTest failed!");
+				logger().flush();
+			}
+		}
+
+		void setUp(void);
+		void tearDown(void) { }
+
+		void test_glob(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->add_node
+#define al as->add_link
+void UnorderedGlobUTest::setUp(void)
+{
+	as = createAtomSpace();
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	delete eval;
+}
+
+#define getarity(hand) hand->get_arity()
+
+// ================================================================
+
+// Unordered links with a glob in it
+void UnorderedGlobUTest::test_glob(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/unordered-glob.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 1 solution
+	// In the buggy case, this hits an info loop.
+	result = eval->eval_h("(cog-execute! est)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
