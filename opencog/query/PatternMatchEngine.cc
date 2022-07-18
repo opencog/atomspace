@@ -547,6 +547,9 @@ printf("duuude elim says that %d\n", match);
 	match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
+	// Everything in osg that did NOT show up in the pattern
+	// must necessarily be a part of the glob.
+
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
 
@@ -576,7 +579,8 @@ printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str()
 		}
 	}
 
-printf("duude xxxxxxxxxxxxx\n");
+	// If we got to here, then the above loop terminated with
+	// at least one good match. So return true in that case.
 	return true;
 }
 
