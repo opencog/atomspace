@@ -268,8 +268,8 @@ private:
 	                             const PatternTermPtr&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
-	bool explore_uno_glob_branches(const PatternTermPtr&, const Handle&,
-	                               const PatternTermPtr&);
+	bool explore_sparse_branches(const PatternTermPtr&, const Handle&,
+	                             const PatternTermPtr&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_odometer(const PatternTermPtr&, const Handle&,

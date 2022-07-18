@@ -1458,11 +1458,15 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	return found;
 }
 
-/// explore_glob_branches -- explore glob grounding alternatives
+/// explore_glob_branches -- explore glob grounding alternatives.
 ///
-/// Please see the docs for `explore_unordered_branches` for the general
-/// idea. In this particular method, all possible alternatives for
-/// grounding glob nodes are explored.
+/// Given a pattern containing one or more globs, this explores all
+/// possible alternative groundings for those glob nodes.
+///
+/// This only works for the case where the pattern is an ordered link.
+/// When the pattern is unordered, a completely different enumeration
+/// strategy is required. See `explore_sparse_branches()` for that case.
+///
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
@@ -1526,17 +1530,22 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 /// explore_unordered_branches -- explore UnorderedLink alternatives.
 ///
 /// Every UnorderedLink of arity N presents N-factorial different
-/// grounding possbilities, corresponding to different permutations
+/// grounding possibilities, corresponding to different permutations
 /// of the UnorderedLink.  Each permutation must be explored. Thus,
 /// this can be thought of as a branching of exploration possibilities,
 /// each branch corresponding to a different permutation.  (If you
-/// know algebra, then think of the "free object" (e.g. theh "free
+/// know algebra, then think of the "free object" (e.g. the "free
 /// group") where alternative branches are "free", unconstrained.)
 ///
 /// For each possible branch, the current state is saved, the branch
 /// is explored, then the state is popped. If the exploration yielded
 /// nothing, then the next branch is explored, until exhaustion of the
 /// possibilities.  Upon exhaustion, it returns to the caller.
+///
+/// This only applies when the UnorderedLink pattern has a fixed arity,
+/// i.e. has no glob nodes in it to soak up any remaining unmatched
+/// subterms. When there is a glob node, the search takes on a different
+/// form; see `explore_sparse_branches()`.
 ///
 bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                     const Handle& hg,
@@ -1564,17 +1573,30 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
-/// explore_uno_glob_branches -- explore unordered links with a glob in it.
+/// explore_sparse_branches -- explore "sparse" unordered links.
 ///
-/// Please see the docs for `explore_unordered_branches` for the general
-/// idea. In this particular method, all possible alternatives for
-/// grounding an unordered link containing one glob node is explored.
-/// This differ sharply from both the unordered/odometer search, since
-/// that won't work when there is a glob, and if differs from the glob
-/// search, since that won't work when its unordered.
-bool PatternMatchEngine::explore_uno_glob_branches(const PatternTermPtr& ptm,
-                                                   const Handle& hg,
-                                                   const PatternTermPtr& clause)
+/// When an UnorderedLink has a glob in it, the manner of iterating over
+/// all possbile alternative groundings is different. In this case, one
+/// must try to ground each of the subterms of the term in every
+/// possible way, given the contents of `hg`, and then take everything
+/// left over in `hg` and jam  it into the glob. This differs from the
+/// unordered/odometer search, which only works for fixed-arity
+/// groundings, and also from the glob search, whoch works only for
+/// ordered links.
+///
+/// Note: it does not make sense for an unordered pattern to have more
+/// than one glob in it! The one glob soaks up all the unmatched
+/// left-overs; having two only confuses the situation.
+///
+/// This is "sparse" in the sense that the glob might end up being huge,
+/// containing everything left-over that wasn't in the pattern. For
+/// the case of chemistry informatics, the pattern will specify the
+/// functional group, and the glob will end up holding the moiety that
+/// is not a part of the functional group.
+///
+bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
+                                                 const Handle& hg,
+                                                 const PatternTermPtr& clause)
 {
 	OC_ASSERT(false, "Not implemented!");
 	return false;
@@ -1621,7 +1643,7 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	{
 		// If ptm is unordered and has a glob in it, then...
 		if (ptm->hasGlobbyVar())
-			return explore_uno_glob_branches(ptm, hg, clause);
+			return explore_sparse_branches(ptm, hg, clause);
 
 		// No glob vars in ptm. There might still be some deeper in.
 		return explore_unordered_branches(ptm, hg, clause);
