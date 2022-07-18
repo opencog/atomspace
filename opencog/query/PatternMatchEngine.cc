@@ -575,7 +575,7 @@ bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
 	{
 		if (gnds.end() != gnds.find(otg)) continue;
 		rest.push_back(otg);
-printf("duuude yaye ungroudned =%s\n", otg->to_short_string().c_str());
+printf("duuude yaye >>>>>>>>>>>ungroudned =%s\n", otg->to_short_string().c_str());
 	}
 
 	Handle glp(createLink(std::move(rest), LIST_LINK));
@@ -584,7 +584,7 @@ printf("duuude yaye ungroudned =%s\n", otg->to_short_string().c_str());
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
 
-printf("duuude doen whith elim %d\n", match);
+printf("duuude doen whith elim -----------------\n");
 	return true;
 }
 
@@ -621,7 +621,7 @@ printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str()
 		const Handle& hp = ptm->getHandle();
 		_pmc.post_link_mismatch(hp, hg);
 	}
-	return false;
+	return found_at_least_one;
 }
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
