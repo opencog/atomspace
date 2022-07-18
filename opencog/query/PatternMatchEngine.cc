@@ -521,29 +521,63 @@ printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
 			continue;
 		}
 		pats.push_back(osp[i]);
-printf ("duuude i=%lu pat=%s\n", i,
-osp[i]->getHandle()->to_string().c_str());
 	}
 
 	// Verify that the glob size bounds are correct.
 	size_t glsz = osg_size - osp_size + 1;
-printf("duuude glsz=%lu\n", glsz);
+printf("duuude glob size must be=%lu\n", glsz);
 	const Handle& gloh(glob->getHandle());
 	if (not _variables->is_lower_bound(gloh, glsz))
 		return false;
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-printf("duuude survived. rest=%lu\n", pats.size());
-	OC_ASSERT(true, "Not implemented!");
-	return false;
+	bool match = elim_compare(pats, osg);
+
+printf("duuude elim says that %d\n", match);
+	const Handle& hp = ptm->getHandle();
+	if (not match)
+	{
+		_pmc.post_link_mismatch(hp, hg);
+		return false;
+	}
+
+	// If we've found a grounding, lets see if the
+	// post-match callback likes this grounding.
+	match = _pmc.post_link_match(hp, hg);
+	if (not match) return false;
+
+	// If we've found a grounding, record it.
+	record_grounding(ptm, hg);
+
+printf("duuude doen whith elim %d\n", match);
+	return true;
 }
 
 bool PatternMatchEngine::elim_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
-	OC_ASSERT(true, "Not implemented!");
-	return false;
+printf("duuude enter elim patsi=%lu\n", osp.size());
+	if (0 == osp.size()) return true;
+
+	PatternTermPtr ptm = osp.back();
+	PatternTermSeq csp = osp;
+	csp.pop_back();
+
+	for (const Handle& hg : osg)
+	{
+		bool match = tree_compare(ptm, hg, CALL_ELIM);
+		if (match)
+		{
+printf("duuude yay match! for hg=%s\n", hg->to_short_string().c_str());
+			bool rest = elim_compare(csp, osg);
+printf("duuude rest reports %d for hg=%s\n", rest, hg->to_short_string().c_str());
+			if (not rest) return false;
+		}
+	}
+
+printf("duude xxxxxxxxxxxxx\n");
+	return true;
 }
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,

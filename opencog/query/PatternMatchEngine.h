@@ -230,6 +230,7 @@ private:
 	typedef enum {
 		CALL_ORDER,
 		CALL_GLOB,
+		CALL_ELIM,
 		CALL_UNORDER,
 		CALL_PRESENT,
 		CALL_CHOICE,
