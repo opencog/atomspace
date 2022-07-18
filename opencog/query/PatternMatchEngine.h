@@ -165,7 +165,7 @@ private:
 	// Sparse matching state management
 	// Similar to choice, unordered and glob state management.
 	typedef std::vector<int> Selection;
-	typedef std::map<PatternTermPtr, Selection> SparseState; // alt: ChoiceState
+	typedef std::map<PatternTermPtr, Selection> SparseState;
 	typedef std::map<PatternTermPtr, Handle> SparseGlob;
 	typedef std::map<PatternTermPtr, PatternTermSeq> SparseTerm;
 

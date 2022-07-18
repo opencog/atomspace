@@ -1115,19 +1115,20 @@ return false;
 	return true;
 }
 
-Selection PatternMatchEngine::curr_select(const PatternTermPtr& ptm)
+PatternMatchEngine::Selection
+PatternMatchEngine::curr_select(const PatternTermPtr& ptm)
 {
 	auto ss = _sparse_state.find(ptm);
-	if (_sparse_state.end() == ss)
-	{
-	}
+	OC_ASSERT(_sparse_state.end() != ss, "Internal Error!");
+
+	return ss->second;
 }
 
 bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
                                       const Handle& hg)
 {
 	auto ss = _sparse_glob.find(ptm);
-	if (_sparse_state.end() != ss)
+	if (_sparse_glob.end() != ss)
 		return true;
 
 	// If there's no glob, then we are starting from scratch.
@@ -1174,8 +1175,12 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-	_sparse_glob.insert({ptm, glob});
+	// Initialize selection state.
+	_sparse_glob.insert({ptm, glob->getHandle()});
 	_sparse_term.insert({ptm, pats});
+
+	Selection iters(pats.size(), -1);
+	_sparse_state.insert({ptm, iters});
 
 	return true;
 }
