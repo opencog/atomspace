@@ -1228,7 +1228,10 @@ bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
 	if (term->hasAnyGlobbyVar())
 		found = explore_glob_branches(term, hg, clause);
 	else if (term->hasUnorderedLink())
+	{
+		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
 		found = explore_odometer(term, hg, clause);
+	}
 	else
 		found = explore_type_branches(term, hg, clause);
 
@@ -1561,6 +1564,22 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
+/// explore_uno_glob_branches -- explore unordered links with a glob in it.
+///
+/// Please see the docs for `explore_unordered_branches` for the general
+/// idea. In this particular method, all possible alternatives for
+/// grounding an unordered link containing one glob node is explored.
+/// This differ sharply from both the unordered/odometer search, since
+/// that won't work when there is a glob, and if differs from the glob
+/// search, since that won't work when its unordered.
+bool PatternMatchEngine::explore_uno_glob_branches(const PatternTermPtr& ptm,
+                                                   const Handle& hg,
+                                                   const PatternTermPtr& clause)
+{
+	OC_ASSERT(false, "Not implemented!");
+	return false;
+}
+
 /// explore_type_branches -- perform exploration of alternatives.
 ///
 /// This dispatches exploration of different grounding alternatives to
@@ -1599,7 +1618,14 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 
 	// Unordered links have permutations to explore.
 	if (ptm->isUnorderedLink())
+	{
+		// If ptm is unordered and has a glob in it, then...
+		if (ptm->hasGlobbyVar())
+			return explore_uno_glob_branches(ptm, hg, clause);
+
+		// No glob vars in ptm. There might still be some deeper in.
 		return explore_unordered_branches(ptm, hg, clause);
+	}
 
 	return explore_single_branch(ptm, hg, clause);
 }
