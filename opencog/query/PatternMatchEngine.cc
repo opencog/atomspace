@@ -736,33 +736,33 @@ PatternMatchEngine::Permutation
 PatternMatchEngine::curr_perm(const PatternTermPtr& ptm)
 {
 	auto ps = _perm_state.find(ptm);
-	if (_perm_state.end() == ps)
-	{
-		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
-		              << ptm->to_string();})
-		Permutation perm = ptm->getOutgoingSet();
-		// Sort into explicit std::less<PatternTermPtr>() order, as
-		// otherwise std::next_permutation() will miss some perms.
-		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
-		_perm_take_step = false;
+	if (_perm_state.end() != ps)
+		return ps->second;
 
-		// This will become the permutation to step, next time we
-		// have to step. Meanwhile, save to old stepper, so that
-		// we can resume it when all perms of this one are exhausted.
-		if (nullptr != _perm_to_step)
-			_perm_step_saver.push(_perm_to_step);
-		_perm_to_step = ptm;
+	// Do not have a currently-running permuation. Create a new one.
+	DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
+	                      << ptm->to_string();})
+	Permutation perm = ptm->getOutgoingSet();
+	// Sort into explicit std::less<PatternTermPtr>() order, as
+	// otherwise std::next_permutation() will miss some perms.
+	sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
+	_perm_take_step = false;
 
-		// If there are unordered links above us, we need to tell them
-		// about our existence, and let them know that we haven't been
-		// explored yet. We tell them by placing ourselves into their
-		// odometer.
-		if (_perm_podo.find(ptm) == _perm_podo.end())
-			_perm_podo[ptm] = false;
+	// This will become the permutation to step, next time we
+	// have to step. Meanwhile, save to old stepper, so that
+	// we can resume it when all perms of this one are exhausted.
+	if (nullptr != _perm_to_step)
+		_perm_step_saver.push(_perm_to_step);
+	_perm_to_step = ptm;
 
-		return perm;
-	}
-	return ps->second;
+	// If there are unordered links above us, we need to tell them
+	// about our existence, and let them know that we haven't been
+	// explored yet. We tell them by placing ourselves into their
+	// odometer.
+	if (_perm_podo.find(ptm) == _perm_podo.end())
+		_perm_podo[ptm] = false;
+
+	return perm;
 }
 
 /// Return true if there are more permutations to explore.
