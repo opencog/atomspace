@@ -485,6 +485,27 @@ the stack are explored first, before those lower in the stack.
 
 ******************************************************************/
 
+/// Unordered links containing exactly one glob in them. Because
+/// of the glob, the conventional permutation strategy will not work.
+/// Instead, we permute directly on the stack.
+//
+// XXX FIXME ... this might actually be a better/faster strategy
+// ... or at least, a simpler strategy, than the complex permutation
+// code.  Performance measurements should be made.
+bool PatternMatchEngine::glob_uno_compare(const PatternTermPtr& ptm,
+                                          const Handle& hg)
+{
+	OC_ASSERT(true, "Not implemented!");
+	return false;
+}
+
+bool PatternMatchEngine::elim_compare(const PatternTermSeq& osp,
+                                      const HandleSeq& osg)
+{
+	OC_ASSERT(true, "Not implemented!");
+	return false;
+}
+
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
                                          const Handle& hg)
 {
@@ -506,7 +527,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	           "Impossible situation! BUG!");
 
 	// Place the parent unordered link ("podo") where the child
-	// unordered link can find it. save the old parent on stack.
+	// unordered link can find it. Save the old parent on stack.
 	PermOdo save_podo = _perm_podo;
 	_perm_podo = _perm_odo;
 
@@ -1213,6 +1234,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
+	// If ptm is unordered and has a glob in it, then...
+	if (ptm->hasGlobbyVar())
+		return glob_uno_compare(ptm, hg);
+
+	// No glob vars in ptm. There might still be some deeper in.
 	return unorder_compare(ptm, hg);
 }
 
