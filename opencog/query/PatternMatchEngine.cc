@@ -1204,9 +1204,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	bool match = setup_select(ptm, hg);
 	if (not match) return false;
 
-printf("duuude enter glob uno ptm=%s\n", ptm->to_string().c_str());
-printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
-
 	// _sparse_state lets use resume where we last left off.
 	Selection select = curr_select(ptm);
 	const PatternTermSeq& pats = curr_sparse_term(ptm);
@@ -1214,19 +1211,24 @@ printf("duuude enter glob uno hg=%s\n", hg->to_short_string().c_str());
 	const HandleSeq& osg = hg->getOutgoingSet();
 	int szg = (int) osg.size();
 
+printf("duuude enter sparse ptm=%s\n", ptm->to_string().c_str());
+printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
+
 	for (size_t i=0; i< pats.size(); i++)
 	{
+printf("duude start term %lu\n", i);
 		const PatternTermPtr& pto = pats[i];
 		int ig = select[i];
 		if (-1 != ig)
 		{
+printf("duude term %lu has %d\n", i, ig);
 			var_grounding[pto->getHandle()] = osg[ig];
 			continue;
 		}
 
-		for (int ig = 0; ig < szg; ig++)
+		for (ig = 0; ig < szg; ig++)
 		{
-			const Handle& hog = osg[i];
+			const Handle& hog = osg[ig];
 			bool match = tree_compare(pto, hog, CALL_ELIM);
 			if (match)
 			{
@@ -1236,10 +1238,13 @@ printf("duuude term %lu grounded at %d\n", i, ig);
 				break;
 			}
 		}
+printf("duude end gnd loop term=%lu ig %d sz %d\n", i, ig, szg);
+
 		if (ig >= szg) return false;
 	}
 printf("duude found grounding for them all\n");
 
+_sparse_glob.clear();
 	return true;
 }
 
