@@ -498,11 +498,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = ptm->hasAnyGlobbyVar();
+
+	// Globs not allowed in this function.
+	OC_ASSERT(not ptm->hasAnyGlobbyVar());
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
-	if (osg.size() != arity and not has_glob)
+	if (osg.size() != arity)
 		return _pmc.fuzzy_match(hp, hg);
 
 	// Either we're going to take a step; or we aren't.
@@ -554,24 +556,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 
-		if (has_glob)
+		for (size_t i=0; i<arity; i++)
 		{
-			// Each glob comparison steps the glob state forwards.
-			// Each different permutation has to start with the
-			// same glob state as before. So save and restore state.
-			auto saved_glob_state = _glob_state;
-			match = glob_compare(mutation, osg);
-			_glob_state = saved_glob_state;
-		}
-		else
-		{
-			for (size_t i=0; i<arity; i++)
+			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
 			{
-				if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
-				{
-					match = false;
-					break;
-				}
+				match = false;
+				break;
 			}
 		}
 
