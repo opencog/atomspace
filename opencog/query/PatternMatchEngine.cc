@@ -86,6 +86,11 @@ static inline void logmsg(const char * msg, const PatternTermPtr& ptm,
 	              << "\n       Found: " << rslt;
 }
 
+static inline void logmsg(const char * msg, int a, int b)
+{
+	logger().fine(msg, a, b);
+}
+
 static inline void logmsg(const char * msg, size_t n)
 {
 	LAZY_LOG_FINE << msg << " " << n;
@@ -100,6 +105,7 @@ static inline void logmsg(const char*, const PatternTermPtr&, bool) {}
 static inline void logmsg(const char*, const PatternTermPtr&) {}
 static inline void logmsg(const char*, const Handle&) {}
 static inline void logmsg(const char*, const HandleSeq&) {}
+static inline void logmsg(const char*, int, int) {}
 static inline void logmsg(const char*, size_t) {}
 static inline void logmsg(const char*) {}
 #endif
@@ -1105,6 +1111,21 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 /* ======================================================== */
 
+#ifdef QDEBUG
+static void prt_sparse_odo(const PatternMatchEngine::Selection& sel,
+                           const char *msg)
+{
+	std::string buf = msg;
+	for (size_t i=0; i<sel.size(); i++)
+	{
+		buf += " ";
+		buf += std::to_string(sel[i]);
+	}
+	logger().fine("%s", buf.c_str());
+}
+#endif // QDEBUG
+
+
 /// Return true if there are more sparse selections to explore.
 /// Else return false.
 bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
@@ -1183,7 +1204,7 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 			if (match)
 			{
 				select[i] = ig;
-printf("duude setup term %lu grounded at %d\n", i, ig);
+				logmsg("Sparse setup term %d grounded at %d", (int) i, ig);
 				break;
 			}
 		}
@@ -1197,6 +1218,7 @@ printf("duude setup term %lu grounded at %d\n", i, ig);
 	_sparse_term.emplace(ptm, pats);
 	_sparse_state.emplace(ptm, select);
 
+	DO_LOG(prt_sparse_odo(select, "Initialized sparse odo:");)
 	return true;
 }
 
@@ -1212,6 +1234,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	bool match = setup_select(ptm, hg);
 	if (not match) return false;
 
+	logmsg("Enter sparse_compare");
+
 	// _sparse_state lets use resume where we last left off.
 	Selection select = _sparse_state[ptm];
 	const PatternTermSeq& pats = _sparse_term[ptm];
@@ -1219,10 +1243,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	int szg = (int) osg.size();
 	int szp = (int) pats.size();
-
-printf("duuude enter sparse ptm=%s\n", ptm->to_string().c_str());
-printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
-printf("duuude enter sparse step=%d\n", _sparse_take_step);
 
 	// Set up the grounding as we last knew it.
 	int it;
@@ -1237,9 +1257,7 @@ printf("duuude enter sparse step=%d\n", _sparse_take_step);
 	if (not _sparse_take_step)
 		return record_sparse(ptm, hg);
 
-printf("pre odo: ");
-for (it=0; it < szp; it++) printf("%d ", select[it]);
-printf("\n");
+	DO_LOG(prt_sparse_odo(select, "Pre-stepper sparse odo:");)
 	it = szp - 1;
 	while (0 <= it)
 	{
@@ -1249,7 +1267,7 @@ printf("\n");
 		int ig = select[it];
 		ig ++;
 
-printf("duude stepping odo %d (was %d)\n", it, ig-1);
+		logmsg("Sparse stepping odo %d (was %d)\n", it, ig-1);
 		for (; ig < szg; ig++)
 		{
 			const Handle& hog = osg[ig];
@@ -1257,16 +1275,13 @@ printf("duude stepping odo %d (was %d)\n", it, ig-1);
 			if (match)
 			{
 				select[it] = ig;
-				var_grounding[pto->getHandle()] = osg[ig];
-printf("duude iterated term %d to new ground at %d\n", it, ig);
-// printf("duude term %s by %s\n",
-// pto->getHandle()->to_short_string().c_str(),
-// osg[ig]->to_short_string().c_str());
+				var_grounding[pto->getHandle()] = hog;
+				logmsg("Sparse iterated term %d to new ground %d", it, ig);
+
 				if (szp - 1 == it)
 				{
-printf("post odo: ");
-for (int jt=0; jt < szp; jt++) printf("%d ", select[jt]);
-printf("\n");
+					DO_LOG(prt_sparse_odo(select, "Post-step sparse odo:");)
+
 					// Save the new state.
 					_sparse_state.insert_or_assign(ptm, select);
 					return record_sparse(ptm, hg);
@@ -1281,7 +1296,7 @@ printf("\n");
 		if (ig >= szg) it --;
 	}
 
-printf("duude exhausedd odo\n");
+	logmsg("Sparse odo is exhausted");
 	_sparse_take_step = false;
 	_sparse_glob.clear();
 	return false;
@@ -1324,7 +1339,18 @@ bool PatternMatchEngine::record_sparse(const PatternTermPtr& ptm,
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
 
+#if 0
 printf("duuude doen whith elim -----------------\n");
+const PatternTermSeq& pats = _sparse_term[ptm];
+for(const PatternTermPtr& pto : pats) {
+Handle g=var_grounding[pto->getHandle()];
+printf("pto=%s has %s\n", pto->getHandle()->to_short_string().c_str(),
+g->to_short_string().c_str()); }
+printf("glob has %s\n", glp->to_short_string().c_str());
+#endif
+
+logger().info("duuude below is print -----------------\n");
+DO_LOG(log_solution(var_grounding, clause_grounding);)
 	return true;
 }
 
@@ -1843,7 +1869,7 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 		if (explore_single_branch(ptm, hg, clause))
 			return true;
 
-		logmsg("Step to next sparse greedy");
+		logmsg("Sparse explore: Step to next odo");
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
