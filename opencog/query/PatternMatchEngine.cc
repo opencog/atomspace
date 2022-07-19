@@ -1109,7 +1109,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 /// Else return false.
 bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
 {
-return false;
 	if (_sparse_glob.end() == _sparse_glob.find(ptm))
 		return false;
 	return true;
@@ -1195,7 +1194,7 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 		for (ig = 0; ig < szg; ig++)
 		{
 			const Handle& hog = osg[ig];
-			bool match = tree_compare(pto, hog, CALL_ELIM);
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
 				select[i] = ig;
@@ -1234,22 +1233,56 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 
 	const HandleSeq& osg = hg->getOutgoingSet();
 	int szg = (int) osg.size();
+	int szp = (int) pats.size();
 
 printf("duuude enter sparse ptm=%s\n", ptm->to_string().c_str());
 printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
 
 	// Set up the grounding as we last knew it.
-	for (size_t i=0; i< pats.size(); i++)
+	int it;
+	for (it=0; it < szp; it++)
 	{
-		const PatternTermPtr& pto = pats[i];
-		int ig = select[i];
+		const PatternTermPtr& pto = pats[it];
+		int ig = select[it];
 		var_grounding[pto->getHandle()] = osg[ig];
 	}
-printf("duude found grounding for them all\n");
+
+	// If not taking a step, the above provided what was wanted.
 	if (not _sparse_take_step) return true;
 
-_sparse_glob.clear();
-	return true;
+	it = szp - 1;
+	while (0 <= it)
+	{
+		const PatternTermPtr& pto = pats[it];
+		var_grounding.erase(pto->getHandle());
+
+		int ig = select[it];
+		ig ++;
+
+printf("duude stepping odo %d\n", it);
+		for (; ig < szg; ig++)
+		{
+			const Handle& hog = osg[ig];
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
+			if (match)
+			{
+				select[it] = ig;
+				var_grounding[pto->getHandle()] = osg[ig];
+printf("duude iterated term %lu to new ground at %d\n", it, ig);
+				if (szp - 1 == it) return true;
+				it ++;
+				select[it] = -1;
+				break;
+			}
+		}
+
+		// If the above wrapped, back up and try again.
+		if (ig >= szg) it --;
+	}
+
+printf("duude exhausedd odo\n");
+	_sparse_glob.clear();
+	return false;
 }
 
 /// Looks like we have a successful unordered glob match.
