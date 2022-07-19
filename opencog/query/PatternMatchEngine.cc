@@ -519,7 +519,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	_perm_podo = _perm_odo;
 
 	// _perm_state lets use resume where we last left off.
-	Permutation mutation = curr_perm(ptm, hg);
+	Permutation mutation = curr_perm(ptm);
 
 	// Likewise, pick up the odometer state where we last left off.
 	if (_perm_odo_state.find(ptm) != _perm_odo_state.end())
@@ -730,43 +730,41 @@ take_next_step:
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
 PatternMatchEngine::Permutation
-PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
-                              const Handle& hg)
+PatternMatchEngine::curr_perm(const PatternTermPtr& ptm)
 {
 	auto ps = _perm_state.find(ptm);
-	if (_perm_state.end() == ps)
-	{
-		DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
-		              << ptm->to_string();})
-		Permutation perm = ptm->getOutgoingSet();
-		// Sort into explicit std::less<PatternTermPtr>() order, as
-		// otherwise std::next_permutation() will miss some perms.
-		sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
-		_perm_take_step = false;
+	if (_perm_state.end() != ps)
+		return ps->second;
 
-		// This will become the permutation to step, next time we
-		// have to step. Meanwhile, save to old stepper, so that
-		// we can resume it when all perms of this one are exhausted.
-		if (nullptr != _perm_to_step)
-			_perm_step_saver.push(_perm_to_step);
-		_perm_to_step = ptm;
+	// Do not have a currently-running permuation. Create a new one.
+	DO_LOG({LAZY_LOG_FINE << "tree_comp FRESH START unordered term="
+	                      << ptm->to_string();})
+	Permutation perm = ptm->getOutgoingSet();
+	// Sort into explicit std::less<PatternTermPtr>() order, as
+	// otherwise std::next_permutation() will miss some perms.
+	sort(perm.begin(), perm.end(), std::less<PatternTermPtr>());
+	_perm_take_step = false;
 
-		// If there are unordered links above us, we need to tell them
-		// about our existence, and let them know that we haven't been
-		// explored yet. We tell them by placing ourselves into their
-		// odometer.
-		if (_perm_podo.find(ptm) == _perm_podo.end())
-			_perm_podo[ptm] = false;
+	// This will become the permutation to step, next time we
+	// have to step. Meanwhile, save to old stepper, so that
+	// we can resume it when all perms of this one are exhausted.
+	if (nullptr != _perm_to_step)
+		_perm_step_saver.push(_perm_to_step);
+	_perm_to_step = ptm;
 
-		return perm;
-	}
-	return ps->second;
+	// If there are unordered links above us, we need to tell them
+	// about our existence, and let them know that we haven't been
+	// explored yet. We tell them by placing ourselves into their
+	// odometer.
+	if (_perm_podo.find(ptm) == _perm_podo.end())
+		_perm_podo[ptm] = false;
+
+	return perm;
 }
 
 /// Return true if there are more permutations to explore.
 /// Else return false.
-bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
-                                   const Handle& hg)
+bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm)
 {
 	if (_perm_state.end() == _perm_state.find(ptm))
 		return false;
@@ -1830,7 +1828,7 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 		_perm_take_step = true;
 		_perm_have_more = false;
 	}
-	while (have_perm(ptm, hg));
+	while (have_perm(ptm));
 
 	_perm_take_step = false;
 	_perm_have_more = false;
