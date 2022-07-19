@@ -175,10 +175,8 @@ private:
 	bool _sparse_take_step;
 
 	bool setup_select(const PatternTermPtr&, const Handle&);
-	Selection curr_select(const PatternTermPtr&);
-	Handle curr_sparse_glob(const PatternTermPtr&);
-	PatternTermSeq curr_sparse_term(const PatternTermPtr&);
 	bool have_select(const PatternTermPtr&);
+	bool record_sparse(const PatternTermPtr&, const Handle&);
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
@@ -188,7 +186,7 @@ private:
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
 	// Similar to the next-clause, above, and someday should be unified
-	// with it. XXX Needs to move to the Mixin class... XX FIXME.
+	// with it. XXX Needs to move to the Mixin class... XXX FIXME.
 
 	bool next_untried_present(const PatternTermPtr&,
 	                          const PatternTermPtr&,
@@ -268,7 +266,6 @@ private:
 	bool sparse_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
-	bool record_elim(const PatternTermPtr&, const Handle&);
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
 	// See PatternMatchEngine.cc for descriptions

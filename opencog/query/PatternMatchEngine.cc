@@ -1114,21 +1114,6 @@ bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
 	return true;
 }
 
-PatternMatchEngine::Selection
-PatternMatchEngine::curr_select(const PatternTermPtr& ptm)
-{
-	auto ss = _sparse_state.find(ptm);
-	OC_ASSERT(_sparse_state.end() != ss, "Internal Error!");
-	return ss->second;
-}
-
-PatternTermSeq PatternMatchEngine::curr_sparse_term(const PatternTermPtr& ptm)
-{
-	auto st = _sparse_term.find(ptm);
-	OC_ASSERT(_sparse_term.end() != st, "Internal Error!");
-	return st->second;
-}
-
 /// Initialize the selection odometer for the first time.
 bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
                                       const Handle& hg)
@@ -1228,8 +1213,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	if (not match) return false;
 
 	// _sparse_state lets use resume where we last left off.
-	Selection select = curr_select(ptm);
-	const PatternTermSeq& pats = curr_sparse_term(ptm);
+	Selection select = _sparse_state[ptm];
+	const PatternTermSeq& pats = _sparse_term[ptm];
 
 	const HandleSeq& osg = hg->getOutgoingSet();
 	int szg = (int) osg.size();
@@ -1283,7 +1268,7 @@ for (int jt=0; jt < szp; jt++) printf("%d ", select[jt]);
 printf("\n");
 					// Save the new state.
 					_sparse_state.insert_or_assign(ptm, select);
-					return true;
+					return record_sparse(ptm, hg);
 				}
 				it ++;
 				select[it] = -1;
@@ -1301,10 +1286,11 @@ printf("duude exhausedd odo\n");
 	return false;
 }
 
-/// Looks like we have a successful unordered glob match.
-/// Do the final checks, and record the solution.
-bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
-                                     const Handle& hg)
+/// Record a successful sparse match. After matching the required terms
+/// in the pattern, everything else left over is pushed into the glob.
+/// Then the term as a whole, and the grounding, are recorded.
+bool PatternMatchEngine::record_sparse(const PatternTermPtr& ptm,
+                                       const Handle& hg)
 {
 	// If we've found a grounding, let's see if the
 	// post-match callback likes this grounding.
@@ -1312,16 +1298,7 @@ bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
 	bool match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
-	// Find the glob node, again
-	PatternTermPtr glob;
-	for (const PatternTermPtr& otp : ptm->getOutgoingSet())
-	{
-		if (GLOB_NODE == otp->getHandle()->get_type())
-		{
-			glob = otp;
-			break;
-		}
-	}
+	Handle glob = _sparse_glob[ptm];
 
 	// Everything in osg that did NOT show up in the pattern
 	// must necessarily be a part of the glob.
@@ -1341,7 +1318,7 @@ bool PatternMatchEngine::record_elim(const PatternTermPtr& ptm,
 	}
 
 	Handle glp(createLink(std::move(rest), UNORDERED_LINK));
-	var_grounding[glob->getHandle()] = glp;
+	var_grounding[glob] = glp;
 
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
