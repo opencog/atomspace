@@ -1113,7 +1113,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 #ifdef QDEBUG
 static void prt_sparse_odo(const std::vector<int>& sel,
-                           const char *msg)
+                           int szg, const char *msg)
 {
 	std::string buf = msg;
 	for (size_t i=0; i<sel.size(); i++)
@@ -1121,6 +1121,7 @@ static void prt_sparse_odo(const std::vector<int>& sel,
 		buf += " ";
 		buf += std::to_string(sel[i]);
 	}
+	buf += " of " + std::to_string(szg);
 	logger().fine("%s", buf.c_str());
 }
 #endif // QDEBUG
@@ -1218,7 +1219,7 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 	_sparse_term.emplace(ptm, pats);
 	_sparse_state.emplace(ptm, select);
 
-	DO_LOG(prt_sparse_odo(select, "Initialized sparse odo:");)
+	DO_LOG(prt_sparse_odo(select, szg, "Initialized sparse odo:");)
 	return true;
 }
 
@@ -1244,27 +1245,34 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	int szg = (int) osg.size();
 	int szp = (int) pats.size();
 
-	// Set up the grounding as we last knew it.
+	// If not taking a step, set up the grounding as we last knew it.
+	if (not _sparse_take_step)
+	{
+		for (int it=0; it < szp; it++)
+		{
+			const PatternTermPtr& pto = pats[it];
+			const Handle& hog = osg[select[it]];
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
+			OC_ASSERT(match, "Internal Error: unable to restore sparse state!");
+		}
+		return record_sparse(ptm, hg);
+	}
+
+	// Set up the grounding as we last knew it; all but the last one.
 	int it;
-	for (it=0; it < szp; it++)
+	for (it=0; it < szp-1; it++)
 	{
 		const PatternTermPtr& pto = pats[it];
 		const Handle& hog = osg[select[it]];
-		bool match = tree_compare(pto, hog, CALL_SPARSE);
-		OC_ASSERT(match, "Internal Error: unable to restore sparse state!");
+		solution_push();
+		tree_compare(pto, hog, CALL_SPARSE);
 	}
 
-	// If not taking a step, the above provided what was wanted.
-	if (not _sparse_take_step)
-		return record_sparse(ptm, hg);
-
-	DO_LOG(prt_sparse_odo(select, "Pre-stepper sparse odo:");)
+	DO_LOG(prt_sparse_odo(select, szg, "Pre-stepper sparse odo:");)
 	it = szp - 1;
 	while (0 <= it)
 	{
 		const PatternTermPtr& pto = pats[it];
-		var_grounding.erase(pto->getHandle());
-
 		int ig = select[it];
 		ig ++;
 
@@ -1280,7 +1288,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 
 				if (szp - 1 == it)
 				{
-					DO_LOG(prt_sparse_odo(select, "Post-step sparse odo:");)
+					DO_LOG(prt_sparse_odo(select, szg, "Post-step sparse odo:");)
+					for (int j=0; j<szp-1; j++) solution_drop();
 
 					// Save the new state.
 					_sparse_state.insert_or_assign(ptm, select);
@@ -1288,12 +1297,17 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 				}
 				it ++;
 				select[it] = -1;
+				solution_push();
 				break;
 			}
 		}
 
 		// If the above wrapped, back up and try again.
-		if (ig >= szg) it --;
+		if (ig >= szg)
+		{
+			it --;
+			solution_pop();
+		}
 	}
 
 	logmsg("Sparse odo is exhausted");
