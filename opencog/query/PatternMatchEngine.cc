@@ -1112,7 +1112,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 /* ======================================================== */
 
 #ifdef QDEBUG
-static void prt_sparse_odo(const PatternMatchEngine::Selection& sel,
+static void prt_sparse_odo(const std::vector<int>& sel,
                            const char *msg)
 {
 	std::string buf = msg;
@@ -1249,8 +1249,9 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	for (it=0; it < szp; it++)
 	{
 		const PatternTermPtr& pto = pats[it];
-		int ig = select[it];
-		var_grounding[pto->getHandle()] = osg[ig];
+		const Handle& hog = osg[select[it]];
+		bool match = tree_compare(pto, hog, CALL_SPARSE);
+		OC_ASSERT(match, "Internal Error: unable to restore sparse state!");
 	}
 
 	// If not taking a step, the above provided what was wanted.
@@ -1275,7 +1276,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			if (match)
 			{
 				select[it] = ig;
-				var_grounding[pto->getHandle()] = hog;
 				logmsg("Sparse iterated term %d to new ground %d", it, ig);
 
 				if (szp - 1 == it)
