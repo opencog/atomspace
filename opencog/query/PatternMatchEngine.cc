@@ -1245,6 +1245,22 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	int szg = (int) osg.size();
 	int szp = (int) pats.size();
 
+#ifdef QDEBUG
+	for (int it=0; it < szp; it++)
+	{
+		const PatternTermPtr& pto = pats[it];
+		logger().fine("Terms for sparse %d pto=%s\n", it,
+		               pto->getHandle()->to_short_string().c_str());
+	}
+	logger().fine("");
+	for (int ig=0; ig < szg; ig++)
+	{
+		const Handle& hog = osg[ig];
+		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
+		               hog->to_short_string().c_str());
+	}
+#endif
+
 	// If not taking a step, set up the grounding as we last knew it.
 	if (not _sparse_take_step)
 	{
@@ -1279,6 +1295,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		logmsg("Stepping sparse odo %d (was %d)\n", it, ig-1);
 		for (; ig < szg; ig++)
 		{
+			logmsg("Test sparse rotor=%d w/ gnd by=%d", it, ig);
 			const Handle& hog = osg[ig];
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
@@ -1352,19 +1369,6 @@ bool PatternMatchEngine::record_sparse(const PatternTermPtr& ptm,
 
 	// If we've found a grounding, record it.
 	record_grounding(ptm, hg);
-
-#if 0
-printf("duuude doen whith elim -----------------\n");
-const PatternTermSeq& pats = _sparse_term[ptm];
-for(const PatternTermPtr& pto : pats) {
-Handle g=var_grounding[pto->getHandle()];
-printf("pto=%s has %s\n", pto->getHandle()->to_short_string().c_str(),
-g->to_short_string().c_str()); }
-printf("glob has %s\n", glp->to_short_string().c_str());
-#endif
-
-logger().info("duuude below is print -----------------\n");
-DO_LOG(log_solution(var_grounding, clause_grounding);)
 	return true;
 }
 
