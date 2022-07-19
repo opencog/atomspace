@@ -1219,7 +1219,25 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 	_sparse_term.emplace(ptm, pats);
 	_sparse_state.emplace(ptm, select);
 
-	DO_LOG(prt_sparse_odo(select, szg, "Initialized sparse odo:");)
+#ifdef QDEBUG
+	prt_sparse_odo(select, szg, "Initialized sparse odo:");
+
+	int szp = (int) pats.size();
+	for (int it=0; it < szp; it++)
+	{
+		const PatternTermPtr& pto = pats[it];
+		logger().fine("Terms for sparse %d pto=%s\n", it,
+		               pto->getHandle()->to_short_string().c_str());
+	}
+	logger().fine("");
+	for (int ig=0; ig < szg; ig++)
+	{
+		const Handle& hog = osg[ig];
+		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
+		               hog->to_short_string().c_str());
+	}
+#endif
+
 	return true;
 }
 
@@ -1244,22 +1262,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	int szg = (int) osg.size();
 	int szp = (int) pats.size();
-
-#ifdef QDEBUG
-	for (int it=0; it < szp; it++)
-	{
-		const PatternTermPtr& pto = pats[it];
-		logger().fine("Terms for sparse %d pto=%s\n", it,
-		               pto->getHandle()->to_short_string().c_str());
-	}
-	logger().fine("");
-	for (int ig=0; ig < szg; ig++)
-	{
-		const Handle& hog = osg[ig];
-		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
-		               hog->to_short_string().c_str());
-	}
-#endif
 
 	// If not taking a step, set up the grounding as we last knew it.
 	if (not _sparse_take_step)
