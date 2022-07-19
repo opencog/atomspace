@@ -1234,7 +1234,8 @@ printf("duuude enter sparse step=%d\n", _sparse_take_step);
 	}
 
 	// If not taking a step, the above provided what was wanted.
-	if (not _sparse_take_step) return true;
+	if (not _sparse_take_step)
+		return record_sparse(ptm, hg);
 
 printf("pre odo: ");
 for (it=0; it < szp; it++) printf("%d ", select[it]);
