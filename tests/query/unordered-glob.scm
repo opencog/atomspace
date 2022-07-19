@@ -5,9 +5,7 @@
 
 (define est
 	(GetLink
-
 		(VariableList
-
 			(TypedVariable (Variable "$vA") (Type 'Concept))
 			(TypedVariable (Variable "$vB") (Type 'Predicate))
 			(TypedVariable (Variable "$vC") (Type 'Any))
@@ -22,6 +20,28 @@
 			(Unordered (Variable "$vD") (Variable "$vC"))
 			(Glob "rest")
 		)
+	)
+)
+
+(define est-uni
+	(GetLink
+		(VariableList
+			(TypedVariable (Variable "$vA") (Type 'Concept))
+			(TypedVariable (Variable "$vB") (Type 'Predicate))
+			(TypedVariable (Variable "$vC") (Type 'Any))
+
+			(Variable "$vD")
+			(Glob "rest")
+		)
+
+		(And
+			(Present
+				(Unordered
+					(Unordered (Variable "$vB") (Variable "$vA"))
+					(Unordered (Variable "$vC") (Variable "$vB"))
+					(Unordered (Variable "$vD") (Variable "$vC"))
+					(Glob "rest")))
+			(Not (Identical (Variable "$vD") (Variable "$vB"))))
 	)
 )
 
