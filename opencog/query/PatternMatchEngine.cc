@@ -1276,7 +1276,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		int ig = select[it];
 		ig ++;
 
-		logmsg("Sparse stepping odo %d (was %d)\n", it, ig-1);
+		logmsg("Stepping sparse odo %d (was %d)\n", it, ig-1);
 		for (; ig < szg; ig++)
 		{
 			const Handle& hog = osg[ig];
@@ -1284,7 +1284,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			if (match)
 			{
 				select[it] = ig;
-				logmsg("Sparse iterated term %d to new ground %d", it, ig);
+				logmsg("Iterated sparse term %d to new ground %d", it, ig);
 
 				if (szp - 1 == it)
 				{
@@ -1306,11 +1306,11 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		if (ig >= szg)
 		{
 			it --;
-			solution_pop();
+			if (0 <= it) solution_pop();
 		}
 	}
 
-	logmsg("Sparse odo is exhausted");
+	logmsg("Odo for sparse is exhausted");
 	_sparse_take_step = false;
 	_sparse_glob.clear();
 	return false;
