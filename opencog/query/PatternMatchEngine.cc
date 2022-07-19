@@ -1208,9 +1208,9 @@ printf("duude setup term %lu grounded at %d\n", i, ig);
 	}
 
 	// Initialize selection state.
-	_sparse_glob.insert({ptm, glob->getHandle()});
-	_sparse_term.insert({ptm, pats});
-	_sparse_state.insert({ptm, select});
+	_sparse_glob.emplace(ptm, glob->getHandle());
+	_sparse_term.emplace(ptm, pats);
+	_sparse_state.emplace(ptm, select);
 
 	return true;
 }
@@ -1237,6 +1237,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 
 printf("duuude enter sparse ptm=%s\n", ptm->to_string().c_str());
 printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
+printf("duuude enter sparse step=%d\n", _sparse_take_step);
 
 	// Set up the grounding as we last knew it.
 	int it;
@@ -1250,6 +1251,9 @@ printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
 	// If not taking a step, the above provided what was wanted.
 	if (not _sparse_take_step) return true;
 
+printf("pre odo: ");
+for (it=0; it < szp; it++) printf("%d ", select[it]);
+printf("\n");
 	it = szp - 1;
 	while (0 <= it)
 	{
@@ -1259,7 +1263,7 @@ printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
 		int ig = select[it];
 		ig ++;
 
-printf("duude stepping odo %d\n", it);
+printf("duude stepping odo %d (was %d)\n", it, ig-1);
 		for (; ig < szg; ig++)
 		{
 			const Handle& hog = osg[ig];
@@ -1268,8 +1272,19 @@ printf("duude stepping odo %d\n", it);
 			{
 				select[it] = ig;
 				var_grounding[pto->getHandle()] = osg[ig];
-printf("duude iterated term %lu to new ground at %d\n", it, ig);
-				if (szp - 1 == it) return true;
+printf("duude iterated term %d to new ground at %d\n", it, ig);
+// printf("duude term %s by %s\n",
+// pto->getHandle()->to_short_string().c_str(),
+// osg[ig]->to_short_string().c_str());
+				if (szp - 1 == it)
+				{
+printf("post odo: ");
+for (int jt=0; jt < szp; jt++) printf("%d ", select[jt]);
+printf("\n");
+					// Save the new state.
+					_sparse_state.insert_or_assign(ptm, select);
+					return true;
+				}
 				it ++;
 				select[it] = -1;
 				break;
@@ -1281,6 +1296,7 @@ printf("duude iterated term %lu to new ground at %d\n", it, ig);
 	}
 
 printf("duude exhausedd odo\n");
+	_sparse_take_step = false;
 	_sparse_glob.clear();
 	return false;
 }
