@@ -172,6 +172,7 @@ private:
 	SparseState _sparse_state;
 	SparseGlob _sparse_glob;
 	SparseTerm _sparse_term;
+	bool _sparse_take_step;
 
 	bool setup_select(const PatternTermPtr&, const Handle&);
 	Selection curr_select(const PatternTermPtr&);

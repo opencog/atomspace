@@ -1182,12 +1182,36 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
+	_sparse_take_step = false;
+
+	// Set up the sparse odometer for the first time.
+	int szg = (int) osg.size();
+	Selection select(pats.size(), -1);
+	for (size_t i=0; i< pats.size(); i++)
+	{
+		const PatternTermPtr& pto = pats[i];
+
+		int ig;
+		for (ig = 0; ig < szg; ig++)
+		{
+			const Handle& hog = osg[ig];
+			bool match = tree_compare(pto, hog, CALL_ELIM);
+			if (match)
+			{
+				select[i] = ig;
+printf("duude setup term %lu grounded at %d\n", i, ig);
+				break;
+			}
+		}
+
+		// Staight out of the chute, we got nothing!
+		if (ig >= szg) return false;
+	}
+
 	// Initialize selection state.
 	_sparse_glob.insert({ptm, glob->getHandle()});
 	_sparse_term.insert({ptm, pats});
-
-	Selection iters(pats.size(), -1);
-	_sparse_state.insert({ptm, iters});
+	_sparse_state.insert({ptm, select});
 
 	return true;
 }
@@ -1214,35 +1238,15 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 printf("duuude enter sparse ptm=%s\n", ptm->to_string().c_str());
 printf("duuude enter sparse hg=%s\n", hg->to_short_string().c_str());
 
+	// Set up the grounding as we last knew it.
 	for (size_t i=0; i< pats.size(); i++)
 	{
-printf("duude start term %lu\n", i);
 		const PatternTermPtr& pto = pats[i];
 		int ig = select[i];
-		if (-1 != ig)
-		{
-printf("duude term %lu has %d\n", i, ig);
-			var_grounding[pto->getHandle()] = osg[ig];
-			continue;
-		}
-
-		for (ig = 0; ig < szg; ig++)
-		{
-			const Handle& hog = osg[ig];
-			bool match = tree_compare(pto, hog, CALL_ELIM);
-			if (match)
-			{
-				select[i] = ig;
-				var_grounding[pto->getHandle()] = osg[ig];
-printf("duuude term %lu grounded at %d\n", i, ig);
-				break;
-			}
-		}
-printf("duude end gnd loop term=%lu ig %d sz %d\n", i, ig, szg);
-
-		if (ig >= szg) return false;
+		var_grounding[pto->getHandle()] = osg[ig];
 	}
 printf("duude found grounding for them all\n");
+	if (not _sparse_take_step) return true;
 
 _sparse_glob.clear();
 	return true;
@@ -1793,6 +1797,12 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// functional group, and the glob will end up holding the moiety that
 /// is not a part of the functional group.
 ///
+/// XXX FIXME: Right now, this code handles graphs that have only one
+/// single sparse search.   Nested sparse searches are not supported;
+/// to implement those, its "easy": implement the same flow control as
+/// the unordered_explore steppers. I'm lzay, today, so I am not doing
+/// this just right now.
+///
 bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
@@ -1810,8 +1820,10 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
+		_sparse_take_step = true;
 	}
 	while (have_select(ptm));
+	_sparse_take_step = false;
 
 	return false;
 }
