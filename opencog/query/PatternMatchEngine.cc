@@ -1098,6 +1098,29 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 }
 
 /* ======================================================== */
+/// "Sparse" matching. This handles the situation of an unordered link
+/// that contains a (single) glob node. It's sparse because the
+/// unordered pattern only specifies a handful of terms to be matched;
+/// everything unmatched at the end gets dumped into the glob. The
+/// code handles only one glob, because two or more "don't make sense":
+/// there's just a pile of left-overs; partitioning them ito two or more
+/// sets is a distinct operation. So we don't do that.
+///
+/// The prototypical use for this search is chemistry, where one is
+/// searching for a small functional group inside a molecule, and don't
+/// care about the rest, the moiety (which can be very large; thus
+/// "sparse".)
+//
+// XXX The current implementation is a brute-force search, and is highly
+// inefficient for truly sparse searches. A (vastly) superior search
+// woudld be to obtain the connected components in the search set, and
+// try to ground those.  This avoids the pointless odometer spinning.
+//
+// There's also a bug/limitation: this code does not support nested
+// sparse searches.  It should not be hard to implement: just copy the
+// general algo used in unordered link permutations, which does handle
+// nesting correctly. But right now, no users envisioned, so... not
+// supported.
 
 #ifdef QDEBUG
 static void prt_sparse_odo(const std::vector<int>& sel,
