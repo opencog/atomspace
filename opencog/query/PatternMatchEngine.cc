@@ -86,6 +86,11 @@ static inline void logmsg(const char * msg, const PatternTermPtr& ptm,
 	              << "\n       Found: " << rslt;
 }
 
+static inline void logmsg(const char * msg, int a, int b)
+{
+	logger().fine(msg, a, b);
+}
+
 static inline void logmsg(const char * msg, size_t n)
 {
 	LAZY_LOG_FINE << msg << " " << n;
@@ -100,6 +105,7 @@ static inline void logmsg(const char*, const PatternTermPtr&, bool) {}
 static inline void logmsg(const char*, const PatternTermPtr&) {}
 static inline void logmsg(const char*, const Handle&) {}
 static inline void logmsg(const char*, const HandleSeq&) {}
+static inline void logmsg(const char*, int, int) {}
 static inline void logmsg(const char*, size_t) {}
 static inline void logmsg(const char*) {}
 #endif
@@ -492,11 +498,13 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	const PatternTermSeq& osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = ptm->hasAnyGlobbyVar();
+
+	// Globs not allowed in this function.
+	OC_ASSERT(not ptm->hasAnyGlobbyVar());
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
-	if (osg.size() != arity and not has_glob)
+	if (osg.size() != arity)
 		return _pmc.fuzzy_match(hp, hg);
 
 	// Either we're going to take a step; or we aren't.
@@ -506,7 +514,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	           "Impossible situation! BUG!");
 
 	// Place the parent unordered link ("podo") where the child
-	// unordered link can find it. save the old parent on stack.
+	// unordered link can find it. Save the old parent on stack.
 	PermOdo save_podo = _perm_podo;
 	_perm_podo = _perm_odo;
 
@@ -526,9 +534,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	{
 		num_perms = facto(mutation.size());
 		logger().fine("tree_comp RESUME unordered search at %d of %d of term=%s "
-		              "take_step=%d have_more=%d\n",
+		              "take_step=%d have_more=%d step_this=%d\n",
 		              _perm_count[ptm] + 1, num_perms,
-		              ptm->to_string().c_str(), _perm_take_step, _perm_have_more);
+		              ptm->to_string().c_str(), _perm_take_step,
+		              _perm_have_more, ptm == _perm_to_step);
 	}
 #endif
 	do
@@ -547,24 +556,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		              << _perm_count[ptm] +1 << " of " << num_perms
 		              << " of term=" << ptm->to_string();})
 
-		if (has_glob)
+		for (size_t i=0; i<arity; i++)
 		{
-			// Each glob comparison steps the glob state forwards.
-			// Each different permutation has to start with the
-			// same glob state as before. So save and restore state.
-			auto saved_glob_state = _glob_state;
-			match = glob_compare(mutation, osg);
-			_glob_state = saved_glob_state;
-		}
-		else
-		{
-			for (size_t i=0; i<arity; i++)
+			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
 			{
-				if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
-				{
-					match = false;
-					break;
-				}
+				match = false;
+				break;
 			}
 		}
 
@@ -1101,6 +1098,326 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 }
 
 /* ======================================================== */
+/// "Sparse" matching. This handles the situation of an unordered link
+/// that contains a (single) glob node. It's sparse because the
+/// unordered pattern only specifies a handful of terms to be matched;
+/// everything unmatched at the end gets dumped into the glob. The
+/// code handles only one glob, because two or more "don't make sense":
+/// there's just a pile of left-overs; partitioning them ito two or more
+/// sets is a distinct operation. So we don't do that.
+///
+/// The prototypical use for this search is chemistry, where one is
+/// searching for a small functional group inside a molecule, and don't
+/// care about the rest, the moiety (which can be very large; thus
+/// "sparse".)
+//
+// XXX The current implementation is a brute-force search, and is highly
+// inefficient for truly sparse searches. A (vastly) superior search
+// woudld be to obtain the connected components in the search set, and
+// try to ground those.  This avoids the pointless odometer spinning.
+//
+// There's also a bug/limitation: this code does not support nested
+// sparse searches.  It should not be hard to implement: just copy the
+// general algo used in unordered link permutations, which does handle
+// nesting correctly. But right now, no users envisioned, so... not
+// supported.
+
+#ifdef QDEBUG
+static void prt_sparse_odo(const std::vector<int>& sel,
+                           int szg, const char *msg)
+{
+	std::string buf = msg;
+	for (size_t i=0; i<sel.size(); i++)
+	{
+		buf += " ";
+		buf += std::to_string(sel[i]);
+	}
+	buf += " of " + std::to_string(szg);
+	logger().fine("%s", buf.c_str());
+}
+#endif // QDEBUG
+
+
+/// Return true if there are more rotor postions to explore.
+/// Else return false.
+bool PatternMatchEngine::have_more_rotors(const PatternTermPtr& ptm)
+{
+	if (_sparse_glob.end() == _sparse_glob.find(ptm))
+		return false;
+	return true;
+}
+
+/// Initialize the sparse-state odometer for the first time.
+bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
+                                      const Handle& hg)
+{
+	auto ss = _sparse_glob.find(ptm);
+	if (_sparse_glob.end() != ss)
+		return true;
+
+	// If there's no glob, then we are starting from scratch.
+	// Set things up.
+	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SELECT sparse term="
+	                      << ptm->to_string();})
+
+	// XXX TODO The logic here should be updated to resemble that
+	// in curr_perm(), which deals correctly with nested permutations
+	// of unordered patterns. For just right now, we are not
+	// implementing nested sparse links, mostly because I'm too lazy
+	// to write the unit tests. Sorry!  The fix is easy, though: do
+	// what `curr_perm()` does.
+
+	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
+
+	// Fuzzy compares are not supported. hg MUST have an arity at
+	// least as big as the pattern, minus one, because glob might
+	// be empty. Exact glob size bound checked shortly below.
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+	if (osg_size < osp_size-1) return false;
+
+	// Find the glob in the pattern, and everything else.
+	PatternTermPtr glob;
+	PatternTermSeq pats;
+	for (size_t i = 0; i< osp_size; i++)
+	{
+		Type pty = osp[i]->getHandle()->get_type();
+		if (GLOB_NODE == pty)
+		{
+			glob = osp[i];
+			continue;
+		}
+		pats.push_back(osp[i]);
+	}
+
+	// Verify that the glob size bounds are correct.
+	size_t glsz = osg_size - osp_size + 1;
+	const Handle& gloh(glob->getHandle());
+	if (not _variables->is_lower_bound(gloh, glsz))
+		return false;
+	if (not _variables->is_upper_bound(gloh, glsz))
+		return false;
+
+	int szg = (int) osg.size();
+	int szp = (int) pats.size();
+
+#ifdef QDEBUG
+	for (int it=0; it < szp; it++)
+	{
+		const PatternTermPtr& pto = pats[it];
+		logger().fine("Terms for sparse %d pto=%s\n", it,
+		               pto->getHandle()->to_short_string().c_str());
+	}
+	logger().fine("");
+	for (int ig=0; ig < szg; ig++)
+	{
+		const Handle& hog = osg[ig];
+		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
+		               hog->to_short_string().c_str());
+	}
+#endif
+
+	_sparse_take_step = false;
+
+	// Set up the sparse odometer for the first time.
+	Rotors rotors(szp, -1);
+	for (int it=0; it<szp; it++)
+	{
+		logmsg("Setting up sparse rotor %d  (%d)\n", it, -1);
+
+		const PatternTermPtr& pto = pats[it];
+
+		int ig;
+		for (ig = 0; ig < szg; ig++)
+		{
+			solution_push();  // Each tree_compare writes into soln set.
+			logmsg("Test sparse rotor %d with proposed ground %d", it, ig);
+			const Handle& hog = osg[ig];
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
+			if (match)
+			{
+				solution_drop();
+				rotors[it] = ig;
+				logmsg("Sparse rotor setup %d grounded at %d", it, ig);
+				break;
+			}
+			solution_pop();
+		}
+
+		// Staight out of the chute, we got nothing!
+		if (ig >= szg) return false;
+	}
+
+	// Initialize rotor state.
+	_sparse_glob.emplace(ptm, glob->getHandle());
+	_sparse_term.emplace(ptm, pats);
+	_sparse_state.emplace(ptm, rotors);
+
+	DO_LOG(prt_sparse_odo(rotors, szg, "Initialized sparse odo:");)
+
+	return true;
+}
+
+/// Compare the outgoing sets of two trees side-by-side, where
+/// the pattern is unordered and contains at least one GlobNode.
+/// See `explore_sparse_branches()` for more info.
+/// Conceptually similar to `unordered_compare()` or `glob_compare()`
+/// in that we have a particular compare state that should be used
+/// when the comparison is performed.
+bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
+                                        const Handle& hg)
+{
+	bool match = setup_rotors(ptm, hg);
+	if (not match) return false;
+
+	logmsg("Enter sparse_compare");
+
+	// _sparse_state lets use resume where we last left off.
+	Rotors rotors = _sparse_state[ptm];
+	const PatternTermSeq& pats = _sparse_term[ptm];
+
+	const HandleSeq& osg = hg->getOutgoingSet();
+	int szg = (int) osg.size();
+	int szp = (int) pats.size();
+
+	// If not taking a step, set up the grounding as we last knew it.
+	if (not _sparse_take_step)
+	{
+		for (int it=0; it < szp; it++)
+		{
+			const PatternTermPtr& pto = pats[it];
+			const Handle& hog = osg[rotors[it]];
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
+			OC_ASSERT(match, "Internal Error: unable to restore sparse state!");
+		}
+		return record_sparse(ptm, hg);
+	}
+
+	// Set up the grounding as we last knew it; all but the last one.
+	int it;
+	for (it=0; it < szp-1; it++)
+	{
+		const PatternTermPtr& pto = pats[it];
+		const Handle& hog = osg[rotors[it]];
+		solution_push();
+		tree_compare(pto, hog, CALL_SPARSE);
+	}
+	solution_push(); // isolate the last rotor.
+
+	it = szp - 1;
+	DO_LOG(prt_sparse_odo(rotors, szg, "Pre-stepper sparse odo:");)
+	while (0 <= it)
+	{
+		const PatternTermPtr& pto = pats[it];
+		int ig = rotors[it];
+
+		logmsg("Stepping sparse rotor %d (was %d)\n", it, ig);
+
+		// As we revisit each sparse rotor, we want any unordered
+		// links that lie underneath to take a step.  So that the
+		// other permutations get tried, before we move on the next
+		// rotor. (Here, `rotors[it]` is the rotor for `it`.)
+		if (pto->hasUnorderedLink() and _perm_have_more)
+		{
+			_perm_have_more = false;
+			_perm_take_step = true;
+		}
+		else if (pto->hasChoice())
+		{
+			// I think this is correct. But it's untested! XXX verify!
+			_choose_next = true;
+		}
+		else
+			ig++;
+
+		for (; ig < szg; ig++)
+		{
+			solution_push();
+			logmsg("Test sparse rotor=%d w/ gnd by=%d", it, ig);
+			const Handle& hog = osg[ig];
+			bool match = tree_compare(pto, hog, CALL_SPARSE);
+			if (match)
+			{
+				solution_drop();
+				rotors[it] = ig;
+				logmsg("Spun sparse rotor %d to new ground %d", it, ig);
+
+				if (szp - 1 == it)
+				{
+					DO_LOG(prt_sparse_odo(rotors, szg, "Post-step sparse odo:");)
+					for (int j=0; j<szp; j++) solution_drop();
+
+					// Save the new state.
+					_sparse_state.insert_or_assign(ptm, rotors);
+					return record_sparse(ptm, hg);
+				}
+				it ++;
+				rotors[it] = 0;
+				solution_push();
+				break;
+			}
+			solution_pop();
+		}
+
+		// If the above wrapped, back up and try again.
+		if (ig >= szg)
+		{
+			it --;
+			solution_pop();  // discard old current rotor
+			solution_pop();  // discard new current rotor
+			solution_push(); // restart with a clean slate.
+		}
+	}
+
+	logmsg("Odo for sparse is exhausted");
+	_sparse_take_step = false;
+	_sparse_glob.clear();
+	_sparse_state.clear();
+	_sparse_term.clear();
+	return false;
+}
+
+/// Record a successful sparse match. After matching the required terms
+/// in the pattern, everything else left over is pushed into the glob.
+/// Then the term as a whole, and the grounding, are recorded.
+bool PatternMatchEngine::record_sparse(const PatternTermPtr& ptm,
+                                       const Handle& hg)
+{
+	// If we've found a grounding, let's see if the
+	// post-match callback likes this grounding.
+	const Handle& hp = ptm->getHandle();
+	bool match = _pmc.post_link_match(hp, hg);
+	if (not match) return false;
+
+	Handle glob = _sparse_glob[ptm];
+
+	// Everything in osg that did NOT show up in the pattern
+	// must necessarily be a part of the glob.
+	HandleSet gnds;
+	for (const PatternTermPtr& otp: ptm->getOutgoingSet())
+	{
+		const Handle& gnd = var_grounding[otp->getHandle()];
+		if (gnd)
+			gnds.insert(gnd);
+	}
+
+	HandleSeq rest;
+	for (const Handle& otg: hg->getOutgoingSet())
+	{
+		if (gnds.end() != gnds.find(otg)) continue;
+		rest.push_back(otg);
+	}
+
+	Handle glp(createLink(std::move(rest), UNORDERED_LINK));
+	var_grounding[glob] = glp;
+
+	// If we've found a grounding, record it.
+	record_grounding(ptm, hg);
+	return true;
+}
+
+/* ======================================================== */
 /**
  * tree_compare compares two trees, side-by-side.
  *
@@ -1210,6 +1527,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
+	// If ptm is unordered and has a glob in it, then a sparse compare.
+	if (ptm->hasGlobbyVar())
+		return sparse_compare(ptm, hg);
+
+	// No glob vars in ptm. There might still be some deeper in.
 	return unorder_compare(ptm, hg);
 }
 
@@ -1225,7 +1547,10 @@ bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
 	if (term->hasAnyGlobbyVar())
 		found = explore_glob_branches(term, hg, clause);
 	else if (term->hasUnorderedLink())
+	{
+		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
 		found = explore_odometer(term, hg, clause);
+	}
 	else
 		found = explore_type_branches(term, hg, clause);
 
@@ -1452,11 +1777,15 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 	return found;
 }
 
-/// explore_glob_branches -- explore glob grounding alternatives
+/// explore_glob_branches -- explore glob grounding alternatives.
 ///
-/// Please see the docs for `explore_unordered_branches` for the general
-/// idea. In this particular method, all possible alternatives for
-/// grounding glob nodes are explored.
+/// Given a pattern containing one or more globs, this explores all
+/// possible alternative groundings for those glob nodes.
+///
+/// This only works for the case where the pattern is an ordered link.
+/// When the pattern is unordered, a completely different enumeration
+/// strategy is required. See `explore_sparse_branches()` for that case.
+///
 bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
@@ -1520,17 +1849,22 @@ bool PatternMatchEngine::explore_odometer(const PatternTermPtr& ptm,
 /// explore_unordered_branches -- explore UnorderedLink alternatives.
 ///
 /// Every UnorderedLink of arity N presents N-factorial different
-/// grounding possbilities, corresponding to different permutations
+/// grounding possibilities, corresponding to different permutations
 /// of the UnorderedLink.  Each permutation must be explored. Thus,
 /// this can be thought of as a branching of exploration possibilities,
 /// each branch corresponding to a different permutation.  (If you
-/// know algebra, then think of the "free object" (e.g. theh "free
+/// know algebra, then think of the "free object" (e.g. the "free
 /// group") where alternative branches are "free", unconstrained.)
 ///
 /// For each possible branch, the current state is saved, the branch
 /// is explored, then the state is popped. If the exploration yielded
 /// nothing, then the next branch is explored, until exhaustion of the
 /// possibilities.  Upon exhaustion, it returns to the caller.
+///
+/// This only applies when the UnorderedLink pattern has a fixed arity,
+/// i.e. has no glob nodes in it to soak up any remaining unmatched
+/// subterms. When there is a glob node, the search takes on a different
+/// form; see `explore_sparse_branches()`.
 ///
 bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
                                                     const Handle& hg,
@@ -1554,6 +1888,58 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 	_perm_take_step = false;
 	_perm_have_more = false;
 	logmsg("No more unordered permutations");
+
+	return false;
+}
+
+/// explore_sparse_branches -- explore "sparse" unordered links.
+///
+/// When an UnorderedLink has a glob in it, the manner of iterating over
+/// all possbile alternative groundings is different. In this case, one
+/// must try to ground each of the subterms of the term in every
+/// possible way, given the contents of `hg`, and then take everything
+/// left over in `hg` and jam  it into the glob. This differs from the
+/// unordered/odometer search, which only works for fixed-arity
+/// groundings, and also from the glob search, whoch works only for
+/// ordered links.
+///
+/// Note: it does not make sense for an unordered pattern to have more
+/// than one glob in it! The one glob soaks up all the unmatched
+/// left-overs; having two only confuses the situation.
+///
+/// This is "sparse" in the sense that the glob might end up being huge,
+/// containing everything left-over that wasn't in the pattern. For
+/// the case of chemistry informatics, the pattern will specify the
+/// functional group, and the glob will end up holding the moiety that
+/// is not a part of the functional group.
+///
+/// XXX FIXME: Right now, this code handles graphs that have only one
+/// single sparse search.   Nested sparse searches are not supported;
+/// to implement those, its "easy": implement the same flow control as
+/// the unordered_explore steppers. I'm lzay, today, so I am not doing
+/// this just right now.
+///
+bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
+                                                 const Handle& hg,
+                                                 const PatternTermPtr& clause)
+{
+	// XXX TODO FIXME. The ptm needs to be decomposed into connected
+	// components. Then every possble permutation of these connected
+	// components must be walked over. For now, we assume only one.
+	do
+	{
+		// If the pattern was satisfied, then we are done for good.
+		if (explore_single_branch(ptm, hg, clause))
+			return true;
+
+		logmsg("Sparse explore: Step to next odo");
+
+		// If we are here, there was no match.
+		// On the next go-around, take a step.
+		_sparse_take_step = true;
+	}
+	while (have_more_rotors(ptm));
+	_sparse_take_step = false;
 
 	return false;
 }
@@ -1596,7 +1982,14 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 
 	// Unordered links have permutations to explore.
 	if (ptm->isUnorderedLink())
+	{
+		// If ptm is unordered and has a glob in it, then...
+		if (ptm->hasGlobbyVar())
+			return explore_sparse_branches(ptm, hg, clause);
+
+		// No glob vars in ptm. There might still be some deeper in.
 		return explore_unordered_branches(ptm, hg, clause);
+	}
 
 	return explore_single_branch(ptm, hg, clause);
 }

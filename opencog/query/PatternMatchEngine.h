@@ -90,7 +90,7 @@ private:
 
 	// -------------------------------------------
 	// ChoiceLink state management
-	// Very similar to permutation state management.
+	// Similar to permutation state management.
 	typedef std::map<PatternTermPtr, size_t> ChoiceState;
 
 	ChoiceState _choice_state;
@@ -105,7 +105,7 @@ private:
 
 	// -------------------------------------------
 	// Unordered Link support
-	// Very similar to ChoiceLink state management.
+	// Similar to ChoiceLink state management.
 	typedef PatternTermSeq Permutation;
 	typedef std::map<PatternTermPtr, Permutation> PermState; // alt: ChoiceState
 	typedef std::map<PatternTermPtr, int> PermCount;
@@ -162,6 +162,23 @@ private:
 	// std::unordered_map<PatternTermSeq, GlobState> _glob_state;
 
 	// --------------------------------------------
+	// Sparse matching state management
+	// Similar to choice, unordered and glob state management.
+	typedef std::vector<int> Rotors;
+	typedef std::map<PatternTermPtr, Rotors> SparseState;
+	typedef std::map<PatternTermPtr, Handle> SparseGlob;
+	typedef std::map<PatternTermPtr, PatternTermSeq> SparseTerm;
+
+	SparseState _sparse_state;
+	SparseGlob _sparse_glob;
+	SparseTerm _sparse_term;
+	bool _sparse_take_step;
+
+	bool setup_rotors(const PatternTermPtr&, const Handle&);
+	bool have_more_rotors(const PatternTermPtr&);
+	bool record_sparse(const PatternTermPtr&, const Handle&);
+
+	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
 	bool do_next_clause(void);
 	bool clause_accepted;
@@ -169,7 +186,7 @@ private:
 	// --------------------------------------------
 	// State that manages the next PresentLink subterm to be grounded.
 	// Similar to the next-clause, above, and someday should be unified
-	// with it. XXX Needs to move to the Mixin class... XX FIXME.
+	// with it. XXX Needs to move to the Mixin class... XXX FIXME.
 
 	bool next_untried_present(const PatternTermPtr&,
 	                          const PatternTermPtr&,
@@ -230,6 +247,7 @@ private:
 	typedef enum {
 		CALL_ORDER,
 		CALL_GLOB,
+		CALL_SPARSE,
 		CALL_UNORDER,
 		CALL_PRESENT,
 		CALL_CHOICE,
@@ -245,6 +263,7 @@ private:
 	bool choice_compare(const PatternTermPtr&, const Handle&);
 	bool ordered_compare(const PatternTermPtr&, const Handle&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&);
+	bool sparse_compare(const PatternTermPtr&, const Handle&);
 	bool glob_compare(const PatternTermSeq&, const HandleSeq&);
 
 	// -------------------------------------------
@@ -268,6 +287,8 @@ private:
 	                             const PatternTermPtr&);
 	bool explore_glob_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
+	bool explore_sparse_branches(const PatternTermPtr&, const Handle&,
+	                             const PatternTermPtr&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_odometer(const PatternTermPtr&, const Handle&,
