@@ -1176,6 +1176,23 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
+#ifdef QDEBUG
+	int szp = (int) pats.size();
+	for (int it=0; it < szp; it++)
+	{
+		const PatternTermPtr& pto = pats[it];
+		logger().fine("Terms for sparse %d pto=%s\n", it,
+		               pto->getHandle()->to_short_string().c_str());
+	}
+	logger().fine("");
+	for (int ig=0; ig < szg; ig++)
+	{
+		const Handle& hog = osg[ig];
+		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
+		               hog->to_short_string().c_str());
+	}
+#endif
+
 	_sparse_take_step = false;
 
 	// Set up the sparse odometer for the first time.
@@ -1207,24 +1224,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	_sparse_term.emplace(ptm, pats);
 	_sparse_state.emplace(ptm, rotors);
 
-#ifdef QDEBUG
-	prt_sparse_odo(rotors, szg, "Initialized sparse odo:");
-
-	int szp = (int) pats.size();
-	for (int it=0; it < szp; it++)
-	{
-		const PatternTermPtr& pto = pats[it];
-		logger().fine("Terms for sparse %d pto=%s\n", it,
-		               pto->getHandle()->to_short_string().c_str());
-	}
-	logger().fine("");
-	for (int ig=0; ig < szg; ig++)
-	{
-		const Handle& hog = osg[ig];
-		logger().fine("Gnds for sparse are %d gnd=%s\n", ig,
-		               hog->to_short_string().c_str());
-	}
-#endif
+	DO_LOG(prt_sparse_odo(rotors, szg, "Initialized sparse odo:");)
 
 	return true;
 }
