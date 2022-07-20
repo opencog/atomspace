@@ -1274,9 +1274,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		tree_compare(pto, hog, CALL_SPARSE);
 	}
 
-	// The `refilling` flag prevents the odometer from getting stuck
-	// in an inf loop of shifting the rotors up and down.
-	bool refilling = false;
 	it = szp - 1;
 	DO_LOG(prt_sparse_odo(rotors, szg, "Pre-stepper sparse odo:");)
 	while (0 <= it)
@@ -1315,7 +1312,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 					return record_sparse(ptm, hg);
 				}
 				it ++;
-				refilling = true;
 				rotors[it] = 0;
 				solution_push();
 				break;
@@ -1325,7 +1321,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		// If the above wrapped, back up and try again.
 		if (ig >= szg)
 		{
-			if (refilling) break;
 			it --;
 			if (0 <= it) solution_pop();
 		}
@@ -1334,6 +1329,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	logmsg("Odo for sparse is exhausted");
 	_sparse_take_step = false;
 	_sparse_glob.clear();
+	_sparse_state.clear();
+	_sparse_term.clear();
 	return false;
 }
 
