@@ -1,7 +1,7 @@
 ;
 ; sparse-list.scm
 ;
-; Same as sparse.scm but uses ListLinks.
+; Similar to sparse.scm, but uses ListLinks.
 ;
 
 (use-modules (opencog))
@@ -22,26 +22,6 @@
 			(List (Variable "$vC") (Variable "$vB"))
 			(List (Variable "$vD") (Variable "$vC"))
 			(Glob "rest"))
-	))
-
-(define est-uni
-	(GetLink
-		(VariableList
-			(TypedVariable (Variable "$vA") (Type 'Concept))
-			(TypedVariable (Variable "$vB") (Type 'Predicate))
-			(TypedVariable (Variable "$vC") (Type 'Any))
-
-			(Variable "$vD")
-			(Glob "rest"))
-
-		(And
-			(Present
-				(Unordered
-					(List (Variable "$vB") (Variable "$vA"))
-					(List (Variable "$vC") (Variable "$vB"))
-					(List (Variable "$vD") (Variable "$vC"))
-					(Glob "rest")))
-			(Not (Identical (Variable "$vD") (Variable "$vB"))))
 	))
 
 (Unordered
@@ -77,33 +57,13 @@
 			(Glob "rest")
 		)))
 
-(define palin-disambig
-	(GetLink
-		(VariableList
-			(TypedVariable (Variable "$vA") (Type 'Predicate))
-			(TypedVariable (Variable "$vB") (Type 'Concept))
-			(TypedVariable (Variable "$vC") (Type 'Any))
-
-			(Variable "$vD")
-			(Glob "rest"))
-
-		(And
-			(Present
-				(Unordered
-					(List (Variable "$vB") (Variable "$vA"))
-					(List (Variable "$vC") (Variable "$vB"))
-					(List (Variable "$vD") (Variable "$vC"))
-					(Glob "rest")))
-			(Not (Identical (Variable "$vD") (Variable "$vB"))))
-	))
-
 (Unordered
 	(List (Concept "BB") (Predicate "AA"))
 	(List (Any "CC") (Concept "BB"))
 	(List (Procedure "DD") (Any "CC"))
-	(List (Any "EE") (Procedure "DD"))
-	(List (Concept "FF") (Any "EE"))
-	(List (Predicate "GG") (Concept "FF"))
+	(List (Procedure "DD") (Any "EE"))
+	(List (Any "EE") (Concept "FF"))
+	(List (Concept "FF") (Predicate "GG"))
 )
 
 ; ---------------------------------------------------------------------
