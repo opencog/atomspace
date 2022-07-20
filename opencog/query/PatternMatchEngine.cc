@@ -1291,6 +1291,11 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			_perm_have_more = false;
 			_perm_take_step = true;
 		}
+		else if (pto->hasChoice())
+		{
+			// I think this is correct. But it's untested! XXX verify!
+			_choose_next = true;
+		}
 		else
 			ig++;
 
