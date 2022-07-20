@@ -1274,15 +1274,24 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		tree_compare(pto, hog, CALL_SPARSE);
 	}
 
-	DO_LOG(prt_sparse_odo(select, szg, "Pre-stepper sparse odo:");)
 	it = szp - 1;
+	DO_LOG(prt_sparse_odo(select, szg, "Pre-stepper sparse odo:");)
 	while (0 <= it)
 	{
 		const PatternTermPtr& pto = pats[it];
 		int ig = select[it];
-		ig ++;
 
-		logmsg("Stepping sparse odo %d (was %d)\n", it, ig-1);
+		// As we revisit each sparse rotor, we want any unordered
+		// links that lie underneath to take a step.  So that the
+		// other permutations get tried, before we move on the next
+		// rotor. (Here, `select[it]` is the rotor for `it`.
+		if (pto->hasUnorderedLink() and _perm_have_more)
+		{
+			_perm_have_more = false;
+			_perm_take_step = true;
+		}
+
+		logmsg("Stepping sparse odo %d (was %d)\n", it, ig);
 		for (; ig < szg; ig++)
 		{
 			logmsg("Test sparse rotor=%d w/ gnd by=%d", it, ig);
@@ -1303,7 +1312,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 					return record_sparse(ptm, hg);
 				}
 				it ++;
-				select[it] = -1;
+				select[it] = 0;
 				solution_push();
 				break;
 			}
