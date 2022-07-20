@@ -1274,6 +1274,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		solution_push();
 		tree_compare(pto, hog, CALL_SPARSE);
 	}
+	solution_push(); // isolate the last rotor.
 
 	it = szp - 1;
 	DO_LOG(prt_sparse_odo(rotors, szg, "Pre-stepper sparse odo:");)
@@ -1281,6 +1282,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	{
 		const PatternTermPtr& pto = pats[it];
 		int ig = rotors[it];
+
+		logmsg("Stepping sparse odo %d (was %d)\n", it, ig);
 
 		// As we revisit each sparse rotor, we want any unordered
 		// links that lie underneath to take a step.  So that the
@@ -1299,7 +1302,6 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		else
 			ig++;
 
-		logmsg("Stepping sparse odo %d (was %d)\n", it, ig);
 		for (; ig < szg; ig++)
 		{
 			logmsg("Test sparse rotor=%d w/ gnd by=%d", it, ig);
@@ -1313,7 +1315,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 				if (szp - 1 == it)
 				{
 					DO_LOG(prt_sparse_odo(rotors, szg, "Post-step sparse odo:");)
-					for (int j=0; j<szp-1; j++) solution_drop();
+					for (int j=0; j<szp; j++) solution_drop();
 
 					// Save the new state.
 					_sparse_state.insert_or_assign(ptm, rotors);
@@ -1330,7 +1332,9 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		if (ig >= szg)
 		{
 			it --;
-			if (0 <= it) solution_pop();
+			solution_pop();  // discard old current rotor
+			solution_pop();  // discard new current rotor
+			solution_push(); // restart with a clean slate.
 		}
 	}
 
