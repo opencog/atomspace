@@ -48,6 +48,8 @@ class SparseUTest :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_glob(void);
+		void test_palin(void);
+		void test_palin_dab(void);
 };
 
 /*
@@ -92,12 +94,40 @@ void SparseUTest::test_glob(void)
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Unordered links with a palindrmoe glob in it
+void SparseUTest::test_palin(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/sparse.scm\")");
+	Handle result;
+
 	// --------------------------------------------
 	// Result should be a SetLink w/ 4 solutions
 	result = eval->eval_h("(cog-execute! palin)");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Unordered links with a palindrmoe glob in it
+void SparseUTest::test_palin_dab(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/sparse.scm\")");
+	Handle result;
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2 solutions
