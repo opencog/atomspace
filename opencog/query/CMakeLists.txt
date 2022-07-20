@@ -13,7 +13,7 @@ ADD_LIBRARY(query-engine
 )
 
 # Optionally enable debug logging for the pattern matcher.
-TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DQDEBUG=1)
+# TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DQDEBUG=1)
 
 # Optionally enable multi-threaded pattern matcher. Experimental.
 # TARGET_COMPILE_OPTIONS(query-engine PRIVATE -DUSE_THREADED_PATTERN_ENGINE=1)
