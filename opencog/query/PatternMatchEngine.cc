@@ -1176,8 +1176,10 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-#ifdef QDEBUG
+	int szg = (int) osg.size();
 	int szp = (int) pats.size();
+
+#ifdef QDEBUG
 	for (int it=0; it < szp; it++)
 	{
 		const PatternTermPtr& pto = pats[it];
@@ -1196,9 +1198,8 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	_sparse_take_step = false;
 
 	// Set up the sparse odometer for the first time.
-	int szg = (int) osg.size();
-	Rotors rotors(pats.size(), -1);
-	for (size_t i=0; i< pats.size(); i++)
+	Rotors rotors(szp, -1);
+	for (size_t i=0; i<szp; i++)
 	{
 		const PatternTermPtr& pto = pats[i];
 
@@ -1290,6 +1291,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			_perm_have_more = false;
 			_perm_take_step = true;
 		}
+		else
+			ig++;
 
 		logmsg("Stepping sparse odo %d (was %d)\n", it, ig);
 		for (; ig < szg; ig++)
