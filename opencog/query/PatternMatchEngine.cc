@@ -1199,19 +1199,22 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 
 	// Set up the sparse odometer for the first time.
 	Rotors rotors(szp, -1);
-	for (size_t i=0; i<szp; i++)
+	for (int it=0; it<szp; it++)
 	{
-		const PatternTermPtr& pto = pats[i];
+		logmsg("Setting up sparse rotor %d  (%d)\n", it, -1);
+
+		const PatternTermPtr& pto = pats[it];
 
 		int ig;
 		for (ig = 0; ig < szg; ig++)
 		{
+			logmsg("Test sparse rotor %d with proposed ground %d", it, ig);
 			const Handle& hog = osg[ig];
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
-				rotors[i] = ig;
-				logmsg("Sparse setup term %d grounded at %d", (int) i, ig);
+				rotors[it] = ig;
+				logmsg("Sparse rotor setup %d grounded at %d", it, ig);
 				break;
 			}
 		}
@@ -1283,7 +1286,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		const PatternTermPtr& pto = pats[it];
 		int ig = rotors[it];
 
-		logmsg("Stepping sparse odo %d (was %d)\n", it, ig);
+		logmsg("Stepping sparse rotor %d (was %d)\n", it, ig);
 
 		// As we revisit each sparse rotor, we want any unordered
 		// links that lie underneath to take a step.  So that the
@@ -1310,7 +1313,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			if (match)
 			{
 				rotors[it] = ig;
-				logmsg("Iterated sparse term %d to new ground %d", it, ig);
+				logmsg("Spun sparse rotor %d to new ground %d", it, ig);
 
 				if (szp - 1 == it)
 				{
