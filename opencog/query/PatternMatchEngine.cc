@@ -1208,15 +1208,18 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 		int ig;
 		for (ig = 0; ig < szg; ig++)
 		{
+			solution_push();  // Each tree_compare writes into soln set.
 			logmsg("Test sparse rotor %d with proposed ground %d", it, ig);
 			const Handle& hog = osg[ig];
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
+				solution_drop();
 				rotors[it] = ig;
 				logmsg("Sparse rotor setup %d grounded at %d", it, ig);
 				break;
 			}
+			solution_pop();
 		}
 
 		// Staight out of the chute, we got nothing!
@@ -1307,11 +1310,13 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 
 		for (; ig < szg; ig++)
 		{
+			solution_push();
 			logmsg("Test sparse rotor=%d w/ gnd by=%d", it, ig);
 			const Handle& hog = osg[ig];
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
+				solution_drop();
 				rotors[it] = ig;
 				logmsg("Spun sparse rotor %d to new ground %d", it, ig);
 
@@ -1329,6 +1334,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 				solution_push();
 				break;
 			}
+			solution_pop();
 		}
 
 		// If the above wrapped, back up and try again.
