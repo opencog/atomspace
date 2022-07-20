@@ -164,8 +164,8 @@ private:
 	// --------------------------------------------
 	// Sparse matching state management
 	// Similar to choice, unordered and glob state management.
-	typedef std::vector<int> Selection;
-	typedef std::map<PatternTermPtr, Selection> SparseState;
+	typedef std::vector<int> Rotors;
+	typedef std::map<PatternTermPtr, Rotors> SparseState;
 	typedef std::map<PatternTermPtr, Handle> SparseGlob;
 	typedef std::map<PatternTermPtr, PatternTermSeq> SparseTerm;
 
@@ -174,8 +174,8 @@ private:
 	SparseTerm _sparse_term;
 	bool _sparse_take_step;
 
-	bool setup_select(const PatternTermPtr&, const Handle&);
-	bool have_select(const PatternTermPtr&);
+	bool setup_rotors(const PatternTermPtr&, const Handle&);
+	bool have_more_rotors(const PatternTermPtr&);
 	bool record_sparse(const PatternTermPtr&, const Handle&);
 
 	// --------------------------------------------

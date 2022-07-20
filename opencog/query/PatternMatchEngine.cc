@@ -1115,17 +1115,17 @@ static void prt_sparse_odo(const std::vector<int>& sel,
 #endif // QDEBUG
 
 
-/// Return true if there are more sparse selections to explore.
+/// Return true if there are more rotor postions to explore.
 /// Else return false.
-bool PatternMatchEngine::have_select(const PatternTermPtr& ptm)
+bool PatternMatchEngine::have_more_rotors(const PatternTermPtr& ptm)
 {
 	if (_sparse_glob.end() == _sparse_glob.find(ptm))
 		return false;
 	return true;
 }
 
-/// Initialize the selection odometer for the first time.
-bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
+/// Initialize the sparse-state odometer for the first time.
+bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
                                       const Handle& hg)
 {
 	auto ss = _sparse_glob.find(ptm);
@@ -1180,7 +1180,7 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 
 	// Set up the sparse odometer for the first time.
 	int szg = (int) osg.size();
-	Selection select(pats.size(), -1);
+	Rotors rotors(pats.size(), -1);
 	for (size_t i=0; i< pats.size(); i++)
 	{
 		const PatternTermPtr& pto = pats[i];
@@ -1192,7 +1192,7 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
-				select[i] = ig;
+				rotors[i] = ig;
 				logmsg("Sparse setup term %d grounded at %d", (int) i, ig);
 				break;
 			}
@@ -1202,13 +1202,13 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 		if (ig >= szg) return false;
 	}
 
-	// Initialize selection state.
+	// Initialize rotor state.
 	_sparse_glob.emplace(ptm, glob->getHandle());
 	_sparse_term.emplace(ptm, pats);
-	_sparse_state.emplace(ptm, select);
+	_sparse_state.emplace(ptm, rotors);
 
 #ifdef QDEBUG
-	prt_sparse_odo(select, szg, "Initialized sparse odo:");
+	prt_sparse_odo(rotors, szg, "Initialized sparse odo:");
 
 	int szp = (int) pats.size();
 	for (int it=0; it < szp; it++)
@@ -1238,13 +1238,13 @@ bool PatternMatchEngine::setup_select(const PatternTermPtr& ptm,
 bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
                                         const Handle& hg)
 {
-	bool match = setup_select(ptm, hg);
+	bool match = setup_rotors(ptm, hg);
 	if (not match) return false;
 
 	logmsg("Enter sparse_compare");
 
 	// _sparse_state lets use resume where we last left off.
-	Selection select = _sparse_state[ptm];
+	Rotors rotors = _sparse_state[ptm];
 	const PatternTermSeq& pats = _sparse_term[ptm];
 
 	const HandleSeq& osg = hg->getOutgoingSet();
@@ -1257,7 +1257,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		for (int it=0; it < szp; it++)
 		{
 			const PatternTermPtr& pto = pats[it];
-			const Handle& hog = osg[select[it]];
+			const Handle& hog = osg[rotors[it]];
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			OC_ASSERT(match, "Internal Error: unable to restore sparse state!");
 		}
@@ -1269,22 +1269,22 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	for (it=0; it < szp-1; it++)
 	{
 		const PatternTermPtr& pto = pats[it];
-		const Handle& hog = osg[select[it]];
+		const Handle& hog = osg[rotors[it]];
 		solution_push();
 		tree_compare(pto, hog, CALL_SPARSE);
 	}
 
 	it = szp - 1;
-	DO_LOG(prt_sparse_odo(select, szg, "Pre-stepper sparse odo:");)
+	DO_LOG(prt_sparse_odo(rotors, szg, "Pre-stepper sparse odo:");)
 	while (0 <= it)
 	{
 		const PatternTermPtr& pto = pats[it];
-		int ig = select[it];
+		int ig = rotors[it];
 
 		// As we revisit each sparse rotor, we want any unordered
 		// links that lie underneath to take a step.  So that the
 		// other permutations get tried, before we move on the next
-		// rotor. (Here, `select[it]` is the rotor for `it`.
+		// rotor. (Here, `rotors[it]` is the rotor for `it`.)
 		if (pto->hasUnorderedLink() and _perm_have_more)
 		{
 			_perm_have_more = false;
@@ -1299,20 +1299,20 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
-				select[it] = ig;
+				rotors[it] = ig;
 				logmsg("Iterated sparse term %d to new ground %d", it, ig);
 
 				if (szp - 1 == it)
 				{
-					DO_LOG(prt_sparse_odo(select, szg, "Post-step sparse odo:");)
+					DO_LOG(prt_sparse_odo(rotors, szg, "Post-step sparse odo:");)
 					for (int j=0; j<szp-1; j++) solution_drop();
 
 					// Save the new state.
-					_sparse_state.insert_or_assign(ptm, select);
+					_sparse_state.insert_or_assign(ptm, rotors);
 					return record_sparse(ptm, hg);
 				}
 				it ++;
-				select[it] = 0;
+				rotors[it] = 0;
 				solution_push();
 				break;
 			}
@@ -1892,7 +1892,7 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 		// On the next go-around, take a step.
 		_sparse_take_step = true;
 	}
-	while (have_select(ptm));
+	while (have_more_rotors(ptm));
 	_sparse_take_step = false;
 
 	return false;
