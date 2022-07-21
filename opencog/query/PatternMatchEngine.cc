@@ -1537,27 +1537,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
-/* ... just search ...  */
-bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
-                                               const Handle& hg,
-                                               const PatternTermPtr& clause)
-{
-	logmsg("Begin exploring term:", term);
-	bool found;
-	if (term->hasAnyGlobbyVar())
-		found = explore_glob_branches(term, hg, clause);
-	else if (term->hasUnorderedLink())
-	{
-		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
-		found = explore_odometer(term, hg, clause);
-	}
-	else
-		found = explore_type_branches(term, hg, clause);
-
-	logmsg("Finished exploring term:", term, found);
-	return found;
-}
-
 /// explore_up_branches -- look for groundings for the given term.
 ///
 /// The argument passed to this function is a clause that needs to be
@@ -1748,6 +1727,14 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 
 	logmsg("Found upward soln =", found);
 	return found;
+}
+
+bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
+                                                   const Handle& hg,
+                                                   const PatternTermPtr& clause)
+{
+	OC_ASSERT(false, "Not implemented!");
+	return false;
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm`
@@ -1969,14 +1956,6 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 	return false;
 }
 
-bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
-                                                   const Handle& hg,
-                                                   const PatternTermPtr& clause)
-{
-	OC_ASSERT(false, "Not implemented!");
-	return false;
-}
-
 /// explore_type_branches -- perform exploration of alternatives.
 ///
 /// This dispatches exploration of different grounding alternatives to
@@ -2025,6 +2004,29 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	}
 
 	return explore_single_branch(ptm, hg, clause);
+}
+
+/* ... just search ...  */
+bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
+                                               const Handle& hg,
+                                               const PatternTermPtr& clause)
+{
+	logmsg("Begin exploring term:", term);
+	bool found;
+	if (term->hasAnyGlobbyVar())
+		found = explore_glob_branches(term, hg, clause);
+
+	else if (term->hasUnorderedLink())
+	{
+		// The asert case is handled immediately above, in explore_type_branches
+		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
+		found = explore_odometer(term, hg, clause);
+	}
+	else
+		found = explore_type_branches(term, hg, clause);
+
+	logmsg("Finished exploring term:", term, found);
+	return found;
 }
 
 /// See explore_unordered_branches() for a general explanation.
