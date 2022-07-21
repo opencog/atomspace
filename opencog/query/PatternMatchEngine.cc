@@ -1586,8 +1586,17 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
                                              const PatternTermPtr& clause)
 {
-	// Check if the pattern has globs in it.
 	const PatternTermPtr& parent(ptm->getParent());
+
+	if (clause == parent and clause->hasEvaluatable())
+		OC_ASSERT(false, "Error: Unexpected situation!\n");
+
+	// We may have walked up to the top of an evaluatable term.
+	// At this time, we only handle IdenticalLinks.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
+	// Check if the pattern has globs in it.
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 
@@ -1666,23 +1675,13 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 		return explore_type_branches(parent, hup, clause);
 	}
 
-	// We may have walked up to the top of an evaluatable term.
-	// At this time, we only handle IdenticalLinks.
-	if (parent->isIdentical())
-		return explore_clause_identical(ptm, hg, clause);
-
-	if (clause == parent and clause->hasEvaluatable())
-	{
-		OC_ASSERT(false, "Error: Unexpected situation!\n");
-	}
-
 	// If we are here, then somehow the upward-term is not unique, and
 	// we have to explore the incoming set of the ground to see which
 	// (if any) of the incoming set satsisfies the parent term.
 
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at ordered term = "
 	                      << parent->getQuote()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
@@ -1717,19 +1716,9 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 
-	// We may have walked up to the top of an evaluatable term.
-	// At this time, we only handle IdenticalLinks.
-	if (parent->isIdentical())
-		return explore_clause_identical(ptm, hg, clause);
-
-	if (clause == parent and clause->hasEvaluatable())
-	{
-		OC_ASSERT(false, "Error: Unexpected situation!\n");
-	}
-
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at maybe disordered term = "
 	                      << parent->getQuote()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
