@@ -1586,17 +1586,31 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
                                              const PatternTermPtr& clause)
 {
-	// Check if the pattern has globs in it.
 	const PatternTermPtr& parent(ptm->getParent());
+
+	if (clause == parent and clause->hasEvaluatable())
+		OC_ASSERT(false, "Error: Unexpected situation!\n");
+
+	// We may have walked up to the top of an evaluatable term.
+	// At this time, we only handle IdenticalLinks.
+	if (parent->isIdentical())
+		return explore_clause_identical(ptm, hg, clause);
+
+	// Check if the pattern has globs in it.
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
-	return explore_upvar_branches(ptm, hg, clause);
+
+	if (ptm->hasUnorderedLink())
+		return explore_upund_branches(ptm, hg, clause);
+
+	return explore_upord_branches(ptm, hg, clause);
 }
 
-/// Same as explore_up_branches(), handles the case where `ptm` has no
-/// GlobNodes in it. This is a straightforward loop over the incoming
-/// set, and nothing more.
-bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
+/// Same as explore_up_branches(), handles the case where `ptm` is an
+/// ordered node with no GlobNodes in it. This is a straightforward
+/// loop over the incoming set, and nothing more. Well, something more;
+/// it includes an optimization for a fast path up the search chain.
+bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
                                                 const Handle& hg,
                                                 const PatternTermPtr& clause)
 {
@@ -1604,6 +1618,7 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	const PatternTermPtr& parent(ptm->getParent());
 	Type t = parent->getHandle()->get_type();
 
+	// Optimization. Short-circuit the search.
 	// If the parent pattern term doesn't have any other bound
 	// variables, aside from `ptm` which is grounded by `hg`,
 	// then we can immediately and directly move upwards. Do this
@@ -1624,52 +1639,40 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 	// immediately jump to the EvaluationLink, without any further ado.
 	// Specifically, there is no need to search the incoming set of `hg`;
 	// just build up the EvaluationLink and offer it as the ground.
-	if (not ptm->hasUnorderedLink())
+
+	bool need_search = false;
+	HandleSeq oset;
+	oset.reserve(parent->getArity());
+	for (const PatternTermPtr& pp: parent->getOutgoingSet())
 	{
-		bool need_search = false;
-		HandleSeq oset;
-		oset.reserve(parent->getArity());
-		for (const PatternTermPtr& pp: parent->getOutgoingSet())
+		if (pp == ptm)
+			oset.push_back(hg);
+		else if (pp->hasAnyBoundVariable())
 		{
-			if (pp == ptm)
-				oset.push_back(hg);
-			else if (pp->hasAnyBoundVariable())
+			// If we are here, then `parent` has another
+			// variable, besides `ptm`. In some (rare?)
+			// cases, we might already know how it's grounded.
+			// Is it a waste of CPU time to check? I dunno.
+			auto gnd(var_grounding.find(pp->getHandle()));
+			if (gnd == var_grounding.end())
 			{
-				// If we are here, then `parent` has another
-				// variable, besides `ptm`. In some (rare?)
-				// cases, we might already know how it's grounded.
-				// Is it a waste of CPU time to check? I dunno.
-				auto gnd(var_grounding.find(pp->getHandle()));
-				if (gnd == var_grounding.end())
-				{
-					// Oh no! Abandon ship!
-					need_search = true;
-					break;
-				}
-				oset.push_back(gnd->second);
+				// Oh no! Abandon ship!
+				need_search = true;
+				break;
 			}
-			else
-				oset.push_back(pp->getHandle());
+			oset.push_back(gnd->second);
 		}
-		if (not need_search)
-		{
-			// Yuck. What we really want to do here is to find out
-			// if `Link(t, oset)` is in the incoming set of `hg`. But
-			// there isn't any direct way of doing this (at this time).
-			Handle hup(_pmc.get_link(hg, t, std::move(oset)));
-			if (nullptr == hup) return false;
-			return explore_type_branches(parent, hup, clause);
-		}
+		else
+			oset.push_back(pp->getHandle());
 	}
-
-	// We may have walked up to the top of an evaluatable term.
-	// At this time, we only handle IdenticalLinks.
-	if (parent->isIdentical())
-		return explore_clause_identical(ptm, hg, clause);
-
-	if (clause == parent and clause->hasEvaluatable())
+	if (not need_search)
 	{
-		OC_ASSERT(false, "Error: Unexpected situation!\n");
+		// Yuck. What we really want to do here is to find out
+		// if `Link(t, oset)` is in the incoming set of `hg`. But
+		// there isn't any direct way of doing this (at this time).
+		Handle hup(_pmc.get_link(hg, t, std::move(oset)));
+		if (nullptr == hup) return false;
+		return explore_type_branches(parent, hup, clause);
 	}
 
 	// If we are here, then somehow the upward-term is not unique, and
@@ -1678,34 +1681,48 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward at term = "
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at ordered term = "
 	                      << parent->getQuote()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
-	// If there aren't any unordered links anywhere, just explore
-	// directly upwards.
-	if (not ptm->hasUnorderedLink())
+	// Just explore directly upwards.
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
 	{
-		bool found = false;
-		for (size_t i = 0; i < sz; i++)
-		{
-			DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-			                      << " at term=" << parent->to_string()
-			                      << " propose=" << iset[i]->to_string();})
+		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		                      << " at term=" << parent->to_string()
+		                      << " propose=" << iset[i]->to_string();})
 
-			found = explore_type_branches(parent, iset[i], clause);
-			if (found) break;
-		}
-
-		logmsg("Found upward soln =", found);
-		return found;
+		found = explore_type_branches(parent, iset[i], clause);
+		if (found) break;
 	}
 
-	// If we are here, then there's at least one (and maybe more)
-	// unordered links, somewhere at this level, next to us or to
-	// the side and below us. Explore all of the different possible
-	// permutations.
+	logmsg("Found upward soln =", found);
+	return found;
+}
+
+/// Same as explore_up_branches(), handles the case where `ptm` has
+/// has unordered links without any GlobNodes in them.
+/// Handles the case where there's at least one (and maybe more)
+/// unordered links, somewhere at this level, or next to us or to
+/// the side and below us. Explore all of the different possible
+/// permutations.
+bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
+                                                const Handle& hg,
+                                                const PatternTermPtr& clause)
+{
+	// Move up the solution graph, looking for a match.
+	const PatternTermPtr& parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
+
+	IncomingSet iset = _pmc.get_incoming_set(hg, t);
+	size_t sz = iset.size();
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at maybe disordered term = "
+	                      << parent->getQuote()->to_string() << std::endl
+	                      << "The grounded pivot point " << hg->to_string()
+	                      << " has " << sz << " branches";})
+
 	_perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
