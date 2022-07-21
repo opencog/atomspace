@@ -1586,10 +1586,17 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
                                              const Handle& hg,
                                              const PatternTermPtr& clause)
 {
-	// Check if the pattern has globs in it.
 	const PatternTermPtr& parent(ptm->getParent());
+
+	// Check if its molecular chemistry.
+	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
+		return explore_upsparse_branches(ptm, hg, clause);
+
+	// Check if the pattern has globs in it.
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
+
+	// All other cases.
 	return explore_upvar_branches(ptm, hg, clause);
 }
 
@@ -1730,9 +1737,9 @@ bool PatternMatchEngine::explore_upvar_branches(const PatternTermPtr& ptm,
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm`
-/// has a GlobNode in it. In this case, we need to loop over the
-/// inconoming, just as above, and also loop over different glob
-/// grounding possibilities.
+/// is an ordered link with a GlobNode in it. In this case, we need to
+/// loop over the incoming, just as above, and also loop over different
+/// glob grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
@@ -1919,13 +1926,17 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// the unordered_explore steppers. I'm lzay, today, so I am not doing
 /// this just right now.
 ///
+/// Also: right now, it uses a very inefficient search strategy,
+/// enumerating over everything. See notes on match_sparse for a better
+/// idea.
+///
 bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
 	// XXX TODO FIXME. The ptm needs to be decomposed into connected
-	// components. Then every possble permutation of these connected
-	// components must be walked over. For now, we assume only one.
+	// components. Then only the connected components need to be walked
+	// over.  That would be much more efficient.
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
@@ -1941,6 +1952,14 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 	while (have_more_rotors(ptm));
 	_sparse_take_step = false;
 
+	return false;
+}
+
+bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
+                                                   const Handle& hg,
+                                                   const PatternTermPtr& clause)
+{
+	OC_ASSERT(false, "Not implemented!");
 	return false;
 }
 

@@ -289,6 +289,8 @@ private:
 	                           const PatternTermPtr&);
 	bool explore_sparse_branches(const PatternTermPtr&, const Handle&,
 	                             const PatternTermPtr&);
+	bool explore_upsparse_branches(const PatternTermPtr&, const Handle&,
+	                               const PatternTermPtr&);
 	bool explore_type_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);
 	bool explore_odometer(const PatternTermPtr&, const Handle&,
