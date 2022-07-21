@@ -1328,7 +1328,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			// I think this is correct. But it's untested! XXX verify!
 			_choose_next = true;
 		}
-		else
+		else  // this is an ordered link. Just plain-old step.
 			ig++;
 
 		for (; ig < szg; ig++)
@@ -1576,10 +1576,15 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		return explore_clause_identical(ptm, hg, clause);
 
 	// Check if its molecular chemistry.
+	// This avoids the accidental call to upglob below.
+	// This could be optimized to call upord if everything
+	// else is ordered ... XXX FIXME ...
 	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
-		return explore_upsparse_branches(ptm, hg, clause);
+		return explore_upund_branches(ptm, hg, clause);
 
 	// Check if the pattern has globs in it.
+	// XXX I'm not convinced this is right, if there are mixtures
+	// of unordered and globby links in different places...
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 
@@ -1727,38 +1732,6 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 
 	logmsg("Found upward soln =", found);
 	return found;
-}
-
-/// Same as explore_up_branches(), handles the case where `ptm`
-/// has unorderd+glob in it.
-bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
-                                                   const Handle& hg,
-                                                   const PatternTermPtr& clause)
-{
-	// Move up the solution graph, looking for a match.
-	const PatternTermPtr& parent(ptm->getParent());
-	Type t = parent->getHandle()->get_type();
-
-	IncomingSet iset = _pmc.get_incoming_set(hg, t);
-	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward at sparse term = "
-	                      << parent->getQuote()->to_string() << std::endl
-	                      << "The grounded pivot point " << hg->to_string()
-	                      << " has " << sz << " branches";})
-
-	// Just explore directly upwards.
-	bool found = false;
-	for (size_t i = 0; i < sz; i++)
-	{
-		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at sparse term=" << parent->to_string()
-		                      << " propose=" << iset[i]->to_string();})
-
-		found = explore_type_branches(parent, iset[i], clause);
-		if (found) break;
-	}
-
-	return false;
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm`
