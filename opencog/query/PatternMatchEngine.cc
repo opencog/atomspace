@@ -1157,7 +1157,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 
 	// If there's no glob, then we are starting from scratch.
 	// Set things up.
-	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SELECT sparse term="
+	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SETUP sparse term="
 	                      << ptm->to_string();})
 
 	// XXX TODO The logic here should be updated to resemble that
@@ -1199,7 +1199,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-	int szg = (int) osg.size();
+	int szg = (int) osg_size;
 	int szp = (int) pats.size();
 
 #ifdef QDEBUG
@@ -1674,7 +1674,7 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at term=" << parent->to_string()
+		                      << " at ordered term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		found = explore_type_branches(parent, iset[i], clause);
@@ -1712,7 +1712,7 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward permutable branch "
 		                      << i+1 << " of " << sz
-		                      << " at term=" << parent->to_string()
+		                      << " at unordered term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		_perm_odo.clear();
@@ -1751,7 +1751,7 @@ bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at term=" << parent->to_string()
+		                      << " at sparse term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		found = explore_type_branches(parent, iset[i], clause);
