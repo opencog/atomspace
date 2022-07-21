@@ -281,7 +281,9 @@ private:
 	                           const PatternTermPtr&);
 	bool explore_up_branches(const PatternTermPtr&, const Handle&,
 	                         const PatternTermPtr&);
-	bool explore_upvar_branches(const PatternTermPtr&, const Handle&,
+	bool explore_upord_branches(const PatternTermPtr&, const Handle&,
+	                            const PatternTermPtr&);
+	bool explore_upund_branches(const PatternTermPtr&, const Handle&,
 	                            const PatternTermPtr&);
 	bool explore_upglob_branches(const PatternTermPtr&, const Handle&,
 	                             const PatternTermPtr&);
