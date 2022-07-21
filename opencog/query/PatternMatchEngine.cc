@@ -1822,7 +1822,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
 {
-	// Check if the pattern has globs in it,
+	// Check to make sure the pattern actually has globs in it!
 	OC_ASSERT(ptm->hasAnyGlobbyVar(),
 	          "Glob exploration went horribly wrong!");
 
@@ -1839,10 +1839,6 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
-		// It's not clear if the odometer can play nice with
-		// globby terms. Anyway, no unit test mixes these two.
-		// So, for now, we ignore it.
-		// if (explore_odometer(ptm, hg, clause))
 		if (explore_type_branches(ptm, hg, clause))
 			return true;
 		logmsg("Globby clause not grounded; try again");
