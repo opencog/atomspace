@@ -1729,11 +1729,35 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 	return found;
 }
 
+/// Same as explore_up_branches(), handles the case where `ptm`
+/// has unorderd+glob in it.
 bool PatternMatchEngine::explore_upsparse_branches(const PatternTermPtr& ptm,
                                                    const Handle& hg,
                                                    const PatternTermPtr& clause)
 {
-	OC_ASSERT(false, "Not implemented!");
+	// Move up the solution graph, looking for a match.
+	const PatternTermPtr& parent(ptm->getParent());
+	Type t = parent->getHandle()->get_type();
+
+	IncomingSet iset = _pmc.get_incoming_set(hg, t);
+	size_t sz = iset.size();
+	DO_LOG({LAZY_LOG_FINE << "Looking upward at sparse term = "
+	                      << parent->getQuote()->to_string() << std::endl
+	                      << "The grounded pivot point " << hg->to_string()
+	                      << " has " << sz << " branches";})
+
+	// Just explore directly upwards.
+	bool found = false;
+	for (size_t i = 0; i < sz; i++)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
+		                      << " at term=" << parent->to_string()
+		                      << " propose=" << iset[i]->to_string();})
+
+		found = explore_type_branches(parent, iset[i], clause);
+		if (found) break;
+	}
+
 	return false;
 }
 
