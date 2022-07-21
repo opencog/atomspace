@@ -1318,7 +1318,13 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		// links that lie underneath to take a step.  So that the
 		// other permutations get tried, before we move on the next
 		// rotor. (Here, `rotors[it]` is the rotor for `it`.)
-		if (pto->hasUnorderedLink() and _perm_have_more)
+		// There's a catch. If this rotor position already has a
+		// grounding, then it will fail to increment (because the
+		// tree_compare() will return `true` immediately.) So,
+		// for this case, unconditionally step the rotor.
+		if (var_grounding.end() != var_grounding.find(pto->getHandle()))
+			ig++;
+		else if (pto->hasUnorderedLink() and _perm_have_more)
 		{
 			_perm_have_more = false;
 			_perm_take_step = true;
