@@ -102,7 +102,7 @@ protected:
 	bool _is_bound_var;
 
 	// True if any pattern subtree rooted in this tree node contains
-	// an GlobNode. Trees without any GlobNodes can be searched in a
+	// a GlobNode. Trees without any GlobNodes can be searched in a
 	// straight-forward manner; those with them need to have all
 	// possible glob matches explored.
 	bool _has_any_globby_var;
@@ -125,11 +125,16 @@ protected:
 	// IdenticalLink). This can be used as a transitive assignment.
 	bool _is_identical;
 
-	// True if any pattern subtree rooted in this tree node contains
-	// an unordered link. Trees without any unordered links can be
-	// searched in a straight-forward manner; those with them need to
-	// have all possible permutations explored.
+	// True if this tree node is unordered, or if any pattern
+	// subtree rooted in this tree node contains an unordered link.
+	// Trees without any unordered links can be searched in a
+	// straight-forward manner; those with them need to have all
+	// possible permutations explored.
 	bool _has_any_unordered_link;
+
+	// True if any pattern subtree rooted in this tree node contains
+	// an unordered link. Ignores the ordering of *this* tree.
+	bool _has_unordered_below;
 
 	// True if quoted, or if it should be taken literally, and not
 	// evaluated or interpreted. Usually, this means that this term
@@ -166,6 +171,7 @@ protected:
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
 	void addAnyEvaluatable();
+	void addUnorderedBelow();
 
 public:
 	static const PatternTermPtr UNDEFINED;
@@ -233,6 +239,7 @@ public:
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
+	bool hasUnorderedBelow() const noexcept { return _has_unordered_below; }
 	bool isUnorderedLink() const noexcept { return _handle->is_unordered_link(); }
 	bool isLink() const noexcept { return _handle->is_link(); }
 

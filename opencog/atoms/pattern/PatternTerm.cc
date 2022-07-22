@@ -30,6 +30,7 @@ PatternTerm::PatternTerm(void)
 	  _is_virtual(false),
 	  _is_identical(false),
 	  _has_any_unordered_link(false),
+	  _has_unordered_below(false),
 	  _is_literal(false),
 	  _is_present(false),
 	  _is_absent(false),
@@ -53,6 +54,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_virtual(false),
 	  _is_identical(false),
 	  _has_any_unordered_link(false),
+	  _has_unordered_below(false),
 	  _is_literal(false),
 	  _is_present(false),
 	  _is_absent(false),
@@ -240,13 +242,23 @@ void PatternTerm::markIdentical()
 
 // ==============================================================
 
+void PatternTerm::addUnorderedBelow()
+{
+	if (_has_unordered_below) return;
+
+	_has_any_unordered_link = true;
+	_has_unordered_below = true;
+	if (_parent->_handle)
+		_parent->addUnorderedBelow();
+}
+
 void PatternTerm::addUnorderedLink()
 {
 	if (_has_any_unordered_link) return;
 
 	_has_any_unordered_link = true;
 	if (_parent->_handle)
-		_parent->addUnorderedLink();
+		_parent->addUnorderedBelow();
 }
 
 // ==============================================================

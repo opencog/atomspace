@@ -52,6 +52,7 @@ class SparseUTest :  public CxxTest::TestSuite
 		void test_palin_ord(void);
 
 		void test_chem(void);
+		void test_chem_inf(void);
 };
 
 /*
@@ -202,6 +203,28 @@ void SparseUTest::test_chem(void)
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// This should not go into an inf loop.
+void SparseUTest::test_chem_inf(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/sparse-rinf.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ no solutions
+	result = eval->eval_h("(cog-execute! ester)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

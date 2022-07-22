@@ -1085,7 +1085,26 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 
 	// If the term is unordered, all parents must know about it.
 	if (nameserver().isA(t, UNORDERED_LINK))
+	{
+		// If there's a GlobNode in here, make sure there's only one.
+		// Unordered links with globs hit the "sparse" pattern match.
+		if (ptm->hasGlobbyVar())
+		{
+			size_t cnt = 0;
+			const Handle& hu = ptm->getHandle();
+			for (const Handle& ho : hu->getOutgoingSet())
+			{
+				if (nameserver().isA(ho->get_type(), GLOB_NODE))
+					cnt++;
+			}
+			if (1 < cnt)
+				throw InvalidParamException(TRACE_INFO,
+					"Unordered patterns can have at most ONE GlobNode\n"
+					"(because having more does not make sense). Got: %s",
+					hu->to_short_string().c_str());
+		}
 		ptm->addUnorderedLink();
+	}
 
 	// If the parent isn't evaluatable, it makes no sense to
 	// mark the child evaluatable. The problem here is that
