@@ -7,7 +7,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 
-; (load "test_types.scm";)
+(load "chem_types.scm")
 
 ; This defines an esterification reaction.
 (define est (Set))
