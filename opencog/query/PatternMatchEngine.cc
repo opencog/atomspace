@@ -1151,12 +1151,6 @@ bool PatternMatchEngine::have_more_rotors(const PatternTermPtr& ptm)
 bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
                                       const Handle& hg)
 {
-	auto ss = _sparse_glob.find(ptm);
-	if (_sparse_glob.end() != ss)
-		return true;
-
-	// If there's no glob, then we are starting from scratch.
-	// Set things up.
 	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SETUP sparse term="
 	                      << ptm->to_string();})
 
@@ -1268,10 +1262,14 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
                                         const Handle& hg)
 {
-	bool match = setup_rotors(ptm, hg);
-	if (not match) return false;
-
-	logmsg("Enter sparse_compare");
+	// If there's no glob, then we are starting from scratch.
+	auto ss = _sparse_glob.find(ptm);
+	if (_sparse_glob.end() == ss)
+	{
+		bool ok = setup_rotors(ptm, hg);
+		if (not ok) return false;
+		return record_sparse(ptm, hg);
+	}
 
 	// _sparse_state lets use resume where we last left off.
 	Rotors rotors = _sparse_state[ptm];
@@ -1284,6 +1282,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 	// If not taking a step, set up the grounding as we last knew it.
 	if (not _sparse_take_step)
 	{
+		logmsg("Enter sparse_compare, standing still");
+
 		for (int it=0; it < szp; it++)
 		{
 			const PatternTermPtr& pto = pats[it];
@@ -1293,6 +1293,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		}
 		return record_sparse(ptm, hg);
 	}
+
+	logmsg("Enter sparse_compare, taking a step.");
 
 	// Set up the grounding as we last knew it; all but the last one.
 	int it;
@@ -1927,8 +1929,8 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// this just right now.
 ///
 /// Also: right now, it uses a very inefficient search strategy,
-/// enumerating over everything. See notes on match_sparse for a better
-/// idea.
+/// enumerating over everything. See notes on sparse_compare for a
+/// better idea.
 ///
 bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
