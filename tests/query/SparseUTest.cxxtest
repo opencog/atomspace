@@ -9,8 +9,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
-#include "test-types.h"
-
 using namespace opencog;
 
 class SparseUTest :  public CxxTest::TestSuite
@@ -27,7 +25,6 @@ class SparseUTest :  public CxxTest::TestSuite
 			logger().set_print_to_stdout_flag(true);
 			logger().set_timestamp_flag(false);
 			logger().set_sync_flag(true);
-#include "test-types.cc"
 		}
 
 		~SparseUTest()
@@ -53,6 +50,8 @@ class SparseUTest :  public CxxTest::TestSuite
 
 		void test_glob_ord(void);
 		void test_palin_ord(void);
+
+		void test_chem(void);
 };
 
 /*
@@ -65,6 +64,7 @@ void SparseUTest::setUp(void)
 	as = createAtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	eval->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
 	delete eval;
 }
 
@@ -102,7 +102,7 @@ void SparseUTest::test_glob(void)
 
 // ================================================================
 
-// Unordered links with a palindrmoe glob in it
+// Unordered links with a palindrome glob in it
 void SparseUTest::test_palin(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -123,7 +123,7 @@ void SparseUTest::test_palin(void)
 
 // ================================================================
 
-// Unordered links with a palindrmoe glob in it
+// Unordered links with a palindrome glob in it
 void SparseUTest::test_palin_dab(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -165,7 +165,7 @@ void SparseUTest::test_glob_ord(void)
 
 // ================================================================
 
-// Unordered links with a palindrmoe glob in it
+// Unordered links with a palindrome glob in it
 void SparseUTest::test_palin_ord(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -180,6 +180,28 @@ void SparseUTest::test_palin_ord(void)
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Unordered links emulating a chemical reaction
+void SparseUTest::test_chem(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/sparse-react.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 4 solutions
+	result = eval->eval_h("(cog-execute! esterification)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

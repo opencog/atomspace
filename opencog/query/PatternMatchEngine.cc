@@ -1157,7 +1157,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 
 	// If there's no glob, then we are starting from scratch.
 	// Set things up.
-	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SELECT sparse term="
+	DO_LOG({LAZY_LOG_FINE << "tree_comp NEW SETUP sparse term="
 	                      << ptm->to_string();})
 
 	// XXX TODO The logic here should be updated to resemble that
@@ -1199,7 +1199,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 	if (not _variables->is_upper_bound(gloh, glsz))
 		return false;
 
-	int szg = (int) osg.size();
+	int szg = (int) osg_size;
 	int szp = (int) pats.size();
 
 #ifdef QDEBUG
@@ -1318,7 +1318,13 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		// links that lie underneath to take a step.  So that the
 		// other permutations get tried, before we move on the next
 		// rotor. (Here, `rotors[it]` is the rotor for `it`.)
-		if (pto->hasUnorderedLink() and _perm_have_more)
+		// There's a catch. If this rotor position already has a
+		// grounding, then it will fail to increment (because the
+		// tree_compare() will return `true` immediately.) So,
+		// for this case, unconditionally step the rotor.
+		if (var_grounding.end() != var_grounding.find(pto->getHandle()))
+			ig++;
+		else if (pto->hasUnorderedLink() and _perm_have_more)
 		{
 			_perm_have_more = false;
 			_perm_take_step = true;
@@ -1328,7 +1334,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 			// I think this is correct. But it's untested! XXX verify!
 			_choose_next = true;
 		}
-		else
+		else  // this is an ordered link. Just plain-old step.
 			ig++;
 
 		for (; ig < szg; ig++)
@@ -1537,27 +1543,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
-/* ... just search ...  */
-bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
-                                               const Handle& hg,
-                                               const PatternTermPtr& clause)
-{
-	logmsg("Begin exploring term:", term);
-	bool found;
-	if (term->hasAnyGlobbyVar())
-		found = explore_glob_branches(term, hg, clause);
-	else if (term->hasUnorderedLink())
-	{
-		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
-		found = explore_odometer(term, hg, clause);
-	}
-	else
-		found = explore_type_branches(term, hg, clause);
-
-	logmsg("Finished exploring term:", term, found);
-	return found;
-}
-
 /// explore_up_branches -- look for groundings for the given term.
 ///
 /// The argument passed to this function is a clause that needs to be
@@ -1596,7 +1581,16 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
 
+	// Check if its molecular chemistry.
+	// This avoids the accidental call to upglob below.
+	// This could be optimized to call upord if everything
+	// else is ordered ... XXX FIXME ...
+	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
+		return explore_upund_branches(ptm, hg, clause);
+
 	// Check if the pattern has globs in it.
+	// XXX I'm not convinced this is right, if there are mixtures
+	// of unordered and globby links in different places...
 	if (parent->hasAnyGlobbyVar())
 		return explore_upglob_branches(ptm, hg, clause);
 
@@ -1691,7 +1685,7 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 	for (size_t i = 0; i < sz; i++)
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		                      << " at term=" << parent->to_string()
+		                      << " at ordered term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		found = explore_type_branches(parent, iset[i], clause);
@@ -1729,7 +1723,7 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward permutable branch "
 		                      << i+1 << " of " << sz
-		                      << " at term=" << parent->to_string()
+		                      << " at unordered term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
 
 		_perm_odo.clear();
@@ -1747,9 +1741,9 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 }
 
 /// Same as explore_up_branches(), handles the case where `ptm`
-/// has a GlobNode in it. In this case, we need to loop over the
-/// inconoming, just as above, and also loop over different glob
-/// grounding possibilities.
+/// is an ordered link with a GlobNode in it. In this case, we need to
+/// loop over the incoming, just as above, and also loop over different
+/// glob grounding possibilities.
 bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
@@ -1807,7 +1801,7 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
                                                const Handle& hg,
                                                const PatternTermPtr& clause)
 {
-	// Check if the pattern has globs in it,
+	// Check to make sure the pattern actually has globs in it!
 	OC_ASSERT(ptm->hasAnyGlobbyVar(),
 	          "Glob exploration went horribly wrong!");
 
@@ -1824,10 +1818,6 @@ bool PatternMatchEngine::explore_glob_branches(const PatternTermPtr& ptm,
 	// quickly check if we can move on to the next one or not.
 	do
 	{
-		// It's not clear if the odometer can play nice with
-		// globby terms. Anyway, no unit test mixes these two.
-		// So, for now, we ignore it.
-		// if (explore_odometer(ptm, hg, clause))
 		if (explore_type_branches(ptm, hg, clause))
 			return true;
 		logmsg("Globby clause not grounded; try again");
@@ -1936,13 +1926,17 @@ bool PatternMatchEngine::explore_unordered_branches(const PatternTermPtr& ptm,
 /// the unordered_explore steppers. I'm lzay, today, so I am not doing
 /// this just right now.
 ///
+/// Also: right now, it uses a very inefficient search strategy,
+/// enumerating over everything. See notes on match_sparse for a better
+/// idea.
+///
 bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
 	// XXX TODO FIXME. The ptm needs to be decomposed into connected
-	// components. Then every possble permutation of these connected
-	// components must be walked over. For now, we assume only one.
+	// components. Then only the connected components need to be walked
+	// over.  That would be much more efficient.
 	do
 	{
 		// If the pattern was satisfied, then we are done for good.
@@ -2009,6 +2003,29 @@ bool PatternMatchEngine::explore_type_branches(const PatternTermPtr& ptm,
 	}
 
 	return explore_single_branch(ptm, hg, clause);
+}
+
+/* ... just search ...  */
+bool PatternMatchEngine::explore_term_branches(const PatternTermPtr& term,
+                                               const Handle& hg,
+                                               const PatternTermPtr& clause)
+{
+	logmsg("Begin exploring term:", term);
+	bool found;
+	if (term->hasAnyGlobbyVar())
+		found = explore_glob_branches(term, hg, clause);
+
+	else if (term->hasUnorderedLink())
+	{
+		// The asert case is handled immediately above, in explore_type_branches
+		OC_ASSERT(not term->hasGlobbyVar(), "Buggy or not implemented!");
+		found = explore_odometer(term, hg, clause);
+	}
+	else
+		found = explore_type_branches(term, hg, clause);
+
+	logmsg("Finished exploring term:", term, found);
+	return found;
 }
 
 /// See explore_unordered_branches() for a general explanation.
