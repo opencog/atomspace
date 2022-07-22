@@ -240,13 +240,23 @@ void PatternTerm::markIdentical()
 
 // ==============================================================
 
+void PatternTerm::addUnorderedBelow()
+{
+	if (_has_any_unordered_link) return;
+
+	_has_any_unordered_link = true;
+	_has_unordered_below = true;
+	if (_parent->_handle)
+		_parent->addUnorderedBelow();
+}
+
 void PatternTerm::addUnorderedLink()
 {
 	if (_has_any_unordered_link) return;
 
 	_has_any_unordered_link = true;
 	if (_parent->_handle)
-		_parent->addUnorderedLink();
+		_parent->addUnorderedBelow();
 }
 
 // ==============================================================
