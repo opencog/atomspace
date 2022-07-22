@@ -1584,11 +1584,8 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		return explore_clause_identical(ptm, hg, clause);
 
 	// Check if its molecular chemistry.
-	// This avoids the accidental call to upglob below.
-	// This could be optimized to call upord if everything
-	// else is ordered ... XXX FIXME ...
 	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
-		return explore_upspun_branches(ptm, hg, clause);
+		return explore_upspar_branches(ptm, hg, clause);
 
 	// Check if the pattern has globs in it.
 	// XXX I'm not convinced this is right, if there are mixtures
@@ -1746,7 +1743,7 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 /// of `ptm` is a 'sparse' pattern (i.e. is an unordered link with one
 /// glob in it.)
 ///
-bool PatternMatchEngine::explore_upspun_branches(const PatternTermPtr& ptm,
+bool PatternMatchEngine::explore_upspar_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
@@ -1756,16 +1753,37 @@ bool PatternMatchEngine::explore_upspun_branches(const PatternTermPtr& ptm,
 
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Upspun (sparse) looking upward at term = "
+	DO_LOG({LAZY_LOG_FINE << "Upsparse looking upward at term = "
 	                      << parent->getQuote()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
 
-	_perm_breakout = _perm_to_step;
+	if (not parent->hasUnorderedBelow())
+	{
+		bool found = false;
+		for (size_t i = 0; i < sz; i++)
+		{
+			DO_LOG({LAZY_LOG_FINE << "Try upward ordered sparse branch "
+			                      << i+1 << " of " << sz
+			                      << " at sparse term=" << parent->to_string()
+			                      << " propose=" << iset[i]->to_string();})
+
+			found = explore_sparse_branches(parent, iset[i], clause);
+			if (found) break;
+		}
+
+		logmsg("Found sparse upward soln from unspun =", found);
+		return found;
+	}
+
+	// If we are here, then the sparse term has unordered links
+	// under it. We need work with a clean slate when iterating,
+	// so push and pop the odometer state as we iterate.
+	 _perm_breakout = _perm_to_step;
 	bool found = false;
 	for (size_t i = 0; i < sz; i++)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Try upward sparse branch "
+		DO_LOG({LAZY_LOG_FINE << "Try upward unordered sparse branch "
 		                      << i+1 << " of " << sz
 		                      << " at sparse term=" << parent->to_string()
 		                      << " propose=" << iset[i]->to_string();})
@@ -1779,7 +1797,6 @@ bool PatternMatchEngine::explore_upspun_branches(const PatternTermPtr& ptm,
 		if (found) break;
 	}
 	_perm_breakout = nullptr;
-
 	logmsg("Found sparse upward soln from unspun =", found);
 	return found;
 }
