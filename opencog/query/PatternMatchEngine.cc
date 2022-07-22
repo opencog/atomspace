@@ -1692,7 +1692,7 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 		if (found) break;
 	}
 
-	logmsg("Found upward soln =", found);
+	logmsg("Found upward soln from ordered =", found);
 	return found;
 }
 
@@ -1712,7 +1712,7 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward at maybe disordered term = "
+	DO_LOG({LAZY_LOG_FINE << "Unordered looking upward at term = "
 	                      << parent->getQuote()->to_string() << std::endl
 	                      << "The grounded pivot point " << hg->to_string()
 	                      << " has " << sz << " branches";})
@@ -1736,7 +1736,7 @@ bool PatternMatchEngine::explore_upund_branches(const PatternTermPtr& ptm,
 	}
 	_perm_breakout = nullptr;
 
-	logmsg("Found upward soln =", found);
+	logmsg("Found upward soln from unordered =", found);
 	return found;
 }
 
@@ -1784,7 +1784,7 @@ bool PatternMatchEngine::explore_upglob_branches(const PatternTermPtr& ptm,
 
 		if (found) break;
 	}
-	logmsg("Found upward soln =", found);
+	logmsg("Found upward soln from glob =", found);
 	return found;
 }
 
