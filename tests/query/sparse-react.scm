@@ -7,10 +7,9 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 
-(load "chem_types.scm")
+; (load-from-path "chem_types.scm")
 
 ; This defines an esterification reaction.
-(define est (Set))
 (define esterification
 	(BindLink
 		; Variable declaration
