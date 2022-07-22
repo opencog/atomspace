@@ -244,7 +244,7 @@ void PatternTerm::markIdentical()
 
 void PatternTerm::addUnorderedBelow()
 {
-	if (_has_any_unordered_link) return;
+	if (_has_unordered_below) return;
 
 	_has_any_unordered_link = true;
 	_has_unordered_below = true;
