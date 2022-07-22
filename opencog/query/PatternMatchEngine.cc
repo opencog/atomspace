@@ -1934,6 +1934,8 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
                                                  const Handle& hg,
                                                  const PatternTermPtr& clause)
 {
+	logmsg("Explore sparse: Start exploration");
+
 	// XXX TODO FIXME. The ptm needs to be decomposed into connected
 	// components. Then only the connected components need to be walked
 	// over.  That would be much more efficient.
@@ -1943,7 +1945,7 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 		if (explore_single_branch(ptm, hg, clause))
 			return true;
 
-		logmsg("Sparse explore: Step to next odo");
+		logmsg("Explore sparse: Step to next odo");
 
 		// If we are here, there was no match.
 		// On the next go-around, take a step.
@@ -1951,6 +1953,7 @@ bool PatternMatchEngine::explore_sparse_branches(const PatternTermPtr& ptm,
 	}
 	while (have_more_rotors(ptm));
 	_sparse_take_step = false;
+	logmsg("Explore sparse: No more steps");
 
 	return false;
 }
