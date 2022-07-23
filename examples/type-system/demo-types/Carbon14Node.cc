@@ -35,7 +35,7 @@ using namespace opencog;
 // This demo does not throw any exceptions.
 ValuePtr Carbon14Node::execute(AtomSpace* as, bool silent)
 {
-	printf("I am a decaying carbon-14 atom of %s origin\n", kind.c_str());
+	printf("I am a decaying carbon-14 atom of '%s' origin\n", kind.c_str());
 
 	ValueSeq decay_products;
 	decay_products.push_back(

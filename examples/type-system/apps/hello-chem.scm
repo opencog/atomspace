@@ -20,7 +20,7 @@
 
 (define decay-products (cog-execute! radioactive))
 
-(format #t "The C14 decay product are:\n~A\n" decay-products)
+(format #t "The C14 decay products are:\n~A\n" decay-products)
 
 ; The end!
 ; That's all folks!

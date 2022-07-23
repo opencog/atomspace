@@ -25,14 +25,14 @@ public:
 	Carbon14Node(const std::string&& s)
 		: Node(CARBON14_NODE, std::move(s))
 	{
-		kind = "atomospheric";
+		kind = "unknown";
 	}
 
 	// The constructor that dervied types need.
 	Carbon14Node(Type t, const std::string&& s)
 		: Node(t, std::move(s))
 	{
-		kind = "unknown";
+		kind = "atomospheric";
 	}
 
 	// Atoms are globally unique and not assignable or copyable.
