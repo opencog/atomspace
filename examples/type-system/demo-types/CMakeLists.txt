@@ -81,6 +81,7 @@ ADD_DEPENDENCIES(chem-demo-types chem_demo_atom_types)
 TARGET_LINK_LIBRARIES(chem-demo-types
 	atom_types
 	atombase
+	atomspace
 	# ${ATOMSPACE_atomtypes_LIBRARY}
 )
 
