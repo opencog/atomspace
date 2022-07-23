@@ -100,7 +100,16 @@ INSTALL (FILES
 INSTALL(
    FILES ${GUILE_BIN_DIR}/opencog/chemodemo-config-installable.scm
    DESTINATION ${GUILE_SITE_DIR}/opencog
-   RENAME cheminfo-config.scm
+   RENAME chemodemo-config.scm
+)
+
+# The below allows you to install the above by saying
+# `sudo make install-demotypes`
+ADD_CUSTOM_TARGET (install-demotypes
+	DEPENDS examples
+	WORKING_DIRECTORY .
+	COMMAND $(MAKE) install
+	COMMENT "Installing examples ..."
 )
 
 # --------------------------------------------------------------
