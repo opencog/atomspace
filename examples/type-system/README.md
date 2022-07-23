@@ -52,6 +52,20 @@ the `apps` directory.
 To build everything here, say `make examples` (in the build dir) and
 then `sudo make install-demotypes` to install into the root filesystem.
 
+Active Atoms
+------------
+Included in the demo is a `Carbon14Node`, which provides an example
+of an executable Atom. Such Atoms provide a C++ class of the same name,
+having a method called `execute()`, which, when called, can execute
+arbitrary code. There is a large variety of ways in which execution can
+be triggered; this is covered in other demos and is outside he scope of
+this one. The demo apps just trigger the execution directly.
+
+It should be obvious as to "what's going one" by reading the code in
+`Carbon14Node.cc` and comparing it to what's printed when the demos run.
+This file is *completely optional*; custom Atom Types can be used
+without making any of them executable.
+
 apps Directory
 --------------
 Contains short examples of using the demo types.
