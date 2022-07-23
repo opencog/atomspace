@@ -71,6 +71,9 @@ TARGET_LINK_LIBRARIES(chem-demo-types
 # price for this is the need for the following two directives,
 # which tell scheme were to find modules in the build directory.
 
+DECLARE_GUILE_CONFIG_TARGET(CHEMODEMO_CONFIG
+	"opencog chemodemo-config" "OPENCOG_TEST")
+
 WRITE_GUILE_CONFIG(
    ${GUILE_BIN_DIR}/opencog/chemodemo-config.scm
    SCM_CONFIG TRUE
@@ -79,6 +82,12 @@ WRITE_GUILE_CONFIG(
 WRITE_GUILE_CONFIG(
    ${GUILE_BIN_DIR}/opencog/chemodemo-config-installable.scm
    SCM_CONFIG FALSE
+)
+
+# Define and install the actual guile module
+ADD_GUILE_MODULE (FILES
+   demo-types.scm
+   MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/demo-types"
 )
 
 # --------------------------------------------------------------
