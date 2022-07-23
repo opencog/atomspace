@@ -127,6 +127,12 @@ ADD_LIBRARY(chempydemo SHARED
 	chempydemo.cpp
 )
 
+TARGET_LINK_LIBRARIES(chempydemo
+	chem-demo-types
+	${ATOMSPACE_LIBRARIES}
+	${PYTHON_LIBRARIES}
+)
+
 # ... except python doesn't like modules called `libfoo.so` It wants
 # to find it's modules in `foo.so` instead.  So this causes CMake to
 # rename the shared object to a name that python likes.
@@ -157,6 +163,11 @@ INSTALL(
 	FILES ${GUILE_BIN_DIR}/opencog/chemodemo-config-installable.scm
 	DESTINATION ${GUILE_SITE_DIR}/opencog
 	RENAME chemodemo-config.scm
+)
+
+INSTALL(TARGETS
+	chempydemo
+	DESTINATION "${PYTHON_DEST}"
 )
 
 # The below allows you to install the above by saying
