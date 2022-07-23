@@ -63,9 +63,12 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 # This will build the `libchem-demo-types.so` shared library
 # containing all the needed machinery to make things work.
+# The `Carbon14Node.cc` file is optional and can be omitted;
+# it demos an "active" AtomSpace atom.
 ADD_LIBRARY (chem-demo-types SHARED
 	chem_types.h
 	ChemTypes.cc
+	Carbon14Node.cc
 )
 
 # Without this, parallel make will race and attempt to build the
