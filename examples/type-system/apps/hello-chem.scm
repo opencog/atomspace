@@ -6,10 +6,10 @@
 
 (define dihydrogen-monoxide
 	(Molecule
-		(SingleBond
+		(SB
 			(O "big man oxygen")
 			(H "one proton"))
-		(SingleBond
+		(SB
 			(O "big man oxygen")
 			(H "another proton"))
 	))
