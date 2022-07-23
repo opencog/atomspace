@@ -60,7 +60,7 @@ ADD_DEPENDENCIES(chem-demo-types chem_demo_atom_types)
 
 # Add linking targets for the library.
 TARGET_LINK_LIBRARIES(chem-demo-types
-   ${ATOMSPACE_atomtypes_LIBRARY}
+   ${ATOMSPACE_LIBRARIES}
 )
 
 # --------------------------------------------------------------
@@ -99,6 +99,12 @@ ADD_GUILE_MODULE (FILES
 # --------------------------------------------------------------
 # Part Five: Install the demo system into the root file system.
 #
+# Install the C++ shared library.
+INSTALL (TARGETS
+	chem-demo-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
 INSTALL (FILES
    ${CMAKE_CURRENT_BINARY_DIR}/chem_types.h
    DESTINATION "include/opencog/demo-types"

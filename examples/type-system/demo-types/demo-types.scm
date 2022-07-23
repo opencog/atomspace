@@ -11,7 +11,7 @@
 
 ; Load the C library that calls the classserver to load the types.
 (load-extension
-	(string-append opencog-ext-path-chemodemo "libchem-types")
+	(string-append opencog-ext-path-chemodemo "libchem-demo-types")
 	"chem_types_init")
 
 (load-from-path "opencog/demo-types/chem_types.scm")

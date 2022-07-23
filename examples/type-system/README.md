@@ -17,6 +17,22 @@ To create new custom Atom Types, just copy these files to your project,
 adjust the various file paths, define the desired types, and build.
 That's all there's to it!
 
+Boilerplate
+-----------
+Almost everything in this demo consists of "boilerplate": a conventional,
+fixed pattern containing various configurable file names, file paths and
+build paramters. Each of these has to be modified to suit your project,
+while maintaining the overall structure.  (Boilerplate is the metal plate
+of specifications that is riveted to a steam boiler or other appliance.
+You can also think of this code as a "magic incantation": as long as you
+stick to the general formula, magic will happen, and everything will be
+built correctly.)
+
+The most infuriating part of modifying this to suit your project is that
+minor typos in filenames, and forgotten or overlooked stanzas can sink
+the entire effort.  All of the names and paths must match precisely,
+where-ever they appear.
+
 demo-types Directory
 --------------------
 The Atom Types are defined in the `chem_types.script` file. This can be
