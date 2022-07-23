@@ -2,7 +2,8 @@
 ; OpenCog example module exposing new Atom Types.
 ;
 ; The code below is all "boilerplate" -- keep the general form, and
-; adjust the various names and paths to suit your needs.
+; adjust the various names and paths to suit your needs. The various
+; names and paths here *must* match those in the CMakefile.
 ;
 (define-module (opencog demo-types))
 

@@ -1,5 +1,14 @@
 #!python
 #cython: language_level=3
+#
+# chempydemo.pyx
+#
+# Example cython file showing how to define a python module
+# containing the custom Atom Types. The cython compiler will
+# convert this into the C++ file `chempydemo.cpp` which is
+# then compiled into a shared object. The shared object can
+# be loaded and used as a python module. See the `apps` directory
+# for an example of using this.
 
 from opencog.atomspace import get_refreshed_types
 from opencog.utilities import add_node, add_link

@@ -1,5 +1,9 @@
-
-// Example types for representing (modelling) chemistry
+//
+// chem_types.script
+//
+// Script file showing example types for representing chemistry.
+// To create your own custom atom types, replace the content below
+// by whatever you want.
 
 // Types for different chemical atoms
 CHEMICAL_ATOM_NODE <- CONCEPT_NODE
