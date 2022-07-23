@@ -21,7 +21,7 @@ Boilerplate
 -----------
 Almost everything in this demo consists of "boilerplate": a conventional,
 fixed pattern containing various configurable file names, file paths and
-build paramters. Each of these has to be modified to suit your project,
+build parameters. Each of these has to be modified to suit your project,
 while maintaining the overall structure.  (Boilerplate is the metal plate
 of specifications that is riveted to a steam boiler or other appliance.
 You can also think of this code as a "magic incantation": as long as you
@@ -51,6 +51,8 @@ then `sudo make install-demotypes` to install into the root filesystem.
 
 apps Directory
 --------------
-Contains short examples of using the demo dypes.
+Contains short examples of using the demo types.
 
 The `hello-chem.scm` demos scheme.
+
+The `chemy-hello.py` demos python.

@@ -23,21 +23,22 @@ print ('Hello! The AtomSpace is ' + str(spa))
 Mg('foo')
 
 # Uhh, well, lets grab hold of it
-define foomg Mg('foo')
+x = Mg('foo')
 
-print ('The Magnesium atom is ' + str(foomg))
+print ('The Magnesium atom is ' + str(x))
 
-# Let's create a single bond between a Carbon and a Hydrogen
-# The atoms must have names. The names can be anything.
-SB(C('some carbon atom'), H('just a proton, ok?'))
+# Demo of using a link.
+ch = SB(C('some carbon atom'), H('just a proton, ok?'))
+print ('The CH bond is ' + str(ch))
 
-# Let's create a methane molecule. The carbon and the hydrogens will all
-# be numbered.
-Molecule( \
+# A demo methane molecule.
+methane = Molecule( \
   SB(C('1'), H('1')), \
   SB(C('1'), H('2')), \
   SB(C('1'), H('3')), \
   SB(C('1'), H('4')))
+
+print ('Methane is a molecule: ' + str(methane))
 
 # The end.
 # That's all, folks!
