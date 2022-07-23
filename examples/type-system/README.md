@@ -1,7 +1,7 @@
 
 Creating Custom Atom Types
 ==========================
-The files here demonstrate how to define new custom Atom Types.
+The files here demonstrate how to define and use new custom Atom Types.
 
 Projects making use of the AtomSpace often require that some new kind
 of data to be represented that does not fit into the basic set of
@@ -31,7 +31,8 @@ built correctly.)
 The most infuriating part of modifying this to suit your project is that
 minor typos in filenames, and forgotten or overlooked stanzas can sink
 the entire effort.  All of the names and paths must match precisely,
-where-ever they appear.
+where-ever they appear.  There's a lot of flexibility here, but if you
+are not careful, things just won't work.
 
 demo-types Directory
 --------------------
@@ -44,7 +45,9 @@ source code.
 The language bindings are exposed in the form of modules: the user only
 needs to include the correct module, and the types become usable. The
 `demo-types.scm` defines a guile scheme module that exposes the scheme
-bindings.  An example of using it is in the `apps` directory.
+bindings.  Likewise, the `chempydemo.pyx` defines a (Cython) Python
+module that exposes the python bindings. Examples of using both are in
+the `apps` directory.
 
 To build everything here, say `make examples` (in the build dir) and
 then `sudo make install-demotypes` to install into the root filesystem.

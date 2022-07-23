@@ -26,4 +26,4 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 * c++           - Example CMakefile and demos for C++ code.
 * c++-guile     - Creating guile wrappers for C++ code.
 
-* type-system   - Creating new kinds of Atom Types.
+* type-system   - Creating and using new kinds of Atom Types.
