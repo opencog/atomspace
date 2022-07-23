@@ -7,7 +7,7 @@
 (define-module (opencog demo-types))
 
 (use-modules (opencog))
-(use-modules (opencog demotype-config))
+(use-modules (opencog chemodemo-config))
 
 ; Load the C library that calls the classserver to load the types.
 (load-extension

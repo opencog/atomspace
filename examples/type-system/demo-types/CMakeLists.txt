@@ -65,6 +65,21 @@ TARGET_LINK_LIBRARIES(chem-demo-types
 
 # --------------------------------------------------------------
 # Part Three: Build the scheme module
+#
+# The AtomSpace unit-test infrastructure allows the unit tests
+# to be run *before* installing files into the filesystem. The
+# price for this is the need for the following two directives,
+# which tell scheme were to find modules in the build directory.
+
+WRITE_GUILE_CONFIG(
+   ${GUILE_BIN_DIR}/opencog/chemodemo-config.scm
+   SCM_CONFIG TRUE
+)
+
+WRITE_GUILE_CONFIG(
+   ${GUILE_BIN_DIR}/opencog/chemodemo-config-installable.scm
+   SCM_CONFIG FALSE
+)
 
 # --------------------------------------------------------------
 # Part Four: Build the Python module
@@ -81,3 +96,11 @@ INSTALL (FILES
    ${CMAKE_CURRENT_BINARY_DIR}/chem_types.scm
    DESTINATION "${GUILE_SITE_DIR}/opencog/demo-types/"
 )
+
+INSTALL(
+   FILES ${GUILE_BIN_DIR}/opencog/chemodemo-config-installable.scm
+   DESTINATION ${GUILE_SITE_DIR}/opencog
+   RENAME cheminfo-config.scm
+)
+
+# --------------------------------------------------------------
