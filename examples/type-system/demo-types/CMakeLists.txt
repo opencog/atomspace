@@ -80,6 +80,7 @@ ADD_DEPENDENCIES(chem-demo-types chem_demo_atom_types)
 # this definition is not available in this repo.
 TARGET_LINK_LIBRARIES(chem-demo-types
 	atom_types
+	atombase
 	# ${ATOMSPACE_atomtypes_LIBRARY}
 )
 
