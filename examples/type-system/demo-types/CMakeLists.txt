@@ -15,13 +15,14 @@
 # You might also want to make a copy of the CMakefile at the
 # root of this project, and edit it down to suit your needs.
 
-IF (NOT DEFINED ATOMSPACE_DATA_DIR)
-	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
-ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
-
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
-INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
+# This is commented out, because it's not directly needed for this demo.
+# IF (NOT DEFINED ATOMSPACE_DATA_DIR)
+# 	SET (ATOMSPACE_DATA_DIR "${COGUTIL_DATA_DIR}")
+# ENDIF (NOT DEFINED ATOMSPACE_DATA_DIR)
+#
+# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogMacros.cmake")
+# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogGuile.cmake")
+# INCLUDE("${ATOMSPACE_DATA_DIR}/cmake/OpenCogCython.cmake")
 
 # --------------------------------------------------------------
 # Part One: Build the various language wrappers.
