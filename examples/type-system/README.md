@@ -53,6 +53,12 @@ apps Directory
 --------------
 Contains short examples of using the demo types.
 
-The `hello-chem.scm` demos scheme.
+The `hello-chem.scm` file demos scheme. Run it as
+`guile -s hello-chem.scm`
 
-The `chemy-hello.py` demos python.
+The `chemy-hello.py` file demos python. Run it as
+`python3 chemy-hello.py`
+
+The `chemain.cc` file demos C++. Building the examples will build this
+file; to run it, run `examples/type-system/apps/cpp-types-demo` from the
+build directory.
