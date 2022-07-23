@@ -11,8 +11,13 @@
 (use-modules (opencog chemodemo-config))
 
 ; Load the C library that calls the classserver to load the types.
+; The library is `libchem-demo-types` and the library constructor
+; is `chem_types_init`.
 (load-extension
 	(string-append opencog-ext-path-chemodemo "libchem-demo-types")
 	"chem_types_init")
 
-(load-from-path "opencog/demo-types/chem_types.scm")
+; The path below is the path of the installed types file.
+; Typically, it will be
+;    /usr/local/share/guile/site/3.0/opencog/demo-types/chem_types.scm
+(include-from-path "opencog/demo-types/chem_types.scm")
