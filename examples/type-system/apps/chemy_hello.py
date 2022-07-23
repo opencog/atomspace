@@ -41,7 +41,7 @@ methane = Molecule( \
 
 print ('Methane is a molecule: ' + str(methane))
 
-c14 = C('found in wood')
+c14 = Carbon14Node('found in wood')
 
 print ('The carbon-14 atom is ' + str(c14))
 decay_products = execute_atom(spa, c14)
