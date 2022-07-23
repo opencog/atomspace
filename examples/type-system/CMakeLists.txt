@@ -1,1 +1,2 @@
+ADD_SUBDIRECTORY (apps)
 ADD_SUBDIRECTORY (demo-types)

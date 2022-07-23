@@ -10,9 +10,9 @@
  * file to create the required c++ shared library entries.
  */
 
-#include "examples/type-system/chem_types.definitions"
+#include "examples/type-system/demo-types/chem_types.definitions"
 
-#define INHERITANCE_FILE "examples/type-system/chem_types.inheritance"
+#define INHERITANCE_FILE "examples/type-system/demo-types/chem_types.inheritance"
 #define INITNAME chem_types_init
 
 #include <opencog/atoms/atom_types/atom_types.cc>
