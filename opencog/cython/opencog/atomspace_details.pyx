@@ -200,8 +200,9 @@ cdef class AtomSpace(Value):
     # Maybe this should be called __repr__ ???
     def __str__(self):
         """ Description of the atomspace """
-        return ("<Atomspace\n" +
-                "   addr: " + hex(<long>self.atomspace) + "\n"
+        return ("<AtomSpace\n" +
+                "   addr: " + hex(<long>self.atomspace) + "\n" +
+                "   name: " + self.atomspace.get_name().decode('UTF-8') + ">\n"
                )
 
     def __len__(self):

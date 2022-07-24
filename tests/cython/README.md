@@ -16,7 +16,7 @@ export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
 ```
 or, if installed:
 ```
-export PYTHONPATH=/usr/local/lib/python3.7/dist-packages/opencog:${PYTHON}
+export PYTHONPATH=/usr/local/lib/python3.9/dist-packages/opencog:${PYTHON}
 ```
 
 Some test functions are in `tests/cython/bindlink/test_functions.py`

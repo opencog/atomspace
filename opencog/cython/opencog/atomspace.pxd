@@ -203,6 +203,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle get_atom(cHandle & h)
         bint is_valid_handle(cHandle h)
         int get_size()
+        string get_name()
 
         # ==== query methods ====
         # get by type

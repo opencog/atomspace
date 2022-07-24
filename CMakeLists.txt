@@ -372,7 +372,7 @@ ENDIF (CXXTEST_FOUND)
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
 ADD_CUSTOM_TARGET (examples
-	# using CMAKE_BUILD_TOOL results in teh cryptic error message
+	# Using CMAKE_BUILD_TOOL results in the cryptic error message:
 	# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 	# This is because make doesn't know how to pass jobserver args to
 	# the submake.  So, instead, just use $(MAKE) (with round parens)
