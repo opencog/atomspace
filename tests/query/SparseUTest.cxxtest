@@ -51,8 +51,9 @@ class SparseUTest :  public CxxTest::TestSuite
 		void test_glob_ord(void);
 		void test_palin_ord(void);
 
-		void test_chem(void);
+		void test_chem_bad(void);
 		void test_chem_inf(void);
+		void test_chem_good(void);
 		void test_chem_order(void);
 };
 
@@ -189,7 +190,7 @@ void SparseUTest::test_palin_ord(void)
 // ================================================================
 
 // Unordered links emulating a chemical reaction
-void SparseUTest::test_chem(void)
+void SparseUTest::test_chem_bad(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -200,10 +201,32 @@ void SparseUTest::test_chem(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 4 solutions
-	result = eval->eval_h("(cog-execute! esterification)");
+	result = eval->eval_h("(cog-execute! bad-ester)");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ================================================================
+
+// Unordered links emulating a chemical reaction
+void SparseUTest::test_chem_good(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/sparse-react.scm\")");
+	Handle result;
+
+	// --------------------------------------------
+	// Result should be a SetLink w/ 1 solutions
+	result = eval->eval_h("(cog-execute! esterification)");
+
+	logger().debug("glob arity is %d\n", getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
