@@ -32,9 +32,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  *
- * Experimental TypeNode class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
+ * TypeNode class. Records Atom Types.
  */
 
 class TypeNode : public Node
