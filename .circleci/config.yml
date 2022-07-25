@@ -123,40 +123,43 @@ jobs:
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
-  ure:
+  as-moses:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
         user: root
         environment:
           CCACHE_DIR: /ws/ccache
-    working_directory: /ws/ure
+    working_directory: /ws/as-moses
     steps:
       - attach_workspace:
-          at: /ws/
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
       - run:
           name: Install CogUtil
-          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+          command: cd /ws/cogutil/build && make install && ldconfig
       - run:
           name: Install AtomSpace
-          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+          command: cd /ws/atomspace/build && make install && ldconfig
       - run:
-          name: Checkout URE
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure .
+          name: Checkout AS-MOSES
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/as-moses .
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
       - run:
           name: Build
-          command: cd build && make -j2
+          command: cd build && make
       - run:
           name: Build tests
-          command: cd build && make -j2 tests
+          command: cd build && make tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make test ARGS="$MAKEFLAGS"
       - run:
-          name: Install URE
-          command: cd build && make -j2 install && ldconfig
+          name: Install AS-MOSES
+          command: cd build && make install && ldconfig
       - run:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
@@ -164,9 +167,59 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
-            - ure
-            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
-            # - ccache
+            - as-moses
+            - ccache
+
+  cogserver:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/cogserver
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make install && ldconfig
+      - run:
+          name: Checkout CogServer
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make
+      - run:
+          name: Build tests
+          command: cd build && make tests
+#
+# Disable, until https://github.com/opencog/cogserver/issues/5
+# is fixed. The failing ShellUTest makes circleci report false
+# negatives.
+#      - run:
+#          name: Run tests
+#          command: cd build && make test ARGS="$MAKEFLAGS"
+#      - run:
+#          name: Print test log
+#          command: cat build/tests/Testing/Temporary/LastTest.log
+#          when: always
+      - run:
+          name: Install CogServer
+          command: cd build && make install && ldconfig
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - cogserver
+            - ccache
 
   spacetime:
     docker:
@@ -210,6 +263,51 @@ jobs:
           root: /ws/
           paths:
             - spacetime
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
+
+  ure:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/ure
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout URE
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j2 test ARGS=-j2
+      - run:
+          name: Install URE
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - ure
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
@@ -319,57 +417,6 @@ jobs:
             - miner
             - ccache
 
-  cogserver:
-    docker:
-      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
-        user: root
-        environment:
-          CCACHE_DIR: /ws/ccache
-    working_directory: /ws/cogserver
-    steps:
-      - attach_workspace:
-          at: /ws
-      - run:
-          name: Set number of make jobs
-          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
-      - run:
-          name: Install CogUtil
-          command: cd /ws/cogutil/build && make -j2 install && ldconfig
-      - run:
-          name: Install AtomSpace
-          command: cd /ws/atomspace/build && make install && ldconfig
-      - run:
-          name: Checkout CogServer
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver .
-      - run:
-          name: CMake Configure
-          command: mkdir build && cd build && cmake ..
-      - run:
-          name: Build
-          command: cd build && make
-      - run:
-          name: Build tests
-          command: cd build && make tests
-#
-# Disable, until https://github.com/opencog/cogserver/issues/5
-# is fixed. The failing ShellUTest makes circleci report false
-# negatives.
-#      - run:
-#          name: Run tests
-#          command: cd build && make test ARGS="$MAKEFLAGS"
-#      - run:
-#          name: Print test log
-#          command: cat build/tests/Testing/Temporary/LastTest.log
-#          when: always
-      - run:
-          name: Install CogServer
-          command: cd build && make install && ldconfig
-      - persist_to_workspace:
-          root: /ws/
-          paths:
-            - cogserver
-            - ccache
-
   attention:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -420,53 +467,6 @@ jobs:
             - attention
             - ccache
 
-  as-moses:
-    docker:
-      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
-        user: root
-        environment:
-          CCACHE_DIR: /ws/ccache
-    working_directory: /ws/as-moses
-    steps:
-      - attach_workspace:
-          at: /ws
-      - run:
-          name: Set number of make jobs
-          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
-      - run:
-          name: Install CogUtil
-          command: cd /ws/cogutil/build && make install && ldconfig
-      - run:
-          name: Install AtomSpace
-          command: cd /ws/atomspace/build && make install && ldconfig
-      - run:
-          name: Checkout AS-MOSES
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/as-moses .
-      - run:
-          name: CMake Configure
-          command: mkdir build && cd build && cmake ..
-      - run:
-          name: Build
-          command: cd build && make
-      - run:
-          name: Build tests
-          command: cd build && make tests
-      - run:
-          name: Run tests
-          command: cd build && make test ARGS="$MAKEFLAGS"
-      - run:
-          name: Install AS-MOSES
-          command: cd build && make install && ldconfig
-      - run:
-          name: Print test log
-          command: cat build/tests/Testing/Temporary/LastTest.log
-          when: always
-      - persist_to_workspace:
-          root: /ws/
-          paths:
-            - as-moses
-            - ccache
-
   opencog:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -513,22 +513,24 @@ jobs:
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
-      - run:
-          name: Build
-          command: cd build && make -j2
-      - run:
-          name: Build tests
-          command: cd build && make -j2 tests
-      - run:
-          name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
-      - run:
-          name: Install OpenCog
-          command: cd build && make -j2 install && ldconfig
-      - run:
-          name: Print test log
-          command: cat build/tests/Testing/Temporary/LastTest.log
-          when: always
+#
+# Stub out until the latest link-grammar is available.
+#      - run:
+#          name: Build
+#          command: cd build && make -j2
+#      - run:
+#          name: Build tests
+#          command: cd build && make -j2 tests
+#      - run:
+#          name: Run tests
+#          command: cd build && make -j2 test ARGS=-j2
+#      - run:
+#          name: Install OpenCog
+#          command: cd build && make -j2 install && ldconfig
+#      - run:
+#          name: Print test log
+#          command: cat build/tests/Testing/Temporary/LastTest.log
+#          when: always
       - persist_to_workspace:
           root: /ws/
           paths:
@@ -559,23 +561,26 @@ workflows:
       - atomspace-rocks:
           requires:
             - atomspace
-      - cogserver:
+      - as-moses:
           requires:
             - atomspace
-      - ure:
+      - cogserver:
           requires:
             - atomspace
       - spacetime:
           requires:
             - atomspace
+      - ure:
+          requires:
+            - atomspace
+      - miner:
+          requires:
+            - ure
       - pln:
           requires:
             - atomspace
             - ure
             - spacetime
-      - miner:
-          requires:
-            - ure
       - attention:
           requires:
             - cogserver
