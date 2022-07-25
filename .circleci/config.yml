@@ -335,14 +335,6 @@ jobs:
       - run:
           name: Install CogUtil
           command: cd /ws/cogutil/build && make -j2 install && ldconfig
-      - restore_cache:
-          name: Restore GHC Cache
-          keys:
-            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
-      - restore_cache:
-          name: Restore Haskell Deps Cache
-          keys:
-            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make install && ldconfig
@@ -394,14 +386,6 @@ jobs:
       - run:
           name: Install CogUtil
           command: cd /ws/cogutil/build && make install && ldconfig
-      - restore_cache:
-          name: Restore GHC Cache
-          keys:
-            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
-      - restore_cache:
-          name: Restore Haskell Deps Cache
-          keys:
-            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make install && ldconfig
@@ -434,6 +418,53 @@ jobs:
           root: /ws/
           paths:
             - attention
+            - ccache
+
+  as-moses:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/as-moses
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make install && ldconfig
+      - run:
+          name: Checkout AS-MOSES
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/as-moses .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make
+      - run:
+          name: Build tests
+          command: cd build && make tests
+      - run:
+          name: Run tests
+          command: cd build && make test ARGS="$MAKEFLAGS"
+      - run:
+          name: Install AS-MOSES
+          command: cd build && make install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - as-moses
             - ccache
 
   opencog:
