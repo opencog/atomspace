@@ -36,6 +36,8 @@ TARGET_LINK_LIBRARIES(logger_cython
 	${PYTHON_LIBRARIES}
 )
 
+# Python is expecting the shared object to be called `logger.so` and
+# not `liblogger_something.so`
 SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME logger)
