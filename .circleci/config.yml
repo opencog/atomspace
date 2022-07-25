@@ -598,7 +598,10 @@ workflows:
             - ure
       - package:
           requires:
+            - as-moses
+            - miner
             - opencog
+            - pln
           filters:
             branches:
               only: master
