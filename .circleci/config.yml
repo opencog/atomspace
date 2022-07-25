@@ -123,53 +123,6 @@ jobs:
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
-  as-moses:
-    docker:
-      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
-        user: root
-        environment:
-          CCACHE_DIR: /ws/ccache
-    working_directory: /ws/as-moses
-    steps:
-      - attach_workspace:
-          at: /ws
-      - run:
-          name: Set number of make jobs
-          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
-      - run:
-          name: Install CogUtil
-          command: cd /ws/cogutil/build && make install && ldconfig
-      - run:
-          name: Install AtomSpace
-          command: cd /ws/atomspace/build && make install && ldconfig
-      - run:
-          name: Checkout AS-MOSES
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/as-moses .
-      - run:
-          name: CMake Configure
-          command: mkdir build && cd build && cmake ..
-      - run:
-          name: Build
-          command: cd build && make
-      - run:
-          name: Build tests
-          command: cd build && make tests
-      - run:
-          name: Run tests
-          command: cd build && make test ARGS="$MAKEFLAGS"
-      - run:
-          name: Install AS-MOSES
-          command: cd build && make install && ldconfig
-      - run:
-          name: Print test log
-          command: cat build/tests/Testing/Temporary/LastTest.log
-          when: always
-      - persist_to_workspace:
-          root: /ws/
-          paths:
-            - as-moses
-            - ccache
-
   cogserver:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -311,19 +264,22 @@ jobs:
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
-  pln:
+  as-moses:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
         user: root
         environment:
           CCACHE_DIR: /ws/ccache
-    working_directory: /ws/pln
+    working_directory: /ws/as-moses
     steps:
       - attach_workspace:
-          at: /ws/
+          at: /ws
+      - run:
+          name: Set number of make jobs
+          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
       - run:
           name: Install CogUtil
-          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+          command: cd /ws/cogutil/build && make install && ldconfig
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
@@ -331,26 +287,23 @@ jobs:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
-          name: Install SpaceTime
-          command: cd /ws/spacetime/build && make -j2 install && ldconfig
-      - run:
-          name: Checkout PLN
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/pln .
+          name: Checkout AS-MOSES
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/as-moses .
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
       - run:
           name: Build
-          command: cd build && make -j2
-      - run:
-          name: Install PLN
-          command: cd build && make -j2 install && ldconfig
+          command: cd build && make
       - run:
           name: Build tests
-          command: cd build && make -j2 tests
+          command: cd build && make tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make test ARGS="$MAKEFLAGS"
+      - run:
+          name: Install AS-MOSES
+          command: cd build && make install && ldconfig
       - run:
           name: Print test log
           command: cat build/tests/Testing/Temporary/LastTest.log
@@ -358,9 +311,8 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
-            - pln
-            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
-            # - ccache
+            - as-moses
+            - ccache
 
   miner:
     docker:
@@ -416,6 +368,57 @@ jobs:
           paths:
             - miner
             - ccache
+
+  pln:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/pln
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install URE
+          command: cd /ws/ure/build && make -j2 install && ldconfig
+      - run:
+          name: Install SpaceTime
+          command: cd /ws/spacetime/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout PLN
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/pln .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Install PLN
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j2 test ARGS=-j2
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - pln
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
 
   attention:
     docker:
@@ -561,9 +564,6 @@ workflows:
       - atomspace-rocks:
           requires:
             - atomspace
-      - as-moses:
-          requires:
-            - atomspace
       - cogserver:
           requires:
             - atomspace
@@ -573,8 +573,13 @@ workflows:
       - ure:
           requires:
             - atomspace
+      - as-moses:
+          requires:
+            - atomspace
+            - ure
       - miner:
           requires:
+            - atomspace
             - ure
       - pln:
           requires:
@@ -583,13 +588,14 @@ workflows:
             - spacetime
       - attention:
           requires:
+            - atomspace
             - cogserver
       - opencog:
           requires:
             - atomspace
-            - ure
-            - cogserver
             - attention
+            - cogserver
+            - ure
       - package:
           requires:
             - opencog
