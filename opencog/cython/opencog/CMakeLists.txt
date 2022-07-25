@@ -21,18 +21,8 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-# Even though Python2 is deprecated, we still have users running
-# ROS Kinetic which requires Python2. So we still support Python2.
-# Use ${PYTHONLIBS_VERSION_STRING} instead of ${PYTHON_VERSION_STRING}
-IF (${PYTHONLIBS_VERSION_STRING} VERSION_LESS 3.0.0)
-	SET(CYTHON_FLAGS "-2" "-f" "-Wextra")
-ELSE ()
-	# SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
-	SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
-ENDIF ()
-
-# Use this as a guide:
-# https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
+# SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
 
 ###################### logger ##########################################
 CYTHON_ADD_MODULE_PYX(logger)
