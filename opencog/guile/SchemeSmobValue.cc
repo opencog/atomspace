@@ -96,7 +96,14 @@ SchemeSmob::scm_to_bool_list (SCM svalue_list)
 		SCM svalue = SCM_CAR(sl);
 
 		if (not scm_is_null(svalue)) {
-			bool v = scm_to_bool(svalue);
+			bool v;
+			if (scm_is_bool(svalue))
+				v = scm_to_bool(svalue);
+			else if (scm_is_integer(svalue))
+				v = scm_to_int8(svalue);
+			else
+				scm_wrong_type_arg_msg("cog-new-value", 2, svalue_list,
+					"a list of boolean values");
 			valist.emplace_back(v);
 		}
 		sl = SCM_CDR(sl);
