@@ -24,7 +24,8 @@ VALUE
 // Values are collections of data that can be associated with atoms.
 // Think of them as decorations that can be hung on an atom.
 VOID_VALUE <- VALUE     // singleton value holding nothing at all.
-FLOAT_VALUE <- VALUE    // vector of floats, actually.
+BOOL_VALUE <- VALUE     // vector of booleans
+FLOAT_VALUE <- VALUE    // vector of floats
 STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE      // (atom,key,value) triple
@@ -838,13 +839,9 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // some of these return truth values.
 
 // Return the indicated value on the indicated atom.
-// XXX FIXME - Not all ValueOfLinks are actually numeric; but there
-// is no way to tell, in advance. They may or may not be... when they
-// aren't, the evaluator will throw a silent exception, which is
-// caught, so its mostly harmless if the returned value isn't actually
-// numeric.  We need this try..catch because sometimes there just isn't
-// a value -- i.e. ValueOfLink can return a null pointer.
-VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+VALUE_OF_LINK <- FUNCTION_LINK
+BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,CRISP_OUTPUT_LINK
+FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
 STREAM_VALUE_OF_LINK <- VALUE_OF_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
 STRENGTH_OF_LINK <- VALUE_OF_LINK
