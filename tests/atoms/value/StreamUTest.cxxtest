@@ -106,7 +106,7 @@ void StreamUTest::test_basic()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 #define LEN 10
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 	double sum = loop(valof);
 
 	printf("Expect 0.485 < %g < 0.515\n", sum);
@@ -122,7 +122,7 @@ void StreamUTest::test_times()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// unit scalar times vector --------------------------------------
 	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "1"), valof);
@@ -196,7 +196,7 @@ void StreamUTest::test_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// zero scalar plus vector --------------------------------------
 	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "0"), valof);
@@ -245,7 +245,7 @@ void StreamUTest::test_times_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 5+3x --------------------------------------------
 	std::vector<double> vfive;
@@ -290,7 +290,7 @@ void StreamUTest::test_minus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 3-x --------------------------------------------
 	std::vector<double> vthree;
@@ -339,7 +339,7 @@ void StreamUTest::test_divide()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// x/4 --------------------------------------------
 	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
@@ -394,7 +394,7 @@ void StreamUTest::test_number()
 	value = al(RANDOM_NUMBER_LINK, an(NUMBER_NODE, "0"), an(NUMBER_NODE, "1"));
 	atom->setValue(key, value);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// x/4 --------------------------------------------
 	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
@@ -439,13 +439,13 @@ void StreamUTest::test_chaining()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	Handle coinflip = al(GREATER_THAN_LINK, an(NUMBER_NODE, "0.5"), valof);
 	Handle flipkey = an(PREDICATE_NODE, "*-binary-flip-*");
 	atom->setValue(flipkey, coinflip);
 
-	Handle chainof = al(VALUE_OF_LINK, atom, flipkey);
+	Handle chainof = al(FLOAT_VALUE_OF_LINK, atom, flipkey);
 
 	double sum = 0.0;
 	for (int i=0; i<LOOPCNT*LEN; i++)

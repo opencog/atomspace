@@ -139,11 +139,11 @@
 		(VariableList (Variable "$x") (Variable "$y"))
 		(SequentialAnd
 			(GreaterThan
-				(ValueOf (Inheritance (Variable "$x") (Variable "$y"))  key)
+				(FloatValueOf (Inheritance (Variable "$x") (Variable "$y"))  key)
 				(Number 0.99))
 			(GreaterThan
 				(Number 1.01)
-				(ValueOf (Inheritance (Variable "$x") (Variable "$y")) key))
+				(FloatValueOf (Inheritance (Variable "$x") (Variable "$y")) key))
 		)))
 
 ; Expect (its-one atom-a atom-b) to be true,

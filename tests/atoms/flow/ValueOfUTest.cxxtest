@@ -210,7 +210,7 @@ void ValueOfUTest::test_times()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// scalar times vector --------------------------------------------
 	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
@@ -263,7 +263,7 @@ void ValueOfUTest::test_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// scalar plus vector --------------------------------------------
 	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
@@ -316,7 +316,7 @@ void ValueOfUTest::test_times_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 5+3x --------------------------------------------
 	Handle times = al(PLUS_LINK, an(NUMBER_NODE, "5"),
@@ -373,7 +373,7 @@ void ValueOfUTest::test_minus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 3-x --------------------------------------------
 	Handle minus = al(MINUS_LINK, an(NUMBER_NODE, "3"), valof);
@@ -426,7 +426,7 @@ void ValueOfUTest::test_divide()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// x/4 --------------------------------------------
 	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4 4 4"));
@@ -487,7 +487,7 @@ void ValueOfUTest::test_number()
 	value = an(NUMBER_NODE, "3");
 	atom->setValue(key, value);
 
-	Handle valof = al(VALUE_OF_LINK, atom, key);
+	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 3/4 --------------------------------------------
 	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
