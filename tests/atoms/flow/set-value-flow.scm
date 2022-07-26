@@ -17,11 +17,11 @@
 (cog-set-value! foo key seq)
 
 ; Copy from foo to bar
-(define set-value (SetValue bar kee (ValueOf foo key)))
+(define set-value (SetValue bar kee (FloatValueOf foo key)))
 
 ; Try out some math
 (define square (SetValue bar kee
-	(Times (ValueOf foo key) (ValueOf foo key))))
+	(Times (FloatValueOf foo key) (FloatValueOf foo key))))
 
 (DefineLink
    (DefinedSchema "triangle numbers")
@@ -34,6 +34,6 @@
 (define triangle
 	(SetValue bar kee
 		(DefinedSchema "triangle numbers")
-		(ValueOf foo key)))
+		(FloatValueOf foo key)))
 ;
 ; -------- THE END -----------
