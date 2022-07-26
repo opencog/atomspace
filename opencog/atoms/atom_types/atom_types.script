@@ -839,14 +839,17 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // some of these return truth values.
 
 // Return the indicated value on the indicated atom.
+// The BoolValueOf and FloatValueOf links exist only to provide
+// creation-time type checking; otherwise, they behave just like
+// the ValueOfLink.
 VALUE_OF_LINK <- FUNCTION_LINK
 BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,CRISP_OUTPUT_LINK
 FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
 STREAM_VALUE_OF_LINK <- VALUE_OF_LINK
 TRUTH_VALUE_OF_LINK <- VALUE_OF_LINK
-STRENGTH_OF_LINK <- VALUE_OF_LINK
-CONFIDENCE_OF_LINK <- VALUE_OF_LINK
-COUNT_OF_LINK <- VALUE_OF_LINK
+STRENGTH_OF_LINK <- FLOAT_VALUE_OF_LINK
+CONFIDENCE_OF_LINK <- FLOAT_VALUE_OF_LINK
+COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 
 // Opposite of the above; attach a value to an atom.
 SET_VALUE_LINK <- FUNCTION_LINK
