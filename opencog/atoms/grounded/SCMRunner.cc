@@ -62,15 +62,8 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
                             const Handle& cargs,
                             bool silent)
 {
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
-
 	SchemeEval* applier = get_evaluator_for_scheme(as);
-	ValuePtr vp = applier->apply_v(_fname, args);
+	ValuePtr vp = applier->apply_v(_fname, cargs);
 
 	// Hmmm... well, a bad scheme function can end up returning a
 	// null pointer. We can convert this to a VoidValue... or we

@@ -61,6 +61,7 @@ GroundedPredicateNode::~GroundedPredicateNode()
 
 void GroundedPredicateNode::init()
 {
+	_eager = false;
 	_runner = nullptr;
 
 	// Get the schema name.
@@ -71,6 +72,16 @@ void GroundedPredicateNode::init()
 	{
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
+	if (0 == schema.compare(0, 10, "scm-eager:", 10))
+	{
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 10;
+		_eager = true;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
 		return;
@@ -103,17 +114,20 @@ void GroundedPredicateNode::init()
 /// `execute()` -- evaluate a GroundedPredicateNode with arguments.
 ///
 /// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// The arguments are "eager-evaluated", because it is assumed that
-/// the GPN is unaware of the concept of lazy evaluation, and can't
-/// do it itself. The arguments are then inserted into the predicate,
-/// and the predicate as a whole is then evaluated.
+/// substituted into the predicate. Then the predicate as a whole
+/// will be evaulated.
 ///
 ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
                                         const Handle& cargs,
                                         bool silent)
 {
+	// Perform "eager evaluation" instead of "lazy evaluation".
+	if (_eager and _runner)
+	{
+		Handle exargs(force_execute(as, cargs, silent));
+		return _runner->evaluate(as, exargs, silent);
+	}
+
 	if (_runner) return _runner->evaluate(as, cargs, silent);
 
 	// Unknown procedure type.
