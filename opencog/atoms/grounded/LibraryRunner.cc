@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/execution/Force.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -61,21 +60,11 @@ static void throwSyntaxException(bool silent, const char* message...)
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-/// The arguments are "eager-evaluated", because it is assumed that
-/// the GPN is unaware of the concept of lazy evaluation, and can't
-/// do it itself. The arguments are then inserted into the predicate,
-/// and the predicate as a whole is then evaluated.
-///
 ValuePtr LibraryRunner::execute(AtomSpace* as,
                                const Handle& cargs,
                                bool silent)
 {
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
 	Handle* (*func)(AtomSpace*, Handle*);
@@ -104,12 +93,7 @@ ValuePtr LibraryRunner::evaluate(AtomSpace* as,
                                 const Handle& cargs,
                                 bool silent)
 {
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
 	TruthValuePtr* (*func)(AtomSpace*, Handle*);

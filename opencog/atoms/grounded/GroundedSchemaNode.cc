@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/execution/Force.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "GroundedSchemaNode.h"
@@ -52,6 +53,7 @@ GroundedSchemaNode::GroundedSchemaNode(Type t, std::string s)
 void GroundedSchemaNode::init()
 {
 	_runner = nullptr;
+	_eager = false;
 
 	// Get the schema name.
 	const std::string& schema = get_name();
@@ -61,6 +63,16 @@ void GroundedSchemaNode::init()
 	{
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
+	if (0 == schema.compare(0, 10, "scm-eager:", 10))
+	{
+		_eager = true;
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 10;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
 		return;
@@ -105,6 +117,12 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
 	              << "with arguments: " << oc_to_string(cargs);
 
+	// Perform "eager evaluation" instead of "lazy evaluation".
+	if (_eager and _runner)
+	{
+		Handle exargs(force_execute(as, cargs, silent));
+		return _runner->execute(as, exargs, silent);
+	}
 	if (_runner) return _runner->execute(as, cargs, silent);
 
 	// Unknown procedure type

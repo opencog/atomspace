@@ -16,6 +16,24 @@
 ;; Define simple truth value
 (define (stv mean conf) (cog-new-stv mean conf))
 
+(define (not-same atom-a atom-b)
+	(define ne (not (equal? atom-a atom-b)))
+	(if ne (stv 1 1) (stv 0 1)))
+
+(define (none-same atom-a atom-b atom-c atom-d atom-e)
+	(define ne (and
+		(not (equal? atom-a atom-b))
+		(not (equal? atom-a atom-c))
+		(not (equal? atom-a atom-d))
+		(not (equal? atom-a atom-e))
+		(not (equal? atom-b atom-c))
+		(not (equal? atom-b atom-d))
+		(not (equal? atom-b atom-e))
+		(not (equal? atom-c atom-d))
+		(not (equal? atom-c atom-e))
+		(not (equal? atom-d atom-e))))
+	(if ne (stv 1 1) (stv 0 1)))
+
 ;; Shorthand for the node types
 (define VN VariableNode)
 (define PN PredicateNode)
@@ -47,7 +65,7 @@
 ;; Predicate clause, asserting that v2 and v3 are different atoms.
 (define (differ t2 v2 t3 v3)
 	(EvaluationLink
-		(GroundedPredicateNode "c++:exclusive")
+		(GroundedPredicateNode "scm:not-same")
 		(ListLink
 			(t2 v2)
 			(t3 v3)
@@ -184,7 +202,7 @@
 			(InheritanceLink (VN "$attr_e") (VN "$attr_type"))
 			;; and attributes a,b,c,d,e are all different from one-another
 			(EvaluationLink
-				(GroundedPredicateNode "c++:exclusive")
+				(GroundedPredicateNode "scm:none-same")
 				(ListLink
 					(VN "$attr_a")
 					(VN "$attr_b")

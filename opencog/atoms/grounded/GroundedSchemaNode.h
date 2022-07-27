@@ -39,6 +39,7 @@ class Runner;
 class GroundedSchemaNode : public GroundedProcedureNode
 {
 	Runner* _runner;
+	bool _eager;
 	void init();
 
 public:

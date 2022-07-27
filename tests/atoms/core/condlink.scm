@@ -1,4 +1,6 @@
-
+;
+; condlink.scm
+;
 (use-modules (opencog) (opencog exec))
 
 (define single
