@@ -974,7 +974,7 @@
   (NumberNode "5.000000")
   (PlusLink
     (NumberNode "3.000000")
-    (ValueOfLink
+    (FloatValueOfLink
       (ConceptNode "some atom")
       (PredicateNode "my key")
     )
@@ -987,7 +987,7 @@
   (NumberNode "5.000000")
   (TimesLink
     (NumberNode "3.000000")
-    (ValueOfLink
+    (FloatValueOfLink
       (ConceptNode "some atom")
       (PredicateNode "my key")
     )

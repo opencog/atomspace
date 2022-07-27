@@ -2,6 +2,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (value
 	Value.cc
+	BoolValue.cc
 	FloatValue.cc
 	FormulaStream.cc
 	LinkStreamValue.cc
@@ -27,6 +28,7 @@ INSTALL (TARGETS value EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	BoolValue.h
 	FloatValue.h
 	FormulaStream.h
 	LinkStreamValue.h

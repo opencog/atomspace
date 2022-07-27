@@ -91,6 +91,7 @@ private:
 	static ValuePtr scm_to_protom(SCM);
 	static ValuePtr make_value(Type, SCM);
 
+	static std::vector<bool> scm_to_bool_list (SCM);
 	static std::vector<double> scm_to_float_list (SCM);
 	static std::vector<ValuePtr> scm_to_protom_list (SCM);
 	static std::vector<std::string> scm_to_string_list (SCM);
@@ -215,6 +216,8 @@ private:
 	                                         int, const char*,  const char*);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                     int pos = 1);
+	static std::vector<bool> verify_bool_list (SCM, const char *,
+	                                           int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
 	                                              int pos = 1);
 	static std::vector<ValuePtr> verify_protom_list (SCM, const char *,

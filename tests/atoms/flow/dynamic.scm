@@ -86,7 +86,7 @@
 
 (cog-set-value! foo akey (FloatValue 1 2 3 4 5))
 
-(define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
+(define fstream (FormulaStream (Plus (Number 10) (FloatValueOf foo akey))))
 (cog-set-value! bar bkey fstream)
 
 ; ------- THE END -------

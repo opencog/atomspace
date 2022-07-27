@@ -25,6 +25,7 @@
 #include <libguile.h>
 
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -67,6 +68,50 @@ SCM SchemeSmob::ss_value_p (SCM s)
 }
 
 /* ============================================================== */
+/**
+ * Convert argument into a list of bools.
+ */
+std::vector<bool>
+SchemeSmob::verify_bool_list (SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list. Allow null list
+	// (which is rather unusual, but legit.  Allow embedded nulls
+	// as this can be convenient for writing scheme code.
+	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of float-pt values");
+	return scm_to_bool_list(svalue_list);
+}
+
+std::vector<bool>
+SchemeSmob::scm_to_bool_list (SCM svalue_list)
+{
+	SCM sl = svalue_list;
+
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
+	std::vector<bool> valist;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		if (not scm_is_null(svalue)) {
+			bool v;
+			if (scm_is_bool(svalue))
+				v = scm_to_bool(svalue);
+			else if (scm_is_integer(svalue))
+				v = scm_to_int8(svalue);
+			else
+				scm_wrong_type_arg_msg("cog-new-value", 2, svalue_list,
+					"a list of boolean values");
+			valist.emplace_back(v);
+		}
+		sl = SCM_CDR(sl);
+	}
+	return valist;
+}
+
+
 /**
  * Convert argument into a list of floats.
  */
@@ -224,6 +269,13 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
+	}
+
+	if (nameserver().isA(t, BOOL_VALUE))
+	{
+		std::vector<bool> valist;
+		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);
 	}
 
@@ -506,7 +558,13 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, scm_from_double)
 	}
 
-	if (STRING_VALUE == t)
+	if (nameserver().isA(t, BOOL_VALUE))
+	{
+		const std::vector<bool>& v = BoolValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_bool)
+	}
+
+	if (nameserver().isA(t, STRING_VALUE))
 	{
 		const std::vector<std::string>& v = StringValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_string)
@@ -548,6 +606,12 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);
+	}
+
+	if (nameserver().isA(t, BOOL_VALUE))
+	{
+		const std::vector<bool>& v = BoolValueCast(pa)->value();
+		if (index < v.size()) return scm_from_bool(v[index]);
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))

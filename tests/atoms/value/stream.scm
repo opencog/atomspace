@@ -13,8 +13,8 @@
 (define a (Concept "my atom"))
 (cog-set-value! a k (FloatValue 1 2 3))
 
-; Fetch the value, using the ValueOfLink
-(define vo (ValueOf a k))
+; Fetch the value, using the FloatValueOfLink
+(define vo (FloatValueOf a k))
 ; (cog-execute! vo)
 
 ; Numeric computations can be performed on that value...
@@ -31,5 +31,5 @@
 ; Add 6 to get a number between 6 and 7.
 ; Then multiply by 2, to get a number between 12 and 14.
 (define sixes (make-list 24 6))
-(define tymb (Times (Number 2) (Plus (ValueOf b k) (Number sixes)) ))
+(define tymb (Times (Number 2) (Plus (FloatValueOf b k) (Number sixes)) ))
 ; (cog-execute! tymb)
