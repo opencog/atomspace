@@ -25,7 +25,7 @@
          )
       )
       (ExecutionOutputLink
-         (GroundedSchemaNode "scm: dummy")
+         (GroundedSchemaNode "scm-eager: dummy")
          (ListLink
             (QuoteLink
                (LambdaLink
@@ -71,7 +71,7 @@
          )
       )
       (ExecutionOutputLink
-         (GroundedSchemaNode "scm: dummy")
+         (GroundedSchemaNode "scm-eager: dummy")
          (ListLink
             (ImplicationLink
                (VariableNode "$P")
