@@ -66,6 +66,15 @@ void GroundedSchemaNode::init()
 		return;
 	}
 
+	if (0 == schema.compare(0, 10, "scm-eager:", 10))
+	{
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 10;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
 	// At this point, we only run scheme, python schemas and functions from
 	// libraries loaded at runtime.
 	if (0 == schema.compare(0, 3, "py:", 3))
