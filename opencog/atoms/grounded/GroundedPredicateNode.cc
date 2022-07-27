@@ -76,6 +76,15 @@ void GroundedPredicateNode::init()
 		return;
 	}
 
+	if (0 == schema.compare(0, 10, "scm-eager:", 10))
+	{
+		// Be friendly, and strip leading white-space, if any.
+		size_t pos = 10;
+		while (' ' == schema[pos]) pos++;
+		_runner = new SCMRunner(schema.substr(pos));
+		return;
+	}
+
 	if (0 == schema.compare(0, 3, "py:", 3))
 	{
 #ifdef HAVE_CYTHON
