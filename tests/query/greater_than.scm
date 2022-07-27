@@ -102,34 +102,6 @@
 
 
 ;; -----------------------------------------------------
-;; This variant uses the built-in c++ greater-than code.
-(define cpp-cmp
-	(EvaluationLink
-		(GroundedPredicateNode "c++:greater")
-		(ListLink
-			(VariableNode "$more-wealth")
-			(VariableNode "$less-wealth")
-		)
-	)
-)
-
-(define (richer-than-person-x person-x)
-	(richer-than-person-x-cmp person-x cpp-cmp))
-
-(define (richer-than-gates)
-	(richer-than-person-x (ConceptNode "Bill Gates")))
-
-(define (richer-than-obama)
-	(richer-than-person-x (ConceptNode "Obama")))
-
-(define (richer-than-george)
-	(richer-than-person-x (ConceptNode "George P. from Waxahachie")))
-
-(define (richer-than-susan)
-	(richer-than-person-x (ConceptNode "Susan M. from Peoria")))
-
-
-;; -----------------------------------------------------
 ;; This variant uses a hand-rolled scm compare function
 (define (richer a b)
 	(if (> (cog-number a) (cog-number b))

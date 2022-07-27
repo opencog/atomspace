@@ -54,7 +54,6 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_numeric_greater(void);
 	void test_scm_greater(void);
 	void test_builtin_greater(void);
 };
@@ -74,41 +73,7 @@ void GreaterThanUTest::setUp(void)
  * involving NumberNodes, and then verifies that the GreaterThanLink
  * is actually performing the numeric comparison correctly.
  */
-void GreaterThanUTest::test_numeric_greater(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
-
-	Handle richer_than_george = eval->eval_h("(richer-than-george)");
-	Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
-	Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
-	Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
-
-	TSM_ASSERT("Failed to load test data", richer_than_george);
-	TSM_ASSERT("Failed to load test data", richer_than_susan);
-	TSM_ASSERT("Failed to load test data", richer_than_obama);
-	TSM_ASSERT("Failed to load test data", richer_than_gates);
-
-	Handle people_richer_than_george = bindlink(as, richer_than_george);
-	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
-
-	TSM_ASSERT("Failed to run test", people_richer_than_george);
-	TSM_ASSERT("Failed to run test", people_richer_than_susan);
-	TSM_ASSERT("Failed to run test", people_richer_than_obama);
-	TSM_ASSERT("Failed to run test", people_richer_than_gates);
-
-	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
-	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
-	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
-	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// Same test as above, but using a scheme func for the compares
+// Uses a scheme func for the compares
 void GreaterThanUTest::test_scm_greater(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
