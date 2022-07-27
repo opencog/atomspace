@@ -62,8 +62,16 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
                             const Handle& cargs,
                             bool silent)
 {
+	// If we arrive here from queries or other places, the
+	// argument will not be (in general) in any atomspace.
+	// That's because it was constructed on the fly, and
+	// we're trying to stick to lazy evaluation. But we have
+	// draw the line here: the callee necesssarily expects
+	// arguments to be in the atomspace. So we add now.
+	Handle asargs = as->add_atom(cargs);
+
 	SchemeEval* applier = get_evaluator_for_scheme(as);
-	ValuePtr vp = applier->apply_v(_fname, cargs);
+	ValuePtr vp = applier->apply_v(_fname, asargs);
 
 	// Hmmm... well, a bad scheme function can end up returning a
 	// null pointer. We can convert this to a VoidValue... or we
