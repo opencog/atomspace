@@ -21,9 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/execution/Force.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
@@ -45,39 +42,30 @@ PythonRunner::PythonRunner(std::string s)
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-/// The arguments are "eager-evaluated", because it is assumed that
-/// the GPN is unaware of the concept of lazy evaluation, and can't
-/// do it itself. The arguments are then inserted into the predicate,
-/// and the predicate as a whole is then evaluated.
-///
 ValuePtr PythonRunner::execute(AtomSpace* as,
                                const Handle& cargs,
                                bool silent)
 {
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	// If we arrive here from queries or other places, the
+	// argument will not be (in general) in any atomspace.
+	// That's because it was constructed on the fly, and
+	// we're trying to stick to lazy evaluation. But we have
+	// draw the line here: the callee necesssarily expects
+	// arguments to be in the atomspace. So we add now.
+	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
 
-	return applier->apply_v(as, _fname, args);
+	return applier->apply_v(as, _fname, asargs);
 }
 
 ValuePtr PythonRunner::evaluate(AtomSpace* as,
                                 const Handle& cargs,
                                 bool silent)
 {
-	// Force execution of the arguments. We have to do this, because
-	// the user-defined functions are black-boxes, and cannot be trusted
-	// to do lazy execution correctly. Right now, forcing is the policy.
-	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
-	// functions smart enough to do lazy evaluation.
-	Handle args(force_execute(as, cargs, silent));
+	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
 
-	return CastToValue(applier->apply_tv(as, _fname, args));
+	return CastToValue(applier->apply_tv(as, _fname, asargs));
 }
