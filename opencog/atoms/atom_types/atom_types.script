@@ -134,23 +134,31 @@ PREDICATE_NODE <- NODE
 // when they are evaluated.
 EVALUATABLE_LINK <- LINK
 
+// Crisp (scalar-valued) boolean-input link.  This link type forces
+// type-checking on it's "inputs" (it's outgoing set): they must be
+// EvaluatableLinks.
+CRISP_INPUT_LINK <- LINK
+
 // Crisp binary true/false output. Link types that, when evaluated,
-// naturally yield a true/false value.
+// naturally yield a singular true/false value (and not a vector of
+// bools)
 CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
 
-// Numeric-output link. Generates either NumberNodes or FloatValues
-// upon execution.
-NUMERIC_OUTPUT_LINK <- LINK
+// Boolean-input link. Accepts BoolValues (vectors of bools).
+BOOLEAN_INPUT_LINK <- LINK
 
-// Boolean-input link.  This link type forces type-checking on it's
-// "inputs" (it's outgoing set): they must be EvaluatableLinks.
-BOOLEAN_LINK <- LINK
+// Boolean-output link. Generates BoolValues upon execution.
+BOOLEAN_OUTPUT_LINK <- LINK
 
 // Numeric-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
 // that can evaluate to NumberNodes: viz NumericOutputLinks, or
 // numeric values (derived from FloatValue).
 NUMERIC_INPUT_LINK <- LINK
+
+// Numeric-output link. Generates either NumberNodes or FloatValues
+// upon execution.
+NUMERIC_OUTPUT_LINK <- LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
@@ -209,13 +217,26 @@ CONTEXT_LINK <- ORDERED_LINK
 // sequential execution until the first failure or the first success.
 // See also CondLink below, which implements traditional conditional.
 //
+// XXX FIXME These types are widely and frequently misused in the code
+// base: people have used them in places where there is no intent
+// whatsoever to actually execute these link types. They're used in
+// an entirely declarative fashion. This should be cleaned up, someday.
+//
 TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
-AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
-OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
-NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,BOOLEAN_LINK
+AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+
+// Similar to above, but meant to be used in an execution context.
+// These links can be used to operate on BoolValues, which are
+// vectors of bools. The ops apply point-wise to the vectors.
+BOOL_OP_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK,BOOLEAN_OUTPUT_LINK,BOOLEAN_INPUT_LINK
+BOOL_AND_LINK <- BOOL_OP_LINK
+BOOL_OR_LINK <- BOOL_OP_LINK
+BOOL_NOT_LINK <- BOOL_OP_LINK
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
