@@ -45,14 +45,13 @@ protected:
 
 
 public:
-	ArithmeticLink(const HandleSeq&&, Type=ARITHMETIC_LINK);
+	ArithmeticLink(const HandleSeq&&, Type);
 
 	ArithmeticLink(const ArithmeticLink&) = delete;
 	ArithmeticLink& operator=(const ArithmeticLink&) = delete;
 
 	virtual ValuePtr delta_reduce(AtomSpace*, bool) const;
 	virtual ValuePtr execute(AtomSpace*, bool);
-	virtual ValuePtr execute(void) { return execute(_atom_space, false); }
 };
 
 LINK_PTR_DECL(ArithmeticLink)
