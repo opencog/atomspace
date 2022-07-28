@@ -32,8 +32,8 @@ namespace opencog
  */
 
 /**
- * The NumericFunctionLink implements the simple arithmetic operations.
- * It uses FoldLink to perform delta-reduction.
+ * The NumericFunctionLink implements a generic framework for
+ * functions that accept and return vectors of floats.
  */
 class NumericFunctionLink : public FunctionLink
 {
