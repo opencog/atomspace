@@ -737,7 +737,9 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
 
 	// PutLink is incompletely evaluated, above. Finish the job here.
-	if (vp and vp->is_atom())
+	if (expr->get_type() == PUT_LINK
+	    and expr->getOutgoingAtom(0)->get_type() != DONT_EXEC_LINK
+	    and vp and vp->is_atom())
 	{
 		Handle h(HandleCast(vp));
 		if (h->is_executable()) return h->execute();
