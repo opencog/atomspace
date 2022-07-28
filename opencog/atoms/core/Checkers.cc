@@ -39,7 +39,7 @@ static inline void check_null(const Handle& h)
 /// it does not check deep types, nor does it check arity.
 
 /// Check to see if every input atom is of Evaluatable type.
-bool check_evaluatable(const Handle& bool_atom)
+static bool check_evaluatable(const Handle& bool_atom)
 {
 	// Make an exception for AndLink, its used in pattern matcher
 	// in an unseemly way.
@@ -94,8 +94,17 @@ bool check_evaluatable(const Handle& bool_atom)
 	return true;
 }
 
+static bool check_bool_vect(const Handle& bool_atom)
+{
+	for (const Handle& h: bool_atom->getOutgoingSet())
+	{
+		if (not h->is_type(BOOLEAN_INPUT_LINK)) return false;
+	}
+	return true;
+}
+
 /// Check to see if every input atom is of Numeric type.
-bool check_numeric(const Handle& bool_atom)
+static bool check_numeric(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
@@ -129,7 +138,7 @@ bool check_numeric(const Handle& bool_atom)
 }
 
 /// Check the type constructors that expect types as input.
-bool check_type_ctors(const Handle& bool_atom)
+static bool check_type_ctors(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
@@ -148,7 +157,8 @@ bool check_type_ctors(const Handle& bool_atom)
 /* This runs when the shared lib is loaded. */
 static __attribute__ ((constructor)) void init(void)
 {
-	classserver().addValidator(BOOLEAN_LINK, check_evaluatable);
+	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
+	classserver().addValidator(BOOLEAN_INPUT_LINK, check_bool_vect);
 	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
 	classserver().addValidator(TYPE_INPUT_LINK, check_type_ctors);
 }
