@@ -47,7 +47,7 @@ protected:
 	void init(void);
 
 public:
-	FoldLink(const HandleSeq&&, Type=FOLD_LINK);
+	FoldLink(const HandleSeq&&, Type);
 
 	FoldLink(const FoldLink&) = delete;
 	FoldLink& operator=(const FoldLink&) = delete;
