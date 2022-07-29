@@ -38,13 +38,18 @@ NumericFunctionLink::NumericFunctionLink(const HandleSeq&& oset, Type t)
 
 void NumericFunctionLink::init(void)
 {
-	Type tscope = get_type();
-	if (NUMERIC_FUNCTION_LINK == tscope)
+	Type t = get_type();
+	if (NUMERIC_FUNCTION_LINK == t)
 		throw InvalidParamException(TRACE_INFO,
 			"NumericFunctionLinks are private and cannot be instantiated.");
 
-	if (not nameserver().isA(tscope, NUMERIC_FUNCTION_LINK))
+	if (not nameserver().isA(t, NUMERIC_FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
+
+	if (LOG2_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "Log2Link expects one argumet");
+	else if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "HeavisideLink expects one argumet");
 }
 
 // ===========================================================

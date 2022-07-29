@@ -48,7 +48,7 @@ protected:
 		double (*)(double, double), ValueSeq&);
 
 public:
-	NumericFunctionLink(const HandleSeq&&, Type=NUMERIC_FUNCTION_LINK);
+	NumericFunctionLink(const HandleSeq&&, Type);
 
 	NumericFunctionLink(const NumericFunctionLink&) = delete;
 	NumericFunctionLink& operator=(const NumericFunctionLink&) = delete;
