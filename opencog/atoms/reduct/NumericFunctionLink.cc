@@ -48,7 +48,9 @@ void NumericFunctionLink::init(void)
 	if (not nameserver().isA(t, NUMERIC_FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
 
-	if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
+	if (FLOOR_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "FloorLink expects one argument");
+	else if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO, "HeavisideLink expects one argument");
 	else if (LOG2_LINK == t and 1 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO, "Log2Link expects one argument");
@@ -58,6 +60,8 @@ void NumericFunctionLink::init(void)
 
 	else if (RANDOM_NUMBER_LINK == t and 2 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO, "RandomNumberLink expects two arguments");
+	else if (SINE_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "SineLink expects one argument");
 }
 
 // ===========================================================
@@ -272,10 +276,14 @@ ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
 	ValuePtr result;
 
 	Type t = get_type();
-	if (LOG2_LINK == t)
-		result = apply_func(as, silent, _outgoing[0], log2, reduction);
+	if (FLOOR_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], floor, reduction);
 	else if (HEAVISIDE_LINK == t)
 		result = apply_func(as, silent, _outgoing[0], impulse, reduction);
+	else if (LOG2_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], log2, reduction);
+	else if (SINE_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], sin, reduction);
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
