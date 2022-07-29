@@ -202,11 +202,14 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 
 // ============================================================
 
+static double impulse(double x) {return 1-std::signbit(x); }
+
 ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
 {
 	double (*fun)(double, double) = nullptr;
 	Type t = get_type();
 	if (LOG2_LINK == t) fun = log2;
+	else if (HEAVISIDE_LINK == t) fun = impulse;
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
