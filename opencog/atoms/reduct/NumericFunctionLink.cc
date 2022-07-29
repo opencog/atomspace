@@ -41,7 +41,7 @@ void NumericFunctionLink::init(void)
 	Type tscope = get_type();
 	if (NUMERIC_FUNCTION_LINK == tscope)
 		throw InvalidParamException(TRACE_INFO,
-			"NumericOutLinks are private and cannot be instantiated.");
+			"NumericFunctionLinks are private and cannot be instantiated.");
 
 	if (not nameserver().isA(tscope, NUMERIC_FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
@@ -200,4 +200,29 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 	return createFloatValue(funvec);
 }
 
+// ============================================================
+
+ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
+{
+	double (*fun)(double, double) = nullptr;
+	Type t = get_type();
+	if (LOG2_LINK == t) fun = log2;
+	else
+		throw InvalidParamException(TRACE_INFO,
+			"Internal Error: unhandled derived type!");
+
+	ValuePtr reduction;
+	ValuePtr result(apply_func(as, silent,
+		_outgoing[0], fun, reduction));
+
+	if (result) return result;
+
+	// No numeric values available. Sorry!
+	// Return the best-possible reduction that we did get.
+	if (reduction->is_atom())
+			return createLog2Link(HandleCast(reduction));
+
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
+}
 // ===========================================================
