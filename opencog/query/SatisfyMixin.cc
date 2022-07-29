@@ -533,6 +533,23 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
+
+	// Compute the size of the cartesion product
+	// If any are empty, then don't even bother to try.
+	size_t prod_size = 1;
+	for (const GroundingMapSeq& vg : comp_var_gnds)
+	{
+		prod_size *= vg.size();
+#ifdef QDEBUG
+		logger().fine("Cartesian component has %lu elts", vg.size());
+#endif
+	}
+#ifdef QDEBUG
+		logger().fine("Total CARTESIAN product size = %lu", prod_size);
+#endif
+
+	if (0 == prod_size) return false;
+
 	done = cartesian_product(virts, pat.absents,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
