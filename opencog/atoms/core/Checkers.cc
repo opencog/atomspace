@@ -98,7 +98,7 @@ static bool check_bool_vect(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
-		if (not h->is_type(BOOLEAN_INPUT_LINK)) return false;
+		if (not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
 	}
 	return true;
 }
