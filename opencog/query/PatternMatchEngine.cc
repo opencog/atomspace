@@ -1224,7 +1224,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 		int ig = rotors[it];
 		ig++;
 
-		logmsg("Setting up sparse rotor %d  (%d)\n", it, ig);
+		logmsg("Setting up sparse rotor %d start with gnd=%d\n", it, ig);
 
 		for (; ig < szg; ig++)
 		{
@@ -1327,7 +1327,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		const PatternTermPtr& pto = pats[it];
 		int ig = rotors[it];
 
-		logmsg("Stepping sparse rotor %d (was %d)\n", it, ig);
+		logmsg("Stepping sparse rotor %d (gnd was %d)\n", it, ig);
 
 		// As we revisit each sparse rotor, we want any unordered
 		// links that lie underneath to take a step.  So that the
