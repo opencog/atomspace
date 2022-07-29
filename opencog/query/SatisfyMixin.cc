@@ -206,7 +206,7 @@ bool SatisfyMixin::cartesian_product(
 #ifdef QDEBUG
 		if (logger().is_fine_enabled())
 		{
-			logger().fine("Explore one possible combinatoric grounding "
+			logger().fine("BEGIN CARTESIAN attempt grounding "
 			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
 			              var_gnds.size(), term_gnds.size());
 			PatternMatchEngine::log_solution(var_gnds, term_gnds);
@@ -252,6 +252,15 @@ bool SatisfyMixin::cartesian_product(
 			if (not match) return false;
 		}
 
+#ifdef QDEBUG
+		if (logger().is_fine_enabled())
+		{
+			logger().fine("FOUND CARTESIAN grounding "
+			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
+			              var_gnds.size(), term_gnds.size());
+			PatternMatchEngine::log_solution(var_gnds, term_gnds);
+		}
+#endif
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
 		return grounding(var_gnds, term_gnds);
