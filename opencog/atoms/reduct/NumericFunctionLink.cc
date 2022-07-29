@@ -22,6 +22,8 @@
 
 #include <limits>
 
+#include <opencog/util/mt19937ar.h>
+
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -215,6 +217,7 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 
 static double impulse(double x) { return 1-std::signbit(x); }
 
+static MT19937RandGen randy(616432);
 static double get_ran(double lb, double ub)
 {
 	// Linear algebra slope-intercept formula.
@@ -282,7 +285,8 @@ ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
 	// No numeric values available. Sorry!
 	// Return the best-possible reduction that we did get.
 	if (reduction->is_atom())
-			return createNumericFunctionLink(HandleCast(reduction), t);
+		return createNumericFunctionLink(
+			HandleSeq({HandleCast(reduction)}), t);
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
@@ -295,9 +299,9 @@ ValuePtr NumericFunctionLink::execute_binary(AtomSpace *as, bool silent)
 
 	Type t = get_type();
 	if (RANDOM_NUMBER_LINK == t)
-		result = apply_func(as, silent, _outgoing[0], get_ran, reduction);
+		result = apply_func(as, silent, _outgoing, get_ran, reduction);
 	else if (POW_LINK == t)
-		result = apply_func(as, silent, _outgoing[0], pow, reduction);
+		result = apply_func(as, silent, _outgoing, pow, reduction);
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
