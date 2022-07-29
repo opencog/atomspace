@@ -1052,6 +1052,3 @@ ATTRACTION_LINK <- ORDERED_LINK
 // define their own custom test types, rather than expecting us to
 // provide them XXX FIXME
 INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
-
-// XXX Remove below after MinerUTest and ASMOSES are fixed.
-BOOLEAN_LINK <- CRISP_INPUT_LINK
