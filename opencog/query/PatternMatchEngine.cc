@@ -1216,14 +1216,17 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 
 	// Set up the sparse odometer for the first time.
 	Rotors rotors(szp, -1);
-	for (int it=0; it<szp; it++)
+	int it = 0;
+	while (0 <= it and it < szp)
 	{
-		logmsg("Setting up sparse rotor %d  (%d)\n", it, -1);
 
 		const PatternTermPtr& pto = pats[it];
+		int ig = rotors[it];
+		ig++;
 
-		int ig;
-		for (ig = 0; ig < szg; ig++)
+		logmsg("Setting up sparse rotor %d  (%d)\n", it, ig);
+
+		for (; ig < szg; ig++)
 		{
 			solution_push();  // Each tree_compare writes into soln set.
 			logmsg("Test sparse rotor %d with proposed ground %d", it, ig);
@@ -1231,17 +1234,27 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 			bool match = tree_compare(pto, hog, CALL_SPARSE);
 			if (match)
 			{
-				solution_drop();
 				rotors[it] = ig;
-				logmsg("Sparse rotor setup %d grounded at %d", it, ig);
+				logmsg("Grounded sparse rotor %d at %d", it, ig);
+				it ++;
 				break;
 			}
 			solution_pop();
 		}
 
-		// Staight out of the chute, we got nothing!
-		if (ig >= szg) return false;
+		// If the above wrapped, back up and try again.
+		if (ig >= szg)
+		{
+			it --;
+			// Staight out of the chute, we got nothing!
+			if (0 > it) return false;
+
+			solution_pop();  // discard prior rotor
+		}
 	}
+
+	for (it=0; it<szp; it++)
+		solution_drop();
 
 	// Initialize rotor state.
 	_sparse_glob.emplace(ptm, glob->getHandle());
