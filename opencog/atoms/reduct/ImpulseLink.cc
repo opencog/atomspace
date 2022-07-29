@@ -47,12 +47,13 @@ void ImpulseLink::init(void)
 /// Convert a BoolValue into a FloatValue.
 ValuePtr ImpulseLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr bptr = NumericFunctionLink::get_value(as, silent,
+	ValuePtr vptr = NumericFunctionLink::get_value(as, silent,
 		_outgoing[0]);
 
-	if (nameserver().isA(bptr->get_type(), BOOLEAN_VALUE))
+	if (nameserver().isA(vptr->get_type(), BOOL_VALUE))
 	{
-		const std::vector<bool>& bv = bptr->get_value();
+		BoolValuePtr bvp = BoolValueCast(vptr);
+		const std::vector<bool>& bv = bvp->value();
 		std::vector<double> fv(bv.size());
 		for (bool b : bv)
 			fv.emplace_back(b? 1.0 : 0.0);
