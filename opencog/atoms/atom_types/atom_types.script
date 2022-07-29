@@ -834,6 +834,9 @@ DIVIDE_LINK <- TIMES_LINK
 MIN_LINK <- NUMERIC_FUNCTION_LINK
 MAX_LINK <- NUMERIC_FUNCTION_LINK
 
+// Truncate to integer (floor)
+FLOOR_LINK <- NUMERIC_FUNCTION_LINK
+
 // Heaviside step function; same as GreaterThan, but works
 // for vectors, and returns numeric value.
 HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
@@ -846,6 +849,9 @@ POW_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return uniformly distributed random number between two limits.
 RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
+
+// Trigonometric Sine function
+SINE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return the sum of vector components of a number/float-value.
 ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
