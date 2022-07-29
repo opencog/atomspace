@@ -46,10 +46,16 @@ void NumericFunctionLink::init(void)
 	if (not nameserver().isA(t, NUMERIC_FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
 
-	if (LOG2_LINK == t and 1 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO, "Log2Link expects one argumet");
-	else if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO, "HeavisideLink expects one argumet");
+	if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "HeavisideLink expects one argument");
+	else if (LOG2_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "Log2Link expects one argument");
+
+	else if (POW_LINK == t and 2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "PowLink expects two arguments");
+
+	else if (RANDOM_NUMBER_LINK == t and 2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "RandomNumberLink expects two arguments");
 }
 
 // ===========================================================
@@ -219,19 +225,43 @@ static double get_ran(double lb, double ub)
 /// functions on vector arguments (i.e. on FloatValues and
 /// NumberNodes, both of which hold float pt vectors by default.)
 ///
+/// ----
 /// The HeavisideLink implements the arithmetic operation of "greater
 /// than" on a component-by-component level. That is,
 ///    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
 /// where the comparison is 1.0 if true, else 0.0.
 /// Note it returns a FloatValue and NOT a BoolValue!
 ///
+/// ----
 /// The Log2Link implements the elementary function of
 /// logarithm base two. That is,
 ///    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
 ///
-/// The RandomNumberLink always returns either a NumberNode, or a
-/// set of NumberNodes.  This is in contrast to a RandomValue,
-/// which always returns a vector of doubles.
+/// ----
+/// The RandomNumberLink returns a NumberNode that lies within the
+/// min-max range, using a uniform distribution.
+///
+/// For example,
+///
+///     RandomNumberLink
+///         NumberNode 0.1
+///         NumberNode 0.5
+///
+/// will return a random number between 0.1 ad 0.5
+///
+/// It always returns either a NumberNode, or a set of NumberNodes.
+/// This is in contrast to a RandomValue, which always returns a
+/// vector of doubles (a FloatValue).
+///
+/// ----
+/// The PowLink implements the arithmetic operation of raising
+/// an argument to a power. If both arguments are vectors, then
+/// they need to be the same size, and the power is computed
+/// component by component. That is
+///    Pow (a, b, c) (d, e, f) is just (a**d,  b**e, c**f).
+/// If one of the arguments is a scalar, then that scalar is applied:
+///    Pow (a, b, c) n is just (a**n,  b**n, c**n).
+///    Pow a (p, q, r) is just (a**p,  a**q, a**r).
 
 ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
 {
@@ -266,6 +296,8 @@ ValuePtr NumericFunctionLink::execute_binary(AtomSpace *as, bool silent)
 	Type t = get_type();
 	if (RANDOM_NUMBER_LINK == t)
 		result = apply_func(as, silent, _outgoing[0], get_ran, reduction);
+	else if (POW_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], pow, reduction);
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
