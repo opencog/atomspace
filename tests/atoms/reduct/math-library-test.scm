@@ -1,6 +1,8 @@
 ;
 ; math-library.scm -- Test assorted elementary arithmetic functions
 ;
+; To run by hand, just say `guile -s math-library.scm`.
+;
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog exec))
