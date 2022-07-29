@@ -1224,7 +1224,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 		int ig = rotors[it];
 		ig++;
 
-		logmsg("Setting up sparse rotor %d  (%d)\n", it, ig);
+		logmsg("Setting up sparse rotor %d start with gnd=%d\n", it, ig);
 
 		for (; ig < szg; ig++)
 		{
@@ -1245,6 +1245,7 @@ bool PatternMatchEngine::setup_rotors(const PatternTermPtr& ptm,
 		// If the above wrapped, back up and try again.
 		if (ig >= szg)
 		{
+			rotors[it] = -1;
 			it --;
 			// Staight out of the chute, we got nothing!
 			if (0 > it) return false;
@@ -1327,7 +1328,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		const PatternTermPtr& pto = pats[it];
 		int ig = rotors[it];
 
-		logmsg("Stepping sparse rotor %d (was %d)\n", it, ig);
+		logmsg("Stepping sparse rotor %d (gnd was %d)\n", it, ig);
 
 		// As we revisit each sparse rotor, we want any unordered
 		// links that lie underneath to take a step.  So that the
@@ -1343,11 +1344,15 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		{
 			_perm_have_more = false;
 			_perm_take_step = true;
+
+			// If we backed down to the begining ... start at begining
+			if (-1 ==  ig) ig++;
 		}
 		else if (pto->hasChoice())
 		{
 			// I think this is correct. But it's untested! XXX verify!
 			_choose_next = true;
+			if (-1 ==  ig) ig++;
 		}
 		else  // this is an ordered link. Just plain-old step.
 			ig++;
@@ -1374,7 +1379,7 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 					return record_sparse(ptm, hg);
 				}
 				it ++;
-				rotors[it] = 0;
+				rotors[it] = -1;
 				solution_push();
 				break;
 			}
@@ -1384,6 +1389,8 @@ bool PatternMatchEngine::sparse_compare(const PatternTermPtr& ptm,
 		// If the above wrapped, back up and try again.
 		if (ig >= szg)
 		{
+			// Clear current rotor; start search at the begining.
+			rotors[it] = -1;
 			it --;
 			solution_pop();  // discard old current rotor
 			solution_pop();  // discard new current rotor

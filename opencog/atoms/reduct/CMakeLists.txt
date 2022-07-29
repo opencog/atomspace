@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (clearbox
 	AccumulateLink.cc
 	ArithmeticLink.cc
+	BoolOpLink.cc
 	DivideLink.cc
 	FoldLink.cc
 	MaxLink.cc
@@ -33,6 +34,7 @@ INSTALL (TARGETS clearbox EXPORT AtomSpaceTargets
 INSTALL (FILES
 	AccumulateLink.h
 	ArithmeticLink.h
+	BoolOpLink.h
 	DivideLink.h
 	FoldLink.h
 	MaxLink.h

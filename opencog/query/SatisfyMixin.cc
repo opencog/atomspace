@@ -206,7 +206,7 @@ bool SatisfyMixin::cartesian_product(
 #ifdef QDEBUG
 		if (logger().is_fine_enabled())
 		{
-			logger().fine("Explore one possible combinatoric grounding "
+			logger().fine("BEGIN CARTESIAN attempt grounding "
 			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
 			              var_gnds.size(), term_gnds.size());
 			PatternMatchEngine::log_solution(var_gnds, term_gnds);
@@ -252,6 +252,15 @@ bool SatisfyMixin::cartesian_product(
 			if (not match) return false;
 		}
 
+#ifdef QDEBUG
+		if (logger().is_fine_enabled())
+		{
+			logger().fine("FOUND CARTESIAN grounding "
+			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
+			              var_gnds.size(), term_gnds.size());
+			PatternMatchEngine::log_solution(var_gnds, term_gnds);
+		}
+#endif
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
 		return grounding(var_gnds, term_gnds);
@@ -524,6 +533,23 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	GroundingMap empty_pg;
 	bool done = start_search();
 	if (done) return done;
+
+	// Compute the size of the cartesion product
+	// If any are empty, then don't even bother to try.
+	size_t prod_size = 1;
+	for (const GroundingMapSeq& vg : comp_var_gnds)
+	{
+		prod_size *= vg.size();
+#ifdef QDEBUG
+		logger().fine("Cartesian component has %lu elts", vg.size());
+#endif
+	}
+#ifdef QDEBUG
+		logger().fine("Total CARTESIAN product size = %lu", prod_size);
+#endif
+
+	if (0 == prod_size) return false;
+
 	done = cartesian_product(virts, pat.absents,
 	                         empty_vg, empty_pg,
 	                         comp_var_gnds, comp_term_gnds);
