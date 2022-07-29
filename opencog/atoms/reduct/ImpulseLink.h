@@ -46,6 +46,7 @@ public:
 	ImpulseLink& operator=(const ImpulseLink&) = delete;
 
 	virtual ValuePtr execute(AtomSpace*, bool);
+	static Handle factory(const Handle&);
 };
 
 LINK_PTR_DECL(ImpulseLink)

@@ -63,4 +63,6 @@ ValuePtr ImpulseLink::execute(AtomSpace* as, bool silent)
 	return shared_from_this();
 }
 
+DEFINE_LINK_FACTORY(ImpulseLink, IMPULSE_LINK);
+
 // ===========================================================
