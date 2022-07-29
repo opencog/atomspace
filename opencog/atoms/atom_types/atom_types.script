@@ -233,7 +233,7 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 // Similar to above, but meant to be used in an execution context.
 // These links can be used to operate on BoolValues, which are
 // vectors of bools. The ops apply point-wise to the vectors.
-BOOL_OP_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK,BOOLEAN_OUTPUT_LINK,BOOLEAN_INPUT_LINK
+BOOL_OP_LINK <- ORDERED_LINK,BOOLEAN_OUTPUT_LINK,BOOLEAN_INPUT_LINK
 BOOL_AND_LINK <- BOOL_OP_LINK
 BOOL_OR_LINK <- BOOL_OP_LINK
 BOOL_NOT_LINK <- BOOL_OP_LINK
