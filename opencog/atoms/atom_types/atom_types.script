@@ -230,14 +230,6 @@ NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 
-// Similar to above, but meant to be used in an execution context.
-// These links can be used to operate on BoolValues, which are
-// vectors of bools. The ops apply point-wise to the vectors.
-BOOL_OP_LINK <- ORDERED_LINK,BOOLEAN_OUTPUT_LINK,BOOLEAN_INPUT_LINK
-BOOL_AND_LINK <- BOOL_OP_LINK
-BOOL_OR_LINK <- BOOL_OP_LINK
-BOOL_NOT_LINK <- BOOL_OP_LINK
-
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
 // engine; they are used to specify what is searched for.
@@ -812,6 +804,18 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // functions.  It is NOT meant to be used as a base type for
 // user-defined structures; users should use the LambdaLink for that.
 FUNCTION_LINK <- FREE_LINK
+
+// --------------------
+// Boolean-valued functions
+
+// Similar to earlier and/or/not links, but these are actually
+// executable functions, and not just declarative declarations.
+// These links can be used to operate on BoolValues, which are
+// vectors of bools. The ops apply point-wise to the vectors.
+BOOL_OP_LINK <- FUNCTION_LINK,BOOLEAN_OUTPUT_LINK,BOOLEAN_INPUT_LINK
+BOOL_AND_LINK <- BOOL_OP_LINK
+BOOL_OR_LINK <- BOOL_OP_LINK
+BOOL_NOT_LINK <- BOOL_OP_LINK
 
 // --------------------
 // Arithmetic and number-valued functions
