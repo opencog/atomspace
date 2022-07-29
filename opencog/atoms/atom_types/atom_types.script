@@ -836,7 +836,12 @@ MAX_LINK <- NUMERIC_FUNCTION_LINK
 
 // Heaviside step function; same as GreaterThan, but works
 // for vectors, and returns numeric value.
+// Uses stdd:signbit to determine if float is positive or not.
 HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
+
+// Converts vector of bools into vector of floats.
+// Replacing false, true by 0.0 and 1.0
+IMPULSE_LINK <- FUNCTION_LINK,BOOLEAN_INPUT_LINK,CRISP_INPUT_LINK,NUMERIC_OUTPUT_LINK
 
 // Logarithm base2
 LOG2_LINK <- NUMERIC_FUNCTION_LINK
