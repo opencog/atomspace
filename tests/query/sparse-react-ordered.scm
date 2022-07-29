@@ -53,7 +53,7 @@
 			; Look for hydroxyl group
 			(Molecule
 				(SBo (Variable "$hydroxO1") (Variable "$hydroxH1"))
-				(SBo (Variable "$hydroxO1") (Variable "hydroxy moiety"))
+				(SBo (Variable "hydroxy moiety") (Variable "$hydroxO1"))
 				(Glob "rest of hydroxy")
 			)
 
