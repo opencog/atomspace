@@ -50,14 +50,25 @@
 ; -----------------------------------------------
 ; Test SineLink
 
-(define pi 3.14159265358979)
+(define pi 3.141592653589793238462643383279502884)
 
-#! ========
-We need to have ApproxEqualLink that works to +/- 2 ULPS.
+#! =========
+; Hmmm ... should differ by only a few ULPS but doesn't ...
 (test-assert "sine n pi"
-	(equal? (Number 0 0 0 0 0)
-		(cog-execute! (Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi))))))
-===== !#
+	(equal? (Number 1 1 1 1 1)
+		(cog-execute!
+			(Plus
+				(Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))
+				(Number 1 1 1 1 1))
+		)))
+
+	(cog-evaluate!
+		(Equal
+			(Number 1 1 1 1 1)
+			(Plus
+				(Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))
+				(Number 1 1 1 1 1))))
+======= !#
 
 (define sero
 	(cog-execute! (Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))))
