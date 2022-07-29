@@ -326,4 +326,6 @@ ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
 	return execute_binary(as, silent);
 }
 
+DEFINE_LINK_FACTORY(NumericFunctionLink, NUMERIC_FUNCTION_LINK);
+
 // ===========================================================
