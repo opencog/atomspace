@@ -39,6 +39,8 @@ class NumericFunctionLink : public FunctionLink
 {
 protected:
 	void init();
+	ValuePtr execute_unary(AtomSpace*, bool);
+	ValuePtr execute_binary(AtomSpace*, bool);
 
 	static const std::vector<double>* get_vector(AtomSpace*, bool,
 		ValuePtr, Type&);
@@ -48,12 +50,15 @@ protected:
 		double (*)(double, double), ValueSeq&);
 
 public:
-	NumericFunctionLink(const HandleSeq&&, Type=NUMERIC_FUNCTION_LINK);
+	NumericFunctionLink(const HandleSeq&&, Type);
 
 	NumericFunctionLink(const NumericFunctionLink&) = delete;
 	NumericFunctionLink& operator=(const NumericFunctionLink&) = delete;
 
+	virtual ValuePtr execute(AtomSpace*, bool);
+
 	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
+	static Handle factory(const Handle&);
 };
 
 LINK_PTR_DECL(NumericFunctionLink)

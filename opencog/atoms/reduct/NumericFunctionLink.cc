@@ -22,6 +22,8 @@
 
 #include <limits>
 
+#include <opencog/util/mt19937ar.h>
+
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -38,13 +40,24 @@ NumericFunctionLink::NumericFunctionLink(const HandleSeq&& oset, Type t)
 
 void NumericFunctionLink::init(void)
 {
-	Type tscope = get_type();
-	if (NUMERIC_FUNCTION_LINK == tscope)
+	Type t = get_type();
+	if (NUMERIC_FUNCTION_LINK == t)
 		throw InvalidParamException(TRACE_INFO,
-			"NumericOutLinks are private and cannot be instantiated.");
+			"NumericFunctionLinks are private and cannot be instantiated.");
 
-	if (not nameserver().isA(tscope, NUMERIC_FUNCTION_LINK))
+	if (not nameserver().isA(t, NUMERIC_FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an NumericFunctionLink");
+
+	if (HEAVISIDE_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "HeavisideLink expects one argument");
+	else if (LOG2_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "Log2Link expects one argument");
+
+	else if (POW_LINK == t and 2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "PowLink expects two arguments");
+
+	else if (RANDOM_NUMBER_LINK == t and 2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "RandomNumberLink expects two arguments");
 }
 
 // ===========================================================
@@ -199,5 +212,120 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 
 	return createFloatValue(funvec);
 }
+
+// ============================================================
+
+static double impulse(double x) { return 1-std::signbit(x); }
+
+static MT19937RandGen randy(616432);
+static double get_ran(double lb, double ub)
+{
+	// Linear algebra slope-intercept formula.
+	return (ub - lb) * randy.randdouble() + lb;
+}
+
+/// The various NumericFunctionLinks implement various numeric
+/// functions on vector arguments (i.e. on FloatValues and
+/// NumberNodes, both of which hold float pt vectors by default.)
+///
+/// ----
+/// The HeavisideLink implements the arithmetic operation of "greater
+/// than" on a component-by-component level. That is,
+///    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
+/// where the comparison is 1.0 if true, else 0.0.
+/// Note it returns a FloatValue and NOT a BoolValue!
+///
+/// ----
+/// The Log2Link implements the elementary function of
+/// logarithm base two. That is,
+///    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
+///
+/// ----
+/// The RandomNumberLink returns a NumberNode that lies within the
+/// min-max range, using a uniform distribution.
+///
+/// For example,
+///
+///     RandomNumberLink
+///         NumberNode 0.1
+///         NumberNode 0.5
+///
+/// will return a random number between 0.1 ad 0.5
+///
+/// It always returns either a NumberNode, or a set of NumberNodes.
+/// This is in contrast to a RandomValue, which always returns a
+/// vector of doubles (a FloatValue).
+///
+/// ----
+/// The PowLink implements the arithmetic operation of raising
+/// an argument to a power. If both arguments are vectors, then
+/// they need to be the same size, and the power is computed
+/// component by component. That is
+///    Pow (a, b, c) (d, e, f) is just (a**d,  b**e, c**f).
+/// If one of the arguments is a scalar, then that scalar is applied:
+///    Pow (a, b, c) n is just (a**n,  b**n, c**n).
+///    Pow a (p, q, r) is just (a**p,  a**q, a**r).
+
+ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
+{
+	ValuePtr reduction;
+	ValuePtr result;
+
+	Type t = get_type();
+	if (LOG2_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], log2, reduction);
+	else if (HEAVISIDE_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], impulse, reduction);
+	else
+		throw InvalidParamException(TRACE_INFO,
+			"Internal Error: unhandled derived type!");
+
+	if (result) return result;
+
+	// No numeric values available. Sorry!
+	// Return the best-possible reduction that we did get.
+	if (reduction->is_atom())
+		return createNumericFunctionLink(
+			HandleSeq({HandleCast(reduction)}), t);
+
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
+}
+
+ValuePtr NumericFunctionLink::execute_binary(AtomSpace *as, bool silent)
+{
+	ValueSeq reduction;
+	ValuePtr result;
+
+	Type t = get_type();
+	if (RANDOM_NUMBER_LINK == t)
+		result = apply_func(as, silent, _outgoing, get_ran, reduction);
+	else if (POW_LINK == t)
+		result = apply_func(as, silent, _outgoing, pow, reduction);
+	else
+		throw InvalidParamException(TRACE_INFO,
+			"Internal Error: unhandled derived type!");
+
+	if (result) return result;
+
+   // No numeric values available. Sorry!
+	// Return the best-possible reduction that we did get.
+	if (reduction[0]->is_atom() and reduction[1]->is_atom())
+		return createNumericFunctionLink(HandleSeq(
+			{HandleCast(reduction[0]),
+			HandleCast(reduction[1])}), t);
+
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
+}
+
+ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
+{
+	if (1 == _outgoing.size())
+		return execute_unary(as, silent);
+	return execute_binary(as, silent);
+}
+
+DEFINE_LINK_FACTORY(NumericFunctionLink, NUMERIC_FUNCTION_LINK);
 
 // ===========================================================
