@@ -5,6 +5,7 @@
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (srfi srfi-64))
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
 
@@ -51,9 +52,20 @@
 
 (define pi 3.14159265358979)
 
+#! ========
+We need to have ApproxEqualLink that works to +/- 2 ULPS.
 (test-assert "sine n pi"
 	(equal? (Number 0 0 0 0 0)
 		(cog-execute! (Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi))))))
+===== !#
+
+(define sero
+	(cog-execute! (Sine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))))
+
+(for-each
+	(lambda (x)
+		(test-approximate "sine zero" 0.0 x 2e-14))
+	(cog-value->list sero))
 
 (define (npih n) (* n 0.5 pi))
 
