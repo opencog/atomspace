@@ -206,6 +206,9 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 }
 
 // ============================================================
+
+static double impulse(double x) {return 1-std::signbit(x); }
+
 /// The various NumericFunctionLinks implement various numeric
 /// functions on vector arguments (i.e. on FloatValues and
 /// NumberNodes, both of which hold float pt vectors by default.)
@@ -220,21 +223,19 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 /// logarithm base two. That is,
 ///    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
 
-static double impulse(double x) {return 1-std::signbit(x); }
-
 ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
 {
-	double (*fun)(double, double) = nullptr;
+	ValuePtr reduction;
+	ValuePtr result;
+
 	Type t = get_type();
-	if (LOG2_LINK == t) fun = log2;
-	else if (HEAVISIDE_LINK == t) fun = impulse;
+	if (LOG2_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], log2, reduction);
+	else if (HEAVISIDE_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], impulse, reduction);
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
-
-	ValuePtr reduction;
-	ValuePtr result(apply_func(as, silent,
-		_outgoing[0], fun, reduction));
 
 	if (result) return result;
 
