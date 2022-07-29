@@ -207,7 +207,13 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 
 // ============================================================
 
-static double impulse(double x) {return 1-std::signbit(x); }
+static double impulse(double x) { return 1-std::signbit(x); }
+
+static double get_ran(double lb, double ub)
+{
+	// Linear algebra slope-intercept formula.
+	return (ub - lb) * randy.randdouble() + lb;
+}
 
 /// The various NumericFunctionLinks implement various numeric
 /// functions on vector arguments (i.e. on FloatValues and
@@ -222,8 +228,12 @@ static double impulse(double x) {return 1-std::signbit(x); }
 /// The Log2Link implements the elementary function of
 /// logarithm base two. That is,
 ///    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
+///
+/// The RandomNumberLink always returns either a NumberNode, or a
+/// set of NumberNodes.  This is in contrast to a RandomValue,
+/// which always returns a vector of doubles.
 
-ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
+ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
 {
 	ValuePtr reduction;
 	ValuePtr result;
@@ -242,9 +252,42 @@ ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
 	// No numeric values available. Sorry!
 	// Return the best-possible reduction that we did get.
 	if (reduction->is_atom())
-			return createLog2Link(HandleCast(reduction));
+			return createNumericFunctionLink(HandleCast(reduction), t);
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
 }
+
+ValuePtr NumericFunctionLink::execute_binary(AtomSpace *as, bool silent)
+{
+	ValueSeq reduction;
+	ValuePtr result;
+
+	Type t = get_type();
+	if (RANDOM_NUMBER_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], get_ran, reduction);
+	else
+		throw InvalidParamException(TRACE_INFO,
+			"Internal Error: unhandled derived type!");
+
+	if (result) return result;
+
+   // No numeric values available. Sorry!
+	// Return the best-possible reduction that we did get.
+	if (reduction[0]->is_atom() and reduction[1]->is_atom())
+		return createNumericFunctionLink(HandleSeq(
+			{HandleCast(reduction[0]),
+			HandleCast(reduction[1])}), t);
+
+	// Unable to reduce at all. Just return the original atom.
+	return get_handle();
+}
+
+ValuePtr NumericFunctionLink::execute(AtomSpace* as, bool silent)
+{
+	if (1 == _outgoing.size())
+		return execute_unary(as, silent);
+	return execute_binary(as, silent);
+}
+
 // ===========================================================

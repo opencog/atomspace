@@ -39,6 +39,8 @@ class NumericFunctionLink : public FunctionLink
 {
 protected:
 	void init();
+	ValuePtr execute_unary(AtomSpace*, bool);
+	ValuePtr execute_binary(AtomSpace*, bool);
 
 	static const std::vector<double>* get_vector(AtomSpace*, bool,
 		ValuePtr, Type&);
