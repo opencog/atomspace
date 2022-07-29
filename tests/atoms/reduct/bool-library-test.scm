@@ -34,6 +34,20 @@
 	(equal? (BoolValue 1 0 1 0 1)
 		(cog-execute! (BoolNot (BoolValueOf foo key)))))
 
+(test-assert "or-not-link"
+	(equal? (BoolValue 1 1 1 1 1)
+		(cog-execute!
+			(BoolOr
+				(BoolValueOf foo key)
+				(BoolNot (BoolValueOf foo key))))))
+
+(test-assert "and-not-link"
+	(equal? (BoolValue 0 0 0 0 0)
+		(cog-execute!
+			(BoolAnd
+				(BoolValueOf foo key)
+				(BoolNot (BoolValueOf foo key))))))
+
 (test-end tname)
 
 (opencog-test-end)
