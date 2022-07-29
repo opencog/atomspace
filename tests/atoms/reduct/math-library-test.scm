@@ -69,7 +69,8 @@
 	(lambda (n)
 		(define sn (cog-execute! (Heaviside (Sine (Number n)))))
 
-		(define wv (Number (modulo (floor (/ n pi)) 2)))
+		; Ugh. round down. Even or od, then reverse.
+		(define wv (Number (- 1 (modulo (floor (/ n pi)) 2))))
 		(test-assert "square-wave" (equal? sn wv))
 	)
 	(iota 70))
