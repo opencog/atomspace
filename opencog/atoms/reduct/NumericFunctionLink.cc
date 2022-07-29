@@ -206,6 +206,19 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 }
 
 // ============================================================
+/// The various NumericFunctionLinks implement various numeric
+/// functions on vector arguments (i.e. on FloatValues and
+/// NumberNodes, both of which hold float pt vectors by default.)
+///
+/// The HeavisideLink implements the arithmetic operation of "greater
+/// than" on a component-by-component level. That is,
+///    Heaviside (a, b, c) (d, e, f) is just (a>d,  b>e, c>f).
+/// where the comparison is 1.0 if true, else 0.0.
+/// Note it returns a FloatValue and NOT a BoolValue!
+///
+/// The Log2Link implements the elementary function of
+/// logarithm base two. That is,
+///    Log2 (a, b, c) evaluates to (log2(a), log2(b), log2(c)).
 
 static double impulse(double x) {return 1-std::signbit(x); }
 
