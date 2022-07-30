@@ -37,15 +37,21 @@ OPENCOG_GEN_CXX_ATOMTYPES(chem_types.script
 # As above, but the guile scheme bindings are generated.
 OPENCOG_GEN_SCM_ATOMTYPES(chem_types.script chem_types.scm)
 
-# Same, for Python.
-OPENCOG_GEN_PYTHON_ATOMTYPES(chem_types.script chem_types.pyx)
+IF (HAVE_PYTHON)
+	# Same, for Python.
+	OPENCOG_GEN_PYTHON_ATOMTYPES(chem_types.script chem_types.pyx)
+ENDIF ()
 
 # A "phony" target, which can be used in other places to guarantee
 # that the bindings are built before any code that uses the bindings.
 # For example, this is used in the `apps` CMakefile, to make sure that
 # the types are built before the apps.
 ADD_CUSTOM_TARGET(chem_demo_atom_types
-	DEPENDS chem_types.h chem_types.scm chem_types.pyx)
+	DEPENDS chem_types.h chem_types.scm
+IF (HAVE_PYTHON)
+      chem_types.pyx
+ENDIF ()
+)
 
 # For OCaml, see the `ocaml` subdirectory in the main project.
 # Building the OCaml bindings is more complex. Note that, in
@@ -122,6 +128,7 @@ ADD_GUILE_MODULE (FILES
 # --------------------------------------------------------------
 # Part Four: Build the Python module
 
+if (HAVE_PYTHON)
 # Specify the location of the Python.h header file
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -152,6 +159,7 @@ SET_TARGET_PROPERTIES(chempydemo PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME chempydemo)
 
+ENDIF (HAVE_PYTHON)
 # --------------------------------------------------------------
 # Part Five: Install the demo system into the root file system.
 #
@@ -182,10 +190,12 @@ INSTALL(
 	RENAME chemodemo-config.scm
 )
 
+IF (HAVE_PYTHON)
 INSTALL(TARGETS
 	chempydemo
 	DESTINATION "${PYTHON_DEST}"
 )
+ENDIF (HAVE_PYTHON)
 
 # The below allows you to install the above by saying
 # `sudo make install-demotypes`

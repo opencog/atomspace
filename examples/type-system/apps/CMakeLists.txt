@@ -5,7 +5,7 @@
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_EXECUTABLE(cpp-types-demo
-   chemain
+   chemain.cc
 )
 
 TARGET_LINK_LIBRARIES(cpp-types-demo
