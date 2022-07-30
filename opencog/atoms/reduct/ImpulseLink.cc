@@ -54,7 +54,8 @@ ValuePtr ImpulseLink::execute(AtomSpace* as, bool silent)
 	{
 		BoolValuePtr bvp = BoolValueCast(vptr);
 		const std::vector<bool>& bv = bvp->value();
-		std::vector<double> fv(bv.size());
+		std::vector<double> fv;
+		fv.reserve(bv.size());
 		for (bool b : bv)
 			fv.emplace_back(b? 1.0 : 0.0);
 		return createFloatValue(fv);
