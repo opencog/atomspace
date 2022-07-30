@@ -34,6 +34,42 @@
 	(equal? (BoolValue 1 0 1 0 1)
 		(cog-execute! (BoolNot (BoolValueOf foo key)))))
 
+(test-assert "or-not-link"
+	(equal? (BoolValue 1 1 1 1 1)
+		(cog-execute!
+			(BoolOr
+				(BoolValueOf foo key)
+				(BoolNot (BoolValueOf foo key))))))
+
+(test-assert "and-not-link"
+	(equal? (BoolValue 0 0 0 0 0)
+		(cog-execute!
+			(BoolAnd
+				(BoolValueOf foo key)
+				(BoolNot (BoolValueOf foo key))))))
+
+; --------
+
+(test-assert "impulse-link"
+	(equal? (FloatValue 1 0 1 0 1)
+		(cog-execute! (Impulse (BoolNot (BoolValueOf foo key))))))
+
+(test-assert "impulse and-not-link"
+	(equal? (FloatValue 0 0 0 0 0)
+		(cog-execute!
+			(Impulse
+				(BoolAnd
+					(BoolValueOf foo key)
+					(BoolNot (BoolValueOf foo key)))))))
+
+(test-assert "impulse or-not-link"
+	(equal? (FloatValue 1 1 1 1 1)
+		(cog-execute!
+			(Impulse
+				(BoolOr
+					(BoolValueOf foo key)
+					(BoolNot (BoolValueOf foo key)))))))
+
 (test-end tname)
 
 (opencog-test-end)
