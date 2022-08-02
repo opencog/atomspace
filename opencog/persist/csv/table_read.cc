@@ -1,7 +1,8 @@
-/** table_io.cc ---
+/** table_read.cc --
  *
  * Copyright (C) 2010 OpenCog Foundation
  * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2022 Linas Vepstas
  *
  * Authors: Nil Geisweiller <ngeiswei@gmail.com>
  *          Linas Vepstas <linasvepstas@gmail.com>
@@ -41,10 +42,9 @@
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
 
-#include "table.h"
-#include "table_io.h"
+#include "table_read.h"
 
-namespace opencog { namespace combo {
+namespace opencog {
 
 using namespace std;
 using namespace boost;
@@ -125,7 +125,7 @@ static const char *sparse_delim = " : ";
 /**
  * parse a pair of key/value in a parse dataset, using ':' as
  * delimiter. For instance
- * 
+ *
  * parse_key_val("key : val")
  *
  * returns
@@ -148,7 +148,7 @@ parse_key_val(string chunk)
     boost::trim(val);
     return {key, val};
 }
-        
+
 /**
  * Take a row, return a tokenizer.  Tokenization uses the
  * separator characters comma, blank, tab (',', ' ' or '\t').
@@ -231,7 +231,7 @@ type_node infer_type_from_token(const string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-static type_node 
+static type_node
 infer_type_from_token2(type_node curr_guess, const string& token)
 {
     type_node tokt = infer_type_from_token(token);
@@ -508,21 +508,21 @@ struct from_sparse_tokens_visitor : public from_tokens_visitor
  * The sparse table format consists of some fixed number of columns,
  * in comma-separated format, followed by key-value pairs, also
  * tab-separated. viz:
- * 
+ *
  *     val, val, val, name:val, name:val, name:val
- * 
- * Thus, for example, a row such as 
- * 
+ *
+ * Thus, for example, a row such as
+ *
  *    earn, issued : 1, results : 2, ending : 1, including : 1
- * 
+ *
  * indicates that there one fixed column, of enum type, (the enum value
- * being "earn"), and that features called "issued", "ending" and 
+ * being "earn"), and that features called "issued", "ending" and
  * "including" have a contin value of 1.0  and "results" has a contin
  * value of 2.
- * 
+ *
  * The routine does NOT store the table in sparse format: it stores the
  * full, exploded table. This could be bad ...
- * TODO: we really need a sparse table format, as well.  
+ * TODO: we really need a sparse table format, as well.
  *
  * The "Raw" format has all data as strings; type conversion to the
  * appropriate type, must all be done as a separate step.
@@ -556,7 +556,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     if (0 == fixed_arity) {
         vector<string> fixy = tokenizeSparseRow(lines[0]);
         // count commas, until a semi-colon is found.
-        while (string::npos == fixy[fixed_arity].find(sparse_delim)) 
+        while (string::npos == fixy[fixed_arity].find(sparse_delim))
             fixed_arity++;
     }
     logger().info() << "Sparse file fixed column count=" << fixed_arity;
@@ -762,20 +762,8 @@ istream& istreamITable_ignore_indices(istream& in, ITable& tab,
                         [&](multi_type_seq& seq) {
                             return aft(seq.get_variant());
                         });
-    
+
     return in;
-}
-
-OTable loadOTable(const string& file_name, const string& target_feature)
-{
-    vector<string> ignore_features;
-    for (const string& l : get_header(file_name))
-        if (l != target_feature)
-            ignore_features.push_back(l);
-
-    ITable itab = loadITable(file_name, ignore_features);
-    OTable res(itab.get_column_data(target_feature), target_feature);
-    return res;
 }
 
 /**
@@ -834,7 +822,7 @@ ITable loadITable_optimized(const string& file_name,
     // determined ignore_indices
     vector<unsigned> ignore_indices = get_indices(ignore_features,
                                                   get_header(file_name));
-    
+
     ITable res;
     istreamITable_ignore_indices(in, res, ignore_indices);
     return res;
@@ -860,12 +848,12 @@ istream& istreamTable_OLD(istream& in, Table& tab,
     istreamITable(in, tab.itable, ignore_features);
 
     tab.otable = tab.itable.get_column_data(target_feature);
-    OC_ASSERT(0 != tab.otable.size(), 
+    OC_ASSERT(0 != tab.otable.size(),
               "Fatal Error: target feature \"%s\" not found",
               target_feature.c_str());
 
     tab.target_pos = tab.itable.get_column_offset(target_feature);
-    
+
     type_node targ_type = tab.itable.get_type(target_feature);
 
     string targ_feat = tab.itable.delete_column(target_feature);
@@ -885,16 +873,16 @@ istream& istreamTable_OLD(istream& in, Table& tab,
 istream& istreamTable_ignore_indices(istream& in, Table& tab,
                                      const string& target_feature,
                                      const vector<unsigned>& ignore_indices)
-{    
+{
     istreamITable_ignore_indices(in, tab.itable, ignore_indices);
 
     tab.otable = tab.itable.get_column_data(target_feature);
-    OC_ASSERT(0 != tab.otable.size(), 
+    OC_ASSERT(0 != tab.otable.size(),
               "Fatal Error: target feature \"%s\" not found",
               target_feature.c_str());
 
     tab.target_pos = tab.itable.get_column_offset(target_feature);
-    
+
     type_node targ_type = tab.itable.get_type(target_feature);
 
     string targ_feat = tab.itable.delete_column(target_feature);
@@ -1067,7 +1055,7 @@ istream& istreamTable(istream& in, Table& tab,
  */
 template<typename T>
 std::pair<std::vector<T>, T>
-tokenizeRowIO(
+tokenizeRowIO (
     const std::string& line,
     const std::vector<unsigned>& ignored_indices=std::vector<unsigned>(),
     unsigned target_idx=0)
@@ -1227,72 +1215,6 @@ istream& istreamDenseTable(istream& in, Table& tab,
 
 // ==================================================================
 
-// Parse a CompressedTable row
-// TODO: implement timestamp support
-CompressedTable::value_type parseCompressedTableRow(const type_tree& tt, const std::string& row_str)
-{
-    // split the string between input and output
-    unsigned end_outputs_pos = row_str.find("}");
-    string outputs = row_str.substr(1, end_outputs_pos - 1),
-        inputs = row_str.substr(end_outputs_pos + 2); // +2 to go
-                                                      // passed the
-                                                      // following ,
-
-    // convert the inputs string into multi_type_seq
-    type_node_seq tns = vector_comp(get_signature_inputs(tt), get_type_node);
-    vector<string> input_seq = tokenizeRow<string>(inputs);
-    from_tokens_visitor ftv(tns);
-    multi_type_seq input_values = ftv(input_seq);
-
-    // convert the outputs string into CompressedTable::counter_t
-    vector<string> output_pair_seq = tokenizeRow<string>(outputs);
-    CompressedTable::counter_t counter;
-    for (const string& pair_str : output_pair_seq) {
-        unsigned sep_pos = pair_str.find(":");
-        string key_str = pair_str.substr(0, sep_pos),
-            value_str = pair_str.substr(sep_pos + 1);
-        vertex v = token_to_vertex(get_type_node(get_signature_output(tt)),
-                                   key_str);
-        count_t count = atof(value_str.c_str());
-        counter[TimedValue(v)] = count;
-    }
-    return CompressedTable::value_type(input_values, counter);
-}
-
-// WARNING: this implementation only supports boolean ctable!!!!
-std::istream& istreamCompressedTable(std::istream& in, CompressedTable& ctable)
-{
-    ////////////////
-    // set header //
-    ////////////////
-    string header_line;
-    get_data_line(in, header_line);
-    auto labels = tokenizeRow<string>(header_line);
-    ctable.set_labels(labels);
-
-    ////////////////////////
-    // set type signature //
-    ////////////////////////
-    // HACK THIS PART TO MAKE IT SUPPORT OTHER TYPES THAN BOOLEAN
-    ctable.set_signature(gen_signature(id::boolean_type, ctable.get_arity()));
-
-    /////////////////
-    // set content //
-    /////////////////
-    std::vector<string> lines;
-    // read the entire file
-    {
-        string line;
-        while (get_data_line(in, line))
-            lines.push_back(line);
-    }
-    // parse each line and fill the ctable
-    for (const string& line : lines)
-        ctable.insert(parseCompressedTableRow(ctable.get_signature(), line));
-
-    return in;
-}
-
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::string& timestamp_feature,
@@ -1305,175 +1227,6 @@ Table loadTable(const std::string& file_name,
     Table res;
     istreamTable(in, res, target_feature, timestamp_feature, ignore_features);
     return res;
-}
-
-CompressedTable loadCompressedTable(const string& file_name)
-{
-    CompressedTable ctable;
-    OC_ASSERT(!file_name.empty(), "No filename specified!");
-    ifstream in(file_name.c_str());
-    istreamCompressedTable(in, ctable);
-    return ctable;
-}
-
-// ===========================================================
-// ostream regular tables
-
-void saveTable(const string& file_name, const Table& table)
-{
-    OC_ASSERT(!file_name.empty(), "No filename specified!");
-    ofstream out(file_name.c_str());
-    OC_ASSERT(out.is_open(), "Could not open %s", file_name.c_str());
-    ostreamTable(out, table);
-}
-
-// ===========================================================
-// ostream CompressedTables
-
-ostream& ostreamCompressedTableHeader(ostream& out, const CompressedTable& ct)
-{
-    return ostreamln_container(out, ct.get_labels(), ",");
-}
-
-ostream& ostreamCompressedTableRow(ostream& out, const CompressedTable::value_type& ctv)
-{
-    to_strings_visitor tsv;
-    auto ats = boost::apply_visitor(tsv);
-    // print map of outputs
-    out << "{";
-    for(auto it = ctv.second.cbegin(); it != ctv.second.cend();) {
-        if (it->first.timestamp != boost::gregorian::date())
-            out << "(" << table_fmt_vertex_to_str(it->first.value)
-                << "," << it->first.timestamp << "):" << it->second;
-        else
-            out << table_fmt_vertex_to_str(it->first.value)
-                << ":" << it->second;
-        if (++it != ctv.second.cend())
-            out << ",";
-    }
-    out << "},";
-    // print inputs
-    return ostreamln_container(out, ats(ctv.first.get_variant()), ",");
-}
-
-ostream& ostreamCompressedTable(ostream& out, const CompressedTable& ct)
-{
-    // print header
-    ostreamCompressedTableHeader(out, ct);
-    // print data
-    for (const auto& v : ct)
-        ostreamCompressedTableRow(out, v);
-
-    return out;
-}
-
-ostream& ostreamCompressedTableTimeHeader(ostream& out, const CompressedTableTime& ctt)
-{
-    out << "timestamp,output" << endl;
-    return out;
-}
-
-ostream& ostreamCompressedTableTimeRow(ostream& out, const CompressedTableTime::value_type& tio)
-{
-    out << tio.first << ",{";
-    for (auto it = tio.second.cbegin(); it != tio.second.cend();) {
-        out << table_fmt_vertex_to_str(it->first)
-            << ":" << it->second;
-        if(++it != tio.second.cend())
-            out << ",";
-    }
-    out << "}" << endl;
-    return out;
-}
-
-ostream& ostreamCompressedTableTime(ostream& out, const CompressedTableTime& ctt)
-{
-    // print header
-    ostreamCompressedTableTimeHeader(out, ctt);
-
-    // print data by time
-    for (const auto& tio : ctt)
-        ostreamCompressedTableTimeRow(out, tio);
-
-    return out;
-}
-
-// ===========================================================
-// operator<< for the various tables and stuff.
-
-ostream& operator<<(ostream& out, const ITable& it)
-{
-    ostreamln_container(out, it.get_labels(), ",");
-    ostreamln_container(out, it.get_types(), ",");
-    to_strings_visitor tsv;
-    for (const auto& row : it) {
-        vector<string> row_str = boost::apply_visitor(tsv, row.get_variant());
-        ostreamln_container(out, row_str, ",");
-    }
-    return out;
-}
-
-ostream& operator<<(ostream& out, const OTable& ot)
-{
-    if (!ot.get_label().empty())
-        out << ot.get_label() << endl;
-    out << ot.get_type() << endl;
-    for (const vertex& v : ot)
-        out << table_fmt_vertex_to_str(v) << endl;
-    return out;
-}
-
-ostream& operator<<(ostream& out, const Table& table)
-{
-    return ostreamTable(out, table);
-}
-
-ostream& operator<<(ostream& out, const complete_truth_table& tt)
-{
-    return ostream_container(out, tt);
-}
-
-ostream& operator<<(ostream& out, const CompressedTable& ct)
-{
-    return ostreamCompressedTable(out, ct);
-}
-
-} // ~namespaces combo
-
-std::string oc_to_string(const combo::ITable& it, const std::string& indent)
-{
-    std::stringstream ss;
-    ss << it;
-    return ss.str();
-}
-
-std::string oc_to_string(const combo::OTable& ot, const std::string& indent)
-{
-    std::stringstream ss;
-    ss << ot;
-    return ss.str();
-}
-
-std::string oc_to_string(const combo::Table& table, const std::string& indent)
-{
-    std::stringstream ss;
-    ss << table;
-    return ss.str();
-}
-
-std::string oc_to_string(const combo::CompressedTable& ct, const std::string& indent)
-{
-    std::stringstream ss;
-    ss << ct;
-    return ss.str();
-}
-
-std::string oc_to_string(const combo::complete_truth_table& tt,
-                         const std::string& indent)
-{
-    std::stringstream ss;
-    ss << tt;
-    return ss.str();
 }
 
 } // ~namespaces opencog
