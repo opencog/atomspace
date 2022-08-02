@@ -1,4 +1,5 @@
-/** load_csv.h ---
+/**
+ * load_csv.h -- Load CSV tables into Values
  *
  * Copyright (C) 2018 OpenCog Foundation
  * Copyright (C) 2022 Linas Vepstas
@@ -26,32 +27,8 @@
 
 namespace opencog {
 
-/**
- * Load columns from a CSV file and place them into Atomese Values on
- * the indicated Atom. Atomese Values are vectors (of floats, bools,
- * srings, or more complex structures). Each Value holds one column
- * from the dataset. 
- *
- * The features (columns) specified in ignore_features will be omitted
- * from the representation.
- *
- * For example, a CSV dataset like this:
- * o, i1, i2, i3, i4
- * 1, 0, 0, 3.3, "foo"
- * 0, 1, 0, 4.4, "bar"
- *
- * will be loaded as the following key-value pairs on the `anchor` Atom:
- * (Predicate "*-column-names-*") (StringValue "o", "i1", "i2", "i3", "i4")
- * (Predicate "o") (BoolValue 1 0)
- * (Predicate "i1") (BoolValue 0 1)
- * (Predicate "i2") (BoolValue 0 0)
- * (Predicate "i3") (FloatValue 3.3 4.4)
- * (Predicate "i4") (StringValue "foo" "bar")
- *
- * @param file_name
- * @param ignore_features
- * @return
- */
+// Load columns from a CSV file and place them into Atomese Values on
+// the indicated Atom. See the .cc file for additional info.
 void load_csv_table(
 	const Handle& anchor,
 	const std::string& file_name,
