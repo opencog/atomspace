@@ -24,6 +24,11 @@ The CogServer provides a network API to send/receive Atoms over the
 internet. See https://wiki.opencog.org/w/CogServer It uses the code
 here to provide a network interface to the JSON code here.
 
+You can access the code here both through the WebSockets and through
+netcat/telnet.   Use `ws://localhost:18080/json` for the websockets
+interface. It works exactly the same way as the telnet interface
+(described below).
+
 Examples
 --------
 First, create an AtomSpace, put some atoms into it, and start the
