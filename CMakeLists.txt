@@ -293,7 +293,7 @@ IF (CXXTEST_FOUND)
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
 			COMMENT "Running tests with coverage..."
 		)
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(check
 			DEPENDS covtest
 			WORKING_DIRECTORY ./
 			# This script combines the coverage analysis of each test,
@@ -304,13 +304,18 @@ IF (CXXTEST_FOUND)
 		)
 	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 		# Coverage is disabled; test normally
-		ADD_CUSTOM_TARGET(test
+		ADD_CUSTOM_TARGET(check
 			DEPENDS tests
 			WORKING_DIRECTORY tests
 			# COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 			COMMENT "Running tests..."
 		)
+
+		# When CMP00037 is finally turned off, just remove these two
+		# lines.
+		ADD_CUSTOM_TARGET(test)
+		ADD_DEPENDENCIES(test check)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 	ADD_CUSTOM_TARGET(test_atomese
