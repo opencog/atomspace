@@ -107,6 +107,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t havel = std::hash<std::string>{}("haveLink");
 	static const size_t havea = std::hash<std::string>{}("haveAtom");
 	static const size_t makea = std::hash<std::string>{}("makeAtom");
+	static const size_t loada = std::hash<std::string>{}("loadAtoms");
 	static const size_t gtinc = std::hash<std::string>{}("getIncoming");
 	static const size_t gettv = std::hash<std::string>{}("getTV");
 	static const size_t settv = std::hash<std::string>{}("setTV");
@@ -136,7 +137,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (versn == act)
 	{
 		CHK_CMD;
-		return "0.9";
+		return "0.9.1";
 	}
 
 	// -----------------------------------------------
@@ -259,6 +260,39 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		ADD_ATOM;
+		return "true\n";
+	}
+
+	// -----------------------------------------------
+	// A list vesion of above.
+	// AtomSpace.loadAtoms([{ "type": "ConceptNode", "name": "foo"},
+	//                      { "type": "ConceptNode", "name": "oofdah"}])
+	if (loada == act)
+	{
+		CHK_CMD;
+		pos = cmd.find_first_not_of(" \n\t", pos);
+		if ('[' != cmd[pos]) return "false\n";
+		pos++;
+		while (epos != cmd.npos)
+		{
+			ADD_ATOM;
+			pos = epos;
+
+			// We expect a comma or a close-bracket.
+			if  (cmd.npos == pos) return "false\n";
+
+			// Skip whitespace
+			pos = cmd.find_first_not_of(" \n\t", pos);
+			if  (cmd.npos == pos) return "false\n";
+
+			// If end of list, we are done.
+			if (']' == cmd[pos]) break;
+
+			// If not end of list, we expect a comma.
+			if (',' != cmd[pos]) return "false\n";
+			pos++;
+			epos = cmd.size();
+		}
 		return "true\n";
 	}
 
