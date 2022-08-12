@@ -41,7 +41,13 @@ INSTALL(FILES
 # A compatible pkgconfig
 configure_package_config_file(atomspace.pc.in
 	${CMAKE_CURRENT_BINARY_DIR}/atomspace.pc
-	INSTALL_DESTINATION lib/pkgconfig/
+	INSTALL_DESTINATION lib/pkgconfig
+	PATH_VARS CMAKE_INSTALL_PREFIX
+)
+
+INSTALL(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/atomspace.pc
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/
 )
 
 # -----------------------------------------------------------
