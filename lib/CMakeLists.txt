@@ -35,3 +35,13 @@ INSTALL(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceConfig.cmake
 	DESTINATION ${ConfigPackageLocation}
 )
+
+# -----------------------------------------------------------
+
+# A compatible pkgconfig
+configure_package_config_file(atomspace.pc.in
+	${CMAKE_CURRENT_BINARY_DIR}/atomspace.pc
+	INSTALL_DESTINATION lib/pkgconfig/
+)
+
+# -----------------------------------------------------------

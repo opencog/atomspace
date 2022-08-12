@@ -1,12 +1,12 @@
 
 atomspace.pc:
-prefix=/usr
+prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
 includedir=${prefix}/include
 libdir=${exec_prefix}/lib/opencog
 
 Name: AtomSpace
 Description: The AtomSpace Hypergraph Database
-Version: 1.0.0
+Version: @SEMANTIC_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lstorage-types -lsexpr -Wl,--no-as-needed -lpersist-file -Wl,--as-needed -lpersist -latomspace
