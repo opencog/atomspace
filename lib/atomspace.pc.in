@@ -1,0 +1,12 @@
+
+atomspace.pc:
+prefix=/usr
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib/opencog
+
+Name: AtomSpace
+Description: The AtomSpace Hypergraph Database
+Version: 1.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lstorage-types -lsexpr -Wl,--no-as-needed -lpersist-file -Wl,--as-needed -lpersist -latomspace
