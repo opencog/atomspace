@@ -426,7 +426,7 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 
 ## Debian specific configurations
 SET(DEPENDENCY_LIST
-	"guile-2.2-dev (>= 2.2.2)"
+	"guile-3.0-dev (>= 3.0.1)"
 	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
 	"libgearman-dev (>=1.0.6)"
