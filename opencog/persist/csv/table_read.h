@@ -99,7 +99,7 @@ typedef std::vector<std::string> string_seq;
 string_seq get_header(const std::string& input_file);
 
 std::istream& istreamRawITable(
-    std::istream& in, Table& tab,
+    std::istream& in, std::vector<string_seq>& table,
     const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
 std::istream& istreamITable(std::istream& in, Table& tab,

@@ -330,8 +330,8 @@ ValuePtr opencog::token_to_vertex(Type tipe, const std::string& token)
  * the appropriate type, and thunking for the header, and ignoring
  * certain features, must all be done as a separate step.
  */
-std::istream& istreamRawITable(std::istream& in, Table& tab,
-							   const std::vector<unsigned>& ignored_indices)
+std::istream& istreamRawITable(std::istream& in, std::vector<string_seq>& tab,
+                               const std::vector<unsigned>& ignored_indices)
 {
 	std::streampos beg = in.tellg();
 
@@ -342,13 +342,16 @@ std::istream& istreamRawITable(std::istream& in, Table& tab,
 	// Read first few by hand. The first might be labels, so we must
 	// get at least the second line. But the second line might have
 	// all default feature values (i.e. no colon), so get the third...
-	dorepeat(20) {
+	dorepeat(20)
+	{
 		if (!get_data_line(in, line))
 			break;
+
 		// If it is a sparse file, we are outta here.
 		// Throw an std::exception, since we don't want to log this as an
 		// error (all the other exception types log to the log file).
-		if (string::npos != line.find (sparse_delim)) {
+		if (std::string::npos != line.find (sparse_delim))
+		{
 			in.seekg(beg);
 			throw std::exception();
 		}
@@ -360,17 +363,17 @@ std::istream& istreamRawITable(std::istream& in, Table& tab,
 		lines.push_back(line);
 
 	// Determine the arity from the first line.
-	vector<string> fl = tokenizeRow<string>(lines[0], ignored_indices);
-	arity_t arity = fl.size();
+	std::vector<std::string> fl = tokenizeRow<std::string>(lines[0], ignored_indices);
+	size_t arity = fl.size();
 
 	std::atomic<int> arity_fail_row(-1);
 	auto parse_line = [&](size_t i)
 	{
 		// tokenize the line and fill the table with
-		tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
+		tab[i] = tokenizeRow<std::string>(lines[i], ignored_indices);
 
 		// Check arity
-		if (arity != (arity_t)tab[i].size())
+		if (arity != tab[i].size())
 			arity_fail_row = i + 1;
 	};
 
@@ -378,12 +381,12 @@ std::istream& istreamRawITable(std::istream& in, Table& tab,
 	size_t ls = lines.size();
 	tab.resize(ls);
 	auto ir = boost::irange((size_t)0, ls);
-	vector<size_t> indices(ir.begin(), ir.end());
+	std::vector<size_t> indices(ir.begin(), ir.end());
 	OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
 
 	if (-1 != arity_fail_row) {
 		in.seekg(beg);
-		OC_ASSERT(false,
+		throw SyntaxException(TRACE_INFO,
 				  "ERROR: Input file inconsistent: the %uth row has "
 				  "a different number of columns than the rest of the file.  "
 				  "All rows should have the same number of columns.\n",
