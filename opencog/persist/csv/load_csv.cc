@@ -1,4 +1,4 @@
-/** 
+/**
  * load_csv.cc -- Load CSV tables into Values
  *
  * Copyright (C) 2022 Linas Vepstas
@@ -25,7 +25,7 @@ using namespace opencog;
  * Load columns from a CSV file and place them into Atomese Values on
  * the indicated Atom. Atomese Values are vectors (of floats, bools,
  * srings, or more complex structures). Each Value holds one column
- * from the dataset. 
+ * from the dataset.
  *
  * The features (columns) specified in ignore_features will be omitted
  * from the representation.
