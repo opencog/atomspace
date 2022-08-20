@@ -370,6 +370,7 @@ inferTableAttributes(std::istream& in,
                      const std::vector<std::string>& ignore_features,
                      std::vector<unsigned>& ignore_idxs,
                      std::vector<Type>& tt,
+                     std::vector<std::string>& maybe_header,
                      bool& has_header)
 {
 	has_header = false;
@@ -383,11 +384,11 @@ inferTableAttributes(std::istream& in,
 	// Get a portion of the dataset into memory (cleaning weird stuff)
 	std::vector<std::string> lines;
 	std::string line;
-	while (get_data_line(in, line) && maxline-- > 0)
+	while (get_data_line(in, line) and 0 < maxline--)
 		lines.push_back(line);
 
 	// Parse what could be a header
-	const std::vector<std::string> maybe_header = tokenizeRow(lines.front());
+	maybe_header = tokenizeRow(lines.front());
 
 	// Determine arity
 	size_t arity = maybe_header.size();
@@ -467,13 +468,14 @@ istreamDenseTable(const Handle& anchor,
                   std::istream& in,
                   const std::vector<unsigned>& ignore_idxs,
                   const std::vector<Type>& col_types,
+                  const std::vector<std::string>& header,
                   bool has_header)
 {
 	// Width of table in the input.
 	size_t table_width = col_types.size();
 
 	// Effective width is the width, without the ignored columns.
-	size_t effective_width = table_width - ignore_idxs.size();
+	// size_t effective_width = table_width - ignore_idxs.size();
 
 	// Setup a mask; should we skip the column?
 	std::vector<bool> skip_col(table_width, false);
@@ -571,14 +573,25 @@ opencog::istreamTable(const Handle& anchor,
 	std::streampos beg = in.tellg();
 
 	// Infer the properties of the table without loading its content
-	bool has_header = false;
 	std::vector<unsigned> ignore_indexes;
 	std::vector<Type> col_types;
+	std::vector<std::string> header;
+	bool has_header = false;
 	inferTableAttributes(in, ignore_features, ignore_indexes,
-	                     col_types, has_header);
+	                     col_types, header, has_header);
+
+	// If the header is missing, then fake it.
+	if (not has_header)
+	{
+		header.clear();
+		for (size_t i=0; i<col_types.size(); i++)
+			header.push_back("c" + std::to_string(i));
+	}
+
 	in.seekg(beg);
 
-	return istreamDenseTable(anchor, in, ignore_indexes, col_types, has_header);
+	return istreamDenseTable(anchor, in, ignore_indexes,
+		col_types, header, has_header);
 }
 
 // ==================================================================
