@@ -17,7 +17,8 @@ Local subdirectories include:
               for RocksDB and one that allows AtomSpaces to trade
               Atoms over the network.)
 
-* csv      -- Load Values from CSV/TSV files. Each column in the CSV
+* csv      -- Load Values from CSV/TSV files. These are "delimiter
+              separated values" -- ordinary tables. Each column in the
               table is loaded into an appropriate Value (`FloatValue`,
               `BoolValue` or `StringValue`). The values are placed
               under keys (named after the column) on the provided Atom.

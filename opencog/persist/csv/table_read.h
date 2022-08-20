@@ -41,7 +41,7 @@ typedef std::vector<std::string> string_seq;
 /**
  * Load columns from a CSV file and place them into Atomese Values on
  * the indicated Atom. Atomese Values are vectors (of floats, bools,
- * srings, or more complex structures). Each Value holds one column
+ * strings, or more complex structures). Each Value holds one column
  * from the dataset.
  *
  * The features (columns) specified in ignore_features will be omitted
