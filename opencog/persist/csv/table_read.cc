@@ -495,6 +495,12 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 	// Get rid of the unwanted columns.
 	// tab.delete_columns(ignore_features);
 
+	// determined ignore_indices
+	std::vector<unsigned> ignore_indices = get_indices(ignore_features,
+		  										  get_header(file_name));
+
+
+....
 	// Finally, perform a column type conversion
 	from_tokens_visitor ftv(tab.get_types());
 	auto aft = apply_visitor(ftv);
@@ -506,166 +512,19 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 	return in;
 }
 
-/**
- * Like istreamITable but add the option to ignore indices.
- *
- * It's akind of a temporary hack, till it's clear that this is much
- * faster and we should recode istreamITable to ignore features
- * head-on.
- *
- * Also, it assumes that the dataset is not sparse.
- */
-istream& istreamITable_ignore_indices(istream& in, ITable& tab,
-                                      const vector<unsigned>& ignore_indices)
-{
-    istreamRawITable(in, tab, ignore_indices);
-
-    // Determine the column types.
-    type_node_seq col_types = infer_column_types(tab);
-    tab.set_types(col_types);
-
-    // If there is a header row, then it must be the column labels.
-    if (has_header(tab, col_types)) {
-        tab.set_labels(tab.begin()->get_seq<string>());
-        tab.erase(tab.begin());
-    }
-
-    // Finally, perform a column type conversion
-    from_tokens_visitor ftv(tab.get_types());
-    auto aft = apply_visitor(ftv);
-    OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
-                        [&](multi_type_seq& seq) {
-                            return aft(seq.get_variant());
-                        });
-
-    return in;
-}
-
-/**
- * Take a line and return a triple with vector containing the input
- * elements, output element and timestamp.
- */
-std::tuple<std::vector<std::string>, std::string, std::string>
-tokenizeRowIOT(const std::string& line,
-               const std::vector<unsigned>& ignored_indices,
-               int target_idx,  // < 0 == ignored
-               int timestamp_idx) // < 0 == ignored
-{
-    std::tuple<std::vector<std::string>, std::string, std::string> res;
-    table_tokenizer toker = get_row_tokenizer(line);
-    int i = 0;
-    for (const std::string& tok : toker) {
-        if (!boost::binary_search(ignored_indices, i)) {
-            std::string el = boost::lexical_cast<string>(tok);
-            if (target_idx == i)
-                std::get<1>(res) = el;
-            else if (timestamp_idx == i)
-                std::get<2>(res) = el;
-            else
-                std::get<0>(res).push_back(el);
-        }
-        i++;
-    }
-    return res;
-}
-
 ITable loadITable(const std::string& file_name,
-                  const vector<string>& ignore_features)
+				  const std::vector<std::string>& ignore_features)
 {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+	if (file_name.empty())
+		throw RuntimeException(TRACE_INFO, "The file name is empty!");
+	std::ifstream in(file_name.c_str());
+	if (not in.is_open())
+		throw RuntimeException(TRACE_INFO,
+			"Could not open %s", file_name.c_str());
 
-    ITable res;
-    istreamITable(in, res, ignore_features);
-    return res;
-}
-
-/**
- * Like loadITable but it is optimized by ignoring features head-on
- * (rather than loading them, then removing them.
- *
- * WARNING: it assumes the dataset has a header!!!
- */
-ITable loadITable_optimized(const std::string& file_name,
-                            const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    // determined ignore_indices
-    vector<unsigned> ignore_indices = get_indices(ignore_features,
-                                                  get_header(file_name));
-
-    ITable res;
-    istreamITable_ignore_indices(in, res, ignore_indices);
-    return res;
-}
-
-/**
- * Fill an input table and output table given a DSV
- * (delimiter-seperated values) file format, where delimiters are ',',
- * ' ' or '\t'.
- *
- * It is assumed that each row have the same number of columns, if not
- * an assert is raised.
- *
- * pos specifies the position of the output, if -1 it is the last
- * position. The default position is 0, the first column.
- *
- * This is only used for sparse table and could be optimized
- */
-istream& istreamTable_OLD(istream& in, Table& tab,
-                          const std::string& target_feature,
-                          const std::vector<std::string>& ignore_features)
-{
-    istreamITable(in, tab.itable, ignore_features);
-
-    tab.otable = tab.itable.get_column_data(target_feature);
-    OC_ASSERT(0 != tab.otable.size(),
-              "Fatal Error: target feature \"%s\" not found",
-              target_feature.c_str());
-
-    tab.target_pos = tab.itable.get_column_offset(target_feature);
-
-    type_node targ_type = tab.itable.get_type(target_feature);
-
-    std::string targ_feat = tab.itable.delete_column(target_feature);
-
-    tab.otable.set_label(targ_feat);
-    tab.otable.set_type(targ_type);
-
-    return in;
-}
-
-/**
- * Like istreamTable but optimize by ignoring features head-on rather
- * than loading them then removing them.
- *
- * Warning: only works on dense data with header file.
- */
-istream& istreamTable_ignore_indices(istream& in, Table& tab,
-                                     const std::string& target_feature,
-                                     const std::vector<unsigned>& ignore_indices)
-{
-    istreamITable_ignore_indices(in, tab.itable, ignore_indices);
-
-    tab.otable = tab.itable.get_column_data(target_feature);
-    OC_ASSERT(0 != tab.otable.size(),
-              "Fatal Error: target feature \"%s\" not found",
-              target_feature.c_str());
-
-    tab.target_pos = tab.itable.get_column_offset(target_feature);
-
-    type_node targ_type = tab.itable.get_type(target_feature);
-
-    std::string targ_feat = tab.itable.delete_column(target_feature);
-
-    tab.otable.set_label(targ_feat);
-    tab.otable.set_type(targ_type);
-
-    return in;
+	ITable res;
+	istreamITable(in, res, ignore_features);
+	return res;
 }
 
 // ==================================================================
