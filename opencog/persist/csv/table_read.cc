@@ -519,10 +519,30 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 
 // ==================================================================
 
+/**
+ * Get indices (aka positions or offsets) of a list of labels given a
+ * header. The labels can be sequenced in any order, it will always
+ * return the order consistent with the header.
+ */
+static std::vector<unsigned>
+get_indices(const string_seq &labels,
+            const string_seq &header)
+{
+   std::vector<unsigned> res;
+   for (size_t i = 0; i < header.size(); ++i)
+      if (std::find(labels.begin(), labels.end(), header[i]) != labels.end())
+         res.push_back(i);
+   return res;
+}
+
+// ==================================================================
+
 static std::istream&
 inferTableAttributes(std::istream& in,
                      const std::vector<std::string>& ignore_features,
-                     std::vector<Type>& tt, bool& has_header)
+                     std::vector<unsigned>& ignore_idxs,
+                     std::vector<Type>& tt,
+                     bool& has_header)
 {
 	has_header = false;
 
@@ -580,11 +600,9 @@ inferTableAttributes(std::istream& in,
 	// Determine type signature
 	if (has_header)
 	{
-		std::vector<unsigned> ignore_idxs =
-			get_indices(ignore_features, maybe_header);
+		ignore_idxs = get_indices(ignore_features, maybe_header);
 		boost::sort(ignore_idxs);
 	}
-	logger().debug() << "Infered type tree: " << tt;
 
 	in.seekg(beg);
 	in.clear();		 // in case it has reached the eof
@@ -606,21 +624,17 @@ istreamTable(const Handle& anchor,
              std::istream& in,
              const std::vector<std::string>& ignore_features)
 {
-    // Infer the properties of the table without loading its content
-    bool has_header;
-    std::streampos beg = in.tellg();
-    inferTableAttributes(in, ignore_features, tt, has_header);
-    in.seekg(beg);
+	std::streampos beg = in.tellg();
 
-    if (is_sparse) {
-        // fallback on the old loader
-        // TODO: this could definitely be optimized
-        OC_ASSERT(timestamp_feature.empty(), "Timestamp feature not implemented");
-        return istreamTable_OLD(in, tab, target_feature, ignore_features);
-    } else {
-        return istreamDenseTable(in, tab, target_feature, timestamp_feature,
-                                 ignore_features, tt, has_header);
-    }
+	// Infer the properties of the table without loading its content
+	bool has_header = false;
+	std::vector<unsigned> ignore_indexes;
+	std::vector<Type> col_types;
+	inferTableAttributes(in, ignore_features, ignore_indexes,
+	                     col_types, has_header);
+	in.seekg(beg);
+
+	return istreamDenseTable(anchor, in, ignore_indexes, col_types, has_header);
 }
 
 // ==================================================================
@@ -655,12 +669,10 @@ tokenizeRowIO (
 
 // ==================================================================
 
-static istream&
-istreamDenseTable_noHeader(istream& in, Table& tab,
-                           int target_idx, // < 0 == ignore
-                           int timestamp_idx, // < 0 == ignore
-                           const vector<unsigned>& ignore_idxs,
-                           const type_tree& tt, bool has_header)
+static std::istream&
+istreamDenseTable(istream& in, Table& tab,
+                  const vector<unsigned>& ignore_idxs,
+                  const type_tree& tt, bool has_header)
 {
     // Get the entire dataset into memory (cleaning weird stuff)
     std::string line;
@@ -732,64 +744,6 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
     return in;
 }
 
-istream& istreamDenseTable(istream& in, Table& tab,
-                           const std::string& target_feature,
-                           const std::string& timestamp_feature,
-                           const vector<string>& ignore_features,
-                           const type_tree& tt, bool has_header)
-{
-    OC_ASSERT(has_header
-              || (target_feature.empty()
-                  && ignore_features.empty()
-                  && timestamp_feature.empty()),
-              "If the data file has no header, "
-              "then a target feature, ignore features or "
-              "timestamp_feature cannot be specified");
-
-    // determine target, timestamp and ignore indexes
-    int target_idx = 0;    // if no header, target is at the first
-                           // column by default
-
-    int timestamp_idx = -1;     // disabled by default
-    vector<unsigned> ignore_idxs;
-    if (has_header) {
-        std::string line;
-        get_data_line(in, line);
-        vector<string> header = tokenizeRow<string>(line);
-
-        // Set target idx
-        if (!target_feature.empty()) {
-            auto target_it = std::find(header.begin(), header.end(),
-                                       target_feature);
-            OC_ASSERT(target_it != header.end(), "Target %s not found",
-                      target_feature.c_str());
-            target_idx = std::distance(header.begin(), target_it);
-        }
-
-        // Set timestamp idx
-        if (!timestamp_feature.empty()) {
-            auto timestamp_it = std::find(header.begin(), header.end(),
-                                          timestamp_feature);
-            OC_ASSERT(timestamp_it != header.end(), "Timestamp feature %s not found",
-                      timestamp_feature.c_str());
-            timestamp_idx = std::distance(header.begin(), timestamp_it);
-        }
-
-        // Set ignore idxs
-        ignore_idxs = get_indices(ignore_features, header);
-
-        // get input and output labels from the header
-        auto iotlabels = tokenizeRowIOT(line, ignore_idxs,
-                                        target_idx, timestamp_idx);
-        tab.itable.set_labels(std::get<0>(iotlabels));
-        tab.otable.set_label(std::get<1>(iotlabels));
-        tab.ttable.set_label(std::get<2>(iotlabels));
-    }
-
-    return istreamDenseTable_noHeader(in, tab, target_idx, timestamp_idx,
-                                      ignore_idxs, tt, has_header);
-}
-
 #endif
 
 // ==================================================================
@@ -805,7 +759,7 @@ void loadTable(const Handle& anchor,
 		throw RuntimeException(TRACE_INFO,
 			"Could not open %s", file_name.c_str());
 
-    istreamTable(acnhro, in, ignore_features);
+    istreamTable(anchor, in, ignore_features);
 }
 
 // ==================================================================

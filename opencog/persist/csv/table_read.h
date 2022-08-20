@@ -105,21 +105,10 @@ std::istream& istreamRawITable(
 std::istream& istreamITable(std::istream& in, ITable& tab,
                            const string_seq& ignore_features);
 
-std::istream& istreamTable(std::istream& in, Table& tab,
+std::istream& istreamTable(const Handle& anchor,
+                           std::istream& in,
                            const string_seq& ignore_features);
 
-// TODO: reimplement loadITable with the same model of loadTable and
-// remove loadITable_optimized
-Table loadITable(
-    const std::string& file_name,
-    const string_seq& ignore_features=string_seq());
-
-Table loadITable_optimized(
-    const std::string& file_name,
-    const string_seq& ignore_features=string_seq());
-
-/**
- */
 void loadTable(const Handle& anchor,
                const std::string& file_name,
                const string_seq& ignore_features=string_seq());
