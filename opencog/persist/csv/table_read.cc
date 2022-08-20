@@ -60,20 +60,6 @@ using boost::phoenix::arg_names::arg1;
 // -------------------------------------------------------
 
 /**
- * Return true if the next chars in 'in' correspond to carriage return
- * (support UNIX and DOS format) and advance in of the checked chars.
- */
-static bool checkCarriageReturn(std::istream& in)
-{
-	char next_c = in.get();
-	if (next_c == '\r') // DOS format
-		next_c = in.get();
-	if (next_c == '\n')
-		return true;
-	return false;
-}
-
-/**
  * remove the carriage return (for DOS format)
  */
 static void removeCarriageReturn(std::string& str)
@@ -134,35 +120,6 @@ std::istream& get_data_line(std::istream& is, std::string& line)
 }
 
 // -------------------------------------------------------
-
-static const char *sparse_delim = " : ";
-
-/**
- * parse a pair of key/value in a parse dataset, using ':' as
- * delimiter. For instance
- *
- * parse_key_val("key : val")
- *
- * returns
- *
- * {"key", "val"}
- *
- * If no such delimiter is found then it return a pair with empty key
- * and empty val.
- */
-static std::pair<std::string, std::string>
-parse_key_val(const std::string& chunk)
-{
-	std::pair<std::string, std::string> res;
-	size_t pos = chunk.find(sparse_delim);
-	if (std::string::npos == pos)
-		return res;
-	std::string key = chunk.substr(0, pos);
-	boost::trim(key);
-	std::string val = chunk.substr(pos + strlen(sparse_delim));
-	boost::trim(val);
-	return {key, val};
-}
 
 /**
  * Take a row, return a tokenizer.  Tokenization uses the
@@ -322,6 +279,7 @@ ValuePtr opencog::token_to_vertex(Type tipe, const std::string& token)
 
 // ===========================================================
 // istream regular tables.
+static const char *sparse_delim = " : ";
 
 /**
  * Fill the input table, given a file in DSV (delimiter-seperated values)
@@ -425,32 +383,12 @@ std::vector<Type> infer_column_types(const std::vector<string_seq>& tab)
 }
 
 /**
- * Infer the column types of the first line of a raw input table and
- * compare it to the given column types.  If there is a mis-match,
- * then the first row must be a header, i.e. a set of ascii column
- * labels.
- */
-static bool has_header(ITable& tab, const std::vector<Type>& col_types)
-{
-	const string_seq& row = *tab.begin();
-
-	size_t arity = row.size();
-
-	for (size_t i=0; i<arity; i++)
-	{
-		Type flt = infer_type_from_token2(col_types[i], row[i]);
-		if ((FLOAT_VALUE == flt) && (STRING_VALUE != col_types[i]))
-			return true;
-	}
-	return false;
-}
-
-/**
  * Infer the column types of a line and compare it to the given column
  * types.  If there is a mis-match, then it must be a header, i.e. a
  * set of ascii column labels.
  */
-bool is_header(const string_seq& tokens, const std::vector<Type>& col_types)
+static bool
+is_header(const string_seq& tokens, const std::vector<Type>& col_types)
 {
 	for (size_t i = 0; i < tokens.size(); i++)
 	{
