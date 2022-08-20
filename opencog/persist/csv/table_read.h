@@ -105,8 +105,8 @@ std::istream& istreamRawITable(
 std::istream& istreamITable(std::istream& in, ITable& tab,
                            const string_seq& ignore_features);
 
-std::istream& istreamTable(const Handle& anchor,
-                           std::istream& in,
+std::istream& istreamTable(const Handle&,
+                           std::istream&,
                            const string_seq& ignore_features);
 
 void loadTable(const Handle& anchor,

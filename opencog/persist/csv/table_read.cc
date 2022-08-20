@@ -656,10 +656,7 @@ istreamDenseTable(const Handle& anchor,
     while (get_data_line(in, line))
         lines.push_back(line);
 
-    // Get the elementary io types
-    type_node_seq itypes =
-        vector_comp(get_signature_inputs(tt), get_type_node);
-
+#if 0
     // Function to parse each line (to be called in parallel)
     auto parse_line = [&](unsigned i) {
         try {
@@ -702,6 +699,7 @@ istreamDenseTable(const Handle& anchor,
     if (timestamp_idx >= 0)
         tab.timestamp_pos = timestamp_idx -
             boost::count_if(ignore_idxs, arg1 < timestamp_idx);
+#endif
 
     return in;
 }
@@ -719,9 +717,9 @@ istreamDenseTable(const Handle& anchor,
  * 2) Load the actual data.
  */
 std::istream&
-istreamTable(const Handle& anchor,
-             std::istream& in,
-             const std::vector<std::string>& ignore_features)
+opencog::istreamTable(const Handle& anchor,
+                      std::istream& in,
+                      const std::vector<std::string>& ignore_features)
 {
 	std::streampos beg = in.tellg();
 
