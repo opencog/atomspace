@@ -50,7 +50,7 @@ using namespace opencog;
 // -------------------------------------------------------
 
 /**
- * remove the carriage return (for DOS format)
+ * Remove the carriage return (for DOS format).
  */
 static void removeCarriageReturn(std::string& str)
 {
@@ -60,7 +60,7 @@ static void removeCarriageReturn(std::string& str)
 }
 
 /**
- * remove non ASCII char at the begining of the string
+ * Remove non ASCII char at the begining of the string.
  */
 static void removeNonASCII(std::string& str)
 {
@@ -343,14 +343,6 @@ is_header(const string_seq& tokens, const std::vector<Type>& col_types)
 			return true;
 	}
 	return false;
-}
-
-std::vector<std::string> get_header(const std::string& file_name)
-{
-	std::ifstream in(file_name.c_str());
-	std::string line;
-	get_data_line(in, line);
-	return tokenizeRow(line);
 }
 
 // ==================================================================

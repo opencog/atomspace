@@ -80,15 +80,9 @@ typedef std::vector<ValuePtr> Table;
 
 // ===========================================================
 
-// Get the header of a DSV file (assuming there is one)
-string_seq get_header(const std::string& input_file);
-
-std::istream& istreamRawITable(
-    std::istream& in, ITable& table,
-    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
-
-std::istream& istreamITable(std::istream& in, ITable& tab,
-                           const string_seq& ignore_features);
+//std::istream& istreamRawITable(
+//    std::istream& in, ITable& table,
+//    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
 std::istream& istreamTable(const Handle&,
                            std::istream&,
