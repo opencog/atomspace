@@ -61,6 +61,34 @@ void CSVLoadUTest::test_simple_load()
 
 	Handle colkey = _asp->add_node(PREDICATE_NODE, "*-column-keys-*");
 	ValuePtr kvp = h->getValue(colkey);
+	TS_ASSERT_EQUALS(5, kvp->size());
+
+	// Loop over the columns
+	LinkValuePtr lvp = LinkValueCast(kvp);
+	HandleSeq keylist = lvp->to_handle_seq();
+	for (const Handle& key : keylist)
+	{
+		ValuePtr vp = h->getValue(key);
+		TS_ASSERT_EQUALS(2, vp->size());
+		printf("Column %s is %s\n", key->to_short_string().c_str(),
+			vp->to_string().c_str());
+	}
+
+	// Loop over columns again, verify types.
+	int bc = 0;
+	int fc = 0;
+	int sc = 0;
+	for (const Handle& key : keylist)
+	{
+		ValuePtr vp = h->getValue(key);
+		Type vt = vp->get_type();
+		if (BOOL_VALUE == vt) bc++;
+		if (FLOAT_VALUE == vt) fc++;
+		if (STRING_VALUE == vt) sc++;
+	}
+	TS_ASSERT_EQUALS(3, bc);
+	TS_ASSERT_EQUALS(1, fc);
+	TS_ASSERT_EQUALS(1, sc);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
