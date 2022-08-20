@@ -38,6 +38,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
@@ -45,10 +46,11 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include "table_read.h"
 
-namespace opencog {
+using namespace opencog;
 
 using namespace boost;
 using namespace boost::phoenix;
@@ -58,26 +60,26 @@ using boost::phoenix::arg_names::arg1;
 
 bool checkCarriageReturn(std::istream& in)
 {
-    char next_c = in.get();
-    if (next_c == '\r') // DOS format
-        next_c = in.get();
-    if (next_c == '\n')
-        return true;
-    return false;
+	char next_c = in.get();
+	if (next_c == '\r') // DOS format
+		next_c = in.get();
+	if (next_c == '\n')
+		return true;
+	return false;
 }
 
 void removeCarriageReturn(std::string& str)
 {
-    size_t s = str.size();
-    if ((s > 0) && (str[s-1] == '\r'))
-        str.resize(s-1);
+	size_t s = str.size();
+	if ((s > 0) && (str[s-1] == '\r'))
+		str.resize(s-1);
 }
 
 //* Remove non-ascii characters at the bigining of the line, only.
 void removeNonASCII(std::string& str)
 {
-    while (str.size() && (unsigned char)str[0] > 127)
-        str = str.substr(1);
+	while (str.size() && (unsigned char)str[0] > 127)
+		str = str.substr(1);
 }
 
 // -------------------------------------------------------
@@ -86,13 +88,13 @@ void removeNonASCII(std::string& str)
 // of hash, bang or semicolon.
 bool is_comment(const char c)
 {
-    if ('#' == c) return true;
-    if (';' == c) return true;
-    if ('!' == c) return true;
-    if ('\n' == c) return true;
-    if ('\r' == c) return true;
-    if (0 == c) return true;
-    return false;
+	if ('#' == c) return true;
+	if (';' == c) return true;
+	if ('!' == c) return true;
+	if ('\n' == c) return true;
+	if ('\r' == c) return true;
+	if (0 == c) return true;
+	return false;
 }
 
 /// Get one line of actual data.
@@ -106,19 +108,19 @@ bool is_comment(const char c)
 //
 std::istream& get_data_line(std::istream& is, std::string& line)
 {
-    while (true)
-    {
-        getline(is, line);
-        if (!is) return is;
-        if (is_comment(line[0])) continue;
+	while (true)
+	{
+		getline(is, line);
+		if (!is) return is;
+		if (is_comment(line[0])) continue;
 
-        // Remove weird symbols at the start of the line (only).
-        removeNonASCII(line);
-        // Remove carriage return at end of line (for DOS files).
-        removeCarriageReturn(line);
+		// Remove weird symbols at the start of the line (only).
+		removeNonASCII(line);
+		// Remove carriage return at end of line (for DOS files).
+		removeCarriageReturn(line);
 
-        return is;
-    }
+		return is;
+	}
 }
 
 // -------------------------------------------------------
@@ -141,15 +143,15 @@ static const char *sparse_delim = " : ";
 static std::pair<std::string, std::string>
 parse_key_val(const std::string& chunk)
 {
-    std::pair<std::string, std::string> res;
-    size_t pos = chunk.find(sparse_delim);
-    if (std::string::npos == pos)
-        return res;
-    std::string key = chunk.substr(0, pos);
-    boost::trim(key);
-    std::string val = chunk.substr(pos + strlen(sparse_delim));
-    boost::trim(val);
-    return {key, val};
+	std::pair<std::string, std::string> res;
+	size_t pos = chunk.find(sparse_delim);
+	if (std::string::npos == pos)
+		return res;
+	std::string key = chunk.substr(0, pos);
+	boost::trim(key);
+	std::string val = chunk.substr(pos + strlen(sparse_delim));
+	boost::trim(val);
+	return {key, val};
 }
 
 /**
@@ -158,23 +160,23 @@ parse_key_val(const std::string& chunk)
  */
 table_tokenizer get_row_tokenizer(const std::string& line)
 {
-    typedef boost::escaped_list_separator<char> separator;
-    typedef boost::tokenizer<separator> tokenizer;
+	typedef boost::escaped_list_separator<char> separator;
+	typedef boost::tokenizer<separator> tokenizer;
 
-    // Tokenize line; currently, we allow tabs, commas, blanks.
-    static const separator sep("\\", ",\t ", "\"");
-    return tokenizer(line, sep);
+	// Tokenize line; currently, we allow tabs, commas, blanks.
+	static const separator sep("\\", ",\t ", "\"");
+	return tokenizer(line, sep);
 }
 
 // Same as above, but only allow commas as a column separator.
 table_tokenizer get_sparse_row_tokenizer(const std::string& line)
 {
-    typedef boost::escaped_list_separator<char> separator;
-    typedef boost::tokenizer<separator> tokenizer;
+	typedef boost::escaped_list_separator<char> separator;
+	typedef boost::tokenizer<separator> tokenizer;
 
-    // Tokenize line; currently, we allow tabs, commas, blanks.
-    static const separator sep("\\", ",", "\"");
-    return tokenizer(line, sep);
+	// Tokenize line; currently, we allow tabs, commas, blanks.
+	static const separator sep("\\", ",", "\"");
+	return tokenizer(line, sep);
 }
 
 /**
@@ -182,15 +184,15 @@ table_tokenizer get_sparse_row_tokenizer(const std::string& line)
  * Used by istreamTable. This will modify the line to remove leading
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
-vector<string> tokenizeSparseRow(const std::string& line)
+std::vector<std::string> tokenizeSparseRow(const std::string& line)
 {
-    table_tokenizer tok = get_sparse_row_tokenizer(line);
-    vector<string> res;
-    for (string t : tok) {
-        boost::trim(t);
-        res.push_back(t);
-    }
-    return res;
+	table_tokenizer tok = get_sparse_row_tokenizer(line);
+	std::vector<std::string> res;
+	for (std::string t : tok) {
+		boost::trim(t);
+		res.push_back(t);
+	}
+	return res;
 }
 
 // -------------------------------------------------------
@@ -198,11 +200,11 @@ vector<string> tokenizeSparseRow(const std::string& line)
  * Given an input string, guess the type of the string.
  * Inferable types are: boolean, contin and enum.
  */
-type_node infer_type_from_token(const std::string& token)
+Type infer_type_from_token(const std::string& token)
 {
     /* Prefered representation is T's and 0's, to maximize clarity,
-     * readability.  Numeric values are easily confused with contin
-     * type.
+     * readability.  Numeric values are easily confused with floating
+     * point type.
      */
     if (token == "0" ||
         token == "1" ||
@@ -210,20 +212,20 @@ type_node infer_type_from_token(const std::string& token)
         token == "F" ||
         token == "t" ||
         token == "f")
-        return id::boolean_type;
+        return BOOL_VALUE;
 
     // If it starts with an alphabetic character, assume its a string
     else if (isalpha(token[0]))
-        return id::enum_type;
+        return STRING_VALUE;
 
     // Hope that we can cast this to a float point number.
     else {
         try {
-            lexical_cast<contin_t>(token);
-            return id::contin_type;
+            boost::lexical_cast<double>(token);
+            return FLOAT_VALUE;
         }
         catch(...) {
-            return id::ill_formed_type;
+            return VOID_VALUE;
         }
     }
 }
@@ -234,13 +236,13 @@ type_node infer_type_from_token(const std::string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-static type_node
-infer_type_from_token2(type_node curr_guess, const std::string& token)
+static Type
+infer_type_from_token2(Type curr_guess, const std::string& token)
 {
-    type_node tokt = infer_type_from_token(token);
+    Type tokt = infer_type_from_token(token);
 
     // First time, just go with the flow.
-    if (id::unknown_type == curr_guess)
+    if (VOID_VALUE == curr_guess)
         return tokt;
 
     // Yayy! its consistent!
@@ -248,17 +250,17 @@ infer_type_from_token2(type_node curr_guess, const std::string& token)
         return tokt;
 
     // If we saw 0,1 when expecting a contin, its a contin.
-    if ((id::contin_type == curr_guess) && (id::boolean_type == tokt))
+    if ((FLOAT_VALUE == curr_guess) && (BOOL_VALUE == tokt))
         return curr_guess;
 
     // If we thought its a boolean 0,1 it might be a contin.
-    if ((id::boolean_type == curr_guess) && (id::contin_type == tokt))
+    if ((BOOL_VALUE == curr_guess) && (FLOAT_VALUE == tokt))
         return tokt;
 
     // If we got to here, then there's some sort of unexpected
     // inconsistency in the column types; we've got to presume that
     // its just some crazy ascii string, i.e. enum_type.
-    return id::enum_type;
+    return STRING_VALUE;
 }
 
 /// cast string "token" to a vertex of type "tipe"
@@ -1218,4 +1220,4 @@ Table loadTable(const std::string& file_name,
     return res;
 }
 
-} // ~namespaces opencog
+// ==================================================================
