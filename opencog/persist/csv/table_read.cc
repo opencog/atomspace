@@ -609,34 +609,6 @@ inferTableAttributes(std::istream& in,
 	return in;
 }
 
-/**
- * Perform 2 passes:
- *
- * 1) Infer
- * 1.1) its type
- * 1.2) whether it has a header
- * 1.3) whether it is dense or sparse
- *
- * 2) Load the actual data.
- */
-std::istream&
-istreamTable(const Handle& anchor,
-             std::istream& in,
-             const std::vector<std::string>& ignore_features)
-{
-	std::streampos beg = in.tellg();
-
-	// Infer the properties of the table without loading its content
-	bool has_header = false;
-	std::vector<unsigned> ignore_indexes;
-	std::vector<Type> col_types;
-	inferTableAttributes(in, ignore_features, ignore_indexes,
-	                     col_types, has_header);
-	in.seekg(beg);
-
-	return istreamDenseTable(anchor, in, ignore_indexes, col_types, has_header);
-}
-
 // ==================================================================
 
 #if 0
@@ -667,36 +639,26 @@ tokenizeRowIO (
     return res;
 }
 
+#endif
+
 // ==================================================================
 
 static std::istream&
-istreamDenseTable(istream& in, Table& tab,
-                  const vector<unsigned>& ignore_idxs,
-                  const type_tree& tt, bool has_header)
+istreamDenseTable(const Handle& anchor,
+                  std::istream& in,
+                  const std::vector<unsigned>& ignore_idxs,
+                  const std::vector<Type>& col_types,
+                  bool has_header)
 {
     // Get the entire dataset into memory (cleaning weird stuff)
     std::string line;
-    std::vector<string> lines;
+    std::vector<std::string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
-
-    // Allocate all rows in the itable, otable and ttable
-    tab.itable.resize(lines.size());
-    tab.otable.resize(lines.size());
-    if (timestamp_idx >= 0)
-        tab.ttable.resize(lines.size());
 
     // Get the elementary io types
     type_node_seq itypes =
         vector_comp(get_signature_inputs(tt), get_type_node);
-    type_node otype = get_type_node(get_signature_output(tt));
-
-    // Assign the io type to the table
-    tab.itable.set_types(itypes);
-    tab.otable.set_type(otype);
-
-    // Instantiate type conversion for inputs
-    from_tokens_visitor ftv(itypes);
 
     // Function to parse each line (to be called in parallel)
     auto parse_line = [&](unsigned i) {
@@ -744,7 +706,35 @@ istreamDenseTable(istream& in, Table& tab,
     return in;
 }
 
-#endif
+// ==================================================================
+
+/**
+ * Perform 2 passes:
+ *
+ * 1) Infer
+ * 1.1) its type
+ * 1.2) whether it has a header
+ * 1.3) whether it is dense or sparse
+ *
+ * 2) Load the actual data.
+ */
+std::istream&
+istreamTable(const Handle& anchor,
+             std::istream& in,
+             const std::vector<std::string>& ignore_features)
+{
+	std::streampos beg = in.tellg();
+
+	// Infer the properties of the table without loading its content
+	bool has_header = false;
+	std::vector<unsigned> ignore_indexes;
+	std::vector<Type> col_types;
+	inferTableAttributes(in, ignore_features, ignore_indexes,
+	                     col_types, has_header);
+	in.seekg(beg);
+
+	return istreamDenseTable(anchor, in, ignore_indexes, col_types, has_header);
+}
 
 // ==================================================================
 
