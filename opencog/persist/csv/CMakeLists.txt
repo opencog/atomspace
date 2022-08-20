@@ -22,3 +22,21 @@ INSTALL (FILES
 )
 
 # -------------------------------
+
+ADD_LIBRARY (csv-table
+   TableSCM.cc
+)
+
+TARGET_LINK_LIBRARIES(csv-table
+	csv
+	atomspace
+	smob
+)
+
+ADD_GUILE_EXTENSION(SCM_CONFIG csv-table "opencog-ext-path-csv-table")
+
+INSTALL (TARGETS csv-table EXPORT AtomSpaceTargets
+   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+# -------------------------------
