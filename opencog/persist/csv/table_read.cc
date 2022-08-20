@@ -643,9 +643,9 @@ opencog::istreamTable(const Handle& anchor,
 // ==================================================================
 
 // See header file for general description.
-void load_cvs_table(const Handle& anchor,
-                    const std::string& file_name,
-                    const string_seq& ignore_features)
+void opencog::load_csv_table(const Handle& anchor,
+                             const std::string& file_name,
+                             const string_seq& ignore_features)
 {
 	if (file_name.empty())
 		throw RuntimeException(TRACE_INFO, "The file name is empty!");
