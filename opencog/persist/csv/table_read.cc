@@ -542,52 +542,29 @@ istreamDenseTable(const Handle& anchor,
 				ic ++;
 				continue;
 			}
-#if 0
-			else
-			if (FLOAT_VALUE == col_types[ic])
-				float_cols.push_back(std::vector<double>());
-			else
-			if (STRING_VALUE == col_types[ic])
-				string_cols.push_back(std::vector<std::string>());
 
-xxx
-				T el = boost::lexical_cast<T>(tok);
-				res.first.push_back(el);
-#endif
+			if (FLOAT_VALUE == col_types[ic])
+			{
+				float_cols[fc].push_back(token_to_contin(tok));
+				fc ++;
+				ic ++;
+				continue;
+			}
+
+			if (STRING_VALUE == col_types[ic])
+			{
+				string_cols[sc].push_back(tok);
+				sc ++;
+				ic ++;
+				continue;
+			}
+
+			throw RuntimeException(TRACE_INFO,
+				"Unhandled column type");
 		}
 	}
 
-#if 0
-    // Function to parse each line (to be called in parallel)
-    auto parse_line = [&](unsigned i) {
-        try {
-            // Fill input
-            auto tokenIOT = tokenizeRowIOT(lines[i], ignore_idxs,
-                                           target_idx, timestamp_idx);
-        }
-        catch (AssertionException& ex) {
-            unsigned lineno = has_header? i+1 : i;
-            OC_ASSERT(false, "Parsing error occurred on line %d of input file\n"
-                             "Exception: %s", lineno, ex.what());
-        }
-    };
-
-    // Call it for each line in parallel
-    auto ir = boost::irange((size_t)0, lines.size());
-    vector<size_t> row_idxs(ir.begin(), ir.end());
-    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
-
-    // Assign the target position relative to the ignored indices
-    // (useful for writing that file back)
-    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
-                                                  arg1 < target_idx);
-
-    if (timestamp_idx >= 0)
-        tab.timestamp_pos = timestamp_idx -
-            boost::count_if(ignore_idxs, arg1 < timestamp_idx);
-#endif
-
-    return in;
+	return in;
 }
 
 // ==================================================================
