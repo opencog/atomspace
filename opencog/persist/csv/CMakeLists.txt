@@ -1,7 +1,6 @@
 
 # Generic JSON decoding.
 ADD_LIBRARY (csv
-	load_csv.cc
 	table_read.cc
 )
 
@@ -18,7 +17,7 @@ INSTALL (TARGETS csv EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	load_csv.h
+	table_read.h
 	DESTINATION "include/opencog/persist/csv"
 )
 
