@@ -37,7 +37,7 @@
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
 
-#include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -548,6 +548,36 @@ istreamDenseTable(const Handle& anchor,
 			throw RuntimeException(TRACE_INFO,
 				"Unhandled column type");
 		}
+	}
+
+	// Now that we've read everything in,
+	// place the individual columns into the anchor atom.
+	AtomSpace* as = anchor->getAtomSpace();
+	size_t bc = 0;
+	size_t fc = 0;
+	size_t sc = 0;
+	for (size_t ic = 0; ic < table_width; ic++)
+	{
+		if (skip_col[ic]) { ic++; continue; }
+		if (BOOL_VALUE == col_types[ic])
+		{
+			Handle key = as->add_node(PREDICATE_NODE, std::string(header[ic]));
+			ValuePtr bvp = createBoolValue(bool_cols[bc]);
+			as->set_value(anchor, key, bvp);
+			bc ++;
+			ic ++;
+		}
+#if 0
+		else
+		if (FLOAT_VALUE == col_types[ic])
+			float_cols.push_back(std::vector<double>());
+		else
+		if (STRING_VALUE == col_types[ic])
+			string_cols.push_back(std::vector<std::string>());
+		else
+#endif
+		throw RuntimeException(TRACE_INFO,
+			"Unhandled column type");
 	}
 
 	return in;
