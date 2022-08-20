@@ -43,6 +43,7 @@
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
 
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -468,6 +469,8 @@ std::vector<std::string> get_header(const std::string& file_name)
 	return tokenizeRow<std::string>(line);
 }
 
+#if 0
+
 /**
  * Fill the input table only, given a DSV (delimiter-seperated values)
  * file format, where delimiters are ',', ' ' or '\t'.
@@ -512,139 +515,125 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 	return in;
 }
 
-ITable loadITable(const std::string& file_name,
-				  const std::vector<std::string>& ignore_features)
-{
-	if (file_name.empty())
-		throw RuntimeException(TRACE_INFO, "The file name is empty!");
-	std::ifstream in(file_name.c_str());
-	if (not in.is_open())
-		throw RuntimeException(TRACE_INFO,
-			"Could not open %s", file_name.c_str());
-
-	ITable res;
-	istreamITable(in, res, ignore_features);
-	return res;
-}
+#endif
 
 // ==================================================================
 
-static istream&
-inferTableAttributes(istream& in, const std::string& target_feature,
-                     const std::string& timestamp_feature,
+static std::istream&
+inferTableAttributes(std::istream& in,
                      const vector<string>& ignore_features,
-                     type_tree& tt, bool& has_header, bool& is_sparse)
+                     std::vector<Type>& tt, bool& has_header)
 {
-    // maxline is the maximum number of lines to read to infer the
-    // attributes. A negative number means reading all lines.
-    int maxline = 20;
-    streampos beg = in.tellg();
 
-    // Get a portion of the dataset into memory (cleaning weird stuff)
-    std::vector<string> lines;
-    {
-        std::string line;
-        is_sparse = false;
-        while (get_data_line(in, line) && maxline-- > 0) {
-            // It is sparse
-            is_sparse = is_sparse || std::string::npos != line.find(sparse_delim);
-            if (is_sparse) { // just get out
-                // TODO could be simplified, optimized, etc
-                in.seekg(beg);
-                in.clear();         // in case it has reached the eof
-                return in;
-            }
+	// maxline is the maximum number of lines to read to infer the
+	// attributes. A negative number means reading all lines.
+	int maxline = 20;
+	streampos beg = in.tellg();
 
-            // put the line in a buffer
-            lines.push_back(line);
-        }
-    }
+	// Get a portion of the dataset into memory (cleaning weird stuff)
+	std::vector<string> lines;
+	{
+		std::string line;
+		while (get_data_line(in, line) && maxline-- > 0) {
+			// It is sparse
+			is_sparse = is_sparse || std::string::npos != line.find(sparse_delim);
+			if (is_sparse) { // just get out
+				// TODO could be simplified, optimized, etc
+				in.seekg(beg);
+				in.clear();		 // in case it has reached the eof
+				return in;
+			}
 
-    // parse what could be a header
-    const vector<string> maybe_header = tokenizeRow<string>(lines.front());
+			// put the line in a buffer
+			lines.push_back(line);
+		}
+	}
 
-    // determine arity
-    arity_t arity = maybe_header.size();
-    std::atomic<int> arity_fail_row(-1);
+	// parse what could be a header
+	const vector<string> maybe_header = tokenizeRow<string>(lines.front());
 
-    // determine initial type
-    type_node_seq types(arity, id::unknown_type);
+	// determine arity
+	arity_t arity = maybe_header.size();
+	std::atomic<int> arity_fail_row(-1);
 
-    // parse the rest, determine its type and whether the arity is
-    // consistent
-    for (size_t i = 1; i < lines.size(); ++i) {
-        // Parse line
-        const string_seq& tokens = tokenizeRow<string>(lines[i]);
+	// determine initial type
+	type_node_seq types(arity, id::unknown_type);
 
-        // Check arity
-        if (arity != (arity_t)tokens.size()) {
-            arity_fail_row = i + 1;
-            in.seekg(beg);
-            in.clear();         // in case it has reached the eof
-            OC_ASSERT(false,
-                      "ERROR: Input file inconsistent: the %uth row has a "
-                      "different number of columns than the rest of the file.  "
-                      "All rows should have the same number of columns.\n",
-                      arity_fail_row.load());
-        }
+	// parse the rest, determine its type and whether the arity is
+	// consistent
+	for (size_t i = 1; i < lines.size(); ++i) {
+		// Parse line
+		const string_seq& tokens = tokenizeRow<string>(lines[i]);
 
-        // Infer type
-        boost::transform(types, tokens, types.begin(),
-                         infer_type_from_token2);
-    }
+		// Check arity
+		if (arity != (arity_t)tokens.size()) {
+			arity_fail_row = i + 1;
+			in.seekg(beg);
+			in.clear();		 // in case it has reached the eof
+			OC_ASSERT(false,
+					  "ERROR: Input file inconsistent: the %uth row has a "
+					  "different number of columns than the rest of the file.  "
+					  "All rows should have the same number of columns.\n",
+					  arity_fail_row.load());
+		}
 
-    // Determine has_header
-    has_header = is_header(maybe_header, types);
+		// Infer type
+		boost::transform(types, tokens, types.begin(),
+						 infer_type_from_token2);
+	}
 
-    // Determine type signature
-    if (has_header) {
+	// Determine has_header
+	has_header = is_header(maybe_header, types);
 
-        // if unspecified, the target is the first column
-        unsigned target_idx = 0;
+	// Determine type signature
+	if (has_header) {
 
-        // target feature will be ignored
-        if (!target_feature.empty()) {
-            auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
-                                       target_feature);
-            OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
-                      target_feature.c_str());
-            target_idx = std::distance(maybe_header.begin(), target_it);
-        }
-        vector<unsigned> ignore_idxs =
-            get_indices(ignore_features, maybe_header);
-        ignore_idxs.push_back(target_idx);
-        boost::sort(ignore_idxs);
+		// if unspecified, the target is the first column
+		unsigned target_idx = 0;
 
-        // Include timestamp feature as idx to ignore
-        if (!timestamp_feature.empty()) {
-            auto timestamp_it = std::find(maybe_header.begin(), maybe_header.end(),
-                                          timestamp_feature);
-            OC_ASSERT(timestamp_it != maybe_header.end(),
-                      "Timestamp feature  %s not found",
-                      timestamp_feature.c_str());
-            unsigned timestamp_idx = std::distance(maybe_header.begin(), timestamp_it);
-            ignore_idxs.push_back(timestamp_idx);
-            boost::sort(ignore_idxs);
-        }
+		// target feature will be ignored
+		if (!target_feature.empty()) {
+			auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
+									   target_feature);
+			OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
+					  target_feature.c_str());
+			target_idx = std::distance(maybe_header.begin(), target_it);
+		}
+		vector<unsigned> ignore_idxs =
+			get_indices(ignore_features, maybe_header);
+		ignore_idxs.push_back(target_idx);
+		boost::sort(ignore_idxs);
 
-        // Generate type signature
-        type_node otype = types[target_idx];
-        type_node_seq itypes;
-        for (unsigned i = 0; i < types.size(); ++i)
-            if (!boost::binary_search(ignore_idxs, i))
-                itypes.push_back(types[i]);
-        tt = gen_signature(itypes, otype);
-    } else {
-        // No header, the target is the first column
-        type_node otype = types[0];
-        types.erase(types.begin());
-        tt = gen_signature(types, otype);
-    }
-    logger().debug() << "Infered type tree: " << tt;
+		// Include timestamp feature as idx to ignore
+		if (!timestamp_feature.empty()) {
+			auto timestamp_it = std::find(maybe_header.begin(), maybe_header.end(),
+										  timestamp_feature);
+			OC_ASSERT(timestamp_it != maybe_header.end(),
+					  "Timestamp feature  %s not found",
+					  timestamp_feature.c_str());
+			unsigned timestamp_idx = std::distance(maybe_header.begin(), timestamp_it);
+			ignore_idxs.push_back(timestamp_idx);
+			boost::sort(ignore_idxs);
+		}
 
-    in.seekg(beg);
-    in.clear();         // in case it has reached the eof
-    return in;
+		// Generate type signature
+		type_node otype = types[target_idx];
+		type_node_seq itypes;
+		for (unsigned i = 0; i < types.size(); ++i)
+			if (!boost::binary_search(ignore_idxs, i))
+				itypes.push_back(types[i]);
+		tt = gen_signature(itypes, otype);
+	} else {
+		// No header, the target is the first column
+		type_node otype = types[0];
+		types.erase(types.begin());
+		tt = gen_signature(types, otype);
+	}
+	logger().debug() << "Infered type tree: " << tt;
+
+	in.seekg(beg);
+	in.clear();		 // in case it has reached the eof
+	return in;
 }
 
 /**
@@ -657,17 +646,15 @@ inferTableAttributes(istream& in, const std::string& target_feature,
  *
  * 2) Load the actual data.
  */
-istream& istreamTable(istream& in, Table& tab,
-                      const std::string& target_feature,
-                      const std::string& timestamp_feature,
-                      const std::vector<std::string>& ignore_features)
+std::istream&
+istreamTable(const Handle& anchor,
+             std::istream& in,
+             const std::vector<std::string>& ignore_features)
 {
     // Infer the properties of the table without loading its content
-    type_tree tt;
-    bool has_header, is_sparse;
-    streampos beg = in.tellg();
-    inferTableAttributes(in, target_feature, timestamp_feature,
-                         ignore_features, tt, has_header, is_sparse);
+    bool has_header;
+    std::streampos beg = in.tellg();
+    inferTableAttributes(in, ignore_features, tt, has_header);
     in.seekg(beg);
 
     if (is_sparse) {
@@ -683,6 +670,7 @@ istream& istreamTable(istream& in, Table& tab,
 
 // ==================================================================
 
+#if 0
 /**
  * Take a line and return a pair with vector containing the input
  * elements and then output element.
@@ -847,20 +835,22 @@ istream& istreamDenseTable(istream& in, Table& tab,
                                       ignore_idxs, tt, has_header);
 }
 
+#endif
+
 // ==================================================================
 
-Table loadTable(const std::string& file_name,
-                const std::string& target_feature,
-                const std::string& timestamp_feature,
-                const string_seq& ignore_features)
+void loadTable(const Handle& anchor,
+               const std::string& file_name,
+               const string_seq& ignore_features)
 {
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
+	if (file_name.empty())
+		throw RuntimeException(TRACE_INFO, "The file name is empty!");
+	std::ifstream in(file_name.c_str());
+	if (not in.is_open())
+		throw RuntimeException(TRACE_INFO,
+			"Could not open %s", file_name.c_str());
 
-    Table res;
-    istreamTable(in, res, target_feature, timestamp_feature, ignore_features);
-    return res;
+    istreamTable(acnhro, in, ignore_features);
 }
 
 // ==================================================================

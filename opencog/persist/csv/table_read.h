@@ -119,17 +119,10 @@ Table loadITable_optimized(
     const string_seq& ignore_features=string_seq());
 
 /**
- * If target_feature is empty then, in case there is no header, it is
- * assumed to be the first feature.
  */
-Table loadTable(
-    const std::string& file_name,
-    const string_seq& ignore_features=string_seq());
-
-std::istream& istreamDenseTable(std::istream&, Table&,
-                                const string_seq& ignore_features,
-                                const std::vector<Type>&, bool has_header);
-
+void loadTable(const Handle& anchor,
+               const std::string& file_name,
+               const string_seq& ignore_features=string_seq());
 
 } // ~namespaces opencog
 
