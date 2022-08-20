@@ -559,25 +559,24 @@ istreamDenseTable(const Handle& anchor,
 	for (size_t ic = 0; ic < table_width; ic++)
 	{
 		if (skip_col[ic]) { ic++; continue; }
+
+		ValuePtr vp;
 		if (BOOL_VALUE == col_types[ic])
-		{
-			Handle key = as->add_node(PREDICATE_NODE, std::string(header[ic]));
-			ValuePtr bvp = createBoolValue(bool_cols[bc]);
-			as->set_value(anchor, key, bvp);
-			bc ++;
-			ic ++;
-		}
-#if 0
+			vp = createBoolValue(bool_cols[bc++]);
+
+		else if (FLOAT_VALUE == col_types[ic])
+			vp = createFloatValue(float_cols[fc++]);
+
+		else if (STRING_VALUE == col_types[ic])
+			vp = createStringValue(string_cols[sc++]);
+
 		else
-		if (FLOAT_VALUE == col_types[ic])
-			float_cols.push_back(std::vector<double>());
-		else
-		if (STRING_VALUE == col_types[ic])
-			string_cols.push_back(std::vector<std::string>());
-		else
-#endif
-		throw RuntimeException(TRACE_INFO,
-			"Unhandled column type");
+			throw RuntimeException(TRACE_INFO,
+				"Unhandled column type");
+
+		Handle key = as->add_node(PREDICATE_NODE, std::string(header[ic]));
+		as->set_value(anchor, key, vp);
+		ic ++;
 	}
 
 	return in;
