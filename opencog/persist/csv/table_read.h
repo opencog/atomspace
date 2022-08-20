@@ -37,6 +37,8 @@
 #include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/tokenizer.hpp>
 
+#include <opencog/atoms/value/Value.h>
+
 namespace opencog {
 
 /**
@@ -58,9 +60,9 @@ bool checkCarriageReturn(std::istream& in);
 /**
  * Convert strings to typed values
  */
-builtin token_to_boolean(const std::string& token);
-contin_t token_to_contin(const std::string& token);
-vertex token_to_vertex(const type_node &tipe, const std::string& token);
+ValuePtr token_to_boolean(const std::string&);
+ValuePtr token_to_contin(const std::string&);
+ValuePtr token_to_vertex(Type, const std::string&);
 
 
 // ===========================================================

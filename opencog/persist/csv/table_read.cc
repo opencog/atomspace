@@ -42,6 +42,10 @@
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
 
+#include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/StringValue.h>
+
 #include "table_read.h"
 
 namespace opencog {
@@ -259,64 +263,50 @@ infer_type_from_token2(type_node curr_guess, const string& token)
 }
 
 /// cast string "token" to a vertex of type "tipe"
-builtin token_to_boolean(const string& token)
+ValuePtr token_to_boolean(const string& token)
 {
-    if ("0" == token || "F" == token || "f" == token)
-        return id::logical_false;
-    else if ("1" == token || "T" == token || "t" == token)
-        return id::logical_true;
-    else {
-        OC_ASSERT(false, "Expecting boolean value, got %s", token.c_str());
-        return builtin();
-    }
+	if ("0" == token || "F" == token || "f" == token)
+		return createBoolValue(false);
+
+	if ("1" == token || "T" == token || "t" == token)
+		return createBoolValue(true);
+
+	throw RuntimeError(TRACE_INFO,
+		"Expecting boolean value, got %s", token.c_str());
 }
-contin_t token_to_contin(const string& token)
+
+ValuePtr token_to_contin(const string& token)
 {
-    try {
-        return lexical_cast<contin_t>(token);
-    } catch(boost::bad_lexical_cast&) {
-        OC_ASSERT(false, "Could not cast %s to contin", token.c_str());
-        return contin_t();
-    }
+	try {
+		return createFloatValue(lexical_cast<double>(token));
+	} catch (boost::bad_lexical_cast&) {
+		throw RuntimeError(TRACE_INFO,
+			"Could not cast %s to floating point", token.c_str());
+	}
 }
-vertex token_to_vertex(const type_node &tipe, const string& token)
+
+ValuePtr token_to_vertex(Type tipe, const std::string& token)
 {
-    switch (tipe) {
+	if (BOOL_VALUE == tipe)
+		return token_to_boolean(token);
 
-    case id::boolean_type:
-        return token_to_boolean(token);
+	if (FLOAT_VALUE == tipe)
+		return token_to_contin(token);
 
-    case id::contin_type:
-        return token_to_contin(token);
+	if (STRING_VALUE == tipe)
+	{
+		// Enum types must begin with an alpha character
+		if (isalpha(token[0]))
+			return createStringValue(token);
 
-    case id::enum_type:
-        // Enum types must begin with an alpha character
-        if (isalpha(token[0]))
-            return enum_t(token);
-        OC_ASSERT(false, "Enum type must begin with alphabetic char, but %s doesn't", token.c_str());
-        break;
+		throw RuntimeError(TRACE_INFO,
+			"Enum type must begin with alphabetic char, but %s doesn't",
+			token.c_str());
+	}
 
-    case id::definite_object_type:
-        return token;
-        break;
-
-    // Ugly hack ... the problem adressed here is that feature
-    // selection has to read and propagate columns of unknown type
-    // (typically, dates, times).  So we hack around this here.
-    case id::ill_formed_type:
-        return enum_t(token);
-        // return id::ill_formed_type;
-        // return id::null_vertex;
-        break;
-
-    default:
-        stringstream ss;
-        ss << "Unable to convert token \"" << token << "\" to type=" << tipe << endl;
-        OC_ASSERT(0, ss.str().c_str());
-    }
-
-    // unreachable
-    return id::null_vertex;
+	stringstream ss;
+	ss << "Unable to convert token \"" << token << "\" to type=" << tipe << endl;
+	throw RuntimeError(TRACE_INFO, "%s", ss.str().c_str());
 }
 
 // ===========================================================
