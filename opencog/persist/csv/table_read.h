@@ -31,9 +31,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-
 #include <opencog/atoms/value/Value.h>
 
 namespace opencog {
@@ -41,19 +38,18 @@ namespace opencog {
 // TODO: Should this be a StringValue?
 typedef std::vector<std::string> string_seq;
 
-// ===========================================================
+void load_csv_table(const Handle& anchor,
+                    const std::string& file_name,
+                    const string_seq& ignore_features=string_seq());
 
 //std::istream& istreamRawITable(
 //    std::istream& in, ITable& table,
 //    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
+// Same as above, but works for an already-open stream.
 std::istream& istreamTable(const Handle&,
                            std::istream&,
                            const string_seq& ignore_features);
-
-void loadTable(const Handle& anchor,
-               const std::string& file_name,
-               const string_seq& ignore_features=string_seq());
 
 } // ~namespaces opencog
 
