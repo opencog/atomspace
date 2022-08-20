@@ -46,7 +46,7 @@ public:
 }  // namespace
 
 extern "C" {
-void opencog_persist_file_init(void);
+void opencog_csv_table_init(void);
 };
 
 #endif // _OPENCOG_CSV_TABLE_SCM_H
@@ -82,7 +82,7 @@ void TableSCM::load_table(const Handle& h, const std::string& path)
 	opencog::load_csv_table(h, path);
 }
 
-void opencog_persist_file_init(void)
+void opencog_csv_table_init(void)
 {
 	static TableSCM patty;
 }
