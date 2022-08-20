@@ -407,54 +407,6 @@ std::vector<std::string> get_header(const std::string& file_name)
 	return tokenizeRow<std::string>(line);
 }
 
-#if 0
-
-/**
- * Fill the input table only, given a DSV (delimiter-seperated values)
- * file format, where delimiters are ',', ' ' or '\t'.
- *
- * This algorithm makes several passes over the data.  First, it reads
- * the entire table, as a collection of strings.  Next, it tries to
- * infer the column types, and the presence of a header.
- */
-std::istream& istreamITable(std::istream& in, ITable& tab,
-                            const std::vector<std::string>& ignore_features)
-{
-	istreamRawITable(in, tab);
-
-	// Determine the column types.
-	std::vector<Type> col_types = infer_column_types(tab);
-
-	// If there is a header row, then it must be the column labels.
-	if (has_header(tab, col_types))
-	{
-		// tab.set_labels(*tab.begin());
-		tab.erase(tab.begin());
-	}
-
-	// Now that we have some column labels to work off of,
-	// Get rid of the unwanted columns.
-	// tab.delete_columns(ignore_features);
-
-	// determined ignore_indices
-	std::vector<unsigned> ignore_indices = get_indices(ignore_features,
-		  										  get_header(file_name));
-
-
-....
-	// Finally, perform a column type conversion
-	from_tokens_visitor ftv(tab.get_types());
-	auto aft = apply_visitor(ftv);
-	OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
-						[&](multi_type_seq& seq) {
-							return aft(seq.get_variant());
-						});
-
-	return in;
-}
-
-#endif
-
 // ==================================================================
 
 /**
@@ -549,38 +501,6 @@ inferTableAttributes(std::istream& in,
 
 // ==================================================================
 
-#if 0
-/**
- * Take a line and return a pair with vector containing the input
- * elements and then output element.
- */
-template<typename T>
-std::pair<std::vector<T>, T>
-tokenizeRowIO (
-    const std::string& line,
-    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>(),
-    unsigned target_idx=0)
-{
-    std::pair<std::vector<T>, T> res;
-    table_tokenizer toker = get_row_tokenizer(line);
-    size_t i = 0;
-    for (const std::string& tok : toker) {
-        if (!boost::binary_search(ignored_indices, i)) {
-            T el = boost::lexical_cast<T>(tok);
-            if (target_idx == i)
-                res.second = el;
-            else
-                res.first.push_back(el);
-        }
-        i++;
-    }
-    return res;
-}
-
-#endif
-
-// ==================================================================
-
 static std::istream&
 istreamDenseTable(const Handle& anchor,
                   std::istream& in,
@@ -588,11 +508,29 @@ istreamDenseTable(const Handle& anchor,
                   const std::vector<Type>& col_types,
                   bool has_header)
 {
-    // Get the entire dataset into memory (cleaning weird stuff)
-    std::string line;
-    std::vector<std::string> lines;
-    while (get_data_line(in, line))
-        lines.push_back(line);
+	std::string line;
+
+	// Assume the stream is at the begining.
+	// If there is a header, skip one line.
+	if (has_header)
+		get_data_line(in, line);
+
+	// Loop over all lines in the table, one by one.
+	while (get_data_line(in, line))
+	{
+		table_tokenizer toker = get_row_tokenizer(line);
+		size_t i = 0;
+		for (const std::string& tok : toker) {
+			if (!boost::binary_search(ignored_indices, i)) {
+				T el = boost::lexical_cast<T>(tok);
+				if (target_idx == i)
+					res.second = el;
+				else
+					res.first.push_back(el);
+			}
+			i++;
+		}
+	}
 
 #if 0
     // Function to parse each line (to be called in parallel)
@@ -601,21 +539,6 @@ istreamDenseTable(const Handle& anchor,
             // Fill input
             auto tokenIOT = tokenizeRowIOT(lines[i], ignore_idxs,
                                            target_idx, timestamp_idx);
-            tab.itable[i] = ftv(std::get<0>(tokenIOT));
-
-            // Fill output
-            std::string output_str = std::get<1>(tokenIOT);
-            // If there is no valid target index, then there is no
-            // "output" column!
-            if (""  != output_str)
-                tab.otable[i] = token_to_vertex(otype, output_str);
-
-            // Fill date
-            std::string date_str = std::get<2>(tokenIOT);
-            // If there is no valid timestamp index, then there is no
-            // "output" column!
-            if (""  != date_str)
-                tab.ttable[i] = TTable::from_string(date_str);
         }
         catch (AssertionException& ex) {
             unsigned lineno = has_header? i+1 : i;
