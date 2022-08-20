@@ -521,113 +521,68 @@ std::istream& istreamITable(std::istream& in, ITable& tab,
 
 static std::istream&
 inferTableAttributes(std::istream& in,
-                     const vector<string>& ignore_features,
+                     const std::vector<std::string>& ignore_features,
                      std::vector<Type>& tt, bool& has_header)
 {
+	has_header = false;
+
+	std::streampos beg = in.tellg();
 
 	// maxline is the maximum number of lines to read to infer the
 	// attributes. A negative number means reading all lines.
 	int maxline = 20;
-	streampos beg = in.tellg();
 
 	// Get a portion of the dataset into memory (cleaning weird stuff)
-	std::vector<string> lines;
-	{
-		std::string line;
-		while (get_data_line(in, line) && maxline-- > 0) {
-			// It is sparse
-			is_sparse = is_sparse || std::string::npos != line.find(sparse_delim);
-			if (is_sparse) { // just get out
-				// TODO could be simplified, optimized, etc
-				in.seekg(beg);
-				in.clear();		 // in case it has reached the eof
-				return in;
-			}
+	std::vector<std::string> lines;
+	std::string line;
+	while (get_data_line(in, line) && maxline-- > 0)
+		lines.push_back(line);
 
-			// put the line in a buffer
-			lines.push_back(line);
-		}
-	}
+	// Parse what could be a header
+	const std::vector<std::string> maybe_header =
+		tokenizeRow<std::string>(lines.front());
 
-	// parse what could be a header
-	const vector<string> maybe_header = tokenizeRow<string>(lines.front());
-
-	// determine arity
-	arity_t arity = maybe_header.size();
+	// Determine arity
+	size_t arity = maybe_header.size();
 	std::atomic<int> arity_fail_row(-1);
 
-	// determine initial type
-	type_node_seq types(arity, id::unknown_type);
+	// Determine initial type
+	std::vector<Type> types(arity, VOID_VALUE);
 
-	// parse the rest, determine its type and whether the arity is
+	// Parse the rest, determine its type and whether the arity is
 	// consistent
-	for (size_t i = 1; i < lines.size(); ++i) {
+	for (size_t i = 1; i < lines.size(); ++i)
+	{
 		// Parse line
-		const string_seq& tokens = tokenizeRow<string>(lines[i]);
+		const string_seq& tokens = tokenizeRow<std::string>(lines[i]);
 
 		// Check arity
-		if (arity != (arity_t)tokens.size()) {
+		if (arity != tokens.size())
+		{
 			arity_fail_row = i + 1;
 			in.seekg(beg);
 			in.clear();		 // in case it has reached the eof
-			OC_ASSERT(false,
-					  "ERROR: Input file inconsistent: the %uth row has a "
-					  "different number of columns than the rest of the file.  "
-					  "All rows should have the same number of columns.\n",
-					  arity_fail_row.load());
+			throw SyntaxException(TRACE_INFO,
+				"ERROR: Input file inconsistent: the %uth row has a "
+				"different number of columns than the rest of the file.  "
+				"All rows should have the same number of columns.\n",
+				arity_fail_row.load());
 		}
 
 		// Infer type
 		boost::transform(types, tokens, types.begin(),
-						 infer_type_from_token2);
+		                 infer_type_from_token2);
 	}
 
 	// Determine has_header
 	has_header = is_header(maybe_header, types);
 
 	// Determine type signature
-	if (has_header) {
-
-		// if unspecified, the target is the first column
-		unsigned target_idx = 0;
-
-		// target feature will be ignored
-		if (!target_feature.empty()) {
-			auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
-									   target_feature);
-			OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
-					  target_feature.c_str());
-			target_idx = std::distance(maybe_header.begin(), target_it);
-		}
-		vector<unsigned> ignore_idxs =
+	if (has_header)
+	{
+		std::vector<unsigned> ignore_idxs =
 			get_indices(ignore_features, maybe_header);
-		ignore_idxs.push_back(target_idx);
 		boost::sort(ignore_idxs);
-
-		// Include timestamp feature as idx to ignore
-		if (!timestamp_feature.empty()) {
-			auto timestamp_it = std::find(maybe_header.begin(), maybe_header.end(),
-										  timestamp_feature);
-			OC_ASSERT(timestamp_it != maybe_header.end(),
-					  "Timestamp feature  %s not found",
-					  timestamp_feature.c_str());
-			unsigned timestamp_idx = std::distance(maybe_header.begin(), timestamp_it);
-			ignore_idxs.push_back(timestamp_idx);
-			boost::sort(ignore_idxs);
-		}
-
-		// Generate type signature
-		type_node otype = types[target_idx];
-		type_node_seq itypes;
-		for (unsigned i = 0; i < types.size(); ++i)
-			if (!boost::binary_search(ignore_idxs, i))
-				itypes.push_back(types[i]);
-		tt = gen_signature(itypes, otype);
-	} else {
-		// No header, the target is the first column
-		type_node otype = types[0];
-		types.erase(types.begin());
-		tt = gen_signature(types, otype);
 	}
 	logger().debug() << "Infered type tree: " << tt;
 
