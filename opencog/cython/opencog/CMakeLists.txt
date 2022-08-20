@@ -183,8 +183,8 @@ IF (HAVE_GUILE)
 	)
 
 	ADD_LIBRARY(scheme
-		load-file
-		PyScheme
+		load-file.cc
+		PyScheme.cc
 		scheme.cpp
 	)
 

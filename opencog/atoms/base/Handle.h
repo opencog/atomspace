@@ -241,9 +241,6 @@ typedef HandleMap GroundingMap;
 typedef std::vector<GroundingMap> GroundingMapSeq;
 typedef std::vector<GroundingMapSeq> GroundingMapSeqSeq;
 
-//! a handle iterator
-typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
-
 bool content_eq(const opencog::HandleSeq& lhs,
                 const opencog::HandleSeq& rhs);
 

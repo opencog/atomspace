@@ -11,7 +11,7 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.9.0.** There is just enough here to be usable for basic things.
+**Version 0.9.1.** There is just enough here to be usable for basic things.
 Several convenience calls are missing, as well as the ability to run
 arbitrary queries. Adding support for this is **really easy**, and just
 slightly tedious.  The hard part is writing the docs!
@@ -24,10 +24,15 @@ The CogServer provides a network API to send/receive Atoms over the
 internet. See https://wiki.opencog.org/w/CogServer It uses the code
 here to provide a network interface to the JSON code here.
 
+You can access the code here both through the WebSockets and through
+netcat/telnet.   Use `ws://localhost:18080/json` for the websockets
+interface. It works exactly the same way as the telnet interface
+(described below).
+
 Examples
 --------
 First, create an AtomSpace, put some atoms into it, and start the
-CogServer. This is as usual, starting at the `bash` prompt: 
+CogServer. This is as usual, starting at the `bash` prompt:
 ```
 $ guile
 (use-modules (opencog) (opencog cogserver))
@@ -40,6 +45,16 @@ $ guile
 
 Now create a network connection to talk to the CogServer, and send it
 an assortment of "javascript" commands. The replies will be in JSON.
+
+When using the telnet interface, as below, the entire JSON message must
+be on one line, with no newlines in it -- newlines will confuse the
+server.  When using the websocket interface, newlines are treated as
+whitespace, and are allowed anywhere that whitespace is allowed.
+However, the entire JSON message must be placed into one single
+WebSocket frame.  The current interface does not concatenate JSON
+messages split across multiple WebSocket frames. (This is all
+"fixable"; we just haven't gotten fancy about things.)
+
 ```
 $ rlwrap telnet localhost 17001
 help
@@ -90,6 +105,19 @@ AtomSpace.version()
 * Create an Atom. Returns `true` if successful, else `false`.
 ```
 AtomSpace.makeAtom({"type": "Concept", "name": "foo"})
+```
+
+* Load a list of Atoms. Returns `true` if successful, else `false`.
+  If using the telnet interface, the newlines must be removed from
+  the example below, else errors will be reported!
+```
+AtomSpace.loadAtoms([
+	{ "type": "ConceptNode", "name": "foo"},
+	{ "type": "ConceptNode", "name": "oofdah"},
+	{"type": "List", "outgoing":
+		[{"type": "Concept", "name": "one"},
+		 {"type": "Concept", "name": "two"}]}
+])
 ```
 
 * Get the TruthValue on Atom. Returns the value.

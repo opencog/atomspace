@@ -634,7 +634,7 @@ Perform the following steps at the shell prompt:
     cmake ..
     make -j4
     sudo make install
-    make -j4 test
+    make -j4 check
 ```
 Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.
@@ -645,11 +645,11 @@ the structure of the source directory root.
 To build and run the unit tests, from the `./build` directory enter
 (after building opencog as above):
 ```
-    make -j4 test
+    make -j4 check
 ```
 Most tests (just not the database tests) can be run in parallel:
 ```
-    make -j4 test ARGS=-j4
+    make -j4 check ARGS=-j4
 ```
 The database tests *will* fail if run in parallel: they will step on
 one-another, since they all set and clear the same database tables.

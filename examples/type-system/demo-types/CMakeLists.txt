@@ -46,11 +46,12 @@ ENDIF ()
 # that the bindings are built before any code that uses the bindings.
 # For example, this is used in the `apps` CMakefile, to make sure that
 # the types are built before the apps.
-ADD_CUSTOM_TARGET(chem_demo_atom_types
-	DEPENDS chem_types.h chem_types.scm
 IF (HAVE_PYTHON)
-      chem_types.pyx
-ENDIF ()
+	SET(CHEM_TYPES_PYX chem_types.pyx)
+ENDIF (HAVE_PYTHON)
+
+ADD_CUSTOM_TARGET(chem_demo_atom_types
+	DEPENDS chem_types.h chem_types.scm ${CHEM_TYPES_PYX}
 )
 
 # For OCaml, see the `ocaml` subdirectory in the main project.

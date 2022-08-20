@@ -124,8 +124,7 @@ Next, load the opencog module:
 ```
 (use-modules (opencog))
 ```
-In the long run, it might be convenient to add the above to `~/.guile`
-as well.
+If the above does not work, please see the next section.
 
 After the opencog module is loaded, you can create atoms "as usual" e.g.
 ```
@@ -157,6 +156,32 @@ See also AtomSpace [guile wrapper README](../../opencog/guile/README)
 or [OpenCog Scheme wiki page](https://wiki.opencog.org/w/Scheme) for
 additional documentation.
 
+Common Faults
+-------------
+If you get the error:
+```
+> (use-modules (opencog))
+While compiling expression:
+no code for module (opencog)
+```
+Make sure you did not forget to say `sudo make install`. If that does
+not fix it, make sure that either `/usr/share/guile/site/3.0/opencog.scm`
+or `/usr/local/share/guile/site/3.0/opencog.scm` exist.  It might also
+have been installed yet somewhere else; find it.  Next, verify that
+guile is looking in the right places:
+```
+> %load-path
+```
+should print
+```
+("/usr/share/guile/3.0" "/usr/share/guile/site/3.0" "/usr/share/guile/site" "/usr/share/guile")
+```
+or something similar.  If the correct path is not listed, then add it:
+```
+(add-to-load-path "/usr/local/share/guile/site/3.0")
+```
+or wherever it is to be found. That should be enough to fix things.
+To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
