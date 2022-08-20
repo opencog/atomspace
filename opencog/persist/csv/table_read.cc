@@ -369,7 +369,7 @@ static std::istream&
 inferTableAttributes(std::istream& in,
                      const std::vector<std::string>& ignore_features,
                      std::vector<unsigned>& ignore_idxs,
-                     std::vector<Type>& tt,
+                     std::vector<Type>& types,
                      std::vector<std::string>& maybe_header,
                      bool& has_header)
 {
@@ -395,7 +395,7 @@ inferTableAttributes(std::istream& in,
 	std::atomic<int> arity_fail_row(-1);
 
 	// Determine initial type
-	std::vector<Type> types(arity, VOID_VALUE);
+	types.resize(arity, VOID_VALUE);
 
 	// Parse the rest, determine its type and whether the arity is
 	// consistent
