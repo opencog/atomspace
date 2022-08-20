@@ -42,28 +42,9 @@
 namespace opencog {
 
 /**
- * remove the carriage return (for DOS format)
- */
-void removeCarriageReturn(std::string& str);
-
-/**
- * remove non ASCII char at the begining of the string
- */
-void removeNonASCII(std::string& str);
-
-/**
- * Return true if the next chars in 'in' correspond to carriage return
- * (support UNIX and DOS format) and advance in of the checked chars.
- */
-bool checkCarriageReturn(std::istream& in);
-
-/**
  * Convert strings to typed values
  */
-ValuePtr token_to_boolean(const std::string&);
-ValuePtr token_to_contin(const std::string&);
 ValuePtr token_to_vertex(Type, const std::string&);
-
 
 // ===========================================================
 

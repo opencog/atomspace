@@ -58,7 +58,11 @@ using boost::phoenix::arg_names::arg1;
 
 // -------------------------------------------------------
 
-bool checkCarriageReturn(std::istream& in)
+/**
+ * Return true if the next chars in 'in' correspond to carriage return
+ * (support UNIX and DOS format) and advance in of the checked chars.
+ */
+static bool checkCarriageReturn(std::istream& in)
 {
 	char next_c = in.get();
 	if (next_c == '\r') // DOS format
@@ -68,15 +72,20 @@ bool checkCarriageReturn(std::istream& in)
 	return false;
 }
 
-void removeCarriageReturn(std::string& str)
+/**
+ * remove the carriage return (for DOS format)
+ */
+static void removeCarriageReturn(std::string& str)
 {
 	size_t s = str.size();
 	if ((s > 0) && (str[s-1] == '\r'))
 		str.resize(s-1);
 }
 
-//* Remove non-ascii characters at the bigining of the line, only.
-void removeNonASCII(std::string& str)
+/**
+ * remove non ASCII char at the begining of the string
+ */
+static void removeNonASCII(std::string& str)
 {
 	while (str.size() && (unsigned char)str[0] > 127)
 		str = str.substr(1);
@@ -86,7 +95,7 @@ void removeNonASCII(std::string& str)
 // Return true if the character is one of the standard comment
 // delimiters.  Here, we define a 'standard delimiter' as one
 // of hash, bang or semicolon.
-bool is_comment(const char c)
+static bool is_comment(const char c)
 {
 	if ('#' == c) return true;
 	if (';' == c) return true;
@@ -264,7 +273,7 @@ infer_type_from_token2(Type curr_guess, const std::string& token)
 }
 
 /// cast string "token" to a vertex of type "tipe"
-ValuePtr token_to_boolean(const std::string& token)
+static ValuePtr token_to_boolean(const std::string& token)
 {
 	if ("0" == token || "F" == token || "f" == token)
 		return createBoolValue(false);
@@ -272,21 +281,21 @@ ValuePtr token_to_boolean(const std::string& token)
 	if ("1" == token || "T" == token || "t" == token)
 		return createBoolValue(true);
 
-	throw RuntimeError(TRACE_INFO,
+	throw SyntaxException(TRACE_INFO,
 		"Expecting boolean value, got %s", token.c_str());
 }
 
-ValuePtr token_to_contin(const std::string& token)
+static ValuePtr token_to_contin(const std::string& token)
 {
 	try {
 		return createFloatValue(lexical_cast<double>(token));
 	} catch (boost::bad_lexical_cast&) {
-		throw RuntimeError(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Could not cast %s to floating point", token.c_str());
 	}
 }
 
-ValuePtr token_to_vertex(Type tipe, const std::string& token)
+ValuePtr opencog::token_to_vertex(Type tipe, const std::string& token)
 {
 	if (BOOL_VALUE == tipe)
 		return token_to_boolean(token);
@@ -300,14 +309,14 @@ ValuePtr token_to_vertex(Type tipe, const std::string& token)
 		if (isalpha(token[0]))
 			return createStringValue(token);
 
-		throw RuntimeError(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Enum type must begin with alphabetic char, but %s doesn't",
 			token.c_str());
 	}
 
-	stringstream ss;
-	ss << "Unable to convert token \"" << token << "\" to type=" << tipe << endl;
-	throw RuntimeError(TRACE_INFO, "%s", ss.str().c_str());
+	throw SyntaxException(TRACE_INFO,
+		"Unable to convert token \"%s\" to type=%d",
+		token.c_str(), tipe);
 }
 
 // ===========================================================
@@ -321,74 +330,74 @@ ValuePtr token_to_vertex(Type tipe, const std::string& token)
  * the appropriate type, and thunking for the header, and ignoring
  * certain features, must all be done as a separate step.
  */
-istream& istreamRawITable(istream& in, ITable& tab,
-                          const vector<unsigned>& ignored_indices)
+std::istream& istreamRawITable(std::istream& in, Table& tab,
+							   const std::vector<unsigned>& ignored_indices)
 {
-    streampos beg = in.tellg();
+	std::streampos beg = in.tellg();
 
-    // Get the entire dataset into memory
-    std::string line;
-    std::vector<string> lines;
+	// Get the entire dataset into memory
+	std::string line;
+	std::vector<std::string> lines;
 
-    // Read first few by hand. The first might be labels, so we must
-    // get at least the second line. But the second line might have
-    // all default feature values (i.e. no colon), so get the third...
-    dorepeat(20) {
-        if (!get_data_line(in, line))
-            break;
-        // If it is a sparse file, we are outta here.
-        // Throw an std::exception, since we don't want to log this as an
-        // error (all the other exception types log to the log file).
-        if (string::npos != line.find (sparse_delim)) {
-            in.seekg(beg);
-            throw std::exception();
-        }
-        lines.push_back(line);
-    }
+	// Read first few by hand. The first might be labels, so we must
+	// get at least the second line. But the second line might have
+	// all default feature values (i.e. no colon), so get the third...
+	dorepeat(20) {
+		if (!get_data_line(in, line))
+			break;
+		// If it is a sparse file, we are outta here.
+		// Throw an std::exception, since we don't want to log this as an
+		// error (all the other exception types log to the log file).
+		if (string::npos != line.find (sparse_delim)) {
+			in.seekg(beg);
+			throw std::exception();
+		}
+		lines.push_back(line);
+	}
 
-    // Grab the rest of the file.
-    while (get_data_line(in, line))
-        lines.push_back(line);
+	// Grab the rest of the file.
+	while (get_data_line(in, line))
+		lines.push_back(line);
 
-    // Determine the arity from the first line.
-    vector<string> fl = tokenizeRow<string>(lines[0], ignored_indices);
-    arity_t arity = fl.size();
+	// Determine the arity from the first line.
+	vector<string> fl = tokenizeRow<string>(lines[0], ignored_indices);
+	arity_t arity = fl.size();
 
-    std::atomic<int> arity_fail_row(-1);
-    auto parse_line = [&](size_t i)
-    {
-        // tokenize the line and fill the table with
-        tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
+	std::atomic<int> arity_fail_row(-1);
+	auto parse_line = [&](size_t i)
+	{
+		// tokenize the line and fill the table with
+		tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
 
-        // Check arity
-        if (arity != (arity_t)tab[i].size())
-            arity_fail_row = i + 1;
-    };
+		// Check arity
+		if (arity != (arity_t)tab[i].size())
+			arity_fail_row = i + 1;
+	};
 
-    // Vector of indices [0, lines.size())
-    size_t ls = lines.size();
-    tab.resize(ls);
-    auto ir = boost::irange((size_t)0, ls);
-    vector<size_t> indices(ir.begin(), ir.end());
-    OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
+	// Vector of indices [0, lines.size())
+	size_t ls = lines.size();
+	tab.resize(ls);
+	auto ir = boost::irange((size_t)0, ls);
+	vector<size_t> indices(ir.begin(), ir.end());
+	OMP_ALGO::for_each(indices.begin(), indices.end(), parse_line);
 
-    if (-1 != arity_fail_row) {
-        in.seekg(beg);
-        OC_ASSERT(false,
-                  "ERROR: Input file inconsistent: the %uth row has "
-                  "a different number of columns than the rest of the file.  "
-                  "All rows should have the same number of columns.\n",
-                  arity_fail_row.load());
-    }
-    return in;
+	if (-1 != arity_fail_row) {
+		in.seekg(beg);
+		OC_ASSERT(false,
+				  "ERROR: Input file inconsistent: the %uth row has "
+				  "a different number of columns than the rest of the file.  "
+				  "All rows should have the same number of columns.\n",
+				  arity_fail_row.load());
+	}
+	return in;
 }
 
 std::vector<std::string> get_header(const std::string& file_name)
 {
-    std::ifstream in(file_name.c_str());
-    std::string line;
-    get_data_line(in, line);
-    return tokenizeRow<std::string>(line);
+	std::ifstream in(file_name.c_str());
+	std::string line;
+	get_data_line(in, line);
+	return tokenizeRow<std::string>(line);
 }
 
 // ===========================================================
