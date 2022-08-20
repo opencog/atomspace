@@ -330,7 +330,7 @@ ValuePtr opencog::token_to_vertex(Type tipe, const std::string& token)
  * the appropriate type, and thunking for the header, and ignoring
  * certain features, must all be done as a separate step.
  */
-std::istream& istreamRawITable(std::istream& in, std::vector<string_seq>& tab,
+std::istream& istreamRawITable(std::istream& in, ITable& tab,
                                const std::vector<unsigned>& ignored_indices)
 {
 	std::streampos beg = in.tellg();
@@ -395,118 +395,9 @@ std::istream& istreamRawITable(std::istream& in, std::vector<string_seq>& tab,
 	return in;
 }
 
-std::vector<std::string> get_header(const std::string& file_name)
-{
-	std::ifstream in(file_name.c_str());
-	std::string line;
-	get_data_line(in, line);
-	return tokenizeRow<std::string>(line);
-}
-
 // ===========================================================
-/**
- * Visitor to parse a list of strings (buried in a multi_type_seq)
- * into a multi_type_seq containing the typed values given the input
- * type signature.
- */
-struct from_tokens_visitor : public boost::static_visitor<ValuePtr>
-{
-	from_tokens_visitor(const std::vector<Type>& types) : _types(types)
-	{
-		all_boolean = boost::count(types, BOOL_VALUE) == (int)types.size();
-		all_contin = boost::count(types, FLOAT_VALUE) == (int)types.size();
-	}
-	result_type operator()(const string_seq& seq)
-	{
-		result_type res;
-		if (all_boolean) {
-			res = builtin_seq();
-			builtin_seq& bs = res.get_seq<builtin>();
-			boost::transform(seq, back_inserter(bs), token_to_boolean);
-		}
-		else if (all_contin) {
-			res = contin_seq();
-			contin_seq& cs = res.get_seq<contin_t>();
-			boost::transform(seq, back_inserter(cs), token_to_contin);
-		}
-		else {
-			res = vertex_seq();
-			vertex_seq& vs = res.get_seq<vertex>();
-			boost::transform(_types, seq, back_inserter(vs), token_to_vertex);
-		}
-		return res;
-	}
-	template<typename Seq> result_type operator()(const Seq& seq) {
-		OC_ASSERT(false, "You are not supposed to do that");
-		return result_type();
-	}
-	const type_node_seq& _types;
-	bool all_boolean, all_contin;
-};
 
-
-/**
- * The class below tokenizes one row, and jams it into the table
- */
-struct from_sparse_tokens_visitor : public from_tokens_visitor
-{
-	from_sparse_tokens_visitor(const type_node_seq& types,
-							   const std::map<const std::string, size_t>& index,
-							   size_t fixed_arity)
-		: from_tokens_visitor(types), _index(index), _fixed_arity(fixed_arity) {}
-	result_type operator()(const string_seq& seq) {
-		using std::transform;
-		using std::for_each;
-		result_type res;
-		if (all_boolean) {
-			res = builtin_seq(_types.size(), id::logical_false);
-			builtin_seq& bs = res.get_seq<builtin>();
-			auto begin_sparse = seq.begin() + _fixed_arity;
-			transform(seq.begin(), begin_sparse, bs.begin(), token_to_boolean);
-			for (auto it = begin_sparse; it != seq.end(); ++it) {
-				auto key_val = parse_key_val(*it);
-				if (key_val != std::pair<std::string, std::string>()) {
-					size_t idx = _index.at(key_val.first);
-					bs[idx] = token_to_boolean(key_val.second);
-				}
-			}
-		}
-		else if (all_contin) {
-			res = contin_seq(_types.size(), 0.0);
-			contin_seq& cs = res.get_seq<contin_t>();
-			auto begin_sparse = seq.cbegin() + _fixed_arity;
-			transform(seq.begin(), begin_sparse, cs.begin(), token_to_contin);
-			for (auto it = begin_sparse; it != seq.end(); ++it) {
-				auto key_val = parse_key_val(*it);
-				if (key_val != std::pair<std::string, std::string>()) {
-					size_t idx = _index.at(key_val.first);
-					cs[idx] = token_to_contin(key_val.second);
-				}
-			}
-		}
-		else {
-			res = vertex_seq(_types.size());
-			vertex_seq& vs = res.get_seq<vertex>();
-			auto begin_sparse_types = _types.cbegin() + _fixed_arity;
-			auto begin_sparse_seq = seq.cbegin() + _fixed_arity;
-			transform(_types.begin(), begin_sparse_types,
-					  seq.begin(), vs.begin(), token_to_vertex);
-			for (auto it = begin_sparse_seq; it != seq.end(); ++it) {
-				auto key_val = parse_key_val(*it);
-				if (key_val != std::pair<std::string, std::string>()) {
-					size_t idx = _index.at(key_val.first);
-					vs[idx] = token_to_vertex(_types[idx], key_val.second);
-				}
-			}
-		}
-		return res;
-	}
-	std::map<const std::string, size_t> _index;
-	size_t _fixed_arity;
-};
-
-
-// ===========================================================
+#if NOT_RIGHT_NOW
 /**
  * Fill the input table, given a file in 'sparse' format.
  *
@@ -630,29 +521,32 @@ istream& istreamSparseITable(istream& in, ITable& tab)
 
     return in;
 }
+#endif
 
 /**
  * Infer the column types of the input table. It is assumed the
  * table's rows are vector of strings.
  */
-type_node_seq infer_column_types(const ITable& tab)
+std::vector<Type> infer_column_types(const std::vector<string_seq>& tab)
 {
-    vector<multi_type_seq>::const_iterator rowit = tab.begin();
+	std::vector<string_seq>::const_iterator rowit = tab.begin();
 
-    arity_t arity = rowit->size();
-    type_node_seq types(arity, id::unknown_type);
+	size_t arity = rowit->size();
+	std::vector<Type> types(arity, VOID_VALUE);
 
-    // Skip the first line, it might be a header...
-    // and that would confuse type inference.
-    if (tab.size() > 1)
-        ++rowit;
-    for (; rowit != tab.end(); ++rowit)
-    {
-        const string_seq& tokens = rowit->get_seq<string>();
-        for (arity_t i=0; i<arity; i++)
-            types[i] = infer_type_from_token2(types[i], tokens[i]);
-    }
-    return types;
+	// Skip the first line, it might be a header...
+	// and that would confuse type inference.
+	if (tab.size() > 1)
+		++rowit;
+
+	// Loop over all rows; this performs a consistency check.
+	for (; rowit != tab.end(); ++rowit)
+	{
+		const string_seq& tokens = *rowit;
+		for (size_t i=0; i<arity; i++)
+			types[i] = infer_type_from_token2(types[i], tokens[i]);
+	}
+	return types;
 }
 
 /**
@@ -661,18 +555,19 @@ type_node_seq infer_column_types(const ITable& tab)
  * then the first row must be a header, i.e. a set of ascii column
  * labels.
  */
-bool has_header(ITable& tab, type_node_seq col_types)
+static bool has_header(ITable& tab, const std::vector<Type>& col_types)
 {
-    const string_seq& row = tab.begin()->get_seq<string>();
+	const string_seq& row = *tab.begin();
 
-    arity_t arity = row.size();
+	size_t arity = row.size();
 
-    for (arity_t i=0; i<arity; i++) {
-        type_node flt = infer_type_from_token2(col_types[i], row[i]);
-        if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
-            return true;
-    }
-    return false;
+	for (size_t i=0; i<arity; i++)
+	{
+		Type flt = infer_type_from_token2(col_types[i], row[i]);
+		if ((FLOAT_VALUE == flt) && (STRING_VALUE != col_types[i]))
+			return true;
+	}
+	return false;
 }
 
 /**
@@ -680,14 +575,23 @@ bool has_header(ITable& tab, type_node_seq col_types)
  * types.  If there is a mis-match, then it must be a header, i.e. a
  * set of ascii column labels.
  */
-bool is_header(const vector<string>& tokens, const type_node_seq& col_types)
+bool is_header(const string_seq& tokens, const std::vector<Type>& col_types)
 {
-    for (size_t i = 0; i < tokens.size(); i++) {
-        type_node flt = infer_type_from_token2(col_types[i], tokens[i]);
-        if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
-            return true;
-    }
-    return false;
+	for (size_t i = 0; i < tokens.size(); i++)
+	{
+		Type flt = infer_type_from_token2(col_types[i], tokens[i]);
+		if ((STRING_VALUE == flt) && (STRING_VALUE != col_types[i]))
+			return true;
+	}
+	return false;
+}
+
+std::vector<std::string> get_header(const std::string& file_name)
+{
+	std::ifstream in(file_name.c_str());
+	std::string line;
+	get_data_line(in, line);
+	return tokenizeRow<std::string>(line);
 }
 
 /**
@@ -699,41 +603,41 @@ bool is_header(const vector<string>& tokens, const type_node_seq& col_types)
  * infer the column types, and the presence of a header.
  */
 istream& istreamITable(istream& in, ITable& tab,
-                       const vector<string>& ignore_features)
+                       const std::vector<std::string>& ignore_features)
 {
-    try {
-        istreamRawITable(in, tab);
-    }
-    catch (std::exception& e) {
-        istreamSparseITable(in, tab);
-        // Get rid of the unwanted columns.
-        tab.delete_columns(ignore_features);
-        return in;
-    }
+	istreamRawITable(in, tab);
+	try {
+	}
+	catch (std::exception& e) {
+		istreamSparseITable(in, tab);
+		// Get rid of the unwanted columns.
+		tab.delete_columns(ignore_features);
+		return in;
+	}
 
-    // Determine the column types.
-    type_node_seq col_types = infer_column_types(tab);
-    tab.set_types(col_types);
+	// Determine the column types.
+	type_node_seq col_types = infer_column_types(tab);
+	tab.set_types(col_types);
 
-    // If there is a header row, then it must be the column labels.
-    if (has_header(tab, col_types)) {
-        tab.set_labels(tab.begin()->get_seq<string>());
-        tab.erase(tab.begin());
-    }
+	// If there is a header row, then it must be the column labels.
+	if (has_header(tab, col_types)) {
+		tab.set_labels(tab.begin()->get_seq<string>());
+		tab.erase(tab.begin());
+	}
 
-    // Now that we have some column labels to work off of,
-    // Get rid of the unwanted columns.
-    tab.delete_columns(ignore_features);
+	// Now that we have some column labels to work off of,
+	// Get rid of the unwanted columns.
+	tab.delete_columns(ignore_features);
 
-    // Finally, perform a column type conversion
-    from_tokens_visitor ftv(tab.get_types());
-    auto aft = apply_visitor(ftv);
-    OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
-                        [&](multi_type_seq& seq) {
-                            return aft(seq.get_variant());
-                        });
+	// Finally, perform a column type conversion
+	from_tokens_visitor ftv(tab.get_types());
+	auto aft = apply_visitor(ftv);
+	OMP_ALGO::transform(tab.begin(), tab.end(), tab.begin(),
+						[&](multi_type_seq& seq) {
+							return aft(seq.get_variant());
+						});
 
-    return in;
+	return in;
 }
 
 /**

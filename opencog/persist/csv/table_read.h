@@ -85,24 +85,24 @@ static std::vector<T> tokenizeRow (
 
 // ===========================================================
 
+// TODO: Should this be a StringValue?
+typedef std::vector<std::string> string_seq;
+
+typedef std::vector<string_seq> ITable;
+
 // TODO Should this be a TableValue?
-class Table : public std::vector<ValuePtr>
-{
-	public:
-		Table(void);
-};
+typedef std::vector<ValuePtr> Table;
 
 // ===========================================================
-typedef std::vector<std::string> string_seq;
 
 // Get the header of a DSV file (assuming there is one)
 string_seq get_header(const std::string& input_file);
 
 std::istream& istreamRawITable(
-    std::istream& in, std::vector<string_seq>& table,
+    std::istream& in, ITable& table,
     const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
-std::istream& istreamITable(std::istream& in, Table& tab,
+std::istream& istreamITable(std::istream& in, ITable& tab,
                            const string_seq& ignore_features);
 
 std::istream& istreamTable(std::istream& in, Table& tab,
