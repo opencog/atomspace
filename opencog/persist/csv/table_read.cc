@@ -592,7 +592,7 @@ istreamDenseTable(const Handle& anchor,
 
 	// And finally, place a list of all the keys in a well-known
 	// location.
-	Handle klp = as->add_node(PREDICATE_NODE, std::string("*-column-keys-*"));
+	Handle klp = as->add_node(PREDICATE_NODE, "*-column-keys-*");
 	ValuePtr kvp = createLinkValue(keylist);
 	as->set_value(anchor, klp, kvp);
 

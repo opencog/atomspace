@@ -1,0 +1,65 @@
+/*
+ * CSVLoadUTest.cxxtest
+ *
+ * Copyright (c) 2022 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/persist/csv/table_read.h>
+
+using namespace opencog;
+
+class CSVLoadUTest : public CxxTest::TestSuite {
+
+private:
+	AtomSpacePtr _asp;
+
+public:
+	CSVLoadUTest() {
+		logger().set_print_to_stdout_flag(true);
+		_asp = createAtomSpace();
+	}
+
+	void setUp() { _asp->clear(); }
+
+	void tearDown() {}
+
+	void test_simple_load();
+};
+
+// Test load_csv_table
+void CSVLoadUTest::test_simple_load()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle h = _asp->add_node(CONCEPT_NODE, "foo");
+
+	load_csv_table(h, "simple.csv");
+
+	// There's the five columns, plus the table of contents.
+	HandleSet keys = h->getKeys();
+	TS_ASSERT_EQUALS(6, keys.size());
+
+	Handle colkey = _asp->add_node(PREDICATE_NODE, "*-column-keys-*");
+	ValuePtr kvp = h->getValue(colkey);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

@@ -1,0 +1,3 @@
+LINK_LIBRARIES(atomspace csv)
+
+ADD_CXXTEST(CSVLoadUTest)
