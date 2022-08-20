@@ -568,7 +568,7 @@ istreamDenseTable(const Handle& anchor,
 	HandleSeq keylist;
 	for (size_t ic = 0; ic < table_width; ic++)
 	{
-		if (skip_col[ic]) { ic++; continue; }
+		if (skip_col[ic]) continue;
 
 		ValuePtr vp;
 		if (BOOL_VALUE == col_types[ic])
@@ -587,7 +587,6 @@ istreamDenseTable(const Handle& anchor,
 		Handle key = as->add_node(PREDICATE_NODE, std::string(header[ic]));
 		as->set_value(anchor, key, vp);
 		keylist.push_back(key);
-		ic ++;
 	}
 
 	// And finally, place a list of all the keys in a well-known
