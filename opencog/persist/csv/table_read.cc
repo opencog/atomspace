@@ -56,7 +56,7 @@ using boost::phoenix::arg_names::arg1;
 
 // -------------------------------------------------------
 
-bool checkCarriageReturn(istream& in)
+bool checkCarriageReturn(std::istream& in)
 {
     char next_c = in.get();
     if (next_c == '\r') // DOS format
@@ -66,7 +66,7 @@ bool checkCarriageReturn(istream& in)
     return false;
 }
 
-void removeCarriageReturn(string& str)
+void removeCarriageReturn(std::string& str)
 {
     size_t s = str.size();
     if ((s > 0) && (str[s-1] == '\r'))
@@ -74,7 +74,7 @@ void removeCarriageReturn(string& str)
 }
 
 //* Remove non-ascii characters at the bigining of the line, only.
-void removeNonASCII(string& str)
+void removeNonASCII(std::string& str)
 {
     while (str.size() && (unsigned char)str[0] > 127)
         str = str.substr(1);
@@ -138,16 +138,16 @@ static const char *sparse_delim = " : ";
  * If no such delimiter is found then it return a pair with empty key
  * and empty val.
  */
-static pair<string, string>
-parse_key_val(string chunk)
+static std::pair<std::string, std::string>
+parse_key_val(const std::string& chunk)
 {
-    pair<string, string> res;
+    std::pair<std::string, std::string> res;
     size_t pos = chunk.find(sparse_delim);
-    if (string::npos == pos)
+    if (std::string::npos == pos)
         return res;
-    string key = chunk.substr(0, pos);
+    std::string key = chunk.substr(0, pos);
     boost::trim(key);
-    string val = chunk.substr(pos + strlen(sparse_delim));
+    std::string val = chunk.substr(pos + strlen(sparse_delim));
     boost::trim(val);
     return {key, val};
 }
@@ -167,7 +167,7 @@ table_tokenizer get_row_tokenizer(const std::string& line)
 }
 
 // Same as above, but only allow commas as a column separator.
-table_tokenizer get_sparse_row_tokenizer(const string& line)
+table_tokenizer get_sparse_row_tokenizer(const std::string& line)
 {
     typedef boost::escaped_list_separator<char> separator;
     typedef boost::tokenizer<separator> tokenizer;
@@ -182,7 +182,7 @@ table_tokenizer get_sparse_row_tokenizer(const string& line)
  * Used by istreamTable. This will modify the line to remove leading
  * non-ASCII characters, as well as stripping of any carriage-returns.
  */
-vector<string> tokenizeSparseRow(const string& line)
+vector<string> tokenizeSparseRow(const std::string& line)
 {
     table_tokenizer tok = get_sparse_row_tokenizer(line);
     vector<string> res;
@@ -198,7 +198,7 @@ vector<string> tokenizeSparseRow(const string& line)
  * Given an input string, guess the type of the string.
  * Inferable types are: boolean, contin and enum.
  */
-type_node infer_type_from_token(const string& token)
+type_node infer_type_from_token(const std::string& token)
 {
     /* Prefered representation is T's and 0's, to maximize clarity,
      * readability.  Numeric values are easily confused with contin
@@ -235,7 +235,7 @@ type_node infer_type_from_token(const string& token)
  * if it can be done consistently.
  */
 static type_node
-infer_type_from_token2(type_node curr_guess, const string& token)
+infer_type_from_token2(type_node curr_guess, const std::string& token)
 {
     type_node tokt = infer_type_from_token(token);
 
@@ -262,7 +262,7 @@ infer_type_from_token2(type_node curr_guess, const string& token)
 }
 
 /// cast string "token" to a vertex of type "tipe"
-ValuePtr token_to_boolean(const string& token)
+ValuePtr token_to_boolean(const std::string& token)
 {
 	if ("0" == token || "F" == token || "f" == token)
 		return createBoolValue(false);
@@ -274,7 +274,7 @@ ValuePtr token_to_boolean(const string& token)
 		"Expecting boolean value, got %s", token.c_str());
 }
 
-ValuePtr token_to_contin(const string& token)
+ValuePtr token_to_contin(const std::string& token)
 {
 	try {
 		return createFloatValue(lexical_cast<double>(token));
@@ -325,7 +325,7 @@ istream& istreamRawITable(istream& in, ITable& tab,
     streampos beg = in.tellg();
 
     // Get the entire dataset into memory
-    string line;
+    std::string line;
     std::vector<string> lines;
 
     // Read first few by hand. The first might be labels, so we must
@@ -525,7 +525,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     // ... unless it isn't. (The header must not contain a colon).
     vector<string> labs;
     size_t fixed_arity = 0;
-    string header;
+    std::string header;
     get_data_line(in, header);
     if (string::npos == header.find(sparse_delim)) {
         // Determine the arity of the fixed columns
@@ -538,7 +538,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     }
 
     // Get the entire dataset into memory
-    string iline;
+    std::string iline;
     while (get_data_line(in, iline))
         lines.push_back(iline);
 
@@ -558,7 +558,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     // Fixed features may have different types, by column.
     type_node_seq types(fixed_arity, id::unknown_type);
 
-    for (const string& line : lines) {
+    for (const std::string& line : lines) {
         vector<string> chunks = tokenizeSparseRow(line);
         vector<string>::const_iterator pit = chunks.begin();
 
@@ -570,7 +570,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
         for (; pit != chunks.end(); ++pit) {
             // Rip out the key-value pairs
             auto key_val = parse_key_val(*pit);
-            if (key_val == pair<string, string>())
+            if (key_val == pair<string, std::string>())
                 break;
             // Store the key, uniquely.  Store best guess as the type.
             feats.insert(key_val.first);
@@ -584,8 +584,8 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     // Convert the feature set into a list of labels.
     // 'index' is a map from feature name to column number.
     size_t cnt = fixed_arity;
-    map<const string, size_t> index;
-    for (const string& key : feats) {
+    std::map<const std::string, size_t> index;
+    for (const std::string& key : feats) {
         types.push_back(feat_type);
         labs.push_back(key);
         index[key] = cnt;
@@ -598,7 +598,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
     from_sparse_tokens_visitor fstv(types, index, fixed_arity);
     auto fill_line = [&](int i)
     {
-        const string& line = lines[i];
+        const std::string& line = lines[i];
         // Tokenize the line
         vector<string> chunks = tokenizeSparseRow(line);
         multi_type_seq row = fstv(chunks);
@@ -759,18 +759,18 @@ istream& istreamITable_ignore_indices(istream& in, ITable& tab,
  * Take a line and return a triple with vector containing the input
  * elements, output element and timestamp.
  */
-std::tuple<vector<string>, string, string>
+std::tuple<std::vector<std::string>, std::string, std::string>
 tokenizeRowIOT(const std::string& line,
                const std::vector<unsigned>& ignored_indices,
                int target_idx,  // < 0 == ignored
                int timestamp_idx) // < 0 == ignored
 {
-    std::tuple<std::vector<string>, string, string> res;
+    std::tuple<std::vector<std::string>, std::string, std::string> res;
     table_tokenizer toker = get_row_tokenizer(line);
     int i = 0;
     for (const std::string& tok : toker) {
         if (!boost::binary_search(ignored_indices, i)) {
-            string el = boost::lexical_cast<string>(tok);
+            std::string el = boost::lexical_cast<string>(tok);
             if (target_idx == i)
                 std::get<1>(res) = el;
             else if (timestamp_idx == i)
@@ -783,7 +783,7 @@ tokenizeRowIOT(const std::string& line,
     return res;
 }
 
-ITable loadITable(const string& file_name,
+ITable loadITable(const std::string& file_name,
                   const vector<string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
@@ -801,7 +801,7 @@ ITable loadITable(const string& file_name,
  *
  * WARNING: it assumes the dataset has a header!!!
  */
-ITable loadITable_optimized(const string& file_name,
+ITable loadITable_optimized(const std::string& file_name,
                             const vector<string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
@@ -831,8 +831,8 @@ ITable loadITable_optimized(const string& file_name,
  * This is only used for sparse table and could be optimized
  */
 istream& istreamTable_OLD(istream& in, Table& tab,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
+                          const std::string& target_feature,
+                          const std::vector<std::string>& ignore_features)
 {
     istreamITable(in, tab.itable, ignore_features);
 
@@ -845,7 +845,7 @@ istream& istreamTable_OLD(istream& in, Table& tab,
 
     type_node targ_type = tab.itable.get_type(target_feature);
 
-    string targ_feat = tab.itable.delete_column(target_feature);
+    std::string targ_feat = tab.itable.delete_column(target_feature);
 
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
@@ -860,8 +860,8 @@ istream& istreamTable_OLD(istream& in, Table& tab,
  * Warning: only works on dense data with header file.
  */
 istream& istreamTable_ignore_indices(istream& in, Table& tab,
-                                     const string& target_feature,
-                                     const vector<unsigned>& ignore_indices)
+                                     const std::string& target_feature,
+                                     const std::vector<unsigned>& ignore_indices)
 {
     istreamITable_ignore_indices(in, tab.itable, ignore_indices);
 
@@ -874,7 +874,7 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
 
     type_node targ_type = tab.itable.get_type(target_feature);
 
-    string targ_feat = tab.itable.delete_column(target_feature);
+    std::string targ_feat = tab.itable.delete_column(target_feature);
 
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
@@ -885,8 +885,8 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
 // ==================================================================
 
 static istream&
-inferTableAttributes(istream& in, const string& target_feature,
-                     const string& timestamp_feature,
+inferTableAttributes(istream& in, const std::string& target_feature,
+                     const std::string& timestamp_feature,
                      const vector<string>& ignore_features,
                      type_tree& tt, bool& has_header, bool& is_sparse)
 {
@@ -898,11 +898,11 @@ inferTableAttributes(istream& in, const string& target_feature,
     // Get a portion of the dataset into memory (cleaning weird stuff)
     std::vector<string> lines;
     {
-        string line;
+        std::string line;
         is_sparse = false;
         while (get_data_line(in, line) && maxline-- > 0) {
             // It is sparse
-            is_sparse = is_sparse || string::npos != line.find(sparse_delim);
+            is_sparse = is_sparse || std::string::npos != line.find(sparse_delim);
             if (is_sparse) { // just get out
                 // TODO could be simplified, optimized, etc
                 in.seekg(beg);
@@ -1013,9 +1013,9 @@ inferTableAttributes(istream& in, const string& target_feature,
  * 2) Load the actual data.
  */
 istream& istreamTable(istream& in, Table& tab,
-                      const string& target_feature,
-                      const string& timestamp_feature,
-                      const vector<string>& ignore_features)
+                      const std::string& target_feature,
+                      const std::string& timestamp_feature,
+                      const std::vector<std::string>& ignore_features)
 {
     // Infer the properties of the table without loading its content
     type_tree tt;
@@ -1075,7 +1075,7 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
                            const type_tree& tt, bool has_header)
 {
     // Get the entire dataset into memory (cleaning weird stuff)
-    string line;
+    std::string line;
     std::vector<string> lines;
     while (get_data_line(in, line))
         lines.push_back(line);
@@ -1107,14 +1107,14 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
             tab.itable[i] = ftv(std::get<0>(tokenIOT));
 
             // Fill output
-            string output_str = std::get<1>(tokenIOT);
+            std::string output_str = std::get<1>(tokenIOT);
             // If there is no valid target index, then there is no
             // "output" column!
             if (""  != output_str)
                 tab.otable[i] = token_to_vertex(otype, output_str);
 
             // Fill date
-            string date_str = std::get<2>(tokenIOT);
+            std::string date_str = std::get<2>(tokenIOT);
             // If there is no valid timestamp index, then there is no
             // "output" column!
             if (""  != date_str)
@@ -1145,8 +1145,8 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
 }
 
 istream& istreamDenseTable(istream& in, Table& tab,
-                           const string& target_feature,
-                           const string& timestamp_feature,
+                           const std::string& target_feature,
+                           const std::string& timestamp_feature,
                            const vector<string>& ignore_features,
                            const type_tree& tt, bool has_header)
 {
@@ -1165,7 +1165,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
     int timestamp_idx = -1;     // disabled by default
     vector<unsigned> ignore_idxs;
     if (has_header) {
-        string line;
+        std::string line;
         get_data_line(in, line);
         vector<string> header = tokenizeRow<string>(line);
 

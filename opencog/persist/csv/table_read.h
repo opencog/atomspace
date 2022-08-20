@@ -103,16 +103,25 @@ static std::vector<T> tokenizeRow (
 }
 
 // ===========================================================
+
+// TODO Should this be a TableValue?
+class Table : public std::vector<ValuePtr>
+{
+	public:
+		Table(void);
+};
+
+// ===========================================================
 typedef std::vector<std::string> string_seq;
 
 // Get the header of a DSV file (assuming there is one)
 string_seq get_header(const std::string& input_file);
 
 std::istream& istreamRawITable(
-    std::istream& in, ITable& tab,
+    std::istream& in, Table& tab,
     const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
-std::istream& istreamITable(std::istream& in, ITable& tab,
+std::istream& istreamITable(std::istream& in, Table& tab,
                            const string_seq& ignore_features);
 
 std::istream& istreamTable(std::istream& in, Table& tab,
@@ -120,11 +129,11 @@ std::istream& istreamTable(std::istream& in, Table& tab,
 
 // TODO: reimplement loadITable with the same model of loadTable and
 // remove loadITable_optimized
-ITable loadITable(
+Table loadITable(
     const std::string& file_name,
     const string_seq& ignore_features=string_seq());
 
-ITable loadITable_optimized(
+Table loadITable_optimized(
     const std::string& file_name,
     const string_seq& ignore_features=string_seq());
 
@@ -136,9 +145,9 @@ Table loadTable(
     const std::string& file_name,
     const string_seq& ignore_features=string_seq());
 
-std::istream& istreamDenseTable(std::istream& in, Table& tab,
+std::istream& istreamDenseTable(std::istream&, Table&,
                                 const string_seq& ignore_features,
-                                const type_tree& tt, bool has_header);
+                                const std::vector<Type>&, bool has_header);
 
 
 } // ~namespaces opencog
