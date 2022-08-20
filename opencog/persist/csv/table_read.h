@@ -73,11 +73,6 @@ static std::vector<std::string> tokenizeRow (const std::string& line)
 // TODO: Should this be a StringValue?
 typedef std::vector<std::string> string_seq;
 
-typedef std::vector<string_seq> ITable;
-
-// TODO Should this be a TableValue?
-typedef std::vector<ValuePtr> Table;
-
 // ===========================================================
 
 //std::istream& istreamRawITable(

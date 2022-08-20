@@ -227,6 +227,8 @@ infer_type_from_token2(Type curr_guess, const std::string& token)
 // istream regular tables.
 static const char *sparse_delim = " : ";
 
+typedef std::vector<string_seq> ITable;
+
 /**
  * Fill the input table, given a file in DSV (delimiter-seperated values)
  * format.  The delimiters are ',', ' ' or '\t'.
