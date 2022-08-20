@@ -462,7 +462,9 @@ static double token_to_contin(const std::string& token)
 	}
 }
 
-
+// See header file for `load_csv_table` for a general description
+// of what is being done here.  In breif, columns from a table
+// are jammed into individual values on a given atom.
 static std::istream&
 istreamDenseTable(const Handle& anchor,
                   std::istream& in,
@@ -482,7 +484,7 @@ istreamDenseTable(const Handle& anchor,
 	for (unsigned i : ignore_idxs)
 		skip_col[i] = true;
 
-	// Set up typed columns.
+	// Set up typed columns.  They're empty at first.
 	std::vector<std::vector<bool>> bool_cols;
 	std::vector<std::vector<double>> float_cols;
 	std::vector<std::vector<std::string>> string_cols;
@@ -503,6 +505,7 @@ istreamDenseTable(const Handle& anchor,
 				"Unhandled column type");
 	}
 
+	// ----------------------------------------------
 	std::string line;
 
 	// Assume the stream is at the begining.
@@ -511,6 +514,8 @@ istreamDenseTable(const Handle& anchor,
 		get_data_line(in, line);
 
 	// Loop over all lines in the table, one by one.
+	// Stuff the desired columns into each of the columns
+	// we created above.
 	while (get_data_line(in, line))
 	{
 		table_tokenizer toker = get_row_tokenizer(line);
@@ -551,7 +556,11 @@ istreamDenseTable(const Handle& anchor,
 	}
 
 	// Now that we've read everything in,
-	// place the individual columns into the anchor atom.
+	// place the individual columns into Values,
+	// and then each value under's its column name,
+	// all of these on the anchor atom.
+
+	// XXX TODO, we should probably take AtomSpace as an argument!?
 	AtomSpace* as = anchor->getAtomSpace();
 	size_t bc = 0;
 	size_t fc = 0;
@@ -633,42 +642,7 @@ opencog::istreamTable(const Handle& anchor,
 
 // ==================================================================
 
-/**
- * Load columns from a CSV file and place them into Atomese Values on
- * the indicated Atom. Atomese Values are vectors (of floats, bools,
- * srings, or more complex structures). Each Value holds one column
- * from the dataset.
- *
- * The features (columns) specified in ignore_features will be omitted
- * from the representation.
- *
- * For example, a CSV dataset like this:
- *    o, i1, i2, i3, i4
- *    1, 0, 0, 3.3, "foo"
- *    0, 1, 0, 4.4, "bar"
- *
- * will be loaded as key-value pairs on the `anchor` Atom.
- *
- * First, at the "well known location"
- *    (Predicate "*-column-keys-*")
- * there will be a list of all of the column-keys in the table:
- *    (LinkValue
- *       (Predicate "o")
- *       (Predicate "i1")
- *       (Predicate "i2")
- *       (Predicate "i3")
- *       (Predicate "i4"))
- *
- * Next, under each key, there will a column of values:
- *    (Predicate "o") (BoolValue 1 0)
- *    (Predicate "i1") (BoolValue 0 1)
- *    (Predicate "i2") (BoolValue 0 0)
- *    (Predicate "i3") (FloatValue 3.3 4.4)
- *    (Predicate "i4") (StringValue "foo" "bar")
- *
- * @param file_name
- * @param ignore_features
- */
+// See header file for general description.
 void load_cvs_table(const Handle& anchor,
                     const std::string& file_name,
                     const string_seq& ignore_features)
