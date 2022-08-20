@@ -518,12 +518,12 @@ istreamDenseTable(const Handle& anchor,
 	// we created above.
 	while (get_data_line(in, line))
 	{
-		table_tokenizer toker = get_row_tokenizer(line);
 		size_t ic = 0;
 		size_t bc = 0;
 		size_t fc = 0;
 		size_t sc = 0;
-		for (const std::string& tok : toker)
+		std::vector<std::string> toks = tokenizeRow(line);
+		for (const std::string& tok : toks)
 		{
 			if (skip_col[ic]) { ic++; continue; }
 			if (BOOL_VALUE == col_types[ic])
