@@ -230,53 +230,6 @@ infer_type_from_token2(Type curr_guess, const std::string& token)
     return STRING_VALUE;
 }
 
-/// cast string "token" to a vertex of type "tipe"
-static ValuePtr token_to_boolean(const std::string& token)
-{
-	if ("0" == token || "F" == token || "f" == token)
-		return createBoolValue(false);
-
-	if ("1" == token || "T" == token || "t" == token)
-		return createBoolValue(true);
-
-	throw SyntaxException(TRACE_INFO,
-		"Expecting boolean value, got %s", token.c_str());
-}
-
-static ValuePtr token_to_contin(const std::string& token)
-{
-	try {
-		return createFloatValue(lexical_cast<double>(token));
-	} catch (boost::bad_lexical_cast&) {
-		throw SyntaxException(TRACE_INFO,
-			"Could not cast %s to floating point", token.c_str());
-	}
-}
-
-ValuePtr opencog::token_to_vertex(Type tipe, const std::string& token)
-{
-	if (BOOL_VALUE == tipe)
-		return token_to_boolean(token);
-
-	if (FLOAT_VALUE == tipe)
-		return token_to_contin(token);
-
-	if (STRING_VALUE == tipe)
-	{
-		// Enum types must begin with an alpha character
-		if (isalpha(token[0]))
-			return createStringValue(token);
-
-		throw SyntaxException(TRACE_INFO,
-			"Enum type must begin with alphabetic char, but %s doesn't",
-			token.c_str());
-	}
-
-	throw SyntaxException(TRACE_INFO,
-		"Unable to convert token \"%s\" to type=%d",
-		token.c_str(), tipe);
-}
-
 // ===========================================================
 // istream regular tables.
 static const char *sparse_delim = " : ";
@@ -501,6 +454,30 @@ inferTableAttributes(std::istream& in,
 
 // ==================================================================
 
+/// cast string "token" to a vertex of type "tipe"
+static bool token_to_bool(const std::string& token)
+{
+	if ("0" == token || "F" == token || "f" == token)
+		return false;
+
+	if ("1" == token || "T" == token || "t" == token)
+		return true;
+
+	throw SyntaxException(TRACE_INFO,
+		"Expecting boolean value, got %s", token.c_str());
+}
+
+static double token_to_contin(const std::string& token)
+{
+	try {
+		return boost::lexical_cast<double>(token);
+	} catch (boost::bad_lexical_cast&) {
+		throw SyntaxException(TRACE_INFO,
+			"Could not cast %s to floating point", token.c_str());
+	}
+}
+
+
 static std::istream&
 istreamDenseTable(const Handle& anchor,
                   std::istream& in,
@@ -551,19 +528,33 @@ istreamDenseTable(const Handle& anchor,
 	while (get_data_line(in, line))
 	{
 		table_tokenizer toker = get_row_tokenizer(line);
-#if 0
-		size_t i = 0;
-		for (const std::string& tok : toker) {
-			if (!boost::binary_search(ignored_indices, i)) {
-				T el = boost::lexical_cast<T>(tok);
-				if (target_idx == i)
-					res.second = el;
-				else
-					res.first.push_back(el);
+		size_t ic = 0;
+		size_t bc = 0;
+		size_t fc = 0;
+		size_t sc = 0;
+		for (const std::string& tok : toker)
+		{
+			if (skip_col[ic]) { ic++; continue; }
+			if (BOOL_VALUE == col_types[ic])
+			{
+				bool_cols[bc].push_back(token_to_bool(tok));
+				bc ++;
+				ic ++;
+				continue;
 			}
-			i++;
-		}
+#if 0
+			else
+			if (FLOAT_VALUE == col_types[ic])
+				float_cols.push_back(std::vector<double>());
+			else
+			if (STRING_VALUE == col_types[ic])
+				string_cols.push_back(std::vector<std::string>());
+
+xxx
+				T el = boost::lexical_cast<T>(tok);
+				res.first.push_back(el);
 #endif
+		}
 	}
 
 #if 0
