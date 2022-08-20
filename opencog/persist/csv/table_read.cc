@@ -125,7 +125,7 @@ std::istream& get_data_line(std::istream& is, std::string& line)
  * Take a row, return a tokenizer.  Tokenization uses the
  * separator characters comma, blank, tab (',', ' ' or '\t').
  */
-table_tokenizer get_row_tokenizer(const std::string& line)
+table_tokenizer opencog::get_row_tokenizer(const std::string& line)
 {
 	typedef boost::escaped_list_separator<char> separator;
 	typedef boost::tokenizer<separator> tokenizer;
@@ -508,6 +508,38 @@ istreamDenseTable(const Handle& anchor,
                   const std::vector<Type>& col_types,
                   bool has_header)
 {
+	// Width of table in the input.
+	size_t table_width = col_types.size();
+
+	// Effective width is the width, without the ignored columns.
+	size_t effective_width = table_width - ignore_idxs.size();
+
+	// Setup a mask; should we skip the column?
+	std::vector<bool> skip_col(table_width, false);
+	for (unsigned i : ignore_idxs)
+		skip_col[i] = true;
+
+	// Set up typed columns.
+	std::vector<std::vector<bool>> bool_cols;
+	std::vector<std::vector<double>> float_cols;
+	std::vector<std::vector<std::string>> string_cols;
+
+	for (size_t ic = 0; ic < table_width; ic++)
+	{
+		if (skip_col[ic]) continue;
+		if (BOOL_VALUE == col_types[ic])
+			bool_cols.push_back(std::vector<bool>());
+		else
+		if (FLOAT_VALUE == col_types[ic])
+			float_cols.push_back(std::vector<double>());
+		else
+		if (STRING_VALUE == col_types[ic])
+			string_cols.push_back(std::vector<std::string>());
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Unhandled column type");
+	}
+
 	std::string line;
 
 	// Assume the stream is at the begining.
@@ -519,6 +551,7 @@ istreamDenseTable(const Handle& anchor,
 	while (get_data_line(in, line))
 	{
 		table_tokenizer toker = get_row_tokenizer(line);
+#if 0
 		size_t i = 0;
 		for (const std::string& tok : toker) {
 			if (!boost::binary_search(ignored_indices, i)) {
@@ -530,6 +563,7 @@ istreamDenseTable(const Handle& anchor,
 			}
 			i++;
 		}
+#endif
 	}
 
 #if 0
