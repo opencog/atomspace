@@ -26,16 +26,10 @@
 #include <iomanip>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/range/algorithm/find.hpp>
-#include <boost/range/algorithm/count_if.hpp>
+#include <boost/tokenizer.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/variant.hpp>
-
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/exceptions.h>
@@ -52,10 +46,6 @@
 #include "table_read.h"
 
 using namespace opencog;
-
-using namespace boost;
-using namespace boost::phoenix;
-using boost::phoenix::arg_names::arg1;
 
 // -------------------------------------------------------
 
@@ -231,6 +221,8 @@ infer_type_from_token2(Type curr_guess, const std::string& token)
 }
 
 // ===========================================================
+#ifdef NOT_USED_ANYWHERE
+
 // istream regular tables.
 static const char *sparse_delim = " : ";
 
@@ -275,14 +267,14 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 		lines.push_back(line);
 
 	// Determine the arity from the first line.
-	std::vector<std::string> fl = tokenizeRow<std::string>(lines[0], ignored_indices);
+	std::vector<std::string> fl = tokenizeRow(lines[0]);
 	size_t arity = fl.size();
 
 	std::atomic<int> arity_fail_row(-1);
 	auto parse_line = [&](size_t i)
 	{
 		// tokenize the line and fill the table with
-		tab[i] = tokenizeRow<std::string>(lines[i], ignored_indices);
+		tab[i] = tokenizeRow(lines[i]);
 
 		// Check arity
 		if (arity != tab[i].size())
@@ -306,6 +298,7 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 	}
 	return in;
 }
+#endif // NOT_USED_ANYWHERE
 
 // ===========================================================
 
@@ -357,7 +350,7 @@ std::vector<std::string> get_header(const std::string& file_name)
 	std::ifstream in(file_name.c_str());
 	std::string line;
 	get_data_line(in, line);
-	return tokenizeRow<std::string>(line);
+	return tokenizeRow(line);
 }
 
 // ==================================================================
@@ -402,8 +395,7 @@ inferTableAttributes(std::istream& in,
 		lines.push_back(line);
 
 	// Parse what could be a header
-	const std::vector<std::string> maybe_header =
-		tokenizeRow<std::string>(lines.front());
+	const std::vector<std::string> maybe_header = tokenizeRow(lines.front());
 
 	// Determine arity
 	size_t arity = maybe_header.size();
@@ -417,7 +409,7 @@ inferTableAttributes(std::istream& in,
 	for (size_t i = 1; i < lines.size(); ++i)
 	{
 		// Parse line
-		const string_seq& tokens = tokenizeRow<std::string>(lines[i]);
+		const string_seq& tokens = tokenizeRow(lines[i]);
 
 		// Check arity
 		if (arity != tokens.size())

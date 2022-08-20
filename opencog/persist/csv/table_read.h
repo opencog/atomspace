@@ -32,21 +32,11 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/range/algorithm/count.hpp>
-#include <boost/range/algorithm/binary_search.hpp>
-#include <boost/range/algorithm_ext/for_each.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <opencog/atoms/value/Value.h>
 
 namespace opencog {
-
-/**
- * Convert strings to typed values
- */
-ValuePtr token_to_vertex(Type, const std::string&);
-
-// ===========================================================
 
 typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
 
@@ -59,28 +49,23 @@ table_tokenizer get_row_tokenizer(const std::string& line);
 /**
  * Take a line and return a vector containing the elements parsed.
  */
-template<typename T>
-static std::vector<T> tokenizeRow (
-    const std::string& line,
-    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>())
+static std::vector<std::string> tokenizeRow (const std::string& line)
 {
-    table_tokenizer tok = get_row_tokenizer(line);
-    std::vector<T> res;
-    unsigned i = 0;
-    for (const std::string& t : tok) {
+	table_tokenizer tok = get_row_tokenizer(line);
+	std::vector<std::string> res;
+	for (const std::string& t : tok)
+	{
+		// Trim away whitespace padding; failing to do this
+		// confuses stuff downstream.
+		std::string clean(t);
+		boost::trim(clean);
 
-        // trim away whitespace padding; failing to do this
-        // confuses stuff downstream.
-        std::string clean(t);
-        boost::trim(clean);
+		// Sometimes the tokenizer returns pure whitespace :-(
+		if (0 == clean.size()) continue;
 
-        // Sometimes the tokenizer returns pure whitespace :-(
-        if (0 == clean.size()) continue;
-
-        if (!boost::binary_search(ignored_indices, i++))
-            res.push_back(boost::lexical_cast<T>(clean));
-    }
-    return res;
+		res.push_back(clean);
+	}
+	return res;
 }
 
 // ===========================================================
