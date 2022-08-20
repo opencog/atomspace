@@ -397,132 +397,6 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 
 // ===========================================================
 
-#if NOT_RIGHT_NOW
-/**
- * Fill the input table, given a file in 'sparse' format.
- *
- * The sparse table format consists of some fixed number of columns,
- * in comma-separated format, followed by key-value pairs, also
- * tab-separated. viz:
- *
- *     val, val, val, name:val, name:val, name:val
- *
- * Thus, for example, a row such as
- *
- *    earn, issued : 1, results : 2, ending : 1, including : 1
- *
- * indicates that there one fixed column, of enum type, (the enum value
- * being "earn"), and that features called "issued", "ending" and
- * "including" have a contin value of 1.0  and "results" has a contin
- * value of 2.
- *
- * The routine does NOT store the table in sparse format: it stores the
- * full, exploded table. This could be bad ...
- * TODO: we really need a sparse table format, as well.
- *
- * The "Raw" format has all data as strings; type conversion to the
- * appropriate type, must all be done as a separate step.
- */
-istream& istreamSparseITable(istream& in, ITable& tab)
-{
-    // The raw dataset
-    std::vector<string> lines;
-
-    // The first non-comment line is assumed to be the header.
-    // ... unless it isn't. (The header must not contain a colon).
-    vector<string> labs;
-    size_t fixed_arity = 0;
-    std::string header;
-    get_data_line(in, header);
-    if (string::npos == header.find(sparse_delim)) {
-        // Determine the arity of the fixed columns
-        vector<string> hdr = tokenizeSparseRow(header);
-        fixed_arity = hdr.size();
-        labs = hdr;
-    }
-    else {
-        lines.push_back(header);
-    }
-
-    // Get the entire dataset into memory
-    std::string iline;
-    while (get_data_line(in, iline))
-        lines.push_back(iline);
-
-    if (0 == fixed_arity) {
-        vector<string> fixy = tokenizeSparseRow(lines[0]);
-        // count commas, until a semi-colon is found.
-        while (string::npos == fixy[fixed_arity].find(sparse_delim))
-            fixed_arity++;
-    }
-    logger().info() << "Sparse file fixed column count=" << fixed_arity;
-
-    // Get a list of all of the features.
-    set<string> feats;
-    // All sparse features have the same type.
-    type_node feat_type = id::unknown_type;
-
-    // Fixed features may have different types, by column.
-    type_node_seq types(fixed_arity, id::unknown_type);
-
-    for (const std::string& line : lines) {
-        vector<string> chunks = tokenizeSparseRow(line);
-        vector<string>::const_iterator pit = chunks.begin();
-
-        // Infer the types of the fixed features.
-        size_t off = 0;
-        for (; off < fixed_arity; ++off, ++pit)
-            types[off] = infer_type_from_token2(types[off], *pit);
-
-        for (; pit != chunks.end(); ++pit) {
-            // Rip out the key-value pairs
-            auto key_val = parse_key_val(*pit);
-            if (key_val == pair<string, std::string>())
-                break;
-            // Store the key, uniquely.  Store best guess as the type.
-            feats.insert(key_val.first);
-            feat_type = infer_type_from_token2(feat_type, key_val.second);
-        }
-    }
-    logger().info() << "Sparse file unique features count=" << feats.size();
-    logger().info() << "Sparse file feature type=" << feat_type;
-    logger().info() << "Sparse file row count=" << lines.size();
-
-    // Convert the feature set into a list of labels.
-    // 'index' is a map from feature name to column number.
-    size_t cnt = fixed_arity;
-    std::map<const std::string, size_t> index;
-    for (const std::string& key : feats) {
-        types.push_back(feat_type);
-        labs.push_back(key);
-        index[key] = cnt;
-        cnt++;
-    }
-    tab.set_labels(labs);
-    tab.set_types(types);
-
-    // And finally, stuff up the table.
-    from_sparse_tokens_visitor fstv(types, index, fixed_arity);
-    auto fill_line = [&](int i)
-    {
-        const std::string& line = lines[i];
-        // Tokenize the line
-        vector<string> chunks = tokenizeSparseRow(line);
-        multi_type_seq row = fstv(chunks);
-        tab[i] = row;
-    };
-
-    // Vector of indices [0, lines.size())
-    size_t ls = lines.size();
-    tab.resize(ls);
-    auto ir = boost::irange((size_t)0, ls);
-    vector<size_t> indices(ir.begin(), ir.end());
-    OMP_ALGO::for_each(indices.begin(), indices.end(), fill_line);
-
-    return in;
-}
-#endif
-
 /**
  * Infer the column types of the input table. It is assumed the
  * table's rows are vector of strings.
@@ -602,32 +476,24 @@ std::vector<std::string> get_header(const std::string& file_name)
  * the entire table, as a collection of strings.  Next, it tries to
  * infer the column types, and the presence of a header.
  */
-istream& istreamITable(istream& in, ITable& tab,
-                       const std::vector<std::string>& ignore_features)
+std::istream& istreamITable(std::istream& in, ITable& tab,
+                            const std::vector<std::string>& ignore_features)
 {
 	istreamRawITable(in, tab);
-	try {
-	}
-	catch (std::exception& e) {
-		istreamSparseITable(in, tab);
-		// Get rid of the unwanted columns.
-		tab.delete_columns(ignore_features);
-		return in;
-	}
 
 	// Determine the column types.
-	type_node_seq col_types = infer_column_types(tab);
-	tab.set_types(col_types);
+	std::vector<Type> col_types = infer_column_types(tab);
 
 	// If there is a header row, then it must be the column labels.
-	if (has_header(tab, col_types)) {
-		tab.set_labels(tab.begin()->get_seq<string>());
+	if (has_header(tab, col_types))
+	{
+		// tab.set_labels(*tab.begin());
 		tab.erase(tab.begin());
 	}
 
 	// Now that we have some column labels to work off of,
 	// Get rid of the unwanted columns.
-	tab.delete_columns(ignore_features);
+	// tab.delete_columns(ignore_features);
 
 	// Finally, perform a column type conversion
 	from_tokens_visitor ftv(tab.get_types());
