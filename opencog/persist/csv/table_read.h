@@ -38,38 +38,6 @@
 
 namespace opencog {
 
-typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
-
-/**
- * Take a row, return a tokenizer.  Tokenization uses the
- * separator characters comma, blank, tab (',', ' ' or '\t').
- */
-table_tokenizer get_row_tokenizer(const std::string& line);
-
-/**
- * Take a line and return a vector containing the elements parsed.
- */
-static std::vector<std::string> tokenizeRow (const std::string& line)
-{
-	table_tokenizer tok = get_row_tokenizer(line);
-	std::vector<std::string> res;
-	for (const std::string& t : tok)
-	{
-		// Trim away whitespace padding; failing to do this
-		// confuses stuff downstream.
-		std::string clean(t);
-		boost::trim(clean);
-
-		// Sometimes the tokenizer returns pure whitespace :-(
-		if (0 == clean.size()) continue;
-
-		res.push_back(clean);
-	}
-	return res;
-}
-
-// ===========================================================
-
 // TODO: Should this be a StringValue?
 typedef std::vector<std::string> string_seq;
 

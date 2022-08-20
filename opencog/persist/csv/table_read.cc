@@ -112,11 +112,13 @@ std::istream& get_data_line(std::istream& is, std::string& line)
 
 // -------------------------------------------------------
 
+typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
+
 /**
  * Take a row, return a tokenizer.  Tokenization uses the
  * separator characters comma, blank, tab (',', ' ' or '\t').
  */
-table_tokenizer opencog::get_row_tokenizer(const std::string& line)
+static table_tokenizer get_row_tokenizer(const std::string& line)
 {
 	typedef boost::escaped_list_separator<char> separator;
 	typedef boost::tokenizer<separator> tokenizer;
@@ -126,29 +128,24 @@ table_tokenizer opencog::get_row_tokenizer(const std::string& line)
 	return tokenizer(line, sep);
 }
 
-// Same as above, but only allow commas as a column separator.
-table_tokenizer get_sparse_row_tokenizer(const std::string& line)
-{
-	typedef boost::escaped_list_separator<char> separator;
-	typedef boost::tokenizer<separator> tokenizer;
-
-	// Tokenize line; currently, we allow tabs, commas, blanks.
-	static const separator sep("\\", ",", "\"");
-	return tokenizer(line, sep);
-}
-
 /**
  * Take a line and return a vector containing the elements parsed.
- * Used by istreamTable. This will modify the line to remove leading
- * non-ASCII characters, as well as stripping of any carriage-returns.
  */
-std::vector<std::string> tokenizeSparseRow(const std::string& line)
+static std::vector<std::string> tokenizeRow (const std::string& line)
 {
-	table_tokenizer tok = get_sparse_row_tokenizer(line);
+	table_tokenizer tok = get_row_tokenizer(line);
 	std::vector<std::string> res;
-	for (std::string t : tok) {
-		boost::trim(t);
-		res.push_back(t);
+	for (const std::string& t : tok)
+	{
+		// Trim away whitespace padding; failing to do this
+		// confuses stuff downstream.
+		std::string clean(t);
+		boost::trim(clean);
+
+		// Sometimes the tokenizer returns pure whitespace :-(
+		if (0 == clean.size()) continue;
+
+		res.push_back(clean);
 	}
 	return res;
 }
@@ -158,7 +155,7 @@ std::vector<std::string> tokenizeSparseRow(const std::string& line)
  * Given an input string, guess the type of the string.
  * Inferable types are: boolean, contin and enum.
  */
-Type infer_type_from_token(const std::string& token)
+static Type infer_type_from_token(const std::string& token)
 {
     /* Prefered representation is T's and 0's, to maximize clarity,
      * readability.  Numeric values are easily confused with floating
