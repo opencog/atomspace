@@ -50,7 +50,6 @@
 
 namespace opencog {
 
-using namespace std;
 using namespace boost;
 using namespace boost::phoenix;
 using boost::phoenix::arg_names::arg1;
@@ -105,9 +104,9 @@ bool is_comment(const char c)
 //
 // The signature of this routine is the same as std:getline()
 //
-istream &get_data_line(istream& is, string& line)
+std::istream& get_data_line(std::istream& is, std::string& line)
 {
-    while (1)
+    while (true)
     {
         getline(is, line);
         if (!is) return is;
@@ -382,12 +381,12 @@ istream& istreamRawITable(istream& in, ITable& tab,
     return in;
 }
 
-vector<string> get_header(const string& file_name)
+std::vector<std::string> get_header(const std::string& file_name)
 {
-    ifstream in(file_name.c_str());
-    string line;
+    std::ifstream in(file_name.c_str());
+    std::string line;
     get_data_line(in, line);
-    return tokenizeRow<string>(line);
+    return tokenizeRow<std::string>(line);
 }
 
 // ===========================================================

@@ -103,6 +103,7 @@ static std::vector<T> tokenizeRow (
 }
 
 // ===========================================================
+typedef std::vector<std::string> string_seq;
 
 // Get the header of a DSV file (assuming there is one)
 string_seq get_header(const std::string& input_file);
