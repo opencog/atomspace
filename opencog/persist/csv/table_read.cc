@@ -40,6 +40,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/VoidValue.h>
 
@@ -556,6 +557,7 @@ istreamDenseTable(const Handle& anchor,
 	size_t bc = 0;
 	size_t fc = 0;
 	size_t sc = 0;
+	HandleSeq keylist;
 	for (size_t ic = 0; ic < table_width; ic++)
 	{
 		if (skip_col[ic]) { ic++; continue; }
@@ -576,8 +578,15 @@ istreamDenseTable(const Handle& anchor,
 
 		Handle key = as->add_node(PREDICATE_NODE, std::string(header[ic]));
 		as->set_value(anchor, key, vp);
+		keylist.push_back(key);
 		ic ++;
 	}
+
+	// And finally, place a list of all the keys in a well-known
+	// location.
+	Handle klp = as->add_node(PREDICATE_NODE, std::string("*-column-keys-*"));
+	ValuePtr kvp = createLinkValue(keylist);
+	as->set_value(anchor, klp, kvp);
 
 	return in;
 }
