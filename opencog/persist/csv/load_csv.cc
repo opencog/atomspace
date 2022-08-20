@@ -19,6 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include "load_csv.h"
+
 using namespace opencog;
 
 /**

@@ -25,6 +25,8 @@
 #ifndef _ATOMESE_LOAD_CSV_H
 #define _ATOMESE_LOAD_CSV_H
 
+#include <opencog/atomspace/AtomSpace.h>
+
 namespace opencog {
 
 // Load columns from a CSV file and place them into Atomese Values on
