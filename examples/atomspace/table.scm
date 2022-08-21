@@ -7,6 +7,8 @@
 ; (a one-liner) and explores how it is represented in the AtomSpace.
 ; The second part applies some formulas to the table columns.
 ;
+; The second part of the demo
+;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog csv-table))
 
@@ -63,8 +65,35 @@
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt2"))
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
 
-(cog-execute!  (DefinedSchema "col diffs") tab)
+; Apply the function to the table.
+(cog-execute! (Put (DefinedSchema "col diffs") tab))
 
+; Verify that the new column showed up.
+(cog-keys tab)
+
+; .. and that it contains the expected data.
+(cog-value tab (Predicate "f2 minus f1"))
+
+;--------
+; The AccumulateLink can be used to sum up all of the rows in a column.
+(cog-execute!
+	(Accumulate (FloatValueOf tab (Predicate "f2 minus f1"))))
+
+; This can be turned into a simple scoring function. It computes the
+; sum-total of the difference of two columns. This is a score, in that
+; it is a single number that can be used as a utility function in
+; conventional machine-learning algos.
+(DefineLink
+	(DefinedSchema "compute score")
+   (Lambda
+      (Variable "$tbl-name")
+		(Accumulate
+			(Minus
+				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt2"))
+				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
+
+; Apply the function to the table.
+(cog-execute! (Put (DefinedSchema "compute score") tab))
 
 ; That's all, folks.
 ; -------------------------------------------------------------------
