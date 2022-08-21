@@ -78,8 +78,8 @@ void TableSCM::init(void)
 
 void TableSCM::load_table(const Handle& h, const std::string& path)
 {
-	// const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("load-table");
-	opencog::load_csv_table(h, path);
+	const AtomSpacePtr& as = SchemeSmob::ss_get_env_as("load-table");
+	opencog::load_csv_table(as, h, path);
 }
 
 void opencog_csv_table_init(void)

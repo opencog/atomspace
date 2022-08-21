@@ -466,7 +466,8 @@ static double token_to_contin(const std::string& token)
 // of what is being done here.  In breif, columns from a table
 // are jammed into individual values on a given atom.
 static std::istream&
-istreamDenseTable(const Handle& anchor,
+istreamDenseTable(const AtomSpacePtr& as,
+                  const Handle& anchor,
                   std::istream& in,
                   const std::vector<unsigned>& ignore_idxs,
                   const std::vector<Type>& col_types,
@@ -560,8 +561,6 @@ istreamDenseTable(const Handle& anchor,
 	// and then each value under's its column name,
 	// all of these on the anchor atom.
 
-	// XXX TODO, we should probably take AtomSpace as an argument!?
-	AtomSpace* as = anchor->getAtomSpace();
 	size_t bc = 0;
 	size_t fc = 0;
 	size_t sc = 0;
@@ -611,7 +610,8 @@ istreamDenseTable(const Handle& anchor,
  * 2) Load the actual data.
  */
 std::istream&
-opencog::istreamTable(const Handle& anchor,
+opencog::istreamTable(const AtomSpacePtr& as,
+                      const Handle& anchor,
                       std::istream& in,
                       const std::vector<std::string>& ignore_features)
 {
@@ -635,14 +635,15 @@ opencog::istreamTable(const Handle& anchor,
 
 	in.seekg(beg);
 
-	return istreamDenseTable(anchor, in, ignore_indexes,
+	return istreamDenseTable(as, anchor, in, ignore_indexes,
 		col_types, header, has_header);
 }
 
 // ==================================================================
 
 // See header file for general description.
-void opencog::load_csv_table(const Handle& anchor,
+void opencog::load_csv_table(const AtomSpacePtr& as,
+                             const Handle& anchor,
                              const std::string& file_name,
                              const string_seq& ignore_features)
 {
@@ -653,7 +654,7 @@ void opencog::load_csv_table(const Handle& anchor,
 		throw RuntimeException(TRACE_INFO,
 			"Could not open %s", file_name.c_str());
 
-    istreamTable(anchor, in, ignore_features);
+    istreamTable(as, anchor, in, ignore_features);
 }
 
 // ==================================================================

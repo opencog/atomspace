@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include <opencog/atoms/value/Value.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
 
@@ -74,7 +74,8 @@ typedef std::vector<std::string> string_seq;
  * @param file_name
  * @param ignore_features
  */
-void load_csv_table(const Handle& anchor,
+void load_csv_table(const AtomSpacePtr&,
+                    const Handle& anchor,
                     const std::string& file_name,
                     const string_seq& ignore_features=string_seq());
 
@@ -83,7 +84,8 @@ void load_csv_table(const Handle& anchor,
 //    const std::vector<unsigned>& ignored_indices=std::vector<unsigned>());
 
 // Same as above, but works for an already-open stream.
-std::istream& istreamTable(const Handle&,
+std::istream& istreamTable(const AtomSpacePtr&,
+                           const Handle&,
                            std::istream&,
                            const string_seq& ignore_features);
 
