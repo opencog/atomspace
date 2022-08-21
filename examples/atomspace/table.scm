@@ -7,7 +7,18 @@
 ; (a one-liner) and explores how it is represented in the AtomSpace.
 ; The second part applies some formulas to the table columns.
 ;
-; The second part of the demo
+; The second part of the demo is intereasting, because it shows how
+; functions, written in Atomese, can be applied to tables, and how
+; a "utility function" or a "scoring function" can be written.
+; Utility functions are commonly used in machine learning, they
+; provide a grand-total score that can be maximized or minized during
+; training. The interesting point here is that the scoring function
+; is represented in Atomese: it is some tree, some DAG of inputs.
+; These trees can be randomly generated and mutated, thus allowing
+; genetic-programming algorithms to be implemented in the AtomSpace.
+;
+; This is. of course, exactly what AS-MOSES does. This is effectively
+; a demo of a sub-component of the AS-MOSES subsystem.
 ;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog csv-table))
