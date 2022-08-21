@@ -17,6 +17,14 @@ Local subdirectories include:
               for RocksDB and one that allows AtomSpaces to trade
               Atoms over the network.)
 
+* csv      -- Load Values from CSV/TSV files. These are "delimiter
+              separated values" -- ordinary tables. Each column in the
+              table is loaded into an appropriate Value (`FloatValue`,
+              `BoolValue` or `StringValue`). The values are placed
+              under keys (named after the column) on the provided Atom.
+              This is intended for the ASMOSES subsystem, which
+              naturally operates on tables or streams of data.
+
 * file     -- Read and write files containing Atomese s-expressions.
               Provides both a `FileStorageNode`, and also some utilities
               to read files, and dump Atomspace contents to files or

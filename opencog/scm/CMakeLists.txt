@@ -19,6 +19,11 @@ ADD_GUILE_MODULE (FILES
 # Each of the files below are distinct modules. They need to be
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
+	opencog/csv-table.scm
+	COMPILE
+)
+
+ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
 	DEPENDS exec
 	COMPILE

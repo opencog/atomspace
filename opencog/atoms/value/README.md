@@ -94,4 +94,10 @@ Adding New Atom and Value Types
 Please see the
 [README-Adding-New-Atom-Types.md](../atom_types/README-Adding-New-Atom-Types.md) file.
 
+See also the [Custom Types Example](../../../examples/type-system/README.md)
 
+TODO
+----
+* Perhaps add a TypeValue, which would be a vector of Types.  If could
+  be useful as a kind-of table signature (for the csv table handling
+  code).

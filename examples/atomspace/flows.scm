@@ -140,7 +140,7 @@
 
 ; Try out some math
 (cog-execute! (SetValue bar kee
-	(Times (ValueOf foo key) (ValueOf foo key))))
+	(Times (FloatValueOf foo key) (FloatValueOf foo key))))
 
 ; Verify
 (cog-execute! (ValueOf bar kee))
@@ -162,6 +162,6 @@
 (cog-execute!
 	(SetValue bar kee
 		(DefinedSchema "triangle numbers")
-		(ValueOf foo key)))
+		(FloatValueOf foo key)))
 ;
 ; -------- THE END -----------

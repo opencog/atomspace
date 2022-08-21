@@ -53,6 +53,7 @@ first).
 * `formulas.scm`       -- Representing arithmetic and computing Values.
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
+* `table.scm`          -- Fetching Values from a CSV/TSV table.
 * `multi-space.scm`    -- Using multiple AtomSpaces at once.
 
 After going through the above, go to the demos in the
@@ -192,6 +193,7 @@ everything else depends on.
 ```
 (use-modules (opencog))
 (use-modules (opencog atom-types))
+(use-modules (opencog csv-table))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog matrix))
@@ -201,9 +203,11 @@ everything else depends on.
 (use-modules (opencog persist-rocks))
 (use-modules (opencog persist-sql))
 (use-modules (opencog python))
+(use-modules (opencog randgen))
 (use-modules (opencog sheaf))
 (use-modules (opencog test-runner))
 (use-modules (opencog type-utils))
+(use-modules (opencog uuid))
 ```
 
 There are other modules provided in other projects and repos. Here is
