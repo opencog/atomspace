@@ -51,9 +51,9 @@ first).
 * `values.scm`         -- Using Values and attaching them to Atoms.
 * `stream.scm`         -- Using a stream of time-varying Values.
 * `formulas.scm`       -- Representing arithmetic and computing Values.
-* `table.scm`          -- Fetching Values from a CSV/TSV table.
 * `flows.scm`          -- Flowing Values around.
 * `flow-formulas.scm`  -- Dynamically updating value flows.
+* `table.scm`          -- Fetching Values from a CSV/TSV table.
 * `multi-space.scm`    -- Using multiple AtomSpaces at once.
 
 After going through the above, go to the demos in the

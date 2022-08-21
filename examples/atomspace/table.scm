@@ -36,14 +36,35 @@
 ; -------------------------------------------------------------------
 ; Part two: apply some formulas to the columns.
 ;
-; Note that cog-value and cog-execute! ValueOf return the same thing:
+; Note that `cog-value` and `cog-execute! ValueOf` return the same thing:
 (cog-value tab (PredicateNode "flt1"))
 (cog-execute! (ValueOf tab (PredicateNode "flt1")))
 
+; Take the difference of two columns. Note that `FloatValueOf` is
+; used instead of `ValueOf`, so that the type-checking subsystem
+; is happy about the types passed to the operator.
 (cog-execute!
 	(Minus
-		(ValueOf tab (PredicateNode "flt2"))
-		(ValueOf tab (PredicateNode "flt1"))))
+		(FloatValueOf tab (PredicateNode "flt2"))
+		(FloatValueOf tab (PredicateNode "flt1"))))
+
+; The above can be wrapped into a function. Several examples follow,
+; below. First, a function that takes the table as an argument,
+; subtracts to columns, and places the result in a third column.
+; The column names are hard-coded in the function.
+
+(DefineLink
+	(DefinedSchema "col diffs")
+   (Lambda
+      (Variable "$tbl-name")
+		(SetValue
+			(Variable "$tbl-name") (Predicate "f2 minus f1")
+			(Minus
+				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt2"))
+				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
+
+(cog-execute!  (DefinedSchema "col diffs") tab)
+
 
 ; That's all, folks.
 ; -------------------------------------------------------------------
