@@ -1,7 +1,11 @@
 ;
-; table.scm -- Formulas applied to Values from a CSV table.
+; table.scm -- Formulas applied to Values from a CSV/TSV table.
 ;
-; Similar to the flows.scm demo.
+; This is similar to the `flows.scm` demo, except that the values
+; are feteched from a convetional DSV (delimiter-separated-value)
+; table. The demo is in two parts. The first part reads the table,
+; (a one-liner) and explores how it is represented in the AtomSpace.
+; The second part applies some formulas to the table columns.
 ;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog csv-table))
@@ -28,3 +32,18 @@
 	(lambda (KEY) 
 		(format #t "The key ~A   holds data ~A\n" KEY (cog-value tab KEY)))
 	(cog-value->list (cog-value tab colkeys)))
+;
+; -------------------------------------------------------------------
+; Part two: apply some formulas to the columns.
+;
+; Note that cog-value and cog-execute! ValueOf return the same thing:
+(cog-value tab (PredicateNode "flt1"))
+(cog-execute! (ValueOf tab (PredicateNode "flt1")))
+
+(cog-execute!
+	(Minus
+		(ValueOf tab (PredicateNode "flt2"))
+		(ValueOf tab (PredicateNode "flt1"))))
+
+; That's all, folks.
+; -------------------------------------------------------------------
