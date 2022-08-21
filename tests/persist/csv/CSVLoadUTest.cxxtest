@@ -53,7 +53,7 @@ void CSVLoadUTest::test_simple_load()
 	Handle h = _asp->add_node(CONCEPT_NODE, "foo");
 
 	// Argh. Ugly. Fix.
-	load_csv_table(h, "../tests/persist/csv/simple.csv");
+	load_csv_table(h, PROJECT_SOURCE_DIR "/tests/persist/csv/simple.csv");
 
 	// There's the five columns, plus the table of contents.
 	HandleSet keys = h->getKeys();
