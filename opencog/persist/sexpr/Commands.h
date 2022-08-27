@@ -81,6 +81,7 @@ protected:
 	std::string cog_update_value(const std::string&);
 	std::string cog_define(const std::string&);
 	std::string cog_ping(const std::string&);
+	std::string cog_version(const std::string&);
 
 public:
 	Commands(void);
