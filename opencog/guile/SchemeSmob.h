@@ -78,6 +78,7 @@ private:
 	// Initialization functions
 	static void init_smob_type(void);
 	static SCM ss_set_server_mode(SCM);
+	static SCM ss_version(void);
 
 	static int print_misc(SCM, SCM, scm_print_state *);
 	static SCM equalp_misc(SCM, SCM);

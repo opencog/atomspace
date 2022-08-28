@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/version.h>
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
 
@@ -112,6 +113,13 @@ void SchemeSmob::init_smob_type(void)
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
+}
+
+/* ============================================================== */
+
+SCM SchemeSmob::ss_version(void)
+{
+	return scm_from_utf8_string(ATOMSPACE_VERSION_STRING);
 }
 
 /* ============================================================== */
@@ -275,6 +283,7 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
+	register_proc("cog-version",           0, 0, 0, C(ss_version));
 	register_proc("cog-set-server-mode!",  1, 0, 0, C(ss_set_server_mode));
 
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
