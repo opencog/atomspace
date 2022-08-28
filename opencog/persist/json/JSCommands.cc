@@ -61,11 +61,11 @@ static std::string reterr(const std::string& cmd)
 
 #define GET_BOOL \
 	pos = cmd.find_first_not_of(",) \n\t", pos); \
-	bool recursive = true; \
+	bool recursive = false; \
 	if (std::string::npos != pos and ( \
-			0 == cmd.compare(pos, 1, "0") or \
-			0 == cmd.compare(pos, 5, "false"))) \
-		recursive = false;
+			0 == cmd.compare(pos, 1, "1") or \
+			0 == cmd.compare(pos, 4, "true"))) \
+		recursive = true;
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
@@ -123,6 +123,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	static const size_t gtval = std::hash<std::string>{}("getValues");
 	static const size_t stval = std::hash<std::string>{}("setValue");
 	static const size_t execu = std::hash<std::string>{}("execute");
+	static const size_t extra = std::hash<std::string>{}("extract");
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
