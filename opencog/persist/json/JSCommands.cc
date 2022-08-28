@@ -32,6 +32,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/version.h>
 
 #include "JSCommands.h"
 #include "Json.h"
@@ -137,7 +138,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	if (versn == act)
 	{
 		CHK_CMD;
-		return "0.9.1";
+		return ATOMSPACE_VERSION_STRING;
 	}
 
 	// -----------------------------------------------
