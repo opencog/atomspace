@@ -61,11 +61,11 @@ static std::string reterr(const std::string& cmd)
 
 #define GET_BOOL \
 	pos = cmd.find_first_not_of(",) \n\t", pos); \
-	bool get_subtypes = true; \
+	bool recursive = true; \
 	if (std::string::npos != pos and ( \
 			0 == cmd.compare(pos, 1, "0") or \
 			0 == cmd.compare(pos, 5, "false"))) \
-		get_subtypes = false;
+		recursive = false;
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
@@ -159,7 +159,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_BOOL;
 
 		std::vector<Type> vect;
-		if (get_subtypes)
+		if (recursive)
 			nameserver().getChildrenRecursive(t, std::back_inserter(vect));
 		else
 			nameserver().getChildren(t, std::back_inserter(vect));
@@ -176,7 +176,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_BOOL;
 
 		std::vector<Type> vect;
-		if (get_subtypes)
+		if (recursive)
 			nameserver().getParentsRecursive(t, std::back_inserter(vect));
 		else
 			nameserver().getParents(t, std::back_inserter(vect));
@@ -193,7 +193,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		std::string rv = "[\n";
 		HandleSeq hset;
-		as->get_handles_by_type(hset, t, get_subtypes);
+		as->get_handles_by_type(hset, t, recursive);
 		bool first = true;
 		for (const Handle& h: hset)
 		{
