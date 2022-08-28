@@ -59,6 +59,14 @@ static std::string reterr(const std::string& cmd)
 		return "Unknown type: " + cmd.substr(pos); \
 	}
 
+#define GET_BOOL \
+	pos = cmd.find_first_not_of(",) \n\t", pos); \
+	bool get_subtypes = true; \
+	if (std::string::npos != pos and ( \
+			0 == cmd.compare(pos, 1, "0") or \
+			0 == cmd.compare(pos, 5, "false"))) \
+		get_subtypes = false;
+
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
 	if (nullptr == h) return rv; \
@@ -148,9 +156,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		GET_TYPE;
+		GET_BOOL;
 
 		std::vector<Type> vect;
-		nameserver().getChildren(t, std::back_inserter(vect));
+		if (get_subtypes)
+			nameserver().getChildrenRecursive(t, std::back_inserter(vect));
+		else
+			nameserver().getChildren(t, std::back_inserter(vect));
 		return Json::encode_type_list(vect);
 	}
 
@@ -161,9 +173,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		GET_TYPE;
+		GET_BOOL;
 
 		std::vector<Type> vect;
-		nameserver().getParents(t, std::back_inserter(vect));
+		if (get_subtypes)
+			nameserver().getParentsRecursive(t, std::back_inserter(vect));
+		else
+			nameserver().getParents(t, std::back_inserter(vect));
 		return Json::encode_type_list(vect);
 	}
 
@@ -173,13 +189,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	{
 		CHK_CMD;
 		GET_TYPE;
-
-		pos = cmd.find_first_not_of(",) \n\t", pos);
-		bool get_subtypes = true;
-		if (std::string::npos != pos and (
-				0 == cmd.compare(pos, 1, "0") or
-				0 == cmd.compare(pos, 5, "false")))
-			get_subtypes = false;
+		GET_BOOL;
 
 		std::string rv = "[\n";
 		HandleSeq hset;

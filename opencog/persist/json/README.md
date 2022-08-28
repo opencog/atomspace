@@ -142,10 +142,14 @@ AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type":
 { "type": "CountTruthValue", "value": [7, 8, 9] } } } )
 ```
 
-* Get base and derived types.
+* Get base and derived types.  The optional bool flag indicates whether
+  to get all of the sub/supertypes rescursively, or not.
 ```
-AtomSpace.getSubTypes("Link")
+AtomSpace.getSubTypes("Atom")
+AtomSpace.getSubTypes("Atom", false)
+AtomSpace.getSubTypes("Atom", true)
 AtomSpace.getSuperTypes("ListLink")
+AtomSpace.getSuperTypes("ListLink", false)
 ```
 
 * Execute an executable Atom
