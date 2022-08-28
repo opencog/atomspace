@@ -151,3 +151,13 @@ write-through proxy, which just listens to connections on the net, and,
 whenever it receives some Atom, it just pushes it to disk.`
 
 For details, see https://github.com/opencog/atomspace-agents
+
+Status & TODO
+-------------
+***Version 1.0.1*** -- Everything works, has withstood the test of time.
+
+However -- multi-atomspace (frame) support is missing. Some basic work
+in this direction has been done, but it is not been completed.  The
+`SpaceFrame`, `SpaceDiamond`, `SpaceWye` and `FrameDelete` unit tests
+in the `atomspace-cog` git repo do not run/do not pass. Getting those
+to run and pass requires additional work to be done here.

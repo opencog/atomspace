@@ -171,7 +171,9 @@ AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
 ### Unimplemented Commands
 * Set multiple values at once -- this would be a nice-to-have utility.
 * Wrapper for cog-evaluate!
-* Multiple AtomSpace support
+* Multiple AtomSpace (Frame) support -- to implement this, one would do
+  what the `sexpr` API does. However, Frame support is incomplete,
+  there.
 
 ### General Access
 To make the AtomSpace generically usable, even more is needed.
