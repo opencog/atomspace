@@ -78,7 +78,7 @@ Commands::Commands(void)
 	static const size_t value = std::hash<std::string>{}("cog-value");
 	static const size_t dfine = std::hash<std::string>{}("define");
 	static const size_t ping = std::hash<std::string>{}("ping)");
-	static const size_t vers = std::hash<std::string>{}("cog-version)");
+	static const size_t versn = std::hash<std::string>{}("cog-version)");
 
 	using namespace std::placeholders;  // for _1, _2, _3...
 
@@ -102,7 +102,7 @@ Commands::Commands(void)
 	_dispatch_map.insert({value, std::bind(&Commands::cog_value, this, _1)});
 	_dispatch_map.insert({dfine, std::bind(&Commands::cog_define, this, _1)});
 	_dispatch_map.insert({ping, std::bind(&Commands::cog_ping, this, _1)});
-	_dispatch_map.insert({vers, std::bind(&Commands::cog_version, this, _1)});
+	_dispatch_map.insert({versn, std::bind(&Commands::cog_version, this, _1)});
 }
 
 Commands::~Commands()
@@ -475,7 +475,7 @@ std::string Commands::cog_ping(const std::string& cmd)
 // (cog-version) -- AtomSpace version
 std::string Commands::cog_version(const std::string& cmd)
 {
-	return "\"" ATOMSPACE_VERSION_STRING "\"";
+	return ATOMSPACE_VERSION_STRING;
 }
 
 // -----------------------------------------------

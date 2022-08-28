@@ -18,11 +18,13 @@ NOTYPE
 // Supertype, equivalent to the top type of type theory. Every specific
 // type inherits from this type. See
 // https://en.wikipedia.org/wiki/Top_type
-VALUE
+TOP_TYPE
 
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with atoms.
 // Think of them as decorations that can be hung on an atom.
+VALUE <- TOP_TYPE
+
 VOID_VALUE <- VALUE     // singleton value holding nothing at all.
 BOOL_VALUE <- VALUE     // vector of booleans
 FLOAT_VALUE <- VALUE    // vector of floats

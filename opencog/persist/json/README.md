@@ -11,11 +11,9 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.9.1.** There is just enough here to be usable for basic things.
-Several convenience calls are missing, as well as the ability to run
-arbitrary queries. Adding support for this is **really easy**, and just
-slightly tedious.  The hard part is writing the docs!
-Patches are solicited and will be accepted.
+**Version 0.9.2.** There is enough here to be usable for basic things.
+Support for multiple AtomSpaces is missing.  A convenience call for
+setting multiple values at the same time is missing.
 
 
 Network API
@@ -142,13 +140,17 @@ AtomSpace.setValue({ "type": "ConceptNode", "name": "foo", "key": { "type":
 { "type": "CountTruthValue", "value": [7, 8, 9] } } } )
 ```
 
-* Get base and derived types.
+* Get base and derived types.  The optional bool flag indicates whether
+  to get all of the sub/supertypes rescursively, or not.
 ```
-AtomSpace.getSubTypes("Link")
+AtomSpace.getSubTypes("Atom")
+AtomSpace.getSubTypes("Atom", false)
+AtomSpace.getSubTypes("Atom", true)
 AtomSpace.getSuperTypes("ListLink")
+AtomSpace.getSuperTypes("ListLink", false)
 ```
 
-* Execute an executable Atom
+* Execute an executable Atom.
 ```
 AtomSpace.execute({ "type": "PlusLink",
     "outgoing":
@@ -156,10 +158,18 @@ AtomSpace.execute({ "type": "PlusLink",
          { "type": "NumberNode", "name": "2" }] })
 ```
 
+* Remove (extract) an Atom. By default, the Atom is not removed if it
+  is contained in some Link. Setting the optional boolean flag to `true`
+  forces the recursive extraction of the Atom, and every Link that
+  contains it. Returns false is the atom was not removed or if an error
+  occured (e.g. the Atom does not exist).
+```
+AtomSpace.extract({ "type": "Concept", "name": "foo"}) // fails if not topmost
+AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
+```
 
 ### Unimplemented Commands
 * Set multiple values at once -- this would be a nice-to-have utility.
-* Extract atoms
 * Wrapper for cog-evaluate!
 * Multiple AtomSpace support
 
