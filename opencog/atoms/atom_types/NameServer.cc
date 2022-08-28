@@ -46,7 +46,7 @@ using namespace opencog;
 NameServer::NameServer(void)
 {
 	nTypes = MAX_NUM_VALUE + 1;
-	nValues = 1;
+	nValues = 0;   // TopType is 0  Value is 1
 	_maxDepth = 0;
 	_tmod = 0;
 }
