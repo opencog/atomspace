@@ -11,11 +11,9 @@ just enough to interact with the AtomSpace, and nothing more.
 
 Status
 ------
-**Version 0.9.1.** There is just enough here to be usable for basic things.
-Several convenience calls are missing, as well as the ability to run
-arbitrary queries. Adding support for this is **really easy**, and just
-slightly tedious.  The hard part is writing the docs!
-Patches are solicited and will be accepted.
+**Version 0.9.2.** There is enough here to be usable for basic things.
+Support for multiple AtomSpaces is missing.  A convenience call for
+setting multiple values at the same time is missing.
 
 
 Network API
