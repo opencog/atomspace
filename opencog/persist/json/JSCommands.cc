@@ -366,7 +366,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_VALUE;
 
 		as->set_value(h, k, v);
-		return "true";
+		return "true\n";
 	}
 
 	// -----------------------------------------------
@@ -392,13 +392,13 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 		GET_VALUE;
 
 		as->set_truthvalue(h, TruthValueCast(v));
-		return "true";
+		return "true\n";
 	}
 
 	// -----------------------------------------------
 	// AtomSpace.execute({ "type": "PlusLink", "outgoing":
-	//     [{ "type": "NumberNode", "value": "2" },
-	//      { "type": "NumberNode", "value": "2" }] })
+	//     [{ "type": "NumberNode", "name": "2" },
+	//      { "type": "NumberNode", "name": "2" }] })
 	if (execu == act)
 	{
 		CHK_CMD;
@@ -406,6 +406,20 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 		ValuePtr vp = h->execute();
 		return Json::encode_value(vp);
+	}
+
+	// -----------------------------------------------
+	// AtomSpace.extract({ "type": "Concept", "name": "foo"}, true)
+	if (extra == act)
+	{
+		CHK_CMD;
+		Handle h = Json::decode_atom(cmd, pos, epos);
+		if (nullptr == h) return "false\n";
+		pos = epos;
+		GET_BOOL;
+		bool ok = as->extract_atom(h, recursive);
+		if (ok) return "true\n";
+		return "false\n";
 	}
 
 	// -----------------------------------------------

@@ -152,7 +152,7 @@ AtomSpace.getSuperTypes("ListLink")
 AtomSpace.getSuperTypes("ListLink", false)
 ```
 
-* Execute an executable Atom
+* Execute an executable Atom.
 ```
 AtomSpace.execute({ "type": "PlusLink",
     "outgoing":
@@ -160,10 +160,18 @@ AtomSpace.execute({ "type": "PlusLink",
          { "type": "NumberNode", "name": "2" }] })
 ```
 
+* Remove (extract) an Atom. By default, the Atom is not removed if it
+  is contained in some Link. Setting the optional boolean flag to `true`
+  forces the recursive extraction of the Atom, and every Link that
+  contains it. Returns false is the atom was not removed or if an error
+  occured (e.g. the Atom does not exist).
+```
+AtomSpace.extract({ "type": "Concept", "name": "foo"}) // fails if not topmost
+AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
+```
 
 ### Unimplemented Commands
 * Set multiple values at once -- this would be a nice-to-have utility.
-* Extract atoms
 * Wrapper for cog-evaluate!
 * Multiple AtomSpace support
 
