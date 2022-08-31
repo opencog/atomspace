@@ -130,6 +130,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 
 	// Ignore comments, blank lines
 	if ('/' == cmd[0]) return "";
+	if ('#' == cmd[0]) return "";
 	if ('\n' == cmd[0]) return "";
 
 	// Find the command and dispatch
