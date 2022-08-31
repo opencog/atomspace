@@ -62,10 +62,13 @@ static std::string reterr(const std::string& cmd)
 #define GET_BOOL \
 	pos = cmd.find_first_not_of(",) \n\t", pos); \
 	bool recursive = false; \
-	if (std::string::npos != pos and ( \
-			0 == cmd.compare(pos, 1, "1") or \
-			0 == cmd.compare(pos, 4, "true"))) \
-		recursive = true;
+	if (std::string::npos != pos) { \
+		recursive = true; \
+		if (0 == cmd.compare(pos, 1, "0") or \
+		    0 == cmd.compare(pos, 5, "false") or \
+		    0 == cmd.compare(pos, 5, "False")) \
+			recursive = false; \
+	}
 
 #define GET_ATOM(rv) \
 	Handle h = Json::decode_atom(cmd, pos, epos); \
