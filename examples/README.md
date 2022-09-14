@@ -27,3 +27,9 @@ By the end, you will have a very clear idea of what the AtomSpace is!
 * c++-guile     - Creating guile wrappers for C++ code.
 
 * type-system   - Creating and using new kinds of Atom Types.
+
+Resources
+---------
+Some links to external sources that might help:
+* [Luke’s Atomspace Bootstrap Guide](https://luketpeterson.github.io/atomspace-bootstrap-guide/)
+  from Luke Peterson, 2020.
