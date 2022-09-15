@@ -2,7 +2,7 @@
 ; sexpr-query.scm - Store and query s-expressions.
 ;
 ; This demo shows how s-expressions can be stored in the AtomSpace,
-; and to be searched for.
+; and how they can be searched for.
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
