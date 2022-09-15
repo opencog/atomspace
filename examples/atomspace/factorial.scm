@@ -76,7 +76,7 @@ Intel Celeron laptop.
 		(/ (- end start) internal-time-units-per-second)))
 
 (format #t "Total run time=~A seconds.  Each call took ~A millisecs\n"
-	elapsed (/ elapsed nrep))
+	elapsed (* 1000 (/ elapsed nrep)))
 
 Note that the run-time does not depend on the atomspace size:
 Lets create half-a-million Atoms:
