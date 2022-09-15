@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/foreign/SexprAST.h
+ * opencog/atoms/foreign/LispAST.h
  *
- * Copyright (C) 2021 Linas Vepstas
+ * Copyright (C) 2021, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SEXPR_AST_H
-#define _OPENCOG_SEXPR_AST_H
+#ifndef _OPENCOG_LISP_AST_H
+#define _OPENCOG_LISP_AST_H
 
-#include <opencog/atoms/foreign/ForeignAST.h>
+#include <opencog/atoms/foreign/SexprAST.h>
 
 namespace opencog
 {
@@ -31,10 +31,11 @@ namespace opencog
  *  @{
  */
 
-/// The SexprAST holds generic abstract syntax trees, printed as
-/// s-expressions.
+/// The LispAST holds Lisp-like, Scheme-like abstract syntax trees,
+/// printed as Lisp-like s-expressions. Quasi-compatible with current
+/// experimental MeTTA code.
 ///
-class SexprAST : public ForeignAST
+class LispAST : public SexprAST
 {
 	void init();
 	void parse(const std::string&);
@@ -44,12 +45,11 @@ class SexprAST : public ForeignAST
 	virtual ContentHash compute_hash() const;
 
 public:
-	SexprAST(Type);
-	SexprAST(const HandleSeq&&, Type = SEXPR_AST);
-	SexprAST(const SexprAST&) = delete;
-	SexprAST& operator=(const SexprAST&) = delete;
+	LispAST(const HandleSeq&&, Type = LISP_AST);
+	LispAST(const LispAST&) = delete;
+	LispAST& operator=(const LispAST&) = delete;
 
-	SexprAST(const std::string&);
+	LispAST(const std::string&);
 
 	virtual std::string to_string(const std::string& indent) const;
 	virtual std::string to_short_string(const std::string& indent) const;
@@ -58,10 +58,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(SexprAST)
-#define createSexprAST CREATE_DECL(SexprAST)
+LINK_PTR_DECL(LispAST)
+#define createLispAST CREATE_DECL(LispAST)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_SEXPR_AST_H
+#endif // _OPENCOG_LISP_AST_H

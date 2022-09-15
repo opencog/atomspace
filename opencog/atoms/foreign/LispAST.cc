@@ -1,9 +1,9 @@
 /*
- * SexprAST.cc
+ * LispAST.cc
  *
- * Copyright (C) 2021 Linas Vepstas
+ * Copyright (C) 2021, 2022 Linas Vepstas
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  October 2021
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  September 2022
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,38 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SexprAST.h"
+#include "LispAST.h"
 
 using namespace opencog;
 
-void SexprAST::init()
+void LispAST::init()
 {
-	if (not nameserver().isA(_type, SEXPR_AST))
+	if (not nameserver().isA(_type, LISP_AST))
 	{
 		const std::string& tname = nameserver().getTypeName(_type);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an SexprAST, got %s", tname.c_str());
+			"Expecting an LispAST, got %s", tname.c_str());
 	}
 }
 
-SexprAST::SexprAST(const HandleSeq&& oset, Type t)
-	: ForeignAST(std::move(oset), t)
+LispAST::LispAST(const HandleSeq&& oset, Type t)
+	: SexprAST(std::move(oset), t)
 {
 	init();
 }
 
-SexprAST::SexprAST(Type t)
-	: ForeignAST(t)
-{
-}
-
-SexprAST::SexprAST(const std::string& sexpr)
-	: ForeignAST(SEXPR_AST)
+LispAST::LispAST(const std::string& sexpr)
+	: SexprAST(LISP_AST)
 {
 	parse(sexpr);
 }
 
-void SexprAST::parse(const std::string& sexpr)
+void LispAST::parse(const std::string& sexpr)
 {
 	size_t l = sexpr.find_first_not_of(" \t\n");
 	if (std::string::npos == l)
@@ -92,7 +87,7 @@ void SexprAST::parse(const std::string& sexpr)
 
 // ---------------------------------------------------------------
 
-Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
@@ -114,7 +109,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		l = sexpr.find_first_not_of(" \t\n", l);
 		r = 0;
 		if (')' == sexpr[l]) r = std::string::npos;
-		return HandleCast(createSexprAST(std::move(oset)));
+		return HandleCast(createLispAST(std::move(oset)));
 	}
 
 	// If its a literal, we are done.
@@ -128,7 +123,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		const std::string& tok = sexpr.substr(l, r-l);
 		l = sexpr.find_first_not_of(" \t\n", r);
 		r = std::string::npos;
-		return HandleCast(createSexprAST(tok));
+		return HandleCast(createLispAST(tok));
 	}
 
 	// If we are here, r points to whitespace, and l points to the first
@@ -139,17 +134,17 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 	if (')' == sexpr[l])
 		r = std::string::npos;
 
-	return HandleCast(createSexprAST(tok));
+	return HandleCast(createLispAST(tok));
 }
 
 // ---------------------------------------------------------------
 
-std::string SexprAST::to_string(const std::string& indent) const
+std::string LispAST::to_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
-		return indent + "(SexprAst \"" + _name + "\") ; " + id_to_string();
+		return indent + "(LispAst \"" + _name + "\") ; " + id_to_string();
 
-	std::string rv = indent + "(SexprAst\n";
+	std::string rv = indent + "(LispAst\n";
 	for (const Handle& h: _outgoing)
 		rv += h->to_string(indent + "  ") + "\n";
 
@@ -157,7 +152,7 @@ std::string SexprAST::to_string(const std::string& indent) const
 	return rv;
 }
 
-std::string SexprAST::to_short_string(const std::string& indent) const
+std::string LispAST::to_short_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
 	{
@@ -185,7 +180,7 @@ std::string SexprAST::to_short_string(const std::string& indent) const
 // ---------------------------------------------------------------
 
 // Content-based comparison.
-bool SexprAST::operator==(const Atom& other) const
+bool LispAST::operator==(const Atom& other) const
 {
 	// If other points to this, then have equality.
 	if (this == &other) return true;
@@ -195,12 +190,12 @@ bool SexprAST::operator==(const Atom& other) const
 	if (not linkeq) return false;
 
 	// Names must match.
-	return 0 == _name.compare(SexprASTCast(other.get_handle())->_name);
+	return 0 == _name.compare(LispASTCast(other.get_handle())->_name);
 }
 
 // ---------------------------------------------------------------
 
-ContentHash SexprAST::compute_hash() const
+ContentHash LispAST::compute_hash() const
 {
    ContentHash hsh = Link::compute_hash();
 	hsh += std::hash<std::string>()(_name);
@@ -218,21 +213,21 @@ ContentHash SexprAST::compute_hash() const
 // pass us a string, behaving like a node, which we parse into an
 // expression tree.
 
-Handle SexprAST::factory(const Handle& base)
+Handle LispAST::factory(const Handle& base)
 {
 	/* If it's castable, nothing to do. */
-	if (SexprASTCast(base)) return base;
+	if (LispASTCast(base)) return base;
 
 	if (0 < base->get_arity())
-		return HandleCast(createSexprAST(std::move(base->getOutgoingSet())));
+		return HandleCast(createLispAST(std::move(base->getOutgoingSet())));
 
-	return HandleCast(createSexprAST(std::move(base->get_name())));
+	return HandleCast(createLispAST(std::move(base->get_name())));
 }
 
 /* This runs when the shared lib is loaded. */
-static __attribute__ ((constructor)) void init_sexprast_factory(void)
+static __attribute__ ((constructor)) void init_lispast_factory(void)
 {
-	classserver().addFactory(SEXPR_AST, &SexprAST::factory);
+	classserver().addFactory(LISP_AST, &LispAST::factory);
 }
 
 /* ===================== END OF FILE ===================== */
