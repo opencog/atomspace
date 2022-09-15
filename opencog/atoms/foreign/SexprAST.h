@@ -37,11 +37,14 @@ namespace opencog
 class SexprAST : public ForeignAST
 {
 	void init();
-	void parse(const std::string&);
 
 	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 
 	virtual ContentHash compute_hash() const;
+
+protected:
+	void parse(const std::string&);
+	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
 
 public:
 	SexprAST(Type);

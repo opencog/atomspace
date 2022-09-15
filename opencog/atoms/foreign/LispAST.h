@@ -38,8 +38,8 @@ namespace opencog
 class LispAST : public SexprAST
 {
 	void init();
-	void parse(const std::string&);
 
+	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
 	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 
 	virtual ContentHash compute_hash() const;

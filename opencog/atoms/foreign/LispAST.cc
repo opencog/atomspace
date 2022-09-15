@@ -47,48 +47,16 @@ LispAST::LispAST(const std::string& sexpr)
 	parse(sexpr);
 }
 
-void LispAST::parse(const std::string& sexpr)
-{
-	size_t l = sexpr.find_first_not_of(" \t\n");
-	if (std::string::npos == l)
-	{
-		_name = "";
-		return;
-	}
-
-	// Look to see if it is a simple literal.
-	if ('(' != sexpr[l])
-	{
-		// If its a literal, we are done.
-		size_t r = sexpr.find_first_of(" \t\n", l);
-		if (std::string::npos == r)
-		{
-			_name = sexpr.substr(l);
-			return;
-		}
-
-		size_t l2 = sexpr.find_first_not_of(" \t\n", r+1);
-		if (std::string::npos == l2)
-		{
-			_name = sexpr.substr(l, r-l);
-			return;
-		}
-	}
-
-	// If we are here, l points to the open-paren.
-	l++; // step past open-paren
-	size_t r = 0;
-	while (std::string::npos != r)
-	{
-		Handle h(get_next_expr(sexpr, l, r));
-		_outgoing.emplace_back(h);
-	}
-}
-
 // ---------------------------------------------------------------
+
+Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+{
+	return get_next_expr(sexpr, l, r);
+}
 
 Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
+printf("duuude hello world %s\n", sexpr.c_str());
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
