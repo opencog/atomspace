@@ -60,7 +60,7 @@
 ;
 #! ----------
 How fast is this? Well, its slowwwww, but still, you can find out:
-Just cut-n-paste the below. It taks about 16 seconds on my cheap
+Just cut-n-paste the below. It takes about 16 seconds on my cheap
 Intel Celeron laptop.
 
 (define nrep 5000)
@@ -78,21 +78,23 @@ Intel Celeron laptop.
 (format #t "Total run time=~6F seconds.  Each call took ~6F millisecs\n"
 	elapsed (* 1000 (/ elapsed nrep)))
 
-Note that the run-time does not depend on the atomspace size:
-Lets create half-a-million Atoms:
-(for-each NumberNode (iota 500000))
+Note that the run-time does not depend on the AtomSpace size:
+Lets create 400K Atoms:
+
+(for-each (lambda (n)
+   (Times (Number n) (Plus (Number (* n 3.14) (Number 1.57)))))
+   (iota 100000))
 
 and run the measurement again; there should be no change.
 
 ---- !#
 
-; Also, lets take a look at the atomspace, after eecution:
+; Also, lets take a look at the atomspace, after execution:
 (cog-report-counts)
 
-; Notice the number of Atoms were created. Effectively, the code
-; is creating a tree that is N levels high, and then evaluating
-; that tree, producing one NumberNode, holding the result of the
-; evaluation.
+; Notice the number of Atoms that were created. Effectively, the code
+; is creating a tree that is N levels high, and then evaluating that
+; tree, producing one NumberNode, holding the result of the evaluation.
 ;
 ; ---------------------------------------------------------------
 ; The End! That's all, folks!
