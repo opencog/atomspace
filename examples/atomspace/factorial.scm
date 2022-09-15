@@ -75,7 +75,7 @@ Intel Celeron laptop.
 	(exact->inexact
 		(/ (- end start) internal-time-units-per-second)))
 
-(format #t "Total run time=~A seconds.  Each call took ~A millisecs\n"
+(format #t "Total run time=~6F seconds.  Each call took ~6F millisecs\n"
 	elapsed (* 1000 (/ elapsed nrep)))
 
 Note that the run-time does not depend on the atomspace size:
