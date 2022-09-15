@@ -77,4 +77,22 @@ Intel Celeron laptop.
 
 (format #t "Total run time=~A seconds.  Each call took ~A millisecs\n"
 	elapsed (/ elapsed nrep))
+
+Note that the run-time does not depend on the atomspace size:
+Lets create half-a-million Atoms:
+(for-each NumberNode (iota 500000))
+
+and run the measurement again; there should be no change.
+
 ---- !#
+
+; Also, lets take a look at the atomspace, after eecution:
+(cog-report-counts)
+
+; Notice the number of Atoms were created. Effectively, the code
+; is creating a tree that is N levels high, and then evaluating
+; that tree, producing one NumberNode, holding the result of the
+; evaluation.
+;
+; ---------------------------------------------------------------
+; The End! That's all, folks!
