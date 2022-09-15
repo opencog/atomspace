@@ -22,7 +22,7 @@
 ;
 ;  * A better example of numerical computation in the AtomSpace is the
 ;    processing of Values. Values are inherently fleeting, and are much
-;    more numerically-oriented. Other examples show how. 
+;    more numerically-oriented. Other examples show how.
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -35,7 +35,7 @@
 		; A single argument; it must be a number
 		(TypedVariable (Variable "$n") (Type "NumberNode"))
 
-		; Conditional: if the first term (the conditional) 
+		; Conditional: if the first term (the conditional)
 		; evaluates to "true", then the second term (the
 		; consequent) will be executed; else the third term
 		; (the alternative) will be executed
@@ -57,3 +57,24 @@
 ; Call the above-defined factorial function, computing the
 ; factorial of five. Should return 120.
 ; (cog-execute! (ExecutionOutput (DefinedSchema "factorial") (Number 5)))
+;
+#! ----------
+How fast is this? Well, its slowwwww, but still, you can find out:
+Just cut-n-paste the below. It taks about 16 seconds on my cheap
+Intel Celeron laptop.
+
+(define nrep 5000)
+(define start (get-internal-real-time))
+(for-each
+	(lambda (x)
+		(cog-execute! (ExecutionOutput (DefinedSchema "factorial") (Number 100))))
+	(iota nrep))
+(define end (get-internal-real-time))
+
+(define elapsed
+	(exact->inexact
+		(/ (- end start) internal-time-units-per-second)))
+
+(format #t "Total run time=~A seconds.  Each call took ~A millisecs\n"
+	elapsed (/ elapsed nrep))
+---- !#
