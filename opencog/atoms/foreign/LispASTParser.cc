@@ -57,6 +57,15 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == "if")
 		return createLink(std::move(args), COND_LINK);
 
+	if (fexp == "and")
+		return createLink(std::move(args), BOOL_AND_LINK);
+
+	if (fexp == "or")
+		return createLink(std::move(args), BOOL_OR_LINK);
+
+	if (fexp == "not")
+		return createLink(std::move(args), BOOL_NOT_LINK);
+
 	// Else assume that this is some kind of function defintion.
 	return createLink(EXECUTION_OUTPUT_LINK,
 		createNode(DEFINED_SCHEMA_NODE, fexp),
@@ -70,6 +79,12 @@ Handle make_tok(const std::string& tok)
 
 	if (isdigit(tok[0]))
 		return HandleCast(createNumberNode(std::move(tok)));
+
+	if (tok == "true")
+		return createLink(TRUE_LINK);
+
+	if (tok == "false")
+		return createLink(FALSE_LINK);
 
 	// Assume that anything else will be a DefinedSchemaNode
 	return createNode(DEFINED_SCHEMA_NODE, tok);

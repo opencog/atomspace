@@ -34,6 +34,12 @@ std::string LispAST::prt_metta(const Handle& h)
 	if (h->is_node())
 		return h->get_name() + " ";
 
+	if (TRUE_LINK == t)
+		return "true ";
+
+	if (FALSE_LINK == t)
+		return "false ";
+
 	std::string rv = "(";
 	if (LISP_AST == t)
 		rv += "LispAst ";
@@ -55,6 +61,12 @@ std::string LispAST::prt_metta(const Handle& h)
 		rv += "> ";
 	else if (COND_LINK == t)
 		rv += "if ";
+	else if (BOOL_AND_LINK == t)
+		rv += "and ";
+	else if (BOOL_OR_LINK == t)
+		rv += "or ";
+	else if (BOOL_NOT_LINK == t)
+		rv += "not ";
 	else if (VARIABLE_LIST == t)
 		rv += "";
 	else if (EXECUTION_OUTPUT_LINK == t)
