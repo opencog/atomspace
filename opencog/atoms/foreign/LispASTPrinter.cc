@@ -58,7 +58,18 @@ std::string LispAST::prt_metta(const Handle& h)
 	else if (VARIABLE_LIST == t)
 		rv += "";
 	else if (EXECUTION_OUTPUT_LINK == t)
+	{
+		// Special handling to unbundle any list links.
+		const Handle& args = h->getOutgoingAtom(1);
+		if (LIST_LINK == args->get_type())
+		{
+			rv += prt_metta(h->getOutgoingAtom(0));
+			for (const Handle& ho: args->getOutgoingSet())
+				rv += prt_metta(ho);
+			return rv;
+		}
 		rv += "";
+	}
 	else if (LIST_LINK == t)
 		rv += "";
 	else
