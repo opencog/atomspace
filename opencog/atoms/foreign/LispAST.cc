@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/DivideLink.h>
 #include <opencog/atoms/reduct/MinusLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/reduct/TimesLink.h>
@@ -64,6 +65,9 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 
 	if (fexp == "*")
 		return HandleCast(createTimesLink(std::move(args)));
+
+	if (fexp == "/")
+		return HandleCast(createDivideLink(std::move(args)));
 
 	if (fexp == ">")
 		return createLink(std::move(args), GREATER_THAN_LINK);
@@ -166,10 +170,11 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 /// Here, x is assumed to be a function signature.
 Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-	if ('=' != sexpr[0])
+	if ('=' != sexpr[l])
 		throw SyntaxException(TRACE_INFO, "Not supported!");
 
 	// Get the function name
+	l++;
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
