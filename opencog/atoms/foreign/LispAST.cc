@@ -72,10 +72,8 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == ">")
 		return createLink(std::move(args), GREATER_THAN_LINK);
 
-	// XXX should be not greater or equal .... yuck.
 	if (fexp == "<")
-		return createLink(NOT_LINK,
-			createLink(std::move(args), GREATER_THAN_LINK));
+		return createLink(std::move(args), LESS_THAN_LINK);
 
 	if (fexp == "if")
 		return createLink(std::move(args), COND_LINK);
