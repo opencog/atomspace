@@ -76,7 +76,10 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == "if")
 		return createLink(std::move(args), COND_LINK);
 
-	return HandleCast(createLispAST(std::move(args)));
+	// Else assume something has been defined.
+	return createLink(EXECUTION_OUTPUT_LINK,
+		createNode(DEFINED_SCHEMA_NODE, fexp),
+		createLink(std::move(args), LIST_LINK));
 }
 
 Handle make_tok(const std::string& tok)
