@@ -3,7 +3,7 @@
 ;
 ; Experimental demo of a quasi-MeTTa-compatible Lisp-like language.
 ;
-(use-modules (opencog) (opencog-exec))
+(use-modules (opencog) (opencog exec))
 
 (define lisp-expr
 	(LispAst

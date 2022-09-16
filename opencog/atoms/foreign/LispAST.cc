@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/reduct/MinusLink.h>
+#include <opencog/atoms/reduct/PlusLink.h>
+#include <opencog/atoms/reduct/TimesLink.h>
 #include "LispAST.h"
 
 using namespace opencog;
@@ -51,9 +54,19 @@ LispAST::LispAST(const std::string& sexpr)
 
 Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 {
+	if (fexp == "+")
+		return HandleCast(createPlusLink(std::move(args)));
+
+	if (fexp == "-")
+		return HandleCast(createMinusLink(std::move(args)));
+
+	if (fexp == "*")
+		return HandleCast(createTimesLink(std::move(args)));
+
 	return HandleCast(createLispAST(std::move(args)));
 }
 
+// ---------------------------------------------------------------
 
 Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
