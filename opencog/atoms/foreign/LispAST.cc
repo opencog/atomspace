@@ -170,12 +170,11 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	// If we are here, r points to whitespace, and l points to the first
 	// thing after the initial opening paren.
 	while ('(' == sexpr[r-1]) r--;
-	const std::string& tok = sexpr.substr(l, r-l);
-	l = sexpr.find_first_not_of(" \t\n", r);
+	Handle htok = get_tok(sexpr, l, r);
 	if (')' == sexpr[l])
 		r = std::string::npos;
 
-	return make_tok(tok);
+	return htok;
 }
 
 // ---------------------------------------------------------------
