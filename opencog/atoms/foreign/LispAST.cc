@@ -49,9 +49,22 @@ LispAST::LispAST(const std::string& sexpr)
 
 // ---------------------------------------------------------------
 
-Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 {
-	return get_next_expr(sexpr, l, r);
+	return HandleCast(createLispAST(std::move(args)));
+}
+
+const std::string& get_tok(const std::string& sexpr, size_t& l, size_t &r)
+{
+	// If we are here, r points to whitespace, and l points to the first
+	// thing after the initial opening paren.
+	while ('(' == sexpr[r-1]) r--;
+	const std::string& tok = sexpr.substr(l, r-l);
+	l = sexpr.find_first_not_of(" \t\n", r);
+	if (')' == sexpr[l])
+		r = std::string::npos;
+
+	return tok;
 }
 
 Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
@@ -65,6 +78,13 @@ printf("duuude hello world %s\n", sexpr.c_str());
 	if ('(' == sexpr[l])
 	{
 		l++; // step past open-paren
+		l = sexpr.find_first_not_of(" \t\n", l);
+		if ('(' == sexpr[l])
+			throw SyntaxException(TRACE_INFO, "Expected literal");
+
+		// Get the first token
+		const std::string& tok = get_tok(sexpr, l, r);
+
 		HandleSeq oset;
 		while (std::string::npos != r)
 		{
@@ -77,7 +97,7 @@ printf("duuude hello world %s\n", sexpr.c_str());
 		l = sexpr.find_first_not_of(" \t\n", l);
 		r = 0;
 		if (')' == sexpr[l]) r = std::string::npos;
-		return HandleCast(createLispAST(std::move(oset)));
+		return make_atom(tok, std::move(oset));
 	}
 
 	// If its a literal, we are done.
@@ -94,15 +114,15 @@ printf("duuude hello world %s\n", sexpr.c_str());
 		return HandleCast(createLispAST(tok));
 	}
 
-	// If we are here, r points to whitespace, and l points to the first
-	// thing after the initial opening paren.
-	while ('(' == sexpr[r-1]) r--;
-	const std::string& tok = sexpr.substr(l, r-l);
-	l = sexpr.find_first_not_of(" \t\n", r);
-	if (')' == sexpr[l])
-		r = std::string::npos;
-
+	const std::string& tok = get_tok(sexpr, l, r);
 	return HandleCast(createLispAST(tok));
+}
+
+// ---------------------------------------------------------------
+
+Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+{
+	return get_next_expr(sexpr, l, r);
 }
 
 // ---------------------------------------------------------------
