@@ -55,6 +55,7 @@ LispAST::LispAST(const std::string& sexpr)
 
 // ---------------------------------------------------------------
 
+/// Parse assorted built-in operators
 Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 {
 	if (fexp == "+")
@@ -78,7 +79,7 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == "if")
 		return createLink(std::move(args), COND_LINK);
 
-	// Else assume something has been defined.
+	// Else assume that this is some kind of function defintion.
 	return createLink(EXECUTION_OUTPUT_LINK,
 		createNode(DEFINED_SCHEMA_NODE, fexp),
 		createLink(std::move(args), LIST_LINK));
@@ -165,7 +166,7 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 
 // ---------------------------------------------------------------
 
-/// Handle named lambda expressions. Currently, only supports
+/// Parse named lambda expressions. Currently, only supports
 /// (= x y) expressions, where y is taken to be the definition of x.
 /// Here, x is assumed to be a function signature.
 Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
@@ -228,6 +229,7 @@ Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 /// the following forms:
 /// (= x y) where x is a function signature and y is the body.
 /// (fun arg) where fun is a previousy defined function, and arg the arg.
+///     fun can include the arithmetic ops, etc.
 Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	// Assume this is a defintion of some kind.
@@ -235,6 +237,8 @@ Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		return define_lambda(sexpr, l, r);
 
 	// Assume it is a function to be applied to args.
+	l--; // Backup to the open-paren.
+	return get_next(sexpr, l, r);
 }
 
 // ---------------------------------------------------------------
