@@ -68,6 +68,8 @@ std::string LispAST::prt_metta(const Handle& h)
 	for (const Handle& ho: h->getOutgoingSet())
 		rv += prt_metta(ho);
 
+	// Remove trailing blank space.
+	rv.pop_back();
 	rv += ") ";
 	return rv;
 }
