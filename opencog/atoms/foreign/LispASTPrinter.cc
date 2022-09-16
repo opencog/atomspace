@@ -30,7 +30,40 @@ using namespace opencog;
 /// Convert Atomese to MeTTa-style strings
 std::string LispAST::prt_metta(const Handle& h)
 {
-	return "foo";
+	Type t = h->get_type();
+	if (h->is_node())
+	{
+		if (VARIABLE_NODE == t)
+			return h->get_name();
+		if (NUMBER_NODE == t)
+		{
+			std::string quoted = h->get_name();
+			return quoted.substr(1, quoted.size()-1);
+		}
+		throw SyntaxException(TRACE_INFO, "Unknown node type");
+	}
+
+	std::string rv = "(";
+	if (LISP_AST == t)
+		rv += "LispAst ";
+	else if (PLUS_LINK == t)
+		rv += "+ ";
+	else if (MINUS_LINK == t)
+		rv += "- ";
+	else if (TIMES_LINK == t)
+		rv += "* ";
+	else if (DIVIDE_LINK == t)
+		rv += "/ ";
+	else if (LESS_THAN_LINK == t)
+		rv += "< ";
+	else if (GREATER_THAN_LINK == t)
+		rv += "> ";
+
+	for (const Handle& ho: h->getOutgoingSet())
+		rv += prt_metta(ho);
+
+	rv += ")";
+	return rv;
 }
 
 // ---------------------------------------------------------------
