@@ -33,7 +33,7 @@ namespace opencog
 
 /// The LispAST holds Lisp-like, Scheme-like abstract syntax trees,
 /// printed as Lisp-like s-expressions. Quasi-compatible with current
-/// experimental MeTTA code.
+/// experimental MeTTa code.
 ///
 class LispAST : public SexprAST
 {

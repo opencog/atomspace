@@ -980,7 +980,7 @@ FOREIGN_AST <- LINK
 // Abstract syntax trees, in the form of s-expressions
 SEXPR_AST <- FOREIGN_AST
 
-// Storge for LISP-style, quasi-Metta-compatible expressions
+// Storge for LISP-style, quasi-MeTTa-compatible expressions
 LISP_AST <- SEXPR_AST
 
 // Storage for JSON.
