@@ -759,6 +759,7 @@ SIMILARITY_LINK <- UNORDERED_LINK
 // terms that evaluate to crisp true/false values.
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
+LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 
 // Test whether all outgoing atoms are closed, that is do not contain
 // any free variable.
