@@ -49,60 +49,15 @@ LispAST::LispAST(const std::string& sexpr)
 
 // ---------------------------------------------------------------
 
-Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle LispAST::make_tok(const std::string& tok)
 {
-	return get_next_expr(sexpr, l, r);
+printf("duuude tok=%s\n", tok.c_str());
+	return HandleCast(createLispAST(tok));
 }
 
-Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle LispAST::make_seq(const HandleSeq&& oset)
 {
-printf("duuude hello world %s\n", sexpr.c_str());
-	l = sexpr.find_first_not_of(" \t\n", l);
-	if (std::string::npos == l)
-		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
-
-	// If another opening paren, recurse
-	if ('(' == sexpr[l])
-	{
-		l++; // step past open-paren
-		HandleSeq oset;
-		while (std::string::npos != r)
-		{
-			Handle h(get_next_expr(sexpr, l, r));
-			oset.emplace_back(h);
-		}
-
-		// l will be pointing at the trailing paren, so move past that.
-		l++;
-		l = sexpr.find_first_not_of(" \t\n", l);
-		r = 0;
-		if (')' == sexpr[l]) r = std::string::npos;
-		return HandleCast(createLispAST(std::move(oset)));
-	}
-
-	// If its a literal, we are done.
-	r = sexpr.find_first_of(" \t\n)", l);
-	if (std::string::npos == r)
-		throw SyntaxException(TRACE_INFO, "Failed to find closing parenthesis");
-
-	// Found the closing paren; just wrap the string.
-	if (')' == sexpr[r])
-	{
-		const std::string& tok = sexpr.substr(l, r-l);
-		l = sexpr.find_first_not_of(" \t\n", r);
-		r = std::string::npos;
-		return HandleCast(createLispAST(tok));
-	}
-
-	// If we are here, r points to whitespace, and l points to the first
-	// thing after the initial opening paren.
-	while ('(' == sexpr[r-1]) r--;
-	const std::string& tok = sexpr.substr(l, r-l);
-	l = sexpr.find_first_not_of(" \t\n", r);
-	if (')' == sexpr[l])
-		r = std::string::npos;
-
-	return HandleCast(createLispAST(tok));
+	return HandleCast(createLispAST(std::move(oset)));
 }
 
 // ---------------------------------------------------------------

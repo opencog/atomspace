@@ -39,10 +39,11 @@ class LispAST : public SexprAST
 {
 	void init();
 
-	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
-	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
-
 	virtual ContentHash compute_hash() const;
+
+protected:
+	virtual Handle make_tok(const std::string&);
+	virtual Handle make_seq(const HandleSeq&&);
 
 public:
 	LispAST(const HandleSeq&&, Type = LISP_AST);

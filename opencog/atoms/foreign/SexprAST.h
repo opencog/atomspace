@@ -38,13 +38,14 @@ class SexprAST : public ForeignAST
 {
 	void init();
 
-	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
+	Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 
 	virtual ContentHash compute_hash() const;
 
 protected:
 	void parse(const std::string&);
-	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
+	virtual Handle make_tok(const std::string&);
+	virtual Handle make_seq(const HandleSeq&&);
 
 public:
 	SexprAST(Type);

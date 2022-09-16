@@ -85,17 +85,12 @@ void SexprAST::parse(const std::string& sexpr)
 	size_t r = 0;
 	while (std::string::npos != r)
 	{
-		Handle h(next_expr(sexpr, l, r));
+		Handle h(get_next_expr(sexpr, l, r));
 		_outgoing.emplace_back(h);
 	}
 }
 
 // ---------------------------------------------------------------
-
-Handle SexprAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
-{
-	return get_next_expr(sexpr, l, r);
-}
 
 Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
@@ -119,7 +114,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		l = sexpr.find_first_not_of(" \t\n", l);
 		r = 0;
 		if (')' == sexpr[l]) r = std::string::npos;
-		return HandleCast(createSexprAST(std::move(oset)));
+		return make_seq(std::move(oset));
 	}
 
 	// If its a literal, we are done.
@@ -133,7 +128,7 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		const std::string& tok = sexpr.substr(l, r-l);
 		l = sexpr.find_first_not_of(" \t\n", r);
 		r = std::string::npos;
-		return HandleCast(createSexprAST(tok));
+		return make_tok(tok);
 	}
 
 	// If we are here, r points to whitespace, and l points to the first
@@ -144,7 +139,19 @@ Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 	if (')' == sexpr[l])
 		r = std::string::npos;
 
+	return make_tok(tok);
+}
+
+// ---------------------------------------------------------------
+
+Handle SexprAST::make_tok(const std::string& tok)
+{
 	return HandleCast(createSexprAST(tok));
+}
+
+Handle SexprAST::make_seq(const HandleSeq&& oset)
+{
+	return HandleCast(createSexprAST(std::move(oset)));
 }
 
 // ---------------------------------------------------------------
