@@ -118,7 +118,7 @@ Handle get_tok(const std::string& sexpr, size_t& l, size_t &r)
 /// Lisp-like MeTTa rules.
 Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
 {
-printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
+// printf("Enter get_next %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
@@ -297,7 +297,7 @@ std::string LispAST::to_short_string(const std::string& indent) const
 	rv[rv.size()-1] = ')';
 
 	// Debugging print
-	if (0 == indent.size()) rv += "\n" + to_string(";") + "\n";
+	// if (0 == indent.size()) rv += "\n" + to_string(";") + "\n";
 	return rv;
 }
 
