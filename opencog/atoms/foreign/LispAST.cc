@@ -65,6 +65,17 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == "*")
 		return HandleCast(createTimesLink(std::move(args)));
 
+	if (fexp == ">")
+		return createLink(std::move(args), GREATER_THAN_LINK);
+
+	// XXX should be not greater or equal .... yuck.
+	if (fexp == "<")
+		return createLink(NOT_LINK,
+			createLink(std::move(args), GREATER_THAN_LINK));
+
+	if (fexp == "if")
+		return createLink(std::move(args), COND_LINK);
+
 	return HandleCast(createLispAST(std::move(args)));
 }
 
@@ -76,7 +87,8 @@ Handle make_tok(const std::string& tok)
 	if (isdigit(tok[0]))
 		return HandleCast(createNumberNode(std::move(tok)));
 
-	return HandleCast(createLispAST(tok));
+	// Assume that anything else will be a DefinedSchemaNode
+	return createNode(DEFINED_SCHEMA_NODE, tok);
 }
 
 // ---------------------------------------------------------------
