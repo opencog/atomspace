@@ -293,28 +293,22 @@ std::string LispAST::to_string(const std::string& indent) const
 
 std::string LispAST::to_short_string(const std::string& indent) const
 {
+	if (0 == indent.size())
+		return _name + "\n" + to_short_string(";") + "\n";
 
-	return _name + "\n" + to_string(";") + "\n";
+	// Debugging print
 	if (0 == _outgoing.size())
-	{
-		if (0 != indent.size()) return _name;
+		return _name;
 
-		return _name + "\n" + to_string(";") + "\n";
-	}
-
-	std::string rv = "(";
+	std::string rv = "";
 	for (const Handle& h: _outgoing)
 	{
 		if (LISP_AST == h->get_type())
 			rv += h->to_short_string("xx") + " ";
 		else
-			rv += "(atomese " + h->to_short_string("") + ") ";
+			rv += indent + h->to_short_string(indent);
 	}
 
-	rv[rv.size()-1] = ')';
-
-	// Debugging print
-	// if (0 == indent.size()) rv += "\n" + to_string(";") + "\n";
 	return rv;
 }
 
