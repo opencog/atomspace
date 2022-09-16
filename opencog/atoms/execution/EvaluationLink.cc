@@ -163,6 +163,19 @@ static bool greater(AtomSpace* as, const Handle& h, bool silent)
 	return (v0 > v1);
 }
 
+static bool lesser(AtomSpace* as, const Handle& h, bool silent)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+		     "GreaterThankLink expects two arguments");
+
+	double v0 = get_numeric_value(as, silent, oset[0]);
+	double v1 = get_numeric_value(as, silent, oset[1]);
+
+	return (v0 < v1);
+}
+
 /// Perform a IsClosed check
 static bool is_outgoing_closed(const Handle& h)
 {
@@ -572,6 +585,7 @@ static bool crispy_maybe(AtomSpace* as,
 	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
+	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);
 	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
 	if (IS_TRUE_LINK == t) return is_outgoing_true(scratch, evelnk);
 	if (IS_FALSE_LINK == t) return is_outgoing_false(scratch, evelnk);
