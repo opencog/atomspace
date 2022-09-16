@@ -5,8 +5,8 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-(define lisp-expr
-	(LispAst "(= (fact $x) (if (< $x 2) 1 (* $x (fact (- $x 1)))))")
-)
+; Define a factorial function
+(LispAst "(= (fact $x) (if (< $x 2) 1 (* $x (fact (- $x 1)))))")
 
-(cog-execute! lisp-expr)
+; Run it.
+(cog-execute! (LispAst "(fact 5)"))

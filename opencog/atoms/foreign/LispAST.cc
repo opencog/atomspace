@@ -98,7 +98,9 @@ Handle make_tok(const std::string& tok)
 
 // ---------------------------------------------------------------
 
-Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
+/// Decode an s-expression, converting it to Atomese using
+/// Lisp-like MeTTa rules.
+Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
 {
 printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	l = sexpr.find_first_not_of(" \t\n", l);
@@ -123,7 +125,7 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 		HandleSeq oset;
 		while (std::string::npos != r)
 		{
-			Handle h(get_next_expr(sexpr, l, r));
+			Handle h(get_next(sexpr, l, r));
 			oset.emplace_back(h);
 		}
 
@@ -163,10 +165,10 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 
 // ---------------------------------------------------------------
 
-/// Handle top-level expressions. Currently, only supports
+/// Handle named lambda expressions. Currently, only supports
 /// (= x y) expressions, where y is taken to be the definition of x.
 /// Here, x is assumed to be a function signature.
-Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 {
 	if ('=' != sexpr[l])
 		throw SyntaxException(TRACE_INFO, "Not supported!");
@@ -198,7 +200,7 @@ Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 	HandleSeq args;
 	while (std::string::npos != r)
 	{
-		Handle h(get_next_expr(sexpr, l, r));
+		Handle h(get_next(sexpr, l, r));
 		args.emplace_back(h);
 	}
 	Handle arglist = createLink(args, VARIABLE_LIST);
@@ -211,7 +213,7 @@ Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		r = std::string::npos;
 
 	// Now get the body.
-	Handle body = get_next_expr(sexpr, l, r);
+	Handle body = get_next(sexpr, l, r);
 
 	// Build the defintion
 	Handle defun = 
@@ -220,6 +222,19 @@ Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 			createLink(LAMBDA_LINK, arglist, body));
 
 	return defun;
+}
+
+/// Handle top-level expressions. Currently, only supports
+/// the following forms:
+/// (= x y) where x is a function signature and y is the body.
+/// (fun arg) where fun is a previousy defined function, and arg the arg.
+Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+{
+	// Assume this is a defintion of some kind.
+	if ('=' == sexpr[l])
+		return define_lambda(sexpr, l, r);
+
+	// Assume it is a function to be applied to args.
 }
 
 // ---------------------------------------------------------------
