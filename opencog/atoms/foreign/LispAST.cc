@@ -187,19 +187,23 @@ Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 	if ('=' != sexpr[l])
 		throw SyntaxException(TRACE_INFO, "Not supported!");
 
-	// Get the function name
 	l++;
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
-	// Perhaps the defintion is a simple variable name
+	// Perhaps the defintion is a simple variable name.
+	// For example: `(= foo 6)`
 	if ('(' != sexpr[l])
 	{
-		throw SyntaxException(TRACE_INFO, "Execting function signature!");
+		Handle name = get_tok(sexpr, l, r);
+		Handle body = get_next(sexpr, l, r);
+		Handle defn = createLink(DEFINE_LINK, name, body);
+		return defn;
 	}
 
-	// Start of function signature
+	// Start of function signature; first, get the function name.
+	// For example, `(fun $x $y $z)`
 	l++; // step past open-paren
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if ('(' == sexpr[l])
