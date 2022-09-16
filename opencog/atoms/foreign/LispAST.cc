@@ -70,12 +70,12 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 
 Handle LispAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-printf("duuude hello world %s\n", sexpr.c_str());
+printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
-	// If another opening paren, recurse
+	// Start of fexpr.
 	if ('(' == sexpr[l])
 	{
 		l++; // step past open-paren
@@ -84,7 +84,7 @@ printf("duuude hello world %s\n", sexpr.c_str());
 			throw SyntaxException(TRACE_INFO, "Expected literal");
 
 		// Get the first token
-		while ('(' == sexpr[r-1]) r--;
+		r = sexpr.find_first_of(" \t\n)", l);
 		const std::string& tok = sexpr.substr(l, r-l);
 		l = sexpr.find_first_not_of(" \t\n", r);
 		if (')' == sexpr[l])
@@ -134,6 +134,7 @@ printf("duuude hello world %s\n", sexpr.c_str());
 
 Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
+	l--; // back up one, we were called badly.
 	return get_next_expr(sexpr, l, r);
 }
 

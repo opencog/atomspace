@@ -6,9 +6,7 @@
 (use-modules (opencog) (opencog exec))
 
 (define lisp-expr
-	(LispAst
-		"(= (fact $x)
-		 	(if (< $x 2) 1 (* $x (fact (- $x 1)))))"
-	))
+	(LispAst "(= (fact $x) (if (< $x 2) 1 (* $x (fact (- $x 1)))))")
+)
 
 (cog-execute! lisp-expr)
