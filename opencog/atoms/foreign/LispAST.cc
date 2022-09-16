@@ -47,6 +47,13 @@ LispAST::LispAST(const HandleSeq&& oset, Type t)
 	init();
 }
 
+LispAST::LispAST(const HandleSeq&& oset, const std::string&& sexpr)
+	: SexprAST(std::move(oset), LISP_AST)
+{
+	init();
+	_name = sexpr;
+}
+
 LispAST::LispAST(const std::string& sexpr)
 	: SexprAST(LISP_AST)
 {
@@ -263,6 +270,14 @@ Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 
 // ---------------------------------------------------------------
 
+/// Convert Atomese to MeTTa-style strings
+std::string prt_metta(const Handle& h)
+{
+	return "foo";
+}
+
+// ---------------------------------------------------------------
+
 std::string LispAST::to_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
@@ -278,6 +293,8 @@ std::string LispAST::to_string(const std::string& indent) const
 
 std::string LispAST::to_short_string(const std::string& indent) const
 {
+
+	return _name + "\n" + to_string(";") + "\n";
 	if (0 == _outgoing.size())
 	{
 		if (0 != indent.size()) return _name;
@@ -288,7 +305,7 @@ std::string LispAST::to_short_string(const std::string& indent) const
 	std::string rv = "(";
 	for (const Handle& h: _outgoing)
 	{
-		if (SEXPR_AST == h->get_type())
+		if (LISP_AST == h->get_type())
 			rv += h->to_short_string("xx") + " ";
 		else
 			rv += "(atomese " + h->to_short_string("") + ") ";
@@ -328,7 +345,11 @@ Handle LispAST::factory(const Handle& base)
 	if (LispASTCast(base)) return base;
 
 	if (0 < base->get_arity())
-		return HandleCast(createLispAST(std::move(base->getOutgoingSet())));
+	{
+		return HandleCast(createLispAST(
+			std::move(base->getOutgoingSet()),
+			std::move(prt_metta(base))));
+	}
 
 	return HandleCast(createLispAST(std::move(base->get_name())));
 }

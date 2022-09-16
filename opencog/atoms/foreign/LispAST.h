@@ -44,6 +44,7 @@ protected:
 
 public:
 	LispAST(const HandleSeq&&, Type = LISP_AST);
+	LispAST(const HandleSeq&&, const std::string&&);
 	LispAST(const LispAST&) = delete;
 	LispAST& operator=(const LispAST&) = delete;
 
