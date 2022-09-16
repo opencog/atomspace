@@ -101,7 +101,8 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 		l++;
 		l = sexpr.find_first_not_of(" \t\n", l);
 		r = 0;
-		if (')' == sexpr[l]) r = std::string::npos;
+		if (std::string::npos == l or ')' == sexpr[l])
+			r = std::string::npos;
 		return make_atom(tok, std::move(oset));
 	}
 
