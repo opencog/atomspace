@@ -37,6 +37,10 @@ std::string LispAST::prt_metta(const Handle& h)
 	std::string rv = "(";
 	if (LISP_AST == t)
 		rv += "LispAst ";
+	else if (DEFINE_LINK == t)
+		rv += "= ";
+	else if (LAMBDA_LINK == t)
+		rv += "λ ";
 	else if (PLUS_LINK == t)
 		rv += "+ ";
 	else if (MINUS_LINK == t)
@@ -51,6 +55,12 @@ std::string LispAST::prt_metta(const Handle& h)
 		rv += "> ";
 	else if (COND_LINK == t)
 		rv += "if ";
+	else if (VARIABLE_LIST == t)
+		rv += "";
+	else if (EXECUTION_OUTPUT_LINK == t)
+		rv += "";
+	else if (LIST_LINK == t)
+		rv += "";
 	else
 		rv += nameserver().getTypeName(t) + " ";
 		// throw SyntaxException(TRACE_INFO, "Unknown link type");
