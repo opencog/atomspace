@@ -5,6 +5,8 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (foreign
 	ForeignAST.cc
 	LispAST.cc
+	LispASTParser.cc
+	LispASTPrinter.cc
 	SexprAST.cc
 )
 

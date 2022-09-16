@@ -38,6 +38,7 @@ namespace opencog
 class LispAST : public SexprAST
 {
 	void init();
+	static std::string prt_metta(const Handle&);
 
 protected:
 	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
