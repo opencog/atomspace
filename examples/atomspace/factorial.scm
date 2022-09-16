@@ -90,7 +90,7 @@ and run the measurement again; there should be no change.
 ---- !#
 
 ; Also, lets take a look at the atomspace, after execution:
-(cog-report-counts)
+; (cog-report-counts)
 
 ; Notice the number of Atoms that were created. Effectively, the code
 ; is creating a tree that is N levels high, and then evaluating that
