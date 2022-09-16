@@ -162,21 +162,6 @@ bool LispAST::operator==(const Atom& other) const
 }
 
 // ---------------------------------------------------------------
-
-ContentHash LispAST::compute_hash() const
-{
-   ContentHash hsh = Link::compute_hash();
-	hsh += std::hash<std::string>()(_name);
-
-	// Links will always have the MSB set.
-	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
-	hsh |= mask;
-
-	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	return hsh;
-}
-
-// ---------------------------------------------------------------
 // Custom factory, because its a hermaphrodite. The ForgeinAST will
 // pass us a string, behaving like a node, which we parse into an
 // expression tree.
