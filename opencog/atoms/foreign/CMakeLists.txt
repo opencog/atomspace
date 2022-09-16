@@ -4,6 +4,9 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
 	ForeignAST.cc
+	LispAST.cc
+	LispASTParser.cc
+	LispASTPrinter.cc
 	SexprAST.cc
 )
 
@@ -21,6 +24,7 @@ INSTALL (TARGETS foreign EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	ForeignAST.h
+	LispAST.h
 	SexprAST.h
 	DESTINATION "include/opencog/atoms/foreign"
 )

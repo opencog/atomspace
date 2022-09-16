@@ -41,6 +41,11 @@ SexprAST::SexprAST(const HandleSeq&& oset, Type t)
 	init();
 }
 
+SexprAST::SexprAST(Type t)
+	: ForeignAST(t)
+{
+}
+
 SexprAST::SexprAST(const std::string& sexpr)
 	: ForeignAST(SEXPR_AST)
 {
@@ -80,12 +85,17 @@ void SexprAST::parse(const std::string& sexpr)
 	size_t r = 0;
 	while (std::string::npos != r)
 	{
-		Handle h(get_next_expr(sexpr, l, r));
+		Handle h(next_expr(sexpr, l, r));
 		_outgoing.emplace_back(h);
 	}
 }
 
 // ---------------------------------------------------------------
+
+Handle SexprAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+{
+	return get_next_expr(sexpr, l, r);
+}
 
 Handle SexprAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
