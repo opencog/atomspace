@@ -161,10 +161,62 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 
 // ---------------------------------------------------------------
 
+/// Handle top-level expressions. Currently, only supports
+/// (= x y) expressions, where y is taken to be the definition of x.
+/// Here, x is assumed to be a function signature.
 Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-	l--; // back up one, we were called badly.
-	return get_next_expr(sexpr, l, r);
+	if ('=' != sexpr[0])
+		throw SyntaxException(TRACE_INFO, "Not supported!");
+
+	// Get the function name
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+
+	// Start of function signature
+	if ('(' != sexpr[l])
+		throw SyntaxException(TRACE_INFO, "Execting function signature!");
+
+	l++; // step past open-paren
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if ('(' == sexpr[l])
+		throw SyntaxException(TRACE_INFO, "Expected function literal");
+
+	// Get the function name
+	r = sexpr.find_first_of(" \t\n)", l);
+	const std::string& func_name = sexpr.substr(l, r-l);
+	l = sexpr.find_first_not_of(" \t\n", r);
+	if (')' == sexpr[l])
+		r = std::string::npos;
+	Handle fname = createNode(DEFINED_SCHEMA_NODE, func_name);
+
+	// Get the list of variables following it.
+	HandleSeq args;
+	while (std::string::npos != r)
+	{
+		Handle h(get_next_expr(sexpr, l, r));
+		args.emplace_back(h);
+	}
+	Handle arglist = createLink(args, VARIABLE_LIST);
+
+	// l will be pointing at the trailing paren, so move past that.
+	l++;
+	l = sexpr.find_first_not_of(" \t\n", l);
+	r = 0;
+	if (std::string::npos == l or ')' == sexpr[l])
+		r = std::string::npos;
+
+	// Now get the body.
+	Handle body = get_next_expr(sexpr, l, r);
+
+	// Build the defintion
+	Handle defun = 
+		createLink(DEFINE_LINK,
+			fname,
+			createLink(LAMBDA_LINK, arglist, body));
+
+	return defun;
 }
 
 // ---------------------------------------------------------------
