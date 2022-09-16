@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/reduct/MinusLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/reduct/TimesLink.h>
@@ -64,6 +66,17 @@ Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 		return HandleCast(createTimesLink(std::move(args)));
 
 	return HandleCast(createLispAST(std::move(args)));
+}
+
+Handle make_tok(const std::string& tok)
+{
+	if ('$' == tok[0])
+		return createNode(VARIABLE_NODE, tok);
+
+	if (isdigit(tok[0]))
+		return HandleCast(createNumberNode(std::move(tok)));
+
+	return HandleCast(createLispAST(tok));
 }
 
 // ---------------------------------------------------------------
@@ -117,7 +130,7 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 		const std::string& tok = sexpr.substr(l, r-l);
 		l = sexpr.find_first_not_of(" \t\n", r);
 		r = std::string::npos;
-		return HandleCast(createLispAST(tok));
+		return make_tok(tok);
 	}
 
 	// If we are here, r points to whitespace, and l points to the first
@@ -128,7 +141,7 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	if (')' == sexpr[l])
 		r = std::string::npos;
 
-	return HandleCast(createLispAST(tok));
+	return make_tok(tok);
 }
 
 // ---------------------------------------------------------------
