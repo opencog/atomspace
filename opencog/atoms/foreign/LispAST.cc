@@ -97,6 +97,21 @@ Handle make_tok(const std::string& tok)
 	return createNode(DEFINED_SCHEMA_NODE, tok);
 }
 
+// Extract a single number or string
+Handle get_tok(const std::string& sexpr, size_t& l, size_t &r)
+{
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if ('(' == sexpr[l])
+		throw SyntaxException(TRACE_INFO, "Expected literal");
+
+	// Get the token name
+	r = sexpr.find_first_of(" \t\n)", l);
+	const std::string& tok = sexpr.substr(l, r-l);
+	l = sexpr.find_first_not_of(" \t\n", r);
+
+	return make_tok(tok);
+}
+
 // ---------------------------------------------------------------
 
 /// Decode an s-expression, converting it to Atomese using
@@ -147,10 +162,9 @@ printf("duuude hello world %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	// Found the closing paren; just wrap the string.
 	if (')' == sexpr[r])
 	{
-		const std::string& tok = sexpr.substr(l, r-l);
-		l = sexpr.find_first_not_of(" \t\n", r);
+		Handle htok = get_tok(sexpr, l, r);
 		r = std::string::npos;
-		return make_tok(tok);
+		return htok;
 	}
 
 	// If we are here, r points to whitespace, and l points to the first
@@ -180,10 +194,13 @@ Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
-	// Start of function signature
+	// Perhaps the defintion is a simple variable name
 	if ('(' != sexpr[l])
+	{
 		throw SyntaxException(TRACE_INFO, "Execting function signature!");
+	}
 
+	// Start of function signature
 	l++; // step past open-paren
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if ('(' == sexpr[l])

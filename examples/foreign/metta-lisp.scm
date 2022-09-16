@@ -10,3 +10,9 @@
 
 ; Run it.
 (cog-execute! (LispAst "(fact 5)"))
+
+; Define a simple named numeric value
+(LispAst "(= foo 6)")
+
+; Run it.
+(cog-execute! (LispAst "(fact foo)"))
