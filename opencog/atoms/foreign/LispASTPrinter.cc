@@ -32,16 +32,7 @@ std::string LispAST::prt_metta(const Handle& h)
 {
 	Type t = h->get_type();
 	if (h->is_node())
-	{
-		if (VARIABLE_NODE == t)
-			return h->get_name();
-		if (NUMBER_NODE == t)
-		{
-			std::string quoted = h->get_name();
-			return quoted.substr(1, quoted.size()-1);
-		}
-		throw SyntaxException(TRACE_INFO, "Unknown node type");
-	}
+		return h->get_name() + " ";
 
 	std::string rv = "(";
 	if (LISP_AST == t)
@@ -58,11 +49,16 @@ std::string LispAST::prt_metta(const Handle& h)
 		rv += "< ";
 	else if (GREATER_THAN_LINK == t)
 		rv += "> ";
+	else if (COND_LINK == t)
+		rv += "if ";
+	else
+		rv += nameserver().getTypeName(t) + " ";
+		// throw SyntaxException(TRACE_INFO, "Unknown link type");
 
 	for (const Handle& ho: h->getOutgoingSet())
 		rv += prt_metta(ho);
 
-	rv += ")";
+	rv += ") ";
 	return rv;
 }
 
