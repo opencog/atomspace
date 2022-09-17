@@ -43,6 +43,7 @@ experimental and very incomplete.  The demos explore the limits of what
 is actually possible.
 
 * `sexpr-query.scm`         -- Working with s-expressions.
+* `metta-lisp.scm`          -- MeTTa emulation example.
 
 TODO
 ----
