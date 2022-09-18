@@ -36,6 +36,7 @@ class ForeignAST : public Link
 {
 protected:
 	std::string _name;
+	virtual ContentHash compute_hash() const;
 
 public:
 	ForeignAST(const HandleSeq&&, Type = FOREIGN_AST);
@@ -45,6 +46,7 @@ public:
 	ForeignAST& operator=(const ForeignAST&) = delete;
 
 	virtual const std::string& get_name() const { return _name; }
+	virtual bool operator==(const Atom&) const;
 };
 
 LINK_PTR_DECL(ForeignAST)

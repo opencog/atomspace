@@ -53,4 +53,35 @@ ForeignAST::ForeignAST(Type t, const std::string& str)
 	_name = str;
 }
 
+// ---------------------------------------------------------------
+
+// Content-based comparison.
+bool ForeignAST::operator==(const Atom& other) const
+{
+	// If other points to this, then have equality.
+	if (this == &other) return true;
+
+	// Let Link do most of the work.
+	bool linkeq = Link::operator==(other);
+	if (not linkeq) return false;
+
+	// Names must match.
+	return 0 == _name.compare(ForeignASTCast(other.get_handle())->_name);
+}
+
+// ---------------------------------------------------------------
+
+ContentHash ForeignAST::compute_hash() const
+{
+   ContentHash hsh = Link::compute_hash();
+	hsh += std::hash<std::string>()(_name);
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	return hsh;
+}
+
 /* ===================== END OF FILE ===================== */
