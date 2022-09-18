@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+
 #include "DatalogAST.h"
 
 using namespace opencog;
@@ -60,6 +63,7 @@ void DatalogAST::parse(const std::string& sexpr)
 	{
 		Handle h(get_next_expr(sexpr, l, r));
 		_outgoing.emplace_back(h);
+printf("duuude made %s\n", h->to_short_string().c_str());
 	}
 }
 
@@ -74,20 +78,24 @@ Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
 	r = sexpr.find_first_of("( \t\n", l+1);
-	const std::string& pred = sexpr.substr(l, r-l);
-printf("duuude got pred >>%s<<\n", pred.c_str());
+	const std::string& spred = sexpr.substr(l, r-l);
+printf("duuude got pred >>%s<<\n", spred.c_str());
+	Handle pred = createNode(PREDICATE_NODE, std::move(spred));
 
-	l = sexpr.find_first_not_of(" \t\n", l);
+	l = sexpr.find_first_not_of(" \t\n", r);
 	if (std::string::npos == l or '(' != sexpr[l])
 		throw SyntaxException(TRACE_INFO, "Expecting open-paren");
 
 	l++; // step past open paren
+
+	HandleSeq clist;
 	while (std::string::npos != l and '.' != sexpr[l])
 	{
 		r = sexpr.find_first_of(",) \t\n", l);
 		const std::string& cept = sexpr.substr(l, r-l);
 printf("duuude got concept >>%s<<\n", cept.c_str());
 
+		clist.emplace_back(createNode(CONCEPT_NODE, cept));
 		if (')' == sexpr[r]) break;
 		l = sexpr.find_first_not_of(", \t\n", r);
 	}
@@ -96,8 +104,12 @@ printf("duuude got concept >>%s<<\n", cept.c_str());
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
 
+	l++;
 	r = sexpr.find_first_not_of(" \t\n", l);
-	return Handle();
+
+	Handle evl = createLink(EVALUATION_LINK,
+		pred, createLink(std::move(clist), LIST_LINK));
+	return evl;
 }
 
 // ---------------------------------------------------------------
