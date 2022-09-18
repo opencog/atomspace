@@ -42,7 +42,6 @@ class DatalogAST : public ForeignAST
 
 protected:
 	void parse(const std::string&);
-	virtual Handle next_expr(const std::string&, size_t& l, size_t& r);
 
 public:
 	DatalogAST(Type);
