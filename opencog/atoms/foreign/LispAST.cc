@@ -55,22 +55,6 @@ LispAST::LispAST(const std::string& sexpr)
 }
 
 // ---------------------------------------------------------------
-
-// Content-based comparison.
-bool LispAST::operator==(const Atom& other) const
-{
-	// If other points to this, then have equality.
-	if (this == &other) return true;
-
-	// Let Link do most of the work.
-	bool linkeq = Link::operator==(other);
-	if (not linkeq) return false;
-
-	// Names must match.
-	return 0 == _name.compare(LispASTCast(other.get_handle())->_name);
-}
-
-// ---------------------------------------------------------------
 // Custom factory, because its a hermaphrodite. The ForgeinAST will
 // pass us a string, behaving like a node, which we parse into an
 // expression tree.
