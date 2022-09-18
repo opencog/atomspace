@@ -31,8 +31,8 @@ namespace opencog
  *  @{
  */
 
-/// The DatalogAST holds a tinygeneric abstract syntax trees, printed as
-/// s-expressions.
+/// The DatalogAST holds a tiny subset of Prolog, some (unspecified)
+/// subset of Datalog, i.e. simple assertions.
 ///
 class DatalogAST : public ForeignAST
 {
