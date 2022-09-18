@@ -984,6 +984,9 @@ SEXPR_AST <- FOREIGN_AST
 // Storge for LISP-style, quasi-MeTTa-compatible expressions
 LISP_AST <- SEXPR_AST
 
+// Storage for DataLog subset of Prolog
+DATALOG_AST <- FOREIGN_AST
+
 // Storage for JSON.
 JSON_AST <- FOREIGN_AST
 
