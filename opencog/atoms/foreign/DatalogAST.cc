@@ -65,12 +65,38 @@ void DatalogAST::parse(const std::string& sexpr)
 
 // ---------------------------------------------------------------
 
+// Parse expressions such as
+// likes(John, Mary).
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
+	r = sexpr.find_first_of("( \t\n", l+1);
+	const std::string& pred = sexpr.substr(l, r-l);
+printf("duuude got pred >>%s<<\n", pred.c_str());
+
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if (std::string::npos == l or '(' != sexpr[l])
+		throw SyntaxException(TRACE_INFO, "Expecting open-paren");
+
+	l++; // step past open paren
+	while (std::string::npos != l and '.' != sexpr[l])
+	{
+		r = sexpr.find_first_of(",) \t\n", l);
+		const std::string& cept = sexpr.substr(l, r-l);
+printf("duuude got concept >>%s<<\n", cept.c_str());
+
+		if (')' == sexpr[r]) break;
+		l = sexpr.find_first_not_of(", \t\n", r);
+	}
+
+	l = sexpr.find_first_of(".", l);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
+
+	r = sexpr.find_first_not_of(" \t\n", l);
 	return Handle();
 }
 

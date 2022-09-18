@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
+	DatalogAST.cc
 	ForeignAST.cc
 	LispAST.cc
 	LispASTParser.cc
@@ -23,6 +24,7 @@ INSTALL (TARGETS foreign EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	DatalogAST.h
 	ForeignAST.h
 	LispAST.h
 	SexprAST.h
