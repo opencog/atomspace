@@ -49,6 +49,13 @@ We already have all the needed bits and parts (DefineLink, ArrowLink,
 SignatureLink, etc.) it just needs to have a pretty user API wrapped
 around it.
 
+Parsing
+-------
+This directory contains three or four different parsers. They are all
+ad-hoc, hand-written. It would probably be better to use yacc or lex
+or something like that, but I am too lazy to futz with that.
+Proper engineering would fix this.
+
 MeTTa
 -----
 One version of MeTTa uses a lisp-like notation. An attempt to explore
@@ -72,3 +79,11 @@ MeTTa emulation TODO:
   `(= A x); (= A y); !(P A A)` returns
   `{(P x x), (P x y), (P y x), (P y y)}`
   Cartesian product.
+
+
+Datalog
+-------
+Datalog is an assertion-only subset of Prolog. Expressions such as
+`:- cousin(Tom, Sue)` can be easily mapped to the Atomese expression
+`(Evaluation (Predicate "cousin") (List (Concept "Tom") (Concept "Sue")))`
+The code here just performs that mapping, and nothing more.

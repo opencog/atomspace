@@ -1,9 +1,9 @@
 /*
- * LispAST.cc
+ * DatalogAST.cc
  *
- * Copyright (C) 2021, 2022 Linas Vepstas
+ * Copyright (C) 2021 Linas Vepstas
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  September 2022
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  October 2021
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,44 +21,40 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LispAST.h"
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+
+#include "DatalogAST.h"
 
 using namespace opencog;
 
-void LispAST::init()
+void DatalogAST::init()
 {
-	if (not nameserver().isA(_type, LISP_AST))
+	if (not nameserver().isA(_type, DATALOG_AST))
 	{
 		const std::string& tname = nameserver().getTypeName(_type);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an LispAST, got %s", tname.c_str());
+			"Expecting an DatalogAST, got %s", tname.c_str());
 	}
 }
 
-LispAST::LispAST(const HandleSeq&& oset, Type t)
-	: SexprAST(std::move(oset), t)
+DatalogAST::DatalogAST(const HandleSeq&& oset, Type t)
+	: ForeignAST(std::move(oset), t)
 {
 	init();
 }
 
-LispAST::LispAST(const HandleSeq&& oset, const std::string&& sexpr)
-	: SexprAST(std::move(oset), LISP_AST)
+DatalogAST::DatalogAST(const HandleSeq&& oset, const std::string&& sexpr)
+	: ForeignAST(std::move(oset), DATALOG_AST)
 {
 	init();
 	_name = sexpr;
 }
 
-LispAST::LispAST(const std::string& sexpr)
-	: SexprAST(LISP_AST)
+DatalogAST::DatalogAST(const std::string& sexpr)
+	: ForeignAST(DATALOG_AST)
 {
-	SexprAST::parse(sexpr);
-
-	// Parser fails to wrap simple tokens. Try again.
-	if (0 == _outgoing.size())
-	{
-		size_t l=0, r=0;
-		_outgoing.emplace_back(next_expr(_name, l, r));
-	}
+	parse(sexpr);
 }
 
 // ---------------------------------------------------------------
@@ -66,23 +62,23 @@ LispAST::LispAST(const std::string& sexpr)
 // pass us a string, behaving like a node, which we parse into an
 // expression tree.
 
-Handle LispAST::factory(const Handle& base)
+Handle DatalogAST::factory(const Handle& base)
 {
 	/* If it's castable, nothing to do. */
-	if (LispASTCast(base)) return base;
+	if (DatalogASTCast(base)) return base;
 
 	if (0 == base->get_arity())
-		return HandleCast(createLispAST(std::move(base->get_name())));
+		return HandleCast(createDatalogAST(std::move(base->get_name())));
 
-	return HandleCast(createLispAST(
+	return HandleCast(createDatalogAST(
 		std::move(base->getOutgoingSet()),
-		std::move(prt_metta(base))));
+		std::move(prt_datalog(base))));
 }
 
 /* This runs when the shared lib is loaded. */
-static __attribute__ ((constructor)) void init_lispast_factory(void)
+static __attribute__ ((constructor)) void init_sexprast_factory(void)
 {
-	classserver().addFactory(LISP_AST, &LispAST::factory);
+	classserver().addFactory(DATALOG_AST, &DatalogAST::factory);
 }
 
 /* ===================== END OF FILE ===================== */
