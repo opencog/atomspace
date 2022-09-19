@@ -67,7 +67,7 @@ static Handle make_tok(const std::string& tok)
 // likes(john, mary) or food(pizza)
 // but also fragments of clauses, such as
 // likes(X,Y)
-Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
+static Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
@@ -123,13 +123,39 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 }
 
 // ---------------------------------------------------------------
+//
+// Stub for handling queries.
+// There are several basic types:
+// 1) ?- likes(alice,john).
+//    Return true of false; tests for presence. (SatisfactionLink) Awkward!
+// 2) ?- likes(alice, _).
+//    Return true of false;, alice likes someone, but its indeterminate.
+// 3) ?- likes(alice, Who).
+//    Return grounding of Who. Standard GetLink.
+// 4) Unification, chaining, ... etc.
+
+static Handle formulate_query(const std::string& sexpr, size_t& l, size_t &r)
+{
+	throw SyntaxException(TRACE_INFO, "Queries are not (yet) supported!");
+}
+
+// ---------------------------------------------------------------
 // Parse clauses such as
 // likes(john, mary).
 // or
-// child(X,Y) : parent(Y,X).
+// child(X,Y) :- parent(Y,X).
 // Clauses must be terminated by a period.
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
+	l = sexpr.find_first_not_of(" \t\n", l);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+
+	// Maybe it's a query?
+	if ('?' == sexpr[l])
+		return formulate_query(sexpr, l, r);
+
+	// Not a query. Get first part of clause.
 	Handle fac = get_fact(sexpr, l, r);
 
 	if (std::string::npos == l)
@@ -145,6 +171,7 @@ Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 
 	l += 2;
 
+	// Loop over conjunctions.
 	HandleSeq premis;
 	while (std::string::npos != l)
 	{
@@ -158,9 +185,11 @@ Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 		l++;
 	}
 
+	// Not a conjunction, just a single term.
 	if (1 == premis.size())
 		return HandleCast(createLink(IMPLICATION_LINK, premis[0], fac));
 
+	// Conjunction of multiple terms.
 	Handle imp = createLink(IMPLICATION_LINK,
 		createLink(std::move(premis), AND_LINK), fac);
 	return imp;
