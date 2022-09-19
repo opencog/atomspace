@@ -96,6 +96,7 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 		throw SyntaxException(TRACE_INFO, "Expecting close-paren");
 
 	l = sexpr.find_first_not_of(" \t\n", r+1);
+	r = std::string::npos;
 
 	Handle evl = createLink(EVALUATION_LINK,
 		pred, createLink(std::move(clist), LIST_LINK));
@@ -134,8 +135,6 @@ Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 			throw SyntaxException(TRACE_INFO, "Badly formed expression");
 		l++;
 	}
-
-	r = std::string::npos;
 
 	if (1 == premis.size())
 		return HandleCast(createLink(IMPLICATION_LINK, premis[0], fac));
