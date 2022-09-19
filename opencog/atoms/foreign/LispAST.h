@@ -54,7 +54,6 @@ public:
 	virtual std::string to_string(const std::string& indent) const;
 	virtual std::string to_short_string(const std::string& indent) const;
 
-	virtual bool operator==(const Atom&) const;
 	static Handle factory(const Handle&);
 };
 

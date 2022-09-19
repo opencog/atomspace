@@ -52,22 +52,13 @@ LispAST::LispAST(const std::string& sexpr)
 	: SexprAST(LISP_AST)
 {
 	parse(sexpr);
-}
 
-// ---------------------------------------------------------------
-
-// Content-based comparison.
-bool LispAST::operator==(const Atom& other) const
-{
-	// If other points to this, then have equality.
-	if (this == &other) return true;
-
-	// Let Link do most of the work.
-	bool linkeq = Link::operator==(other);
-	if (not linkeq) return false;
-
-	// Names must match.
-	return 0 == _name.compare(LispASTCast(other.get_handle())->_name);
+	// Parser fails to wrap simple tokens. Try again.
+	if (0 == _outgoing.size())
+	{
+		size_t l=0, r=0;
+		_outgoing.emplace_back(next_expr(_name, l, r));
+	}
 }
 
 // ---------------------------------------------------------------
