@@ -42,15 +42,19 @@ printf("duuude made %s\n", h->to_short_string().c_str());
 
 // ---------------------------------------------------------------
 
+// Lower-case tokens, or quoted tokens, are concept nodes.
+// Upper-case tokens are Variables.
 static Handle make_tok(const std::string& tok)
 {
-printf("duuude got concept >>%s<<\n", tok.c_str());
-	Handle h = createNode(CONCEPT_NODE, tok);
-	return h;
+	char c = tok[0];
+	if ('\'' == c or islower(c))
+		return HandleCast(createNode(CONCEPT_NODE, tok));
+
+	return HandleCast(createNode(VARIABLE_NODE, tok));
 }
 
 // Parse expressions such as
-// likes(John, Mary).
+// likes(john, mary).
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
@@ -71,7 +75,16 @@ printf("duuude got pred >>%s<<\n", spred.c_str());
 	HandleSeq clist;
 	while (std::string::npos != l and '.' != sexpr[l])
 	{
-		r = sexpr.find_first_of(",) \t\n", l);
+		// Matching quotes, if quoted.
+		if ('\'' == sexpr[l])
+		{
+			r = sexpr.find('\'', l+1);
+			if (std::string::npos != r) r++;
+			else
+				throw SyntaxException(TRACE_INFO, "Unbalanced quotes");
+		}
+		else
+			r = sexpr.find_first_of(",) \t\n", l);
 		const std::string& cept = sexpr.substr(l, r-l);
 		clist.emplace_back(make_tok(cept));
 

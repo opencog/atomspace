@@ -16,6 +16,14 @@
 
 (test-assert "basic eval link" (equal? ls le))
 
+; Shouldn't throw.
+(define ls2 (DatalogAst "likes(john, 'M foo, (()), barf, mary')."))
+(define le2 (DatalogAst (EvaluationLink (PredicateNode "likes")
+  (ListLink (ConceptNode "john") (ConceptNode "'M foo, (()), barf, mary'")))))
+
+(test-assert "quote eval link" (equal? ls2 le2))
+
+
 (test-end tname)
 
 (opencog-test-end)
