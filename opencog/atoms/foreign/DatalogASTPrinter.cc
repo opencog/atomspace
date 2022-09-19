@@ -61,8 +61,31 @@ std::string DatalogAST::prt_datalog(const Handle& h)
 		rv.pop_back();
 		rv += ").";
 	}
+	else if (IMPLICATION_LINK == t)
+	{
+		if (2 != h->get_arity())
+			throw SyntaxException(TRACE_INFO, "Bad arity for implication.");
+
+		const Handle& premis = h->getOutgoingAtom(0);
+		const Handle& conclu = h->getOutgoingAtom(1);
+		rv += prt_datalog(conclu);
+		rv += " :- ";
+
+		if (AND_LINK == premis->get_type())
+		{
+			for (const Handle& po : premis->getOutgoingSet())
+				rv += prt_datalog(po) + ", ";
+			rv.pop_back();
+			rv.pop_back();
+			rv += ")";
+		}
+		else
+			rv += prt_datalog(premis);
+
+		rv += ".";
+	}
 	else
-		rv += "foo";
+		throw SyntaxException(TRACE_INFO, "Unknown exprssion.");
 
 	return rv;
 }
