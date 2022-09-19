@@ -4,6 +4,8 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
 	DatalogAST.cc
+	DatalogASTParser.cc
+	DatalogASTPrinter.cc
 	ForeignAST.cc
 	LispAST.cc
 	LispASTParser.cc
