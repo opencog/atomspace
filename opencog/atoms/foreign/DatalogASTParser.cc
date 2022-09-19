@@ -38,6 +38,10 @@ void DatalogAST::parse(const std::string& sexpr)
 		_outgoing.emplace_back(h);
 printf("duuude made %s\n", h->to_short_string().c_str());
 	}
+	l = sexpr.find_first_of(".", l);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
+
 }
 
 // ---------------------------------------------------------------
@@ -53,9 +57,11 @@ static Handle make_tok(const std::string& tok)
 	return HandleCast(createNode(VARIABLE_NODE, tok));
 }
 
-// Parse expressions such as
-// likes(john, mary).
-Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
+// Parse factual assertions such as
+// likes(john, mary) or food(pizza)
+// but also fragments of clauses, such as
+// likes(X,Y)
+Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if (std::string::npos == l)
@@ -63,7 +69,6 @@ Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 
 	r = sexpr.find_first_of("( \t\n", l+1);
 	const std::string& spred = sexpr.substr(l, r-l);
-printf("duuude got pred >>%s<<\n", spred.c_str());
 	Handle pred = createNode(PREDICATE_NODE, std::move(spred));
 
 	l = sexpr.find_first_not_of(" \t\n", r);
@@ -73,7 +78,7 @@ printf("duuude got pred >>%s<<\n", spred.c_str());
 	l++; // step past open paren
 
 	HandleSeq clist;
-	while (std::string::npos != l and '.' != sexpr[l])
+	while (std::string::npos != l)
 	{
 		// Matching quotes, if quoted.
 		if ('\'' == sexpr[l])
@@ -91,17 +96,22 @@ printf("duuude got pred >>%s<<\n", spred.c_str());
 		if (')' == sexpr[r]) break;
 		l = sexpr.find_first_not_of(", \t\n", r);
 	}
-
-	l = sexpr.find_first_of(".", l);
 	if (std::string::npos == l)
-		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
+		throw SyntaxException(TRACE_INFO, "Expecting close-paren");
 
-	l++;
-	r = sexpr.find_first_not_of(" \t\n", l);
+	l = r;
 
 	Handle evl = createLink(EVALUATION_LINK,
 		pred, createLink(std::move(clist), LIST_LINK));
 	return evl;
+}
+
+// ---------------------------------------------------------------
+// Parse expressions such as
+// likes(john, mary) or food(pizza)
+Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
+{
+	return get_fact(sexpr, l, r);
 }
 
 /* ===================== END OF FILE ===================== */
