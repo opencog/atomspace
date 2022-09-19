@@ -28,15 +28,23 @@
 
 using namespace opencog;
 
+/// Parse one or more clauses, e.g.
+/// foo(X) :- bar(X). bing(bang,bong). food(pizza).
 void DatalogAST::parse(const std::string& sexpr)
 {
 	size_t l = 0;
 	size_t r = 0;
-	while (std::string::npos != r)
+	while (std::string::npos != l)
 	{
 		Handle h(get_next_expr(sexpr, l, r));
 		_outgoing.emplace_back(h);
 printf("duuude made %s\n", h->to_short_string().c_str());
+
+		if (std::string::npos == l)
+			throw SyntaxException(TRACE_INFO, "Expecting period at end.");
+
+		l++;
+		l = sexpr.find_first_not_of(" \t\n", l);
 	}
 }
 
@@ -115,8 +123,11 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 }
 
 // ---------------------------------------------------------------
-// Parse expressions such as
-// likes(john, mary) or food(pizza)
+// Parse clauses such as
+// likes(john, mary).
+// or
+// child(X,Y) : parent(Y,X).
+// Clauses must be terminated by a period.
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	Handle fac = get_fact(sexpr, l, r);
