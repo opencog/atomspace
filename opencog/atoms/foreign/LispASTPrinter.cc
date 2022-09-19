@@ -78,9 +78,11 @@ std::string LispAST::prt_metta(const Handle& h)
 			rv += prt_metta(h->getOutgoingAtom(0));
 			for (const Handle& ho: args->getOutgoingSet())
 				rv += prt_metta(ho);
-			return rv;
+
+			// Remove trailing blank space.
+			rv.pop_back();
+			return rv + ") ";
 		}
-		rv += "";
 	}
 	else if (LIST_LINK == t)
 		rv += "";
