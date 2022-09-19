@@ -38,10 +38,6 @@ void DatalogAST::parse(const std::string& sexpr)
 		_outgoing.emplace_back(h);
 printf("duuude made %s\n", h->to_short_string().c_str());
 	}
-	l = sexpr.find_first_of(".", l);
-	if (std::string::npos == l)
-		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
-
 }
 
 // ---------------------------------------------------------------
@@ -99,7 +95,7 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Expecting close-paren");
 
-	l = r;
+	l = sexpr.find_first_not_of(" \t\n", r+1);
 
 	Handle evl = createLink(EVALUATION_LINK,
 		pred, createLink(std::move(clist), LIST_LINK));
@@ -111,7 +107,42 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 // likes(john, mary) or food(pizza)
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-	return get_fact(sexpr, l, r);
+	Handle fac = get_fact(sexpr, l, r);
+
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Expecting terminating period");
+
+	// Just a single fact.
+	if ('.' == sexpr[l])
+		return fac;
+
+	// Is it a Horn clause?
+	if (sexpr.substr(l, 2) != ":-")
+		throw SyntaxException(TRACE_INFO, "Badly formed expression");
+
+	l += 2;
+
+	HandleSeq premis;
+	while (std::string::npos != l)
+	{
+		Handle fac = get_fact(sexpr, l, r);
+		premis.emplace_back(fac);
+		if (std::string::npos == l)
+			throw SyntaxException(TRACE_INFO, "Badly formed expression");
+		if ('.' == sexpr[l]) break;
+		if (',' != sexpr[l])
+			throw SyntaxException(TRACE_INFO, "Badly formed expression");
+		l++;
+	}
+
+	r = std::string::npos;
+
+	if (1 == premis.size())
+		return HandleCast(createLink(IMPLICATION_LINK, premis[0], fac));
+
+	Handle imp = createLink(IMPLICATION_LINK,
+		createLink(std::move(premis), AND_LINK), fac);
+	return imp;
 }
 
 /* ===================== END OF FILE ===================== */
