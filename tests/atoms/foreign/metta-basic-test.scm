@@ -16,7 +16,7 @@
 (define fact5 (cog-execute! (LispAst "(fact 5)")))
 
 ; Expect this
-(define ef5 "120")
+(define ef5 (LispAst "120"))
 
 (test-assert "factorial-five" (equal? fact5 ef5))
 
@@ -26,7 +26,7 @@
 ; Run it.
 (define fact6 (cog-execute! (LispAst "(fact foo)")))
 ; Expect this
-(define ef6 "720")
+(define ef6 (LispAst "720"))
 
 (test-assert "factorial-six" (equal? fact6 ef6))
 

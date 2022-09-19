@@ -52,6 +52,13 @@ LispAST::LispAST(const std::string& sexpr)
 	: SexprAST(LISP_AST)
 {
 	parse(sexpr);
+
+	// Parser fails to wrap simple tokens. Try again.
+	if (0 == _outgoing.size())
+	{
+		size_t l=0, r=0;
+		_outgoing.emplace_back(next_expr(_name, l, r));
+	}
 }
 
 // ---------------------------------------------------------------

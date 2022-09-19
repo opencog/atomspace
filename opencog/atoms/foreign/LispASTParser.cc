@@ -34,7 +34,7 @@ using namespace opencog;
 // ---------------------------------------------------------------
 
 /// Parse assorted built-in operators
-Handle make_atom(const std::string& fexp, const HandleSeq&& args)
+static Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 {
 	if (fexp == "+")
 		return HandleCast(createPlusLink(std::move(args)));
@@ -91,7 +91,7 @@ Handle make_tok(const std::string& tok)
 }
 
 // Extract a single number or string
-Handle get_tok(const std::string& sexpr, size_t& l, size_t &r)
+static Handle get_tok(const std::string& sexpr, size_t& l, size_t &r)
 {
 	l = sexpr.find_first_not_of(" \t\n", l);
 	if ('(' == sexpr[l])
@@ -109,7 +109,7 @@ Handle get_tok(const std::string& sexpr, size_t& l, size_t &r)
 
 /// Decode an s-expression, converting it to Atomese using
 /// Lisp-like MeTTa rules.
-Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
+static Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
 {
 // printf("Enter get_next %lu %lu >>%s<<\n", l, r, sexpr.substr(l).c_str());
 	l = sexpr.find_first_not_of(" \t\n", l);
@@ -147,13 +147,9 @@ Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
 		return make_atom(tok, std::move(oset));
 	}
 
-	// If its a literal, we are done.
+	// If its a literal, we are done. Just wrap the string.
 	r = sexpr.find_first_of(" \t\n)", l);
-	if (std::string::npos == r)
-		throw SyntaxException(TRACE_INFO, "Failed to find closing parenthesis");
-
-	// Found the closing paren; just wrap the string.
-	if (')' == sexpr[r])
+	if (std::string::npos == r or ')' == sexpr[r])
 	{
 		Handle htok = get_tok(sexpr, l, r);
 		r = std::string::npos;
@@ -175,7 +171,7 @@ Handle get_next(const std::string& sexpr, size_t& l, size_t &r)
 /// Parse named lambda expressions. Currently, only supports
 /// (= x y) expressions, where y is taken to be the definition of x.
 /// Here, x is assumed to be a function signature.
-Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
+static Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 {
 	if ('=' != sexpr[l])
 		throw SyntaxException(TRACE_INFO, "Not supported!");
@@ -245,12 +241,12 @@ Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 ///     fun can include the arithmetic ops, etc.
 Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
-	// Assume this is a defintion of some kind.
+	// Assume this is a definition of some kind.
 	if ('=' == sexpr[l])
 		return define_lambda(sexpr, l, r);
 
 	// Assume it is a function to be applied to args.
-	l--; // Backup to the open-paren.
+	if (0 < l) l--; // Backup to the open-paren.
 	return get_next(sexpr, l, r);
 }
 
