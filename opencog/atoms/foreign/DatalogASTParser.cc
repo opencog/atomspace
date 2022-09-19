@@ -42,6 +42,13 @@ printf("duuude made %s\n", h->to_short_string().c_str());
 
 // ---------------------------------------------------------------
 
+static Handle make_tok(const std::string& tok)
+{
+printf("duuude got concept >>%s<<\n", tok.c_str());
+	Handle h = createNode(CONCEPT_NODE, tok);
+	return h;
+}
+
 // Parse expressions such as
 // likes(John, Mary).
 Handle DatalogAST::get_next_expr(const std::string& sexpr, size_t& l, size_t &r)
@@ -66,9 +73,8 @@ printf("duuude got pred >>%s<<\n", spred.c_str());
 	{
 		r = sexpr.find_first_of(",) \t\n", l);
 		const std::string& cept = sexpr.substr(l, r-l);
-printf("duuude got concept >>%s<<\n", cept.c_str());
+		clist.emplace_back(make_tok(cept));
 
-		clist.emplace_back(createNode(CONCEPT_NODE, cept));
 		if (')' == sexpr[r]) break;
 		l = sexpr.find_first_not_of(", \t\n", r);
 	}

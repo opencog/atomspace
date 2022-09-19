@@ -72,7 +72,7 @@ static Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 		createLink(std::move(args), LIST_LINK));
 }
 
-Handle make_tok(const std::string& tok)
+static Handle make_tok(const std::string& tok)
 {
 	if ('$' == tok[0])
 		return createNode(VARIABLE_NODE, tok);
