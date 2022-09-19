@@ -44,6 +44,7 @@ is actually possible.
 
 * `sexpr-query.scm`         -- Working with s-expressions.
 * `metta-lisp.scm`          -- MeTTa emulation example.
+* `prolog-datalog.scm`      -- ProLog-compatible expressions.
 
 TODO
 ----
