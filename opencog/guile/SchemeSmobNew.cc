@@ -496,7 +496,11 @@ Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 	{
 		// It might be an embedded VariableNode.
 		Handle h(scm_to_handle(sexpr));
-		if (h) return h;
+		if (h)
+		{
+			HandleSeq oset({h});
+			return createForeignAST(std::move(oset), t);
+		}
 
 		scm_wrong_type_arg_msg("cog-new-ast", 2, sexpr,
 			"expecting symbol, string or Atom");
