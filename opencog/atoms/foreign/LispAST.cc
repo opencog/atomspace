@@ -51,7 +51,7 @@ LispAST::LispAST(const HandleSeq&& oset, const std::string&& sexpr)
 LispAST::LispAST(const std::string& sexpr)
 	: SexprAST(LISP_AST)
 {
-	parse(sexpr);
+	SexprAST::parse(sexpr);
 
 	// Parser fails to wrap simple tokens. Try again.
 	if (0 == _outgoing.size())
@@ -71,14 +71,12 @@ Handle LispAST::factory(const Handle& base)
 	/* If it's castable, nothing to do. */
 	if (LispASTCast(base)) return base;
 
-	if (0 < base->get_arity())
-	{
-		return HandleCast(createLispAST(
-			std::move(base->getOutgoingSet()),
-			std::move(prt_metta(base))));
-	}
+	if (0 == base->get_arity())
+		return HandleCast(createLispAST(std::move(base->get_name())));
 
-	return HandleCast(createLispAST(std::move(base->get_name())));
+	return HandleCast(createLispAST(
+		std::move(base->getOutgoingSet()),
+		std::move(prt_metta(base))));
 }
 
 /* This runs when the shared lib is loaded. */

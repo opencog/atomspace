@@ -44,9 +44,11 @@ DatalogAST::DatalogAST(const HandleSeq&& oset, Type t)
 	init();
 }
 
-DatalogAST::DatalogAST(Type t)
-	: ForeignAST(t)
+DatalogAST::DatalogAST(const HandleSeq&& oset, const std::string&& sexpr)
+	: ForeignAST(std::move(oset), DATALOG_AST)
 {
+	init();
+	_name = sexpr;
 }
 
 DatalogAST::DatalogAST(const std::string& sexpr)
@@ -114,6 +116,13 @@ printf("duuude got concept >>%s<<\n", cept.c_str());
 
 // ---------------------------------------------------------------
 
+std::string DatalogAST::prt_datalog(const Handle& h)
+{
+	return "foo";
+}
+
+// ---------------------------------------------------------------
+
 std::string DatalogAST::to_string(const std::string& indent) const
 {
 	if (0 == _outgoing.size())
@@ -162,10 +171,12 @@ Handle DatalogAST::factory(const Handle& base)
 	/* If it's castable, nothing to do. */
 	if (DatalogASTCast(base)) return base;
 
-	if (0 < base->get_arity())
-		return HandleCast(createDatalogAST(std::move(base->getOutgoingSet())));
+	if (0 == base->get_arity())
+		return HandleCast(createDatalogAST(std::move(base->get_name())));
 
-	return HandleCast(createDatalogAST(std::move(base->get_name())));
+	return HandleCast(createDatalogAST(
+		std::move(base->getOutgoingSet()),
+		std::move(prt_datalog(base))));
 }
 
 /* This runs when the shared lib is loaded. */

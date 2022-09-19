@@ -39,13 +39,14 @@ class DatalogAST : public ForeignAST
 	void init();
 
 	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
+	static std::string prt_datalog(const Handle&);
 
 protected:
 	void parse(const std::string&);
 
 public:
-	DatalogAST(Type);
 	DatalogAST(const HandleSeq&&, Type = DATALOG_AST);
+	DatalogAST(const HandleSeq&&, const std::string&&);
 	DatalogAST(const DatalogAST&) = delete;
 	DatalogAST& operator=(const DatalogAST&) = delete;
 
