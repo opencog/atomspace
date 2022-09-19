@@ -47,10 +47,12 @@ printf("duuude made %s\n", h->to_short_string().c_str());
 static Handle make_tok(const std::string& tok)
 {
 	char c = tok[0];
-	if ('\'' == c or islower(c))
-		return HandleCast(createNode(CONCEPT_NODE, tok));
 
-	return HandleCast(createNode(VARIABLE_NODE, tok));
+	// Variables begin with an underscore, or uppercase letter.
+	if ('_' == c or isupper(c))
+		return HandleCast(createNode(VARIABLE_NODE, tok));
+
+	return HandleCast(createNode(CONCEPT_NODE, tok));
 }
 
 // Parse factual assertions such as
