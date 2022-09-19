@@ -118,7 +118,39 @@ printf("duuude got concept >>%s<<\n", cept.c_str());
 
 std::string DatalogAST::prt_datalog(const Handle& h)
 {
-	return "foo";
+	Type t = h->get_type();
+	if (h->is_node())
+		return h->get_name();
+
+	std::string rv = "";
+	if (DATALOG_AST == t)
+	{
+		rv += "(DatalogAst \"";
+		for (const Handle& ho: h->getOutgoingSet())
+			rv += prt_datalog(ho);
+		rv += "\")";
+	}
+	else if (EVALUATION_LINK == t)
+	{
+		// First comes a PredicateNode
+		rv += prt_datalog(h->getOutgoingAtom(0));
+
+		rv += "(";
+		// Next comes a ListLink
+		const Handle& ll = h->getOutgoingAtom(1);
+		for (const Handle& ho : ll->getOutgoingSet())
+		{
+			rv += prt_datalog(ho);
+			rv += ", ";
+		}
+		rv.pop_back();
+		rv.pop_back();
+		rv += ").";
+	}
+	else
+		rv += "foo";
+
+	return rv;
 }
 
 // ---------------------------------------------------------------
@@ -138,26 +170,22 @@ std::string DatalogAST::to_string(const std::string& indent) const
 
 std::string DatalogAST::to_short_string(const std::string& indent) const
 {
-	if (0 == _outgoing.size())
-	{
-		if (0 != indent.size()) return _name;
+	if (0 == indent.size())
+		return _name + "\n" + to_short_string(";") + "\n";
 
-		return _name + "\n" + to_string(";") + "\n";
-	}
+	// Debugging print
+	if (0 == _outgoing.size()) // this should never happen
+		return _name + "XXX-borken";
 
-	std::string rv = "(";
+	std::string rv = "";
 	for (const Handle& h: _outgoing)
 	{
 		if (DATALOG_AST == h->get_type())
 			rv += h->to_short_string("xx") + " ";
 		else
-			rv += "(atomese " + h->to_short_string("") + ") ";
+			rv += indent + h->to_short_string(indent);
 	}
 
-	rv[rv.size()-1] = ')';
-
-	// Debugging print
-	if (0 == indent.size()) rv += "\n" + to_string(";") + "\n";
 	return rv;
 }
 

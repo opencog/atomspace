@@ -120,8 +120,8 @@ std::string LispAST::to_short_string(const std::string& indent) const
 		return _name + "\n" + to_short_string(";") + "\n";
 
 	// Debugging print
-	if (0 == _outgoing.size())
-		return _name;
+	if (0 == _outgoing.size()) // this should never happen!
+		return _name + "XXX-borken";
 
 	std::string rv = "";
 	for (const Handle& h: _outgoing)
