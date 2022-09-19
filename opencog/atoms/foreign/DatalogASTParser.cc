@@ -132,10 +132,22 @@ static Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 //    Return true of false;, alice likes someone, but its indeterminate.
 // 3) ?- likes(alice, Who).
 //    Return grounding of Who. Standard GetLink.
+//    Caution: this may require chaining to solve. Ugh.
 // 4) Unification, chaining, ... etc.
 
 static Handle formulate_query(const std::string& sexpr, size_t& l, size_t &r)
 {
+#if 0
+	// Skip past the ?- at the start.
+	l = sexpr.find_first_not_of(" \t\n", l+2);
+	if (std::string::npos == l)
+		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
+
+	// Lets see if we can come up with one of the simple cases.
+	// Looking for case 3.
+	Handle fac = get_fact(sexpr, l, r);
+#endif
+
 	throw SyntaxException(TRACE_INFO, "Queries are not (yet) supported!");
 }
 
