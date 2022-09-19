@@ -494,10 +494,11 @@ Handle SchemeSmob::h_from_ast(Type t, bool rec, SCM sexpr)
 	}
 	else
 	{
-		// It might be an embedded VariableNode.
+		// Just a single atom.
 		Handle h(scm_to_handle(sexpr));
 		if (h)
 		{
+			if (rec) return h;
 			HandleSeq oset({h});
 			return createForeignAST(std::move(oset), t);
 		}
@@ -534,7 +535,7 @@ SCM SchemeSmob::ss_new_ast (SCM stype, SCM sexpr)
 	// 2) The AtomSpace may be read-only.
 	try
 	{
-		// Create the AST. Unwrap singleton stringss, so they
+		// Create the AST. Unwrap singleton strings, so they
 		// don't get confused by recursive constructions.
 		Handle h;
 		if (scm_is_pair(sexpr) and
