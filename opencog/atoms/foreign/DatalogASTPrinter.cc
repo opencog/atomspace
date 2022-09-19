@@ -30,7 +30,7 @@ using namespace opencog;
 
 // ---------------------------------------------------------------
 
-std::string DatalogAST::prt_datalog(const Handle& h)
+std::string DatalogAST::prt_datalog(const Handle& h, bool rec)
 {
 	Type t = h->get_type();
 	if (h->is_node())
@@ -41,25 +41,27 @@ std::string DatalogAST::prt_datalog(const Handle& h)
 	{
 		rv += "(DatalogAst \"";
 		for (const Handle& ho: h->getOutgoingSet())
-			rv += prt_datalog(ho);
+			rv += prt_datalog(ho, false) + " ";
+		rv.pop_back();
 		rv += "\")";
 	}
 	else if (EVALUATION_LINK == t)
 	{
 		// First comes a PredicateNode
-		rv += prt_datalog(h->getOutgoingAtom(0));
+		rv += prt_datalog(h->getOutgoingAtom(0), true);
 
 		rv += "(";
 		// Next comes a ListLink
 		const Handle& ll = h->getOutgoingAtom(1);
 		for (const Handle& ho : ll->getOutgoingSet())
 		{
-			rv += prt_datalog(ho);
+			rv += prt_datalog(ho, true);
 			rv += ", ";
 		}
 		rv.pop_back();
 		rv.pop_back();
-		rv += ").";
+		rv += ")";
+		if (not rec) rv += ".";
 	}
 	else if (IMPLICATION_LINK == t)
 	{
@@ -68,19 +70,19 @@ std::string DatalogAST::prt_datalog(const Handle& h)
 
 		const Handle& premis = h->getOutgoingAtom(0);
 		const Handle& conclu = h->getOutgoingAtom(1);
-		rv += prt_datalog(conclu);
+		rv += prt_datalog(conclu, true);
 		rv += " :- ";
 
 		if (AND_LINK == premis->get_type())
 		{
 			for (const Handle& po : premis->getOutgoingSet())
-				rv += prt_datalog(po) + ", ";
+				rv += prt_datalog(po, true) + ", ";
 			rv.pop_back();
 			rv.pop_back();
 			rv += ")";
 		}
 		else
-			rv += prt_datalog(premis);
+			rv += prt_datalog(premis, true);
 
 		rv += ".";
 	}
