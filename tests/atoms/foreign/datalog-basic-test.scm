@@ -9,10 +9,10 @@
 (define tname "datalog-basic-test")
 (test-begin tname)
 
-(define ls (DatalogAst "likes(John, Mary)."))
+(define ls (DatalogAst "likes(john, mary)."))
 (define le (DatalogAst (EvaluationLink
   (PredicateNode "likes")
-  (ListLink (ConceptNode "John") (ConceptNode "Mary")))))
+  (ListLink (ConceptNode "john") (ConceptNode "mary")))))
 
 (test-assert "basic eval link" (equal? ls le))
 
