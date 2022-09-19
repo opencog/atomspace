@@ -86,8 +86,17 @@ Handle get_fact(const std::string& sexpr, size_t& l, size_t &r)
 		}
 		else
 			r = sexpr.find_first_of(",) \t\n", l);
-		const std::string& cept = sexpr.substr(l, r-l);
-		clist.emplace_back(make_tok(cept));
+		const std::string& litrl = sexpr.substr(l, r-l);
+
+		if ('\'' == litrl[0] or std::string::npos == litrl.find('('))
+			clist.emplace_back(make_tok(litrl));
+		else
+		{
+			// The literal is yet another fact. Yuck.
+			// Go and nest them. (For now? Maybe fix later?)
+			clist.emplace_back(get_fact(sexpr, l, r));
+			r = l;
+		}
 
 		if (')' == sexpr[r]) break;
 		l = sexpr.find_first_not_of(", \t\n", r);
