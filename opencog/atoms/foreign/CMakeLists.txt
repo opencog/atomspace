@@ -4,8 +4,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
 	DatalogAST.cc
-	DatalogASTParser.cc
-	DatalogASTPrinter.cc
 	ForeignAST.cc
 	LispAST.cc
 	LispASTParser.cc
@@ -17,6 +15,7 @@ ADD_LIBRARY (foreign
 ADD_DEPENDENCIES(foreign opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(foreign
+	datalog
 	atombase
 	${COGUTIL_LIBRARY}
 )

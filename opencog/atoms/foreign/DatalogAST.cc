@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
+#include <opencog/persist/prolog/Prolog.h>
 
 #include "DatalogAST.h"
 
@@ -55,6 +54,53 @@ DatalogAST::DatalogAST(const std::string& sexpr)
 	: ForeignAST(DATALOG_AST)
 {
 	parse(sexpr);
+}
+
+// ---------------------------------------------------------------
+
+/// Parse one or more clauses, e.g.
+/// foo(X) :- bar(X). bing(bang,bong). food(pizza).
+void DatalogAST::parse(const std::string& sexpr)
+{
+	size_t l = 0;
+	size_t r = 0;
+	_outgoing = Prolog::parse(sexpr, l, r);
+}
+
+// ---------------------------------------------------------------
+
+std::string DatalogAST::to_string(const std::string& indent) const
+{
+	if (0 == _outgoing.size())
+		return indent + "(DatalogAst \"" + _name + "\") ; " + id_to_string();
+
+	std::string rv = indent + "(DatalogAst\n";
+	for (const Handle& h: _outgoing)
+		rv += h->to_string(indent + "  ") + "\n";
+
+	rv += indent + ") ; " + id_to_string();
+	return rv;
+}
+
+std::string DatalogAST::to_short_string(const std::string& indent) const
+{
+	if (0 == indent.size())
+		return _name + "\n" + to_short_string(";") + "\n";
+
+	// Debugging print
+	if (0 == _outgoing.size()) // this should never happen
+		return _name + "XXX-borken";
+
+	std::string rv = "";
+	for (const Handle& h: _outgoing)
+	{
+		if (DATALOG_AST == h->get_type())
+			rv += h->to_short_string("xx") + " ";
+		else
+			rv += indent + h->to_short_string(indent);
+	}
+
+	return rv;
 }
 
 // ---------------------------------------------------------------
