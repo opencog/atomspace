@@ -46,7 +46,7 @@ public:
 
 	// -------------------------------------------
 	// Encoding functions
-	static std::string encode_atom(const Handle&, bool=false);
+	static std::string prt_datalog(const Handle&, bool=false);
 };
 
 /** @}*/

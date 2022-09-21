@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
-#include "DatalogAST.h"
+#include "Prolog.h"
 
 using namespace opencog;
 

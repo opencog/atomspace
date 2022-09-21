@@ -2,6 +2,7 @@
 # Generic Datalog/prolog decoding.
 ADD_LIBRARY(datalog
 	DecodeProlog.cc
+	EncodeProlog.cc
 )
 
 ADD_DEPENDENCIES(datalog opencog_atom_types)

@@ -1,5 +1,5 @@
 /*
- * DatalogASTPrinter.cc
+ * EncodeProlog.cc
  *
  * Copyright (C) 2022 Linas Vepstas
  *
@@ -24,13 +24,13 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
-#include "DatalogAST.h"
+#include "Prolog.h"
 
 using namespace opencog;
 
 // ---------------------------------------------------------------
 
-std::string DatalogAST::prt_datalog(const Handle& h, bool rec)
+std::string Prolog::prt_datalog(const Handle& h, bool rec)
 {
 	Type t = h->get_type();
 	if (h->is_node())
@@ -88,42 +88,6 @@ std::string DatalogAST::prt_datalog(const Handle& h, bool rec)
 	}
 	else
 		throw SyntaxException(TRACE_INFO, "Unknown exprssion.");
-
-	return rv;
-}
-
-// ---------------------------------------------------------------
-
-std::string DatalogAST::to_string(const std::string& indent) const
-{
-	if (0 == _outgoing.size())
-		return indent + "(DatalogAst \"" + _name + "\") ; " + id_to_string();
-
-	std::string rv = indent + "(DatalogAst\n";
-	for (const Handle& h: _outgoing)
-		rv += h->to_string(indent + "  ") + "\n";
-
-	rv += indent + ") ; " + id_to_string();
-	return rv;
-}
-
-std::string DatalogAST::to_short_string(const std::string& indent) const
-{
-	if (0 == indent.size())
-		return _name + "\n" + to_short_string(";") + "\n";
-
-	// Debugging print
-	if (0 == _outgoing.size()) // this should never happen
-		return _name + "XXX-borken";
-
-	std::string rv = "";
-	for (const Handle& h: _outgoing)
-	{
-		if (DATALOG_AST == h->get_type())
-			rv += h->to_short_string("xx") + " ";
-		else
-			rv += indent + h->to_short_string(indent);
-	}
 
 	return rv;
 }
