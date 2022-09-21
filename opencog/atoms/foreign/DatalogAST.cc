@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
+#include <opencog/persist/prolog/Prolog.h>
 
 #include "DatalogAST.h"
 
@@ -63,6 +62,9 @@ DatalogAST::DatalogAST(const std::string& sexpr)
 /// foo(X) :- bar(X). bing(bang,bong). food(pizza).
 void DatalogAST::parse(const std::string& sexpr)
 {
+	size_t l = 0;
+	size_t r = 0;
+	_outgoing = Prolog::parse(sexpr, l, r);
 }
 
 // ---------------------------------------------------------------

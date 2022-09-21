@@ -38,7 +38,6 @@ class DatalogAST : public ForeignAST
 {
 	void init();
 
-	static Handle get_next_expr(const std::string&, size_t& l, size_t& r);
 	static std::string prt_datalog(const Handle&, bool=false);
 
 protected:
