@@ -38,8 +38,6 @@ class DatalogAST : public ForeignAST
 {
 	void init();
 
-	static std::string prt_datalog(const Handle&, bool=false);
-
 protected:
 	void parse(const std::string&);
 
