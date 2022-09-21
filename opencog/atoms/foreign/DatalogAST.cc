@@ -118,7 +118,7 @@ Handle DatalogAST::factory(const Handle& base)
 
 	return HandleCast(createDatalogAST(
 		std::move(base->getOutgoingSet()),
-		std::move(prt_datalog(base))));
+		std::move(Prolog::prt_datalog(base))));
 }
 
 /* This runs when the shared lib is loaded. */

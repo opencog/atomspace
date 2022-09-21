@@ -10,6 +10,10 @@ can be printed as prolog.
 The world "datalog" is used, because this is mostly just the declarative
 part of prolog, and not the chaining and evaluation part.
 
+The code works; see the
+[Prolog/Datalog example](../../../examples/foreign/prolog-datalog.scm)
+for a working demo.
+
 Mapping
 -------
 The mapping is very easy and obvious. The Prolog "fact"

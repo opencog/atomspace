@@ -38,6 +38,10 @@ Local subdirectories include:
               web applications. Note, however, the `sexpr` interface
               is superior for performance and function.
 
+* metta    -- Import and export fragments of MeTTa as Atomese. This
+              provides only a fragment of MeTTa, currently consisting
+              only of function declarations.
+
 * prolog   -- Import and export fragments of prolog (datalog) as
               Atomese. This presumes only the simplest, most basic
               mapping: `:- siblings(jack, jill).` becomes

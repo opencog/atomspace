@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/persist/metta/MeTTa.h>
 #include "LispAST.h"
 
 using namespace opencog;
@@ -61,6 +62,47 @@ LispAST::LispAST(const std::string& sexpr)
 	}
 }
 
+Handle LispAST::next_expr(const std::string& expr, size_t& l, size_t& r)
+{
+	return MeTTa::next_expr(expr, l, r);
+}
+
+// ---------------------------------------------------------------
+
+std::string LispAST::to_string(const std::string& indent) const
+{
+	if (0 == _outgoing.size())
+		return indent + "(LispAst \"" + _name + "\") ; " + id_to_string();
+
+	std::string rv = indent + "(LispAst\n";
+	for (const Handle& h: _outgoing)
+		rv += h->to_string(indent + "  ") + "\n";
+
+	rv += indent + ") ; " + id_to_string();
+	return rv;
+}
+
+std::string LispAST::to_short_string(const std::string& indent) const
+{
+	if (0 == indent.size())
+		return _name + "\n" + to_short_string(";") + "\n";
+
+	// Debugging print
+	if (0 == _outgoing.size()) // this should never happen!
+		return _name + "XXX-borken";
+
+	std::string rv = "";
+	for (const Handle& h: _outgoing)
+	{
+		if (LISP_AST == h->get_type())
+			rv += h->to_short_string("xx") + " ";
+		else
+			rv += indent + h->to_short_string(indent);
+	}
+
+	return rv;
+}
+
 // ---------------------------------------------------------------
 // Custom factory, because its a hermaphrodite. The ForgeinAST will
 // pass us a string, behaving like a node, which we parse into an
@@ -76,7 +118,7 @@ Handle LispAST::factory(const Handle& base)
 
 	return HandleCast(createLispAST(
 		std::move(base->getOutgoingSet()),
-		std::move(prt_metta(base))));
+		std::move(MeTTa::prt_metta(base))));
 }
 
 /* This runs when the shared lib is loaded. */
