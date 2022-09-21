@@ -2,6 +2,7 @@
 # Generic MeTTa encoding/decoding.
 ADD_LIBRARY(metta
 	DecodeMeTTa.cc
+	EncodeMeTTa.cc
 )
 
 ADD_DEPENDENCIES(metta opencog_atom_types)

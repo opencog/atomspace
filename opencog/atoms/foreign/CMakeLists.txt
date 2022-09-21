@@ -6,7 +6,6 @@ ADD_LIBRARY (foreign
 	DatalogAST.cc
 	ForeignAST.cc
 	LispAST.cc
-	LispASTPrinter.cc
 	SexprAST.cc
 )
 
