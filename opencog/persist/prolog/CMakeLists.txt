@@ -1,31 +1,25 @@
 
-# Generic S-expression decoding.
-ADD_LIBRARY (sexpr
-	AtomSexpr.cc
-	Commands.cc
-	FrameSexpr.cc
-	SexprEval.cc
-	ValueSexpr.cc
+# Generic Datalog/prolog decoding.
+ADD_LIBRARY(datalog
+	DecodeProlog.cc
 )
 
-ADD_DEPENDENCIES(sexpr opencog_atom_types)
+ADD_DEPENDENCIES(datalog opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(sexpr
+TARGET_LINK_LIBRARIES(datalog
 	atomspace
 	execution
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS sexpr EXPORT AtomSpaceTargets
+INSTALL (TARGETS datalog EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
-	Commands.h
-	Sexpr.h
-	SexprEval.h
-	DESTINATION "include/opencog/persist/sexpr"
+	Prolog.h
+	DESTINATION "include/opencog/persist/prolog"
 )
 
 # -------------------------------

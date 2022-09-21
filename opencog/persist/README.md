@@ -38,6 +38,13 @@ Local subdirectories include:
               web applications. Note, however, the `sexpr` interface
               is superior for performance and function.
 
+* prolog   -- Import and export fragments of prolog (datalog) as
+              Atomese. This presumes only the simplest, most basic
+              mapping: `:- siblings(jack, jill).` becomes
+              `(Evaluation (Predicate "siblings") (List (Concept "jack") (Concept "jill")))`
+              This is just enough to encode prolog facts and Horn
+              clauses as Atomese.
+
 * sexpr    -- Read and write Atomese s-expressions as UTF-8 strings.
               Used both by the `FileStorageNode` and by `CogStorageNode`,
               which works in conjunction with the CogServer to provide
