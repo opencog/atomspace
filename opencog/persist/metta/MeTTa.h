@@ -44,7 +44,7 @@ public:
 
 	// -------------------------------------------
 	// Encoding functions
-	static std::string prt_datalog(const Handle&, bool=false);
+	static std::string prt_metta(const Handle&);
 };
 
 /** @}*/

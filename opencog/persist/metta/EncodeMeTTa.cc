@@ -21,7 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "LispAST.h"
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+
+#include "MeTTa.h"
 
 using namespace opencog;
 

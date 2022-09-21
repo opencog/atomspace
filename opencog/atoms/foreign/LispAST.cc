@@ -118,7 +118,7 @@ Handle LispAST::factory(const Handle& base)
 
 	return HandleCast(createLispAST(
 		std::move(base->getOutgoingSet()),
-		std::move(prt_metta(base))));
+		std::move(MeTTa::prt_metta(base))));
 }
 
 /* This runs when the shared lib is loaded. */
