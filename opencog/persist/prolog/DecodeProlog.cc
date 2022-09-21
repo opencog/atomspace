@@ -37,7 +37,6 @@ HandleSeq Prolog::parse(const std::string& sexpr, size_t& l, size_t& r)
 	{
 		Handle h(get_next_expr(sexpr, l, r));
 		clauses.emplace_back(h);
-printf("duuude made %s\n", h->to_short_string().c_str());
 
 		if (std::string::npos == l)
 			throw SyntaxException(TRACE_INFO, "Expecting period at end.");
