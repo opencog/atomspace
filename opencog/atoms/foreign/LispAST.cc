@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/persist/metta/MeTTa.h>
 #include "LispAST.h"
 
 using namespace opencog;
@@ -59,6 +60,11 @@ LispAST::LispAST(const std::string& sexpr)
 		size_t l=0, r=0;
 		_outgoing.emplace_back(next_expr(_name, l, r));
 	}
+}
+
+Handle LispAST::next_expr(const std::string& expr, size_t& l, size_t& r)
+{
+	return MeTTa::next_expr(expr, l, r);
 }
 
 // ---------------------------------------------------------------

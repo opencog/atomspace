@@ -1,5 +1,5 @@
 /*
- * LispASTParser.cc
+ * DecodeMeTTa.cc
  *
  * Copyright (C) 2021, 2022 Linas Vepstas
  *
@@ -27,7 +27,7 @@
 #include <opencog/atoms/reduct/MinusLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/reduct/TimesLink.h>
-#include "LispAST.h"
+#include "MeTTa.h"
 
 using namespace opencog;
 
@@ -239,7 +239,7 @@ static Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 /// (= x y) where x is a function signature and y is the body.
 /// (fun arg) where fun is a previousy defined function, and arg the arg.
 ///     fun can include the arithmetic ops, etc.
-Handle LispAST::next_expr(const std::string& sexpr, size_t& l, size_t &r)
+Handle MeTTa::next_expr(const std::string& sexpr, size_t& l, size_t &r)
 {
 	// Assume this is a definition of some kind.
 	if ('=' == sexpr[l])

@@ -1,6 +1,6 @@
 /*
- * Prolog.h
- * Encoding and Decoding of subsets of Atomese as prolog (datalog).
+ * MeTTa.h
+ * Encoding and Decoding of subsets of Atomese as MeTTa.
  *
  * Copyright (C) 2020,2022 Linas Vepstas
  *
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PROLOG_ECODE_H
-#define _PROLOG_ECODE_H
+#ifndef _METTA_ECODE_H
+#define _METTA_ECODE_H
 
 #include <string>
 #include <opencog/atoms/base/Handle.h>
@@ -32,17 +32,15 @@ namespace opencog
  *  @{
  */
 
-class Prolog
+class MeTTa
 {
 public:
 
 	// -------------------------------------------
 	// API more suitable to very long, file-driven I/O.
-	static HandleSeq parse(const std::string&,
-                          size_t& l, size_t& r);
 
-	static Handle get_next_expr(const std::string&,
-                              size_t& l, size_t& r);
+	static Handle next_expr(const std::string&,
+                           size_t& l, size_t& r);
 
 	// -------------------------------------------
 	// Encoding functions
@@ -52,4 +50,4 @@ public:
 /** @}*/
 } // namespace opencog
 
-#endif // _PROLOG_ECODE_H
+#endif // _METTA_ECODE_H
