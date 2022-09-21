@@ -15,6 +15,7 @@ ADD_LIBRARY (foreign
 ADD_DEPENDENCIES(foreign opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(foreign
+	datalog
 	atombase
 	${COGUTIL_LIBRARY}
 )
