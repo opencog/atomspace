@@ -58,6 +58,14 @@ DatalogAST::DatalogAST(const std::string& sexpr)
 }
 
 // ---------------------------------------------------------------
+
+/// Parse one or more clauses, e.g.
+/// foo(X) :- bar(X). bing(bang,bong). food(pizza).
+void DatalogAST::parse(const std::string& sexpr)
+{
+}
+
+// ---------------------------------------------------------------
 // Custom factory, because its a hermaphrodite. The ForgeinAST will
 // pass us a string, behaving like a node, which we parse into an
 // expression tree.
