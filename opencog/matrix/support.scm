@@ -293,7 +293,8 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT 'get-count))
+	#:optional (GET-CNT 'get-count)
+	#:key (ID (LLOBJ 'id)))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -311,6 +312,15 @@
   This object provides per-row/per-column values for these quantities.
   The `make-central-compute` object has methods with similar or the
   same names; they provide the matrix-wide averages.
+
+  The location of where counts are fetched can be specified by passing
+  an optiona paramter, the name of the method providing counts. It
+  defaults to 'get-count. Thus, `(add-support-compute LLOBJ)` is
+  identical to `(add-support-compute LLOBJ 'get-count)`.
+
+  The location where results are stored can be controlled with the
+  parameter #:ID, which should be a string.  For example,
+  `(add-support-compute LLOBJ #:ID \"foo\")` stores results at `foo`.
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
@@ -383,7 +393,7 @@
   and returns a number is allowed.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(api-obj (add-support-api star-obj))
+			(api-obj (add-support-api star-obj ID))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
