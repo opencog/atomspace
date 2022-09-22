@@ -573,11 +573,10 @@
 					; negative values; we do want to work with those.
 					(define cnt (get-cnt ITM))
 					(when (not (eqv? 0 cnt))
-						(define abc (abs cnt))
 						(set! l0 (+ l0 1))
-						(set! l1 (+ l1 abc))
+						(set! l1 (+ l1 (abs cnt)))
 						(set! l2 (+ l2 (* cnt cnt)))
-						(set! lq (+ lq (sqrt abc)))))
+						(set! lq (+ lq (sqrt (abs cnt))))))
 				LIST)
 			(list l0 l1 l2 lq))
 
