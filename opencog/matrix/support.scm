@@ -502,7 +502,7 @@
 				(fold
 					(lambda (lopr sum)
 						(define cnt (get-cnt lopr))
-						(+ sum (expt cnt P)))
+						(if (valid? cnt) (+ sum (expt (abs cnt) P)) sum))
 					0
 					LIST))
 			(expt tot (/ 1.0 P)))
@@ -573,11 +573,8 @@
 			(define lq 0)
 			(for-each
 				(lambda (ITM)
-					; Missing matrix elements return a count of exact-zero.
-					; Some kinds of matrixes return float-point 0.0 or even
-					; negative values; we do want to work with those.
 					(define cnt (get-cnt ITM))
-					(when (not (eqv? 0 cnt))
+					(when (valid? cnt)
 						(set! l0 (+ l0 1))
 						(set! l1 (+ l1 (abs cnt)))
 						(set! l2 (+ l2 (* cnt cnt)))
