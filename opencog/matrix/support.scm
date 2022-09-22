@@ -399,13 +399,14 @@
 
 		; -------------
 		; Filter and return only pairs with non-zero count.
-		; Internal use only.
-		(define (non-zero-filter LIST)
-			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
-xxxxxx
+		; Internal use only. NB get-cnt returns exact zero when a
+		; matrix element is missing. Else it might return floating
+		; zero or even negative numbers, and we do wnat to handle those.
+		(define (not-absent? X) (not (eqv? 0 (get-cnt X))))
+		(define (non-zero-filter LIST) (filter not-absent? LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
-		; N(x,y) > 0.  Specifically, this returns the pairs which
+		; N(x,y) != 0.  Specifically, this returns the pairs which
 		; are holding the counts (and not the low-level pairs).
 		(define (get-left-support-set ITEM)
 			(non-zero-filter (star-obj 'left-stars ITEM)))
@@ -419,7 +420,7 @@ xxxxxx
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
+					(if (not-absent? lopr) (+ sum 1) sum))
 				0
 				LIST))
 
