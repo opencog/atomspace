@@ -169,6 +169,9 @@
 			(format #t "Elapsed time to load sims: ~A secs\n"
 				(elapsed-secs)))
 
+		(define (get-id)
+			(if ID ID (string-append (LLOBJ 'id) "-similarity")))
+
 		(define (help)
 			(format #t
 				(string-append
@@ -186,6 +189,7 @@
 		(lambda (message . args)
 			(case message
 				((name)           name)
+				((id)             (get-id))
 				((left-type)      item-type)
 				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
