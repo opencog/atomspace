@@ -402,7 +402,9 @@
 		; Internal use only. NB get-cnt returns exact zero when a
 		; matrix element is missing. Else it might return floating
 		; zero or even negative numbers, and we do wnat to handle those.
-		(define (not-absent? X) (not (eqv? 0 (get-cnt X))))
+		; Matrices with MI in them use -inf.0 to denote absence.
+		(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
+		(define (not-absent? PR) (valid? (get-cnt PR)))
 		(define (non-zero-filter LIST) (filter not-absent? LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
@@ -425,7 +427,8 @@
 				LIST))
 
 		; Should return a value exactly equal to
-		; (length (get-left-support ITEM))
+		;    (length (get-left-support ITEM))
+		; but more efficient cause list is not created.
 		; Equivalently to the l_0 norm (l_p norm for p=0)
 		(define (get-left-support-size ITEM)
 			(get-support-size (star-obj 'left-stars ITEM)))
@@ -437,7 +440,9 @@
 		; Return the sum of the counts on the list
 		(define (sum-count LIST)
 			(fold
-				(lambda (lopr sum) (+ sum (get-cnt lopr)))
+				(lambda (lopr sum)
+					(define v (get-cnt lopr))
+					(if (valid? v) (+ sum (abs v)) sum))
 				0
 				LIST))
 
