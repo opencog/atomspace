@@ -556,12 +556,16 @@
 			(define lq 0)
 			(for-each
 				(lambda (ITM)
+					; Missing matrix elements return a count of exact-zero.
+					; Some kinds of matrixes return float-point 0.0 or even
+					; negative values; we do want to work with those.
 					(define cnt (get-cnt ITM))
-					(when (< 0 cnt)
+					(when (not (eqv? 0 cnt))
+						(define abc (abs cnt))
 						(set! l0 (+ l0 1))
-						(set! l1 (+ l1 cnt))
+						(set! l1 (+ l1 abc))
 						(set! l2 (+ l2 (* cnt cnt)))
-						(set! lq (+ lq (sqrt cnt)))))
+						(set! lq (+ lq (sqrt abc)))))
 				LIST)
 			(list l0 l1 l2 lq))
 
