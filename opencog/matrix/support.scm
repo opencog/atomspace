@@ -53,7 +53,7 @@
 	; to hold exactly the same values. We duplicate that data here,
 	; because we want to avoid the overhead of the graph centrality
 	; computations that the report object does.
-	(define is-filtered? (and ID (LLOBJ 'filters?)))
+	(define is-filtered? (not (equal? ID (LLOBJ 'id))))
 	(define dim-key (PredicateNode
 		(if is-filtered?
 			(string-append "*-Supp Dimension Key " ID)
@@ -402,6 +402,7 @@
 		; Internal use only.
 		(define (non-zero-filter LIST)
 			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
+xxxxxx
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
 		; N(x,y) > 0.  Specifically, this returns the pairs which
