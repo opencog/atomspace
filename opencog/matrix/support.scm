@@ -461,7 +461,7 @@
 				(fold
 					(lambda (lopr sum)
 						(define cnt (get-cnt lopr))
-						(+ sum (* cnt cnt)))
+						(if (valid? cnt) (+ sum (* cnt cnt)) sum))
 					0
 					LIST))
 			(sqrt tot))
@@ -480,7 +480,7 @@
 				(fold
 					(lambda (lopr sum)
 						(define cnt (get-cnt lopr))
-						(+ sum (sqrt cnt)))
+						(if (valid? cnt) (+ sum (sqrt (abs cnt))) sum))
 					0
 					LIST))
 			(* tot tot))
