@@ -53,7 +53,7 @@
 	; to hold exactly the same values. We duplicate that data here,
 	; because we want to avoid the overhead of the graph centrality
 	; computations that the report object does.
-	(define is-filtered? (and ID (LLOBJ 'filters?)))
+	(define is-filtered? (not (equal? ID (LLOBJ 'id))))
 	(define dim-key (PredicateNode
 		(if is-filtered?
 			(string-append "*-Supp Dimension Key " ID)
@@ -293,7 +293,8 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT 'get-count))
+	#:optional (GET-CNT 'get-count)
+	#:key (ID (LLOBJ 'id)))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -311,6 +312,15 @@
   This object provides per-row/per-column values for these quantities.
   The `make-central-compute` object has methods with similar or the
   same names; they provide the matrix-wide averages.
+
+  The location of where counts are fetched can be specified by passing
+  an optiona paramter, the name of the method providing counts. It
+  defaults to 'get-count. Thus, `(add-support-compute LLOBJ)` is
+  identical to `(add-support-compute LLOBJ 'get-count)`.
+
+  The location where results are stored can be controlled with the
+  parameter #:ID, which should be a string.  For example,
+  `(add-support-compute LLOBJ #:ID \"foo\")` stores results at `foo`.
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
@@ -383,18 +393,20 @@
   and returns a number is allowed.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(api-obj (add-support-api star-obj))
+			(api-obj (add-support-api star-obj ID))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
 		; -------------
 		; Filter and return only pairs with non-zero count.
-		; Internal use only.
-		(define (non-zero-filter LIST)
-			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
+		; Internal use only. NB get-cnt returns exact zero when a
+		; matrix element is missing. Else it might return floating
+		; zero or even negative numbers, and we do wnat to handle those.
+		(define (not-absent? X) (not (eqv? 0 (get-cnt X))))
+		(define (non-zero-filter LIST) (filter not-absent? LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
-		; N(x,y) > 0.  Specifically, this returns the pairs which
+		; N(x,y) != 0.  Specifically, this returns the pairs which
 		; are holding the counts (and not the low-level pairs).
 		(define (get-left-support-set ITEM)
 			(non-zero-filter (star-obj 'left-stars ITEM)))
@@ -408,7 +420,7 @@
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
+					(if (not-absent? lopr) (+ sum 1) sum))
 				0
 				LIST))
 
@@ -556,12 +568,16 @@
 			(define lq 0)
 			(for-each
 				(lambda (ITM)
+					; Missing matrix elements return a count of exact-zero.
+					; Some kinds of matrixes return float-point 0.0 or even
+					; negative values; we do want to work with those.
 					(define cnt (get-cnt ITM))
-					(when (< 0 cnt)
+					(when (not (eqv? 0 cnt))
+						(define abc (abs cnt))
 						(set! l0 (+ l0 1))
-						(set! l1 (+ l1 cnt))
+						(set! l1 (+ l1 abc))
 						(set! l2 (+ l2 (* cnt cnt)))
-						(set! lq (+ lq (sqrt cnt)))))
+						(set! lq (+ lq (sqrt abc)))))
 				LIST)
 			(list l0 l1 l2 lq))
 

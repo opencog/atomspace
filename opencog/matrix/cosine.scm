@@ -121,11 +121,11 @@
 
   Overlap (Jaccard):
   ------------------
-  The overlap similarity simply counts how many common non-zero entries
+  The overlap similarity simply counts how many common non-absent entries
   are shared in common between two rows or columns.  That is, it is
 
-      left-overlap(y,z) = sum_x (0 < N(x,y)) * (0 < N(x,z)) /
-               sum_x (0 < N(x,y) + N(x,z))
+      left-overlap(y,z) = sum_x (0 != N(x,y)) * (0 != N(x,z)) /
+               sum_x (0 != N(x,y) + N(x,z))
 
   It is the same thing as the (unweighted) Jaccard similarity, where each
   point is given exactly the same weight (zero or non-zero). That is,
@@ -147,8 +147,9 @@
   element pair and returns a number is allowed.
 "
 
-	(define (either x y) (if (or (< 0.0 x) (< 0.0 y)) 1.0 0.0))
-	(define (both x y) (if (and (< 0.0 x) (< 0.0 y)) 1.0 0.0))
+	(define (not-absent? x) (not (eqv? 0 x)))
+	(define (either x y) (if (or (not-absent? x) (not-absent? y)) 1 0))
+	(define (both x y) (if (and (not-absent? x) (not-absent? y)) 1 0))
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj  (add-support-compute star-obj GET-CNT))
 			(prod-obj  (add-support-compute
@@ -277,7 +278,7 @@
 			; over the union, so we have to manually reject counts
 			; where one is zero (i.e. to get the intersection)
 			(define (denom na nb)
-				(if (and (< 0.0 na) (< 0.0 nb))
+				(if (and (not-absent? na) (not-absent? nb))
 					(/ 1.0 (weighted-max (/ 1.0 na) (/ 1.0 nb)))
 					0.0))
 
