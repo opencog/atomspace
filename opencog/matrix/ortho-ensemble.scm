@@ -38,6 +38,8 @@
 
 	(define (star-obj  (add-pair-stars LLOBJ))
 	(define (get-cnt x) (LLOBJ GET-CNT x))
+	(define mean 0)
+	(define sdev 1)
 
 	; Note that get-cnt returns exact zero when a matrix element is
 	; missing. Else it might return floating zero or even negative
@@ -46,7 +48,7 @@
 	(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
 
 	; Return a list holding the mean and RMS for the matrix.
-	(define (get-mean-rms)
+	(define (compute-mean-rms)
 		(define ntot 0)
 		(define sumc 0)
 		(define susq 0)
@@ -64,12 +66,20 @@
 		(list avg rms)
 	)
 
+	; Get the mean and rms
+	(define (get-mean-rms)
+		(if (eqv? mean 0)
+			(let ((ar (compute-mean-rms)))
+				(set! mean (first ar))
+				(set! sdev (second ar))))
+		(list mean sdev))
+
 	; -------------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((mean-rms)     (get-mean-rms)
-			(else           (apply LLOBJ (cons message args))))
+			((mean-rms)         (get-mean-rms)
+			(else               (apply LLOBJ (cons message args))))
 	))
 
 ; ---------------------------------------------------------------------
