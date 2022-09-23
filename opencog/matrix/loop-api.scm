@@ -120,10 +120,10 @@
    it is called only on the diagonals and the + entries.
 "
 	; Perform pair computations for one row.
-	(define (batch-simlist ITEM ITEM-LIST)
+	(define (batch-col-list ROW COL-LIST)
 		(for-each
-			(lambda (item) (FUN ITEM item))
-			ITEM-LIST))
+			(lambda (col) (FUN ROW col))
+			COL-LIST))
 
 	; Take the item list and trim it down.
 	(define nitems (length ITEMLI))
@@ -137,14 +137,14 @@
 
 	(define (do-one-row off)
 		(define pone (+ 1 off))
-		(batch-simlist (list-ref row-range off) (col-range pone)))
+		(batch-col-list (list-ref row-range off) (col-range pone)))
 
 	(define rpt-one-row
 		(make-progress-rpt do-one-row 10 #f
 			"Diag: Finished ~D rows in ~D secs (~5F/sec)\n"
 			60))
 
-	; Perform the similarity calculations, looping over the fat diagonal.
+	; Perform the calculations, looping over the fat diagonal.
 	(for-each (lambda (n) (rpt-one-row n)) (iota depth))
 )
 
