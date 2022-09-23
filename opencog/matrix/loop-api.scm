@@ -20,6 +20,9 @@
 ;   'left-basis and 'right-basis, providing a list of all rows and columns
 ;   'left-stars and 'right-stars, providing a list of all non-zero
 ;        entries in each row and column.
+;
+; XXX TODO -- need to merge this with the `batch-similarity` object.
+; The both do the same thing.
 
 ; ---------------------------------------------------------------------
 ;
@@ -80,6 +83,7 @@
 
 ; TODO: if the object provided row and column basis in ranked order,
 ; then we could pass the object, instead of the itemlist. Is it work it?
+; i.e. we could use the `batch-similarity` object ...
 
 (define-public (loop-upper-diagonal FUN ITEMLI START-RANK DEPTH)
 "
@@ -118,9 +122,12 @@
                - - @ +
                  - - @
 
-   The @ marks the diagonal, and the + and - mark the off-diagonal
-   entries that will be computed. Because FUN is assumed to be symmtric,
-   it is called only on the diagonals and the + entries.
+  The @ marks the diagonal, and the + and - mark the off-diagonal
+  entries that will be computed. Because FUN is assumed to be symmtric,
+  it is called only on the diagonals and the + entries.
+
+  See also:
+   * batch-similarity -- an object that provides methods for looping.
 "
 	; Perform pair computations for one row.
 	(define (batch-col-list ROW COL-LIST)

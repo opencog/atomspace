@@ -341,7 +341,9 @@ The `add-loop-api` class provides methods to loop over all non-zero
 pairs in the matrix, and invoke a function on them. There are two
 methods:  `for-each-pair`, which simply calls the function for each
 pair, and a `map-pair` method which returns a list of the results of
-calling the function on each pair.
+calling the function on each pair. XXX Should be merged with the
+`batch-similarity` object, which does a similar thing, and also with
+`loop-upper-diagonal`, which does diagonal looping.
 
 The `add-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
