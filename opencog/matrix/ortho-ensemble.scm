@@ -60,7 +60,7 @@
 			(star-obj 'get-all-elts))
 		(define avg (/ sumc ntot))
 		(define msq (/ susq ntot))
-		(define rms (sqrt (- susq (* avg avg))))
+		(define rms (sqrt (- msq (* avg avg))))
 		(list avg rms)
 	)
 
