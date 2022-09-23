@@ -13,6 +13,7 @@ ADD_GUILE_MODULE (FILES
 	group-similarity.scm
 	loop-api.scm
 	object-api.scm
+	ortho-ensemble.scm
 	progress.scm
 	report-api.scm
 	similarity-api.scm

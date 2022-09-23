@@ -225,6 +225,7 @@
 ;
 ; Extend the LLOBJ with additional methods to batch-compute similarity
 ; scores.
+; XXX TODO merge with loop-upper-diagonal in loop-api
 ;
 (define*-public (batch-similarity LLOBJ SIM-FUN
 	#:optional
@@ -297,6 +298,9 @@
      previously computed, then that value is returned. If not, then
      it is computed by calling `SIM-FUN A B` and storing the result
      with the `add-similarity-api` object.
+
+  See also:
+     * loop-upper-diagonal -- provides a simpler looping interface.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))

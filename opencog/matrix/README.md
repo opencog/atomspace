@@ -341,7 +341,9 @@ The `add-loop-api` class provides methods to loop over all non-zero
 pairs in the matrix, and invoke a function on them. There are two
 methods:  `for-each-pair`, which simply calls the function for each
 pair, and a `map-pair` method which returns a list of the results of
-calling the function on each pair.
+calling the function on each pair. XXX Should be merged with the
+`batch-similarity` object, which does a similar thing, and also with
+`loop-upper-diagonal`, which does diagonal looping.
 
 The `add-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
@@ -464,6 +466,18 @@ are tuples (pairs, triples, etc) of the underlying matrix. For example,
 one can ask for the matrix entry `(x, [y,z,w])`.  The value returned
 will be `(x, f((x,y), (x,z), (x,w)))` where the user-defined function
 `f` was used to create the `x` row.
+
+
+Gaussian Orthogonal Ensembles
+-----------------------------
+The `add-gaussian-ortho-compute` object will take a (non-sparse)
+symmetric matrix as input, and normalize it such that the mean of all
+of the matrix entries is zero, and the standared deviation is one.
+This will result in a matrix that is (approximately) gaussian
+orthogonal. The rows and columns can then be understood to be
+(approximately) uniformly distributed about the origin, and when
+normalized to unit length, can be understood to lie on the surface
+of a sphere $S_{N-1}$ where the original matrix is N x N dimensional.
 
 
 Principal Component Analysis
