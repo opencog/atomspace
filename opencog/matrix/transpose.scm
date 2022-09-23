@@ -75,25 +75,16 @@
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
-	(define (get-support KEY ATOM)
+	(define (get-stuff KEY ATOM REF)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM KEY) 0))
+			(lambda () (cog-value-ref (cog-value ATOM KEY) REF))
 			(lambda (key . args) 0)))
 
-	(define (get-count KEY ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM KEY) 1))
-			(lambda (key . args) 0)))
-
-	(define (get-length KEY ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM KEY) 2))
-			(lambda (key . args) 0)))
-
-	(define (get-amplitude KEY ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM KEY) 3))
-			(lambda (key . args) 0)))
+	(define (get-support KEY ATOM)   (get-stuff KEY ATOM 0))
+	(define (get-count KEY ATOM)     (get-stuff KEY ATOM 1))
+	(define (get-length KEY ATOM)    (get-stuff KEY ATOM 2))
+	(define (get-amplitude KEY ATOM) (get-stuff KEY ATOM 3))
+	(define (get-sum KEY ATOM)       (get-stuff KEY ATOM 4))
 
 	;--------
 	; The internal sum is over the left items, so hang on the left.
@@ -101,6 +92,9 @@
 	; other one.
 	(define (get-mtm-support ITEM)
 		(get-support mtm-key (LLOBJ 'left-wildcard ITEM)))
+
+	(define (get-mtm-sum ITEM)
+		(get-sum mtm-key (LLOBJ 'left-wildcard ITEM)))
 
 	(define (get-mtm-count ITEM)
 		(get-count mtm-key (LLOBJ 'left-wildcard ITEM)))
@@ -118,6 +112,9 @@
 	(define (get-mmt-support ITEM)
 		(get-support mmt-key (LLOBJ 'right-wildcard ITEM)))
 
+	(define (get-mmt-sum ITEM)
+		(get-sum mmt-key (LLOBJ 'right-wildcard ITEM)))
+
 	(define (get-mmt-count ITEM)
 		(get-count mmt-key (LLOBJ 'right-wildcard ITEM)))
 
@@ -134,6 +131,9 @@
 	(define (tot-mmt-support)
 		(get-support mmt-key (LLOBJ 'wild-wild)))
 
+	(define (tot-mmt-sum)
+		(get-sum mmt-key (LLOBJ 'wild-wild)))
+
 	(define (tot-mmt-count)
 		(get-count mmt-key (LLOBJ 'wild-wild)))
 
@@ -149,6 +149,9 @@
 	;--------
 	(define (tot-mtm-support)
 		(get-support mtm-key (LLOBJ 'wild-wild)))
+
+	(define (tot-mtm-sum)
+		(get-sum mtm-key (LLOBJ 'wild-wild)))
 
 	(define (tot-mtm-count)
 		(get-count mtm-key (LLOBJ 'wild-wild)))
@@ -168,6 +171,8 @@
 		(case message
 			((mtm-support)        (apply get-mtm-support args))
 			((mmt-support)        (apply get-mmt-support args))
+			((mtm-sum)            (apply get-mtm-sum args))
+			((mmt-sum)            (apply get-mmt-sum args))
 			((mtm-count)          (apply get-mtm-count args))
 			((mmt-count)          (apply get-mmt-count args))
 			((mtm-length)         (apply get-mtm-length args))
@@ -179,6 +184,8 @@
 
 			((total-mtm-support)  (tot-mtm-support))
 			((total-mmt-support)  (tot-mmt-support))
+			((total-mtm-sum)      (tot-mtm-sum))
+			((total-mmt-sum)      (tot-mmt-sum))
 			((total-mtm-count)    (tot-mtm-count))
 			((total-mmt-count)    (tot-mmt-count))
 			((total-mtm-length)   (tot-mtm-length))
