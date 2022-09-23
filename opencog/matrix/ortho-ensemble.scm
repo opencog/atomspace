@@ -36,7 +36,7 @@
   distributed on the unit sphere.
 "
 
-	(define (star-obj  (add-pair-stars LLOBJ))
+	(define star-obj (add-pair-stars LLOBJ))
 	(define (get-cnt x) (LLOBJ GET-CNT x))
 	(define mean 0)
 	(define sdev 1)
@@ -87,7 +87,7 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((mean-rms)         (get-mean-rms)
+			((mean-rms)         (get-mean-rms))
 			((get-count)        (apply get-renorm-count args))
 			(else               (apply LLOBJ (cons message args))))
 	))
