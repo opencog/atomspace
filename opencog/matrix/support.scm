@@ -338,34 +338,44 @@
   functional methods for 'left-type and 'right-type on it.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+  Let |N(x,y)| be the absolute value of N(x,y). Since N is a count, it
+  is usually absent (zero) or positive; however, this class is designed
+  to work with 'counts' that might be negative.
+
+  Let D(x,y) == 1 if N(x,y) != 0; otherwise D(x,y) == 0. The comparison
+  uses scheme(guile) exact-zero to determine if N(x,y) is absent; thus
+  floating-point 0.0 indicates that N is 'present', and is zero.
 
   The 'left-support-set method return all pairs (x,y), for fixed y, for
-  which N(x,y) > 0. The right-support-set is the same, for fixed x.
+  which N(x,y) != 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
   The 'left-support is the number of non-zero entries in a column.
   That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The 'left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
+  The 'left-sum is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
+
+  The 'left-count is the wild-card |N|(*,y) = sum_x |N(x,y)| for fixed y.
+  That is, for a given column y, this sums the absiolute value of all
+  counts in that column. This is the l_1 norm.
 
   The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
-  The 'left-amplitude is (sum_x N^0.5(x,y))^2 for fixed y.
+  The 'left-amplitude is (sum_x |N|^0.5(x,y))^2 for fixed y.
 
-  The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
+  The 'left-lp-norm is |sum_x |N|^p(x,y)|^1/p for fixed y.
 
   The 'total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
-  The 'total-count-left is N(*,*) = sum_x N(x,*)
+  The 'total-count-left is |N|(*,*) = sum_x |N|(x,*)
   That is, the total of all count entries in the matrix, with the
   left-sum being done last. It uses the cached, previously-computed
-  right-marginal sums N(x,*) to perform the computation, and so this
-  computation will fail, if the marginals have not been stored.
+  right-marginal sums |N|(x,*) to perform the computation, and so
+  this computation will fail, if the marginals have not been stored.
 
-  The 'total-count-right is N(*,*) = sum_y N(*,y)
+  The 'total-count-right is |N|(*,*) = sum_y |N|(*,y)
   Same as above, but does the right-sum last. Should yield the same
   answer, as above, except for rounding errors. Using this method can
   be more convenient, if the right-marginal sums are not available
@@ -438,6 +448,23 @@
 
 		; -------------
 		; Return the sum of the counts on the list
+		(define (sum-sum LIST)
+			(fold
+				(lambda (lopr sum)
+					(define v (get-cnt lopr))
+					(if (valid? v) (+ sum v) sum))
+				0
+				LIST))
+
+		(define (sum-left-sum ITEM)
+			(sum-sum (star-obj 'left-stars ITEM)))
+
+		(define (sum-right-sum ITEM)
+			(sum-sum (star-obj 'right-stars ITEM)))
+
+		; -------------
+		; Return the sum of the absolute value of the counts on
+		; the list. This is the l_1 norm.
 		(define (sum-count LIST)
 			(fold
 				(lambda (lopr sum)
@@ -702,6 +729,8 @@
 				((right-support-set)  (apply get-right-support-set args))
 				((left-support)       (apply get-left-support-size args))
 				((right-support)      (apply get-right-support-size args))
+				((left-sum)           (apply sum-left-sum args))
+				((right-sum)          (apply sum-right-sum args))
 				((left-count)         (apply sum-left-count args))
 				((right-count)        (apply sum-right-count args))
 				((left-length)        (apply sum-left-length args))
