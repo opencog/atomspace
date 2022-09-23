@@ -78,9 +78,12 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (loop-upper-diagonal LLOBJ FUN ITEMLI START-RANK DEPTH)
+; TODO: if the object provided row and column basis in ranked order,
+; then we could pass the object, instead of the itemlist. Is it work it?
+
+(define-public (loop-upper-diagonal FUN ITEMLI START-RANK DEPTH)
 "
-  loop-upper-diagonal LLOBJ FUN ITEMLI START-RANK DEPTH - call FUN on pairs.
+  loop-upper-diagonal FUN ITEMLI START-RANK DEPTH - call FUN on pairs.
 
   This implements a loop that calls FUN on pairs of items, chosen from
   ITEMLI, lying near the diagonal.  The width of the diagonal is DEPTH.
