@@ -86,8 +86,8 @@
 
 	(define norm-key (PredicateNode key-name))
 
-	(define (set-norms ATOM L0 L1 L2 LQ)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2 LQ)))
+	(define (set-norms ATOM L0 L1 L2 LQ SU)
+		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2 LQ SU)))
 
 	; -----------------
 	; Set the grand-total count. Use the CountTruthValue.
