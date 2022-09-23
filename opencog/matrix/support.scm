@@ -598,16 +598,18 @@
 			(define l1 0)
 			(define l2 0)
 			(define lq 0)
+			(define su 0)
 			(for-each
 				(lambda (ITM)
 					(define cnt (get-cnt ITM))
 					(when (valid? cnt)
 						(set! l0 (+ l0 1))
+						(set! su (+ su cnt))
 						(set! l1 (+ l1 (abs cnt)))
 						(set! l2 (+ l2 (* cnt cnt)))
 						(set! lq (+ lq (sqrt (abs cnt))))))
 				LIST)
-			(list l0 l1 l2 lq))
+			(list l0 l1 l2 lq su))
 
 		(define (sum-left-norms ITEM)
 			(sum-norms (star-obj 'left-stars ITEM)))
@@ -621,7 +623,8 @@
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-left-norms COL l0 l1 l2 lq))
+			(define su (fifth sums))
+			(api-obj 'set-left-norms COL l0 l1 l2 lq su))
 
 		(define (set-right-marginals ROW)
 			(define sums (sum-right-norms ROW))
@@ -629,7 +632,8 @@
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-right-norms ROW l0 l1 l2 lq))
+			(define su (fifth sums))
+			(api-obj 'set-right-norms ROW l0 l1 l2 lq su))
 
 		; ----------------------------------------------------
 
