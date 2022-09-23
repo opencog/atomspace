@@ -23,7 +23,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-gaussian-ortho-compute LLOBJ
+(define*-public (add-gaussian-ortho-api LLOBJ
 	#:optional (GET-CNT 'get-count)
 	#:key (ID (LLOBJ 'id)))
 "
