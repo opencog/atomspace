@@ -162,14 +162,14 @@
 
 		(define (set-mtm-q)
 			(if (not mtm-q)
-				(let ((tcr (sup-obj 'total-count-right)))
+				(let ((tcr (sup-obj 'total-sum-right)))
 					(set-mtm-total)
 					(set! mtm-q (- (log2 mtm-total (* tcr tcr))))))
 			mtm-q)
 
 		(define (set-mmt-q)
 			(if (not mmt-q)
-				(let ((tcl (sup-obj 'total-count-left)))
+				(let ((tcl (sup-obj 'total-sum-left)))
 					(set-mmt-total)
 					(set! mmt-q (- (log2 mmt-total (* tcl tcl))))))
 			mmt-q)
@@ -177,15 +177,15 @@
 		; -------------
 		; Return the vector product of column A and column B
 		; The prod-obj takes the product of pairs of matrix entries,
-		; and the 'left-count method just adds them up.  Equivalently,
+		; and the 'left-sum method just adds them up.  Equivalently,
 		; we could just sum over the left-stars ourselves, but this
 		; would take three lines of code instead of one.
 		(define (compute-left-product COL-A COL-B)
-			(prod-obj 'left-count (list COL-A COL-B)))
+			(prod-obj 'left-sum (list COL-A COL-B)))
 
 		; Return the vector product of row A and row B
 		(define (compute-right-product ROW-A ROW-B)
-			(prod-obj 'right-count (list ROW-A ROW-B)))
+			(prod-obj 'right-sum (list ROW-A ROW-B)))
 
 		; Same as above, but normalized, so that the value is the
 		; joint probability between COL-A and COL-B.
