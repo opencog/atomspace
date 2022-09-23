@@ -466,6 +466,18 @@ will be `(x, f((x,y), (x,z), (x,w)))` where the user-defined function
 `f` was used to create the `x` row.
 
 
+Gaussian Orthogonal Ensembles
+-----------------------------
+The `add-gaussian-ortho-compute` object will take a (non-sparse)
+symmetric matrix as input, and normalize it such that the mean of all
+of the matrix entries is zero, and the standared deviation is one.
+This will result in a matrix that is (approximately) gaussian
+orthogonal. The rows and columns can then be understood to be
+(approximately) uniformly distributed about the origin, and when
+normalized to unit length, can be understood to lie on the surface
+of a sphere $S_{N-1}$ where the original matrix is N x N dimensional.
+
+
 Principal Component Analysis
 ----------------------------
 A power iteration object is provided by the `make-power-iter-pca`

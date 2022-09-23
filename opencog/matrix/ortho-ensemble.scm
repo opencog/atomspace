@@ -1,5 +1,5 @@
 ;
-; ensemble.scm
+; ortho-ensemble.scm
 ;
 ; Define API for recasting symmetric matrices as Gaussian Orthogonal
 ; Ensembles. Given a (non-sparse) symmetric matix M, renormalize it so
@@ -35,3 +35,41 @@
   normalized to unit length, to be (approximately) uniformly
   distributed on the unit sphere.
 "
+
+	(define (star-obj  (add-pair-stars LLOBJ))
+	(define (get-cnt x) (LLOBJ GET-CNT x))
+
+	; Note that get-cnt returns exact zero when a matrix element is
+	; missing. Else it might return floating zero or even negative
+	; numbers, and we do wnat to handle those. Matrices with MI in
+	; them use -inf.0 to denote absence.
+	(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
+
+	; Return a list holding the mean and RMS for the matrix.
+	(define (get-mean-rms)
+		(define ntot 0)
+		(define sumc 0)
+		(define susq 0)
+		(for-each
+			(lambda (ITM)
+				(define cnt (get-cnt ITM))
+				(when (valid? cnt)
+					(set! ntot (+ ntot 1))
+					(set! sumc (+ sumc cnt))
+					(set! susq (+ susq (* cnt cnt)))))
+			(star-obj 'get-all-elts))
+		(define avg (/ sumc ntot))
+		(define msq (/ susq ntot))
+		(define rms (sqrt (- susq (* avg avg))))
+		(list avg rms)
+	)
+
+	; -------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((mean-rms)     (get-mean-rms)
+			(else           (apply LLOBJ (cons message args))))
+	))
+
+; ---------------------------------------------------------------------
