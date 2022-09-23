@@ -345,6 +345,7 @@
   Let D(x,y) == 1 if N(x,y) != 0; otherwise D(x,y) == 0. The comparison
   uses scheme(guile) exact-zero to determine if N(x,y) is absent; thus
   floating-point 0.0 indicates that N is 'present', and is zero.
+  A value of -inf.0 is also taken to mean 'absent'.
 
   The 'left-support-set method return all pairs (x,y), for fixed y, for
   which N(x,y) != 0. The right-support-set is the same, for fixed x.

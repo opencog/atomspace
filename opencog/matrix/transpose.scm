@@ -246,7 +246,9 @@
   methods. They take one argument: the column or row to be recomputed.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+  Let D(x,y) == 1 if N(x,y) != 0; otherwise D(x,y) == 0.  An 'absent'
+  matrix entry is one for which N is scheme/guile exact zero, or is
+  -inf.0. A floating-point value of 0.0 is taken as 'present'.
   Wild-cards are as usual:  e.g. D(x,*) = sum_y D(x,y), etc.
 
   Note that M^TM is symmetric, that is, (M^TM)^T = M^TM and so the
@@ -264,26 +266,33 @@
 
   The 'mmt-support is equal to sum_y D(x,y) D(*,y)
 
-  The 'mtm-count is the wild-card sum_x N(x,y) N(x,*) for fixed y.
-  The 'mmt-count is the wild-card sum_y N(x,y) N(*,y) for fixed x.
+  The 'mtm-sum is the wild-card sum_x N(x,y) N(x,*) for fixed y.
+  The 'mmt-sum is the wild-card sum_y N(x,y) N(*,y) for fixed x.
+
+  The 'mtm-count is the wild-card sum_x |N|(x,y) |N|(x,*) for fixed y.
+  The 'mmt-count is the wild-card sum_y |N|(x,y) |N|(*,y) for fixed x.
+  Here |N| is the absolute value of N.
 
   The 'mtm-length is the wild-card sum_x N^2(x,y) N^2(x,*) for fixed y.
   The 'mmt-length is the wild-card sum_y N^2(x,y) N^2(*,y) for fixed x.
 
-  The 'mtm-amplitude is the wild-card sum_x sqrt(N(x,y) N(x,*)) for fixed y.
-  The 'mmt-amplitude is the wild-card sum_y sqrt(N(x,y) N(*,y)) for fixed x.
+  The 'mtm-amplitude is the wild-card sum_x sqrt(|N|(x,y) |N|(x,*)) for fixed y.
+  The 'mmt-amplitude is the wild-card sum_y sqrt(|N|(x,y) |N|(*,y)) for fixed x.
 
   The 'total-mtm-support is sum_x D(x,*) D(x,*)
   The 'total-mmt-support is sum_y D(*,y) D(*,y)
 
-  The 'total-mtm-count is sum_x N(x,*) N(x,*)
-  The 'total-mmt-count is sum_y N(*,y) N(*,y)
+  The 'total-mtm-sum is sum_x N(x,*) N(x,*)
+  The 'total-mmt-sum is sum_y N(*,y) N(*,y)
+
+  The 'total-mtm-count is sum_x |N|(x,*) |N|(x,*)
+  The 'total-mmt-count is sum_y |N|(*,y) |N|(*,y)
 
   The 'total-mtm-length is sum_x N^2(x,*) N^2(x,*)
   The 'total-mmt-length is sum_y N^2(*,y) N^2(*,y)
 
-  The 'total-mtm-amplitude is sum_x sqrt(N(x,*) N(x,*))
-  The 'total-mmt-amplitude is sum_y sqrt(N(*,y) N(*,y))
+  The 'total-mtm-amplitude is sum_x sqrt(|N|(x,*) |N|(x,*))
+  The 'total-mmt-amplitude is sum_y sqrt(|N|(*,y) |N|(*,y))
 
   Here, the LLOBJ is expected to be an object, with valid counts
   and count-marginals.
