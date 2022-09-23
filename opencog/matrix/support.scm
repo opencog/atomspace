@@ -542,6 +542,17 @@
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
+		(define (compute-total-from-left METH)
+			(fold
+				;;; Use the cached value from METH
+				(lambda (item sum) (+ sum (api-obj METH item)))
+				0 (star-obj 'left-basis)))
+
+		(define (compute-total-from-right METH)
+			(fold
+				;;; Use the cached value from METH
+				(lambda (item sum) (+ sum (api-obj METH item)))
+				0 (star-obj 'right-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -552,12 +563,9 @@
 		; that the 'right-wild-count returns a valid value. This value
 		; should be the same as what 'compute-right-count would return.
 		(define (compute-total-count-from-left)
-			(fold
-				;;; Use the cached value, equiavalent to this:
-				;;; (lambda (item sum) (+ sum (sum-right-count item)))
-				(lambda (item sum) (+ sum (api-obj 'right-count item)))
-				0
-				(star-obj 'left-basis)))
+			;;; Use the cached value, equiavalent to this:
+			;;; (lambda (item sum) (+ sum (sum-right-count item)))
+			(compute-total-from-left 'right-count))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
@@ -566,26 +574,21 @@
 		; thus large differences indicate a bug; small differences are
 		; due to rounding errors.
 		(define (compute-total-count-from-right)
-			(fold
-				;;; (lambda (item sum) (+ sum (sum-left-count item)))
-				(lambda (item sum) (+ sum (api-obj 'left-count item)))
-				0
-				(star-obj 'right-basis)))
+			(compute-total-from-right 'left-count))
 
 		; Same as above, but for the support
 		(define (compute-total-support-from-left)
-			(fold
-				; (lambda (item sum) (+ sum (get-right-support-size item)))
-				(lambda (item sum) (+ sum (api-obj 'right-support item)))
-				0
-				(star-obj 'left-basis)))
+			(compute-total-from-left 'right-support))
 
 		(define (compute-total-support-from-right)
-			(fold
-				; (lambda (item sum) (+ sum (get-left-support-size item)))
-				(lambda (item sum) (+ sum (api-obj 'left-support item)))
-				0
-				(star-obj 'right-basis)))
+			(compute-total-from-right 'left-support))
+
+		; Same as above, but for the sum
+		(define (compute-total-sum-from-left)
+			(compute-total-from-left 'right-sum))
+
+		(define (compute-total-sum-from-right)
+			(compute-total-from-right 'left-sum))
 
 		; -------------
 		; Compute all l_0, l_0.5, l_1 and l_2 norms, attach them
@@ -748,6 +751,8 @@
 				((total-support-right) (compute-total-support-from-right))
 				((total-count-left)    (compute-total-count-from-left))
 				((total-count-right)   (compute-total-count-from-right))
+				((total-sum-left)      (compute-total-sum-from-left))
+				((total-sum-right)     (compute-total-sum-from-right))
 
 				((set-left-totals)     (do-left-totals))
 				((set-right-totals)    (do-right-totals))
