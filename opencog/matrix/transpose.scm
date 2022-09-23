@@ -196,6 +196,8 @@
 	 (GET-COUNT 'get-count)
 	 (LEFT-SUPPORT    'left-support)
 	 (RIGHT-SUPPORT   'right-support)
+	 (LEFT-SUM        'left-sum)
+	 (RIGHT-SUM       'right-sum)
 	 (LEFT-COUNT      'left-count)
 	 (RIGHT-COUNT     'right-count)
 	 (LEFT-LENGTH     'left-length)
@@ -296,12 +298,14 @@
   The other marginals default as follows, and are over-ridden as:
   D(*,y) == 'left-support    override with #:LEFT-SUPPORT
   D(x,*) == 'right-support   override with #:RIGHT-SUPPORT
-  N(*,y) == 'left-count      override with #:LEFT-COUNT
-  N(x,*) == 'right-count     override with #:RIGHT-COUNT
+  N(*,y) == 'left-sum        override with #:LEFT-SUM
+  N(x,*) == 'right-sum       override with #:RIGHT-SUM
+  |N|(*,y) == 'left-count    override with #:LEFT-COUNT
+  |N|(x,*) == 'right-count   override with #:RIGHT-COUNT
   sqrt(N^2(*,y)) == 'left-length   override with #:LEFT-LENGTH
   sqrt(N^2(x,*)) == 'right-length  override with #:RIGHT-LENGTH
-  (N^0.5(*,y))^2 == 'left-amplitude   override with #:LEFT-AMPLITUDE
-  (N^0.5(x,*))^2 == 'right-amplitude  override with #:RIGHT-AMPLITUDE
+  (|N|^0.5(*,y))^2 == 'left-amplitude   override with #:LEFT-AMPLITUDE
+  (|N|^0.5(x,*))^2 == 'right-amplitude  override with #:RIGHT-AMPLITUDE
 "
 
 	(let* ((star-obj     (add-pair-stars LLOBJ))
@@ -311,6 +315,8 @@
 			(get-pr-cnt    (lambda (l r) (get-cnt (LLOBJ 'get-pair l r))))
 			(left-support  (lambda (x) (support-obj LEFT-SUPPORT x)))
 			(right-support (lambda (x) (support-obj RIGHT-SUPPORT x)))
+			(left-sum      (lambda (x) (support-obj LEFT-SUM x)))
+			(right-sum     (lambda (x) (support-obj RIGHT-SUM x)))
 			(left-count    (lambda (x) (support-obj LEFT-COUNT x)))
 			(right-count   (lambda (x) (support-obj RIGHT-COUNT x)))
 			(left-length   (lambda (x) (support-obj LEFT-LENGTH x)))
@@ -324,13 +330,13 @@
 		; sum_x N(x,*) N(x,y) > 0.
 		(define (get-mtm-support-set ITEM)
 			(filter (lambda (ldual)
-				(< 0 (* (right-count ldual) (get-pr-cnt ldual ITEM))))
+				(< 0 (* (right-sum ldual) (get-pr-cnt ldual ITEM))))
 			(star-obj 'left-duals ITEM)))
 
 		; Same as above, but on the right.
 		(define (get-mmt-support-set ITEM)
 			(filter (lambda (rdual)
-				(< 0 (* (left-count rdual) (get-pr-cnt ITEM rdual))))
+				(< 0 (* (left-sum rdual) (get-pr-cnt ITEM rdual))))
 			(star-obj 'right-duals ITEM)))
 
 		; -------------
@@ -352,6 +358,18 @@
 
 		; -------------
 		; Sum counts
+		(define (sum-mmt-sum ITEM)
+			(fold (lambda (rdual sum)
+				(+ sum (* (left-sum rdual) (get-pr-cnt ITEM rdual)))) 0
+				(star-obj 'right-duals ITEM)))
+
+		(define (sum-mtm-sum ITEM)
+			(fold (lambda (ldual sum)
+				(+ sum (* (right-sum ldual) (get-pr-cnt ldual ITEM)))) 0
+				(star-obj 'left-duals ITEM)))
+
+		; -------------
+		; Sum l1 norms
 		(define (sum-mmt-count ITEM)
 			(fold (lambda (rdual sum)
 				(+ sum (* (left-count rdual) (get-pr-cnt ITEM rdual)))) 0
@@ -403,6 +421,11 @@
 				(lambda (item sum) (+ sum (api-obj 'mtm-support item))) 0
 				(star-obj 'right-basis)))
 
+		(define (compute-total-mtm-sum)
+			(fold
+				(lambda (item sum) (+ sum (api-obj 'mtm-sum item))) 0
+				(star-obj 'right-basis)))
+
 		(define (compute-total-mtm-count)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mtm-count item))) 0
@@ -427,6 +450,11 @@
 		(define (compute-total-mmt-support)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mmt-support item))) 0
+				(star-obj 'left-basis)))
+
+		(define (compute-total-mmt-sum)
+			(fold
+				(lambda (item sum) (+ sum (api-obj 'mmt-sum item))) 0
 				(star-obj 'left-basis)))
 
 		(define (compute-total-mmt-count)
@@ -457,61 +485,79 @@
 		; Equivalent to
 		;    (define l0 (sum-mtm-support ITEM))
 		;    (define l1 (sum-mtm-count ITEM))
+		;    (define su (sum-mtm-sum ITEM))
 		;    (define l2 (sum-mtm-length ITEM))
 		;    (define lq (sum-mtm-amplitude ITEM))
 		; but 4x faster by performing all four loops at the
 		; same time.
 		(define (set-mtm-marginals ITEM)
+			(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
 			(define l0 0.0)
 			(define l1 0.0)
+			(define su 0.0)
 			(define l2 0.0)
 			(define lq 0.0)
 			(for-each
 				(lambda (ldual)
-					(define cnt (get-pr-cnt ldual ITEM))
-					(define sup (if (< 0 cnt) (right-support ldual) 0))
-					(define term (* (right-count ldual) cnt))
+					(define raw (get-pr-cnt ldual ITEM))
+					(define ok  (valid? cnt))
+					(define cnt (if ok cnt 0))
+					(define acnt (abs cnt))
+
+					(define sup (if ok (right-support ldual) 0))
+					(define sum (* (right-sum ldual) cnt))
+					(define term (* (right-count ldual) acnt))
 					(define rms (* (right-length ldual) cnt))
 					(define len (* rms rms))
-					(define amp (sqrt (* (right-amplitude ldual) cnt)))
+					(define amp (sqrt (* (right-amplitude ldual) acnt)))
 
 					(set! l0 (+ l0 sup))
+					(set! su (+ su sum))
 					(set! l1 (+ l1 term))
 					(set! l2 (+ l2 len))
 					(set! lq (+ lq amp))
 				)
 				(star-obj 'left-duals ITEM))
-			(api-obj 'set-mtm-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-mtm-norms ITEM l0 l1 l2 lq su))
 
 		(define (set-mmt-marginals ITEM)
+			(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
 			(define l0 0.0)
+			(define su 0.0)
 			(define l1 0.0)
 			(define l2 0.0)
 			(define lq 0.0)
 			(for-each
 				(lambda (rdual)
-					(define cnt (get-pr-cnt ITEM rdual))
-					(define sup (if (< 0 cnt) (left-support rdual) 0))
-					(define term (* (left-count rdual) cnt))
+					(define raw (get-pr-cnt ITEM rdual))
+					(define ok  (valid? cnt))
+					(define cnt (if ok cnt 0))
+					(define acnt (abs cnt))
+
+					(define sup (if ok (left-support rdual) 0))
+					(define sum (* (left-sum rdual) cnt))
+					(define term (* (left-count rdual) acnt))
 					(define rms (* (left-length rdual) cnt))
 					(define len (* rms rms))
-					(define amp (sqrt (* (left-amplitude rdual) cnt)))
+					(define amp (sqrt (* (left-amplitude rdual) acnt)))
 
 					(set! l0 (+ l0 sup))
+					(set! su (+ su sum))
 					(set! l1 (+ l1 term))
 					(set! l2 (+ l2 len))
 					(set! lq (+ lq amp))
 				)
 				(star-obj 'right-duals ITEM))
-			(api-obj 'set-mmt-norms ITEM l0 l1 l2 lq))
+			(api-obj 'set-mmt-norms ITEM l0 l1 l2 lq su))
 
 		; Compute the grand-totals
 		(define (set-mtm-totals)
 			(let ((mtm-sup (compute-total-mtm-support))
+					(mtm-sum (compute-total-mtm-sum))
 					(mtm-cnt (compute-total-mtm-count))
 					(mtm-len (compute-total-mtm-length))
 					(mtm-amp (compute-total-mtm-amplitude)))
-				(api-obj 'set-mtm-totals mtm-sup mtm-cnt mtm-len mtm-amp)))
+				(api-obj 'set-mtm-totals mtm-sup mtm-cnt mtm-len mtm-amp mtm-sum)))
 
 		(define (all-mtm-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -528,10 +574,11 @@
 		; Compute the grand-totals
 		(define (set-mmt-totals)
 			(let ((mmt-sup (compute-total-mmt-support))
+					(mmt-sum (compute-total-mmt-sum))
 					(mmt-cnt (compute-total-mmt-count))
 					(mmt-len (compute-total-mmt-length))
 					(mmt-amp (compute-total-mmt-amplitude)))
-				(api-obj 'set-mmt-totals mmt-sup mmt-cnt mmt-len mmt-amp)))
+				(api-obj 'set-mmt-totals mmt-sup mmt-cnt mmt-len mmt-amp mmt-sum)))
 
 		(define (all-mmt-marginals)
 			(define elapsed-secs (make-elapsed-secs))
@@ -558,6 +605,8 @@
 				((mmt-support-set)    (apply get-mmt-support-set args))
 				((mtm-support)        (apply sum-mtm-support args))
 				((mmt-support)        (apply sum-mmt-support args))
+				((mtm-sum)            (apply sum-mtm-sum args))
+				((mmt-sum)            (apply sum-mmt-sum args))
 				((mtm-count)          (apply sum-mtm-count args))
 				((mmt-count)          (apply sum-mmt-count args))
 				((mtm-length)         (apply sum-mtm-length args))
@@ -566,10 +615,12 @@
 				((mmt-amplitude)      (apply sum-mmt-amplitude args))
 
 				((total-mtm-support)  (compute-total-mtm-support))
+				((total-mtm-sum)      (compute-total-mtm-sum))
 				((total-mtm-count)    (compute-total-mtm-count))
 				((total-mtm-length)   (compute-total-mtm-length))
 				((total-mtm-amplitude) (compute-total-mtm-amplitude))
 				((total-mmt-support)  (compute-total-mmt-support))
+				((total-mmt-sum)      (compute-total-mmt-sum))
 				((total-mmt-count)    (compute-total-mmt-count))
 				((total-mmt-length)   (compute-total-mmt-length))
 				((total-mmt-amplitude) (compute-total-mmt-amplitude))
