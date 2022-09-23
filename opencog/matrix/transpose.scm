@@ -69,8 +69,8 @@
 	(define mmt-key (PredicateNode mmt-name))
 	(define mtm-key (PredicateNode mtm-name))
 
-	(define (set-norms KEY ATOM L0 L1 L2 LQ)
-		(cog-set-value! ATOM KEY (FloatValue L0 L1 L2 LQ)))
+	(define (set-norms KEY ATOM L0 L1 L2 LQ SU)
+		(cog-set-value! ATOM KEY (FloatValue L0 L1 L2 LQ SU)))
 
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
@@ -111,8 +111,8 @@
 	(define (get-mtm-amplitude ITEM)
 		(get-amplitude mtm-key (LLOBJ 'left-wildcard ITEM)))
 
-	(define (set-mtm-norms ITEM L0 L1 L2 LQ)
-		(set-norms mtm-key (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-mtm-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms mtm-key (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (get-mmt-support ITEM)
@@ -127,8 +127,8 @@
 	(define (get-mmt-amplitude ITEM)
 		(get-amplitude mmt-key (LLOBJ 'right-wildcard ITEM)))
 
-	(define (set-mmt-norms ITEM L0 L1 L2 LQ)
-		(set-norms mmt-key (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-mmt-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms mmt-key (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (tot-mmt-support)
@@ -143,8 +143,8 @@
 	(define (tot-mmt-amplitude)
 		(get-amplitude mmt-key (LLOBJ 'wild-wild)))
 
-	(define (set-mmt-totals L0 L1 L2 LQ)
-		(set-norms mmt-key (LLOBJ 'wild-wild) L0 L1 L2 LQ))
+	(define (set-mmt-totals L0 L1 L2 LQ SU)
+		(set-norms mmt-key (LLOBJ 'wild-wild) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (tot-mtm-support)
@@ -159,8 +159,8 @@
 	(define (tot-mtm-amplitude)
 		(get-amplitude mtm-key (LLOBJ 'wild-wild)))
 
-	(define (set-mtm-totals L0 L1 L2 LQ)
-		(set-norms mtm-key (LLOBJ 'wild-wild) L0 L1 L2 LQ))
+	(define (set-mtm-totals L0 L1 L2 LQ SU)
+		(set-norms mtm-key (LLOBJ 'wild-wild) L0 L1 L2 LQ SU))
 
 	;--------
 	; Methods on this class.
