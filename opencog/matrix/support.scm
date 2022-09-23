@@ -122,29 +122,23 @@
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
-	(define (get-support ATOM)
+	(define (get-thing ATOM REF)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 0))
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) REF))
 			(lambda (key . args) 0)))
 
-	(define (get-count ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 1))
-			(lambda (key . args) 0)))
-
-	(define (get-length ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
-			(lambda (key . args) 0)))
-
-	(define (get-amplitude ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 3))
-			(lambda (key . args) 0)))
+	(define (get-support ATOM)   (get-thing ATOM 0))
+	(define (get-count ATOM)     (get-thing ATOM 1))
+	(define (get-length ATOM)    (get-thing ATOM 2))
+	(define (get-amplitude ATOM) (get-thing ATOM 3))
+	(define (get-sum ATOM)       (get-thing ATOM 4))
 
 	;--------
 	(define (get-left-support ITEM)
 		(get-support (LLOBJ 'left-wildcard ITEM)))
+
+	(define (get-left-sum ITEM)
+		(get-sum (LLOBJ 'left-wildcard ITEM)))
 
 	(define (get-left-count ITEM)
 		(get-count (LLOBJ 'left-wildcard ITEM)))
@@ -155,12 +149,15 @@
 	(define (get-left-amplitude ITEM)
 		(get-amplitude (LLOBJ 'left-wildcard ITEM)))
 
-	(define (set-left-norms ITEM L0 L1 L2 LQ)
-		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-left-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (get-right-support ITEM)
 		(get-support (LLOBJ 'right-wildcard ITEM)))
+
+	(define (get-right-sum ITEM)
+		(get-sum (LLOBJ 'right-wildcard ITEM)))
 
 	(define (get-right-count ITEM)
 		(get-count (LLOBJ 'right-wildcard ITEM)))
@@ -171,8 +168,8 @@
 	(define (get-right-amplitude ITEM)
 		(get-amplitude (LLOBJ 'right-wildcard ITEM)))
 
-	(define (set-right-norms ITEM L0 L1 L2 LQ)
-		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-right-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (error-no-data)
@@ -182,25 +179,16 @@
 "Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
 				))
 
-	(define (get-total-support-left)
+	(define (get-total KEY REF)
 		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) KEY) REF))
 			(lambda (key . args) (error-no-data))))
 
-	(define (get-total-count-left)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
-			(lambda (key . args) (error-no-data))))
+	(define (get-total-support-left) (get-total left-total-key 0))
+	(define (get-total-count-left)   (get-total left-total-key 1))
 
-	(define (get-total-support-right)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
-			(lambda (key . args) (error-no-data))))
-
-	(define (get-total-count-right)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
-			(lambda (key . args) (error-no-data))))
+	(define (get-total-support-right) (get-total right-total-key 0))
+	(define (get-total-count-right)   (get-total right-total-key 1))
 
 	;--------
 	; Backwards-compatibility method. Remove this someday.
@@ -259,6 +247,8 @@
 
 			((left-support)       (apply get-left-support args))
 			((right-support)      (apply get-right-support args))
+			((left-sum)           (apply get-left-sum args))
+			((right-sum)          (apply get-right-sum args))
 			((left-count)         (apply get-left-count args))
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
