@@ -75,10 +75,20 @@
 		(list mean sdev))
 
 	; -------------
+
+	; Get the renormalized count. Just a simple rescaling.
+	; Invalid matrix entries are mapped to exact zero.
+	(define (get-renorm-count PR)
+		(if (eqv? mean 0) (get-mean-rms)) ; just in case.
+		(define raw (get-cnt PR))
+		(if (valid? raw) (/ (- raw mean) sdev) 0))
+
+	; -------------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
 			((mean-rms)         (get-mean-rms)
+			((get-count)        (apply get-renorm-count args))
 			(else               (apply LLOBJ (cons message args))))
 	))
 
