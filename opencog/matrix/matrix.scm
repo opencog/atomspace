@@ -58,3 +58,4 @@
 (include-from-path "opencog/matrix/similarity-api.scm")
 (include-from-path "opencog/matrix/direct-sum.scm")
 (include-from-path "opencog/matrix/thresh-pca.scm")
+(include-from-path "opencog/matrix/ortho-ensemble.scm")
