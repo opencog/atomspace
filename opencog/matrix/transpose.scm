@@ -516,8 +516,8 @@
 			(for-each
 				(lambda (ldual)
 					(define raw (get-pr-cnt ldual ITEM))
-					(define ok  (valid? cnt))
-					(define cnt (if ok cnt 0))
+					(define ok  (valid? raw))
+					(define cnt (if ok raw 0))
 					(define acnt (abs cnt))
 
 					(define sup (if ok (right-support ldual) 0))
@@ -546,8 +546,8 @@
 			(for-each
 				(lambda (rdual)
 					(define raw (get-pr-cnt ITEM rdual))
-					(define ok  (valid? cnt))
-					(define cnt (if ok cnt 0))
+					(define ok  (valid? raw))
+					(define cnt (if ok raw 0))
 					(define acnt (abs cnt))
 
 					(define sup (if ok (left-support rdual) 0))
