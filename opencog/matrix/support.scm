@@ -86,8 +86,8 @@
 
 	(define norm-key (PredicateNode key-name))
 
-	(define (set-norms ATOM L0 L1 L2 LQ)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2 LQ)))
+	(define (set-norms ATOM L0 L1 L2 LQ SU)
+		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2 LQ SU)))
 
 	; -----------------
 	; Set the grand-total count. Use the CountTruthValue.
@@ -122,29 +122,23 @@
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
-	(define (get-support ATOM)
+	(define (get-thing ATOM REF)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 0))
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) REF))
 			(lambda (key . args) 0)))
 
-	(define (get-count ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 1))
-			(lambda (key . args) 0)))
-
-	(define (get-length ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
-			(lambda (key . args) 0)))
-
-	(define (get-amplitude ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 3))
-			(lambda (key . args) 0)))
+	(define (get-support ATOM)   (get-thing ATOM 0))
+	(define (get-count ATOM)     (get-thing ATOM 1))
+	(define (get-length ATOM)    (get-thing ATOM 2))
+	(define (get-amplitude ATOM) (get-thing ATOM 3))
+	(define (get-sum ATOM)       (get-thing ATOM 4))
 
 	;--------
 	(define (get-left-support ITEM)
 		(get-support (LLOBJ 'left-wildcard ITEM)))
+
+	(define (get-left-sum ITEM)
+		(get-sum (LLOBJ 'left-wildcard ITEM)))
 
 	(define (get-left-count ITEM)
 		(get-count (LLOBJ 'left-wildcard ITEM)))
@@ -155,12 +149,15 @@
 	(define (get-left-amplitude ITEM)
 		(get-amplitude (LLOBJ 'left-wildcard ITEM)))
 
-	(define (set-left-norms ITEM L0 L1 L2 LQ)
-		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-left-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (get-right-support ITEM)
 		(get-support (LLOBJ 'right-wildcard ITEM)))
+
+	(define (get-right-sum ITEM)
+		(get-sum (LLOBJ 'right-wildcard ITEM)))
 
 	(define (get-right-count ITEM)
 		(get-count (LLOBJ 'right-wildcard ITEM)))
@@ -171,8 +168,8 @@
 	(define (get-right-amplitude ITEM)
 		(get-amplitude (LLOBJ 'right-wildcard ITEM)))
 
-	(define (set-right-norms ITEM L0 L1 L2 LQ)
-		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ))
+	(define (set-right-norms ITEM L0 L1 L2 LQ SU)
+		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
 	(define (error-no-data)
@@ -182,25 +179,16 @@
 "Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
 				))
 
-	(define (get-total-support-left)
+	(define (get-total KEY REF)
 		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) KEY) REF))
 			(lambda (key . args) (error-no-data))))
 
-	(define (get-total-count-left)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
-			(lambda (key . args) (error-no-data))))
+	(define (get-total-support-left) (get-total left-total-key 0))
+	(define (get-total-count-left)   (get-total left-total-key 1))
 
-	(define (get-total-support-right)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
-			(lambda (key . args) (error-no-data))))
-
-	(define (get-total-count-right)
-		(catch 'wrong-type-arg
-			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
-			(lambda (key . args) (error-no-data))))
+	(define (get-total-support-right) (get-total right-total-key 0))
+	(define (get-total-count-right)   (get-total right-total-key 1))
 
 	;--------
 	; Backwards-compatibility method. Remove this someday.
@@ -259,6 +247,8 @@
 
 			((left-support)       (apply get-left-support args))
 			((right-support)      (apply get-right-support args))
+			((left-sum)           (apply get-left-sum args))
+			((right-sum)          (apply get-right-sum args))
 			((left-count)         (apply get-left-count args))
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
@@ -338,34 +328,45 @@
   functional methods for 'left-type and 'right-type on it.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+  Let |N(x,y)| be the absolute value of N(x,y). Since N is a count, it
+  is usually absent (zero) or positive; however, this class is designed
+  to work with 'counts' that might be negative.
+
+  Let D(x,y) == 1 if N(x,y) != 0; otherwise D(x,y) == 0. The comparison
+  uses scheme(guile) exact-zero to determine if N(x,y) is absent; thus
+  floating-point 0.0 indicates that N is 'present', and is zero.
+  A value of -inf.0 is also taken to mean 'absent'.
 
   The 'left-support-set method return all pairs (x,y), for fixed y, for
-  which N(x,y) > 0. The right-support-set is the same, for fixed x.
+  which N(x,y) != 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
   The 'left-support is the number of non-zero entries in a column.
   That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The 'left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
+  The 'left-sum is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
+
+  The 'left-count is the wild-card |N|(*,y) = sum_x |N(x,y)| for fixed y.
+  That is, for a given column y, this sums the absiolute value of all
+  counts in that column. This is the l_1 norm.
 
   The 'left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
-  The 'left-amplitude is (sum_x N^0.5(x,y))^2 for fixed y.
+  The 'left-amplitude is (sum_x |N|^0.5(x,y))^2 for fixed y.
 
-  The 'left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
+  The 'left-lp-norm is |sum_x |N|^p(x,y)|^1/p for fixed y.
 
   The 'total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
-  The 'total-count-left is N(*,*) = sum_x N(x,*)
+  The 'total-count-left is |N|(*,*) = sum_x |N|(x,*)
   That is, the total of all count entries in the matrix, with the
   left-sum being done last. It uses the cached, previously-computed
-  right-marginal sums N(x,*) to perform the computation, and so this
-  computation will fail, if the marginals have not been stored.
+  right-marginal sums |N|(x,*) to perform the computation, and so
+  this computation will fail, if the marginals have not been stored.
 
-  The 'total-count-right is N(*,*) = sum_y N(*,y)
+  The 'total-count-right is |N|(*,*) = sum_y |N|(*,y)
   Same as above, but does the right-sum last. Should yield the same
   answer, as above, except for rounding errors. Using this method can
   be more convenient, if the right-marginal sums are not available
@@ -438,6 +439,23 @@
 
 		; -------------
 		; Return the sum of the counts on the list
+		(define (sum-sum LIST)
+			(fold
+				(lambda (lopr sum)
+					(define v (get-cnt lopr))
+					(if (valid? v) (+ sum v) sum))
+				0
+				LIST))
+
+		(define (sum-left-sum ITEM)
+			(sum-sum (star-obj 'left-stars ITEM)))
+
+		(define (sum-right-sum ITEM)
+			(sum-sum (star-obj 'right-stars ITEM)))
+
+		; -------------
+		; Return the sum of the absolute value of the counts on
+		; the list. This is the l_1 norm.
 		(define (sum-count LIST)
 			(fold
 				(lambda (lopr sum)
@@ -515,6 +533,17 @@
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
+		(define (compute-total-from-left METH)
+			(fold
+				;;; Use the cached value from METH
+				(lambda (item sum) (+ sum (api-obj METH item)))
+				0 (star-obj 'left-basis)))
+
+		(define (compute-total-from-right METH)
+			(fold
+				;;; Use the cached value from METH
+				(lambda (item sum) (+ sum (api-obj METH item)))
+				0 (star-obj 'right-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -525,12 +554,9 @@
 		; that the 'right-wild-count returns a valid value. This value
 		; should be the same as what 'compute-right-count would return.
 		(define (compute-total-count-from-left)
-			(fold
-				;;; Use the cached value, equiavalent to this:
-				;;; (lambda (item sum) (+ sum (sum-right-count item)))
-				(lambda (item sum) (+ sum (api-obj 'right-count item)))
-				0
-				(star-obj 'left-basis)))
+			;;; Use the cached value, equiavalent to this:
+			;;; (lambda (item sum) (+ sum (sum-right-count item)))
+			(compute-total-from-left 'right-count))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
@@ -539,26 +565,21 @@
 		; thus large differences indicate a bug; small differences are
 		; due to rounding errors.
 		(define (compute-total-count-from-right)
-			(fold
-				;;; (lambda (item sum) (+ sum (sum-left-count item)))
-				(lambda (item sum) (+ sum (api-obj 'left-count item)))
-				0
-				(star-obj 'right-basis)))
+			(compute-total-from-right 'left-count))
 
 		; Same as above, but for the support
 		(define (compute-total-support-from-left)
-			(fold
-				; (lambda (item sum) (+ sum (get-right-support-size item)))
-				(lambda (item sum) (+ sum (api-obj 'right-support item)))
-				0
-				(star-obj 'left-basis)))
+			(compute-total-from-left 'right-support))
 
 		(define (compute-total-support-from-right)
-			(fold
-				; (lambda (item sum) (+ sum (get-left-support-size item)))
-				(lambda (item sum) (+ sum (api-obj 'left-support item)))
-				0
-				(star-obj 'right-basis)))
+			(compute-total-from-right 'left-support))
+
+		; Same as above, but for the sum
+		(define (compute-total-sum-from-left)
+			(compute-total-from-left 'right-sum))
+
+		(define (compute-total-sum-from-right)
+			(compute-total-from-right 'left-sum))
 
 		; -------------
 		; Compute all l_0, l_0.5, l_1 and l_2 norms, attach them
@@ -571,16 +592,18 @@
 			(define l1 0)
 			(define l2 0)
 			(define lq 0)
+			(define su 0)
 			(for-each
 				(lambda (ITM)
 					(define cnt (get-cnt ITM))
 					(when (valid? cnt)
 						(set! l0 (+ l0 1))
+						(set! su (+ su cnt))
 						(set! l1 (+ l1 (abs cnt)))
 						(set! l2 (+ l2 (* cnt cnt)))
 						(set! lq (+ lq (sqrt (abs cnt))))))
 				LIST)
-			(list l0 l1 l2 lq))
+			(list l0 l1 l2 lq su))
 
 		(define (sum-left-norms ITEM)
 			(sum-norms (star-obj 'left-stars ITEM)))
@@ -594,7 +617,8 @@
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-left-norms COL l0 l1 l2 lq))
+			(define su (fifth sums))
+			(api-obj 'set-left-norms COL l0 l1 l2 lq su))
 
 		(define (set-right-marginals ROW)
 			(define sums (sum-right-norms ROW))
@@ -602,7 +626,8 @@
 			(define l1 (second sums))
 			(define l2 (sqrt (third sums)))
 			(define lq (* (fourth sums) (fourth sums)))
-			(api-obj 'set-right-norms ROW l0 l1 l2 lq))
+			(define su (fifth sums))
+			(api-obj 'set-right-norms ROW l0 l1 l2 lq su))
 
 		; ----------------------------------------------------
 
@@ -702,6 +727,8 @@
 				((right-support-set)  (apply get-right-support-set args))
 				((left-support)       (apply get-left-support-size args))
 				((right-support)      (apply get-right-support-size args))
+				((left-sum)           (apply sum-left-sum args))
+				((right-sum)          (apply sum-right-sum args))
 				((left-count)         (apply sum-left-count args))
 				((right-count)        (apply sum-right-count args))
 				((left-length)        (apply sum-left-length args))
@@ -715,6 +742,8 @@
 				((total-support-right) (compute-total-support-from-right))
 				((total-count-left)    (compute-total-count-from-left))
 				((total-count-right)   (compute-total-count-from-right))
+				((total-sum-left)      (compute-total-sum-from-left))
+				((total-sum-right)     (compute-total-sum-from-right))
 
 				((set-left-totals)     (do-left-totals))
 				((set-right-totals)    (do-right-totals))

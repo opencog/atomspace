@@ -167,15 +167,15 @@
 		; -------------
 		; Return the vector product of column A and column B
 		; The prod-obj takes the product of pairs of matrix entries,
-		; and the 'left-count method just adds them up.  Equivalently,
+		; and the 'left-sum method just adds them up.  Equivalently,
 		; we could just sum over the left-stars ourselves, but this
 		; would take three lines of code instead of one.
 		(define (compute-left-product COL-A COL-B)
-			(prod-obj 'left-count (list COL-A COL-B)))
+			(prod-obj 'left-sum (list COL-A COL-B)))
 
 		; Return the vector product of row A and row B
 		(define (compute-right-product ROW-A ROW-B)
-			(prod-obj 'right-count (list ROW-A ROW-B)))
+			(prod-obj 'right-sum (list ROW-A ROW-B)))
 
 		; -------------
 		(define (get-left-length COL) (supp-obj 'left-length COL))
@@ -202,23 +202,23 @@
 		; -------------
 		; Return the left-jaccard distance
 		(define (compute-left-jaccard-dist COL-A COL-B)
-			(define left-min (min-obj 'left-count (list COL-A COL-B)))
-			(define left-max (max-obj 'left-count (list COL-A COL-B)))
+			(define left-min (min-obj 'left-sum (list COL-A COL-B)))
+			(define left-max (max-obj 'left-sum (list COL-A COL-B)))
 			(- 1.0 (/ left-min left-max))
 		)
 
 		; Return the right-jaccard distance
 		(define (compute-right-jaccard-dist ROW-A ROW-B)
-			(define right-min (min-obj 'right-count (list ROW-A ROW-B)))
-			(define right-max (max-obj 'right-count (list ROW-A ROW-B)))
+			(define right-min (min-obj 'right-sum (list ROW-A ROW-B)))
+			(define right-max (max-obj 'right-sum (list ROW-A ROW-B)))
 			(- 1.0 (/ right-min right-max))
 		)
 
 		; -------------
 		; Return the conditional jaccard distance
 		; IDX is a row or a column
-		; METH is either 'left-count or 'right-count
-		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		; METH is either 'left-sum or 'right-sum
+		; 'left-sum is N(*,COL) and 'right-sum is N(ROW,*)
 		(define (compute-cond-jacc-dist IDX-A IDX-B METH)
 			(define osum-A (/ 1.0 (supp-obj METH IDX-A)))
 			(define osum-B (/ 1.0 (supp-obj METH IDX-B)))
@@ -236,31 +236,31 @@
 		)
 
 		(define (compute-left-cond-jacc-dist COL-A COL-B)
-			(compute-cond-jacc-dist COL-A COL-B 'left-count))
+			(compute-cond-jacc-dist COL-A COL-B 'left-sum))
 
 		(define (compute-right-cond-jacc-dist ROW-A ROW-B)
-			(compute-cond-jacc-dist ROW-A ROW-B 'right-count))
+			(compute-cond-jacc-dist ROW-A ROW-B 'right-sum))
 
 		; -------------
 		; Return the left-overlap similarity
 		(define (compute-left-overlap-sim COL-A COL-B)
-			(define left-eith (either-obj 'left-count (list COL-A COL-B)))
-			(define left-both (both-obj 'left-count (list COL-A COL-B)))
+			(define left-eith (either-obj 'left-sum (list COL-A COL-B)))
+			(define left-both (both-obj 'left-sum (list COL-A COL-B)))
 			(/ left-both left-eith)
 		)
 
 		; Return the right-overlap similarity
 		(define (compute-right-overlap-sim ROW-A ROW-B)
-			(define right-eith (either-obj 'right-count (list ROW-A ROW-B)))
-			(define right-both (both-obj 'right-count (list ROW-A ROW-B)))
+			(define right-eith (either-obj 'right-sum (list ROW-A ROW-B)))
+			(define right-both (both-obj 'right-sum (list ROW-A ROW-B)))
 			(/ right-both right-eith)
 		)
 
 		; -------------
 		; Return the probability-jaccard distance
 		; IDX is a row or a column
-		; METH is either 'left-count or 'right-count
-		; 'left-count is N(*,COL) and 'right-count is N(ROW,*)
+		; METH is either 'left-sum or 'right-sum
+		; 'left-sum is N(*,COL) and 'right-sum is N(ROW,*)
 		(define (compute-prob-jaccard-dist IDX-A IDX-B METH)
 
 			; Given weights `weig-a` and `weig-b` take the sum of the
@@ -292,11 +292,11 @@
 
 		; Return the left-probability-jaccard distance
 		(define (compute-left-prob-jaccard-dist COL-A COL-B)
-			(compute-prob-jaccard-dist COL-A COL-B 'left-count))
+			(compute-prob-jaccard-dist COL-A COL-B 'left-sum))
 
 		; Return the right-probability-jaccard distance
 		(define (compute-right-prob-jaccard-dist COL-A COL-B)
-			(compute-prob-jaccard-dist COL-A COL-B 'right-count))
+			(compute-prob-jaccard-dist COL-A COL-B 'right-sum))
 
 		; -------------
 		; Methods on this class.
