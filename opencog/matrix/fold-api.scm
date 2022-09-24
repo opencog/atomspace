@@ -298,12 +298,17 @@
 			(define rowset (cog-value->list (cog-execute! qry)))
 			(cog-extract-recursive! row-var)
 
+			; Argh. The rowset might include duplicates. This is a
+			; "feature", not a bug, with how MeetLink works. However,
+			; we now have to deduplicate.
+			(define uniqrows (delete-dup-atoms rowset))
+
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
 			(map
 				(lambda (ROW)
 					(map (lambda (COL) (LLOBJ 'make-pair ROW COL)) COL-TUPLE))
-				rowset)
+				uniqrows)
 		)
 
 		; ---------------
@@ -330,12 +335,15 @@
 			(define colset (cog-value->list (cog-execute! qry)))
 			(cog-extract-recursive! col-var)
 
+			; De-duplicate. This adds yet more complexity to above.
+			(define uniqcols (delete-dup-atoms colset))
+
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
 			(map
 				(lambda (COL)
 					(map (lambda (ROW) (LLOBJ 'make-pair ROW COL)) ROW-TUPLE))
-				colset)
+				uniqcols)
 		)
 
 		; ---------------
