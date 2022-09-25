@@ -104,6 +104,7 @@
 	(define left-total-key (PredicateNode left-total-key-name))
 
 	(define (set-left-totals L0 L1 SU)
+		(set-wild-wild-count L1)
 		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1 SU)))
 
 	(define right-total-key-name
@@ -114,6 +115,7 @@
 	(define right-total-key (PredicateNode right-total-key-name))
 
 	(define (set-right-totals L0 L1 SU)
+		(set-wild-wild-count L1)
 		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1 SU)))
 
 	; -----------------

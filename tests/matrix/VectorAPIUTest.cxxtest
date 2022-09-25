@@ -198,6 +198,16 @@ void VectorAPIUTest::test_marginals(void)
 	num = eval->eval("(papi 'wild-wild-count)");
 	CHKNUM("Wild-wild count", num, 22);
 
+	num = eval->eval("(papi 'total-sum-left)");
+	CHKNUM("Wild-wild count-left", num, 22);
+	num = eval->eval("(papi 'total-sum-right)");
+	CHKNUM("Wild-wild count-right", num, 22);
+
+	num = eval->eval("(papi 'total-count-left)");
+	CHKNUM("Wild-wild count-left", num, 22);
+	num = eval->eval("(papi 'total-count-right)");
+	CHKNUM("Wild-wild count-right", num, 22);
+
 	num = eval->eval("(length (papi 'right-stars (Word \"chicken\")))");
 	CHKNUM("chicken stars", num, 3);
 
