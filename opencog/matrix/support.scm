@@ -172,17 +172,20 @@
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2 LQ SU))
 
 	;--------
-	(define (error-no-data)
+	(define (error-no-data KEY REF)
 		(throw 'no-data 'add-support-api
-			(string-append
-"There isn't any cached data on `" ID "`\n"
-"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n")
-				))
+			(format #f
+				(string-append
+"There isn't any cached data on `~A`\n"
+"Run `((add-support-compute LLOBJ) 'cache-all)` to compute that data.\n"
+"Key = `~A` ref = ~D\n")
+				ID (cog-name KEY) REF)
+			))
 
 	(define (get-total KEY REF)
 		(catch 'wrong-type-arg
 			(lambda() (cog-value-ref (cog-value (LLOBJ 'wild-wild) KEY) REF))
-			(lambda (key . args) (error-no-data))))
+			(lambda (key . args) (error-no-data KEY REF))))
 
 	(define (get-total-support-left) (get-total left-total-key 0))
 	(define (get-total-count-left)   (get-total left-total-key 1))
