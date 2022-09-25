@@ -103,9 +103,8 @@
 
 	(define left-total-key (PredicateNode left-total-key-name))
 
-	(define (set-left-totals L0 L1)
-		(set-wild-wild-count L1)
-		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1)))
+	(define (set-left-totals L0 L1 SU)
+		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1 SU)))
 
 	(define right-total-key-name
 		(if (and ID (LLOBJ 'filters?))
@@ -114,9 +113,8 @@
 
 	(define right-total-key (PredicateNode right-total-key-name))
 
-	(define (set-right-totals L0 L1)
-		(set-wild-wild-count L1)
-		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1)))
+	(define (set-right-totals L0 L1 SU)
+		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1 SU)))
 
 	; -----------------
 	; User might ask for something not in the matrix. In that
@@ -186,9 +184,11 @@
 
 	(define (get-total-support-left) (get-total left-total-key 0))
 	(define (get-total-count-left)   (get-total left-total-key 1))
+	(define (get-total-sum-left)     (get-total left-total-key 2))
 
 	(define (get-total-support-right) (get-total right-total-key 0))
 	(define (get-total-count-right)   (get-total right-total-key 1))
+	(define (get-total-sum-right)     (get-total right-total-key 2))
 
 	;--------
 	; Backwards-compatibility method. Remove this someday.
@@ -260,6 +260,8 @@
 			((total-support-right)(get-total-support-right))
 			((total-count-left)   (get-total-count-left))
 			((total-count-right)  (get-total-count-right))
+			((total-sum-left)     (get-total-sum-left))
+			((total-sum-right)    (get-total-sum-right))
 
 			; The 'wild-wild-count method provides backwards-compat
 			; with the old `add-pair-count-api` object. Remove whenever.
@@ -371,6 +373,9 @@
   answer, as above, except for rounding errors. Using this method can
   be more convenient, if the right-marginal sums are not available
   (and v.v. if the other marginals are not available.)
+
+  The 'total-sum-left and `total-sum-right are as above, but the
+  absolute value is NOT taken.
 
   The 'set-left-marginals COL requires an argument COL from the
   right basis. It computes the marginals for that COL and caches
@@ -641,7 +646,8 @@
 		(define (do-left-totals)
 			(api-obj 'set-left-totals
 				(compute-total-support-from-left)
-				(compute-total-count-from-left))
+				(compute-total-count-from-left)
+				(compute-total-sum-from-left))
 
 			; total-support-left should equal total-support-right
 			(set-dimensions (api-obj 'total-support-left))
@@ -666,7 +672,8 @@
 		(define (do-right-totals)
 			(api-obj 'set-right-totals
 				(compute-total-support-from-right)
-				(compute-total-count-from-right))
+				(compute-total-count-from-right)
+				(compute-total-sum-from-right))
 
 			; total-support-left should equal total-support-right
 			(set-dimensions (api-obj 'total-support-right))
