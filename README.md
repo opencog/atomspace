@@ -694,3 +694,12 @@ Thus, it is significantly less-used than scheme in the OpenCog project.
 None-the-less, it remains vital for various applications. See the
 [`/examples/python`](/examples/python) directory for how to use python
 with the AtomSpace.
+
+TODO - Notes - Open Projects
+============================
+* Porting to Android: multiple issues described in
+  [cogroid/b-obstacles](https://github.com/cogroid/b-obstacles).
+  See also [bug 2995](https://github.com/opencog/atomspace/issues/2995).
+
+* Bug: Crashes on Arm v7a:
+  [bug 2944](https://github.com/opencog/atomspace/issues/2944).
