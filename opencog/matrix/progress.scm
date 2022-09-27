@@ -53,6 +53,8 @@
   FUNC should be the function to be called, taking one argument.
   MSG should be a string of the form
      \"Did ~A of ~A in ~A seconds (~A items/sec)\n\"
+     or
+     \"Did ~A in ~A seconds (~A items/sec)\n\"
      The first argument is the message; the second is the TOTAL,
      the third is the elapsed time in seconds, the fourth is the
      rate, in calls per second. If TOTAL is #f, then this argument
@@ -79,7 +81,8 @@
 						(icnt (atomic-box-ref cnt))
 						(rate (if (< 0 elapsed)
 							(/ (exact->inexact (- icnt done)) elapsed) 0))
-						(irate (inexact->exact (round rate)))
+						(irate (if (< 100 rate) ; If rate is large, round to integer
+							(inexact->exact (round rate)) rate))
 					)
 					(when (or (not HYST) (<= HYST ilapsed))
 						(if TOTAL
