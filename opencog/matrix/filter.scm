@@ -427,6 +427,7 @@
   add-knockout-filter LLOBJ - Modify LLOBJ so that the explicitly
   indicated rows and columns are removed. The LEFT-KNOCKOUT and
   RIGHT-KNOCKOUT should be lists of left and right basis elements.
+  This is the opposite of `add-keep-filter`.
 
   The RENAME argument should be #f or #t, it is used to determine how
   other API's generate predicate keys to obtain values.
@@ -449,6 +450,43 @@
 	(define id-str
 		(format #f "knockout-~D-~D"
 			(length LEFT-KNOCKOUT) (length RIGHT-KNOCKOUT)))
+
+	; ---------------
+	(add-generic-filter LLOBJ
+		left-basis-pred right-basis-pred
+		pair-pred id-str RENAME)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (add-keep-filter LLOBJ LEFT-KEEP RIGHT-KEEP RENAME)
+"
+  add-keep-filter LLOBJ - Modify LLOBJ so that the explicitly
+  indicated rows and columns are kept, and all others are removed.
+  The LEFT-KEEP and RIGHT-KEEP should be lists of left and right
+  basis elements. This is the 'opposite' of `add-knockout-filter`.
+
+  The RENAME argument should be #f or #t, it is used to determine how
+  other API's generate predicate keys to obtain values.
+"
+	; ---------------
+	; Filter out rows and columns in the knockout lists.
+	;
+	(define (left-basis-pred ITEM)
+		(any
+			(lambda (keep) (equal? keep ITEM))
+			LEFT-KEEP))
+
+	(define (right-basis-pred ITEM)
+		(any
+			(lambda (keep) (equal? keep ITEM))
+			RIGHT-KEEP))
+
+	(define (pair-pred PAIR) #t)
+
+	(define id-str
+		(format #f "keep-~D-~D"
+			(length LEFT-KEEP) (length RIGHT-KEEP)))
 
 	; ---------------
 	(add-generic-filter LLOBJ
