@@ -273,6 +273,7 @@
 				((base)             LLOBJ)
 
 				; Pass through some selected methods
+				((make-pair)        (apply LLOBJ (cons message args)))
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
 				((pair-type)        (apply LLOBJ (cons message args)))
