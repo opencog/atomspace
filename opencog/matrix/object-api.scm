@@ -423,12 +423,12 @@
 
 		(define (is-in-left-basis? ATOM)
 			(if (not in-l-basis?)
-				(set! in-l-basis (make-aset-predicate (get-left-basis))))
+				(set! in-l-basis? (make-aset-predicate (get-left-basis))))
 			(in-l-basis? ATOM))
 
 		(define (is-in-right-basis? ATOM)
 			(if (not in-r-basis?)
-				(set! in-r-basis (make-aset-predicate (get-right-basis))))
+				(set! in-r-basis? (make-aset-predicate (get-right-basis))))
 			(in-r-basis? ATOM))
 
 		; -------------------------------------------------------
