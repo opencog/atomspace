@@ -241,8 +241,11 @@
 
   Return a list of all atoms in LIST-A that are not in LIST-B.
 
-  This does the same thing as `lset-difference` but will usually be
-  much much faster, if either list is more than ten atoms long.
+  This does the same thing as srfi-1 `lset-difference`, but will
+  usually be much much faster, if either list is more than ten
+  atoms long.
+
+  See also: atoms-intersect, remove-duplicate-atoms
 "
 	(define cache (make-hash-table))
 
@@ -250,6 +253,30 @@
 		(hashx-set! atom-hash atom-assoc cache ITEM #f))
 		LIST-B)
 	(remove (lambda (ATOM)
+		(hashx-get-handle atom-hash atom-assoc cache ATOM))
+		LIST-A)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (atoms-intersect LIST-A LIST-B)
+"
+  atoms-intersect LIST-A LIST-B
+
+  Return a list of all atoms that are both in LIST-A and in LIST-B.
+
+  This does the same thing as srfi-1 `lset-intersection` but will
+  usually be much much faster, if either list is more than ten atoms
+  long.
+
+  See also: atoms-subtract, remove-duplicate-atoms
+"
+	(define cache (make-hash-table))
+
+	(for-each (lambda (ITEM)
+		(hashx-set! atom-hash atom-assoc cache ITEM #f))
+		LIST-B)
+	(filter (lambda (ATOM)
 		(hashx-get-handle atom-hash atom-assoc cache ATOM))
 		LIST-A)
 )
