@@ -231,6 +231,12 @@
 
   'right-basis-size - Likewise.
 
+  'in-left-basis? ROW - Return #t if ROW is an Atom in the left basis;
+      else return #f. This predicate is much faster than searching the
+      left-basis list directly.
+
+  'in-right-basis? COL - Likewise.
+
   'left-duals COL - Return the set of rows for which the pair
       `(row, COL)` exists in the atomspace.  That is, return the set
           `{ x | (x,COL) exists in the atomspace }`
@@ -347,6 +353,8 @@
 			(r-basis #f)
 			(l-size 0)
 			(r-size 0)
+			(in-l-basis? #f)
+			(in-r-basis? #f)
 
 			; Caches for the left and right stars
 			(star-l-hit (make-atomic-box '()))
@@ -413,6 +421,16 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
+		(define (is-in-left-basis? ATOM)
+			(if (not in-l-basis?)
+				(set! in-l-basis? (make-aset-predicate (get-left-basis))))
+			(in-l-basis? ATOM))
+
+		(define (is-in-right-basis? ATOM)
+			(if (not in-r-basis?)
+				(set! in-r-basis? (make-aset-predicate (get-right-basis))))
+			(in-r-basis? ATOM))
+
 		; -------------------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
@@ -475,7 +493,12 @@
 			(define var (VARGEN))
 			(define rv (cog-value->list (cog-execute! (FUNC ITEM var))))
 			(if (cog-atom? var) (cog-extract-recursive! var))
-			rv)
+
+			; XXX FIXME the query can return duplicates.
+			; The `remove-duplicate-atoms` will remove the duplicates,
+			; but it pays a hefty performance premium. Better if this
+			; was done in C++, in the query call.
+			(remove-duplicate-atoms rv))
 
 		; -------------------------------------------------------
 		;
@@ -599,6 +622,8 @@
 				(f-right-basis      (overload 'right-basis get-right-basis))
 				(f-left-basis-size  (overload 'left-basis-size get-left-size))
 				(f-right-basis-size (overload 'right-basis-size get-right-size))
+				(f-in-left-basis?   (overload 'in-left-basis? is-in-left-basis?))
+				(f-in-right-basis?  (overload 'in-right-basis? is-in-right-basis?))
 				(f-left-stars       (overload 'left-stars get-left-stars))
 				(f-right-stars      (overload 'right-stars get-right-stars))
 				(f-left-duals       (overload 'left-duals get-left-duals))
@@ -619,6 +644,8 @@
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
+					((in-left-basis?)   f-in-left-basis?)
+					((in-right-basis?)  f-in-right-basis?)
 					((left-stars)       f-left-stars)
 					((right-stars)      f-right-stars)
 					((left-duals)       f-left-duals)
@@ -637,6 +664,8 @@
 					((right-basis)      (f-right-basis))
 					((left-basis-size)  (f-left-basis-size))
 					((right-basis-size) (f-right-basis-size))
+					((in-left-basis?)   (apply f-in-left-basis? args))
+					((in-right-basis?)  (apply f-in-right-basis? args))
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
 					((left-duals)       (apply f-left-duals args))

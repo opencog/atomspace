@@ -136,6 +136,9 @@
   name of a method to use, instead of 'pair-count, for obtaining
   numeric values. A typical example would be to use 'pair-freq
   to get the frequency p(x,y) of a pair, instead of the count N(x,y).
+
+  XXX FIXME -- assorted other methods provided by `add-pair-stars` are
+  missing, not implemented here. They should be added.
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
@@ -276,6 +279,9 @@
 
      { [(x,y), (x,z)] | both (x,y) and (x,z) are present in
                        the atomspace. }
+
+  XXX FIXME This could be made even faster, but that would require some
+  hefty work in C++.
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
@@ -298,17 +304,23 @@
 			(define rowset (cog-value->list (cog-execute! qry)))
 			(cog-extract-recursive! row-var)
 
+			; For filtered matrices, the query might return rows that
+			; are not actually in the matrix. These must be removed.
+			(define valid-rows (filter!
+				(lambda (ROW) (LLOBJ 'in-left-basis? ROW))
+				rowset))
+
 			; Argh. The rowset might include duplicates. This is a
 			; "feature", not a bug, with how MeetLink works. However,
 			; we now have to deduplicate.
-			(define uniqrows (delete-dup-atoms rowset))
+			(define uniq-rows (remove-duplicate-atoms valid-rows))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
 			(map
 				(lambda (ROW)
 					(map (lambda (COL) (LLOBJ 'make-pair ROW COL)) COL-TUPLE))
-				uniqrows)
+				uniq-rows)
 		)
 
 		; ---------------
@@ -335,15 +347,20 @@
 			(define colset (cog-value->list (cog-execute! qry)))
 			(cog-extract-recursive! col-var)
 
+			; Remove atoms not in basis.
+			(define valid-cols (filter!
+				(lambda (COL) (LLOBJ 'in-right-basis? COL))
+				colset))
+
 			; De-duplicate. This adds yet more complexity to above.
-			(define uniqcols (delete-dup-atoms colset))
+			(define uniq-cols (remove-duplicate-atoms valid-cols))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
 			(map
 				(lambda (COL)
 					(map (lambda (ROW) (LLOBJ 'make-pair ROW COL)) ROW-TUPLE))
-				uniqcols)
+				uniq-cols)
 		)
 
 		; ---------------

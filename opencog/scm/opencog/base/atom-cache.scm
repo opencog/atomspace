@@ -177,11 +177,13 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (delete-dup-atoms ATOM-LIST)
+(define-public (remove-duplicate-atoms ATOM-LIST)
 "
-  delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
+  remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as srfi-1 `delete-duplicates`, but is faster.
+  This does the same thing as srfi-1 `delete-duplicates` but is faster.
+
+  See also: keep-duplicate-atoms
 "
 	(define atom-set (make-atom-set))
 	(for-each atom-set ATOM-LIST)
@@ -190,13 +192,15 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (remove-duplicate-atoms ATOM-LIST)
+(define-public (delete-dup-atoms ATOM-LIST)
 "
-  remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
+  delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as srfi-1 `delete-duplicates` but is faster.
+  This does the same thing as srfi-1 `delete-duplicates`, but is faster.
+
+  Please use `remove-duplicate-atoms` in new code.
 "
-	(delete-dup-atoms ATOM-LIST)
+	(remove-duplicate-atoms ATOM-LIST)
 )
 
 ; ---------------------------------------------------------------------
@@ -210,6 +214,8 @@
   repeated calls to this function allows progressively higher
   multiplicities to be removed. For example, two calls to this function
   will cause all atoms that appear once or twice to be removed.
+
+  See also: remove-duplicate-atoms
 "
 	; Sort first, and then filter.
 	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
@@ -235,8 +241,11 @@
 
   Return a list of all atoms in LIST-A that are not in LIST-B.
 
-  This does the same thing as `lset-difference` but will usually be
-  much much faster, if either list is more than ten atoms long.
+  This does the same thing as srfi-1 `lset-difference`, but will
+  usually be much much faster, if either list is more than ten
+  atoms long.
+
+  See also: atoms-intersect, remove-duplicate-atoms
 "
 	(define cache (make-hash-table))
 
@@ -244,6 +253,30 @@
 		(hashx-set! atom-hash atom-assoc cache ITEM #f))
 		LIST-B)
 	(remove (lambda (ATOM)
+		(hashx-get-handle atom-hash atom-assoc cache ATOM))
+		LIST-A)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (atoms-intersect LIST-A LIST-B)
+"
+  atoms-intersect LIST-A LIST-B
+
+  Return a list of all atoms that are both in LIST-A and in LIST-B.
+
+  This does the same thing as srfi-1 `lset-intersection` but will
+  usually be much much faster, if either list is more than ten atoms
+  long.
+
+  See also: atoms-subtract, remove-duplicate-atoms
+"
+	(define cache (make-hash-table))
+
+	(for-each (lambda (ITEM)
+		(hashx-set! atom-hash atom-assoc cache ITEM #f))
+		LIST-B)
+	(filter (lambda (ATOM)
 		(hashx-get-handle atom-hash atom-assoc cache ATOM))
 		LIST-A)
 )
