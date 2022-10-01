@@ -475,7 +475,12 @@
 			(define var (VARGEN))
 			(define rv (cog-value->list (cog-execute! (FUNC ITEM var))))
 			(if (cog-atom? var) (cog-extract-recursive! var))
-			rv)
+
+			; XXX FIXME the query can return duplicates.
+			; The `remove-duplicate-atoms` will remove the duplicates,
+			; but it pays a hefty performance premium. Better if this
+			; was done in C++, in the query call.
+			(remove-duplicate-atoms rv))
 
 		; -------------------------------------------------------
 		;
