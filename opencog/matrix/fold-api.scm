@@ -276,6 +276,9 @@
 
      { [(x,y), (x,z)] | both (x,y) and (x,z) are present in
                        the atomspace. }
+
+  XXX FIXME This could be made even faster, but that would require some
+  hefty work in C++.
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
@@ -301,7 +304,7 @@
 			; Argh. The rowset might include duplicates. This is a
 			; "feature", not a bug, with how MeetLink works. However,
 			; we now have to deduplicate.
-			(define uniqrows (delete-dup-atoms rowset))
+			(define uniqrows (remove-duplicate-atoms rowset))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
@@ -336,7 +339,7 @@
 			(cog-extract-recursive! col-var)
 
 			; De-duplicate. This adds yet more complexity to above.
-			(define uniqcols (delete-dup-atoms colset))
+			(define uniqcols (remove-duplicate-atoms colset))
 
 			; Convert what the pattern engine returned to
 			; a list of scheme lists.
