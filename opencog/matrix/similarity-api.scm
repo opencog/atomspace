@@ -163,14 +163,31 @@
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		; XXX FIXME This is disasterously wrong, if the database contains
 		; similarities for several different kinds of matrices in it!!
+		; However, we don't currently have a "fetch all atoms that have
+		; this key on it" callback into storage nodes, so fixing it this
+		; way is ... hard. An alternative encoding is to encode
+		; similarities as (Evaluation (Predicate id-string) (Similarity ...))
+		; but that doubles the number of atoms... This encoding, if used,
+		; should be done outside of this object, somewhere else.
 		(define (fetch-sim-pairs)
 			(define elapsed-secs (make-elapsed-secs))
 			(load-atoms-of-type pair-sim-type)
 			(format #t "Elapsed time to load sims: ~A secs\n"
 				(elapsed-secs)))
 
+		; Caution: this can be terribly slow.
+		(define (get-all-elts)
+			(filter get-sim ((add-pair-stars LLOBJ) 'get-all-elts)))
+
 		(define (get-id)
 			(if ID ID (string-append (LLOBJ 'id) "-similarity")))
+
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((get-all-elts)     get-all-elts)
+				(else               #f)
+			))
 
 		(define (help)
 			(format #t
@@ -205,8 +222,9 @@
 				((wild-wild)      (get-wild-wild))
 
 				((fetch-pairs)    (fetch-sim-pairs))
-				((provides)       #f)
-				((filters?)       #f)
+				((get-all-elts)   (get-all-elts))
+				((provides)       (apply provides args))
+				((filters?)       #t)
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
