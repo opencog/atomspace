@@ -168,8 +168,21 @@
 			mtm-q)
 
 		(define (set-mmt-q)
+			; Backwards-compat wrapper for older datasets (pre Sept 2022).
+			; Older datasets do not distinguish between count and sum.
+			; The sum should be at (cog-value-ref (FloatValue ...) 2)
+			; but older datasets don't have a vector that long, and so
+			; it will throw exception. Catch the exception, and try again
+			; with (cog-value-ref (FloatValue ...) 1)
+			; For datasets with this problem, this is a valid work-around.
+			; Remove this after year 2027.
+			(define (backwards-compat-sum-count)
+				(catch #t
+					(lambda () (sup-obj 'total-sum-left))
+					(lambda (key . args) (sup-obj 'total-count-left))))
+
 			(if (not mmt-q)
-				(let ((tcl (sup-obj 'total-sum-left)))
+				(let ((tcl (backwards-compat-sum-count)))
 					(set-mmt-total)
 					(set! mmt-q (- (log2 mmt-total (* tcl tcl))))))
 			mmt-q)
