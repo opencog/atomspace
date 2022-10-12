@@ -418,31 +418,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     if (not recursive and not handle->isIncomingSetEmpty())
         return false;
 
-    // Atom seems to reside somewhere else. This "somewhere else" is
-    // assumed to lie underneath this space.
-    AtomSpace* other = handle->getAtomSpace();
-    if (other != this)
-    {
-        // If the Atom is in some other AtomSpace that is not in our
-        // environment, then it is a user error. ... Except that this
-        // can be hit during multi-threaded racing of add-delete, as
-        // witnessed by `UseCountUTest`.
-        if (not in_environ(handle)) return false;
-
-        // If this is a COW space, then force-add it, so that it
-        // can hide the atom in the deeper space.
-// XXX except this is wrong if recursive, we want to also delete the
-// recursives in this space!
-        if (_copy_on_write) {
-            const Handle& hide(add(handle, true));
-            hide->setAbsent();
-            return true;
-        }
-
-        // Delegate to the other atomspace for processing.
-        return other->extract_atom(handle, recursive);
-    }
-
     // If it is already marked, just return.
     if (handle->markForRemoval()) return false;
 
@@ -476,6 +451,30 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
     }
 
+    // Atom seems to reside somewhere else. This "somewhere else" is
+    // assumed to lie underneath this space.
+    AtomSpace* other = handle->getAtomSpace();
+    if (other != this)
+    {
+        // If the Atom is in some other AtomSpace that is not in our
+        // environment, then it is a user error. ... Except that this
+        // can be hit during multi-threaded racing of add-delete, as
+        // witnessed by `UseCountUTest`.
+        if (not in_environ(handle)) return false;
+
+        // If this is a COW space, then force-add it, so that it
+        // can hide the atom in the deeper space.
+// XXX except this is wrong if recursive, we want to also delete the
+// recursives in this space!
+        if (_copy_on_write) {
+            const Handle& hide(add(handle, true));
+            hide->setAbsent();
+            return true;
+        }
+
+        // Delegate to the other atomspace for processing.
+        return other->extract_atom(handle, recursive);
+    }
     // If the incoming set still is not empty, after the above recursive
     // delete, that means that there are atomspace frames above this
     // atom that have links in them. We must not wreck those links, so
