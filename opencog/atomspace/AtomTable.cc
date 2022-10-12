@@ -418,18 +418,21 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     if (not recursive and not handle->isIncomingSetEmpty())
         return false;
 
-    // Atom seems to reside somewhere else.
+    // Atom seems to reside somewhere else. This "somewhere else" is
+    // assumed to lie underneath this space.
     AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
         // If the Atom is in some other AtomSpace that is not in our
         // environment, then it is a user error. ... Except that this
         // can be hit during multi-threaded racing of add-delete, as
-        // witnessed by UseCountUTest.
+        // witnessed by `UseCountUTest`.
         if (not in_environ(handle)) return false;
 
         // If this is a COW space, then force-add it, so that it
         // can hide the atom in the deeper space.
+// XXX except this is wrong if recursive, we want to also delete the
+// recursives in this space!
         if (_copy_on_write) {
             const Handle& hide(add(handle, true));
             hide->setAbsent();
@@ -447,27 +450,27 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // atom's incoming set. This might not succeed, if those atoms are
     // in other (higher) atomspaces (because recursion must not reach up
     // into those).
-    if (recursive) {
-
+    if (recursive)
+    {
         HandleSeq is(handle->getIncomingSet());
         for (const Handle& his : is)
         {
             AtomSpace* other = his->getAtomSpace();
 
-            // Something is seriously screwed up if the incoming set
-            // is not in this atomspace, and its not a child of this
-            // atomspace.
+            // Something is seriously screwed up if the other atomspace
+            // is not equal to or above this atomspace. Space frames
+            // must be in stacking order.
             OC_ASSERT(nullptr == other or other == this or
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-            if (not his->isMarkedForRemoval()) {
-                if (other) {
-                    if (other != this) {
-                        other->extract_atom(his, true);
-                    } else {
-                        extract_atom(his, true);
-                    }
+// XXX FIXME this is not right for cow spaces
+            if (not his->isMarkedForRemoval() and other) {
+                // if (other != this and not _copy_on_write)
+                if (other != this) {
+                    other->extract_atom(his, true);
+                } else {
+                    extract_atom(his, true);
                 }
             }
         }
@@ -478,8 +481,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // atom that have links in them. We must not wreck those links, so
     // instead, just mark this atom as being absent (invisible). This
     // applies only to COW spaces. FWIW, UseCountUTest seems able to
-    // force the incoming-set ti be non-empty at this point. Not sure
-    // if this is a good thing, or if this should be "fixed".
+    // force the incoming-set to be non-empty at this point.
     if (_copy_on_write and not handle->isIncomingSetEmpty()) {
         // OC_ASSERT(_copy_on_write, "Internal error: expecting COW space!");
         handle->setAbsent();
