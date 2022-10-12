@@ -436,10 +436,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-// XXX FIXME this is not right for cow spaces, err well now it is...
             if (not his->isMarkedForRemoval() and other) {
-                if (other != this and not _copy_on_write) {
-                // if (other != this)
+                if (other != this) {
                     other->extract_atom(his, true);
                 } else {
                     extract_atom(his, true);
@@ -460,9 +458,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         if (not in_environ(handle)) return false;
 
         // If this is a COW space, then force-add it, so that it
-        // can hide the atom in the deeper space.
-// XXX except this is wrong if recursive, we want to also delete the
-// recursives in this space!
+        // can hide the atom in the deeper space. (Because for COW
+        // spaces, we are not allowed to reach down to its actual
+        // location to delete it there.)
         if (_copy_on_write) {
             const Handle& hide(add(handle, true));
             hide->setAbsent();
