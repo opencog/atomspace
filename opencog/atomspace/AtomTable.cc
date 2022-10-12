@@ -418,9 +418,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     if (not recursive and not handle->isIncomingSetEmpty())
         return false;
 
-    // If it is already marked, just return.
-    if (handle->markForRemoval()) return false;
-
     // If the recursive-flag is set, then extract all the links in the
     // atom's incoming set. This might not succeed, if those atoms are
     // in other (higher) atomspaces (because recursion must not reach up
@@ -439,10 +436,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-// XXX FIXME this is not right for cow spaces
+// XXX FIXME this is not right for cow spaces, err well now it is...
             if (not his->isMarkedForRemoval() and other) {
-                // if (other != this and not _copy_on_write)
-                if (other != this) {
+                if (other != this and not _copy_on_write) {
+                // if (other != this)
                     other->extract_atom(his, true);
                 } else {
                     extract_atom(his, true);
@@ -475,6 +472,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         // Delegate to the other atomspace for processing.
         return other->extract_atom(handle, recursive);
     }
+
+    // If it is already marked, just return.
+    if (handle->markForRemoval()) return false;
+
     // If the incoming set still is not empty, after the above recursive
     // delete, that means that there are atomspace frames above this
     // atom that have links in them. We must not wreck those links, so
