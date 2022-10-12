@@ -443,13 +443,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // If it is already marked, just return.
     if (handle->markForRemoval()) return false;
 
-    // If we are working in a COW space, don't actually remove the
-    // atom. Just mark it as being absent (invisible).
-    if (_copy_on_write) {
-        handle->setAbsent();
-        return true;
-    }
-
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
     if (recursive) {
@@ -476,6 +469,13 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
                 }
             }
         }
+    }
+
+    // If we are working in a COW space, don't actually remove the
+    // atom. Just mark it as being absent (invisible).
+    if (_copy_on_write) {
+        handle->setAbsent();
+        return true;
     }
 
     // This check avoids a race condition with the add() method.
