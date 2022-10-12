@@ -443,8 +443,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // If it is already marked, just return.
     if (handle->markForRemoval()) return false;
 
-    // If recursive-flag is set, also extract all the links in the atom's
-    // incoming set
+    // If the recursive-flag is set, then extract all the links in the
+    // atom's incoming set. This might not succeed, if those atoms are
+    // in other (higher) atomspaces (because recursion must not reach up
+    // into those).
     if (recursive) {
 
         HandleSeq is(handle->getIncomingSet());
@@ -471,9 +473,15 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
     }
 
-    // If we are working in a COW space, don't actually remove the
-    // atom. Just mark it as being absent (invisible).
-    if (_copy_on_write) {
+    // If the incoming set still is not empty, after the above recursive
+    // delete, that means that there are atomspace frames above this
+    // atom that have links in them. We must not wreck those links, so
+    // instead, just mark this atom as being absent (invisible). This
+    // applies only to COW spaces. FWIW, UseCountUTest seems able to
+    // force the incoming-set ti be non-empty at this point. Not sure
+    // if this is a good thing, or if this should be "fixed".
+    if (_copy_on_write and not handle->isIncomingSetEmpty()) {
+        // OC_ASSERT(_copy_on_write, "Internal error: expecting COW space!");
         handle->setAbsent();
         return true;
     }
@@ -661,7 +669,7 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
 
 /**
  * Returns the set of atoms of a given type, but only if they have
- * and empty outgoing set. 
+ * and empty outgoing set.
  *
  * @param The desired type.
  * @param Whether type subclasses should be considered.
