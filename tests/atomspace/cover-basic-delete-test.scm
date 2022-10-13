@@ -86,6 +86,7 @@
 	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
 
 	; The lower lower space was protected. Bot a and b should be there.
+	(cog-set-atomspace! lower-space)
 	(test-equal "lower-ok" 2 (length (cog-get-atoms 'Atom #t)))
 )
 (test-end basic-hi-delete)
