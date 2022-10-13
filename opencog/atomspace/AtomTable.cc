@@ -506,7 +506,8 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // force the incoming-set to be non-empty at this point.
     if (_copy_on_write and not handle->isIncomingSetEmpty()) {
         // OC_ASSERT(_copy_on_write, "Internal error: expecting COW space!");
-        handle->setAbsent();
+        const Handle& hide(add(handle, true));
+        hide->setAbsent();
         return true;
     }
 
