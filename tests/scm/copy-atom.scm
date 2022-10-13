@@ -21,9 +21,9 @@
 
 (test-assert "created copy" (not (nil? xca)))
 (test-assert "copy is an atom" (cog-atom? xca))
-(test-assert "copy exists" (equal? xca (cog-atom xca)))
+(test-assert "copy exists" (cog-equal? xca (cog-atom xca)))
 
-(test-assert "original and copy content compare" (equal? xca ca))
+(test-assert "original and copy content compare" (cog-equal? xca ca))
 (test-assert "original and copy differ" (not (eq? xca ca)))
 (test-assert "original and copy in different atmspaces"
 	(not (eq? (cog-atomspace xca) (cog-atomspace ca))))

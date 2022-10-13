@@ -167,6 +167,20 @@ SCM SchemeSmob::ss_atom_less_p (SCM sleft, SCM sright)
 	return SCM_BOOL_F;
 }
 
+/** Return #t if the contents compare, else return #f. */
+SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
+{
+	ValuePtr vleft(scm_to_protom(sleft));
+	ValuePtr vright(scm_to_protom(sright));
+	if (vleft == vright) return SCM_BOOL_T;
+
+	if (nullptr == vleft) return SCM_BOOL_F;
+	if (nullptr == vright) return SCM_BOOL_F;
+
+	if (*vleft == *vright) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
 /* ============================================================== */
 /** Return true if s is an atom. Invalid handles are not atoms. */
 
