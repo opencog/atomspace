@@ -643,6 +643,8 @@ std::string Atom::id_to_string() const
     if (_atom_space) ss << _atom_space->get_uuid();
     else ss << "-1";
     ss << "]";
+    if (isAbsent()) ss << "[absent]";
+    if (isMarkedForRemoval()) ss << " !!! ERROR: marked for removal!";
     return ss.str();
 }
 
