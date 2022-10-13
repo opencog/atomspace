@@ -58,6 +58,9 @@
 (begin
 
 	; Setup ----
+	(cog-atomspace-clear lower-space)
+	(cog-atomspace-clear upper-space)
+
 	(cog-set-atomspace! lower-space)
 	(define a (Concept "a"))
 	(define b (Concept "b"))
@@ -99,6 +102,9 @@
 (begin
 
 	; Setup ----
+	(cog-atomspace-clear lower-space)
+	(cog-atomspace-clear upper-space)
+
 	(cog-set-atomspace! lower-space)
 	(cog-atomspace-rw! lower-space)
 	(cog-atomspace-cow! #t lower-space)
