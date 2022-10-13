@@ -101,6 +101,7 @@
 	; Setup ----
 	(cog-set-atomspace! lower-space)
 	(cog-atomspace-rw! lower-space)
+	(cog-atomspace-cow! #t lower-space)
 	(define a (Concept "a"))
 	(define b (Concept "b"))
 
