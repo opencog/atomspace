@@ -495,17 +495,20 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         return other->extract_atom(handle, recursive);
     }
 
-    // If the incoming set still is not empty, after the above recursive
-    // delete, that means that there are atomspace frames above this
-    // atom that have links in them. We must not wreck those links, so
-    // instead, just mark this atom as being absent (invisible). This
-    // applies only to COW spaces. FWIW, UseCountUTest seems able to
-    // force the incoming-set to be non-empty at this point.
-    if (_copy_on_write and not handle->isIncomingSetEmpty()) {
-        // OC_ASSERT(_copy_on_write, "Internal error: expecting COW space!");
-        const Handle& hide(add(handle, true));
-        hide->setAbsent();
-        return true;
+    // For COW spaces, when there is some atom in a lower space, then
+    // we must hide that atom.  Otherwise, if there's nothing to hide,
+    // then we can just delete. (i.e. fall through and delete.)
+    if (_copy_on_write) {
+        for (const AtomSpacePtr& base: _environ)
+        {
+            const Handle& found = base->lookupHandle(handle);
+            if (found)
+            {
+                const Handle& hide(add(handle, true));
+                hide->setAbsent();
+                return true;
+            }
+        }
     }
 
     // If it is already marked, just return.
