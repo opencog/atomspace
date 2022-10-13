@@ -441,10 +441,11 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
     }
     else // if (not recursive)
+    if (0 < handle->getIncomingSetSize())
     {
         // User asked for a non-recursive remove, and the atom still
         // appears in incoming sets. Do nothing for the ordinary case.
-        if (not _copy_on_write and 0 < handle->getIncomingSetSize())
+        if (not _copy_on_write)
             return false;
 
         // If this is a copy-on-write space, and any of the links are
