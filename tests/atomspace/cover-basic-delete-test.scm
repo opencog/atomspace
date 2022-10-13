@@ -92,4 +92,38 @@
 (test-end basic-hi-delete)
 
 ; ===================================================================
+; Test clean extraction under covers.
+
+(define basic-clean-delete "test clean extraction below")
+(test-begin basic-clean-delete)
+(begin
+
+	; Setup ----
+	(cog-set-atomspace! lower-space)
+	(cog-atomspace-rw! lower-space)
+	(define a (Concept "a"))
+	(define b (Concept "b"))
+
+	(cog-set-atomspace! upper-space)
+	(cog-atomspace-cow! #t upper-space)
+	(define li (Link a b))
+
+	; Test ---
+	(cog-set-atomspace! lower-space)
+
+	(test-equal "lower-size" 2 (length (cog-get-atoms 'Atom #t)))
+	(test-assert "extract-works" (cog-extract! a))
+	(test-equal "ex-lower-size" 1 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "lower-b-only" (list b) (cog-get-atoms 'Atom #t))
+	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
+
+	; The upper space was COW, we expect the link to still be there.
+	(cog-set-atomspace! upper-space)
+	(test-equal "upper-OK" 3 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "upper-OK-list" 1 (length (cog-get-all-roots)))
+	(test-equal "upper-list" (list li) (cog-get-all-roots))
+)
+(test-end basic-clean-delete)
+
+; ===================================================================
 (opencog-test-end)
