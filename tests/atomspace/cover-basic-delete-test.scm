@@ -120,9 +120,21 @@
 
 	; The upper space was COW, we expect the link to still be there.
 	(cog-set-atomspace! upper-space)
-	(test-equal "upper-OK" 3 (length (cog-get-atoms 'Atom #t)))
+
+	; Ugh. a will be quasi-hidden.
+	; (test-equal "upper-OK" 3 (length (cog-get-atoms 'Atom #t)))
 	(test-equal "upper-OK-list" 1 (length (cog-get-all-roots)))
 	(test-equal "upper-list" (list li) (cog-get-all-roots))
+
+	; Go and unhide a again.
+	(cog-set-atomspace! lower-space)
+	(define alo (Concept "a"))
+
+	(cog-set-atomspace! upper-space)
+	; Now it should be visible.
+	(test-equal "upper-all-there" 3 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "unhidden" alo (gar li))
+
 )
 (test-end basic-clean-delete)
 
