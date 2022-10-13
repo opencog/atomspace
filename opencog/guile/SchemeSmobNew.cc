@@ -724,9 +724,6 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
 	Handle h = verify_handle(satom, "cog-extract!");
 
-	// The extract will fail/log warning if the incoming set isn't null.
-	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
-
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-extract!");
