@@ -176,10 +176,12 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 			// Do not perform content compare! Why? Because the atomspace
 			// already does this for us.  If we have two different pointers
-			// but their contents compare OK, they must be inn different
+			// but their contents compare OK, they must be in different
 			// atomspaces, having different TV's and Values on them. They
-			// are NOT the same atom! NO to content-compare!
-			// if (**av == **bv) return SCM_BOOL_T; // content-compare!
+			// are NOT the same atom! NO to content-compare for atoms!
+			if ((*av)->is_atom()) return SCM_BOOL_F;
+
+			if (**av == **bv) return SCM_BOOL_T; // content-compare!
 			return SCM_BOOL_F;
 		}
 	}
