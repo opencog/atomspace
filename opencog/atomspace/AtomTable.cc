@@ -222,13 +222,19 @@ Handle AtomSpace::get_atom(const Handle& a) const
 /// returns that atom. Copies over values in the process.
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    // If force-adding, and a version of this atom is already in
-    // the local atomspace, then return that. Do not recurse.
-    if (force) {
-        const Handle& hc(typeIndex.findAtom(orig));
-        if (hc and not hc->isAbsent()) return hc;
-        return Handle::UNDEFINED;
+    // If we have a version of this atom in this AtomSpace, return it.
+    // If it was previously marked hidden, unhide it first.
+    const Handle& hc(typeIndex.findAtom(orig));
+    if (hc) {
+        if (hc->isAbsent()) {
+            if (_read_only) return Handle::UNDEFINED;
+            hc->setPresent();
+        }
+        return hc;
     }
+
+    // If force-adding, do not recurse. We don't have it.
+    if (force) return Handle::UNDEFINED;
 
     // If this is not a COW atomspace, then search recursively for
     // some version, any version of this atom in any parent atomspace.
