@@ -38,7 +38,14 @@
 (for-each (lambda (space)
 		(test-equal "space-env-size" 1 (length (cog-atomspace-env space)))
 		(test-equal "space-parent" curr-space (car (cog-atomspace-env space)))
-		(set! curr-space (car (cog-atomspace-env space)))
+
+		; Verify atomspaces are distinct. The problem here is
+		; that the equal? predicate on atomspaces should not do
+		; a content-compare (as all of these atomspaces are empty
+		; and thus equal content-wise.
+		(test-assert "space-distinct"
+			(not (equal? space (car (cog-atomspace-env space)))))
+		(set! curr-space space)
 	)
 	; Test all but the first.
 	(cdr space-list))
