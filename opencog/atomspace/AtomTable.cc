@@ -495,9 +495,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         return other->extract_atom(handle, recursive);
     }
 
-    // If it is already marked, just return.
-    if (handle->markForRemoval()) return false;
-
     // If the incoming set still is not empty, after the above recursive
     // delete, that means that there are atomspace frames above this
     // atom that have links in them. We must not wreck those links, so
@@ -510,6 +507,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         hide->setAbsent();
         return true;
     }
+
+    // If it is already marked, just return.
+    if (handle->markForRemoval()) return false;
 
     // This check avoids a race condition with the add() method.
     // The add() method installs the atom into the incoming set,
