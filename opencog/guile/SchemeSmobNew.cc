@@ -729,15 +729,16 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 		ss_get_env_as("cog-extract!");
 
 	// AtomSpace::extract_atom() returns true if atom was extracted,
-	// else returns false
+	// else returns false.
 	bool rc = asp->extract_atom(h, false);
+	if (rc)
+	{
+		// Clobber the handle, too.
+		*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
+		scm_remember_upto_here_1(satom);
+		return SCM_BOOL_T;
+	}
 
-	// Clobber the handle, too.
-	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
-	scm_remember_upto_here_1(satom);
-
-	// rc should always be true at this point ...
-	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
