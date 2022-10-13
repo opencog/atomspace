@@ -413,11 +413,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Report success if its already gone.
     if (nullptr == handle) return true;
 
-    // User asked for a non-recursive remove, and the
-    // atom is still referenced. So, do nothing.
-    if (not recursive and not handle->isIncomingSetEmpty())
-        return false;
-
     // If the recursive-flag is set, then extract all the links in the
     // atom's incoming set. This might not succeed, if those atoms are
     // in other (higher) atomspaces (because recursion must not reach up
@@ -444,6 +439,28 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
                 }
             }
         }
+    }
+    else // if (not recursive)
+    {
+        // User asked for a non-recursive remove, and the atom still
+        // appears in incoming sets. Do nothing for the ordinary case.
+        if (not _copy_on_write and 0 < handle->getIncomingSetSize())
+            return false;
+
+        // If this is a copy-on-write space, and any of the links are
+        // in this atomspace, then do nothing. If they are all elsewhere,
+        // then we must mask.
+        HandleSeq is(handle->getIncomingSet());
+        for (const Handle& his : is)
+        {
+            AtomSpace* other = his->getAtomSpace();
+            if (this == other) return false;
+        }
+
+        // If we are here, then mask.
+        const Handle& hide(add(handle, true));
+        hide->setAbsent();
+        return true;
     }
 
     // Atom seems to reside somewhere else. This "somewhere else" is
