@@ -19,34 +19,35 @@
 
 (define basic-lo-delete "test basic extract from below")
 (test-begin basic-lo-delete)
+(begin
 
-; Setup ----
-(cog-set-atomspace! lower-space)
-(define a (Concept "a"))
-(define b (Concept "b"))
+	; Setup ----
+	(cog-set-atomspace! lower-space)
+	(define a (Concept "a"))
+	(define b (Concept "b"))
 
-(cog-set-atomspace! upper-space)
-(define li (Link a b))
+	(cog-set-atomspace! upper-space)
+	(define li (Link a b))
 
-; Test ---
-(cog-set-atomspace! lower-space)
+	; Test ---
+	(cog-set-atomspace! lower-space)
 
-(test-equal "lower-size" 2 (length (cog-get-atoms 'Atom #t)))
-(test-assert "extract-fail" (not (cog-extract! a)))
-(test-equal "ex-lower-size" 2 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "lower-size" 2 (length (cog-get-atoms 'Atom #t)))
+	(test-assert "extract-fail" (not (cog-extract! a)))
+	(test-equal "ex-lower-size" 2 (length (cog-get-atoms 'Atom #t)))
 
-(test-assert "extract-works" (cog-extract-recursive! a))
-(test-equal "post-ex-lower-size" 1 (length (cog-get-atoms 'Atom #t)))
+	(test-assert "extract-works" (cog-extract-recursive! a))
+	(test-equal "post-ex-lower-size" 1 (length (cog-get-atoms 'Atom #t)))
 
-(test-equal "empty-income" 0 (length (cog-incoming-set b)))
+	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
 
-; Because the upper space was not protected, we expect the recursive
-; delete to have blown away the link. Protection requires configing
-; the COW flag correctly.
-(cog-set-atomspace! upper-space)
-(test-equal "upper-blown" 1 (length (cog-get-atoms 'Atom #t)))
-(test-equal "upper-b-only" (list b) (cog-get-atoms 'Atom #t))
-
+	; Because the upper space was not protected, we expect the recursive
+	; delete to have blown away the link. Protection requires configing
+	; the COW flag correctly.
+	(cog-set-atomspace! upper-space)
+	(test-equal "upper-blown" 1 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "upper-b-only" (list b) (cog-get-atoms 'Atom #t))
+)
 (test-end basic-lo-delete)
 
 ; ===================================================================
