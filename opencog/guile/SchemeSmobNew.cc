@@ -167,6 +167,20 @@ SCM SchemeSmob::ss_atom_less_p (SCM sleft, SCM sright)
 	return SCM_BOOL_F;
 }
 
+/** Return #t if the contents compare, else return #f. */
+SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
+{
+	ValuePtr vleft(scm_to_protom(sleft));
+	ValuePtr vright(scm_to_protom(sright));
+	if (vleft == vright) return SCM_BOOL_T;
+
+	if (nullptr == vleft) return SCM_BOOL_F;
+	if (nullptr == vright) return SCM_BOOL_F;
+
+	if (*vleft == *vright) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
 /* ============================================================== */
 /** Return true if s is an atom. Invalid handles are not atoms. */
 
@@ -724,23 +738,21 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
 	Handle h = verify_handle(satom, "cog-extract!");
 
-	// The extract will fail/log warning if the incoming set isn't null.
-	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
-
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-extract!");
 
 	// AtomSpace::extract_atom() returns true if atom was extracted,
-	// else returns false
+	// else returns false.
 	bool rc = asp->extract_atom(h, false);
+	if (rc)
+	{
+		// Clobber the handle, too.
+		*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
+		scm_remember_upto_here_1(satom);
+		return SCM_BOOL_T;
+	}
 
-	// Clobber the handle, too.
-	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
-	scm_remember_upto_here_1(satom);
-
-	// rc should always be true at this point ...
-	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 

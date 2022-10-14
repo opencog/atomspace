@@ -47,6 +47,7 @@ cog-atomspace-uuid
 cog-confidence
 cog-count
 cog-count-atoms
+cog-equal?
 cog-extract!
 cog-extract-recursive!
 cog-get-subtypes

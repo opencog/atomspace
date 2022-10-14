@@ -222,13 +222,19 @@ Handle AtomSpace::get_atom(const Handle& a) const
 /// returns that atom. Copies over values in the process.
 Handle AtomSpace::check(const Handle& orig, bool force)
 {
-    // If force-adding, and a version of this atom is already in
-    // the local atomspace, then return that. Do not recurse.
-    if (force) {
-        const Handle& hc(typeIndex.findAtom(orig));
-        if (hc and not hc->isAbsent()) return hc;
-        return Handle::UNDEFINED;
+    // If we have a version of this atom in this AtomSpace, return it.
+    // If it was previously marked hidden, unhide it first.
+    const Handle& hc(typeIndex.findAtom(orig));
+    if (hc) {
+        if (hc->isAbsent()) {
+            if (_read_only) return Handle::UNDEFINED;
+            hc->setPresent();
+        }
+        return hc;
     }
+
+    // If force-adding, do not recurse. We don't have it.
+    if (force) return Handle::UNDEFINED;
 
     // If this is not a COW atomspace, then search recursively for
     // some version, any version of this atom in any parent atomspace.
@@ -413,23 +419,72 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Report success if its already gone.
     if (nullptr == handle) return true;
 
-    // User asked for a non-recursive remove, and the
-    // atom is still referenced. So, do nothing.
-    if (not recursive and not handle->isIncomingSetEmpty())
-        return false;
+    // If the recursive-flag is set, then extract all the links in the
+    // atom's incoming set. This might not succeed, if those atoms are
+    // in other (higher) atomspaces (because recursion must not reach up
+    // into those).
+    if (recursive)
+    {
+        HandleSeq is(handle->getIncomingSet());
+        for (const Handle& his : is)
+        {
+            AtomSpace* other = his->getAtomSpace();
 
-    // Atom seems to reside somewhere else.
+            // Something is seriously screwed up if the other atomspace
+            // is not equal to or above this atomspace. Space frames
+            // must be in stacking order.
+            OC_ASSERT(nullptr == other or other == this or
+                      other->in_environ(handle),
+                "AtomSpace::extract() internal error, non-DAG membership.");
+
+            if (not his->isMarkedForRemoval() and other) {
+                if (other != this) {
+                    other->extract_atom(his, true);
+                } else {
+                    extract_atom(his, true);
+                }
+            }
+        }
+    }
+    else // if (not recursive)
+    if (0 < handle->getIncomingSetSize())
+    {
+        // User asked for a non-recursive remove, and the atom still
+        // appears in incoming sets. Do nothing for the ordinary case.
+        if (not _copy_on_write)
+            return false;
+
+        // If this is a copy-on-write space, and any of the links are
+        // in this atomspace, then do nothing. If they are all elsewhere,
+        // then we must mask.
+        HandleSeq is(handle->getIncomingSet());
+        for (const Handle& his : is)
+        {
+            AtomSpace* other = his->getAtomSpace();
+            if (this == other) return false;
+        }
+
+        // If we are here, then mask.
+        const Handle& hide(add(handle, true));
+        hide->setAbsent();
+        return true;
+    }
+
+    // Atom seems to reside somewhere else. This "somewhere else" is
+    // assumed to lie underneath this space.
     AtomSpace* other = handle->getAtomSpace();
     if (other != this)
     {
         // If the Atom is in some other AtomSpace that is not in our
         // environment, then it is a user error. ... Except that this
         // can be hit during multi-threaded racing of add-delete, as
-        // witnessed by UseCountUTest.
+        // witnessed by `UseCountUTest`.
         if (not in_environ(handle)) return false;
 
         // If this is a COW space, then force-add it, so that it
-        // can hide the atom in the deeper space.
+        // can hide the atom in the deeper space. (Because for COW
+        // spaces, we are not allowed to reach down to its actual
+        // location to delete it there.)
         if (_copy_on_write) {
             const Handle& hide(add(handle, true));
             hide->setAbsent();
@@ -440,43 +495,24 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         return other->extract_atom(handle, recursive);
     }
 
-    // If it is already marked, just return.
-    if (handle->markForRemoval()) return false;
-
-    // If we are working in a COW space, don't actually remove the
-    // atom. Just mark it as being absent (invisible).
+    // For COW spaces, when there is some atom in a lower space, then
+    // we must hide that atom.  Otherwise, if there's nothing to hide,
+    // then we can just delete. (i.e. fall through and delete.)
     if (_copy_on_write) {
-        handle->setAbsent();
-        return true;
-    }
-
-    // If recursive-flag is set, also extract all the links in the atom's
-    // incoming set
-    if (recursive) {
-
-        HandleSeq is(handle->getIncomingSet());
-        for (const Handle& his : is)
+        for (const AtomSpacePtr& base: _environ)
         {
-            AtomSpace* other = his->getAtomSpace();
-
-            // Something is seriously screwed up if the incoming set
-            // is not in this atomspace, and its not a child of this
-            // atomspace.
-            OC_ASSERT(nullptr == other or other == this or
-                      other->in_environ(handle),
-                "AtomSpace::extract() internal error, non-DAG membership.");
-
-            if (not his->isMarkedForRemoval()) {
-                if (other) {
-                    if (other != this) {
-                        other->extract_atom(his, true);
-                    } else {
-                        extract_atom(his, true);
-                    }
-                }
+            const Handle& found = base->lookupHandle(handle);
+            if (found)
+            {
+                const Handle& hide(add(handle, true));
+                hide->setAbsent();
+                return true;
             }
         }
     }
+
+    // If it is already marked, just return.
+    if (handle->markForRemoval()) return false;
 
     // This check avoids a race condition with the add() method.
     // The add() method installs the atom into the incoming set,
@@ -661,7 +697,7 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
 
 /**
  * Returns the set of atoms of a given type, but only if they have
- * and empty outgoing set. 
+ * and empty outgoing set.
  *
  * @param The desired type.
  * @param Whether type subclasses should be considered.

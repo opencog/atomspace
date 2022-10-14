@@ -527,6 +527,28 @@
        #f
 ")
 
+(set-procedure-property! cog-equal? 'documentation
+"
+ cog-equal? L-ATOM R-ATOM
+    Return #t if the contents of L-ATOM and R-ATOM are the same, else
+    return #f.  This can be used to compare two atoms in two different
+    AtomSpaces for equality. A content-compare is performed, i.e. a
+    check is made to see if they have the same name or the same outgoing
+    set. The Values hanging off the atoms are NOT compared; they might
+    differ.
+
+    Example:
+       guile> (define space1 (cog-atomspace))
+       guile> (define a1 (Concept \"abc\"))
+       guile> (define space2 (cog-new-atomspace))
+       guile> (cog-set-atomspace! space2)
+       guile> (define a2 (Concept \"abc\"))
+       guile> (equal? a1 a2)
+       #f
+       guile> (cog-equal? a1 a2)
+       #t
+")
+
 (set-procedure-property! cog-inc-count! 'documentation
 "
   cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
