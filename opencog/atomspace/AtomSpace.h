@@ -35,6 +35,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
+#include <opencog/atomspace/Frame.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
@@ -53,7 +54,7 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
  * OpenCog. It contains methods to add and remove atoms, as well as to
  * retrieve specific sets according to different criteria.
  */
-class AtomSpace : public Atom
+class AtomSpace : public Frame
 {
     friend class StorageNode;     // Needs to call add() directly.
 
@@ -87,8 +88,6 @@ class AtomSpace : public Atom
     // we keep two distinct lists to avoid the CPU overhead of casting
     // between the two different pointer types (its significant).
     std::vector<AtomSpacePtr> _environ;
-    HandleSeq _outgoing;
-    std::string _name;
 
     /** Find out about atom type additions in the NameServer. */
     NameServer& _nameserver;
@@ -140,7 +139,6 @@ public:
     AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
-    bool is_atom(void) const { return true; }
     bool is_node(void) const { return true; }
     bool is_link(void) const { return true; }
     UUID get_uuid(void) const { return _uuid; }
@@ -539,7 +537,12 @@ static inline Handle HandleCast(AtomSpace* as)
 template< class... Args >
 AtomSpacePtr createAtomSpace( Args&&... args )
 {
-   return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
+	AtomSpacePtr asp(std::make_shared<AtomSpace>(std::forward<Args>(args) ...));
+	// Unfortunately, Frame::install() cannot be called in the ctor
+	// because shared_from_this() cannot be called in the ctor.
+	// So we do this after the ctor has finished.
+	asp->install();
+	return asp;
 }
 
 /** @}*/

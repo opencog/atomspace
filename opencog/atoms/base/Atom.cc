@@ -445,7 +445,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
     {
         for (const WinkPtr& w : bucket.second)
         {
-            WEAKLY_DO(l, w, { if (not as or as->in_environ(l)) return false; })
+            WEAKLY_DO(l, w, { if (not as or as->in_environ(l) or nameserver().isA(_type, FRAME)) return false; })
         }
     }
     return true;
@@ -455,7 +455,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
 
-    if (as)
+    if (as and not nameserver().isA(_type, FRAME))
     {
         // If the _copy_on_write flag is set, we need to
         // deduplicate the incoming set.
@@ -501,7 +501,8 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
-    if (as) {
+    if (as and not nameserver().isA(_type, FRAME))
+    {
         // If the _copy_on_write flag is set, we need to
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
@@ -565,7 +566,8 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     const auto bucket = _incoming_set->_iset.find(type);
     if (bucket == _incoming_set->_iset.cend()) return empty_set;
 
-    if (as) {
+    if (as and not nameserver().isA(_type, FRAME))
+    {
         // If the _copy_on_write flag is set, we need to
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
@@ -617,7 +619,8 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 
     size_t cnt = 0;
 
-    if (as) {
+    if (as and not nameserver().isA(_type, FRAME))
+    {
         // If the _copy_on_write flag is set, we need to
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
