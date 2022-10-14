@@ -10,6 +10,7 @@ ENDIF (HAVE_FOLLY)
 ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomTable.cc
+	Frame.cc
 	Transient.cc
 	TypeIndex.cc
 )
@@ -47,6 +48,7 @@ INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AtomSpace.h
+	Frame.h
 	Transient.h
 	TypeIndex.h
 	version.h
