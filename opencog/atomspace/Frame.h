@@ -50,8 +50,13 @@ public:
 	/**
 	 * Constructor and destructor for this class.
 	 */
+	Frame(Type t)
+		: Atom(t)
+	{
+		init();
+	}
 	Frame(Type t, const HandleSeq oset)
-		:  Atom(t), _outgoing(std::move(oset))
+		: Atom(t), _outgoing(std::move(oset))
 	{
 		init();
 	}

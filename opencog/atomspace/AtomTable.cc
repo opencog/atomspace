@@ -42,9 +42,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-//#define DPRINTF printf
-#define DPRINTF(...)
-
 // Uncomment the following to check at run-time atom hash collisions,
 // that is whether 2 different atoms a1 and a2 have the same hash,
 // formally
@@ -85,7 +82,7 @@ void AtomSpace::init(void)
  * temporary results during evaluation, pattern matching and inference.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    Atom(ATOM_SPACE),
+    Frame(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(transient),
     _transient(transient),
@@ -103,7 +100,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
 }
 
 AtomSpace::AtomSpace(AtomSpacePtr& parent) :
-    Atom(ATOM_SPACE),
+    Frame(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
@@ -121,13 +118,12 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
 }
 
 AtomSpace::AtomSpace(const HandleSeq& bases) :
-    Atom(ATOM_SPACE),
+    Frame(ATOM_SPACE, bases),
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
     _nameserver(nameserver())
 {
-    _outgoing = bases;
     for (const Handle& base : bases)
     {
         _environ.push_back(AtomSpaceCast(base));
