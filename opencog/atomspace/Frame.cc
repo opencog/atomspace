@@ -75,8 +75,7 @@ void Frame::scrub_incoming_set(void)
 
 	// Iterate over all frame types
 	std::vector<Type> framet;
-	std::vector<Type>::iterator it = framet.begin();
-	nameserver().getChildrenRecursive(FRAME, it);
+	nameserver().getChildrenRecursive(FRAME, back_inserter(framet));
 	for (Type t : framet)
 	{
 		auto bucket = _incoming_set->_iset.find(t);
