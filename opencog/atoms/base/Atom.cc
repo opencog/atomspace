@@ -517,9 +517,14 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
             }
 
             // Use lookupHandle to find the shallowest copy.
+            // It might be an atom that is marked absent,
+            // and so turns into nullptr.
             IncomingSet iset;
             for (const Handle& h: hs)
-                iset.push_back(as->lookupHandle(h));
+            {
+                const Handle& local(as->lookupHandle(h));
+                if (local) iset.emplace_back(local);
+            }
             return iset;
         }
 
@@ -574,10 +579,15 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
                 }
             }
 
-            // Use lookupHandle to find the shallowest copy.
+            // Use lookupHandle() to find the shallowest copy.
+            // It might be an atom that is marked absent,
+            // and so turns into nullptr.
             IncomingSet iset;
             for (const Handle& h: hs)
-                iset.push_back(as->lookupHandle(h));
+            {
+                const Handle& local(as->lookupHandle(h));
+                if (local) iset.emplace_back(local);
+            }
             return iset;
         }
 
