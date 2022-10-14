@@ -84,7 +84,14 @@
 	(define (get-count KEY ATOM)     (get-stuff KEY ATOM 1))
 	(define (get-length KEY ATOM)    (get-stuff KEY ATOM 2))
 	(define (get-amplitude KEY ATOM) (get-stuff KEY ATOM 3))
-	(define (get-sum KEY ATOM)       (get-stuff KEY ATOM 4))
+
+	; (define (get-sum KEY ATOM)       (get-stuff KEY ATOM 4))
+	; Backwards-compat for older datasets (pre Spet 2022) that don't
+	; have sum marginals. For these, sum is the same as count.
+	; Remove this after year 2027, and use above, instead.
+	(define (get-sum KEY ATOM)
+		(catch 'out-of-range (lambda () (get-stuff KEY ATOM 4))
+			(lambda (key . args) (get-count KEY ATOM))))
 
 	;--------
 	; The internal sum is over the left items, so hang on the left.

@@ -134,9 +134,9 @@
 	; (define (get-sum ATOM)       (get-thing ATOM 4))
 	; Backwards-compat for older datasets (pre Spet 2022) that don't
 	; have sum marginals. For these, sum is the same as count.
-	; Remove this after year 2027.
+	; Remove this after year 2027, and use above, instead.
 	(define (get-sum ATOM)
-		(catch #t (lambda () (get-thing ATOM 4))
+		(catch 'out-of-range (lambda () (get-thing ATOM 4))
 			(lambda (key . args) (get-count ATOM))))
 
 	;--------
