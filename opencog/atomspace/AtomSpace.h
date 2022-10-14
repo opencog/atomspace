@@ -537,7 +537,12 @@ static inline Handle HandleCast(AtomSpace* as)
 template< class... Args >
 AtomSpacePtr createAtomSpace( Args&&... args )
 {
-   return std::make_shared<AtomSpace>(std::forward<Args>(args) ...);
+	AtomSpacePtr asp(std::make_shared<AtomSpace>(std::forward<Args>(args) ...));
+	// Unfortunately, Frame::install() cannot be called in the ctor
+	// because shared_from_this() cannot be called in the ctor.
+	// So we do this after the ctor has finished.
+	asp->install();
+	return asp;
 }
 
 /** @}*/

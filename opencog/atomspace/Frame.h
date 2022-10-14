@@ -43,8 +43,11 @@ private:
 protected:
 	HandleSeq _outgoing;
 	std::string _name;
-	virtual void install();
 	virtual void remove();
+
+public:
+	// Must be public, so that createAtomSpace() can call this.
+	virtual void install();
 
 public:
 	/**

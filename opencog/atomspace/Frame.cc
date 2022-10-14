@@ -33,7 +33,10 @@ void Frame::init()
 
 	// Set up the incoming set.
 	keep_incoming_set();
-	install();
+
+	// Cannot call shared_from_this() in the ctor, so cannot call
+	// install() here.
+	// install();
 }
 
 Frame::~Frame()
