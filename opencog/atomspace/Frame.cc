@@ -30,6 +30,10 @@ void Frame::init()
 {
 	if (not nameserver().isA(_type, FRAME))
 		throw InvalidParamException(TRACE_INFO, "Not a Frame!");
+
+	// Set up the incoming set.
+	keep_incoming_set();
+	install();
 }
 
 Frame::~Frame()
