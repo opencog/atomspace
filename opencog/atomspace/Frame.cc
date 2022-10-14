@@ -44,6 +44,11 @@ Frame::~Frame()
 	// Cannot call this in the dtor, because cannot call
 	// shared_from_this() in the dtor.
 	// remove();
+
+	// Because we cannot remove ourselves directly, via above,
+	// we can at least remove other dead weak pointerss.
+	for (Handle& h : _outgoing)
+		FrameCast(h)->scrub_incoming_set();
 }
 
 /// Place `this` into the incoming set of each outgoing frame
@@ -60,4 +65,27 @@ void Frame::remove()
 	Handle lll(get_handle());
 	for (Handle& h : _outgoing)
 		h->remove_atom(lll);
+}
+
+/// Remove all dead frames in the incoming set.
+void Frame::scrub_incoming_set(void)
+{
+	if (nullptr == _incoming_set) return;
+	INCOMING_UNIQUE_LOCK;
+
+	// Iterate over all frame types
+	std::vector<Type> framet;
+	std::vector<Type>::iterator it = framet.begin();
+	nameserver().getChildrenRecursive(FRAME, it);
+	for (Type t : framet)
+	{
+		auto bucket = _incoming_set->_iset.find(t);
+		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
+		{
+			// if the weak pointer points at nothing, remove it.
+			Handle h(bi->lock());
+			if (h) bi++;
+			else bi = bucket->second.erase(bi);
+		}
+	}
 }

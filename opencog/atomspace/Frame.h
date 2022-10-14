@@ -43,6 +43,7 @@ private:
 protected:
 	HandleSeq _outgoing;
 	std::string _name;
+	void scrub_incoming_set();
 	virtual void remove();
 
 public:
@@ -67,6 +68,10 @@ public:
 
 	bool is_atom(void) const { return true; }
 };
+
+typedef std::shared_ptr<Frame> FramePtr;
+static inline FramePtr FrameCast(const ValuePtr& a)
+    { return std::dynamic_pointer_cast<Frame>(a); }
 
 /** @}*/
 } // namespace opencog
