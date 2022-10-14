@@ -41,7 +41,9 @@ void Frame::init()
 
 Frame::~Frame()
 {
-	remove();
+	// Cannot call this in the dtor, because cannot call
+	// shared_from_this() in the dtor.
+	// remove();
 }
 
 /// Place `this` into the incoming set of each outgoing frame
