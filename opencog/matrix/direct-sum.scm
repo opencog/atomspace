@@ -164,21 +164,21 @@
 			(define bt (LLB 'left-type))
 			(define tat (if (cog-atom? at) at (Type at)))
 			(define tbt (if (cog-atom? bt) bt (Type bt)))
-			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
+			(if (cog-equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		(define (get-right-type)
 			(define at (LLA 'right-type))
 			(define bt (LLB 'right-type))
 			(define tat (if (cog-atom? at) at (Type at)))
 			(define tbt (if (cog-atom? bt) bt (Type bt)))
-			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
+			(if (cog-equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		(define (get-pair-type)
 			(define at (LLA 'pair-type))
 			(define bt (LLB 'pair-type))
 			(define tat (if (cog-atom? at) at (Type at)))
 			(define tbt (if (cog-atom? bt) bt (Type bt)))
-			(if (equal? tat tbt) tat (TypeChoice tat tbt)))
+			(if (cog-equal? tat tbt) tat (TypeChoice tat tbt)))
 
 		; ---------------
 		; Delegate the pair fetching to each subobject.
@@ -206,7 +206,7 @@
 		; There's some atomspace utility that handles this already...
 		(define (symb-comp? ATM MTH)
 			(if (cog-atom? MTH)
-				(equal? (Type (cog-type ATM)) MTH)
+				(cog-equal? (Type (cog-type ATM)) MTH)
 				(equal? (cog-type ATM) MTH)))
 
 		; Create a pair, whether or not it exists.
@@ -269,7 +269,7 @@
 			; We used disjoint-left to construct it, so use same to test it.
 			(if (and (not disjoint-left)
 					(equal? 'EvaluationLink (cog-type PAIR))
-					(equal? pred-node (cog-outgoing-atom PAIR 0)))
+					(cog-equal? pred-node (cog-outgoing-atom PAIR 0)))
 				(cog-outgoing-atom PAIR 1)
 
 				; It's not a wild-card. Delegate.
@@ -284,7 +284,7 @@
 			; We used disjoint-right to construct it, so use same to test it.
 			(if (and (not disjoint-right)
 					(equal? 'EvaluationLink (cog-type PAIR))
-					(equal? pred-node (cog-outgoing-atom PAIR 0)))
+					(cog-equal? pred-node (cog-outgoing-atom PAIR 0)))
 				(cog-outgoing-atom PAIR 2)
 
 				; It's not a wild-card. Delegate.

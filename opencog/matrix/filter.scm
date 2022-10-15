@@ -442,12 +442,12 @@
 	;
 	(define (left-basis-pred ITEM)
 		(not (any
-			(lambda (knockout) (equal? knockout ITEM))
+			(lambda (knockout) (cog-equal? knockout ITEM))
 			LEFT-KNOCKOUT)))
 
 	(define (right-basis-pred ITEM)
 		(not (any
-			(lambda (knockout) (equal? knockout ITEM))
+			(lambda (knockout) (cog-equal? knockout ITEM))
 			RIGHT-KNOCKOUT)))
 
 	(define (pair-pred PAIR) #t)
@@ -479,12 +479,12 @@
 	;
 	(define (left-basis-pred ITEM)
 		(any
-			(lambda (keep) (equal? keep ITEM))
+			(lambda (keep) (cog-equal? keep ITEM))
 			LEFT-KEEP))
 
 	(define (right-basis-pred ITEM)
 		(any
-			(lambda (keep) (equal? keep ITEM))
+			(lambda (keep) (cog-equal? keep ITEM))
 			RIGHT-KEEP))
 
 	(define (pair-pred PAIR) #t)

@@ -90,7 +90,7 @@
 		(define (unit-fvec ELT-LIST)
 			(define weight (/ 1 (sqrt (length ELT-LIST))))
 			(lambda (ITEM)
-				(if (any (lambda (elt) (equal? elt ITEM)) ELT-LIST)
+				(if (any (lambda (elt) (cog-equal? elt ITEM)) ELT-LIST)
 					weight  0.0)))
 
 		; Apply equal weighting to all elements specified in the
