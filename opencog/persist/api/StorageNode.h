@@ -169,6 +169,16 @@ public:
 	void store_frames(const Handle&);
 
 	/**
+	 * Delete the contents of the indicated AtomSpace. This will remove
+	 * only those atoms in this particular frame, and not those of any
+	 * frame above or below. Atoms marked Absent will also be removed,
+	 * which may cause lower atoms to become visible.
+	 *
+	 * The argument must be an AtomSpacePtr somewhere in the DAG.
+	 */
+	void delete_frame(const Handle&);
+
+	/**
 	 * Use the backing store to load the entire incoming set of the
 	 * atom.
 	 *

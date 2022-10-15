@@ -250,6 +250,14 @@ class BackingStore
 		}
 
 		/**
+		 * Delete the contents of the indicated AtomSpace.
+		 */
+		virtual void deleteFrame(AtomSpace*)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
 		 * Read-write synchronization barrier.
 		 *
 		 * All writes will be completed before this routine returns.

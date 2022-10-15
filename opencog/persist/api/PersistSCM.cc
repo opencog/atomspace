@@ -79,6 +79,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_load_frames, "persist", false);
 	define_scheme_primitive("sn-store-frames",
 	             &PersistSCM::sn_store_frames, "persist", false);
+	define_scheme_primitive("sn-delete-frame",
+	             &PersistSCM::sn_delete_frame, "persist", false);
 	define_scheme_primitive("sn-delete",
 	             &PersistSCM::sn_delete, "persist", false);
 	define_scheme_primitive("sn-delete-rec",
@@ -116,6 +118,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_load_frames, this, "persist", false);
 	define_scheme_primitive("dflt-store-frames",
 	             &PersistSCM::dflt_store_frames, this, "persist", false);
+	define_scheme_primitive("dflt-delete-frame",
+	             &PersistSCM::dflt_delete_frame, this, "persist", false);
 	define_scheme_primitive("dflt-delete",
 	             &PersistSCM::dflt_delete, this, "persist", false);
 	define_scheme_primitive("dflt-delete-rec",
@@ -290,6 +294,12 @@ void PersistSCM::sn_store_frames(Handle hsn, Handle has)
 	stnp->store_frames(has);
 }
 
+void PersistSCM::sn_delete_frame(Handle hsn, Handle has)
+{
+	GET_STNP;
+	stnp->delete_frame(has);
+}
+
 bool PersistSCM::sn_delete(Handle h, Handle hsn)
 {
 	GET_STNP;
@@ -421,6 +431,12 @@ void PersistSCM::dflt_store_frames(Handle has)
 {
 	CHECK;
 	_sn->store_frames(has);
+}
+
+void PersistSCM::dflt_delete_frame(Handle has)
+{
+	CHECK;
+	_sn->delete_frame(has);
 }
 
 bool PersistSCM::dflt_delete(Handle h)

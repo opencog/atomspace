@@ -218,4 +218,9 @@ void StorageNode::store_frames(const Handle& has)
 	return storeFrameDAG((AtomSpace*)has.get());
 }
 
+void StorageNode::delete_frame(const Handle& has)
+{
+	return deleteFrame((AtomSpace*)has.get());
+}
+
 // ====================================================================

@@ -35,7 +35,8 @@
 	load-atomspace
 	store-atomspace
 	load-frames
-	store-frames)
+	store-frames
+	delete-frame!)
 
 ;; -----------------------------------------------------
 ;;
@@ -401,6 +402,28 @@
 		(dflt-store-frames ATOMSPACE))
 )
 
+(define*-public (delete-frame! ATOMSPACE #:optional (STORAGE #f))
+"
+ delete-frame! ATOMSPACE [STORAGE] - delete the contents of the AtomSpace.
+
+    This will delete all of the Atoms in the ATOMSPACE, as well as the
+    associated frame, so that it no longer appears in the frame DAG.
+    Note that this will also delete any Atoms that have been marked
+    hidden, and thus might cause the corresponding Atoms in lower frames
+    to become visible.
+
+    If the optional STORAGE argument is provided, then it will be
+    used as the target of the delete. It must be a StorageNode.
+
+    See also:
+       load-frames -- load the DAG of AtomSpaces from storage.
+       store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
+"
+	(if STORAGE
+		(sn-delete-frame ATOMSPACE STORAGE)
+		(dflt-delete-frame ATOMSPACE))
+)
+
 ;
 ; --------------------------------------------------------------------
 (define*-public (fetch-query QUERY KEY
@@ -549,6 +572,8 @@
        (cog-delete! (Concept \"foo\")
               (CogStorage \"cog://cogserver.example.com\"))
 
+    See also:
+       delete-frame! -- Delete all the Atoms in the frame.
 "
 	(if STORAGE (sn-delete ATOM STORAGE)
 		(let ((sn (cog-storage-node)))
@@ -577,7 +602,10 @@
     Atoms that the other does not.  It is up to you, the user, to avoid
     this inconsistncy when performing racey inserts/deletes.
 
-    See also: cog-delete! and cog-extract-recursive!
+    See also:
+       cog-delete! -- Delete an atom from storage, w/o recursion.
+       cog-extract-recursive! -- Remove an atom form the AtomSpace only.
+       delete-frame! -- Delete all the Atoms in the frame.
 "
 	(if STORAGE (sn-delete-rec ATOM STORAGE)
 		(let ((sn (cog-storage-node)))
