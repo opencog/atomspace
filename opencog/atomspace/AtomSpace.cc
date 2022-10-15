@@ -480,12 +480,36 @@ std::string AtomSpace::to_string(void) const
 	return ss.str();
 }
 
+/// Pretty-print with proper indentation.
+/// The idea is that it should be easier to understand the hierarchy.
+/// For example:
+///    (use-modules (opencog))
+///    (define space1 (cog-atomspace))
+///    (define space2 (cog-new-atomspace space1))
+///    (define space3 (cog-new-atomspace space2))
+///    (define space4 (cog-new-atomspace space3))
+///    (define space5a (cog-new-atomspace space4))
+///    (define space5b (cog-new-atomspace space4))
+///    (define space5c (cog-new-atomspace space4))
+///    (define space6 (cog-new-atomspace space5a space5b space5c))
+///    space6
+///
 std::string AtomSpace::to_string(const std::string& indent) const
 {
 	std::string sexpr = indent + "(AtomSpace \"" + _name + "\"";
+	size_t szo = _outgoing.size();
+	if (0 == szo)
+		return sexpr + ")";
+
+	if (1 == szo)
+		return sexpr + "\n   " + _outgoing[0]->to_string(indent) + ")";
+
+	sexpr += "\n";
+	std::string idmore = indent + "   ";
 	for (const Handle& ho : _outgoing)
-		sexpr += " " + ho->to_string();
-	sexpr += ")";
+		sexpr += ho->to_string(idmore) + "\n";
+	sexpr += ")\n";
+
 	return sexpr;
 }
 
