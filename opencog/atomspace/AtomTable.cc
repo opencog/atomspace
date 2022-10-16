@@ -199,17 +199,10 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     return Handle::UNDEFINED;
 }
 
-/// Ask the atom if it belongs to this Atomtable. If so, we're done.
-/// Otherwise, search for an equivalent atom that we might be holding.
+/// Search for an equivalent atom that we might be holding.
 Handle AtomSpace::get_atom(const Handle& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
-
-    if (in_environ(a)) {
-        if (a->isAbsent()) return Handle::UNDEFINED;
-        return a;
-    }
-
     return lookupHandle(a);
 }
 

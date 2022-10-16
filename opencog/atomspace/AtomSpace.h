@@ -479,7 +479,7 @@ public:
      * in the AtomSpace:
      * @code
      *         HandleSet atoms;
-     *         atomSpace.get_handlset_by_type(atoms, CONCEPT_NODE);
+     *         atomSpace.get_handles_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
     void
