@@ -275,10 +275,6 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     // really clear how this should work or how it should be used.
     if (ATOM_SPACE == orig->get_type()) return orig;
 
-    // Is the atom already in this table, or one of its environments?
-    if (not force and in_environ(orig) and not orig->isAbsent())
-        return orig;
-
     // Check to see if we already have this atom in the atomspace.
     const Handle& hc(check(orig, force));
     if (hc) {
