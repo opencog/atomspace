@@ -117,6 +117,7 @@ class AtomSpace : public Frame
                         const AtomSpace*) const;
 
     void get_absent_atoms(HandleSeq&) const;
+    void get_atoms_in_frame(HandleSeq&) const;
 
 public:
     /**
@@ -524,6 +525,7 @@ public:
 
     /* ----------------------------------------------------------- */
     // Not for public use! Only StorageNodes get to call this!
+    // XXX FIXME Users should call StorageNode::add_nocheck() instead.
     Handle storage_add_nocheck(const Handle& h) { return add(h); }
 };
 

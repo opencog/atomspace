@@ -761,3 +761,8 @@ void AtomSpace::get_absent_atoms(HandleSeq& missing) const
     for (const Handle& h: rawseq)
         if (h->isAbsent()) missing.push_back(h);
 }
+
+void AtomSpace::get_atoms_in_frame(HandleSeq& hseq) const
+{
+    typeIndex.get_handles_by_type(hseq, ATOM, true);
+}

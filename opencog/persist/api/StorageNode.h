@@ -42,6 +42,8 @@ protected:
 		{ return as->add(h); }
 	void get_absent_atoms(const AtomSpace* as, HandleSeq& missing) const
 		{ as->get_absent_atoms(missing); }
+	void get_atoms_in_frame(const AtomSpace* as, HandleSeq& fseq) const
+		{ as->get_atoms_in_frame(fseq); }
 
 public:
 	StorageNode(Type, std::string);
