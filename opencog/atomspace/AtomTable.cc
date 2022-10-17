@@ -257,7 +257,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     return cand;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force)
+Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -417,19 +417,17 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         {
             AtomSpace* other = his->getAtomSpace();
 
-            // Something is seriously screwed up if the other atomspace
-            // is not equal to or above this atomspace. Space frames
-            // must be in stacking order.
+            // Atoms in the incoming set must belong to some Atomspace
+            // above that of `handle`.  Space frames must be in stacking
+            // order.
             OC_ASSERT(nullptr == other or other == this or
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-            if (not his->isMarkedForRemoval() and other) {
-                if (other != this) {
-                    other->extract_atom(his, true);
-                } else {
-                    extract_atom(his, true);
-                }
+            if (not his->isMarkedForRemoval() and other and
+                other->in_environ(this))
+            {
+                other->extract_atom(his, true);
             }
         }
     }
@@ -452,7 +450,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
 
         // If we are here, then mask.
-        const Handle& hide(add(handle, true));
+        const Handle& hide(add(handle, true, true));
         hide->setAbsent();
         return true;
     }
@@ -473,7 +471,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         // spaces, we are not allowed to reach down to its actual
         // location to delete it there.)
         if (_copy_on_write) {
-            const Handle& hide(add(handle, true));
+            const Handle& hide(add(handle, true, true));
             hide->setAbsent();
             return true;
         }
@@ -491,7 +489,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
             const Handle& found = base->lookupHandle(handle);
             if (found)
             {
-                const Handle& hide(add(handle, true));
+                const Handle& hide(add(handle, true, true));
                 hide->setAbsent();
                 return true;
             }
