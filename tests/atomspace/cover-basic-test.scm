@@ -38,6 +38,7 @@
 (test-equal 3 (get-val (List x y) "bang"))
 (test-equal 3 (get-val (List (Concept "foo") (Concept "bar")) "bang"))
 
+; ------------------------------------------------------
 ; Do it again, one level up.
 (define top-space (cog-new-atomspace base-space))
 (cog-set-atomspace! top-space)
@@ -71,6 +72,26 @@
 (test-equal 6 (get-val (List x2 y2) "bang"))
 (test-equal 6 (get-val (List x y) "bang"))
 (test-equal 6 (get-val (List (Concept "foo") (Concept "bar")) "bang"))
+
+; ------------------------------------------------------
+; Go back to the base space, check that its valid
+(cog-set-atomspace! base-space)
+
+(define xb (Concept "foo"))
+(test-equal "base-xb" base-space (cog-atomspace xb))
+(test-equal 1 (get-val xb "gee"))
+(test-equal 1 (get-val (Concept "foo") "gee"))
+
+(define yb (Concept "bar"))
+(test-equal "base-yb" base-space (cog-atomspace yb))
+(test-equal 2 (get-val yb "gosh"))
+(test-equal 2 (get-val (Concept "bar") "gosh"))
+
+(define zb (List xb yb))
+(test-equal "base-zb" base-space (cog-atomspace zb))
+(test-equal 3 (get-val zb "bang"))
+(test-equal 3 (get-val (List xb yb) "bang"))
+(test-equal 3 (get-val (List (Concept "foo") (Concept "bar")) "bang"))
 
 
 (test-end basic-link)
