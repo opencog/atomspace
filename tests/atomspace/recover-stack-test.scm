@@ -30,6 +30,9 @@
 
 	(define z (List x y))
 	(cog-set-value! z (Predicate "bang") (ctv 1 0 (+ 2 N)))
+
+	(define w (List z x))
+	(cog-set-value! w (Predicate "bash") (ctv 1 0 (+ 3 N)))
 )
 
 ; Recursive calls to above
@@ -60,7 +63,11 @@
 	(define z (cog-link 'List (Concept "foo") (Concept "bar")))
 	(test-assert "link-absent" (not (cog-atom? z)))
 
-	; Next one down should have all three atoms
+	(define w (cog-link 'List (List (Concept "foo") (Concept "bar"))
+	                          (Concept "foo")))
+	(test-assert "l2-absent" (not (cog-atom? w)))
+
+	; Next one down should have all four atoms
 	(define downli (cog-atomspace-env))
 	(test-equal "num-childs" 1 (length downli))
 	(cog-set-atomspace! (car downli))
@@ -75,6 +82,10 @@
 	(test-assert "link-present" (cog-atom? z2))
 	(test-equal "link-tv" (+ (* 3 N) 3) (get-val z2 "bang"))
 
+	(define w2 (cog-link 'List z2 x2))
+	(test-assert "link-present" (cog-atom? w2))
+	(test-equal "l2-tv" (+ (* 3 N) 4) (get-val w2 "bash"))
+
 	; Recurse downwards
 	(define downext (cog-atomspace-env))
 	(when (equal? 1 (length downext))
@@ -88,7 +99,7 @@
 (define (test-progressive)
 
 	; Number of AtomSpaces to create.
-	(define STACK-DEPTH 5)
+	(define STACK-DEPTH 1500)
 
 	; Write a bunch of atoms
 	(progressive-store STACK-DEPTH)
