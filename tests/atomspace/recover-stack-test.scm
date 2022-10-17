@@ -94,6 +94,7 @@
 	(progressive-store STACK-DEPTH)
 
 	; Check the result, recursing downwards.
+	(cog-set-atomspace! (car (cog-outgoing-set (cog-atomspace))))
 	(progressive-check (- STACK-DEPTH 1))
 )
 
