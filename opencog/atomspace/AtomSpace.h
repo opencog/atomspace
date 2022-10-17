@@ -104,11 +104,16 @@ class AtomSpace : public Frame
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
      *
-     * The `recurse` flag supporesses the copying of values for
-     * recursive additions.
+     * The `recurse` flag suppresses the copying of values for
+     * recursive additions. This is used to avodi accidental clobbers.
+     *
+     * The `absent` flag indicates that the atom is being added
+     * so that it can hide others in lower layers.
      */
-    Handle add(const Handle&, bool force=false, bool recurse=false);
+    Handle add(const Handle&, bool force=false,
+               bool recurse=false, bool absent = false);
     Handle check(const Handle&, bool force=false);
+    Handle lookupHide(const Handle&) const;
 
     virtual ContentHash compute_hash() const;
 

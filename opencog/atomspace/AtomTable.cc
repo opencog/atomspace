@@ -199,6 +199,23 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     return Handle::UNDEFINED;
 }
 
+Handle AtomSpace::lookupHide(const Handle& a) const
+{
+    const Handle& h(typeIndex.findAtom(a));
+    if (h) return h;
+
+    for (const AtomSpacePtr& base: _environ)
+    {
+        const Handle& found = base->lookupHide(a);
+        if (found) return found;
+    }
+
+    // Since we're using this function to hide an Atom,
+    // this function cannot come up empty!
+    OC_ASSERT(false, "Internal Error!");
+    return Handle::UNDEFINED;
+}
+
 /// Search for an equivalent atom that we might be holding.
 Handle AtomSpace::get_atom(const Handle& a) const
 {
@@ -257,7 +274,8 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     return cand;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force, bool recurse)
+Handle AtomSpace::add(const Handle& orig, bool force,
+                      bool recurse, bool absent)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -304,7 +322,14 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool recurse)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, false, true));
+
+                // If the goal of the add is to hide atoms in lower
+                // layers, then avoid accidentally adding atoms that
+                // unhide other atoms.
+                if (absent)
+                    closet.emplace_back(lookupHide(h));
+                else
+                    closet.emplace_back(add(h, false, true));
             }
             atom = createLink(std::move(closet), atom->get_type());
 
@@ -457,7 +482,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
 
         // If we are here, then mask.
-        const Handle& hide(add(handle, true, true));
+        const Handle& hide(add(handle, true, true, true));
         hide->setAbsent();
         return true;
     }
@@ -478,7 +503,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         // spaces, we are not allowed to reach down to its actual
         // location to delete it there.)
         if (_copy_on_write) {
-            const Handle& hide(add(handle, true, true));
+            const Handle& hide(add(handle, true, true, true));
             hide->setAbsent();
             return true;
         }
@@ -496,7 +521,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
             const Handle& found = base->lookupHandle(handle);
             if (found)
             {
-                const Handle& hide(add(handle, true, true));
+                const Handle& hide(add(handle, true, true, true));
                 hide->setAbsent();
                 return true;
             }
