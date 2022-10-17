@@ -31,6 +31,7 @@
 	(define z (List x y))
 	(cog-set-value! z (Predicate "bang") (ctv 1 0 (+ 2 N)))
 
+	; A different code-branch is taken, when a link contains other links.
 	(define w (List z x))
 	(cog-set-value! w (Predicate "bash") (ctv 1 0 (+ 3 N)))
 )
