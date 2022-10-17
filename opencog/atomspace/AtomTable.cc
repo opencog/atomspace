@@ -424,10 +424,12 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-            if (not his->isMarkedForRemoval() and other and
-                other->in_environ(this))
+            if (not his->isMarkedForRemoval())
             {
-                other->extract_atom(his, true);
+                if (other and other->in_environ(this))
+                    other->extract_atom(his, true);
+                else
+                    extract_atom(his, true);
             }
         }
     }
