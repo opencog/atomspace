@@ -257,7 +257,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     return cand;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
+Handle AtomSpace::add(const Handle& orig, bool force, bool recurse)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -269,9 +269,13 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
     if (ATOM_SPACE == orig->get_type()) return orig;
 
     // Check to see if we already have this atom in the atomspace.
+    // If this is a top-level add, then copy the values over. If it's
+    // a recursive add, the `orig` atom may contain wild values from
+    // outer space, and we do not want to copy those.
     const Handle& hc(check(orig, force));
     if (hc) {
-        hc->copyValues(orig);
+        if (not recurse and orig != hc)
+            hc->copyValues(orig);
         return hc;
     }
 
@@ -288,7 +292,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
             need_copy = true;
         else
             for (const Handle& h : atom->getOutgoingSet())
-                if (not in_environ(h) or h->isAbsent())
+                if (lookupHandle(h) != h)
                   { need_copy = true; break; }
 
         if (need_copy) {
@@ -300,7 +304,7 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, false));
+                closet.emplace_back(add(h, false, true));
             }
             atom = createLink(std::move(closet), atom->get_type());
 
@@ -308,7 +312,8 @@ Handle AtomSpace::add(const Handle& orig, bool force, bool absent)
             // see if we already have this atom in the atomspace.
             const Handle& hc(check(atom, force));
             if (hc and (not _copy_on_write or this == hc->getAtomSpace())) {
-                hc->copyValues(orig);
+                if (not recurse)
+                    hc->copyValues(orig);
                 return hc;
             }
 

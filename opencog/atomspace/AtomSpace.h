@@ -99,12 +99,15 @@ class AtomSpace : public Frame
 
     /**
      * Private: add an atom to the table. This skips the read-only
-     * check. To be used only by the storage nodes.
+     * check.
      *
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
+     *
+     * The `recurse` flag supporesses the copying of values for
+     * recursive additions.
      */
-    Handle add(const Handle&, bool force=false, bool absent=false);
+    Handle add(const Handle&, bool force=false, bool recurse=false);
     Handle check(const Handle&, bool force=false);
 
     virtual ContentHash compute_hash() const;
