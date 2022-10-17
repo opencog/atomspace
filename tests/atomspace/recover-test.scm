@@ -4,7 +4,6 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog test-runner))
-(use-modules (opencog persist) (opencog persist-rocks))
 
 (opencog-test-runner)
 
