@@ -299,26 +299,52 @@ void AtomSpace::setAtomSpace(AtomSpace* as)
 // beleive the compiler has optimized them to be tail-recursive. (If
 // they are tail-recursive, I guess that's OK, eh?)
 
-int AtomSpace::depth(const Handle& atom) const
+int AtomSpace::depth(const AtomSpace* as) const
 {
-    if (nullptr == atom) return -1;
-    if (atom->getAtomSpace() == this) return 0;
+    if (nullptr == as) return -1;
+    if (as == this) return 0;
 
     for (const AtomSpacePtr& base : _environ)
     {
-        int d = base->depth(atom);
+        int d = base->depth(as);
         if (0 < d) return d+1;
     }
     return -1;
 }
 
+int AtomSpace::depth(const Handle& atom) const
+{
+    if (nullptr == atom) return -1;
+    AtomSpace* as = atom->getAtomSpace();
+    if (as == this) return 0;
+
+    for (const AtomSpacePtr& base : _environ)
+    {
+        int d = base->depth(as);
+        if (0 < d) return d+1;
+    }
+    return -1;
+}
+
+bool AtomSpace::in_environ(const AtomSpace* as) const
+{
+    if (nullptr == as) return false;
+    if (as == this) return true;
+    for (const AtomSpacePtr& base : _environ)
+    {
+        if (base->in_environ(as)) return true;
+    }
+    return false;
+}
+
 bool AtomSpace::in_environ(const Handle& atom) const
 {
     if (nullptr == atom) return false;
-    if (atom->getAtomSpace() == this) return true;
+    AtomSpace* as = atom->getAtomSpace();
+    if (as == this) return true;
     for (const AtomSpacePtr& base : _environ)
     {
-        if (base->in_environ(atom)) return true;
+        if (base->in_environ(as)) return true;
     }
     return false;
 }

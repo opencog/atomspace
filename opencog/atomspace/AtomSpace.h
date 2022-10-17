@@ -99,12 +99,15 @@ class AtomSpace : public Frame
 
     /**
      * Private: add an atom to the table. This skips the read-only
-     * check. To be used only by the storage nodes.
+     * check.
      *
      * The `force` flag forces the addition of this atom into the
      * atomtable, even if it is already in a parent atomspace.
+     *
+     * The `recurse` flag supporesses the copying of values for
+     * recursive additions.
      */
-    Handle add(const Handle&, bool force=false);
+    Handle add(const Handle&, bool force=false, bool recurse=false);
     Handle check(const Handle&, bool force=false);
 
     virtual ContentHash compute_hash() const;
@@ -181,18 +184,14 @@ public:
      * in the chain.
      */
     int depth(const Handle& atom) const;
+    int depth(const AtomSpace*) const;
 
     /**
-     * Return true if the atom is in this atomtable, or if it is
-     * in the environment of this atomtable.
-     *
-     * This is provided in the header file, so that it gets inlined
-     * into Atom.cc, where the incoming link is fetched.  This helps
-     * avoid what would otherwise be a circular dependency between
-     * shared libraries. Yes, this is kind-of hacky, but its the
-     * simplest fix for just right now.
+     * Return true if the atom is in this AtomSpace,
+     * or if it is in the environment of this AtomSpace.
      */
-    bool in_environ(const Handle& atom) const;
+    bool in_environ(const Handle&) const;
+    bool in_environ(const AtomSpace*) const;
 
     /* AtomSpaces are Atoms; provide virtual methods of base class. */
     virtual const std::string& get_name() const;

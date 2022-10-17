@@ -257,7 +257,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     return cand;
 }
 
-Handle AtomSpace::add(const Handle& orig, bool force)
+Handle AtomSpace::add(const Handle& orig, bool force, bool recurse)
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
@@ -269,9 +269,13 @@ Handle AtomSpace::add(const Handle& orig, bool force)
     if (ATOM_SPACE == orig->get_type()) return orig;
 
     // Check to see if we already have this atom in the atomspace.
+    // If this is a top-level add, then copy the values over. If it's
+    // a recursive add, the `orig` atom may contain wild values from
+    // outer space, and we do not want to copy those.
     const Handle& hc(check(orig, force));
     if (hc) {
-        hc->copyValues(orig);
+        if (not recurse and orig != hc)
+            hc->copyValues(orig);
         return hc;
     }
 
@@ -288,7 +292,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
             need_copy = true;
         else
             for (const Handle& h : atom->getOutgoingSet())
-                if (not in_environ(h) or h->isAbsent())
+                if (lookupHandle(h) != h)
                   { need_copy = true; break; }
 
         if (need_copy) {
@@ -300,7 +304,7 @@ Handle AtomSpace::add(const Handle& orig, bool force)
                 // operator->() will be null if its a Value that is
                 // not an atom.
                 if (nullptr == h.operator->()) return Handle::UNDEFINED;
-                closet.emplace_back(add(h, false));
+                closet.emplace_back(add(h, false, true));
             }
             atom = createLink(std::move(closet), atom->get_type());
 
@@ -308,7 +312,8 @@ Handle AtomSpace::add(const Handle& orig, bool force)
             // see if we already have this atom in the atomspace.
             const Handle& hc(check(atom, force));
             if (hc and (not _copy_on_write or this == hc->getAtomSpace())) {
-                hc->copyValues(orig);
+                if (not recurse)
+                    hc->copyValues(orig);
                 return hc;
             }
 
@@ -417,19 +422,19 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         {
             AtomSpace* other = his->getAtomSpace();
 
-            // Something is seriously screwed up if the other atomspace
-            // is not equal to or above this atomspace. Space frames
-            // must be in stacking order.
+            // Atoms in the incoming set must belong to some Atomspace
+            // above that of `handle`.  Space frames must be in stacking
+            // order.
             OC_ASSERT(nullptr == other or other == this or
                       other->in_environ(handle),
                 "AtomSpace::extract() internal error, non-DAG membership.");
 
-            if (not his->isMarkedForRemoval() and other) {
-                if (other != this) {
+            if (not his->isMarkedForRemoval())
+            {
+                if (other and other->in_environ(this))
                     other->extract_atom(his, true);
-                } else {
+                else
                     extract_atom(his, true);
-                }
             }
         }
     }
@@ -452,7 +457,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         }
 
         // If we are here, then mask.
-        const Handle& hide(add(handle, true));
+        const Handle& hide(add(handle, true, true));
         hide->setAbsent();
         return true;
     }
@@ -473,7 +478,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
         // spaces, we are not allowed to reach down to its actual
         // location to delete it there.)
         if (_copy_on_write) {
-            const Handle& hide(add(handle, true));
+            const Handle& hide(add(handle, true, true));
             hide->setAbsent();
             return true;
         }
@@ -491,7 +496,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
             const Handle& found = base->lookupHandle(handle);
             if (found)
             {
-                const Handle& hide(add(handle, true));
+                const Handle& hide(add(handle, true, true));
                 hide->setAbsent();
                 return true;
             }
