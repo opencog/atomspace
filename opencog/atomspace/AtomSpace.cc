@@ -293,11 +293,13 @@ void AtomSpace::setAtomSpace(AtomSpace* as)
 }
 
 // ====================================================================
-// XXX FIXME -- The recursive design of the two routines below make
-// them into a bottleneck, when the stack of AtomSpaces exceeds a few
+// XXX FIXME -- The recursive design of the depth() routine below makes
+// it into a bottleneck, when the stack of AtomSpaces exceeds a few
 // hundred. In particular, the recursion is on the C stack, and I don't
 // beleive the compiler has optimized them to be tail-recursive. (If
 // they are tail-recursive, I guess that's OK, eh?)
+// At this time, the only user of this code appears to be UniqueLink.cc
+// It is NOT used by Rocks.
 
 int AtomSpace::depth(const AtomSpace* as) const
 {
@@ -330,7 +332,16 @@ bool AtomSpace::in_environ(const AtomSpace* as) const
 {
     if (nullptr == as) return false;
     if (as == this) return true;
-    for (const AtomSpacePtr& base : _environ)
+    const std::vector<AtomSpacePtr>* env = &_environ;
+    while (true)
+    {
+        size_t evs = env->size();
+        if (0 == evs) return false;
+        if (1 < evs) break;
+        if (as == (*env)[0].get()) return true;
+        env = &((*env)[0]->_environ);
+    }
+    for (const AtomSpacePtr& base : *env)
     {
         if (base->in_environ(as)) return true;
     }
