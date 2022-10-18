@@ -330,7 +330,16 @@ bool AtomSpace::in_environ(const AtomSpace* as) const
 {
     if (nullptr == as) return false;
     if (as == this) return true;
-    for (const AtomSpacePtr& base : _environ)
+    const std::vector<AtomSpacePtr>* env = &_environ;
+    while (true)
+    {
+        size_t evs = env->size();
+        if (0 == evs) return false;
+        if (1 < evs) break;
+        if (as == (*env)[0].get()) return true;
+        env = &((*env)[0]->_environ);
+    }
+    for (const AtomSpacePtr& base : *env)
     {
         if (base->in_environ(as)) return true;
     }
