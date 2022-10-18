@@ -1078,8 +1078,14 @@
      Extract all atoms from ATOMSPACE. The ATOMSPACE argument is
      optional; if not specified, the current atomspace is assumed.
 
-     This only removes the atoms from the atomspace, it does NOT
-     remove them from the backingstore.
+     This only removes the atoms from the current atomspace frame,
+     it does NOT remove them from any attached storage. Use the
+     `delete-frame!` function to remove frames from storage.
+
+     Note that removing a frame may cause Atoms in lower frames to
+     become visible! This is because `absent` atoms are used to hide
+     Atoms in lower layers; when these are removed, the lower atoms
+     become visible.
 ")
 
 (set-procedure-property! cog-atomspace-ro! 'documentation

@@ -415,9 +415,19 @@
     If the optional STORAGE argument is provided, then it will be
     used as the target of the delete. It must be a StorageNode.
 
+    Caveats:
+    If STORAGE is specified, it must be open for writing.
+    If it is not specified, the AtomSpace must be attached to storage
+    that is open for writing.
+    At this time, only the top-most frame can be deleted.
+    The frame is deleted in storage only; the atoms remain in RAM
+    until all references to ATOMSPACE are gone. Use
+    `cog-atomspace-clear` to also remove these atoms.
+
     See also:
        load-frames -- load the DAG of AtomSpaces from storage.
        store-frames ATOMSPACE -- store the DAG of AtomSpaces to storage.
+       cog-atomspace-clear -- extract all atoms in a frame.
 "
 	(if STORAGE
 		(sn-delete-frame ATOMSPACE STORAGE)
