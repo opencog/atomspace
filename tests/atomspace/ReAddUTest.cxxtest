@@ -1,0 +1,94 @@
+/*
+ * tests/atomspace/ReAddUTest.cxxtest
+ *
+ * Copyright (C) 2022 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+using namespace opencog;
+
+// Verify removing and readding works in differrent layers.
+//
+class RemoveUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr asp1;
+	AtomSpacePtr asp2;
+	AtomSpacePtr asp3;
+
+public:
+	RemoveUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	void setUp()
+	{
+		asp1 = createAtomSpace();
+		asp2 = createAtomSpace(asp1);
+		asp3 = createAtomSpace(asp2);
+	}
+
+	void tearDown() {}
+
+	void testSimple();
+};
+
+// Simple test of removal in multiple atomspaces.
+void RemoveUTest::testSimple()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create atoms in different atomspaces
+	Handle hna = asp1->add_node(CONCEPT_NODE, "foo");
+	bool rc = asp2->extract_atom(hna);
+	Handle hnb = asp2->get_atom(hna);
+	Handle hnc = asp3->add_atom(hna);
+
+	TS_ASSERT(rc);
+	TS_ASSERT(nullptr == hnb);
+
+	TS_ASSERT(asp1->get_size() == 1);
+	TS_ASSERT(asp2->get_size() == 1); // includes hidden atoms
+	TS_ASSERT(asp3->get_size() == 1);
+
+	HandleSeq hs1;
+	asp1->get_handles_by_type(hs1, ATOM, true);
+	TS_ASSERT(hs1.size() == 1);
+
+	HandleSeq hs2;
+	asp2->get_handles_by_type(hs2, ATOM, true);
+	TS_ASSERT(hs2.size() == 0);
+
+	HandleSeq hs3;
+	asp3->get_handles_by_type(hs3, ATOM, true);
+	TS_ASSERT(hs3.size() == 1);
+
+	TS_ASSERT(hnc != hna);
+	// TS_ASSERT(not hna->isAbsent());
+	// TS_ASSERT(not hnc->isAbsent());
+
+	TS_ASSERT(asp1.get() == hna->getAtomSpace());
+	TS_ASSERT(asp3.get() == hnc->getAtomSpace());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
