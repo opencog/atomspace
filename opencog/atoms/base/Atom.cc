@@ -459,13 +459,8 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
-            INCOMING_SHARED_LOCK;
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
-            {
-                for (const WinkPtr& w : bucket.second)
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-            }
+            getCoveredInc(as, hs);
             return hs.size();
         }
 
