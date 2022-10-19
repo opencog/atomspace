@@ -200,11 +200,13 @@ public:
 
     /* AtomSpaces are Atoms; provide virtual methods of base class. */
     virtual const std::string& get_name() const;
-    virtual Arity get_arity() const;
+    virtual Arity get_arity() const { return _environ.size(); }
     virtual size_t size() const { return get_arity(); }
-    virtual const HandleSeq& getOutgoingSet() const;
+    virtual const HandleSeq& getOutgoingSet() const { return _outgoing; }
     virtual Handle getOutgoingAtom(Arity) const;
     virtual void setAtomSpace(AtomSpace *);
+
+    const std::vector<AtomSpacePtr>& getEnviron() const { return _environ; }
 
     /* Restoring complex AtomSpace DAG's from storage requires the
      * ability to set the AtomSpace name. So we provide this.

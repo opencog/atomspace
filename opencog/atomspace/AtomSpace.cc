@@ -268,16 +268,6 @@ void AtomSpace::set_name(const std::string& newna)
 	_name = newna;
 }
 
-Arity AtomSpace::get_arity() const
-{
-	return _environ.size();
-}
-
-const HandleSeq& AtomSpace::getOutgoingSet() const
-{
-	return _outgoing;
-}
-
 Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
 	if (_outgoing.size() <= n) return Handle::UNDEFINED;
