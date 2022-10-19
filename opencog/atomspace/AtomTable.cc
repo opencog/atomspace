@@ -189,14 +189,20 @@ void AtomSpace::clear()
 /// and the atom occurs in more than one frame, then the first such
 /// found will be returned. It is left up to the user to resolve
 /// cases of ambiguous multiple inheritance.
-Handle AtomSpace::lookupHandle(const Handle& a) const
+Handle AtomSpace::lookupHide(const Handle& a, bool hide) const
 {
     const Handle& h(typeIndex.findAtom(a));
     if (h) {
-        if (h->isAbsent()) return Handle::UNDEFINED;
+        if (hide and h->isAbsent()) return Handle::UNDEFINED;
         return h;
     }
 
+    // The complicated-looking while-loop is just implementing
+    // a non-recursive version of what would otherwise be a
+    // much simpler recursive call back to ourselves. There's
+    // real code which will have environments that go thousands
+    // deep, and we want to avoid having thousands of stack-frames,
+    // here.
     size_t esz = _environ.size();
     if (0 == esz) return Handle::UNDEFINED;
 
@@ -205,7 +211,7 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     {
         const Handle& h(eas->typeIndex.findAtom(a));
         if (h) {
-            if (h->isAbsent()) return Handle::UNDEFINED;
+            if (hide and h->isAbsent()) return Handle::UNDEFINED;
             return h;
         }
 
@@ -218,7 +224,7 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
         {
              for (const AtomSpacePtr& base: eas->_environ)
              {
-                 const Handle& found = base->lookupHandle(a);
+                 const Handle& found = base->lookupHide(a, hide);
                  if (found) return found;
              }
              return Handle::UNDEFINED;
@@ -231,27 +237,14 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
     // one is found. This is done via recursive call.
     for (const AtomSpacePtr& base: _environ)
     {
-        const Handle& found = base->lookupHandle(a);
-        if (found) return found;
-    }
-
-    return Handle::UNDEFINED;
-}
-
-Handle AtomSpace::lookupHide(const Handle& a) const
-{
-    const Handle& h(typeIndex.findAtom(a));
-    if (h) return h;
-
-    for (const AtomSpacePtr& base: _environ)
-    {
-        const Handle& found = base->lookupHide(a);
+        const Handle& found = base->lookupHide(a, hide);
         if (found) return found;
     }
 
     // Since we're using this function to hide an Atom,
     // this function cannot come up empty!
-    OC_ASSERT(false, "Internal Error!");
+    OC_ASSERT(hide, "Internal Error!");
+
     return Handle::UNDEFINED;
 }
 
