@@ -197,22 +197,36 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
         return h;
     }
 
-    AtomSpacePtr eas = AtomSpaceCast((AtomSpace*)this);
-    while (true)
+    size_t esz = _environ.size();
+    if (0 == esz) return Handle::UNDEFINED;
+    while (1 == esz)
     {
-        size_t esz = eas->_environ.size();
-        if (0 == esz) return Handle::UNDEFINED;
-        if (1 < esz) break;
-        eas = _environ[0];
-
+        AtomSpacePtr eas = _environ[0];
         const Handle& h(eas->typeIndex.findAtom(a));
         if (h) {
             if (h->isAbsent()) return Handle::UNDEFINED;
             return h;
         }
+
+        esz = eas->_environ.size();
+        if (0 == esz) return Handle::UNDEFINED;
+
+        // If there's a case of multiple inheritance, we make a
+        // recursive call to find the atom.
+        if (1 < esz)
+        {
+             for (const AtomSpacePtr& base: eas->_environ)
+             {
+                 const Handle& found = base->lookupHandle(a);
+                 if (found) return found;
+             }
+             return Handle::UNDEFINED;
+        }
     }
 
-    for (const AtomSpacePtr& base: eas->_environ)
+    // In the case of multiple inheritance, check each merge, until
+    // one is found. This is done via recursive call.
+    for (const AtomSpacePtr& base: _environ)
     {
         const Handle& found = base->lookupHandle(a);
         if (found) return found;
