@@ -18,7 +18,7 @@
 (define level2b (cog-new-atomspace level1a))
 
 ; -------------------------------------------------------------------
-; Test that concoming sets work.
+; Test that incoming sets work.
 
 (define space-inc "test incoming")
 (test-begin space-inc)

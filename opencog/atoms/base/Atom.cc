@@ -486,6 +486,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
     return cnt;
 }
 
+/// Add the incoming set for this Atom only to the HandleSet.
 void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs) const
 {
     INCOMING_SHARED_LOCK;
@@ -496,6 +497,10 @@ void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs) const
     }
 }
 
+/// Find all copies of this atom in deeper AtomSpaces, and add the
+/// incoming sets of those copies into the HandleSet. The search
+/// stops when a hiding Atom is encountered; i.e. it will not go
+/// below a hidden Atom.
 void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
 {
     getLocalInc(as, hs);
@@ -505,8 +510,8 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
         size_t asz = eva->size();
         if (0 == asz) return;
         if (1 < asz) break;
-        Handle hlo = eva->getOutgoingAtom(0);
-        eva = (AtomSpace*) hlo.get();
+        AtomSpacePtr alo = eva->getEnviron()[0];
+        eva = (AtomSpace*) alo.get();
         Handle hat = eva->lookupHandle(get_handle());
         if (nullptr == hat) return;
         hat->getLocalInc(as, hs);
@@ -537,14 +542,21 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
             // Use lookupHandle to find the shallowest copy.
             // It might be an atom that is marked absent,
-            // and so turns into nullptr.
-            IncomingSet iset;
-            INCOMING_SHARED_LOCK;
+            // and so turns into nullptr. A set is used, in
+            // order to de-duplicate multiple copies of the
+            // same Atom.
+            HandleSet shallow;
             for (const Handle& h: hs)
             {
                 const Handle& local(as->lookupHandle(h));
-                if (local) iset.emplace_back(local);
+                if (local) shallow.insert(local);
             }
+
+				// Copy from set to vector.
+            IncomingSet iset;
+            for (const Handle& h: shallow)
+                iset.emplace_back(h);
+
             return iset;
         }
 
