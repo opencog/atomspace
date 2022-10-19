@@ -182,6 +182,13 @@ void AtomSpace::clear()
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
+///
+/// If there are multiple AtomSpace frames below this, they will be
+/// searched as well, returning the shallowest copy that is found.
+/// If there is a merge below (inheritance from multiple frames)
+/// and the atom occurs in more than one frame, then the first such
+/// found will be returned. It is left up to the user to resolve
+/// cases of ambiguous multiple inheritance.
 Handle AtomSpace::lookupHandle(const Handle& a) const
 {
     const Handle& h(typeIndex.findAtom(a));
@@ -190,7 +197,22 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
         return h;
     }
 
-    for (const AtomSpacePtr& base: _environ)
+    AtomSpacePtr eas = AtomSpaceCast((AtomSpace*)this);
+    while (true)
+    {
+        size_t esz = eas->_environ.size();
+        if (0 == esz) return Handle::UNDEFINED;
+        if (1 < esz) break;
+        eas = _environ[0];
+
+        const Handle& h(eas->typeIndex.findAtom(a));
+        if (h) {
+            if (h->isAbsent()) return Handle::UNDEFINED;
+            return h;
+        }
+    }
+
+    for (const AtomSpacePtr& base: eas->_environ)
     {
         const Handle& found = base->lookupHandle(a);
         if (found) return found;
