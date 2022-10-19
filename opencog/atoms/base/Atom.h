@@ -300,6 +300,8 @@ private:
     bool setAbsent();
     bool setPresent();
 
+    void getCoveredInc(const AtomSpace*, HandleSet&) const;
+
 public:
 
     virtual ~Atom();

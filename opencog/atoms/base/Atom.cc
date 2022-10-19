@@ -444,9 +444,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
     for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
-        {
             WEAKLY_DO(l, w, { if (not as or as->in_environ(l) or nameserver().isA(_type, FRAME)) return false; })
-        }
     }
     return true;
 }
@@ -466,9 +464,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
             for (const auto& bucket : _incoming_set->_iset)
             {
                 for (const WinkPtr& w : bucket.second)
-                {
                     WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-                }
             }
             return hs.size();
         }
@@ -478,9 +474,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
-            {
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
-            }
         }
         return cnt;
     }
@@ -490,6 +484,16 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
     for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
+}
+
+void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
+{
+    INCOMING_SHARED_LOCK;
+    for (const auto& bucket : _incoming_set->_iset)
+    {
+        for (const WinkPtr& w : bucket.second)
+            WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+    }
 }
 
 // We return a copy here, and not a reference, because the set itself
@@ -507,20 +511,14 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
-            INCOMING_SHARED_LOCK;
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
-            {
-                for (const WinkPtr& w : bucket.second)
-                {
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-                }
-            }
+            getCoveredInc(as, hs);
 
             // Use lookupHandle to find the shallowest copy.
             // It might be an atom that is marked absent,
             // and so turns into nullptr.
             IncomingSet iset;
+            INCOMING_SHARED_LOCK;
             for (const Handle& h: hs)
             {
                 const Handle& local(as->lookupHandle(h));
@@ -535,9 +533,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
-            {
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
-            }
         }
         return iset;
     }
@@ -548,9 +544,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
     for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
-        {
             WEAKLY_DO(l, w, { iset.emplace_back(l); });
-        }
     }
     return iset;
 }
@@ -574,9 +568,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
         {
             HandleSet hs;
             for (const WinkPtr& w : bucket->second)
-            {
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-            }
 
             // Use lookupHandle() to find the shallowest copy.
             // It might be an atom that is marked absent,
@@ -592,17 +584,15 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
         IncomingSet result;
         for (const WinkPtr& w : bucket->second)
-        {
             WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
-        }
+
         return result;
     }
 
     IncomingSet result;
     for (const WinkPtr& w : bucket->second)
-    {
         WEAKLY_DO(l, w, { result.emplace_back(l); })
-    }
+
     return result;
 }
 
@@ -624,22 +614,20 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         {
             HandleSet hs;
             for (const WinkPtr& w : bucket->second)
-            {
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-            }
+
             return hs.size();
         }
+
         for (const WinkPtr& w : bucket->second)
-        {
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
-        }
+
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
-    {
         WEAKLY_DO(l, w, { cnt++; })
-    }
+
     return cnt;
 }
 
