@@ -428,73 +428,11 @@ public:
     //! in other threads) will not be reflected in the returned set.
     IncomingSet getIncomingSet(const AtomSpace* = nullptr) const;
 
-    //! Place incoming set into STL container of Handles.
-    //! Example usage:
-    //!     HandleSeq hvect;
-    //!     atom->getIncomingSet(back_inserter(hvect));
-    //! The resulting vector hvect will contain only valid handles
-    //! that were actually part of the incoming set at the time of
-    //! the call to this function.
-    template <typename OutputIterator> OutputIterator
-    getIncomingIter(OutputIterator result) const
-    {
-        if (nullptr == _incoming_set) return result;
-        INCOMING_SHARED_LOCK;
-        for (const auto& bucket : _incoming_set->_iset)
-        {
-            for (const WinkPtr& w : bucket.second)
-            {
-                WEAKLY_DO(h, w, { *result = h; result ++; })
-            }
-        }
-        return result;
-    }
-
-    //! Invoke the callback on each atom in the incoming set of
-    //! handle h, until one of them returns true, in which case
-    //! iteration stopsm and true is returned. Otherwise the
-    //! callback is called on all incomings and false is returned.
-    template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
-    {
-        // We make a copy of the set, so that we don't call the
-        // callback with locks held.
-        IncomingSet vh(getIncomingSet());
-
-        for (const Handle& lp : vh)
-            if ((data->*cb)(lp)) return true;
-        return false;
-    }
-
-    /**
-     * Return all atoms of type `type` that contain this atom.
-     * That is, return all atoms that contain this atom, and are
-     * also of the given type.
-     *
-     * @param The iterator where the set of atoms will be returned.
-     * @param The type of the parent atom.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result, Type type) const
-    {
-        if (nullptr == _incoming_set) return result;
-        INCOMING_SHARED_LOCK;
-
-        const auto bucket = _incoming_set->_iset.find(type);
-        if (bucket == _incoming_set->_iset.cend()) return result;
-
-        for (const WinkPtr& w : bucket->second)
-        {
-            WEAKLY_DO(h, w, { *result = h; result ++; })
-        }
-        return result;
-    }
-
     /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type, const AtomSpace* = nullptr) const;
 
     /** Return the size of the incoming set, for the given type. */
-    size_t getIncomingSetSizeByType(Type type, const AtomSpace* = nullptr) const;
+    size_t getIncomingSetSizeByType(Type, const AtomSpace* = nullptr) const;
 
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
@@ -533,6 +471,75 @@ public:
 
     /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
+
+    // ---------------------------------------------------------
+    // Deprecated calls, do not use these in new code!
+    // Some day, these will be removed.
+
+    //! Deprecated! Do not use in new code!
+    //! Place incoming set into STL container of Handles.
+    //! Example usage:
+    //!     HandleSeq hvect;
+    //!     atom->getIncomingSet(back_inserter(hvect));
+    //! The resulting vector hvect will contain only valid handles
+    //! that were actually part of the incoming set at the time of
+    //! the call to this function.
+    template <typename OutputIterator> OutputIterator
+    getIncomingIter(OutputIterator result) const
+    {
+        if (nullptr == _incoming_set) return result;
+        INCOMING_SHARED_LOCK;
+        for (const auto& bucket : _incoming_set->_iset)
+        {
+            for (const WinkPtr& w : bucket.second)
+            {
+                WEAKLY_DO(h, w, { *result = h; result ++; })
+            }
+        }
+        return result;
+    }
+
+    //! Deprecated! Do not use in new code!
+    //! Invoke the callback on each atom in the incoming set of
+    //! handle h, until one of them returns true, in which case
+    //! iteration stops, and true is returned. Otherwise the
+    //! callback is called on all incomings and false is returned.
+    template<class T>
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
+    {
+        // We make a copy of the set, so that we don't call the
+        // callback with locks held.
+        IncomingSet vh(getIncomingSet());
+
+        for (const Handle& lp : vh)
+            if ((data->*cb)(lp)) return true;
+        return false;
+    }
+
+    /**
+     * Deprecated! Do not use in new code!
+     * Return all atoms of type `type` that contain this atom.
+     * That is, return all atoms that contain this atom, and are
+     * also of the given type.
+     *
+     * @param The iterator where the set of atoms will be returned.
+     * @param The type of the parent atom.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result, Type type) const
+    {
+        if (nullptr == _incoming_set) return result;
+        INCOMING_SHARED_LOCK;
+
+        const auto bucket = _incoming_set->_iset.find(type);
+        if (bucket == _incoming_set->_iset.cend()) return result;
+
+        for (const WinkPtr& w : bucket->second)
+        {
+            WEAKLY_DO(h, w, { *result = h; result ++; })
+        }
+        return result;
+    }
 };
 
 #define ATOM_PTR_DECL(CNAME)                                \
