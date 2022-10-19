@@ -199,9 +199,10 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
 
     size_t esz = _environ.size();
     if (0 == esz) return Handle::UNDEFINED;
+
+    AtomSpacePtr eas = _environ[0];
     while (1 == esz)
     {
-        AtomSpacePtr eas = _environ[0];
         const Handle& h(eas->typeIndex.findAtom(a));
         if (h) {
             if (h->isAbsent()) return Handle::UNDEFINED;
@@ -222,6 +223,8 @@ Handle AtomSpace::lookupHandle(const Handle& a) const
              }
              return Handle::UNDEFINED;
         }
+
+        eas = eas->_environ[0];
     }
 
     // In the case of multiple inheritance, check each merge, until
