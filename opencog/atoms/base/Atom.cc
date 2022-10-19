@@ -486,7 +486,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
     return cnt;
 }
 
-void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
+void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs) const
 {
     INCOMING_SHARED_LOCK;
     for (const auto& bucket : _incoming_set->_iset)
@@ -494,6 +494,27 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
     }
+}
+
+void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs) const
+{
+    getLocalInc(as, hs);
+    AtomSpace* eva = _atom_space;
+    while (true)
+    {
+        size_t asz = eva->size();
+        if (0 == asz) return;
+        if (1 < asz) break;
+        Handle hlo = eva->getOutgoingAtom(0);
+        eva = (AtomSpace*) hlo.get();
+        Handle hat = eva->lookupHandle(get_handle());
+        if (nullptr == hat) return;
+        hat->getLocalInc(as, hs);
+        eva = hat->getAtomSpace();
+    }
+
+    for (const AtomSpacePtr& has : eva->getEnviron())
+        has->getCoveredInc(as, hs);
 }
 
 // We return a copy here, and not a reference, because the set itself

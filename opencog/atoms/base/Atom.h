@@ -300,6 +300,7 @@ private:
     bool setAbsent();
     bool setPresent();
 
+    void getLocalInc(const AtomSpace*, HandleSet&) const;
     void getCoveredInc(const AtomSpace*, HandleSet&) const;
 
 public:
