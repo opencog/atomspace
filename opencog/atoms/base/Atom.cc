@@ -488,7 +488,10 @@ void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs) const
     for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
-            WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+            WEAKLY_DO(l, w, {
+                const Handle& local(as->lookupHandle(l));
+                if (local) hs.insert(local);
+            })
     }
 }
 
@@ -532,24 +535,15 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
+            // We use a set here, in order to perform
+            // deduplication. Lookups of multiple copies
+            // may result in duplicates in the incoming set.
             HandleSet hs;
             getCoveredInc(as, hs);
 
-            // Use lookupHandle to find the shallowest copy.
-            // It might be an atom that is marked absent,
-            // and so turns into nullptr. A set is used, in
-            // order to de-duplicate multiple copies of the
-            // same Atom.
-            HandleSet shallow;
-            for (const Handle& h: hs)
-            {
-                const Handle& local(as->lookupHandle(h));
-                if (local) shallow.insert(local);
-            }
-
 				// Copy from set to vector.
             IncomingSet iset;
-            for (const Handle& h: shallow)
+            for (const Handle& h: hs)
                 iset.emplace_back(h);
 
             return iset;
