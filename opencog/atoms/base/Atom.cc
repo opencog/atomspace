@@ -573,12 +573,9 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
         if (as->get_copy_on_write())
         {
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
+            for (const WinkPtr& w : bucket->second)
             {
-                for (const WinkPtr& w : bucket.second)
-                {
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-                }
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
             }
 
             // Use lookupHandle() to find the shallowest copy.
@@ -626,12 +623,9 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         if (as->get_copy_on_write())
         {
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
+            for (const WinkPtr& w : bucket->second)
             {
-                for (const WinkPtr& w : bucket.second)
-                {
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-                }
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
             }
             return hs.size();
         }
