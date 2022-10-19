@@ -107,9 +107,9 @@ typedef std::weak_ptr<Atom> WinkPtr;
 }
 
 #if USE_BARE_BACKPOINTER
-	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP->get_handle()); STMT;
+	#define WEAKLY_DO(HA,WP,STMT) { Handle HA(WP->get_handle()); STMT; }
 #else  // USE_BARE_BACKPOINTER
-	#define WEAKLY_DO(HA,WP,STMT) Handle HA(WP.lock()); if (HA) { STMT; }
+	#define WEAKLY_DO(HA,WP,STMT) { Handle HA(WP.lock()); if (HA) { STMT; }}
 #endif // USE_BARE_BACKPOINTER
 
 namespace std
@@ -492,9 +492,7 @@ public:
         for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
-            {
                 WEAKLY_DO(h, w, { *result = h; result ++; })
-            }
         }
         return result;
     }
@@ -535,9 +533,7 @@ public:
         if (bucket == _incoming_set->_iset.cend()) return result;
 
         for (const WinkPtr& w : bucket->second)
-        {
             WEAKLY_DO(h, w, { *result = h; result ++; })
-        }
         return result;
     }
 };
