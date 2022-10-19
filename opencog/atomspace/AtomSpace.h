@@ -113,7 +113,7 @@ class AtomSpace : public Frame
     Handle add(const Handle&, bool force=false,
                bool recurse=false, bool absent = false);
     Handle check(const Handle&, bool force=false);
-    Handle lookupHide(const Handle&) const;
+    Handle lookupHide(const Handle&, bool hide=false) const;
 
     virtual ContentHash compute_hash() const;
 
@@ -412,7 +412,8 @@ public:
      * If such an atom is in the AtomSpace, or in any of it's parent
      * AtomSpaces, return that Atom. Return the shallowest such Atom.
      */
-    Handle lookupHandle(const Handle&) const;
+    Handle lookupHandle(const Handle& h) const
+    { return lookupHide(h, true); }
 
     /**
      * Get a node from the AtomSpace, if it's in there. If the atom

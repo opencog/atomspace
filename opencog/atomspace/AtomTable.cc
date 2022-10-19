@@ -182,37 +182,69 @@ void AtomSpace::clear()
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else return nullptr.
-Handle AtomSpace::lookupHandle(const Handle& a) const
+///
+/// If there are multiple AtomSpace frames below this, they will be
+/// searched as well, returning the shallowest copy that is found.
+/// If there is a merge below (inheritance from multiple frames)
+/// and the atom occurs in more than one frame, then the first such
+/// found will be returned. It is left up to the user to resolve
+/// cases of ambiguous multiple inheritance.
+Handle AtomSpace::lookupHide(const Handle& a, bool hide) const
 {
     const Handle& h(typeIndex.findAtom(a));
     if (h) {
-        if (h->isAbsent()) return Handle::UNDEFINED;
+        if (hide and h->isAbsent()) return Handle::UNDEFINED;
         return h;
     }
 
-    for (const AtomSpacePtr& base: _environ)
+    // The complicated-looking while-loop is just implementing
+    // a non-recursive version of what would otherwise be a
+    // much simpler recursive call back to ourselves. There's
+    // real code which will have environments that go thousands
+    // deep, and we want to avoid having thousands of stack-frames,
+    // here.
+    size_t esz = _environ.size();
+    if (0 == esz) return Handle::UNDEFINED;
+
+    AtomSpacePtr eas = _environ[0];
+    while (1 == esz)
     {
-        const Handle& found = base->lookupHandle(a);
-        if (found) return found;
+        const Handle& h(eas->typeIndex.findAtom(a));
+        if (h) {
+            if (hide and h->isAbsent()) return Handle::UNDEFINED;
+            return h;
+        }
+
+        esz = eas->_environ.size();
+        if (0 == esz) return Handle::UNDEFINED;
+
+        // If there's a case of multiple inheritance, we make a
+        // recursive call to find the atom.
+        if (1 < esz)
+        {
+             for (const AtomSpacePtr& base: eas->_environ)
+             {
+                 const Handle& found = base->lookupHide(a, hide);
+                 if (found) return found;
+             }
+             return Handle::UNDEFINED;
+        }
+
+        eas = eas->_environ[0];
     }
 
-    return Handle::UNDEFINED;
-}
-
-Handle AtomSpace::lookupHide(const Handle& a) const
-{
-    const Handle& h(typeIndex.findAtom(a));
-    if (h) return h;
-
+    // In the case of multiple inheritance, check each merge, until
+    // one is found. This is done via recursive call.
     for (const AtomSpacePtr& base: _environ)
     {
-        const Handle& found = base->lookupHide(a);
+        const Handle& found = base->lookupHide(a, hide);
         if (found) return found;
     }
 
     // Since we're using this function to hide an Atom,
     // this function cannot come up empty!
-    OC_ASSERT(false, "Internal Error!");
+    OC_ASSERT(hide, "Internal Error!");
+
     return Handle::UNDEFINED;
 }
 

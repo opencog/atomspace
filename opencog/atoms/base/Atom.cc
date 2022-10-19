@@ -585,14 +585,12 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
         IncomingSet result;
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
-
         return result;
     }
 
     IncomingSet result;
     for (const WinkPtr& w : bucket->second)
         WEAKLY_DO(l, w, { result.emplace_back(l); })
-
     return result;
 }
 
@@ -615,19 +613,16 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
             HandleSet hs;
             for (const WinkPtr& w : bucket->second)
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-
             return hs.size();
         }
 
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
-
         return cnt;
     }
 
     for (const WinkPtr& w : bucket->second)
         WEAKLY_DO(l, w, { cnt++; })
-
     return cnt;
 }
 
