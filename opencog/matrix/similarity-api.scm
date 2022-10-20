@@ -124,9 +124,6 @@
 
 		(define pair-sim-type 'SimilarityLink)
 
-		(define (get-pair L-ATOM R-ATOM)
-			(cog-link pair-sim-type L-ATOM R-ATOM))
-
 		(define (make-pair L-ATOM R-ATOM)
 			(SimilarityLink L-ATOM R-ATOM))
 
@@ -140,6 +137,11 @@
 		(define (get-sim ATOM)
 			(if (nil? ATOM) #f
 				(cog-value ATOM sim-key)))
+
+		; Its a valid pair, if it exists, and ALSO has the key on it!
+		(define (get-pair L-ATOM R-ATOM)
+			(define pr (cog-link pair-sim-type L-ATOM R-ATOM))
+			(if (get-sim pr) pr #f))
 
 		(define (get-pair-sim A B) (get-sim (get-pair A B)))
 
