@@ -1,5 +1,5 @@
 ;
-; cover-incoming-test.scm
+; frame-incoming-test.scm
 ; Verify that getIncomingSet() works on AtomSpaces.
 ;
 (use-modules (srfi srfi-1))
