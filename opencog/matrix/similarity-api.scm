@@ -175,9 +175,14 @@
 			(format #t "Elapsed time to load sims: ~A secs\n"
 				(elapsed-secs)))
 
+		; Examine *all* similarity pairs; reject those that are missing
+		; the desired key, or are marginals.
 		; Caution: this can be terribly slow.
 		(define (get-all-elts)
-			(filter get-sim ((add-pair-stars LLOBJ) 'get-all-elts)))
+			(define (valid? PR) (and (get-sim PR)
+					(not (equal? (cog-type (gar PR)) 'AnyNode))
+					(not (equal? (cog-type (gdr PR)) 'AnyNode))))
+			(filter valid? (cog-get-atoms pair-sim-type)))
 
 		(define (get-id)
 			(if ID ID (string-append (LLOBJ 'id) "-similarity")))
