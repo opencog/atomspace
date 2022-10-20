@@ -386,20 +386,23 @@
 		(define rt (LLOBJ 'right-type))
 		(define right-type (if (cog-atom? rt) rt (Type rt)))
 
-		; Perform a query to find all atoms that might appear on
-		; the left, or the right of a pair.  Return a list of them.
+		; Deduce the basis from the collection of pairs.
+		; First, get all the valid pairs. Then get the left or right
+		; else for those pairs. Deduplicate as we do this.
 		(define (do-get-basis LEF)
-			(define uleft (uniquely-named-variable))
-			(define uright (uniquely-named-variable))
-			(define term (LLOBJ 'make-pair uleft uright))
-			(define queue (cog-execute! (Query
-				(VariableList
-					(TypedVariable uleft left-type)
-					(TypedVariable uright right-type))
-				term (if LEF uleft uright))))
-			(cog-extract-recursive! uleft)
-			(cog-extract-recursive! uright)
-			(cog-value->list queue))
+			(define is-unord (cog-subtype? 'UnorderedLink (LLOBJ 'pair-type)))
+			(define basis-set (make-atom-set))
+			(if is-unord
+				(for-each (lambda (PR)
+						(basis-set (LLOBJ 'left-element PR))
+						(basis-set (LLOBJ 'right-element PR)))
+					(get-all-pairs))
+				(if LEF
+					(for-each (lambda (PR) (basis-set (LLOBJ 'left-element PR)))
+						(get-all-pairs))
+					(for-each (lambda (PR) (basis-set (LLOBJ 'right-element PR)))
+						(get-all-pairs))))
+			(basis-set #f))
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
@@ -579,7 +582,7 @@
 		;-------------------------------------------
 		; Perform a query to find all (non-marginal) matrix entries
 		; in the matrix. Return a list of them.
-		(define (get-all-pairs)
+		(define (query-all-pairs)
 			(define uleft (uniquely-named-variable))
 			(define uright (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair uleft uright))
@@ -591,6 +594,19 @@
 			(cog-extract-recursive! uleft)
 			(cog-extract-recursive! uright)
 			(cog-value->list queue))
+
+		; Make sure that the found pairs are acceptable to LLOBJ
+		; Sometimes, pairs don't belong to LLOBJ, if they don't
+		; have a specific key on them; we don't have a way of
+		; performing a query for the presence of that key. Mostly
+		; because we cannot assume that's how the object actually
+		; works.
+		(define (get-all-pairs)
+			(define (valid? PR)
+				(LLOBJ 'get-pair
+					(LLOBJ 'left-element PR)
+					(LLOBJ 'right-element PR)))
+			(filter valid? (query-all-pairs)))
 
 		;-------------------------------------------
 
