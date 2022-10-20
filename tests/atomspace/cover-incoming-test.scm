@@ -73,6 +73,42 @@
 (test-equal "top-lk-tv" 8 (get-cnt (List (Concept "foo") (Concept "bar"))))
 
 ; ------------------------------------
+; mid6 space
+(test-equal "6foo-inset-sz" 3 (cog-incoming-size foo mid6-space))
+(test-equal "6foo-inset" 3 (length (cog-incoming-set foo mid6-space)))
+
+(test-equal "6foo-lk-inset-sz" 2 (cog-incoming-size-by-type foo 'List mid6-space))
+(test-equal "6foo-lk-inset" 2 (length (cog-incoming-by-type foo 'List mid6-space)))
+
+(test-equal "6foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set mid6-space))
+(test-equal "6foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set mid6-space)))
+
+(test-equal "6bar-lk-inset-sz" 1 (cog-incoming-size-by-type bar 'List mid6-space))
+(test-equal "6bar-lk-inset-cnt" 8
+	(get-cnt (car (cog-incoming-by-type bar 'List mid6-space))))
+
+; This Link still has the lower foo in it, not the top foo
+(define lofo (gar (car (cog-incoming-by-type bar 'List mid6-space))))
+(test-equal "6bar-lk-in-foo-cnt" 6 (get-cnt lofo))
+(test-assert "6foo" (not (equal? lofo foo)))
+(test-assert "6foo-eq" (cog-equal? lofo foo))
+
+; ------------------------------------
+; mid5 space
+(test-equal "5foo-inset-sz" 3 (cog-incoming-size foo mid5-space))
+(test-equal "5foo-inset" 3 (length (cog-incoming-set foo mid5-space)))
+
+(test-equal "5foo-lk-inset-sz" 2 (cog-incoming-size-by-type foo 'List mid5-space))
+(test-equal "5foo-lk-inset" 2 (length (cog-incoming-by-type foo 'List mid5-space)))
+
+(test-equal "5foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set mid5-space))
+(test-equal "5foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set mid5-space)))
+
+(test-equal "5bar-lk-inset-sz" 1 (cog-incoming-size-by-type bar 'List mid5-space))
+(test-equal "5bar-lk-inset-cnt" 8
+	(get-cnt (car (cog-incoming-by-type bar 'List mid5-space))))
+
+; ------------------------------------
 ; mid4 space
 (test-equal "4foo-inset-sz" 3 (cog-incoming-size foo mid4-space))
 (test-equal "4foo-inset" 3 (length (cog-incoming-set foo mid4-space)))
