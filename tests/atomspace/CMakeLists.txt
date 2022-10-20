@@ -19,6 +19,7 @@ ADD_CXXTEST(ReAddUTest)
 
 ADD_GUILE_TEST(CoverBasic cover-basic-test.scm)
 ADD_GUILE_TEST(DeepSpace deep-space-test.scm)
+ADD_GUILE_TEST(FrameIncoming frame-incoming-test.scm)
 ADD_GUILE_TEST(CoverSpace cover-space-test.scm)
 ADD_GUILE_TEST(CoverIncoming cover-incoming-test.scm)
 ADD_GUILE_TEST(CoverDelete cover-delete-test.scm)

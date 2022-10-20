@@ -459,13 +459,8 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
-            INCOMING_SHARED_LOCK;
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
-            {
-                for (const WinkPtr& w : bucket.second)
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-            }
+            getCoveredInc(as, hs, NOTYPE);
             return hs.size();
         }
 
@@ -486,6 +481,58 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
     return cnt;
 }
 
+/// Add the incoming set for this Atom only to the HandleSet.
+void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs, Type t) const
+{
+    INCOMING_SHARED_LOCK;
+    if (NOTYPE != t)
+    {
+        const auto bucket = _incoming_set->_iset.find(t);
+        if (bucket == _incoming_set->_iset.cend()) return;
+        for (const WinkPtr& w : bucket->second)
+            WEAKLY_DO(l, w, {
+                const Handle& local(as->lookupHandle(l));
+                if (local) hs.insert(local);
+            })
+        return;
+    }
+
+    // If NOTYPE was given, then loop over all possibilities.
+    for (const auto& bucket : _incoming_set->_iset)
+    {
+        for (const WinkPtr& w : bucket.second)
+            WEAKLY_DO(l, w, {
+                const Handle& local(as->lookupHandle(l));
+                if (local) hs.insert(local);
+            })
+    }
+}
+
+/// Find all copies of this atom in deeper AtomSpaces, and add the
+/// incoming sets of those copies into the HandleSet. The search
+/// stops when a hiding Atom is encountered; i.e. it will not go
+/// below a hidden Atom.
+void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
+{
+    getLocalInc(as, hs, t);
+    AtomSpace* eva = _atom_space;
+    while (true)
+    {
+        size_t asz = eva->size();
+        if (0 == asz) return;
+        if (1 < asz) break;
+        AtomSpacePtr alo = eva->getEnviron()[0];
+        eva = (AtomSpace*) alo.get();
+        Handle hat = eva->lookupHandle(get_handle());
+        if (nullptr == hat) return;
+        hat->getLocalInc(as, hs, t);
+        eva = hat->getAtomSpace();
+    }
+
+    for (const AtomSpacePtr& has : eva->getEnviron())
+        has->getCoveredInc(as, hs, t);
+}
+
 // We return a copy here, and not a reference, because the set itself
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
@@ -501,23 +548,16 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
         // deduplicate the incoming set.
         if (as->get_copy_on_write())
         {
-            INCOMING_SHARED_LOCK;
+            // We use a set here, in order to perform
+            // deduplication. Lookups of multiple copies
+            // may result in duplicates in the incoming set.
             HandleSet hs;
-            for (const auto& bucket : _incoming_set->_iset)
-            {
-                for (const WinkPtr& w : bucket.second)
-                    WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
-            }
+            getCoveredInc(as, hs, NOTYPE);
 
-            // Use lookupHandle to find the shallowest copy.
-            // It might be an atom that is marked absent,
-            // and so turns into nullptr.
+				// Copy from set to vector.
             IncomingSet iset;
             for (const Handle& h: hs)
-            {
-                const Handle& local(as->lookupHandle(h));
-                if (local) iset.emplace_back(local);
-            }
+                iset.emplace_back(h);
             return iset;
         }
 
@@ -548,12 +588,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
     static IncomingSet empty_set;
     if (nullptr == _incoming_set) return empty_set;
 
-    // Lock to prevent updates of the set of atoms.
-    INCOMING_SHARED_LOCK;
-
-    const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return empty_set;
-
     if (as and not nameserver().isA(_type, FRAME))
     {
         // If the _copy_on_write flag is set, we need to
@@ -561,26 +595,30 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
         if (as->get_copy_on_write())
         {
             HandleSet hs;
-            for (const WinkPtr& w : bucket->second)
-                WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+            getCoveredInc(as, hs, type);
 
-            // Use lookupHandle() to find the shallowest copy.
-            // It might be an atom that is marked absent,
-            // and so turns into nullptr.
+				// Copy from set to vector.
             IncomingSet iset;
             for (const Handle& h: hs)
-            {
-                const Handle& local(as->lookupHandle(h));
-                if (local) iset.emplace_back(local);
-            }
+                iset.emplace_back(h);
             return iset;
         }
+
+        // Lock to prevent updates of the set of atoms.
+        INCOMING_SHARED_LOCK;
+        const auto bucket = _incoming_set->_iset.find(type);
+        if (bucket == _incoming_set->_iset.cend()) return empty_set;
 
         IncomingSet result;
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) result.emplace_back(l); })
         return result;
     }
+
+    // Lock to prevent updates of the set of atoms.
+    INCOMING_SHARED_LOCK;
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return empty_set;
 
     IncomingSet result;
     for (const WinkPtr& w : bucket->second)
@@ -591,10 +629,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (nullptr == _incoming_set) return 0;
-    INCOMING_SHARED_LOCK;
-
-    const auto bucket = _incoming_set->_iset.find(type);
-    if (bucket == _incoming_set->_iset.cend()) return 0;
 
     size_t cnt = 0;
 
@@ -605,14 +639,22 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         if (as->get_copy_on_write())
         {
             HandleSet hs;
-            for (const WinkPtr& w : bucket->second)
-                WEAKLY_DO(l, w, { if (as->in_environ(l)) hs.insert(l); })
+            getCoveredInc(as, hs, type);
             return hs.size();
         }
+
+        INCOMING_SHARED_LOCK;
+        const auto bucket = _incoming_set->_iset.find(type);
+        if (bucket == _incoming_set->_iset.cend()) return 0;
+
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
         return cnt;
     }
+
+    INCOMING_SHARED_LOCK;
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return 0;
 
     for (const WinkPtr& w : bucket->second)
         WEAKLY_DO(l, w, { cnt++; })

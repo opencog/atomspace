@@ -28,6 +28,10 @@
 (cog-set-atomspace! mid2-space)
 (ListLink (Concept "foo") (Concept "bar") (ctv 1 0 5))
 
+(cog-set-atomspace! surface-space)
+(List (Concept "foo") (Concept "x"))
+(Set (Concept "foo") (Concept "s"))
+
 ; -------------------------------------------------------------------
 ; Test that deep links are found correctly.
 
@@ -48,15 +52,17 @@
 ; -------------------------------------------------------------------
 ; Test that deep links are covered correctly.
 
-(define deep-cover "test deep links")
+(define deep-cover "test deep covering")
 (test-begin deep-cover)
 
 ; Alter counts in the outgoing set.
 ; The new ListLink should pick up the counts on the deeper one.
 (Concept "foo" (ctv 1 0 9))
+(define lifnd (cog-link 'ListLink (Concept "foo") (Concept "bar")))
 (define litop (ListLink (Concept "foo") (Concept "bar")))
 
 ; The mid-grade ListLink should be unchanged.
+(test-equal "old-link" lifnd lilly)
 (test-equal "link-space" mid2-space (cog-atomspace lilly))
 (test-equal "foo-space" base-space (cog-atomspace (gar lilly)))
 (test-equal "bar-space" mid1-space (cog-atomspace (gdr lilly)))
@@ -77,6 +83,39 @@
 (test-equal "top-bar-tv" 4 (get-cnt (gdr litop)))
 
 (test-end deep-cover)
+
+; -------------------------------------------------------------------
+; Test that incoming sets to deep links work correctly.
+
+(define deep-inco "test deep incoming")
+(test-begin deep-inco)
+(cog-set-atomspace! surface-space)
+
+(define foo (Concept "foo"))
+(test-equal "foo-inset-sz" 3 (cog-incoming-size foo))
+(test-equal "foo-inset" 3 (length (cog-incoming-set foo)))
+
+(test-equal "foo-lk-inset-sz" 2 (cog-incoming-size-by-type foo 'List))
+(test-equal "foo-lk-inset" 2 (length (cog-incoming-by-type foo 'List)))
+
+(test-equal "foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set))
+(test-equal "foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set)))
+
+; Expect less, in the lower spaces.
+(test-equal "mfoo-lk-inset-sz" 1 (cog-incoming-size-by-type foo 'List mid2-space))
+(test-equal "mfoo-lk-inset" 1 (length (cog-incoming-by-type foo 'List mid2-space)))
+
+(test-equal "mfoo-st-inset-sz" 0 (cog-incoming-size-by-type foo 'Set mid2-space))
+(test-equal "mfoo-st-inset" 0 (length (cog-incoming-by-type foo 'Set mid2-space)))
+
+; None at the bottom
+(test-equal "mfoo-lk-inset-sz" 0 (cog-incoming-size-by-type foo 'List mid1-space))
+(test-equal "mfoo-lk-inset" 0 (length (cog-incoming-by-type foo 'List mid1-space)))
+
+(test-equal "mfoo-st-inset-sz" 0 (cog-incoming-size-by-type foo 'Set mid1-space))
+(test-equal "mfoo-st-inset" 0 (length (cog-incoming-by-type foo 'Set mid1-space)))
+
+(test-end deep-inco)
 
 ; -------------------------------------------------------------------
 (opencog-test-end)
