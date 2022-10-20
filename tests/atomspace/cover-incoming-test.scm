@@ -56,6 +56,10 @@
 (test-begin complex-inco)
 
 (define foo (Concept "foo"))
+(define bar (Concept "bar"))
+
+; ------------------------------------
+; top space
 (test-equal "foo-inset-sz" 3 (cog-incoming-size foo))
 (test-equal "foo-inset" 3 (length (cog-incoming-set foo)))
 
@@ -65,16 +69,52 @@
 (test-equal "foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set))
 (test-equal "foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set)))
 
+(test-equal "top-foo-tv" 9 (get-cnt (Concept "foo")))
+(test-equal "top-lk-tv" 8 (get-cnt (List (Concept "foo") (Concept "bar"))))
+
+; ------------------------------------
+; mid4 space
+(test-equal "4foo-inset-sz" 3 (cog-incoming-size foo mid4-space))
+(test-equal "4foo-inset" 3 (length (cog-incoming-set foo mid4-space)))
+
+(test-equal "4foo-lk-inset-sz" 2 (cog-incoming-size-by-type foo 'List mid4-space))
+(test-equal "4foo-lk-inset" 2 (length (cog-incoming-by-type foo 'List mid4-space)))
+
+(test-equal "4foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set mid4-space))
+(test-equal "4foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set mid4-space)))
+
+(test-equal "4bar-lk-inset-sz" 1 (cog-incoming-size-by-type bar 'List mid4-space))
+(test-equal "4bar-lk-inset-cnt" 7
+	(get-cnt (car (cog-incoming-by-type bar 'List mid4-space))))
+
+; ------------------------------------
+; mid3 space
+(test-equal "3foo-inset-sz" 3 (cog-incoming-size foo mid3-space))
+(test-equal "3foo-inset" 3 (length (cog-incoming-set foo mid3-space)))
+
+(test-equal "3foo-lk-inset-sz" 2 (cog-incoming-size-by-type foo 'List mid3-space))
+(test-equal "3foo-lk-inset" 2 (length (cog-incoming-by-type foo 'List mid3-space)))
+
+(test-equal "3foo-st-inset-sz" 1 (cog-incoming-size-by-type foo 'Set mid3-space))
+(test-equal "3foo-st-inset" 1 (length (cog-incoming-by-type foo 'Set mid3-space)))
+
+(test-equal "set-space" mid3-space
+	(cog-atomspace (car (cog-incoming-by-type foo 'Set))))
+
+(test-equal "3bar-lk-inset-cnt" 5
+	(get-cnt (car (cog-incoming-by-type bar 'List mid3-space))))
+; ------------------------------------
+; mid2 space
 ; Expect less, in the lower spaces.
-(test-equal "mfoo-lk-inset-sz" 1 (cog-incoming-size-by-type foo 'List mid2-space))
-(test-equal "mfoo-lk-inset" 1 (length (cog-incoming-by-type foo 'List mid2-space)))
+(test-equal "mfoo-lk-inset-sz" 0 (cog-incoming-size-by-type foo 'List mid2-space))
+(test-equal "mfoo-lk-inset" 0 (length (cog-incoming-by-type foo 'List mid2-space)))
 
 (test-equal "mfoo-st-inset-sz" 0 (cog-incoming-size-by-type foo 'Set mid2-space))
 (test-equal "mfoo-st-inset" 0 (length (cog-incoming-by-type foo 'Set mid2-space)))
 
 ; None at the bottom
-(test-equal "mfoo-lk-inset-sz" 0 (cog-incoming-size-by-type foo 'List mid1-space))
-(test-equal "mfoo-lk-inset" 0 (length (cog-incoming-by-type foo 'List mid1-space)))
+(test-equal "mfoo-lk-inset-sz" 1 (cog-incoming-size-by-type foo 'List mid1-space))
+(test-equal "mfoo-lk-inset" 1 (length (cog-incoming-by-type foo 'List mid1-space)))
 
 (test-equal "mfoo-st-inset-sz" 0 (cog-incoming-size-by-type foo 'Set mid1-space))
 (test-equal "mfoo-st-inset" 0 (length (cog-incoming-by-type foo 'Set mid1-space)))
