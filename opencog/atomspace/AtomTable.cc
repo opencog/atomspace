@@ -300,7 +300,10 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     const HandleSeq& cset(cand->getOutgoingSet());
     size_t sz = oset.size();
     for (size_t i=0; i<sz; i++) {
-        if (oset[i]->getAtomSpace() != cset[i]->getAtomSpace())
+        AtomSpace* oa = oset[i]->getAtomSpace();
+        if (nullptr == oa)
+            return cand;
+        if (oa != cset[i]->getAtomSpace())
             return Handle::UNDEFINED;
     }
     return cand;
