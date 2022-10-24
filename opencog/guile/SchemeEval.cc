@@ -623,19 +623,10 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// Set the execution environment atomspace (i.e. for this thread)
-	// to the evaluator _atomspace variable.
-	AtomSpacePtr saved_as;
-	if (_atomspace)
-	{
-		saved_as = SchemeSmob::ss_get_env_as("do_eval");
-		if (saved_as != _atomspace)
-			SchemeSmob::ss_set_env_as(_atomspace);
-		else
-			saved_as = nullptr;
-	}
-
 	_input_line += expr;
+
+	if (_atomspace)
+		SchemeSmob::ss_set_env_as(_atomspace);
 
 	redirect_output();
 	_caught_error = false;
@@ -662,9 +653,6 @@ void SchemeEval::do_eval(const std::string &expr)
 		save_rc(rc);
 	}
 	restore_output();
-
-	if (saved_as)
-		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
