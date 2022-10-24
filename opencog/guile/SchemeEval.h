@@ -160,8 +160,8 @@ class SchemeEval : public GenericEval
 
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
-		static void set_scheme_as(AtomSpacePtr&);
-		AtomSpacePtr get_scheme_as(void);
+		virtual void set_scheme_as(AtomSpacePtr&);
+		virtual AtomSpacePtr get_scheme_as(void);
 
 		SchemeEval(AtomSpace* = NULL);
 		SchemeEval(AtomSpacePtr&);
