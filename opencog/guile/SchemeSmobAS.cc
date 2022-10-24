@@ -286,15 +286,8 @@ void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 
 const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
 {
-	// There are weird test-case scenarios where the fluid is not
-	// initialized. Those will crash-n-burn without this test.
-	static AtomSpacePtr nullasp;
-	if (0x0 == atomspace_fluid) return nullasp;
-
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	const AtomSpacePtr& asp = ss_to_atomspace(ref);
-	// if (nullptr == as)
-	//	scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
 	return asp;
 }
 
