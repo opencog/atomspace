@@ -1216,6 +1216,7 @@ SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
 	SchemeEval* evaluator = get_from_pool();
 	evaluator->_atomspace = asp;
 	issued[asp] = evaluator;
+
 	return evaluator;
 }
 
@@ -1265,7 +1266,7 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 	scm_with_guile(c_wrap_set_atomspace, as);
 }
 
-void SchemeEval::set_scheme_as(AtomSpacePtr& as)
+void SchemeEval::set_scheme_as(const AtomSpacePtr& as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
