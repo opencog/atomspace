@@ -1,4 +1,4 @@
-LINK_LIBRARIES(atomspace smob)
+LINK_LIBRARIES(atomspace)
 
 ADD_SUBDIRECTORY (csv)
 ADD_SUBDIRECTORY (sexpr)

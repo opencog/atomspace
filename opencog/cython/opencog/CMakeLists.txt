@@ -104,7 +104,6 @@ ADD_LIBRARY(type_constructors
 TARGET_LINK_LIBRARIES(type_constructors
 	${NO_AS_NEEDED}
 	atomspace
-	smob
 	${PYTHON_LIBRARIES}
 )
 
@@ -150,8 +149,6 @@ ADD_LIBRARY(exec_cython
 
 TARGET_LINK_LIBRARIES(exec_cython
 	atomspace_cython
-	${NO_AS_NEEDED}
-	smob
 	atomspace
 	${PYTHON_LIBRARIES}
 )

@@ -1,3 +1,3 @@
-LINK_LIBRARIES(csv atomspace smob)
+LINK_LIBRARIES(csv atomspace)
 
 ADD_CXXTEST(CSVLoadUTest)
