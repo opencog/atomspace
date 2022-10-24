@@ -149,6 +149,7 @@ class SchemeEval : public GenericEval
 		static std::string prt(SCM);
 
 		static void * c_wrap_set_atomspace(void *);
+		static void * c_wrap_get_atomspace(void *);
 		AtomSpacePtr _atomspace;
 		int _gc_ctr;
 		bool _in_eval;
@@ -160,6 +161,7 @@ class SchemeEval : public GenericEval
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
 		static void set_scheme_as(AtomSpacePtr&);
+		AtomSpacePtr get_scheme_as(void);
 
 		SchemeEval(AtomSpace* = NULL);
 		SchemeEval(AtomSpacePtr&);

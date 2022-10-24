@@ -1223,6 +1223,19 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 
 /* ============================================================== */
 
+void* SchemeEval::c_wrap_get_atomspace(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	self->_retas = SchemeSmob::ss_get_env_as("get_scheme_as");
+	return self;
+}
+
+AtomSpacePtr SchemeEval::get_scheme_as(void)
+{
+	scm_with_guile(c_wrap_get_atomspace, this);
+	return _retas;
+}
+
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {
 	AtomSpace* as = (AtomSpace*) vas;
