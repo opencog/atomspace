@@ -202,8 +202,6 @@ class SchemeEval : public GenericEval
 		virtual ValuePtr apply_v(const std::string& func, Handle varargs);
 		Handle apply(const std::string& func, Handle varargs) {
 			return HandleCast(apply_v(func, varargs)); }
-		TruthValuePtr apply_tv(const std::string& func, Handle varargs) {
-			return TruthValueCast(apply_v(func, varargs)); }
 
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }
