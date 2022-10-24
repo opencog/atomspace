@@ -821,15 +821,8 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	per_thread_init();
 
 	// Set per-thread atomspace variable in the execution environment.
-	AtomSpacePtr saved_as;
 	if (_atomspace)
-	{
-		saved_as = SchemeSmob::ss_get_env_as("do_scm_eval");
-		if (saved_as != _atomspace)
-			SchemeSmob::ss_set_env_as(_atomspace);
-		else
-			saved_as = nullptr;
-	}
+		SchemeSmob::ss_set_env_as(_atomspace);
 
 	// If we are running from the cogserver shell, capture all output
 	if (_in_shell)
@@ -846,9 +839,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	// Restore the outport
 	if (_in_shell)
 		restore_output();
-
-	if (saved_as)
-		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (_caught_error)
 	{

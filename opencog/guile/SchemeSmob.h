@@ -237,16 +237,16 @@ private:
 	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;
-	static void ss_set_env_as(const AtomSpacePtr&);
 
 	SchemeSmob();
 public:
 	// This makes init publicly visible; needed for the guile module.
 	static void init();
 
-	// This allows other users to get the atomspace that scheme is
-	// using.
+	// This allows other users to get the AtomSpace that scheme is
+	// using. If they change it, we trust that they will set it back.
 	static const AtomSpacePtr& ss_get_env_as(const char *);
+	static void ss_set_env_as(const AtomSpacePtr&);
 };
 
 // This assumes that sizeof(ValuePtr) == 16. If it ever changes
