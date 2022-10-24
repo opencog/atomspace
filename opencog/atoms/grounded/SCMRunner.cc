@@ -24,6 +24,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
 
 #include <opencog/atoms/grounded/SCMRunner.h>
 #include "DLScheme.h"
@@ -70,7 +71,10 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	Handle asargs = as->add_atom(cargs);
 
 	SchemeEval* applier = get_evaluator_for_scheme(as);
+	AtomSpacePtr saved_as = applier->get_scheme_as();
 	ValuePtr vp = applier->apply_v(_fname, asargs);
+	if (saved_as)
+		applier->set_scheme_as(saved_as);
 
 	// Hmmm... well, a bad scheme function can end up returning a
 	// null pointer. We can convert this to a VoidValue... or we

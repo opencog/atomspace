@@ -240,12 +240,12 @@ private:
 	static void ss_set_env_as(const AtomSpacePtr&);
 
 	SchemeSmob();
+
 public:
 	// This makes init publicly visible; needed for the guile module.
 	static void init();
 
-	// This allows other users to get the atomspace that scheme is
-	// using.
+	// This is used in the guile module wrappers for foreign calls.
 	static const AtomSpacePtr& ss_get_env_as(const char *);
 };
 

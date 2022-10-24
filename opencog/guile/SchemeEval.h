@@ -149,6 +149,7 @@ class SchemeEval : public GenericEval
 		static std::string prt(SCM);
 
 		static void * c_wrap_set_atomspace(void *);
+		static void * c_wrap_get_atomspace(void *);
 		AtomSpacePtr _atomspace;
 		int _gc_ctr;
 		bool _in_eval;
@@ -159,7 +160,8 @@ class SchemeEval : public GenericEval
 
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
-		static void set_scheme_as(AtomSpacePtr&);
+		virtual void set_scheme_as(AtomSpacePtr&);
+		virtual AtomSpacePtr get_scheme_as(void);
 
 		SchemeEval(AtomSpace* = NULL);
 		SchemeEval(AtomSpacePtr&);
@@ -200,8 +202,6 @@ class SchemeEval : public GenericEval
 		virtual ValuePtr apply_v(const std::string& func, Handle varargs);
 		Handle apply(const std::string& func, Handle varargs) {
 			return HandleCast(apply_v(func, varargs)); }
-		TruthValuePtr apply_tv(const std::string& func, Handle varargs) {
-			return TruthValueCast(apply_v(func, varargs)); }
 
 		// Nested invocations
 		bool recursing(void) { return _in_eval; }
