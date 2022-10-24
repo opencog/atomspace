@@ -1,15 +1,12 @@
 
 LINK_LIBRARIES(
+	smob
 	atombase
 	atomspace
 )
 
-IF(HAVE_GUILE)
-	ADD_CXXTEST(AtomTableUTest)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob clearbox)
-ENDIF(HAVE_GUILE)
-
 ADD_CXXTEST(HashMixUTest)
+ADD_CXXTEST(AtomTableUTest)
 ADD_CXXTEST(AtomSpaceUTest)
 ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
