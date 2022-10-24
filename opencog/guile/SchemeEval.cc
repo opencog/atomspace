@@ -92,6 +92,13 @@ void SchemeEval::init(void)
 	_rc = scm_gc_protect_object(_rc);
 
 	_gc_ctr = 0;
+
+	// We expect one evaluator per thread, so set that up now.
+	// More complicated possibilities are too hard to deal with:
+	// evaluated expressions might themselves be setting the
+	// AtomSpace of the thread.
+	if (_atomspace)
+		SchemeSmob::ss_set_env_as(_atomspace);
 }
 
 /// When the user is using the guile shell from within the cogserver,
