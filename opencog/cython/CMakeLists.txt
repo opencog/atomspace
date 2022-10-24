@@ -35,11 +35,13 @@ ADD_LIBRARY(PythonEval
 ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	${NO_AS_NEEDED}
 	pattern
 	execution
 	atomflow
 	atombase
 	atomspace
+	smob
 	executioncontext
  	load_scm
 	${PYTHON_LIBRARIES}
