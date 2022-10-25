@@ -32,7 +32,7 @@ using namespace opencog;
 // Single shared instance holding single shared frame cache.
 Commands SexprEval::_interpreter;
 
-SexprEval::SexprEval(AtomSpacePtr& asp)
+SexprEval::SexprEval(const AtomSpacePtr& asp)
 	: GenericEval()
 {
 	_atomspace = asp;
@@ -102,7 +102,7 @@ void SexprEval::interrupt(void)
 	_error_string = "Caught interrupt!";
 }
 
-SexprEval* SexprEval::get_evaluator(AtomSpacePtr& asp)
+SexprEval* SexprEval::get_evaluator(const AtomSpacePtr& asp)
 {
 	static thread_local SexprEval* evaluator = new SexprEval(asp);
 
