@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-JsonEval::JsonEval(AtomSpace* as)
+JsonEval::JsonEval(const AtomSpacePtr& as)
 	: GenericEval()
 {
 	_atomspace = as;
@@ -47,7 +47,7 @@ void JsonEval::eval_expr(const std::string &expr)
 {
 	try {
 		std::lock_guard<std::mutex> lock(_mtx);
-		_answer = JSCommands::interpret_command(_atomspace, expr);
+		_answer = JSCommands::interpret_command(_atomspace.get(), expr);
 	}
 	catch (const StandardException& ex)
 	{
@@ -86,7 +86,7 @@ void JsonEval::interrupt(void)
 	_error_string = "Caught interrupt!";
 }
 
-JsonEval* JsonEval::get_evaluator(AtomSpace* as)
+JsonEval* JsonEval::get_evaluator(const AtomSpacePtr& as)
 {
 	static thread_local JsonEval* evaluator = new JsonEval(as);
 
