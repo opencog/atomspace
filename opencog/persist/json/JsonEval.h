@@ -25,6 +25,7 @@
 
 #include <mutex>
 #include <string>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
 
 /**
