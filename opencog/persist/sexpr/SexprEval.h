@@ -58,7 +58,7 @@ class SexprEval : public GenericEval
 		std::mutex _mtx;
 		std::string _answer;
 
-		SexprEval(AtomSpacePtr&);
+		SexprEval(const AtomSpacePtr&);
 	public:
 		virtual ~SexprEval();
 
@@ -68,7 +68,7 @@ class SexprEval : public GenericEval
 
 		virtual void interrupt(void);
 
-		static SexprEval* get_evaluator(AtomSpacePtr&);
+		static SexprEval* get_evaluator(const AtomSpacePtr&);
 		static SexprEval* get_evaluator(AtomSpace* as) {
 			AtomSpacePtr asp(AtomSpaceCast(as));
 			return get_evaluator(asp); }

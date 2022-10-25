@@ -43,7 +43,7 @@ class AtomSpace;
 class JsonEval : public GenericEval
 {
 	private:
-		AtomSpace* _atomspace;
+		AtomSpacePtr _atomspace;
 
 		// poll_result() is called in a different thread
 		// than eval_expr() and the result is that _answer
@@ -51,7 +51,7 @@ class JsonEval : public GenericEval
 		std::mutex _mtx;
 		std::string _answer;
 
-		JsonEval(AtomSpace*);
+		JsonEval(const AtomSpacePtr&);
 	public:
 		virtual ~JsonEval();
 
@@ -61,7 +61,7 @@ class JsonEval : public GenericEval
 
 		virtual void interrupt(void);
 
-		static JsonEval* get_evaluator(AtomSpace*);
+		static JsonEval* get_evaluator(const AtomSpacePtr&);
 };
 
 /** @}*/
