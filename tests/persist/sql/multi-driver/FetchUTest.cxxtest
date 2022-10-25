@@ -104,6 +104,7 @@ void FetchUTest::setUp(void)
 {
 	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
+	eval->set_scheme_as(_as);
 	kill_data();
 
 	// eval->eval(R"((add-to-load-path "/usr/local/share/opencog/scm"))");
@@ -203,6 +204,7 @@ void FetchUTest::test_stuff(void)
 
 	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
+	eval->set_scheme_as(_as);
 	eval->eval(sql_open);
 	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
 	eval->eval("(barrier)");
@@ -233,6 +235,7 @@ void FetchUTest::test_stuff(void)
 
 	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
+	eval->set_scheme_as(_as);
 	eval->eval(sql_open);
 
 	// AAA should have been updated, as above.
@@ -273,6 +276,7 @@ void FetchUTest::test_readonly(void)
 
 	_as = createAtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
+	eval->set_scheme_as(_as);
 	eval->eval(sql_open);
 	_as->set_read_only();
 

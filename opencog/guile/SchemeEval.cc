@@ -92,6 +92,13 @@ void SchemeEval::init(void)
 	_rc = scm_gc_protect_object(_rc);
 
 	_gc_ctr = 0;
+
+	// We expect one evaluator per thread, so set that up now.
+	// More complicated possibilities are too hard to deal with:
+	// evaluated expressions might themselves be setting the
+	// AtomSpace of the thread.
+	if (_atomspace)
+		SchemeSmob::ss_set_env_as(_atomspace);
 }
 
 /// When the user is using the guile shell from within the cogserver,
@@ -197,6 +204,9 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
+	// Unset the AtomSpace for this thread.
+	SchemeSmob::ss_set_env_as(nullptr);
+
 	std::lock_guard<std::mutex> lck(init_mtx);
 	scm_gc_unprotect_object(_rc);
 
@@ -625,7 +635,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_input_line += expr;
 
-	if (_atomspace)
+	if (_atomspace and nullptr == SchemeSmob::ss_get_env_as("do_eval"))
 		SchemeSmob::ss_set_env_as(_atomspace);
 
 	redirect_output();
@@ -821,7 +831,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	per_thread_init();
 
 	// Set per-thread atomspace variable in the execution environment.
-	if (_atomspace)
+	if (_atomspace) // and nullptr == SchemeSmob::ss_get_env_as("do_scm_eval"))
 		SchemeSmob::ss_set_env_as(_atomspace);
 
 	// If we are running from the cogserver shell, capture all output
@@ -1206,6 +1216,7 @@ SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
 	SchemeEval* evaluator = get_from_pool();
 	evaluator->_atomspace = asp;
 	issued[asp] = evaluator;
+
 	return evaluator;
 }
 
@@ -1255,7 +1266,7 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 	scm_with_guile(c_wrap_set_atomspace, as);
 }
 
-void SchemeEval::set_scheme_as(AtomSpacePtr& as)
+void SchemeEval::set_scheme_as(const AtomSpacePtr& as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
