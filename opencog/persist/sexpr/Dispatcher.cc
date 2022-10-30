@@ -53,7 +53,7 @@ Dispatcher::Dispatcher(void)
 	// are collisions, pre-pend the paren, post-pend the space.)
 #define MASH(HSH,STR,CB) \
    static const size_t HSH = std::hash<std::string>{}(STR); \
-   _dispatch_map.insert({HSH, std::bind(&Commands::CB, _default, _1)});
+   _dispatch_map.insert({HSH, std::bind(&Commands::CB, &_default, _1)});
 
 	MASH(space, "cog-atomspace)",         cog_atomspace);
 	MASH(clear, "cog-atomspace-clear)",   cog_atomspace_clear);
