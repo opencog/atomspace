@@ -39,7 +39,7 @@ using namespace opencog;
 ///
 /// To aid in performance, a very special set of about 15 scheme
 /// functions have been hard-coded in C++, in the static function
-/// `Commands::interpret_command()` below.  The goal is to avoid the
+/// `Dispatcher::interpret_command()` below.  The goal is to avoid the
 /// overhead of entry/exit into guile. This works because the cogserver
 /// is guaranteed to send only these commands, and no others.
 //
@@ -49,50 +49,56 @@ Dispatcher::Dispatcher(void)
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pend the paren, post-pend the space.)
-	static const size_t space = std::hash<std::string>{}("cog-atomspace)");
-	static const size_t clear = std::hash<std::string>{}("cog-atomspace-clear)");
-	static const size_t cache = std::hash<std::string>{}("cog-execute-cache!");
-	static const size_t extra = std::hash<std::string>{}("cog-extract!");
-	static const size_t recur = std::hash<std::string>{}("cog-extract-recursive!");
+#define MASH(HSH,STR) \
+   static const size_t HSH = std::hash<std::string>{}(STR);
 
-	static const size_t gtatm = std::hash<std::string>{}("cog-get-atoms");
-	static const size_t incty = std::hash<std::string>{}("cog-incoming-by-type");
-	static const size_t incom = std::hash<std::string>{}("cog-incoming-set");
-	static const size_t keys = std::hash<std::string>{}("cog-keys->alist");
-	static const size_t link = std::hash<std::string>{}("cog-link");
-	static const size_t node = std::hash<std::string>{}("cog-node");
+	MASH(space, "cog-atomspace)");
+	MASH(clear, "cog-atomspace-clear)");
+	MASH(cache, "cog-execute-cache!");
+	MASH(extra, "cog-extract!");
+	MASH(recur, "cog-extract-recursive!");
 
-	static const size_t stval = std::hash<std::string>{}("cog-set-value!");
-	static const size_t svals = std::hash<std::string>{}("cog-set-values!");
-	static const size_t settv = std::hash<std::string>{}("cog-set-tv!");
-	static const size_t value = std::hash<std::string>{}("cog-value");
-	static const size_t dfine = std::hash<std::string>{}("define");
-	static const size_t ping = std::hash<std::string>{}("ping)");
-	static const size_t versn = std::hash<std::string>{}("cog-version)");
+	MASH(gtatm, "cog-get-atoms");
+	MASH(incty, "cog-incoming-by-type");
+	MASH(incom, "cog-incoming-set");
+	MASH(keys,  "cog-keys->alist");
+	MASH(link,  "cog-link");
+	MASH(node,  "cog-node");
+
+	MASH(stval, "cog-set-value!");
+	MASH(svals, "cog-set-values!");
+	MASH(settv, "cog-set-tv!");
+	MASH(value, "cog-value");
+	MASH(dfine, "define");
+	MASH(ping,  "ping)");
+	MASH(versn, "cog-version)");
 
 	using namespace std::placeholders;  // for _1, _2, _3...
 
 	// Hash map to look up method to call
-	_dispatch_map.insert({space, std::bind(&Dispatcher::cog_atomspace, this, _1)});
-	_dispatch_map.insert({clear, std::bind(&Dispatcher::cog_atomspace_clear, this, _1)});
-	_dispatch_map.insert({cache, std::bind(&Dispatcher::cog_execute_cache, this, _1)});
-	_dispatch_map.insert({extra, std::bind(&Dispatcher::cog_extract, this, _1)});
-	_dispatch_map.insert({recur, std::bind(&Dispatcher::cog_extract_recursive, this, _1)});
+#define DIS(HSH,CB) \
+   _dispatch_map.insert({HSH, std::bind(&Commands::##CB, _default, _1)});
 
-	_dispatch_map.insert({gtatm, std::bind(&Dispatcher::cog_get_atoms, this, _1)});
-	_dispatch_map.insert({incty, std::bind(&Dispatcher::cog_incoming_by_type, this, _1)});
-	_dispatch_map.insert({incom, std::bind(&Dispatcher::cog_incoming_set, this, _1)});
-	_dispatch_map.insert({keys, std::bind(&Dispatcher::cog_keys_alist, this, _1)});
-	_dispatch_map.insert({link, std::bind(&Dispatcher::cog_link, this, _1)});
-	_dispatch_map.insert({node, std::bind(&Dispatcher::cog_node, this, _1)});
+	DIS(space, cog_atomspace);
+	DIS(clear, cog_atomspace_clear);
+	DIS(cache, cog_execute_cache);
+	DIS(extra, cog_extract);
+	DIS(recur, cog_extract_recursive);
 
-	_dispatch_map.insert({stval, std::bind(&Dispatcher::cog_set_value, this, _1)});
-	_dispatch_map.insert({svals, std::bind(&Dispatcher::cog_set_values, this, _1)});
-	_dispatch_map.insert({settv, std::bind(&Dispatcher::cog_set_tv, this, _1)});
-	_dispatch_map.insert({value, std::bind(&Dispatcher::cog_value, this, _1)});
-	_dispatch_map.insert({dfine, std::bind(&Dispatcher::cog_define, this, _1)});
-	_dispatch_map.insert({ping, std::bind(&Dispatcher::cog_ping, this, _1)});
-	_dispatch_map.insert({versn, std::bind(&Dispatcher::cog_version, this, _1)});
+	DIS(gtatm, cog_get_atoms);
+	DIS(incty, cog_incoming_by_type);
+	DIS(incom, cog_incoming_set);
+	DIS(keys,  cog_keys_alist);
+	DIS(link,  cog_link);
+	DIS(node,  cog_node);
+
+	DIS(stval, cog_set_value);
+	DIS(svals, cog_set_values);
+	DIS(settv, cog_set_tv);
+	DIS(value, cog_value);
+	DIS(dfine, cog_define);
+	DIS(ping,  cog_ping);
+	DIS(versn, cog_version);
 }
 
 Dispatcher::~Dispatcher()
@@ -142,150 +148,6 @@ std::string Dispatcher::interpret_command(const std::string& cmd)
 
 	throw SyntaxException(TRACE_INFO, "Command not supported: >>%s<<",
 		cmd.substr(pos, epos-pos).c_str());
-}
-
-// -----------------------------------------------
-// Frame support
-void Dispatcher::set_base_space(const AtomSpacePtr& asp)
-{
-	_default.set_base_space(asp);
-}
-
-// -----------------------------------------------
-// (cog-atomspace)
-std::string Dispatcher::cog_atomspace(const std::string& arg)
-{
-	return _default.cog_atomspace(arg);
-}
-
-// -----------------------------------------------
-// (cog-atomspace-clear)
-std::string Dispatcher::cog_atomspace_clear(const std::string& arg)
-{
-	return _default.cog_atomspace_clear(arg);
-}
-
-// -----------------------------------------------
-// (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
-// This is complicated, and subject to change...
-std::string Dispatcher::cog_execute_cache(const std::string& cmd)
-{
-	return _default.cog_execute_cache(cmd);
-}
-
-// -----------------------------------------------
-// (cog-extract! (Concept "foo"))
-std::string Dispatcher::cog_extract(const std::string& cmd)
-{
-	return _default.cog_extract(cmd);
-}
-
-// -----------------------------------------------
-// (cog-extract-recursive! (Concept "foo"))
-std::string Dispatcher::cog_extract_recursive(const std::string& cmd)
-{
-	return _default.cog_extract_recursive(cmd);
-}
-
-// -----------------------------------------------
-// (cog-get-atoms 'Node #t)
-std::string Dispatcher::cog_get_atoms(const std::string& cmd)
-{
-	return _default.cog_get_atoms(cmd);
-}
-
-// -----------------------------------------------
-// (cog-incoming-by-type (Concept "foo") 'ListLink)
-std::string Dispatcher::cog_incoming_by_type(const std::string& cmd)
-{
-	return _default.cog_incoming_by_type(cmd);
-}
-
-// -----------------------------------------------
-// (cog-incoming-set (Concept "foo"))
-std::string Dispatcher::cog_incoming_set(const std::string& cmd)
-{
-	return _default.cog_incoming_set(cmd);
-}
-
-// -----------------------------------------------
-// (cog-keys->alist (Concept "foo"))
-std::string Dispatcher::cog_keys_alist(const std::string& cmd)
-{
-	return _default.cog_keys_alist(cmd);
-}
-
-// -----------------------------------------------
-// (cog-node 'Concept "foobar")
-std::string Dispatcher::cog_node(const std::string& cmd)
-{
-	return _default.cog_node(cmd);
-}
-
-// -----------------------------------------------
-// (cog-link 'ListLink (Atom) (Atom) (Atom))
-std::string Dispatcher::cog_link(const std::string& cmd)
-{
-	return _default.cog_link(cmd);
-}
-
-// -----------------------------------------------
-// (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Dispatcher::cog_set_value(const std::string& cmd)
-{
-	return _default.cog_set_value(cmd);
-}
-
-// -----------------------------------------------
-// (cog-set-values! (Concept "foo") (AtomSpace "foo")
-//     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
-std::string Dispatcher::cog_set_values(const std::string& cmd)
-{
-	return _default.cog_set_values(cmd);
-}
-
-// -----------------------------------------------
-// (cog-set-tv! (Concept "foo") (stv 1 0))
-// (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
-std::string Dispatcher::cog_set_tv(const std::string& cmd)
-{
-	return _default.cog_set_tv(cmd);
-}
-
-// -----------------------------------------------
-// (cog-update-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Dispatcher::cog_update_value(const std::string& cmd)
-{
-	return _default.cog_update_value(cmd);
-}
-
-// -----------------------------------------------
-// (cog-value (Concept "foo") (Predicate "key"))
-std::string Dispatcher::cog_value(const std::string& cmd)
-{
-	return _default.cog_value(cmd);
-}
-
-// -----------------------------------------------
-// (define sym (AtomSpace "foo" (AtomSpace "bar") (AtomSpace "baz")))
-// Place the current atomspace at the bottom of the hierarchy.
-std::string Dispatcher::cog_define(const std::string& cmd)
-{
-	return _default.cog_define(cmd);
-}
-
-// -----------------------------------------------
-// (ping) -- network ping
-std::string Dispatcher::cog_ping(const std::string& cmd)
-{
-	return _default.cog_ping(cmd);
-}
-
-// -----------------------------------------------
-// (cog-version) -- AtomSpace version
-std::string Dispatcher::cog_version(const std::string& cmd)
-{
-	return _default.cog_version(cmd);
 }
 
 // ===================================================================
