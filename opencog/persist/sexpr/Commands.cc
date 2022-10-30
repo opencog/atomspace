@@ -303,6 +303,15 @@ std::string Commands::cog_node(const std::string& cmd)
 	size_t l = pos+1;
 	size_t r = cmd.size();
 	std::string name = Sexpr::get_node_name(cmd, l, r, t);
+
+	// Let the callback run, before we query the AtomSpace
+	if(_uc.have_node_cb)
+	{
+		std::string nam = name;
+		Handle h = createNode(t, std::move(nam));
+		_uc.node_cb(h);
+	}
+
 	AtomSpace* as = _uc.get_opt_as(cmd, r);
 	Handle h = as->get_node(t, std::move(name));
 
@@ -330,6 +339,15 @@ std::string Commands::cog_link(const std::string& cmd)
 		l = r1 + 1;
 		pos = r1;
 	}
+
+	// Let the callback run, before we query the AtomSpace
+	if(_uc.have_link_cb)
+	{
+		HandleSeq oset = outgoing;
+		Handle h = createLink(std::move(oset), t);
+		_uc.link_cb(h);
+	}
+
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
 	Handle h = as->get_link(t, std::move(outgoing));
 

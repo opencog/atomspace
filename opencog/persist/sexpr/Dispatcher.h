@@ -78,11 +78,11 @@ public:
 	///    cog-keys->alist
 	///    cog-link
 	///    cog-node
+	///    cog-value
 	///    cog-set-value!
 	///    cog-set-values!
 	///    cog-set-tv!
 	///    cog-update-value!
-	///    cog-value
 	///    ping
 	///
 	/// They MUST appear only once in the string, at the very beginning,

@@ -69,14 +69,14 @@ public:
 	virtual void extract_cb(const Handle&, bool) {}
 	virtual void extract_recursive_cb(const Handle&, bool) {}
 
-	virtual void get_atoms_cb(const std::string&) {}
+	// virtual void get_atoms_cb(const std::string&) {}
 	virtual void incoming_by_type_cb(const Handle&, Type) {}
 	virtual void incoming_set_cb(const Handle&) {}
-	virtual void keys_alist_cb(const std::string&) {}
-	virtual void link_cb(const std::string&) {}
-	virtual void node_cb(const std::string&) {}
+	// virtual void keys_alist_cb(const std::string&) {}
+	virtual void link_cb(const Handle&) {}
+	virtual void node_cb(const Handle&) {}
+	// virtual void value_cb(const std::string&) {}
 
-	virtual void value_cb(const std::string&) {}
 	virtual void set_value_cb(const Handle&, const Handle&, const ValuePtr&) {}
 	virtual void set_values_cb(const Handle&) {}
 	virtual void set_tv_cb(const Handle&, const TruthValuePtr&) {}

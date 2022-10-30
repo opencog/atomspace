@@ -67,11 +67,12 @@ Dispatcher::Dispatcher(void)
 	MASH(keys,  "cog-keys->alist",        cog_keys_alist);
 	MASH(link,  "cog-link",               cog_link);
 	MASH(node,  "cog-node",               cog_node);
+	MASH(value, "cog-value",              cog_value);
 
 	MASH(stval, "cog-set-value!",         cog_set_value);
 	MASH(svals, "cog-set-values!",        cog_set_values);
 	MASH(settv, "cog-set-tv!",            cog_set_tv);
-	MASH(value, "cog-value",              cog_value);
+
 	MASH(dfine, "define",                 cog_define);
 	MASH(ping,  "ping)",                  cog_ping);
 	MASH(versn, "cog-version)",           cog_version);
