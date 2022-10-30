@@ -355,7 +355,7 @@ std::string Commands::cog_set_tv(const std::string& cmd, CB_HT cb)
 
 // -----------------------------------------------
 // (cog-update-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Commands::cog_update_value(const std::string& cmd)
+std::string Commands::cog_update_value(const std::string& cmd, CB_HHV cb)
 {
 	size_t pos = 0;
 	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -371,6 +371,8 @@ std::string Commands::cog_update_value(const std::string& cmd)
 
 	FloatValuePtr fvp = FloatValueCast(vp);
 	as->increment_count(atom, key, fvp->value());
+
+	if (cb) cb(atom, key, vp);
 
 	// Return the new value. XXX Why? This just wastes CPU?
 	// ValuePtr vp = atom->getValue(key);

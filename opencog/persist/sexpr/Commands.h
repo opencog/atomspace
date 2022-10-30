@@ -83,8 +83,8 @@ public:
 	std::string cog_set_value(const std::string&, CB_HHV=nullptr);
 	std::string cog_set_values(const std::string&, CB_H=nullptr);
 	std::string cog_set_tv(const std::string&, CB_HT=nullptr);
+	std::string cog_update_value(const std::string&, CB_HHV=nullptr);
 	std::string cog_value(const std::string&);
-	std::string cog_update_value(const std::string&);
 	std::string cog_define(const std::string&);
 	std::string cog_ping(const std::string&);
 	std::string cog_version(const std::string&);
