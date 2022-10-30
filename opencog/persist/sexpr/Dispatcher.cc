@@ -46,59 +46,35 @@ using namespace opencog;
 
 Dispatcher::Dispatcher(void)
 {
+	using namespace std::placeholders;  // for _1, _2, _3...
+
 	// Fast dispatch. There should be zero hash collisions
 	// here. If there are, we are in trouble. (Well, if there
 	// are collisions, pre-pend the paren, post-pend the space.)
-#define MASH(HSH,STR) \
-   static const size_t HSH = std::hash<std::string>{}(STR);
-
-	MASH(space, "cog-atomspace)");
-	MASH(clear, "cog-atomspace-clear)");
-	MASH(cache, "cog-execute-cache!");
-	MASH(extra, "cog-extract!");
-	MASH(recur, "cog-extract-recursive!");
-
-	MASH(gtatm, "cog-get-atoms");
-	MASH(incty, "cog-incoming-by-type");
-	MASH(incom, "cog-incoming-set");
-	MASH(keys,  "cog-keys->alist");
-	MASH(link,  "cog-link");
-	MASH(node,  "cog-node");
-
-	MASH(stval, "cog-set-value!");
-	MASH(svals, "cog-set-values!");
-	MASH(settv, "cog-set-tv!");
-	MASH(value, "cog-value");
-	MASH(dfine, "define");
-	MASH(ping,  "ping)");
-	MASH(versn, "cog-version)");
-
-	using namespace std::placeholders;  // for _1, _2, _3...
-
-	// Hash map to look up method to call
-#define DIS(HSH,CB) \
+#define MASH(HSH,STR,CB) \
+   static const size_t HSH = std::hash<std::string>{}(STR); \
    _dispatch_map.insert({HSH, std::bind(&Commands::##CB, _default, _1)});
 
-	DIS(space, cog_atomspace);
-	DIS(clear, cog_atomspace_clear);
-	DIS(cache, cog_execute_cache);
-	DIS(extra, cog_extract);
-	DIS(recur, cog_extract_recursive);
+	MASH(space, "cog-atomspace)",         cog_atomspace);
+	MASH(clear, "cog-atomspace-clear)",   cog_atomspace_clear);
+	MASH(cache, "cog-execute-cache!",     cog_execute_cache);
+	MASH(extra, "cog-extract!",           cog_extract);
+	MASH(recur, "cog-extract-recursive!", cog_extract_recursive);
 
-	DIS(gtatm, cog_get_atoms);
-	DIS(incty, cog_incoming_by_type);
-	DIS(incom, cog_incoming_set);
-	DIS(keys,  cog_keys_alist);
-	DIS(link,  cog_link);
-	DIS(node,  cog_node);
+	MASH(gtatm, "cog-get-atoms",          cog_get_atoms);
+	MASH(incty, "cog-incoming-by-type",   cog_incoming_by_type);
+	MASH(incom, "cog-incoming-set",       cog_incoming_set);
+	MASH(keys,  "cog-keys->alist",        cog_keys_alist);
+	MASH(link,  "cog-link",               cog_link);
+	MASH(node,  "cog-node",               cog_node);
 
-	DIS(stval, cog_set_value);
-	DIS(svals, cog_set_values);
-	DIS(settv, cog_set_tv);
-	DIS(value, cog_value);
-	DIS(dfine, cog_define);
-	DIS(ping,  cog_ping);
-	DIS(versn, cog_version);
+	MASH(stval, "cog-set-value!",         cog_set_value);
+	MASH(svals, "cog-set-values!",        cog_set_values);
+	MASH(settv, "cog-set-tv!",            cog_set_tv);
+	MASH(value, "cog-value",              cog_value);
+	MASH(dfine, "define",                 cog_define);
+	MASH(ping,  "ping)",                  cog_ping);
+	MASH(versn, "cog-version)",           cog_version);
 }
 
 Dispatcher::~Dispatcher()
