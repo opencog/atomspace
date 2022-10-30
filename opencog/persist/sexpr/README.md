@@ -138,11 +138,12 @@ needs to be written to or read from disk. The proxy agent determines
 what is to be done.
 
 To implement the proxy, one needs to intercept network commands, as they
-come in. This spot is the `interpret_command()` method in `Commands.cc`.
-The `class Command` maintains a table of functions to be called, one for
+come in. This spot is the `interpret_command()` method in `Dispatcher.cc`.
+The `class Dispatcher` maintains a table of functions to be called, one for
 each network command.  By altering this table and installing command
 handlers other than the default handlers, the proxy agent can respond
-in some custom fashion.
+in some custom fashion. The `class Commands` provides some default
+decoders.
 
 For example, if the CogServer receives a command to put an Atom into the
 AtomSpace, it can then immediately push it out to any open `StorageNode`s,
@@ -154,7 +155,7 @@ For details, see https://github.com/opencog/atomspace-agents
 
 Status & TODO
 -------------
-***Version 1.0.1*** -- Everything works, has withstood the test of time.
+***Version 1.0.2*** -- Everything works, has withstood the test of time.
 
 However -- multi-atomspace (frame) support is missing. Some basic work
 in this direction has been done, but it is not been completed.  The

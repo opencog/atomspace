@@ -29,7 +29,7 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 
-#include "opencog/persist/sexpr/Commands.h"
+#include "opencog/persist/sexpr/Dispatcher.h"
 
 using namespace opencog;
 
@@ -69,7 +69,7 @@ void CommandsUTest::test_node()
 
 	std::string in = R"((cog-node 'Concept "foo"))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -96,7 +96,7 @@ void CommandsUTest::test_node_quoted()
 	std::string in = ss.str();
 	printf("Input %s\n", in.c_str());
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -130,7 +130,7 @@ void CommandsUTest::test_link()
 
 	std::string in = R"((cog-link 'List (Concept "a") (Concept "b")))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -156,7 +156,7 @@ void CommandsUTest::test_set_tv()
 
 	std::string in = R"((cog-set-tv! (Concept "a") (stv 1 0)))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -190,7 +190,7 @@ void CommandsUTest::test_set_value()
 	std::string in =
 		R"((cog-set-value! (Concept "a") (Predicate "key") (stv 0.6 0.8)))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -222,7 +222,7 @@ void CommandsUTest::test_set_value_quoted()
 	std::string in = ss.str();
 	printf("Input %s\n", in.c_str());
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -268,7 +268,7 @@ void CommandsUTest::test_get_value()
 	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
 
 	std::string in = "(cog-value (Concept \"a\") (Predicate \"key\"))";
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -303,7 +303,7 @@ void CommandsUTest::test_get_value_quoted()
 	h->setValue(buz, ValueCast(createSimpleTruthValue(0.3, 0.4)));
 
 	std::string in = "(cog-value (Concept \"a\") (Predicate \"fiz\"))";
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got    %s\n", out.c_str());
@@ -330,7 +330,7 @@ void CommandsUTest::test_set_values()
 		"(cons (Predicate \"fiz\") (FloatValue 1 2 3))"
 		"(cons (Predicate \"buz\") (StringValue \"gee\" \"golly\"))))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -384,7 +384,7 @@ void CommandsUTest::test_get_values()
 
 	std::string in = "(cog-keys->alist (Concept \"a\"))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %zu %s\n", out.size(), out.c_str());
@@ -406,7 +406,7 @@ void CommandsUTest::test_extract()
 
 	std::string in = "(cog-extract! (Concept \"a\"))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
@@ -444,7 +444,7 @@ void CommandsUTest::test_execute()
 		"(Present (List (Variable \"x\") (Concept \"b\"))))"
 		"(Predicate \"key\"))";
 
-	Commands com;
+	Dispatcher com;
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got >>%s<<\n", out.c_str());

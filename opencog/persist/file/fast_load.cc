@@ -29,7 +29,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sexpr/Commands.h>
+#include <opencog/persist/sexpr/Dispatcher.h>
 #include <opencog/persist/sexpr/Sexpr.h>
 
 #include "fast_load.h"
@@ -38,7 +38,7 @@ using namespace opencog;
 
 Handle opencog::parseStream(std::istream& in, AtomSpacePtr asp)
 {
-    Commands cmd;
+    Dispatcher cmd;
     cmd.set_base_space(asp);
     static std::unordered_map<std::string, Handle> ascache; // empty, not currently used.
     Handle h;

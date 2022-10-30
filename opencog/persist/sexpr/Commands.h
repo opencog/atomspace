@@ -23,8 +23,10 @@
 #ifndef _COMMANDS_H
 #define _COMMANDS_H
 
-#include <functional>
+#include <map>
 #include <string>
+
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -32,12 +34,14 @@ namespace opencog
  *  @{
  */
 
-class AtomSpace;
-
 class Commands
 {
 public:
-	typedef std::function<std::string (const std::string&)> Meth;
+	typedef std::function<void (const Handle&)> CB_H;
+	typedef std::function<void (const Handle&, bool)> CB_HB;
+	typedef std::function<void (const Handle&, const TruthValuePtr&)> CB_HT;
+	typedef std::function<void (const Handle&, Type)> CB_HY;
+	typedef std::function<void (const Handle&, const Handle&, const ValuePtr&)> CB_HHV;
 
 protected:
 	/// True, if the _space_map below is being used, and AtomSpaces need
@@ -46,9 +50,6 @@ protected:
 
 	/// Map from string AtomSpace names to the matching AtomSpacePtr's
 	std::unordered_map<std::string, Handle> _space_map;
-
-	/// Map to dispatch table
-	std::unordered_map<size_t, Meth> _dispatch_map;
 
 	AtomSpace* get_opt_as(const std::string&, size_t&);
 
@@ -60,29 +61,6 @@ protected:
 	/// not free the frame immediattely after it is created.
 	AtomSpacePtr top_space;
 
-	/// Methods that implement each of the interpreted commands, below.
-	std::string cog_atomspace(const std::string&);
-	std::string cog_atomspace_clear(const std::string&);
-	std::string cog_execute_cache(const std::string&);
-	std::string cog_extract(const std::string&);
-	std::string cog_extract_recursive(const std::string&);
-
-	std::string cog_get_atoms(const std::string&);
-	std::string cog_incoming_by_type(const std::string&);
-	std::string cog_incoming_set(const std::string&);
-	std::string cog_keys_alist(const std::string&);
-	std::string cog_link(const std::string&);
-	std::string cog_node(const std::string&);
-
-	std::string cog_set_value(const std::string&);
-	std::string cog_set_values(const std::string&);
-	std::string cog_set_tv(const std::string&);
-	std::string cog_value(const std::string&);
-	std::string cog_update_value(const std::string&);
-	std::string cog_define(const std::string&);
-	std::string cog_ping(const std::string&);
-	std::string cog_version(const std::string&);
-
 public:
 	Commands(void);
 	~Commands();
@@ -90,42 +68,28 @@ public:
 	// Indicate which AtomSpace to use
 	void set_base_space(const AtomSpacePtr&);
 
-	/// Interpret a very small subset of singular scheme commands.
-	/// This is an ultra-minimalistic command interpreter. It only
-	/// supports those commands needed for network I/O of AtomSpace
-	/// contents (The cogserver uses this to provide peer AtomSpace
-	/// network services). The goal is to provide much higher
-	/// performance than what is possible through the guile interfaces.
-	///
-	/// The supported commands are:
-	///    cog-atomspace-clear
-	///    cog-execute-cache!
-	///    cog-extract!
-	///    cog-extract-recursive!
-	///    cog-get-atoms
-	///    cog-incoming-by-type
-	///    cog-incoming-set
-	///    cog-keys->alist
-	///    cog-link
-	///    cog-node
-	///    cog-set-value!
-	///    cog-set-values!
-	///    cog-set-tv!
-	///    cog-update-value!
-	///    cog-value
-	///    ping
-	///
-	/// They MUST appear only once in the string, at the very beginning,
-	/// and they MUST be followed by valid Atomese s-expressions, and
-	/// nothing else.
-	///
-	std::string interpret_command(const std::string&);
+	/// Methods that implement each of the interpreted commands.
+	std::string cog_atomspace(const std::string&);
+	std::string cog_atomspace_clear(const std::string&);
+	std::string cog_execute_cache(const std::string&);
+	std::string cog_extract(const std::string&, CB_HB=nullptr);
+	std::string cog_extract_recursive(const std::string&, CB_HB=nullptr);
 
-	/// Install a callback handler, over-riding the default behavior for
-	/// the command interpreter. This allows proxy agents to over-ride the
-	/// default interpretation of any message that is received, so as to do
-	/// ... something different. Anything different.
-	void install_handler(const std::string&, Meth);
+	std::string cog_get_atoms(const std::string&);
+	std::string cog_incoming_by_type(const std::string&, CB_HY=nullptr);
+	std::string cog_incoming_set(const std::string&, CB_H=nullptr);
+	std::string cog_keys_alist(const std::string&);
+	std::string cog_link(const std::string&);
+	std::string cog_node(const std::string&);
+
+	std::string cog_set_value(const std::string&, CB_HHV=nullptr);
+	std::string cog_set_values(const std::string&, CB_H=nullptr);
+	std::string cog_set_tv(const std::string&, CB_HT=nullptr);
+	std::string cog_update_value(const std::string&, CB_HHV=nullptr);
+	std::string cog_value(const std::string&);
+	std::string cog_define(const std::string&);
+	std::string cog_ping(const std::string&);
+	std::string cog_version(const std::string&);
 };
 
 /** @}*/
