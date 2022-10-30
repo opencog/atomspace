@@ -49,7 +49,7 @@ MyDispatch::MyDispatch(void)
 
 std::string MyDispatch::my_node(const std::string& arg)
 {
-	std::string rv = cog_node(arg);
+	std::string rv = _default.cog_node(arg);
 
 	return "foobar" + rv;
 }
