@@ -219,6 +219,8 @@ std::string Commands::cog_get_atoms(const std::string& cmd)
 	if (std::string::npos != pos and cmd.compare(pos, 2, "#f"))
 		get_subtypes = true;
 
+	if (_uc.have_get_atoms_cb) _uc.get_atoms_cb(t, get_subtypes);
+
 	// as = get_opt_as(cmd, pos, as);
 
 	std::string rv = "(";
@@ -283,6 +285,8 @@ std::string Commands::cog_keys_alist(const std::string& cmd)
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
 	h = as->add_atom(h);
 
+	if (_uc.have_keys_alist_cb) _uc.keys_alist_cb(h);
+
 	std::string alist = "(";
 	for (const Handle& key : h->getKeys())
 	{
@@ -305,6 +309,7 @@ std::string Commands::cog_node(const std::string& cmd)
 	std::string name = Sexpr::get_node_name(cmd, l, r, t);
 
 	// Let the callback run, before we query the AtomSpace
+	// The callback might add this Atom to the AtomSpace
 	if(_uc.have_node_cb)
 	{
 		std::string nam = name;
@@ -341,6 +346,7 @@ std::string Commands::cog_link(const std::string& cmd)
 	}
 
 	// Let the callback run, before we query the AtomSpace
+	// The callback might add this Atom to the AtomSpace
 	if(_uc.have_link_cb)
 	{
 		HandleSeq oset = outgoing;
@@ -366,6 +372,8 @@ std::string Commands::cog_value(const std::string& cmd)
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
 	atom = as->add_atom(atom);
 	key = as->add_atom(key);
+
+	if (_uc.have_value_cb) _uc.value_cb(atom, key);
 
 	ValuePtr vp = atom->getValue(key);
 	return Sexpr::encode_value(vp);
