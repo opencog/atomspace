@@ -40,6 +40,7 @@ public:
 	typedef std::function<void (const Handle&)> CB_H;
 	typedef std::function<void (const Handle&, bool)> CB_HB;
 	typedef std::function<void (const Handle&, const TruthValuePtr&)> CB_HT;
+	typedef std::function<void (const Handle&, Type)> CB_HY;
 	typedef std::function<void (const Handle&, const Handle&, const ValuePtr&)> CB_HHV;
 
 protected:
@@ -75,8 +76,8 @@ public:
 	std::string cog_extract_recursive(const std::string&, CB_HB=nullptr);
 
 	std::string cog_get_atoms(const std::string&);
-	std::string cog_incoming_by_type(const std::string&);
-	std::string cog_incoming_set(const std::string&);
+	std::string cog_incoming_by_type(const std::string&, CB_HY=nullptr);
+	std::string cog_incoming_set(const std::string&, CB_H=nullptr);
 	std::string cog_keys_alist(const std::string&);
 	std::string cog_link(const std::string&);
 	std::string cog_node(const std::string&);

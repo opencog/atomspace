@@ -196,7 +196,7 @@ std::string Commands::cog_get_atoms(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-incoming-by-type (Concept "foo") 'ListLink)
-std::string Commands::cog_incoming_by_type(const std::string& cmd)
+std::string Commands::cog_incoming_by_type(const std::string& cmd, CB_HY cb)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -205,6 +205,8 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd)
 
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
+
+	if (cb) cb(h, t);
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSetByType(t))
@@ -216,12 +218,15 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-incoming-set (Concept "foo"))
-std::string Commands::cog_incoming_set(const std::string& cmd)
+std::string Commands::cog_incoming_set(const std::string& cmd, CB_H cb)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
+
+	if (cb) cb(h);
+
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSet())
 		alist += Sexpr::encode_atom(hi);
