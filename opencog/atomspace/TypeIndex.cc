@@ -62,9 +62,9 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = ATOM; t<_num_types; t++)
+	for (Type t = type+1; t<_num_types; t++)
 	{
-		if (t == type or not _nameserver.isA(t, type)) continue;
+		if (not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
 		for (const Handle& h : s)
@@ -84,9 +84,9 @@ void TypeIndex::get_handles_by_type(HandleSet& hset,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = ATOM; t<_num_types; t++)
+	for (Type t = type+1; t<_num_types; t++)
 	{
-		if (t == type or not _nameserver.isA(t, type)) continue;
+		if (not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
 	   hset.insert(s.begin(), s.end());
@@ -122,9 +122,9 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = ATOM; t<_num_types; t++)
+	for (Type t = type+1; t<_num_types; t++)
 	{
-		if (t == type or not _nameserver.isA(t, type)) continue;
+		if (not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
 		for (const Handle& h : s)
