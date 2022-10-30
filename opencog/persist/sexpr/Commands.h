@@ -116,7 +116,7 @@ class Commands
 {
 protected:
 	static UnwrappedCommands default_uc;
-	UnwrappedCommands& _uc = default_uc;
+	UnwrappedCommands& _uc;
 
 public:
 	Commands(void);

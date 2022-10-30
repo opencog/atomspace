@@ -105,18 +105,11 @@ UnwrappedCommands::get_opt_as(const std::string& cmd, size_t& pos)
 
 UnwrappedCommands Commands::default_uc;
 
-Commands::Commands(void)
-{
-}
+Commands::Commands(void) : _uc(default_uc) {}
 
-Commands::Commands(UnwrappedCommands& uc)
-{
-	_uc = uc;
-}
+Commands::Commands(UnwrappedCommands& uc) : _uc(uc) {}
 
-Commands::~Commands()
-{
-}
+Commands::~Commands() {}
 
 void Commands::set_base_space(const AtomSpacePtr& asp)
 {
