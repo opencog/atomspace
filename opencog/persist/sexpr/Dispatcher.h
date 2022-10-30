@@ -39,6 +39,11 @@ class AtomSpace;
 class Dispatcher
 {
 public:
+	// XXX FIXME: This is a terrible design for performance.
+	// The std::bind call turns into seven!! stack frames of
+	// unwraps befor the actual method is called. This is ...
+	// horrific. We can replace with with a conventional
+	// class of virtual methods.
 	typedef std::function<std::string (const std::string&)> Meth;
 
 protected:
@@ -47,35 +52,13 @@ protected:
 	/// Map to dispatch table
 	std::unordered_map<size_t, Meth> _dispatch_map;
 
-	/// Methods that implement each of the interpreted commands, below.
-	std::string cog_atomspace(const std::string&);
-	std::string cog_atomspace_clear(const std::string&);
-	std::string cog_execute_cache(const std::string&);
-	std::string cog_extract(const std::string&);
-	std::string cog_extract_recursive(const std::string&);
-
-	std::string cog_get_atoms(const std::string&);
-	std::string cog_incoming_by_type(const std::string&);
-	std::string cog_incoming_set(const std::string&);
-	std::string cog_keys_alist(const std::string&);
-	std::string cog_link(const std::string&);
-	std::string cog_node(const std::string&);
-
-	std::string cog_set_value(const std::string&);
-	std::string cog_set_values(const std::string&);
-	std::string cog_set_tv(const std::string&);
-	std::string cog_value(const std::string&);
-	std::string cog_update_value(const std::string&);
-	std::string cog_define(const std::string&);
-	std::string cog_ping(const std::string&);
-	std::string cog_version(const std::string&);
-
 public:
 	Dispatcher(void);
 	~Dispatcher();
 
 	// Indicate which AtomSpace to use
-	void set_base_space(const AtomSpacePtr&);
+	void set_base_space(const AtomSpacePtr& asp) {
+		_default.set_base_space(asp); }
 
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only
@@ -95,11 +78,11 @@ public:
 	///    cog-keys->alist
 	///    cog-link
 	///    cog-node
+	///    cog-value
 	///    cog-set-value!
 	///    cog-set-values!
 	///    cog-set-tv!
 	///    cog-update-value!
-	///    cog-value
 	///    ping
 	///
 	/// They MUST appear only once in the string, at the very beginning,
