@@ -34,15 +34,62 @@ namespace opencog
  *  @{
  */
 
-class Commands
+class UnwrappedCommands
 {
 public:
-	typedef std::function<void (const Handle&)> CB_H;
-	typedef std::function<void (const Handle&, bool)> CB_HB;
-	typedef std::function<void (const Handle&, const TruthValuePtr&)> CB_HT;
-	typedef std::function<void (const Handle&, Type)> CB_HY;
-	typedef std::function<void (const Handle&, const Handle&, const ValuePtr&)> CB_HHV;
+	UnwrappedCommands(void);
+	virtual ~UnwrappedCommands();
 
+	/// Methods that implement each of the interpreted commands.
+	// virtual void atomspace_cb(const std::string&) {}
+	// virtual void atomspace_clear_cb(const std::string&) {}
+	// virtual void execute_cache_cb(const std::string&) {}
+	virtual void extract_cb(const Handle&, bool) {}
+	virtual void extract_recursive_cb(const Handle&, bool) {}
+
+	// virtual void get_atoms_cb(const std::string&) {}
+	virtual void incoming_by_type_cb(const Handle&, Type) {}
+	virtual void incoming_set_cb(const Handle&) {}
+	// virtual void keys_alist_cb(const std::string&) {}
+	// virtual void link_cb(const std::string&) {}
+	// virtual void node_cb(const std::string&) {}
+
+	virtual void set_value_cb(const Handle&, const Handle&, const ValuePtr&) {}
+	virtual void set_values_cb(const Handle&) {}
+	virtual void set_tv_cb(const Handle&, Type) {}
+	virtual void update_value_cb(const Handle&, const Handle&, const ValuePtr&) {}
+
+	// virtual void value_cb(const std::string&) {}
+	// virtual void define_cb(const std::string&) {}
+	// virtual void ping_cb(const std::string&) {}
+	// virtual void version_cb(const std::string&) {}
+
+	// bool have_atomspace_cb;
+	// bool have_atomspace_clear_cb;
+	// bool have_execute_cache_cb;
+	bool have_extract_cb;
+	bool have_extract_recursive_cb;
+
+	// bool have_get_atoms_cb;
+	bool have_incoming_by_type_cb;
+	bool have_incoming_set_cb;
+	// bool have_keys_alist_cb;
+	// bool have_link_cb;
+	// bool have_node_cb;
+
+	bool have_set_value_cb;
+	bool have_set_values_cb;
+	bool have_set_tv_cb;
+	bool have_update_value_cb;
+
+	// bool have_value_cb;
+	// bool have_define_cb;
+	// bool have_ping_cb;
+	// bool have_version_cb;
+};
+
+class Commands
+{
 protected:
 	/// True, if the _space_map below is being used, and AtomSpaces need
 	/// to be sent and received.
@@ -61,8 +108,11 @@ protected:
 	/// not free the frame immediattely after it is created.
 	AtomSpacePtr top_space;
 
+	UnwrappedCommands *_uc;
+
 public:
 	Commands(void);
+	Commands(UnwrappedCommands&);
 	~Commands();
 
 	// Indicate which AtomSpace to use
@@ -72,20 +122,21 @@ public:
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
 	std::string cog_execute_cache(const std::string&);
-	std::string cog_extract(const std::string&, CB_HB=nullptr);
-	std::string cog_extract_recursive(const std::string&, CB_HB=nullptr);
+	std::string cog_extract(const std::string&);
+	std::string cog_extract_recursive(const std::string&);
 
 	std::string cog_get_atoms(const std::string&);
-	std::string cog_incoming_by_type(const std::string&, CB_HY=nullptr);
-	std::string cog_incoming_set(const std::string&, CB_H=nullptr);
+	std::string cog_incoming_by_type(const std::string&);
+	std::string cog_incoming_set(const std::string&);
 	std::string cog_keys_alist(const std::string&);
 	std::string cog_link(const std::string&);
 	std::string cog_node(const std::string&);
 
-	std::string cog_set_value(const std::string&, CB_HHV=nullptr);
-	std::string cog_set_values(const std::string&, CB_H=nullptr);
-	std::string cog_set_tv(const std::string&, CB_HT=nullptr);
-	std::string cog_update_value(const std::string&, CB_HHV=nullptr);
+	std::string cog_set_value(const std::string&);
+	std::string cog_set_values(const std::string&);
+	std::string cog_set_tv(const std::string&);
+	std::string cog_update_value(const std::string&);
+
 	std::string cog_value(const std::string&);
 	std::string cog_define(const std::string&);
 	std::string cog_ping(const std::string&);

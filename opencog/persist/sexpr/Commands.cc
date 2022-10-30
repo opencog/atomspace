@@ -52,8 +52,46 @@ using namespace opencog;
 /// is guaranteed to send only these commands, and no others.
 //
 
+UnwrappedCommands::UnwrappedCommands(void)
+{
+	// have_atomspace_cb = false;
+	// have_atomspace_clear_cb = false;
+	// have_execute_cache_cb = false;
+	have_extract_cb = false;
+	have_extract_recursive_cb = false;
+
+	// have_get_atoms_cb = false;
+	have_incoming_by_type_cb = false;
+	have_incoming_set_cb = false;
+	// have_keys_alist_cb = false;
+	// have_link_cb = false;
+	// have_node_cb = false;
+
+	have_set_value_cb = false;
+	have_set_values_cb = false;
+	have_set_tv_cb = false;
+	have_update_value_cb = false;
+
+	// have_value_cb = false;
+	// have_define_cb = false;
+	// have_ping_cb = false;
+	// have_version_cb = false;
+}
+
+UnwrappedCommands::~UnwrappedCommands(void)
+{}
+
+// ==================================================================
+
 Commands::Commands(void)
 {
+	_uc = nullptr;
+	_multi_space = false;
+}
+
+Commands::Commands(UnwrappedCommands& uc)
+{
+	_uc = &uc;
 	_multi_space = false;
 }
 
