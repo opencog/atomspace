@@ -38,6 +38,7 @@ class Commands
 {
 public:
 	typedef std::function<void (const Handle&)> CB_H;
+	typedef std::function<void (const Handle&, bool)> CB_HB;
 	typedef std::function<void (const Handle&, const TruthValuePtr&)> CB_HT;
 	typedef std::function<void (const Handle&, const Handle&, const ValuePtr&)> CB_HHV;
 
@@ -70,8 +71,8 @@ public:
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
 	std::string cog_execute_cache(const std::string&);
-	std::string cog_extract(const std::string&);
-	std::string cog_extract_recursive(const std::string&);
+	std::string cog_extract(const std::string&, CB_HB=nullptr);
+	std::string cog_extract_recursive(const std::string&, CB_HB=nullptr);
 
 	std::string cog_get_atoms(const std::string&);
 	std::string cog_incoming_by_type(const std::string&);
