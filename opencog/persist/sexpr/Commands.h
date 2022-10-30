@@ -108,7 +108,7 @@ protected:
 	/// not free the frame immediattely after it is created.
 	AtomSpacePtr top_space;
 
-	UnwrappedCommands *_uc;
+	UnwrappedCommands& _uc;
 
 public:
 	Commands(void);

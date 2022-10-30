@@ -91,7 +91,7 @@ Commands::Commands(void)
 
 Commands::Commands(UnwrappedCommands& uc)
 {
-	_uc = &uc;
+	_uc = uc;
 	_multi_space = false;
 }
 
@@ -180,13 +180,13 @@ std::string Commands::cog_execute_cache(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-extract! (Concept "foo"))
-std::string Commands::cog_extract(const std::string& cmd, CB_HB cb)
+std::string Commands::cog_extract(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 	if (nullptr == h) return "#t";
 
-	if (cb) cb(h, false);
+	if (_uc.have_extract_cb) uc.extract_cb(h, false);
 
 	if (_base_space->extract_atom(h, false)) return "#t";
 	return "#f";
@@ -194,13 +194,13 @@ std::string Commands::cog_extract(const std::string& cmd, CB_HB cb)
 
 // -----------------------------------------------
 // (cog-extract-recursive! (Concept "foo"))
-std::string Commands::cog_extract_recursive(const std::string& cmd, CB_HB cb)
+std::string Commands::cog_extract_recursive(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 	if (nullptr == h) return "#t";
 
-	if (cb) cb(h, true);
+	if (_uc.have_extract_cb) uc.extract_cb(h, true);
 
 	if (_base_space->extract_atom(h, true)) return "#t";
 	return "#f";
@@ -234,7 +234,7 @@ std::string Commands::cog_get_atoms(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-incoming-by-type (Concept "foo") 'ListLink)
-std::string Commands::cog_incoming_by_type(const std::string& cmd, CB_HY cb)
+std::string Commands::cog_incoming_by_type(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -244,7 +244,7 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd, CB_HY cb)
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
 
-	if (cb) cb(h, t);
+	if (_uc.have_incoming_by_type_cb) _uc.incoming_by_type_cb(h, t);
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSetByType(t))
@@ -256,14 +256,14 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd, CB_HY cb)
 
 // -----------------------------------------------
 // (cog-incoming-set (Concept "foo"))
-std::string Commands::cog_incoming_set(const std::string& cmd, CB_H cb)
+std::string Commands::cog_incoming_set(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
 	AtomSpace* as = get_opt_as(cmd, pos);
 	h = as->add_atom(h);
 
-	if (cb) cb(h);
+	if (_uc.have_incoming_set_cb) _uc.incoming_set_cb(h);
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSet())
@@ -338,7 +338,7 @@ std::string Commands::cog_link(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Commands::cog_set_value(const std::string& cmd, CB_HHV cb)
+std::string Commands::cog_set_value(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -352,7 +352,7 @@ std::string Commands::cog_set_value(const std::string& cmd, CB_HHV cb)
 		vp = Sexpr::add_atoms(as, vp);
 	as->set_value(atom, key, vp);
 
-	if (cb) cb(atom, key, vp);
+	if (_uc.have_set_value_cb) _uc.set_value_cb(atom, key, vp);
 
 	return "()";
 }
@@ -360,7 +360,7 @@ std::string Commands::cog_set_value(const std::string& cmd, CB_HHV cb)
 // -----------------------------------------------
 // (cog-set-values! (Concept "foo") (AtomSpace "foo")
 //     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
-std::string Commands::cog_set_values(const std::string& cmd, CB_H cb)
+std::string Commands::cog_set_values(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -374,7 +374,7 @@ std::string Commands::cog_set_values(const std::string& cmd, CB_H cb)
 	}
 	Sexpr::decode_slist(h, cmd, pos);
 
-	if (cb) cb(h);
+	if (_uc.have_set_values_cb) _uc.set_values_cb(h);
 
 	return "()";
 }
@@ -382,7 +382,7 @@ std::string Commands::cog_set_values(const std::string& cmd, CB_H cb)
 // -----------------------------------------------
 // (cog-set-tv! (Concept "foo") (stv 1 0))
 // (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
-std::string Commands::cog_set_tv(const std::string& cmd, CB_HT cb)
+std::string Commands::cog_set_tv(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -397,14 +397,14 @@ std::string Commands::cog_set_tv(const std::string& cmd, CB_HT cb)
 	TruthValuePtr tvp(TruthValueCast(vp));
 	ha = as->set_truthvalue(ha, tvp);
 
-	if (cb) cb(ha, tvp);
+	if (_uc.have_set_tv_cb) _uc.set_tv_cb(ha, tvp);
 
 	return "()";
 }
 
 // -----------------------------------------------
 // (cog-update-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Commands::cog_update_value(const std::string& cmd, CB_HHV cb)
+std::string Commands::cog_update_value(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -421,7 +421,7 @@ std::string Commands::cog_update_value(const std::string& cmd, CB_HHV cb)
 	FloatValuePtr fvp = FloatValueCast(vp);
 	as->increment_count(atom, key, fvp->value());
 
-	if (cb) cb(atom, key, vp);
+	if (_uc.have_update_value_cb) _uc.update_value_cb(atom, key, vp);
 
 	// Return the new value. XXX Why? This just wastes CPU?
 	// ValuePtr vp = atom->getValue(key);
