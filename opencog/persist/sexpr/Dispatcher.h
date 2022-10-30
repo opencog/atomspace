@@ -52,7 +52,8 @@ public:
 	~Dispatcher();
 
 	// Indicate which AtomSpace to use
-	void set_base_space(const AtomSpacePtr&);
+	void set_base_space(const AtomSpacePtr& asp) {
+		_default.set_base_space(asp); }
 
 	/// Interpret a very small subset of singular scheme commands.
 	/// This is an ultra-minimalistic command interpreter. It only

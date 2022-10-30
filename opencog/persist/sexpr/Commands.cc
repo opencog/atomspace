@@ -83,6 +83,8 @@ UnwrappedCommands::~UnwrappedCommands(void)
 
 // ==================================================================
 
+UnwrappedCommands Commands::default_uc;
+
 Commands::Commands(void)
 {
 	_multi_space = false;
