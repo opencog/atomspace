@@ -311,7 +311,7 @@ std::string Commands::cog_set_value(const std::string& cmd, CB_HHV cb)
 // -----------------------------------------------
 // (cog-set-values! (Concept "foo") (AtomSpace "foo")
 //     (alist (cons (Predicate "bar") (stv 0.9 0.8)) ...))
-std::string Commands::cog_set_values(const std::string& cmd)
+std::string Commands::cog_set_values(const std::string& cmd, CB_H cb)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -324,6 +324,8 @@ std::string Commands::cog_set_values(const std::string& cmd)
 		h = as->add_atom(h);
 	}
 	Sexpr::decode_slist(h, cmd, pos);
+
+	if (cb) cb(h);
 
 	return "()";
 }
