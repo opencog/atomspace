@@ -27,7 +27,7 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
-#include <opencog/persist/sexpr/Commands.h>
+#include <opencog/persist/sexpr/Dispatcher.h>
 
 /**
  * The SexprEval class implements a very simple API for s-exprssion
@@ -50,7 +50,7 @@ class SexprEval : public GenericEval
 		// Static, so that there is a singleton instance shared by
 		// by all threads. Specifically, the frame cache needs to
 		// be shared by all.
-		static Commands _interpreter;
+		static Dispatcher _interpreter;
 
 		// poll_result() is called in a different thread
 		// than eval_expr() and the result is that _answer
@@ -73,7 +73,7 @@ class SexprEval : public GenericEval
 			AtomSpacePtr asp(AtomSpaceCast(as));
 			return get_evaluator(asp); }
 
-		void install_handler(const std::string& cmd, Commands::Meth impl) {
+		void install_handler(const std::string& cmd, Dispatcher::Meth impl) {
 			_interpreter.install_handler(cmd, impl);
 		}
 };

@@ -26,13 +26,13 @@
 #include <map>
 #include <string>
 
+#include <opencog/atomspace/AtomSpace.h>
+
 namespace opencog
 {
 /** \addtogroup grp_persist
  *  @{
  */
-
-class AtomSpace;
 
 class Commands
 {

@@ -26,6 +26,8 @@
 #include <functional>
 #include <string>
 
+#include <opencog/persist/sexpr/Commands.h>
+
 namespace opencog
 {
 /** \addtogroup grp_persist
