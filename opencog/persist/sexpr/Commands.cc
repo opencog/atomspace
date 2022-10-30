@@ -333,18 +333,23 @@ std::string Commands::cog_set_values(const std::string& cmd, CB_H cb)
 // -----------------------------------------------
 // (cog-set-tv! (Concept "foo") (stv 1 0))
 // (cog-set-tv! (Concept "foo") (stv 1 0) (AtomSpace "foo"))
-std::string Commands::cog_set_tv(const std::string& cmd)
+std::string Commands::cog_set_tv(const std::string& cmd, CB_HT cb)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _space_map);
-	ValuePtr tv = Sexpr::decode_value(cmd, ++pos);
+	ValuePtr vp = Sexpr::decode_value(cmd, ++pos);
 
 	// Search for optional AtomSpace argument
 	AtomSpace* as = get_opt_as(cmd, pos);
 
 	Handle ha = as->add_atom(h);
 	if (nullptr == ha) return "()"; // read-only atomspace.
-	as->set_truthvalue(ha, TruthValueCast(tv));
+
+	TruthValuePtr tvp(TruthValueCast(vp));
+	ha = as->set_truthvalue(ha, tvp);
+
+	if (cb) cb(ha, tvp);
+
 	return "()";
 }
 
