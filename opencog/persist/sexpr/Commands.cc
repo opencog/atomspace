@@ -56,26 +56,25 @@ UnwrappedCommands::UnwrappedCommands(void)
 {
 	_multi_space = false;
 
-
 	// have_atomspace_cb = false;
 	// have_atomspace_clear_cb = false;
 	// have_execute_cache_cb = false;
 	have_extract_cb = false;
 	have_extract_recursive_cb = false;
 
-	// have_get_atoms_cb = false;
+	have_get_atoms_cb = false;
 	have_incoming_by_type_cb = false;
 	have_incoming_set_cb = false;
-	// have_keys_alist_cb = false;
-	// have_link_cb = false;
-	// have_node_cb = false;
+	have_keys_alist_cb = false;
+	have_link_cb = false;
+	have_node_cb = false;
+	have_value_cb = false;
 
 	have_set_value_cb = false;
 	have_set_values_cb = false;
 	have_set_tv_cb = false;
 	have_update_value_cb = false;
 
-	// have_value_cb = false;
 	// have_define_cb = false;
 	// have_ping_cb = false;
 	// have_version_cb = false;
@@ -339,6 +338,22 @@ std::string Commands::cog_link(const std::string& cmd)
 }
 
 // -----------------------------------------------
+// (cog-value (Concept "foo") (Predicate "key"))
+std::string Commands::cog_value(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle atom = Sexpr::decode_atom(cmd, pos, _uc._space_map);
+	Handle key = Sexpr::decode_atom(cmd, ++pos, _uc._space_map);
+
+	AtomSpace* as = _uc.get_opt_as(cmd, pos);
+	atom = as->add_atom(atom);
+	key = as->add_atom(key);
+
+	ValuePtr vp = atom->getValue(key);
+	return Sexpr::encode_value(vp);
+}
+
+// -----------------------------------------------
 // (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
 std::string Commands::cog_set_value(const std::string& cmd)
 {
@@ -429,22 +444,6 @@ std::string Commands::cog_update_value(const std::string& cmd)
 	// ValuePtr vp = atom->getValue(key);
 	// return Sexpr::encode_value(vp);
 	return "()";
-}
-
-// -----------------------------------------------
-// (cog-value (Concept "foo") (Predicate "key"))
-std::string Commands::cog_value(const std::string& cmd)
-{
-	size_t pos = 0;
-	Handle atom = Sexpr::decode_atom(cmd, pos, _uc._space_map);
-	Handle key = Sexpr::decode_atom(cmd, ++pos, _uc._space_map);
-
-	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	atom = as->add_atom(atom);
-	key = as->add_atom(key);
-
-	ValuePtr vp = atom->getValue(key);
-	return Sexpr::encode_value(vp);
 }
 
 // -----------------------------------------------
