@@ -39,6 +39,11 @@ class AtomSpace;
 class Dispatcher
 {
 public:
+	// XXX FIXME: This is a terrible design for performance.
+	// The std::bind call turns into seven!! stack frames of
+	// unwraps befor the actual method is called. This is ...
+	// horrific. We can replace with with a conventional
+	// class of virtual methods.
 	typedef std::function<std::string (const std::string&)> Meth;
 
 protected:
