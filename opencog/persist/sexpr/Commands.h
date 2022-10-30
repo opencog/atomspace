@@ -56,7 +56,7 @@ public:
 
 	virtual void set_value_cb(const Handle&, const Handle&, const ValuePtr&) {}
 	virtual void set_values_cb(const Handle&) {}
-	virtual void set_tv_cb(const Handle&, Type) {}
+	virtual void set_tv_cb(const Handle&, const TruthValuePtr&) {}
 	virtual void update_value_cb(const Handle&, const Handle&, const ValuePtr&) {}
 
 	// virtual void value_cb(const std::string&) {}
@@ -108,7 +108,8 @@ protected:
 	/// not free the frame immediattely after it is created.
 	AtomSpacePtr top_space;
 
-	UnwrappedCommands& _uc;
+	static UnwrappedCommands default_uc;
+	UnwrappedCommands& _uc = default_uc;
 
 public:
 	Commands(void);

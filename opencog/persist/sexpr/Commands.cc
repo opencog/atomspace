@@ -85,7 +85,6 @@ UnwrappedCommands::~UnwrappedCommands(void)
 
 Commands::Commands(void)
 {
-	_uc = nullptr;
 	_multi_space = false;
 }
 
@@ -186,7 +185,7 @@ std::string Commands::cog_extract(const std::string& cmd)
 	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 	if (nullptr == h) return "#t";
 
-	if (_uc.have_extract_cb) uc.extract_cb(h, false);
+	if (_uc.have_extract_cb) _uc.extract_cb(h, false);
 
 	if (_base_space->extract_atom(h, false)) return "#t";
 	return "#f";
@@ -200,7 +199,7 @@ std::string Commands::cog_extract_recursive(const std::string& cmd)
 	Handle h = _base_space->get_atom(Sexpr::decode_atom(cmd, pos, _space_map));
 	if (nullptr == h) return "#t";
 
-	if (_uc.have_extract_cb) uc.extract_cb(h, true);
+	if (_uc.have_extract_cb) _uc.extract_cb(h, true);
 
 	if (_base_space->extract_atom(h, true)) return "#t";
 	return "#f";
