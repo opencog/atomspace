@@ -36,6 +36,26 @@ namespace opencog
 
 class UnwrappedCommands
 {
+	friend class Commands;
+
+protected:
+	/// True, if the _space_map below is being used, and AtomSpaces need
+	/// to be sent and received.
+	bool _multi_space;
+
+	/// Map from string AtomSpace names to the matching AtomSpacePtr's
+	std::unordered_map<std::string, Handle> _space_map;
+
+	AtomSpace* get_opt_as(const std::string&, size_t&);
+
+	/// AtomSpace to which all commands apply.
+	AtomSpacePtr _base_space;
+
+	/// If AtomSpace frames are in use, this points at the top-most
+	/// frame. It is needed so that the automatic use-counting does
+	/// not free the frame immediately after it is created.
+	AtomSpacePtr _top_space;
+
 public:
 	UnwrappedCommands(void);
 	virtual ~UnwrappedCommands();
@@ -91,23 +111,6 @@ public:
 class Commands
 {
 protected:
-	/// True, if the _space_map below is being used, and AtomSpaces need
-	/// to be sent and received.
-	bool _multi_space;
-
-	/// Map from string AtomSpace names to the matching AtomSpacePtr's
-	std::unordered_map<std::string, Handle> _space_map;
-
-	AtomSpace* get_opt_as(const std::string&, size_t&);
-
-	/// AtomSpace to which all commands apply.
-	AtomSpacePtr _base_space;
-
-	/// If AtomSpace frames are in use, this points at the top-most
-	/// frame. It is needed so that the automatic use-counting does
-	/// not free the frame immediattely after it is created.
-	AtomSpacePtr top_space;
-
 	static UnwrappedCommands default_uc;
 	UnwrappedCommands& _uc = default_uc;
 
