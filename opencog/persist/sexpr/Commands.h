@@ -36,6 +36,9 @@ namespace opencog
 
 class Commands
 {
+public:
+	typedef std::function<void (const Handle&, const Handle&, const ValuePtr&)> CB_HHV;
+
 protected:
 	/// True, if the _space_map below is being used, and AtomSpaces need
 	/// to be sent and received.
@@ -75,7 +78,7 @@ public:
 	std::string cog_link(const std::string&);
 	std::string cog_node(const std::string&);
 
-	std::string cog_set_value(const std::string&);
+	std::string cog_set_value(const std::string&, CB_HHV=nullptr);
 	std::string cog_set_values(const std::string&);
 	std::string cog_set_tv(const std::string&);
 	std::string cog_value(const std::string&);

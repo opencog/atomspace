@@ -289,7 +289,7 @@ std::string Commands::cog_link(const std::string& cmd)
 
 // -----------------------------------------------
 // (cog-set-value! (Concept "foo") (Predicate "key") (FloatValue 1 2 3))
-std::string Commands::cog_set_value(const std::string& cmd)
+std::string Commands::cog_set_value(const std::string& cmd, CB_HHV cb)
 {
 	size_t pos = 0;
 	Handle atom = Sexpr::decode_atom(cmd, pos, _space_map);
@@ -302,6 +302,9 @@ std::string Commands::cog_set_value(const std::string& cmd)
 	if (vp)
 		vp = Sexpr::add_atoms(as, vp);
 	as->set_value(atom, key, vp);
+
+	if (cb) cb(atom, key, vp);
+
 	return "()";
 }
 
