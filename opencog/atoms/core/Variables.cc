@@ -308,6 +308,9 @@ bool Variables::is_type(const HandleSeq& hseq) const
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
 	const GlobInterval &intervals = get_interval(glob);
+
+	if (TypeChoice::is_empty(intervals))
+		return false;
 	return (n >= intervals.first);
 }
 
@@ -320,6 +323,9 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 {
 	const GlobInterval &intervals = get_interval(glob);
+
+	if (TypeChoice::is_empty(intervals))
+		return false;
 	return (n <= intervals.second or intervals.second < 0);
 }
 
@@ -332,6 +338,9 @@ bool Variables::is_upper_bound(const Handle &glob, size_t n) const
 bool Variables::is_globby(const Handle &glob) const
 {
 	const GlobInterval &intervals = get_interval(glob);
+
+	if (TypeChoice::is_empty(intervals))
+		return false;
 	return (1 != intervals.first or 1 != intervals.second);
 }
 
