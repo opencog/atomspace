@@ -108,7 +108,7 @@ void TypeChoice::init(bool glob)
 	for (const Handle& h : _outgoing)
 		analyze(h);
 
-	if (GlobInterval({INT_MAX, 0}) == _glob_interval)
+	if (TypeChoice::is_empty(_glob_interval))
 		_glob_interval = default_interval(glob);
 
 	post_analyze(glob);
@@ -140,6 +140,9 @@ GlobInterval TypeChoice::make_interval(const HandleSeq& ivl)
 static inline GlobInterval extend(const GlobInterval& lhs,
                                   const GlobInterval& rhs)
 {
+	if (TypeChoice::is_empty(lhs)) return rhs;
+	if (TypeChoice::is_empty(rhs)) return lhs;
+
 	const auto lb = std::min(lhs.first, rhs.first);
 	const auto ub = std::max(lhs.second, rhs.second);
 	return GlobInterval{lb, ub};
