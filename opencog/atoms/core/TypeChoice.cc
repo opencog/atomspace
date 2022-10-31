@@ -265,6 +265,12 @@ const GlobInterval TypeChoice::default_interval(bool glob)
 	return vi;
 }
 
+// Return true if the interval is an empty set
+bool TypeChoice::is_empty(const GlobInterval& glob)
+{
+	return glob.first > glob.second;
+}
+
 /* ================================================================= */
 
 /// Return true if the type is completely unconstrained.

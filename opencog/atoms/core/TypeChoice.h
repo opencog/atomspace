@@ -77,6 +77,7 @@ public:
 
 	// The default interval for glob matching.
 	static const GlobInterval default_interval(bool);
+	static bool is_empty(const GlobInterval&);
 
 	bool is_simple(void) const;
 
