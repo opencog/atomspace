@@ -444,8 +444,11 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     /*     throw opencog::RuntimeException(TRACE_INFO,                */ \
     /*            "Your atom is needs to be placed in an atomspace!") */ \
                                                                          \
-    /* Uhh oh. No-op. Shouldn't we throw?                             */ \
-    if (_read_only) return h;                                            \
+    if (_read_only) {                                                    \
+        throw opencog::RuntimeException(TRACE_INFO,                      \
+             "Value not changed; AtomSpace is readonly");                \
+        return Handle::UNDEFINED;                                        \
+    }                                                                    \
                                                                          \
     /* No copy needed. Safe to just update.                           */ \
     if (has == this) {                                                   \
@@ -462,14 +465,10 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
         Handle copy(add(h, true));                                       \
         DO_STUFF(copy);                                                  \
         return copy;                                                     \
-                                                                         \
-    } else {                                                             \
-        DO_STUFF(h);                                                     \
-        return h;                                                        \
     }                                                                    \
-    throw opencog::RuntimeException(TRACE_INFO,                          \
-         "Value not changed; AtomSpace is readonly");                    \
-    return Handle::UNDEFINED;
+                                                                         \
+    DO_STUFF(h);                                                         \
+    return h;
 
 
 // Copy-on-write for setting values.
