@@ -460,7 +460,9 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     /* is read-only) and this atomspace is read-write, then make      */ \
     /* a copy of the atom, and then set the value.                    */ \
     /* If this is a COW space, then always copy, no matter what.      */ \
-    if (nullptr == has or has->_read_only or _copy_on_write) {           \
+    if (nullptr == has or has->_read_only or _copy_on_write or           \
+        not in_environ(has))                                             \
+    {                                                                    \
         /* Copy the atom into this atomspace                          */ \
         Handle copy(add(h, true));                                       \
         DO_STUFF(copy);                                                  \
