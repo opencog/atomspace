@@ -37,7 +37,7 @@ using namespace opencog;
 static bool is_valid_utf8(const char* str)
 {
 	const char* ptr = str;
-	while (ptr)
+	while (*ptr)
 	{
 		if (MASK(0x80, 0x0)) {
 			ptr++; continue;
