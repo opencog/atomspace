@@ -34,7 +34,7 @@ using namespace opencog;
 
 #define MASK(mask,val) (((*ptr) & mask) == val)
 
-static bool is_valid_utf8(const char* str)
+static const char * first_invalid_utf8(const char* str)
 {
 	const char* ptr = str;
 	while (*ptr)
@@ -43,23 +43,23 @@ static bool is_valid_utf8(const char* str)
 			ptr++; continue;
 		}
 		if (MASK(0xe0, 0xc0)) {
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
 			ptr++; continue;
 		}
 		if (MASK(0xf0, 0xe0)) {
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
 			ptr++; continue;
 		}
 		if (MASK(0xf8, 0xf0)) {
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
-			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
+			ptr++; if (not MASK(0xc0, 0x80)) return ptr;
 			ptr++; continue;
 		}
-		return false;
+		return ptr;
 	}
-	return true;
+	return 0;
 }
 #endif // CHECK_UTF8
 
@@ -71,9 +71,12 @@ void Node::init()
             _type, nameserver().getTypeName(_type).c_str());
 
 #ifdef CHECK_UTF8
-    if (not is_valid_utf8(_name.c_str()))
+    const char *np = _name.c_str();
+    const char *bad = first_invalid_utf8(np);
+    if (0 != bad)
         throw InvalidParamException(TRACE_INFO,
-            "Node - Invalid UTF8 in node name %s.", _name.c_str());
+            "Node - Invalid UTF8 at pos=%ld in node name %s.",
+            bad-np, np);
 #endif // CHECK_UTF8
 }
 
