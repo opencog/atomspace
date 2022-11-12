@@ -635,7 +635,7 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_input_line += expr;
 
-	if (_atomspace and nullptr == SchemeSmob::ss_get_env_as("do_eval"))
+	if (_atomspace)
 		SchemeSmob::ss_set_env_as(_atomspace);
 
 	redirect_output();
