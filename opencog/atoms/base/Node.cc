@@ -29,14 +29,52 @@
 
 using namespace opencog;
 
+// #define CHECK_UTF8
+#ifdef CHECK_UTF8
+
+#define MASK(mask,val) (((*ptr) & mask) == val)
+
+static bool is_valid_utf8(const char* str)
+{
+	const char* ptr = str;
+	while (ptr)
+	{
+		if (MASK(0x80, 0x0)) {
+			ptr++; continue;
+		}
+		if (MASK(0xe0, 0xc0)) {
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; continue;
+		}
+		if (MASK(0xf0, 0xe0)) {
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; continue;
+		}
+		if (MASK(0xf8, 0xf0)) {
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; if (not MASK(0xc0, 0x80)) return false;
+			ptr++; continue;
+		}
+		return false;
+	}
+	return true;
+}
+#endif // CHECK_UTF8
+
 void Node::init()
 {
     if (not nameserver().isA(_type, NODE))
-    {
         throw InvalidParamException(TRACE_INFO,
             "Node - Invalid node type '%d' %s.",
             _type, nameserver().getTypeName(_type).c_str());
-    }
+
+#ifdef CHECK_UTF8
+    if (not is_valid_utf8(_name.c_str()))
+        throw InvalidParamException(TRACE_INFO,
+            "Node - Invalid UTF8 in node name %s.", _name.c_str());
+#endif // CHECK_UTF8
 }
 
 /// Return a universally-unique string for each distinct node.
