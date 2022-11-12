@@ -46,7 +46,7 @@ Frame::~Frame()
 	// remove();
 
 	// Because we cannot remove ourselves directly, via above,
-	// we can at least remove other dead weak pointerss.
+	// we can at least remove other dead weak pointers.
 	for (Handle& h : _outgoing)
 		FrameCast(h)->scrub_incoming_set();
 }
@@ -81,10 +81,9 @@ void Frame::scrub_incoming_set(void)
 		auto bucket = _incoming_set->_iset.find(t);
 		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
 		{
-			// if the weak pointer points at nothing, remove it.
-			Handle h(bi->lock());
-			if (h) bi++;
-			else bi = bucket->second.erase(bi);
+			if (0 == bi->use_count())
+				bi = bucket->second.erase(bi);
+			else bi++;
 		}
 	}
 }
