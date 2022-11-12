@@ -833,10 +833,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 {
 	per_thread_init();
 
-	// Set per-thread atomspace variable in the execution environment.
-	if (_atomspace)
-		SchemeSmob::ss_set_env_as(_atomspace);
-
 	// If we are running from the cogserver shell, capture all output
 	if (_in_shell)
 		redirect_output();
@@ -937,6 +933,11 @@ SCM recast_scm_eval_string(void * expr)
 void * SchemeEval::c_wrap_eval_v(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
+
+	// Set per-thread atomspace variable in the execution environment.
+	if (self->_atomspace)
+		SchemeSmob::ss_set_env_as(self->_atomspace);
+
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
@@ -1032,6 +1033,11 @@ AtomSpacePtr SchemeEval::eval_as(const std::string &expr)
 void * SchemeEval::c_wrap_eval_as(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
+
+	// Set per-thread atomspace variable in the execution environment.
+	if (self->_atomspace)
+		SchemeSmob::ss_set_env_as(self->_atomspace);
+
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
@@ -1080,6 +1086,10 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 		}
 	}
 	expr = scm_cons(sfunc, expr);
+
+	// Set per-thread atomspace variable in the execution environment.
+	if (_atomspace)
+		SchemeSmob::ss_set_env_as(_atomspace);
 
 	// TODO: it would be nice to pass exceptions on through, but
 	// this currently breaks unit tests.
