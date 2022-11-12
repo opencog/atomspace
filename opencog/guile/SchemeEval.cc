@@ -585,6 +585,11 @@ void* SchemeEval::c_wrap_eval(void* p)
 	OC_ASSERT(self, "c_wrap_eval got null pointer!");
 	OC_ASSERT(self->_pexpr, "c_wrap_eval got null expression!");
 
+	// There might be multiple evaluators running in this thread.
+	// Set the thread-space unconditionally.
+	if (self->_atomspace)
+		SchemeSmob::ss_set_env_as(self->_atomspace);
+
 	self->do_eval(*(self->_pexpr));
 	return self;
 }
@@ -635,9 +640,6 @@ void SchemeEval::do_eval(const std::string &expr)
 
 	_input_line += expr;
 
-	if (_atomspace)
-		SchemeSmob::ss_set_env_as(_atomspace);
-
 	redirect_output();
 	_caught_error = false;
 	_pending_input = false;
@@ -664,6 +666,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	}
 	restore_output();
 
+	// XXX I don't think this is needed any more ...
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
 	_eval_done = true;
@@ -831,7 +834,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	per_thread_init();
 
 	// Set per-thread atomspace variable in the execution environment.
-	if (_atomspace) // and nullptr == SchemeSmob::ss_get_env_as("do_scm_eval"))
+	if (_atomspace)
 		SchemeSmob::ss_set_env_as(_atomspace);
 
 	// If we are running from the cogserver shell, capture all output
