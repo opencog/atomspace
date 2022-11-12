@@ -444,30 +444,33 @@ ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
     /*     throw opencog::RuntimeException(TRACE_INFO,                */ \
     /*            "Your atom is needs to be placed in an atomspace!") */ \
                                                                          \
+    if (_read_only) {                                                    \
+        throw opencog::RuntimeException(TRACE_INFO,                      \
+             "Value not changed; AtomSpace is readonly");                \
+        return Handle::UNDEFINED;                                        \
+    }                                                                    \
+                                                                         \
+    /* No copy needed. Safe to just update.                           */ \
+    if (has == this) {                                                   \
+        DO_STUFF(h);                                                     \
+        return h;                                                        \
+    }                                                                    \
+                                                                         \
     /* If the atom is in a read-only atomspace (i.e. if the parent    */ \
     /* is read-only) and this atomspace is read-write, then make      */ \
     /* a copy of the atom, and then set the value.                    */ \
     /* If this is a COW space, then always copy, no matter what.      */ \
-    if (nullptr == has or has->_read_only or _copy_on_write) {           \
-        if (has != this and (_copy_on_write or not _read_only)) {        \
-            /* Copy the atom into this atomspace                      */ \
-            Handle copy(add(h, true));                                   \
-            DO_STUFF(copy);                                              \
-            return copy;                                                 \
-        }                                                                \
-                                                                         \
-        /* No copy needed. Safe to just update.                       */ \
-        if (has == this and not _read_only) {                            \
-            DO_STUFF(h);                                                 \
-            return h;                                                    \
-        }                                                                \
-    } else {                                                             \
-        DO_STUFF(h);                                                     \
-        return h;                                                        \
+    if (nullptr == has or has->_read_only or _copy_on_write or           \
+        not in_environ(has))                                             \
+    {                                                                    \
+        /* Copy the atom into this atomspace                          */ \
+        Handle copy(add(h, true));                                       \
+        DO_STUFF(copy);                                                  \
+        return copy;                                                     \
     }                                                                    \
-    throw opencog::RuntimeException(TRACE_INFO,                          \
-         "Value not changed; AtomSpace is readonly");                    \
-    return Handle::UNDEFINED;
+                                                                         \
+    DO_STUFF(h);                                                         \
+    return h;
 
 
 // Copy-on-write for setting values.
