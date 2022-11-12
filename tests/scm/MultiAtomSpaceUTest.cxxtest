@@ -215,13 +215,16 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
+	printf("as1 is uuid=%lu %s\n", as1->get_uuid(), as1->get_name().c_str());
+	printf("as2 is uuid=%lu %s\n", as2->get_uuid(), as2->get_name().c_str());
+
 	// The below is a complicated multi-atom-space version of part of
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...
 	// Increment a count tv in atomspace 1 ---------------------------------
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter1 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter1 = %llu %p\n", (long long unsigned int) counter1.value(), counter1.operator->());
+	printf ("counter1 = %s\n", counter1->to_string().c_str());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
@@ -243,7 +246,7 @@ void MultiAtomSpace::test_load(void)
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter2 = ev2->eval_h("counter");
 	CHKEV(ev2);
-	printf ("counter2 = %llu %p\n", (long long unsigned int) counter2.value(), counter2.operator->());
+	printf ("counter2 = %s\n", counter2->to_string().c_str());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->get_type());
@@ -262,7 +265,7 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
 	Handle counter3 = ev1->eval_h("counter");
 	CHKEV(ev1);
-	printf ("counter3 = %llu %p\n", (long long unsigned int) counter3.value(), counter3.operator->());
+	printf ("counter3 = %s\n", counter3->to_string().c_str());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->get_type());
