@@ -91,8 +91,6 @@ void SchemeEval::init(void)
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
 
-	_gc_ctr = 0;
-
 	// We expect one evaluator per thread, so set that up now.
 	// More complicated possibilities are too hard to deal with:
 	// evaluated expressions might themselves be setting the
@@ -222,9 +220,6 @@ void SchemeEval::finish(void)
 
 	scm_gc_unprotect_object(_scm_error_string);
 	scm_gc_unprotect_object(_captured_stack);
-
-	// Force garbage collection
-	scm_gc();
 }
 
 void * SchemeEval::c_wrap_finish(void *p)
@@ -594,39 +589,6 @@ void* SchemeEval::c_wrap_eval(void* p)
 	return self;
 }
 
-/// Ad hoc hack to try to limit guile memory consumption, while still
-/// providing decent performance.  The problem addressed here is that
-/// guile can get piggy with the system RAM, happily gobbling up RAM
-/// instead of garbage-collecting it.  Users have noticed. See github
-/// issue #1116. This improves on the original pull request #1117.
-/// Clue: bug report #1419 suggests the problem is related to the
-/// do_async_output flag-- setting it to false avoids the blow-up.
-/// Is there an i/o-related leak or weird reserve bug?
-static void do_gc(void)
-{
-	static size_t prev_usage = 0;
-
-	size_t curr_usage = getMemUsage();
-	// Yes, this is 10MBytes. Which seems nutty. But it does the trick...
-	if (10 * 1024 * 1024 < curr_usage - prev_usage)
-	{
-		prev_usage = curr_usage;
-		scm_gc();
-	}
-
-#if 0
-	static SCM since = scm_from_utf8_symbol("heap-allocated-since-gc");
-	SCM stats = scm_gc_stats();
-	size_t allo = scm_to_size_t(scm_assoc_ref(stats, since));
-
-	int times = scm_to_int(scm_assoc_ref(stats, scm_from_utf8_symbol("gc-times")));
-	printf("allo=%lu  mem=%lu time=%d\n", allo/1024, (getMemUsage() / (1024)), times);
-	scm_gc();
-	logger().info() << "Guile evaluated: " << expr;
-	logger().info() << "Mem usage=" << (getMemUsage() / (1024*1024)) << "MB";
-#endif
-}
-
 /**
  * do_eval -- evaluate a scheme expression string.
  * This implements the working guts of the shell-friendly evaluator.
@@ -665,9 +627,6 @@ void SchemeEval::do_eval(const std::string &expr)
 		save_rc(rc);
 	}
 	restore_output();
-
-	// XXX I don't think this is needed any more ...
-	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
 
 	_eval_done = true;
 	_wait_done.notify_all();

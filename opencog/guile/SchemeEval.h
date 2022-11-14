@@ -151,7 +151,6 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_set_atomspace(void *);
 		static void * c_wrap_get_atomspace(void *);
 		AtomSpacePtr _atomspace;
-		int _gc_ctr;
 		bool _in_eval;
 
 	public:
