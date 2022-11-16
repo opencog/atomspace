@@ -64,9 +64,12 @@ TypeIntersectionLink::TypeIntersectionLink(const HandleSeq&& oset, Type t, bool 
 static inline GlobInterval intersect(const GlobInterval& lhs,
                                      const GlobInterval& rhs)
 {
+	if (TypeChoice::is_empty(lhs) or TypeChoice::is_empty(rhs))
+		return GlobInterval{1, 0};
+
 	const auto lb = std::max(lhs.first, rhs.first);
 	const auto ub = std::min(lhs.second, rhs.second);
-	return lb > ub ? GlobInterval{0, 0} : GlobInterval{lb, ub};
+	return GlobInterval{lb, ub};
 }
 
 /**
