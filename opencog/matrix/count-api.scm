@@ -35,25 +35,9 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
-
-;
-;     ; Return the observed count for the pair PAIR.
-;     (define (get-count PAIR)
-;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
-;
-;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
-;     ; exists, else return zero.
-;     (define (get-pair-count L-ATOM R-ATOM)
-;        (define stats-atom (get-pair L-ATOM R-ATOM))
-;        (if (nil? stats-atom) 0 (get-count stats-atom)))
-;
-;              ((pair-count) get-pair-count)
-;              ((get-count) get-count)
-
 
 (define-public (add-pair-count LLOBJ)
 "
@@ -66,10 +50,20 @@
       L must be an Atom of type 'left-type on the base object LLOBJ,
       and likewise for R. Returns zero if such a pair does not exist.
 
+  'pair-set L R N - Sets the total observed count to N on the pair (L,R).
+      Creates the pair, if it does not yet exist.
+
+  'pair-inc L R N - Increments the total observed count by N on the
+      pair (L,R).  Creates the pair, if it does not yet exist.
+
+   The next three methods are the same as above, but take the pair
+   Atom directly, instead of the two index Atoms.
+
   'get-count P - Returns the total observed count on the pair P.
       The P atom should be one of the atoms returned by the LLOBJ
       'get-pair method.
-  'set-count P - Set the total observed count on the pair P.
+
+  'set-count P N - Set the total observed count to N on the pair P.
 
   'inc-count P N - Perform an atomic increment of the count on P by N.
        The increment is atomic, meaning that it is thread-safe against
@@ -81,6 +75,16 @@
 	    ACC and DONOR should be two pairs in this matrix.
 	    FRAC should be a numeric fraction, between 0.0 and 1.0.
 "
+	; Return the observed count for the pair PAIR.
+	(define (get-count PAIR)
+xxxxx
+
+	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+	; exists, else return zero.
+	(define (get-pair-count L-ATOM R-ATOM)
+	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
+	  (if (nil? stats-atom) 0 (get-count stats-atom)))
+
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	(define (move-count ACCUM DONOR FRAC)
 		; Return #t if the count is effectively zero.
@@ -98,12 +102,6 @@
 
 		; Return how much was transferred over.
 		frac-cnt)
-
-	; -------------------------------------------------------
-	; Return default, only if LLOBJ does not provide symbol
-	(define (overload symbol default)
-		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
 
 	;-------------------------------------------
 
@@ -123,24 +121,46 @@
 	(define (describe)
 		(display (procedure-property add-pair-count 'documentation)))
 
-	;-------------------------------------------
+	; -------------------------------------------------------
+	; Return default, only if LLOBJ does not provide symbol
+	(define (overload symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
 
 	; Provide default methods, but only if the low-level object
 	; does not already provide them.
-	(define f-move-count       (overload 'move-count move-count))
+	(define f-pair-count    (overload 'pair-count pair-count))
+	(define f-pair-set      (overload 'pair-set pair-set))
+	(define f-pair-inc      (overload 'pair-inc pair-inc))
+	(define f-get-count     (overload 'get-count get-count))
+	(define f-set-count     (overload 'set-count set-count))
+	(define f-inc-count     (overload 'inc-count inc-count))
+	(define f-move-count    (overload 'move-count move-count))
 
 	;-------------------------------------------
 	; Explain what is provided.
 	(define (provides meth)
 		(case meth
-			((move-count)       f-move-count)
+			((pair-count)    f-pair-count)
+			((pair-set)      f-pair-set)
+			((pair-inc)      f-pair-inc)
+			((get-count)     f-get-count)
+			((set-count)     f-set-count)
+			((inc-count)     f-inc-count)
+			((move-count)    f-move-count)
 
-			(else               (LLOBJ 'provides meth))))
+			(else              (LLOBJ 'provides meth))))
 
 	;-------------------------------------------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
+			((pair-count)       (apply f-pair-count args))
+			((pair-set)         (apply f-pair-set args))
+			((pair-inc)         (apply f-pair-inc args))
+			((get-count)        (apply f-get-count args))
+			((set-count)        (apply f-set-count args))
+			((inc-count)        (apply f-inc-count args))
 			((move-count)       (apply f-move-count args))
 
 			((provides)         (apply provides args))
