@@ -136,6 +136,7 @@ private:
 	// Atom properties
 	static SCM ss_name(SCM);
 	static SCM ss_number(SCM);
+	static SCM from_type(const ValuePtr&);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_tv(SCM);
@@ -145,6 +146,7 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
+	static SCM ss_value_type(SCM, SCM);
 	static SCM ss_incoming_set(SCM, SCM);
 	static SCM ss_incoming_size(SCM, SCM);
 	static SCM ss_incoming_by_type(SCM, SCM, SCM);
@@ -197,7 +199,8 @@ private:
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
-	// Logger
+	// Logger XXX TODO these do not belong here, they
+	// need to be moved to their own module.
 	static SCM logger_to_scm(Logger*);
 	static Logger* ss_to_logger(SCM);
 	static std::string logger_to_string(const Logger *);

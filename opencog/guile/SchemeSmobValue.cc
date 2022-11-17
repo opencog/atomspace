@@ -41,15 +41,20 @@ using namespace opencog;
 /* ============================================================== */
 /** Return the type of a value/atom */
 
-SCM SchemeSmob::ss_type (SCM svalue)
+SCM SchemeSmob::from_type (const ValuePtr& vp)
 {
-	ValuePtr pa(verify_protom(svalue, "cog-type"));
-	Type t = pa->get_type();
+	Type t = vp->get_type();
 	const std::string &tname = nameserver().getTypeName(t);
 	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
 
 	return sym;
+}
+
+SCM SchemeSmob::ss_type (SCM svalue)
+{
+	ValuePtr vp(verify_protom(svalue, "cog-type"));
+	return from_type(vp);
 }
 
 /* ============================================================== */
@@ -476,6 +481,23 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 		throw_exception(ex, "cog-value", scm_cons(satom, skey));
 	}
 	return SCM_EOL;
+}
+
+SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
+{
+	Handle atom(verify_handle(satom, "cog-value-type", 1));
+	Handle key(verify_handle(skey, "cog-value-type", 2));
+
+	try
+	{
+		ValuePtr vp = atom->getValue(key);
+		return from_type(vp);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-value-type", scm_cons(satom, skey));
+	}
+	return SCM_BOOL_F;
 }
 
 /** Return all of the keys on the atom */

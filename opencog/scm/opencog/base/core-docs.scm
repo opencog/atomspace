@@ -337,14 +337,18 @@
 "
  cog-type EXP
     Return the type of EXP, where EXP is a Value or an Atom.
+    The returned value is a guile symbol.
 
     Example:
        ; Define a node
        guile> (define x (Concept \"abc\"))
        guile> (cog-type x)
        ConceptNode
-       guile> (eq? 'Concept (cog-type x))
+       guile> (eq? 'ConceptNode (cog-type x))
        #t
+
+    See also:
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-arity 'documentation
@@ -735,6 +739,7 @@
     See also:
        cog-keys->alist ATOM - return association list of keys+values
        cog-value ATOM KEY - return a value for the given KEY
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-keys->alist 'documentation
@@ -751,13 +756,13 @@
     See also:
        cog-keys ATOM - return list of all keys on ATOM
        cog-value ATOM KEY - return a value for the given KEY
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-value 'documentation
 "
  cog-value ATOM KEY
-    Return the value of of KEY for ATOM. Both ATOM and KEY must be
-    atoms.
+    Return the value of KEY for ATOM. Both ATOM and KEY must be atoms.
 
     Example:
        guile> (cog-set-value!
@@ -765,6 +770,28 @@
                  (FloatValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
+
+   See also:
+       cog-keys ATOM - return list of all keys on ATOM
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+")
+
+(set-procedure-property! cog-value-type 'documentation
+"
+ cog-value-type ATOM KEY
+    Return the type of the value of KEY for ATOM. Both ATOM and KEY
+    must be atoms. The returned type is a guile symbol.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
+       FloatValue
+
+   See also:
+       cog-value ATOM KEY -- get the value at KEY on ATOM.
+       cog-keys ATOM - return list of all keys on ATOM.
 ")
 
 (set-procedure-property! cog-set-value! 'documentation
@@ -931,8 +958,9 @@
 "
  cog-type->int TYPE
     Return the integer value corresponding to an Atom TYPE.
-    This is unique for the current session, only; it is not universally
-    unique, and may change from one session to the next.
+    This is unique only for the current session; it is not universally
+    unique, and may change from one session to the next. Use of this
+    function is strongly discouraged!
 
     Example:
         guile> (cog-type->int 'ListLink)
@@ -940,6 +968,7 @@
 
     See also:
         cog-type ATOM -- get the type of ATOM.
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
         cog-get-types -- get all of the types in the type system.
 ")
 
