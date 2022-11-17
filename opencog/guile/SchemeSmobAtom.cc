@@ -174,7 +174,7 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	}
 }
 
-/// Increment the count, keeping mean and confidence as-is.
+/// Atomic increment the count, keeping mean and confidence as-is.
 /// Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 {
@@ -189,7 +189,7 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 }
 
 /* ============================================================== */
-/// Increment the count of some generic FloatValue.
+/// Atomic increment the count of some generic FloatValue.
 /// Just like ss_inc_count but generic.
 /// key == key for value
 /// cnt == how much to increment

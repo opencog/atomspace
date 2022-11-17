@@ -553,13 +553,15 @@
 "
   cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
 
-  Increment the count on a CountTruthValue by CNT. The mean and
-  confidence values are left untouched.  CNT may be any floating-point
-  number (positive or negative).
+  Atomically increment the count on a CountTruthValue by CNT. The mean
+  and confidence values are left untouched.  CNT may be any floating
+  point number (positive or negative).
 
   If the current truth value on the ATOM is not a CountTruthValue,
   then the truth value is replaced by a CountTruthValue, with the
   count set to CNT.
+
+  The increment is atomic; that is, it is safe against racing threads.
 
   Example usage:
      (cog-inc-count! (Concept \"Answer\") 42.0)
@@ -574,14 +576,16 @@
 "
   cog-inc-value! ATOM KEY CNT REF -- Increment value on ATOM by CNT.
 
-  The REF location of the FloatValue at KEY is incremented by CNT.
-  CNT may be any floating-point number (positive or negative).
+  The REF location of the FloatValue at KEY is atomically incremented
+  by CNT.  CNT may be any floating-point number (positive or negative).
   The rest of the FloatValue vector is left untouched.
 
   If the ATOM does not have any Value at KEY, or if the current Value
   is not a FloatValue, then a new FloatValue of length (REF+1) is
   created. If the existing FloatValue is too short, it is extended
   until it is at least (REF+1) in length.
+
+  The increment is atomic; that is, it is safe against racing threads.
 
   To increment several locations at once, use the cog-update-value!
   function.
@@ -815,6 +819,8 @@
     that it allows a full-vector update. When DELTA is a vector, with
     multiple non-zero entries, all of them are added to the matching
     entries in the Value at KEY. This is a vector-increment.
+
+    The update is atomic; that is, it is safe against racing threads.
 
     See also:
        cog-inc-count! -- Increment a CountTruthValue

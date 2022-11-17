@@ -392,7 +392,7 @@ public:
     void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
     ValuePtr getValue(const Handle& key) const;
-    /// Increment a generic FloatValue.
+    /// Atomically increment a generic FloatValue.
     ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
 
     /// Get the set of all keys in use for this Atom.

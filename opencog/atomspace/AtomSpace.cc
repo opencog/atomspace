@@ -490,12 +490,14 @@ Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 }
 
 // Copy-on-write for incrementing truth values.
+// The increment is atomic i.e. thread-safe.
 Handle AtomSpace::increment_countTV(const Handle& h, double cnt)
 {
 	#define INC_TV(atm) atm->incrementCountTV(cnt);
 	COWBOY_CODE(INC_TV);
 }
 
+// The increment is atomic i.e. thread-safe.
 Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
                                   const std::vector<double>& count)
 {
