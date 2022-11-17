@@ -3,6 +3,7 @@ ADD_GUILE_MODULE (FILES
 	bin-count.scm
 	compute-mi.scm
 	cosine.scm
+	count-api.scm
 	direct-sum.scm
 	dynamic.scm
 	entropy.scm

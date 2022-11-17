@@ -38,6 +38,7 @@
 (include-from-path "opencog/matrix/progress.scm")
 (include-from-path "opencog/matrix/eval-pairs.scm")
 (include-from-path "opencog/matrix/object-api.scm")
+(include-from-path "opencog/matrix/count-api.scm")
 (include-from-path "opencog/matrix/dynamic.scm")
 (include-from-path "opencog/matrix/store.scm")
 (include-from-path "opencog/matrix/frequency.scm")
