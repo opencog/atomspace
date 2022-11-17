@@ -76,14 +76,21 @@
 	    FRAC should be a numeric fraction, between 0.0 and 1.0.
 "
 	; Return the observed count for the pair PAIR.
-	(define (get-count PAIR)
-xxxxx
+	(define (get-count PAIR) (cog-count PAIR))
+	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
+	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 	; exists, else return zero.
-	(define (get-pair-count L-ATOM R-ATOM)
+	(define (pair-count L-ATOM R-ATOM)
 	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
 	  (if (nil? stats-atom) 0 (get-count stats-atom)))
+
+	(define (pair-set L-ATOM R-ATOM CNT)
+	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+
+	(define (pair-inc L-ATOM R-ATOM CNT)
+	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	(define (move-count ACCUM DONOR FRAC)
