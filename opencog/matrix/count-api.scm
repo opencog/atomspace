@@ -54,9 +54,6 @@
 ;              ((pair-count) get-pair-count)
 ;              ((get-count) get-count)
 
-  'pair-count L R - Returns the total observed count on the pair (L,R)
-      L must be an Atom of type 'left-type and likewise for R.
-
 
 (define-public (add-pair-count LLOBJ)
 "
@@ -64,18 +61,27 @@
   increment the counts on pairs.
 
   The supported methods are:
+
+  'pair-count L R - Returns the total observed count on the pair (L,R)
+      L must be an Atom of type 'left-type on the base object LLOBJ,
+      and likewise for R. Returns zero if such a pair does not exist.
+
   'get-count P - Returns the total observed count on the pair P.
       The P atom should be one of the atoms returned by the LLOBJ
-      'get-pair method
+      'get-pair method.
   'set-count P - Set the total observed count on the pair P.
 
-  'inc-count P
+  'inc-count P N - Perform an atomic increment of the count on P by N.
+       The increment is atomic, meaning that it is thread-safe against
+       racing threads.
+
+  'move-count ACC DONOR FRAC - Move a fraction FRAC of the count from
+       DONOR to ACC. The move is atomic, in that no counts are lost in
+       the case of racing threads performing other count updates.
+	    ACC and DONOR should be two pairs in this matrix.
+	    FRAC should be a numeric fraction, between 0.0 and 1.0.
 "
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
-	; ACC and DONOR should be two pairs in this matrix.
-	; FRAC should be a numeric fraction, between 0.0 and 1.0.
-	; XXX This is not thread-safe! TODO: we need an atomic version
-	; of this.
 	(define (move-count ACCUM DONOR FRAC)
 		; Return #t if the count is effectively zero.
 		; Use an epsilon for rounding errors.
@@ -84,23 +90,14 @@
 		; The counts on the accumulator and the pair to merge.
 		(define donor-cnt (LLOBJ 'get-count DONOR))
 		(define frac-cnt (* FRAC donor-cnt))
-		(define rem-cnt (- donor-cnt frac-cnt))
 
 		; If there is nothing to transfer over, do nothing.
 		(when (not (is-zero? frac-cnt))
-
-			; The accumulated count
-			(LLOBJ 'set-count ACCUM (+ frac-cnt (LLOBJ 'get-count ACCUM)))
-
-			; Update the count on the donor pair.
-			(LLOBJ 'set-count DONOR rem-cnt)
-		)
+			(inc-count ACCUM frac-cnt)
+			(inc-count DONOR (- frac-cnt)))
 
 		; Return how much was transferred over.
-		frac-cnt
-	)
-
-xxxxx
+		frac-cnt)
 
 	; -------------------------------------------------------
 	; Return default, only if LLOBJ does not provide symbol
