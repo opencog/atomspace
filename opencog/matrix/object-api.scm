@@ -320,35 +320,6 @@
   'filters - Used in filtering out certain rows, columns or individual
       entries. Return #f if none.
 "
-	; Accumulate a fraction FRAC of the count from DONOR into ACC.
-	; ACC and DONOR should be two pairs in this matrix.
-	; FRAC should be a numeric fraction, between 0.0 and 1.0.
-	; XXX This is not thread-safe! TODO: we need an atomic version
-	; of this.
-	(define (move-count ACCUM DONOR FRAC)
-		; Return #t if the count is effectively zero.
-		; Use an epsilon for rounding errors.
-		(define (is-zero? cnt) (< cnt 1.0e-10))
-
-		; The counts on the accumulator and the pair to merge.
-		(define donor-cnt (LLOBJ 'get-count DONOR))
-		(define frac-cnt (* FRAC donor-cnt))
-		(define rem-cnt (- donor-cnt frac-cnt))
-
-		; If there is nothing to transfer over, do nothing.
-		(when (not (is-zero? frac-cnt))
-
-			; The accumulated count
-			(LLOBJ 'set-count ACCUM (+ frac-cnt (LLOBJ 'get-count ACCUM)))
-
-			; Update the count on the donor pair.
-			(LLOBJ 'set-count DONOR rem-cnt)
-		)
-
-		; Return how much was transferred over.
-		frac-cnt
-	)
-
 	(let ((l-basis #f)
 			(r-basis #f)
 			(l-size 0)
@@ -645,8 +616,7 @@
 				(f-left-duals       (overload 'left-duals get-left-duals))
 				(f-right-duals      (overload 'right-duals get-right-duals))
 				(f-get-all-elts     (overload 'get-all-elts get-all-pairs))
-
-				(f-move-count       (overload 'move-count move-count)))
+			)
 
 			;-------------------------------------------
 			; Explain what it is that I provide. The point here is that
@@ -667,7 +637,6 @@
 					((left-duals)       f-left-duals)
 					((right-duals)      f-right-duals)
 					((get-all-elts)     f-get-all-elts)
-					((move-count)       f-move-count)
 
 					((clobber)          clobber)
 					(else               (LLOBJ 'provides meth))))
@@ -687,8 +656,6 @@
 					((left-duals)       (apply f-left-duals args))
 					((right-duals)      (apply f-right-duals args))
 					((get-all-elts)     (f-get-all-elts))
-
-					((move-count)       (apply f-move-count args))
 
 					((clobber)          (clobber))
 					((provides)         (apply provides args))
