@@ -864,7 +864,7 @@
     a history of value changes.
 
     See also:
-       cog-set-values! ATOM ALIST - Set multiple values.
+       cog-set-value! ATOM VALUE - Set a single value.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
@@ -937,6 +937,10 @@
     Example:
         guile> (cog-type->int 'ListLink)
         8
+
+    See also:
+        cog-type ATOM -- get the type of ATOM.
+        cog-get-types -- get all of the types in the type system.
 ")
 
 (set-procedure-property! cog-get-subtypes 'documentation
