@@ -87,10 +87,35 @@
 	    ACC and DONOR should be two pairs in this matrix.
 	    FRAC should be a numeric fraction, between 0.0 and 1.0.
 "
+	; By default, the count is stored as a CountTruthValue.
+	; That means that it is on the TruthValue Key, and is the
+	; third number (the first two being strength and confidence.)
+	; These defaults are used if and only if the base object does
+	; not provide these.
+	(define (count-type) 'CountTruthValue)
+	(define (count-key) (PredicateNode "*-TruthValueKey-*"))
+	(define (count-ref) 2)
+
+	; See if the base object provides the type, key and ref.
+	(define (get-loc symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
+
+	; Get the type, key and ref from the base, if it is provided.
+	; Otherwise, use the defaults.
+	(define cnt-type (get-loc 'count-type (count-type)))
+	(define cnt-key (get-loc 'count-key (count-key)))
+	(define cnt-ref (get-loc 'count-ref (count-ref)))
+
 	; Return the observed count for the pair PAIR.
-	(define (get-count PAIR) (cog-count PAIR))
-	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
-	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
+	(define (get-count PAIR)
+		(cog-value-ref (cog-value PAIR cnt-key) cnt-ref))
+	(define (set-count PAIR CNT)
+		(if (not (equal? cnt-type (cog-type (cog-value (
+xxxxxxxxx
+		(cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
+	(define (inc-count PAIR CNT)
+		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 	; exists, else return zero.
@@ -148,6 +173,9 @@
 
 	; Provide default methods, but only if the low-level object
 	; does not already provide them.
+	(define f-count-type    (overload 'count-type count-type))
+	(define f-count-key     (overload 'count-key count-key))
+	(define f-count-ref     (overload 'count-ref count-ref))
 	(define f-pair-count    (overload 'pair-count pair-count))
 	(define f-pair-set      (overload 'pair-set pair-set))
 	(define f-pair-inc      (overload 'pair-inc pair-inc))
@@ -160,6 +188,9 @@
 	; Explain what is provided.
 	(define (provides meth)
 		(case meth
+			((count-type)    f-count-type)
+			((count-key)     f-count-key)
+			((count-ref)     f-count-ref)
 			((pair-count)    f-pair-count)
 			((pair-set)      f-pair-set)
 			((pair-inc)      f-pair-inc)
@@ -174,6 +205,9 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
+			((count-type)       (f-count-type)
+			((count-key)        (f-count-key)
+			((count-ref)        (f-count-ref)
 			((pair-count)       (apply f-pair-count args))
 			((pair-set)         (apply f-pair-set args))
 			((pair-inc)         (apply f-pair-inc args))
@@ -209,7 +243,12 @@
   See `add-pair-count` for a description of the provided methods.
 "
 	; Return the observed count for the pair PAIR.
-	(define (get-count PAIR) (cog-count PAIR))
+	(define (get-count PAIR)
+		(if (not (cog-ctv? (cog-tv PAIR)))
+			(fetch-atom PAIR
+
+xxxxxxx
+ (cog-count PAIR))
 	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
 	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
 
