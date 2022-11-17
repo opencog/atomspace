@@ -91,6 +91,8 @@
 
 		; Get the observational count on ATOM.
 		(define (get-count ATOM) (cog-count ATOM))
+		(define (inc-count ATOM)
+			(cog-inc-count! ATOM 1))
 		(define (set-count ATOM CNT)
 			(cog-set-tv! ATOM (CountTruthValue 1 0 CNT)))
 
@@ -198,6 +200,8 @@
 "    pair-count L R   Returns the count on Evaluation Pred List L R\n"
 "    get-pair L R     Returns Evaluation Pred List L R, if it exists, else null\n"
 "    get-count E      Returns the count on E (an EvaluationLink)\n"
+"    inc-count E      Atomic increment of the count on E by one\n"
+"    set-count E N    Sets the count on E to N\n"
 "    make-pair L R    Unconditionally make Evaluation Pred List L R\n"
 "    left-element E   Return the row Atom of the EvaluationLink E\n"
 "    right-element E  Return the column Atom of the EvaluationLink E\n"
@@ -229,6 +233,7 @@
 					((pair-count)       get-pair-count)
 					((get-pair)         get-pair)
 					((get-count)        get-count)
+					((inc-count)        inc-count)
 					((set-count)        set-count)
 					((make-pair)        make-pair)
 					((left-element)     get-left-element)
