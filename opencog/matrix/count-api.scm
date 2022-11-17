@@ -40,6 +40,24 @@
 
 ; ---------------------------------------------------------------------
 
+;
+;     ; Return the observed count for the pair PAIR.
+;     (define (get-count PAIR)
+;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
+;
+;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+;     ; exists, else return zero.
+;     (define (get-pair-count L-ATOM R-ATOM)
+;        (define stats-atom (get-pair L-ATOM R-ATOM))
+;        (if (nil? stats-atom) 0 (get-count stats-atom)))
+;
+;              ((pair-count) get-pair-count)
+;              ((get-count) get-count)
+
+  'pair-count L R - Returns the total observed count on the pair (L,R)
+      L must be an Atom of type 'left-type and likewise for R.
+
+
 (define-public (add-pair-count LLOBJ)
 "
   add-pair-count LLOBJ - Extend LLOBJ with methods to get, set and

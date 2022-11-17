@@ -68,14 +68,16 @@
 ; ---------------------------------------------------------------------
 ;
 ; Example low-level API class. It provides a handful of core methods;
-; these return atoms on which observation counts are stored as values.
-; Higher-level objects use this object to fetch counts, store them
-; into the database, or to compute and return various statistics.
+; these return atoms on which observation counts and other kinds of
+; info are stored as values. Higher-level objects use this object to
+; access this information.
 ;
 ; Most users will find it easiest to use the `make-evaluation-pair-api`
-; to provide the low-level API.  It is ideal, when counts are stored
-; in the form of `EvaluationLink PredicateNode "..." ListLink ...`.
-; See `eval-pair.scm` for details.
+; to provide the low-level API.  This provides a default, generic pair
+; object of the form
+;    `EvaluationLink PredicateNode "..." ListLink ...`.
+; where the PredicateNode identifies what kind of object it is, and the
+; ListLink specifies the specific pair.  See `eval-pair.scm` for details.
 ;
 ; See `make-evaluation-pair-api` and `make-any-link-api` for working
 ; examples.
@@ -115,16 +117,6 @@
 ;        (define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
 ;        (if (nil? maybe-list) #f
 ;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
-;
-;     ; Return the observed count for the pair PAIR.
-;     (define (get-count PAIR)
-;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
-;
-;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
-;     ; exists, else return zero.
-;     (define (get-pair-count L-ATOM R-ATOM)
-;        (define stats-atom (get-pair L-ATOM R-ATOM))
-;        (if (nil? stats-atom) 0 (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'get-pair
@@ -181,9 +173,7 @@
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
-;              ((pair-count) get-pair-count)
 ;              ((get-pair) get-pair)
-;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
 ;              ((left-element) get-pair-left)
 ;              ((right-element) get-pair-right)
@@ -221,8 +211,6 @@
       `(LLOBJ 'left-type)`.  A check is made to verify that `(x,y)` is
       a valid pair, viz. that it is an atom whose type is
       `(LLOBJ 'pair-type)` and that `y` is of type `(LLOBJ 'right-type)`.
-      This only verifies that such pairs exist in the atomspace; it
-      does NOT verify that they have a nonzero count!
 
   'right-basis - Likewise, but for columns.
 
@@ -242,7 +230,6 @@
           `{ x | (x,COL) exists in the atomspace }`
       The returned rows will all be of type `(LLOBJ 'left-type)`.
       The input COL atom must be of type `(LLOBJ 'right-type)`.
-      This does NOT verify that these pairs have a non-zero count.
 
   'right-duals ROW - Likewise, but returns the columns for `(ROW, *)`.
 
@@ -252,8 +239,7 @@
          (*, COL) == { (x,COL) | (x,COL) exists in the atomspace }
       The returned pairs will all be of type `(LLOBJ 'pair-type)`,
       and the x's will all be of type `(LLOBJ 'left-type)`. The
-      input COL atom must be of type `(LLOBJ 'right-type)`.  This does
-      NOT verify that these pairs have a non-zero count.
+      input COL atom must be of type `(LLOBJ 'right-type)`.
 
   'right-stars ROW - Likewise, but returns the set `(ROW, *)`.
 
@@ -280,17 +266,9 @@
       each side of the pair.
   'pair-type - Returns the type of the Atom holding the pair.
 
-  'pair-count L R - Returns the total observed count on the pair (L,R)
-      L must be an Atom of type 'left-type and likewise for R.
-
   'get-pair L R - Returns the Atom holding the pair (L,R). The returned
       Atom will be of type 'pair-type. All statistics and information
       about this pair are attached as Values on this Atom.
-
-  'get-count P - Returns the total observed count on the pair P, where
-      P is the Atom returned by 'get-pair.
-  'set-count P - Set the total observed count on the pair P, where
-      P is the Atom returned by 'get-pair.
 
   'make-pair L R - Create the Atom holding the pair, if it does not
       already exist.
