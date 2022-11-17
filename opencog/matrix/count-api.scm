@@ -1,7 +1,7 @@
 ;
 ; count-api.scm
 ;
-; Define object-oriented class API that handles counting.
+; Define object-oriented class APIs that handle counting.
 ;
 ; Copyright (c) 2017, 2022 Linas Vepstas
 ;
@@ -32,6 +32,14 @@
 ; some object-oriented OO API's for pairs, which the algos can assume,
 ; and the different types of pairs can implement.
 ;
+; Three API's are provided:
+; -- add-pair-count, which provides basic counting.
+; -- add-storage-count, same as above, but fectches & updates storage.
+; -- add-marginal-count, same as above, but updates marginal counts.
+; The last two can be combined to safely update marginal counts in storage.
+; The storage API should be "below" the marginal API; the marginal API
+; will use it to perform the storage.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -43,6 +51,10 @@
 "
   add-pair-count LLOBJ - Extend LLOBJ with methods to get, set and
   increment the counts on pairs.
+
+  The provided methods are all thread-safe.  Counts in attached storage
+  are NOT updated; nor are Atoms fetch from storage prior to update.
+  Use the `add-storage-count` API to get storage updates.
 
   The supported methods are:
 
@@ -177,6 +189,28 @@
 			((base)             LLOBJ)
 			(else               (apply LLOBJ (cons message args))))
 	))
+
+; ---------------------------------------------------------------------
+
+(define-public (add-storage-count LLOBJ)
+"
+  add-storage-count LLOBJ - Extend LLOBJ with methods to get, set and
+  increment the counts on pairs, fetching them from storage, or updating
+  storage, as neccessary.
+
+  All updates will be thread-safe. After update, the new count will be
+  written to storage. If there's no existing count, it will be fetched
+  from storage.
+
+  This is sufficient to maintain single-user, multi-threaded storage.
+  It is NOT safe to use with multi-user storage, because the counts
+  are fetched only once!
+
+  See `add-pair-count` for a description of the provided methods.
+"
+
+)
+
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
