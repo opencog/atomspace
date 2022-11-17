@@ -208,9 +208,107 @@
 
   See `add-pair-count` for a description of the provided methods.
 "
+	; Return the observed count for the pair PAIR.
+	(define (get-count PAIR) (cog-count PAIR))
+	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
+	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
 
+	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+	; exists, else return zero.
+	(define (pair-count L-ATOM R-ATOM)
+	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
+	  (if (nil? stats-atom) 0 (get-count stats-atom)))
+
+	(define (pair-set L-ATOM R-ATOM CNT)
+	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+
+	(define (pair-inc L-ATOM R-ATOM CNT)
+	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+
+	; Accumulate a fraction FRAC of the count from DONOR into ACC.
+	(define (move-count ACCUM DONOR FRAC)
+		; Return #t if the count is effectively zero.
+		; Use an epsilon for rounding errors.
+		(define (is-zero? cnt) (< cnt 1.0e-10))
+
+		; The counts on the accumulator and the pair to merge.
+		(define donor-cnt (LLOBJ 'get-count DONOR))
+		(define frac-cnt (* FRAC donor-cnt))
+
+		; If there is nothing to transfer over, do nothing.
+		(when (not (is-zero? frac-cnt))
+			(inc-count ACCUM frac-cnt)
+			(inc-count DONOR (- frac-cnt)))
+
+		; Return how much was transferred over.
+		frac-cnt)
+
+	;-------------------------------------------
+
+	(define (help)
+		(format #t
+			(string-append
+"This is the `add-storage-count` object applied to the \"~A\"\n"
+"object.  It provides the same API as `add-pair-count`, but updates\n"
+"counts in storage. For more information, say `,d add-storage-count`\n"
+"at the guile prompt, or just use the 'describe method on this object.\n"
+"You can also get at the base object with the 'base method: e.g.\n"
+"`((obj 'base) 'help)`.\n"
 )
+			(LLOBJ 'id)))
 
+	(define (describe)
+		(display (procedure-property add-storage-count 'documentation)))
+
+	; -------------------------------------------------------
+	; Return default, only if LLOBJ does not provide symbol
+	(define (overload symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
+
+	; Provide default methods, but only if the low-level object
+	; does not already provide them.
+	(define f-pair-count    (overload 'pair-count pair-count))
+	(define f-pair-set      (overload 'pair-set pair-set))
+	(define f-pair-inc      (overload 'pair-inc pair-inc))
+	(define f-get-count     (overload 'get-count get-count))
+	(define f-set-count     (overload 'set-count set-count))
+	(define f-inc-count     (overload 'inc-count inc-count))
+	(define f-move-count    (overload 'move-count move-count))
+
+	;-------------------------------------------
+	; Explain what is provided.
+	(define (provides meth)
+		(case meth
+			((pair-count)    f-pair-count)
+			((pair-set)      f-pair-set)
+			((pair-inc)      f-pair-inc)
+			((get-count)     f-get-count)
+			((set-count)     f-set-count)
+			((inc-count)     f-inc-count)
+			((move-count)    f-move-count)
+
+			(else              (LLOBJ 'provides meth))))
+
+	;-------------------------------------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((pair-count)       (apply f-pair-count args))
+			((pair-set)         (apply f-pair-set args))
+			((pair-inc)         (apply f-pair-inc args))
+			((get-count)        (apply f-get-count args))
+			((set-count)        (apply f-set-count args))
+			((inc-count)        (apply f-inc-count args))
+			((move-count)       (apply f-move-count args))
+
+			((provides)         (apply provides args))
+			((help)             (help))
+			((describe)         (describe))
+			((obj)              "add-storage-count")
+			((base)             LLOBJ)
+			(else               (apply LLOBJ (cons message args))))
+	))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
