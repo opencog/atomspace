@@ -33,7 +33,7 @@
 ; and the different types of pairs can implement.
 ;
 ; Three API's are provided:
-; -- add-pair-count, which provides basic counting.
+; -- add-count-api, which provides basic counting.
 ; -- add-storage-count, same as above, but fectches & updates storage.
 ; -- add-marginal-count, same as above, but updates marginal counts.
 ; The last two can be combined to safely update marginal counts in storage.
@@ -131,7 +131,7 @@
 
 	; Avoid insanity.
 	(define chkt (if (not (cog-subtype? 'FloatValue cnt-key))
-		(throw 'bad-type 'add-pair-count "Count type must be a FloatValue!")))
+		(throw 'bad-type 'add-count-api "Count type must be a FloatValue!")))
 
 	; Return the observed count for the pair PAIR.
 	(define (get-count PAIR)
@@ -168,7 +168,7 @@
 		(define (is-zero? cnt) (< cnt 1.0e-10))
 
 		; The counts on the accumulator and the pair to merge.
-		(define donor-cnt (LLOBJ 'get-count DONOR))
+		(define donor-cnt (get-count DONOR))
 		(define frac-cnt (* FRAC donor-cnt))
 
 		; If there is nothing to transfer over, do nothing.
@@ -184,10 +184,10 @@
 	(define (help)
 		(format #t
 			(string-append
-"This is the `add-pair-count` object applied to the \"~A\"\n"
+"This is the `add-count-api` object applied to the \"~A\"\n"
 "object.  It provides generic counting support methods for the base\n"
 "object. This is a core utility, widely used to simplify counting. For\n"
-"more information, say `,d add-pair-count` or `,describe add-pair-count`\n"
+"more information, say `,d add-count-api` or `,describe add-count-api`\n"
 "at the guile prompt, or just use the 'describe method on this object.\n"
 "You can also get at the base object with the 'base method: e.g.\n"
 "`((obj 'base) 'help)`.\n"
@@ -195,7 +195,7 @@
 			(LLOBJ 'id)))
 
 	(define (describe)
-		(display (procedure-property add-pair-count 'documentation)))
+		(display (procedure-property add-count-api 'documentation)))
 
 	; -------------------------------------------------------
 	; Return default, only if LLOBJ does not provide symbol
@@ -237,9 +237,9 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((count-type)       (f-count-type)
-			((count-key)        (f-count-key)
-			((count-ref)        (f-count-ref)
+			((count-type)       (f-count-type))
+			((count-key)        (f-count-key))
+			((count-ref)        (f-count-ref))
 			((pair-count)       (apply f-pair-count args))
 			((pair-set)         (apply f-pair-set args))
 			((pair-inc)         (apply f-pair-inc args))
@@ -251,7 +251,7 @@
 			((provides)         (apply provides args))
 			((help)             (help))
 			((describe)         (describe))
-			((obj)              "add-pair-count")
+			((obj)              "add-count-api")
 			((base)             LLOBJ)
 			(else               (apply LLOBJ (cons message args))))
 	))
@@ -272,14 +272,13 @@
   It is NOT safe to use with multi-user storage, because the counts
   are fetched only once!
 
-  See `add-pair-count` for a description of the provided methods.
+  See `add-count-api` for a description of the provided methods.
 "
 	(define count-obj (add-count-api LLOBJ))
 
 	; Get the type, key and ref from the base, if it is provided.
 	(define cnt-type (count-obj 'count-type))
 	(define cnt-key (count-obj 'count-key))
-	(define cnt-ref (count-obj 'count-ref))
 
 	; Return the observed count for the pair PAIR.
 	; If the pair has nothing at the storage key, fetch it.
@@ -290,15 +289,18 @@
 			(fetch-value PAIR cnt-key))
 		(count-obj 'get-count PAIR))
 
-xxxxxxx
-	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
-	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
+	(define (set-count PAIR CNT)
+		(count-obj 'set-count PAIR CNT)
+		(store-value PAIR cnt-key))
 
-	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
-	; exists, else return zero.
+	(define (inc-count PAIR CNT)
+		(count-obj 'inc-count PAIR CNT)
+		(store-value PAIR cnt-key))
+
+	; Return the observed count for the pair (L-ATOM, R-ATOM).
+	; If it does not exist, make it.
 	(define (pair-count L-ATOM R-ATOM)
-	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
-	  (if (nil? stats-atom) 0 (get-count stats-atom)))
+	  (get-count (LLOBJ 'make-pair L-ATOM R-ATOM)))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
 	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
@@ -313,7 +315,7 @@ xxxxxxx
 		(define (is-zero? cnt) (< cnt 1.0e-10))
 
 		; The counts on the accumulator and the pair to merge.
-		(define donor-cnt (LLOBJ 'get-count DONOR))
+		(define donor-cnt (get-count DONOR))
 		(define frac-cnt (* FRAC donor-cnt))
 
 		; If there is nothing to transfer over, do nothing.
@@ -330,7 +332,7 @@ xxxxxxx
 		(format #t
 			(string-append
 "This is the `add-storage-count` object applied to the \"~A\"\n"
-"object.  It provides the same API as `add-pair-count`, but updates\n"
+"object.  It provides the same API as `add-count-api`, but updates\n"
 "counts in storage. For more information, say `,d add-storage-count`\n"
 "at the guile prompt, or just use the 'describe method on this object.\n"
 "You can also get at the base object with the 'base method: e.g.\n"
