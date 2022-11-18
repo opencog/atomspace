@@ -426,26 +426,32 @@
 	(define count-obj (add-count-api LLOBJ))
 	(define wild-wild (LLOBJ 'wild-wild))
 
-	(define (set-count PAIR CNT)
-		(count-obj 'set-count PAIR CNT)
-		(store-value PAIR cnt-key))
-
 	(define (inc-count PAIR CNT)
-		(define L-ATOM (LLOBJ 'get-
+		(define L-ATOM (LLOBJ 'left-element))
+		(define R-ATOM (LLOBJ 'right-element))
 		(count-obj 'inc-count PAIR CNT)
 		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
-		(count-obj 'inc-count (LLOBJ L-ATOM 'right-wildcard) CNT)
+		(count-obj 'inc-count (LLOBJ 'right-wildcard L-ATOM) CNT)
 		(count-obj 'inc-count wild-wild CNT))
-
-	(define (pair-set L-ATOM R-ATOM CNT)
-		(set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; Increment the counts, and update the marginals.
 	(define (pair-inc L-ATOM R-ATOM CNT)
 		(count-obj 'inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT)
 		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
-		(count-obj 'inc-count (LLOBJ L-ATOM 'right-wildcard) CNT)
+		(count-obj 'inc-count (LLOBJ 'right-wildcard L-ATOM) CNT)
 		(count-obj 'inc-count wild-wild CNT))
+
+	; FIXME: Maybe we should be throwing an exception here?
+	; Trying the just "set" the count while maintaining marginals
+	; is bad form, and shouldn't really be done. We work around this
+	; by computing a delta, and using that to adjuct the marginal
+	; counts.
+	(define (set-count PAIR CNT)
+		(inc-count PAIR (- CNT (count-obj 'get-count PAIR))))
+
+	(define (pair-set L-ATOM R-ATOM CNT)
+		(pair-inc L-ATOM R-ATOM
+			(- CNT (count-obj 'pair-count L-ATOM R-ATOM))))
 
 	;-------------------------------------------
 
