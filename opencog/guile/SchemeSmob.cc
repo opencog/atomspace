@@ -230,8 +230,6 @@ bool SchemeSmob::scm_is_protom(SCM s)
 		free(v);
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
-		// XXX FIXME I think using scm_error here might be better,
-		// that way, we'll at least get a formatted error message!?
 		scm_throw(
 			scm_from_utf8_symbol("C++-EXCEPTION"),
 			scm_cons(
