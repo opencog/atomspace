@@ -49,6 +49,8 @@ public:
 		: Value(STRING_VALUE) { _value.push_back(v); }
 	StringValue(const std::vector<std::string>& v)
 		: Value(STRING_VALUE), _value(v) {}
+	StringValue(Type t, const std::vector<std::string>& v)
+		: Value(t), _value(v) {}
 
 	virtual ~StringValue() {}
 

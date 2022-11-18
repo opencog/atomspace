@@ -201,12 +201,8 @@ SCM SchemeSmob::ss_inc_value (SCM satom, SCM skey, SCM scnt, SCM sref)
 	double cnt = verify_real(scnt, "cog-inc-value!", 3);
 	size_t ref = verify_size_t(sref, "cog-inc-value!", 4);
 
-	std::vector<double> delta;
-	delta.resize(ref+1, 0.0);
-	delta[ref] = cnt;
-
 	const AtomSpacePtr& asp = ss_get_env_as("cog-inc-value!");
-	Handle ha(asp->increment_count(h, key, delta));
+	Handle ha(asp->increment_count(h, key, ref, cnt));
 	if (ha == h)
 		return satom;
 	return handle_to_scm(ha);

@@ -317,11 +317,12 @@ void SchemeSmob::register_procs()
 
 	// Value API
 	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));
-	register_proc("cog-value-ref",         2, 0, 0, C(ss_value_ref));
+	register_proc("cog-value-ref",         2, 1, 0, C(ss_value_ref));
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
 	register_proc("cog-set-values!",       2, 0, 0, C(ss_set_values));
+	register_proc("cog-set-value-ref!",    4, 0, 0, C(ss_set_value_ref));
 
 	// Value property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
@@ -344,9 +345,10 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-keys->alist",       1, 0, 0, C(ss_keys_alist));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
+	register_proc("cog-value-type",        2, 0, 0, C(ss_value_type));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
-	register_proc("cog-atomspace",         0, 0, 1, C(ss_as));
-	register_proc("cog-as",                0, 0, 1, C(ss_as));
+	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));
+	register_proc("cog-as",                0, 1, 0, C(ss_as));
 	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
 	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
 	register_proc("cog-count",             1, 0, 0, C(ss_get_count));

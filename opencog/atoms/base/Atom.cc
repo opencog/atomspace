@@ -212,7 +212,44 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 	if (nameserver().isA(vt, TRUTH_VALUE))
 		nv = ValueCast(TruthValue::factory(vt, new_value));
 	else
-		nv = createFloatValue(new_value);
+		nv = createFloatValue(vt, new_value);
+
+	_values[key] = nv;
+	return nv;
+}
+
+ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
+{
+	std::vector<double> new_value;
+	Type vt = FLOAT_VALUE;
+
+	KVP_SHARED_LOCK;
+
+	// Find the existing value, if it is there.
+	auto pr = _values.find(key);
+	if (_values.end() != pr)
+	{
+		const ValuePtr& pap = pr->second;
+		vt = pap->get_type();
+		if (nameserver().isA(vt, FLOAT_VALUE))
+		{
+			FloatValuePtr fv(FloatValueCast(pap));
+			new_value = fv->value();
+		}
+	}
+
+	// Increment the existing value (or create a new one).
+	if (new_value.size() <= idx)
+		new_value.resize(idx+1, 0.0);
+
+	new_value[idx] += count;
+
+	// Set the new value.
+	ValuePtr nv;
+	if (nameserver().isA(vt, TRUTH_VALUE))
+		nv = ValueCast(TruthValue::factory(vt, new_value));
+	else
+		nv = createFloatValue(vt, new_value);
 
 	_values[key] = nv;
 	return nv;

@@ -234,17 +234,16 @@ SCM SchemeSmob::ss_as_clear(SCM sas)
  * Return the atomspace of an atom.
  * If no atom, return the current atomspace.
  */
-SCM SchemeSmob::ss_as(SCM slist)
+SCM SchemeSmob::ss_as(SCM satom)
 {
 	// If no argument, then return the current AtomSpace.
-	if (scm_is_null(slist))
+	Handle h(scm_to_handle(satom));
+	if (nullptr == h)
 	{
 		const AtomSpacePtr& asp = ss_get_env_as("cog-atomspace");
 		return asp ? make_as(asp) : SCM_EOL;
 	}
 
-	SCM satom = scm_car(slist);
-	Handle h(verify_handle(satom, "cog-atomspace"));
 	AtomSpace* as = h->getAtomSpace();
 	return as ? make_as(AtomSpaceCast(as->shared_from_this())) : SCM_EOL;
 }

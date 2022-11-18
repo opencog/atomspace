@@ -41,15 +41,20 @@ using namespace opencog;
 /* ============================================================== */
 /** Return the type of a value/atom */
 
-SCM SchemeSmob::ss_type (SCM svalue)
+SCM SchemeSmob::from_type (const ValuePtr& vp)
 {
-	ValuePtr pa(verify_protom(svalue, "cog-type"));
-	Type t = pa->get_type();
+	Type t = vp->get_type();
 	const std::string &tname = nameserver().getTypeName(t);
 	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
 
 	return sym;
+}
+
+SCM SchemeSmob::ss_type (SCM svalue)
+{
+	ValuePtr vp(verify_protom(svalue, "cog-type"));
+	return from_type(vp);
 }
 
 /* ============================================================== */
@@ -78,7 +83,7 @@ SchemeSmob::verify_bool_list (SCM svalue_list, const char * subrname, int pos)
 	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of float-pt values");
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of boolean values");
 	return scm_to_bool_list(svalue_list);
 }
 
@@ -336,6 +341,25 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 
 /* ============================================================== */
 
+SCM SchemeSmob::set_value (const Handle& atom, const Handle& key,
+                           const ValuePtr& value, SCM satom,
+                           const char* msg)
+{
+	// Note that pa might be a null pointer, if svalue is '() or #f
+	// In this case, the key is removed.
+	const AtomSpacePtr& asp = ss_get_env_as(msg);
+	try
+	{
+		Handle newh = asp->set_value(atom, key, value);
+		if (atom == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, msg, satom);
+	}
+}
+
 SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 {
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
@@ -399,19 +423,60 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		pa = verify_protom(svalue, "cog-set-value!", 3);
 	}
 
-	// Note that pa might be a null pointer, if svalue is '() or #f
-	// In this case, the key is removed.
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value!");
-	try
+	return set_value(atom, key, pa, satom, "cog-set-value!");
+}
+
+// Set the value at the indicated location in the vector.
+SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
+{
+	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
+	Handle key(verify_handle(skey, "cog-set-value-ref!", 2));
+	size_t index = verify_size_t(sindex, "cog-set-value-ref!", 4);
+
+	ValuePtr pa(atom->getValue(key));
+	Type t = pa->get_type();
+
+	ValuePtr nvp;
+
+	// OK. What we do next depends on the actual type of the value.
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
-		Handle newh = asp->set_value(atom, key, pa);
-		if (atom == newh) return satom;
-		return handle_to_scm(newh);
+		std::vector<double> v = FloatValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
+
+		// Explicitly run the TruthValue factory.
+		if (nameserver().isA(t, TRUTH_VALUE))
+			nvp = ValueCast(TruthValue::factory(t, v));
+		else
+			nvp = createFloatValue(t, v);
 	}
-	catch (const std::exception& ex)
+
+	if (nameserver().isA(t, BOOL_VALUE))
 	{
-		throw_exception(ex, "cog-set-value!", satom);
+		std::vector<bool> v = BoolValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
+		nvp = createBoolValue(t, v);
 	}
+
+	if (nameserver().isA(t, STRING_VALUE))
+	{
+		std::vector<std::string> v = StringValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
+		nvp = createStringValue(t, v);
+	}
+
+	if (nameserver().isA(t, LINK_VALUE))
+	{
+		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
+		nvp = createLinkValue(t, v);
+	}
+
+	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");
 }
 
 // alist is an association-list of key-value pairs.
@@ -467,15 +532,16 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	Handle atom(verify_handle(satom, "cog-value", 1));
 	Handle key(verify_handle(skey, "cog-value", 2));
 
-	try
-	{
-		return protom_to_scm(atom->getValue(key));
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-value", scm_cons(satom, skey));
-	}
-	return SCM_EOL;
+	return protom_to_scm(atom->getValue(key));
+}
+
+SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
+{
+	Handle atom(verify_handle(satom, "cog-value-type", 1));
+	Handle key(verify_handle(skey, "cog-value-type", 2));
+
+	ValuePtr vp = atom->getValue(key);
+	return from_type(vp);
 }
 
 /** Return all of the keys on the atom */
@@ -596,10 +662,31 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	return SCM_EOL;
 }
 
-SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
+// This has two forms:
+// If two arguments, then VALUE and INDEX
+// If three arguments, then ATOM KEY INDEX
+// Decode which.
+SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 {
-	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
-	size_t index = verify_size_t(sindex, "cog-value-ref", 2);
+	// There isn't any third argument, assume s1 is a Value.
+	if (scm_is_false(scm_integer_p(s3)))
+	{
+		ValuePtr pa(verify_protom(s1, "cog-value-ref", 1));
+		size_t index = verify_size_t(s2, "cog-value-ref", 2);
+		return value_ref(pa, index);
+	}
+
+	// If there are three args, the first two are Atom and Key
+	size_t index = (size_t) scm_to_long(s3);
+	Handle atom(verify_handle(s1, "cog-value-ref", 1));
+	Handle key(verify_handle(s2, "cog-value-ref", 2));
+
+	ValuePtr pa(atom->getValue(key));
+	return value_ref(pa, index);
+}
+
+SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
+{
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))

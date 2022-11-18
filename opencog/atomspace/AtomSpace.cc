@@ -505,6 +505,14 @@ Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
 	COWBOY_CODE(INCR_CNT);
 }
 
+// The increment is atomic i.e. thread-safe.
+Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
+                                  size_t ref, double count)
+{
+	#define INCR_LOC(atm) atm->incrementCount(key, ref, count);
+	COWBOY_CODE(INCR_LOC);
+}
+
 std::string AtomSpace::to_string(void) const
 {
 	std::stringstream ss;
