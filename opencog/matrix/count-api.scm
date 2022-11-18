@@ -231,7 +231,7 @@
 			((inc-count)     f-inc-count)
 			((move-count)    f-move-count)
 
-			(else              (LLOBJ 'provides meth))))
+			(else            (LLOBJ 'provides meth))))
 
 	;-------------------------------------------
 	; Methods on this class.
@@ -276,7 +276,7 @@
 "
 	(define count-obj (add-count-api LLOBJ))
 
-	; Get the type, key and ref from the base, if it is provided.
+	; Get the type and key from the base.
 	(define cnt-type (count-obj 'count-type))
 	(define cnt-key (count-obj 'count-key))
 
@@ -343,47 +343,31 @@
 	(define (describe)
 		(display (procedure-property add-storage-count 'documentation)))
 
-	; -------------------------------------------------------
-	; Return default, only if LLOBJ does not provide symbol
-	(define (overload symbol default)
-		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
-
-	; Provide default methods, but only if the low-level object
-	; does not already provide them.
-	(define f-pair-count    (overload 'pair-count pair-count))
-	(define f-pair-set      (overload 'pair-set pair-set))
-	(define f-pair-inc      (overload 'pair-inc pair-inc))
-	(define f-get-count     (overload 'get-count get-count))
-	(define f-set-count     (overload 'set-count set-count))
-	(define f-inc-count     (overload 'inc-count inc-count))
-	(define f-move-count    (overload 'move-count move-count))
-
 	;-------------------------------------------
 	; Explain what is provided.
 	(define (provides meth)
 		(case meth
-			((pair-count)    f-pair-count)
-			((pair-set)      f-pair-set)
-			((pair-inc)      f-pair-inc)
-			((get-count)     f-get-count)
-			((set-count)     f-set-count)
-			((inc-count)     f-inc-count)
-			((move-count)    f-move-count)
+			((pair-count)    pair-count)
+			((pair-set)      pair-set)
+			((pair-inc)      pair-inc)
+			((get-count)     get-count)
+			((set-count)     set-count)
+			((inc-count)     inc-count)
+			((move-count)    move-count)
 
-			(else              (LLOBJ 'provides meth))))
+			(else            (LLOBJ 'provides meth))))
 
 	;-------------------------------------------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((pair-count)       (apply f-pair-count args))
-			((pair-set)         (apply f-pair-set args))
-			((pair-inc)         (apply f-pair-inc args))
-			((get-count)        (apply f-get-count args))
-			((set-count)        (apply f-set-count args))
-			((inc-count)        (apply f-inc-count args))
-			((move-count)       (apply f-move-count args))
+			((pair-count)       (apply pair-count args))
+			((pair-set)         (apply pair-set args))
+			((pair-inc)         (apply pair-inc args))
+			((get-count)        (apply get-count args))
+			((set-count)        (apply set-count args))
+			((inc-count)        (apply inc-count args))
+			((move-count)       (apply move-count args))
 
 			((provides)         (apply provides args))
 			((help)             (help))
