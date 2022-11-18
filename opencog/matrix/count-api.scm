@@ -133,6 +133,9 @@
 	(define chkt (if (not (cog-subtype? 'FloatValue cnt-key))
 		(throw 'bad-type 'add-count-api "Count type must be a FloatValue!")))
 
+	; -------------------------------------------------------
+	; The three basic routines to access counts.
+
 	; Return the observed count for the pair PAIR.
 	(define (get-count PAIR)
 		(cog-value-ref (cog-value PAIR cnt-key) cnt-ref))
@@ -149,17 +152,33 @@
 	(define (inc-count PAIR CNT)
 		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
 
+	; -------------------------------------------------------
+	; Return default, only if LLOBJ does not provide symbol
+	(define (overload symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
+
+	; Use the functions defined above, but only if the low-level
+	; object does not already provide them. If it does, use what
+	; is provided. We need these three, to finish the rest of the
+	; implementation, below.
+	(define f-get-count     (overload 'get-count get-count))
+	(define f-set-count     (overload 'set-count set-count))
+	(define f-inc-count     (overload 'inc-count inc-count))
+
+	; -------------------------------------------------------
+
 	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 	; exists, else return zero.
 	(define (pair-count L-ATOM R-ATOM)
 	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
-	  (if (nil? stats-atom) 0 (get-count stats-atom)))
+	  (if (nil? stats-atom) 0 (f-get-count stats-atom)))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
-	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+	  (f-set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	(define (pair-inc L-ATOM R-ATOM CNT)
-	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+	  (f-inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	(define (move-count ACCUM DONOR FRAC)
@@ -168,15 +187,15 @@
 		(define (is-zero? cnt) (< cnt 1.0e-10))
 
 		; The counts on the accumulator and the pair to merge.
-		(define donor-cnt (get-count DONOR))
+		(define donor-cnt (f-get-count DONOR))
 		(define frac-cnt (* FRAC donor-cnt))
 
 		; If there is nothing to transfer over, do nothing.
 		(when (not (is-zero? frac-cnt))
-			(inc-count ACCUM frac-cnt)
-			(inc-count DONOR (- frac-cnt)))
+			(f-inc-count ACCUM frac-cnt)
+			(f-inc-count DONOR (- frac-cnt)))
 
-		; Return how much was transferred over.
+		; Return how much was transfered over.
 		frac-cnt)
 
 	;-------------------------------------------
@@ -198,11 +217,6 @@
 		(display (procedure-property add-count-api 'documentation)))
 
 	; -------------------------------------------------------
-	; Return default, only if LLOBJ does not provide symbol
-	(define (overload symbol default)
-		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
-
 	; Provide default methods, but only if the low-level object
 	; does not already provide them.
 	(define f-count-type    (overload 'count-type count-type))
@@ -211,9 +225,6 @@
 	(define f-pair-count    (overload 'pair-count pair-count))
 	(define f-pair-set      (overload 'pair-set pair-set))
 	(define f-pair-inc      (overload 'pair-inc pair-inc))
-	(define f-get-count     (overload 'get-count get-count))
-	(define f-set-count     (overload 'set-count set-count))
-	(define f-inc-count     (overload 'inc-count inc-count))
 	(define f-move-count    (overload 'move-count move-count))
 
 	;-------------------------------------------
@@ -323,7 +334,7 @@
 			(inc-count ACCUM frac-cnt)
 			(inc-count DONOR (- frac-cnt)))
 
-		; Return how much was transferred over.
+		; Return how much was transfered over.
 		frac-cnt)
 
 	;-------------------------------------------
