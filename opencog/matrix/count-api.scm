@@ -47,9 +47,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-count LLOBJ)
+(define-public (add-count-api LLOBJ)
 "
-  add-pair-count LLOBJ - Extend LLOBJ with methods to get, set and
+  add-count-api LLOBJ - Extend LLOBJ with methods to get, set and
   increment the counts on pairs.
 
   The provided methods are all thread-safe.  Counts in attached storage
@@ -274,13 +274,23 @@
 
   See `add-pair-count` for a description of the provided methods.
 "
+	(define count-obj (add-count-api LLOBJ))
+
+	; Get the type, key and ref from the base, if it is provided.
+	(define cnt-type (count-obj 'count-type))
+	(define cnt-key (count-obj 'count-key))
+	(define cnt-ref (count-obj 'count-ref))
+
 	; Return the observed count for the pair PAIR.
+	; If the pair has nothing at the storage key, fetch it.
+	; If the pair has the wrong type, e.g. SimpleTV instead of CountTV
+	; then fetch it. Be surgical w/ the fetch. Get only what we need.
 	(define (get-count PAIR)
-		(if (not (cog-ctv? (cog-tv PAIR)))
-			(fetch-atom PAIR
+		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(fetch-value PAIR cnt-key))
+		(count-obj 'get-count PAIR))
 
 xxxxxxx
- (cog-count PAIR))
 	(define (set-count PAIR CNT) (cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
 	(define (inc-count PAIR CNT) (cog-inc-count! PAIR CNT))
 
