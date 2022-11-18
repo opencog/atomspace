@@ -97,6 +97,7 @@ cog-value
 cog-value?
 cog-value->list
 cog-value-ref
+cog-value-type
 )
 
 ; Print C++ exceptions so that they are readable.

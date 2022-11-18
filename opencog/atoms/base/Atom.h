@@ -394,6 +394,7 @@ public:
     ValuePtr getValue(const Handle& key) const;
     /// Atomically increment a generic FloatValue.
     ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
+    ValuePtr incrementCount(const Handle& key, size_t idx, double);
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;

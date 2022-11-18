@@ -60,6 +60,10 @@
     (and (cog-subtype? 'Value SYMBOL) (not (cog-subtype? 'Atom SYMBOL)))
 
     Example:
+        guile> (cog-value-type? 'FloatValue)
+        #t
+        guile> (cog-value-type? 'ConceptNode)
+        #f
         guile> (cog-type? 'ConceptNode)
         #t
         guile> (cog-type? 'FlorgleBarf)

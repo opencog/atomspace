@@ -123,19 +123,24 @@ private:
 
 	// Access the list encoded in a value
 	static SCM ss_value_to_list(SCM);
-	static SCM ss_value_ref(SCM, SCM);
+	static SCM ss_value_ref(SCM, SCM, SCM);
+	static SCM value_ref(const ValuePtr&, size_t);
 
 	// Property setters on atoms
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
+	static SCM set_value(const Handle&, const Handle&,
+	                     const ValuePtr&, SCM, const char*);
 	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
+	static SCM ss_set_value_ref(SCM, SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
 	static SCM ss_number(SCM);
+	static SCM from_type(const ValuePtr&);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_tv(SCM);
@@ -145,6 +150,7 @@ private:
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
+	static SCM ss_value_type(SCM, SCM);
 	static SCM ss_incoming_set(SCM, SCM);
 	static SCM ss_incoming_size(SCM, SCM);
 	static SCM ss_incoming_by_type(SCM, SCM, SCM);
@@ -197,7 +203,8 @@ private:
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
-	// Logger
+	// Logger XXX TODO these do not belong here, they
+	// need to be moved to their own module.
 	static SCM logger_to_scm(Logger*);
 	static Logger* ss_to_logger(SCM);
 	static std::string logger_to_string(const Logger *);
@@ -232,6 +239,8 @@ private:
 	                       const char *msg = "integer");
 	static size_t verify_size_t (SCM, const char *, int pos = 1,
 	                             const char *msg = "integer size_t");
+	static bool verify_bool (SCM, const char *, int pos = 1,
+	                         const char *msg = "boolean");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);

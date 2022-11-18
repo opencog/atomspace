@@ -337,14 +337,18 @@
 "
  cog-type EXP
     Return the type of EXP, where EXP is a Value or an Atom.
+    The returned value is a guile symbol.
 
     Example:
        ; Define a node
        guile> (define x (Concept \"abc\"))
        guile> (cog-type x)
        ConceptNode
-       guile> (eq? 'Concept (cog-type x))
+       guile> (eq? 'ConceptNode (cog-type x))
        #t
+
+    See also:
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-arity 'documentation
@@ -363,11 +367,18 @@
 
 (set-procedure-property! cog-incoming-set 'documentation
 "
- cog-incoming-set ATOM
+ cog-incoming-set ATOM [ATOMSPACE]
     Return the incoming set of ATOM.  This set is returned as an
     ordinary scheme list.
 
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
+
     See also: cog-incoming-size, cog-incoming-by-type
+
     Example:
        ; Define two nodes and a link between them:
        guile> (define x (Concept \"abc\"))
@@ -406,8 +417,14 @@
 
 (set-procedure-property! cog-incoming-size 'documentation
 "
- cog-incoming-size ATOM
+ cog-incoming-size ATOM [ATOMSPACE]
     Return the number of atoms in the incoming set of ATOM.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     See also: cog-incoming-set, cog-incoming-size-by-type
 
@@ -427,12 +444,18 @@
 
 (set-procedure-property! cog-incoming-by-type 'documentation
 "
- cog-incoming-by-type ATOM TYPE
+ cog-incoming-by-type ATOM TYPE [ATOMSPACE]
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
     Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
     should be faster, performance-wise.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     Example:
        ; Define two nodes and two links between them:
@@ -460,8 +483,14 @@
 
 (set-procedure-property! cog-incoming-size-by-type 'documentation
 "
- cog-incoming-size-by-type ATOM TYPE
+ cog-incoming-size-by-type ATOM TYPE [ATOMSPACE]
     Return the number of atoms of type TYPE in the incoming set of ATOM.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     See also: cog-incoming-by-type, cog-incoming-size
 
@@ -599,6 +628,7 @@
   See also:
       cog-inc-count! -- Increment the CountTruthValue.
       cog-update-value! -- A generic atomic read-modify-write.
+      cog-set-value-ref! - Set one location in a vector.
 ")
 
 (set-procedure-property! cog-mean 'documentation
@@ -735,6 +765,7 @@
     See also:
        cog-keys->alist ATOM - return association list of keys+values
        cog-value ATOM KEY - return a value for the given KEY
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-keys->alist 'documentation
@@ -751,13 +782,13 @@
     See also:
        cog-keys ATOM - return list of all keys on ATOM
        cog-value ATOM KEY - return a value for the given KEY
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-value 'documentation
 "
  cog-value ATOM KEY
-    Return the value of of KEY for ATOM. Both ATOM and KEY must be
-    atoms.
+    Return the value of KEY for ATOM. Both ATOM and KEY must be atoms.
 
     Example:
        guile> (cog-set-value!
@@ -765,6 +796,28 @@
                  (FloatValue 1 2 3))
        guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
+
+   See also:
+       cog-keys ATOM - return list of all keys on ATOM
+       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+")
+
+(set-procedure-property! cog-value-type 'documentation
+"
+ cog-value-type ATOM KEY
+    Return the type of the value of KEY for ATOM. Both ATOM and KEY
+    must be atoms. The returned type is a guile symbol.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
+       FloatValue
+
+   See also:
+       cog-value ATOM KEY -- get the value at KEY on ATOM.
+       cog-keys ATOM - return list of all keys on ATOM.
 ")
 
 (set-procedure-property! cog-set-value! 'documentation
@@ -797,11 +850,47 @@
        #f
 
     See also:
+       cog-set-value-ref! - Set one location in a vector.
+       cog-inc-value! - Increment one location in a vector.
        cog-update-value! - Perform an atomic read-modify-write
        cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
+")
+
+(set-procedure-property! cog-set-value-ref! 'documentation
+"
+  cog-set-value-ref! ATOM KEY VAL REF -- Set location REF of vector
+     locatated at KEY on ATOM to VAL.
+
+  The REF location of the vector Value at KEY is set to VAL. The type
+  of VAL must be appropriate for the Value stored there: for StringValue
+  vectors, VAL must be a string; for FloatValueV vectors, VAL must be a
+  float, and so on. The other locations in the  value are left untouched.
+
+  The reference is a zero-based offset from the start of the vector.
+
+  If the ATOM does not have any Value at KEY, then nothing is done.
+  If the existing Value is too short, it is extended until it is at
+  least (REF+1) in length.
+
+  Example usage:
+     (cog-set-value!
+         (Concept \"Question\")
+         (Predicate \"Answer\")
+         (StringValue \"a\" \"b\" \"c\" \"d\" \"e\"))
+     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
+     (cog-set-value-ref!
+         (Concept \"Question\")
+         (Predicate \"Answer\")
+         \"forty-two\" 3)
+     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
+
+  See also:
+      cog-inc-count! -- Increment the CountTruthValue.
+      cog-update-value! -- A generic atomic read-modify-write.
+      cog-set-value-ref! - Set one location in a vector.
 ")
 
 (set-procedure-property! cog-update-value! 'documentation
@@ -824,9 +913,10 @@
 
     See also:
        cog-inc-count! -- Increment a CountTruthValue
-       cog-inc-value! -- Increment a generic FloatValue
+       cog-inc-value! -- Increment one location in a generic FloatValue
        cog-set-value! -- Set a single value.
        cog-set-values! -- Set multiple values.
+       cog-set-value-ref! - Set one location in a vector.
 ")
 
 (set-procedure-property! cog-set-values! 'documentation
@@ -864,7 +954,7 @@
     a history of value changes.
 
     See also:
-       cog-set-values! ATOM ALIST - Set multiple values.
+       cog-set-value! ATOM VALUE - Set a single value.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
@@ -901,21 +991,36 @@
 (set-procedure-property! cog-value-ref 'documentation
 "
  cog-value-ref VALUE N
-    Return the N'th entry in the OpenCog VALUE.
-    If VALUE is a Link, this returns the N'th atom in the outgoing set.
+ cog-value-ref ATOM KEY N
+    The first form returns the N'th entry in the OpenCog VALUE.
+    The second form looks up the value om ATOM at KEY, and then returns
+    the N'th entry.
+
+    If the value is a Link, this returns the N'th atom in the outgoing set.
         That is, it returns the same atom as cog-outgoing-atom.
-    If VALUE is a Node, and N is zero, this returns the node name.
-    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    If the value is a Node, and N is zero, this returns the node name.
+    If the value is a StringValue, FloatValue or LinkValue, this returns
         the N'th entry in the value.
 
-    This returns the same result as
+    The first form returns the same result as
         (list-ref (cog-value->list VALUE) N)
+
+    The second form returns the same result as
+        (list-ref (cog-value->list (cog-value ATOM KEY)) N)
+
+    The difference is that this one call will be a lot faster than
+    either of the equivalent forms (and thus is suitable for use in
+    tight inner loops).
 
     Example:
        guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
        0.3
        guile> (cog-value-ref (Number 1 2 3) 2)
        3.0
+
+	See also:
+       cog-set-value-ref! - Set one location in a vector.
+       cog-inc-value! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-get-types 'documentation
@@ -930,13 +1035,11 @@
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
-    Return the integer value corresponding to an Atom TYPE.
-    This is unique for the current session, only; it is not universally
-    unique, and may change from one session to the next.
-
-    Example:
-        guile> (cog-type->int 'ListLink)
-        8
+    Return the C++ internal type number assigned to an Atom TYPE.
+    This provides access to the type numbering in the current C++
+    AtomSpace session. The value is not universally unique, and may
+    change from one session to the next. This function is for
+    internal use only; do not use in general code.
 ")
 
 (set-procedure-property! cog-get-subtypes 'documentation

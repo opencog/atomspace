@@ -115,7 +115,7 @@ std::string Node::to_short_string(const std::string& indent) const
     answer += '\"';
 
     // Print the TV only if its not the default.
-    if (not getTruthValue()->isDefaultTV())
+    if (getTruthValue() and not getTruthValue()->isDefaultTV())
         answer += ' ' + getTruthValue()->to_string();
 
     answer += ')';
