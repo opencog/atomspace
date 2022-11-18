@@ -103,7 +103,7 @@
    'count-key - Return the key at which the the count is stored. If the
        base class LLOBJ provides this method, then this key will be used
        for all access. If the base class does not provide this, then the
-       default of `(PredicateNode "*-TruthValueKey-*")` is used.
+       default of `(PredicateNode \"*-TruthValueKey-*\")` is used.
 
    'count-type - Return the type of the Value holding the count. If the
        base class LLOBJ provides this method, then this type will be used
@@ -153,8 +153,8 @@
 	; Explicitly set location to value
 	(define (set-count PAIR CNT)
 		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
-			(cog-set-value! PAIR (cog-new-value cnt-type
-				(make-list (+ cnt-ref 1) 0))))
+			(cog-set-value! PAIR cnt-key
+				(cog-new-value cnt-type (make-list (+ cnt-ref 1) 0))))
 		(cog-set-value-ref! PAIR cnt-key CNT cnt-ref))
 
 	; Increment location. Unlike cog-set-value-ref!, this will
