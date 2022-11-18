@@ -129,6 +129,8 @@ private:
 	// Property setters on atoms
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
+	static SCM set_value(const Handle&, const Handle&,
+	                     const ValuePtr&, SCM, const char*);
 	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);

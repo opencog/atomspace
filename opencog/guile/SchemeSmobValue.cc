@@ -341,6 +341,25 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 
 /* ============================================================== */
 
+SCM SchemeSmob::set_value (const Handle& atom, const Handle& key,
+                           const ValuePtr& value, SCM satom,
+                           const char* msg)
+{
+	// Note that pa might be a null pointer, if svalue is '() or #f
+	// In this case, the key is removed.
+	const AtomSpacePtr& asp = ss_get_env_as(msg);
+	try
+	{
+		Handle newh = asp->set_value(atom, key, value);
+		if (atom == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, msg, satom);
+	}
+}
+
 SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 {
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
@@ -404,21 +423,10 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		pa = verify_protom(svalue, "cog-set-value!", 3);
 	}
 
-	// Note that pa might be a null pointer, if svalue is '() or #f
-	// In this case, the key is removed.
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value!");
-	try
-	{
-		Handle newh = asp->set_value(atom, key, pa);
-		if (atom == newh) return satom;
-		return handle_to_scm(newh);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-set-value!", satom);
-	}
+	return set_value(atom, key, pa, satom, "cog-set-value!");
 }
 
+// Set the value at the indicated location in the vector.
 SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 {
 	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
@@ -463,24 +471,37 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		nvp = createLinkValue(t, v);
 	}
 
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value-ref!");
-	try
-	{
-		Handle newh = asp->set_value(atom, key, nvp);
-		if (atom == newh) return satom;
-		return handle_to_scm(newh);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-set-value-ref!", scm_cons(satom, skey));
-	}
-
-	return SCM_BOOL_F; // not reached.
+	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");
 }
 
+// Increment the value at the given location
 SCM SchemeSmob::ss_inc_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 {
-	return SCM_BOOL_F; // not reached.
+	Handle atom(verify_handle(satom, "cog-inc-value-ref!", 1));
+	Handle key(verify_handle(skey, "cog-inc-value-ref!", 2));
+	size_t index = verify_size_t(sindex, "cog-inc-value-ref!", 4);
+
+	ValuePtr pa(atom->getValue(key));
+	Type t = pa->get_type();
+	if (not nameserver().isA(t, FLOAT_VALUE))
+	{
+		const std::string &tname = nameserver().getTypeName(t);
+		SCM ilist = scm_cons(scm_from_utf8_string(tname.c_str()), SCM_EOL);
+		scm_error_scm(
+			scm_from_utf8_symbol("wrong-type"),
+			scm_from_utf8_string("cog-inc-value-ref!"),
+			scm_from_utf8_string("Expecting a FloatValue, found ~A"),
+			ilist,
+			ilist);
+		/* scm_error_scm does not return */
+	}
+
+	std::vector<double> v = FloatValueCast(pa)->value();
+	if (v.size() <= index) v.resize(index+1);
+	v[index] += verify_real(svalue, "cog-set-value-ref!", 3);
+	ValuePtr nvp = createFloatValue(t, v);
+
+	return set_value(atom, key, nvp, satom, "cog-inc-value-ref!");
 }
 
 // alist is an association-list of key-value pairs.
