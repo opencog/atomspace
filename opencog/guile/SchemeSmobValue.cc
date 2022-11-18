@@ -689,9 +689,9 @@ SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 	SCM ilist = scm_cons(s1, SCM_EOL);
 	ilist = scm_cons(s2, ilist);
 	scm_error(
-		scm_from_utf8_symbol("no-value"),
+		scm_from_utf8_symbol("out-of-range"),
 		"cog-value-ref",
-		"No value at ~A on ~A",
+		"No Value at key ~A on Atom ~A",
 		ilist,
 		SCM_BOOL_F);
 }
@@ -744,11 +744,12 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		}
 	}
 
-	SCM ilist = scm_cons(scm_from_int(index), SCM_EOL);
+	SCM ilist = scm_cons(protom_to_scm(pa), SCM_EOL);
+	ilist = scm_cons(scm_from_int(index), ilist);
 	scm_error(
 		scm_from_utf8_symbol("out-of-range"),
 		"cog-value-ref",
-		"Index of ~A is out of range",
+		"Index ~A is out of range for Value ~A",
 		ilist,
 		SCM_BOOL_F);
 
