@@ -395,4 +395,80 @@
 	))
 
 ; ---------------------------------------------------------------------
+
+(define-public (add-marginal-count LLOBJ)
+"
+  add-marginal-count LLOBJ - Extend LLOBJ with methods that update
+  marginal counts whenever the pair-count is updated.
+
+  All updates are thread-safe.
+
+  See `add-count-api` for a description of the provided methods.
+"
+	(define count-obj (add-count-api LLOBJ))
+
+	; Get the type and key from the base.
+	(define cnt-type (count-obj 'count-type))
+	(define cnt-key (count-obj 'count-key))
+
+	(define (set-count PAIR CNT)
+		(count-obj 'set-count PAIR CNT)
+		(store-value PAIR cnt-key))
+
+	(define (inc-count PAIR CNT)
+		(count-obj 'inc-count PAIR CNT)
+		(store-value PAIR cnt-key))
+
+	(define (pair-set L-ATOM R-ATOM CNT)
+	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+
+	(define (pair-inc L-ATOM R-ATOM CNT)
+	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+
+	;-------------------------------------------
+
+	(define (help)
+		(format #t
+			(string-append
+"This is the `add-marginal-count` object applied to the \"~A\"\n"
+"object.  It provides the same API as `add-count-api`, but updates\n"
+"marginal counts whenever pair counts are changed. For more information,\n"
+"say `,d add-marginal-count` at the guile prompt, or just use the\n"
+"'describe method on this object. You can also get at the base object\n"
+"with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+			(LLOBJ 'id)))
+
+	(define (describe)
+		(display (procedure-property add-marginal-count 'documentation)))
+
+	;-------------------------------------------
+	; Explain what is provided.
+	(define (provides meth)
+		(case meth
+			((pair-set)      pair-set)
+			((pair-inc)      pair-inc)
+			((set-count)     set-count)
+			((inc-count)     inc-count)
+
+			(else            (LLOBJ 'provides meth))))
+
+	;-------------------------------------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((pair-set)         (apply pair-set args))
+			((pair-inc)         (apply pair-inc args))
+			((set-count)        (apply set-count args))
+			((inc-count)        (apply inc-count args))
+
+			((provides)         (apply provides args))
+			((help)             (help))
+			((describe)         (describe))
+			((obj)              "add-marginal-count")
+			((base)             LLOBJ)
+			(else               (apply LLOBJ (cons message args))))
+	))
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
