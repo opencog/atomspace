@@ -472,15 +472,7 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	Handle atom(verify_handle(satom, "cog-value", 1));
 	Handle key(verify_handle(skey, "cog-value", 2));
 
-	try
-	{
-		return protom_to_scm(atom->getValue(key));
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-value", scm_cons(satom, skey));
-	}
-	return SCM_EOL;
+	return protom_to_scm(atom->getValue(key));
 }
 
 SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
@@ -488,16 +480,8 @@ SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
 	Handle atom(verify_handle(satom, "cog-value-type", 1));
 	Handle key(verify_handle(skey, "cog-value-type", 2));
 
-	try
-	{
-		ValuePtr vp = atom->getValue(key);
-		return from_type(vp);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-value-type", scm_cons(satom, skey));
-	}
-	return SCM_BOOL_F;
+	ValuePtr vp = atom->getValue(key);
+	return from_type(vp);
 }
 
 /** Return all of the keys on the atom */
@@ -637,16 +621,8 @@ SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 	Handle atom(verify_handle(s1, "cog-value-ref", 1));
 	Handle key(verify_handle(s2, "cog-value-ref", 2));
 
-	try
-	{
-		ValuePtr pa(atom->getValue(key));
-		return value_ref(pa, index);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-value-ref", scm_cons(s1, s2));
-	}
-	return SCM_BOOL_F;
+	ValuePtr pa(atom->getValue(key));
+	return value_ref(pa, index);
 }
 
 SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
