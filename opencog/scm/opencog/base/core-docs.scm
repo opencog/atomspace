@@ -367,11 +367,18 @@
 
 (set-procedure-property! cog-incoming-set 'documentation
 "
- cog-incoming-set ATOM
+ cog-incoming-set ATOM [ATOMSPACE]
     Return the incoming set of ATOM.  This set is returned as an
     ordinary scheme list.
 
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
+
     See also: cog-incoming-size, cog-incoming-by-type
+
     Example:
        ; Define two nodes and a link between them:
        guile> (define x (Concept \"abc\"))
@@ -410,8 +417,14 @@
 
 (set-procedure-property! cog-incoming-size 'documentation
 "
- cog-incoming-size ATOM
+ cog-incoming-size ATOM [ATOMSPACE]
     Return the number of atoms in the incoming set of ATOM.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     See also: cog-incoming-set, cog-incoming-size-by-type
 
@@ -431,12 +444,18 @@
 
 (set-procedure-property! cog-incoming-by-type 'documentation
 "
- cog-incoming-by-type ATOM TYPE
+ cog-incoming-by-type ATOM TYPE [ATOMSPACE]
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
     Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
     should be faster, performance-wise.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     Example:
        ; Define two nodes and two links between them:
@@ -464,8 +483,14 @@
 
 (set-procedure-property! cog-incoming-size-by-type 'documentation
 "
- cog-incoming-size-by-type ATOM TYPE
+ cog-incoming-size-by-type ATOM TYPE [ATOMSPACE]
     Return the number of atoms of type TYPE in the incoming set of ATOM.
+
+    If the optional argument ATOMSPACE is given, then the lookup is
+    performed in that AtomSpace. This is useful when the Atom appears
+    in more than one AtomSpace, and it's incoming set differs in each
+    space.  If the optional argument is not given, then the current
+    AtomSpace is used.
 
     See also: cog-incoming-by-type, cog-incoming-size
 
