@@ -957,19 +957,11 @@
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
-    Return the integer value corresponding to an Atom TYPE.
-    This is unique only for the current session; it is not universally
-    unique, and may change from one session to the next. Use of this
-    function is strongly discouraged!
-
-    Example:
-        guile> (cog-type->int 'ListLink)
-        8
-
-    See also:
-        cog-type ATOM -- get the type of ATOM.
-        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
-        cog-get-types -- get all of the types in the type system.
+    Return the C++ internal type number assigned to an Atom TYPE.
+    This provides access to the type numbering in the current C++
+    AtomSpace session. The value is not universally unique, and may
+    change from one session to the next. This function is for
+    internal use only; do not use in general code.
 ")
 
 (set-procedure-property! cog-get-subtypes 'documentation

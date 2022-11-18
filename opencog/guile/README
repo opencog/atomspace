@@ -446,13 +446,6 @@ interface.
           guile> (cog-link-type? 'FlorgleBarf)
           #f
 
-=== cog-type->int ===
-      Return the integer value corresponding to an atom type.
-
-      Example:
-          guile> (cog-type->int 'ListLink)
-          8
-
 === cog-get-subtypes type ===
       Return a list of the subtypes of the given type.  Only the
       immediate subtypes are returned; to obtain all subtypes, this
