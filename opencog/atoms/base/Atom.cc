@@ -227,7 +227,7 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 {
 	std::vector<double> new_value;
-	Type vt = FLOAT_VALUE;
+	Type vt = 0;
 
 	KVP_SHARED_LOCK;
 
@@ -236,18 +236,25 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	if (_values.end() != pr)
 	{
 		const ValuePtr& pap = pr->second;
-		vt = pap->get_type();
-		if (nameserver().isA(vt, FLOAT_VALUE))
+		Type et = pap->get_type();
+		if (nameserver().isA(et, FLOAT_VALUE))
 		{
+			vt = et;
 			FloatValuePtr fv(FloatValueCast(pap));
 			new_value = fv->value();
 		}
 	}
 
-	// XXX FIXME -- if vt is a TruthValue, and idx is larger than the
-	// TruthValue size, then it should not be resized, and, instead,
-	// an exception should be thrown. Unless idx==2 and vt==SimpleTV
-	// in which case just promote to CountTV (done below).
+	// Backwards compatibility: If there's no prior value *and*
+	// the key is the default TruthValue key, then automatically
+	// create a CountTruthValue.
+	if (0 == vt)
+	{
+		if (2 == idx and *truth_key() == *key)
+			vt = COUNT_TRUTH_VALUE;
+		else
+			vt = FLOAT_VALUE;
+	}
 
 	// Increment the existing value (or create a new one).
 	if (new_value.size() <= idx)
@@ -262,7 +269,7 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 		// Backwards compatibility: If we're incrementing the count
 		// location on a SimpleTruthValue, then automatically promote
 		// it to a CountTruthValue.
-		if (2 == idx and vt != COUNT_TRUTH_VALUE)
+		if (2 == idx and *key == *truth_key())
 			vt = COUNT_TRUTH_VALUE;
 		nv = ValueCast(TruthValue::factory(vt, new_value));
 	}
