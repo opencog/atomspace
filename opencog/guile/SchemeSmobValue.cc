@@ -444,7 +444,12 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<double> v = FloatValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloatValue(t, v);
+
+		// Explicitly run the TruthValue factory.
+		if (nameserver().isA(t, TRUTH_VALUE))
+			nvp = ValueCast(TruthValue::factory(t, v));
+		else
+			nvp = createFloatValue(t, v);
 	}
 
 	if (nameserver().isA(t, BOOL_VALUE))
