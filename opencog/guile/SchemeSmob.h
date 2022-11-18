@@ -133,6 +133,8 @@ private:
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
+	static SCM ss_set_value_ref(SCM, SCM, SCM, SCM);
+	static SCM ss_inc_value_ref(SCM, SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
@@ -236,6 +238,8 @@ private:
 	                       const char *msg = "integer");
 	static size_t verify_size_t (SCM, const char *, int pos = 1,
 	                             const char *msg = "integer size_t");
+	static bool verify_bool (SCM, const char *, int pos = 1,
+	                         const char *msg = "boolean");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);

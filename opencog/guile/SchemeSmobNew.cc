@@ -246,7 +246,6 @@ Type SchemeSmob::verify_type (SCM stype, const char *subrname, int pos)
 	return t;
 }
 
-
 /**
  * Check that the argument is an int, else throw errors.
  * Return the int.
@@ -273,6 +272,23 @@ size_t SchemeSmob::verify_size_t (SCM ssizet, const char *subrname,
 	// but it also doesn't provide a uintmax.
 	// return scm_to_size_t(ssizet);
 	return (size_t) scm_to_long(ssizet);
+}
+
+/**
+ * Check that the argument is a boolean constant, else throw errors.
+ * Return the bool.
+ */
+bool SchemeSmob::verify_bool (SCM sbool, const char *subrname,
+                              int pos, const char * msg)
+{
+	if (scm_is_bool(sbool))
+		return scm_to_bool(sbool);
+	else if (scm_is_integer(sbool))
+		return scm_to_int8(sbool);
+	else
+		scm_wrong_type_arg_msg(subrname, pos, sbool, msg);
+
+	return false; // not reached
 }
 
 /**

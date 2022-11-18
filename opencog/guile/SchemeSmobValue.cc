@@ -83,7 +83,7 @@ SchemeSmob::verify_bool_list (SCM svalue_list, const char * subrname, int pos)
 	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of float-pt values");
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of boolean values");
 	return scm_to_bool_list(svalue_list);
 }
 
@@ -417,6 +417,41 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	{
 		throw_exception(ex, "cog-set-value!", satom);
 	}
+}
+
+SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
+{
+	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
+	Handle key(verify_handle(skey, "cog-set-value-ref!", 2));
+	size_t index = verify_size_t(s2, "cog-set-value-ref!", 4);
+
+	ValuePtr pa(atom->getValue(key));
+	size_t sz = pa->size();
+	Type t = pa->get_type();
+
+	// OK. What we do next depends on the actual type of the value.
+	if (nameserver().isA(t, FLOAT_VALUE))
+	{
+		const std::vector<double>& v = FloatValueCast(pa)->value();
+		double newv = verify_real(svalue);
+	}
+
+	if (nameserver().isA(t, BOOL_VALUE))
+	{
+		const std::vector<bool>& v = BoolValueCast(pa)->value();
+	}
+
+	if (nameserver().isA(t, STRING_VALUE))
+	{
+		const std::vector<std::string>& v = StringValueCast(pa)->value();
+	}
+
+	if (nameserver().isA(t, LINK_VALUE))
+	{
+		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
+	}
+
+xxxxxxxxxx
 }
 
 // alist is an association-list of key-value pairs.
