@@ -60,7 +60,7 @@
   are NOT updated; nor are Atoms fetch from storage prior to update.
   Use the `add-storage-count` API to get storage updates.
 
-  The supported methods are:
+  The provided methods are:
 
   'pair-count L R - Returns the total observed count on the pair (L,R)
       L must be an Atom of type 'left-type on the base object LLOBJ,
@@ -72,9 +72,10 @@
   'pair-inc L R N - Increments the total observed count by N on the
       pair (L,R).  Creates the pair, if it does not yet exist.
 
-   The next three methods are the same as above, but take the pair
-   Atom directly, instead of the two index Atoms. If LLOBJ already
-   provides the above, the below will use that.
+   The above three methods are built on the three below. These do the
+   same as above, but take the pair Atom directly, instead of the two
+   index Atoms. If LLOBJ already provides the below, then that will
+   will be used to implement the above.
 
   'get-count P - Returns the total observed count on the pair P.
       The P atom should be one of the atoms returned by the LLOBJ
@@ -86,6 +87,9 @@
        The increment is atomic, meaning that it is thread-safe against
        racing threads.
 
+  The next method provides an atomic transfer of counts from one
+  location to another. It is built on top of the above methods.
+
   'move-count ACC DONOR FRAC - Move a fraction FRAC of the count from
        DONOR to ACC. The move is atomic, in that no counts are lost in
        the case of racing threads performing other count updates.
@@ -94,7 +98,7 @@
 
    The final three methods provide a simplfied API to store values
    in non-standard, custom locations. If LLOBJ provides these methods,
-   they will be used to build the above.
+   they will be used to build all of the other methods.
 
    'count-key - Return the key at which the the count is stored. If the
        base class LLOBJ provides this method, then this key will be used
@@ -404,6 +408,20 @@
   All updates are thread-safe.
 
   See `add-count-api` for a description of the provided methods.
+  The provided methods are:
+
+  'pair-set L R N - Sets the total observed count to N on the pair (L,R).
+      Creates the pair, if it does not yet exist.
+
+  'pair-inc L R N - Increments the total observed count by N on the
+      pair (L,R).  Creates the pair, if it does not yet exist.
+
+  'set-count P N - Set the total observed count to N on the pair P.
+
+  'inc-count P N - Perform an atomic increment of the count on P by N.
+       The increment is atomic, meaning that it is thread-safe against
+       racing threads.
+
 "
 	(define count-obj (add-count-api LLOBJ))
 
