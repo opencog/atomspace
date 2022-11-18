@@ -181,14 +181,14 @@
 	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 	; exists, else return zero.
 	(define (pair-count L-ATOM R-ATOM)
-	  (define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
-	  (if (nil? stats-atom) 0 (f-get-count stats-atom)))
+		(define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
+		(if (nil? stats-atom) 0 (f-get-count stats-atom)))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
-	  (f-set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(f-set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	(define (pair-inc L-ATOM R-ATOM CNT)
-	  (f-inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(f-inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	(define (move-count ACCUM DONOR FRAC)
@@ -321,13 +321,13 @@
 	; Return the observed count for the pair (L-ATOM, R-ATOM).
 	; If it does not exist, make it.
 	(define (pair-count L-ATOM R-ATOM)
-	  (get-count (LLOBJ 'make-pair L-ATOM R-ATOM)))
+		(get-count (LLOBJ 'make-pair L-ATOM R-ATOM)))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
-	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	(define (pair-inc L-ATOM R-ATOM CNT)
-	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; Accumulate a fraction FRAC of the count from DONOR into ACC.
 	(define (move-count ACCUM DONOR FRAC)
@@ -424,24 +424,28 @@
 
 "
 	(define count-obj (add-count-api LLOBJ))
-
-	; Get the type and key from the base.
-	(define cnt-type (count-obj 'count-type))
-	(define cnt-key (count-obj 'count-key))
+	(define wild-wild (LLOBJ 'wild-wild))
 
 	(define (set-count PAIR CNT)
 		(count-obj 'set-count PAIR CNT)
 		(store-value PAIR cnt-key))
 
 	(define (inc-count PAIR CNT)
+		(define L-ATOM (LLOBJ 'get-
 		(count-obj 'inc-count PAIR CNT)
-		(store-value PAIR cnt-key))
+		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
+		(count-obj 'inc-count (LLOBJ L-ATOM 'right-wildcard) CNT)
+		(count-obj 'inc-count wild-wild CNT))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
-	  (set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
+	; Increment the counts, and update the marginals.
 	(define (pair-inc L-ATOM R-ATOM CNT)
-	  (inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
+		(count-obj 'inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT)
+		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
+		(count-obj 'inc-count (LLOBJ L-ATOM 'right-wildcard) CNT)
+		(count-obj 'inc-count wild-wild CNT))
 
 	;-------------------------------------------
 
