@@ -239,9 +239,8 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	}
 
 	// Increment the existing value (or create a new one).
-	size_t cntsz = count.size();
-	if (new_value.size() <= cntsz)
-		new_value.resize(cntsz, 0.0);
+	if (new_value.size() <= idx)
+		new_value.resize(idx+1, 0.0);
 
 	new_value[idx] += count;
 
