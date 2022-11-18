@@ -474,37 +474,6 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");
 }
 
-// Increment the value at the given location
-// Only works on FloatValues
-SCM SchemeSmob::ss_inc_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
-{
-	Handle atom(verify_handle(satom, "cog-inc-value-ref!", 1));
-	Handle key(verify_handle(skey, "cog-inc-value-ref!", 2));
-	size_t index = verify_size_t(sindex, "cog-inc-value-ref!", 4);
-
-	ValuePtr pa(atom->getValue(key));
-	Type t = pa->get_type();
-	if (not nameserver().isA(t, FLOAT_VALUE))
-	{
-		const std::string &tname = nameserver().getTypeName(t);
-		SCM ilist = scm_cons(scm_from_utf8_string(tname.c_str()), SCM_EOL);
-		scm_error_scm(
-			scm_from_utf8_symbol("wrong-type"),
-			scm_from_utf8_string("cog-inc-value-ref!"),
-			scm_from_utf8_string("Expecting a FloatValue, found ~A"),
-			ilist,
-			ilist);
-		/* scm_error_scm does not return */
-	}
-
-	std::vector<double> v = FloatValueCast(pa)->value();
-	if (v.size() <= index) v.resize(index+1);
-	v[index] += verify_real(svalue, "cog-inc-value-ref!", 3);
-	ValuePtr nvp = createFloatValue(t, v);
-
-	return set_value(atom, key, nvp, satom, "cog-inc-value-ref!");
-}
-
 // alist is an association-list of key-value pairs.
 Handle SchemeSmob::set_values(const Handle& h, const AtomSpacePtr& asp, SCM alist)
 {
