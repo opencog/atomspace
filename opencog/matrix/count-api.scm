@@ -49,8 +49,12 @@
 
 (define-public (add-count-api LLOBJ)
 "
-  add-count-api LLOBJ - Extend LLOBJ with methods to get, set and
-  increment the counts on pairs.
+  add-count-api LLOBJ - Extend LLOBJ with default methods to get, set
+  and increment the counts on pairs.
+
+  The provided methods are defaults: they are exposed and used only
+  if LLOBJ does not already provide them. Otherwise, the methods on
+  LLOBJ take precedence.
 
   The provided methods are all thread-safe.  Counts in attached storage
   are NOT updated; nor are Atoms fetch from storage prior to update.
@@ -69,7 +73,8 @@
       pair (L,R).  Creates the pair, if it does not yet exist.
 
    The next three methods are the same as above, but take the pair
-   Atom directly, instead of the two index Atoms.
+   Atom directly, instead of the two index Atoms. If LLOBJ already
+   provides the above, the below will use that.
 
   'get-count P - Returns the total observed count on the pair P.
       The P atom should be one of the atoms returned by the LLOBJ
@@ -84,11 +89,12 @@
   'move-count ACC DONOR FRAC - Move a fraction FRAC of the count from
        DONOR to ACC. The move is atomic, in that no counts are lost in
        the case of racing threads performing other count updates.
-	    ACC and DONOR should be two pairs in this matrix.
-	    FRAC should be a numeric fraction, between 0.0 and 1.0.
+       ACC and DONOR should be two pairs in this matrix.
+       FRAC should be a numeric fraction, between 0.0 and 1.0.
 
-	The finaly three methods provide a simplfied API to store values
-	in non-standard, custom locations.
+   The final three methods provide a simplfied API to store values
+   in non-standard, custom locations. If LLOBJ provides these methods,
+   they will be used to build the above.
 
    'count-key - Return the key at which the the count is stored. If the
        base class LLOBJ provides this method, then this key will be used
