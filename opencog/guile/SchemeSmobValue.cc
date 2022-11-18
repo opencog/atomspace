@@ -423,35 +423,64 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 {
 	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
 	Handle key(verify_handle(skey, "cog-set-value-ref!", 2));
-	size_t index = verify_size_t(s2, "cog-set-value-ref!", 4);
+	size_t index = verify_size_t(sindex, "cog-set-value-ref!", 4);
 
 	ValuePtr pa(atom->getValue(key));
-	size_t sz = pa->size();
 	Type t = pa->get_type();
+
+	ValuePtr nvp;
 
 	// OK. What we do next depends on the actual type of the value.
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
-		const std::vector<double>& v = FloatValueCast(pa)->value();
-		double newv = verify_real(svalue);
+		std::vector<double> v = FloatValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
+		nvp = createFloatValue(v);
 	}
 
 	if (nameserver().isA(t, BOOL_VALUE))
 	{
-		const std::vector<bool>& v = BoolValueCast(pa)->value();
+		std::vector<bool> v = BoolValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
+		nvp = createBoolValue(v);
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))
 	{
-		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		std::vector<std::string> v = StringValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
+		nvp = createStringValue(v);
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
 	{
-		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
+		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
+		nvp = createLinkValue(v);
 	}
 
-xxxxxxxxxx
+	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value-ref!");
+	try
+	{
+		Handle newh = asp->set_value(atom, key, nvp);
+		if (atom == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-value-ref!", scm_cons(satom, skey));
+	}
+
+	return SCM_BOOL_F; // not reached.
+}
+
+SCM SchemeSmob::ss_inc_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
+{
+	return SCM_BOOL_F; // not reached.
 }
 
 // alist is an association-list of key-value pairs.
