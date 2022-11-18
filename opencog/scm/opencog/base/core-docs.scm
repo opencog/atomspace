@@ -629,7 +629,6 @@
       cog-inc-count! -- Increment the CountTruthValue.
       cog-update-value! -- A generic atomic read-modify-write.
       cog-set-value-ref! - Set one location in a vector.
-      cog-inc-value-ref! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-mean 'documentation
@@ -852,12 +851,46 @@
 
     See also:
        cog-set-value-ref! - Set one location in a vector.
-       cog-inc-value-ref! - Increment one location in a vector.
+       cog-inc-value! - Increment one location in a vector.
        cog-update-value! - Perform an atomic read-modify-write
        cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
+")
+
+(set-procedure-property! cog-set-value-ref! 'documentation
+"
+  cog-set-value-ref! ATOM KEY VAL REF -- Set location REF of vector
+     locatated at KEY on ATOM to VAL.
+
+  The REF location of the vector Value at KEY is set to VAL. The type
+  of VAL must be appropriate for the Value stored there: for StringValue
+  vectors, VAL must be a string; for FloatValueV vectors, VAL must be a
+  float, and so on. The other locations in the  value are left untouched.
+
+  The reference is a zero-based offset from the start of the vector.
+
+  If the ATOM does not have any Value at KEY, then nothing is done.
+  If the existing Value is too short, it is extended until it is at
+  least (REF+1) in length.
+
+  Example usage:
+     (cog-set-value!
+         (Concept \"Question\")
+         (Predicate \"Answer\")
+         (StringValue \"a\" \"b\" \"c\" \"d\" \"e\"))
+     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
+     (cog-set-value-ref!
+         (Concept \"Question\")
+         (Predicate \"Answer\")
+         \"forty-two\" 3)
+     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
+
+  See also:
+      cog-inc-count! -- Increment the CountTruthValue.
+      cog-update-value! -- A generic atomic read-modify-write.
+      cog-set-value-ref! - Set one location in a vector.
 ")
 
 (set-procedure-property! cog-update-value! 'documentation
@@ -880,11 +913,10 @@
 
     See also:
        cog-inc-count! -- Increment a CountTruthValue
-       cog-inc-value! -- Increment a generic FloatValue
+       cog-inc-value! -- Increment one location in a generic FloatValue
        cog-set-value! -- Set a single value.
        cog-set-values! -- Set multiple values.
        cog-set-value-ref! - Set one location in a vector.
-       cog-inc-value-ref! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-set-values! 'documentation
@@ -988,7 +1020,7 @@
 
 	See also:
        cog-set-value-ref! - Set one location in a vector.
-       cog-inc-value-ref! - Increment one location in a vector.
+       cog-inc-value! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-get-types 'documentation
