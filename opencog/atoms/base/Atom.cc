@@ -110,10 +110,16 @@ TruthValuePtr Atom::incrementCountTV(double cnt)
 	if (_values.end() != pr)
 	{
 		const TruthValuePtr& tvp = TruthValueCast(pr->second);
-		if (COUNT_TRUTH_VALUE == tvp->get_type())
-			cnt += tvp->get_count();
-		mean = tvp->get_mean();
-		conf = tvp->get_confidence();
+		// tvp might be nullptr, if someone set the TV to something
+		// that is not a truth value. This can happen if the truth
+		// predicate is used directly with setValue().
+		if (tvp)
+		{
+			if (COUNT_TRUTH_VALUE == tvp->get_type())
+				cnt += tvp->get_count();
+			mean = tvp->get_mean();
+			conf = tvp->get_confidence();
+		}
 	}
 
 	TruthValuePtr newTV = CountTruthValue::createTV(mean, conf, cnt);
