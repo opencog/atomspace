@@ -131,7 +131,7 @@
 	; See if the base object provides the type, key and ref.
 	(define (get-loc symbol default)
 		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
+		(if fp (fp) default))
 
 	; Get the type, key and ref from the base, if it is provided.
 	; Otherwise, use the defaults.
@@ -140,8 +140,9 @@
 	(define cnt-ref (get-loc 'count-ref (count-ref)))
 
 	; Avoid insanity.
-	(define chkt (if (not (cog-subtype? 'FloatValue cnt-key))
-		(throw 'bad-type 'add-count-api "Count type must be a FloatValue!")))
+	(define chkt (if (not (cog-subtype? 'FloatValue cnt-type))
+		(throw 'wrong-type-arg 'add-count-api
+			"Count type must be a FloatValue; got ~A!" (list cnt-type))))
 
 	; -------------------------------------------------------
 	; The three basic routines to access counts.
