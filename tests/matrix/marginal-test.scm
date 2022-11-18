@@ -9,7 +9,8 @@
 (test-begin tmarg)
 
 (define epa (make-evaluation-pair-api
-	(Predicate "foo") 'Concept 'Concept 'Any 'Any "marge" "Marginal Test"))
+	(Predicate "foo") 'Concept 'Concept
+	(Any "leftie") (Any "roost") "marge" "Marginal Test"))
 
 (define sep (add-pair-stars epa))
 (define cti (add-count-api sep))

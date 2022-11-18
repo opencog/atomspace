@@ -456,17 +456,21 @@
 	(define (inc-count PAIR CNT)
 		(define L-ATOM (LLOBJ 'left-element))
 		(define R-ATOM (LLOBJ 'right-element))
-		(count-obj 'inc-count PAIR CNT)
 		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
 		(count-obj 'inc-count (LLOBJ 'right-wildcard L-ATOM) CNT)
-		(count-obj 'inc-count wild-wild CNT))
+		(count-obj 'inc-count wild-wild CNT)
+
+		; Do this last; its the return value.
+		(count-obj 'inc-count PAIR CNT))
 
 	; Increment the counts, and update the marginals.
 	(define (pair-inc L-ATOM R-ATOM CNT)
-		(count-obj 'inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT)
 		(count-obj 'inc-count (LLOBJ 'left-wildcard R-ATOM) CNT)
 		(count-obj 'inc-count (LLOBJ 'right-wildcard L-ATOM) CNT)
-		(count-obj 'inc-count wild-wild CNT))
+		(count-obj 'inc-count wild-wild CNT)
+
+		; Do this last; its the return value.
+		(count-obj 'inc-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))
 
 	; FIXME: Maybe we should be throwing an exception here?
 	; Trying the just "set" the count while maintaining marginals
