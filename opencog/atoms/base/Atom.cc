@@ -238,6 +238,11 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 		}
 	}
 
+	// XXX FIXME -- if vt is a TruthValue, and idx is larger than the
+	// TruthValue size, then it should not be resized, and, instead,
+	// an exception should be thrown. Unless idx==2 and vt==SimpleTV
+	// in which case just promote to CountTV (done below).
+
 	// Increment the existing value (or create a new one).
 	if (new_value.size() <= idx)
 		new_value.resize(idx+1, 0.0);
@@ -247,7 +252,14 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	// Set the new value.
 	ValuePtr nv;
 	if (nameserver().isA(vt, TRUTH_VALUE))
+	{
+		// Backwards compatibility: If we're incrementing the count
+		// location on a SimpleTruthValue, then automatically promote
+		// it to a CountTruthValue.
+		if (2 == idx and vt != COUNT_TRUTH_VALUE)
+			vt = COUNT_TRUTH_VALUE;
 		nv = ValueCast(TruthValue::factory(vt, new_value));
+	}
 	else
 		nv = createFloatValue(vt, new_value);
 
