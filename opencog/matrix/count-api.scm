@@ -86,6 +86,28 @@
        the case of racing threads performing other count updates.
 	    ACC and DONOR should be two pairs in this matrix.
 	    FRAC should be a numeric fraction, between 0.0 and 1.0.
+
+	The finaly three methods provide a simplfied API to store values
+	in non-standard, custom locations.
+
+   'count-key - Return the key at which the the count is stored. If the
+       base class LLOBJ provides this method, then this key will be used
+       for all access. If the base class does not provide this, then the
+       default of `(PredicateNode "*-TruthValueKey-*")` is used.
+
+   'count-type - Return the type of the Value holding the count. If the
+       base class LLOBJ provides this method, then this type will be used
+       when first creating a Value to hold the count. If the base class
+       does not provide this, then the default of `CountTruthValue` will
+       be used. The count-type should be a subtype of type `FloatValue`,
+       as this is the only type capable of holding numbers.
+
+   'count-ref - Return the offset into the vector of the Value holding
+       the count. If the base class LLOBJ provides this method, then
+       this offset will be used when setting or incrementing the count.
+       If the base class does not provide this, then the default of 2
+       will be used. This default is the location of the count field on
+       `CountTruthValue`'s and is thus backwards-compat with older code.
 "
 	; By default, the count is stored as a CountTruthValue.
 	; That means that it is on the TruthValue Key, and is the
@@ -107,13 +129,23 @@
 	(define cnt-key (get-loc 'count-key (count-key)))
 	(define cnt-ref (get-loc 'count-ref (count-ref)))
 
+	; Avoid insanity.
+	(define chkt (if (not (cog-subtype? 'FloatValue cnt-key))
+		(throw 'bad-type 'add-pair-count "Count type must be a FloatValue!")))
+
 	; Return the observed count for the pair PAIR.
 	(define (get-count PAIR)
 		(cog-value-ref (cog-value PAIR cnt-key) cnt-ref))
+
+	; Explicitly set location to value
 	(define (set-count PAIR CNT)
-		(if (not (equal? cnt-type (cog-type (cog-value (
-xxxxxxxxx
-		(cog-set-tv! PAIR (CountTruthValue 1 0 CNT)))
+		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(cog-set-value! PAIR (cog-new-value cnt-type
+				(make-list (+ cnt-ref 1) 0))))
+		(cog-set-value-ref! PAIR cnt-key CNT cnt-ref))
+
+	; Increment location. Unlike cog-set-value-ref!, this will
+	; automatically create the FloatValue (or CountTruthValue).
 	(define (inc-count PAIR CNT)
 		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
 
