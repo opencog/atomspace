@@ -405,23 +405,49 @@
   add-marginal-count LLOBJ - Extend LLOBJ with methods that update
   marginal counts whenever the pair-count is updated.
 
-  All updates are thread-safe.
+  The goal of this object is to keep the marginal counts in sync with
+  the pair counts, so that the marginal counts are always valid. That
+  is, when the count on a pair (L,R) is updated, then the wild-card
+  counts (L,*) and (*,R) and (*,*) are updated.  In other words, if an
+  increment delta is added to N(L,R), then this same increment is added
+  to right-marginal count N(L,*), the left-marginal count N(*,R) and
+  the total pair count N(*,*).
 
-  See `add-count-api` for a description of the provided methods.
+  The increments are thread-safe against multiple updating threads, in
+  that the marginals are eventually updated in a consistent manner.
+  However, the update of the marginals is not atomic with respect to the
+  update of the pair count. For example, there is a small timing window
+  in which it is possible to read the new N(L,R) while still reading the
+  old N(L,*).
+
+  To write the updates to storage, the LLOBJ should be set to the
+  `add-storage-count` object; its methods will be used to store the
+  updated pair count as well as the marginal counts.
+
   The provided methods are:
 
-  'pair-set L R N - Sets the total observed count to N on the pair (L,R).
-      Creates the pair, if it does not yet exist.
-
   'pair-inc L R N - Increments the total observed count by N on the
-      pair (L,R).  Creates the pair, if it does not yet exist.
-
-  'set-count P N - Set the total observed count to N on the pair P.
+      pair (L,R).  Creates the pair, if it does not yet exist. In
+      addition, the count on (L,*) and (*,R) and (*,*) are upated
+      as well.
 
   'inc-count P N - Perform an atomic increment of the count on P by N.
-       The increment is atomic, meaning that it is thread-safe against
-       racing threads.
+       The pair P is decomposed into (L,R) and the counts are updated on
+       (L,*) and (*,R) and (*,*) as well.
 
+  The two setter methods are also pprovided, but thier use is discouraged.
+  This is because, in order to keep the marginals in sync, the old pair
+  counts must be fetched first, and a delta taken against the new count.
+  This delta is needed to adjust the marginals correctly.  In other words,
+  the setters below are converted into the incrementers above. So there
+  is no benefit to using the below.
+
+  'pair-set L R N - Sets the total observed count to N on the pair (L,R).
+      Creates the pair, if it does not yet exist. Updates the marginals
+      appropriately.
+
+  'set-count P N - Set the total observed count to N on the pair P.
+      Updates the marginals appropriately.
 "
 	(define count-obj (add-count-api LLOBJ))
 	(define wild-wild (LLOBJ 'wild-wild))
