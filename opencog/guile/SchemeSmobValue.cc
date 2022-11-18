@@ -541,6 +541,7 @@ SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
 	Handle key(verify_handle(skey, "cog-value-type", 2));
 
 	ValuePtr vp = atom->getValue(key);
+	if (nullptr == vp) return SCM_BOOL_F;
 	return from_type(vp);
 }
 
