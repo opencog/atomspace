@@ -475,6 +475,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 }
 
 // Increment the value at the given location
+// Only works on FloatValues
 SCM SchemeSmob::ss_inc_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 {
 	Handle atom(verify_handle(satom, "cog-inc-value-ref!", 1));
@@ -498,7 +499,7 @@ SCM SchemeSmob::ss_inc_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 
 	std::vector<double> v = FloatValueCast(pa)->value();
 	if (v.size() <= index) v.resize(index+1);
-	v[index] += verify_real(svalue, "cog-set-value-ref!", 3);
+	v[index] += verify_real(svalue, "cog-inc-value-ref!", 3);
 	ValuePtr nvp = createFloatValue(t, v);
 
 	return set_value(atom, key, nvp, satom, "cog-inc-value-ref!");

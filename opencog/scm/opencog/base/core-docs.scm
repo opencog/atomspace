@@ -628,6 +628,8 @@
   See also:
       cog-inc-count! -- Increment the CountTruthValue.
       cog-update-value! -- A generic atomic read-modify-write.
+      cog-set-value-ref! - Set one location in a vector.
+      cog-inc-value-ref! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-mean 'documentation
@@ -849,6 +851,8 @@
        #f
 
     See also:
+       cog-set-value-ref! - Set one location in a vector.
+       cog-inc-value-ref! - Increment one location in a vector.
        cog-update-value! - Perform an atomic read-modify-write
        cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
@@ -879,6 +883,8 @@
        cog-inc-value! -- Increment a generic FloatValue
        cog-set-value! -- Set a single value.
        cog-set-values! -- Set multiple values.
+       cog-set-value-ref! - Set one location in a vector.
+       cog-inc-value-ref! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-set-values! 'documentation
@@ -979,6 +985,10 @@
        0.3
        guile> (cog-value-ref (Number 1 2 3) 2)
        3.0
+
+	See also:
+       cog-set-value-ref! - Set one location in a vector.
+       cog-inc-value-ref! - Increment one location in a vector.
 ")
 
 (set-procedure-property! cog-get-types 'documentation

@@ -406,7 +406,8 @@ public:
      *
      * If the atom is copied, then the copy is returned.
      */
-    Handle increment_count(const Handle&, const Handle& key, const std::vector<double>&);
+    Handle increment_count(const Handle&, const Handle&, const std::vector<double>&);
+    Handle increment_count(const Handle&, const Handle&, size_t, double);
     Handle increment_countTV(const Handle&, double = 1.0);
 
     /**
