@@ -436,7 +436,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<double> v = FloatValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloatValue(v);
+		nvp = createFloatValue(t, v);
 	}
 
 	if (nameserver().isA(t, BOOL_VALUE))
@@ -444,7 +444,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<bool> v = BoolValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
-		nvp = createBoolValue(v);
+		nvp = createBoolValue(t, v);
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))
@@ -452,7 +452,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<std::string> v = StringValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
-		nvp = createStringValue(v);
+		nvp = createStringValue(t, v);
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
@@ -460,7 +460,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = createLinkValue(v);
+		nvp = createLinkValue(t, v);
 	}
 
 	const AtomSpacePtr& asp = ss_get_env_as("cog-set-value-ref!");

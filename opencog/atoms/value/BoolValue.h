@@ -46,13 +46,12 @@ protected:
 	virtual void update() const {}
 
 	BoolValue(Type t) : Value(t) {}
-public: // XXX should be protected...
-	BoolValue(Type t, const std::vector<bool>& v) : Value(t), _value(v) {}
 
 public:
 	BoolValue(bool v) : Value(BOOL_VALUE) { _value.push_back(v); }
 	BoolValue(const std::vector<bool>& v)
 		: Value(BOOL_VALUE), _value(v) {}
+	BoolValue(Type t, const std::vector<bool>& v) : Value(t), _value(v) {}
 
 	virtual ~BoolValue() {}
 

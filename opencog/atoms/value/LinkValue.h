@@ -51,6 +51,9 @@ public:
 	LinkValue(const ValueSeq& vlist)
 		: Value(LINK_VALUE), _value(vlist) {}
 
+	LinkValue(Type t, const ValueSeq& vlist)
+		: Value(t), _value(vlist) {}
+
 	LinkValue(const ValueSet& vset)
 		: Value(LINK_VALUE)
 	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
