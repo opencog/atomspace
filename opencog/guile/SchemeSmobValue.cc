@@ -618,10 +618,39 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	return SCM_EOL;
 }
 
-SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
+// This has two forms:
+// If two arguments, then VALUE and INDEX
+// If three arguments, then ATOM KEY INDEX
+// Decode which.
+SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 {
-	ValuePtr pa(verify_protom(svalue, "cog-value-ref"));
-	size_t index = verify_size_t(sindex, "cog-value-ref", 2);
+	// There isn't any third argument, assume s1 is a Value.
+	if (scm_is_false(scm_integer_p(s3)))
+	{
+		ValuePtr pa(verify_protom(s1, "cog-value-ref", 1));
+		size_t index = verify_size_t(s2, "cog-value-ref", 2);
+		return value_ref(pa, index);
+	}
+
+	// If there are three args, the first two are Atom and Key
+	size_t index = (size_t) scm_to_long(s3);
+	Handle atom(verify_handle(s1, "cog-value-ref", 1));
+	Handle key(verify_handle(s2, "cog-value-ref", 2));
+
+	try
+	{
+		ValuePtr pa(atom->getValue(key));
+		return value_ref(pa, index);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-value-ref", scm_cons(s1, s2));
+	}
+	return SCM_BOOL_F;
+}
+
+SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
+{
 	Type t = pa->get_type();
 
 	if (nameserver().isA(t, FLOAT_VALUE))

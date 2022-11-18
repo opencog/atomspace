@@ -953,15 +953,26 @@
 (set-procedure-property! cog-value-ref 'documentation
 "
  cog-value-ref VALUE N
-    Return the N'th entry in the OpenCog VALUE.
-    If VALUE is a Link, this returns the N'th atom in the outgoing set.
+ cog-value-ref ATOM KEY N
+    The first form returns the N'th entry in the OpenCog VALUE.
+    The second form looks up the value om ATOM at KEY, and then returns
+    the N'th entry.
+
+    If the value is a Link, this returns the N'th atom in the outgoing set.
         That is, it returns the same atom as cog-outgoing-atom.
-    If VALUE is a Node, and N is zero, this returns the node name.
-    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    If the value is a Node, and N is zero, this returns the node name.
+    If the value is a StringValue, FloatValue or LinkValue, this returns
         the N'th entry in the value.
 
-    This returns the same result as
+    The first form returns the same result as
         (list-ref (cog-value->list VALUE) N)
+
+    The second form returns the same result as
+        (list-ref (cog-value->list (cog-value ATOM KEY)) N)
+
+    The difference is that this one call will be a lot faster than
+    either of the equivalent forms (and thus is suitable for use in
+    tight inner loops).
 
     Example:
        guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)

@@ -123,7 +123,8 @@ private:
 
 	// Access the list encoded in a value
 	static SCM ss_value_to_list(SCM);
-	static SCM ss_value_ref(SCM, SCM);
+	static SCM ss_value_ref(SCM, SCM, SCM);
+	static SCM value_ref(const ValuePtr&, size_t);
 
 	// Property setters on atoms
 	static SCM ss_set_tv(SCM, SCM);
