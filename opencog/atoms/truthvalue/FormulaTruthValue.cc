@@ -118,7 +118,7 @@ std::string FormulaTruthValue::to_string(const std::string& indent) const
 	update();
 	std::string rv = indent + "(FormulaTruthValue\n";
 	for (const Handle& fo: _formula)
-		rv += fo->to_string(indent + "   ") + "\n";
+		rv += fo->to_short_string(indent + "   ") + "\n";
 	rv += indent + "   ; Current sample:\n";
 	rv += indent + "   ; " + SimpleTruthValue::to_string() + "\n)";
 	return rv;
