@@ -92,6 +92,8 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 	if (!tranny)
 	{
 		tranny = createAtomSpace(parent, TRANSIENT_SPACE);
+
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
 		s_issued.insert(tranny);
 		num_issued ++;
 	}
