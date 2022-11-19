@@ -1,6 +1,14 @@
 # No CMakeLists.txt in dir:
 #ADD_SUBDIRECTORY (wires)
 
+# About the COMPILE flag in the macros below:
+# It causes the guild compiler to run and build a compiled version of
+# the module. It works. But guile does not actually use this compiled
+# version, because, after install, it finds that the sources have a
+# newer timestamp.  I don't feel like wrestling with this right now,
+# so ... for just right now, disable this. It should be fixed and
+# re-enabled.
+
 ADD_GUILE_MODULE (FILES
 	opencog.scm
 	opencog/base/apply.scm
@@ -13,59 +21,59 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/types.scm
 	opencog/base/utilities.scm
 	DEPENDS opencog_atom_types smob
-	COMPILE
+#	COMPILE
 )
 
 # Each of the files below are distinct modules. They need to be
 # compiled seperately.
 ADD_GUILE_MODULE (FILES
 	opencog/csv-table.scm
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/exec.scm
 	DEPENDS exec
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/logger.scm
 	DEPENDS logger
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/randgen.scm
 	DEPENDS randgen
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/query.scm
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/type-utils.scm
 	DEPENDS type-utils
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/uuid.scm
 	DEPENDS guile-uuid
-	COMPILE
+#	COMPILE
 )
 
 # Need to recompile persist.scm whenever storage_types.scm changes
@@ -74,13 +82,13 @@ ADD_GUILE_MODULE (FILES
 ADD_GUILE_MODULE (FILES
 	opencog/persist.scm
 	DEPENDS storage_types persist
-	COMPILE
+#	COMPILE
 )
 
 ADD_GUILE_MODULE (FILES
 	opencog/persist-file.scm
 	DEPENDS persist-file
-	COMPILE
+#	COMPILE
 )
 
 # These guile modules spew "libBlahBlah.so not found" errors,
@@ -90,7 +98,7 @@ IF (HAVE_GEARMAN)
 	ADD_GUILE_MODULE (FILES
 		opencog/dist-gearman.scm
 		DEPENDS dist-gearman
-		COMPILE
+#		COMPILE
 	)
 ENDIF (HAVE_GEARMAN)
 
@@ -98,7 +106,7 @@ IF (HAVE_SQL_STORAGE)
 	ADD_GUILE_MODULE (FILES
 		opencog/persist-sql.scm
 		DEPENDS persist-sql
-		COMPILE
+#		COMPILE
 	)
 ENDIF (HAVE_SQL_STORAGE)
 
@@ -106,6 +114,6 @@ IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
 		DEPENDS PythonSCM
-		COMPILE
+#		COMPILE
 	)
 ENDIF (HAVE_CYTHON)
