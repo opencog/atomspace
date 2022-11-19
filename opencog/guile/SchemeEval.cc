@@ -246,7 +246,6 @@ void SchemeEval::set_error_string(SCM newerror)
 	scm_gc_unprotect_object(olderror);
 }
 
-static std::atomic_flag eval_is_inited = ATOMIC_FLAG_INIT;
 static thread_local bool thread_is_inited = false;
 
 // This will throw an exception, when it is called.  It is used
@@ -272,6 +271,7 @@ void* c_wrap_init_only_once(void* p)
 	return nullptr;
 }
 
+// Cheap, simple semphore.
 static volatile bool done_with_init = false;
 
 static void immortal_thread(void)
@@ -287,26 +287,28 @@ static void immortal_thread(void)
 	while (true) { pause(); }
 }
 
-// Initialization that needs to be performed only once, for the entire
-// process.
+// Create an immortal thread. Force all other threads to spin, until
+// that immortal thread has been created and is done starting.
+//
+// The first time that guile is initialized, it MUST be done in some
+// thread that will never-ever exit. If this thread exits, the bdwgc
+// will not ever find out about it, and this will scramble it's
+// state.  This is documented in two related bugs:
+// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26711  and
+// https://github.com/opencog/atomspace/issues/1054
 static void init_only_once(void)
 {
+	static std::atomic_flag call_once_flag = ATOMIC_FLAG_INIT;
+
 	if (done_with_init) return;
 
-	// Enter initialization only once. All other threads spin, until
-	// it is completed.
-	//
-	// The first time that guile is initialized, it MUST be done in some
-	// thread that will never-ever exit. If this thread exits, the bdwgc
-	// will not ever find out about it, and this will scramble it's
-	// state.  This is documented in two related bugs:
-	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26711  and
-	// https://github.com/opencog/atomspace/issues/1054
-	if (not eval_is_inited.test_and_set())
-	{
+	// The call_once flag just ensures that we make only one
+	// immortal thread. Same thing as
+	// std::call_once(flag, []() { new std::thread(...); });
+	if (not call_once_flag.test_and_set())
 		new std::thread(immortal_thread);
-	}
 
+	// Spin. This is the semaphore wait() emulation.
 	while (not done_with_init) { usleep(1000); }
 }
 
