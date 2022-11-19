@@ -34,7 +34,7 @@
 ;
 ; Three API's are provided:
 ; -- add-count-api, which provides basic counting.
-; -- add-storage-count, same as above, but fectches & updates storage.
+; -- add-storage-count, same as above, but fetches & updates storage.
 ; -- add-marginal-count, same as above, but updates marginal counts.
 ; The last two can be combined to safely update marginal counts in storage.
 ; The storage API should be "below" the marginal API; the marginal API
@@ -206,7 +206,7 @@
 			(f-inc-count ACCUM frac-cnt)
 			(f-inc-count DONOR (- frac-cnt)))
 
-		; Return how much was transfered over.
+		; Return how much was transferred over.
 		frac-cnt)
 
 	;-------------------------------------------
@@ -284,7 +284,7 @@
 "
   add-storage-count LLOBJ - Extend LLOBJ with methods to get, set and
   increment the counts on pairs, fetching them from storage, or updating
-  storage, as neccessary.
+  storage, as necessary.
 
   All updates will be thread-safe. After update, the new count will be
   written to storage. If there's no existing count, it will be fetched
@@ -345,7 +345,7 @@
 			(inc-count ACCUM frac-cnt)
 			(inc-count DONOR (- frac-cnt)))
 
-		; Return how much was transfered over.
+		; Return how much was transferred over.
 		frac-cnt)
 
 	;-------------------------------------------
@@ -429,14 +429,14 @@
 
   'pair-inc L R N - Increments the total observed count by N on the
       pair (L,R).  Creates the pair, if it does not yet exist. In
-      addition, the count on (L,*) and (*,R) and (*,*) are upated
+      addition, the count on (L,*) and (*,R) and (*,*) are updated
       as well.
 
   'inc-count P N - Perform an atomic increment of the count on P by N.
        The pair P is decomposed into (L,R) and the counts are updated on
        (L,*) and (*,R) and (*,*) as well.
 
-  The two setter methods are also pprovided, but thier use is discouraged.
+  The two setter methods are also pprovided, but their use is discouraged.
   This is because, in order to keep the marginals in sync, the old pair
   counts must be fetched first, and a delta taken against the new count.
   This delta is needed to adjust the marginals correctly.  In other words,

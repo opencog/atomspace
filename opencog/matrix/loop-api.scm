@@ -109,7 +109,7 @@
   This results in a total of 200x200 pairs, as 200 rows are
   computed, out to 200 places away from the diagonal. Visually, this is
   a rhombus, one side lying along the diagonal (a rhombus is a
-  parellelogram with all sides equal length.)
+  parallelogram with all sides equal length.)
 
   Here's an ascii-art image for the pairs computed, out to DEPTH=3 for
   a list of 7 items:

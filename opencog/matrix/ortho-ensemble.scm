@@ -2,7 +2,7 @@
 ; ortho-ensemble.scm
 ;
 ; Define API for recasting symmetric matrices as Gaussian Orthogonal
-; Ensembles. Given a (non-sparse) symmetric matix M, renormalize it so
+; Ensembles. Given a (non-sparse) symmetric matrix M, renormalize it so
 ; that the rows/columns of the matrix can be taken to be vectors on the
 ; unit sphere S_{N-1} (when the matrix has dimension N x N).
 ;
@@ -11,7 +11,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Search the internet for infor on Gaussian Orthogonal Ensembles and
+; Search the internet for info on Gaussian Orthogonal Ensembles and
 ; Spin Glasses.
 ;
 ; The code here does nothing fancy or sophisticated; it just
@@ -43,7 +43,7 @@
 
 	; Note that get-cnt returns exact zero when a matrix element is
 	; missing. Else it might return floating zero or even negative
-	; numbers, and we do wnat to handle those. Matrices with MI in
+	; numbers, and we do want to handle those. Matrices with MI in
 	; them use -inf.0 to denote absence.
 	(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
 

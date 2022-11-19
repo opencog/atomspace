@@ -200,7 +200,7 @@
 			(format #t
 				(string-append
 "This is the `add-similarity-api` object applied to the \"~A\" object.\n"
-"It provides acccess to similarities stored at the \"~A\" key.\n"
+"It provides access to similarities stored at the \"~A\" key.\n"
 "For more info, use the 'describe method on this object. You can also\n"
 "get at the base object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
 )
