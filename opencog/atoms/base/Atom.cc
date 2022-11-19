@@ -191,7 +191,7 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 	std::vector<double> new_value;
 	Type vt = FLOAT_VALUE;
 
-	KVP_SHARED_LOCK;
+	KVP_UNIQUE_LOCK;
 
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
@@ -229,7 +229,7 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	std::vector<double> new_value;
 	Type vt = 0;
 
-	KVP_SHARED_LOCK;
+	KVP_UNIQUE_LOCK;
 
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
