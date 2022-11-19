@@ -419,7 +419,13 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     // may have raced and inserted this atom already. So the insert does
     // have to be an atomic test-n-set.
     const Handle& oldh(typeIndex.insertAtom(atom));
-    if (oldh) return oldh;
+    if (oldh)
+    {
+        // If it was already in the index, then undo the install above.
+        atom->setAtomSpace(nullptr);
+        atom->remove();
+        return oldh;
+    }
     return atom;
 }
 
