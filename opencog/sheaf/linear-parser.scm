@@ -84,7 +84,7 @@
 	; It is assumed the last three are in left-right sorted order.
 	(define (*join-em-up result to-at prev verli grali disli)
 		(cond
-			; If we've got no more disconencted nodes, we are done.
+			; If we've got no more disconnected nodes, we are done.
 			((or (null? disli) (null? verli)) result)
 
 			; If there are no more graph nodes, then all that

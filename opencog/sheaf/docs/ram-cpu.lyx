@@ -5963,7 +5963,7 @@ To make data migration easy, one needs to be able to represent the graph
  Later sections will describe a metaquery system that accomplishes this.
  This is in contrast to the situation with SQL.
  The graph that is the schema of an SQL database is not itself stored in
- a table, nor is it queriable with SQL commands.
+ a table, nor is it queryable with SQL commands.
  When a DBA hand-crafts an SQL expression to perform a graph rewrite, they
  do not store that expression within the database itself; it exists externally,
  in a distinct location.
@@ -13039,7 +13039,7 @@ data processing
 
  in all of its glorious 1960's generality: performing database queries to
  associate an electric utility customer's account with their electric usage
- for that month, and thier mailing address, and print a bill to be mailed
+ for that month, and their mailing address, and print a bill to be mailed
  to the customer.
  This is, in a sense, quintessential data processing, and central to it
  is the database holding names, accounts and monthly usages.

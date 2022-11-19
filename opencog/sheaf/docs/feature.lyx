@@ -811,7 +811,7 @@ cat
  should go, but it also indicates how the basis vectors should be treated:
  the wild-card helps establish that dogs and cats are similar.
  The basis vectors indicate how dot products can be taken.
- Recall the defintion of a dot-product (the inner product).
+ Recall the definition of a dot-product (the inner product).
  For 
 \begin_inset Formula $\vec{v}$
 \end_inset
@@ -933,7 +933,7 @@ and
 
 \end_inset
 
-Ignoring the differnces in notation (ignoring that the quantities in parenthesis
+Ignoring the differences in notation (ignoring that the quantities in parenthesis
  are tensors), one clearly can see that these are still feature vectors.
  Focusing on the vector aspect only, these represent the same information
  as the 3-gram feature vectors.

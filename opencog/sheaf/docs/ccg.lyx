@@ -231,7 +231,7 @@ ah, whatever, I get the general idea, let's just assume this is right, and
 
 \begin_layout Standard
 This paper is a physics paper, not a math paper.
- I beleive everything in it is absolutely correct; however, there are no
+ I believe everything in it is absolutely correct; however, there are no
  formal proofs here.
  There are proofs in here, they're just not formal.
 \end_layout
@@ -2192,7 +2192,7 @@ forgotten
 \begin_layout Standard
 The second part of applying this lemma is to confirm that CCG really is
  the free object of the six combinators.
- I beleive the answer is yes.
+ I believe the answer is yes.
  There are not any further constraints on combining the combinators: all
  possible syntactically-valid combinations are valid.
 \end_layout

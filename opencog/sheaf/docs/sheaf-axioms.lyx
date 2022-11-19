@@ -335,7 +335,7 @@ sideways
 \end_inset
 
  from the direction we wish to travel in.
- The Yoneda lemma is also sufficently abstract that it cannot be made a
+ The Yoneda lemma is also sufficiently abstract that it cannot be made a
  pre-requisite to understanding this text.
  It does, however, provide the sign-post to a 
 \begin_inset Quotes eld
@@ -406,7 +406,7 @@ mesh
 
  (the diagram above shows four interconnected seeds; in general it could
  be a mesh of trillions, or even an infinite mesh.
- An infinite mesh might be countable, if it was constructed recusively,
+ An infinite mesh might be countable, if it was constructed recursively,
  or even uncountable, if one is willing to entertain a mesh that interconnects
  elements in a Cantor set.) One point to be careful about, in this analogy:
  here, 
@@ -648,7 +648,7 @@ topology
 \begin_inset Quotes eld
 \end_inset
 
- That is the conclusion, with emphasis in the orginal.
+ That is the conclusion, with emphasis in the original.
 \end_layout
 
 \begin_layout Standard
@@ -747,7 +747,7 @@ Subobject Classifier
 .
  Either something belongs or doesn't.
  It is, or it ain't.
- The subobject classifer is conceptually heavyweight, though.
+ The subobject classifier is conceptually heavyweight, though.
  The whole point of having half-edges is that it is conceptually simple.
  A jigsaw-puzzle piece with unconnected tabs is a 
 \begin_inset Quotes eld

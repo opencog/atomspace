@@ -32,7 +32,7 @@ There are several files here:
    piece analogy formally meets the criteria for these mathematical
    objects.
 
-    * [ram-cpu.pdf](ram-cpu.pdf) gives a precise mathematical defintion for
+    * [ram-cpu.pdf](ram-cpu.pdf) gives a precise mathematical definition for
    a graph, a hypergraph and a metagraph, and, very importantly, explains
    how metagraphs are more efficient, more flexible and more powerful for
    storing graphs, than graph databases are. The representational

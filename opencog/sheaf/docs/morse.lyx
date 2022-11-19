@@ -229,7 +229,7 @@ This can be made more concrete is several ways.
 \begin_inset Formula $p$
 \end_inset
 
- where the number of inferences change are refered to as the 
+ where the number of inferences change are referred to as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -362,7 +362,7 @@ accessible
 \begin_inset Quotes eld
 \end_inset
 
-neccessary inference
+necessary inference
 \begin_inset Quotes erd
 \end_inset
 
@@ -415,7 +415,7 @@ from above
 \begin_inset Quotes erd
 \end_inset
 
- into the inference proccess: it offers a way of thinking about the global
+ into the inference process: it offers a way of thinking about the global
  structure of inference.
 \end_layout
 
@@ -515,11 +515,11 @@ there is a probability of 0.9 that John likes baseball
 \end_inset
 
  which is in turn an oversimplification of possible world-model statements
- beleif system (epistemic logic): 
+ belief system (epistemic logic): 
 \begin_inset Quotes eld
 \end_inset
 
-based on the evidence at hand, you and I beleive that John likes baseball,
+based on the evidence at hand, you and I believe that John likes baseball,
  probably.
 \begin_inset Quotes erd
 \end_inset
