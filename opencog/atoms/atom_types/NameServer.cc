@@ -75,13 +75,16 @@ NameServer::NameServer(void)
  */
 bool NameServer::beginTypeDecls(const char * mod_name)
 {
-	std::lock_guard<std::mutex> l(type_mutex);
-	std::string mname(mod_name);
-	if (_loaded_modules.end() != _loaded_modules.find(mname))
-		return true;
-
 	// Prevent anyone else from performing type decls.
 	_module_mutex.lock();
+
+	std::string mname(mod_name);
+	if (_loaded_modules.end() != _loaded_modules.find(mname))
+	{
+		_module_mutex.unlock();
+		return true;
+	}
+
 	_tmod++;
 	_loaded_modules.insert(mname);
 	return false;
