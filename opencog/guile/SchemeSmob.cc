@@ -243,12 +243,12 @@ bool SchemeSmob::scm_is_protom(SCM s)
 	{
 		logger().error("Guile caught unknown C++ exception");
 		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
-		scm_error_scm(
+		scm_error(
 			scm_from_utf8_symbol("C++ exception"),
-			scm_from_utf8_string(func),
-			scm_from_utf8_string("unknown C++ exception"),
+			func,
+			"unknown C++ exception, args=~A",
 			args,
-			SCM_EOL);
+			SCM_BOOL_F);
 		// Hmm. scm_error never returns.
 	}
 

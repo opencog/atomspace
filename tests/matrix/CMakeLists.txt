@@ -18,3 +18,5 @@ LINK_LIBRARIES(
 )
 
 ADD_CXXTEST(VectorAPIUTest)
+
+ADD_GUILE_TEST(MarginalTest marginal-test.scm)

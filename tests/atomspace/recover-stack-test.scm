@@ -100,7 +100,9 @@
 (define (test-progressive)
 
 	; Number of AtomSpaces to create.
-	(define STACK-DEPTH 1500)
+	; (define STACK-DEPTH 1500) ; circle-ci chokes on this
+	; (define STACK-DEPTH 500)
+	(define STACK-DEPTH 50)
 
 	; Write a bunch of atoms
 	(progressive-store STACK-DEPTH)

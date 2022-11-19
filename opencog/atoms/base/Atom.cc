@@ -110,10 +110,16 @@ TruthValuePtr Atom::incrementCountTV(double cnt)
 	if (_values.end() != pr)
 	{
 		const TruthValuePtr& tvp = TruthValueCast(pr->second);
-		if (COUNT_TRUTH_VALUE == tvp->get_type())
-			cnt += tvp->get_count();
-		mean = tvp->get_mean();
-		conf = tvp->get_confidence();
+		// tvp might be nullptr, if someone set the TV to something
+		// that is not a truth value. This can happen if the truth
+		// predicate is used directly with setValue().
+		if (tvp)
+		{
+			if (COUNT_TRUTH_VALUE == tvp->get_type())
+				cnt += tvp->get_count();
+			mean = tvp->get_mean();
+			conf = tvp->get_confidence();
+		}
 	}
 
 	TruthValuePtr newTV = CountTruthValue::createTV(mean, conf, cnt);
@@ -221,7 +227,7 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 {
 	std::vector<double> new_value;
-	Type vt = FLOAT_VALUE;
+	Type vt = 0;
 
 	KVP_SHARED_LOCK;
 
@@ -230,12 +236,24 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	if (_values.end() != pr)
 	{
 		const ValuePtr& pap = pr->second;
-		vt = pap->get_type();
-		if (nameserver().isA(vt, FLOAT_VALUE))
+		Type et = pap->get_type();
+		if (nameserver().isA(et, FLOAT_VALUE))
 		{
+			vt = et;
 			FloatValuePtr fv(FloatValueCast(pap));
 			new_value = fv->value();
 		}
+	}
+
+	// Backwards compatibility: If there's no prior value *and*
+	// the key is the default TruthValue key, then automatically
+	// create a CountTruthValue.
+	if (0 == vt)
+	{
+		if (2 == idx and *truth_key() == *key)
+			vt = COUNT_TRUTH_VALUE;
+		else
+			vt = FLOAT_VALUE;
 	}
 
 	// Increment the existing value (or create a new one).
@@ -247,7 +265,14 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	// Set the new value.
 	ValuePtr nv;
 	if (nameserver().isA(vt, TRUTH_VALUE))
+	{
+		// Backwards compatibility: If we're incrementing the count
+		// location on a SimpleTruthValue, then automatically promote
+		// it to a CountTruthValue.
+		if (2 == idx and *key == *truth_key())
+			vt = COUNT_TRUTH_VALUE;
 		nv = ValueCast(TruthValue::factory(vt, new_value));
+	}
 	else
 		nv = createFloatValue(vt, new_value);
 

@@ -541,6 +541,7 @@ SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
 	Handle key(verify_handle(skey, "cog-value-type", 2));
 
 	ValuePtr vp = atom->getValue(key);
+	if (nullptr == vp) return SCM_BOOL_F;
 	return from_type(vp);
 }
 
@@ -682,7 +683,17 @@ SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 	Handle key(verify_handle(s2, "cog-value-ref", 2));
 
 	ValuePtr pa(atom->getValue(key));
-	return value_ref(pa, index);
+	if (pa)
+		return value_ref(pa, index);
+
+	SCM ilist = scm_cons(s1, SCM_EOL);
+	ilist = scm_cons(s2, ilist);
+	scm_error(
+		scm_from_utf8_symbol("out-of-range"),
+		"cog-value-ref",
+		"No Value at key ~A on Atom ~A",
+		ilist,
+		SCM_BOOL_F);
 }
 
 SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
@@ -733,13 +744,14 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		}
 	}
 
-	SCM ilist = scm_cons(scm_from_int(index), SCM_EOL);
-	scm_error_scm(
+	SCM ilist = scm_cons(protom_to_scm(pa), SCM_EOL);
+	ilist = scm_cons(scm_from_int(index), ilist);
+	scm_error(
 		scm_from_utf8_symbol("out-of-range"),
-		scm_from_utf8_string("cog-value-ref"),
-		scm_from_utf8_string("Index of ~A is out of range"),
+		"cog-value-ref",
+		"Index ~A is out of range for Value ~A",
 		ilist,
-		ilist);
+		SCM_BOOL_F);
 
 	// Hmm. scm_error never returns.
 	return SCM_EOL;

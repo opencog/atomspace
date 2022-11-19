@@ -317,7 +317,7 @@
   same names; they provide the matrix-wide averages.
 
   The location of where counts are fetched can be specified by passing
-  an optiona paramter, the name of the method providing counts. It
+  an optional parameter, the name of the method providing counts. It
   defaults to 'get-count. Thus, `(add-support-compute LLOBJ)` is
   identical to `(add-support-compute LLOBJ 'get-count)`.
 
@@ -418,7 +418,7 @@
 		; Filter and return only pairs with non-zero count.
 		; Internal use only. NB get-cnt returns exact zero when a
 		; matrix element is missing. Else it might return floating
-		; zero or even negative numbers, and we do wnat to handle those.
+		; zero or even negative numbers, and we do want to handle those.
 		; Matrices with MI in them use -inf.0 to denote absence.
 		(define (valid? VAL) (and (not (eqv? 0 VAL)) (< -inf.0 VAL)))
 		(define (not-absent? PR) (valid? (get-cnt PR)))

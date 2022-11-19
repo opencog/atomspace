@@ -350,7 +350,7 @@
   frequencies (probabilities) and marginal probabilities. The results
   can be cached so that the `add-pair-freq-api` can access them.
 
-  Given a count N(l,r) of observed occurances for a matrix pair (l,r)
+  Given a count N(l,r) of observed occurrences for a matrix pair (l,r)
   == (left,right) == (row,column), the frequency aka 'probability' is
   defined as
 
@@ -398,7 +398,7 @@
   'cache-right-freq ROW   -- As above.
 
   'cache-all-left-freqs  -- Compute and cache all left marginals.
-  'cache-all-right-freqs -- Compute and cahce all right marginals.
+  'cache-all-right-freqs -- Compute and cache all right marginals.
   'cache-all-pair-freqs  -- Compute and cache all pair frequencies.
   'cache-all             -- Do all three of the above.
 "

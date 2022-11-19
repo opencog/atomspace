@@ -82,6 +82,7 @@ cog-set-atomspace!
 cog-set-server-mode!
 cog-set-tv!
 cog-set-value!
+cog-set-value-ref!
 cog-set-values!
 cog-subtype?
 cog-tv
