@@ -37,6 +37,35 @@ void TypeIndex::resize(void)
 	_idx.resize(_num_types + 1);
 }
 
+void TypeIndex::clear(void)
+{
+	std::vector<AtomSet> dead;
+	{
+		TYPE_INDEX_UNIQUE_LOCK;
+		dead.resize(_num_types + 1);
+		dead.swap(_idx);
+
+		// Clear the AtomSpace before releasing the lock.
+		for (auto& s : dead)
+			for (auto& h : s)
+				h->_atom_space = nullptr;
+	}
+
+	// Do the final cleanup after releasing the lock. This enables
+	// the very unlikely situation of having other threads start
+	// using the AtomSpace again, while we do final cleanup. BTW,
+	// the matching `install()` for the `remove()` below happened
+	// in the `AtomSpace::add()` method. We do it here cause its
+	// easier. Anyway, we can't do the `remove()` under the lock,
+	// that would result in lock inversion.
+	for (auto& s : dead)
+	{
+		for (auto& h : s)
+			h->remove();
+		s.clear();
+	}
+}
+
 // ================================================================
 
 void TypeIndex::get_handles_by_type(HandleSeq& hseq,

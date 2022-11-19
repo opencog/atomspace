@@ -147,21 +147,7 @@ class TypeIndex
 			return result;
 		}
 
-		void clear(void)
-		{
-			TYPE_INDEX_UNIQUE_LOCK;
-			for (auto& s : _idx)
-			{
-				for (auto& h : s)
-				{
-					h->_atom_space = nullptr;
-
-					// We installed the incoming set; we remove it too.
-					h->remove();
-				}
-				s.clear();
-			}
-		}
+		void clear(void);
 
 		void get_handles_by_type(HandleSeq&, Type, bool subclass) const;
 		void get_handles_by_type(HandleSet&, Type, bool subclass) const;
