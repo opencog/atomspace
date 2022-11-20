@@ -686,7 +686,7 @@ static TruthValuePtr reduce_formula(const Handle& pred,
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the PredicateFormulasLink.
+///     DefinedPredicateNode and the PredicateFormulaLink.
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
