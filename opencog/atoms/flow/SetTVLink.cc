@@ -47,24 +47,16 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// When evaluated, this will evaluate the second argument to obtain
-/// a TruthValue, and then set that TruthValue on the indicated Atom
-/// (first argument). The computed TV is returned.
-TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
+/// Direct evaluation. The SetTV has only two args: the Atom to set,
+/// and the Atom to get the TV from. If the second arg is evaluatable,
+/// then evaluate it to get a TV, and slap that TV onto the first arg.
+/// The TV thus obtained is returned.
+TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
-
-	// Obtain the value that we will be setting.
+	// Step one: Evaluate the second argument. We expect it to
+	// return a TruthValue of some kind.
 	TruthValuePtr tv;
-
-	// The expression to evaluate
-	Handle evex;
-	if (2 == ary)
-		evex = _outgoing[1];
-	else if (3 == ary)
-		evex = createEvaluationLink(_outgoing[1], _outgoing[2]);
-
-	// Now, evaluate it.
+	const Handle& evex = _outgoing[1];
 	if (evex->is_evaluatable())
 		tv = evex->evaluate(as, silent);
 	else if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
@@ -100,13 +92,22 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 		return tv;
 	}
 
-	// Hmm. shouldn't this be SilentException?
 	if (silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
-		"No atom %s",
+		"Cannot SetTV because cannot find atom %s",
 		_outgoing[0]->to_string().c_str());
+}
+
+TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
+{
+	size_t ary = _outgoing.size();
+
+	if (2 == ary)
+		return eval_direct(as, silent);
+
+	throw InvalidParamException(TRACE_INFO, "under construction");
 }
 
 DEFINE_LINK_FACTORY(SetTVLink, SET_TV_LINK)

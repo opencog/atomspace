@@ -37,6 +37,7 @@ namespace opencog
 ///
 class SetTVLink : public SetValueLink
 {
+	TruthValuePtr eval_direct(AtomSpace*, bool);
 public:
 	SetTVLink(const HandleSeq&&, Type=SET_TV_LINK);
 
