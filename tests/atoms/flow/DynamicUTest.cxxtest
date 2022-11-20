@@ -37,7 +37,7 @@ public:
 
 	void test_predicate_formula();
 	void test_formula_define();
-	void test_dynamic_formula();
+	void test_dynamic_predicate();
 	void test_defined_dynamic();
 	void test_formula_stream();
 };
@@ -137,7 +137,7 @@ void DynamicUTest::test_formula_define()
 
 // ====================================================================
 // Basic dynamic truth value
-void DynamicUTest::test_dynamic_formula()
+void DynamicUTest::test_dynamic_predicate()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
