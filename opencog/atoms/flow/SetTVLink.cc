@@ -85,7 +85,7 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 		}
 		else
 			throw RuntimeException(TRACE_INFO,
-				"Expecting a FlotValue or TruthValue, got %s",
+				"Expecting a FloatValue or TruthValue, got %s",
 				vp->to_string().c_str());
 	}
 	else
