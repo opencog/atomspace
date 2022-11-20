@@ -29,7 +29,7 @@
 ; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
 (define tv-stream
 	(FormulaTruthValue
-		(PredicateFormula
+		(FormulaPredicate
 			(Minus
 				(Number 1)
 				(Times
@@ -67,7 +67,7 @@
 ; on two input Atoms.
 (DefineLink
    (DefinedPredicate "has a reddish color")
-   (PredicateFormula
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times
@@ -143,7 +143,7 @@
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values. Can we do the same, without using scheme?
 ; Yes, we can. Just use the DynamicPredicateLink.  This is quite similar
-; to the PredicateFormulaLink, demoed in `formulas.scm`, but in this
+; to the FormulaPredicateLink, demoed in `formulas.scm`, but in this
 ; case, instead of producing a single, static TV, this wraps the entire
 ; formula into a FormulaTruthValue. Thus, it is enough to set the TV
 ; only once; after that, the TV updates will be automatic.
@@ -180,7 +180,7 @@
 
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
-; or PredicateFormula can be used. They all provide the same utility:
+; or FormulaPredicate can be used. They all provide the same utility:
 ; they provide a TruthValue.
 (cog-execute!
 	(SetTV

@@ -30,7 +30,7 @@
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
-#include <opencog/atoms/flow/PredicateFormulaLink.h>
+#include <opencog/atoms/flow/FormulaPredicateLink.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
@@ -686,7 +686,7 @@ static TruthValuePtr reduce_formula(const Handle& pred,
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the PredicateFormulaLink.
+///     DefinedPredicateNode and the FormulaPredicateLink.
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
@@ -717,8 +717,8 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 			dtype = defn->get_type();
 		}
 
-		if (PREDICATE_FORMULA_LINK == dtype)
-			return PredicateFormulaLinkCast(defn)->apply(as, cargs, silent);
+		if (FORMULA_PREDICATE_LINK == dtype)
+			return FormulaPredicateLinkCast(defn)->apply(as, cargs, silent);
 
 		if (DYNAMIC_PREDICATE_LINK == dtype)
 			return reduce_formula(defn, cargs);
@@ -738,8 +738,8 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 
 	// Like a GPN, but the entire function is declared in the
 	// AtomSpace.
-	if (PREDICATE_FORMULA_LINK == pntype)
-		return PredicateFormulaLinkCast(pn)->apply(as, cargs, silent);
+	if (FORMULA_PREDICATE_LINK == pntype)
+		return FormulaPredicateLinkCast(pn)->apply(as, cargs, silent);
 
 	if (DYNAMIC_PREDICATE_LINK == pntype)
 		return reduce_formula(pn, cargs);

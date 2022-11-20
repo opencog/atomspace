@@ -905,7 +905,7 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // Its a ScopeLink, because in general it will contain variables that
 // are scoped, bound. The Lambda provides the mechanism to access/shield
 // the variables.
-PREDICATE_FORMULA_LINK <- SCOPE_LINK,EVALUATABLE_LINK
+FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
 // Return a FormulaTruthValue when evaluated.
 // Like the above, but the TV is not a constant, but the formula itself.

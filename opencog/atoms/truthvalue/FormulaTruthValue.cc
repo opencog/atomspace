@@ -81,7 +81,7 @@ void FormulaTruthValue::update(void) const
 	// If there is just one formula, then we expect it to produce
 	// two numbers, the strength and the confidence.
 	const Handle& fo = _formula[0];
-	if (fo->get_type() == PREDICATE_FORMULA_LINK)
+	if (fo->get_type() == FORMULA_PREDICATE_LINK)
 	{
 		TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, fo);
 		_value = tvp->value();

@@ -51,7 +51,7 @@ actual answer, if you ask it).
 
 More complex examples include the arithmetic links: PlusLink and
 TimesLink, which can add an multiply numbers; the ValueOfLink, which can
-obtain numeric values, the PredicateFormulaLink, which can evaluate
+obtain numeric values, the FormulaPredicateLink, which can evaluate
 predicateds on inputs, and the GroundedPredicateNode, which can convert
 external stimuli into Atomese predicates.
 

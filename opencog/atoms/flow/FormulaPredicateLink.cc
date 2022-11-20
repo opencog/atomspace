@@ -1,5 +1,5 @@
 /*
- * PredicateFormulaLink.cc
+ * FormulaPredicateLink.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  *
@@ -27,7 +27,7 @@
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "PredicateFormulaLink.h"
+#include "FormulaPredicateLink.h"
 
 using namespace opencog;
 
@@ -42,19 +42,19 @@ using namespace opencog;
 /// variable declarations, and/or an explicit Lambda in the body, for
 /// some reason that I cannot imagine.  The code below will then fail.
 /// For now, ignore this possibility.
-void PredicateFormulaLink::init(void)
+void FormulaPredicateLink::init(void)
 {
 	_variables.find_variables(_outgoing);
 }
 
-PredicateFormulaLink::PredicateFormulaLink(const HandleSeq&& oset, Type t)
+FormulaPredicateLink::FormulaPredicateLink(const HandleSeq&& oset, Type t)
 	: ScopeLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, PREDICATE_FORMULA_LINK))
+	if (not nameserver().isA(t, FORMULA_PREDICATE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an PredicateFormulaLink, got %s", tname.c_str());
+			"Expecting an FormulaPredicateLink, got %s", tname.c_str());
 	}
 	if (2 != _outgoing.size() and 3 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
@@ -68,7 +68,7 @@ PredicateFormulaLink::PredicateFormulaLink(const HandleSeq&& oset, Type t)
 /// Evaluate a formula defined by this atom.
 /// This returns a SimpleTruthValue, if there are two arguments,
 /// and a CountTruthVaue, if there are three.
-TruthValuePtr PredicateFormulaLink::apply(AtomSpace* as,
+TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
                                           const HandleSeq& cargs,
                                           bool silent)
 {
@@ -136,7 +136,7 @@ TruthValuePtr PredicateFormulaLink::apply(AtomSpace* as,
 // ---------------------------------------------------------------
 
 /// A shortened, argument-free version of apply()
-TruthValuePtr PredicateFormulaLink::evaluate(AtomSpace* as, bool silent)
+TruthValuePtr FormulaPredicateLink::evaluate(AtomSpace* as, bool silent)
 {
 	std::vector<double> nums;
 	for (const Handle& h: getOutgoingSet())
@@ -176,6 +176,6 @@ TruthValuePtr PredicateFormulaLink::evaluate(AtomSpace* as, bool silent)
 
 // ---------------------------------------------------------------
 
-DEFINE_LINK_FACTORY(PredicateFormulaLink, PREDICATE_FORMULA_LINK)
+DEFINE_LINK_FACTORY(FormulaPredicateLink, FORMULA_PREDICATE_LINK)
 
 /* ===================== END OF FILE ===================== */

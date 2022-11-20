@@ -13,10 +13,10 @@
 (define prod
 	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
 
-(define stv-const (PredicateFormula (Number 0.7) (Number 0.314)))
+(define stv-const (FormulaPredicate (Number 0.7) (Number 0.314)))
 
 (define formula-stv
-	(PredicateFormula
+	(FormulaPredicate
 		(Minus
 			(Number 1)
 			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
@@ -26,7 +26,7 @@
 ; EvaluationLink.
 (define my-ev-link
 	(Evaluation
-		(PredicateFormula (Number 0.75) (Number 0.628))
+		(FormulaPredicate (Number 0.75) (Number 0.628))
 		(List
 			(Concept "A")
 			(Concept "B"))))
@@ -35,7 +35,7 @@
 (define eval-formula
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(PredicateFormula
+		(FormulaPredicate
 			(Minus
 				(Number 1)
 				(Times
@@ -53,7 +53,7 @@
 (define eval-lambda
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(PredicateFormula
+		(FormulaPredicate
 			(Lambda
 				; Lambda without a decl, intentionally so.
 				; (NopeVariableList (Variable "$X") (Variable "$Y"))
@@ -80,7 +80,7 @@
 			(VariableList (Variable "$VA") (Variable "$VB"))
 			(Evaluation
 				; Compute TV = (1-sA*sB, cA*cB)
-				(PredicateFormula
+				(FormulaPredicate
 					(Minus
 						(Number 1)
 						(Times
@@ -97,7 +97,7 @@
 ; One can also use DefinedPredicates, to give the formula a name.
 (DefineLink
 	(DefinedPredicate "has a reddish color")
-	(PredicateFormula
+	(FormulaPredicate
 		(Minus
 			(Number 1)
 			(Times
@@ -173,14 +173,14 @@
 ; Testing naked predicate formulas (issue #2218).
 
 (define naked-pred1
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Number 1)
   )
 )
 
 (define naked-pred2
-  (PredicateFormula
+  (FormulaPredicate
     (Times
       (Number 0.5)
       (Number 1)
@@ -190,7 +190,7 @@
 )
 
 (define naked-pred3
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Times
       (Number 0.5)
@@ -203,7 +203,7 @@
 (define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
 
 (define naked-pred4
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Times
       (Number 1)
@@ -219,7 +219,7 @@
 )
 
 (define naked-pred5
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (ExecutionOutput
       (GroundedSchema "scm:times")
@@ -229,14 +229,14 @@
 )
 
 (define naked-pred-crash1
-  (PredicateFormula
+  (FormulaPredicate
     (Concept "blabla")
     (Number 1)
   )
 )
 
 (define naked-pred-crash2
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (ExecutionOutput
       (Lambda (Concept "blabla"))
@@ -250,7 +250,7 @@
 
 (Define
   (DefinedPredicate "defined-pred1")
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Number 1)
   )
@@ -258,7 +258,7 @@
 
 (Define
   (DefinedPredicate "defined-pred2")
-  (PredicateFormula
+  (FormulaPredicate
     (Times
       (Number 1)
       (Number 0.5)
@@ -269,7 +269,7 @@
 
 (Define
   (DefinedPredicate "defined-pred3")
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Times
       (Number 1)
@@ -280,7 +280,7 @@
 
 (Define
   (DefinedPredicate "defined-pred4")
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Times
       (Number 1)
@@ -293,7 +293,7 @@
 
 (Define
   (DefinedPredicate "defined-pred-crash1")
-  (PredicateFormula
+  (FormulaPredicate
     (ExecutionOutput
       (Lambda (Concept "ahaha"))
       (List)
@@ -309,7 +309,7 @@
 
 (Define
   (DefinedPredicate "defined-pred-crash2")
-  (PredicateFormula
+  (FormulaPredicate
     (Number 1)
     (Concept "saboteur")
   )

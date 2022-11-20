@@ -1,6 +1,6 @@
 ;
-; predicate-formula.scm
-; Make sure that PredicateFormulaLink works in search patterns.
+; formula-predicate.scm
+; Make sure that FormulaPredicateLink works in search patterns.
 ; This tests the second bug reported in opencog/atomspace#2650
 ;
 (use-modules (opencog) (opencog exec))
@@ -42,7 +42,7 @@
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(Evaluation
-			(PredicateFormula
+			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
 						(StrengthOf (Variable "$X"))
@@ -64,7 +64,7 @@
 		(Equal (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
 		(Evaluation
-			(PredicateFormula
+			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
 						(StrengthOf (Variable "$X"))
@@ -86,7 +86,7 @@
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
 		(Evaluation
-			(PredicateFormula
+			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
 						(StrengthOf (Variable "$X"))
@@ -127,7 +127,7 @@
 ; The definition needed for the above.
 (DefineLink
 	(DefinedPredicate "pred1")
-	(PredicateFormula
+	(FormulaPredicate
 		(Minus (Number 1)
 			(Times
 				(StrengthOf (Variable "$X"))
@@ -197,7 +197,7 @@
 		(GreaterThan
 			(StrengthOf
 				(Evaluation
-					(PredicateFormula
+					(FormulaPredicate
 						(Minus (Number 1)
 							(Times
 								(StrengthOf (Variable "$X"))

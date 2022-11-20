@@ -1,5 +1,5 @@
 /*
- * tests/query/PredicateFormulaUTest.cxxtest
+ * tests/query/FormulaPredicateUTest.cxxtest
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -30,14 +30,14 @@ using namespace opencog;
 #define al as->add_link
 #define an as->add_node
 
-class PredicateFormulaUTest: public CxxTest::TestSuite
+class FormulaPredicateUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
-	PredicateFormulaUTest(void)
+	FormulaPredicateUTest(void)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -49,7 +49,7 @@ public:
 		eval->eval("(use-modules (opencog exec))");
 	}
 
-	~PredicateFormulaUTest()
+	~FormulaPredicateUTest()
 	{
 		delete eval;
 		// Erase the log file if no assertions failed.
@@ -65,23 +65,23 @@ public:
 	void test_reject(void);
 };
 
-void PredicateFormulaUTest::tearDown(void)
+void FormulaPredicateUTest::tearDown(void)
 {
 	as->clear();
 }
 
-void PredicateFormulaUTest::setUp(void)
+void FormulaPredicateUTest::setUp(void)
 {
 	as->clear();
 	// eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 /*
- * A PredicateFormulaLink embeded in a search query should act as a
+ * A FormulaPredicateLink embeded in a search query should act as a
  * a predicate, acepting or rejecting whatever the formula is applied
  * to.
  */
-void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
+void FormulaPredicateUTest::do_predicate_test(HandleSeq ans)
 {
 	// We expect all tests to return this.
 	printf("Expecting: %s\n", oc_to_string(ans).c_str());
@@ -159,11 +159,11 @@ void PredicateFormulaUTest::do_predicate_test(HandleSeq ans)
 	TSM_ASSERT_EQUALS("Expect list", hget, ans);
 }
 
-void PredicateFormulaUTest::test_accept(void)
+void FormulaPredicateUTest::test_accept(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/predicate-formula.scm\")");
+	eval->eval("(load-from-path \"tests/query/formula-predicate.scm\")");
 
 	// Set TV's from which computations will happen.
 	eval->eval_h("(Concept \"node1\" (stv 0.5 0.6))");
@@ -198,11 +198,11 @@ void PredicateFormulaUTest::test_accept(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void PredicateFormulaUTest::test_reject(void)
+void FormulaPredicateUTest::test_reject(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/predicate-formula.scm\")");
+	eval->eval("(load-from-path \"tests/query/formula-predicate.scm\")");
 
 	// Set TV's from which computations will happen.
 	eval->eval_h("(Concept \"node1\" (stv 0.9 0.3))");

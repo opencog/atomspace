@@ -25,7 +25,7 @@
 
 (DefineLink
    (DefinedPredicate "has a reddish color")
-   (PredicateFormula
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times

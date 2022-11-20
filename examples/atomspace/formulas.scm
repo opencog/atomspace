@@ -35,11 +35,11 @@
 
 ; Create a SimpleTruthValue with a non-trivial formula:
 ; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
-; and cA, cB are confidence values. The PredicateFormulaLink assembles
+; and cA, cB are confidence values. The FormulaPredicateLink assembles
 ; two floating-point values, and creates a SimpleTruthValue out of them.
 ;
 (cog-evaluate!
-	(PredicateFormula
+	(FormulaPredicate
 		(Minus
 			(Number 1)
 			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
@@ -47,7 +47,7 @@
 
 ; The values do not need to be formulas; they can be hard-coded numbers.
 (cog-evaluate!
-	(PredicateFormula (Number 0.7) (Number 0.314)))
+	(FormulaPredicate (Number 0.7) (Number 0.314)))
 
 ; The below computes a truth value, and attaches it to the
 ; EvaluationLink. Let's demo this in three parts: first define it,
@@ -55,7 +55,7 @@
 ;
 (define my-ev-link
 	(Evaluation
-		(PredicateFormula (Number 0.7) (Number 0.314))
+		(FormulaPredicate (Number 0.7) (Number 0.314))
 		(List
 			(Concept "A")
 			(Concept "B"))))
@@ -74,7 +74,7 @@
 (cog-evaluate!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(PredicateFormula
+		(FormulaPredicate
 			(Minus
 				(Number 1)
 				(Times
@@ -92,7 +92,7 @@
 (cog-evaluate!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(PredicateFormula
+		(FormulaPredicate
 			(Lambda (Minus
 				(Number 1)
 				(Times
@@ -106,11 +106,11 @@
 			(Concept "B"))))
 
 
-; The PredicateFormulaLink behaves just like any other algebraic
+; The FormulaPredicateLink behaves just like any other algebraic
 ; expression with VariableNodes in it. When executed, it might
 ; reduce a bit, but that is all.
 (cog-execute!
-	(PredicateFormula
+	(FormulaPredicate
 		(Plus (Number 41)
 			(Minus
 				(Number 1)
@@ -130,7 +130,7 @@
 			(VariableList (Variable "$VA") (Variable "$VB"))
 			(Evaluation
 				; Compute TV = (1-sA*sB, cA*cB)
-				(PredicateFormula
+				(FormulaPredicate
 					(Minus
 						(Number 1)
 						(Times
@@ -165,7 +165,7 @@
 ; One can also use DefinedPredicates, to give the formula a name.
 (DefineLink
 	(DefinedPredicate "has a reddish color")
-	(PredicateFormula
+	(FormulaPredicate
 		(Minus
 			(Number 1)
 			(Times

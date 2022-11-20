@@ -11,7 +11,7 @@
 
 (define ftv
 	(FormulaTruthValue
-		(PredicateFormula
+		(FormulaPredicate
 			(Minus
 				(Number 1)
 				(Times (StrengthOf A) (StrengthOf B)))
@@ -21,7 +21,7 @@
 ; For DynamicUTest::test_formula_define()
 (DefineLink
    (DefinedPredicate "has a reddish color")
-   (PredicateFormula
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times

@@ -488,10 +488,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return HandleCast(expr->execute(_as, ist._silent));
 	}
 
-	// Do not reduce PredicateFormulaLink. That is because it contains
+	// Do not reduce FormulaPredicateLink. That is because it contains
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.
-	if (PREDICATE_FORMULA_LINK == t)
+	if (FORMULA_PREDICATE_LINK == t)
 		return expr;
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,

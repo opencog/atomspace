@@ -49,7 +49,7 @@
 ; The DefinedFormulaLink can be used to create SimpleTruthValues out
 ; of a pair of numbers. For example:
 (cog-execute! (SetTV (Concept "bar")
-	(PredicateFormula (Number 0.2718) (Number 0.314))))
+	(FormulaPredicate (Number 0.2718) (Number 0.314))))
 
 ; Explicitly look at it.
 (cog-tv (Concept "bar"))
@@ -67,7 +67,7 @@
 ; example. Consider a named formula, with variables.
 (DefineLink
    (DefinedPredicate "has a reddish color")
-   (PredicateFormula
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times
