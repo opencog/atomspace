@@ -1,7 +1,7 @@
 
-ProtoAtoms [now renamed Value]
-==========
-ProtoAtoms aka Values provide a common base class for both Atoms and Values.
+Values
+======
+The class Value provides a common base class for both Atoms and Values.
 The aim of having a common base class for both kinds of objects is to
 simplify general handling in various different subsystems.
 
@@ -60,10 +60,12 @@ the kind of richness and flexibility suitable for complex problems.
 
 Streams
 -------
-The API for time-varying value streams is still experimental. What is
-currently implemented in StreamValue and RandomStream is an experiment.
-Known deficiencies:
-* We need a way of streaming something other than vectors of floats.
+The API for time-varying value streams is still experimental, but seems
+to be working OK. Besides plan-old `StreamValue` and `RandomStream`,
+assorted more complex Values, such as `FormulaStream`, `LinkStream`
+and `FormulaTruthValue` seem to work well. They're even used for
+computing the dot-products of two vectors, on the fly. So the
+"experimental" tag might be going away soon!?
 
 Names
 -----
@@ -101,3 +103,32 @@ TODO
 * Perhaps add a TypeValue, which would be a vector of Types.  If could
   be useful as a kind-of table signature (for the csv table handling
   code).
+
+History and Bibliography
+------------------------
+The first attempt at this was in the "WIRES" system, from December 2008.
+It was in the `opencog/scm/wires` directory, which is being removed in
+the same git commit as the one adding this remark.  That work was
+originally conceived as a constraint-type wiring system, inspired by
+SICP sections 3.3 (constraints) and 3.5 (streams).
+
+* SICP is "Structure and Interpretation of Computer Programs",
+  Abelson & Sussman. MIT Press
+
+Additional inspiration was drawn from:
+
+* *The Art of the Propagator*
+  Alexey Radul; Gerald Jay Sussman
+  local: MIT-CSAIL-TR-2009-002
+  http://dspace.mit.edu/handle/1721.1/44215
+
+Over time, these ideas evolved into two distinct subsystems: the query
+system, and dynamically changing Values. The query system, AKA the pattern
+matcher, solved the issue of finding complex "wiring diagrams" in the
+AtomSpace, and determining possible groundings, and queuing them up
+into a QueueValue result.
+
+Separately, the idea of TV's that "flow" through the hypergraphs morphed
+into the concept of dynamically-changing, real-time Values. The
+implementation for this was spurred by Alexey Potopov's demand to run
+some deep-learning neural-net image-processing data through the AtomSpace.
