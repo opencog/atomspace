@@ -718,9 +718,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		}
 
 		if (FORMULA_PREDICATE_LINK == dtype)
-			return FormulaPredicateLinkCast(defn)->apply(as, cargs, silent);
-
-		if (DYNAMIC_PREDICATE_LINK == dtype)
 			return reduce_formula(defn, cargs);
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -739,9 +736,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// Like a GPN, but the entire function is declared in the
 	// AtomSpace.
 	if (FORMULA_PREDICATE_LINK == pntype)
-		return FormulaPredicateLinkCast(pn)->apply(as, cargs, silent);
-
-	if (DYNAMIC_PREDICATE_LINK == pntype)
 		return reduce_formula(pn, cargs);
 
 	// Treat LambdaLink as if it were a PutLink -- perform
@@ -889,7 +883,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (DYNAMIC_PREDICATE_LINK == t)
+	else if (FORMULA_PREDICATE_LINK == t)
 	{
 		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
 	}

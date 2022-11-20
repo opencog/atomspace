@@ -907,10 +907,6 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // the variables.
 FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
-// Return a FormulaTruthValue when evaluated.
-// Like the above, but the TV is not a constant, but the formula itself.
-DYNAMIC_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
-
 // --------------------
 // Other kinds of functions.
 
