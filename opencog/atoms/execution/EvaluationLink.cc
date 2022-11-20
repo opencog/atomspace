@@ -647,41 +647,6 @@ static bool crispy_eval_scratch(AtomSpace* as,
 	return false;
 }
 
-
-static TruthValuePtr reduce_formula(const Handle& pred,
-                                    const HandleSeq& args)
-{
-	HandleSeq reduced;
-	for (Handle flh : pred->getOutgoingSet())
-	{
-		if (LAMBDA_LINK == flh->get_type())
-			flh = LambdaLinkCast(flh)->beta_reduce(args);
-
-		if (nameserver().isA(flh->get_type(), FUNCTION_LINK))
-		{
-			// The FunctionLink presumably has free variables in it.
-			// Reduce them with the provided arguments.
-			FunctionLinkPtr flp(FunctionLinkCast(flh));
-			const FreeVariables& fvars = flp->get_vars();
-			if (not fvars.empty())
-				flh = fvars.substitute_nocheck(flh, args);
-		}
-		else
-			// We expected something executable...
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a Lambda or FunctionLink");
-
-		// Wherever the args live, the reduced formula must
-		// live there also: it's lifettime must be identical
-		// to the args.
-		AtomSpace* as = args[0]->getAtomSpace();
-		flh = as->add_atom(flh);
-		reduced.push_back(flh);
-	}
-
-	return createFormulaTruthValue(std::move(reduced));
-}
-
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
@@ -718,7 +683,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		}
 
 		if (FORMULA_PREDICATE_LINK == dtype)
-			return reduce_formula(defn, cargs);
+			return FormulaPredicateLinkCast(defn)->apply(as, cargs, silent);
 
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
@@ -736,7 +701,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// Like a GPN, but the entire function is declared in the
 	// AtomSpace.
 	if (FORMULA_PREDICATE_LINK == pntype)
-		return reduce_formula(pn, cargs);
+		return FormulaPredicateLinkCast(pn)->apply(as, cargs, silent);
 
 	// Treat LambdaLink as if it were a PutLink -- perform
 	// the beta-reduction, and evaluate the result.
