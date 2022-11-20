@@ -8,7 +8,7 @@
 ;
 ; The core implementation is in two parts: the FormulaTruthValue,
 ; which implements a dynamically-variable TruthValue, and the
-; DynamicFormulaLink, which installs this TruthValue into an Atom.
+; DynamicPredicateLink, which installs this TruthValue into an Atom.
 ;
 ; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
 ; time that it is accessed, the current value -- that is, the current
@@ -142,7 +142,7 @@
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values. Can we do the same, without using scheme?
-; Yes, we can. Just use the DynamicFormulaLink.  This is quite similar
+; Yes, we can. Just use the DynamicPredicateLink.  This is quite similar
 ; to the PredicateFormulaLink, demoed in `formulas.scm`, but in this
 ; case, instead of producing a single, static TV, this wraps the entire
 ; formula into a FormulaTruthValue. Thus, it is enough to set the TV
@@ -152,7 +152,7 @@
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
-		(DynamicFormula
+		(DynamicPredicate
 			(Minus
 				(Number 1)
 				(Times
@@ -168,7 +168,7 @@
 ; before, we get a dynamic example:
 (DefineLink
    (DefinedPredicate "dynamic example")
-   (DynamicFormula
+   (DynamicPredicate
       (Minus
          (Number 1)
          (Times
@@ -234,7 +234,7 @@
 (cog-execute! (StreamValueOf bar bkey))
 
 ; TODO: At this time, there is no DynamicSchema that would be the
-; generalized analog of DynamicFormula demonstrated above.  This
+; generalized analog of DynamicPredicate demonstrated above.  This
 ; should be created...
 
 ; ------- THE END -------

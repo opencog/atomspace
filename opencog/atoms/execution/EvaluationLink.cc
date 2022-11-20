@@ -686,7 +686,7 @@ static TruthValuePtr reduce_formula(const Handle& pred,
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the PredicateFormulasLink.
+///     DefinedPredicateNode and the PredicateFormulaLink.
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
@@ -720,7 +720,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		if (PREDICATE_FORMULA_LINK == dtype)
 			return PredicateFormulaLinkCast(defn)->apply(as, cargs, silent);
 
-		if (DYNAMIC_FORMULA_LINK == dtype)
+		if (DYNAMIC_PREDICATE_LINK == dtype)
 			return reduce_formula(defn, cargs);
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -741,7 +741,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	if (PREDICATE_FORMULA_LINK == pntype)
 		return PredicateFormulaLinkCast(pn)->apply(as, cargs, silent);
 
-	if (DYNAMIC_FORMULA_LINK == pntype)
+	if (DYNAMIC_PREDICATE_LINK == pntype)
 		return reduce_formula(pn, cargs);
 
 	// Treat LambdaLink as if it were a PutLink -- perform
@@ -889,7 +889,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (DYNAMIC_FORMULA_LINK == t)
+	else if (DYNAMIC_PREDICATE_LINK == t)
 	{
 		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
 	}

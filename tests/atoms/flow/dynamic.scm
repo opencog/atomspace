@@ -46,7 +46,7 @@
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
-		(DynamicFormula
+		(DynamicPredicate
 			(Minus
 				(Number 1)
 				(Times
@@ -58,7 +58,7 @@
 
 (DefineLink
    (DefinedPredicate "dynamic example")
-   (DynamicFormula
+   (DynamicPredicate
       (Minus
          (Number 1)
          (Times

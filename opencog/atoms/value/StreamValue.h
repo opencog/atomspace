@@ -34,10 +34,14 @@ namespace opencog
  */
 
 /**
- * StreamValues provide a continuously-updating, dynamic stream of
+ * StreamValues provide a base class for any kind of values
+ * that can provide continuously-updating, dynamic stream of
  * floating-point data. They are meant to hold any kind of
  * rapidly-changing data encoded as floats, including video and
  * audio feeds, or other kinds of high-bandwidth data.
+ *
+ * This class itself doesn't "do anything" other than to provde
+ * a base class.
  *
  * See also LinkStreamValue when the data is encoded as Atoms or
  * as other (non-floating-point) Values.
