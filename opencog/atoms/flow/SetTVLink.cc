@@ -53,61 +53,57 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 /// The TV thus obtained is returned.
 TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 {
-	// Step one: Evaluate the second argument. We expect it to
-	// return a TruthValue of some kind.
-	TruthValuePtr tv;
+	// Try to evaluate the second argument.
 	const Handle& evex = _outgoing[1];
 	if (evex->is_evaluatable())
-		tv = evex->evaluate(as, silent);
-	else if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
-		tv = EvaluationLink::do_evaluate(as, evex, silent);
-	else if (evex->is_executable())
+		return evex->evaluate(as, silent);
+
+	if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
+		return EvaluationLink::do_evaluate(as, evex, silent);
+
+	// Maybe it's executable, and returns something that can
+	// be converted to a TV.
+	if (evex->is_executable())
 	{
 		ValuePtr vp = evex->execute(as, silent);
 		Type vpt = vp->get_type();
 		if (nameserver().isA(vpt, TRUTH_VALUE))
-			tv = TruthValueCast(vp);
-		else
+			return TruthValueCast(vp);
+
 		if (nameserver().isA(vpt, FLOAT_VALUE))
 		{
 			if (2 == FloatValueCast(vp)->value().size())
-				tv = createSimpleTruthValue(vp);
-			else
-				tv = createCountTruthValue(vp);
+				return = createSimpleTruthValue(vp);
+
+			return createCountTruthValue(vp);
 		}
-		else
-			throw RuntimeException(TRACE_INFO,
-				"Expecting a FloatValue or TruthValue, got %s",
-				vp->to_string().c_str());
-	}
-	else
-		tv = evex->getTruthValue();
 
-	// We cannot set TVs unless we are working with the unique
-	// version of the atom that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	if (ah)
-	{
-		ah->setTruthValue(tv);
-		return tv;
+		throw RuntimeException(TRACE_INFO,
+			"Expecting a FloatValue or TruthValue, got %s",
+			vp->to_string().c_str());
 	}
 
-	if (silent)
-		throw SilentException();
+	// None of the above. It is a constant.
+	return evex->getTruthValue();
+}
 
-	throw InvalidParamException(TRACE_INFO,
-		"Cannot SetTV because cannot find atom %s",
-		_outgoing[0]->to_string().c_str());
+/// Multiple arguments. Wrap them all up into a FormulaTruthValue
+/// and return that.
+TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
+{
+	return SimpleTruthValue(1,0);
 }
 
 TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
+	TruthValuePtr tv;
+	if (2 == _outgoing.size())
+		tv = eval_direct(as, silent);
+	else
+		tv = make_formula(as, silent);
 
-	if (2 == ary)
-		return eval_direct(as, silent);
-
-	throw InvalidParamException(TRACE_INFO, "under construction");
+	as->set_truthvalue(_outgoing[0], tv);
+	return tv;
 }
 
 DEFINE_LINK_FACTORY(SetTVLink, SET_TV_LINK)
