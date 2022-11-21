@@ -17,7 +17,7 @@
 ; occurs every time the numeric value is accessed (i.e. when the
 ; strength and confidence of the TV are accessed).
 ;
-; The FloatStream is a generalization of the FutureTruthValue, in
+; The FormulaStream is a generalization of the FutureTruthValue, in
 ; that it allows for the computation of any FloatValue. That is, the
 ; SimpleTV's are just vectors of length two - the strength and
 ; confidence, whereas the FloatValue is a vector of arbitrary length.
