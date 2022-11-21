@@ -6,29 +6,29 @@
 ; Examples of such formulas are provided below, together with the
 ; code for wiring them into Atoms.
 ;
-; The core implementation is in two parts: the FormulaTruthValue,
+; The core implementation is in two parts: the FutureTruthValue,
 ; which implements a dynamically-variable TruthValue, and the
-; DynamicPredicateLink, which installs this TruthValue into an Atom.
+; PromisePredicateLink, which installs this TruthValue into an Atom.
 ;
-; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
+; The FutureTruthValue is a kind of SimpleTruthValue, such that, every
 ; time that it is accessed, the current value -- that is, the current
 ; pair of floating point numbers -- is recomputed.  The recomputation
 ; occurs every time the numeric value is accessed (i.e. when the
 ; strength and confidence of the TV are accessed).
 ;
-; The FormulaStream is a generalization of the FormulaTruthValue, in
+; The FloatStream is a generalization of the FutureTruthValue, in
 ; that it allows for the computation of any FloatValue. That is, the
 ; SimpleTV's are just vectors of length two - the strength and
 ; confidence, whereas the FloatValue is a vector of arbitrary length.
 
 (use-modules (opencog) (opencog exec))
 
-; The FormulaTruthValue is a kind of TruthValue that is recomputed,
+; The FutureTruthValue is a kind of TruthValue that is recomputed,
 ; every time it is accessed. Thus, it is a kind of dynamically-changing
 ; TruthValue. The value to be computed can be defined in Atomese. Thus,
 ; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
 (define tv-stream
-	(FormulaTruthValue
+	(FutureTruthValue
 		(FormulaPredicate
 			(Minus
 				(Number 1)
@@ -93,7 +93,7 @@
 
 ; Now that we've verified that the EvaluationLink works as expected,
 ; it can be deployed in the stream.
-(define ev-stream (FormulaTruthValue evlnk))
+(define ev-stream (FutureTruthValue evlnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:
@@ -145,7 +145,7 @@
 ; Yes, we can. Just use the DynamicPredicateLink.  This is quite similar
 ; to the FormulaPredicateLink, demoed in `formulas.scm`, but in this
 ; case, instead of producing a single, static TV, this wraps the entire
-; formula into a FormulaTruthValue. Thus, it is enough to set the TV
+; formula into a FutureTruthValue. Thus, it is enough to set the TV
 ; only once; after that, the TV updates will be automatic.
 
 ; For example:
@@ -181,7 +181,12 @@
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
 ; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue.
+; they provide a TruthValue. More precisely, a FutureTruthValue
+; is created, that wraps the 2nd and later args to the SetTV.
+; This FutureTruthValue is installed onto the first arg (the
+; ImplicationLink). From thenceforth, any calls to get the TV
+; on the ImplicatioLink get the FutureTruthValue, which recomputes
+; the TV value each time it's accessed.
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
@@ -200,7 +205,7 @@
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
 ; -------------------------------------------------------------
-; The FormulaStream is the generalization of FormulaTruthValue, suitable
+; The FormulaStream is the generalization of FutureTruthValue, suitable
 ; for streaming a FloatValue of arbitrary length. As before, whenever it
 ; is accessed, the current vector value is recomputed. The recomputation
 ; forced by calling `execute()` on the Atom that the stream is created

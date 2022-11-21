@@ -10,7 +10,7 @@
 (define B (Concept "B"))
 
 (define ftv
-	(FormulaTruthValue
+	(FutureTruthValue
 		(FormulaPredicate
 			(Minus
 				(Number 1)
@@ -36,7 +36,7 @@
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
-(define tv-stream (FormulaTruthValue evlnk))
+(define tv-stream (FutureTruthValue evlnk))
 
 ; ----------
 ; for DynamicUTest::test_dynamic_formula()

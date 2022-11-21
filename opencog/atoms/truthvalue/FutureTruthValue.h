@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/truthvalue/FormulaTruthValue.h
+ * opencog/atoms/truthvalue/FutureTruthValue.h
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2020,2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FORMULA_TRUTH_VALUE_H_
-#define _OPENCOG_FORMULA_TRUTH_VALUE_H_
+#ifndef _OPENCOG_FUTURE_TRUTH_VALUE_H_
+#define _OPENCOG_FUTURE_TRUTH_VALUE_H_
 
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-// #include <opencog/atoms/value/FormulaStream.h>
 
 namespace opencog
 {
@@ -34,19 +33,17 @@ namespace opencog
  *  @{
  */
 
-//! A TruthValue that recomputes the TV from a stored formula.
-class FormulaTruthValue : public SimpleTruthValue
+//! A TruthValue that recomputes the TV from a stored predicate.
+class FutureTruthValue : public SimpleTruthValue
 {
 protected:
-	void init(void);
 	virtual void update(void) const;
-	HandleSeq _formula;
+	Handle _future;
 	AtomSpace* _as;
 
 public:
-	FormulaTruthValue(const Handle&, const Handle&);
-	FormulaTruthValue(const HandleSeq&&);
-	virtual ~FormulaTruthValue();
+	FutureTruthValue(const Handle&);
+	virtual ~FutureTruthValue();
 
 	virtual bool operator==(const Value& rhs) const;
 
@@ -57,17 +54,17 @@ public:
 	virtual strength_t get_mean() const;
 };
 
-typedef std::shared_ptr<const FormulaTruthValue> FormulaTruthValuePtr;
-static inline FormulaTruthValuePtr FormulaTruthValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<FormulaTruthValue>(a); }
+typedef std::shared_ptr<const FutureTruthValue> FutureTruthValuePtr;
+static inline FutureTruthValuePtr FutureTruthValueCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<FutureTruthValue>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<FormulaTruthValue> createFormulaTruthValue(Type&&... args)
+static inline std::shared_ptr<FutureTruthValue> createFutureTruthValue(Type&&... args)
 {
-   return std::make_shared<FormulaTruthValue>(std::forward<Type>(args)...);
+   return std::make_shared<FutureTruthValue>(std::forward<Type>(args)...);
 }
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_FORMULA_TRUTH_VALUE_H_
+#endif // _OPENCOG_FUTURE_TRUTH_VALUE_H_
