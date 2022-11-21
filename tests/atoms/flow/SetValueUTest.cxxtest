@@ -114,21 +114,21 @@ void SetValueUTest::test_triangle()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr tvp = _eval.eval_v("(cog-execute! triangle)");
-
-	ValuePtr result = _eval.eval_v("tri");
+	ValuePtr tvp = _eval.eval_v("tri");
 	printf("expect: %s\n", tvp->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
+
+	ValuePtr result = _eval.eval_v("(cog-execute! triangle)");
+	printf("result ex-tri: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
 	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
-	printf("result: %s\n", result->to_string().c_str());
+	printf("result val-of: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
 	result = _eval.eval_v("(cog-value bar kee)");
-	printf("result: %s\n", result->to_string().c_str());
+	printf("result cog-val: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
