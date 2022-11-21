@@ -68,6 +68,16 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 		return createFloatValue(acc);
 	}
 
+	// XXX TODO -- we could also handle vectors of strings, by
+	// concatenating them into one long string.  However, for this
+	// to be generally useful, we'd want to insert whitespace in
+	// between. But how? One way would be to pass another argument
+	// to this function, which would provide the desired kind of
+	// whitespace. Another would be to extend multiplication to
+	// cover strings, by multipling a vector of strings by a scalar
+	// string that is appended or prepended. But this goes down the
+	// slippery slope of a generalized algebraic functions...
+
 	// If its a bool value, it's a vector. Count the bits.
 	if (nameserver().isA(vitype, BOOL_VALUE))
 	{

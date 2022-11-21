@@ -41,7 +41,7 @@ void DecimateLink::init(void)
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vi(get_value(as, silent, _outgoing[0]));
+	ValuePtr vi(get_value(as, silent, _outgoing[1]));
 	Type vitype = vi->get_type();
 
 	// If its a plain number, assume it's a vector, and sum.
