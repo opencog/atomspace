@@ -43,7 +43,6 @@ protected:
 	AtomSpace* _as;
 
 public:
-	FormulaTruthValue(const Handle&);
 	FormulaTruthValue(const Handle&, const Handle&);
 	FormulaTruthValue(const HandleSeq&&);
 	virtual ~FormulaTruthValue();
