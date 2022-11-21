@@ -45,13 +45,15 @@ protected:
 	FutureStream(Type t, const Handle&) : Value(t) {}
 
 	virtual void update() const;
-	ValuePtr _value;
 	Handle _formula;
 	AtomSpace* _as;
+	mutable ValuePtr _value;
 
 public:
 	FutureStream(const Handle&);
 	virtual ~FutureStream() {}
+
+	ValuePtr value() const { update(); return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;

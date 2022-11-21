@@ -5,6 +5,7 @@ ADD_LIBRARY (value
 	BoolValue.cc
 	FloatValue.cc
 	FormulaStream.cc
+	FutureStream.cc
 	LinkStreamValue.cc
 	LinkValue.cc
 	QueueValue.cc
@@ -31,6 +32,7 @@ INSTALL (FILES
 	BoolValue.h
 	FloatValue.h
 	FormulaStream.h
+	FutureStream.h
 	LinkStreamValue.h
 	LinkValue.h
 	QueueValue.h

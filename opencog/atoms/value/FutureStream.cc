@@ -54,13 +54,13 @@ FutureStream::FutureStream(const Handle& h) :
 
 void FutureStream::update() const
 {
-	if (_formula->is_evaluatable())
+	if (_formula->is_executable())
 	{
-		_value = _formula->evaluate(_as);
+		_value = _formula->execute(_as);
 	}
-	else if (_formula->is_executable())
+	else if (_formula->is_evaluatable())
 	{
-		_value = FloatValueCast(_formula->execute(_as));
+		_value = ValueCast(_formula->evaluate(_as));
 	}
 }
 
