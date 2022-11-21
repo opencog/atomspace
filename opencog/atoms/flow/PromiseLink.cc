@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/value/FutureStream.h>
 #include "PromiseLink.h"
 
 using namespace opencog;
@@ -41,13 +42,13 @@ PromiseLink::PromiseLink(const HandleSeq&& oset, Type t)
 }
 
 PromiseLink::PromiseLink(const Handle& valb)
-	: Link(std::move({valb}), PROMISE_LINK)
+	: Link({valb}, PROMISE_LINK)
 {
 	init();
 }
 
 PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
-	: Link(std::move({valb, typ}), PROMISE_LINK)
+	: Link({valb, typ}, PROMISE_LINK)
 {
 	init();
 }
@@ -55,9 +56,13 @@ PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
 void PromiseLink::init(void)
 {
 	// The default future.
-	_type = STREAM_VALUE;
+	_future_type = FORMULA_STREAM;
 
 	if (1 == _outgoing.size()) return;
+
+	if (2 != _outgoing.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an executable Atom and an optional TypeNode!");
 
 	// The second Atom is a type specifying the kind of future
 	// we should use.
@@ -66,24 +71,23 @@ void PromiseLink::init(void)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a TypeNode to specify the future type!");
 
-	_type = tnp->get_kind();
+	_future_type = tnp->get_kind();
 
-	if (not ((STREAM_VALUE == _type) or (LINK_STREAM_VALUE == _type)))
+	if (not ((FORMULA_STREAM == _future_type) or (FUTURE_STREAM == _future_type)))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a Stream of some kind!");
 }
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return the value at the indicated key.
+/// When executed, this will wrap the promise with a future.
 ValuePtr PromiseLink::execute(AtomSpace* as, bool silent)
 {
-	if (silent)
-		throw SilentException();
+	if (FORMULA_STREAM == _future_type)
+		return createFormulaStream(_outgoing[0]);
 
-	throw InvalidParamException(TRACE_INFO,
-	   "No value at key %s on atom %s",
-	   ak->to_string().c_str(), ah->to_string().c_str());
+	// if (FUTURE_STREAM == _future_type)
+		return createFutureStream(_outgoing[0]);
 }
 
 DEFINE_LINK_FACTORY(PromiseLink, PROMISE_LINK)

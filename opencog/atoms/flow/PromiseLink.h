@@ -39,7 +39,7 @@ class PromiseLink : public Link
 {
 private:
 	void init(void);
-	Type _type;
+	Type _future_type;
 
 public:
 	PromiseLink(const HandleSeq&&, Type=PROMISE_LINK);
