@@ -6,6 +6,7 @@ ADD_LIBRARY (clearbox
 	AccumulateLink.cc
 	ArithmeticLink.cc
 	BoolOpLink.cc
+	DecimateLink.cc
 	DivideLink.cc
 	FoldLink.cc
 	ImpulseLink.cc
@@ -36,6 +37,7 @@ INSTALL (FILES
 	AccumulateLink.h
 	ArithmeticLink.h
 	BoolOpLink.h
+	DecimateLink.h
 	DivideLink.h
 	FoldLink.h
 	ImpulseLink.h

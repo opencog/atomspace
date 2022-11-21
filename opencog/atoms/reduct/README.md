@@ -3,8 +3,8 @@ Arithmetic and term reduction for atoms
 ---------------------------------------
 
 This is an implementation of arithmetic and arithmetic (algebraic)
-reduction for the AtomSpace. It works, but suffers from various design
-flaws.  It is a proof-of-concept, and should be redesigned.
+reduction for the AtomSpace. It works. Its basic, direct, and fairly
+simple-minded. A fancier, more general system is not hard to imagine.
 
 First, a few words about what it does; then a few words about its flaws.
 
@@ -23,17 +23,27 @@ AtomSpace.
 
 At the same time, the code in this directory allows arithmetic
 expressions to be evaluated, to get numeric results. In particular,
-these arithmetic expressions can be applied to FloatValues, TruthValues
-and AttentionValues. That is, it can be executed on the fly to create
-new TruthValues, and so on.
+these arithmetic expressions can be applied to FloatValues and
+TruthValues. That is, it can be executed on the fly to create new
+FloatValues, and so on.
 
-This is particularly interesting for systems like PLN. The code here
+This is particularly interesting for two kinds of systems. One type
+is any kind of vector processing done in the AtomSpace. FloatValues
+are vectors: they can be huge. A vector processing pipeline can be
+specified in Atomese, and then executed with reasonable performance.
+This is currently being used in the language learning subsystem,
+where assorted counts are accumulated and processed.
+
+Another (potential, not yet actual) user is PLN. The code here
 allows PLN formulas to be stored in the AtomSpace, while also being
-run evaluatable, so as to generate the actual TV's that PLN needs to
-calculate. Keeping the formulas here provides a significant performance
-enhancement over computing formulas in scheme or python: both of those
-systems need about 50 microseconds to get in and out of them, limiting
-you to about 20K formulas/second.  The code here is much faster.
+evaluatable, so that running them will to generate the actual TV's
+that PLN needs. Keeping the formulas here provides a significant
+performance enhancement over computing formulas in scheme or python:
+both of those systems need about 50 microseconds to get in and out
+of them, limiting you to about 20K formulas/second.  The code here
+is much faster. Also, encoding the formulas as Atomese makes
+everything more readable; one does not have to track what's happening
+in the assorted GroundedPredicateNodes.
 
 ### What's wrong with it
 Although multiplying numbers here is 100x faster than calling the guile
@@ -51,18 +61,13 @@ By "term reduction", I mean reducing expressions like x+x to 2x, or
 reducing x+0 to just x. More complex examples, too: 6(x/2) == 3x and
 so on.
 
-### TODO
-A short-term "easy" TODO is to finish vectorizing the code.  Right
-now, `PlusLink` correctly handles vectors, but the other arithmetic
-operators do not.  In particular, TimeLink should provide pointwise
-vector math. There should be a SumLink to sum vectors into scalars
-(accumulate). There should be a NumberOfLink that converts FloatValue
-into NumberNode... This stuff would make basic vector math just a little
-simpler...
+The code here assumes that the vectors are numbers, and not vectors of
+strings or vectors of Atoms. One can imagine a more general algebra
+system, which might be able to work with vectors of strings.
 
 ## Examples
-I believe the following examples all work. See also the AtomSpace
-[examples](../../../examples/atomspace) directory for more examples.
+Some basic examples below. See also the AtomSpace
+[examples](../../../examples/atomspace) directory for more.
 Take a good look at `stream.scm` in particular.
 
 Anyway... try this at the guile prompt:

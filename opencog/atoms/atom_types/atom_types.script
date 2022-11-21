@@ -866,6 +866,14 @@ SINE_LINK <- NUMERIC_FUNCTION_LINK
 // Return the sum of vector components of a number/float-value.
 ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 
+// Apply a BoolValue to any other vector, knocking out all locations
+// marked with a zero, keeping all location marked with a one, thus
+// creating a shorter vector.
+DECIMATE_LINK <- FUNCTION_LINK
+
+// TODO: perhaps create shift-left, shift-right and truncate operators?
+// Someday, they will be needed; just not yet, I guess.
+
 // Return arity of the wrapped link. If it's a NumberNode
 // of a value, return the length of the underlying vector.
 // XXX FIXME .. did we mis-name this? Should it be SizeOfLink

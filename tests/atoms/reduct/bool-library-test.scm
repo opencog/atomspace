@@ -20,6 +20,12 @@
 (cog-set-value! foo key (BoolValue 0 1 0 1 0))
 (cog-set-value! bar kee (BoolValue 1 1 0 1 1))
 
+(define float-key (Predicate "float key"))
+(define string-key (Predicate "string key"))
+
+(cog-set-value! foo float-key (FloatValue 1 2 3 4 5))
+(cog-set-value! foo string-key (StringValue "a" "b" "c" "d" "e"))
+
 ; -----------------------------------------------
 
 (test-assert "or-link"
@@ -69,6 +75,43 @@
 				(BoolOr
 					(BoolValueOf foo key)
 					(BoolNot (BoolValueOf foo key)))))))
+
+; --------
+
+(test-assert "float-decimate-key"
+	(equal? (FloatValue 2 4)
+		(cog-execute! (Decimate (ValueOf foo key) (ValueOf foo float-key)))))
+
+(test-assert "float-decimate-key-not"
+	(equal? (FloatValue 1 3 5)
+		(cog-execute! (Decimate (BoolNot (BoolValueOf foo key)) (ValueOf foo float-key)))))
+
+(test-assert "float-decimate-kee"
+	(equal? (FloatValue 1 2 4 5)
+		(cog-execute! (Decimate (ValueOf bar kee) (ValueOf foo float-key)))))
+
+(test-assert "float-decimate-kee-not"
+	(equal? (FloatValue 3)
+		(cog-execute! (Decimate (BoolNot (BoolValueOf bar kee)) (ValueOf foo float-key)))))
+
+; --------
+
+(test-assert "string-decimate-key"
+	(equal? (StringValue "b" "d")
+		(cog-execute! (Decimate (ValueOf foo key) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-key-not"
+	(equal? (StringValue "a" "c" "e")
+		(cog-execute! (Decimate (BoolNot (BoolValueOf foo key)) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-kee"
+	(equal? (StringValue "a" "b" "d" "e")
+		(cog-execute! (Decimate (ValueOf bar kee) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-kee-not"
+	(equal? (StringValue "c")
+		(cog-execute! (Decimate (BoolNot (BoolValueOf bar kee)) (ValueOf foo string-key)))))
+
 
 (test-end tname)
 
