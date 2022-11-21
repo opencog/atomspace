@@ -7,6 +7,12 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
+#include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include "DecimateLink.h"
 
 using namespace opencog;
@@ -41,54 +47,70 @@ void DecimateLink::init(void)
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vi(get_value(as, silent, _outgoing[1]));
+	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
+	const std::vector<bool>& vmask = BoolValueCast(vm)->value();
+
+	if (nullptr == vmask)
+		throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
+
+	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
 	Type vitype = vi->get_type();
 
-	// If its a plain number, assume it's a vector, and sum.
-	if (NUMBER_NODE == vitype)
-	{
-		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
-		double acc = 0.0;
-		for (double dv : dvec)
-			acc += dv;
-		return createNumberNode(acc);
-	}
+	// Get the shorter of the two.
+	size_t len = std::min(vm->size(), vi->size());
 
-	// If its a float value, it's a vector. Sum.
+	// Handle the various value types. Try the most likely ones first.
+	// If its a float value, it's a vector.
 	if (nameserver().isA(vitype, FLOAT_VALUE))
 	{
 		const std::vector<double>& dvec(FloatValueCast(vi)->value());
-		double acc = 0.0;
-		for (double dv : dvec)
-			acc += dv;
-		return createFloatValue(acc);
+		std::vector<double> chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(dvec[i]);
+		return createFloatValue(chopped);
 	}
 
-	// If it's a link value, assume its a list of floats. Sum.
+	// A vector of bools.
+	if (nameserver().isA(vitype, BOOL_VALUE))
+	{
+		const std::vector<bool>& bvec(BoolValueCast(vi)->value());
+		std::vector<bool> chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(bvec[i]);
+		return createBoolValue(chopped);
+	}
+
+	// If its a plain number, assume it's a vector.
+	if (NUMBER_NODE == vitype)
+	{
+		const std::vector<double>& dvec(NumberNodeCast(vi)->value());
+		std::vector<double> chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(dvec[i]);
+		return createNumberNode(chopped);
+	}
+
+	// A vector of other things.
 	if (nameserver().isA(vitype, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& lvec(LinkValueCast(vi)->value());
-		std::vector<double> acc;
-		for (const ValuePtr& lv : lvec)
-		{
-			Type lvtype = lv->get_type();
-			if (not nameserver().isA(lvtype, FLOAT_VALUE)) continue;
-
-			const std::vector<double>& dvec(FloatValueCast(lv)->value());
-
-			if (acc.size() < dvec.size())
-				acc.resize(dvec.size());
-			acc = plus(acc, dvec);
-		}
-		return createFloatValue(acc);
+		std::vector<ValuePtr> chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(lvec[i]);
+		return createLinkValue(chopped);
 	}
 
-	// If it did not fully reduce, then return the best-possible
-	// reduction that we did get.
-	if (vi->is_atom())
-		return createDecimateLink(HandleCast(vi));
+	// A vector of strings
+	if (nameserver().isA(vitype, STRING_VALUE))
+	{
+		const std::vector<std::string>& svec(StringValueCast(vi)->value());
+		std::vector<std::string> chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(svec[i]);
+		return createStringValue(chopped);
+	}
 
-	// Unable to reduce at all. Just return the original atom.
+	// WTF. Should never be reached.
 	return get_handle();
 }
 
