@@ -25,6 +25,7 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
@@ -73,7 +74,7 @@ TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 		if (nameserver().isA(vpt, FLOAT_VALUE))
 		{
 			if (2 == FloatValueCast(vp)->value().size())
-				return = createSimpleTruthValue(vp);
+				return createSimpleTruthValue(vp);
 
 			return createCountTruthValue(vp);
 		}
@@ -87,11 +88,16 @@ TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 	return evex->getTruthValue();
 }
 
-/// Multiple arguments. Wrap them all up into a FormulaTruthValue
-/// and return that.
+/// Multiple arguments. Wrap them all up into an EvaluationLink,
+/// and wrap that into a FormulaTruthValue.
 TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
 {
-	return SimpleTruthValue(1,0);
+	HandleSeq args = _outgoing;
+	args.erase(args.begin()); // drop the target
+
+	Handle evl(createEvaluationLink(std::move(args)));
+	evl = as->add_atom(evl);
+	return createFormulaTruthValue(evl);
 }
 
 TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
