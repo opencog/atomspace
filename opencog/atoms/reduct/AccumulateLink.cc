@@ -9,6 +9,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include "AccumulateLink.h"
 
@@ -64,6 +65,16 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 		double acc = 0.0;
 		for (double dv : dvec)
 			acc += dv;
+		return createFloatValue(acc);
+	}
+
+	// If its a bool value, it's a vector. Count the bits.
+	if (nameserver().isA(vitype, BOOL_VALUE))
+	{
+		const std::vector<bool>& bvec(BoolValueCast(vi)->value());
+		size_t acc = 0;
+		for (bool bv : bvec)
+			if (bv) acc++;
 		return createFloatValue(acc);
 	}
 
