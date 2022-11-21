@@ -48,10 +48,12 @@ ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// get_value() causes execution to happen on the arguments
 	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
-	const std::vector<bool>& vmask = BoolValueCast(vm)->value();
+	BoolValuePtr bvp = BoolValueCast(vm);
 
-	if (nullptr == vmask)
+	if (nullptr == bvp)
 		throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
+
+	const std::vector<bool>& vmask = bvp->value();
 
 	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
 	Type vitype = vi->get_type();

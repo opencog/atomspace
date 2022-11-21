@@ -85,7 +85,7 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 		size_t acc = 0;
 		for (bool bv : bvec)
 			if (bv) acc++;
-		return createFloatValue(acc);
+		return createFloatValue((double) acc);
 	}
 
 	// If it's a link value, assume its a list of floats. Sum.
