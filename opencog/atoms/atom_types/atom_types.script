@@ -1,5 +1,5 @@
 //
-// Script for automatic "atom type" generation. For more information,
+// Script for automatic "Atom type" generation. For more information,
 // consult the `README.md` file in this directory.
 //
 // Please note: some of the types below are used only via the scheme
@@ -10,7 +10,7 @@
 //
 // ===========================================================
 
-// Special type designating that no atom type has been assigned. It is
+// Special type designating that no Atom type has been assigned. It is
 // equivalent to the bottom type in type theory, see
 // https://en.wikipedia.org/wiki/Bottom_type
 NOTYPE
@@ -21,31 +21,36 @@ NOTYPE
 TOP_TYPE
 
 // --------------------------------------------------------------
-// Values are collections of data that can be associated with atoms.
-// Think of them as decorations that can be hung on an atom.
+// Values are collections of data that can be associated with Atoms.
+// Think of them as decorations that can be hung on an Atom.
 VALUE <- TOP_TYPE
 
-VOID_VALUE <- VALUE     // singleton value holding nothing at all.
+VOID_VALUE <- VALUE     // singleton Value holding nothing at all.
 BOOL_VALUE <- VALUE     // vector of booleans
 FLOAT_VALUE <- VALUE    // vector of floats
 STRING_VALUE <- VALUE   // vector of strings
-LINK_VALUE <- VALUE     // vector of values ("link" holding values)
-VALUATION <- VALUE      // (atom,key,value) triple
+LINK_VALUE <- VALUE     // vector of Values ("link" holding Values)
+VALUATION <- VALUE      // (Atom,key,Value) triple
 
 // ===========================================================
-// A base class for time-varying floating-point values.
+// Streams aka Futures. Futures deliver a Value when asked.
+// Since they can deliver more than one, and it typically changes
+// over time, we call them "streams".  They provide wrappers for
+// any kind of time-varying data.
+
+// A base class for time-varying floating-point Values.
 STREAM_VALUE <- FLOAT_VALUE
 
-// An example of a time-varying value stream
+// An example of a time-varying Value stream
 RANDOM_STREAM <- STREAM_VALUE
 
 // A stream computed by a formula held in the AtomSpace.
 FORMULA_STREAM <- STREAM_VALUE
 
-// A base class for time-varying value sequences.
+// A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
 
-// A thread-safe FIFO queue of value sequences.
+// A thread-safe FIFO queue of Value sequences.
 QUEUE_VALUE <- LINK_STREAM_VALUE
 
 // ===========================================================
@@ -56,7 +61,7 @@ QUEUE_VALUE <- LINK_STREAM_VALUE
 // with additional evidence associated to them. In yet other cases,
 // these resemble the truth values of "fuzzy logic", and so on.
 //
-// Many atoms and operations on atoms explicitly require truth values
+// Many Atoms and operations on Atoms explicitly require TruthValues
 // -- for example, PredicateNodes and EvaluationLinks -- and so these
 // are vital and centrally important for getting things to work.
 //
@@ -72,7 +77,7 @@ FUTURE_TRUTH_VALUE         <- TRUTH_VALUE, FORMULA_STREAM
 FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
-// Base of the atom hierarchy. Atoms are globally unique; the AtomSpace
+// Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
 // guarantees that uniqueness. They are persistent; the AtomSpace
 // provides persistence. They are immutable (unchangeable); links and
 // nodes cannot be modified. However, the Values stored on a link/node
@@ -115,13 +120,13 @@ PREDICATE_NODE <- NODE
 // This mechanism is adequate to deal with simple user errors, but
 // isn't very strong. Issues include:
 //
-// *) By doing type-checking at atom-creation time, this is a kind-of
+// *) By doing type-checking at Atom-creation time, this is a kind-of
 //    static type-checking, and thus suffers from the typical issues
 //    of static type-checking.
 // *) Polymorphic outputs are broken.  For example, ValueOfLink
 //    can return both numbers, and not-numbers...
 // *) It fails to handle "deep types", as there should be some form
-//    of ArrowLink associated with each atom atype.
+//    of ArrowLink associated with each Atom atype.
 // *) It fails to handle connector polarities beyond just "input"
 //    and "output". That is, there are more ways of connecting things
 //    than merely saying "outputs are things that can be plugged into
@@ -130,13 +135,18 @@ PREDICATE_NODE <- NODE
 // So... deficient in many ways, but basically, it works for now, and it
 // handles most of the basic cases in a fairly straightforward fashion.
 
+// ValuableLink. Any link type which might be executed, resulting
+// in a Value, should inherit from this type.  This is a mixin-type,
+// it does nothing by itself, but is used to identify link types that
+// are executable - that is, they return Values when they are executed.
+VALUABLE_LINK <- LINK
 
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a truth-value, should inherit from this type.  This is a
+// in a TruthValue, should inherit from this type.  This is a
 // mixin-type, it does nothing by itself, but is used to identify
-// link types that are evaluatable - that is, they return truth values
+// link types that are evaluatable - that is, they return TruthValues
 // when they are evaluated.
-EVALUATABLE_LINK <- LINK
+EVALUATABLE_LINK <- VALUABLE_LINK
 
 // Crisp (scalar-valued) boolean-input link.  This link type forces
 // type-checking on it's "inputs" (it's outgoing set): they must be
@@ -152,7 +162,7 @@ CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
 BOOLEAN_INPUT_LINK <- LINK
 
 // Boolean-output link. Generates BoolValues upon execution.
-BOOLEAN_OUTPUT_LINK <- LINK
+BOOLEAN_OUTPUT_LINK <- VALUABLE_LINK
 
 // Numeric-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
@@ -162,14 +172,14 @@ NUMERIC_INPUT_LINK <- LINK
 
 // Numeric-output link. Generates either NumberNodes or FloatValues
 // upon execution.
-NUMERIC_OUTPUT_LINK <- LINK
+NUMERIC_OUTPUT_LINK <- VALUABLE_LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
 TYPE_INPUT_LINK <- LINK
 
 // Type-output link. Generates Types upon execution.
-TYPE_OUTPUT_LINK <- LINK
+TYPE_OUTPUT_LINK <- VALUABLE_LINK
 
 // Alpha-convertible links are those that may have multiple different
 // representations that are alpha-equivalent. This mixin helps checkers
@@ -190,7 +200,7 @@ LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
 SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 
 // Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute truth values.
+// These use probabilistic formulas to compute TruthValues.
 // See issue opencog/atomspace#2814 for a discussion.
 UNION_LINK <- UNORDERED_LINK,COLLECTION_LINK
 INTERSECTION_LINK <- UNORDERED_LINK,COLLECTION_LINK
@@ -262,7 +272,7 @@ CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
 // terms are AND'ed together.  Since it does not make sense to ask if
-// the same atom is present more than once, or what order it was in, it
+// the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
 PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
@@ -450,7 +460,7 @@ VARIABLE_LIST <- CONNECTOR_SEQ
 // BindLink.
 VARIABLE_SET <- CONNECTOR_SET
 
-// A non-greedy globbing variable; matches one or more atoms in a
+// A non-greedy globbing variable; matches one or more Atoms in a
 // sequence. All this really does is to name a variable, such that
 // the default type cnstructor for it will accept multiple matches.
 GLOB_NODE <- VARIABLE_NODE
@@ -467,7 +477,7 @@ UNQUOTE_LINK <- ORDERED_LINK
 
 // Like QuoteLink but only affects the direct child, not its
 // descendants. It has the same effect as wrapping the child with a
-// QuoteLink and each atom of the its outgoing set with an UnquoteLink.
+// QuoteLink and each Atom of the its outgoing set with an UnquoteLink.
 LOCAL_QUOTE_LINK <- ORDERED_LINK
 
 // Everything under a DontExecLink is not executed. This is typically
@@ -518,7 +528,7 @@ FREE_LINK <- ORDERED_LINK
 DELETE_LINK <- FREE_LINK
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
-// fixed first atom of the link.  Useful for defining state.  Additional
+// fixed first Atom of the Link.  Useful for defining state.  Additional
 // "open" links may exist; "open" links are defined as links that
 // contain free variables (see Wikipedia definition of "open term",
 // "closed term").  Kind of like DeleteLink, but allows one instead of
@@ -553,7 +563,7 @@ SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_LINK
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
-// class for many kinds of atom types, most of which CANNOT be treated
+// class for many kinds of Atom types, most of which CANNOT be treated
 // as if they were lambdas!  So user beware: although RewriteLink feels
 // like LambdaLink ... it isn't.  Not everything is a Lambda.
 REWRITE_LINK <- SCOPE_LINK
@@ -604,7 +614,7 @@ MAXIMAL_JOIN_LINK <- JOIN_LINK
 PATTERN_LINK <- PRENEX_LINK
 
 // We subdivide patterns into two types: one type returns a TV when it
-// is evaluated.  The other type returns a set of atoms when it is
+// is evaluated.  The other type returns a set of Atoms when it is
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 
@@ -617,7 +627,7 @@ SATISFYING_LINK <- PATTERN_LINK
 // ImplicationLink, except that its imperative, not declarative.
 // Both return SetLinks holding the results.
 // QueryLink is identical to BindLink, except it returns a LinkValue
-// holding the result, instead of a SetLink. (Less atomspace pollution).
+// holding the result, instead of a SetLink. (Less AtomSpace pollution).
 MEET_LINK <- SATISFYING_LINK       // Finds all groundings, returns them
 GET_LINK <- MEET_LINK              // Finds all groundings, returns them
 QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
@@ -633,17 +643,17 @@ DUAL_LINK <- SATISFYING_LINK
 //
 // EvaluationLinks record the result of evaluating a predicate.
 // That is, given some elements, they indicate whether the predicate is
-// true or false (or has some other truth value) on those elements.
+// true or false (or has some other TruthValue) on those elements.
 EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
 // ==============================================================
-// Types and type constructors. Variables and other atoms can be
+// Types and type constructors. Variables and other Atoms can be
 // given types.  The below describe the types.
 
 // A TypeNode holds simple, "atomic" type declarations, such as those
 // defined in this file. It cannot hold compound types (deep types),
 // because compound types are Atoms, and this is a Node, not a Link,
-// and so it cannot hold any atoms. Use DefinedTypeNode for compound
+// and so it cannot hold any Atoms. Use DefinedTypeNode for compound
 // types. Its a LexicalNode, whose lexis consists of Atom types.
 TYPE_NODE <- BOND_NODE
 
@@ -705,10 +715,10 @@ SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 // The variable name is not lexical -- its a wild-card.
 TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_LINK
 
-// A type binder for non-variable atoms. It binds a type to an atom
+// A type binder for non-variable Atoms. It binds a type to an Atom
 // at a "global" level.  Always arity-2, the first position cannot be
-// any atom except for a VariableNode, the second must be a type.
-// A given atom can only ever have just one type, thus, this is unique.
+// any Atom except for a VariableNode, the second must be a type.
+// A given Atom can only ever have just one type, thus, this is unique.
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // An arity-2 link, used for specifying numeric intervals, that is,
@@ -763,18 +773,18 @@ VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 
-// Test whether all outgoing atoms are closed, that is do not contain
+// Test whether all outgoing Atoms are closed, that is do not contain
 // any free variable.
 IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
-// Test whether all outgoing atoms have a TRUE_TV (resp. FALSE_TV).
+// Test whether all outgoing Atoms have a TRUE_TV (resp. FALSE_TV).
 IS_TRUE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 IS_FALSE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
-// arguments; it is true only if both sides are the same atom.
+// arguments; it is true only if both sides are the same Atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
-// after execution, they evaluate to the same atom.
+// after execution, they evaluate to the same Atom.
 IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
@@ -793,8 +803,8 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
 
-// A FunctionLink is a link that can be executed, with the result of
-// execution being some atom.  FunctionLink does NOT derive from
+// A FunctionLink is a Link that can be executed, with the result of
+// execution being some Atom.  FunctionLink does NOT derive from
 // LambdaLink, which may seem counter-intuitive; here's why, so
 // listen up.  All of the explicitly-named functions (e.g. PlusLink)
 // do not need to explicitly name their arguments, and it would even
@@ -863,11 +873,19 @@ RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
 // Trigonometric Sine function
 SINE_LINK <- NUMERIC_FUNCTION_LINK
 
-// Return the sum of vector components of a number/float-value.
+// Return the sum of vector components of a NumberNode or FloatValue.
 ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 
+// Apply a BoolValue to any other vector, knocking out all locations
+// marked with a zero, keeping all location marked with a one, thus
+// creating a shorter vector.
+DECIMATE_LINK <- FUNCTION_LINK
+
+// TODO: perhaps create shift-left, shift-right and truncate operators?
+// Someday, they will be needed; just not yet, I guess.
+
 // Return arity of the wrapped link. If it's a NumberNode
-// of a value, return the length of the underlying vector.
+// or a Value, return the length of the underlying vector.
 // XXX FIXME .. did we mis-name this? Should it be SizeOfLink
 // or maybe LengthOfLink? (viz, the length of FloatValue...)
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
@@ -876,10 +894,9 @@ ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // --------------------
-// Truth-value manipulating functions. Some of these return numbers,
-// some of these return truth values.
+// Value getters. Grab the current Value attached to some Atom.
 
-// Return the indicated value on the indicated atom.
+// Return the indicated Value on the indicated Atom.
 // The BoolValueOf and FloatValueOf links exist only to provide
 // creation-time type checking; otherwise, they behave just like
 // the ValueOfLink.
@@ -892,12 +909,21 @@ STRENGTH_OF_LINK <- FLOAT_VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- FLOAT_VALUE_OF_LINK
 COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 
-// Opposite of the above; attach a value to an atom.
-SET_VALUE_LINK <- FUNCTION_LINK
-SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
+// Like the above, but this returns a promise to return a Value
+// sometime in the future. This is accomplished by returning a
+// StreamValue or a LinkStreamValue, when executed. The streams
+// will then cough up the actual Value later on, when interrogated.
+// Used to create dynamically executable computation chains.
+PROMISE_LINK <- VALUABLE_LINK
+
+// Return a FutureTruthValue when evaluated. Same as above, but for
+// TruthValues only.  This can be used to wrap any Atom that returns a
+// TruthValue. The effect is to defer to the future the evaluation of
+// that predicate. Used to create dynamically evaluatable formulas.
+PROMISE_PREDICATE_LINK <- EVALUATABLE_LINK, PROMISE_LINK
 
 // Return a SimpleTruthValue when evaluated.
-// This is used to wrap any atom that returns a FloatValue; all this
+// This is used to wrap any Atom that returns a FloatValue; all this
 // does is to provide some formatting.  It is not strictly needed,
 // because any LambdaLink returning FloatValue is enough. But this is
 // handy to have while a transition is made to a more general setting.
@@ -909,19 +935,18 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // the variables.
 FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
-// Return a FormulaTruthValue when evaluated.
-// This is used to wrap any atom that returns a TruthValue. The effect
-// is to defer to the future the evaluation of that predicate. Used to
-// create dynamically evaluatable formulas.
-PROMISE_PREDICATE_LINK <- EVALUATABLE_LINK
+// Opposite of the above; attach a Value to an Atom.
+SET_VALUE_LINK <- FUNCTION_LINK
+SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // --------------------
 // Other kinds of functions.
 
 // The ExecutionOutputLink is a specific kind of function: it must have
-// a GroundedSchemeNode as its first argument.  The other kinds of
-// FunctionLinks do not have this restriction: indeed, the actual
-// function they perform is implicit in the link type.
+// a Schema of some kind in it's first argument. Current choices include:
+// Schema, GroundedSchema, DefinedSchema and PromiseSchema. The other
+// kinds of FunctionLinks do not need this; the function they perform,
+// that is, the schema, is implcit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
@@ -938,7 +963,7 @@ COND_LINK <- FUNCTION_LINK
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
-// by extracting values for a given set of variables.  In many ways,
+// by extracting Values for a given set of variables.  In many ways,
 // it resembles a GetLink, except that it searches only its argument
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
@@ -948,13 +973,19 @@ MAP_LINK <- FUNCTION_LINK
 // Procedure and schema nodes.
 //
 // These form the foundation for a different way of looking at
-// values and predicates: they generalize the notion of "predicate"
-// so that any value or atom can be the result of evaluation
+// Values and Predicates: they generalize the notion of "predicate"
+// so that any Value or Atom can be the result of evaluation
 // (which is now renamed "execution", to make a distinction).
 //
 // Procedures are generic terms; when they are executed, they can
-// return any value, including Atoms, and not just TruthValues.
+// return any Value, including Atoms, and not just TruthValues.
 PROCEDURE_NODE <- NODE
+
+// DefinedProcedureNodes are used to make human-written Atomese easier
+// to read by humans. They have no other fundamental usefulness...
+// They are meant to be wrappers for more complex Atomese that return
+// some Value.
+DEFINED_PROCEDURE_NODE <- PROCEDURE_NODE
 
 // Grounded procedures/predicates/schemas are "jets", which replace
 // inefficient code with efficient implementations in an ad-hoc kind of
@@ -963,22 +994,25 @@ PROCEDURE_NODE <- NODE
 // http://lambda-the-ultimate.org/node/5482 for discussion of jets.
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
-// SchemaNodes are similar to PredicateNodes, except they must
-// necessarily return an Atom when executed.
-SCHEMA_NODE <- PROCEDURE_NODE
-DEFINED_SCHEMA_NODE <- SCHEMA_NODE
-GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
+// GroundedPredicates wrap something that returns a TruthValue.
+GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
-// Special cases of PredicateNodes.
 // DefinedPredicateNodes are used to make human-written Atomese easier
 // to read by humans. They have no other fundamental usefulness...
+// They are meant to be wrappers for more complex Atomese that return
+// some TruthValue.
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE
-GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
+
+// SchemaNodes are similar to PredicateNodes, except they must
+// necessarily return Atoms when executed.
+SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE,DEFINED_PROCEDURE_NODE
+GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
 // Foreign abstrast syntax trees (AST's)
 
-// Base class for all foregin (non-atomese) language abstract syntax
+// Base class for all foregin (non-Atomese) language abstract syntax
 // trees.
 FOREIGN_AST <- LINK
 
@@ -1001,7 +1035,8 @@ PYTHON_AST <- FOREIGN_AST
 // Assorted miscellaneous link types with an unclear future.
 //
 
-// What is this? I dunno.
+// This is a marker used to avoid type-checking in the static type
+// checker. See `atoms/core/Checkers.cc`
 DIRECTLY_EVALUATABLE_LINK <- LINK
 
 // The ImplicationLink and the InheritanceLink ... these are really
@@ -1061,7 +1096,7 @@ EXECUTION_LINK <- ORDERED_LINK
 
 // Mystery link used by URE in it's unit tests. It is not documented
 // anywhere that I know of. But since URE does not define it's own
-// custom atom types ... we keep it here, for now. XXX FIXME
+// custom Atom types ... we keep it here, for now. XXX FIXME
 ATTRACTION_LINK <- ORDERED_LINK
 
 // Used in the URE unit tests. XXX FIXME the URE unit tests should
