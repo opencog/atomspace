@@ -181,7 +181,12 @@
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
 ; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue.
+; they provide a TruthValue. More precisely, a PromiseTruthValue
+; is created, that wraps the 2nd and later args to the SetTV.
+; This PromiseTruthValue is installed onto the first arg (the
+; ImplicationLink). From thenceforth, any calls to get the TV
+; on the ImplicatioLink get the PromiseTruthValue, which recomputes
+; the TV value each time it's accessed.
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
