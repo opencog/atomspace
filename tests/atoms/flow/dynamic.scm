@@ -75,7 +75,7 @@
 	(SetTV
 		(Implication (Concept "P") (Concept "Q"))
 		(DefinedPredicate "dynamic example")
-		(List (Concept "A") (Concept "B"))))
+		(Concept "A") (Concept "B")))
 
 ; -------------------------------------------------------------
 ; for DynamicUTest::test_formula_stream()
