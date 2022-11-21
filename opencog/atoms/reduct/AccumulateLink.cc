@@ -26,12 +26,6 @@ AccumulateLink::AccumulateLink(const Handle& a)
 	init();
 }
 
-AccumulateLink::AccumulateLink(const Handle& a, const Handle& b)
-    : NumericFunctionLink({a, b}, ACCUMULATE_LINK)
-{
-	init();
-}
-
 void AccumulateLink::init(void)
 {
 	Type tscope = get_type();

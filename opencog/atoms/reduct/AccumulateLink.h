@@ -27,8 +27,7 @@ protected:
 	void init(void);
 
 public:
-	AccumulateLink(const Handle& a);
-	AccumulateLink(const Handle& a, const Handle& b);
+	AccumulateLink(const Handle&);
 	AccumulateLink(const HandleSeq&&, Type=ACCUMULATE_LINK);
 
 	AccumulateLink(const AccumulateLink&) = delete;
