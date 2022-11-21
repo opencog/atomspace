@@ -46,11 +46,12 @@ void DefineLink::init()
 	// definitions anchored with these types; other definitions won't
 	// work during execution.
 	Type dtype = _outgoing[0]->get_type();
-	if (DEFINED_SCHEMA_NODE != dtype and
+	if (DEFINED_PROCEDURE_NODE != dtype and
+	    DEFINED_SCHEMA_NODE != dtype and
 	    DEFINED_PREDICATE_NODE != dtype and
 	    DEFINED_TYPE_NODE != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting Defined(Schema/Predicate/Type)Node, got %s",
+			"Expecting Defined(Procedure/Schema/Predicate/Type)Node, got %s",
 				nameserver().getTypeName(dtype).c_str());
 }
 
