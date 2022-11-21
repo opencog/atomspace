@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/Value.h>
 
 namespace opencog
 {
@@ -35,15 +36,16 @@ namespace opencog
 
 /**
  * FutureStream will evaluate the stored Atom to obtain a fresh
- * FloatValue, every time it is queried for data.
+ * Value, every time it is queried for data.
  */
 class FutureStream
-	: public LinkStreamValue
+	: public Value
 {
 protected:
-	FutureStream(Type t, const Handle&) : LinkStreamValue(t) {}
+	FutureStream(Type t, const Handle&) : Value(t) {}
 
 	virtual void update() const;
+	ValuePtr _value;
 	Handle _formula;
 	AtomSpace* _as;
 

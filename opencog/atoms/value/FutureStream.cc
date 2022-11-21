@@ -31,16 +31,16 @@ using namespace opencog;
 // ==============================================================
 
 FutureStream::FutureStream(const Handle& h) :
-	LinkStreamValue(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
+	Value(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
 {
 	ValuePtr vp;
 	if (h->is_executable())
 	{
-		vp = h->execute(_as);
+		_value = h->execute(_as);
 	}
 	else if (h->is_evaluatable())
 	{
-		vp = ValueCast(h->evaluate(_as));
+		_value = ValueCast(h->evaluate(_as));
 	}
 	else
 	{
@@ -48,30 +48,20 @@ FutureStream::FutureStream(const Handle& h) :
 			"Expecting an executable/evaluatable atom, got %s",
 			h->to_string().c_str());
 	}
-
-	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting formula to return a FloatValue, got %s",
-			vp->to_string().c_str());
-
-	_value = FloatValueCast(vp)->value();
 }
 
 // ==============================================================
 
 void FutureStream::update() const
 {
-	FloatValuePtr vp;
 	if (_formula->is_evaluatable())
 	{
-		vp = _formula->evaluate(_as);
+		_value = _formula->evaluate(_as);
 	}
 	else if (_formula->is_executable())
 	{
-		vp = FloatValueCast(_formula->execute(_as));
+		_value = FloatValueCast(_formula->execute(_as));
 	}
-
-	_value = vp->value();
 }
 
 // ==============================================================
@@ -81,7 +71,7 @@ std::string FutureStream::to_string(const std::string& indent) const
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += "\n" + _formula->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += indent + "   ; " + FloatValue::to_string("", FLOAT_VALUE);
+	rv += indent + "   ; " + _value->to_string("");
 	rv += "\n)";
 	return rv;
 }
