@@ -22,9 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/value/FormulaStream.h>
 #include "SetValueLink.h"
 
 using namespace opencog;
@@ -60,7 +59,7 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 		else
 			pap = _outgoing[2];
 
-		as->set_value(_ougoing[0], _outgoing[1], pap);
+		as->set_value(_outgoing[0], _outgoing[1], pap);
 		return pap;
 	}
 
@@ -68,39 +67,15 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	// Atom and key, as before. Then comes a lambda or function in
 	// third place, and the arguments to the function in fourth place.
 	// Wrap these two in an ExecutionOutput, and then wrap that in a
-	// PromiseLink.
+	// FormulaStream. The user could do this themselves; this is
+	// provided as a conenience function. Note that SetTV works the
+	// same way.
 
-	Handle put(_outgoing[2]);
-	Type pt = put->get_type();
-	if (DEFINED_PROCEDURE_NODE == pt or DEFINED_SCHEMA_NODE == pt or
-	    DEFINED_PREDICATE_NODE == pt)
-	{
-		put = DefineLink::get_definition(put);
-		pt = put->get_type();
-	}
-
-	// XXX TODO we should perform a type-check to make sure
-	// variable declarations match the args.
-	if (not nameserver().isA(pt, LAMBDA_LINK))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s",
-			put->to_string().c_str());
-
-	LambdaLinkPtr lamp(LambdaLinkCast(put));
-	const Handle& args(_outgoing[3]);
-	Handle reduct;
-	if (LIST_LINK == args->get_type())
-		reduct = lamp->beta_reduce(args->getOutgoingSet());
-	else
-		reduct = lamp->beta_reduce({args});
-
-	if (reduct->is_executable())
-		pap = reduct->execute(as, silent);
-	else
-		pap = reduct;
-
-	as->set_value(_outgoing[0], _outgoing[1], pap);
-	return pap;
+	Handle exo(createExecutionOutputLink(_outgoing[2], _outgoing[3]));
+	exo = as->add_atom(exo);
+	ValuePtr fsp = createFormulaStream(exo);
+	as->set_value(_outgoing[0], _outgoing[1], fsp);
+	return fsp;
 }
 
 DEFINE_LINK_FACTORY(SetValueLink, SET_VALUE_LINK)
