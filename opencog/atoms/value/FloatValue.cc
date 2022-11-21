@@ -28,7 +28,9 @@ using namespace opencog;
 
 bool FloatValue::operator==(const Value& other) const
 {
-	if (FLOAT_VALUE != other.get_type()) return false;
+	// Unlike Atoms, we are willing to compare othr types, as long
+	// as the type hierachy makes sence, and the values compare.
+	if (not other.is_type(FLOAT_VALUE)) return false;
 
    const FloatValue* fov = (const FloatValue*) &other;
 
