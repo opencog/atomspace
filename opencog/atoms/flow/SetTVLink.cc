@@ -91,22 +91,8 @@ TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
 	else
 		tv = evex->getTruthValue();
 
-	// We cannot set TVs unless we are working with the unique
-	// version of the atom that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	if (ah)
-	{
-		ah->setTruthValue(tv);
-		return tv;
-	}
-
-	// Hmm. shouldn't this be SilentException?
-	if (silent)
-		throw SilentException();
-
-	throw InvalidParamException(TRACE_INFO,
-		"No atom %s",
-		_outgoing[0]->to_string().c_str());
+	as->set_truthvalue(_outgoing[0], tv);
+	return tv;
 }
 
 DEFINE_LINK_FACTORY(SetTVLink, SET_TV_LINK)
