@@ -8,7 +8,8 @@
 ;
 ; The core implementation is in two parts: the FutureTruthValue,
 ; which implements a dynamically-variable TruthValue, and the
-; PromisePredicateLink, which installs this TruthValue into an Atom.
+; FormulaPredicateLink, which specifies the formula used to compute
+; the TruthValue.
 ;
 ; The FutureTruthValue is a kind of SimpleTruthValue, such that, every
 ; time that it is accessed, the current value -- that is, the current
@@ -142,25 +143,26 @@
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values. Can we do the same, without using scheme?
-; Yes, we can. Just use the DynamicPredicateLink.  This is quite similar
-; to the FormulaPredicateLink, demoed in `formulas.scm`, but in this
-; case, instead of producing a single, static TV, this wraps the entire
-; formula into a FutureTruthValue. Thus, it is enough to set the TV
-; only once; after that, the TV updates will be automatic.
+; Yes, we can. Just use the PromisePredicateLink.  This can wrap any
+; evaluatable Atom, anything that can produce a TruthValue, and provides
+; a promiste that it can be evaluated in the future. The when the SetTV
+; is executed, then whatever was wrapped is unwrapped and placed into
+; a FutureTruthValue, which will then update every time it is accessed.
 
 ; For example:
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
-		(DynamicPredicate
-			(Minus
-				(Number 1)
+		(PromisePredicate
+			(FormulaPredicate
+				(Minus
+					(Number 1)
+					(Times
+						(StrengthOf (Concept "A"))
+						(StrengthOf (Concept "B"))))
 				(Times
-					(StrengthOf (Concept "A"))
-					(StrengthOf (Concept "B"))))
-			(Times
-				(ConfidenceOf (Concept "A"))
-				(ConfidenceOf (Concept "B"))))))
+					(ConfidenceOf (Concept "A"))
+					(ConfidenceOf (Concept "B")))))))
 
 ; The above can be tedious, as it requires manually creating a new
 ; formula for each SetTV.  Some of this tedium can be avoided by
@@ -237,9 +239,5 @@
 (cog-execute! (StreamValueOf bar bkey))
 (cog-execute! (StreamValueOf bar bkey))
 (cog-execute! (StreamValueOf bar bkey))
-
-; TODO: At this time, there is no DynamicSchema that would be the
-; generalized analog of DynamicPredicate demonstrated above.  This
-; should be created...
 
 ; ------- THE END -------

@@ -36,7 +36,7 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
-#include <opencog/atoms/truthvalue/FormulaTruthValue.h>
+#include <opencog/atoms/truthvalue/FutureTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -647,41 +647,6 @@ static bool crispy_eval_scratch(AtomSpace* as,
 	return false;
 }
 
-
-static TruthValuePtr reduce_formula(const Handle& pred,
-                                    const HandleSeq& args)
-{
-	HandleSeq reduced;
-	for (Handle flh : pred->getOutgoingSet())
-	{
-		if (LAMBDA_LINK == flh->get_type())
-			flh = LambdaLinkCast(flh)->beta_reduce(args);
-
-		if (nameserver().isA(flh->get_type(), FUNCTION_LINK))
-		{
-			// The FunctionLink presumably has free variables in it.
-			// Reduce them with the provided arguments.
-			FunctionLinkPtr flp(FunctionLinkCast(flh));
-			const FreeVariables& fvars = flp->get_vars();
-			if (not fvars.empty())
-				flh = fvars.substitute_nocheck(flh, args);
-		}
-		else
-			// We expected something executable...
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a Lambda or FunctionLink");
-
-		// Wherever the args live, the reduced formula must
-		// live there also: it's lifettime must be identical
-		// to the args.
-		AtomSpace* as = args[0]->getAtomSpace();
-		flh = as->add_atom(flh);
-		reduced.push_back(flh);
-	}
-
-	return createFormulaTruthValue(std::move(reduced));
-}
-
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
@@ -720,9 +685,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		if (FORMULA_PREDICATE_LINK == dtype)
 			return FormulaPredicateLinkCast(defn)->apply(as, cargs, silent);
 
-		if (DYNAMIC_PREDICATE_LINK == dtype)
-			return reduce_formula(defn, cargs);
-
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
 			throw SyntaxException(TRACE_INFO,
@@ -740,9 +702,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	// AtomSpace.
 	if (FORMULA_PREDICATE_LINK == pntype)
 		return FormulaPredicateLinkCast(pn)->apply(as, cargs, silent);
-
-	if (DYNAMIC_PREDICATE_LINK == pntype)
-		return reduce_formula(pn, cargs);
 
 	// Treat LambdaLink as if it were a PutLink -- perform
 	// the beta-reduction, and evaluate the result.
@@ -889,9 +848,12 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (DYNAMIC_PREDICATE_LINK == t)
+	else if (PROMISE_PREDICATE_LINK == t)
 	{
-		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
+		if (1 < evelnk->size())
+			throwSyntaxException(silent,
+				"PromisePredicate can only wrap one Atom");
+		return createFutureTruthValue(evelnk->getOutgoingAtom(0));
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
