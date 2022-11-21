@@ -1,47 +1,44 @@
 /*
- * opencog/atoms/reduct/AccumulateLink.cc
+ * opencog/atoms/reduct/DecimateLink.cc
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2020, 2022 Linas Vepstas
  * All Rights Reserved
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include "AccumulateLink.h"
+#include "DecimateLink.h"
 
 using namespace opencog;
 
-AccumulateLink::AccumulateLink(const HandleSeq&& oset, Type t)
-    : NumericFunctionLink(std::move(oset), t)
+DecimateLink::DecimateLink(const HandleSeq&& oset, Type t)
+    : Link(std::move(oset), t)
 {
 	init();
 }
 
-AccumulateLink::AccumulateLink(const Handle& a)
-    : NumericFunctionLink({a}, ACCUMULATE_LINK)
+DecimateLink::DecimateLink(const Handle& a, const Handle& b)
+    : Link({a, b}, DECIMATE_LINK)
 {
 	init();
 }
 
-void AccumulateLink::init(void)
+void DecimateLink::init(void)
 {
 	Type tscope = get_type();
-	if (not nameserver().isA(tscope, ACCUMULATE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a AccumulateLink");
+	if (not nameserver().isA(tscope, DECIMATE_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a DecimateLink");
 
 	size_t nargs = _outgoing.size();
-	if (1 != nargs)
+	if (2 != nargs)
 		throw InvalidParamException(TRACE_INFO,
-			"AccumulateLink expects one argument, got %s",
+			"DecimateLink expects two arguments, got %s",
 			to_string().c_str());
 }
 
 // ============================================================
 
-ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
+ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// get_value() causes execution to happen on the arguments
 	ValuePtr vi(get_value(as, silent, _outgoing[0]));
@@ -89,12 +86,12 @@ ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 	// If it did not fully reduce, then return the best-possible
 	// reduction that we did get.
 	if (vi->is_atom())
-		return createAccumulateLink(HandleCast(vi));
+		return createDecimateLink(HandleCast(vi));
 
 	// Unable to reduce at all. Just return the original atom.
 	return get_handle();
 }
 
-DEFINE_LINK_FACTORY(AccumulateLink, ACCUMULATE_LINK);
+DEFINE_LINK_FACTORY(DecimateLink, DECIMATE_LINK);
 
 // ============================================================
