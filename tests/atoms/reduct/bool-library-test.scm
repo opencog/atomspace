@@ -94,6 +94,24 @@
 	(equal? (FloatValue 3)
 		(cog-execute! (Decimate (BoolNot (BoolValueOf bar kee)) (ValueOf foo float-key)))))
 
+; --------
+
+(test-assert "string-decimate-key"
+	(equal? (StringValue "b" "d")
+		(cog-execute! (Decimate (ValueOf foo key) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-key-not"
+	(equal? (StringValue "a" "c" "e")
+		(cog-execute! (Decimate (BoolNot (BoolValueOf foo key)) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-kee"
+	(equal? (StringValue "a" "b" "d" "e")
+		(cog-execute! (Decimate (ValueOf bar kee) (ValueOf foo string-key)))))
+
+(test-assert "string-decimate-kee-not"
+	(equal? (StringValue "c")
+		(cog-execute! (Decimate (BoolNot (BoolValueOf bar kee)) (ValueOf foo string-key)))))
+
 
 (test-end tname)
 
