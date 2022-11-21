@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/value/StreamValue.h>
+#include <opencog/atoms/value/FormulaStream.h>
 #include "PromiseLink.h"
 
 using namespace opencog;

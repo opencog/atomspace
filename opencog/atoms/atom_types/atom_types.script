@@ -44,14 +44,19 @@ STREAM_VALUE <- FLOAT_VALUE
 // An example of a time-varying Value stream
 RANDOM_STREAM <- STREAM_VALUE
 
-// A stream computed by a formula held in the AtomSpace.
-FORMULA_STREAM <- STREAM_VALUE
-
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
 
 // A thread-safe FIFO queue of Value sequences.
 QUEUE_VALUE <- LINK_STREAM_VALUE
+
+// A stream of Values, computed by a function held in the AtomSpace.
+// Typically computed by one of the FunctionLinks, below.
+FUTURE_STREAM <- LINK_STREAM_VALUE
+
+// A stream of FloatValues computed by a formula held in the AtomSpace.
+// Same as the FutureStream, specialized for FloatValues.
+FORMULA_STREAM <- STREAM_VALUE, FUTURE_STREAM
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used
@@ -910,10 +915,10 @@ CONFIDENCE_OF_LINK <- FLOAT_VALUE_OF_LINK
 COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 
 // Like the above, but this returns a promise to return a Value
-// sometime in the future. This is accomplished by returning a
-// StreamValue or a LinkStreamValue, when executed. The streams
-// will then cough up the actual Value later on, when interrogated.
-// Used to create dynamically executable computation chains.
+// sometime in the future. This is accomplished by returning a either
+// a FutureStream or a FormulaStream when executed. This stream will
+// then cough up the actual Value later on, when interrogated. Used to
+// create dynamically executable computation chains.
 PROMISE_LINK <- VALUABLE_LINK
 
 // Return a FutureTruthValue when evaluated. Same as above, but for
