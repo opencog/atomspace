@@ -22,6 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/value/StreamValue.h>
 #include "PromiseLink.h"
 
 using namespace opencog;
@@ -52,10 +54,23 @@ PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
 
 void PromiseLink::init(void)
 {
-	size_t ary = _outgoing.size();
-	if (2 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
+	// The default future.
+	_type = STREAM_VALUE;
 
+	if (1 == _outgoing.size()) return;
+
+	// The second Atom is a type specifying the kind of future
+	// we should use.
+	TypeNodePtr tnp = TypeNodeCast(_outgoing[1]);
+	if (nullptr == tnp)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a TypeNode to specify the future type!");
+
+	_type = tnp->get_kind();
+
+	if (not ((STREAM_VALUE == _type) or (LINK_STREAM_VALUE == _type)))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a Stream of some kind!");
 }
 
 // ---------------------------------------------------------------

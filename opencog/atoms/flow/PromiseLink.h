@@ -37,6 +37,10 @@ namespace opencog
 ///
 class PromiseLink : public Link
 {
+private:
+	void init(void);
+	Type _type;
+
 public:
 	PromiseLink(const HandleSeq&&, Type=PROMISE_LINK);
 	PromiseLink(const Handle&);
