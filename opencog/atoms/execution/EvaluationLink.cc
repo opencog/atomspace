@@ -848,10 +848,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
 	}
-	else if (FORMULA_PREDICATE_LINK == t)
-	{
-		return createFormulaTruthValue(HandleSeq(evelnk->getOutgoingSet()));
-	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
