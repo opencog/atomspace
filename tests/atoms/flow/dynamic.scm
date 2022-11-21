@@ -46,15 +46,16 @@
 (cog-execute!
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
-		(FormulaPredicate
-			(Minus
-				(Number 1)
+		(PromisePredicate
+			(FormulaPredicate
+				(Minus
+					(Number 1)
+					(Times
+						(StrengthOf (Concept "A"))
+						(StrengthOf (Concept "B"))))
 				(Times
-					(StrengthOf (Concept "A"))
-					(StrengthOf (Concept "B"))))
-			(Times
-				(ConfidenceOf (Concept "A"))
-				(ConfidenceOf (Concept "B"))))))
+					(ConfidenceOf (Concept "A"))
+					(ConfidenceOf (Concept "B")))))))
 
 (DefineLink
    (DefinedPredicate "dynamic example")
