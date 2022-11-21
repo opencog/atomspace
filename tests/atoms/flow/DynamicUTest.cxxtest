@@ -60,7 +60,7 @@ void DynamicUTest::setUp(void)
 #define EPSI 1.0e-8
 
 // ====================================================================
-// Basic FormulaTruthValue
+// Basic PromiseTruthValue
 void DynamicUTest::test_predicate_formula()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -69,7 +69,7 @@ void DynamicUTest::test_predicate_formula()
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
-	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(result->get_type(), PROMISE_TRUTH_VALUE);
 
 	TruthValuePtr stv = TruthValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
@@ -98,7 +98,7 @@ void DynamicUTest::test_predicate_formula()
 }
 
 // ====================================================================
-// Basic FormulaTruthValue
+// Basic PromiseTruthValue
 void DynamicUTest::test_formula_define()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -107,7 +107,7 @@ void DynamicUTest::test_formula_define()
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
-	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(result->get_type(), PROMISE_TRUTH_VALUE);
 
 	TruthValuePtr stv = TruthValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
@@ -183,7 +183,7 @@ void DynamicUTest::test_defined_dynamic()
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
-	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(result->get_type(), PROMISE_TRUTH_VALUE);
 
 	TruthValuePtr stv = TruthValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
