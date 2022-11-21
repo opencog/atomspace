@@ -41,9 +41,8 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 			"Expecting an SetTVLink, got %s", tname.c_str());
 	}
 
-	size_t ary = _outgoing.size();
-	if (2 != ary and 3 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
+	if (_outgoing.size() < 2)
+		throw SyntaxException(TRACE_INFO, "Expecting at least two atoms!");
 }
 
 // ---------------------------------------------------------------

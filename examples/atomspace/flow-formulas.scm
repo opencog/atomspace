@@ -186,7 +186,7 @@
 	(SetTV
 		(Implication (Concept "A") (Concept "B"))
 		(DefinedPredicate "dynamic example")
-		(List (Concept "A") (Concept "B"))))
+		(Concept "A") (Concept "B")))
 
 ; Double-check, as before:
 (cog-tv a-implies-b)
