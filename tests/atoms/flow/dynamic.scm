@@ -58,7 +58,7 @@
 
 (DefineLink
    (DefinedPredicate "dynamic example")
-   (DynamicPredicate
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times

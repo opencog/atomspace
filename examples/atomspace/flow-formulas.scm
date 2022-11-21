@@ -168,7 +168,7 @@
 ; before, we get a dynamic example:
 (DefineLink
    (DefinedPredicate "dynamic example")
-   (DynamicPredicate
+   (FormulaPredicate
       (Minus
          (Number 1)
          (Times
