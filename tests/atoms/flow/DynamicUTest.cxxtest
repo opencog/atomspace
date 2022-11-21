@@ -136,7 +136,7 @@ void DynamicUTest::test_formula_define()
 }
 
 // ====================================================================
-// Basic dynamic truth value
+// Verify that PromisePredicate create FutureTV
 void DynamicUTest::test_dynamic_predicate()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -145,7 +145,7 @@ void DynamicUTest::test_dynamic_predicate()
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
-	TS_ASSERT_EQUALS(result->get_type(), FORMULA_TRUTH_VALUE);
+	TS_ASSERT_EQUALS(result->get_type(), FUTURE_TRUTH_VALUE);
 
 	TruthValuePtr stv = TruthValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
