@@ -37,7 +37,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	// Derived types do their own validation.
 	if (EXECUTION_OUTPUT_LINK != get_type()) return;
 
-	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
+	if (not nameserver().isA(schema->get_type(), PROCEDURE_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
 	    VARIABLE_NODE != schema->get_type() and
@@ -174,7 +174,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		return gsn->execute(as, args, silent);
 	}
 
-	if (DEFINED_SCHEMA_NODE == snt)
+	if (DEFINED_PROCEDURE_NODE == snt or DEFINED_SCHEMA_NODE == snt)
 		sn = DefineLink::get_definition(sn);
 
 	if (LAMBDA_LINK == sn->get_type())
