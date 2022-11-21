@@ -30,17 +30,11 @@
 
 using namespace opencog;
 
-FormulaTruthValue::FormulaTruthValue(const Handle& h)
-	: SimpleTruthValue(0, 0), _formula({h}), _as(h->getAtomSpace())
-{
-	_type = FORMULA_TRUTH_VALUE;
-	update();
-}
-
 FormulaTruthValue::FormulaTruthValue(const Handle& stn, const Handle& cnf)
 	: SimpleTruthValue(0, 0), _formula({stn, cnf}), _as(stn->getAtomSpace())
 {
 	_type = FORMULA_TRUTH_VALUE;
+	init();
 	update();
 }
 
@@ -48,62 +42,43 @@ FormulaTruthValue::FormulaTruthValue(const HandleSeq&& seq)
 	: SimpleTruthValue(0, 0), _formula(seq), _as(seq[0]->getAtomSpace())
 {
 	_type = FORMULA_TRUTH_VALUE;
+	init();
 	update();
 }
 
 FormulaTruthValue::~FormulaTruthValue()
 {}
 
+void FormulaTruthValue::init(void)
+{
+	// We expect two formulas, they produce the strength and
+	// the confidence, respectively.
+	if (2 != _formula.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting exactly two formulas; got %s",
+				_formula.size());
+
+	for (size_t i=0; i<2; i++)
+	{
+		if (not _formula[i]->is_executable())
+			throw SyntaxException(TRACE_INFO,
+				"Formula %d needs to be executable; got %s",
+					i, _formula[i]->to_string().c_str());
+	}
+}
+
 void FormulaTruthValue::update(void) const
 {
-	// If there are two formulas, they produce the strength and
-	// the confidence, respectively.  We ignore more than two formulas.
-	if (1 < _formula.size())
+	// We expect two formulas, they produce the strength and
+	// the confidence, respectively.
+	for (size_t i=0; i<2; i++)
 	{
-		for (size_t i=0; i<2; i++)
-		{
-			const Handle& fo = _formula[i];
-			if (not fo->is_executable())
-				throw SyntaxException(TRACE_INFO,
-					"Formula needs to be executable; got %s",
-						fo->to_string().c_str());
-
-			ValuePtr vp = fo->execute(_as);
-			if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-				throw SyntaxException(TRACE_INFO,
-					"Expecting FloatValue, got %s",
-						vp->to_string().c_str());
-			_value[i] = FloatValueCast(vp)->value()[0];
-		}
-		return;
-	}
-
-	// If there is just one formula, then we expect it to produce
-	// two numbers, the strength and the confidence.
-	const Handle& fo = _formula[0];
-	if (fo->get_type() == FORMULA_PREDICATE_LINK)
-	{
-		TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, fo);
-		_value = tvp->value();
-	}
-	else if (fo->is_evaluatable())
-	{
-		TruthValuePtr tvp = fo->evaluate(_as);
-		_value = tvp->value();
-	}
-	else if (fo->is_executable())
-	{
-		ValuePtr vp = fo->execute(_as);
+		ValuePtr vp = _formula[i]->execute(_as);
 		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
 			throw SyntaxException(TRACE_INFO,
 				"Expecting FloatValue, got %s",
 					vp->to_string().c_str());
-		_value = FloatValueCast(vp)->value();
-	}
-	else
-	{
-		TruthValuePtr tvp = fo->getTruthValue();
-		_value = tvp->value();
+		_value[i] = FloatValueCast(vp)->value()[0];
 	}
 }
 
@@ -133,4 +108,4 @@ bool FormulaTruthValue::operator==(const Value& rhs) const
 }
 
 DEFINE_VALUE_FACTORY(FORMULA_TRUTH_VALUE,
-	createFormulaTruthValue, const Handle&)
+	createFormulaTruthValue, const Handle&, const Handle&)
