@@ -108,4 +108,4 @@ bool FormulaTruthValue::operator==(const Value& rhs) const
 }
 
 DEFINE_VALUE_FACTORY(FORMULA_TRUTH_VALUE,
-	createFormulaTruthValue, const Handle&)
+	createFormulaTruthValue, const Handle&, const Handle&)
