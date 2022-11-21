@@ -5,6 +5,7 @@ ADD_LIBRARY (truthvalue
 	FuzzyTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
+	PromiseTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
 )
