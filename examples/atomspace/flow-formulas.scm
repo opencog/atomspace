@@ -8,7 +8,7 @@
 ;
 ; The core implementation is in two parts: the FutureTruthValue,
 ; which implements a dynamically-variable TruthValue, and the
-; DynamicPredicateLink, which installs this TruthValue into an Atom.
+; PromisePredicateLink, which installs this TruthValue into an Atom.
 ;
 ; The FutureTruthValue is a kind of SimpleTruthValue, such that, every
 ; time that it is accessed, the current value -- that is, the current

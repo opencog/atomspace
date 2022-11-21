@@ -25,7 +25,7 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/PromiseTruthValue.h>
+#include <opencog/atoms/truthvalue/FutureTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
@@ -88,7 +88,7 @@ TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 }
 
 /// Multiple arguments. Wrap them all up into an EvaluationLink,
-/// and wrap that into a PromiseTruthValue.
+/// and wrap that into a FutureTruthValue.
 TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
 {
 	HandleSeq args = _outgoing;
@@ -96,7 +96,7 @@ TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
 
 	Handle evl(createEvaluationLink(std::move(args)));
 	evl = as->add_atom(evl);
-	return createPromiseTruthValue(evl);
+	return createFutureTruthValue(evl);
 }
 
 TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)

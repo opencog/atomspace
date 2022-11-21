@@ -60,7 +60,7 @@ void DynamicUTest::setUp(void)
 #define EPSI 1.0e-8
 
 // ====================================================================
-// Basic PromiseTruthValue
+// Basic FutureTruthValue
 void DynamicUTest::test_predicate_formula()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -98,7 +98,7 @@ void DynamicUTest::test_predicate_formula()
 }
 
 // ====================================================================
-// Basic PromiseTruthValue
+// Basic FutureTruthValue
 void DynamicUTest::test_formula_define()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
