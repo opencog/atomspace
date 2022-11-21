@@ -90,10 +90,17 @@ std::string FormulaStream::to_string(const std::string& indent) const
 
 bool FormulaStream::operator==(const Value& other) const
 {
-	if (FORMULA_STREAM != other.get_type()) return false;
+	// If they are both FormulaStream's, then we're good.
+	if (FORMULA_STREAM == other.get_type())
+	{
+		const FormulaStream* eso = (const FormulaStream*) &other;
+		return eso->_formula == _formula;
+	}
 
-	const FormulaStream* eso = (const FormulaStream*) &other;
-	return eso->_formula == _formula;
+	if (not other.is_type(FLOAT_VALUE)) return false;
+
+	// Value-compare
+	return FloatValue::operator==(other);
 }
 
 // ==============================================================

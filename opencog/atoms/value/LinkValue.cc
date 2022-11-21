@@ -71,8 +71,10 @@ HandleSet LinkValue::to_handle_set(void) const
 
 bool LinkValue::operator==(const Value& other) const
 {
-	// Derived classes use this, so use get_type()
-	if (get_type() != other.get_type()) return false;
+	// We do content-compare, and only loose type compare.
+	// As long as other is a derviced type, we're good if
+	// the actual values compare
+	if (not other.is_type(LINK_VALUE)) return false;
 
 	const LinkValue* lov = (const LinkValue*) &other;
 

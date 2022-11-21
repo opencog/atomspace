@@ -40,7 +40,7 @@ namespace opencog
  * rapidly-changing data encoded as floats, including video and
  * audio feeds, or other kinds of high-bandwidth data.
  *
- * This class itself doesn't "do anything" other than to provde
+ * This class itself doesn't "do anything" other than to provide
  * a base class.
  *
  * See also LinkStreamValue when the data is encoded as Atoms or

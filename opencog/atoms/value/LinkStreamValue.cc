@@ -29,7 +29,11 @@ using namespace opencog;
 
 bool LinkStreamValue::operator==(const Value& other) const
 {
-	return &other == this;
+	// Since we're streaming, get the latest value before compare!
+	update();
+
+	// Let the base class do the hard work.
+	return LinkValue::operator==(other);
 }
 
 // ==============================================================
