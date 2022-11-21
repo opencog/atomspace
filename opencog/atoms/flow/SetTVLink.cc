@@ -25,6 +25,7 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
+#include <opencog/atoms/truthvalue/FormulaTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include "SetTVLink.h"
 
@@ -47,66 +48,68 @@ SetTVLink::SetTVLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// When evaluated, this will evaluate the second argument to obtain
-/// a TruthValue, and then set that TruthValue on the indicated Atom
-/// (first argument). The computed TV is returned.
-TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
+/// Direct evaluation. The SetTV has only two args: the Atom to set,
+/// and the Atom to get the TV from. If the second arg is evaluatable,
+/// then evaluate it to get a TV, and slap that TV onto the first arg.
+/// The TV thus obtained is returned.
+TruthValuePtr SetTVLink::eval_direct(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
-
-	// Obtain the value that we will be setting.
-	TruthValuePtr tv;
-
-	// The expression to evaluate
-	Handle evex;
-	if (2 == ary)
-		evex = _outgoing[1];
-	else if (3 == ary)
-		evex = createEvaluationLink(_outgoing[1], _outgoing[2]);
-
-	// Now, evaluate it.
+	// Try to evaluate the second argument.
+	const Handle& evex = _outgoing[1];
 	if (evex->is_evaluatable())
-		tv = evex->evaluate(as, silent);
-	else if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
-		tv = EvaluationLink::do_evaluate(as, evex, silent);
-	else if (evex->is_executable())
+		return evex->evaluate(as, silent);
+
+	if (nameserver().isA(evex->get_type(), EVALUATABLE_LINK))
+		return EvaluationLink::do_evaluate(as, evex, silent);
+
+	// Maybe it's executable, and returns something that can
+	// be converted to a TV.
+	if (evex->is_executable())
 	{
 		ValuePtr vp = evex->execute(as, silent);
 		Type vpt = vp->get_type();
 		if (nameserver().isA(vpt, TRUTH_VALUE))
-			tv = TruthValueCast(vp);
-		else
+			return TruthValueCast(vp);
+
 		if (nameserver().isA(vpt, FLOAT_VALUE))
 		{
 			if (2 == FloatValueCast(vp)->value().size())
-				tv = createSimpleTruthValue(vp);
-			else
-				tv = createCountTruthValue(vp);
+				return createSimpleTruthValue(vp);
+
+			return createCountTruthValue(vp);
 		}
-		else
-			throw RuntimeException(TRACE_INFO,
-				"Expecting a FlotValue or TruthValue, got %s",
-				vp->to_string().c_str());
+
+		throw RuntimeException(TRACE_INFO,
+			"Expecting a FloatValue or TruthValue, got %s",
+			vp->to_string().c_str());
 	}
+
+	// None of the above. It is a constant.
+	return evex->getTruthValue();
+}
+
+/// Multiple arguments. Wrap them all up into an EvaluationLink,
+/// and wrap that into a FormulaTruthValue.
+TruthValuePtr SetTVLink::make_formula(AtomSpace* as, bool silent)
+{
+	HandleSeq args = _outgoing;
+	args.erase(args.begin()); // drop the target
+
+	Handle evl(createEvaluationLink(std::move(args)));
+	evl = as->add_atom(evl);
+	return createFormulaTruthValue(evl);
+}
+
+TruthValuePtr SetTVLink::evaluate(AtomSpace* as, bool silent)
+{
+	TruthValuePtr tv;
+	if (2 == _outgoing.size())
+		tv = eval_direct(as, silent);
 	else
-		tv = evex->getTruthValue();
+		tv = make_formula(as, silent);
 
-	// We cannot set TVs unless we are working with the unique
-	// version of the atom that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	if (ah)
-	{
-		ah->setTruthValue(tv);
-		return tv;
-	}
-
-	// Hmm. shouldn't this be SilentException?
-	if (silent)
-		throw SilentException();
-
-	throw InvalidParamException(TRACE_INFO,
-		"No atom %s",
-		_outgoing[0]->to_string().c_str());
+	as->set_truthvalue(_outgoing[0], tv);
+	return tv;
 }
 
 DEFINE_LINK_FACTORY(SetTVLink, SET_TV_LINK)
