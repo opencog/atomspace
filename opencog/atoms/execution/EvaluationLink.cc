@@ -36,7 +36,7 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
-#include <opencog/atoms/truthvalue/FormulaTruthValue.h>
+#include <opencog/atoms/truthvalue/FutureTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -847,6 +847,13 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		return EvaluationLink::do_eval_scratch(as,
 		                       DefineLink::get_definition(evelnk),
 		                       scratch, silent);
+	}
+	else if (PROMISE_PREDICATE_LINK == t)
+	{
+		if (1 < evelnk->size())
+			throwSyntaxException(silent,
+				"PromisePredicate can only wrap one Atom");
+		return createFutureTruthValue(evelnk->getOutgoingAtom(0));
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
