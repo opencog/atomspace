@@ -52,9 +52,9 @@ public:
 
 	std::string to_string(const std::string&) const;
 
+	/// Update the values. The get_confidence() method is NOT
+	/// overloaded because only one update is needed/desired.
 	virtual strength_t get_mean() const;
-	// virtual count_t get_count() const;
-	// virtual confidence_t get_confidence() const;
 };
 
 typedef std::shared_ptr<const FormulaTruthValue> FormulaTruthValuePtr;
