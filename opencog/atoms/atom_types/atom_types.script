@@ -907,6 +907,12 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // the variables.
 FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
+// Return a FormulaTruthValue when evaluated.
+// This is used to wrap any atom that returns a TruthValue. The effect
+// is to defer to the future the evaluation of that predicate. Used to
+// create dynamically evaluatable formulas.
+PROMISE_PREDICATE_LINK <- EVALUATABLE_LINK
+
 // --------------------
 // Other kinds of functions.
 
