@@ -38,6 +38,7 @@ namespace opencog
 class FormulaTruthValue : public SimpleTruthValue
 {
 protected:
+	void init(void);
 	virtual void update(void) const;
 	HandleSeq _formula;
 	AtomSpace* _as;
