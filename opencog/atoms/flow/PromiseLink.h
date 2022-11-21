@@ -49,6 +49,7 @@ public:
 	PromiseLink(const PromiseLink&) = delete;
 	PromiseLink& operator=(const PromiseLink&) = delete;
 
+	virtual bool is_executable() const { return true; }
 	// Return a future
 	virtual ValuePtr execute(AtomSpace*, bool);
 
