@@ -2,10 +2,10 @@ ADD_LIBRARY (truthvalue
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
 	FormulaTruthValue.cc
+	FutureTruthValue.cc
 	FuzzyTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
-	PromiseTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
 )

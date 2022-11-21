@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/truthvalue/PromiseTruthValue.cc
+ * opencog/atoms/truthvalue/FutureTruthValue.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -26,21 +26,21 @@
 
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/ValueFactory.h>
-#include "PromiseTruthValue.h"
+#include "FutureTruthValue.h"
 
 using namespace opencog;
 
-PromiseTruthValue::PromiseTruthValue(const Handle& h)
+FutureTruthValue::FutureTruthValue(const Handle& h)
 	: SimpleTruthValue(0, 0), _future(h), _as(h->getAtomSpace())
 {
-	_type = PROMISE_TRUTH_VALUE;
+	_type = FUTURE_TRUTH_VALUE;
 	update();
 }
 
-PromiseTruthValue::~PromiseTruthValue()
+FutureTruthValue::~FutureTruthValue()
 {}
 
-void PromiseTruthValue::update(void) const
+void FutureTruthValue::update(void) const
 {
 	// The wrapped predicate, when evaluated, should produce
 	// two numbers, the strength and the confidence.
@@ -70,29 +70,29 @@ void PromiseTruthValue::update(void) const
 	}
 }
 
-strength_t PromiseTruthValue::get_mean() const
+strength_t FutureTruthValue::get_mean() const
 {
 	update();
 	return _value[MEAN];
 }
 
-std::string PromiseTruthValue::to_string(const std::string& indent) const
+std::string FutureTruthValue::to_string(const std::string& indent) const
 {
 	update();
-	std::string rv = indent + "(PromiseTruthValue\n";
+	std::string rv = indent + "(FutureTruthValue\n";
 		rv += _future->to_short_string(indent + "   ") + "\n";
 	rv += indent + "   ; Current sample:\n";
 	rv += indent + "   ; " + SimpleTruthValue::to_string() + "\n)";
 	return rv;
 }
 
-bool PromiseTruthValue::operator==(const Value& rhs) const
+bool FutureTruthValue::operator==(const Value& rhs) const
 {
-	if (PROMISE_TRUTH_VALUE != rhs.get_type()) return false;
+	if (FUTURE_TRUTH_VALUE != rhs.get_type()) return false;
 
-	const PromiseTruthValue *ftv = dynamic_cast<const PromiseTruthValue *>(&rhs);
+	const FutureTruthValue *ftv = dynamic_cast<const FutureTruthValue *>(&rhs);
 	return ftv->_future == _future;
 }
 
-DEFINE_VALUE_FACTORY(PROMISE_TRUTH_VALUE,
-	createPromiseTruthValue, const Handle&)
+DEFINE_VALUE_FACTORY(FUTURE_TRUTH_VALUE,
+	createFutureTruthValue, const Handle&)
