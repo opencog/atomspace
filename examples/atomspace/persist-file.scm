@@ -58,7 +58,7 @@
 ; loads it. For plain Atomese, this is a complete waste of time, and,
 ; for large files, it can be painfully slow. Yes, you can disable it
 ; with the GUILE_AUTO_COMPILE flag, or by loading it "raw", but that
-; still won't be enough for extrememly large files. One can do even
+; still won't be enough for extremely large files. One can do even
 ; better, by using the "fast loader".
 ;
 ; But first: you can load Atomese without compiling by doing this:

@@ -99,7 +99,7 @@
 ; DecimateLink. But that would make the demo too complicated, so
 ; that is not done. See however, below.
 
-; We really only want the third number. So grab that.
+; We really ony want the third number. So grab that.
 (define (get-mi STRING-A STRING-B)
 	(cog-value-ref (get-mi-stream STRING-A STRING-B) 2))
 
@@ -114,7 +114,7 @@
 (observe "hello" "Gary")
 (get-mi "hello" "world")
 
-(observe "what's" "up")
+(observe "whats" "up")
 (get-mi "hello" "world")
 
 ; Dump the contents of the AtomSpace. Review to make sure the
@@ -122,7 +122,7 @@
 (cog-prt-atomspace)
 
 ; -------------------------------------------------------------
-; Repeat some of the above, this time using the DecimateLink
+; Repeate some of the above, this time using the DecimateLink
 ; to pick out the desired component.
 
 ; Defina a bit-mask and install it.
@@ -141,7 +141,7 @@
 		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
 		(FloatValueOf ATOM tvp)))
 
-; A new procedure, that works only on the one item.
+; A new proceedure, that works only on the one item.
 (DefineLink
 	(DefinedProcedure "scalar MI")
 	(Lambda
