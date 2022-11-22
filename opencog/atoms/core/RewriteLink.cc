@@ -167,8 +167,9 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
                                     const HandleMap& vm) const
 {
-	Variables vars(nvardecl);
 	Handle nbody = get_variables().substitute(body, vm, _silent);
+
+	Variables vars(nvardecl);
 	bool needless_quotation = true;
 	nbody = consume_quotations(vars, nbody, Quotation(),
 	                           needless_quotation, true);
