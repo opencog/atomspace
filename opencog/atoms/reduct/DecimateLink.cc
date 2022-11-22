@@ -46,18 +46,48 @@ void DecimateLink::init(void)
 
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
-	// get_value() causes execution to happen on the arguments
-	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
-	BoolValuePtr bvp = BoolValueCast(vm);
-
-	if (nullptr == bvp)
-		throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
-
-	const std::vector<bool>& vmask = bvp->value();
-
+	// The vector we're planning on cutting down.
 	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
 
-	return do_execute(vmask, vi);
+	// Lets see what kind of mask this is. We accept three kinds:
+	// A BoolValue, NumberNode and FloatValue
+	// get_value() causes execution to happen on the arguments
+	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
+	Type mtype = vm->get_type();
+	if (BOOL_VALUE == mtype)
+	{
+		BoolValuePtr bvp = BoolValueCast(vm);
+		const std::vector<bool>& vmask = bvp->value();
+		return do_execute(vmask, vi);
+	}
+
+	// XXX FIXME ... both the NumberNode and the FloatValue variations
+	// below make a copy of the mask.  Instead of making a copy, create
+	// something more efficient/faster. It is, after all, a simple
+	// test...
+
+	// Perhaps its a NumberNode?
+	if (NUMBER_NODE == mtype)
+	{
+		NumberNodePtr nnp = NumberNodeCast(vm);
+		const std::vector<double>& fmask = nnp->value();
+		std::vector<bool> vmask;
+		for (double f : fmask)
+			vmask.emplace_back(0 < f);
+		return do_execute(vmask, vi);
+	}
+
+	if (FLOAT_VALUE == mtype)
+	{
+		FloatValuePtr fvp = FloatValueCast(vm);
+		const std::vector<double>& fmask = fvp->value();
+		std::vector<bool> vmask;
+		for (double f : fmask)
+			vmask.emplace_back(0 < f);
+		return do_execute(vmask, vi);
+	}
+
+	throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
 }
 
 ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
