@@ -97,7 +97,7 @@
 ; the formula to extract the third number at the beginning, and
 ; then only work with that. The extraction can be done with the
 ; DecimateLink. But that would make the demo too complicated, so
-; that is not done.
+; that is not done. See however, below.
 
 ; We really ony want the third number. So grab that.
 (define (get-mi STRING-A STRING-B)
@@ -120,5 +120,65 @@
 ; Dump the contents of the AtomSpace. Review to make sure the
 ; demo was understood.
 (cog-prt-atomspace)
+
+; -------------------------------------------------------------
+; Repeate some of the above, this time using the DecimateLink
+; to pick out the desired component.
+
+; Defina a bit-mask and install it.
+(cog-set-value! (Concept "someplace") (Predicate "mask key")
+	(BoolValue 0 0 1))
+
+; Verify that masking works
+(cog-execute!
+	(Decimate
+		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
+		(FloatValueOf (AnyNode "grand total") tvp)))
+
+; Wrap it in a utility constructor
+(define (make-deci ATOM)
+	(Decimate
+		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
+		(FloatValueOf ATOM tvp)))
+
+; A new proceedure, that works only on the one item.
+(DefineLink
+	(DefinedProcedure "scalar MI")
+	(Lambda
+		(VariableList (Variable "$L") (Variable "$R"))
+		(Log2
+			(Divide
+				(Times
+					(make-deci (List (Variable "$L") (Variable "$R")))
+					(make-deci (AnyNode "grand total")))
+				(Times
+					(make-deci (List (Variable "$L") (Any "right wildcard")))
+					(make-deci (List (Any "left wildcard") (Variable "$R"))))))))
+
+(define (install-scalar THING-A THING-B)
+	(define pair (List THING-A THING-B))
+	(cog-set-value! pair (Predicate "Alt MI Key")
+		(FormulaStream
+			(ExecutionOutput (DefinedProcedure "scalar MI") pair))))
+
+; Convenience wrapper, works with strings.
+(define (install-scalar-mi STRING-A STRING-B)
+	(install-scalar (Concept STRING-A) (Concept STRING-B)))
+
+; Get the value
+(define (get-computed-scalar THING-A THING-B)
+	(cog-value (List THING-A THING-B) (Predicate "Alt MI Key")))
+
+(define (get-mi-scalar STRING-A STRING-B)
+	(get-computed-scalar (Concept STRING-A) (Concept STRING-B)))
+
+; Try it out
+(get-mi-scalar "hello" "world")
+(get-mi "hello" "world")
+
+(observe "Hey" "Joe")
+
+(get-mi-scalar "hello" "world")
+(get-mi "hello" "world")
 
 ; ------- THE END -------
