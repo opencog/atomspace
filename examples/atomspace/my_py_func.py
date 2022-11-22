@@ -10,7 +10,7 @@ from opencog.atomspace import types
 
 asp = AtomSpace()
 
-# Python function taking two atoms, converting thier string-names to
+# Python function taking two atoms, converting their string-names to
 # floats, adding the floats, and returning a new atom holding the sum.
 def my_py_func(atoma, atomb):
     print('Python received two arguments:\n' + str(atoma) + str(atomb))

@@ -9,7 +9,7 @@
 ; RocksDB backend, although any set of backends can be used. This
 ; demo requires Postgres to be configured, and the RocksDB backend
 ; to be installed. If you want to skip Postgres, then just try the
-; demo wth two different RocksDB stores.
+; demo with two different RocksDB stores.
 ;
 
 (use-modules (ice-9 readline))

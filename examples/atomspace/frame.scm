@@ -1,5 +1,5 @@
 ;
-; frame.scm -- Combining StateLink with dervived AtomSpaces
+; frame.scm -- Combining StateLink with derived AtomSpaces
 ;
 ; The StateLink guarantees that only one copy of the StateLink
 ; will be present in the AtomSpace.  The cog-push-atomspace and

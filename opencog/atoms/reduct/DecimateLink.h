@@ -33,6 +33,7 @@ public:
 	DecimateLink(const DecimateLink&) = delete;
 	DecimateLink& operator=(const DecimateLink&) = delete;
 
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);

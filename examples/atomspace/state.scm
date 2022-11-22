@@ -117,7 +117,7 @@
 	(Evaluation (Predicate "Is A") (List (Concept "fruit") (Variable "$x")))))
 
 ; ------------------
-; The is-a relation is so very special, it get's it's own custom link
+; The is-a relation is so very special, it gets it's own custom link
 ; type. It is a bit shorter and easier to read.
 
 (Inheritance (Concept "fruit") (Concept "apple"))

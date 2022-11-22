@@ -4,7 +4,7 @@
 ; The AtomSpace is an in-RAM database. You just might want to sometimes
 ; write some of it out to disk, and save it for later; or maybe you want
 ; to share AtomSpace contents with other AtomSpaces. This is accomplished
-; with "persistance" plug-in modules. As of this writing, there are
+; with "persistence" plug-in modules. As of this writing, there are
 ; four stable, supported modules for doing this:
 ;
 ; (persist-sql)   - Stores the AtomSpace to a PostgreSQL database.
@@ -42,7 +42,7 @@
 ; format (serialization/deserialization) takes up far more CPU time than
 ; the AtomSpace does. That is, converting Atoms/Values into key-value
 ; pairs (for no-SQL databases) or into row/column format (for SQL) or
-; even into vertexes and edges (for graph databases) is a very costly
+; even into vertices and edges (for graph databases) is a very costly
 ; proposition. It take a *lot* of CPU time! Worse, most databases are
 ; network-enabled, and thus have to create packets, send them and decode
 ; them at the other end, which adds even more overhead!  We found this

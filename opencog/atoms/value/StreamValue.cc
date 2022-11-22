@@ -29,7 +29,11 @@ using namespace opencog;
 
 bool StreamValue::operator==(const Value& other) const
 {
-	return &other == this;
+	// Since we're streaming, get the latest value before comparing!
+	update();
+
+	// Let the base class do the hard work.
+	return FloatValue::operator==(other);
 }
 
 // ==============================================================

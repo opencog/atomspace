@@ -30,7 +30,7 @@ using namespace opencog;
 
 bool StringValue::operator==(const Value& other) const
 {
-	if (STRING_VALUE != other.get_type()) return false;
+	if (not other.is_type(STRING_VALUE)) return false;
 
 	const StringValue* sov = (const StringValue*) &other;
 

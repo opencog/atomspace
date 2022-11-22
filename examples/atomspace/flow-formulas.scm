@@ -17,10 +17,14 @@
 ; occurs every time the numeric value is accessed (i.e. when the
 ; strength and confidence of the TV are accessed).
 ;
-; The FormulaStream is a generalization of the FutureTruthValue, in
-; that it allows for the computation of any FloatValue. That is, the
-; SimpleTV's are just vectors of length two - the strength and
-; confidence, whereas the FloatValue is a vector of arbitrary length.
+; Note that SimpleTV's are just vectors of length two - the strength
+; and confidence. These are generalized by FloatValue, which can hold
+; a vector of arbitrary length.
+;
+; The FormulaStream generalizes the FutureTruthValue, so that it can
+; work with any FloatValue, not just TruthValues. An introductory demo
+; is provided at the bottom of this file. A more complex demo is in the
+; `flow-futures.scm` file.
 
 (use-modules (opencog) (opencog exec))
 

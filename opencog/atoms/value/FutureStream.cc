@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/value/FormulaStream.cc
+ * opencog/atoms/value/FutureStream.cc
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2020, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  */
 
 #include <stdlib.h>
-#include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/value/FutureStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -30,17 +30,17 @@ using namespace opencog;
 
 // ==============================================================
 
-FormulaStream::FormulaStream(const Handle& h) :
-	StreamValue(FORMULA_STREAM), _formula(h), _as(h->getAtomSpace())
+FutureStream::FutureStream(const Handle& h) :
+	Value(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
 {
 	ValuePtr vp;
 	if (h->is_executable())
 	{
-		vp = h->execute(_as);
+		_value = h->execute(_as);
 	}
 	else if (h->is_evaluatable())
 	{
-		vp = ValueCast(h->evaluate(_as));
+		_value = ValueCast(h->evaluate(_as));
 	}
 	else
 	{
@@ -48,62 +48,45 @@ FormulaStream::FormulaStream(const Handle& h) :
 			"Expecting an executable/evaluatable atom, got %s",
 			h->to_string().c_str());
 	}
-
-	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting formula to return a FloatValue, got %s",
-			vp->to_string().c_str());
-
-	_value = FloatValueCast(vp)->value();
 }
 
 // ==============================================================
 
-void FormulaStream::update() const
+void FutureStream::update() const
 {
-	FloatValuePtr vp;
-	if (_formula->is_evaluatable())
+	if (_formula->is_executable())
 	{
-		vp = _formula->evaluate(_as);
+		_value = _formula->execute(_as);
 	}
-	else if (_formula->is_executable())
+	else if (_formula->is_evaluatable())
 	{
-		vp = FloatValueCast(_formula->execute(_as));
+		_value = ValueCast(_formula->evaluate(_as));
 	}
-
-	_value = vp->value();
 }
 
 // ==============================================================
 
-std::string FormulaStream::to_string(const std::string& indent) const
+std::string FutureStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += "\n" + _formula->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += indent + "   ; " + FloatValue::to_string("", FLOAT_VALUE);
+	rv += indent + "   ; " + _value->to_string("");
 	rv += "\n)";
 	return rv;
 }
 
 // ==============================================================
 
-bool FormulaStream::operator==(const Value& other) const
+bool FutureStream::operator==(const Value& other) const
 {
-	// If they are both FormulaStream's, then we're good.
-	if (FORMULA_STREAM == other.get_type())
-	{
-		const FormulaStream* eso = (const FormulaStream*) &other;
-		return eso->_formula == _formula;
-	}
+	if (FUTURE_STREAM != other.get_type()) return false;
 
-	if (not other.is_type(FLOAT_VALUE)) return false;
-
-	// Value-compare
-	return FloatValue::operator==(other);
+	const FutureStream* eso = (const FutureStream*) &other;
+	return eso->_formula == _formula;
 }
 
 // ==============================================================
 
 // Adds factor when library is loaded.
-DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const Handle&)
+DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const Handle&)

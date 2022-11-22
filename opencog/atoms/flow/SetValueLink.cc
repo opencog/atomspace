@@ -22,9 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/value/FormulaStream.h>
 #include "SetValueLink.h"
 
 using namespace opencog;
@@ -51,64 +50,32 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 /// first argument. The computed value is returned.
 ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 {
-	// Obtain the value that we will be setting.
-	ValuePtr pap;
+	// Simple case: just set the Value. Obtain it, as needed.
 	if (3 == _outgoing.size())
 	{
+		ValuePtr pap;
 		if (_outgoing[2]->is_executable())
 			pap = _outgoing[2]->execute(as, silent);
 		else
 			pap = _outgoing[2];
-	}
-	else
-	{
-		Handle put(_outgoing[2]);
-		Type pt = put->get_type();
-		if (DEFINED_PREDICATE_NODE == pt or DEFINED_SCHEMA_NODE == pt)
-		{
-			put = DefineLink::get_definition(put);
-			pt = put->get_type();
-		}
 
-		// XXX TODO we should perform a type-check to make sure
-		// variable declarations match the args.
-		if (not nameserver().isA(pt, LAMBDA_LINK))
-			throw SyntaxException(TRACE_INFO,
-				"Expecting a LambdaLink, got %s",
-				put->to_string().c_str());
-
-		LambdaLinkPtr lamp(LambdaLinkCast(put));
-		const Handle& args(_outgoing[3]);
-		Handle reduct;
-		if (LIST_LINK == args->get_type())
-			reduct = lamp->beta_reduce(args->getOutgoingSet());
-		else
-			reduct = lamp->beta_reduce({args});
-
-		if (reduct->is_executable())
-			pap = reduct->execute(as, silent);
-		else
-			pap = reduct;
-	}
-
-	// We cannot set Values unless we are working with the unique
-	// version of the atom that sits in the AtomSpace!
-	Handle ah(as->get_atom(_outgoing[0]));
-	Handle ak(as->get_atom(_outgoing[1]));
-	if (ah and ak)
-	{
-		ah->setValue(ak, pap);
+		as->set_value(_outgoing[0], _outgoing[1], pap);
 		return pap;
 	}
 
-	// Hmm. shouldn't this be SilentException?
-	if (silent)
-		throw SilentException();
+	// Complicated Case: There are four arguments. The first two are
+	// Atom and key, as before. Then comes a lambda or function in
+	// third place, and the arguments to the function in fourth place.
+	// Wrap these two in an ExecutionOutput, and then wrap that in a
+	// FormulaStream. The user could do this themselves; this is
+	// provided as a conenience function. Note that SetTV works the
+	// same way.
 
-	throw InvalidParamException(TRACE_INFO,
-		"No atom %s or no key %s",
-		_outgoing[0]->to_string().c_str(),
-		_outgoing[1]->to_string().c_str());
+	Handle exo(createExecutionOutputLink(_outgoing[2], _outgoing[3]));
+	exo = as->add_atom(exo);
+	ValuePtr fsp = createFormulaStream(exo);
+	as->set_value(_outgoing[0], _outgoing[1], fsp);
+	return fsp;
 }
 
 DEFINE_LINK_FACTORY(SetValueLink, SET_VALUE_LINK)
