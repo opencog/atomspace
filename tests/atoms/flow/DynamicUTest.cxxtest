@@ -273,6 +273,24 @@ void DynamicUTest::test_futures()
 	double vmi = fvp->value()[2];
 	TS_ASSERT(fabs(vmi - 0.7369655941662062) <= EPSI);
 
+	// Bump the numbers
+	_eval.eval("(observe \"Hey\" \"Joe\")");
+	_eval.eval("(observe \"whazzup\" \"Joe\")");
+
+	scalar = _eval.eval_v("(get-mi-scalar \"hello\" \"world\")");
+	printf("scalar: %s\n", scalar->to_string().c_str());
+	fvp = FloatValueCast(scalar);
+	TS_ASSERT(nullptr != fvp);
+	smi = fvp->value()[0];
+	TS_ASSERT(fabs(smi - 1.222392421336448) <= EPSI);
+
+	flvect = _eval.eval_v("(get-mi-stream \"hello\" \"world\")");
+	printf("flvect: %s\n", flvect->to_string().c_str());
+	fvp = FloatValueCast(flvect);
+	TS_ASSERT(nullptr != fvp);
+	vmi = fvp->value()[2];
+	TS_ASSERT(fabs(vmi - 1.222392421336448) <= EPSI);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
