@@ -167,7 +167,8 @@ TruthValuePtr FormulaPredicateLink::evaluate(AtomSpace* as, bool silent)
 		}
 
 		throw RuntimeException(TRACE_INFO,
-			"Expecting a FunctionLink that returns NumberNode/FloatValue");
+			"Expecting a FunctionLink that returns NumberNodeor FloatValue; got %s",
+			v->to_string().c_str());
 	}
 	if (nums.size() == 2)
 		return createSimpleTruthValue(nums);
