@@ -883,8 +883,9 @@ ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Apply a BoolValue to any other vector, knocking out all locations
 // marked with a zero, keeping all location marked with a one, thus
-// creating a shorter vector.
-DECIMATE_LINK <- FUNCTION_LINK
+// creating a shorter vector. Works on vectors of Bools, Strings, Floats,
+// etc. Declare that, so the static typechecker passes.
+DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
