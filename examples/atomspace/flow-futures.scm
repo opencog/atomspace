@@ -23,15 +23,15 @@
 ; on pairs, as well as on marginals.
 
 (define (incr-counts THING-A THING-B)
-	(cog-inc-count! (List THING-A THING-B))
-	(cog-inc-count! (List (AnyNode "left wildcard") THING-B))
-	(cog-inc-count! (List THING-A (AnyNode "right wildcard")))
-	(cog-inc-count! (AnyNode "grand total")))
+	(cog-inc-count! (List THING-A THING-B) 1.0)
+	(cog-inc-count! (List (AnyNode "left wildcard") THING-B) 1.0)
+	(cog-inc-count! (List THING-A (AnyNode "right wildcard")) 1.0)
+	(cog-inc-count! (AnyNode "grand total") 1.0))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".
 (define (observe STRING-A STRING-B)
-	(incr-count (Concept STRING-A) (Concept STRING-B)))
+	(incr-counts (Concept STRING-A) (Concept STRING-B)))
 
 ; Provide some initial data
 (observe "hello" "world")
@@ -73,9 +73,52 @@
 (define (install-mi STRING-A STRING-B)
 	(install-formula (Concept STRING-A) (Concept STRING-B)))
 
+; Get the value
+(define (get-computed-value THING-A THING-B)
+	(cog-value (List THING-A THING-B) (Predicate "MI Key")))
+
+(define (get-mi-stream STRING-A STRING-B)
+	(get-computed-value (Concept STRING-A) (Concept STRING-B)))
+
 ; -------------------------------------------------------------
 ; OK, we're done. Lets see what happens.
 
-(install-mi "hello" "world)
+(install-mi "hello" "world")
+(get-mi-stream "hello" "world")
+
+; Well, that's messy! But it does show the full structure of
+; what was set up. Note that the formulas were applied to the
+; full vector of floats, which have the form (1 0 N) for some
+; count N. Dividing by zero and taking a log will result in a
+; NAN (Not A Number), and so the first two numbers are garbage.
+; We only want the third number.
+;
+; Instead of treating the full vector, we could have written
+; the formula to extract the third number at the beginning, and
+; then only work with that. The extraction can be done with the
+; DecimateLink. But that would make the demo too complicated, so
+; that is not done.
+
+; We really ony want the third number. So grab that.
+(define (get-mi STRING-A STRING-B)
+	(cog-value-ref (get-mi-stream STRING-A STRING-B) 2))
+
+(get-mi "hello" "world")
+
+; And now play with the data. Observe the pair a second time.
+; The MI will change.
+(observe "hello" "world")
+(get-mi "hello" "world")
+
+; Observing other pairs will also change the MI
+(observe "hello" "Gary")
+(get-mi "hello" "world")
+
+(observe "whats" "up")
+(get-mi "hello" "world")
+
+; Dump the contents of the AtomSpace. Review to make sure the
+; demo was understood.
+(cog-prt-atomspace)
 
 ; ------- THE END -------
