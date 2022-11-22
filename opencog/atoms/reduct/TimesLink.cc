@@ -100,7 +100,7 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 		return vsum;
 	}
 
-	// Are they numbers? If so, perform vector (pointwise) subtraction.
+	// Are they numbers? If so, perform vector (pointwise) multiplication.
 	// Always lower the strength: Number+Number->Number
 	// but FloatValue+Number->FloatValue
 	try
