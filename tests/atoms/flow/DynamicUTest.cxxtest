@@ -40,6 +40,7 @@ public:
 	void test_dynamic_predicate();
 	void test_defined_dynamic();
 	void test_formula_stream();
+	void test_futures();
 };
 
 DynamicUTest::DynamicUTest(void) : _asp(createAtomSpace()), _eval(_asp)
@@ -247,6 +248,21 @@ void DynamicUTest::test_formula_stream()
 			TS_ASSERT(fabs(result[k] - rv[k] - 10.0) <= EPSI);
 		}
 	}
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Test the flow-dutures.scm example.
+void DynamicUTest::test_futures()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	_eval.eval("(load-from-path \"tests/atoms/flow/futures.scm\")");
+
+	ValuePtr scalar = _eval.eval_v("(get-mi-scalar \"hello\" \"world\")");
+	printf("scalar: %s\n", scalar->to_string().c_str());
+
+	// TS_ASSERT_EQUALS(result->get_type(), FUTURE_TRUTH_VALUE);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
