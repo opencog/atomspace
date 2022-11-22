@@ -7,6 +7,7 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/BoolValue.h>
@@ -147,6 +148,16 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(svec[i]);
 		return createStringValue(chopped);
+	}
+
+	// A Link.
+	if (vi->is_link())
+	{
+		const HandleSeq& oset(HandleCast(vi)->getOutgoingSet());
+		HandleSeq chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(oset[i]);
+		return createLink(chopped, vitype);
 	}
 
 	// WTF. Should never be reached.
