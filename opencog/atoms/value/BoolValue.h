@@ -51,6 +51,7 @@ public:
 	BoolValue(bool v) : Value(BOOL_VALUE) { _value.push_back(v); }
 	BoolValue(const std::vector<bool>& v)
 		: Value(BOOL_VALUE), _value(v) {}
+	BoolValue(unsigned long);
 	BoolValue(Type t, const std::vector<bool>& v) : Value(t), _value(v) {}
 
 	virtual ~BoolValue() {}

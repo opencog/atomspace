@@ -279,6 +279,15 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, BOOL_VALUE))
 	{
+		// Special case -- if it is a single integer, then its
+		// a mask.
+		SCM sval = SCM_CAR(svalue_list);
+		SCM srest = SCM_CDR(svalue_list);
+		if (scm_is_null(srest) and scm_is_integer(sval))
+		{
+			size_t mask = verify_size_t(sval, "cog-new-value", 2);
+			return valueserver().create(t, mask);
+		}
 		std::vector<bool> valist;
 		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);

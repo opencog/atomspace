@@ -26,6 +26,28 @@
 
 using namespace opencog;
 
+BoolValue::BoolValue(unsigned long mask)
+	: Value(BOOL_VALUE)
+{
+	// Avoid padding with zeroes.
+	unsigned long mcopy = mask;
+	size_t maxlen = 1;
+	for (size_t i=0; i<8*sizeof(unsigned long); i++)
+	{
+		if (mcopy & 0x1) maxlen = i;
+		mcopy >>= 1;
+	}
+
+	// We print vectors as little-endians but the integer
+	// itself is a big-endian, so we reverse the bit pattern.
+	_value.resize(maxlen+1);
+	for (size_t i=0; i<=maxlen; i++)
+	{
+		_value[maxlen-i] = (mask & 0x1);
+		mask >>= 1;
+	}
+}
+
 bool BoolValue::operator==(const Value& other) const
 {
 	if (BOOL_VALUE != other.get_type()) return false;
@@ -182,3 +204,5 @@ DEFINE_VALUE_FACTORY(BOOL_VALUE,
                      createBoolValue, std::vector<bool>)
 DEFINE_VALUE_FACTORY(BOOL_VALUE,
                      createBoolValue, bool)
+DEFINE_VALUE_FACTORY(BOOL_VALUE,
+                     createBoolValue, unsigned long)
