@@ -71,7 +71,7 @@
 
 ; -------------------------------------------------------------
 
-; Defina a bit-mask and install it.
+; Define a bit-mask and install it.
 (cog-set-value! (Concept "someplace") (Predicate "mask key")
 	(BoolValue 0 0 1))
 
