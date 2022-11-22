@@ -172,7 +172,8 @@
 (define (get-mi-scalar STRING-A STRING-B)
 	(get-computed-scalar (Concept STRING-A) (Concept STRING-B)))
 
-; Try it out
+; Try it out. Need to install it before first use.
+(install-scalar-mi "hello" "world")
 (get-mi-scalar "hello" "world")
 (get-mi "hello" "world")
 
