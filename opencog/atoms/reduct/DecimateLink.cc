@@ -56,10 +56,17 @@ ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 	const std::vector<bool>& vmask = bvp->value();
 
 	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
+
+	return do_execute(vmask, vi);
+}
+
+ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
+                                  const ValuePtr& vi)
+{
 	Type vitype = vi->get_type();
 
 	// Get the shorter of the two.
-	size_t len = std::min(vm->size(), vi->size());
+	size_t len = std::min(vmask.size(), vi->size());
 
 	// Handle the various value types. Try the most likely ones first.
 	// If its a float value, it's a vector.
