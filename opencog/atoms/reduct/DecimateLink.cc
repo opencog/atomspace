@@ -7,6 +7,7 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/BoolValue.h>
@@ -46,20 +47,57 @@ void DecimateLink::init(void)
 
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
+	// The vector we're planning on cutting down.
+	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
+
+	// Lets see what kind of mask this is. We accept three kinds:
+	// A BoolValue, NumberNode and FloatValue
 	// get_value() causes execution to happen on the arguments
 	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
-	BoolValuePtr bvp = BoolValueCast(vm);
+	Type mtype = vm->get_type();
+	if (BOOL_VALUE == mtype)
+	{
+		BoolValuePtr bvp = BoolValueCast(vm);
+		const std::vector<bool>& vmask = bvp->value();
+		return do_execute(vmask, vi);
+	}
 
-	if (nullptr == bvp)
-		throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
+	// XXX FIXME ... both the NumberNode and the FloatValue variations
+	// below make a copy of the mask.  Instead of making a copy, create
+	// something more efficient/faster. It is, after all, a simple
+	// test...
 
-	const std::vector<bool>& vmask = bvp->value();
+	// Perhaps its a NumberNode?
+	if (NUMBER_NODE == mtype)
+	{
+		NumberNodePtr nnp = NumberNodeCast(vm);
+		const std::vector<double>& fmask = nnp->value();
+		std::vector<bool> vmask;
+		for (double f : fmask)
+			vmask.emplace_back(0 < f);
+		return do_execute(vmask, vi);
+	}
 
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
+	if (FLOAT_VALUE == mtype)
+	{
+		FloatValuePtr fvp = FloatValueCast(vm);
+		const std::vector<double>& fmask = fvp->value();
+		std::vector<bool> vmask;
+		for (double f : fmask)
+			vmask.emplace_back(0 < f);
+		return do_execute(vmask, vi);
+	}
+
+	throw SyntaxException(TRACE_INFO, "Mask must be a BoolValue!");
+}
+
+ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
+                                  const ValuePtr& vi)
+{
 	Type vitype = vi->get_type();
 
 	// Get the shorter of the two.
-	size_t len = std::min(vm->size(), vi->size());
+	size_t len = std::min(vmask.size(), vi->size());
 
 	// Handle the various value types. Try the most likely ones first.
 	// If its a float value, it's a vector.
@@ -110,6 +148,16 @@ ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(svec[i]);
 		return createStringValue(chopped);
+	}
+
+	// A Link.
+	if (vi->is_link())
+	{
+		const HandleSeq& oset(HandleCast(vi)->getOutgoingSet());
+		HandleSeq chopped;
+		for (size_t i=0; i<len; i++)
+			if (vmask[i]) chopped.push_back(oset[i]);
+		return createLink(chopped, vitype);
 	}
 
 	// WTF. Should never be reached.

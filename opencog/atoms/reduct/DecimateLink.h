@@ -25,6 +25,7 @@ class DecimateLink : public Link
 {
 protected:
 	void init(void);
+	ValuePtr do_execute(const std::vector<bool>&, const ValuePtr&);
 
 public:
 	DecimateLink(const Handle&, const Handle&);
