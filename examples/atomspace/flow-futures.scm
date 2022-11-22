@@ -19,5 +19,25 @@
 (use-modules (opencog) (opencog exec))
 
 ; -------------------------------------------------------------
+; Below is a toy pair-counting framework.  It increments counts
+; on pairs, as well as on marginals.
+
+(define (incr-counts THING-A THING-B)
+	(cog-inc-count! (List THING-A THING-B))
+	(cog-inc-count! (List (AnyNode "left wildcard") THING-B))
+	(cog-inc-count! (List THING-A (AnyNode "right wildcard")))
+	(cog-inc-count! (AnyNode "grand total")))
+
+; Same as above, but works with strings. It counts how often a pair
+; was "observed".
+(define (observe STRING-A STRING-B)
+	(incr-count (Concept STRING-A) (Concept STRING-B)))
+
+; Provide some initial data
+(observe "hello" "world")
+(observe "hello" "Sue")
+(observe "hello" "Adrian")
+(observe "goodbye" "Adrian")
+(observe "goodbye" "Mike")
 
 ; ------- THE END -------
