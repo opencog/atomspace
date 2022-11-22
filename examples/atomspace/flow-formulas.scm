@@ -22,8 +22,9 @@
 ; a vector of arbitrary length.
 ;
 ; The FormulaStream generalizes the FutureTruthValue, so that it can
-; work with any FloatValue, not just TruthValues. This is demo'ed in
-; the `flow-futures.scm` file.
+; work with any FloatValue, not just TruthValues. An introductory demo
+; is provided at the bottom of this file. A more complex demo is in the
+; `flow-futures.scm` file.
 
 (use-modules (opencog) (opencog exec))
 
@@ -208,5 +209,39 @@
 ; And take another look.
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
+
+; -------------------------------------------------------------
+; The FormulaStream is the generalization of FutureTruthValue, suitable
+; for streaming a FloatValue of arbitrary length. As before, whenever it
+; is accessed, the current vector value is recomputed. The recomputation
+; forced by calling `execute()` on the Atom that the stream is created
+; with.
+;
+; Create an Atom, a key, and a random stream of five numbers.
+; The random stream is a FloatValue vector, of length 5; each of
+; the numbers are randomly distributed between 0.0 and 1.0
+(define foo (Concept "foo"))
+(define bar (Concept "bar"))
+(define akey (Predicate "some key"))
+(define bkey (Predicate "other key"))
+
+(cog-set-value! foo akey (RandomStream 5))
+
+; Take a look at what was created.
+(cog-value foo akey)
+
+; Verify that it really is a vector, and that it changes with each
+; access. The StreamValueOfLink will sample from the RandomStream.
+(cog-execute! (StreamValueOf foo akey))
+
+; Apply a formula to that stream, to get a different stream.
+(define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
+
+; Place it on an atom, take a look at it, and make sure that it works.
+(cog-set-value! bar bkey fstream)
+(cog-value bar bkey)
+(cog-execute! (StreamValueOf bar bkey))
+(cog-execute! (StreamValueOf bar bkey))
+(cog-execute! (StreamValueOf bar bkey))
 
 ; ------- THE END -------
