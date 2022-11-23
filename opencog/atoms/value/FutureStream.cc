@@ -31,16 +31,15 @@ using namespace opencog;
 // ==============================================================
 
 FutureStream::FutureStream(const Handle& h) :
-	Value(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
+	LinkValue(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
 {
-	ValuePtr vp;
 	if (h->is_executable())
 	{
-		_value = h->execute(_as);
+		_value[0] = h->execute(_as);
 	}
 	else if (h->is_evaluatable())
 	{
-		_value = ValueCast(h->evaluate(_as));
+		_value[0] = ValueCast(h->evaluate(_as));
 	}
 	else
 	{
@@ -56,11 +55,11 @@ void FutureStream::update() const
 {
 	if (_formula->is_executable())
 	{
-		_value = _formula->execute(_as);
+		_value[0] = _formula->execute(_as);
 	}
 	else if (_formula->is_evaluatable())
 	{
-		_value = ValueCast(_formula->evaluate(_as));
+		_value[0] = ValueCast(_formula->evaluate(_as));
 	}
 }
 
@@ -71,7 +70,7 @@ std::string FutureStream::to_string(const std::string& indent) const
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += "\n" + _formula->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += indent + "   ; " + _value->to_string("");
+	rv += indent + "   ; " + _value[0]->to_string("");
 	rv += "\n)";
 	return rv;
 }
