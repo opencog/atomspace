@@ -71,14 +71,14 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
-	if (nameserver().isA(stream->get_type(), STREAM_VALUE))
+	if (stream->is_type(STREAM_VALUE))
 	{
 		// Sample a value out of the stream.
 		FloatValuePtr fvp = FloatValueCast(stream);
 		return createFloatValue(fvp->value());
 	}
 
-	if (nameserver().isA(stream->get_type(), LINK_STREAM_VALUE))
+	if (stream->is_type(LINK_STREAM_VALUE))
 	{
 		LinkValuePtr lvp = LinkValueCast(stream);
       return createLinkValue(lvp->value());
