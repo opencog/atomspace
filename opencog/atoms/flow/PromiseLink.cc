@@ -55,19 +55,17 @@ PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
 
 void PromiseLink::init(void)
 {
-	_future_type = NOTYPE;
-	_need_strip = false;
-
 	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting at least one executable Atom!");
+
+	_future_type = NOTYPE;
 
 	// Hunt down a TypeNode, if there is one
 	for (const Handle& h : _outgoing)
 	{
 		if (TYPE_NODE == h->get_type())
 		{
-			_need_strip = true;
 			TypeNodePtr tnp = TypeNodeCast(h);
 			if (NOTYPE == _future_type)
 				_future_type = tnp->get_kind();
@@ -76,9 +74,7 @@ void PromiseLink::init(void)
 					"Expecting at most one Type specification");
 			continue;
 		}
-		if (not h->is_executable())
-			throw SyntaxException(TRACE_INFO,
-				"Expecting an executable Atom, got %s", h->to_string().c_str());
+		_args.push_back(h);
 	}
 
 	if (NOTYPE == _future_type)
@@ -87,6 +83,15 @@ void PromiseLink::init(void)
 	if (not ((FORMULA_STREAM == _future_type) or (FUTURE_STREAM == _future_type)))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a Stream of some kind!");
+
+	// Unwrap a ListLink, if that's what we got.
+	if (1 == _args.size() and LIST_LINK == _args[0]->get_type())
+		_args = _args[0]->getOutgoingSet();
+
+	for (const Handle& h : _args)
+		if (not h->is_executable())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable Atom, got %s", h->to_string().c_str());
 }
 
 // ---------------------------------------------------------------
@@ -94,17 +99,7 @@ void PromiseLink::init(void)
 /// When executed, this will wrap the promise with a future.
 ValuePtr PromiseLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq oset;
-	if (not _need_strip)
-		oset = _outgoing;
-	else
-	{
-		for (const Handle& h : _outgoing)
-		{
-			if (TYPE_NODE == h->get_type()) continue;
-			oset.push_back(h);
-		}
-	}
+	HandleSeq oset = _args;
 
 	if (FORMULA_STREAM == _future_type)
 		return createFormulaStream(std::move(oset));

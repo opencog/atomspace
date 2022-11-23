@@ -40,7 +40,7 @@ class PromiseLink : public Link
 private:
 	void init(void);
 	Type _future_type;
-	bool _need_strip;
+	HandleSeq _args;
 
 public:
 	PromiseLink(const HandleSeq&&, Type=PROMISE_LINK);
