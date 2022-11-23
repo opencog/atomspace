@@ -58,6 +58,10 @@ void PromiseLink::init(void)
 	// The default future.
 	_future_type = FORMULA_STREAM;
 
+	if (0 < _outgoing.size() and not _outgoing[0]->is_executable())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an executable Atom!");
+
 	if (1 == _outgoing.size()) return;
 
 	if (2 != _outgoing.size())

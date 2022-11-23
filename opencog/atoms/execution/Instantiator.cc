@@ -722,9 +722,11 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// capable of this, yet, but the FunctionLinks all do seem to work.
 	//
 	// if (expr->is_executable())
-	if (nameserver().isA(expr->get_type(), FUNCTION_LINK) or
-	    nameserver().isA(expr->get_type(), SATISFYING_LINK) or
-	    nameserver().isA(expr->get_type(), JOIN_LINK))
+	if (expr->is_type(FUNCTION_LINK) or
+	    expr->is_type(SATISFYING_LINK) or
+	    expr->is_type(JOIN_LINK) or
+	    expr->is_type(PROMISE_LINK) or
+	    expr->is_type(PROMISE_PREDICATE_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
 		if (vp->is_atom())
