@@ -33,6 +33,7 @@ using namespace opencog;
 FutureStream::FutureStream(const Handle& h) :
 	LinkValue(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
 {
+	_value.resize(1);
 	if (h->is_executable())
 	{
 		_value[0] = h->execute(_as);
