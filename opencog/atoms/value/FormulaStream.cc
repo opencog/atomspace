@@ -39,6 +39,8 @@ FormulaStream::FormulaStream(const Handle& h) :
 FormulaStream::FormulaStream(const HandleSeq&& oset) :
 	StreamValue(FORMULA_STREAM), _formula(std::move(oset))
 {
+	if (not (FORMULA_STREAM == _type)) return;
+
 	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting at least one atom!");
@@ -118,7 +120,7 @@ void FormulaStream::update() const
 	for (const Handle& h :_formula)
 		newval.push_back(FloatValueCast(h->execute(_as))->value()[0]);
 
-	_value = newval;
+	_value.swap(newval);
 }
 
 // ==============================================================

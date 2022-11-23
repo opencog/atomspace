@@ -43,6 +43,8 @@ class FormulaStream
 	: public StreamValue
 {
 protected:
+	FormulaStream(Type t) : StreamValue(t) {}
+
 	void init(void);
 	virtual void update() const;
 	HandleSeq _formula;
