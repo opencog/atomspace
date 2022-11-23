@@ -106,11 +106,12 @@ TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
 
 std::string FuzzyTruthValue::to_string(const std::string& indent) const
 {
-    char buf[1024];
-    sprintf(buf, "(ftv %f %f)",
-            static_cast<float>(get_mean()),
-            static_cast<float>(get_confidence()));
-    return buf;
+#define BUFSZ 102
+    char buf[BUFSZ];
+    snprintf(buf, BUFSZ, "(ftv %f %f)",
+             static_cast<float>(get_mean()),
+             static_cast<float>(get_confidence()));
+    return indent + buf;
 }
 
 bool FuzzyTruthValue::operator==(const Value& rhs) const

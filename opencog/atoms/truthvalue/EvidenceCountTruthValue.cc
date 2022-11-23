@@ -153,11 +153,12 @@ TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
 
 std::string EvidenceCountTruthValue::to_string(const std::string& indent) const
 {
-	char buf[1024];
-	sprintf(buf, "(ectv %f %f)",
-	        static_cast<float>(_value[POS_COUNT]),
-	        static_cast<float>(_value[TOTAL_COUNT]));
-	return buf;
+#define BUFSZ 102
+	char buf[BUFSZ];
+	snprintf(buf, BUFSZ, "(ectv %f %f)",
+	         static_cast<float>(_value[POS_COUNT]),
+	         static_cast<float>(_value[TOTAL_COUNT]));
+	return indent + buf;
 }
 
 bool EvidenceCountTruthValue::operator==(const Value& rhs) const

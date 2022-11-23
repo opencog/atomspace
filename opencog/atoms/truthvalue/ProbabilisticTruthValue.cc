@@ -92,12 +92,13 @@ confidence_t ProbabilisticTruthValue::get_confidence() const
 
 std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
 {
-    char buf[1024];
-    sprintf(buf, "(ctv %f %f %f)",
-            static_cast<float>(get_mean()),
-            static_cast<float>(get_count()),
-            static_cast<double>(get_confidence()));
-    return buf;
+#define BUFSZ 102
+    char buf[BUFSZ];
+    snprintf(buf, BUFSZ, "(ctv %f %f %f)",
+             static_cast<float>(get_mean()),
+             static_cast<float>(get_count()),
+             static_cast<double>(get_confidence()));
+    return indent + buf;
 }
 
 bool ProbabilisticTruthValue::operator==(const Value& rhs) const

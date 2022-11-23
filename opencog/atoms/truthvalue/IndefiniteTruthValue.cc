@@ -219,15 +219,16 @@ TruthValuePtr IndefiniteTruthValue::merge(const TruthValuePtr& other,
 
 std::string IndefiniteTruthValue::to_string(const std::string& indent) const
 {
-    char buf[1024];
-    sprintf(buf, "[%f,%f,%f,%f,%f,%d]",
-            static_cast<float>(get_mean()),
-            static_cast<float>(getL()),
-            static_cast<float>(getU()),
-            static_cast<float>(getConfidenceLevel()),
-            static_cast<float>(diff),
-            symmetric);
-    return buf;
+#define BUFSZ 512
+    char buf[BUFSZ];
+    snprintf(buf, BUFSZ, "(itv %f %f %f %f %f %d)",
+             static_cast<float>(get_mean()),
+             static_cast<float>(getL()),
+             static_cast<float>(getU()),
+             static_cast<float>(getConfidenceLevel()),
+             static_cast<float>(diff),
+             symmetric);
+    return indent + buf;
 }
 
 DEFINE_VALUE_FACTORY(INDEFINITE_TRUTH_VALUE,
