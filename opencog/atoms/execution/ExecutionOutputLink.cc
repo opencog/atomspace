@@ -168,14 +168,25 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 	Handle sn(_outgoing[0]);
 	Handle args(_outgoing[1]);
 	Type snt = sn->get_type();
-	if (GROUNDED_SCHEMA_NODE == snt)
+	if (snt->is_type(GROUNDED_PROCEDURE_NODE))
 	{
 		GroundedProcedureNodePtr gsn = GroundedProcedureNodeCast(sn);
 		return gsn->execute(as, args, silent);
 	}
 
-	if (DEFINED_PROCEDURE_NODE == snt or DEFINED_SCHEMA_NODE == snt)
+	if (sn->is_type(DEFINED_PROCEDURE_NODE))
 		sn = DefineLink::get_definition(sn);
+
+	if (sn->is_type(FUNCTION_LINK))
+	{
+		FunctionLinkPtr flp = FunctionLinkCast(sn);
+		const FreeVariables& vars = flp->get_vars();
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+			args->getOutgoingSet(): HandleSeq{args});
+		Handle reduct = vars.substitute_nocheck(sn, oset, silent);
+		ValuePtr vp = reduct->execute(as, silent);
+		return vp;
+	}
 
 	if (LAMBDA_LINK == sn->get_type())
 	{
@@ -193,7 +204,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		// the case where GetLink returns a set of multiple results;
 		// we want to emulate that set passing through the processing
 		// pipeline. (XXX Is there a better way of doing this?)
-		// If there is more than one SettLink, then this won't work,
+		// If there is more than one SetLink, then this won't work,
 		// and we need to make a Cartesian product of them, instead.
 		bool have_set = false;
 		HandleSeq xargs(execute_args(as, oset, silent, have_set));
