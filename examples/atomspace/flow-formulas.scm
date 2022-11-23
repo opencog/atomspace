@@ -34,15 +34,14 @@
 ; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
 (define tv-stream
 	(FormulaTruthValue
-		(FormulaPredicate
-			(Minus
-				(Number 1)
-				(Times
-					(StrengthOf (Concept "A"))
-					(StrengthOf (Concept "B"))))
+		(Minus
+			(Number 1)
 			(Times
-				(ConfidenceOf (Concept "A"))
-				(ConfidenceOf (Concept "B"))))))
+				(StrengthOf (Concept "A"))
+				(StrengthOf (Concept "B"))))
+		(Times
+			(ConfidenceOf (Concept "A"))
+			(ConfidenceOf (Concept "B")))))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom. Of course, at this point Concept A and B only have the
@@ -81,6 +80,10 @@
       (Times
          (ConfidenceOf (Variable "$X"))
          (ConfidenceOf (Variable "$Y")))))
+
+; Note that FormulaPredicate is a link type; it computes the same
+; things as FormulaTruthValue, except that ... it is not a Value!
+; It's a link.
 
 ; Create an EvaluationLink that will apply the formula above to a pair
 ; of Atoms. This is as before; see the `formulas.scm` example for details.
@@ -235,7 +238,7 @@
 (cog-execute! (StreamValueOf foo akey))
 
 ; Apply a formula to that stream, to get a different stream.
-(define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
+(define fstream (FormulaStream (Plus (Number 10) (FloatValueOf foo akey))))
 
 ; Place it on an atom, take a look at it, and make sure that it works.
 (cog-set-value! bar bkey fstream)
