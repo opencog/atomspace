@@ -22,9 +22,6 @@
  */
 
 #include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/core/NumberNode.h>
 
 #include "SizeOfLink.h"
 
@@ -43,8 +40,7 @@ SizeOfLink::SizeOfLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Return the SizeOf, as a NumberNode.  Contrast this with
-/// SizeOfValueOf, which returns a FloatValue, instead.
+/// Return a FloatValue scalar.
 ValuePtr SizeOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = 0;
@@ -60,7 +56,7 @@ ValuePtr SizeOfLink::execute(AtomSpace* as, bool silent)
 		ary += pap->size();
 	}
 
-	return ValuePtr(createNumberNode(ary));
+	return createFloatValue((double)ary);
 }
 
 DEFINE_LINK_FACTORY(SizeOfLink, SIZE_OF_LINK)
