@@ -22,7 +22,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 #include "TimeLink.h"
 
@@ -53,7 +53,7 @@ ValuePtr TimeLink::execute(AtomSpace* as, bool silent)
 	gettimeofday(&tv, nullptr);
 	double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
 
-	return ValuePtr(createNumberNode(now));
+	return ValuePtr(createFloatValue(now));
 }
 
 DEFINE_LINK_FACTORY(TimeLink, TIME_LINK)

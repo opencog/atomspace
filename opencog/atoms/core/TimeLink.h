@@ -31,7 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The TimeLink returns a NumberNode holding the current time.
+/// The TimeLink returns a FloatValue holding the current time.
 /// At this time, it takes no arguments.
 ///
 class TimeLink : public FunctionLink
