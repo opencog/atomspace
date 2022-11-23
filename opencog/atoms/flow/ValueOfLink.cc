@@ -43,7 +43,18 @@ void ValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
 	if (2 != ary)
+	{
+		if (nameserver().isA(_type, TRUTH_VALUE_OF_LINK) or
+		    nameserver().isA(_type, STRENGTH_OF_LINK) or
+		    nameserver().isA(_type, CONFIDENCE_OF_LINK) or
+		    nameserver().isA(_type, COUNT_OF_LINK))
+		{
+			if (1 == ary) return;
+			throw SyntaxException(TRACE_INFO, "Expecting one atom!");
+		}
+
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
+	}
 }
 
 // ---------------------------------------------------------------
