@@ -96,7 +96,9 @@ TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
 
 		// At this point, we expect a FunctionLink of some kind.
 		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a FunctionLink, got %s",
+				flh->to_string().c_str());
 
 		// If the FunctionLink has free variables in it,
 		// reduce them with the provided arguments.

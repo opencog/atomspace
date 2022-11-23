@@ -55,6 +55,8 @@ PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
 
 void PromiseLink::init(void)
 {
+	if (PROMISE_LINK != _type) return;
+
 	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting at least one executable Atom!");
