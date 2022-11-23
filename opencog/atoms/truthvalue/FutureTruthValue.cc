@@ -37,6 +37,19 @@ FutureTruthValue::FutureTruthValue(const Handle& h)
 	update();
 }
 
+FutureTruthValue::FutureTruthValue(const HandleSeq&& oset)
+	: SimpleTruthValue(0, 0)
+{
+	if (1 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting exactly one Atom!");
+
+	_type = FUTURE_TRUTH_VALUE;
+	_future = oset[0];
+	_as = _future->getAtomSpace();
+	update();
+}
+
 FutureTruthValue::~FutureTruthValue()
 {}
 
@@ -96,3 +109,5 @@ bool FutureTruthValue::operator==(const Value& rhs) const
 
 DEFINE_VALUE_FACTORY(FUTURE_TRUTH_VALUE,
 	createFutureTruthValue, const Handle&)
+DEFINE_VALUE_FACTORY(FUTURE_TRUTH_VALUE,
+	createFutureTruthValue, const HandleSeq&&)

@@ -43,6 +43,7 @@ protected:
 
 public:
 	FutureTruthValue(const Handle&);
+	FutureTruthValue(const HandleSeq&&);
 	virtual ~FutureTruthValue();
 
 	virtual bool operator==(const Value& rhs) const;
