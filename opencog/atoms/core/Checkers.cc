@@ -38,6 +38,15 @@ static inline void check_null(const Handle& h)
 /// This only performs a very simple kind of type checking;
 /// it does not check deep types, nor does it check arity.
 
+// XXX FIXME Much of the onfusion below is due to a bug: if the
+// types script says something like
+// FOOBAR <- FUNCTION_LINK,BOOL_INPUT_LINK,NUMBER_INPUT_LINK
+// then the Foobar function will fail if given a boolean input:
+// the check for it being a number fails. We want this check to
+// be "input this or that", instead of "input this and that".
+// Right now, we don't have a syntax for that. We've been too
+// sloppy with types to get this right.
+
 /// Check to see if every input atom is of Evaluatable type.
 static bool check_evaluatable(const Handle& bool_atom)
 {
@@ -98,6 +107,14 @@ static bool check_bool_vect(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		Type t = h->get_type();
+		// Explcitly allow variables.
+		if (VARIABLE_NODE == t) continue;
+
+		// Allow Lambdas and whatnot.
+		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
+		if (EXECUTION_OUTPUT_LINK == t) continue;
+
 		if (not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
 	}
 	return true;
@@ -118,10 +135,13 @@ static bool check_numeric(const Handle& bool_atom)
 
 		if (VARIABLE_NODE == t) continue;
 		if (GLOB_NODE == t) continue;
+
+		// Hmm Should not be needed...
 		if (NUMBER_NODE == t) continue;
+		if (h->is_type(BOOL_OP_LINK)) continue;
 
 		// TODO - look up the schema, and make sure its numeric, also.
-		if (DEFINED_SCHEMA_NODE == t) continue;
+		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
 
 		// Oddly enough, sets of numbers are allowed.
 		if (SET_LINK == t and check_numeric(h)) continue;

@@ -163,7 +163,8 @@ Handle ClassServer::factory(const Handle& h) const
 	/* Well, is it OK, or not? */
 	if (checker and not checker(result))
 		throw SyntaxException(TRACE_INFO,
-				"Invalid Atom syntax: %s", result->to_string().c_str());
+			"Types fail to agree, invalid Atom syntax: %s",
+			result->to_string().c_str());
 
 	return result;
 }

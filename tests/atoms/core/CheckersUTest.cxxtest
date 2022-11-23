@@ -45,7 +45,7 @@ public:
 			),
 			const SyntaxException& e,
 			TS_ASSERT(std::string(e.get_message())
-				.find("Invalid Atom syntax:") == 0)
+				.find("Types fail to agree, invalid Atom syntax:") == 0)
 		);
 	}
 
@@ -58,7 +58,7 @@ public:
 			),
 			const SyntaxException& e,
 			TS_ASSERT(std::string(e.get_message())
-				.find("Invalid Atom syntax:") == 0)
+				.find("Types fail to agree, invalid Atom syntax:") == 0)
 		);
 	}
 };
