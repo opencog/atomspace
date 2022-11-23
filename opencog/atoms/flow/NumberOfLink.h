@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/ValueOfLink.h
+ * opencog/atoms/flow/NumberOfLink.h
  *
  * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_VALUE_OF_LINK_H
-#define _OPENCOG_VALUE_OF_LINK_H
+#ifndef _OPENCOG_NUMBER_OF_LINK_H
+#define _OPENCOG_NUMBER_OF_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,19 +31,21 @@ namespace opencog
  *  @{
  */
 
-/// The ValueOfLink returns the value on the indicated atom (first
-/// argument) at the indicated key (second argument).
+/// The NumberOfLink converts FloatValues to NumberNodes.
+/// It executes the Atom that it wraps, and stuffs the result
+/// into a NumberNode.
 ///
-class ValueOfLink : public FunctionLink
+class NumberOfLink : public FunctionLink
 {
 private:
 	void init(void);
 
 public:
-	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
+	NumberOfLink(const HandleSeq&&, Type=NUMBER_OF_LINK);
+	NumberOfLink(const Handle&);
 
-	ValueOfLink(const ValueOfLink&) = delete;
-	ValueOfLink& operator=(const ValueOfLink&) = delete;
+	NumberOfLink(const NumberOfLink&) = delete;
+	NumberOfLink& operator=(const NumberOfLink&) = delete;
 
 	// Return a pointer to the value at the specified key.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -51,10 +53,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(ValueOfLink)
-#define createValueOfLink CREATE_DECL(ValueOfLink)
+LINK_PTR_DECL(NumberOfLink)
+#define createNumberOfLink CREATE_DECL(NumberOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_VALUE_OF_LINK_H
+#endif // _OPENCOG_NUMBER_OF_LINK_H

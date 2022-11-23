@@ -36,6 +36,14 @@ ValueOfLink::ValueOfLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ValueOfLink, got %s", tname.c_str());
 	}
+	init();
+}
+
+void ValueOfLink::init(void)
+{
+	size_t ary = _outgoing.size();
+	if (2 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -43,10 +51,6 @@ ValueOfLink::ValueOfLink(const HandleSeq&& oset, Type t)
 /// When executed, this will return the value at the indicated key.
 ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
-	size_t ary = _outgoing.size();
-	if (2 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
-
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the
 	// AtomSpace! It can happen, during evaluation e.g. of
