@@ -879,7 +879,7 @@ RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
 SINE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return the sum of vector components of a NumberNode or FloatValue.
-ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
+ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK,BOOLEAN_INPUT_LINK
 
 // Apply a BoolValue to any other vector, knocking out all locations
 // marked with a zero, keeping all location marked with a one, thus
