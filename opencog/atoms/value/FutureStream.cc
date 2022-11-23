@@ -33,6 +33,7 @@ using namespace opencog;
 FutureStream::FutureStream(const Handle& h) :
 	LinkStreamValue(FUTURE_STREAM), _formula({h}), _as(h->getAtomSpace())
 {
+	init();
 }
 
 FutureStream::FutureStream(const HandleSeq&& oset) :
@@ -45,10 +46,19 @@ FutureStream::FutureStream(const HandleSeq&& oset) :
 			"Expecting at least one atom!");
 
 	_as = _formula[0]->getAtomSpace();
+
+	init();
 }
 
 void FutureStream::init(void)
 {
+	if (not (FUTURE_STREAM == _type)) return;
+
+	// Unwrap a ListLink, if it is present.
+	if (1 == _formula.size() and LIST_LINK == _formula[0]->get_type())
+		_formula = _formula[0]->getOutgoingSet();
+
+	// Verify that we've got valid stuff.
 	for (const Handle& h : _formula)
 	{
 		if (h->is_executable())
@@ -92,7 +102,7 @@ std::string FutureStream::to_string(const std::string& indent) const
 	for (const Handle& h : _formula)
 		rv += "\n" + h->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += indent + "   ; " + LinkValue::to_string("");
+	rv += LinkValue::to_string(indent + "   ; ");
 	rv += "\n)";
 	return rv;
 }
