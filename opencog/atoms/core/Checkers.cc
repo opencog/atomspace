@@ -38,6 +38,15 @@ static inline void check_null(const Handle& h)
 /// This only performs a very simple kind of type checking;
 /// it does not check deep types, nor does it check arity.
 
+// XXX FIXME Much of the onfusion below is due to a bug: if the
+// types script says something like
+// FOOBAR <- FUNCTION_LINK,BOOL_INPUT_LINK,NUMBER_INPUT_LINK
+// then the Foobar function will fail if given a boolean input:
+// the check for it being a number fails. We want this check to
+// be "input this or that", instead of "input this and that".
+// Right now, we don't have a syntax for that. We've been too
+// sloppy with types to get this right.
+
 /// Check to see if every input atom is of Evaluatable type.
 static bool check_evaluatable(const Handle& bool_atom)
 {
@@ -126,7 +135,10 @@ static bool check_numeric(const Handle& bool_atom)
 
 		if (VARIABLE_NODE == t) continue;
 		if (GLOB_NODE == t) continue;
+
+		// Hmm Should not be needed...
 		if (NUMBER_NODE == t) continue;
+		if (h->is_type(BOOL_OP_LINK)) continue;
 
 		// TODO - look up the schema, and make sure its numeric, also.
 		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
