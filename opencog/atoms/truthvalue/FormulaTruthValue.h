@@ -50,8 +50,6 @@ public:
 	FormulaTruthValue(const HandleSeq&&);
 	virtual ~FormulaTruthValue();
 
-	virtual bool operator==(const Value& rhs) const;
-
 	std::string to_string(const std::string&) const;
 
 	/// Update the values. The get_confidence() method is NOT

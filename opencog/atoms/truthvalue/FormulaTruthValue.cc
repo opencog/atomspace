@@ -66,7 +66,7 @@ void FormulaTruthValue::init(void)
 	// If there is just one atom, then it is either a ListLink wrapping
 	// a pair of formulas, or it is a predicate that is promising us
 	// TV's in the future.
-	if (1 ==  _formula.size() and LIST_LINK == _formula[0]->get_type())
+	if (1 == _formula.size() and LIST_LINK == _formula[0]->get_type())
 		_formula = _formula[0]->getOutgoingSet();
 
 	// We expect two formulas, they produce the strength and
@@ -76,7 +76,18 @@ void FormulaTruthValue::init(void)
 			"Expecting no more than two formulas; got %s",
 				_formula.size());
 
-	for (size_t i=0; i<_formula.size(); i++)
+	if (1 == _formula.size())
+	{
+		if (not _formula[0]->is_type(EVALUATABLE_LINK) and
+		    not _formula[0]->is_executable())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an evalutable or executable predicate, got %s",
+				_formula[0]->to_string().c_str());
+		return;
+	}
+
+	// If we are here, there are two.
+	for (size_t i=0; i<2; i++)
 	{
 		if (not _formula[i]->is_executable())
 			throw SyntaxException(TRACE_INFO,
@@ -85,10 +96,37 @@ void FormulaTruthValue::init(void)
 	}
 }
 
+// XXX FIXME This update is not thread-safe.
 void FormulaTruthValue::update(void) const
 {
-	// We expect two formulas, they produce the strength and
-	// the confidence, respectively.
+	if (1 == _formula.size())
+	{
+		const Handle& fut = _formula[0];
+		if (fut->is_type(EVALUATABLE_LINK))
+		{
+			TruthValuePtr tvp = EvaluationLink::do_evaluate(_as, fut);
+			_value = tvp->value();
+			return;
+		}
+
+		if (fut->is_executable())
+		{
+			ValuePtr vp = fut->execute(_as);
+			if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+				throw SyntaxException(TRACE_INFO,
+					"Expecting FloatValue, got %s",
+					vp->to_string().c_str());
+			_value = FloatValueCast(vp)->value();
+			return;
+		}
+
+		TruthValuePtr tvp = fut->getTruthValue();
+		_value = tvp->value();
+		return;
+	}
+
+	// If we are here, there are two atoms. We expect two formulas,
+	// they produce the strength and the confidence, respectively.
 	for (size_t i=0; i<2; i++)
 	{
 		ValuePtr vp = _formula[i]->execute(_as);
@@ -117,13 +155,9 @@ std::string FormulaTruthValue::to_string(const std::string& indent) const
 	return rv;
 }
 
-bool FormulaTruthValue::operator==(const Value& rhs) const
-{
-	if (FORMULA_TRUTH_VALUE != rhs.get_type()) return false;
-
-	const FormulaTruthValue *ftv = dynamic_cast<const FormulaTruthValue *>(&rhs);
-	return ftv->_formula == _formula;
-}
-
+DEFINE_VALUE_FACTORY(FORMULA_TRUTH_VALUE,
+	createFormulaTruthValue, const Handle&)
 DEFINE_VALUE_FACTORY(FORMULA_TRUTH_VALUE,
 	createFormulaTruthValue, const Handle&, const Handle&)
+DEFINE_VALUE_FACTORY(FORMULA_TRUTH_VALUE,
+	createFormulaTruthValue, const HandleSeq&&)
