@@ -50,6 +50,12 @@ FormulaStream::FormulaStream(const HandleSeq&& oset) :
 
 void FormulaStream::init(void)
 {
+	// If the single argument is a ListLink, unwrap it.
+	if (1 == _formula.size() and LIST_LINK == _formula[0]->get_type())
+	{
+		_formula = _formula[0]->getOutgoingSet();
+	}
+
 	if (1 == _formula.size())
 	{
 		const Handle& h = _formula[0];
