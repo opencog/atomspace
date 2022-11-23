@@ -98,6 +98,14 @@ static bool check_bool_vect(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		Type t = h->get_type();
+		// Explcitly allow variables.
+		if (VARIABLE_NODE == t) continue;
+
+		// Allow Lambdas and whatnot.
+		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
+		if (EXECUTION_OUTPUT_LINK == t) continue;
+
 		if (not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
 	}
 	return true;
@@ -121,7 +129,7 @@ static bool check_numeric(const Handle& bool_atom)
 		if (NUMBER_NODE == t) continue;
 
 		// TODO - look up the schema, and make sure its numeric, also.
-		if (DEFINED_SCHEMA_NODE == t) continue;
+		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
 
 		// Oddly enough, sets of numbers are allowed.
 		if (SET_LINK == t and check_numeric(h)) continue;
