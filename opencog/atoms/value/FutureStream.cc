@@ -111,3 +111,4 @@ bool FutureStream::operator==(const Value& other) const
 
 // Adds factor when library is loaded.
 DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const Handle&)
+DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const HandleSeq&&)
