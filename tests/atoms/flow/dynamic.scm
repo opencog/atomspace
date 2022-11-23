@@ -9,7 +9,7 @@
 (define A (Concept "A"))
 (define B (Concept "B"))
 
-(define ftv
+(define fututv
 	(FutureTruthValue
 		(FormulaPredicate
 			(Minus
