@@ -71,9 +71,9 @@ void FormulaTruthValue::init(void)
 
 	// We expect two formulas, they produce the strength and
 	// the confidence, respectively.
-	if (2 >= _formula.size())
+	if (2 < _formula.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting no more than two formulas; got %s",
+			"Expecting no more than two formulas; got %d",
 				_formula.size());
 
 	if (1 == _formula.size())
