@@ -31,47 +31,88 @@ using namespace opencog;
 // ==============================================================
 
 FormulaStream::FormulaStream(const Handle& h) :
-	StreamValue(FORMULA_STREAM), _formula(h), _as(h->getAtomSpace())
+	StreamValue(FORMULA_STREAM), _formula({h}), _as(h->getAtomSpace())
 {
-	ValuePtr vp;
-	if (h->is_executable())
-	{
-		vp = h->execute(_as);
-	}
-	else if (h->is_evaluatable())
-	{
-		vp = ValueCast(h->evaluate(_as));
-	}
-	else
-	{
+	init();
+}
+
+FormulaStream::FormulaStream(const HandleSeq&& oset) :
+	StreamValue(FORMULA_STREAM), _formula(std::move(oset))
+{
+	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable/evaluatable atom, got %s",
-			h->to_string().c_str());
+			"Expecting at least one atom!");
+
+	 _as = _formula[0]->getAtomSpace();
+
+	init();
+}
+
+void FormulaStream::init(void)
+{
+	if (1 == _formula.size())
+	{
+		const Handle& h = _formula[0];
+		ValuePtr vp;
+		if (h->is_executable())
+			vp = h->execute(_as);
+		else if (h->is_evaluatable())
+			vp = ValueCast(h->evaluate(_as));
+		else
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable or evaluatable atom, got %s",
+				h->to_string().c_str());
+
+		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting formula to return a FloatValue, got %s",
+				vp->to_string().c_str());
+
+		_value = FloatValueCast(vp)->value();
+		return;
 	}
 
-	if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting formula to return a FloatValue, got %s",
-			vp->to_string().c_str());
+	for (const Handle& h: _formula)
+	{
+		ValuePtr vp;
+		if (h->is_executable())
+			vp = h->execute(_as);
+		else
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable atom, got %s",
+				h->to_string().c_str());
 
-	_value = FloatValueCast(vp)->value();
+		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting formula to return a FloatValue, got %s",
+				vp->to_string().c_str());
+
+		_value.emplace_back(FloatValueCast(vp)->value()[0]);
+	}
 }
 
 // ==============================================================
 
+// XXX FIXME The update here is not thread-safe...
 void FormulaStream::update() const
 {
-	FloatValuePtr vp;
-	if (_formula->is_evaluatable())
+	if (1 == _formula.size())
 	{
-		vp = _formula->evaluate(_as);
-	}
-	else if (_formula->is_executable())
-	{
-		vp = FloatValueCast(_formula->execute(_as));
+		if (_formula[0]->is_evaluatable())
+			_value = _formula[0]->evaluate(_as)->value();
+		else if (_formula[0]->is_executable())
+			_value = FloatValueCast(_formula[0]->execute(_as))->value();
+		return;
 	}
 
-	_value = vp->value();
+	// If there are multiple arguments, assume that each one returns a
+	// single Float. Just concatenate all of them. Just execute to get it;
+	// I cannot imagine why evaluating would be useful, here.
+	std::vector<double> newval;
+	for (const Handle& h :_formula)
+		newval.push_back(FloatValueCast(h->execute(_as))->value()[0]);
+
+	_value = newval;
 }
 
 // ==============================================================
@@ -79,7 +120,8 @@ void FormulaStream::update() const
 std::string FormulaStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	rv += "\n" + _formula->to_short_string(indent + "   ");
+	for (const Handle& h : _formula)
+		rv += "\n" + h->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
 	rv += indent + "   ; " + FloatValue::to_string("", FLOAT_VALUE);
 	rv += "\n)";
@@ -106,4 +148,4 @@ bool FormulaStream::operator==(const Value& other) const
 // ==============================================================
 
 // Adds factor when library is loaded.
-DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const Handle&)
+DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const HandleSeq&&)

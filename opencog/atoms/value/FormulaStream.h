@@ -43,14 +43,14 @@ class FormulaStream
 	: public StreamValue
 {
 protected:
-	FormulaStream(Type t, const Handle&) : StreamValue(t) {}
-
+	void init(void);
 	virtual void update() const;
-	Handle _formula;
+	HandleSeq _formula;
 	AtomSpace* _as;
 
 public:
 	FormulaStream(const Handle&);
+	FormulaStream(const HandleSeq&&);
 	virtual ~FormulaStream() {}
 
 	/** Returns a string representation of the value.  */
