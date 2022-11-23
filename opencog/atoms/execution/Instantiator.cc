@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
@@ -129,7 +130,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 	sn = beta_reduce(sn, ist._varmap);
 
 	// If its a DSN, obtain the correct body for it.
-	if (DEFINED_SCHEMA_NODE == sn->get_type())
+	if (sn->is_type(DEFINED_PROCEDURE_NODE))
 		sn = DefineLink::get_definition(sn);
 
 	// If its an anonymous function link, execute it here.
