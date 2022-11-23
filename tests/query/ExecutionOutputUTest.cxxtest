@@ -68,6 +68,7 @@ public:
 	void test_clear_box_single_argument_link(void);
 	void test_value(void);
 	void test_recursion(void);
+	void test_function(void);
 	void test_lambda(void);
 	void test_lambda_get(void);
 	void test_implication_scope(void);
@@ -398,6 +399,41 @@ void ExecutionOutputUTest::test_value(void)
 		TruthValuePtr stv = TruthValueCast(va);
 		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
 		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
+	}
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Execute defined function
+ */
+void ExecutionOutputUTest::test_function(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	al(DEFINE_LINK,
+		an(DEFINED_PROCEDURE_NODE, "remainder"),
+		al(MINUS_LINK,
+			an(VARIABLE_NODE, "X"),
+			al(FLOOR_LINK,
+				an(VARIABLE_NODE, "X"))));
+
+	Handle exout =
+	al(EXECUTION_OUTPUT_LINK,
+		an(DEFINED_PROCEDURE_NODE, "remainder"),
+		an(NUMBER_NODE, "2.1 4.2 5.3 2.4 6.5 7.6 0.7 -0.2 -8.1"));
+
+	ValuePtr result = exout->execute(as.get());
+	printf("Got: %s\n", result->to_string().c_str());
+
+	NumberNodePtr nnp = NumberNodeCast(result);
+	const std::vector<double>& val = nnp->value();
+	TS_ASSERT_EQUALS(val.size(), 9);
+
+	// The atoms won't be the same, due to rounding errors.
+	for (int i=0; i<9; i++)
+	{
+		TS_ASSERT(fabs(val[i]-0.1*(i+1))< 1.0e-9);
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
