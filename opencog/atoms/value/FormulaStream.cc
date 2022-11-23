@@ -39,13 +39,11 @@ FormulaStream::FormulaStream(const Handle& h) :
 FormulaStream::FormulaStream(const HandleSeq&& oset) :
 	StreamValue(FORMULA_STREAM), _formula(std::move(oset))
 {
-	if (not (FORMULA_STREAM == _type)) return;
-
 	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting at least one atom!");
 
-	 _as = _formula[0]->getAtomSpace();
+	_as = _formula[0]->getAtomSpace();
 
 	init();
 }

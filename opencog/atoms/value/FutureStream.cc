@@ -39,8 +39,6 @@ FutureStream::FutureStream(const Handle& h) :
 FutureStream::FutureStream(const HandleSeq&& oset) :
 	LinkStreamValue(FUTURE_STREAM), _formula(std::move(oset))
 {
-	if (not (FUTURE_STREAM == _type)) return;
-
 	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting at least one atom!");
@@ -52,8 +50,6 @@ FutureStream::FutureStream(const HandleSeq&& oset) :
 
 void FutureStream::init(void)
 {
-	if (not (FUTURE_STREAM == _type)) return;
-
 	// Unwrap a ListLink, if it is present.
 	if (1 == _formula.size() and LIST_LINK == _formula[0]->get_type())
 		_formula = _formula[0]->getOutgoingSet();
