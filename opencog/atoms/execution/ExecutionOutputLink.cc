@@ -167,8 +167,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 {
 	Handle sn(_outgoing[0]);
 	Handle args(_outgoing[1]);
-	Type snt = sn->get_type();
-	if (snt->is_type(GROUNDED_PROCEDURE_NODE))
+	if (sn->is_type(GROUNDED_PROCEDURE_NODE))
 	{
 		GroundedProcedureNodePtr gsn = GroundedProcedureNodeCast(sn);
 		return gsn->execute(as, args, silent);
