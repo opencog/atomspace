@@ -891,12 +891,6 @@ DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
-// Return arity of the wrapped link. If it's a NumberNode
-// or a Value, return the length of the underlying vector.
-// XXX FIXME .. did we mis-name this? Should it be SizeOfLink
-// or maybe LengthOfLink? (viz, the length of FloatValue...)
-ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
@@ -916,8 +910,15 @@ STRENGTH_OF_LINK <- FLOAT_VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- FLOAT_VALUE_OF_LINK
 COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 
+// Return size of the wrapped link. If it's a NumberNode
+// or a Value, return the length of the underlying vector.
+SIZE_OF_LINK <- FLOAT_VALUE_OF_LINK
+
 // Inverse of the above; convert a FloatValue to a NumberNode
 NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
+// Return the type of the wrapped Atom
+TYPE_OF_LINK <- VALUE_OF_LINK
 
 // Like the above, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either

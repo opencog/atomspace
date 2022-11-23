@@ -31,37 +31,57 @@ using namespace opencog;
 // ==============================================================
 
 FutureStream::FutureStream(const Handle& h) :
-	LinkValue(FUTURE_STREAM), _formula(h), _as(h->getAtomSpace())
+	LinkStreamValue(FUTURE_STREAM), _formula({h}), _as(h->getAtomSpace())
 {
-	_value.resize(1);
-	if (h->is_executable())
-	{
-		_value[0] = h->execute(_as);
-	}
-	else if (h->is_evaluatable())
-	{
-		_value[0] = ValueCast(h->evaluate(_as));
-	}
-	else
-	{
+}
+
+FutureStream::FutureStream(const HandleSeq&& oset) :
+	LinkStreamValue(FUTURE_STREAM), _formula(std::move(oset))
+{
+	if (not (FUTURE_STREAM == _type)) return;
+
+	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable/evaluatable atom, got %s",
-			h->to_string().c_str());
+			"Expecting at least one atom!");
+
+	_as = _formula[0]->getAtomSpace();
+}
+
+void FutureStream::init(void)
+{
+	for (const Handle& h : _formula)
+	{
+		if (h->is_executable())
+		{
+			_value.emplace_back(h->execute(_as));
+		}
+		else if (h->is_evaluatable())
+		{
+			_value.emplace_back(ValueCast(h->evaluate(_as)));
+		}
+		else
+		{
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable/evaluatable atom, got %s",
+				h->to_string().c_str());
+		}
 	}
 }
+
 
 // ==============================================================
 
 void FutureStream::update() const
 {
-	if (_formula->is_executable())
+	std::vector<ValuePtr> newval;
+	for (const Handle& h : _formula)
 	{
-		_value[0] = _formula->execute(_as);
+		if (h->is_executable())
+			newval.emplace_back(h->execute(_as));
+		else if (h->is_evaluatable())
+			newval.emplace_back(ValueCast(h->evaluate(_as)));
 	}
-	else if (_formula->is_evaluatable())
-	{
-		_value[0] = ValueCast(_formula->evaluate(_as));
-	}
+	_value.swap(newval);
 }
 
 // ==============================================================
@@ -69,9 +89,10 @@ void FutureStream::update() const
 std::string FutureStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	rv += "\n" + _formula->to_short_string(indent + "   ");
+	for (const Handle& h : _formula)
+		rv += "\n" + h->to_short_string(indent + "   ");
 	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += indent + "   ; " + _value[0]->to_string("");
+	rv += indent + "   ; " + LinkValue::to_string("");
 	rv += "\n)";
 	return rv;
 }

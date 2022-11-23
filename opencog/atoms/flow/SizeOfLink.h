@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ArityLink.h
+ * opencog/atoms/flow/SizeOfLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ARITY_LINK_H
-#define _OPENCOG_ARITY_LINK_H
+#ifndef _OPENCOG_SIZE_OF_LINK_H
+#define _OPENCOG_SIZE_OF_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,25 +31,25 @@ namespace opencog
  *  @{
  */
 
-/// The ArityLink returns a NumberNode holding the arity of the wrapped
+/// The SizeOfLink returns a FloatValue holding the arity of the wrapped
 /// atom; its zero for Nodes and empty Links.
 ///
 /// For example,
 ///
-///     ArityLink
+///     SizeOfLink
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// will return
 ///
-///     NumberNode 2
+///     FloatValue 2
 ///
-class ArityLink : public FunctionLink
+class SizeOfLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&&, Type = ARITY_LINK);
-	ArityLink(const ArityLink&) = delete;
-	ArityLink& operator=(const ArityLink&) = delete;
+	SizeOfLink(const HandleSeq&&, Type = SIZE_OF_LINK);
+	SizeOfLink(const SizeOfLink&) = delete;
+	SizeOfLink& operator=(const SizeOfLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -57,10 +57,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(ArityLink)
-#define createArityLink CREATE_DECL(ArityLink)
+LINK_PTR_DECL(SizeOfLink)
+#define createSizeOfLink CREATE_DECL(SizeOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_ARITY_LINK_H
+#endif // _OPENCOG_SIZE_OF_LINK_H

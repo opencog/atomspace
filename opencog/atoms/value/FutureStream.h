@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/LinkStreamValue.h>
 
 namespace opencog
 {
@@ -39,15 +39,19 @@ namespace opencog
  * Value, every time it is queried for data.
  */
 class FutureStream
-	: public LinkValue
+	: public LinkStreamValue
 {
 protected:
+	FutureStream(Type t) : LinkStreamValue(t) {}
+
+	void init(void);
 	virtual void update() const;
-	Handle _formula;
+	HandleSeq _formula;
 	AtomSpace* _as;
 
 public:
 	FutureStream(const Handle&);
+	FutureStream(const HandleSeq&&);
 	virtual ~FutureStream() {}
 
 	/** Returns a string representation of the value.  */

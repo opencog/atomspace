@@ -1,5 +1,5 @@
 /*
- * ArityLink.cc
+ * SizeOfLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -22,30 +22,26 @@
  */
 
 #include <opencog/atoms/value/FloatValue.h>
-#include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/core/NumberNode.h>
 
-#include "ArityLink.h"
+#include "SizeOfLink.h"
 
 using namespace opencog;
 
-ArityLink::ArityLink(const HandleSeq&& oset, Type t)
+SizeOfLink::SizeOfLink(const HandleSeq&& oset, Type t)
 	: FunctionLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, ARITY_LINK))
+	if (not nameserver().isA(t, SIZE_OF_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ArityLink, got %s", tname.c_str());
+			"Expecting an SizeOfLink, got %s", tname.c_str());
 	}
 }
 
 // ---------------------------------------------------------------
 
-/// Return the Arity, as a NumberNode.  Contrast this with
-/// ArityValueOf, which returns a FloatValue, instead.
-ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
+/// Return a FloatValue scalar.
+ValuePtr SizeOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = 0;
 	for (const Handle& h : _outgoing)
@@ -60,9 +56,9 @@ ValuePtr ArityLink::execute(AtomSpace* as, bool silent)
 		ary += pap->size();
 	}
 
-	return ValuePtr(createNumberNode(ary));
+	return createFloatValue((double)ary);
 }
 
-DEFINE_LINK_FACTORY(ArityLink, ARITY_LINK)
+DEFINE_LINK_FACTORY(SizeOfLink, SIZE_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

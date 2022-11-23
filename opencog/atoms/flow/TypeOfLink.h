@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/flow/PromiseLink.h
+ * opencog/atoms/flow/TypeOfLink.h
  *
- * Copyright (C) 2018, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PROMISE_LINK_H
-#define _OPENCOG_PROMISE_LINK_H
+#ifndef _OPENCOG_TYPE_OF_LINK_H
+#define _OPENCOG_TYPE_OF_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -31,36 +31,36 @@ namespace opencog
  *  @{
  */
 
-/// The PromiseLink returns the provided atom wrapped with a future.
-/// The three future base clases are StreamValue, LinkStream and
-/// FutureTruthValue.
+/// The TypeOfLink returns a vector of Types of the wrapped
+/// atoms.
 ///
-class PromiseLink : public Link
+/// For example,
+///
+///     TypeOfLink
+///         SomeAtom
+///         OtherAtom
+///
+/// will return
+///
+///     (LinkValue (TypeNode 'SomeAtom) (TypeNode 'OtherAtom))
+///
+class TypeOfLink : public FunctionLink
 {
-private:
-	void init(void);
-	Type _future_type;
-	HandleSeq _args;
-
 public:
-	PromiseLink(const HandleSeq&&, Type=PROMISE_LINK);
-	PromiseLink(const Handle&);
-	PromiseLink(const Handle&, const Handle&);
+	TypeOfLink(const HandleSeq&&, Type = TYPE_OF_LINK);
+	TypeOfLink(const TypeOfLink&) = delete;
+	TypeOfLink& operator=(const TypeOfLink&) = delete;
 
-	PromiseLink(const PromiseLink&) = delete;
-	PromiseLink& operator=(const PromiseLink&) = delete;
-
-	virtual bool is_executable() const { return true; }
-	// Return a future
+	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(PromiseLink)
-#define createPromiseLink CREATE_DECL(PromiseLink)
+LINK_PTR_DECL(TypeOfLink)
+#define createTypeOfLink CREATE_DECL(TypeOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PROMISE_LINK_H
+#endif // _OPENCOG_TYPE_OF_LINK_H
