@@ -156,4 +156,5 @@ bool FormulaStream::operator==(const Value& other) const
 // ==============================================================
 
 // Adds factor when library is loaded.
+DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const Handle&)
 DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const HandleSeq&&)
