@@ -917,6 +917,9 @@ SIZE_OF_LINK <- FLOAT_VALUE_OF_LINK
 // Inverse of the above; convert a FloatValue to a NumberNode
 NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
+// Return the type of the wrapped Atom
+TYPE_OF_LINK <- VALUE_OF_LINK
+
 // Like the above, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either
 // a FutureStream or a FormulaStream when executed. This stream will

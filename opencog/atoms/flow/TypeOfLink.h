@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/flow/SizeOfLink.h
+ * opencog/atoms/flow/TypeOfLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SIZE_OF_LINK_H
-#define _OPENCOG_SIZE_OF_LINK_H
+#ifndef _OPENCOG_TYPE_OF_LINK_H
+#define _OPENCOG_TYPE_OF_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,25 +31,25 @@ namespace opencog
  *  @{
  */
 
-/// The SizeOfLink returns a FloatValue holding the arity of the wrapped
-/// atom; its zero for Nodes and empty Links.
+/// The TypeOfLink returns a vector of Types of the wrapped
+/// atoms.
 ///
 /// For example,
 ///
-///     SizeOfLink
+///     TypeOfLink
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// will return
 ///
-///     FloatValue 2
+///     (LinkValue (TypeNode 'SomeAtom) (TypeNode 'OtherAtom))
 ///
-class SizeOfLink : public FunctionLink
+class TypeOfLink : public FunctionLink
 {
 public:
-	SizeOfLink(const HandleSeq&&, Type = SIZE_OF_LINK);
-	SizeOfLink(const SizeOfLink&) = delete;
-	SizeOfLink& operator=(const SizeOfLink&) = delete;
+	TypeOfLink(const HandleSeq&&, Type = TYPE_OF_LINK);
+	TypeOfLink(const TypeOfLink&) = delete;
+	TypeOfLink& operator=(const TypeOfLink&) = delete;
 
 	// Return a pointer to the atom being specified.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -57,10 +57,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(SizeOfLink)
-#define createSizeOfLink CREATE_DECL(SizeOfLink)
+LINK_PTR_DECL(TypeOfLink)
+#define createTypeOfLink CREATE_DECL(TypeOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_SIZE_OF_LINK_H
+#endif // _OPENCOG_TYPE_OF_LINK_H

@@ -9,6 +9,7 @@ ADD_LIBRARY (atomflow
 	SetTVLink.cc
 	SetValueLink.cc
 	SizeOfLink.cc
+	TypeOfLink.cc
 	StreamValueOfLink.cc
 	TruthValueOfLink.cc
 	ValueOfLink.cc
@@ -34,6 +35,7 @@ INSTALL (FILES
 	SetTVLink.h
 	SetValueLink.h
 	SizeOfLink.h
+	TypeOfLink.h
 	StreamValueOfLink.h
 	TruthValueOfLink.h
 	ValueOfLink.h
