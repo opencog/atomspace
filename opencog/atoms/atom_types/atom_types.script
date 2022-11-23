@@ -38,19 +38,19 @@ VALUATION <- VALUE      // (Atom,key,Value) triple
 // over time, we call them "streams".  They provide wrappers for
 // any kind of time-varying data.
 
-// A stream of Values, computed by a function held in the AtomSpace.
-// Typically computed by one of the FunctionLinks, below.
-FUTURE_STREAM <- VALUE
-
 // A base class for time-varying floating-point Values.
 STREAM_VALUE <- FLOAT_VALUE
 
 // An example of a time-varying Value stream
 RANDOM_STREAM <- STREAM_VALUE
 
+// A stream of FloatValues, computed by a function held in the AtomSpace.
+// Typically computed by one of the FunctionLinks, below.
+FUTURE_STREAM <- STREAM_VALUE
+
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
-FORMULA_STREAM <- STREAM_VALUE, FUTURE_STREAM
+FORMULA_STREAM <- FUTURE_STREAM
 
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
