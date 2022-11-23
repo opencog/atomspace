@@ -23,10 +23,9 @@
 #ifndef _OPENCOG_FORMULA_TRUTH_VALUE_H_
 #define _OPENCOG_FORMULA_TRUTH_VALUE_H_
 
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-// #include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 namespace opencog
 {
@@ -35,6 +34,8 @@ namespace opencog
  */
 
 //! A TruthValue that recomputes the TV from a stored formula.
+//! This can be either a single stored predicate, or a pair of
+//! formulas that each return a single number.
 class FormulaTruthValue : public SimpleTruthValue
 {
 protected:
@@ -44,6 +45,7 @@ protected:
 	AtomSpace* _as;
 
 public:
+	FormulaTruthValue(const Handle&);
 	FormulaTruthValue(const Handle&, const Handle&);
 	FormulaTruthValue(const HandleSeq&&);
 	virtual ~FormulaTruthValue();

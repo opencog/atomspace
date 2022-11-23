@@ -30,18 +30,28 @@
 
 using namespace opencog;
 
+FormulaTruthValue::FormulaTruthValue(const Handle& pred)
+	: SimpleTruthValue(0, 0), _formula({pred}), _as(pred->getAtomSpace())
+{
+	init();
+	update();
+}
+
 FormulaTruthValue::FormulaTruthValue(const Handle& stn, const Handle& cnf)
 	: SimpleTruthValue(0, 0), _formula({stn, cnf}), _as(stn->getAtomSpace())
 {
-	_type = FORMULA_TRUTH_VALUE;
 	init();
 	update();
 }
 
 FormulaTruthValue::FormulaTruthValue(const HandleSeq&& seq)
-	: SimpleTruthValue(0, 0), _formula(seq), _as(seq[0]->getAtomSpace())
+	: SimpleTruthValue(0, 0), _formula(std::move(seq))
 {
-	_type = FORMULA_TRUTH_VALUE;
+	if (0 == _formula.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a formula!");
+
+	_as = _formula[0]->getAtomSpace();
 	init();
 	update();
 }
@@ -51,14 +61,22 @@ FormulaTruthValue::~FormulaTruthValue()
 
 void FormulaTruthValue::init(void)
 {
+	_type = FORMULA_TRUTH_VALUE;
+
+	// If there is just one atom, then it is either a ListLink wrapping
+	// a pair of formulas, or it is a predicate that is promising us
+	// TV's in the future.
+	if (1 ==  _formula.size() and LIST_LINK == _formula[0]->get_type())
+		_formula = _formula[0]->getOutgoingSet();
+
 	// We expect two formulas, they produce the strength and
 	// the confidence, respectively.
-	if (2 != _formula.size())
+	if (2 >= _formula.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting exactly two formulas; got %s",
+			"Expecting no more than two formulas; got %s",
 				_formula.size());
 
-	for (size_t i=0; i<2; i++)
+	for (size_t i=0; i<_formula.size(); i++)
 	{
 		if (not _formula[i]->is_executable())
 			throw SyntaxException(TRACE_INFO,
