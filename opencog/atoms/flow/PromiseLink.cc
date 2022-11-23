@@ -55,27 +55,34 @@ PromiseLink::PromiseLink(const Handle& valb, const Handle& typ)
 
 void PromiseLink::init(void)
 {
-	// The default future.
-	_future_type = FORMULA_STREAM;
+	_future_type = NOTYPE;
+	_need_strip = false;
 
-	if (0 < _outgoing.size() and not _outgoing[0]->is_executable())
+	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable Atom!");
+			"Expecting at least one executable Atom!");
 
-	if (1 == _outgoing.size()) return;
+	// Hunt down a TypeNode, if there is one
+	for (const Handle& h : _outgoing)
+	{
+		if (TYPE_NODE == h->get_type())
+		{
+			_need_strip = true;
+			TypeNodePtr tnp = TypeNodeCast(h);
+			if (NOTYPE == _future_type)
+				_future_type = tnp->get_kind();
+			else
+				throw SyntaxException(TRACE_INFO,
+					"Expecting at most one Type specification");
+			continue;
+		}
+		if (not h->is_executable())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable Atom, got %s", h->to_string().c_str());
+	}
 
-	if (2 != _outgoing.size())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable Atom and an optional TypeNode!");
-
-	// The second Atom is a type specifying the kind of future
-	// we should use.
-	TypeNodePtr tnp = TypeNodeCast(_outgoing[1]);
-	if (nullptr == tnp)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a TypeNode to specify the future type!");
-
-	_future_type = tnp->get_kind();
+	if (NOTYPE == _future_type)
+		_future_type = FORMULA_STREAM;
 
 	if (not ((FORMULA_STREAM == _future_type) or (FUTURE_STREAM == _future_type)))
 		throw SyntaxException(TRACE_INFO,
@@ -87,11 +94,22 @@ void PromiseLink::init(void)
 /// When executed, this will wrap the promise with a future.
 ValuePtr PromiseLink::execute(AtomSpace* as, bool silent)
 {
-	if (FORMULA_STREAM == _future_type)
-		return createFormulaStream(_outgoing[0]);
+	HandleSeq oset;
+	if (not _need_strip)
+		oset = _outgoing;
+	else
+	{
+		for (const Handle& h : _outgoing)
+		{
+			if (TYPE_NODE == h->get_type()) continue;
+			oset.push_back(h);
+		}
+	}
 
-	// if (FUTURE_STREAM == _future_type)
-		return createFutureStream(_outgoing[0]);
+	if (FORMULA_STREAM == _future_type)
+		return createFormulaStream(std::move(oset));
+
+	return createFutureStream(std::move(oset));
 }
 
 DEFINE_LINK_FACTORY(PromiseLink, PROMISE_LINK)
