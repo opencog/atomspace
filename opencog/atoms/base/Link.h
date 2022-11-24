@@ -144,6 +144,11 @@ public:
         return _outgoing.at(pos);
     }
 
+    virtual ValuePtr value_at_index(size_t idx) const
+    {
+        return ValueCast(getOutgoingAtom(idx));
+    }
+
     //! Invoke the callback on each atom in the outgoing set of
     //! handle h, until till one of them returns true, in which case,
     //! the loop stops and returns true. Otherwise the callback is

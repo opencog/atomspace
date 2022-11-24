@@ -28,6 +28,13 @@
 
 using namespace opencog;
 
+ValuePtr StringValue::value_at_index(size_t idx) const
+{
+	std::string str;
+	if (_value.size() > idx) str = _value[idx];
+	return createStringValue(str);
+}
+
 bool StringValue::operator==(const Value& other) const
 {
 	if (not other.is_type(STRING_VALUE)) return false;

@@ -76,6 +76,9 @@ public:
     virtual const std::string& get_name() const { return _name; }
 
     virtual size_t size() const { return 1; }
+    virtual ValuePtr value_at_index(size_t idx) const {
+        return ValueCast(get_handle());
+    }
 
     /**
      * Returns a string representation of the node.

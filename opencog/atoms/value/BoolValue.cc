@@ -48,6 +48,13 @@ BoolValue::BoolValue(unsigned long mask)
 	}
 }
 
+ValuePtr BoolValue::value_at_index(size_t idx) const
+{
+	bool b = false;
+	if (_value.size() > idx) b = _value[idx];
+	return createBoolValue(b);
+}
+
 bool BoolValue::operator==(const Value& other) const
 {
 	if (BOOL_VALUE != other.get_type()) return false;

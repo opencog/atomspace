@@ -67,6 +67,13 @@ HandleSet LinkValue::to_handle_set(void) const
 	return hs;
 }
 
+ValuePtr LinkValue::value_at_index(size_t idx) const
+{
+	ValuePtr vp;
+	if (_value.size() > idx) vp = _value[idx];
+	return createLinkValue(vp);
+}
+
 // ==============================================================
 
 bool LinkValue::operator==(const Value& other) const

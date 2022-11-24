@@ -48,6 +48,9 @@ protected:
 
 	LinkValue(Type t) : Value(t) {}
 public:
+	LinkValue(const ValuePtr& vp)
+		: Value(LINK_VALUE) { _value.push_back(vp); }
+
 	LinkValue(const ValueSeq& vlist)
 		: Value(LINK_VALUE), _value(vlist) {}
 
@@ -72,6 +75,7 @@ public:
 	HandleSeq to_handle_seq(void) const;
 	HandleSet to_handle_set(void) const;
 	size_t size() const { return _value.size(); }
+	ValuePtr value_at_index(size_t) const;
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
