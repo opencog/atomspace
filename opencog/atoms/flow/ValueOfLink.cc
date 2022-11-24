@@ -84,7 +84,6 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		if (2 == _outgoing.size())
 			return pap;
 
-#if LATER
 		double offset = 0.0;
 		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[2]));
 		if (nvp->is_type(NUMBER_NODE))
@@ -93,8 +92,7 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 			offset = FloatValueCast(nvp)->value()[0];
 
 		size_t idx = (size_t) (round (offset));
-		return pap->get_index(idx);
-#endif
+		return pap->value_at_index(idx);
 	}
 
 	if (silent)
