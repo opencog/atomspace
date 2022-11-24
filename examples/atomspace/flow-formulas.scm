@@ -6,12 +6,12 @@
 ; Examples of such formulas are provided below, together with the
 ; code for wiring them into Atoms.
 ;
-; The core implementation is in two parts: the FutureTruthValue,
+; The core implementation is in two parts: the FormulaTruthValue,
 ; which implements a dynamically-variable TruthValue, and the
 ; FormulaPredicateLink, which specifies the formula used to compute
 ; the TruthValue.
 ;
-; The FutureTruthValue is a kind of SimpleTruthValue, such that, every
+; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
 ; time that it is accessed, the current value -- that is, the current
 ; pair of floating point numbers -- is recomputed.  The recomputation
 ; occurs every time the numeric value is accessed (i.e. when the
@@ -21,28 +21,27 @@
 ; and confidence. These are generalized by FloatValue, which can hold
 ; a vector of arbitrary length.
 ;
-; The FormulaStream generalizes the FutureTruthValue, so that it can
+; The FormulaStream generalizes the FormulaTruthValue, so that it can
 ; work with any FloatValue, not just TruthValues. An introductory demo
 ; is provided at the bottom of this file. A more complex demo is in the
 ; `flow-futures.scm` file.
 
 (use-modules (opencog) (opencog exec))
 
-; The FutureTruthValue is a kind of TruthValue that is recomputed,
+; The FormulaTruthValue is a kind of TruthValue that is recomputed,
 ; every time it is accessed. Thus, it is a kind of dynamically-changing
 ; TruthValue. The value to be computed can be defined in Atomese. Thus,
 ; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
 (define tv-stream
-	(FutureTruthValue
-		(FormulaPredicate
-			(Minus
-				(Number 1)
-				(Times
-					(StrengthOf (Concept "A"))
-					(StrengthOf (Concept "B"))))
+	(FormulaTruthValue
+		(Minus
+			(Number 1)
 			(Times
-				(ConfidenceOf (Concept "A"))
-				(ConfidenceOf (Concept "B"))))))
+				(StrengthOf (Concept "A"))
+				(StrengthOf (Concept "B"))))
+		(Times
+			(ConfidenceOf (Concept "A"))
+			(ConfidenceOf (Concept "B")))))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom. Of course, at this point Concept A and B only have the
@@ -82,6 +81,10 @@
          (ConfidenceOf (Variable "$X"))
          (ConfidenceOf (Variable "$Y")))))
 
+; Note that FormulaPredicate is a link type; it computes the same
+; things as FormulaTruthValue, except that ... it is not a Value!
+; It's a link.
+
 ; Create an EvaluationLink that will apply the formula above to a pair
 ; of Atoms. This is as before; see the `formulas.scm` example for details.
 (define evlnk
@@ -98,7 +101,7 @@
 
 ; Now that we've verified that the EvaluationLink works as expected,
 ; it can be deployed in the stream.
-(define ev-stream (FutureTruthValue evlnk))
+(define ev-stream (FormulaTruthValue evlnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:
@@ -151,7 +154,7 @@
 ; evaluatable Atom, anything that can produce a TruthValue, and provides
 ; a promiste that it can be evaluated in the future. The when the SetTV
 ; is executed, then whatever was wrapped is unwrapped and placed into
-; a FutureTruthValue, which will then update every time it is accessed.
+; a FormulaTruthValue, which will then update every time it is accessed.
 
 ; For example:
 (cog-execute!
@@ -187,11 +190,11 @@
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
 ; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue. More precisely, a FutureTruthValue
+; they provide a TruthValue. More precisely, a FormulaTruthValue
 ; is created, that wraps the 2nd and later args to the SetTV.
-; This FutureTruthValue is installed onto the first arg (the
+; This FormulaTruthValue is installed onto the first arg (the
 ; ImplicationLink). From thenceforth, any calls to get the TV
-; on the ImplicatioLink get the FutureTruthValue, which recomputes
+; on the ImplicatioLink get the FormulaTruthValue, which recomputes
 ; the TV value each time it's accessed.
 (cog-execute!
 	(SetTV
@@ -211,7 +214,7 @@
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
 ; -------------------------------------------------------------
-; The FormulaStream is the generalization of FutureTruthValue, suitable
+; The FormulaStream is the generalization of FormulaTruthValue, suitable
 ; for streaming a FloatValue of arbitrary length. As before, whenever it
 ; is accessed, the current vector value is recomputed. The recomputation
 ; forced by calling `execute()` on the Atom that the stream is created
@@ -235,7 +238,7 @@
 (cog-execute! (StreamValueOf foo akey))
 
 ; Apply a formula to that stream, to get a different stream.
-(define fstream (FormulaStream (Plus (Number 10) (ValueOf foo akey))))
+(define fstream (FormulaStream (Plus (Number 10) (FloatValueOf foo akey))))
 
 ; Place it on an atom, take a look at it, and make sure that it works.
 (cog-set-value! bar bkey fstream)

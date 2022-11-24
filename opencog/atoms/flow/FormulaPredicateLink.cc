@@ -68,6 +68,24 @@ FormulaPredicateLink::FormulaPredicateLink(const HandleSeq&& oset, Type t)
 /// Evaluate a formula defined by this atom.
 /// This returns a SimpleTruthValue, if there are two arguments,
 /// and a CountTruthVaue, if there are three.
+//
+// XXX This is buggy. If the formula contains a VariableList,
+// and any of the two sub-parts of it use only some of the variables,
+// but not all of them, then the reduction will go wrong. The solution
+// is probably to inherit from Lambda instead, and also have multi-body
+// support in the Lambda.  I'm too exhausted to do this right now, and no
+// one wants this. So ... punt.
+//
+// The only "real" problem is that the demo at
+// https://wiki.opencog.org/w/PromisePredicateLink
+// is subtly wrong. At this time, I doubt anyone will spot it.
+// This is an accident waiting to happen...
+//
+// At the root of this is a very old decision to have only one body.
+// I guess we can fake it by wrapping everything in a List, that way
+// its just one body again, and then unwrapping it when done. Ugh.
+// What an effing mess.
+//
 TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
                                           const HandleSeq& cargs,
                                           bool silent)
@@ -76,6 +94,9 @@ TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
 	std::vector<double> nums;
 	for (const Handle& h: getOutgoingSet())
 	{
+		if (h->is_type(VARIABLE_NODE)) continue;
+		if (h->is_type(VARIABLE_LIST)) continue;
+
 		// An ordinary number.
 		if (NUMBER_NODE == h->get_type())
 		{
@@ -96,7 +117,9 @@ TruthValuePtr FormulaPredicateLink::apply(AtomSpace* as,
 
 		// At this point, we expect a FunctionLink of some kind.
 		if (not nameserver().isA(flh->get_type(), FUNCTION_LINK))
-			throw SyntaxException(TRACE_INFO, "Expecting a FunctionLink");
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a FunctionLink, got %s",
+				flh->to_string().c_str());
 
 		// If the FunctionLink has free variables in it,
 		// reduce them with the provided arguments.

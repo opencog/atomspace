@@ -149,6 +149,9 @@ std::string SimpleTruthValue::to_string(const std::string& indent) const
 
 bool SimpleTruthValue::operator==(const Value& rhs) const
 {
+    if (not rhs.is_type(SIMPLE_TRUTH_VALUE))
+        return false;
+
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
 

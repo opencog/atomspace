@@ -79,8 +79,7 @@ FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 
-FUTURE_TRUTH_VALUE         <- TRUTH_VALUE, FORMULA_STREAM
-FORMULA_TRUTH_VALUE        <- TRUTH_VALUE, FORMULA_STREAM
+FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
@@ -927,7 +926,7 @@ TYPE_OF_LINK <- VALUE_OF_LINK
 // create dynamically executable computation chains.
 PROMISE_LINK <- VALUABLE_LINK
 
-// Return a FutureTruthValue when evaluated. Same as above, but for
+// Return a FormulaTruthValue when evaluated. Same as above, but for
 // TruthValues only.  This can be used to wrap any Atom that returns a
 // TruthValue. The effect is to defer to the future the evaluation of
 // that predicate. Used to create dynamically evaluatable formulas.
