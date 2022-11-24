@@ -32,6 +32,8 @@ namespace opencog
  */
 
 /// The StreamValueOfLink returns a sample from the indicated stream.
+/// It returns something of exactly the same base type as the stream,
+/// effectively "freezing" the sample for all time.
 ///
 class StreamValueOfLink : public ValueOfLink
 {
