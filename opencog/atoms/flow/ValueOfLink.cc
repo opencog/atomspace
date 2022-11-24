@@ -23,6 +23,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include "ValueOfLink.h"
 
 using namespace opencog;
@@ -42,19 +44,17 @@ ValueOfLink::ValueOfLink(const HandleSeq&& oset, Type t)
 void ValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
-	if (2 != ary)
+	if (1 == ary and
+		 (nameserver().isA(_type, TRUTH_VALUE_OF_LINK) or
+		  nameserver().isA(_type, STRENGTH_OF_LINK) or
+		  nameserver().isA(_type, CONFIDENCE_OF_LINK) or
+		  nameserver().isA(_type, COUNT_OF_LINK)))
 	{
-		if (nameserver().isA(_type, TRUTH_VALUE_OF_LINK) or
-		    nameserver().isA(_type, STRENGTH_OF_LINK) or
-		    nameserver().isA(_type, CONFIDENCE_OF_LINK) or
-		    nameserver().isA(_type, COUNT_OF_LINK))
-		{
-			if (1 == ary) return;
-			throw SyntaxException(TRACE_INFO, "Expecting one atom!");
-		}
-
-		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
+		return;
 	}
+
+	if (3 < ary)
+		throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -70,11 +70,32 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	// space; we can add the Atom there, and things will
 	// trickle out properly in the end.
 	//
+	// XXX TODO FIXME ... if either of these are executable, then
+	// they need to be executed, first, right? Or not? Do we need
+	// an explicit ExecuteLink to find out what these are? I'm
+	// confused.
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 
 	ValuePtr pap = ah->getValue(ak);
-	if (pap) return pap;
+	if (pap)
+	{
+		// If there's no third reference, we are done.
+		if (2 == _outgoing.size())
+			return pap;
+
+#if LATER
+		double offset = 0.0;
+		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[2]));
+		if (nvp->is_type(NUMBER_NODE))
+			offset = NumberNodeCast(nvp)->value()[0];
+		else if (nvp->is_type(FLOAT_VALUE))
+			offset = FloatValueCast(nvp)->value()[0];
+
+		size_t idx = (size_t) (round (offset));
+		return pap->get_index(idx);
+#endif
+	}
 
 	if (silent)
 		throw SilentException();
