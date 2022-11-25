@@ -28,25 +28,7 @@ ADD_GUILE_MODULE (FILES
 # compiled seperately.
 
 ADD_GUILE_MODULE (FILES
-	opencog/exec.scm
-	DEPENDS exec
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/logger.scm
-	DEPENDS logger
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/randgen.scm
-	DEPENDS randgen
 #	COMPILE
 )
 
@@ -57,18 +39,6 @@ ADD_GUILE_MODULE (FILES
 
 ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/type-utils.scm
-	DEPENDS type-utils
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/uuid.scm
-	DEPENDS guile-uuid
 #	COMPILE
 )
 
