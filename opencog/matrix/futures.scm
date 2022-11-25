@@ -7,7 +7,13 @@
 (use-modules (srfi srfi-1))
 
 (define-public (add-dynamic-mi LLOBJ)
+"
+  add-dynamic-mi LLOBJ -- Add formula to dynamically recompute the MI
 
+  Whenever a pair is references, the MI for that pair is recomputed for
+  the count values on that pair.  Uses the conventional asymetric
+  formula.
+"
 	; Check for valid strructure
 	(if (or (not (LLOBJ 'provides 'count-key) (LLOBJ 'provides 'count-ref)))
 		(throw 'wrong-type-arg 'add-dynamic-mi
@@ -45,7 +51,62 @@
 							(FloatValueOf wwp cnt-key cnt-ref))
 						(Times
 							(FloatValueOf lwp cnt-key cnt-ref
-							(FloatValueOf rwp cnt-key cnt-ref)))))))
-	)
+							(FloatValueOf rwp cnt-key cnt-ref))))))))
 
 
+	(define (install-formula ATOM L R)
+		(cog-set-value! ATOM mi-key (FormulaStream dyn-proc L R)))
+
+	(define (get-count PAIR)
+		(cog-value-ref PAIR cnt-key cnt-ref))
+
+	(define (pair-count L-ATOM R-ATOM)
+		(define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
+		(if (nil? stats-atom) 0 (f-get-count stats-atom)))
+
+	(define (help)
+		(format #t
+			(string-append
+"This is the `add-dynamic-mi` object applied to the \"~A\"\n"
+"object.  It installs a formula that dynamically computes the MI\n"
+"for each pair.  For more information, say `,d add-dynamic-mi` or\n"
+"`,describe add-dynamic-mi` at the guile prompt, or just use the\n"
+"'describe method on this object. You can also get at the base\n"
+"object with the 'base method: e.g. `((obj 'base) 'help)`.\n"
+)
+			(LLOBJ 'id)))
+
+	(define (describe)
+		(display (procedure-property add-dynamic-mi 'documentation)))
+
+	;-------------------------------------------
+	; Explain what is provided.
+	(define (count-type) 'FloatValue)
+	(define (count-key)  mi-key)
+	(define (count-ref)  0)
+	(define (provides meth)
+		(case meth
+			((count-type)    count-type)
+			((count-key)     count-key)
+			((count-ref)     count-ref)
+			((pair-count)    pair-count)
+			((get-count)     get-count)
+			(else            (LLOBJ 'provides meth))))
+
+	;-------------------------------------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((count-type)       (count-type))
+			((count-key)        (count-key))
+			((count-ref)        (count-ref))
+			((pair-count)       (apply pair-count args))
+			((get-count)        (apply get-count args))
+
+			((provides)         (apply provides args))
+			((help)             (help))
+			((describe)         (describe))
+			((obj)              "add-dnymaic-mi")
+			((base)             LLOBJ)
+			(else               (apply LLOBJ (cons message args))))
+	))
