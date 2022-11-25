@@ -81,7 +81,9 @@
 
 	; Get the MI, given only the left and right bits.
 	(define (pair-count L-ATOM R-ATOM)
-xxxxxx this fails for storage nodes
+		; Force LLOBJ to fetch from storage.
+		(LLOBJ 'pair-count L-ATOM R-ATOM)
+		; If it was found, then compute the MI. Else not.
 		(define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
 		(if (nil? stats-atom) -inf.0
 			(get-mi stats-atom L-ATOM R-ATOM)))
