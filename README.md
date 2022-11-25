@@ -89,14 +89,18 @@ listed below.  Things are things that no one else does:
   constructors, including types for graphs that are functions. This
   resembles programming systems that have type constructors, such as
   CaML or Haskell.
+* **Graph nodes carry vectors**
+  [Values](https://wiki.opencog.org/w/Value) are mutable vectors of
+  data. Each graph element (vertex or edge, node or link) can host
+  an arbitrary collection of Values. This is, each graph element is
+  also a key-value database.
 * **Graphs specify flows**
-  ([Values](https://wiki.opencog.org/w/Value) and
-  [DynamicFormulaLink](https://wiki.opencog.org/w/DynamicFormulaLink).)
-  Graph elements host dynamic, mutable
-  key-value databases. That is, every graph element has an associated
-  key-value database. Think of the graph is "pipes" or "plumbing"; the
-  key-value data is the mutable, dynamically changing "water" that flows
-  through those pipes.
+  Values can be static or dynamic.  For the dynamic case, a given
+  graph can be thought of as "pipes" or "plumbing"; the Values can
+  "flow" along that graph.  For example, the
+  [FormulaStream](https://wiki.opencog.org/w/FormulaStream) allows
+  numeric vector operations ("formulas") to be defined. Accessing
+  a FormulaStream provides the vector value *at that instant*.
 * **Unordered sets**
   ([UnorderedLink](https://wiki.opencog.org/w/UnorderedLink).)
   A graph vertex can be an unordered set (Think of a list of edges, but
@@ -160,7 +164,7 @@ So, a few things it is not.
   The AtomSpace is similar, except that there are no keys! The
   AtomSpace still organizes data hierarchically, and provides lists,
   but all entries are anonymous, nameless. Why? There are performance
-  (CPU and RAM usage) and other design tradeoffs in not using explicit
+  (CPU and RAM usage) and other design benefits in not using explicit
   named keys in the data structure. You can still have named values;
   it is just that they are not required. There are several different
   ways of importing JSON data into the AtomSpace. If your mental model
@@ -169,7 +173,7 @@ So, a few things it is not.
 * **It's not SQL. It's also not noSQL**. Databases from 50 years ago
   organized structured data into tables, where the `key` is the label
   of a column, and different `values` sit in different rows. This is
-  more efficient than JSON, if you have many rows: you don't have to
+  more efficient than JSON, when you have many rows: you don't have to
   store the same key over and over again, for each row. Of course,
   tabular data is impractical if you have zillions of tables, each with
   only one or two rows. That's one reason why JSON was invented.
@@ -186,12 +190,14 @@ So, a few things it is not.
   in a large table of vertexes and edges. This is non-local; it
   requires large indexes on those tables (requires a lot of RAM),
   and the lookups are CPU consuming. Graph traversal can be a
-  bottleneck. The AtomSpace avoids much of this overhead by using
-  (hyper-/meta-)graphs. This enables more effective and simpler
+  bottleneck. The AtomSpace [avoids much of this overhead by using
+  (hyper-/meta-)graphs.](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+  This enables more effective and simpler
   traversal algorithms, which in turn allows more sophisticated
   search features to be implemented.  If your mental model of
   graph data is lists of vertexes and edges, then you will be confused
   by the AtomSpace.
+
 
 **What is it, then?** Most simply, the AtomSpace stores immutable,
 globally unique, [typed](https://en.wikipedia.org/wiki/Type_theory)
@@ -201,10 +207,14 @@ all) Atom types do have a corresponding C++ class. Each s-expression is
 called "an Atom". Each Atom is globally unique: there is only one copy,
 ever, of any given s-expression (Atom). It's almost just that simple,
 with only one little twist: a (mutable) key-value database is attached
-to each Atom. Atoms can be used to define (hyper-/meta-)graphs. It's fun
-to think of these graphs as defining "plumbing"; whereas the Values
-stored in the associated key-value database is like the "fluid" in
-these pipes.
+to each Atom. Now, "ordinary" graph databases do this too: every vertex
+or edge can have "attributes" on it. The AtomSpace allows these
+attributes to be dynamic: to change in time or to "flow". The flow
+itself is described by a graph; thus, graphs can be thought of as
+"plumbing"; whereas the Values are like the "fluid" in these pipes.
+This is much like the distinction between "software" and "data":
+software describes algos, data is what moves through them. In the
+AtomSpace, the algos are explicit graphs. The Values are the data.
 
 The AtomSpace borrows ideas and concepts from many different systems,
 including ideas from JSON, SQL and graph stores. The goal of the
