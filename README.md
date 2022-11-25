@@ -518,8 +518,10 @@ is to gain experience with distributed data processing. Currently,
 one can build simple distributed networks of AtomSpaces, by using
 the [**StorageNode**](https://wiki.opencog.org/w/StorageNode) to
 specify a remote AtomSpace. However, it is up to you as to what
-kinds of data these AtomSpace exchange with one-another. There
-are no pre-configured, suggested communications styles.
+kinds of data these AtomSpace exchange with one-another. Only two
+simple pre-configured communications styles have been created: the
+read-thru and the write-thru proxies for the cogserver. These pass
+incoming data and results on to the next nodes in the network.
 
 ### Cross-system Bridges
 Because the AtomSpace can hold many different representatioinal
