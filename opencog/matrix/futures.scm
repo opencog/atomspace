@@ -15,7 +15,7 @@
   formula.
 "
 	; Check for valid strructure
-	(if (or (not (LLOBJ 'provides 'count-key) (LLOBJ 'provides 'count-ref)))
+	(if (not (and (LLOBJ 'provides 'count-key) (LLOBJ 'provides 'count-ref)))
 		(throw 'wrong-type-arg 'add-dynamic-mi
 			"Expecting a count object, to access the raw counts!"))
 
@@ -27,7 +27,7 @@
 	(define dyn-proc
 		(DefinedProcedure (string-append "*-dynamic MI " (LLOBJ 'id))))
 
-	(define (make-forumla)
+	(define (make-formula)
 		; The various pairs, per the LLOBJ
 		(define lrp (LLOBJ 'make-pair (Variable "$L") (Variable "$R")))
 		(define lwp (LLOBJ 'left-wildcard (Variable "$R")))
@@ -50,8 +50,10 @@
 							(FloatValueOf lrp cnt-key cnt-ref)
 							(FloatValueOf wwp cnt-key cnt-ref))
 						(Times
-							(FloatValueOf lwp cnt-key cnt-ref
-							(FloatValueOf rwp cnt-key cnt-ref))))))))
+							(FloatValueOf lwp cnt-key cnt-ref)
+							(FloatValueOf rwp cnt-key cnt-ref)))))))
+
+	(make-formula)
 
 	; Install the formula for this pair.
 	(define (install-formula ATOM L R)
@@ -59,7 +61,7 @@
 
 	; Get the MI for this pair. Install the formula, if not yet
 	; installed.
-	(define (get-mi ATOM L R)
+	(define (get-mi PAIR L R)
 		(define miv (cog-value PAIR mi-key))
 		(when (not miv)
 			(install-formula PAIR L R)
@@ -122,3 +124,12 @@
 			((base)             LLOBJ)
 			(else               (apply LLOBJ (cons message args))))
 	))
+
+; ---------------------------------------------------------------------
+; Example usage
+;
+; (define ala (make-any-link-api))
+; (define alc (add-count-api ala))
+; (define als (add-storage-count alc))
+; (define ady (add-dynamic-mi als))
+; (ady 'pair-count (Word "the") (Word "horse"))
