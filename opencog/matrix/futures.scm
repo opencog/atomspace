@@ -31,12 +31,7 @@
 		; The location of the count, per the LLOBJ, which had
 		; better be a count-obj, or else!
 		(define cnt-key (LLOBJ 'count-key))
-		(define cnt-ref (LLOBJ 'count-ref))
-
-		; Create a mask to fish out the on single number, by decimation.
-		; For example, for ref=2, the mask is "0 0 1"
-		(define zero-pad (string-join (make-list cnt-ref "0")))
-		(define cnt-mask (Number (string-append zero-pad " 1")))
+		(define cnt-ref (NumberNode (LLOBJ 'count-ref)))
 
 		; Create the actual procedure
 		(DefineLink
@@ -46,11 +41,11 @@
 				(Log2
 					(Divide
 						(Times
-							(Decimate cnt-mask (FloatValueOf lrp cnt-key))
-							(Decimate cnt-mask (FloatValueOf wwp cnt-key)))
+							(FloatValueOf lrp cnt-key cnt-ref)
+							(FloatValueOf wwp cnt-key cnt-ref))
 						(Times
-							(Decimate cnt-mask (FloatValueOf lwp cnt-key)
-							(Decimate cnt-mask (FloatValueOf rwp cnt-key))))))))
+							(FloatValueOf lwp cnt-key cnt-ref
+							(FloatValueOf rwp cnt-key cnt-ref)))))))
 	)
 
 
