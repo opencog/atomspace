@@ -63,14 +63,6 @@ IF (HAVE_GEARMAN)
 	)
 ENDIF (HAVE_GEARMAN)
 
-IF (HAVE_SQL_STORAGE)
-	ADD_GUILE_MODULE (FILES
-		opencog/persist-sql.scm
-		DEPENDS persist-sql
-#		COMPILE
-	)
-ENDIF (HAVE_SQL_STORAGE)
-
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
