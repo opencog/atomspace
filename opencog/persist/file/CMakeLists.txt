@@ -37,6 +37,12 @@ TARGET_LINK_LIBRARIES(persist-file
 
 ADD_GUILE_EXTENSION(SCM_CONFIG persist-file "opencog-ext-path-persist-file")
 
+ADD_GUILE_MODULE (FILES
+   opencog/persist-file.scm
+   DEPENDS persist-file
+#  COMPILE
+)
+
 INSTALL (TARGETS persist-file EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

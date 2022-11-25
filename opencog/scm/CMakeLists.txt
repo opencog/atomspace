@@ -51,11 +51,6 @@ ADD_GUILE_MODULE (FILES
 #	COMPILE
 )
 
-ADD_GUILE_MODULE (FILES
-	opencog/persist-file.scm
-	DEPENDS persist-file
-#	COMPILE
-)
 
 # These guile modules spew "libBlahBlah.so not found" errors,
 # if the user failed to actually build the needed component.
