@@ -254,6 +254,26 @@ manipulation.  If you are comfortable with extremely complex
 mathematical theory, and just also happen to be extremely comfortable
 writing code, you are invited -- encouraged -- to join the project.
 
+### Related ideas
+A short list of some related concepts:
+
+* [Carnegie Mellon Binary Analysis Platforrm (BAP)](https://github.com/BinaryAnalysisPlatform/bap)
+  allows binary programs (viruses, etc.) to be disassembled and analyzed.
+  The disassembled program is stored as a graph in a database. The graph
+  can be analyzed, investigated, and even executed, to see what it does.
+  Thus, similar to the AtomSpace, but very highly specialized for binaries,
+  and nothing else.
+
+* [Modelica](https://en.wikipedia.org/wiki/Modelica) is a modelling
+  language for describing complex systems. Intended for describing
+  mechanical, electrical, electronic, hydraulic, thermal, control,
+  electric power and process-oriented systems. The descriptions are
+  static, object-oriented, file-based, and meant to be written by
+  humans. That is, the models are atomated, but not the creation and
+  management of them. Not suitable for general graph structures.
+
+* The concept of graph programming.
+
 
 Using Atomese and the AtomSpace
 ===============================
@@ -612,12 +632,12 @@ Essentially all Linux distributions will provide these packages.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.2.2 or newer required, 3.0 strongly preferred.)
+* Embedded scheme REPL; version 3.0 or newer required.
 * https://www.gnu.org/software/guile/guile.html
 * For Debian/Ubuntu,  `apt install guile-3.0-dev`
 
 ###### cxxtest
-* Unit test framework
+* Unit test framework.
 * Required for running unit tests. Breaking unit tests is verboten!
 * https://cxxtest.com/ | `apt install cxxtest`
 
@@ -628,7 +648,7 @@ optional parts of the AtomSpace will not be built.  The `cmake` command,
 during the build, will be more precise as to which parts will not be built.
 
 ###### Cython
-* C bindings for Python. (version 0.23 or newer)
+* C bindings for Python. (Cython version 0.23 or newer)
 * Recommended, as many users enjoy using python.
 * https://cython.org | `apt install cython`
 
