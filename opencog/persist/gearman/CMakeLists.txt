@@ -13,7 +13,12 @@ TARGET_LINK_LIBRARIES(dist-gearman
 
 ADD_GUILE_EXTENSION(SCM_CONFIG dist-gearman "opencog-ext-path-dist-gearman")
 
+ADD_GUILE_MODULE (FILES
+	opencog/dist-gearman.scm
+	DEPENDS dist-gearman
+#	COMPILE
+)
+
 INSTALL (TARGETS dist-gearman 
     EXPORT AtomSpaceTargets 
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-

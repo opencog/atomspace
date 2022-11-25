@@ -51,17 +51,9 @@ ADD_GUILE_MODULE (FILES
 #	COMPILE
 )
 
-
 # These guile modules spew "libBlahBlah.so not found" errors,
 # if the user failed to actually build the needed component.
 # So, do not install them if the component is missing.
-IF (HAVE_GEARMAN)
-	ADD_GUILE_MODULE (FILES
-		opencog/dist-gearman.scm
-		DEPENDS dist-gearman
-#		COMPILE
-	)
-ENDIF (HAVE_GEARMAN)
 
 IF (HAVE_CYTHON)
 	ADD_GUILE_MODULE (FILES
