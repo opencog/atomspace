@@ -272,20 +272,29 @@ reasoning and induction, chatbots, robot control, perceptual subsystems
 deep-learning neural-net interfaces. These can be found in other github
 repos, including:
 
-* [Natural language, chat, robot control](https://github.com/opencog/opencog)
+* [Unsupervised natural language learning](https://github.com/opencog/learn)
+  (learn repo)
+* [JSON, Python, Scheme network interfaces](https://github.com/opencog/cogserver)
+  (cogserver repo)
+
+Zombie projects: these are half-dead; no one is currently working on them,
+but they should still work and still provide useful capabilities.
+* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
+  (agi-bio repo) and various [MOZI.AI](https://github.com/mozi-ai) repos.
+* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
+  (as-moses repo)
+* [Unified Rule Engine](https://github.com/opencog/ure)
+* [OpenAI Gym and Minecraft agents](https://github.com/opencog/rocca)
+
+Dead projects: these are no longer maintained. They used to work, but have
+been abandoned for various theoretical and political reasons:
+* [Natural language chat, robot control](https://github.com/opencog/opencog)
   (the opencog repo)
 * [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
   (ghost-bridge repo)
-* [Unsupervised natural language learning](https://github.com/opencog/learn)
-  (learn repo)
-* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
-  (agi-bio repo) and various [MOZI.AI](https://github.com/mozi-ai) repos.
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
   (tinycog repo)
-* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
-  (as-moses repo)
-* [JSON, Python, Scheme network interfaces](https://github.com/opencog/cogserver)
-  (cogserver repo)
+* [Probabilistic Logic Networks](https://github.com/opencog/pln)
 
 
 Examples, Documentation, Blog
