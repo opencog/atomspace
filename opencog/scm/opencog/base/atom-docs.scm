@@ -8,7 +8,8 @@
 ;
 ; A list of all of these is printed by saying
 ;
-;    guile> ,apropos cog
+;    guile> ,apropos Link
+;    guile> ,apropos Node
 ;
 (set-procedure-property! QueryLink 'documentation
 "
