@@ -13,6 +13,7 @@ ADD_GUILE_MODULE (FILES
 	opencog.scm
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
+	opencog/base/atom-docs.scm
 	opencog/base/core-docs.scm
 	opencog/base/debug-trace.scm
 	opencog/base/file-utils.scm
