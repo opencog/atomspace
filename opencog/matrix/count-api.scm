@@ -149,7 +149,7 @@
 
 	; Return the observed count for the pair PAIR.
 	(define (get-count PAIR)
-		(cog-value-ref PAIR cnt-key cnt-ref))
+		(cog-value-ref (cog-value PAIR cnt-key) cnt-ref))
 
 	; Explicitly set location to value
 	(define (set-count PAIR CNT)
