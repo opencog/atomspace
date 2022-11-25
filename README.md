@@ -4,13 +4,11 @@ OpenCog AtomSpace
 [![CircleCI](https://circleci.com/gh/opencog/atomspace.svg?style=svg)](https://circleci.com/gh/opencog/atomspace)
 
 The OpenCog AtomSpace is an in-RAM knowledge representation (KR)
-database, an associated query engine and graph-re-writing system,
-and a rule-driven inferencing engine that can apply and manipulate
-sequences of rules to perform reasoning. It is a kind of in-RAM
-generalized hypergraph (metagraph) database. Metagraphs offer more
-efficient, more flexible and more powerful ways of representing
-graphs: [a metagraph store is literally just-plain better than a
-graph store.](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
+database with an associated query engine and graph-re-writing system.
+It is a kind of in-RAM generalized hypergraph (metagraph) database.
+Metagraphs offer more efficient, more flexible and more powerful ways
+of representing graphs: [a metagraph store is literally just-plain
+better than a graph store.](https://github.com/opencog/atomspace/blob/master/opencog/sheaf/docs/ram-cpu.pdf)
 On top of this, the Atomspace provides a large variety of advanced
 features not available anywhere else.
 
@@ -19,6 +17,15 @@ The AtomSpace is a platform for building Artificial General Intelligence
 for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
+
+There are several dozen modules built on top of the AtomSpace. Notable
+ones include:
+
+* [Store AtomSpaces to disk](https://github.com/opencog/atomspace-rocks)
+* [Network-distributed AtomSpace storage](https://github.com/opencog/atomspace-cog)
+* [Network shell to AtomSpaces, including a WebSocket API](https://github.com/opencog/cogserver)
+* [Rule Engine for rule-driven inferencing and reasoning](https://github.com/opencog/ure)
+* [Language learning](https://github.com/opencog/learn)
 
 Data as MetaGraphs
 ==================

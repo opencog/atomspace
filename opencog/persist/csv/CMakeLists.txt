@@ -1,5 +1,6 @@
 
-# Generic JSON decoding.
+# Generic Comma-Seperated Value (CSV) decoding.
+# Also TSV (tab-seperated)
 ADD_LIBRARY (csv
 	table_read.cc
 )
@@ -37,6 +38,13 @@ ADD_GUILE_EXTENSION(SCM_CONFIG csv-table "opencog-ext-path-csv-table")
 
 INSTALL (TARGETS csv-table EXPORT AtomSpaceTargets
    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+# -------------------------------
+
+ADD_GUILE_MODULE (FILES
+   opencog/csv-table.scm
+#  COMPILE
 )
 
 # -------------------------------

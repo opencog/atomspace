@@ -24,10 +24,14 @@ TARGET_LINK_LIBRARIES(persist-sql
 	atomspace
 )
 
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(persist-sql smob)
-	ADD_GUILE_EXTENSION(SCM_CONFIG persist-sql "opencog-ext-path-persist-sql")
-ENDIF (HAVE_GUILE)
+TARGET_LINK_LIBRARIES(persist-sql smob)
+ADD_GUILE_EXTENSION(SCM_CONFIG persist-sql "opencog-ext-path-persist-sql")
+
+ADD_GUILE_MODULE (FILES
+	opencog/persist-sql.scm
+	DEPENDS persist-sql
+#	COMPILE
+)
 
 IF (ODBC_FOUND)
 	INCLUDE_DIRECTORIES(${ODBC_INCLUDE_DIRS})
@@ -51,22 +55,18 @@ IF (PGSQL_FOUND)
 	)
 ENDIF (PGSQL_FOUND)
 
-ADD_EXECUTABLE(sniff
-	sniff.cc
-)
+# Test/example. Not needed for anything but hand-testing.
+# ADD_EXECUTABLE(sniff sniff.cc)
+#
+# TARGET_LINK_LIBRARIES(sniff persist-sql smob)
+#
+# IF (ODBC_FOUND)
+# 	TARGET_LINK_LIBRARIES(sniff persist-odbc)
+# ENDIF (ODBC_FOUND)
+# IF (PGSQL_FOUND)
+# 	TARGET_LINK_LIBRARIES(sniff persist-pg)
+# ENDIF (PGSQL_FOUND)
 
-TARGET_LINK_LIBRARIES(sniff
-	persist-sql
-)
-IF (ODBC_FOUND)
-	TARGET_LINK_LIBRARIES(sniff persist-odbc)
-ENDIF (ODBC_FOUND)
-IF (PGSQL_FOUND)
-	TARGET_LINK_LIBRARIES(sniff persist-pg)
-ENDIF (PGSQL_FOUND)
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(sniff smob)
-ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS persist-sql EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

@@ -13,6 +13,7 @@ ADD_GUILE_MODULE (FILES
 	opencog.scm
 	opencog/base/apply.scm
 	opencog/base/atom-cache.scm
+	opencog/base/atom-docs.scm
 	opencog/base/core-docs.scm
 	opencog/base/debug-trace.scm
 	opencog/base/file-utils.scm
@@ -26,31 +27,9 @@ ADD_GUILE_MODULE (FILES
 
 # Each of the files below are distinct modules. They need to be
 # compiled seperately.
-ADD_GUILE_MODULE (FILES
-	opencog/csv-table.scm
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/exec.scm
-	DEPENDS exec
-#	COMPILE
-)
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/logger.scm
-	DEPENDS logger
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/randgen.scm
-	DEPENDS randgen
 #	COMPILE
 )
 
@@ -63,57 +42,3 @@ ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
 #	COMPILE
 )
-
-ADD_GUILE_MODULE (FILES
-	opencog/type-utils.scm
-	DEPENDS type-utils
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/uuid.scm
-	DEPENDS guile-uuid
-#	COMPILE
-)
-
-# Need to recompile persist.scm whenever storage_types.scm changes
-# However, no matter what I do, I can't get the rebuild to trigger.
-# In other words, the persist module is badly broken.
-ADD_GUILE_MODULE (FILES
-	opencog/persist.scm
-	DEPENDS storage_types persist
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
-	opencog/persist-file.scm
-	DEPENDS persist-file
-#	COMPILE
-)
-
-# These guile modules spew "libBlahBlah.so not found" errors,
-# if the user failed to actually build the needed component.
-# So, do not install them if the component is missing.
-IF (HAVE_GEARMAN)
-	ADD_GUILE_MODULE (FILES
-		opencog/dist-gearman.scm
-		DEPENDS dist-gearman
-#		COMPILE
-	)
-ENDIF (HAVE_GEARMAN)
-
-IF (HAVE_SQL_STORAGE)
-	ADD_GUILE_MODULE (FILES
-		opencog/persist-sql.scm
-		DEPENDS persist-sql
-#		COMPILE
-	)
-ENDIF (HAVE_SQL_STORAGE)
-
-IF (HAVE_CYTHON)
-	ADD_GUILE_MODULE (FILES
-		opencog/python.scm
-		DEPENDS PythonSCM
-#		COMPILE
-	)
-ENDIF (HAVE_CYTHON)

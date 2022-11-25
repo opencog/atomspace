@@ -73,7 +73,13 @@ TARGET_LINK_LIBRARIES(PythonSCM
 )
 ADD_GUILE_EXTENSION(SCM_CONFIG PythonSCM "opencog-ext-path-python-scm")
 
-  INSTALL (TARGETS PythonSCM
+ADD_GUILE_MODULE (FILES
+	opencog/python.scm
+	DEPENDS PythonSCM
+#	COMPILE
+)
+
+INSTALL (TARGETS PythonSCM
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

@@ -267,6 +267,10 @@ bool SchemeSmob::scm_is_protom(SCM s)
 // must link to the module definition, which is thus incomplete without
 // the load of the *.scm files.
 //
+// The below solves the problem of running the evaluator inside a
+// CogServer guile shell. However, at the guile prompt, this causes
+// all files to be loaded twice; once from `opencog.scm` and once below.
+//
 void SchemeSmob::module_init(void*)
 {
 	// The portion of (opencog) done in C++
@@ -274,6 +278,7 @@ void SchemeSmob::module_init(void*)
 	
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
