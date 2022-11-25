@@ -11,6 +11,7 @@ ADD_GUILE_MODULE (FILES
 	filter.scm
 	fold-api.scm
 	frequency.scm
+	futures.scm
 	group-similarity.scm
 	loop-api.scm
 	object-api.scm
