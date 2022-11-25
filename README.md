@@ -303,8 +303,9 @@ but they should still work and still provide useful capabilities.
   (agi-bio repo) and various [MOZI.AI](https://github.com/mozi-ai) repos.
 * [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
   (as-moses repo)
-* [Unified Rule Engine](https://github.com/opencog/ure)
+* [Unified Rule Engine](https://github.com/opencog/ure) (ure repo)
 * [OpenAI Gym and Minecraft agents](https://github.com/opencog/rocca)
+  (rocca repo)
 
 Dead projects: these are no longer maintained. They used to work, but have
 been abandoned for various theoretical and political reasons:
@@ -314,7 +315,7 @@ been abandoned for various theoretical and political reasons:
   (ghost-bridge repo)
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
   (tinycog repo)
-* [Probabilistic Logic Networks](https://github.com/opencog/pln)
+* [Probabilistic Logic Networks](https://github.com/opencog/pln) (pln repo)
 
 
 Examples, Documentation, Blog
