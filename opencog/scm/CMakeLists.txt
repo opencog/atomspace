@@ -41,15 +41,3 @@ ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
 #	COMPILE
 )
-
-# These guile modules spew "libBlahBlah.so not found" errors,
-# if the user failed to actually build the needed component.
-# So, do not install them if the component is missing.
-
-IF (HAVE_CYTHON)
-	ADD_GUILE_MODULE (FILES
-		opencog/python.scm
-		DEPENDS PythonSCM
-#		COMPILE
-	)
-ENDIF (HAVE_CYTHON)
