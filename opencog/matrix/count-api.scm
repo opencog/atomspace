@@ -335,11 +335,10 @@
 		(define test-pair (LLOBJ 'get-pair L-ATOM R-ATOM))
 		(if (not (nil? test-pair))
 			(get-count test-pair)
-			(begin
-				(cog-push-atomspace)
-				(define PAIR (LLOBJ 'make-pair L-ATOM R-ATOM))
-				(fetch-value PAIR cnt-key)
-				(define have-it (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(let* ((base (cog-push-atomspace))
+					(PAIR (LLOBJ 'make-pair L-ATOM R-ATOM))
+					(junk (fetch-value PAIR cnt-key))
+					(have-it (equal? cnt-type (cog-value-type PAIR cnt-key))))
 				(cog-pop-atomspace)
 				(if have-it
 					(get-count PAIR)
