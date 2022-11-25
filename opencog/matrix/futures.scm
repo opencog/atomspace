@@ -53,16 +53,28 @@
 							(FloatValueOf lwp cnt-key cnt-ref
 							(FloatValueOf rwp cnt-key cnt-ref))))))))
 
-
+	; Install the formula for this pair.
 	(define (install-formula ATOM L R)
 		(cog-set-value! ATOM mi-key (FormulaStream dyn-proc L R)))
 
-	(define (get-count PAIR)
-		(cog-value-ref PAIR cnt-key cnt-ref))
+	; Get the MI for this pair. Install the formula, if not yet
+	; installed.
+	(define (get-mi ATOM L R)
+		(define miv (cog-value PAIR mi-key))
+		(when (not miv)
+			(install-formula PAIR L R)
+			(set! miv (cog-value PAIR mi-key)))
+		(cog-value-ref miv 0))
 
+	; Get the MI, given only the pair.
+	(define (get-count PAIR)
+		(get-mi PAIR (LLOBJ 'left-element PAIR) (LLOBJ 'right-element PAIR)))
+
+	; Get the MI, given only the left and right bits.
 	(define (pair-count L-ATOM R-ATOM)
 		(define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
-		(if (nil? stats-atom) 0 (f-get-count stats-atom)))
+		(if (nil? stats-atom) -inf.0
+			(get-mi stats-atom L-ATOM R-ATOM)))
 
 	(define (help)
 		(format #t
