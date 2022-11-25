@@ -341,7 +341,7 @@
 					(have-it (equal? cnt-type (cog-value-type PAIR cnt-key))))
 				(cog-pop-atomspace)
 				(if have-it
-					(get-count PAIR)
+					(get-count (LLOBJ 'make-pair L-ATOM R-ATOM))
 					(LLOBJ 'pair-count L-ATOM R-ATOM)))))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
