@@ -46,6 +46,10 @@ public:
 
 	static const ValuePtr INSTANCE;
 
+	virtual ValuePtr value_at_index(size_t idx) const {
+		return INSTANCE;
+	}
+
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const {
 		return indent + "(VoidValue)";

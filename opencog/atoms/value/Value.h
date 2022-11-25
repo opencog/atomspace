@@ -37,6 +37,9 @@ namespace opencog
  *  @{
  */
 
+class Value;
+typedef std::shared_ptr<Value> ValuePtr;
+
 /**
  * Values are the base class for the Atom shared pointer.
  */
@@ -60,6 +63,7 @@ public:
 	virtual bool is_link() const { return false; }
 	virtual bool is_unordered_link() const { return false; }
 	virtual size_t size() const { return 0; }
+	virtual ValuePtr value_at_index(size_t) const = 0;
 
 	/** Basic predicate */
 	bool is_type(Type t, bool subclass = true) const
@@ -97,8 +101,6 @@ public:
 	bool operator!=(const Value& other) const
 		{ return not operator==(other); }
 };
-
-typedef std::shared_ptr<Value> ValuePtr;
 
 typedef std::vector<ValuePtr> ValueSeq;
 typedef std::set<ValuePtr> ValueSet;

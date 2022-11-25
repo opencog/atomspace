@@ -26,6 +26,13 @@
 
 using namespace opencog;
 
+ValuePtr FloatValue::value_at_index(size_t idx) const
+{
+	double d = 0.0;
+	if (_value.size() > idx) d = _value[idx];
+	return createFloatValue(d);
+}
+
 bool FloatValue::operator==(const Value& other) const
 {
 	// Unlike Atoms, we are willing to compare othr types, as long

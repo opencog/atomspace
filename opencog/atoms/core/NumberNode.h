@@ -65,6 +65,8 @@ public:
 	NumberNode(NumberNode&) = delete;
 	NumberNode& operator=(const NumberNode&) = delete;
 
+	virtual ValuePtr value_at_index(size_t idx) const;
+
 	static std::vector<double> to_vector(const std::string&);
 	static std::string vector_to_json(const std::vector<double>&);
 	static std::string vector_to_plain(const std::vector<double>&);

@@ -149,7 +149,7 @@
 
 	; Return the observed count for the pair PAIR.
 	(define (get-count PAIR)
-		(cog-value-ref PAIR cnt-key cnt-ref))
+		(cog-value-ref (cog-value PAIR cnt-key) cnt-ref))
 
 	; Explicitly set location to value
 	(define (set-count PAIR CNT)
@@ -320,9 +320,29 @@
 		(store-value PAIR cnt-key))
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM).
-	; If it does not exist, make it.
+	; Be careful to not create tha pair, if it doesn't exist.
+	; The logic below:
+	; If the pair exists, then just fetch the count.
+	; If the pair does not exist,
+	;    -- create a temp atomspace,
+	;    -- create the pair in that temp space
+	;    -- fetch value from storage.
+	;    -- if the value was found
+	;         -- fetch value in mainspace
+	;    -- else if not found, defer to LLOBJ about what to return.
+	;
 	(define (pair-count L-ATOM R-ATOM)
-		(get-count (LLOBJ 'make-pair L-ATOM R-ATOM)))
+		(define test-pair (LLOBJ 'get-pair L-ATOM R-ATOM))
+		(if (not (nil? test-pair))
+			(get-count test-pair)
+			(let* ((base (cog-push-atomspace))
+					(PAIR (LLOBJ 'make-pair L-ATOM R-ATOM))
+					(junk (fetch-value PAIR cnt-key))
+					(have-it (equal? cnt-type (cog-value-type PAIR cnt-key))))
+				(cog-pop-atomspace)
+				(if have-it
+					(get-count (LLOBJ 'make-pair L-ATOM R-ATOM))
+					(LLOBJ 'pair-count L-ATOM R-ATOM)))))
 
 	(define (pair-set L-ATOM R-ATOM CNT)
 		(set-count (LLOBJ 'make-pair L-ATOM R-ATOM) CNT))

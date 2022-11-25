@@ -25,6 +25,7 @@
 #include "StreamValueOfLink.h"
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 
 using namespace opencog;
 
@@ -71,14 +72,20 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		   ak->to_string().c_str(), ah->to_string().c_str());
 	}
 
-	if (stream->is_type(STREAM_VALUE))
+	if (stream->is_type(TRUTH_VALUE))
+	{
+		// Sample a value out of the stream.
+		return ValueCast(createSimpleTruthValue(stream));
+	}
+
+	if (stream->is_type(FLOAT_VALUE))
 	{
 		// Sample a value out of the stream.
 		FloatValuePtr fvp = FloatValueCast(stream);
 		return createFloatValue(fvp->value());
 	}
 
-	if (stream->is_type(LINK_STREAM_VALUE))
+	if (stream->is_type(LINK_VALUE))
 	{
 		LinkValuePtr lvp = LinkValueCast(stream);
       return createLinkValue(lvp->value());
