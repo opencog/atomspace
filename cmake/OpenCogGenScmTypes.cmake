@@ -38,6 +38,8 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 		FILE(APPEND "${SCM_FILE}"
 			"(define-public (${TYPE_NAME} . x)\n"
 			"\t(apply cog-new-value (cons ${TYPE_NAME}Type x)))\n"
+			"(set-procedure-property! ${TYPE_NAME} 'documentation\n"
+			"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 		)
 	ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
 
@@ -45,11 +47,15 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 		FILE(APPEND "${SCM_FILE}"
 			"(define-public (${TYPE_NAME} . x)\n"
 			"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
+			"(set-procedure-property! ${TYPE_NAME} 'documentation\n"
+			"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 		)
 		IF (NOT SHORT_NAME STREQUAL "")
 			FILE(APPEND "${SCM_FILE}"
 				"(define-public (${SHORT_NAME} . x)\n"
 				"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
+				"(set-procedure-property! ${SHORT_NAME} 'documentation\n"
+				"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 			)
 		ENDIF (NOT SHORT_NAME STREQUAL "")
 	ENDIF (ISNODE STREQUAL "NODE")
@@ -58,11 +64,15 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 		FILE(APPEND "${SCM_FILE}"
 			"(define-public (${TYPE_NAME} . x)\n"
 			"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
+			"(set-procedure-property! ${TYPE_NAME} 'documentation\n"
+			"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 		)
 		IF (NOT SHORT_NAME STREQUAL "")
 			FILE(APPEND "${SCM_FILE}"
 				"(define-public (${SHORT_NAME} . x)\n"
 				"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
+				"(set-procedure-property! ${SHORT_NAME} 'documentation\n"
+				"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 			)
 		ENDIF (NOT SHORT_NAME STREQUAL "")
 	ENDIF (ISLINK STREQUAL "LINK")
