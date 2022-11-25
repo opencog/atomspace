@@ -53,11 +53,18 @@
 							(FloatValueOf lwp cnt-key cnt-ref)
 							(FloatValueOf rwp cnt-key cnt-ref)))))))
 
+	(LLOBJ 'get-count (LLOBJ 'wild-wild))
 	(make-formula)
 
-	; Install the formula for this pair.
-	(define (install-formula ATOM L R)
-		(cog-set-value! ATOM mi-key (FormulaStream dyn-proc L R)))
+	; Install the formula for this pair. This requires touching
+	; all of the counts, at least once, in case they are sitting
+	; storage.
+	(define (install-formula PAIR L R)
+		(LLOBJ 'pair-count L R)
+		(LLOBJ 'get-count (LLOBJ 'right-wildcard L))
+		(LLOBJ 'get-count (LLOBJ 'left-wildcard R))
+		(cog-set-value! PAIR mi-key (FormulaStream
+			(ExecutionOutput dyn-proc (List L R)))))
 
 	; Get the MI for this pair. Install the formula, if not yet
 	; installed.
@@ -74,6 +81,7 @@
 
 	; Get the MI, given only the left and right bits.
 	(define (pair-count L-ATOM R-ATOM)
+xxxxxx this fails for storage nodes
 		(define stats-atom (LLOBJ 'get-pair L-ATOM R-ATOM))
 		(if (nil? stats-atom) -inf.0
 			(get-mi stats-atom L-ATOM R-ATOM)))
