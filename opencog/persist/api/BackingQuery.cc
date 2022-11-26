@@ -214,7 +214,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	// The pattern engine does a graph crawl, and as it crawls, it
 	// needs things like the incoming set of assorted Atoms. This
 	// incoming set is typically *not* in the local AtomSpace; but it
-	// is in storage. Thus, the imcoming set must be fetched from
+	// is in storage. Thus, the incoming set must be fetched from
 	// storage, before the graph craw can continue. The
 	// `class  BackingImplicator` and related classes do this fetch.
 	Type qt = query->get_type();

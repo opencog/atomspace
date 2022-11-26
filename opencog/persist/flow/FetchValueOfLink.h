@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/flow/ValueOfLink.h
+ * opencog/persist/flow/FetchValueOfLink.h
  *
- * Copyright (C) 2018 Linas Vepstas
+ * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_VALUE_OF_LINK_H
-#define _OPENCOG_VALUE_OF_LINK_H
+#ifndef _OPENCOG_FETCH_VALUE_OF_LINK_H
+#define _OPENCOG_FETCH_VALUE_OF_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/flow/ValueOfLink.h>
 
 namespace opencog
 {
@@ -31,33 +31,29 @@ namespace opencog
  *  @{
  */
 
-/// The ValueOfLink returns the value on the indicated atom (first
-/// argument) at the indicated key (second argument).
+/// The FetchValueOfLink gets a Value from and open StorageNode,
+/// sets it at the key, and then returns that Value.
 ///
-class ValueOfLink : public FunctionLink
+class FetchValueOfLink : public ValueOfLink
 {
 private:
 	void init(void);
 
-protected:
-	ValuePtr do_execute(AtomSpace*, bool, int);
-
 public:
-	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
+	FetchValueOfLink(const HandleSeq&&, Type = FETCH_VALUE_OF_LINK);
+	FetchValueOfLink(const FetchValueOfLink&) = delete;
+	FetchValueOfLink& operator=(const FetchValueOfLink&) = delete;
 
-	ValueOfLink(const ValueOfLink&) = delete;
-	ValueOfLink& operator=(const ValueOfLink&) = delete;
-
-	// Return a pointer to the value at the specified key.
+	// Return a pointer to the Value being updated.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(ValueOfLink)
-#define createValueOfLink CREATE_DECL(ValueOfLink)
+LINK_PTR_DECL(FetchValueOfLink)
+#define createFetchValueOfLink CREATE_DECL(FetchValueOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_VALUE_OF_LINK_H
+#endif // _OPENCOG_FETCH_VALUE_OF_LINK_H

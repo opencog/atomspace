@@ -58,7 +58,7 @@ public:
 	virtual void open(void) = 0;
 
 	/**
-	 * Cloase an active, ppen a connection to the indicated URI.
+	 * Close an active connection.
 	 */
 	virtual void close(void) = 0;
 

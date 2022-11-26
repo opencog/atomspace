@@ -60,7 +60,8 @@ void ValueOfLink::init(void)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.
-ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
+/// The idx_of_idx is where we can find the optional index atom.
+ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 {
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the
@@ -71,9 +72,9 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	// trickle out properly in the end.
 	//
 	// XXX TODO FIXME ... if either of these are executable, then
-	// they need to be executed, first, right? Or not? Do we need
-	// an explicit ExecuteLink to find out what these are? I'm
-	// confused.
+	// they need to be executed, first, right? Because that's the
+	// usual intent. Else they'd be wrapped in a DontExecLink, right?
+	// I'm confused.
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 
@@ -81,11 +82,11 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	if (pap)
 	{
 		// If there's no third reference, we are done.
-		if (2 == _outgoing.size())
+		if (0 > idx_of_idx)
 			return pap;
 
 		double offset = 0.0;
-		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[2]));
+		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[idx_of_idx]));
 		if (nvp->is_type(NUMBER_NODE))
 			offset = NumberNodeCast(nvp)->value()[0];
 		else if (nvp->is_type(FLOAT_VALUE))
@@ -95,12 +96,29 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		return pap->value_at_index(idx);
 	}
 
+#if 0
+	// Hmm. If there's no value, it might be because it was deleted.
+	// There are many reasons for that. So, instead of throwing, we're
+	// going to return a nullptr instead, and assume that all upstream
+	// users are smart enough to check for that. It think they are,
+	// but you never know...
 	if (silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
 	   "No value at key %s on atom %s",
 	   ak->to_string().c_str(), ah->to_string().c_str());
+#endif
+
+	return nullptr;
+}
+
+/// When executed, this will return the value at the indicated key.
+ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
+{
+	if (2 == _outgoing.size())
+		return do_execute(as, silent, -1);
+	return do_execute(as, silent, 2);
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

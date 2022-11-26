@@ -709,9 +709,10 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// Make sure that the atom is in an atomspace that is compatible
 	// with the execution environment. When it's not, then bizarre
 	// results happen (e.g. with searches, because the search cannot
-	// find atoms in the correct atomspace.) We do allow, for now,
-	// atoms with null atomspaces; if/when these need to be inserted
-	// somewhere, that will be done when needed, into the right place.
+	// find atoms in the correct atomspace.)  XXX FIXME. Eventually,
+	// All generators and consumers of Atoms need to do this themselves,
+	// instead of having it done here. The insertion below is problematic
+	// for frames and other comlex situations.
 	AtomSpace* exas = expr->getAtomSpace();
 	if (nullptr != exas and not _as->in_environ(expr))
 		throw RuntimeException(TRACE_INFO,
@@ -729,7 +730,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	    expr->is_type(PROMISE_PREDICATE_LINK))
 	{
 		ValuePtr vp = expr->execute(_as, silent);
-		if (vp->is_atom())
+		if (vp and vp->is_atom())
 			return _as->add_atom(HandleCast(vp));
 		return vp;
 	}
