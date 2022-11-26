@@ -919,12 +919,6 @@ NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the type of the wrapped Atom
 TYPE_OF_LINK <- VALUE_OF_LINK
 
-// Fetch and store Values from Storage.
-// Marked "NUMERIC" only because having a FetchFloatValueOfLink seems
-// like overkill.
-FETCH_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-STORE_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-
 // Like the above, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either
 // a FutureStream or a FormulaStream when executed. This stream will

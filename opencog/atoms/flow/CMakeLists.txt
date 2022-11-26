@@ -3,14 +3,12 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomflow
-	FetchValueOfLink.cc
 	FormulaPredicateLink.cc
 	NumberOfLink.cc
 	PromiseLink.cc
 	SetTVLink.cc
 	SetValueLink.cc
 	SizeOfLink.cc
-	StoreValueOfLink.cc
 	StreamValueOfLink.cc
 	TruthValueOfLink.cc
 	TypeOfLink.cc
@@ -31,14 +29,12 @@ INSTALL (TARGETS atomflow EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	FetchValueOfLink.h
 	FormulaPredicateLink.h
 	NumberOfLink.h
 	PromiseLink.h
 	SetTVLink.h
 	SetValueLink.h
 	SizeOfLink.h
-	StoreValueOfLink.h
 	StreamValueOfLink.h
 	TruthValueOfLink.h
 	TypeOfLink.h
