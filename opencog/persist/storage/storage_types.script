@@ -25,7 +25,7 @@ COG_STORAGE_NODE <- STORAGE_NODE
 // are currently deeply, fundamentally broken. Whoops!
 
 // ------------------------------------------------------------------
-/ Fetch and store Values from Storage.
+// Fetch and store Values from Storage.
 // Marked "NUMERIC" only because having a FetchFloatValueOfLink seems
 // like overkill.
 //
