@@ -7,10 +7,6 @@ ADD_LIBRARY (persist
 )
 
 TARGET_LINK_LIBRARIES(persist
-	storage-types
-	atomspace
-	smob
-
 	# The ${NO_AS_NEEDED} causes this library to be force-linked
 	# with all symbols in it. We do this for two reasons: to include
 	# the definitions for FetchValueOf, etc to be part of the persist
@@ -18,6 +14,9 @@ TARGET_LINK_LIBRARIES(persist
 	# persistflow lib, as otherwise, the Atom factory is not set up.
 	${NO_AS_NEEDED}
 	persistflow
+	storage-types
+	atomspace
+	smob
 )
 
 ADD_GUILE_EXTENSION(SCM_CONFIG persist "opencog-ext-path-persist")
