@@ -96,12 +96,21 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 		return pap->value_at_index(idx);
 	}
 
+#if 0
+	// Hmm. If there's no value, it might be because it was deleted.
+	// There are many reasons for that. So, instead of throwing, we're
+	// going to return a nullptr instead, and assume that all upstream
+	// users are smart enough to check for that. It think they are,
+	// but you never know...
 	if (silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
 	   "No value at key %s on atom %s",
 	   ak->to_string().c_str(), ah->to_string().c_str());
+#endif
+
+	return nullptr;
 }
 
 /// When executed, this will return the value at the indicated key.
