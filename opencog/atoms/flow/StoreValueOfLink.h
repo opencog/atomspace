@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/FetchValueOfLink.h
+ * opencog/atoms/flow/StoreValueOfLink.h
  *
  * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FETCH_VALUE_OF_LINK_H
-#define _OPENCOG_FETCH_VALUE_OF_LINK_H
+#ifndef _OPENCOG_STORE_VALUE_OF_LINK_H
+#define _OPENCOG_STORE_VALUE_OF_LINK_H
 
 #include <opencog/atoms/flow/ValueOfLink.h>
 
@@ -31,18 +31,18 @@ namespace opencog
  *  @{
  */
 
-/// The FetchValueOfLink gets a Value from and open StorageNode,
+/// The StoreValueOfLink gets a Value from and open StorageNode,
 /// sets it at the key, and then returns that Value.
 ///
-class FetchValueOfLink : public ValueOfLink
+class StoreValueOfLink : public ValueOfLink
 {
 private:
 	void init(void);
 
 public:
-	FetchValueOfLink(const HandleSeq&&, Type = FETCH_VALUE_OF_LINK);
-	FetchValueOfLink(const FetchValueOfLink&) = delete;
-	FetchValueOfLink& operator=(const FetchValueOfLink&) = delete;
+	StoreValueOfLink(const HandleSeq&&, Type = STORE_VALUE_OF_LINK);
+	StoreValueOfLink(const StoreValueOfLink&) = delete;
+	StoreValueOfLink& operator=(const StoreValueOfLink&) = delete;
 
 	// Return a pointer to the Value being updated.
 	virtual ValuePtr execute(AtomSpace*, bool);
@@ -50,10 +50,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(FetchValueOfLink)
-#define createFetchValueOfLink CREATE_DECL(FetchValueOfLink)
+LINK_PTR_DECL(StoreValueOfLink)
+#define createStoreValueOfLink CREATE_DECL(StoreValueOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_FETCH_VALUE_OF_LINK_H
+#endif // _OPENCOG_STORE_VALUE_OF_LINK_H

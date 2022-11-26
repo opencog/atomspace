@@ -68,7 +68,7 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	// third place, and the arguments to the function in fourth place.
 	// Wrap these two in an ExecutionOutput, and then wrap that in a
 	// FormulaStream. The user could do this themselves; this is
-	// provided as a conenience function. Note that SetTV works the
+	// provided as a convenience function. Note that SetTV works the
 	// same way.
 
 	Handle exo(createExecutionOutputLink(_outgoing[2], _outgoing[3]));

@@ -1,5 +1,5 @@
 /*
- * FetchValueOfLink.cc
+ * StoreValueOfLink.cc
  *
  * Copyright (C) 2015, 2022 Linas Vepstas
  *
@@ -23,23 +23,23 @@
 
 #include <opencog/persist/api/StorageNode.h>
 
-#include "FetchValueOfLink.h"
+#include "StoreValueOfLink.h"
 
 using namespace opencog;
 
-FetchValueOfLink::FetchValueOfLink(const HandleSeq&& oset, Type t)
+StoreValueOfLink::StoreValueOfLink(const HandleSeq&& oset, Type t)
 	: ValueOfLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, FETCH_VALUE_OF_LINK))
+	if (not nameserver().isA(t, STORE_VALUE_OF_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an FetchValueOfLink, got %s", tname.c_str());
+			"Expecting an StoreValueOfLink, got %s", tname.c_str());
 	}
 	init();
 }
 
-void FetchValueOfLink::init(void)
+void StoreValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
 
@@ -53,8 +53,8 @@ void FetchValueOfLink::init(void)
 
 // ---------------------------------------------------------------
 
-/// Fetch the Value first, and then return it.
-ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
+/// Store the Value first, and then return it.
+ValuePtr StoreValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	StorageNodePtr stnp = StorageNodeCast(_outgoing[2]);
 
@@ -73,6 +73,6 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 	return ValueOfLink::do_execute(as, silent, 3);
 }
 
-DEFINE_LINK_FACTORY(FetchValueOfLink, FETCH_VALUE_OF_LINK)
+DEFINE_LINK_FACTORY(StoreValueOfLink, STORE_VALUE_OF_LINK)
 
 /* ===================== END OF FILE ===================== */
