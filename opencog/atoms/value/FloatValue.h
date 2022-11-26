@@ -56,7 +56,9 @@ public:
 
 	const std::vector<double>& value() const { update(); return _value; }
 	size_t size() const { return _value.size(); }
-	ValuePtr value_at_index(size_t) const;
+	virtual ValuePtr value_at_index(size_t) const;
+	virtual ValuePtr incrementCount(const std::vector<double>&) const;
+	virtual ValuePtr incrementCount(size_t, double) const;
 
 	/** Returns a string representation of the value. */
 	virtual std::string to_string(const std::string& indent = "") const

@@ -33,6 +33,39 @@ ValuePtr FloatValue::value_at_index(size_t idx) const
 	return createFloatValue(d);
 }
 
+ValuePtr FloatValue::incrementCount(const std::vector<double>& v) const
+{
+	// Make a copy
+	std::vector<double> new_vect = _value;
+
+	// Increase size to fit.
+	if (new_vect.size() < v.size())
+		new_vect.resize(v.size(), 0.0);
+
+	// Increment
+	for (size_t idx=0; idx < new_vect.size(); idx++)
+		new_vect[idx] += v[idx];
+
+	// Return a brand new value of the same type.
+	return createFloatValue(_type, new_vect);
+}
+
+ValuePtr FloatValue::incrementCount(size_t idx, double count) const
+{
+	// Make a copy
+	std::vector<double> new_vect = _value;
+
+	// Increase size to fit.
+	if (new_vect.size() <= idx)
+		new_vect.resize(idx+1, 0.0);
+
+	// Increment
+	new_vect[idx] += count;
+
+	// Return a brand new value of the same type.
+	return createFloatValue(_type, new_vect);
+}
+
 bool FloatValue::operator==(const Value& other) const
 {
 	// Unlike Atoms, we are willing to compare othr types, as long

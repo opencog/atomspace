@@ -188,93 +188,102 @@ ValuePtr Atom::getValue(const Handle& key) const
 
 ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& count)
 {
-	std::vector<double> new_value;
-	Type vt = FLOAT_VALUE;
-
 	KVP_UNIQUE_LOCK;
 
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
 	if (_values.end() != pr)
 	{
-		const ValuePtr& pap = pr->second;
-		vt = pap->get_type();
-		if (nameserver().isA(vt, FLOAT_VALUE))
+		ValuePtr pap = pr->second;
+
+		// Its not a float. Do nothing.
+		if (not pap->is_type(FLOAT_VALUE))
+			return pap;
+
+		// Backwards compatibility: If we're incrementing the count
+		// location on a SimpleTruthValue, then automatically promote
+		// it to a CountTruthValue.
+		if (*key == *truth_key() and
+			 not pap->is_type(COUNT_TRUTH_VALUE))
 		{
 			FloatValuePtr fv(FloatValueCast(pap));
-			new_value = fv->value();
+			std::vector<double> vect = fv->value();
+			pap = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, vect));
 		}
+
+		// Its a float. Let it increment itself.
+		FloatValuePtr fv(FloatValueCast(pap));
+		ValuePtr nv = fv->incrementCount(count);
+
+		_values[key] = nv;
+		return nv;
 	}
 
-	// Increment the existing value (or create a new one).
-	size_t cntsz = count.size();
-	if (new_value.size() <= cntsz)
-		new_value.resize(cntsz, 0.0);
-	for (size_t i=0; i<cntsz; i++)
-		new_value[i] += count[i];
+	// If we are here, an existing value was not found.
+	// Backwards compatibility: If there's no prior value *and*
+	// the key is the default TruthValue key, then automatically
+	// create a CountTruthValue.
 
-	// Set the new value.
+	// Create a brand new float.
 	ValuePtr nv;
-	if (nameserver().isA(vt, TRUTH_VALUE))
-		nv = ValueCast(TruthValue::factory(vt, new_value));
+	if (*truth_key() == *key)
+		nv = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, count));
 	else
-		nv = createFloatValue(vt, new_value);
+		nv = createFloatValue(FLOAT_VALUE, count);
 
 	_values[key] = nv;
 	return nv;
 }
 
+// Cut-n-paste of the code above.
 ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 {
-	std::vector<double> new_value;
-	Type vt = 0;
-
 	KVP_UNIQUE_LOCK;
 
 	// Find the existing value, if it is there.
 	auto pr = _values.find(key);
 	if (_values.end() != pr)
 	{
-		const ValuePtr& pap = pr->second;
-		Type et = pap->get_type();
-		if (nameserver().isA(et, FLOAT_VALUE))
-		{
-			vt = et;
-			FloatValuePtr fv(FloatValueCast(pap));
-			new_value = fv->value();
-		}
-	}
+		ValuePtr pap = pr->second;
 
-	// Backwards compatibility: If there's no prior value *and*
-	// the key is the default TruthValue key, then automatically
-	// create a CountTruthValue.
-	if (0 == vt)
-	{
-		if (2 == idx and *truth_key() == *key)
-			vt = COUNT_TRUTH_VALUE;
-		else
-			vt = FLOAT_VALUE;
-	}
+		// Its not a float. Do nothing.
+		if (not pap->is_type(FLOAT_VALUE))
+			return pap;
 
-	// Increment the existing value (or create a new one).
-	if (new_value.size() <= idx)
-		new_value.resize(idx+1, 0.0);
-
-	new_value[idx] += count;
-
-	// Set the new value.
-	ValuePtr nv;
-	if (nameserver().isA(vt, TRUTH_VALUE))
-	{
 		// Backwards compatibility: If we're incrementing the count
 		// location on a SimpleTruthValue, then automatically promote
 		// it to a CountTruthValue.
-		if (2 == idx and *key == *truth_key())
-			vt = COUNT_TRUTH_VALUE;
-		nv = ValueCast(TruthValue::factory(vt, new_value));
+		if (2 == idx and *key == *truth_key() and
+			 not pap->is_type(COUNT_TRUTH_VALUE))
+		{
+			FloatValuePtr fv(FloatValueCast(pap));
+			std::vector<double> vect = fv->value();
+			pap = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, vect));
+		}
+
+		// Its a float. Let it increment itself.
+		FloatValuePtr fv(FloatValueCast(pap));
+		ValuePtr nv = fv->incrementCount(idx, count);
+
+		_values[key] = nv;
+		return nv;
 	}
+
+	// If we are here, an existing value was not found.
+	// Backwards compatibility: If there's no prior value *and*
+	// the key is the default TruthValue key, then automatically
+	// create a CountTruthValue.
+
+	// Create a brand new float.
+	std::vector<double> new_vect;
+	new_vect.resize(idx+1, 0.0);
+	new_vect[idx] += count;
+
+	ValuePtr nv;
+	if (2 == idx and *truth_key() == *key)
+		nv = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, new_vect));
 	else
-		nv = createFloatValue(vt, new_value);
+		nv = createFloatValue(FLOAT_VALUE, new_vect);
 
 	_values[key] = nv;
 	return nv;
