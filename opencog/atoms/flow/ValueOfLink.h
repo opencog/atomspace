@@ -39,6 +39,9 @@ class ValueOfLink : public FunctionLink
 private:
 	void init(void);
 
+protected:
+	ValuePtr do_execute(AtomSpace*, bool, int);
+
 public:
 	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
 

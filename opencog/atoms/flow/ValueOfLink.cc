@@ -60,7 +60,8 @@ void ValueOfLink::init(void)
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.
-ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
+/// The idx_of_idx is where we can find the optional index atom.
+ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 {
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the
@@ -81,11 +82,11 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	if (pap)
 	{
 		// If there's no third reference, we are done.
-		if (2 == _outgoing.size())
+		if (0 > idx_of_idx)
 			return pap;
 
 		double offset = 0.0;
-		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[2]));
+		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[idx_of_idx]));
 		if (nvp->is_type(NUMBER_NODE))
 			offset = NumberNodeCast(nvp)->value()[0];
 		else if (nvp->is_type(FLOAT_VALUE))
@@ -101,6 +102,14 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	throw InvalidParamException(TRACE_INFO,
 	   "No value at key %s on atom %s",
 	   ak->to_string().c_str(), ah->to_string().c_str());
+}
+
+/// When executed, this will return the value at the indicated key.
+ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
+{
+	if (2 == _outgoing.size())
+		return do_execute(as, bool, -1);
+	return do_execute(as, bool, 2);
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

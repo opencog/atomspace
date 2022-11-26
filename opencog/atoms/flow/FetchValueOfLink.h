@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/SizeOfLink.h
+ * opencog/atoms/flow/FetchValueOfLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SIZE_OF_LINK_H
-#define _OPENCOG_SIZE_OF_LINK_H
+#ifndef _OPENCOG_FETCH_VALUE_OF_LINK_H
+#define _OPENCOG_FETCH_VALUE_OF_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/flow/ValueOf.h>
 
 namespace opencog
 {
@@ -31,36 +31,28 @@ namespace opencog
  *  @{
  */
 
-/// The SizeOfLink returns a FloatValue holding the arity of the wrapped
-/// atom; its zero for Nodes and empty Links.
+/// The FetchValueOfLink gets a Value from and open StorageNode,
+/// sets it at the key, and then returns that Value.
 ///
-/// For example,
-///
-///     SizeOfLink
-///         SomeAtom
-///         OtherAtom
-///
-/// will return
-///
-///     FloatValue 2
-///
-class SizeOfLink : public FunctionLink
+class FetchValueOfLink : public ValueOfLink
 {
-public:
-	SizeOfLink(const HandleSeq&&, Type = SIZE_OF_LINK);
-	SizeOfLink(const SizeOfLink&) = delete;
-	SizeOfLink& operator=(const SizeOfLink&) = delete;
+	void init(void);
 
-	// Return a pointer to a FloatValue.
+public:
+	FetchValueOfLink(const HandleSeq&&, Type = FETCH_VALUE_OF_LINK);
+	FetchValueOfLink(const FetchValueOfLink&) = delete;
+	FetchValueOfLink& operator=(const FetchValueOfLink&) = delete;
+
+	// Return a pointer to the Value being updated.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(SizeOfLink)
-#define createSizeOfLink CREATE_DECL(SizeOfLink)
+LINK_PTR_DECL(FetchValueOfLink)
+#define createFetchValueOfLink CREATE_DECL(FetchValueOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_SIZE_OF_LINK_H
+#endif // _OPENCOG_FETCH_VALUE_OF_LINK_H
