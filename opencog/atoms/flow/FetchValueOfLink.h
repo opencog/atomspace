@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_FETCH_VALUE_OF_LINK_H
 #define _OPENCOG_FETCH_VALUE_OF_LINK_H
 
-#include <opencog/atoms/flow/ValueOf.h>
+#include <opencog/atoms/flow/ValueOfLink.h>
 
 namespace opencog
 {
@@ -36,6 +36,7 @@ namespace opencog
 ///
 class FetchValueOfLink : public ValueOfLink
 {
+private:
 	void init(void);
 
 public:

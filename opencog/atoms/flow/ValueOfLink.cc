@@ -108,8 +108,8 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	if (2 == _outgoing.size())
-		return do_execute(as, bool, -1);
-	return do_execute(as, bool, 2);
+		return do_execute(as, silent, -1);
+	return do_execute(as, silent, 2);
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/persist/api/StorageNode.h>
 
 #include "FetchValueOfLink.h"
 
@@ -39,16 +39,28 @@ FetchValueOfLink::FetchValueOfLink(const HandleSeq&& oset, Type t)
 	init();
 }
 
-void FetchValueOfLink::void(init)
+void FetchValueOfLink::init(void)
 {
+	size_t ary = _outgoing.size();
+
+	if (3 != ary and 4 != ary)
+	throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
 }
 
 // ---------------------------------------------------------------
 
-/// Return a FloatValue scalar.
+/// Fetch the Value first, and then return it.
 ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 {
-	return ValueOfLink::execute(as, silent);
+	StorageNodePtr stnp = StorageNodeCast(_outgoing[2]);
+
+	// If the StorageNode is not open for reading, it
+	// will either throw, or do something else. Not our decision.
+	stnp->fetch_value(_outgoing[0], _outgoing[1], as);
+
+	if (3 == _outgoing.size())
+		return ValueOfLink::do_execute(as, silent, -1);
+	return ValueOfLink::do_execute(as, silent, 3);
 }
 
 DEFINE_LINK_FACTORY(FetchValueOfLink, FETCH_VALUE_OF_LINK)
