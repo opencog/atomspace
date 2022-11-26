@@ -51,7 +51,7 @@ public:
 	TypeOfLink(const TypeOfLink&) = delete;
 	TypeOfLink& operator=(const TypeOfLink&) = delete;
 
-	// Return a pointer to the atom being specified.
+	// Return a pointer to the Type of Atoms in the OutgoingSet.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);

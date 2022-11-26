@@ -51,7 +51,7 @@ public:
 	SizeOfLink(const SizeOfLink&) = delete;
 	SizeOfLink& operator=(const SizeOfLink&) = delete;
 
-	// Return a pointer to the atom being specified.
+	// Return a pointer to a FloatValue.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
