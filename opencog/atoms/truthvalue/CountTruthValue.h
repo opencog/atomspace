@@ -56,6 +56,9 @@ public:
     CountTruthValue(CountTruthValue const&);
     CountTruthValue(const ValuePtr&);
 
+    virtual ValuePtr incrementCount(const std::vector<double>&) const;
+    virtual ValuePtr incrementCount(size_t, double) const;
+
     virtual bool operator==(const Value& rhs) const;
 
     virtual std::string to_string(const std::string& = "") const;

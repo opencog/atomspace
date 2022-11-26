@@ -95,6 +95,30 @@ confidence_t CountTruthValue::get_confidence() const
     return _value[CONFIDENCE];
 }
 
+ValuePtr CountTruthValue::incrementCount(const std::vector<double>& delta) const
+{
+	// Make a copy
+	std::vector<double> new_vect = _value;
+
+	for (size_t idx=0; idx <= 2; idx++)
+		new_vect[idx] += delta[idx];
+
+	// Return a brand new copy
+	return ValueCast(createCountTruthValue(new_vect));
+}
+
+ValuePtr CountTruthValue::incrementCount(size_t idx, double count) const
+{
+	// Make a copy
+	std::vector<double> new_vect = _value;
+
+	if (2 >= idx)
+		new_vect[idx] += count;
+
+	// Return a brand new copy
+	return ValueCast(createCountTruthValue(new_vect));
+}
+
 std::string CountTruthValue::to_string(const std::string& indent) const
 {
 #define BUFSZ 102
