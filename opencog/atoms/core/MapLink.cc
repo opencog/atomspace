@@ -351,13 +351,13 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return createLink(std::move(valseq), LIST_LINK);
+		return scratch->add_link(LIST_LINK, std::move(valseq));
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;
 }
 
-ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
+ValuePtr MapLink::execute(AtomSpace* as, bool silent)
 {
 	const Handle& valh = _outgoing[1];
 
@@ -371,19 +371,19 @@ ValuePtr MapLink::execute(AtomSpace* scratch, bool silent)
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
-			Handle mone = rewrite_one(h, scratch);
+			Handle mone = rewrite_one(h, as);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
-		return createLink(std::move(remap), argtype);
+		return as->add_link(argtype, std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = rewrite_one(valh, scratch);
+	Handle mone = rewrite_one(valh, as);
 	if (mone) return mone;
 
 	// Avoid returning null handle.  This is broken.
-	// I don't link MapLink much any more.
-	return createLink(SET_LINK);
+	// I don't like MapLink much any more.
+	return as->add_link(SET_LINK);
 }
 
 DEFINE_LINK_FACTORY(MapLink, MAP_LINK)
