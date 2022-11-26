@@ -72,9 +72,9 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 	// trickle out properly in the end.
 	//
 	// XXX TODO FIXME ... if either of these are executable, then
-	// they need to be executed, first, right? Or not? Do we need
-	// an explicit ExecuteLink to find out what these are? I'm
-	// confused.
+	// they need to be executed, first, right? Because that's the
+	// usual intent. Else they'd be wrapped in a DontExecLink, right?
+	// I'm confused.
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 

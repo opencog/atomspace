@@ -44,7 +44,11 @@ void FetchValueOfLink::init(void)
 	size_t ary = _outgoing.size();
 
 	if (3 != ary and 4 != ary)
-	throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
+		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
+
+	if (not _outgoing[2]->is_type(STORAGE_NODE))
+		throw SyntaxException(TRACE_INFO, "Expecting a StorageNode, got %s",
+			_outgoing[2]->to_string().c_str());
 }
 
 // ---------------------------------------------------------------
@@ -54,10 +58,16 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	StorageNodePtr stnp = StorageNodeCast(_outgoing[2]);
 
-	// If the StorageNode is not open for reading, it
-	// will either throw, or do something else. Not our decision.
+	// XXX TODO FIXME ... if either of _outgoing[0] or _outgoing[1]
+	// are executable, then they need to be executed, first, right?
+	// Because that's the usual intent. Else they'd be wrapped in a
+	// DontExecLink, right? I'm confused.
+
+	// If the StorageNode is not open for reading, it will
+	// either throw, or do something else. Not our decision.
 	stnp->fetch_value(_outgoing[0], _outgoing[1], as);
 
+	// Let the base class do the rest of the work.
 	if (3 == _outgoing.size())
 		return ValueOfLink::do_execute(as, silent, -1);
 	return ValueOfLink::do_execute(as, silent, 3);
