@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/StoreValueOfLink.h
+ * opencog/persist/flow/StoreValueOfLink.h
  *
  * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved

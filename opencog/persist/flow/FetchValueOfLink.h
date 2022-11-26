@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/FetchValueOfLink.h
+ * opencog/persist/flow/FetchValueOfLink.h
  *
  * Copyright (C) 2015, 2022 Linas Vepstas
  * All Rights Reserved
