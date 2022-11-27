@@ -53,8 +53,9 @@ void ValueOfLink::init(void)
 		return;
 	}
 
-	if (3 < ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
+	// Argh. FETCH_VALUE_OF can have 4 args.
+	//if (3 < ary)
+	//	throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
 }
 
 // ---------------------------------------------------------------

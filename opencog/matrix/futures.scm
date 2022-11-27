@@ -156,5 +156,5 @@
 ; (define ala (make-any-link-api))
 ; (define alc (add-count-api ala))
 ; (define als (add-storage-count alc))
-; (define ady (add-dynamic-mi als #:STORAGE (cog-storage-node)))
+; (define ady (add-dynamic-mi als)
 ; (ady 'pair-count (Word "the") (Word "horse"))
