@@ -6,9 +6,12 @@
 
 (use-modules (srfi srfi-1))
 
-(define-public (add-dynamic-mi LLOBJ)
+(define-public (add-dynamic-mi LLOBJ STORAGE-NODE)
 "
-  add-dynamic-mi LLOBJ -- Add formula to dynamically recompute the MI
+  add-dynamic-mi LLOBJ STORAGE-NODE -- Add formula to dynamically
+  recompute the MI
+
+  STORAGE-NODE must be a StorageNode, and it must be open for reading.
 
   Whenever a pair is references, the MI for that pair is recomputed for
   the count values on that pair.  Uses the conventional asymmetric
@@ -18,6 +21,10 @@
 	(if (not (and (LLOBJ 'provides 'count-key) (LLOBJ 'provides 'count-ref)))
 		(throw 'wrong-type-arg 'add-dynamic-mi
 			"Expecting a count object, to access the raw counts!"))
+
+	(if (not (cog-subtype? 'StorageNode (cog-type STORAGE-NODE)))
+		(throw 'wrong-type-arg 'add-dynamic-mi
+			"Expecting an StorageNode!"))
 
 	; Location where the MI will be stored.
 	(define mi-key (Predicate "*-Dynamic MI Key-*"))
@@ -39,6 +46,8 @@
 		(define cnt-key (LLOBJ 'count-key))
 		(define cnt-ref (NumberNode (LLOBJ 'count-ref)))
 
+		(define sto STORAGE-NODE)
+
 		; Create the actual procedure
 		(DefineLink
 			dyn-proc
@@ -47,11 +56,11 @@
 				(Log2
 					(Divide
 						(Times
-							(FetchValueOf lrp cnt-key cnt-ref)
-							(FetchValueOf wwp cnt-key cnt-ref))
+							(FetchValueOf lrp cnt-key sto cnt-ref)
+							(FetchValueOf wwp cnt-key sto cnt-ref))
 						(Times
-							(FetchValueOf lwp cnt-key cnt-ref)
-							(FetchValueOf rwp cnt-key cnt-ref)))))))
+							(FetchValueOf lwp cnt-key sto cnt-ref)
+							(FetchValueOf rwp cnt-key sto cnt-ref)))))))
 
 	(LLOBJ 'get-count (LLOBJ 'wild-wild))
 	(make-formula)
