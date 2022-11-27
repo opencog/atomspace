@@ -5,13 +5,16 @@
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 
-(define-public (add-dynamic-mi LLOBJ STORAGE-NODE)
+(define*-public (add-dynamic-mi LLOBJ
+	#:key (STORAGE (cog-storage-node)))
 "
-  add-dynamic-mi LLOBJ STORAGE-NODE -- Add formula to dynamically
-  recompute the MI
+  add-dynamic-mi LLOBJ -- Add formula to dynamically recompute the MI
 
-  STORAGE-NODE must be a StorageNode, and it must be open for reading.
+  #:STORAGE is an optional argument; if specified, it must be a
+  StorageNode, and it must be open for reading.  If not specified,
+  the currently open StorageNode is used.
 
   Whenever a pair is references, the MI for that pair is recomputed for
   the count values on that pair.  Uses the conventional asymmetric
@@ -22,7 +25,7 @@
 		(throw 'wrong-type-arg 'add-dynamic-mi
 			"Expecting a count object, to access the raw counts!"))
 
-	(if (not (cog-subtype? 'StorageNode (cog-type STORAGE-NODE)))
+	(if (not (cog-subtype? 'StorageNode (cog-type STORAGE)))
 		(throw 'wrong-type-arg 'add-dynamic-mi
 			"Expecting an StorageNode!"))
 
@@ -46,7 +49,7 @@
 		(define cnt-key (LLOBJ 'count-key))
 		(define cnt-ref (NumberNode (LLOBJ 'count-ref)))
 
-		(define sto STORAGE-NODE)
+		(define sto STORAGE)
 
 		; Create the actual procedure
 		(DefineLink
@@ -153,5 +156,5 @@
 ; (define ala (make-any-link-api))
 ; (define alc (add-count-api ala))
 ; (define als (add-storage-count alc))
-; (define ady (add-dynamic-mi als))
+; (define ady (add-dynamic-mi als #:STORAGE (cog-storage-node)))
 ; (ady 'pair-count (Word "the") (Word "horse"))
