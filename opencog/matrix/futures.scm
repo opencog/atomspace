@@ -11,7 +11,7 @@
   add-dynamic-mi LLOBJ -- Add formula to dynamically recompute the MI
 
   Whenever a pair is references, the MI for that pair is recomputed for
-  the count values on that pair.  Uses the conventional asymetric
+  the count values on that pair.  Uses the conventional asymmetric
   formula.
 "
 	; Check for valid strructure
@@ -47,22 +47,23 @@
 				(Log2
 					(Divide
 						(Times
-							(FloatValueOf lrp cnt-key cnt-ref)
-							(FloatValueOf wwp cnt-key cnt-ref))
+							(FetchValueOf lrp cnt-key cnt-ref)
+							(FetchValueOf wwp cnt-key cnt-ref))
 						(Times
-							(FloatValueOf lwp cnt-key cnt-ref)
-							(FloatValueOf rwp cnt-key cnt-ref)))))))
+							(FetchValueOf lwp cnt-key cnt-ref)
+							(FetchValueOf rwp cnt-key cnt-ref)))))))
 
 	(LLOBJ 'get-count (LLOBJ 'wild-wild))
 	(make-formula)
 
-	; Install the formula for this pair. This requires touching
-	; all of the counts, at least once, in case they are sitting
-	; storage.
+	; Install the formula for this pair.
 	(define (install-formula PAIR L R)
-		(LLOBJ 'pair-count L R)
-		(LLOBJ 'get-count (LLOBJ 'right-wildcard L))
-		(LLOBJ 'get-count (LLOBJ 'left-wildcard R))
+		; Touch all of the counts, at least once, in case they
+		; are sitting storage. Actually, no; FetchValueOf will
+		; do that for us.
+		; (LLOBJ 'pair-count L R)
+		; (LLOBJ 'get-count (LLOBJ 'right-wildcard L))
+		; (LLOBJ 'get-count (LLOBJ 'left-wildcard R))
 		(cog-set-value! PAIR mi-key (FormulaStream
 			(ExecutionOutput dyn-proc (List L R)))))
 
