@@ -127,6 +127,8 @@
 			((pair-count)       (apply pair-count args))
 			((get-count)        (apply get-count args))
 
+			((formula)          dyn-proc)
+
 			((provides)         (apply provides args))
 			((help)             (help))
 			((describe)         (describe))
