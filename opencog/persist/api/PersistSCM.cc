@@ -85,6 +85,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_delete, "persist", false);
 	define_scheme_primitive("sn-delete-rec",
 	             &PersistSCM::sn_delete_recursive, "persist", false);
+	define_scheme_primitive("sn-erase",
+	             &PersistSCM::sn_erase, "persist", false);
 	define_scheme_primitive("sn-barrier",
 	             &PersistSCM::sn_barrier, "persist", false);
 	define_scheme_primitive("sn-monitor",
@@ -124,6 +126,8 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_delete, this, "persist", false);
 	define_scheme_primitive("dflt-delete-rec",
 	             &PersistSCM::dflt_delete_recursive, this, "persist", false);
+	define_scheme_primitive("dflt-erase",
+	             &PersistSCM::dflt_erase, this, "persist", false);
 	define_scheme_primitive("dflt-barrier",
 	             &PersistSCM::dflt_barrier, this, "persist", false);
 	define_scheme_primitive("dflt-monitor",
@@ -321,6 +325,12 @@ void PersistSCM::sn_barrier(Handle hsn)
 	stnp->barrier(asp.get());
 }
 
+void PersistSCM::sn_erase(Handle hsn)
+{
+	GET_STNP;
+	stnp->erase();
+}
+
 std::string PersistSCM::sn_monitor(Handle hsn)
 {
 	GET_STNP;
@@ -458,6 +468,12 @@ void PersistSCM::dflt_barrier(void)
 	CHECK;
 	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("barrier");
 	_sn->barrier(asp.get());
+}
+
+void PersistSCM::dflt_erase(void)
+{
+	CHECK;
+	_sn->erase();
 }
 
 std::string PersistSCM::dflt_monitor(void)

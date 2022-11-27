@@ -15,6 +15,7 @@
 (define sto (PostgresStorageNode
 	"postgres:///opencog_test?user=opencog_tester&password=cheese"))
 (cog-open sto)
+(cog-erase! sto)
 
 (define fvof (FetchValueOf (Concept "a") (Predicate "foo") sto))
 (test-assert "No val" (nil? (cog-execute! fvof)))
@@ -34,7 +35,7 @@
 (cog-set-value! (Concept "a") (Predicate "foo") sv)
 (test-assert "Reset" (equal? fv (cog-execute! fvof)))
 
-(cog-delete! (Concept "a"))
+(cog-erase! sto)
 (cog-close sto)
 (test-end tname)
 

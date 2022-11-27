@@ -31,6 +31,7 @@
 	cog-delete!
 	cog-delete-recursive!
 	barrier
+	cog-erase!
 	monitor-storage
 	load-atomspace
 	store-atomspace
@@ -280,6 +281,19 @@
     be applied to it. It must be a StorageNode.
 "
 	(if STORAGE (sn-barrier STORAGE) (dflt-barrier))
+)
+
+(define*-public (cog-erase! #:optional (STORAGE #f))
+"
+ cog-erase! [STORAGE]
+
+    Erase the entire contents of storage.  Use with caution to avoid
+    massive data loss.
+
+    If the optional STORAGE argument is provided, then the erase will
+    be applied to it. It must be a StorageNode.
+"
+	(if STORAGE (sn-erase STORAGE) (dflt-erase))
 )
 
 (define*-public (monitor-storage #:optional (STORAGE #f))

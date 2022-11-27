@@ -58,6 +58,7 @@ private:
 	static void sn_delete_frame(Handle, Handle);
 	static bool sn_delete(Handle, Handle);
 	static bool sn_delete_recursive(Handle, Handle);
+	static void sn_erase(Handle);
 	static void sn_barrier(Handle);
 	static std::string sn_monitor(Handle);
 
@@ -86,6 +87,7 @@ private:
 	void dflt_delete_frame(Handle);
 	bool dflt_delete(Handle);
 	bool dflt_delete_recursive(Handle);
+	void dflt_erase(void);
 	void dflt_barrier(void);
 	std::string dflt_monitor(void);
 	Handle current_storage(void);
