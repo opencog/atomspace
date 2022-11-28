@@ -17,7 +17,7 @@
   the currently open StorageNode is used.
 
   Whenever a pair is references, the MI for that pair is recomputed for
-  the count values on that pair.  Uses the conventional asymmetric
+  the count values on that pair.  Uses the conventional asymetric
   formula.
 "
 	; Check for valid strructure
@@ -59,23 +59,22 @@
 				(Log2
 					(Divide
 						(Times
-							(FetchValueOf lrp cnt-key sto cnt-ref)
-							(FetchValueOf wwp cnt-key sto cnt-ref))
+							(FloatValueOf lrp cnt-key cnt-ref)
+							(FloatValueOf wwp cnt-key cnt-ref))
 						(Times
-							(FetchValueOf lwp cnt-key sto cnt-ref)
-							(FetchValueOf rwp cnt-key sto cnt-ref)))))))
+							(FloatValueOf lwp cnt-key cnt-ref)
+							(FloatValueOf rwp cnt-key cnt-ref)))))))
 
 	(LLOBJ 'get-count (LLOBJ 'wild-wild))
 	(make-formula)
 
-	; Install the formula for this pair.
+	; Install the formula for this pair. This requires touching
+	; all of the counts, at least once, in case they are sitting
+	; storage.
 	(define (install-formula PAIR L R)
-		; Touch all of the counts, at least once, in case they
-		; are sitting storage. Actually, no; FetchValueOf will
-		; do that for us.
-		; (LLOBJ 'pair-count L R)
-		; (LLOBJ 'get-count (LLOBJ 'right-wildcard L))
-		; (LLOBJ 'get-count (LLOBJ 'left-wildcard R))
+		(LLOBJ 'pair-count L R)
+		(LLOBJ 'get-count (LLOBJ 'right-wildcard L))
+		(LLOBJ 'get-count (LLOBJ 'left-wildcard R))
 		(cog-set-value! PAIR mi-key (FormulaStream
 			(ExecutionOutput dyn-proc (List L R)))))
 
