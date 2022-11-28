@@ -34,7 +34,7 @@ void TimesLink::init(void)
 	if (nullptr == one) one = createNumberNode(1);
 	Type tscope = get_type();
 	if (not nameserver().isA(tscope, TIMES_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
+		throw SyntaxException(TRACE_INFO, "Expecting a TimesLink");
 
 	knil = one;
 	_commutative = true;
@@ -159,9 +159,19 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	Handle hi(HandleCast(vi));
 	if (nullptr == hi) hi = HandleCast(fi);
+	if (nullptr == hi and fi->is_type(FLOAT_VALUE))
+		hi = createNumberNode(FloatValueCast(fi)->value());
+	if (nullptr == hi)
+		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
+			fi->to_string());
 
 	Handle hj(HandleCast(vj));
 	if (nullptr == hj) hj = HandleCast(fj);
+	if (nullptr == hj and fj->is_type(FLOAT_VALUE))
+		hj = createNumberNode(FloatValueCast(fj)->value());
+	if (nullptr == hj)
+		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
+			fj->to_string());
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
