@@ -159,16 +159,12 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 
 	Handle hi(HandleCast(vi));
 	if (nullptr == hi) hi = HandleCast(fi);
-	if (nullptr == hi and fi->is_type(FLOAT_VALUE))
-		hi = createNumberNode(FloatValueCast(fi)->value());
 	if (nullptr == hi)
 		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
 			fi->to_string());
 
 	Handle hj(HandleCast(vj));
 	if (nullptr == hj) hj = HandleCast(fj);
-	if (nullptr == hj and fj->is_type(FLOAT_VALUE))
-		hj = createNumberNode(FloatValueCast(fj)->value());
 	if (nullptr == hj)
 		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
 			fj->to_string());
