@@ -52,6 +52,7 @@ protected:
 public:
 	FutureStream(const Handle&);
 	FutureStream(const HandleSeq&&);
+	FutureStream(const ValueSeq&);
 	virtual ~FutureStream() {}
 
 	/** Returns a string representation of the value.  */

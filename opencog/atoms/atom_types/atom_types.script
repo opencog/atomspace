@@ -32,6 +32,8 @@ STRING_VALUE <- VALUE   // vector of strings
 LINK_VALUE <- VALUE     // vector of Values ("link" holding Values)
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
+LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
+
 // ===========================================================
 // Streams aka Futures. Futures deliver a Value when asked.
 // Since they can deliver more than one, and it typically changes
@@ -47,7 +49,7 @@ RANDOM_STREAM <- STREAM_VALUE
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
 // Typically computed by one of the FunctionLinks, below.
-FORMULA_STREAM <- STREAM_VALUE
+FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE
 
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
@@ -57,7 +59,7 @@ QUEUE_VALUE <- LINK_STREAM_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- LINK_STREAM_VALUE
+FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE
 
 // ===========================================================
 // TruthValues are the subobject classifiers for Atomese; they are used

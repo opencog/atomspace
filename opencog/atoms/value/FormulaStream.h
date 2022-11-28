@@ -53,6 +53,7 @@ protected:
 public:
 	FormulaStream(const Handle&);
 	FormulaStream(const HandleSeq&&);
+	FormulaStream(const ValueSeq&);
 	virtual ~FormulaStream() {}
 
 	/** Returns a string representation of the value.  */

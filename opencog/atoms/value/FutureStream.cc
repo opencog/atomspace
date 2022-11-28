@@ -48,6 +48,26 @@ FutureStream::FutureStream(const HandleSeq&& oset) :
 	init();
 }
 
+// Same as above, but Handles as a ValueSeq. The Sexper decoder
+// will create these when it deserializes FutureStreams.
+FutureStream::FutureStream(const ValueSeq& voset) :
+	LinkStreamValue(FUTURE_STREAM)
+{
+	for (const ValuePtr& v : voset)
+	{
+		Handle h(HandleCast(v));
+		if (h) _formula.emplace_back(h);
+	}
+
+	if (0 == _formula.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting at least one atom!");
+
+	_as = _formula[0]->getAtomSpace();
+
+	init();
+}
+
 void FutureStream::init(void)
 {
 	// Unwrap a ListLink, if it is present.
@@ -118,3 +138,4 @@ bool FutureStream::operator==(const Value& other) const
 // Adds factor when library is loaded.
 DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const Handle&)
 DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const HandleSeq&&)
+DEFINE_VALUE_FACTORY(FUTURE_STREAM, createFutureStream, const ValueSeq&)

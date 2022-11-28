@@ -48,6 +48,26 @@ FormulaStream::FormulaStream(const HandleSeq&& oset) :
 	init();
 }
 
+// Same as above, but Handles as a ValueSeq. The Sexper decoder
+// will create these when it deserializes FormulaStreams.
+FormulaStream::FormulaStream(const ValueSeq& voset) :
+	StreamValue(FORMULA_STREAM)
+{
+	for (const ValuePtr& v : voset)
+	{
+		Handle h(HandleCast(v));
+		if (h) _formula.emplace_back(h);
+	}
+
+	if (0 == _formula.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting at least one atom!");
+
+	_as = _formula[0]->getAtomSpace();
+
+	init();
+}
+
 void FormulaStream::init(void)
 {
 	// If the single argument is a ListLink, unwrap it.
@@ -156,3 +176,4 @@ bool FormulaStream::operator==(const Value& other) const
 // Adds factor when library is loaded.
 DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const Handle&)
 DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const HandleSeq&&)
+DEFINE_VALUE_FACTORY(FORMULA_STREAM, createFormulaStream, const ValueSeq&)
