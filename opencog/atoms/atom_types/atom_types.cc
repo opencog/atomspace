@@ -6,9 +6,10 @@
  * Copyright (c) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-// library initialization
-
-static __attribute__ ((constructor)) void init(void)
+// Library initialization
+// Set constructor priority to 101 because we want this to be
+// the very first one that runs, before any of the factories run.
+static __attribute__ ((constructor (101))) void init(void)
 {
 #define str(x) #x
 #define xstr(x) str(x)

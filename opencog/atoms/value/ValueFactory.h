@@ -142,7 +142,8 @@ ValueServer& valueserver();
 #define DEFINE_VALUE_FACTORY(CTYPE,CREATE,...)                       \
                                                                      \
 /* This runs when the shared lib is loaded. */                       \
-static __attribute__ ((constructor)) void                            \
+/* Set priority to 110 so that it runs after nameserver. */          \
+static __attribute__ ((constructor (110))) void                      \
     TOKENPASTE2(init, __COUNTER__)(void)                             \
 {                                                                           \
    valueserver().addFactory(CTYPE, (ValueFactory) & (CREATE<__VA_ARGS__>),  \
