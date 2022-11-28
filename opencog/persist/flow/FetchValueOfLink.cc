@@ -66,6 +66,7 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 	// If the StorageNode is not open for reading, it will
 	// either throw, or do something else. Not our decision.
 	stnp->fetch_value(_outgoing[0], _outgoing[1], as);
+	stnp->barrier();
 
 	// Let the base class do the rest of the work.
 	if (3 == _outgoing.size())
