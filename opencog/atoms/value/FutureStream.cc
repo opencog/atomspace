@@ -77,18 +77,11 @@ void FutureStream::init(void)
 	// Verify that we've got valid stuff.
 	for (const Handle& h : _formula)
 	{
-		if (h->is_executable())
-		{
-			_value.emplace_back(h->execute(_as));
-		}
-		else if (h->is_evaluatable())
-		{
-			_value.emplace_back(ValueCast(h->evaluate(_as)));
-		}
-		else
+		if (not h->is_executable() and
+		    not h->is_evaluatable())
 		{
 			throw SyntaxException(TRACE_INFO,
-				"Expecting an executable/evaluatable atom, got %s",
+				"Expecting an executable or evaluatable atom, got %s",
 				h->to_string().c_str());
 		}
 	}

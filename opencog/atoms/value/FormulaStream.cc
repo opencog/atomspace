@@ -78,42 +78,20 @@ void FormulaStream::init(void)
 
 	if (1 == _formula.size())
 	{
-		const Handle& h = _formula[0];
-		ValuePtr vp;
-		if (h->is_executable())
-			vp = h->execute(_as);
-		else if (h->is_evaluatable())
-			vp = ValueCast(h->evaluate(_as));
-		else
+		if (not _formula[0]->is_evaluatable() and
+		    not _formula[0]->is_executable())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting an executable or evaluatable atom, got %s",
-				h->to_string().c_str());
-
-		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-			throw SyntaxException(TRACE_INFO,
-				"Expecting formula to return a FloatValue, got %s",
-				vp->to_string().c_str());
-
-		_value = FloatValueCast(vp)->value();
+				_formula[0]->to_string().c_str());
 		return;
 	}
 
 	for (const Handle& h: _formula)
 	{
-		ValuePtr vp;
-		if (h->is_executable())
-			vp = h->execute(_as);
-		else
+		if (not h->is_executable())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting an executable atom, got %s",
 				h->to_string().c_str());
-
-		if (not nameserver().isA(vp->get_type(), FLOAT_VALUE))
-			throw SyntaxException(TRACE_INFO,
-				"Expecting formula to return a FloatValue, got %s",
-				vp->to_string().c_str());
-
-		_value.emplace_back(FloatValueCast(vp)->value()[0]);
 	}
 }
 
@@ -124,10 +102,19 @@ void FormulaStream::update() const
 {
 	if (1 == _formula.size())
 	{
-		if (_formula[0]->is_evaluatable())
+		if (_formula[0]->is_executable())
+		{
+			ValuePtr vp = _formula[0]->execute(_as);
+
+			if (not vp->is_type(FLOAT_VALUE))
+				throw SyntaxException(TRACE_INFO,
+					"Expecting formula to return a FloatValue, got %s",
+					vp->to_string().c_str());
+
+			_value = FloatValueCast(vp)->value();
+		}
+		else if (_formula[0]->is_evaluatable())
 			_value = _formula[0]->evaluate(_as)->value();
-		else if (_formula[0]->is_executable())
-			_value = FloatValueCast(_formula[0]->execute(_as))->value();
 		return;
 	}
 
@@ -136,7 +123,16 @@ void FormulaStream::update() const
 	// I cannot imagine why evaluating would be useful, here.
 	std::vector<double> newval;
 	for (const Handle& h :_formula)
-		newval.push_back(FloatValueCast(h->execute(_as))->value()[0]);
+	{
+		ValuePtr vp = h->execute(_as);
+
+		if (not vp->is_type(FLOAT_VALUE))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting formula to return a FloatValue, got %s",
+				vp->to_string().c_str());
+
+		newval.push_back(FloatValueCast(vp)->value()[0]);
+	}
 
 	_value.swap(newval);
 }
