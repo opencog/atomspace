@@ -70,7 +70,7 @@ void NumericFunctionLink::init(void)
 /// of the execution.
 ValuePtr NumericFunctionLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
-	if (DEFINED_SCHEMA_NODE == vptr->get_type())
+	if (vptr->is_type(DEFINED_PROCEDURE_NODE))
 	{
 		vptr = DefineLink::get_definition(HandleCast(vptr));
 	}
