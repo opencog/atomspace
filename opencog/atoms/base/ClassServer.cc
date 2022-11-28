@@ -88,6 +88,12 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
+	if (0 == t)
+		throw RuntimeException(TRACE_INFO,
+			"Error: adding factory before type has been declared!\n"
+			"Double check your shared lib link and load order!\n"
+			"Make sure the type declaration library is loaded first!");
+
 	splice(_atomFactory, t, fact);
 }
 
