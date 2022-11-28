@@ -17,6 +17,11 @@ TARGET_LINK_LIBRARIES(persist-flow
 	${COGUTIL_LIBRARY}
 )
 
+# Arghhhh. I hate this stuff. This sets up a file-load path that the
+# `(opencog persist)` module will use.  There is no `(opencog persist-flow)`
+# module.
+ADD_GUILE_EXTENSION(SCM_CONFIG persist-flow "opencog-ext-path-persist-flow")
+
 INSTALL (TARGETS persist-flow EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
