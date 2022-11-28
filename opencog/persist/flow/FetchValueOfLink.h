@@ -56,4 +56,8 @@ LINK_PTR_DECL(FetchValueOfLink)
 /** @}*/
 }
 
+extern "C" {
+void opencog_persist_flow_init(void);
+};
+
 #endif // _OPENCOG_FETCH_VALUE_OF_LINK_H

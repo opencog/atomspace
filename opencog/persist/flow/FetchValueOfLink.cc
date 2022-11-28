@@ -76,4 +76,10 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 
 DEFINE_LINK_FACTORY(FetchValueOfLink, FETCH_VALUE_OF_LINK)
 
+void opencog_persist_flow_init(void)
+{
+	// Force shared lib ctors to run
+};
+
+
 /* ===================== END OF FILE ===================== */
