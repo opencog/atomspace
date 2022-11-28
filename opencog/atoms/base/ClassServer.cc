@@ -88,11 +88,19 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
+	// This is called in shared-library ctors, and so if there's
+	// an error, we can't throw an exeption. (Well, we can, but
+	// it will hang). So this is a fatal error. Print a helpful
+	// message, and exit.
 	if (0 == t)
-		throw RuntimeException(TRACE_INFO,
+	{
+		fprintf(stderr,
 			"Error: adding factory before type has been declared!\n"
 			"Double check your shared lib link and load order!\n"
-			"Make sure the type declaration library is loaded first!");
+			"Make sure the type declaration library is loaded first!\n");
+		fflush(stdout);
+		assert(0);
+	}
 
 	splice(_atomFactory, t, fact);
 }
