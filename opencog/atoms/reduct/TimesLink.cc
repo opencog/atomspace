@@ -160,14 +160,16 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
 	Handle hi(HandleCast(vi));
 	if (nullptr == hi) hi = HandleCast(fi);
 	if (nullptr == hi)
-		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
-			fi->to_string());
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an Atom, got %s first arg of kons %s",
+			oc_to_string(fi).c_str(), to_string().c_str());
 
 	Handle hj(HandleCast(vj));
 	if (nullptr == hj) hj = HandleCast(fj);
 	if (nullptr == hj)
-		throw SyntaxException(TRACE_INFO, "Expecting an Atom, got %s",
-			fj->to_string());
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an Atom, got %s second arg of kons %s",
+			oc_to_string(fj).c_str(), to_string().c_str());
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
