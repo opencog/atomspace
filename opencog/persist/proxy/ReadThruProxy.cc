@@ -25,7 +25,7 @@
 using namespace opencog;
 
 ReadThruProxy::ReadThruProxy(const std::string&& name)
-	: StorageNode(READ_THRU_PROXY, std::move(name))
+	: StorageNode(READ_THRU_PROXY, std::move(name)), _round_robin(0)
 {
 }
 
@@ -41,24 +41,78 @@ std::string ReadThruProxy::monitor(void)
 	return "";
 }
 
-void ReadThruProxy::getAtom(const Handle&)
+// Get our configuration from the DefineLink we live in.
+void ReadThruProxy::open(void)
 {
+	_readers.clear();
+	_round_robin = 0;
+
+	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
+
+	// We could throw an error here ... or we can just no-op.
+	if (0 == dli.size()) return;
+
+	// Expect the parameters to be wrapped in a ListLink
+	Handle params = dli[0]->getOutgoingAtom(1);
+	if (not params->is_type(LIST_LINK))
+		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
+
+	for (const Handle& h : params->getOutgoingSet())
+	{
+		StorageNodePtr stnp = StorageNodeCast(h);
+		if (nullptr == stnp)
+			SyntaxException(TRACE_INFO, "Expecting a list of StorageNodes!");
+
+		_readers.emplace_back(stnp);
+	}
 }
 
-void ReadThruProxy::fetchIncomingSet(AtomSpace*, const Handle&)
+#define UP \
+	size_t nr = _readers.size(); \
+	if (0 == nr) return; \
+	size_t ir = _round_robin; \
+	const StorageNodePtr& stnp = _readers[ir];
+
+#define DOWN \
+	stnp->barrier(); \
+	ir++; \
+	ir %= nr; \
+	_round_robin = ir;
+
+// Just get one atom. Round-robin.
+void ReadThruProxy::getAtom(const Handle& h)
 {
+	UP;
+	stnp->fetch_atom(h);
+	DOWN;
 }
 
-void ReadThruProxy::fetchIncomingByType(AtomSpace*, const Handle&, Type)
+void ReadThruProxy::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
+	UP;
+	stnp->fetch_incoming_set(h, false, as);
+	DOWN;
+}
+
+void ReadThruProxy::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
+{
+	UP;
+	stnp->fetch_incoming_by_type(h, t, as);
+	DOWN;
 }
 
 void ReadThruProxy::loadValue(const Handle& atom, const Handle& key)
 {
+	UP;
+	stnp->fetch_value(atom, key);
+	DOWN;
 }
 
-void ReadThruProxy::loadType(AtomSpace*, Type)
+void ReadThruProxy::loadType(AtomSpace* as, Type t)
 {
+	UP;
+	stnp->fetch_all_atoms_of_type(t, as);
+	DOWN;
 }
 
 HandleSeq ReadThruProxy::loadFrameDAG(void)

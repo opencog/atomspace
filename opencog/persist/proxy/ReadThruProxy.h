@@ -32,15 +32,19 @@ namespace opencog
  */
 class ReadThruProxy : public StorageNode
 {
+private:
+	std::vector<StorageNodePtr> _readers;
+	unsigned int _round_robin;
+
 public:
 	ReadThruProxy(const std::string&&);
 	virtual ~ReadThruProxy();
 
 	// ----------------------------------------------------------------
 	// StorageNode virtuals  are all no-ops.
-	virtual void open(void) {}
+	virtual void open(void);
 	virtual void close(void) {}
-	virtual bool connected(void) { return  true; }
+	virtual bool connected(void) { return  0 < _readers.size(); }
 	virtual void create(void) {}
 
 	virtual void destroy(void);
