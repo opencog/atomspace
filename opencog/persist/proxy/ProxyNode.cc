@@ -92,3 +92,11 @@ Handle ProxyNode::getLink(Type t, const HandleSeq& hseq)
 	HandleSeq hsc(hseq);
 	return _atom_space->get_link(t, std::move(hsc));
 }
+
+void opencog_persist_proxy_init(void)
+{
+   // Force shared lib ctors to run
+};
+
+
+/* ===================== END OF FILE ===================== */

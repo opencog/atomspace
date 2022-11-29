@@ -30,6 +30,11 @@ Local subdirectories include:
               to read files, and dump Atomspace contents to files or
               guile ports (without having to use `StorageNode`s.)
 
+* flow     -- Implement the FetchValueOfLink and the StoreCalueOfLink
+              These allow specific Values to be obtained from storage,
+              with Atomese. That is, it allows complex Atomese scripts
+              to be written, that will work with Storage.
+
 * gearman  -- Experimental support for distributed operation, using
               GearMan. Unused, unsupported, deprecated, more or less.
               If you are interested in this, contact the mailing list.
@@ -48,6 +53,12 @@ Local subdirectories include:
               `(Evaluation (Predicate "siblings") (List (Concept "jack") (Concept "jill")))`
               This is just enough to encode prolog facts and Horn
               clauses as Atomese.
+
+* proxy    -- Implements a hierarchy of StorageNodes that act as agents.
+              This includes a ReadThruProxy and a WriteThruProxy, that
+              will pass storage I/O requests on to other StorageNodes.
+              This is useful for configuring complex I/O pipelines
+              in Atomese.
 
 * sexpr    -- Read and write Atomese s-expressions as UTF-8 strings.
               Used both by the `FileStorageNode` and by `CogStorageNode`,

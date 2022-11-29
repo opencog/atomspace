@@ -68,4 +68,8 @@ NODE_PTR_DECL(ProxyNode)
 /** @}*/
 } // namespace opencog
 
+extern "C" {
+void opencog_persist_proxy_init(void);
+};
+
 #endif // _OPENCOG_PROXY_NODE_H

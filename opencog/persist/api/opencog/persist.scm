@@ -16,6 +16,10 @@
 (load-extension (string-append opencog-ext-path-persist-flow "libpersist-flow")
 	"opencog_persist_flow_init")
 
+; And another one, for force the shlib ctor to run.
+(load-extension (string-append opencog-ext-path-persist-proxy "libpersist-proxy")
+	"opencog_persist_proxy_init")
+
 (include-from-path "opencog/persist/types/storage_types.scm")
 
 ; This avoids complaints, when the docs are set, below.
