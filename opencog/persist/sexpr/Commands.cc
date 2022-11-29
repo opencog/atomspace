@@ -135,6 +135,13 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 }
 
 // -----------------------------------------------
+// (cog-set-proxy! (DefineLink (ProxyNode "foo") ...))
+std::string Commands::cog_set_proxy(const std::string& arg)
+{
+	return "#t";
+}
+
+// -----------------------------------------------
 // (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
 // This is complicated, and subject to change...
 // XXX this should be nuked, and replaced by appropriate kind of proxy.

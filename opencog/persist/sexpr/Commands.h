@@ -133,6 +133,8 @@ public:
 	/// Methods that implement each of the interpreted commands.
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
+	std::string cog_set_proxy(const std::string&);
+
 	std::string cog_execute_cache(const std::string&);
 
 	/// Methods that read

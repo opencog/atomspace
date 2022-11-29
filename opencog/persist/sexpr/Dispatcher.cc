@@ -57,9 +57,8 @@ Dispatcher::Dispatcher(void)
 
 	MASH(space, "cog-atomspace)",         cog_atomspace);
 	MASH(clear, "cog-atomspace-clear)",   cog_atomspace_clear);
+	MASH(proxy, "cog-set-proxy!",         cog_set_proxy);
 	MASH(cache, "cog-execute-cache!",     cog_execute_cache);
-	MASH(extra, "cog-extract!",           cog_extract);
-	MASH(recur, "cog-extract-recursive!", cog_extract_recursive);
 
 	MASH(gtatm, "cog-get-atoms",          cog_get_atoms);
 	MASH(incty, "cog-incoming-by-type",   cog_incoming_by_type);
@@ -69,6 +68,8 @@ Dispatcher::Dispatcher(void)
 	MASH(node,  "cog-node",               cog_node);
 	MASH(value, "cog-value",              cog_value);
 
+	MASH(extra, "cog-extract!",           cog_extract);
+	MASH(recur, "cog-extract-recursive!", cog_extract_recursive);
 	MASH(stval, "cog-set-value!",         cog_set_value);
 	MASH(svals, "cog-set-values!",        cog_set_values);
 	MASH(settv, "cog-set-tv!",            cog_set_tv);

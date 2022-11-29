@@ -151,7 +151,8 @@ Many calls require a call to `StorageNode::barrier()`.
 TBD:
 cog_atomspace
 cog_atomspace_clear
-cog_execute_cache
+cog_set_proxy
+cog_execute_cache <== probably obsoleted by proxy !?
 
 ReadThru:
 cog_get_atoms -> cog_get_atoms+barrier
