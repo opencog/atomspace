@@ -8,7 +8,7 @@ ADD_LIBRARY (persist-flow
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(persist-flow storage_atom_types)
+ADD_DEPENDENCIES(persist-flow storage_types)
 
 TARGET_LINK_LIBRARIES(persist-flow
 	persist

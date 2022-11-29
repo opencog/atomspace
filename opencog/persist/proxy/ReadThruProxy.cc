@@ -57,8 +57,15 @@ void ReadThruProxy::open(void)
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return;
 
-	// Expect the parameters to be wrapped in a ListLink
+	// If there is only one, grab it.
 	Handle params = dli[0]->getOutgoingAtom(1);
+	if (params->is_type(PROXY_NODE))
+	{
+		_readers.emplace_back(StorageNodeCast(params));
+		return;
+	}
+
+	// Expect the parameters to be wrapped in a ListLink
 	if (not params->is_type(LIST_LINK))
 		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
 

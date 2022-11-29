@@ -56,8 +56,15 @@ void WriteThruProxy::open(void)
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return;
 
-	// Expect the parameters to be wrapped in a ListLink
+	// If there is only one, grab it.
 	Handle params = dli[0]->getOutgoingAtom(1);
+	if (params->is_type(PROXY_NODE))
+	{
+		_targets.emplace_back(StorageNodeCast(params));
+		return;
+	}
+
+	// Expect the parameters to be wrapped in a ListLink
 	if (not params->is_type(LIST_LINK))
 		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
 
@@ -71,21 +78,37 @@ void WriteThruProxy::open(void)
 	}
 }
 
-void WriteThruProxy::storeAtom(const Handle&, bool synchronous = false)
+void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)
 {
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->store_atom(h);
+
+	if (not synchronous) return;
+
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->barrier();
 }
 
-void WriteThruProxy::removeAtom(AtomSpace*, const Handle&, bool recursive)
+void WriteThruProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
 {
+	// XXX FIXME this is deeply fundamentally broken if there's more
+	// than one target; because StorageNode::remove_atom() is broken.
+	// See the comments in that code for additional guidance.
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->remove_atom(as, h, recursive);
 }
 
 void WriteThruProxy::storeValue(const Handle& atom, const Handle& key)
 {
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->store_value(atom, key);
 }
 
 void WriteThruProxy::updateValue(const Handle& atom, const Handle& key,
                             const ValuePtr& delta)
 {
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->update_value(atom, key, delta);
 }
 
 HandleSeq WriteThruProxy::loadFrameDAG(void)

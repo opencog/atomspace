@@ -5,10 +5,11 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (persist-proxy
 	NullProxy.cc
 	ReadThruProxy.cc
+	WriteThruProxy.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(persist-proxy storage_atom_types)
+ADD_DEPENDENCIES(persist-proxy storage_types)
 
 TARGET_LINK_LIBRARIES(persist-proxy
 	persist
@@ -29,5 +30,6 @@ INSTALL (TARGETS persist-proxy EXPORT AtomSpaceTargets
 INSTALL (FILES
 	NullProxy.h
 	ReadThruProxy.h
+	WriteThruProxy.h
 	DESTINATION "include/opencog/persist/proxy"
 )
