@@ -136,9 +136,34 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 
 // -----------------------------------------------
 // (cog-set-proxy! (DefineLink (ProxyNode "foo") ...))
-std::string Commands::cog_set_proxy(const std::string& arg)
+std::string Commands::cog_set_proxy(const std::string& cmd)
 {
-	return "#t";
+	size_t pos = 0;
+	Handle h = Sexpr::decode_atom(cmd, pos, _uc._space_map);
+
+	// If we got a full definition, the proxy is then just the first atom.
+	if (h->is_type(DEFINE_LINK))
+	{
+		h = _uc._base_space->add_atom(h);
+		Handle pxy = h->getOutgoingAtom(0);
+		if (pxy and pxy->is_type(PROXY_NODE))
+		{
+			_proxy = StorageNodeCast(pxy);
+			return "#t";
+		}
+		return "#f";
+	}
+
+	// If it's a bare-naked proxy, just set it.
+	if (h->is_type(PROXY_NODE))
+	{
+		h = _uc._base_space->add_atom(h);
+		_proxy = StorageNodeCast(h);
+		return "#t";
+	}
+
+	// If we are here, its an error.
+	return "#f";
 }
 
 // -----------------------------------------------
@@ -235,7 +260,7 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd)
 	Type t = Sexpr::decode_type(cmd, pos);
 
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	h = as->add_atom(h);
+	h = as->add_atom(h); // XXX shouldn't this be get_atom!????
 
 	if (_uc.have_incoming_by_type_cb) _uc.incoming_by_type_cb(h, t);
 	_proxy->fetch_incoming_by_type(h, t);
@@ -276,7 +301,7 @@ std::string Commands::cog_keys_alist(const std::string& cmd)
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _uc._space_map);
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	h = as->add_atom(h);
+	h = as->add_atom(h); // XXX shouldn't this be get_atom!????
 
 	if (_uc.have_keys_alist_cb) _uc.keys_alist_cb(h);
 	_proxy->fetch_atom(h);
@@ -367,7 +392,7 @@ std::string Commands::cog_value(const std::string& cmd)
 	Handle key = Sexpr::decode_atom(cmd, ++pos, _uc._space_map);
 
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	atom = as->add_atom(atom);
+	atom = as->add_atom(atom); // XXX shouldn't this be get_atom!????
 	key = as->add_atom(key);
 
 	if (_uc.have_value_cb) _uc.value_cb(atom, key);
