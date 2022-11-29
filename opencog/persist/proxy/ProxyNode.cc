@@ -98,5 +98,4 @@ void opencog_persist_proxy_init(void)
    // Force shared lib ctors to run
 };
 
-
 /* ===================== END OF FILE ===================== */

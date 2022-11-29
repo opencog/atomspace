@@ -25,12 +25,12 @@
 using namespace opencog;
 
 NullProxy::NullProxy(Type t, const std::string&& name)
-	: StorageNode(t, std::move(name))
+	: ProxyNode(t, std::move(name))
 {
 }
 
 NullProxy::NullProxy(const std::string&& name)
-	: StorageNode(NULL_PROXY, std::move(name))
+	: ProxyNode(NULL_PROXY_NODE, std::move(name))
 {
 }
 
@@ -38,25 +38,4 @@ NullProxy::~NullProxy()
 {
 }
 
-void NullProxy::destroy(void) {}
-void NullProxy::erase(void) {}
-
-std::string NullProxy::monitor(void)
-{
-	return "";
-}
-
-HandleSeq NullProxy::loadFrameDAG(void)
-{
-	// XXX FIXME;
-	return HandleSeq();
-}
-
-Handle NullProxy::getLink(Type t, const HandleSeq& hseq)
-{
-	// Ugh Copy
-	HandleSeq hsc(hseq);
-	return _atom_space->get_link(t, std::move(hsc));
-}
-
-DEFINE_NODE_FACTORY(NullProxy, NULL_PROXY)
+DEFINE_NODE_FACTORY(NullProxy, NULL_PROXY_NODE)

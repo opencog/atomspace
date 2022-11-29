@@ -115,7 +115,7 @@ Commands::~Commands() {}
 void Commands::set_base_space(const AtomSpacePtr& asp)
 {
 	_uc._base_space = asp;
-	_proxy = StorageNodeCast(asp->add_node(NULL_PROXY, "*-null proxy-*"));
+	_proxy = StorageNodeCast(asp->add_node(NULL_PROXY_NODE, "*-null proxy-*"));
 }
 
 // -----------------------------------------------

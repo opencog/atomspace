@@ -23,14 +23,14 @@
 #ifndef _OPENCOG_NULL_PROXY_H
 #define _OPENCOG_NULL_PROXY_H
 
-#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/proxy/ProxyNode.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class NullProxy : public StorageNode
+class NullProxy : public ProxyNode
 {
 public:
 	NullProxy(const std::string&&);
@@ -40,14 +40,7 @@ public:
 	// ----------------------------------------------------------------
 	// StorageNode virtuals  are all no-ops.
 	virtual void open(void) {}
-	virtual void close(void) {}
 	virtual bool connected(void) { return  true; }
-	virtual void create(void) {}
-
-	virtual void destroy(void);
-	virtual void erase(void);
-
-	virtual std::string monitor(void);
 
 protected:
 	// ----------------------------------------------------------------
@@ -67,13 +60,7 @@ protected:
 	virtual void loadAtomSpace(AtomSpace*) {}
 	virtual void storeAtomSpace(const AtomSpace*) {}
 
-	virtual HandleSeq loadFrameDAG(void);
-	virtual void storeFrameDAG(AtomSpace*) {}
-
-	virtual void deleteFrame(AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr) {}
-
-	virtual Handle getLink(Type, const HandleSeq&);
 
 public:
 	static Handle factory(const Handle&);

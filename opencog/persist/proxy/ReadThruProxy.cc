@@ -25,7 +25,7 @@
 using namespace opencog;
 
 ReadThruProxy::ReadThruProxy(const std::string&& name)
-	: ProxyNode(READ_THRU_PROXY, std::move(name)), _round_robin(0)
+	: ProxyNode(READ_THRU_PROXY_NODE, std::move(name)), _round_robin(0)
 {
 }
 
@@ -101,4 +101,4 @@ void ReadThruProxy::barrier(AtomSpace* as)
 		stnp->barrier(as);
 }
 
-DEFINE_NODE_FACTORY(ReadThruProxy, READ_THRU_PROXY)
+DEFINE_NODE_FACTORY(ReadThruProxy, READ_THRU_PROXY_NODE)

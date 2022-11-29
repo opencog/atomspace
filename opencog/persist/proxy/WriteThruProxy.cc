@@ -25,7 +25,7 @@
 using namespace opencog;
 
 WriteThruProxy::WriteThruProxy(const std::string&& name)
-	: ProxyNode(WRITE_THRU_PROXY, std::move(name))
+	: ProxyNode(WRITE_THRU_PROXY_NODE, std::move(name))
 {
 }
 
@@ -84,4 +84,4 @@ void WriteThruProxy::barrier(AtomSpace* as)
 		stnp->barrier(as);
 }
 
-DEFINE_NODE_FACTORY(WriteThruProxy, WRITE_THRU_PROXY)
+DEFINE_NODE_FACTORY(WriteThruProxy, WRITE_THRU_PROXY_NODE)
