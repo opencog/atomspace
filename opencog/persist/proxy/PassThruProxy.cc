@@ -22,7 +22,7 @@
 
 #include <opencog/persist/proxy/PassThruProxy.h>
 
-using opencog;
+using namespace opencog;
 
 PassThruProxy::PassThruProxy(Type t, std::string name)
 	: StorageNode(t, name)
@@ -33,12 +33,10 @@ PassThruProxy::~PassThruProxy()
 {
 }
 
-#ifdef LATER
+void PassThruProxy::destroy(void) {}
+void PassThruProxy::erase(void) {}
 
-void PassThruProxy::destroy(void);
-void PassThruProxy::erase(void);
-
-std::string PassThruProxy::monitor(void);
+std::string PassThruProxy::monitor(void) { return ""; }
 
 void PassThruProxy::getAtom(const Handle& h) {}
 void PassThruProxy::fetchIncomingSet(AtomSpace* as, const Handle& h) {}
@@ -54,10 +52,15 @@ void PassThruProxy::loadType(AtomSpace*, Type) {}
 void PassThruProxy::loadAtomSpace(AtomSpace*) {}
 void PassThruProxy::storeAtomSpace(const AtomSpace*) {}
 
-HandleSeq PassThruProxy::loadFrameDAG(void) {}
+HandleSeq PassThruProxy::loadFrameDAG(void) { return HandleSeq(); }
 void PassThruProxy::storeFrameDAG(AtomSpace*) {}
 
 void PassThruProxy::deleteFrame(AtomSpace*) {}
 void PassThruProxy::barrier(AtomSpace*) {}
 
-Handle PassThruProxy::getLink(Type, const HandleSeq& hseq) {}
+Handle PassThruProxy::getLink(Type t, const HandleSeq& hseq)
+{
+	// Ugh Copy
+	HandleSeq hsc(hseq);
+	return _atom_space->get_link(t, std::move(hsc));
+}
