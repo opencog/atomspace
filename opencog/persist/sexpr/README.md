@@ -167,12 +167,12 @@ cog_link -> ??? fetch_atom+barrier
 cog_value -> fetch_value+barrier =>> loadValue
 
 WriteThru:
-cog_extract -> remove_atom
+cog_extract -> remove_atom =>> removeAtom
 cog_extract_recursive -> remove_atom
-cog_set_value -> store_value
-cog_set_values -> store_atom
-cog_set_tv -> store_value
-cog_update_value -> update_value
+cog_set_value -> store_value =>> storeValue
+cog_set_values -> store_atom =>> storeAtom
+cog_set_tv -> store_value =>> storeValue
+cog_update_value -> update_value =>> updateValue
 
 Misc:
 cog_define

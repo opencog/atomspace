@@ -1,5 +1,5 @@
 /*
- * opencog/persist/proxy/ReadThruProxy.h
+ * opencog/persist/proxy/WriteThruProxy.h
  *
  * Copyright (C) 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_READ_THRU_PROXY_H
-#define _OPENCOG_READ_THRU_PROXY_H
+#ifndef _OPENCOG_WRITE_THRU_PROXY_H
+#define _OPENCOG_WRITE_THRU_PROXY_H
 
 #include <opencog/persist/api/StorageNode.h>
 
@@ -30,20 +30,19 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class ReadThruProxy : public StorageNode
+class WriteThruProxy : public StorageNode
 {
 private:
-	std::vector<StorageNodePtr> _readers;
-	unsigned int _round_robin;
+	std::vector<StorageNodePtr> _targets;
 
 public:
-	ReadThruProxy(const std::string&&);
-	virtual ~ReadThruProxy();
+	WriteThruProxy(const std::string&&);
+	virtual ~WriteThruProxy();
 
 	// ----------------------------------------------------------------
 	virtual void open(void);
 	virtual void close(void) {}
-	virtual bool connected(void) { return  0 < _readers.size(); }
+	virtual bool connected(void) { return  0 < _targets.size(); }
 	virtual void create(void) {}
 
 	virtual void destroy(void);
@@ -55,18 +54,17 @@ protected:
 	// ----------------------------------------------------------------
 	// BackingStore virtuals.
 
-	virtual void getAtom(const Handle&);
-	virtual void fetchIncomingSet(AtomSpace*, const Handle&);
-	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type);
-
-	virtual void storeAtom(const Handle&, bool synchronous = false) {}
-	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) {}
-	virtual void storeValue(const Handle& atom, const Handle& key) {}
+	virtual void getAtom(const Handle&) {}
+	virtual void fetchIncomingSet(AtomSpace*, const Handle&) {}
+	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type) {}
+	virtual void storeAtom(const Handle&, bool synchronous = false);
+	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive);
+	virtual void storeValue(const Handle& atom, const Handle& key);
 	virtual void updateValue(const Handle& atom, const Handle& key,
-	                         const ValuePtr& delta) {}
-	virtual void loadValue(const Handle& atom, const Handle& key);
+	                         const ValuePtr& delta);
+	virtual void loadValue(const Handle& atom, const Handle& key) {}
 
-	virtual void loadType(AtomSpace*, Type);
+	virtual void loadType(AtomSpace*, Type) {}
 	virtual void loadAtomSpace(AtomSpace*) {}
 	virtual void storeAtomSpace(const AtomSpace*) {}
 
@@ -80,11 +78,11 @@ protected:
 	virtual Handle getLink(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<ReadThruProxy> ReadThruProxyPtr;
-static inline ReadThruProxyPtr ReadThruProxyCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ReadThruProxy>(h); }
+typedef std::shared_ptr<WriteThruProxy> WriteThruProxyPtr;
+static inline WriteThruProxyPtr WriteThruProxyCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<WriteThruProxy>(h); }
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_READ_THRU_PROXY_H
+#endif // _OPENCOG_WRITE_THRU_PROXY_H

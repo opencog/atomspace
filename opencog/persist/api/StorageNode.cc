@@ -108,6 +108,9 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	if (not _atom_space->get_read_only())
 		removeAtom(as, h, recursive);
 
+	// XXX FIXME This is breaks the WriteThruProxy when there are two
+	// or more targets: after the first target runs, the Atom will be
+	// gone and the second target will fail badly. For now, punt.
 	return as->extract_atom(h, recursive);
 }
 
