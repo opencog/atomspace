@@ -58,7 +58,7 @@ DYNAMIC_DATA_PROXY <- PROXY_NODE
 // Decorate the Proxies with additional parameters.
 // We use the UniqueLink because the DefineLink constructor does
 // checks for DefinedSchema and what-not, which wrecks us.
-PROXY_LINK <- UNIQUE_LINK
+PROXY_PARAMETERS_LINK <- UNIQUE_LINK
 
 // ------------------------------------------------------------------
 // Fetch and store Values from Storage.

@@ -51,7 +51,7 @@ StorageNodeSeq  ProxyNode::setup(void)
 {
 	StorageNodeSeq stolist;
 
-	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
+	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
 
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return stolist;
