@@ -148,13 +148,10 @@ underbars) and then `StorageNode::fetch_incoming_set()` is called.
 Many calls require a call to `StorageNode::barrier()`.
 
 ```
+TBD:
 cog_atomspace
 cog_atomspace_clear
 cog_execute_cache
-
-WriteThru:
-cog_extract -> remove_atom
-cog_extract_recursive -> remove_atom
 
 ReadThru:
 cog_get_atoms -> cog_get_atoms+barrier
@@ -166,11 +163,14 @@ cog_link -> ??? fetch_atom+barrier
 cog_value -> fetch_value+barrier
 
 WriteThru:
+cog_extract -> remove_atom
+cog_extract_recursive -> remove_atom
 cog_set_value -> store_value
 cog_set_values -> store_atom
 cog_set_tv -> store_value
 cog_update_value -> update_value
 
+Misc:
 cog_define
 ```
 

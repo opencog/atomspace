@@ -180,34 +180,6 @@ std::string Commands::cog_execute_cache(const std::string& cmd)
 }
 
 // -----------------------------------------------
-// (cog-extract! (Concept "foo"))
-std::string Commands::cog_extract(const std::string& cmd)
-{
-	size_t pos = 0;
-	Handle h =_uc._base_space->get_atom(Sexpr::decode_atom(cmd, pos, _uc._space_map));
-	if (nullptr == h) return "#t";
-
-	if (_uc.have_extract_cb) _uc.extract_cb(h, false);
-
-	if (_proxy->remove_atom(_uc._base_space, h, false)) return "#t";
-	return "#f";
-}
-
-// -----------------------------------------------
-// (cog-extract-recursive! (Concept "foo"))
-std::string Commands::cog_extract_recursive(const std::string& cmd)
-{
-	size_t pos = 0;
-	Handle h =_uc._base_space->get_atom(Sexpr::decode_atom(cmd, pos, _uc._space_map));
-	if (nullptr == h) return "#t";
-
-	if (_uc.have_extract_cb) _uc.extract_cb(h, true);
-
-	if (_proxy->remove_atom(_uc._base_space, h, true)) return "#t";
-	return "#f";
-}
-
-// -----------------------------------------------
 // (cog-get-atoms 'Node #t)
 std::string Commands::cog_get_atoms(const std::string& cmd)
 {
@@ -398,6 +370,34 @@ std::string Commands::cog_value(const std::string& cmd)
 
 	ValuePtr vp = atom->getValue(key);
 	return Sexpr::encode_value(vp);
+}
+
+// -----------------------------------------------
+// (cog-extract! (Concept "foo"))
+std::string Commands::cog_extract(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h =_uc._base_space->get_atom(Sexpr::decode_atom(cmd, pos, _uc._space_map));
+	if (nullptr == h) return "#t";
+
+	if (_uc.have_extract_cb) _uc.extract_cb(h, false);
+
+	if (_proxy->remove_atom(_uc._base_space, h, false)) return "#t";
+	return "#f";
+}
+
+// -----------------------------------------------
+// (cog-extract-recursive! (Concept "foo"))
+std::string Commands::cog_extract_recursive(const std::string& cmd)
+{
+	size_t pos = 0;
+	Handle h =_uc._base_space->get_atom(Sexpr::decode_atom(cmd, pos, _uc._space_map));
+	if (nullptr == h) return "#t";
+
+	if (_uc.have_extract_cb) _uc.extract_cb(h, true);
+
+	if (_proxy->remove_atom(_uc._base_space, h, true)) return "#t";
+	return "#f";
 }
 
 // -----------------------------------------------
