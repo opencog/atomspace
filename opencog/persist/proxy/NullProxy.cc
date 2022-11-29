@@ -24,6 +24,11 @@
 
 using namespace opencog;
 
+NullProxy::NullProxy(Type t, const std::string&& name)
+	: StorageNode(t, std::move(name))
+{
+}
+
 NullProxy::NullProxy(const std::string&& name)
 	: StorageNode(NULL_PROXY, std::move(name))
 {
@@ -53,3 +58,5 @@ Handle NullProxy::getLink(Type t, const HandleSeq& hseq)
 	HandleSeq hsc(hseq);
 	return _atom_space->get_link(t, std::move(hsc));
 }
+
+DEFINE_NODE_FACTORY(NullProxy, NULL_PROXY)

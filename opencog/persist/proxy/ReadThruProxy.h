@@ -38,6 +38,7 @@ private:
 
 public:
 	ReadThruProxy(const std::string&&);
+	ReadThruProxy(Type t, const std::string&&);
 	virtual ~ReadThruProxy();
 
 	// ----------------------------------------------------------------
@@ -76,13 +77,14 @@ protected:
 	virtual void deleteFrame(AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr) {}
 
-protected:
 	virtual Handle getLink(Type, const HandleSeq&);
+
+public:
+	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ReadThruProxy> ReadThruProxyPtr;
-static inline ReadThruProxyPtr ReadThruProxyCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ReadThruProxy>(h); }
+NODE_PTR_DECL(ReadThruProxy)
+#define createReadThruProxy CREATE_DECL(ReadThruProxy)
 
 /** @}*/
 } // namespace opencog

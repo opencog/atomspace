@@ -37,6 +37,7 @@ private:
 
 public:
 	WriteThruProxy(const std::string&&);
+	WriteThruProxy(Type, const std::string&&);
 	virtual ~WriteThruProxy();
 
 	// ----------------------------------------------------------------
@@ -74,13 +75,14 @@ protected:
 	virtual void deleteFrame(AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr) {}
 
-protected:
 	virtual Handle getLink(Type, const HandleSeq&);
+
+public:
+	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<WriteThruProxy> WriteThruProxyPtr;
-static inline WriteThruProxyPtr WriteThruProxyCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<WriteThruProxy>(h); }
+NODE_PTR_DECL(WriteThruProxy)
+#define createWriteThruProxy CREATE_DECL(WriteThruProxy)
 
 /** @}*/
 } // namespace opencog

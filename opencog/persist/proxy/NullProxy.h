@@ -34,6 +34,7 @@ class NullProxy : public StorageNode
 {
 public:
 	NullProxy(const std::string&&);
+	NullProxy(Type t, const std::string&&);
 	virtual ~NullProxy();
 
 	// ----------------------------------------------------------------
@@ -72,13 +73,14 @@ protected:
 	virtual void deleteFrame(AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr) {}
 
-protected:
 	virtual Handle getLink(Type, const HandleSeq&);
+
+public:
+	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<NullProxy> NullProxyPtr;
-static inline NullProxyPtr NullProxyCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<NullProxy>(h); }
+NODE_PTR_DECL(NullProxy)
+#define createNullProxy CREATE_DECL(NullProxy)
 
 /** @}*/
 } // namespace opencog

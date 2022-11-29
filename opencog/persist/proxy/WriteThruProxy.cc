@@ -25,7 +25,12 @@
 using namespace opencog;
 
 WriteThruProxy::WriteThruProxy(const std::string&& name)
-	: StorageNode(READ_THRU_PROXY, std::move(name)), _round_robin(0)
+	: StorageNode(WRITE_THRU_PROXY, std::move(name))
+{
+}
+
+WriteThruProxy::WriteThruProxy(Type t, const std::string&& name)
+	: StorageNode(t, std::move(name))
 {
 }
 
@@ -44,8 +49,7 @@ std::string WriteThruProxy::monitor(void)
 // Get our configuration from the DefineLink we live in.
 void WriteThruProxy::open(void)
 {
-	_readers.clear();
-	_round_robin = 0;
+	_targets.clear();
 
 	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
 
@@ -63,22 +67,9 @@ void WriteThruProxy::open(void)
 		if (nullptr == stnp)
 			SyntaxException(TRACE_INFO, "Expecting a list of StorageNodes!");
 
-		_readers.emplace_back(stnp);
+		_targets.emplace_back(stnp);
 	}
 }
-
-#define UP \
-	size_t nr = _readers.size(); \
-	if (0 == nr) return; \
-	size_t ir = _round_robin; \
-	const StorageNodePtr& stnp = _readers[ir];
-
-#define DOWN \
-	stnp->barrier(); \
-	ir++; \
-	ir %= nr; \
-	_round_robin = ir;
-
 
 void WriteThruProxy::storeAtom(const Handle&, bool synchronous = false)
 {
@@ -109,3 +100,5 @@ Handle WriteThruProxy::getLink(Type t, const HandleSeq& hseq)
 	HandleSeq hsc(hseq);
 	return _atom_space->get_link(t, std::move(hsc));
 }
+
+DEFINE_NODE_FACTORY(WriteThruProxy, WRITE_THRU_PROXY)
