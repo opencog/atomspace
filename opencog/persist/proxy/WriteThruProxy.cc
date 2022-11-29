@@ -111,6 +111,12 @@ void WriteThruProxy::updateValue(const Handle& atom, const Handle& key,
 		stnp->update_value(atom, key, delta);
 }
 
+void WriteThruProxy::barrier(AtomSpace* as)
+{
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->barrier(as);
+}
+
 HandleSeq WriteThruProxy::loadFrameDAG(void)
 {
 	// XXX FIXME;

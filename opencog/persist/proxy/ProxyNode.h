@@ -1,5 +1,5 @@
 /*
- * opencog/persist/proxy/ReadThruProxy.h
+ * opencog/persist/proxy/ProxyNode.h
  *
  * Copyright (C) 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_READ_THRU_PROXY_H
-#define _OPENCOG_READ_THRU_PROXY_H
+#ifndef _OPENCOG_PROXY_NODE_H
+#define _OPENCOG_PROXY_NODE_H
 
 #include <opencog/persist/api/StorageNode.h>
 
@@ -30,21 +30,17 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class ReadThruProxy : public StorageNode
+class ProxyNode : public StorageNode
 {
-private:
-	std::vector<StorageNodePtr> _readers;
-	unsigned int _round_robin;
-
 public:
-	ReadThruProxy(const std::string&&);
-	ReadThruProxy(Type t, const std::string&&);
-	virtual ~ReadThruProxy();
+	ProxyNode(const std::string&&);
+	ProxyNode(Type t, const std::string&&);
+	virtual ~ProxyNode();
+
+	std::vector<StorageNodePtr> setup();
 
 	// ----------------------------------------------------------------
-	virtual void open(void);
 	virtual void close(void) {}
-	virtual bool connected(void) { return  0 < _readers.size(); }
 	virtual void create(void) {}
 
 	virtual void destroy(void);
@@ -54,39 +50,21 @@ public:
 
 protected:
 	// ----------------------------------------------------------------
-	// BackingStore virtuals.
-
-	virtual void getAtom(const Handle&);
-	virtual void fetchIncomingSet(AtomSpace*, const Handle&);
-	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type);
-
-	virtual void storeAtom(const Handle&, bool synchronous = false) {}
-	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) {}
-	virtual void storeValue(const Handle& atom, const Handle& key) {}
-	virtual void updateValue(const Handle& atom, const Handle& key,
-	                         const ValuePtr& delta) {}
-	virtual void loadValue(const Handle& atom, const Handle& key);
-
-	virtual void loadType(AtomSpace*, Type);
-	virtual void loadAtomSpace(AtomSpace*) {}
-	virtual void storeAtomSpace(const AtomSpace*) {}
+	// XXX FIXME Unimplemented BackingStore virtuals.
+	// These need to go into the assorted implementations,
+	// But its all very confusing and tedious, so punt.
 
 	virtual HandleSeq loadFrameDAG(void);
 	virtual void storeFrameDAG(AtomSpace*) {}
 
 	virtual void deleteFrame(AtomSpace*) {}
-	virtual void barrier(AtomSpace* = nullptr);
-
 	virtual Handle getLink(Type, const HandleSeq&);
-
-public:
-	static Handle factory(const Handle&);
 };
 
-NODE_PTR_DECL(ReadThruProxy)
-#define createReadThruProxy CREATE_DECL(ReadThruProxy)
+NODE_PTR_DECL(ProxyNode)
+#define createProxyNode CREATE_DECL(ProxyNode)
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_READ_THRU_PROXY_H
+#endif // _OPENCOG_PROXY_NODE_H

@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (persist-proxy
 	NullProxy.cc
+	ProxyNode.cc
 	ReadThruProxy.cc
 	WriteThruProxy.cc
 )
@@ -29,6 +30,7 @@ INSTALL (TARGETS persist-proxy EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	NullProxy.h
+	ProxyNode.h
 	ReadThruProxy.h
 	WriteThruProxy.h
 	DESTINATION "include/opencog/persist/proxy"

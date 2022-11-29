@@ -127,6 +127,12 @@ void ReadThruProxy::loadType(AtomSpace* as, Type t)
 	DOWN;
 }
 
+void ReadThruProxy::barrier(AtomSpace* as)
+{
+	for (const StorageNodePtr& stnp :_readers)
+		stnp->barrier(as);
+}
+
 HandleSeq ReadThruProxy::loadFrameDAG(void)
 {
 	// XXX FIXME;

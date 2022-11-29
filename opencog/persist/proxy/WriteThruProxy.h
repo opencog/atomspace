@@ -73,7 +73,7 @@ protected:
 	virtual void storeFrameDAG(AtomSpace*) {}
 
 	virtual void deleteFrame(AtomSpace*) {}
-	virtual void barrier(AtomSpace* = nullptr) {}
+	virtual void barrier(AtomSpace* = nullptr);
 
 	virtual Handle getLink(Type, const HandleSeq&);
 
