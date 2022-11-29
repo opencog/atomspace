@@ -58,7 +58,7 @@ StorageNodeSeq ProxyNode::setup(void)
 
 	// If there is only one, grab it.
 	Handle params = dli[0]->getOutgoingAtom(1);
-	if (params->is_type(PROXY_NODE))
+	if (params->is_type(STORAGE_NODE))
 	{
 		stolist.emplace_back(StorageNodeCast(params));
 		return stolist;
