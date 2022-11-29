@@ -25,12 +25,12 @@
 using namespace opencog;
 
 ReadThruProxy::ReadThruProxy(const std::string&& name)
-	: StorageNode(READ_THRU_PROXY, std::move(name)), _round_robin(0)
+	: ProxyNode(READ_THRU_PROXY, std::move(name)), _round_robin(0)
 {
 }
 
 ReadThruProxy::ReadThruProxy(Type t, const std::string&& name)
-	: StorageNode(t, std::move(name)), _round_robin(0)
+	: ProxyNode(t, std::move(name)), _round_robin(0)
 {
 }
 
@@ -38,45 +38,13 @@ ReadThruProxy::~ReadThruProxy()
 {
 }
 
-void ReadThruProxy::destroy(void) {}
-void ReadThruProxy::erase(void) {}
-
-std::string ReadThruProxy::monitor(void)
-{
-	return "";
-}
-
 // Get our configuration from the DefineLink we live in.
 void ReadThruProxy::open(void)
 {
-	_readers.clear();
 	_round_robin = 0;
 
-	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
-
-	// We could throw an error here ... or we can just no-op.
-	if (0 == dli.size()) return;
-
-	// If there is only one, grab it.
-	Handle params = dli[0]->getOutgoingAtom(1);
-	if (params->is_type(PROXY_NODE))
-	{
-		_readers.emplace_back(StorageNodeCast(params));
-		return;
-	}
-
-	// Expect the parameters to be wrapped in a ListLink
-	if (not params->is_type(LIST_LINK))
-		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
-
-	for (const Handle& h : params->getOutgoingSet())
-	{
-		StorageNodePtr stnp = StorageNodeCast(h);
-		if (nullptr == stnp)
-			SyntaxException(TRACE_INFO, "Expecting a list of StorageNodes!");
-
-		_readers.emplace_back(stnp);
-	}
+	StorageNodeSeq rdrs = setup();
+	_readers.swap(rdrs);
 }
 
 #define UP \
@@ -131,19 +99,6 @@ void ReadThruProxy::barrier(AtomSpace* as)
 {
 	for (const StorageNodePtr& stnp :_readers)
 		stnp->barrier(as);
-}
-
-HandleSeq ReadThruProxy::loadFrameDAG(void)
-{
-	// XXX FIXME;
-	return HandleSeq();
-}
-
-Handle ReadThruProxy::getLink(Type t, const HandleSeq& hseq)
-{
-	// Ugh Copy
-	HandleSeq hsc(hseq);
-	return _atom_space->get_link(t, std::move(hsc));
 }
 
 DEFINE_NODE_FACTORY(ReadThruProxy, READ_THRU_PROXY)

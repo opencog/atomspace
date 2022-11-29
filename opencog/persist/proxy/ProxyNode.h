@@ -30,6 +30,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
 class ProxyNode : public StorageNode
 {
 public:
@@ -37,7 +38,7 @@ public:
 	ProxyNode(Type t, const std::string&&);
 	virtual ~ProxyNode();
 
-	std::vector<StorageNodePtr> setup();
+	StorageNodeSeq setup();
 
 	// ----------------------------------------------------------------
 	virtual void close(void) {}

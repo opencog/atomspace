@@ -299,9 +299,9 @@ public:
 		{ return remove_atom(as.get(), h, recursive); }
 };
 
-typedef std::shared_ptr<StorageNode> StorageNodePtr;
-static inline StorageNodePtr StorageNodeCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<StorageNode>(h); }
+NODE_PTR_DECL(StorageNode)
+
+typedef std::vector<StorageNodePtr> StorageNodeSeq;
 
 /** @}*/
 } // namespace opencog

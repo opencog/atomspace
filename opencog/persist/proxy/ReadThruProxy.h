@@ -23,17 +23,17 @@
 #ifndef _OPENCOG_READ_THRU_PROXY_H
 #define _OPENCOG_READ_THRU_PROXY_H
 
-#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/proxy/ProxyNode.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class ReadThruProxy : public StorageNode
+class ReadThruProxy : public ProxyNode
 {
 private:
-	std::vector<StorageNodePtr> _readers;
+	StorageNodeSeq _readers;
 	unsigned int _round_robin;
 
 public:
@@ -43,14 +43,7 @@ public:
 
 	// ----------------------------------------------------------------
 	virtual void open(void);
-	virtual void close(void) {}
 	virtual bool connected(void) { return  0 < _readers.size(); }
-	virtual void create(void) {}
-
-	virtual void destroy(void);
-	virtual void erase(void);
-
-	virtual std::string monitor(void);
 
 protected:
 	// ----------------------------------------------------------------
@@ -70,14 +63,7 @@ protected:
 	virtual void loadType(AtomSpace*, Type);
 	virtual void loadAtomSpace(AtomSpace*) {}
 	virtual void storeAtomSpace(const AtomSpace*) {}
-
-	virtual HandleSeq loadFrameDAG(void);
-	virtual void storeFrameDAG(AtomSpace*) {}
-
-	virtual void deleteFrame(AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr);
-
-	virtual Handle getLink(Type, const HandleSeq&);
 
 public:
 	static Handle factory(const Handle&);

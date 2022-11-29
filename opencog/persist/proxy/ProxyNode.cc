@@ -47,9 +47,9 @@ std::string ProxyNode::monitor(void)
 }
 
 // Get our configuration from the DefineLink we live in.
-std::vector<StorageNodePtr>  ProxyNode::setup(void)
+StorageNodeSeq  ProxyNode::setup(void)
 {
-	std::vector<StorageNodePtr> stolist;
+	StorageNodeSeq stolist;
 
 	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
 

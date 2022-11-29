@@ -25,12 +25,12 @@
 using namespace opencog;
 
 WriteThruProxy::WriteThruProxy(const std::string&& name)
-	: StorageNode(WRITE_THRU_PROXY, std::move(name))
+	: ProxyNode(WRITE_THRU_PROXY, std::move(name))
 {
 }
 
 WriteThruProxy::WriteThruProxy(Type t, const std::string&& name)
-	: StorageNode(t, std::move(name))
+	: ProxyNode(t, std::move(name))
 {
 }
 
@@ -38,44 +38,11 @@ WriteThruProxy::~WriteThruProxy()
 {
 }
 
-void WriteThruProxy::destroy(void) {}
-void WriteThruProxy::erase(void) {}
-
-std::string WriteThruProxy::monitor(void)
-{
-	return "";
-}
-
 // Get our configuration from the DefineLink we live in.
 void WriteThruProxy::open(void)
 {
-	_targets.clear();
-
-	IncomingSet dli(getIncomingSetByType(DEFINE_LINK));
-
-	// We could throw an error here ... or we can just no-op.
-	if (0 == dli.size()) return;
-
-	// If there is only one, grab it.
-	Handle params = dli[0]->getOutgoingAtom(1);
-	if (params->is_type(PROXY_NODE))
-	{
-		_targets.emplace_back(StorageNodeCast(params));
-		return;
-	}
-
-	// Expect the parameters to be wrapped in a ListLink
-	if (not params->is_type(LIST_LINK))
-		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
-
-	for (const Handle& h : params->getOutgoingSet())
-	{
-		StorageNodePtr stnp = StorageNodeCast(h);
-		if (nullptr == stnp)
-			SyntaxException(TRACE_INFO, "Expecting a list of StorageNodes!");
-
-		_targets.emplace_back(stnp);
-	}
+	StorageNodeSeq sns = setup();
+	_targets.swap(sns);
 }
 
 void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)
@@ -115,19 +82,6 @@ void WriteThruProxy::barrier(AtomSpace* as)
 {
 	for (const StorageNodePtr& stnp : _targets)
 		stnp->barrier(as);
-}
-
-HandleSeq WriteThruProxy::loadFrameDAG(void)
-{
-	// XXX FIXME;
-	return HandleSeq();
-}
-
-Handle WriteThruProxy::getLink(Type t, const HandleSeq& hseq)
-{
-	// Ugh Copy
-	HandleSeq hsc(hseq);
-	return _atom_space->get_link(t, std::move(hsc));
 }
 
 DEFINE_NODE_FACTORY(WriteThruProxy, WRITE_THRU_PROXY)
