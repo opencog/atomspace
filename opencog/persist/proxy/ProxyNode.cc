@@ -47,7 +47,7 @@ std::string ProxyNode::monitor(void)
 }
 
 // Get our configuration from the DefineLink we live in.
-StorageNodeSeq  ProxyNode::setup(void)
+StorageNodeSeq ProxyNode::setup(void)
 {
 	StorageNodeSeq stolist;
 
@@ -66,13 +66,17 @@ StorageNodeSeq  ProxyNode::setup(void)
 
 	// Expect the parameters to be wrapped in a ListLink
 	if (not params->is_type(LIST_LINK))
-		SyntaxException(TRACE_INFO, "Expecting parameters in a ListLink!");
+		throw SyntaxException(TRACE_INFO,
+			"Expecting parameters in a ListLink! Got\n%s\n",
+			dli[0]->to_short_string().c_str());
 
 	for (const Handle& h : params->getOutgoingSet())
 	{
 		StorageNodePtr stnp = StorageNodeCast(h);
 		if (nullptr == stnp)
-			SyntaxException(TRACE_INFO, "Expecting a list of StorageNodes!");
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a list of StorageNodes! Got\n%s\n",
+				dli[0]->to_short_string().c_str());
 
 		stolist.emplace_back(stnp);
 	}
