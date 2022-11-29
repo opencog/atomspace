@@ -147,6 +147,9 @@ to `Commands::cog_incoming_set(...)` (note how the dashes are now
 underbars) and then `StorageNode::fetch_incoming_set()` is called.
 Many calls require a call to `StorageNode::barrier()`.
 
+The single arrow `->` is the string to `StorageNode` map. The double
+arrow `=>>` is the `StorageNode` to `BackingStore` map.
+
 ```
 TBD:
 cog_atomspace
@@ -155,13 +158,13 @@ cog_set_proxy
 cog_execute_cache <== probably obsoleted by proxy !?
 
 ReadThru:
-cog_get_atoms -> cog_get_atoms+barrier
-cog_incoming_by_type -> fetch_incoming_by_type+barrier
-cog_incoming_set -> fetch_incoming_set+barrier
-cog_keys_alist -> fetch_atom+barrier
+cog_get_atoms -> fetch_all_atoms_of_type+barrier =>> loadType
+cog_incoming_by_type -> fetch_incoming_by_type+barrier =>> fetchIncomingByType
+cog_incoming_set -> fetch_incoming_set+barrier =>> fetchIncomingSet
+cog_keys_alist -> fetch_atom+barrier =>> getAtom
 cog_node -> ??? fetch_atom+barrier
 cog_link -> ??? fetch_atom+barrier
-cog_value -> fetch_value+barrier
+cog_value -> fetch_value+barrier =>> loadValue
 
 WriteThru:
 cog_extract -> remove_atom
