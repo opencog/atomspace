@@ -28,10 +28,8 @@ COG_STORAGE_NODE <- STORAGE_NODE
 // Base type for the various proxies
 PROXY <- STORAGE_NODE
 
-// Pass all requests on to all attached StorageNodes. Used for
-// harnessing ReadThru and WriteThru proxies into one.
-// If empty, passes through to the underlying AtomSpace.
-PASS_THRU_PROXY <- PROXY
+// Pass all requests on to the underlying AtomSpace.
+NULL_PROXY <- PROXY
 
 // Mirroring Proxy, selects one StorageNode target randomly out of the
 // set that it's given, and reads from that. Does NOT pass on writes.
@@ -44,6 +42,9 @@ SEQUENTIAL_READ_PROXY <- PROXY
 // Mirroring Proxy, write thru to *all* StorageNodes. Does NOT pass on
 // reads.
 WRITE_THRU_PROXY <- PROXY
+
+// Combo of ReadtThru and WriteThru
+READ_WRITE_PROXY <- PROXY
 
 // Read-caching Proxy. Goes to Storage only if the requested item is
 // not in the local AtomSpace. Configureable to expire the data after

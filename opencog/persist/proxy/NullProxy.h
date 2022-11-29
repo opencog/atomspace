@@ -1,5 +1,5 @@
 /*
- * opencog/persist/proxy/PassThruyProxy.h
+ * opencog/persist/proxy/NullyProxy.h
  *
  * Copyright (C) 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PASS_THRU_PROXY_H
-#define _OPENCOG_PASS_THRU_PROXY_H
+#ifndef _OPENCOG_NULL_PROXY_H
+#define _OPENCOG_NULL_PROXY_H
 
 #include <opencog/persist/api/StorageNode.h>
 
@@ -30,14 +30,11 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class PassThruProxy : public StorageNode
+class NullProxy : public StorageNode
 {
-protected:
-	std::vector<StorageNodePtr> _store_nodes;
-
 public:
-	PassThruProxy(Type, std::string);
-	virtual ~PassThruProxy();
+	NullProxy(const std::string&&);
+	virtual ~NullProxy();
 
 	// ----------------------------------------------------------------
 	// StorageNode virtuals  are all no-ops.
@@ -54,35 +51,35 @@ public:
 	// ----------------------------------------------------------------
 	// BackingStore virtuals.
 
-	virtual void getAtom(const Handle&);
-	virtual void fetchIncomingSet(AtomSpace*, const Handle&);
-	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type);
-	virtual void storeAtom(const Handle&, bool synchronous = false);
-	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive);
-	virtual void storeValue(const Handle& atom, const Handle& key);
+	virtual void getAtom(const Handle&) {}
+	virtual void fetchIncomingSet(AtomSpace*, const Handle&) {}
+	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type) {}
+	virtual void storeAtom(const Handle&, bool synchronous = false) {}
+	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) {}
+	virtual void storeValue(const Handle& atom, const Handle& key) {}
 	virtual void updateValue(const Handle& atom, const Handle& key,
-	                         const ValuePtr& delta);
-	virtual void loadValue(const Handle& atom, const Handle& key);
+	                         const ValuePtr& delta) {}
+	virtual void loadValue(const Handle& atom, const Handle& key) {}
 
-	virtual void loadType(AtomSpace*, Type);
-	virtual void loadAtomSpace(AtomSpace*);
-	virtual void storeAtomSpace(const AtomSpace*);
+	virtual void loadType(AtomSpace*, Type) {}
+	virtual void loadAtomSpace(AtomSpace*) {}
+	virtual void storeAtomSpace(const AtomSpace*) {}
 
 	virtual HandleSeq loadFrameDAG(void);
-	virtual void storeFrameDAG(AtomSpace*);
+	virtual void storeFrameDAG(AtomSpace*) {}
 
-	virtual void deleteFrame(AtomSpace*);
-	virtual void barrier(AtomSpace* = nullptr);
+	virtual void deleteFrame(AtomSpace*) {}
+	virtual void barrier(AtomSpace* = nullptr) {}
 
 protected:
 	virtual Handle getLink(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<PassThruProxy> PassThruProxyPtr;
-static inline PassThruProxyPtr PassThruProxyCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PassThruProxy>(h); }
+typedef std::shared_ptr<NullProxy> NullProxyPtr;
+static inline NullProxyPtr NullProxyCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<NullProxy>(h); }
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_PASS_THRU_PROXY_H
+#endif // _OPENCOG_NULL_PROXY_H

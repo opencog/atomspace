@@ -3,7 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (persist-proxy
-	PassThruProxy.cc
+	NullProxy.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -26,7 +26,6 @@ INSTALL (TARGETS persist-proxy EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	FetchValueOfLink.h
-	StoreValueOfLink.h
-	DESTINATION "include/opencog/persist/flow"
+	NullProxy.h
+	DESTINATION "include/opencog/persist/proxy"
 )
