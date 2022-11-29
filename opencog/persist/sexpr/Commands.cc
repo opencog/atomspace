@@ -33,6 +33,7 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/version.h>
+#include <opencog/persist/proxy/NullProxy.h>
 
 #include "Commands.h"
 #include "Sexpr.h"
@@ -114,6 +115,7 @@ Commands::~Commands() {}
 void Commands::set_base_space(const AtomSpacePtr& asp)
 {
 	_uc._base_space = asp;
+	_proxy = StorageNodeCast(asp->add_node(NULL_PROXY, "*-null proxy-*"));
 }
 
 // -----------------------------------------------
@@ -135,6 +137,8 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 // -----------------------------------------------
 // (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
 // This is complicated, and subject to change...
+// XXX this should be nuked, and replaced by appropriate kind of proxy.
+// FIXME read above comment.
 std::string Commands::cog_execute_cache(const std::string& cmd)
 {
 	size_t pos = 0;
@@ -169,6 +173,9 @@ std::string Commands::cog_execute_cache(const std::string& cmd)
 
 	_uc._base_space->set_value(query, key, rslt);
 
+	// XXX is this correct???
+	// _proxy->store_value(query, key);
+
 	return Sexpr::encode_value(rslt);
 }
 
@@ -182,7 +189,7 @@ std::string Commands::cog_extract(const std::string& cmd)
 
 	if (_uc.have_extract_cb) _uc.extract_cb(h, false);
 
-	if (_uc._base_space->extract_atom(h, false)) return "#t";
+	if (_proxy->remove_atom(_uc._base_space, h, false)) return "#t";
 	return "#f";
 }
 
@@ -196,7 +203,7 @@ std::string Commands::cog_extract_recursive(const std::string& cmd)
 
 	if (_uc.have_extract_cb) _uc.extract_cb(h, true);
 
-	if (_uc._base_space->extract_atom(h, true)) return "#t";
+	if (_proxy->remove_atom(_uc._base_space, h, true)) return "#t";
 	return "#f";
 }
 
@@ -213,6 +220,17 @@ std::string Commands::cog_get_atoms(const std::string& cmd)
 		get_subtypes = true;
 
 	if (_uc.have_get_atoms_cb) _uc.get_atoms_cb(t, get_subtypes);
+
+	_proxy->fetch_all_atoms_of_type(t);
+	if (get_subtypes)
+	{
+		for (Type st = t+1; st < nameserver().getNumberOfClasses(); st++)
+		{
+			if (nameserver().isA(st, t))
+				_proxy->fetch_all_atoms_of_type(st);
+		}
+	}
+	_proxy->barrier();
 
 	// as = get_opt_as(cmd, pos, as);
 
@@ -241,6 +259,8 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd)
 	h = as->add_atom(h);
 
 	if (_uc.have_incoming_by_type_cb) _uc.incoming_by_type_cb(h, t);
+	_proxy->fetch_incoming_by_type(h, t);
+	_proxy->barrier();
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSetByType(t))
@@ -257,9 +277,10 @@ std::string Commands::cog_incoming_set(const std::string& cmd)
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _uc._space_map);
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	h = as->add_atom(h);
 
 	if (_uc.have_incoming_set_cb) _uc.incoming_set_cb(h);
+	h = _proxy->fetch_incoming_set(h, false, as);
+	_proxy->barrier();
 
 	std::string alist = "(";
 	for (const Handle& hi : h->getIncomingSet())
@@ -279,6 +300,8 @@ std::string Commands::cog_keys_alist(const std::string& cmd)
 	h = as->add_atom(h);
 
 	if (_uc.have_keys_alist_cb) _uc.keys_alist_cb(h);
+	_proxy->fetch_atom(h);
+	_proxy->barrier();
 
 	std::string alist = "(";
 	for (const Handle& key : h->getKeys())
@@ -301,17 +324,18 @@ std::string Commands::cog_node(const std::string& cmd)
 	size_t r = cmd.size();
 	std::string name = Sexpr::get_node_name(cmd, l, r, t);
 
-	// Let the callback run, before we query the AtomSpace
-	// The callback might add this Atom to the AtomSpace
+	std::string nam = name;
+	Handle h = createNode(t, std::move(nam));
+
 	if(_uc.have_node_cb)
-	{
-		std::string nam = name;
-		Handle h = createNode(t, std::move(nam));
 		_uc.node_cb(h);
-	}
+
+	// ?????? XXX Is this right? Needs review
+	_proxy->fetch_atom(h);
+	_proxy->barrier();
 
 	AtomSpace* as = _uc.get_opt_as(cmd, r);
-	Handle h = as->get_node(t, std::move(name));
+	h = as->get_node(t, std::move(name));
 
 	if (nullptr == h) return "()";
 	return Sexpr::encode_atom(h, _uc._multi_space);
@@ -338,17 +362,18 @@ std::string Commands::cog_link(const std::string& cmd)
 		pos = r1;
 	}
 
-	// Let the callback run, before we query the AtomSpace
-	// The callback might add this Atom to the AtomSpace
+	HandleSeq oset = outgoing;
+	Handle h = createLink(std::move(oset), t);
+
 	if(_uc.have_link_cb)
-	{
-		HandleSeq oset = outgoing;
-		Handle h = createLink(std::move(oset), t);
 		_uc.link_cb(h);
-	}
+
+	// ?????? XXX Is this right? Needs review
+	_proxy->fetch_atom(h);
+	_proxy->barrier();
 
 	AtomSpace* as = _uc.get_opt_as(cmd, pos);
-	Handle h = as->get_link(t, std::move(outgoing));
+	h = as->get_link(t, std::move(outgoing));
 
 	if (nullptr == h) return "()";
 	return Sexpr::encode_atom(h, _uc._multi_space);
@@ -367,6 +392,9 @@ std::string Commands::cog_value(const std::string& cmd)
 	key = as->add_atom(key);
 
 	if (_uc.have_value_cb) _uc.value_cb(atom, key);
+
+	_proxy->fetch_value(atom, key);
+	_proxy->barrier();
 
 	ValuePtr vp = atom->getValue(key);
 	return Sexpr::encode_value(vp);
@@ -389,6 +417,7 @@ std::string Commands::cog_set_value(const std::string& cmd)
 	as->set_value(atom, key, vp);
 
 	if (_uc.have_set_value_cb) _uc.set_value_cb(atom, key, vp);
+	_proxy->store_value(atom, key);
 
 	return "()";
 }
@@ -411,6 +440,13 @@ std::string Commands::cog_set_values(const std::string& cmd)
 	Sexpr::decode_slist(h, cmd, pos);
 
 	if (_uc.have_set_values_cb) _uc.set_values_cb(h);
+
+	// TODO: In principle, we should be selective, and only pass
+	// on the values we were given... this would require
+	// Sexpr::decode_slist to return a list of keys, and then we'd
+	// have to store one key at a time, which seems inefficient.
+	// But still ... maybe fixme?
+	_proxy->store_atom(h);
 
 	return "()";
 }
@@ -435,6 +471,12 @@ std::string Commands::cog_set_tv(const std::string& cmd)
 
 	if (_uc.have_set_tv_cb) _uc.set_tv_cb(ha, tvp);
 
+	// Make sure we can store truth values!
+	if (nullptr == _truth_key)
+		_truth_key = as->add_node(PREDICATE_NODE, "*-TruthValueKey-*");
+
+	_proxy->store_value(ha, _truth_key);
+
 	return "()";
 }
 
@@ -458,6 +500,7 @@ std::string Commands::cog_update_value(const std::string& cmd)
 	as->increment_count(atom, key, fvp->value());
 
 	if (_uc.have_update_value_cb) _uc.update_value_cb(atom, key, vp);
+	_proxy->update_value(atom, key, vp);
 
 	// Return the new value. XXX Why? This just wastes CPU?
 	// ValuePtr vp = atom->getValue(key);

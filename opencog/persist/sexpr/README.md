@@ -117,8 +117,8 @@ Here's an example of reading back what was stored above:
 ```
 
 
-Network API, Command Dispatching
---------------------------------
+Network API and Proxying
+------------------------
 The CogServer provides a network API to send/receive Atoms over the
 internet. The actual API is that of the StorageNode (see the wiki page
 https://wiki.opencog.org/w/StorageNode for details.) The cogserver
@@ -132,30 +132,53 @@ because the cogserver is guaranteed to send only these commands, and no
 others.
 
 Network-distributed AtomSpaces need to have proxy agents that know what
-to do with the data being passed around.  Besides just workig with the
+to do with the data being passed around.  Besides just working with the
 attached AtomSpace, maybe something more needs to be done: maybe data
-needs to be written to or read from disk. The proxy agent determines
+needs to be written to or read from disk. The StorageNode Proxy determines
 what is to be done.
 
-To implement the proxy, one needs to intercept network commands, as they
-come in. This spot is the `interpret_command()` method in `Dispatcher.cc`.
-The `class Dispatcher` maintains a table of functions to be called, one for
-each network command.  By altering this table and installing command
-handlers other than the default handlers, the proxy agent can respond
-in some custom fashion. The `class Commands` provides some default
-decoders.
+String to Callback Map
+----------------------
+Below is a short table summarizing the mapping of network strings to
+the StorageNode API. When a network string is received (by `Commands.cc`)
+it is decoded, and a corresponding StorageNode API call is made. For
+example, the network string `(cog-incoming-set ...)` results in a call
+to `Commands::cog_incoming_set(...)` (note how the dashes are now
+underbars) and then `StorageNode::fetch_incoming_set()` is called.
+Many calls require a call to `StorageNode::barrier()`.
 
-For example, if the CogServer receives a command to put an Atom into the
-AtomSpace, it can then immediately push it out to any open `StorageNode`s,
-for example, to disk storage. This becomes an easy way to implement a
-write-through proxy, which just listens to connections on the net, and,
-whenever it receives some Atom, it just pushes it to disk.`
+```
+cog_atomspace
+cog_atomspace_clear
+cog_execute_cache
 
-For details, see https://github.com/opencog/atomspace-agents
+WriteThru:
+cog_extract -> remove_atom
+cog_extract_recursive -> remove_atom
+
+ReadThru:
+cog_get_atoms -> cog_get_atoms+barrier
+cog_incoming_by_type -> fetch_incoming_by_type+barrier
+cog_incoming_set -> fetch_incoming_set+barrier
+cog_keys_alist -> fetch_atom+barrier
+cog_node -> ??? fetch_atom+barrier
+cog_link -> ??? fetch_atom+barrier
+cog_value -> fetch_value+barrier
+
+WriteThru:
+cog_set_value -> store_value
+cog_set_values -> store_atom
+cog_set_tv -> store_value
+cog_update_value -> update_value
+
+cog_define
+```
+
 
 Status & TODO
 -------------
 ***Version 1.0.2*** -- Everything works, has withstood the test of time.
+***Version 1.1.0*** -- Under construction Proxy redesign.
 
 However -- multi-atomspace (frame) support is missing. Some basic work
 in this direction has been done, but it is not been completed.  The
