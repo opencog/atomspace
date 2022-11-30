@@ -92,6 +92,23 @@ public:
 	virtual void erase(void) = 0;
 
 	/**
+	 * For StorageNodes that support proxying, open the proxy for operation.
+	 */
+	virtual void proxy_open(void);
+
+	/**
+	 * For StorageNodes that support proxying, close the proxy for operation.
+	 */
+	virtual void proxy_close(void);
+
+	/**
+	 * For StorageNodes that support proxying, define what the proxy will be.
+	 * The argument must be of the form `(FooProxyNode "blah")` or of the
+	 * form `(ProxyParameters (FooProxyNode "blah") (BlahBlah...) ...)`.
+	 */
+	virtual void set_proxy(const Handle&);
+
+	/**
 	 * Return debug diagnostics and/or performance monitoring stats.
 	 */
 	virtual std::string monitor(void);

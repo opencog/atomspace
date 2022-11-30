@@ -42,6 +42,24 @@ StorageNode::~StorageNode()
 {
 }
 
+void StorageNode::proxy_open(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::proxy_close(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::set_proxy(const Handle&)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
 std::string StorageNode::monitor(void)
 {
 	return "This StorageNode does not implement a monitor.";
