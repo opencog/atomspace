@@ -33,7 +33,7 @@ namespace opencog
 class WriteThruProxy : public ProxyNode
 {
 private:
-	StorageNodeSeq _targets;
+	ProxyNodeSeq _targets;
 
 public:
 	WriteThruProxy(const std::string&&);

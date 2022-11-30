@@ -51,7 +51,7 @@ cog_define
 Status & TODO
 -------------
 ***Version 1.0.2*** -- Everything works, has withstood the test of time.
-***Version 1.1.0*** -- Under construction Proxy redesign.
+***Version 1.1.0*** -- Under reconstruction due to Proxy redesign.
 
 However -- multi-atomspace (frame) support is missing. Some basic work
 in this direction has been done, but it is not been completed.  The

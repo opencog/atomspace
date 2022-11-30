@@ -27,15 +27,32 @@ using namespace opencog;
 ProxyNode::ProxyNode(const std::string&& name)
 	: StorageNode(PROXY_NODE, std::move(name))
 {
+	init();
 }
 
 ProxyNode::ProxyNode(Type t, const std::string&& name)
 	: StorageNode(t, std::move(name))
 {
+	init();
 }
 
 ProxyNode::~ProxyNode()
 {
+}
+
+void ProxyNode::init(void)
+{
+	have_getAtom = false;
+	have_fetchIncomingSet = false;
+	have_fetchIncomingByType = false;
+	have_storeAtom = false;
+	have_removeAtom = false;
+	have_storeValue = false;
+	have_updateValue = false;
+	have_loadValue = false;
+	have_loadType = false;
+	have_loadAtomSpace = false;
+	have_storeAtomSpace = false;
 }
 
 void ProxyNode::destroy(void) {}
@@ -47,9 +64,9 @@ std::string ProxyNode::monitor(void)
 }
 
 // Get our configuration from the DefineLink we live in.
-StorageNodeSeq ProxyNode::setup(void)
+ProxyNodeSeq ProxyNode::setup(void)
 {
-	StorageNodeSeq stolist;
+	ProxyNodeSeq stolist;
 
 	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
 
@@ -60,7 +77,7 @@ StorageNodeSeq ProxyNode::setup(void)
 	Handle params = dli[0]->getOutgoingAtom(1);
 	if (params->is_type(STORAGE_NODE))
 	{
-		stolist.emplace_back(StorageNodeCast(params));
+		stolist.emplace_back(ProxyNodeCast(params));
 		return stolist;
 	}
 
@@ -72,10 +89,10 @@ StorageNodeSeq ProxyNode::setup(void)
 
 	for (const Handle& h : params->getOutgoingSet())
 	{
-		StorageNodePtr stnp = StorageNodeCast(h);
+		ProxyNodePtr stnp = ProxyNodeCast(h);
 		if (nullptr == stnp)
 			throw SyntaxException(TRACE_INFO,
-				"Expecting a list of StorageNodes! Got\n%s\n",
+				"Expecting a list of ProxyNodes! Got\n%s\n",
 				dli[0]->to_short_string().c_str());
 
 		stolist.emplace_back(stnp);

@@ -41,7 +41,7 @@ WriteThruProxy::~WriteThruProxy()
 // Get our configuration from the DefineLink we live in.
 void WriteThruProxy::open(void)
 {
-	StorageNodeSeq sns = setup();
+	ProxyNodeSeq sns = setup();
 	_targets.swap(sns);
 
 	for (const StorageNodePtr& stnp : _targets)

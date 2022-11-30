@@ -33,7 +33,7 @@ namespace opencog
 class ReadThruProxy : public ProxyNode
 {
 private:
-	StorageNodeSeq _readers;
+	ProxyNodeSeq _readers;
 	unsigned int _round_robin;
 
 public:
