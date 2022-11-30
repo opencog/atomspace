@@ -45,7 +45,17 @@ void ReadThruProxy::open(void)
 
 	StorageNodeSeq rdrs = setup();
 	_readers.swap(rdrs);
+
+	for (const StorageNodePtr& stnp :_readers)
+		stnp->open();
 }
+
+void ReadThruProxy::close(void)
+{
+	for (const StorageNodePtr& stnp :_readers)
+		stnp->close();
+}
+
 
 #define UP \
 	size_t nr = _readers.size(); \

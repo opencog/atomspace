@@ -43,6 +43,15 @@ void WriteThruProxy::open(void)
 {
 	StorageNodeSeq sns = setup();
 	_targets.swap(sns);
+
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->open();
+}
+
+void WriteThruProxy::close(void)
+{
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->close();
 }
 
 void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)

@@ -42,6 +42,7 @@ public:
 
 	// ----------------------------------------------------------------
 	virtual void open(void);
+	virtual void close(void);
 	virtual bool connected(void) { return  0 < _targets.size(); }
 
 protected:

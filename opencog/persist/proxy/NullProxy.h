@@ -40,6 +40,7 @@ public:
 	// ----------------------------------------------------------------
 	// StorageNode virtuals  are all no-ops.
 	virtual void open(void) {}
+	virtual void close(void) {}
 	virtual bool connected(void) { return  true; }
 
 protected:

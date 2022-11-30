@@ -41,7 +41,6 @@ public:
 	StorageNodeSeq setup();
 
 	// ----------------------------------------------------------------
-	virtual void close(void) {}
 	virtual void create(void) {}
 
 	virtual void destroy(void);
