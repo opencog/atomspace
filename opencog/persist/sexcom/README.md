@@ -8,37 +8,36 @@ At the "center" of each command is a StorageNode object which performs
 the desired command. The results are then re-encoded as strings, and
 returned to the caller.
 
+The "central" StorageNode allows custom handling to be chained in.
+The primary use is for proxying, where the central StorageNode would
+be a ReadThruProxy or a WriteThruProxy, or perhaps a combination of
+others. The ReadThruProxy acts as an "agent": it fetches Atoms from
+storage, placing them in the local AtomSpace. Because this is done
+before the sexcom reply is generated, it allows the AtomSpace to be
+dynamically updated.
+
+If the central StorageNode is not set, all sexcoms workt directly with
+the current AtomSpace (i.e. with whatever it currently contains).
+
 These sexcoms are used by the CogServer, working together with the
 `CogStorageNode`, to send Atoms and Values across the TCP/IP network.
-This is how distributed storage is implemented for teh AtomSpace.
+This is how distributed storage is implemented for the AtomSpace.
+The proxying allows Atom fetch or store commands arriving over the
+network to be fetched from disk storage first (or otherwise manipulated
+before a reply is given to the CogServer.
 
+See the wiki page https://wiki.opencog.org/w/StorageNode for API
+documentation.
 
+These sexcoms are also understood by guile; there are AtomSpace
+guile functions that have exactly the same name. These even work
+the same way, when there is no proxying. The sexcoms do two things
+that guile doesn't:
 
+* They allow proxying.
+* By being coded in straight C++, they avoid the rather hefty CPU
+  penalty of entering/exiting the guile interpreter.
 
-The CogServer provides a network API to send/receive Atoms over the
-internet. The actual API is that of the StorageNode (see the wiki page
-https://wiki.opencog.org/w/StorageNode for details.) The cogserver
-supports the full `StorageNode` API, and it uses the code in this
-directory to respond to the `CogStorageNode` commands.
-
-The `CogStorageNode` uses a very special set of about 15 scheme
-functions to do network I/O. Rather than flowing these through
-guile, which has hefty enter/exit penalties, these "sexpr comms"
-have been hard-coded in C++. These are implemented in `Commands.cc`
-The goal is to avoid the overhead of entry/exit into guile. This works
-because the cogserver is guaranteed to send only these commands, and no
-others. This is not a general scheme interpreter.
-
-Proxying
---------
-The code here places the StorageNode Proxy subsystem at it's center.
-That is, a sexcom is decoded
-
-Network-distributed AtomSpaces need to have proxy agents that know what
-to do with the data being passed around.  Besides just working with the
-attached AtomSpace, maybe something more needs to be done: maybe data
-needs to be written to or read from disk. The StorageNode Proxy determines
-what is to be done.
 
 String to Callback Map
 ----------------------
