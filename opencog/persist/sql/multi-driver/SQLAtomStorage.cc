@@ -300,6 +300,8 @@ void SQLAtomStorage::barrier(AtomSpace* as)
 
 void SQLAtomStorage::close(void)
 {
+	if (not _is_open) return;
+
 	barrier();
 	_write_queue.close();
 	close_conn_pool();

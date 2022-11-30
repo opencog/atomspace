@@ -41,7 +41,10 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
-	flushStoreQueue();
+	// The DB is probably not open right now, esp if as==nullptr
+	if (_is_open)
+		flushStoreQueue();
+
 	_tlbuf.clear_resolver(as);
 }
 
