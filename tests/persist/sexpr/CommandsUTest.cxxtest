@@ -74,6 +74,7 @@ void CommandsUTest::test_node()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
+	printf("AtomSpace is %s\n", as->to_string().c_str());
 	TS_ASSERT_EQUALS(0, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
 

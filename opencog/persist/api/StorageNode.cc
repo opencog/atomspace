@@ -125,7 +125,7 @@ Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 	// and not to play monkey-shines with them.  If you want something
 	// else, then save the old TV, fetch the new TV, and combine them
 	// with your favorite algo.
-	Handle ah = as->add_atom(h);
+	Handle ah = as->get_atom(h);
 	if (nullptr == ah) return ah; // if read-only, then cannot update.
 	getAtom(ah);
 	return ah;
