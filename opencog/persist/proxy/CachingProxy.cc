@@ -75,8 +75,17 @@ void CachingProxy::close(void)
 void CachingProxy::getAtom(const Handle& h)
 {
 	CHECK_OPEN;
-	const Handle& ch = _atom_space->get_atom(h);
-	if (ch) return;
+
+	// We want to do this:
+	// const Handle& ch = _atom_space->get_atom(h);
+	// if (ch) return;
+	// but it won't work, of course, because by this point,
+	// h has already been inserted into the AtomSpace.
+	// (BTW, this causes issues in several places, not just here.
+	// So XXX TODO Review if this was a good design choice. Someday.)
+	// Instead, we look to see if it's decorated with any Values.
+	// It won't have any, if its a fresh atom.
+	if (h->haveValues()) return;
 
 	_reader->fetch_atom(h);
 	_reader->barrier();
