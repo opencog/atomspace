@@ -134,14 +134,14 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 }
 
 // -----------------------------------------------
-// (cog-set-proxy! (DefineLink (ProxyNode "foo") ...))
+// (cog-set-proxy! (ProxyParameters (ProxyNode "foo") ...))
 std::string Commands::cog_set_proxy(const std::string& cmd)
 {
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _uc._space_map);
 
 	// If we got a full definition, the proxy is then just the first atom.
-	if (h->is_type(DEFINE_LINK))
+	if (h->is_type(PROXY_PARAMETERS_LINK))
 	{
 		h = _uc._base_space->add_atom(h);
 		Handle pxy = h->getOutgoingAtom(0);
