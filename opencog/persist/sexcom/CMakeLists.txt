@@ -3,6 +3,7 @@
 ADD_LIBRARY (sexcom
 	Commands.cc
 	Dispatcher.cc
+	SexprEval.cc
 )
 
 ADD_DEPENDENCIES(sexcom opencog_atom_types)
@@ -25,6 +26,7 @@ INSTALL (TARGETS sexcom EXPORT AtomSpaceTargets
 INSTALL (FILES
 	Commands.h
 	Dispatcher.h
+	SexprEval.h
 	DESTINATION "include/opencog/persist/sexcom"
 )
 

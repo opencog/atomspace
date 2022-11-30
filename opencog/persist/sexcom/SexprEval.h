@@ -27,7 +27,7 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
-#include <opencog/persist/sexpr/Dispatcher.h>
+#include <opencog/persist/sexcom/Dispatcher.h>
 
 /**
  * The SexprEval class implements a very simple API for s-exprssion

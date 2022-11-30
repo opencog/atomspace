@@ -23,13 +23,13 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sexpr/Dispatcher.h>
+#include <opencog/persist/sexcom/Dispatcher.h>
 
 #include "SexprEval.h"
 
 using namespace opencog;
 
-// Single shared instance holding single shared frame cache.
+// Singleton shared instance holding single shared frame cache.
 Dispatcher SexprEval::_interpreter;
 
 SexprEval::SexprEval(const AtomSpacePtr& asp)
