@@ -36,6 +36,8 @@ private:
 	ProxyNodeSeq _readers;
 	unsigned int _round_robin;
 
+	void init(void);
+
 public:
 	ReadThruProxy(const std::string&&);
 	ReadThruProxy(Type t, const std::string&&);

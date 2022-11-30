@@ -27,15 +27,25 @@ using namespace opencog;
 WriteThruProxy::WriteThruProxy(const std::string&& name)
 	: ProxyNode(WRITE_THRU_PROXY_NODE, std::move(name))
 {
+	init();
 }
 
 WriteThruProxy::WriteThruProxy(Type t, const std::string&& name)
 	: ProxyNode(t, std::move(name))
 {
+	init();
 }
 
 WriteThruProxy::~WriteThruProxy()
 {
+}
+
+void WriteThruProxy::init(void)
+{
+	have_removeAtom = true;
+	have_storeValue = true;
+	have_storeAtom = true;
+	have_updateValue = true;
 }
 
 // Get our configuration from the DefineLink we live in.

@@ -34,6 +34,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/version.h>
 #include <opencog/persist/sexpr/Sexpr.h>
+#include <opencog/persist/proxy/ProxyNode.h>
 
 #include "Commands.h"
 
@@ -114,10 +115,6 @@ Commands::~Commands() {}
 void Commands::set_base_space(const AtomSpacePtr& asp)
 {
 	_uc._base_space = asp;
-
-	// Erm, leve as null pointer
-	// _proxy = StorageNodeCast(asp->add_node(NULL_PROXY_NODE, "*-null proxy-*"));
-	// _proxy = StorageNodeCast(createNullProxy("*-null proxy-*"));
 }
 
 // -----------------------------------------------
@@ -150,7 +147,7 @@ std::string Commands::cog_set_proxy(const std::string& cmd)
 		Handle pxy = h->getOutgoingAtom(0);
 		if (pxy and pxy->is_type(PROXY_NODE))
 		{
-			_proxy = StorageNodeCast(pxy);
+			_proxy = ProxyNodeCast(pxy);
 			return "#t";
 		}
 		return "#f";
@@ -160,7 +157,7 @@ std::string Commands::cog_set_proxy(const std::string& cmd)
 	if (h->is_type(PROXY_NODE))
 	{
 		h = _uc._base_space->add_atom(h);
-		_proxy = StorageNodeCast(h);
+		_proxy = ProxyNodeCast(h);
 		return "#t";
 	}
 
@@ -227,7 +224,7 @@ std::string Commands::cog_get_atoms(const std::string& cmd)
 
 	if (_uc.have_get_atoms_cb) _uc.get_atoms_cb(t, get_subtypes);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_loadType)
 	{
 		_proxy->fetch_all_atoms_of_type(t);
 
@@ -270,7 +267,7 @@ std::string Commands::cog_incoming_by_type(const std::string& cmd)
 
 	if (_uc.have_incoming_by_type_cb) _uc.incoming_by_type_cb(h, t);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_fetchIncomingByType)
 	{
 		_proxy->fetch_incoming_by_type(h, t);
 		_proxy->barrier();
@@ -294,7 +291,7 @@ std::string Commands::cog_incoming_set(const std::string& cmd)
 
 	if (_uc.have_incoming_set_cb) _uc.incoming_set_cb(h);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_fetchIncomingSet)
 	{
 		h = _proxy->fetch_incoming_set(h, false, as);
 		_proxy->barrier();
@@ -319,7 +316,7 @@ std::string Commands::cog_keys_alist(const std::string& cmd)
 
 	if (_uc.have_keys_alist_cb) _uc.keys_alist_cb(h);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_getAtom)
 	{
 		_proxy->fetch_atom(h);
 		_proxy->barrier();
@@ -353,7 +350,7 @@ std::string Commands::cog_node(const std::string& cmd)
 		_uc.node_cb(h);
 
 	// ?????? XXX Is this right? Needs review
-	if (_proxy)
+	if (_proxy and _proxy->have_getAtom)
 	{
 		_proxy->fetch_atom(h);
 		_proxy->barrier();
@@ -394,7 +391,7 @@ std::string Commands::cog_link(const std::string& cmd)
 		_uc.link_cb(h);
 
 	// ?????? XXX Is this right? Needs review
-	if (_proxy)
+	if (_proxy and _proxy->have_getAtom)
 	{
 		_proxy->fetch_atom(h);
 		_proxy->barrier();
@@ -421,7 +418,7 @@ std::string Commands::cog_value(const std::string& cmd)
 
 	if (_uc.have_value_cb) _uc.value_cb(atom, key);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_loadValue)
 	{
 		_proxy->fetch_value(atom, key, as);
 		_proxy->barrier();
@@ -441,7 +438,7 @@ std::string Commands::cog_extract(const std::string& cmd)
 
 	if (_uc.have_extract_cb) _uc.extract_cb(h, false);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_removeAtom)
 	{
 		if (_proxy->remove_atom(_uc._base_space, h, false)) return "#t";
 		return "#f";
@@ -461,7 +458,7 @@ std::string Commands::cog_extract_recursive(const std::string& cmd)
 
 	if (_uc.have_extract_cb) _uc.extract_cb(h, true);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_removeAtom)
 	{
 		if (_proxy->remove_atom(_uc._base_space, h, true)) return "#t";
 		return "#f";
@@ -489,7 +486,7 @@ std::string Commands::cog_set_value(const std::string& cmd)
 
 	if (_uc.have_set_value_cb) _uc.set_value_cb(atom, key, vp);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_storeValue)
 		_proxy->store_value(atom, key);
 
 	return "()";
@@ -519,7 +516,7 @@ std::string Commands::cog_set_values(const std::string& cmd)
 	// Sexpr::decode_slist to return a list of keys, and then we'd
 	// have to store one key at a time, which seems inefficient.
 	// But still ... maybe fixme?
-	if (_proxy)
+	if (_proxy and _proxy->have_storeAtom)
 		_proxy->store_atom(h);
 
 	return "()";
@@ -549,7 +546,7 @@ std::string Commands::cog_set_tv(const std::string& cmd)
 	if (nullptr == _truth_key)
 		_truth_key = as->add_node(PREDICATE_NODE, "*-TruthValueKey-*");
 
-	if (_proxy)
+	if (_proxy and _proxy->have_storeValue)
 		_proxy->store_value(ha, _truth_key);
 
 	return "()";
@@ -576,7 +573,7 @@ std::string Commands::cog_update_value(const std::string& cmd)
 
 	if (_uc.have_update_value_cb) _uc.update_value_cb(atom, key, vp);
 
-	if (_proxy)
+	if (_proxy and _proxy->have_updateValue)
 		_proxy->update_value(atom, key, vp);
 
 	// Return the new value. XXX Why? This just wastes CPU?

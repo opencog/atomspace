@@ -34,6 +34,7 @@ class WriteThruProxy : public ProxyNode
 {
 private:
 	ProxyNodeSeq _targets;
+	void init(void);
 
 public:
 	WriteThruProxy(const std::string&&);

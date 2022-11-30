@@ -27,7 +27,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/api/StorageNode.h>
+#include <opencog/persist/proxy/ProxyNode.h>
 
 namespace opencog
 {
@@ -119,7 +119,7 @@ protected:
 	static UnwrappedCommands default_uc;
 	UnwrappedCommands& _uc;
 
-	StorageNodePtr _proxy;
+	ProxyNodePtr _proxy;
 	Handle _truth_key;
 
 public:

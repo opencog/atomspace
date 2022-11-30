@@ -27,15 +27,26 @@ using namespace opencog;
 ReadThruProxy::ReadThruProxy(const std::string&& name)
 	: ProxyNode(READ_THRU_PROXY_NODE, std::move(name)), _round_robin(0)
 {
+	init();
 }
 
 ReadThruProxy::ReadThruProxy(Type t, const std::string&& name)
 	: ProxyNode(t, std::move(name)), _round_robin(0)
 {
+	init();
 }
 
 ReadThruProxy::~ReadThruProxy()
 {
+}
+
+void ReadThruProxy::init(void)
+{
+	have_loadType = true;
+	have_fetchIncomingByType = true;
+	have_fetchIncomingSet = true;
+	have_getAtom = true;
+	have_loadValue = true;
 }
 
 // Get our configuration from the DefineLink we live in.
