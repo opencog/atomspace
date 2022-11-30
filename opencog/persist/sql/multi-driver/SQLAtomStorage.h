@@ -67,6 +67,7 @@ class SQLAtomStorage : public StorageNode
 		// Utility for handling responses (on stack).
 		class Response;
 
+		bool _is_open;
 		bool _use_libpq;
 		bool _use_odbc;
 		int _server_version;
