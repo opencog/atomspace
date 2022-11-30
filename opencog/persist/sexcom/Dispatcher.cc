@@ -58,6 +58,8 @@ Dispatcher::Dispatcher(void)
 	MASH(space, "cog-atomspace)",         cog_atomspace);
 	MASH(clear, "cog-atomspace-clear)",   cog_atomspace_clear);
 	MASH(proxy, "cog-set-proxy!",         cog_set_proxy);
+	MASH(popen, "cog-proxy-open)",        cog_proxy_open);
+	MASH(pclos, "cog-proxy-close)",       cog_proxy_close);
 	MASH(cache, "cog-execute-cache!",     cog_execute_cache);
 
 	MASH(gtatm, "cog-get-atoms",          cog_get_atoms);

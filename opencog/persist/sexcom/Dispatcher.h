@@ -71,6 +71,8 @@ public:
 	///    cog-atomspace
 	///    cog-atomspace-clear
 	///    cog-set-proxy!
+	///    cog-proxy-open
+	///    cog-proxy-close
 	///    cog-execute-cache!
 	///
 	///    cog-get-atoms

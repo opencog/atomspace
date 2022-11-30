@@ -166,6 +166,32 @@ std::string Commands::cog_set_proxy(const std::string& cmd)
 }
 
 // -----------------------------------------------
+// (cog-proxy-open)
+std::string Commands::cog_proxy_open(const std::string& arg)
+{
+	if (_proxy)
+	{
+		_proxy->open();
+		if (_proxy->connected())
+			return "#t";
+		return "#f";
+	}
+	return "#f";
+}
+
+// -----------------------------------------------
+// (cog-proxy-close)
+std::string Commands::cog_proxy_close(const std::string& arg)
+{
+	if (_proxy)
+	{
+		_proxy->close();
+		return "#t";
+	}
+	return "#f";
+}
+
+// -----------------------------------------------
 // (cog-execute-cache! (GetLink ...) (Predicate "key") ...)
 // This is complicated, and subject to change...
 // XXX this should be nuked, and replaced by appropriate kind of proxy.

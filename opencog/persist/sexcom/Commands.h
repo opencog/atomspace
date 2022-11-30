@@ -134,6 +134,8 @@ public:
 	std::string cog_atomspace(const std::string&);
 	std::string cog_atomspace_clear(const std::string&);
 	std::string cog_set_proxy(const std::string&);
+	std::string cog_proxy_open(const std::string&);
+	std::string cog_proxy_close(const std::string&);
 
 	std::string cog_execute_cache(const std::string&);
 
