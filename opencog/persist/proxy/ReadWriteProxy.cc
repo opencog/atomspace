@@ -81,36 +81,50 @@ void ReadWriteProxy::close(void)
 	_reader = nullptr;
 }
 
+#define CHECK_OPEN if (nullptr == _reader) return;
+#define FINISH _reader->barrier();
+
 // -----------------------------
 // The readers
 
 void ReadWriteProxy::getAtom(const Handle& h)
 {
+	CHECK_OPEN
 	_reader->fetch_atom(h);
+	FINISH
 }
 
 void ReadWriteProxy::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
+	CHECK_OPEN
 	_reader->fetch_incoming_set(h, false, as);
+	_reader->barrier(as);
 }
 
 void ReadWriteProxy::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
+	CHECK_OPEN
 	_reader->fetch_incoming_by_type(h, t, as);
+	_reader->barrier(as);
 }
 
 void ReadWriteProxy::loadValue(const Handle& atom, const Handle& key)
 {
+	CHECK_OPEN
 	_reader->fetch_value(atom, key);
+	FINISH
 }
 
 void ReadWriteProxy::loadType(AtomSpace* as, Type t)
 {
+	CHECK_OPEN
 	_reader->fetch_all_atoms_of_type(t, as);
+	_reader->barrier(as);
 }
 
 void ReadWriteProxy::barrier(AtomSpace* as)
 {
+	CHECK_OPEN
 	_writer->barrier(as);
 	_reader->barrier(as);
 }
@@ -120,6 +134,7 @@ void ReadWriteProxy::barrier(AtomSpace* as)
 
 void ReadWriteProxy::storeAtom(const Handle& h, bool synchronous)
 {
+	CHECK_OPEN
 	_writer->store_atom(h);
 
 	if (not synchronous) return;
@@ -129,6 +144,7 @@ void ReadWriteProxy::storeAtom(const Handle& h, bool synchronous)
 
 void ReadWriteProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
 {
+	CHECK_OPEN
 	// XXX FIXME this is deeply fundamentally broken if there's more
 	// than one target; because StorageNode::remove_atom() is broken.
 	// See the comments in that code for additional guidance.
@@ -137,12 +153,14 @@ void ReadWriteProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
 
 void ReadWriteProxy::storeValue(const Handle& atom, const Handle& key)
 {
+	CHECK_OPEN
 	_writer->store_value(atom, key);
 }
 
 void ReadWriteProxy::updateValue(const Handle& atom, const Handle& key,
                             const ValuePtr& delta)
 {
+	CHECK_OPEN
 	_writer->update_value(atom, key, delta);
 }
 
