@@ -25,13 +25,13 @@
 using namespace opencog;
 
 ReadWriteProxy::ReadWriteProxy(const std::string&& name)
-	: ProxyNode(READ_WRITE_PROXY_NODE, std::move(name)), _round_robin(0)
+	: ProxyNode(READ_WRITE_PROXY_NODE, std::move(name))
 {
 	init();
 }
 
 ReadWriteProxy::ReadWriteProxy(Type t, const std::string&& name)
-	: ProxyNode(t, std::move(name)), _round_robin(0)
+	: ProxyNode(t, std::move(name))
 {
 	init();
 }
@@ -59,11 +59,9 @@ void ReadWriteProxy::init(void)
 // Get our configuration from the DefineLink we live in.
 void ReadWriteProxy::open(void)
 {
-	_round_robin = 0;
-
 	StorageNodeSeq rwpair = setup();
 
-	if (rwpair != 2)
+	if (rwpair.size() != 2)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting two StorageNodes: a reader and a writer!");
 
@@ -78,6 +76,9 @@ void ReadWriteProxy::close(void)
 {
 	_writer->close();
 	_reader->close();
+
+	_writer = nullptr;
+	_reader = nullptr;
 }
 
 // -----------------------------

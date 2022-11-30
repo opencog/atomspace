@@ -6,6 +6,7 @@ ADD_LIBRARY (persist-proxy
 	NullProxy.cc
 	ProxyNode.cc
 	ReadThruProxy.cc
+	ReadWriteProxy.cc
 	WriteThruProxy.cc
 )
 
@@ -32,6 +33,7 @@ INSTALL (FILES
 	NullProxy.h
 	ProxyNode.h
 	ReadThruProxy.h
+	ReadWriteProxy.h
 	WriteThruProxy.h
 	DESTINATION "include/opencog/persist/proxy"
 )

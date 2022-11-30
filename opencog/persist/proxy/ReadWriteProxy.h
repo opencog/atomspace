@@ -46,7 +46,7 @@ public:
 	// ----------------------------------------------------------------
 	virtual void open(void);
 	virtual void close(void);
-	virtual bool connected(void) { return  0 < _readers.size(); }
+	virtual bool connected(void) { return  _reader != nullptr; }
 
 protected:
 	// ----------------------------------------------------------------

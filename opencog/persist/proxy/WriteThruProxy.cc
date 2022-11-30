@@ -62,6 +62,9 @@ void WriteThruProxy::close(void)
 {
 	for (const StorageNodePtr& stnp : _targets)
 		stnp->close();
+
+	// Get rid of them for good. The `connected()` method needs this.
+	_targets.resize(0);
 }
 
 void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)

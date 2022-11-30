@@ -65,6 +65,9 @@ void ReadThruProxy::close(void)
 {
 	for (const StorageNodePtr& stnp :_readers)
 		stnp->close();
+
+	// Get rid of them for good. The `connected()` method needs this.
+	_readers.resize(0);
 }
 
 
