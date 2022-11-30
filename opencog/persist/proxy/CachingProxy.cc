@@ -75,37 +75,46 @@ void CachingProxy::close(void)
 void CachingProxy::getAtom(const Handle& h)
 {
 	CHECK_OPEN;
+	const Handle& ch = _atom_space->get_atom(h);
+	if (ch) return;
 
 	_reader->fetch_atom(h);
-	DOWN;
+	_reader->barrier();
 }
 
 void CachingProxy::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
 	CHECK_OPEN;
+	if (0 < h->getIncomingSetSize(as)) return;
+
 	_reader->fetch_incoming_set(h, false, as);
-	DOWN;
+	_reader->barrier(as);
 }
 
 void CachingProxy::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
 	CHECK_OPEN;
+	if (0 < h->getIncomingSetSizeByType(t, as)) return;
+
 	_reader->fetch_incoming_by_type(h, t, as);
-	DOWN;
+	_reader->barrier(as);
 }
 
 void CachingProxy::loadValue(const Handle& atom, const Handle& key)
 {
 	CHECK_OPEN;
+	if (nullptr != atom->getValue(key)) return;
+
 	_reader->fetch_value(atom, key);
-	DOWN;
+	_reader->barrier();
 }
 
+// We're just going to be unconditional, here.
 void CachingProxy::loadType(AtomSpace* as, Type t)
 {
 	CHECK_OPEN;
 	_reader->fetch_all_atoms_of_type(t, as);
-	DOWN;
+	_reader->barrier(as);
 }
 
 void CachingProxy::barrier(AtomSpace* as)
