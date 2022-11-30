@@ -33,7 +33,7 @@ namespace opencog
 class WriteThruProxy : public ProxyNode
 {
 private:
-	ProxyNodeSeq _targets;
+	StorageNodeSeq _targets;
 	void init(void);
 
 public:

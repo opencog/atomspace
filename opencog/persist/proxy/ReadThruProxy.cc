@@ -54,7 +54,7 @@ void ReadThruProxy::open(void)
 {
 	_round_robin = 0;
 
-	ProxyNodeSeq rdrs = setup();
+	StorageNodeSeq rdrs = setup();
 	_readers.swap(rdrs);
 
 	for (const StorageNodePtr& stnp :_readers)

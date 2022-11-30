@@ -64,9 +64,9 @@ std::string ProxyNode::monitor(void)
 }
 
 // Get our configuration from the DefineLink we live in.
-ProxyNodeSeq ProxyNode::setup(void)
+StorageNodeSeq ProxyNode::setup(void)
 {
-	ProxyNodeSeq stolist;
+	StorageNodeSeq stolist;
 
 	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
 
@@ -77,7 +77,7 @@ ProxyNodeSeq ProxyNode::setup(void)
 	Handle params = dli[0]->getOutgoingAtom(1);
 	if (params->is_type(STORAGE_NODE))
 	{
-		stolist.emplace_back(ProxyNodeCast(params));
+		stolist.emplace_back(StorageNodeCast(params));
 		return stolist;
 	}
 
@@ -89,7 +89,7 @@ ProxyNodeSeq ProxyNode::setup(void)
 
 	for (const Handle& h : params->getOutgoingSet())
 	{
-		ProxyNodePtr stnp = ProxyNodeCast(h);
+		StorageNodePtr stnp = StorageNodeCast(h);
 		if (nullptr == stnp)
 			throw SyntaxException(TRACE_INFO,
 				"Expecting a list of ProxyNodes! Got\n%s\n",

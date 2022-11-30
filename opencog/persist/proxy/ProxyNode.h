@@ -31,10 +31,6 @@ namespace opencog
  *  @{
  */
 
-class ProxyNode;
-NODE_PTR_DECL(ProxyNode)
-typedef std::vector<ProxyNodePtr> ProxyNodeSeq;
-
 class ProxyNode : public StorageNode
 {
 private:
@@ -45,7 +41,7 @@ public:
 	ProxyNode(Type t, const std::string&&);
 	virtual ~ProxyNode();
 
-	ProxyNodeSeq setup();
+	StorageNodeSeq setup();
 
 	// Flags. Avoid calling into the proxy, if these are absent.
 	bool have_getAtom;
@@ -83,7 +79,7 @@ protected:
 	virtual Handle getLink(Type, const HandleSeq&);
 };
 
-// NODE_PTR_DECL(ProxyNode)
+NODE_PTR_DECL(ProxyNode)
 #define createProxyNode CREATE_DECL(ProxyNode)
 
 /** @}*/
