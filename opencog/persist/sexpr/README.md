@@ -21,3 +21,6 @@ interpreter.
 Status & TODO
 -------------
 ***Version 1.0.2*** -- Everything works, has withstood the test of time.
+
+Except Frame support may be wobbly. Frames are new, and do not yet flow
+properly through the s-expression commands subsystem.

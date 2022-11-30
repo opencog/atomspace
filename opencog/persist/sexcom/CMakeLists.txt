@@ -9,6 +9,8 @@ ADD_DEPENDENCIES(sexcom opencog_atom_types)
 ADD_DEPENDENCIES(sexcom storage_types)
 
 TARGET_LINK_LIBRARIES(sexcom
+	storage-types
+	persist-proxy
 	persist
 	atomspace
 	execution
