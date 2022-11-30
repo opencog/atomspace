@@ -396,7 +396,7 @@ std::string Commands::cog_value(const std::string& cmd)
 
 	if (_uc.have_value_cb) _uc.value_cb(atom, key);
 
-	_proxy->fetch_value(atom, key);
+	_proxy->fetch_value(atom, key, as);
 	_proxy->barrier();
 
 	ValuePtr vp = atom->getValue(key);
