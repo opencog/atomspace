@@ -1,17 +1,5 @@
-S-Expression Command Dispatching
---------------------------------
-The CogServer provides a network API to send/receive Atoms over the
-internet. The actual API is that of the StorageNode (see the wiki page
-https://wiki.opencog.org/w/StorageNode for details.) The cogserver
-supports the full `StorageNode` API, and it uses the code in this
-directory in order to make it fast.
-
-To aid in performance, a very special set of about 15 scheme functions
-have been hard-coded in C++. These are implemented in `Commands.cc`
-The goal is to avoid the overhead of entry/exit into guile. This works
-because the cogserver is guaranteed to send only these commands, and no
-others. This is not a general scheme interpreter.
-
+Storage Proxies
+---------------
 Network-distributed AtomSpaces need to have proxy agents that know what
 to do with the data being passed around.  Besides just working with the
 attached AtomSpace, maybe something more needs to be done: maybe data
@@ -58,6 +46,7 @@ cog_update_value -> update_value =>> updateValue
 Misc:
 cog_define
 ```
+
 
 Status & TODO
 -------------

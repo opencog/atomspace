@@ -26,7 +26,7 @@
 #include <functional>
 #include <string>
 
-#include <opencog/persist/sexpr/Commands.h>
+#include <opencog/persist/sexcom/Commands.h>
 
 namespace opencog
 {

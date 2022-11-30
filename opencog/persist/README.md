@@ -65,6 +65,10 @@ Local subdirectories include:
               which works in conjunction with the CogServer to provide
               network-distributed AtomSpaces.
 
+* sexcom   -- Respond to a very special set of 17 s-expression commands.
+              These are used to provide high-speed network I/O for the
+              CogServer to provide network-distributed AtomSpaces.
+
 * sql      -- Postgres, for now. Works OK for most uses -- with caveats.
               Mostly, it's slow, running 3x slower than the RocksDB
               backend. It also fails to support some newer AtomSpace
