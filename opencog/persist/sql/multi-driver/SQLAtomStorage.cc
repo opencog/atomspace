@@ -252,6 +252,9 @@ void SQLAtomStorage::get_server_version(void)
 /// it at the first user, any user that is doing some other SQL stuff.
 void SQLAtomStorage::rethrow(void)
 {
+	if (0 == _initial_conn_pool_size)
+		throw IOException(TRACE_INFO, "DB %s is not open!", _name.c_str());
+
 	if (_async_write_queue_exception)
 	{
 		std::exception_ptr exptr = _async_write_queue_exception;
@@ -288,6 +291,13 @@ void SQLAtomStorage::flushStoreQueue()
 void SQLAtomStorage::barrier(AtomSpace* as)
 {
 	flushStoreQueue();
+}
+
+void SQLAtomStorage::close(void)
+{
+	barrier();
+	_write_queue.close();
+	close_conn_pool();
 }
 
 /* ================================================================ */

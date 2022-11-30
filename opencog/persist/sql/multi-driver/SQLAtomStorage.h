@@ -244,7 +244,7 @@ class SQLAtomStorage : public StorageNode
 		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
 		void open(void);
-		void close(void) { barrier(); /* FIXME we should do more */ }
+		void close(void);
 		void connect(void);
 		bool connected(void); // connection to DB is alive
 
