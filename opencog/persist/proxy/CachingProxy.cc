@@ -58,7 +58,7 @@ void CachingProxy::open(void)
 	StorageNodeSeq rdr = setup();
 	if (1 != rdr.size())
 		throw RuntimeException(TRACE_INFO,
-			"Excpecting exactly one StoraeNode");
+			"Excpecting exactly one StorageNode");
 
 	_reader = rdr[0];
 	_reader->open();
