@@ -33,10 +33,9 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/version.h>
-#include <opencog/persist/proxy/NullProxy.h>
+#include <opencog/persist/sexpr/Sexpr.h>
 
 #include "Commands.h"
-#include "Sexpr.h"
 
 using namespace opencog;
 
