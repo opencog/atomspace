@@ -57,13 +57,17 @@ public:
 	bool have_storeAtomSpace;
 
 	// ----------------------------------------------------------------
-	// Assorted gorp. Provide som stop-gap methods, for now.
-	// Probably needs fixing, later. XXX FIXME.
-	virtual void create(void) {}
+	// Virtual methods from the BackingStore API. These provide some default
+	// implementations. Some of these are stop-gap, and will need to be
+	// updated at some later date. XXX FIXME.
 
-	virtual void destroy(void);
-	virtual void erase(void);
+	virtual void create(void) {} // stop-gap. FIXME
+	virtual void destroy(void);  //stop-gap. FIXME
+	virtual void erase(void);    // stop-gap. FIXME
 
+	virtual void proxy_open(void);
+	virtual void proxy_close(void);
+	virtual void set_proxy(const Handle&);
 	virtual std::string monitor(void);
 
 protected:

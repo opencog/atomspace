@@ -55,12 +55,27 @@ void ProxyNode::init(void)
 	have_storeAtomSpace = false;
 }
 
-void ProxyNode::destroy(void) {}
-void ProxyNode::erase(void) {}
+void ProxyNode::proxy_open(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"If you want to open the proxy, just say `cog-open`");
+}
+
+void ProxyNode::proxy_close(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"If you want to close the proxy, just say `cog-close`");
+}
+
+void ProxyNode::set_proxy(const Handle&)
+{
+	throw RuntimeException(TRACE_INFO,
+		"Error: `cog-set-proxy!` is not appropriate, here.");
+}
 
 std::string ProxyNode::monitor(void)
 {
-	return "";
+	return "This proxy has not implemented monitoring.";
 }
 
 // Get our configuration from the DefineLink we live in.
@@ -100,6 +115,9 @@ StorageNodeSeq ProxyNode::setup(void)
 
 	return stolist;
 }
+
+void ProxyNode::destroy(void) {}
+void ProxyNode::erase(void) {}
 
 HandleSeq ProxyNode::loadFrameDAG(void)
 {
