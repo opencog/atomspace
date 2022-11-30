@@ -162,7 +162,9 @@ void CommandsUTest::test_set_tv()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(1, as->get_size());
+	// Two, because its the Concept, and the Predicate "TruthValueKey"
+	printf("AtomSpace is %s\n", as->to_string().c_str());
+	TS_ASSERT_EQUALS(2, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
