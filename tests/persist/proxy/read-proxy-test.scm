@@ -5,6 +5,7 @@
 (use-modules (opencog persist-sql))
 (use-modules (opencog exec))
 (use-modules (opencog test-runner))
+(use-modules (srfi srfi-64))
 
 ; ---------------------------------------------------------------------
 (opencog-test-runner)
