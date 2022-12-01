@@ -11,6 +11,34 @@
 ; around and passes it forward to the disk StorageNode. Once fetched
 ; from disk, it can then be returned by network to the requesting client.
 ;
+; Here's a visual example: the LG parser, sitting on top of a local
+; AtomSpace, wishes to read Atoms from a remote AtomSpace. The remote
+; AtomSpace is empty, because everything is sitting on disk. The
+; proxy agent, when properly configured, will fetch the desired Atoms
+; from the RocksDB and pass them up to LG.  BTW, this works today.
+; This demo shows how to configure this (but without LG in the picture).
+;
+;                                            +----------------+
+;                                            |  Link Grammar  |
+;                                            |    parser      |
+;                                            +----------------+
+;                                            |   AtomSpace    |
+;    +-------------+                         +----------------+
+;    |             |                         |                |
+;    |  CogServer  | <<==== Internet ====>>  | CogStorageNode |
+;    |             |                         |                |
+;    +-------------+                         +----------------+
+;    |  AtomSpace  |
+;    +-------------+
+;    |    Rocks    |
+;    | StorageNode |
+;    +-------------+
+;    |   RocksDB   |
+;    +-------------+
+;    | disk drive  |
+;    +-------------+
+;
+;
 ; Proxy agents currently include:
 ;
 ; * ReadThruProxy -- Passes on requests involving the reading of
