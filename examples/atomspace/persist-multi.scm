@@ -11,6 +11,10 @@
 ; to be installed. If you want to skip Postgres, then just try the
 ; demo with two different RocksDB stores.
 ;
+; The copying in this demo is manual, i.e. you will do it, by hand,
+; as that is the point of the demo. Copying, and more complex
+; operations, can be automated with proxy agents. See the
+; `persistence-proxy.scm` demo for an example.
 
 (use-modules (ice-9 readline))
 (activate-readline)
