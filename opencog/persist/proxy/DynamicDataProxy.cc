@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/value/FormulaStream.h>
 #include <opencog/atoms/value/FutureStream.h>
 #include <opencog/persist/proxy/DynamicDataProxy.h>
@@ -76,7 +77,8 @@ void DynamicDataProxy::loadValue(const Handle& atom, const Handle& key)
 	}
 
 	// Ah! Its a procedure! Make it executable!
-	Handle exo = _atom_space->add_link(EXECUTION_OUTPUT_LINK, rawvp,
+	Handle exo = _atom_space->add_link(EXECUTION_OUTPUT_LINK,
+		HandleCast(rawvp),
 		createLink(LIST_LINK, atom));
 
 	// Stick it in a future. Be careful with the type. Anything that
