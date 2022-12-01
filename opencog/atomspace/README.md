@@ -196,7 +196,7 @@ AV's or both.
 
 ------
 Conclusion: Design A3 seems like the best, for now. See the
-[DeepSpace README](README-DeepSpace.md) for a mor detailed discussion.
+[DeepSpace README](README-DeepSpace.md) for a more detailed discussion.
 
 
 -------------------------

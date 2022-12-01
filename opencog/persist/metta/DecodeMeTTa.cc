@@ -66,7 +66,7 @@ static Handle make_atom(const std::string& fexp, const HandleSeq&& args)
 	if (fexp == "not")
 		return createLink(std::move(args), BOOL_NOT_LINK);
 
-	// Else assume that this is some kind of function defintion.
+	// Else assume that this is some kind of function definition.
 	return createLink(EXECUTION_OUTPUT_LINK,
 		createNode(DEFINED_SCHEMA_NODE, fexp),
 		createLink(std::move(args), LIST_LINK));
@@ -181,7 +181,7 @@ static Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 	if (std::string::npos == l)
 		throw SyntaxException(TRACE_INFO, "Unexpected blank line");
 
-	// Perhaps the defintion is a simple variable name.
+	// Perhaps the definition is a simple variable name.
 	// For example: `(= foo 6)`
 	if ('(' != sexpr[l])
 	{
@@ -225,7 +225,7 @@ static Handle define_lambda(const std::string& sexpr, size_t& l, size_t &r)
 	// Now get the body.
 	Handle body = get_next(sexpr, l, r);
 
-	// Build the defintion
+	// Build the definition
 	Handle defun = 
 		createLink(DEFINE_LINK,
 			fname,

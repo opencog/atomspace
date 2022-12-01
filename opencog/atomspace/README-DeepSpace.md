@@ -25,7 +25,7 @@ altered: usually, the Values on Atoms are altered, but also sometimes
 new Atoms are added, and some Atoms are deleted.
 
 The URE might be able to use this ability, but currently, it appears
-that it has invented its own subsystem for doing somethig similar.
+that it has invented its own subsystem for doing something similar.
 
 A "change-set" is meant to convey the same idea as in git: a single,
 coherent set of changes to many Atoms, rather than some piecemeal,

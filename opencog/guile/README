@@ -358,7 +358,7 @@ interface.
       functions.
 
       It may be useful to remember that scheme indicates hexadecimal
-      numbers by preceeding them with #x, and so, for example,
+      numbers by preceding them with #x, and so, for example,
       (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
 
       Example:

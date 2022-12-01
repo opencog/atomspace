@@ -280,7 +280,7 @@ std::string JSCommands::interpret_command(AtomSpace* as,
 	}
 
 	// -----------------------------------------------
-	// A list vesion of above.
+	// A list version of above.
 	// AtomSpace.loadAtoms([{ "type": "ConceptNode", "name": "foo"},
 	//                      { "type": "ConceptNode", "name": "oofdah"}])
 	if (loada == act)

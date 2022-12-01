@@ -51,14 +51,14 @@ void CachingProxy::init(void)
 
 // Get our configuration from the ProxyParameterLink we live in.
 // XXX TODO Add support for expriation times, limited AtomSpace
-// size and whatever otehr whizzy caching ideas we might want.
+// size and whatever other whizzy caching ideas we might want.
 void CachingProxy::open(void)
 {
 	// Can't use this if there are more parameters...
 	StorageNodeSeq rdr = setup();
 	if (1 != rdr.size())
 		throw RuntimeException(TRACE_INFO,
-			"Excpecting exactly one StorageNode");
+			"Expecting exactly one StorageNode");
 
 	_reader = rdr[0];
 	_reader->open();

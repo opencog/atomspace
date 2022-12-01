@@ -17,7 +17,7 @@
   the currently open StorageNode is used.
 
   Whenever a pair is references, the MI for that pair is recomputed for
-  the count values on that pair.  Uses the conventional asymetric
+  the count values on that pair.  Uses the conventional asymmetric
   formula.
 "
 	; Check for valid strructure

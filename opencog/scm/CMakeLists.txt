@@ -26,7 +26,7 @@ ADD_GUILE_MODULE (FILES
 )
 
 # Each of the files below are distinct modules. They need to be
-# compiled seperately.
+# compiled separately.
 
 ADD_GUILE_MODULE (FILES
 	opencog/extension.scm

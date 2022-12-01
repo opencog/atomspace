@@ -47,7 +47,7 @@ WRITE_THRU_PROXY_NODE <- PROXY_NODE
 READ_WRITE_PROXY_NODE <- PROXY_NODE
 
 // Read-caching Proxy. Goes to Storage only if the requested item is
-// not in the local AtomSpace. Configureable to expire the data after
+// not in the local AtomSpace. Configurable to expire the data after
 // some time, or to limit the cache to a fixed size.
 CACHING_PROXY_NODE <- PROXY_NODE
 
