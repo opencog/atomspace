@@ -81,7 +81,7 @@ be effective.
 * `persistence.scm`    -- StorageNode API to an SQL database.
 * `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
-* `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
+* `persist-proxy.scm`  -- Work with proxy agents to access multiple dbs.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `frame.scm`          -- Using StateLink in overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
