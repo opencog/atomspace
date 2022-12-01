@@ -33,7 +33,6 @@ namespace opencog
 class DynamicDataProxy : public ProxyNode
 {
 private:
-
 	void init(void);
 
 public:
@@ -42,9 +41,9 @@ public:
 	virtual ~DynamicDataProxy();
 
 	// ----------------------------------------------------------------
-	virtual void open(void);
-	virtual void close(void);
-	virtual bool connected(void) { return _reader != nullptr; }
+	virtual void open(void) {}
+	virtual void close(void) {}
+	virtual bool connected(void) { return true; }
 
 protected:
 	// ----------------------------------------------------------------

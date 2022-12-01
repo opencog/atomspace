@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/value/FutureStream.h>
 #include <opencog/persist/proxy/DynamicDataProxy.h>
 
 using namespace opencog;
@@ -46,32 +48,50 @@ void DynamicDataProxy::init(void)
 	have_loadValue = true;
 }
 
-void DynamicDataProxy::open(void)
-{
-}
-
-void DynamicDataProxy::close(void)
-{
-	_reader->close();
-	_reader = nullptr;
-}
-
-#define CHECK_OPEN if (nullptr == _reader) return;
-
 void DynamicDataProxy::getAtom(const Handle& h)
 {
-	CHECK_OPEN;
+	const HandleSet& keys(getKeys());
 
-	_reader->fetch_atom(h);
-	_reader->barrier();
+	for (const Handle& k : keys)
+		loadValue(h, k);
 }
 
+// We use the Values on *this proxy node itself* as the source
+// for ProcedureNodes that will generate dynamic data. Basically,
+// we will look for a ProcedureNode on *this proxy*, with the given key.
+// If it is found, then wrap it in an ExecutionOutputLink, using
+// it as the procedure, and the argument Atom as a argument to the
+// procedure. The wrap the whole mess in a Future, so that any access
+// to the value results in an evaluation of the ExOutLink.
 void DynamicDataProxy::loadValue(const Handle& atom, const Handle& key)
 {
-	CHECK_OPEN;
-	if (nullptr != atom->getValue(key)) return;
+	const ValuePtr& rawvp = getValue(key);
+	if (nullptr == rawvp) return;
 
-	_reader->fetch_value(atom, key);
+	// Unlikely case: the data is not dynamic.
+	if (not rawvp->is_type(PROCEDURE_NODE))
+	{
+		_atom_space->set_value(atom, key, rawvp);
+		return;
+	}
+
+	// Ah! Its a procedure! Make it executable!
+	Handle exo = _atom_space->add_link(EXECUTION_OUTPUT_LINK, rawvp,
+		createLink(LIST_LINK, atom));
+
+	// Stick it in a future. Be careful with the type. Anything that
+	// is a NumericOutputLink will normally result in a FloatValue;
+	// thus a FormulaStream is appropriate. Everything else gets the
+	// plainer FutureStream.
+	if (rawvp->is_type(NUMERIC_OUTPUT_LINK))
+	{
+		ValuePtr fut = createFormulaStream(exo);
+		_atom_space->set_value(atom, key, fut);
+		return;
+	}
+
+	ValuePtr fut = createFutureStream(exo);
+	_atom_space->set_value(atom, key, fut);
 }
 
 DEFINE_NODE_FACTORY(DynamicDataProxy, DYNAMIC_DATA_PROXY_NODE)

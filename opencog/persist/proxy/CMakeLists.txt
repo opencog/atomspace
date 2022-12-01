@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (persist-proxy
 	CachingProxy.cc
+	DynamicDataProxy.cc
 	NullProxy.cc
 	ProxyNode.cc
 	ReadThruProxy.cc
@@ -32,6 +33,7 @@ INSTALL (TARGETS persist-proxy EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	CachingProxy.h
+	DynamicDataProxy.h
 	NullProxy.h
 	ProxyNode.h
 	ReadThruProxy.h

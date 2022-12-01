@@ -1013,7 +1013,7 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // to read by humans. They have no other fundamental usefulness...
 // They are meant to be wrappers for more complex Atomese that return
 // some TruthValue.
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE,PROCEDURE_NODE
 
 // SchemaNodes are similar to PredicateNodes, except they must
 // necessarily return Atoms when executed.
