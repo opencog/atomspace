@@ -89,6 +89,12 @@ void PersistSCM::init(void)
 	             &PersistSCM::sn_erase, "persist", false);
 	define_scheme_primitive("sn-barrier",
 	             &PersistSCM::sn_barrier, "persist", false);
+	define_scheme_primitive("sn-proxy-open",
+	             &PersistSCM::sn_proxy_open, "persist", false);
+	define_scheme_primitive("sn-proxy-close",
+	             &PersistSCM::sn_proxy_close, "persist", false);
+	define_scheme_primitive("sn-set-proxy",
+	             &PersistSCM::sn_set_proxy, "persist", false);
 	define_scheme_primitive("sn-monitor",
 	             &PersistSCM::sn_monitor, "persist", false);
 
@@ -130,6 +136,12 @@ void PersistSCM::init(void)
 	             &PersistSCM::dflt_erase, this, "persist", false);
 	define_scheme_primitive("dflt-barrier",
 	             &PersistSCM::dflt_barrier, this, "persist", false);
+	define_scheme_primitive("dflt-proxy-open",
+	             &PersistSCM::dflt_proxy_open, this, "persist", false);
+	define_scheme_primitive("dflt-proxy-close",
+	             &PersistSCM::dflt_proxy_close, this, "persist", false);
+	define_scheme_primitive("dflt-set-proxy",
+	             &PersistSCM::dflt_set_proxy, this, "persist", false);
 	define_scheme_primitive("dflt-monitor",
 	             &PersistSCM::dflt_monitor, this, "persist", false);
 }
@@ -331,6 +343,24 @@ void PersistSCM::sn_erase(Handle hsn)
 	stnp->erase();
 }
 
+void PersistSCM::sn_proxy_open(Handle hsn)
+{
+	GET_STNP;
+	stnp->proxy_open();
+}
+
+void PersistSCM::sn_proxy_close(Handle hsn)
+{
+	GET_STNP;
+	stnp->proxy_close();
+}
+
+void PersistSCM::sn_set_proxy(Handle h, Handle hsn)
+{
+	GET_STNP;
+	stnp->set_proxy(h);
+}
+
 std::string PersistSCM::sn_monitor(Handle hsn)
 {
 	GET_STNP;
@@ -474,6 +504,24 @@ void PersistSCM::dflt_erase(void)
 {
 	CHECK;
 	_sn->erase();
+}
+
+void PersistSCM::dflt_proxy_open(void)
+{
+	CHECK;
+	_sn->proxy_open();
+}
+
+void PersistSCM::dflt_proxy_close(void)
+{
+	CHECK;
+	_sn->proxy_close();
+}
+
+void PersistSCM::dflt_set_proxy(Handle h)
+{
+	CHECK;
+	_sn->set_proxy(h);
 }
 
 std::string PersistSCM::dflt_monitor(void)

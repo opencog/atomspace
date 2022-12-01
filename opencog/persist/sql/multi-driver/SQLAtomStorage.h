@@ -67,6 +67,7 @@ class SQLAtomStorage : public StorageNode
 		// Utility for handling responses (on stack).
 		class Response;
 
+		bool _is_open;
 		bool _use_libpq;
 		bool _use_odbc;
 		int _server_version;
@@ -244,7 +245,7 @@ class SQLAtomStorage : public StorageNode
 		SQLAtomStorage(std::string uri);
 		virtual ~SQLAtomStorage();
 		void open(void);
-		void close(void) { barrier(); /* FIXME we should do more */ }
+		void close(void);
 		void connect(void);
 		bool connected(void); // connection to DB is alive
 

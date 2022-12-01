@@ -7,6 +7,7 @@ ADD_LIBRARY (load_scm
 )
 
 TARGET_LINK_LIBRARIES(load_scm
+	sexcom
 	sexpr
 )
 
@@ -30,6 +31,7 @@ TARGET_LINK_LIBRARIES(persist-file
 	persist
 	storage-types
 	load_scm
+	sexcom
 	sexpr
 	atomspace
 	smob

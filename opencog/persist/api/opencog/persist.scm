@@ -16,6 +16,10 @@
 (load-extension (string-append opencog-ext-path-persist-flow "libpersist-flow")
 	"opencog_persist_flow_init")
 
+; And another one, for force the shlib ctor to run.
+(load-extension (string-append opencog-ext-path-persist-proxy "libpersist-proxy")
+	"opencog_persist_proxy_init")
+
 (include-from-path "opencog/persist/types/storage_types.scm")
 
 ; This avoids complaints, when the docs are set, below.
@@ -301,16 +305,107 @@
 	(if STORAGE (sn-erase STORAGE) (dflt-erase))
 )
 
+(define*-public (cog-proxy-open #:optional (STORAGE #f))
+"
+ cog-proxy-open [STORAGE] - Start proxying at the remote end.
+
+    Pass a `cog-open` request to a proxy at the remote end of a network
+    connection. This works only for StorageNodes that have a remote end;
+    that is, for StorageNodes that can connect to other AtomSpaces.
+    Examples of these include CogStorageNode and CogSimpleStorageNode,
+    which can exchange Atoms and Values with a remote AtomSpace.
+
+    Proxies are StorageNodes that support the StorageNode API, and then
+    satisfy API requests by passing them on to other StorageNodes. For
+    example, the ReadThruProxy passes on all API Atom and Value fetch
+    requests to other StorageNodes.
+
+    A typical setup is to have a CogServer pass on network I/O to a
+    disk-based StorageNode (e.g. the RocksStorageNode.) The users of
+    the CogServer (i.e. the users of a CogStorageNode) must first tell
+    the remote end to open the proxy, before this pass-thru can happen.
+
+    Since ProxyNodes are just like ordinary StorageNodes, they must be
+    opened before they can be used. Since they are in a remote AtomSpace,
+    there is no way to access them directly; the `cog-proxy-open` command
+    will perform that open.
+
+    If the optional STORAGE argument is provided, then the open will
+    be applied to it. It must be a StorageNode that supports proxying.
+
+    Example:
+       (define rsn (RocksStorageNode \"rocks:///tmp/foo.rdb\"))
+       (define pxy (WriteThruProxy \"any name will do\"))
+       (define pms (ProxyParameters pxy (List rsn)))
+
+       (define csn (CogStorageNode \"cog://example.com:17001\"))
+       (cog-open csn)
+       (cog-set-proxy! pms)
+       (cog-proxy-open)
+       (store-atom (Concept \"foo\"))
+
+    The above example will cause the Atom `(Concept \"foo\"))` to be
+    sent to the CogServer at `example.com`, which will then write it
+    into the RocksDB database.  Note that proxies allow arbitrarily
+    complex dataflow networks to be defined.
+
+    See also:
+       `cog-proxy-close` to halt proxying.
+       `cog-set-proxy!` to declare the remote proxy.
+"
+	(if STORAGE (sn-proxy-open STORAGE) (dflt-proxy-open))
+)
+
+(define*-public (cog-proxy-close #:optional (STORAGE #f))
+"
+ cog-proxy-close [STORAGE] - Stop proxying at the remote end.
+
+    Pass a `cog-close` request to a remote proxy. This stops proxying
+    previously started with the `cog-proxy-open` command.
+
+    See also:
+       `cog-proxy-open` to start proxying.
+       `cog-set-proxy!` to declare the remote proxy.
+"
+	(if STORAGE (sn-proxy-close STORAGE) (dflt-proxy-close))
+)
+
+(define*-public (cog-set-proxy! PROXY #:optional (STORAGE #f))
+"
+ cog-set-proxy! PROXY [STORAGE] - Declare a proxy to the remote end.
+
+    Declare a ProxyNode to the remote end of a network connection.
+
+    ProxyNodes are StorageNodes that support the StorageNode API, and
+    then satisfy API requests by passing them on to other StorageNodes.
+    For example, the ReadThruProxy passes on all API Atom and Value
+    fetch requests to other StorageNodes.
+
+    Since ProxyNodes are just like ordinary StorageNodes, they must be
+    opened before they can be used. Since they are in a remote AtomSpace,
+    there is no way to access them directly; the `cog-proxy-open` command
+    will perform that open.
+
+    See also:
+       `cog-proxy-open` to start proxying.
+       `cog-proxy-close` to stope proxying.
+"
+	(if STORAGE (sn-set-proxy PROXY STORAGE) (dflt-set-proxy PROXY))
+)
+
 (define*-public (monitor-storage #:optional (STORAGE #f))
 "
  monitor-storage [STORAGE]
 
     Return a string containing storage performance monitoring and
     debugging information. To display the string in a properly
-    formatted fashion, say `(display (monitor-storeage))`.
+    formatted fashion, say `(display (monitor-storage))`.
 
     If the optional STORAGE argument is provided, then the statistics
     will be printed for that Node. It must be a StorageNode.
+
+    Note that some StorageNodes might do significant computations
+    before returning a report, and thus may appear to hang. Patience!
 
     See also:
        `cog-open` to open a connection.

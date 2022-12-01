@@ -25,6 +25,42 @@ COG_STORAGE_NODE <- STORAGE_NODE
 // are currently deeply, fundamentally broken. Whoops!
 
 // ------------------------------------------------------------------
+// Base type for the various proxies
+PROXY_NODE <- STORAGE_NODE
+
+// Pass all requests on to the underlying AtomSpace.
+NULL_PROXY_NODE <- PROXY_NODE
+
+// Mirroring Proxy, selects one StorageNode target randomly out of the
+// set that it's given, and reads from that. Does NOT pass on writes.
+READ_THRU_PROXY_NODE <- PROXY_NODE
+
+// Read through a sequence of StorageNodes, stop when the first one
+// finds a result.
+SEQUENTIAL_READ_PROXY_NODE <- PROXY_NODE
+
+// Mirroring Proxy, write thru to *all* StorageNodes. Does NOT pass on
+// reads.
+WRITE_THRU_PROXY_NODE <- PROXY_NODE
+
+// Combo of ReadtThru and WriteThru
+READ_WRITE_PROXY_NODE <- PROXY_NODE
+
+// Read-caching Proxy. Goes to Storage only if the requested item is
+// not in the local AtomSpace. Configurable to expire the data after
+// some time, or to limit the cache to a fixed size.
+CACHING_PROXY_NODE <- PROXY_NODE
+
+// Supplies Values on-demand from the provided ProcedureNodes.
+// Given an (Atom,Key) pair, it computes the appropriate Value on the fly.
+DYNAMIC_DATA_PROXY_NODE <- PROXY_NODE
+
+// Decorate the Proxies with additional parameters.
+// We use the UniqueLink because the DefineLink constructor does
+// checks for DefinedSchema and what-not, which wrecks us.
+PROXY_PARAMETERS_LINK <- UNIQUE_LINK
+
+// ------------------------------------------------------------------
 // Fetch and store Values from Storage.
 // Marked "NUMERIC" only because having a FetchFloatValueOfLink seems
 // like overkill.

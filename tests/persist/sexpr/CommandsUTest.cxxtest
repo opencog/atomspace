@@ -29,7 +29,7 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 
-#include "opencog/persist/sexpr/Dispatcher.h"
+#include "opencog/persist/sexcom/Dispatcher.h"
 
 using namespace opencog;
 
@@ -74,6 +74,7 @@ void CommandsUTest::test_node()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
+	printf("AtomSpace is %s\n", as->to_string().c_str());
 	TS_ASSERT_EQUALS(0, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
 
@@ -161,7 +162,9 @@ void CommandsUTest::test_set_tv()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(1, as->get_size());
+	// Two, because its the Concept, and the Predicate "TruthValueKey"
+	printf("AtomSpace is %s\n", as->to_string().c_str());
+	TS_ASSERT_EQUALS(2, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
@@ -335,8 +338,8 @@ void CommandsUTest::test_set_values()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(5, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT_EQUALS(5, as->get_size());
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);

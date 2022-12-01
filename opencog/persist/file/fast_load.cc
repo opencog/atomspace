@@ -29,7 +29,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sexpr/Dispatcher.h>
+#include <opencog/persist/sexcom/Dispatcher.h>
 #include <opencog/persist/sexpr/Sexpr.h>
 
 #include "fast_load.h"

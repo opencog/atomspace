@@ -26,7 +26,7 @@
 #include <functional>
 #include <string>
 
-#include <opencog/persist/sexpr/Commands.h>
+#include <opencog/persist/sexcom/Commands.h>
 
 namespace opencog
 {
@@ -68,10 +68,13 @@ public:
 	/// performance than what is possible through the guile interfaces.
 	///
 	/// The supported commands are:
+	///    cog-atomspace
 	///    cog-atomspace-clear
+	///    cog-set-proxy!
+	///    cog-proxy-open
+	///    cog-proxy-close
 	///    cog-execute-cache!
-	///    cog-extract!
-	///    cog-extract-recursive!
+	///
 	///    cog-get-atoms
 	///    cog-incoming-by-type
 	///    cog-incoming-set
@@ -79,11 +82,16 @@ public:
 	///    cog-link
 	///    cog-node
 	///    cog-value
+	///
+	///    cog-extract!
+	///    cog-extract-recursive!
 	///    cog-set-value!
 	///    cog-set-values!
 	///    cog-set-tv!
 	///    cog-update-value!
+	///
 	///    ping
+	///    cog-version
 	///
 	/// They MUST appear only once in the string, at the very beginning,
 	/// and they MUST be followed by valid Atomese s-expressions, and

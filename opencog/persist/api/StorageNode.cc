@@ -42,6 +42,24 @@ StorageNode::~StorageNode()
 {
 }
 
+void StorageNode::proxy_open(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::proxy_close(void)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
+void StorageNode::set_proxy(const Handle&)
+{
+	throw RuntimeException(TRACE_INFO,
+		"This StorageNode does not implement proxying!");
+}
+
 std::string StorageNode::monitor(void)
 {
 	return "This StorageNode does not implement a monitor.";
@@ -108,6 +126,9 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	if (not _atom_space->get_read_only())
 		removeAtom(as, h, recursive);
 
+	// XXX FIXME This is breaks the WriteThruProxy when there are two
+	// or more targets: after the first target runs, the Atom will be
+	// gone and the second target will fail badly. For now, punt.
 	return as->extract_atom(h, recursive);
 }
 

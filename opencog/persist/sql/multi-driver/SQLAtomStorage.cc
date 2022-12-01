@@ -74,6 +74,7 @@ SQLAtomStorage::SQLAtomStorage(const std::string uri) :
 	_initial_conn_pool_size = 0;
 	_use_libpq = false;
 	_use_odbc = false;
+	_is_open = false;
 
 	type_map_was_loaded = false;
 	for (int i=0; i< TYPEMAP_SZ; i++)
@@ -87,6 +88,7 @@ SQLAtomStorage::SQLAtomStorage(const std::string uri) :
 
 SQLAtomStorage::~SQLAtomStorage()
 {
+	_is_open = true;  // hack around shutdown tests.
 	close_conn_pool();
 
 	for (int i=0; i<TYPEMAP_SZ; i++)
@@ -153,6 +155,8 @@ void SQLAtomStorage::connect(const char * uri)
 
 	if (0 == _initial_conn_pool_size)
 		enlarge_conn_pool(NUM_WB_QUEUES + 2, uri);
+
+	_is_open = true;
 
 	if (!connected()) return;
 
@@ -223,6 +227,7 @@ void SQLAtomStorage::open(void)
  */
 bool SQLAtomStorage::connected(void)
 {
+	if (0 == _is_open) return false;
 	if (0 == _initial_conn_pool_size) return false;
 
 	// This will leak a resource, if db_conn->connected() ever throws.
@@ -252,6 +257,9 @@ void SQLAtomStorage::get_server_version(void)
 /// it at the first user, any user that is doing some other SQL stuff.
 void SQLAtomStorage::rethrow(void)
 {
+	if (0 == _is_open)
+		throw IOException(TRACE_INFO, "DB %s is not open!", _name.c_str());
+
 	if (_async_write_queue_exception)
 	{
 		std::exception_ptr exptr = _async_write_queue_exception;
@@ -288,6 +296,16 @@ void SQLAtomStorage::flushStoreQueue()
 void SQLAtomStorage::barrier(AtomSpace* as)
 {
 	flushStoreQueue();
+}
+
+void SQLAtomStorage::close(void)
+{
+	if (not _is_open) return;
+
+	barrier();
+	_write_queue.close();
+	close_conn_pool();
+	_is_open = false;
 }
 
 /* ================================================================ */

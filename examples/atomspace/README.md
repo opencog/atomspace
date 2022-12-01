@@ -81,7 +81,7 @@ be effective.
 * `persistence.scm`    -- StorageNode API to an SQL database.
 * `persist-query.scm`  -- Fetching sets of Atoms with queries.
 * `persist-multi.scm`  -- Work with multiple databases/servers at once.
-* `distributed.scm`    -- Distributed AtomSpace on multiple network nodes.
+* `persist-proxy.scm`  -- Work with proxy agents to access multiple dbs.
 * `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
 * `frame.scm`          -- Using StateLink in overlays.
 * `gperf.scm`          -- Some very crude performance measurements.
@@ -212,33 +212,46 @@ everything else depends on.
 ```
 
 There are other modules provided in other projects and repos. Here is
-a reasonably up-to-date list of modules provided by OpenCog:
+a list of some of the key, important (supported and active) modules
+in other git repos:
+```
+(use-modules (opencog cogserver))
+(use-modules (opencog learn))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
+```
+
+A list of important modules that are taking a break, waiting to spring
+into action for when they are next needed:
 ```
 (use-modules (opencog agi-bio))
 (use-modules (opencog asmoses))
+(use-modules (opencog bioscience))
+(use-modules (opencog cheminformatics))
+(use-modules (opencog generate))
+(use-modules (opencog pln))
+(use-modules (opencog ure))
+(use-modules (opencog vision))
+```
+
+These modules are more or less obsolete and are no longer being
+maintained. It seems unlikely that they will ever be maintained
+again.
+```
 (use-modules (opencog attention))
 (use-modules (opencog attention-bank))
-(use-modules (opencog bioscience))
-(use-modules (opencog cogserver))
-(use-modules (opencog generate))
 (use-modules (opencog ghost))
-(use-modules (opencog learn))
 (use-modules (opencog miner))
-(use-modules (opencog nlp))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 (use-modules (opencog nlp fuzzy))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp lg-export))
 (use-modules (opencog nlp microplanning))
 (use-modules (opencog nlp relex2logic))
 (use-modules (opencog nlp sureal))
 (use-modules (opencog octomap))
 (use-modules (opencog openpsi))
 (use-modules (opencog reduct))
-(use-modules (opencog pln))
 (use-modules (opencog spacetime))
-(use-modules (opencog ure))
-(use-modules (opencog vision))
 ```

@@ -29,7 +29,7 @@
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
 
-#include "opencog/persist/sexpr/Dispatcher.h"
+#include "opencog/persist/sexcom/Dispatcher.h"
 
 using namespace opencog;
 
