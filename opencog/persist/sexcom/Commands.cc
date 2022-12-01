@@ -137,6 +137,9 @@ std::string Commands::cog_atomspace_clear(const std::string& arg)
 // (cog-set-proxy! (ProxyParameters (ProxyNode "foo") ...))
 std::string Commands::cog_set_proxy(const std::string& cmd)
 {
+	// If there already is one, do nothing.
+	if (_proxy) return "#f";
+
 	size_t pos = 0;
 	Handle h = Sexpr::decode_atom(cmd, pos, _uc._space_map);
 
@@ -169,13 +172,11 @@ std::string Commands::cog_set_proxy(const std::string& cmd)
 // (cog-proxy-open)
 std::string Commands::cog_proxy_open(const std::string& arg)
 {
-	if (_proxy)
-	{
-		_proxy->open();
-		if (_proxy->connected())
-			return "#t";
-		return "#f";
-	}
+	if (nullptr == _proxy) return "#f";
+
+	_proxy->open();
+	if (_proxy->connected())
+		return "#t";
 	return "#f";
 }
 
@@ -183,12 +184,12 @@ std::string Commands::cog_proxy_open(const std::string& arg)
 // (cog-proxy-close)
 std::string Commands::cog_proxy_close(const std::string& arg)
 {
-	if (_proxy)
-	{
-		_proxy->close();
-		return "#t";
-	}
-	return "#f";
+	if (nullptr == _proxy) return "#f";
+
+	_proxy->close();
+	_proxy = nullptr;
+
+	return "#t";
 }
 
 // -----------------------------------------------

@@ -120,7 +120,7 @@ scheme@(guile-user)>
 (use-modules (opencog cogserver))
 (start-cogserver)
 
-; That's it. Now, from a different terminal, start the client again.
+; That's it. Exit and restart the client again.
 
 $ guile
 scheme@(guile-user)>
