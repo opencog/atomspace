@@ -68,23 +68,26 @@
 ; (1) Persistence-to-disk. This is best achieved by using the RocksDB
 ;     module. Its really quite fast, and reasonably compact. It saves
 ;     the AtomSpace to a file, and you can use ordinary file-management
-;     tools to copy distributed and backup RocksDB AtmSpaces. See
+;     tools to copy distributed and backup RocksDB AtomSpaces. See
 ;     https://github.com/opencog/atomspace-rocks and the examples there.
 ;
 ; (2) Network communications. The best current system for this is the
-;     cogserver-based client/server system. A single cogserver can scale
+;     CogServer-based client/server system. A single CogServer can scale
 ;     to approximately a dozen clients, all sharing data via the common
-;     cogserver. This is a single hub-n-spoke model; by running many
-;     hubs (many cogservers) one can have a crude distributed AtomSpace
-;     system. Of course, two cogservers can talk to one-another in a
+;     CogServer. This is a single hub-n-spoke model; by running many
+;     hubs (many CogServers) one can have a crude distributed AtomSpace
+;     system. Of course, two CogServers can talk to one-another in a
 ;     peer-to-peer fashion. See the repo at
 ;     https://github.com/opencog/atomspace-cog and the examples there.
 ;
-; (3) Coordination of distributed work. That is, if multiple agents
-;     are performing multiple kinds of processing at various nodes,
-;     how should they coordinate, given points (1) and (2) above?
-;     This is an area of active research, and no pat answers are
-;     currently available.
+; (3) Proxying and coordination of distributed work. Consider a
+;     CogServer sitting on top of RocksDB. When a client goes to fetch
+;     an Atom from the CogServer (that is, from the AtomSpace inside
+;     the CogServer), it can happen that it's not there because its
+;     still on disk, and hasn't been loaded yet. The ProxyNodes solve
+;     this problem: they're configurable agents that can pass requests
+;     on to others. They can be configured in arbitrarily complicated
+;     ways, to pipe AtomSpace data around between various locations.
 ;
 ; ----------------------------------------
 ; This Demo.
@@ -98,7 +101,7 @@
 ; the database, the unit tests will fail! Caveat Emptor!
 ;
 ; This demo can also run, almost unchanged, with the RocksDB backend,
-; or the cogserver backend. Some hints below on how to proceed.
+; or the CogServer backend. Some hints below on how to proceed.
 ;
 
 (use-modules (ice-9 readline))
@@ -116,7 +119,7 @@
 ; For RocksDB, the rocks module. (Won't work, if not installed!)
 (use-modules (opencog persist-rocks))
 
-; For the cogserver... (this is also an external component)
+; For the CogServer... (this is also an external component)
 (use-modules (opencog persist-cog))
 
 ; For postgres, use the test database credentials. These are the
@@ -128,7 +131,7 @@
 ; The RocksDB requires no configuration. Just use it.
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
 
-; The cogserver requires no configuration. Just use it.
+; The CogServer requires no configuration. Just use it.
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Lets use postgres, for now.
