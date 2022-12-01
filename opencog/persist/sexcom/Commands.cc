@@ -53,7 +53,7 @@ using namespace opencog;
 /// is guaranteed to send only these commands, and no others.
 //
 
-Commands::Commands(void) {}
+Commands::Commands(void) : _multi_space(false) {}
 Commands::~Commands() {}
 
 /// Search for optional AtomSpace argument in `cmd` at `pos`.
@@ -64,14 +64,16 @@ Commands::get_opt_as(const std::string& cmd, size_t& pos)
 	if (not _multi_space) return _base_space.get();
 
 	pos = cmd.find_first_not_of(" \n\t", pos);
-	if (0 == cmd.compare(pos, 10, "(AtomSpace"))
-	{
-		_multi_space = true;
-		Handle hasp = Sexpr::decode_frame(
-			HandleCast(_top_space), cmd, pos, _space_map);
-		return (AtomSpace*) hasp.get();
-	}
-	return _base_space.get();
+
+	// If no optional AtomSpace, just return the base.
+	if (cmd.compare(pos, 10, "(AtomSpace"))
+		return _base_space.get();
+
+	// Ah! Optional AtomSpace! Try to handle it!
+	_multi_space = true;
+	Handle hasp = Sexpr::decode_frame(
+		HandleCast(_top_space), cmd, pos, _space_map);
+	return (AtomSpace*) hasp.get();
 }
 
 // ==================================================================

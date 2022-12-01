@@ -338,8 +338,8 @@ void CommandsUTest::test_set_values()
 	std::string out = com.interpret_command(in);
 	printf("Got %s\n", out.c_str());
 
-	TS_ASSERT_EQUALS(5, as->get_size());
 	TS_ASSERT(0 == out.compare("()"));
+	TS_ASSERT_EQUALS(5, as->get_size());
 
 	Handle h = as->get_node(CONCEPT_NODE, "a");
 	TS_ASSERT(nullptr != h);
