@@ -6,6 +6,51 @@ attached AtomSpace, maybe something more needs to be done: maybe data
 needs to be written to or read from disk. The StorageNode Proxy determines
 what is to be done.
 
+Example
+--------
+In the standard mode, when a network connection is made to the
+CogServer, the user at the far end of the network connection is working
+with the AtomSpace that this CogServer holds. It is reasonable to want
+to have the CogServer attached to storage (say, disk storage), so that
+when an Atom is received, it is also written to disk.  This general
+idea is called "proxying", and "proxy agents" are responsible to doing
+whatever needs to be done, when a read or write request for an Atom is
+received by the CogServer. The proxy agent passes on those requests to
+other StorageNodes.
+
+The diagram below shows a typical usage scenario. In this example,
+the Link Grammar parser is reading from the local AtomSpace to which
+it is attached. That AtomSpace uses a CogStorageNode to get access
+to the "actual data", residing on the CogServer. However, the CogServer
+itself doesn't "have the data"; its actually on disk (in the
+RocksStorageNode) Thus, any read requests made by the the LG parser
+have to be proxied by the CogServer to the disk storage (using a
+read-thru proxy.)
+```
+                                            +----------------+
+                                            |  Link Grammar  |
+                                            |    parser      |
+                                            +----------------+
+                                            |   AtomSpace    |
+    +-------------+                         +----------------+
+    |             |                         |                |
+    |  CogServer  | <<==== Internet ====>>  | CogStorageNode |
+    |             |                         |                |
+    +-------------+                         +----------------+
+    |  AtomSpace  |
+    +-------------+
+    |    Rocks    |
+    | StorageNode |
+    +-------------+
+    |   RocksDB   |
+    +-------------+
+    | disk drive  |
+    +-------------+
+```
+
+See the [proxy example](../../../examples/atomsppace/persist-proxy,scm)
+in the examples directory for a working example.
+
 String to Callback Map
 ----------------------
 Below is a short table summarizing the mapping of network strings to
@@ -50,8 +95,7 @@ cog_define
 
 Status & TODO
 -------------
-***Version 1.0.2*** -- Everything works, has withstood the test of time.
-***Version 1.1.0*** -- Under reconstruction due to Proxy redesign.
+***Version 0.9.0*** -- Seems to work. Has not been stressed.
 
 However -- multi-atomspace (frame) support is missing. Some basic work
 in this direction has been done, but it is not been completed.  The
