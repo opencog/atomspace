@@ -493,7 +493,7 @@ void GetLinkUTest::test_embed_vardels(void)
 
 #define REVERSE 1
 #if REVERSE
-	// Oh dear ... the embeded declarations end up unordered, which
+	// Oh dear ... the embedded declarations end up unordered, which
 	// hoses the Getlink we are testing. Whatever, hack around this.
 	hans = eval->eval_h(
 		"(SetLink "

@@ -658,7 +658,7 @@ public:
 // The old design leaked memory in this scenario, so it was bad. The new
 // design (using std::shared_ptr) no longer leaks, and so this can work.
 //
-// Its still a somwhat questionable design, as the only way to access such
+// Its still a somewhat questionable design, as the only way to access such
 // anonymous nodes is by knowning their Handle or uuid.  Should we support this?
 
         // test adding a node with no name or truth value

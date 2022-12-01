@@ -206,7 +206,7 @@ void ScopeUTest::test_pushpop()
 
 /*
  * Test search of embedded scope links.
- * The search pattern inculdes QuoteLinks that have to be navigated
+ * The search pattern includes QuoteLinks that have to be navigated
  * correctly, in order for things to work.
  */
 void ScopeUTest::test_quote()

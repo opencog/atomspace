@@ -13,7 +13,7 @@
 	)
 )
 
-; The pattern below can confuse the search start, becuase
+; The pattern below can confuse the search start, because
 ; the first constant link in the clause is the quote ... 
 ; and that's won't provide the desired start ...
 (define bindy

@@ -164,7 +164,7 @@ void LargeFlatUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 		{
 			printf("Mismatching la = %s\n", la->to_string().c_str());
 			printf("Mismatching lb = %s\n", lb->to_string().c_str());
-			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
+			TSM_ASSERT_EQUALS("Link mismatch", la, lb);
 		}
 	}
 

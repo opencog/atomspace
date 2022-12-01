@@ -148,7 +148,7 @@ void LargeZipfTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 		{
 			printf("Mismatching la = %s\n", a->to_string().c_str());
 			printf("Mismatching lb = %s\n", b->to_string().c_str());
-			TSM_ASSERT_EQUALS("Link mis-match", a, b);
+			TSM_ASSERT_EQUALS("Link mismatch", a, b);
 		}
 	}
 

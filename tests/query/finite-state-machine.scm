@@ -12,15 +12,15 @@
 	(ConceptNode "red")
 )
 
-;; The inital state of the FSM
+;; The initial state of the FSM
 (ListLink
 	(AnchorNode "Current State")
 	(ConceptNode "initial state")
 )
 
-;; The set of allowed state transistions.  Its a triangular cycle,
+;; The set of allowed state transitions.  Its a triangular cycle,
 ;; of green goint to yellow going to red going back to green.
-;; The intial state transitions into green (and is never visted again).
+;; The initial state transitions into green (and is never visited again).
 (ListLink
 	(ConceptNode "initial state")
 	(ConceptNode "green")
@@ -74,7 +74,7 @@
 			)
 		)
 		(AndLink
-			;; ... then transistion to the next state ...
+			;; ... then transition to the next state ...
 			(ListLink
 				(AnchorNode "Current State")
 				(VariableNode "$next-state")

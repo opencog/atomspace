@@ -74,7 +74,7 @@ void MultiThreadUTest::tearDown(void)
 }
 
 /*
- * Test multiple threads, all performing intialization at the same
+ * Test multiple threads, all performing initialization at the same
  * time.  Initialization should happen once, and there should be no
  * corruption.
  */

@@ -40,7 +40,7 @@
 				(SB (Variable "$carboxyC1") (Variable "carboxy moiety"))
 
 				; Globs match one or more bonds.  To match zero,
-				; change the lower bound by declaring it lik this:
+				; change the lower bound by declaring it like this:
 				; (TypedVariable (Glob "rest of carboxy")
 				;     (Interval (Number 0) (Number -1)))
 				(Glob "rest of carboxy")
@@ -111,7 +111,7 @@
 				(SB (Variable "$carboxyC1") (Variable "carboxy moiety"))
 
 				; Globs match one or more bonds.  To match zero,
-				; change the lower bound by declaring it lik this:
+				; change the lower bound by declaring it like this:
 				; (TypedVariable (Glob "rest of carboxy")
 				;     (Interval (Number 0) (Number -1)))
 				(Glob "rest of carboxy")

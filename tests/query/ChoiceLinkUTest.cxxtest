@@ -101,7 +101,7 @@ void ChoiceLinkUTest::test_basic_or(void)
 }
 
 /*
- * ChoiceLink embeded unit test.
+ * ChoiceLink embedded unit test.
  */
 void ChoiceLinkUTest::test_embed_or(void)
 {
@@ -117,7 +117,7 @@ void ChoiceLinkUTest::test_embed_or(void)
 }
 
 /*
- * ChoiceLink nested embeded unit test.
+ * ChoiceLink nested embedded unit test.
  */
 void ChoiceLinkUTest::test_nest_or(void)
 {
@@ -151,7 +151,7 @@ void ChoiceLinkUTest::test_top_nest_or(void)
 }
 
 /*
- * ChoiceLink bad nested embeded unit test.
+ * ChoiceLink bad nested embedded unit test.
  */
 void ChoiceLinkUTest::test_nest_bad_or(void)
 {
@@ -168,7 +168,7 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
 }
 
 /*
- * ChoiceLink bad nested embeded unit test.
+ * ChoiceLink bad nested embedded unit test.
  */
 void ChoiceLinkUTest::test_top_nest_bad_or(void)
 {

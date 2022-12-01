@@ -7,7 +7,7 @@
 ; search patterns, because they lacked explicit clauses that
 ; asserted the presence of a variable in the atompsace.  However,
 ; it seems to be OK to assume implicit presence, when it is not
-; declared explicity. So, in fact, everything below should be
+; declared explicitly. So, in fact, everything below should be
 ; considered to be valid.
 
 (use-modules (opencog))

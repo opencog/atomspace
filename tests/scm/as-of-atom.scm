@@ -25,7 +25,7 @@
 ;; Switch the atomspace where A is (which is auxiliary-as)
 (define pre-as (cog-set-atomspace! (cog-atomspace auxiliary-A)))
 
-;; Verify that the current atomspace, auxiliary-as and the prevous one
+;; Verify that the current atomspace, auxiliary-as and the previous one
 ;; are all the same
 (cog-logger-info "[1] current as = ~a" (cog-atomspace))
 (cog-logger-info "[1] auxiliary-as = ~a" auxiliary-as)
@@ -61,7 +61,7 @@
 
 ;; Now A is an invalid handle.
 ;;
-;; Very strangly if the line
+;; Very strangely, if the line
 ;;
 ;; (define pre-as (cog-set-atomspace! (cog-atomspace auxiliary-A)))
 ;;

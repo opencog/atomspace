@@ -72,11 +72,11 @@ public:
 		int num_results = answers->getOutgoingSet().size();
 		TS_ASSERT_EQUALS(num_results, 1);
 		TruthValuePtr stv = answer->getTruthValue();
-		float strengh = stv->get_mean();
+		float strength = stv->get_mean();
 		float confidence = stv->get_confidence();
 		float expected_strength = 1;
 		float expected_confidence = 0;
-		TS_ASSERT_EQUALS(strengh, expected_strength);
+		TS_ASSERT_EQUALS(strength, expected_strength);
 		TS_ASSERT_EQUALS(confidence, expected_confidence);
 	}
 };

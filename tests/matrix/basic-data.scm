@@ -24,7 +24,7 @@
 
 ; chicken-support = 3
 ; dog-support = 3
-; table=suport = 1
+; table=support = 1
 ; average left support = (/ (+ 3 3 1) 3)
 
 ; N(chicken,*) = chicken-count = (+ 3 6 2) = 11

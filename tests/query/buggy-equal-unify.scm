@@ -25,6 +25,6 @@
 
 ; (cog-evaluate! qunify)
 
-; Exptected result of above
+; Expected result of above
 (define expected
 	(List (Concept "node1") (Concept "name1")))

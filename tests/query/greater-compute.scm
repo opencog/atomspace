@@ -2,7 +2,7 @@
 ; greater-compute.scm
 ;
 ; Similar to the greater-than unit test, but requires that execution
-; of programs to occur during the proccess
+; of programs to occur during the process
 ;
 
 (use-modules (opencog))

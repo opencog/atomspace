@@ -61,7 +61,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 /*
  * This function sets up an implication link, and some data.
  *
- * Note: although raw ImplicationLinks occuring outside of a
+ * Note: although raw ImplicationLinks occurring outside of a
  * BindLink are now deprecated, this test still tests that
  * function, since there's a fair amount of existing code that
  * still uses it.  At any rate, under the covers, both share a
@@ -88,7 +88,7 @@ void ImplicationUTest::setUp(void)
 	as = createAtomSpace();
 	eval = new SchemeEval(as);
 
-	// Create initialzation
+	// Create initialization
 	const char * setup = 
 	"(define (stv mean conf) (cog-new-stv mean conf))\n"
 	"(define (AndLink . x)\n"

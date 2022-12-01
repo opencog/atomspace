@@ -12,7 +12,7 @@
 ; The room state is set by invoking two patterns: is-visible and
 ; is-invisibile.  The first checks for the presence of the EvaluationLink
 ; and, if found, sets the room state to full.  The second checks for it's
-; absense, and if it is absent, sets the state to "empty".
+; absence, and if it is absent, sets the state to "empty".
 ;
 ; The EvaluationLink is created and destroyed by running one of two
 ; patterns, `create` or `destroy`.
@@ -23,7 +23,7 @@
 ; Clause to match during query
 (define query 
 	(EvaluationLink
-		(PredicateNode "visiblity")
+		(PredicateNode "visibility")
 		(ListLink (VariableNode "$x"))))
 
 ; Create a golem; the golem is brought to life when its executed.
@@ -35,7 +35,7 @@
 	(BindLink query (DeleteLink query))
 )
 
-; If nothing is visible, then hallucinate the golem into existance.
+; If nothing is visible, then hallucinate the golem into existence.
 (define create
 	(BindLink (AbsentLink query) golem)
 )

@@ -80,7 +80,7 @@ void AbsentUTest::setUp(void)
 
 /*
  * Single AbsentLink used to trigger an action that takes
- * place only when the atomspace is commpletely lacking something!
+ * place only when the atomspace is completely lacking something!
  */
 void AbsentUTest::test_single(void)
 {
@@ -91,7 +91,7 @@ void AbsentUTest::test_single(void)
 	Handle empty = eval->eval_h("(ConceptNode \"room empty\")");
 	Handle full = eval->eval_h("(ConceptNode \"room nonempty\")");
 
-	// Verify the intial state, room should be empty
+	// Verify the initial state, room should be empty
 	Handle state = eval->eval_h("(show-room-state)");
 	printf("Expecting: %s\n", empty->to_string().c_str());
 	printf("Got: %s\n", state->to_string().c_str());
@@ -143,7 +143,7 @@ void AbsentUTest::test_double(void)
 	Handle exists = eval->eval_h("(get-exists)");
 	Handle proven = eval->eval_h("(get-proven)");
 
-	// Verify the intial state, UFO should exist
+	// Verify the initial state, UFO should exist
 	Handle state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
 

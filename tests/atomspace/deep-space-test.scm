@@ -30,7 +30,7 @@
 (define astack "verify AtomSpace stack")
 (test-begin astack)
 
-; Go back to the begining.
+; Go back to the beginning.
 (cog-set-atomspace! base-space)
 (define curr-space base-space)
 

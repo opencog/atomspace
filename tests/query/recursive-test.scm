@@ -174,7 +174,7 @@
 				(List (Concept "Ben") (Variable "?inh")))))))))
 
 ; ----------
-; The infinte loop case.
+; The infinite loop case.
 (Inheritance (Concept "thing") (Concept "Ben"))
 
 (test-assert "cont-finite-ben-anim" (equal? (stv 1 1)

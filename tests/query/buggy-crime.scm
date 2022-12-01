@@ -1,4 +1,4 @@
-; Example taken from "Artifical Intelligence - A Modern Approach"
+; Example taken from "Artificial Intelligence - A Modern Approach"
 
 ; "The law says that it is a crime for an American to sell weapons to hostile
 ; nations. The country Nono, an enemy of America, has some missiles, and all

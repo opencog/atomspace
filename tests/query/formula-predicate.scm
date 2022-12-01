@@ -11,7 +11,7 @@
 		(List (Concept "node1") (Concept "name1")))
 	(Concept "node2"))
 
-; The answer we always expet to get:
+; The answer we always expect to get:
 (define ans (List (Concept "node1") (Concept "name1")))
 
 ; Make sure this passes, before we get fancy

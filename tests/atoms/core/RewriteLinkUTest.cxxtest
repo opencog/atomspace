@@ -87,7 +87,7 @@ public:
 #define NB _asb->add_node
 #define LB _asb->add_link
 
-// Test RewriteLink::is_equal with undordered links
+// Test RewriteLink::is_equal with unordered links
 void RewriteLinkUTest::test_unordered()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);

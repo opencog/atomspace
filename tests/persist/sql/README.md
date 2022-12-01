@@ -19,13 +19,13 @@ To run these tests, perform the following steps:
 
 1) If you choose to change the default test database name and username,
    then edit tests/persist/sql/CMakeLists.txt and uncomment
-   `SET(DB_IS_CONFIGURED 1)`.  It probbly easier to just use the default
+   `SET(DB_IS_CONFIGURED 1)`.  It probably easier to just use the default
    test database name and username; see below.
 
 2) Configure an SQL server, as described in `opencog/persist/sql/README`
    Abbreiviated instructions follow below; else skip to step 3.
 
-2a) Install the postgres server and the postgress client.
+2a) Install the postgres server and the postgresql client.
 
 2b) You don't need to test ODBC, but if you are, then:
     Install `unixodbc` and `odbc-postgresql`.
@@ -164,4 +164,4 @@ To run these tests, perform the following steps:
 ```
     /etc/postgresql/9.6/main/postgresql.conf
 ```
-    look for "port =" near the begining of the file.
+    look for "port =" near the beginning of the file.

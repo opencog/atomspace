@@ -137,12 +137,12 @@ void BasicSCMUTest::test_utf8(void)
 	eval->eval("(+ 2 2)");
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
-	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
+	TSM_ASSERT("Failed to find functional scheme interpreter", !eval_err);
 
 	eval->eval("Evaluating this will cause an error to be thrown!");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
-	TSM_ASSERT("Scheme iterpreter fails to throw errors", eval_err);
+	TSM_ASSERT("Scheme interpreter fails to throw errors", eval_err);
 
 	eval->eval("(display \"Ćićolina\")");
 	eval_err = eval->eval_error();

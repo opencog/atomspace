@@ -374,7 +374,7 @@ void VariablesUTest::test_find_variables_ordered_4()
 
 	// Simple ordered body with quoted and scoped variables (thus that
 	// should be ignored). Result should be [X, Y] as the first
-	// occurence of Y is quoted, and other variables like Z and W are
+	// occurrence of Y is quoted, and other variables like Z and W are
 	// scoped.
 	Handle body = al(LIST_LINK,
 	                 al(QUOTE_LINK, Y),

@@ -14,7 +14,7 @@
 ; ----------------------------------------------------
 ; Coupled sets, expect 2! * (2! * 2!) = 8 permutations
 ;
-; $W should ALWAYS be "R" and the remaing permutations are
+; $W should ALWAYS be "R" and the remaining permutations are
 ; free order for PQ and ST, at the start or end.
 
 (Set (Concept "B")
@@ -35,7 +35,7 @@
 ;
 ; $D should ALWAYS be S and the middle three should always
 ; be either TSR or RST.
-; The remaing permutations are free order for PQ and UV
+; The remaining permutations are free order for PQ and UV
 ;
 (Set (Concept "C")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))
@@ -58,7 +58,7 @@
 ;
 ; $E should ALWAYS be "T", and the
 ; middle five should be either RSTUV or VUTSR
-; The remaing permutations are free order for PQ and WX
+; The remaining permutations are free order for PQ and WX
 ;
 (Set (Concept "D")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R"))

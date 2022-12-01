@@ -81,7 +81,7 @@
 		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
 		(FloatValueOf ATOM tvp)))
 
-; A new proceedure, that works only on the one item.
+; A new procedure, that works only on the one item.
 (DefineLink
 	(DefinedProcedure "scalar MI")
 	(Lambda
