@@ -61,7 +61,7 @@ static void removeCarriageReturn(std::string& str)
 }
 
 /**
- * Remove non ASCII char at the begining of the string.
+ * Remove non ASCII char at the beginning of the string.
  */
 static void removeNonASCII(std::string& str)
 {
@@ -157,7 +157,7 @@ static std::vector<std::string> tokenizeRow (const std::string& line)
  */
 static Type infer_type_from_token(const std::string& token)
 {
-    /* Prefered representation is T's and 0's, to maximize clarity,
+    /* Preferred representation is T's and 0's, to maximize clarity,
      * readability.  Numeric values are easily confused with floating
      * point type.
      */
@@ -330,7 +330,7 @@ std::vector<Type> infer_column_types(const std::vector<string_seq>& tab)
 
 /**
  * Infer the column types of a line and compare it to the given column
- * types.  If there is a mis-match, then it must be a header, i.e. a
+ * types.  If there is a mismatch, then it must be a header, i.e. a
  * set of ascii column labels.
  */
 static bool
@@ -463,7 +463,7 @@ static double token_to_contin(const std::string& token)
 }
 
 // See header file for `load_csv_table` for a general description
-// of what is being done here.  In breif, columns from a table
+// of what is being done here.  In brief, columns from a table
 // are jammed into individual values on a given atom.
 static std::istream&
 istreamDenseTable(const AtomSpacePtr& as,
@@ -509,7 +509,7 @@ istreamDenseTable(const AtomSpacePtr& as,
 	// ----------------------------------------------
 	std::string line;
 
-	// Assume the stream is at the begining.
+	// Assume the stream is at the beginning.
 	// If there is a header, skip one line.
 	if (has_header)
 		get_data_line(in, line);

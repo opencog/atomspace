@@ -115,7 +115,7 @@ void GroundedPredicateNode::init()
 ///
 /// Expects "args" to be a ListLink. These arguments will be
 /// substituted into the predicate. Then the predicate as a whole
-/// will be evaulated.
+/// will be evaluated.
 ///
 ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
                                         const Handle& cargs,

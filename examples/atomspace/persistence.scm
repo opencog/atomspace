@@ -81,7 +81,7 @@
 ;     https://github.com/opencog/atomspace-cog and the examples there.
 ;
 ; (3) Coordination of distributed work. That is, if multiple agents
-;     are preforming multiple kinds of processing at various nodes,
+;     are performing multiple kinds of processing at various nodes,
 ;     how should they coordinate, given points (1) and (2) above?
 ;     This is an area of active research, and no pat answers are
 ;     currently available.

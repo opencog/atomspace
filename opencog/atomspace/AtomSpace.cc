@@ -261,7 +261,7 @@ const std::string& AtomSpace::get_name() const
 }
 
 // In order to restore complex AtomSpace DAG's from storage, we need
-// to be able to set thier names, to match what is in storage. So the
+// to be able to set their names, to match what is in storage. So the
 // name is settable.
 void AtomSpace::set_name(const std::string& newna)
 {
@@ -291,7 +291,7 @@ void AtomSpace::setAtomSpace(AtomSpace* as)
 // XXX FIXME -- The recursive design of the depth() routine below makes
 // it into a bottleneck, when the stack of AtomSpaces exceeds a few
 // hundred. In particular, the recursion is on the C stack, and I don't
-// beleive the compiler has optimized them to be tail-recursive. (If
+// believe the compiler has optimized them to be tail-recursive. (If
 // they are tail-recursive, I guess that's OK, eh?)
 // At this time, the only user of this code appears to be UniqueLink.cc
 // It is NOT used by Rocks.

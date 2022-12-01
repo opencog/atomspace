@@ -271,7 +271,7 @@ void* c_wrap_init_only_once(void* p)
 	return nullptr;
 }
 
-// Cheap, simple semphore.
+// Cheap, simple semaphore.
 static volatile bool done_with_init = false;
 
 static void immortal_thread(void)

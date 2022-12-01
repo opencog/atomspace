@@ -165,7 +165,7 @@ void TypeIntersectionLink::analyze(Handle anontype, bool& touched)
 			_deep_typeset.clear();
 		else if (0 < _deep_typeset.size())
 			throw RuntimeException(TRACE_INFO,
-				"Intersection fo deep types not implemented!");
+				"Intersection of deep types not implemented!");
 
 		touched = true;
 		_glob_interval = intersect(_glob_interval, tcp->get_glob_interval());

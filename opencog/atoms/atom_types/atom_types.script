@@ -958,7 +958,7 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // a Schema of some kind in it's first argument. Current choices include:
 // Schema, GroundedSchema, DefinedSchema and PromiseSchema. The other
 // kinds of FunctionLinks do not need this; the function they perform,
-// that is, the schema, is implcit in the link type.
+// that is, the schema, is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.

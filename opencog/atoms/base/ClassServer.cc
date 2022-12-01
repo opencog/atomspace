@@ -89,7 +89,7 @@ void ClassServer::splice(std::vector<T>& methods, Type t, T fact)
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
 	// This is called in shared-library ctors, and so if there's
-	// an error, we can't throw an exeption. (Well, we can, but
+	// an error, we can't throw an exception. (Well, we can, but
 	// it will hang). So this is a fatal error. Print a helpful
 	// message, and exit.
 	if (0 == t)

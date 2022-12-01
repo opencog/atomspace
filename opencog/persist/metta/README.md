@@ -2,7 +2,7 @@
 MeTTa Import/Export
 ===================
 
-A fraction of the MeTTa langauge can be easily imported as Artomese.
+A fraction of the MeTTa language can be easily imported as Artomese.
 The code here is a proof of concept of this mapping.  At this time,
 only the simplest mapping is done: the declaration of functions.
 

@@ -48,7 +48,7 @@ as this would create a loop with a cycle, and thus could never decrement
 itself back down to zero if there are no external references to the cycle.
 
 The conventional wisdom here is to use weak pointers, as these will not
-interfere with reference counting, while stil enabling safe memory access.
+interfere with reference counting, while still enabling safe memory access.
 The code for the incoming set was originally written to use weak pointers.
 
 However ... they are not really needed, and, instead, naked, bare pointers
@@ -58,7 +58,7 @@ are kept *only* when an Atom is in an AtomSpace, and are *never* kept when
 an Atom is *not* in an AtomSpace!
 
 The use of naked, bare backpointers in the incoming set should have allowed
-for faster dereferencing, avoiding the lock and the overhead of conveting
+for faster dereferencing, avoiding the lock and the overhead of converting
 weak pointers into strong pointers.  Unfortunately, nothing is gained, as
 the need to convert bare pointers into Handles appears to offset any gains.
 In fact, this conversion might even slow things down slightly.

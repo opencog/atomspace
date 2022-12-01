@@ -91,7 +91,7 @@ typedef hashable_weak_ptr<Atom> WinkPtr;
 // See discussion in README, explaining why using a bare pointer is safe.
 //
 // Based on current measurements (March 2022, benchmark/query-loop/diary.txt)
-// there is no performance advantage to useing bare pointers. In addition,
+// there is no performance advantage to using bare pointers. In addition,
 // it appears that AtomSpaceAsyncUTest fails, probably due to "trivial"
 // reasons. Thus, there does not seem to be any advantage to enabling bare
 // pointers, and perhaps some minor disadvantages.

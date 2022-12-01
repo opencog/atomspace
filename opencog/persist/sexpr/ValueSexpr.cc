@@ -131,7 +131,7 @@ ValuePtr Sexpr::decode_value(const std::string& stv, size_t& pos)
 
 	// LinkValues are vectors of Values.
 	// ListValues are possibly other types (such as FloatValues)
-	// but contain Atoms in thier configuration data, and thus
+	// but contain Atoms in their configuration data, and thus
 	// need to be desrialized as if they were LinkValues (even
 	// though they are not.) FormulaStream is an example.
 	if (nameserver().isA(vtype, LINK_VALUE) or

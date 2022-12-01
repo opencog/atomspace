@@ -162,7 +162,7 @@ AtomSpace.execute({ "type": "PlusLink",
   is contained in some Link. Setting the optional boolean flag to `true`
   forces the recursive extraction of the Atom, and every Link that
   contains it. Returns false is the atom was not removed or if an error
-  occured (e.g. the Atom does not exist).
+  occurred (e.g. the Atom does not exist).
 ```
 AtomSpace.extract({ "type": "Concept", "name": "foo"}) // fails if not topmost
 AtomSpace.extract({ "type": "Concept", "name": "foo"}, true) // recursive
