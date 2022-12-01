@@ -15,7 +15,46 @@
 ;
 ; * ReadThruProxy -- Passes on requests involving the reading of
 ;      Atoms and Values. This includes `fetch-atom`, `fetch-value`,  
-;      `fetch-incoming-set` and `fetch-incoming-by-type`.
+;      `fetch-incoming-set` and `fetch-incoming-by-type`. This is
+;      a load-balancing or proxy: if there are multiple providers,
+;      it will pick one and use that for a given request.
+;
+; * SequentialReadProxy -- Pass read requests on to the first
+;      StorageNode. If that suceeds, return that. Else try the
+;      next in line, until there either the Atom/Value is found,
+;      or until the list is exhaused.
+;
+; * CachingProxy -- If an Atom or Value is already in the AtomSpace,
+;      do nothing. Otherwise go to the StorageNode to get it.
+;      Experimental. The currrent implementation is minimal, and
+;      does nothing to limit cache size or expire old data.
 ;
 ; * WriteThruProxy -- Passes on requests involving the storing of
-;       Atoms and Values. This includes
+;      Atoms and Values. This includes `store-atom`, `store-value`,
+;      and `store-referrers`. This is a mirroring proxy: if there
+;      is more than one target, the write will be made too all of
+;      them.
+;
+; * ReadWriteProxy -- Combines reading and writing into one. It does
+;      NOT do mirroring or load-balancing; do get that, just chain in
+;      the above!
+;
+; * DynamicDataProxy -- Create FormulaStreams and FutureStreams on
+;      the fly. Experimental.
+;
+; ---------------------------------------------------------------------
+; The below illustrates a simple WriteThruProxy. It starts with a
+; CogServer attached to an empty RocksDB database. Then a network
+; client stores some data into it.
+;
+; First, start guile, and then the CogServer.
+
+$ guile
+scheme@(guile-user)>
+
+(use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-rocks))
+(use-modules (opencog cogserver))
+(start-cogserver)
+
+; That's it. Now, from a different terminal
