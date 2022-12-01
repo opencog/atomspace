@@ -97,8 +97,81 @@ Status & TODO
 -------------
 ***Version 0.9.0*** -- Seems to work. Has not been stressed.
 
-However -- multi-atomspace (frame) support is missing. Some basic work
-in this direction has been done, but it is not been completed.  The
-`SpaceFrame`, `SpaceDiamond`, `SpaceWye` and `FrameDelete` unit tests
-in the `atomspace-cog` git repo do not run/do not pass. Getting those
-to run and pass requires additional work to be done here.
+Some open TODO items:
+
+ * Multi-atomspace (frame) support is missing. Some basic work
+   in this direction has been done, but it is not been completed.  The
+   `SpaceFrame`, `SpaceDiamond`, `SpaceWye` and `FrameDelete` unit tests
+   in the `atomspace-cog` git repo do not run/do not pass. Getting those
+   to run and pass requires additional work to be done here (probably in
+   the [sexpr-commands](../sexcom) directory.
+
+ * The CachingProxy needs to get bells-n-whistles added. For example:
+   the ability to limit to a max AtomSpace size, and the ability to
+   expire old/stale data. This would allow the cache to be used with
+   HUGE disk DB's, without the risk of running out of RAM.
+
+ * Implement a "LazyWriter". This does NOT immediately write-out
+   (pass on) the Atoms that it is given, but instead sticks them into
+   a buffer (or queue).  The queue is drained at a later time, by
+   different threads.  Implementing this is actually easy: cogutils
+   already has a thread-safe `async_buffer.h` which provides a
+   write-back buffer: push stuff into it, and it eventually writes
+   out. Not clear how useful this really is, since RocksDB already
+   has a mess of threads to to stuff. On the other hand, maybe there's
+   some savings possible from moving the atomspace-rocks code so it
+   executes in the buffer, instead of slowing down the main AtomSpace
+   processing thread(s). On the other hand, the main AtomSpace
+   bottleneck appears to be the C++ `std::shard_ptr<>` template:
+   it uses atomic cache-line locks, and most CPU's seem to have a
+   shortage of these (they are in the CPU cache hardware. Proprietary
+   design; its hard to find out who has what, but it can be measured,
+   e.g. with the [AtomSpace benchmarks](https://github.com/opencog/benchmark).)
+   Might be worth a try, cause this is "easy".
+
+ * Create a "Remembering Agent", which would be like the "CachingProxy
+   in reverse" -- once RAM usage got too large, Atoms would be
+   automatically saved to disk (and deleted from RAM). Similarly, it
+   could back a large "live" AtomSpace, periodically writing to disk,
+   so that the active user of the AtomSpace wouldn't need to concern
+   themselves with need to manually store data. The tricky part with
+   remembering, though, is avoiding accidental saves of temporary/junk
+   data.
+
+### Some RememberingAgent notes:
+Designing an effective RememberingAgent is surprisingly difficult.
+
+Here are some thoughts about such a design. One could stick a timestamp
+on each Atom (a timestamp Value) and store the oldest ones. But this
+eats up RAM, to store the timestamp, and then eats more RAM to keep
+a sorted list of the oldest ones. If we don't keep a sorted list,
+then we have to search the atomspace for old ones, and that eats CPU.
+Yuck and yuck.
+
+Every time a client asks for an Atom, we have to update the timestamp
+(like the access timestamp on a Unix file.)  So, Unix files have three
+timestamps to aid in decision-making - "created", "modified" and "accessed".
+This works because most Unix files are huge compared to the size of the
+timestamps. For the AtomSpace, the Atoms are the same size as the
+timestamps, so we have to be careful not to mandate that every Atom
+must have some meta-data.
+
+There's another problem. Suppose some client asks for the incoming set
+of some Atom. Well, is that in RAM already, or is it on disk, and needs
+to be fetched? The worst-case scenario is to assume it's not in RAM, and
+always re-fetch from disk. But this hurts performance. (what's the point
+of RAM, if we're always going to disk???) Can one be more clever? How?
+
+There's a third problem: "vital" data vs "re-creatable" data. For example,
+a genomics dataset itself is "vital" in that if you erase anything, it's a
+permanent "dataloss".  The [MOZI genomics code-base](https://github/mozi-ai),
+as it is being used, performs searches, and places the search results into
+the AtomSpace, as a cache, to avoid re-searching next time. These search
+results are "re-creatable".   Should re-creatable data be saved to disk?
+Sometimes? Always? Never? If one has a dozen Values attached to some Atom,
+how can you tell which of these Values are "vital", and which are
+"re-creatable"?
+
+The above sketches three different problems that plague any designs
+beyond the very simplest ones.  The obvious solutions are not very good,
+the good solutions are not obvious.
