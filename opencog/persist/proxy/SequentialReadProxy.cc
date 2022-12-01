@@ -52,8 +52,6 @@ void SequentialReadProxy::init(void)
 // Get our configuration from the DefineLink we live in.
 void SequentialReadProxy::open(void)
 {
-	_round_robin = 0;
-
 	StorageNodeSeq rdrs = setup();
 	_readers.swap(rdrs);
 
@@ -71,52 +69,67 @@ void SequentialReadProxy::close(void)
 }
 
 
-#define UP \
-	size_t nr = _readers.size(); \
-	if (0 == nr) return; \
-	size_t ir = _round_robin; \
-	const StorageNodePtr& stnp = _readers[ir];
+#define CHECK_OPEN if (0 == _readers.size()) return;
 
-#define DOWN \
-	stnp->barrier(); \
-	ir++; \
-	ir %= nr; \
-	_round_robin = ir;
-
-// Just get one atom. Round-robin.
+// Just get one atom.
 void SequentialReadProxy::getAtom(const Handle& h)
 {
-	UP;
-	stnp->fetch_atom(h);
-	DOWN;
+	CHECK_OPEN;
+	for (const StorageNodePtr& stnp : _readers)
+	{
+		stnp->fetch_atom(h);
+		stnp->barrier();
+		if (h->haveValues()) return;
+	}
 }
 
 void SequentialReadProxy::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
-	UP;
-	stnp->fetch_incoming_set(h, false, as);
-	DOWN;
+	CHECK_OPEN;
+	for (const StorageNodePtr& stnp : _readers)
+	{
+		stnp->fetch_incoming_set(h, false, as);
+		stnp->barrier();
+		if (0 < h->getIncomingSetSize(as)) return;
+	}
 }
 
 void SequentialReadProxy::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
-	UP;
-	stnp->fetch_incoming_by_type(h, t, as);
-	DOWN;
+	CHECK_OPEN;
+	for (const StorageNodePtr& stnp : _readers)
+	{
+		stnp->fetch_incoming_by_type(h, t, as);
+		stnp->barrier();
+		if (0 < h->getIncomingSetSizeByType(t, as)) return;
+	}
 }
 
 void SequentialReadProxy::loadValue(const Handle& atom, const Handle& key)
 {
-	UP;
-	stnp->fetch_value(atom, key);
-	DOWN;
+	CHECK_OPEN;
+	for (const StorageNodePtr& stnp : _readers)
+	{
+		stnp->fetch_value(atom, key);
+		stnp->barrier();
+		if (nullptr != atom->getValue(key)) return;
+	}
 }
 
 void SequentialReadProxy::loadType(AtomSpace* as, Type t)
 {
-	UP;
-	stnp->fetch_all_atoms_of_type(t, as);
-	DOWN;
+	CHECK_OPEN;
+	size_t curnum = as->get_num_atoms_of_type(t);
+	for (const StorageNodePtr& stnp : _readers)
+	{
+		stnp->fetch_all_atoms_of_type(t, as);
+		stnp->barrier();
+
+		// If we found more, we're done. If user wants to
+		// go deeper, they can call us again, or configure
+		// a different kind of proxy.
+		if (curnum < as->get_num_atoms_of_type(t)) return;
+	}
 }
 
 void SequentialReadProxy::barrier(AtomSpace* as)
