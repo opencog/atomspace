@@ -48,19 +48,19 @@
 ;      it will pick one and use that for a given request.
 ;
 ; * SequentialReadProxy -- Pass read requests on to the first
-;      StorageNode. If that suceeds, return that. Else try the
+;      StorageNode. If that succeeds, return that. Else try the
 ;      next in line, until there either the Atom/Value is found,
-;      or until the list is exhaused.
+;      or until the list is exhausted.
 ;
 ; * CachingProxy -- If an Atom or Value is already in the AtomSpace,
 ;      do nothing. Otherwise go to the StorageNode to get it.
-;      Experimental. The currrent implementation is minimal, and
+;      Experimental. The current implementation is minimal, and
 ;      does nothing to limit cache size or expire old data.
 ;
 ; * WriteThruProxy -- Passes on requests involving the storing of
 ;      Atoms and Values. This includes `store-atom`, `store-value`,
 ;      and `store-referrers`. This is a mirroring proxy: if there
-;      is more than one target, the write will be made too all of
+;      is more than one target, the write will be made to all of
 ;      them.
 ;
 ; * ReadWriteProxy -- Combines reading and writing into one. It does
@@ -177,7 +177,7 @@ scheme@(guile-user)>
 ; Now, tell the Cogserver to start using this proxy.
 (cog-proxy-open)
 
-; Lets retreive the Atom we wrote above.
+; Lets retrieve the Atom we wrote above.
 ;
 ; Fetch the entire Atom.
 (fetch-atom (Concept "foo"));
