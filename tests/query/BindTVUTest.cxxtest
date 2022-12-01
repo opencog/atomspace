@@ -85,9 +85,9 @@ void BindTVUTest::test_single_bindlink(void)
 
 	Handle answer = answers->getOutgoingAtom(0);
 	TruthValuePtr stv = answer->getTruthValue(); 
-	float strengh = stv->get_mean();
+	float strength = stv->get_mean();
 	float confidence = stv->get_confidence();
 	float expected = 0.55;
-	TS_ASSERT_EQUALS(strengh, expected);
+	TS_ASSERT_EQUALS(strength, expected);
 	TS_ASSERT_EQUALS(confidence, expected);
 }

@@ -189,7 +189,7 @@
 		)
 		;; body -- if all parts of AndLink hold true ... then
 		(AndLink
-			;; If person does NOT have atttribute a,b,c or d ...
+			;; If person does NOT have attribute a,b,c or d ...
 			(not-clause VN "$predicate" VN "$person" VN "$attr_a")
 			(not-clause VN "$predicate" VN "$person" VN "$attr_b")
 			(not-clause VN "$predicate" VN "$person" VN "$attr_c")
@@ -307,7 +307,7 @@
 		)
 		;; body -- if all parts of AndLink hold true ... 
 		(AndLink
-			;; if adress of personA is 1st house
+			;; if address of personA is 1st house
 			(clause PN "Address" VN "$person_a" CN "101 Main Street")
 			(clause PN "Address" VN "$person_a" VN "$addr_a")
 			;; and A is neighbor of B

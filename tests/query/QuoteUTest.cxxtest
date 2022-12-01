@@ -302,7 +302,7 @@ void QuoteUTest::test_crash(void)
 
     eval->eval("(load-from-path \"tests/query/quote-crash.scm\")");
 
-    // If we can execute this without crashing, the test is succesful.
+    // If we can execute this without crashing, the test is successful.
     Handle cr = eval->eval_h("(cog-execute! crasher)");
     TS_ASSERT_EQUALS(1, getarity(cr));
 
@@ -322,7 +322,7 @@ void QuoteUTest::test_crash(void)
 }
 
 // Test for bug #646. QuoteLink placed below GetLink should not
-// be discarded by Instantiator before begining of pattern matching.
+// be discarded by Instantiator before beginning of pattern matching.
 void QuoteUTest::test_exec_getlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);

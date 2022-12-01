@@ -36,7 +36,7 @@ executionOutputTest = do
     case res of
         Just (Link "ListLink" [Node "ConceptNode" "test" _] _) -> return True
         Just ares -> error $ "ExecutionOutputTest failed and returned: " ++ show ares
-        Nothing ->error $ "ExecutionOutputTest failed and retruned Nothing"
+        Nothing ->error $ "ExecutionOutputTest failed and returned Nothing"
 
         
 evaluationTest :: IO Bool

@@ -67,7 +67,7 @@ void NestedClauseUTest::setUp()
 }
 
 /**
- * Test sucessful decomposition of clauses.
+ * Test successful decomposition of clauses.
  */
 void NestedClauseUTest::test_nested_and()
 {

@@ -26,7 +26,7 @@
 
 using namespace opencog;
 
-// Verify removing and readding works in differrent layers.
+// Verify removing and readding works in different layers.
 //
 class RemoveUTest :  public CxxTest::TestSuite
 {

@@ -75,7 +75,7 @@ void ClassicalBooleanUTest::setUp(void)
 
 /*
  * Test positive double-clause boolean constructions.
- * One positive cluase forces examination of entire universe;
+ * One positive clause forces examination of entire universe;
  * One negative clause rejects members of the universe.
  */
 void ClassicalBooleanUTest::test_double_clause(void)

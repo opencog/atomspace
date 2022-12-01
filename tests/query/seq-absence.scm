@@ -65,7 +65,7 @@
 		)))
 
 ;; You might think that this one is similar to the above, but the
-;; Pattern matcher treates present and Absent links in a very
+;; Pattern matcher treats present and Absent links in a very
 ;; different way. This one actually does not work correctly,
 ;; and right now, I'm not gonna fix it... XXX FIXME.
 (define and-not-present

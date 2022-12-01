@@ -119,7 +119,7 @@
 
 ;; Should match to this, and only this.
 ;; Put this in the middle of the file, so that its kind-of
-;; randomized in the atomspace -- i.e. not at the begining (lowest
+;; randomized in the atomspace -- i.e. not at the beginning (lowest
 ;; handle uuid's) nor at the end (highest handle numbers) of the
 ;; atomspace
 (MemberLink

@@ -77,7 +77,7 @@ void FormulaPredicateUTest::setUp(void)
 }
 
 /*
- * A FormulaPredicateLink embeded in a search query should act as a
+ * A FormulaPredicateLink embedded in a search query should act as a
  * a predicate, acepting or rejecting whatever the formula is applied
  * to.
  */

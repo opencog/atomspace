@@ -41,7 +41,7 @@
 	(equal? (cog-execute! qr4) (Set (Concept "you") (Concept "me"))))
 
 ; ------------
-; Same as above, but with implcit PresentLink
+; Same as above, but with implicit PresentLink
 (define qr5
 	(Get (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or

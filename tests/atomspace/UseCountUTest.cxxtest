@@ -177,7 +177,7 @@ public:
         size_t fsize = atomSpace->get_size();
         std::cout << "Final atomspace size: " << fsize << std::endl;
 
-        std::cout << "Total addded: " << __totalAdded << std::endl;
+        std::cout << "Total added: " << __totalAdded << std::endl;
         std::cout << "Total removed: " << __totalRemoved << std::endl;
 
         int changed = __totalRemoved - __totalAdded;

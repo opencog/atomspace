@@ -36,7 +36,7 @@
 ; would fail on slashes at the end of string: (ConceptNode "a\\")
 (test-assert "load data from file" contain_all)
 
-; Make sure corect number of atoms loaded:
+; Make sure correct number of atoms loaded:
 (test-assert "correct number of atoms" (equal? 27 (count-all)))
 
 (test-assert "Concept" (equal? 10 (cog-count-atoms 'Concept)))

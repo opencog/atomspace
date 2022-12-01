@@ -1,7 +1,7 @@
 ;
 ; Simple named question answering
 ;
-; Implmentation: need to look for definition corresponding to the second
+; Implementation: need to look for definition corresponding to the second
 ; element of the member link, and then it is a simple atomspace check
 ;
 ;;; Assert basic fact

@@ -94,7 +94,7 @@ void Boolean2NotUTest::setUp(void)
 					an(VARIABLE_NODE, "$var2")
 				)
 			),
-			// used to gaurentee that both are in the same "sentence"
+			// used to guarantee that both are in the same "sentence"
 			al(MEMBER_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$sent")

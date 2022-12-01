@@ -2,7 +2,7 @@
 ; Simple question answering
 ;
 ; plan of attack:
-; implement (cog-member? which takes MemberLink, subsitutes
+; implement (cog-member? which takes MemberLink, substitutes
 ; (calls sustitute method, which is already implemented) and
 ; thenasks atom-table directly about it
 ;

@@ -2301,7 +2301,7 @@ void PutLinkUTest::test_get_lambda()
 }
 
 /*
- * Like above, but with mutiple arguments
+ * Like above, but with multiple arguments
  */
 void PutLinkUTest::test_get_multi()
 {

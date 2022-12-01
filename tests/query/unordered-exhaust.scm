@@ -1,6 +1,6 @@
 ;
 ; Test the exhaustive search of the unordered link.
-; We expect all possible permuations to be traversed.
+; We expect all possible permutations to be traversed.
 ;
 
 ; The raw data: a set containing four objects.
@@ -34,8 +34,8 @@
 )
 
 ;; This should match in 4! + (6+6+6) + (6+6+6) = 60 different ways,
-;; with 4! for the xyzw permuations, and (6+6+6)=18 for the pqr-set
-;; permuations, and another (6+6+6)=18 for the abc-set.
+;; with 4! for the xyzw permutations, and (6+6+6)=18 for the pqr-set
+;; permutations, and another (6+6+6)=18 for the abc-set.
 (define (exhaust)
 	(BindLink
 		;; variable decls
@@ -66,7 +66,7 @@
 ;; explosion.  The embedded SetLink match is unique (which is why its not
 ;; 4! as there's no possible ambiguity there).
 ;;
-;; Acutally there should be 36+36=72 solutions, 36 for the pqr-set and
+;; Actually there should be 36+36=72 solutions, 36 for the pqr-set and
 ;; another 36 for the abc-set.
 ;;
 ;; The goal of this test is to check nested unordered links: viz one

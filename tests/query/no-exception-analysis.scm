@@ -3,7 +3,7 @@
 ;
 ; Backward-chainer creates something like the following.
 ; It triggered an exception during pattern analysis.
-; If the MeetLink can be creted without a throw, then test passes.
+; If the MeetLink can be created without a throw, then test passes.
 ;
 (use-modules (opencog) (opencog exec))
 

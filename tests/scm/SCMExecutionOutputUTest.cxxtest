@@ -394,7 +394,7 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	eval->eval("(define (grab-tv x) (cog-tv x))");
 	CHKEV(eval);
 
-	// Wrap the proceedure, returning a TV
+	// Wrap the procedure, returning a TV
 	eval->eval(
 		"(define (evl-tv x) "
 		"   (cog-evaluate! "
@@ -433,7 +433,7 @@ void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 		"    (begin (ConceptNode \"cpy\" (cog-tv x)) (cog-new-stv 1 1)))");
 	CHKEV(eval);
 
-	// Wrap the proceedure, returning a TV
+	// Wrap the procedure, returning a TV
 	eval->eval(
 		"(define (cevl-tv x) "
 		"   (cog-evaluate! "
@@ -647,7 +647,7 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 	eval->eval("(define (grab-tv x) (cog-tv x))");
 	CHKEV(eval);
 
-	// Wrap the proceedure, returning a TV
+	// Wrap the procedure, returning a TV
 	eval->eval(
 		"(define (single-arg-evl-tv x) "
 		"   (cog-evaluate! "

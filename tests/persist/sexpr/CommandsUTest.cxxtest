@@ -432,7 +432,7 @@ void CommandsUTest::test_execute()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Populate teh AtomSpace
+	// Populate the AtomSpace
 	Handle a = as->add_node(CONCEPT_NODE, "a");
 	Handle b = as->add_node(CONCEPT_NODE, "b");
 	Handle l = as->add_link(LIST_LINK, a, b);

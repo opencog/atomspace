@@ -1,7 +1,7 @@
 ;
 ; disco-dancers.scm
 ;
-; Test the addition of implict clauses for variables appearing in
+; Test the addition of implicit clauses for variables appearing in
 ; virtual clauses but not otherwise groundable.  Per bug #2516
 ;
 

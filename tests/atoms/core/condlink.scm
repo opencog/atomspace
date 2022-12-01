@@ -7,7 +7,7 @@
 	; In this flattened CondLink every item in even places is a condition
 	; for the next expression.
 	(CondLink
-	 ; If this evaluates to true then the next expresion will execute.
+	 ; If this evaluates to true then the next expression will execute.
 	 (GreaterThanLink
 		(PlusLink
 		 (NumberNode 2)
@@ -21,7 +21,7 @@
 	 (FalseLink )
 	 ; Expression for the second condition.
 	 (PlusLink (Number 1)(Number 2))
-	 ; If all the above conditions evaluate to false, then this is the defualt
+	 ; If all the above conditions evaluate to false, then this is the default
 	 ; expression to be executed.
 	 (PlusLink (Number 1)(Number -2)))
 )
@@ -30,7 +30,7 @@
 	; In this flattened CondLink every item in even places is a condition
 	; for the next expression.
 	(CondLink
-   ; If this evaluates to true then the next expresion will execute.
+   ; If this evaluates to true then the next expression will execute.
 		(GreaterThanLink
 		 (PlusLink
 			(NumberNode 2)

@@ -119,7 +119,7 @@ void AnchorUTest::test_bind(void)
  * DualLink unit test.
  * XXX FIXME -- there is currently no documented way of squeezing
  * an AnchorNode into an SRAI search, and so the unit test below
- * canot possibly pass until that design issue is fixed...
+ * cannot possibly pass until that design issue is fixed...
  */
 void AnchorUTest::xtest_dual(void)
 {

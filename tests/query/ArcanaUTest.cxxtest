@@ -94,7 +94,7 @@ void ArcanaUTest::test_repeats(void)
 	Handle diff = eval->eval_h("(cog-execute! (repeat-different))");
 
 	// Either one or two solutions are acceptable, as long as the
-	// two are identical. One solution is prefered, but seems
+	// two are identical. One solution is preferred, but seems
 	// not possible with the current algo.
 	const HandleSeq& oset = diff->getOutgoingSet();
 	size_t nsol = oset.size();

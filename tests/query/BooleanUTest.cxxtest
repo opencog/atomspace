@@ -92,7 +92,7 @@ void BooleanUTest::setUp(void)
 					an(VARIABLE_NODE, "$var2")
 				)
 			),
-			// Used to gaurantee that both are in the same "sentence"
+			// Used to guarantee that both are in the same "sentence"
 			al(MEMBER_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$sent")
@@ -209,7 +209,7 @@ void BooleanUTest::test_isa(void)
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the
-	// captial is marked 'definite' and the ABSENT_LINK
+	// capital is marked 'definite' and the ABSENT_LINK
 	// should reject that.
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 

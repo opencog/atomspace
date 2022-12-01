@@ -60,7 +60,7 @@ public:
 
 /**
  * LocalQuote at the root of an AndLink in a pattern is used to
- * indicate that a litteral AndLink should be matched instead of
+ * indicate that a literal AndLink should be matched instead of
  * interpreting as a logic connector.
  */
 void QuotationUTest::test_root_local_quote_over_consumption()
