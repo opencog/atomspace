@@ -236,7 +236,7 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
-          name: Checkout URE
+          name: Checkout Unify
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/unify .
       - run:
           name: CMake Configunify
@@ -251,7 +251,7 @@ jobs:
           name: Run tests
           command: cd build && make -j2 test ARGS=-j2
       - run:
-          name: Install URE
+          name: Install Unify
           command: cd build && make -j2 install && ldconfig
       - run:
           name: Print test log
