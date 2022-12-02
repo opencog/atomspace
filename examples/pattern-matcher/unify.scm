@@ -39,4 +39,22 @@
 ; Run it.
 (cog-execute! implicit-vars)
 
+; Lets try something more complex, a three-way unification.
+; We'll declare the variables explicitly, to avoid confusion.
+
+(define three-way
+	(Get
+		(VariableList (Variable "$X") (Variable "$Y") (Variable "$Z"))
+		(And
+			(Identical
+				(Inheritance (Concept "A") (Variable "$Y"))
+				(Inheritance (Variable "$X") (Concept "B")))
+			(Identical
+				(Inheritance (Concept "B") (Variable "$Z"))
+				(Inheritance (Variable "$Y") (Concept "C")))
+)))
+
+; Run it.
+(cog-execute! three-way)
+
 ; The End. That's all, folks!
