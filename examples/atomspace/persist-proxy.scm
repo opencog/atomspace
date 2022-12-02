@@ -44,7 +44,7 @@
 ; * ReadThruProxy -- Passes on requests involving the reading of
 ;      Atoms and Values. This includes `fetch-atom`, `fetch-value`,
 ;      `fetch-incoming-set` and `fetch-incoming-by-type`. This is
-;      a load-balancing or proxy: if there are multiple providers,
+;      a load-balancing proxy: if there are multiple providers,
 ;      it will pick one and use that for a given request.
 ;
 ; * SequentialReadProxy -- Pass read requests on to the first
