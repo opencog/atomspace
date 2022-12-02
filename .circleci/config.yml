@@ -281,6 +281,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
+          name: Install Unify
+          command: cd /ws/unify/build && make -j2 install && ldconfig
+      - run:
           name: Checkout URE
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/ure .
       - run:
@@ -328,6 +331,9 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install Unify
+          command: cd /ws/unify/build && make -j2 install && ldconfig
       - run:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
@@ -384,6 +390,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
+          name: Install Unify
+          command: cd /ws/unify/build && make -j2 install && ldconfig
+      - run:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
@@ -430,6 +439,9 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install Unify
+          command: cd /ws/unify/build && make -j2 install && ldconfig
       - run:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
@@ -540,6 +552,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
+          name: Install Unify
+          command: cd /ws/unify/build && make -j2 install && ldconfig
+      - run:
           name: Install URE
           command: cd /ws/ure/build && make -j2 install && ldconfig
       - run:
@@ -615,9 +630,13 @@ workflows:
       - spacetime:
           requires:
             - atomspace
+      - unify:
+          requires:
+            - atomspace
       - ure:
           requires:
             - atomspace
+            - unify
       - as-moses:
           requires:
             - atomspace
