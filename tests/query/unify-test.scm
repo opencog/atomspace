@@ -86,4 +86,45 @@
 ;;;
 ;;;(test-end "UnifyUTest::test_unify_undeclared_var_1")
 
+; --------------------------------------
+; Stub out. Throws error
+;  The variable (VariableNode "$Y") does not appear (unquoted) in any clause!
+; Even if we didn't get this error, there is now a conceptual issue.
+; Unify reports a result: it says that (Variable "$X") and (Variable "$X")
+; are the same, because they are constants, and constant variables are
+; by definition alpha-equivalent.
+; The problem here is that we have no way to even report this result.
+; So port this test to an alternate form, below.
+;;;(test-begin "UnifyUTest::test_unify_undeclared_var_2")
+;;;(define tuuv2
+;;;	(cog-execute!
+;;;		(Get
+;;;			(Variable "$Y")
+;;;			(Identical
+;;;				(Variable "$X")
+;;;				(Variable "$Z")))))
+;;;
+;;;(format #t "Got ~A\n" tuuv2)
+;;;(test-assert "UnifyUTest::test_unify_undeclared_var_2"
+;;;	(equal? tuuv2 (Set)))
+;;;
+;;;(test-end "UnifyUTest::test_unify_undeclared_var_2")
+
+(test-begin "UnifyUTest::test_unify_undeclared_var_2_alt")
+(define tuuv2
+	(cog-execute!
+		(Bind
+			(Variable "$X")
+			(Identical
+				(Variable "$X")
+				(Variable "$Z"))
+			(List (Quote (Variable "$X")) (Variable "$X")))))
+
+(format #t "Got ~A\n" tuuv2)
+(test-assert "UnifyUTest::test_unify_undeclared_var_2_alt"
+	(equal? tuuv2
+		(Set (List (Variable "$X") (Variable "$Z")))))
+
+(test-end "UnifyUTest::test_unify_undeclared_var_2_alt")
+
 (opencog-test-end)
