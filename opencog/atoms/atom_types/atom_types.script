@@ -155,6 +155,14 @@ VALUABLE_LINK <- LINK
 // when they are evaluated.
 EVALUATABLE_LINK <- VALUABLE_LINK
 
+// Bogus placeholder. Used by Instantiator.cc. At this time, not every
+// atom that has an `virtual ValuePtr Atom::execute()` method on it
+// can do "the right thing", i.e. $vau it's way through life, and
+// instead needs to be helped along the way by Instantiator. This
+// link type identifies good links, the ones that can actually run
+// correctly.
+EXECUTABLE_LINK <- VALUABLE_LINK
+
 // Crisp (scalar-valued) boolean-input link.  This link type forces
 // type-checking on it's "inputs" (it's outgoing set): they must be
 // EvaluatableLinks.
@@ -606,7 +614,7 @@ PUT_LINK <- PRENEX_LINK
 // The MinimalJoin is the supremum.
 // The MaximalJoin is the top.
 // The UpperSet is everything in between.
-JOIN_LINK <- PRENEX_LINK
+JOIN_LINK <- PRENEX_LINK,EXECUTABLE_LINK
 MINIMAL_JOIN_LINK <- JOIN_LINK
 UPPER_SET_LINK <- JOIN_LINK
 MAXIMAL_JOIN_LINK <- JOIN_LINK
@@ -626,7 +634,7 @@ PATTERN_LINK <- PRENEX_LINK
 // so that it can dispatch appropriately, based on the base type.
 
 // Finds all groundings, returns generic Value
-SATISFYING_LINK <- PATTERN_LINK
+SATISFYING_LINK <- PATTERN_LINK,EXECUTABLE_LINK
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
@@ -825,7 +833,7 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // The FunctionLink is meant to be a base type for links that define
 // functions.  It is NOT meant to be used as a base type for
 // user-defined structures; users should use the LambdaLink for that.
-FUNCTION_LINK <- FREE_LINK
+FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 
 // --------------------
 // Boolean-valued functions
@@ -926,7 +934,7 @@ TYPE_OF_LINK <- VALUE_OF_LINK
 // a FutureStream or a FormulaStream when executed. This stream will
 // then cough up the actual Value later on, when interrogated. Used to
 // create dynamically executable computation chains.
-PROMISE_LINK <- VALUABLE_LINK
+PROMISE_LINK <- VALUABLE_LINK,EXECUTABLE_LINK
 
 // Return a FormulaTruthValue when evaluated. Same as above, but for
 // TruthValues only.  This can be used to wrap any Atom that returns a
