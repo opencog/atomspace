@@ -1,6 +1,36 @@
 ;
 ; Port of UnifyUTest.cxxtest
-; Unfinished, under construction
+; Unfinished, under construction!
+;
+; UnifyUTest::test_unify_unordered_5 actually fails. See below. #3016
+;
+; So, here's the deal:
+; (Unify A B) is more or less the same thing as
+; (Get (Identical A B)) and because this is "more or less" the case,
+; that is what this unit test tests. However... There are some
+; conceptual differences. Unify allows the form:
+;
+;   (Unify
+;      (VariableList left-vars...)
+;      (VariableList right-vars..)
+;      left-expr
+;      right-expr)
+;
+; where left-vars... are the things to be taken as variables in left-expr.
+; There's nothing like this for IndeticalLink or GetLink. We can almost
+; get the same thing by writing
+;
+;   (Get
+;      (VariableList left-vars... right-vars..)
+;      (Identical left-expr right-expr))
+;
+; except that this can fail if (Variable "$X") apprears in left-vars,
+; and also appears in right-expr, but not in right-vars. There is no
+; way to handle this case in any kind of easy or natural way using
+; GetLink. And that is how Unify is different from (Get (Identical ..))
+;
+; Ignroing this critical difference, this is a port of UnifyUTest.cxxtest
+; that "does the same thing", ignoring the subtleties above.
 
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
@@ -162,6 +192,31 @@
 		(Set (Concept "B"))))
 
 (test-end "UnifyUTest::test_unify_unordered_2")
+; --------------------------------------
+; Skip cause its boring: UnifyUTest::test_unify_unordered_3
+; Skip cause its boring: UnifyUTest::test_unify_unordered_4
+; --------------------------------------
+(test-begin "UnifyUTest::test_unify_unordered_5")
+(define tun5
+	(cog-execute!
+		(Get
+			(VariableList (Variable "$X") (Variable "$Y"))
+			(Identical
+				(And (Concept "A") (Concept "A") (Concept "B") (Concept "B"))
+				(And (Concept "A") (Concept "B") (Variable "$X") (Variable "$Y"))))))
+
+(define tune5
+	(Set
+		(List (Concept "A") (Concept "B"))
+		(List (Concept "B") (Concept "A"))))
+
+(format #t "Got ~A\n" tun5)
+(format #t "Expected ~A\n" tune5)
+
+; This test fails! Yikes! See issue #3016
+; (test-assert "UnifyUTest::test_unify_unordered_5" (equal? tun5 tune5))
+
+(test-end "UnifyUTest::test_unify_unordered_5")
 ; --------------------------------------
 
 (opencog-test-end)
