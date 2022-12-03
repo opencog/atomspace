@@ -10,6 +10,18 @@ a bunch of atom types for working with words and sentences. The agi-bio
 subsystem defines a bunch of atom types for working with genes and
 proteins.
 
+
+QuickStart
+==========
+If just want to create some types and don't want to read the docs, then
+go to
+
+  https://github.com/opencog/cheminformatics/tree/master/cheminformatics/types
+
+and copy the stuff there to your location, edit to suit your tastes,
+and go. That's it.
+
+
 Adding New Atom and Value Types
 ===============================
 The `NameServer` provides an extension mechanism so that third parties
