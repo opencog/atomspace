@@ -126,5 +126,42 @@
 		(Set (List (Variable "$X") (Variable "$Z")))))
 
 (test-end "UnifyUTest::test_unify_undeclared_var_2_alt")
+; --------------------------------------
+; skip because its trivial: UnifyUTest::test_unify_undeclared_var_3
+; --------------------------------------
+; Going to skip test_unify_vardecl_1 thru 5.
+; These all seem to want to have the form
+;   (Identical
+;      (Clause (VariableList left-vars...) left-expr)
+;      (Clause (VariableList right-vars..) right-expr))
+; which is not a natural form that is supported. One "easy" fix would
+; be to rewrite the above as
+;   (Get
+;      (VariableList left-vars... right-vars..)
+;      (Identical left-expr right-expr))
+; but I think that violates the "spirit" of the idea, which is to
+; keep the left and right vars disjoint.
+; --------------------------------------
+; Going to skip test_unify_cyclic_dependence_1 thru 4
+; They seem to be boring. Not clear why these matter.
+; --------------------------------------
+; Skip some more, too, they seem boring ...
+; --------------------------------------
+(test-begin "UnifyUTest::test_unify_unordered_2")
+(define tun2
+	(cog-execute!
+		(Get
+			(Variable "$Y")
+			(Identical
+				(And (Concept "A") (Concept "B"))
+				(And (Concept "A") (Variable "$Y"))))))
+
+(format #t "Got ~A\n" tun2)
+(test-assert "UnifyUTest::test_unify_unordered_2"
+	(equal? tun2
+		(Set (Concept "B"))))
+
+(test-end "UnifyUTest::test_unify_unordered_2")
+; --------------------------------------
 
 (opencog-test-end)
