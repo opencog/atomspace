@@ -14,6 +14,10 @@ The code works; see the
 [Prolog/Datalog example](../../../examples/foreign/prolog-datalog.scm)
 for a working demo.
 
+This is a *proof of concept*. It can be, and should be, expanded into a
+broader connectivity layer, including translation of chaining and
+inference (*e.g.* by mapping to the Atomese `QueryLink`).
+
 Mapping
 -------
 The mapping is very easy and obvious. The Prolog "fact"
