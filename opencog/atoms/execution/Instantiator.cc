@@ -714,17 +714,16 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 			_as->get_uuid(), exas->get_uuid());
 
 	// Try to execute directly, if possible. Not everything is
-	// capable of this, yet, but the FunctionLinks all do seem to work.
+	// capable of this, yet. The ones that are, we've tagged as
+	// being of type EXECUTABLE_LINK in the type definitions.
+	// This is a quasi-bogus work-around, but it *does* make it
+	// possible for external libraries defining thier own executable
+	// atoms to get executed immediately, here, instead of flowing
+	// through the instantiator.
 	//
 	// if (expr->is_executable())
-	if (expr->is_type(FUNCTION_LINK) or
-	    expr->is_type(SATISFYING_LINK) or
-	    expr->is_type(JOIN_LINK) or
-	    expr->is_type(PROMISE_LINK) or
-	    expr->is_type(PROMISE_PREDICATE_LINK))
-	{
+	if (expr->is_type(EXECUTABLE_LINK))
 		return expr->execute(_as, silent);
-	}
 
 	// XXX FIXME, we need to get rid of this call entirely, and just
 	// return expr->execute(_as, silent) instead, like above.
