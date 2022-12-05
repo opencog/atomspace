@@ -40,7 +40,7 @@
 			(TypedVariable (Variable "$B") (Type 'ConceptNode)))
 
 		; Assumptions (list of premises)
-		(And
+		(SequentialAnd
 			(Implication (Variable "$A") (Variable "$B"))
 			(Variable "$A"))
 
@@ -75,8 +75,8 @@
 (test-assert "conclud intro" (equal? (cog-execute! (ConclusionOf intro)) lamb-impl))
 
 (test-assert "vardecl elim" (equal? (cog-execute! (VardeclOf elim)) var-ab))
-(test-assert "premi-1 elim" (equal? (cog-execute! (PremiseOf elim (Number 0))) lamb-b))
-(test-assert "premi-2 elim" (equal? (cog-execute! (PremiseOf elim (Number 1))) lamb-impl))
+(test-assert "premi-1 elim" (equal? (cog-execute! (PremiseOf elim (Number 0))) lamb-impl))
+(test-assert "premi-2 elim" (equal? (cog-execute! (PremiseOf elim (Number 1))) lamb-b))
 (test-assert "conclud elim" (equal? (cog-execute! (ConclusionOf elim)) lamb-b))
 
 (test-end tname)
