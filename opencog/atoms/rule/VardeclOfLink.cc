@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include "RuleLink.h"
 #include "VardeclOfLink.h"
 
@@ -36,26 +37,55 @@ VardeclOfLink::VardeclOfLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an VardeclOfLink, got %s", tname.c_str());
 	}
+	if (VARDECL_OF_LINK == t and 1 != _outgoing.size())
+		throw SyntaxException(TRACE_INFO, "Expecting exactly one argument!");
+
 	init();
 }
 
 void VardeclOfLink::init(void)
 {
-	if (1 != _outgoing.size())
-		throw SyntaxException(TRACE_INFO, "Expecting only one argument!");
+	if (0 < _outgoing.size())
+		throw SyntaxException(TRACE_INFO, "Expecting at least one argument!");
 
 	const Handle& ho = _outgoing[0];
 	if (not ho->is_type(RULE_LINK))
 		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
 
-	const RuleLinkPtr& rule = RuleLinkCast(ho);
-	_vardecl = rule->get_vardecl();
+	_rule = RuleLinkCast(ho);
+	_vardecl = _rule->get_vardecl();
 
 	// If we found it, we are home-free.
 	if (_vardecl) return;
 
 	// Ask Variables::get_vardecl() to do the heavy lifting.
-	_vardecl = rule->get_variables().get_vardecl();
+	_vardecl = _rule->get_variables().get_vardecl();
+}
+
+// ---------------------------------------------------------------
+
+// Utility, used by the derived classes
+// The second arg is a NumberNode, it's an index into termlist.
+const Handle& VardeclOfLink::term_at(const HandleSeq& termlist)
+{
+	// TBD call NumericFunctionLink::get_value() ...
+	const Handle& nu = _outgoing[1];
+	if (not nu->is_type(NUMBER_NODE))
+		throw SyntaxException(TRACE_INFO, "Expecting a NumberNode!");
+
+	double off = NumberNodeCast(nu)->get_value();
+	if (0.0 > off)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a  non-negative index");
+
+	size_t idx = std::round(off);
+
+	size_t nump = termlist.size();
+	if (nump <= idx)
+		throw InvalidParamException(TRACE_INFO,
+			"Index is out-of-range: index: %lu vs num-terms: %lu", idx, nump);
+
+	return termlist[idx];
 }
 
 // ---------------------------------------------------------------

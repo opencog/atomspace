@@ -22,14 +22,13 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/NumberNode.h>
 #include "RuleLink.h"
 #include "PremiseOfLink.h"
 
 using namespace opencog;
 
 PremiseOfLink::PremiseOfLink(const HandleSeq&& oset, Type t)
-	: Link(std::move(oset), t)
+	: VardeclOfLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, PREMISE_OF_LINK))
 	{
@@ -46,42 +45,22 @@ void PremiseOfLink::init(void)
 	if (1 != sz and 2 != sz)
 		throw SyntaxException(TRACE_INFO, "Expecting one or two arguments!");
 
-	const Handle& ho = _outgoing[0];
-	if (not ho->is_type(RULE_LINK))
-		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
-
-	const RuleLinkPtr& rule = RuleLinkCast(ho);
 	if (1 == sz)
-	{
-		_premise = rule->get_body();
-		return;
-	}
+		_premise = _rule->get_body();
+	else
+		_premise = term_at(_rule->get_body()->getOutgoingSet());
 
-	// TBD call NumericFunctionLink::get_value() ...
-	const Handle& nu = _outgoing[1];
-	if (not nu->is_type(NUMBER_NODE))
-		throw SyntaxException(TRACE_INFO, "Expecting a NumberNode!");
-
-	double off = NumberNodeCast(nu)->get_value();
-	if (0.0 > off)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a  non-negative index");
-
-	size_t idx = std::round(off);
-
-	size_t nump = rule->get_body()->size();
-	if (nump <= idx)
-		throw InvalidParamException(TRACE_INFO,
-			"Index is out-of-range: %lu vs %lu", nump, idx);
-
-	_premise = rule->get_body()->getOutgoingAtom(idx);
+	// Make a copy of the bound vars in the rule.
+	Variables vars = _rule->get_variables();
+	vars.trim(_premise);
+	_vardecl = vars.get_vardecl();
 }
 
 // ---------------------------------------------------------------
 
 ValuePtr PremiseOfLink::execute(AtomSpace* as, bool silent)
 {
-	return _premise;
+	return as->add_link(LAMBDA_LINK, _vardecl, _premise);
 }
 
 DEFINE_LINK_FACTORY(PremiseOfLink, PREMISE_OF_LINK)

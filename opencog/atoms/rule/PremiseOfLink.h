@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PREMISE_OF_LINK_H
 #define _OPENCOG_PREMISE_OF_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/rule/VardeclOfLink.h>
 
 namespace opencog
 {
@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The PremiseOfLink returns the n'th premise on the given RuleLink
-class PremiseOfLink : public Link
+class PremiseOfLink : public VardeclOfLink
 {
 private:
 	void init(void);

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VARDECL_OF_LINK_H
 #define _OPENCOG_VARDECL_OF_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/rule/RuleLink.h>
 
 namespace opencog
 {
@@ -38,7 +38,10 @@ private:
 	void init(void);
 
 protected:
+	RuleLinkPtr _rule;
 	Handle _vardecl;
+
+	const Handle& term_at(const HandleSeq&);
 
 public:
 	VardeclOfLink(const HandleSeq&&, Type=VARDECL_OF_LINK);
