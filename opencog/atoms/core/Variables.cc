@@ -554,6 +554,25 @@ void Variables::erase(const Handle& var)
 
 /* ================================================================= */
 
+void Variables::trim(const Handle& term)
+{
+	// Find the vars in the term.
+	FreeVariables fv;
+	fv.find_variables(term);
+
+	// Find all vars not in the term.
+	HandleSeq unused;
+	for (const Handle& hv: varseq)
+		if (not fv.varset_contains(hv))
+			unused.push_back(hv);
+
+	// Get rid of all vars not in the term.
+	for (const Handle& hu: unused)
+		erase(hu);
+}
+
+/* ================================================================= */
+
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
 /// type restrictions, but possibly different variable names.

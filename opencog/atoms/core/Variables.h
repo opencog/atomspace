@@ -152,8 +152,11 @@ struct Variables : public FreeVariables
 	void extend(const Variables&);
 	void extend_intersect(const Variables&);
 
-	// Erase the given variable, if exist
+	/// Erase the given variable, if it exists.
 	void erase(const Handle&);
+
+	/// Remove *all* variables that do not appear in the term.
+	void trim(const Handle&);
 
 	/// Return the TypedVariableLink for the indicated variable.
 	/// Return just the Variable itself, if its not typed.
