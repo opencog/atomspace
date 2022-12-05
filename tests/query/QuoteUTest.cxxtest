@@ -308,7 +308,7 @@ void QuoteUTest::test_crash(void)
 
     // This blows out the stack in an infinite loop, if the pattern
     // matcher doesn't prevent it.
-    // The bug fix fir bug #704 re-introduces tthis inf loop in a whole
+    // The bug fix for bug #704 re-introduces this inf loop in a whole
     // new way.  Rather than inventing some arcane, performance-sucking
     // hack to prevent this, we will allow users to shoot themselves in
     // the foot.  (We can't stop inf loops anyway; only the simplest

@@ -99,8 +99,14 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	    GLOB_NODE == vt)
 	{
 		_vardecl = oset[0];
-		init_scoped_variables(_vardecl);
+		ScopeLink::init_scoped_variables(_vardecl);
 		boff = 1;
+	}
+	else
+	{
+		// Hunt for variables only if they were not declared.
+		// Mixing both styles together breaks unit tests.
+		_variables.find_variables(oset);
 	}
 
 	// We already know that sz==1 or greater, so if boff is that oh no
@@ -111,11 +117,6 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	_body = oset[boff];
 	for (size_t i=boff+1; i < sz; i++)
 		_implicand.push_back(oset[i]);
-
-	// Hunt for variables only if they were not declared.
-	// Mixing both styles together breaks unit tests.
-	if (0 == boff)
-		_variables.find_variables(oset);
 }
 
 DEFINE_LINK_FACTORY(RuleLink, RULE_LINK)
