@@ -31,8 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The PremiseOfLink returns the Variable declarations on the
-/// indicated atom.
+/// The PremiseOfLink returns the n'th premise on the given RuleLink
 class PremiseOfLink : public Link
 {
 private:

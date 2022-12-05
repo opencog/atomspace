@@ -31,8 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The VardeclOfLink returns the Variable declarations on the
-/// indicated atom.
+/// The VardeclOfLink returns the Variable declarations on the RuleLink
 class VardeclOfLink : public Link
 {
 private:

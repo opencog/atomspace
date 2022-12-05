@@ -3,7 +3,9 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (rule
+	PremiseOfLink.cc
 	RuleLink.cc
+	VardeclOfLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -20,6 +22,8 @@ INSTALL (TARGETS rule EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	PremiseOfLink.h
 	RuleLink.h
+	VardeclOfLink.h
 	DESTINATION "include/opencog/atoms/rule"
 )

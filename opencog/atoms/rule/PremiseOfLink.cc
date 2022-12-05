@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include "RuleLink.h"
 #include "PremiseOfLink.h"
 
@@ -41,20 +42,43 @@ PremiseOfLink::PremiseOfLink(const HandleSeq&& oset, Type t)
 
 void PremiseOfLink::init(void)
 {
-	if (1 != _outgoing.size())
-		throw SyntaxException(TRACE_INFO, "Expecting only one argument!");
+	size_t sz = _outgoing.size();
+	if (1 != sz and 2 != sz)
+		throw SyntaxException(TRACE_INFO, "Expecting one or two arguments!");
 
 	const Handle& ho = _outgoing[0];
 	if (not ho->is_type(RULE_LINK))
 		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
 
 	const RuleLinkPtr& rule = RuleLinkCast(ho);
+	if (1 == sz)
+	{
+		_premise = _body;
+		return;
+	}
 
+	// TBD call NumericFunctionLink::get_value() ...
+	const Handle& nu = _outgoing[1];
+	if (not nu->is_type(NUMBER_NODE))
+		throw SyntaxException(TRACE_INFO, "Expecting a NumberNode!");
+
+	double off = NumberNodeCast(nu)->get_value();
+	if (0.0 > off)
+		throw InvalidParameterException(TRACE_INFO,
+			"Expecting a  non-negative index");
+
+	size_t idx = std::round(off);
+
+	size_t nump = _body->size();
+	if (nump <= idx)
+		throw InvalidParameterException(TRACE_INFO,
+			"Index is out-of-range: %lu vs %lu", nump, idx);
+
+	_premise = _body->getOutgoingAtom(idx);
 }
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return the value at the indicated key.
 ValuePtr PremiseOfLink::execute(AtomSpace* as, bool silent)
 {
 	return _premise;

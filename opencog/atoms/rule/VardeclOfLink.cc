@@ -55,15 +55,14 @@ void VardeclOfLink::init(void)
 	if (_vardecl) return;
 
 	// Ask Variables::get_vardecl() to do the heavy lifting.
-	_vardecl = rule->get_variables()->get_vardecl();
+	_vardecl = rule->get_variables().get_vardecl();
 }
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return the value at the indicated key.
 ValuePtr VardeclOfLink::execute(AtomSpace* as, bool silent)
 {
-	// We need this, if Variables::get_varecl() was called.
+	// We need tp as->add, if Variables::get_varecl() was called.
 	return as->add_atom(_vardecl);
 }
 
