@@ -36,6 +36,11 @@ using namespace opencog;
 void RuleLink::init(void)
 {
 	Type t = get_type();
+
+	// If this is a PatternLink, bail out now. They have thier
+	// own custom setup.
+	if (nameserver().isA(t, PATTERN_LINK)) return;
+
 	if (not nameserver().isA(t, RULE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
