@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include "RuleLink.h"
 #include "PremiseOfLink.h"
 
 using namespace opencog;

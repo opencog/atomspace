@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_CONCLUSION_OF_LINK_H
 #define _OPENCOG_CONCLUSION_OF_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/rule/VardeclOfLink.h>
 
 namespace opencog
 {
@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The ConclusionOfLink returns the n'th premise on the given RuleLink
-class ConclusionOfLink : public Link
+class ConclusionOfLink : public VardeclOfLink
 {
 private:
 	void init(void);

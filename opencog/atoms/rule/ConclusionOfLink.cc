@@ -22,14 +22,12 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/NumberNode.h>
-#include "RuleLink.h"
 #include "ConclusionOfLink.h"
 
 using namespace opencog;
 
 ConclusionOfLink::ConclusionOfLink(const HandleSeq&& oset, Type t)
-	: Link(std::move(oset), t)
+	: VardeclOfLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, CONCLUSION_OF_LINK))
 	{
@@ -46,47 +44,27 @@ void ConclusionOfLink::init(void)
 	if (1 != sz and 2 != sz)
 		throw SyntaxException(TRACE_INFO, "Expecting one or two arguments!");
 
-	const Handle& ho = _outgoing[0];
-	if (not ho->is_type(RULE_LINK))
-		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
+	const HandleSeq& impl = _rule->get_implicand();
+	if (0 == impl.size())
+		throw SyntaxException(TRACE_INFO,
+			 "Expecting a RuleLink with an implicand!");
 
-	const RuleLinkPtr& rule = RuleLinkCast(ho);
-	const HandleSeq& impl = rule->get_implicand();
 	if (1 == sz)
-	{
-		if (0 == impl.size())
-			throw SyntaxException(TRACE_INFO,
-				 "Expecting a RuleLink with an implicand!");
-
 		_conclusion = impl[0];
-		return;
-	}
+	else
+		_conclusion = term_at(impl);
 
-	// TBD call NumericFunctionLink::get_value() ...
-	const Handle& nu = _outgoing[1];
-	if (not nu->is_type(NUMBER_NODE))
-		throw SyntaxException(TRACE_INFO, "Expecting a NumberNode!");
-
-	double off = NumberNodeCast(nu)->get_value();
-	if (0.0 > off)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a  non-negative index");
-
-	size_t idx = std::round(off);
-
-	size_t nump = impl.size();
-	if (nump <= idx)
-		throw InvalidParamException(TRACE_INFO,
-			"Index is out-of-range: %lu vs %lu", nump, idx);
-
-	_conclusion = impl[idx];
+	// Make a copy of the bound vars in the rule.
+	Variables vars = _rule->get_variables();
+	vars.trim(_conclusion);
+	_vardecl = vars.get_vardecl();
 }
 
 // ---------------------------------------------------------------
 
 ValuePtr ConclusionOfLink::execute(AtomSpace* as, bool silent)
 {
-	return _conclusion;
+	return as->add_link(LAMBDA_LINK, _vardecl, _conclusion);
 }
 
 DEFINE_LINK_FACTORY(ConclusionOfLink, CONCLUSION_OF_LINK)

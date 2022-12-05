@@ -633,8 +633,8 @@ RULE_LINK <- PRENEX_LINK
 // rule to be disassembled, in Atomese, and then run through the
 // the unifier, to create proof trees.
 VARDECL_OF_LINK <- EXECUTABLE_LINK
-PREMISE_OF_LINK <- EXECUTABLE_LINK
-CONCLUSION_OF_LINK <- EXECUTABLE_LINK
+PREMISE_OF_LINK <- VARDECL_OF_LINK
+CONCLUSION_OF_LINK <- VARDECL_OF_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
