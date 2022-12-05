@@ -39,7 +39,7 @@ private:
 	void init(void);
 
 protected:
-	ValuePtr do_execute(AtomSpace*, bool, int);
+	Handle _vardecl;
 
 public:
 	VardeclOfLink(const HandleSeq&&, Type=VARDECL_OF_LINK);

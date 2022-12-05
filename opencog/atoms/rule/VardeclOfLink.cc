@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include "RuleLink.h"
 #include "VardeclOfLink.h"
 
 using namespace opencog;
@@ -42,6 +43,19 @@ void VardeclOfLink::init(void)
 {
 	if (1 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO, "Expecting only one argument!");
+
+	const Handle& ho = _outgoing[0];
+	if (not ho->is_type(RULE_LINK))
+		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
+
+	const RuleLinkPtr& rule = RuleLinkCast(ho);
+	_vardecl = rule->get_vardecl();
+
+	// If we found it, we are home-free.
+	if (_vardecl) return;
+
+	// Ask Variables::get_vardecl() to do the heavy lifting.
+	_vardecl = rule->get_variables()->get_vardecl();
 }
 
 // ---------------------------------------------------------------
@@ -49,6 +63,8 @@ void VardeclOfLink::init(void)
 /// When executed, this will return the value at the indicated key.
 ValuePtr VardeclOfLink::execute(AtomSpace* as, bool silent)
 {
+	// We need this, if Variables::get_varecl() was called.
+	return as->add_atom(_vardecl);
 }
 
 DEFINE_LINK_FACTORY(VardeclOfLink, VARDECL_OF_LINK)
