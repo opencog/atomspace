@@ -106,7 +106,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	{
 		// Hunt for variables only if they were not declared.
 		// Mixing both styles together breaks unit tests.
-		_variables.find_variables(oset);
+		_variables.find_variables(oset[0]);
 	}
 
 	// We already know that sz==1 or greater, so if boff is that oh no
