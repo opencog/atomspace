@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/rule/RuleLink.h
+ * opencog/atoms/rule/VardeclOfLink.h
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2018, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,46 +19,44 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_RULE_LINK_H
-#define _OPENCOG_RULE_LINK_H
 
-#include <opencog/atoms/core/PrenexLink.h>
+#ifndef _OPENCOG_VARDECL_OF_LINK_H
+#define _OPENCOG_VARDECL_OF_LINK_H
+
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class RuleLink : public PrenexLink
+
+/// The VardeclOfLink returns the Variable declarations on the
+/// indicated atom.
+class VardeclOfLink : public Link
 {
-protected:
+private:
 	void init(void);
 
-	/// The rewrite term
-	HandleSeq _implicand;
-
-	/// Grab variables, wherever they may be.
-	void extract_variables(const HandleSeq& oset);
+protected:
+	ValuePtr do_execute(AtomSpace*, bool, int);
 
 public:
-	RuleLink(const HandleSeq&&, Type=RULE_LINK);
-	RuleLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
-	RuleLink(const Handle& body, const Handle& rewrite);
+	VardeclOfLink(const HandleSeq&&, Type=VARDECL_OF_LINK);
 
-	RuleLink(const RuleLink&) = delete;
-	RuleLink& operator=(const RuleLink&) = delete;
+	VardeclOfLink(const VardeclOfLink&) = delete;
+	VardeclOfLink& operator=(const VardeclOfLink&) = delete;
 
-	virtual const HandleSeq& get_implicand(void) { return _implicand; }
-
-	virtual bool is_executable() const { return false; }
+	// Return the variable decls.
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(RuleLink)
-#define createRuleLink CREATE_DECL(RuleLink)
+LINK_PTR_DECL(VardeclOfLink)
+#define createVardeclOfLink CREATE_DECL(VardeclOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_RULE_LINK_H
+#endif // _OPENCOG_VARDECL_OF_LINK_H
