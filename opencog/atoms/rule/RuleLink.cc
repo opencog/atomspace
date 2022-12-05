@@ -60,7 +60,7 @@ RuleLink::RuleLink(const Handle& body, const Handle& rewrite)
 {}
 
 RuleLink::RuleLink(const HandleSeq&& hseq, Type t)
-	: PatternLink(std::move(hseq), t)
+	: PrenexLink(std::move(hseq), t)
 {
 	init();
 }

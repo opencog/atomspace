@@ -23,7 +23,6 @@
 #define _OPENCOG_RULE_LINK_H
 
 #include <opencog/atoms/core/PrenexLink.h>
-#include <opencog/atoms/value/QueueValue.h>
 
 namespace opencog
 {
