@@ -835,6 +835,13 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // user-defined structures; users should use the LambdaLink for that.
 FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 
+// XXX TODO-FIXME: Many of the link types below are derived from
+// FunctionLink, but it's not clear that they need to be, and that
+// maybe all they really need is ExecutableLink? That's because the
+// FunctionLink runs the FreeLink constructor (to find the free
+// variables) and most of these link types don't actually need that
+// ability. Right? I'm confused by this.
+
 // --------------------
 // Boolean-valued functions
 
