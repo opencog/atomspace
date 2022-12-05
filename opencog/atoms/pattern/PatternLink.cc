@@ -241,7 +241,7 @@ void PatternLink::init(void)
 /// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
-	: PrenexLink(HandleSeq(), PATTERN_LINK)
+	: RuleLink(HandleSeq(), PATTERN_LINK)
 {
 	_pat.redex_name = "jit PatternLink";
 
@@ -261,7 +261,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const Variables& varspec,
                          const HandleSeq& compo,
                          const PatternTermSeq& absts)
-	: PrenexLink(HandleSeq(), PATTERN_LINK)
+	: RuleLink(HandleSeq(), PATTERN_LINK)
 {
 
 	// First, lets deal with the vars. We have discarded the original
@@ -332,7 +332,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 /// old unit tests should be removed.
 PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
-	: PrenexLink(HandleSeq(), PATTERN_LINK)
+	: RuleLink(HandleSeq(), PATTERN_LINK)
 {
 	_variables.varset = vars;
 	for (const Handle& clause : clauses)
@@ -347,19 +347,19 @@ PatternLink::PatternLink(const HandleSet& vars,
 /* ================================================================= */
 
 PatternLink::PatternLink(const Handle& body)
-	: PrenexLink(HandleSeq({body}), PATTERN_LINK)
+	: RuleLink(HandleSeq({body}), PATTERN_LINK)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body)
-	: PrenexLink(HandleSeq({vars, body}), PATTERN_LINK)
+	: RuleLink(HandleSeq({vars, body}), PATTERN_LINK)
 {
 	init();
 }
 
 PatternLink::PatternLink(const HandleSeq&& hseq, Type t)
-	: PrenexLink(std::move(hseq), t)
+	: RuleLink(std::move(hseq), t)
 {
 	// Type must be as expected
 	if (not nameserver().isA(t, PATTERN_LINK))

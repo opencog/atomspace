@@ -82,16 +82,6 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a non-empty outgoing set");
 
-	// If the outgoing set size is two, then there are no
-	// variable declarations; extract all free variables.
-	if (2 == sz)
-	{
-		_body = oset[0];
-		_implicand.push_back(oset[1]);
-		_variables.find_variables(oset);
-		return;
-	}
-
 	// Old-style declarations had variables in the first
 	// slot. If they are there, then respect that.
 	// Otherwise, the first slot holds the body.
@@ -114,13 +104,16 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 			"Expecting a delcaration of a body/premise!");
 
 	_body = oset[boff];
-
-	// Hunt for variables only if they were  not declared.
-	// Mixing both styles together breaks unit tests.
-	if (0 == boff) _variables.find_variables(_body);
-
 	for (size_t i=boff+1; i < sz; i++)
 		_implicand.push_back(oset[i]);
+
+	// Hunt for variables only if they were not declared.
+	// Mixing both styles together breaks unit tests.
+	if (0 == boff)
+	{
+		_variables.find_variables(_body);
+		_variables.find_variables(_implicand);
+	}
 }
 
 DEFINE_LINK_FACTORY(RuleLink, RULE_LINK)

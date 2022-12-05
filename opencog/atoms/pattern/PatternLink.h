@@ -26,7 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atoms/core/PrenexLink.h>
+#include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/pattern/Pattern.h>
 
 namespace opencog
@@ -72,7 +72,7 @@ namespace opencog
 ///
 class PatternLink;
 LINK_PTR_DECL(PatternLink)
-class PatternLink : public PrenexLink
+class PatternLink : public RuleLink
 {
 protected:
 	// The pattern that is specified by this link.

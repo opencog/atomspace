@@ -35,14 +35,6 @@ class QueryLink : public PatternLink
 protected:
 	void init(void);
 
-	/// The rewrite term
-	HandleSeq _implicand;
-
-	// Overwrite PatternLink::extract_variables as QueryLink has one
-	// more outgoing for the rewrite rule. In addition this method
-	// will initialize the rewrite term _implicand.
-	void extract_variables(const HandleSeq& oset);
-
 	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
 
 public:
@@ -52,8 +44,6 @@ public:
 
 	QueryLink(const QueryLink&) = delete;
 	QueryLink& operator=(const QueryLink&) = delete;
-
-	const HandleSeq& get_implicand(void) { return _implicand; }
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);

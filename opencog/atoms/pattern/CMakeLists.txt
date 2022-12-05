@@ -23,6 +23,7 @@ ADD_DEPENDENCIES(pattern opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(pattern
 	query-engine
+	rule
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
