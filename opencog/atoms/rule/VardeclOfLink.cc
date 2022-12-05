@@ -45,7 +45,7 @@ VardeclOfLink::VardeclOfLink(const HandleSeq&& oset, Type t)
 
 void VardeclOfLink::init(void)
 {
-	if (0 < _outgoing.size())
+	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO, "Expecting at least one argument!");
 
 	const Handle& ho = _outgoing[0];
