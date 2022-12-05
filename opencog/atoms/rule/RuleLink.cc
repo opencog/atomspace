@@ -78,9 +78,9 @@ RuleLink::RuleLink(const HandleSeq&& hseq, Type t)
 void RuleLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
-	if (sz < 2)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at least two, got %d", sz);
+	if (sz < 1)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a non-empty outgoing set");
 
 	// If the outgoing set size is two, then there are no
 	// variable declarations; extract all free variables.
@@ -107,13 +107,19 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		init_scoped_variables(_vardecl);
 		boff = 1;
 	}
+
+	// We know sz=1 or greater. 
+	if (sz == boff)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a delcaration of a body/premise!");
+
 	_body = oset[boff];
 
 	// Hunt for variables only if they were  not declared.
 	// Mixing both styles together breaks unit tests.
 	if (0 == boff) _variables.find_variables(_body);
 
-	for (size_t i=boff+1; i < oset.size(); i++)
+	for (size_t i=boff+1; i < sz; i++)
 		_implicand.push_back(oset[i]);
 }
 
