@@ -103,7 +103,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		boff = 1;
 	}
 
-	// We know sz=1 or greater. 
+	// We already know that sz==1 or greater, so if boff is that oh no
 	if (sz == boff)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a delcaration of a body/premise!");
@@ -115,10 +115,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	// Hunt for variables only if they were not declared.
 	// Mixing both styles together breaks unit tests.
 	if (0 == boff)
-	{
-		_variables.find_variables(_body);
-		_variables.find_variables(_implicand);
-	}
+		_variables.find_variables(oset);
 }
 
 DEFINE_LINK_FACTORY(RuleLink, RULE_LINK)
