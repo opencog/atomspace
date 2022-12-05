@@ -1,5 +1,5 @@
 /*
- * PremiseOfLink.cc
+ * ConclusionOfLink.cc
  *
  * Copyright (C) 2015, 2018, 2022 Linas Vepstas
  *
@@ -24,23 +24,23 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "RuleLink.h"
-#include "PremiseOfLink.h"
+#include "ConclusionOfLink.h"
 
 using namespace opencog;
 
-PremiseOfLink::PremiseOfLink(const HandleSeq&& oset, Type t)
+ConclusionOfLink::ConclusionOfLink(const HandleSeq&& oset, Type t)
 	: Link(std::move(oset), t)
 {
-	if (not nameserver().isA(t, PREMISE_OF_LINK))
+	if (not nameserver().isA(t, CONCLUSION_OF_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an PremiseOfLink, got %s", tname.c_str());
+			"Expecting an ConclusionOfLink, got %s", tname.c_str());
 	}
 	init();
 }
 
-void PremiseOfLink::init(void)
+void ConclusionOfLink::init(void)
 {
 	size_t sz = _outgoing.size();
 	if (1 != sz and 2 != sz)
@@ -51,9 +51,14 @@ void PremiseOfLink::init(void)
 		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
 
 	const RuleLinkPtr& rule = RuleLinkCast(ho);
+	const HandleSeq& impl = rule->get_implicand();
 	if (1 == sz)
 	{
-		_premise = rule->get_body();
+		if (0 == impl.size())
+			throw SyntaxException(TRACE_INFO,
+				 "Expecting a RuleLink with an implicand!");
+
+		_conclusion = impl[0];
 		return;
 	}
 
@@ -69,21 +74,21 @@ void PremiseOfLink::init(void)
 
 	size_t idx = std::round(off);
 
-	size_t nump = rule->get_body()->size();
+	size_t nump = impl.size();
 	if (nump <= idx)
 		throw InvalidParamException(TRACE_INFO,
 			"Index is out-of-range: %lu vs %lu", nump, idx);
 
-	_premise = rule->get_body()->getOutgoingAtom(idx);
+	_conclusion = impl[idx];
 }
 
 // ---------------------------------------------------------------
 
-ValuePtr PremiseOfLink::execute(AtomSpace* as, bool silent)
+ValuePtr ConclusionOfLink::execute(AtomSpace* as, bool silent)
 {
-	return _premise;
+	return _conclusion;
 }
 
-DEFINE_LINK_FACTORY(PremiseOfLink, PREMISE_OF_LINK)
+DEFINE_LINK_FACTORY(ConclusionOfLink, CONCLUSION_OF_LINK)
 
 /* ===================== END OF FILE ===================== */

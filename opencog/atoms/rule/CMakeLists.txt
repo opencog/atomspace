@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (rule
+	ConclusionOfLink.cc
 	PremiseOfLink.cc
 	RuleLink.cc
 	VardeclOfLink.cc
@@ -22,6 +23,7 @@ INSTALL (TARGETS rule EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	ConclusionOfLink.h
 	PremiseOfLink.h
 	RuleLink.h
 	VardeclOfLink.h
