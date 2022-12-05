@@ -360,7 +360,7 @@ ContentHash ScopeLink::scope_hash(const FreeVariables::IndexMap& index) const
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;
-	UnorderedHandleSet hidden;
+	fnv1a_hash(hsh, n_scoped_terms);
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
 		const Handle& h(_outgoing[i + vardecl_offset]);
