@@ -175,7 +175,7 @@ void QuoteUTest::test_throw(void)
 #undef al
 #undef an
     }
-    catch (InvalidParamException &e)
+    catch (const InvalidParamException& e)
     {
         did_throw = true;
     }
@@ -308,15 +308,17 @@ void QuoteUTest::test_crash(void)
 
     // This blows out the stack in an infinite loop, if the pattern
     // matcher doesn't prevent it.
-    // The bug fix fir bug #704 re-introduces tthis inf loop in a whole
-    // new way.  Rather than inventing some arcane, performance-sucking
-    // hack to prevent this, we will allow users to shoot themselves in
-    // the foot.  (We can't stop inf loops anyway; only the simplest
-    // ones, at considerable cost...)
-    // Handle infloop = eval->eval_h("infloop");
-    // Handle inf = bindlink(as, infloop);
-    // printf("infloop is %s\n", inf->to_short_string().c_str());
-    // TS_ASSERT_EQUALS(4, getarity(inf));
+    Handle infloop = eval->eval_h("infloop");
+    bool did_throw = false;
+    try {
+        Handle inf = bindlink(as, infloop);
+        printf("infloop is %s\n", inf->to_short_string().c_str());
+    }
+    catch (const RuntimeException&)
+    {
+        did_throw = true;
+    }
+    TS_ASSERT(did_throw);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
