@@ -119,6 +119,23 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		_implicand.push_back(oset[i]);
 }
 
+/* ================================================================= */
+
+/// Reduce the link; i.e. call execute on everything that it wraps.
+ValuePtr RuleLink::execute(AtomSpace* as, bool silent)
+{
+	HandleSeq redset;
+
+	for (const Handle& h : _outgoing)
+	{
+		if (h->is_type(EXECUTABLE_LINK))
+			redset.emplace_back(HandleCast(h->execute()));
+		else
+			redset.push_back(h);
+	}
+	return as->add_link(_type, std::move(redset));
+}
+
 DEFINE_LINK_FACTORY(RuleLink, RULE_LINK)
 
 /* ===================== END OF FILE ===================== */

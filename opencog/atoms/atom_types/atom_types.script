@@ -627,7 +627,7 @@ MAXIMAL_JOIN_LINK <- JOIN_LINK
 // for constructing an actual PatternLink, and so is faster to create.
 // It is more appropriate for systems like the URE, which are mostly
 // just manipulating rules, instead of actually running them (as queries).
-RULE_LINK <- PRENEX_LINK
+RULE_LINK <- PRENEX_LINK,EXECUTABLE_LINK
 
 // Links that can return the components of a RuleLink. They allow a
 // rule to be disassembled, in Atomese, and then run through the

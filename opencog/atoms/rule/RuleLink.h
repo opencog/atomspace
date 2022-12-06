@@ -50,7 +50,8 @@ public:
 
 	virtual const HandleSeq& get_implicand(void) { return _implicand; }
 
-	virtual bool is_executable() const { return false; }
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
