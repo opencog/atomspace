@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VARDECL_OF_LINK_H
 #define _OPENCOG_VARDECL_OF_LINK_H
 
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PrenexLink.h>
 
 namespace opencog
 {
@@ -38,7 +38,7 @@ private:
 	void init(void);
 
 protected:
-	LambdaLinkPtr _lambda;
+	PrenexLinkPtr _lambda;
 	Handle _vardecl;
 
 	const Handle& term_at(const HandleSeq&);

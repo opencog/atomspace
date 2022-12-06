@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/core/LambdaLink.h>
 #include "VardeclOfLink.h"
 
 using namespace opencog;
@@ -49,10 +48,10 @@ void VardeclOfLink::init(void)
 		throw SyntaxException(TRACE_INFO, "Expecting at least one argument!");
 
 	const Handle& ho = _outgoing[0];
-	if (not ho->is_type(LAMBDA_LINK))
+	if (not ho->is_type(PRENEX_LINK))
 		throw SyntaxException(TRACE_INFO, "Expecting a LambdaLink!");
 
-	_lambda = LambdaLinkCast(ho);
+	_lambda = PrenexLinkCast(ho);
 	_vardecl = _lambda->get_vardecl();
 
 	// If we found it, we are home-free.
