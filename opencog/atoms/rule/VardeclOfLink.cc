@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "RuleLink.h"
+#include <opencog/atoms/core/LambdaLink.h>
 #include "VardeclOfLink.h"
 
 using namespace opencog;
@@ -49,17 +49,17 @@ void VardeclOfLink::init(void)
 		throw SyntaxException(TRACE_INFO, "Expecting at least one argument!");
 
 	const Handle& ho = _outgoing[0];
-	if (not ho->is_type(RULE_LINK))
-		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
+	if (not ho->is_type(LAMBDA_LINK))
+		throw SyntaxException(TRACE_INFO, "Expecting a LambdaLink!");
 
-	_rule = RuleLinkCast(ho);
-	_vardecl = _rule->get_vardecl();
+	_lambda = LambdaLinkCast(ho);
+	_vardecl = _lambda->get_vardecl();
 
 	// If we found it, we are home-free.
 	if (_vardecl) return;
 
 	// Ask Variables::get_vardecl() to do the heavy lifting.
-	_vardecl = _rule->get_variables().get_vardecl();
+	_vardecl = _lambda->get_variables().get_vardecl();
 }
 
 // ---------------------------------------------------------------

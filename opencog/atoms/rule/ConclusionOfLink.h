@@ -24,6 +24,7 @@
 #define _OPENCOG_CONCLUSION_OF_LINK_H
 
 #include <opencog/atoms/rule/VardeclOfLink.h>
+#include <opencog/atoms/rule/RuleLink.h>
 
 namespace opencog
 {
@@ -38,6 +39,7 @@ private:
 	void init(void);
 
 protected:
+	RuleLinkPtr _rule;
 	Handle _conclusion;
 
 public:

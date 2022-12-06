@@ -44,6 +44,12 @@ void ConclusionOfLink::init(void)
 	if (1 != sz and 2 != sz)
 		throw SyntaxException(TRACE_INFO, "Expecting one or two arguments!");
 
+	const Handle& ho = _outgoing[0];
+	if (not ho->is_type(RULE_LINK))
+		throw SyntaxException(TRACE_INFO, "Expecting a RuleLink!");
+
+	_rule = RuleLinkCast(ho);
+
 	const HandleSeq& impl = _rule->get_implicand();
 	if (0 == impl.size())
 		throw SyntaxException(TRACE_INFO,

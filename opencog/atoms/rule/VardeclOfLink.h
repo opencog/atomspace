@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VARDECL_OF_LINK_H
 #define _OPENCOG_VARDECL_OF_LINK_H
 
-#include <opencog/atoms/rule/RuleLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 
 namespace opencog
 {
@@ -31,14 +31,14 @@ namespace opencog
  *  @{
  */
 
-/// The VardeclOfLink returns the Variable declarations on the RuleLink
+/// The VardeclOfLink returns the Variable declarations on a LambdaLink
 class VardeclOfLink : public Link
 {
 private:
 	void init(void);
 
 protected:
-	RuleLinkPtr _rule;
+	LambdaLinkPtr _lambda;
 	Handle _vardecl;
 
 	const Handle& term_at(const HandleSeq&);

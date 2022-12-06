@@ -45,12 +45,12 @@ void PremiseOfLink::init(void)
 		throw SyntaxException(TRACE_INFO, "Expecting one or two arguments!");
 
 	if (1 == sz)
-		_premise = _rule->get_body();
+		_premise = _lambda->get_body();
 	else
-		_premise = term_at(_rule->get_body()->getOutgoingSet());
+		_premise = term_at(_lambda->get_body()->getOutgoingSet());
 
-	// Make a copy of the bound vars in the rule.
-	Variables vars = _rule->get_variables();
+	// Make a copy of the bound vars in the lambda.
+	Variables vars = _lambda->get_variables();
 	vars.trim(_premise);
 	_vardecl = vars.get_vardecl();
 }
