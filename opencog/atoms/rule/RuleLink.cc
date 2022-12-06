@@ -23,10 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/query/Implicator.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "RuleLink.h"
@@ -122,30 +120,44 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 
 /* ================================================================= */
 
+// Execute h. It its a lambda, unwrap it.
+static Handle maybe_exec(const Handle& h, Variables& redvars)
+{
+	Handle hred;
+	if (h->is_type(EXECUTABLE_LINK))
+		hred = HandleCast(h->execute());
+	else
+		hred = h;
+
+	if (hred->is_type(LAMBDA_LINK))
+	{
+		LambdaLinkPtr lmb(LambdaLinkCast(hred));
+		redvars.extend_intersect(lmb->get_variables());
+		hred = lmb->get_body();
+	}
+	return hred;
+}
+
 /// Reduce the link; i.e. call execute on everything that it wraps.
 ValuePtr RuleLink::execute(AtomSpace* as, bool silent)
 {
+	Variables redvars = _variables;
+
 	HandleSeq redbody;
 	for (const Handle& h : _body->getOutgoingSet())
-	{
-		if (h->is_type(EXECUTABLE_LINK))
-			redbody.emplace_back(HandleCast(h->execute()));
-		else
-			redbody.push_back(h);
-	}
+		redbody.emplace_back(maybe_exec(h, redvars));
+
 	Handle rbdy(as->add_link(_body->get_type(), std::move(redbody)));
 
-	HandleSeq redset;
-	redset.emplace_back(_vardecl);
-	redset.emplace_back(rbdy);
-
+	HandleSeq redimpl;
 	for (const Handle& h : _implicand)
-	{
-		if (h->is_type(EXECUTABLE_LINK))
-			redset.emplace_back(HandleCast(h->execute()));
-		else
-			redset.push_back(h);
-	}
+		redimpl.emplace_back(maybe_exec(h, redvars));
+
+	HandleSeq redset;
+	redset.emplace_back(redvars.get_vardecl());
+	redset.emplace_back(rbdy);
+	redset.insert(redset.end(), redimpl.begin(), redimpl.end());
+
 	return as->add_link(_type, std::move(redset));
 }
 
