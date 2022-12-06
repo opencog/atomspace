@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/pattern/QueryLink.h
+ * opencog/atoms/rule/VardeclOfLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2018, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,42 +19,46 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_QUERY_LINK_H
-#define _OPENCOG_QUERY_LINK_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/value/QueueValue.h>
+#ifndef _OPENCOG_VARDECL_OF_LINK_H
+#define _OPENCOG_VARDECL_OF_LINK_H
+
+#include <opencog/atoms/rule/RuleLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class QueryLink : public PatternLink
+
+/// The VardeclOfLink returns the Variable declarations on the RuleLink
+class VardeclOfLink : public Link
 {
-protected:
+private:
 	void init(void);
 
-	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
+protected:
+	RuleLinkPtr _rule;
+	Handle _vardecl;
+
+	const Handle& term_at(const HandleSeq&);
 
 public:
-	QueryLink(const HandleSeq&&, Type=QUERY_LINK);
-	QueryLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
-	QueryLink(const Handle& body, const Handle& rewrite);
+	VardeclOfLink(const HandleSeq&&, Type=VARDECL_OF_LINK);
 
-	QueryLink(const QueryLink&) = delete;
-	QueryLink& operator=(const QueryLink&) = delete;
+	VardeclOfLink(const VardeclOfLink&) = delete;
+	VardeclOfLink& operator=(const VardeclOfLink&) = delete;
 
-	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace*, bool silent=false);
+	// Return the variable decls.
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(QueryLink)
-#define createQueryLink CREATE_DECL(QueryLink)
+LINK_PTR_DECL(VardeclOfLink)
+#define createVardeclOfLink CREATE_DECL(VardeclOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_QUERY_LINK_H
+#endif // _OPENCOG_VARDECL_OF_LINK_H

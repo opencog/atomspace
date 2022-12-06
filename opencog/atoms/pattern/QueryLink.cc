@@ -46,8 +46,13 @@ void QueryLink::init(void)
 	// If we are quoted, don't bother to try to do anything.
 	if (_quoted) return;
 
+	size_t sz = _outgoing.size();
+	if (sz < 2)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an outgoing set size of at least two, got %d", sz);
+
 	_pat.redex_name = "anonymous QueryLink";
-	extract_variables(_outgoing);
+	RuleLink::extract_variables(_outgoing);
 
 	init_bottom();
 
@@ -70,58 +75,6 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
 	: PatternLink(std::move(hseq), t)
 {
 	init();
-}
-
-/* ================================================================= */
-///
-/// Find and unpack variable declarations, if any; otherwise, just
-/// find all free variables.
-///
-/// On top of that, initialize _body and _implicand with the
-/// clauses and the rewrite rule(s). (Multiple implicands are
-/// allowed, this can save some CPU cycles when one search needs to
-/// create several rewrites.)
-///
-void QueryLink::extract_variables(const HandleSeq& oset)
-{
-	size_t sz = oset.size();
-	if (sz < 2)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at least two, got %d", sz);
-
-	// If the outgoing set size is two, then there are no
-	// variable declarations; extract all free variables.
-	if (2 == sz)
-	{
-		_body = oset[0];
-		_implicand.push_back(oset[1]);
-		_variables.find_variables(oset);
-		return;
-	}
-
-	// Old-style declarations had variables in the first
-	// slot. If they are there, then respect that.
-	// Otherwise, the first slot holds the body.
-	size_t boff = 0;
-	Type vt = oset[0]->get_type();
-	if (VARIABLE_LIST == vt or
-	    VARIABLE_SET == vt or
-	    TYPED_VARIABLE_LINK == vt or
-	    VARIABLE_NODE == vt or
-	    GLOB_NODE == vt)
-	{
-		_vardecl = oset[0];
-		init_scoped_variables(_vardecl);
-		boff = 1;
-	}
-	_body = oset[boff];
-
-	// Hunt for variables only if they were  not declared.
-	// Mixing both styles together breaks unit tests.
-	if (0 == boff) _variables.find_variables(_body);
-
-	for (size_t i=boff+1; i < oset.size(); i++)
-		_implicand.push_back(oset[i]);
 }
 
 /* ================================================================= */

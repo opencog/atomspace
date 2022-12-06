@@ -256,7 +256,7 @@ FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK // ,CRISP_INPUT_LINK
 SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 
 // ====================================================================
@@ -619,6 +619,23 @@ MINIMAL_JOIN_LINK <- JOIN_LINK
 UPPER_SET_LINK <- JOIN_LINK
 MAXIMAL_JOIN_LINK <- JOIN_LINK
 
+// A proof-theory style "rule". It consists of a variable declaration,
+// a collection of "formulas" that are the "presmises" of the rule, and
+// one (or more) formulas that are the conclusion of the rule. This is
+// a base class that provides ctor-time analyis of the PrenexLink, adds
+// a virtual method to get the conclusion(s). It avoids the overhead
+// for constructing an actual PatternLink, and so is faster to create.
+// It is more appropriate for systems like the URE, which are mostly
+// just manipulating rules, instead of actually running them (as queries).
+RULE_LINK <- PRENEX_LINK,EXECUTABLE_LINK
+
+// Links that can return the components of a RuleLink. They allow a
+// rule to be disassembled, in Atomese, and then run through the
+// the unifier, to create proof trees.
+VARDECL_OF_LINK <- EXECUTABLE_LINK
+PREMISE_OF_LINK <- VARDECL_OF_LINK
+CONCLUSION_OF_LINK <- VARDECL_OF_LINK
+
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
@@ -626,7 +643,7 @@ MAXIMAL_JOIN_LINK <- JOIN_LINK
 // into assorted C++ structures. It does not have any semantics in and
 // of itself, it just holds machinery and a cache of the pre-compiled
 // pattern.
-PATTERN_LINK <- PRENEX_LINK
+PATTERN_LINK <- RULE_LINK
 
 // We subdivide patterns into two types: one type returns a TV when it
 // is evaluated.  The other type returns a set of Atoms when it is

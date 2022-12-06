@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/pattern/QueryLink.h
+ * opencog/atoms/rule/ConclusionOfLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2018, 2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,42 +19,43 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_QUERY_LINK_H
-#define _OPENCOG_QUERY_LINK_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/value/QueueValue.h>
+#ifndef _OPENCOG_CONCLUSION_OF_LINK_H
+#define _OPENCOG_CONCLUSION_OF_LINK_H
+
+#include <opencog/atoms/rule/VardeclOfLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class QueryLink : public PatternLink
+
+/// The ConclusionOfLink returns the n'th premise on the given RuleLink
+class ConclusionOfLink : public VardeclOfLink
 {
-protected:
+private:
 	void init(void);
 
-	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
+protected:
+	Handle _conclusion;
 
 public:
-	QueryLink(const HandleSeq&&, Type=QUERY_LINK);
-	QueryLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
-	QueryLink(const Handle& body, const Handle& rewrite);
+	ConclusionOfLink(const HandleSeq&&, Type=CONCLUSION_OF_LINK);
 
-	QueryLink(const QueryLink&) = delete;
-	QueryLink& operator=(const QueryLink&) = delete;
+	ConclusionOfLink(const ConclusionOfLink&) = delete;
+	ConclusionOfLink& operator=(const ConclusionOfLink&) = delete;
 
-	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace*, bool silent=false);
+	// Return the n'th conclusion of the rule.
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(QueryLink)
-#define createQueryLink CREATE_DECL(QueryLink)
+LINK_PTR_DECL(ConclusionOfLink)
+#define createConclusionOfLink CREATE_DECL(ConclusionOfLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_QUERY_LINK_H
+#endif // _OPENCOG_CONCLUSION_OF_LINK_H
