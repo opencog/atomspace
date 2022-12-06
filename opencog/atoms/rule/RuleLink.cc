@@ -107,6 +107,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		// Hunt for variables only if they were not declared.
 		// Mixing both styles together breaks unit tests.
 		_variables.find_variables(oset);
+		_vardecl = _variables.get_vardecl();
 	}
 
 	// We already know that sz==1 or greater, so if boff is that oh no
@@ -124,9 +125,21 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 /// Reduce the link; i.e. call execute on everything that it wraps.
 ValuePtr RuleLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq redset;
+	HandleSeq redbody;
+	for (const Handle& h : _body->getOutgoingSet())
+	{
+		if (h->is_type(EXECUTABLE_LINK))
+			redbody.emplace_back(HandleCast(h->execute()));
+		else
+			redbody.push_back(h);
+	}
+	Handle rbdy(as->add_link(_body->get_type(), std::move(redbody)));
 
-	for (const Handle& h : _outgoing)
+	HandleSeq redset;
+	redset.emplace_back(_vardecl);
+	redset.emplace_back(rbdy);
+
+	for (const Handle& h : _implicand)
 	{
 		if (h->is_type(EXECUTABLE_LINK))
 			redset.emplace_back(HandleCast(h->execute()));
