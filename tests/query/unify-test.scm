@@ -1,5 +1,6 @@
 ;
-; Port of UnifyUTest.cxxtest
+; unify-test.scm -- Port of UnifyUTest.cxxtest
+;
 ; Unfinished, under construction!
 ;
 ; UnifyUTest::test_unify_unordered_5 actually fails. See below. #3016
@@ -17,7 +18,7 @@
 ;      right-expr)
 ;
 ; where left-vars... are the things to be taken as variables in left-expr.
-; There's nothing like this for IndeticalLink or GetLink. We can almost
+; There's nothing like this for IdenticalLink or GetLink. We can almost
 ; get the same thing by writing
 ;
 ;   (Get
@@ -35,7 +36,7 @@
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
 
-; General setup
+; Populate AtomSpace with test data.
 (Inheritance (Concept "A") (Concept "B"))
 
 (opencog-test-runner)
