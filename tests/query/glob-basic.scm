@@ -156,6 +156,27 @@
 			(Concept "also"))))
 
 ; -----------------------------------------------------------------
+; Glob with intersection of interval with empty interval
+
+(define love-interval-glob-empty-intersection
+	(BindLink
+		(TypedVariable (Glob "$star")
+			(TypeIntersectionLink
+				(IntervalLink (Number 0) (Number -1))
+				(IntervalLink (Number 1) (Number 0))
+				(Type "ConceptNode")))
+		(ListLink
+			(Concept "I")
+			(Concept "love")
+			(Glob "$star"))
+		(ListLink
+			(Concept "Hey!")
+			(Concept "I")
+			(Concept "like")
+			(Glob "$star")
+			(Concept "also"))))
+
+; -----------------------------------------------------------------
 ; Slightly more complicated
 
 (define love-three-globs
