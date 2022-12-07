@@ -2,9 +2,13 @@ AtomSpace Examples
 ------------------
 
 This directory contains various examples and demos that illustrate
-what the AtomSpace is, and what it's capable of doing.  You will
-want to go through the contents here, as written in the order below.
-By the end, you will have a very clear idea of what the AtomSpace is!
+what the [AtomSpace](https://wiki.opencog.org/w/AtomSpace) and
+[Atomese](https://wiki.opencog.org/w/Atomese) is.  You will want to
+go through the contents here, in the order below. Keep in mind that
+*every* [Atom](https://wiki.opencog.org/w/Atom) and
+[Value](https://wiki.opencog.org/w/Value)
+[type](https://wiki.opencog.org/w/Atom_types) is documented in the
+wiki.
 
 * atomspace     - Demos of all of the basic AtomSpace features and
                   functions. VISIT THIS FIRST!!
