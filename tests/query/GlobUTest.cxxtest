@@ -62,6 +62,7 @@ public:
 	void test_glob_type(void);
 	void test_glob_interval(void);
 	void test_glob_empty_intersection(void);
+	void test_glob_empty_union(void);
 	void test_glob_typeset(void);
 	void test_glob_three_globs(void);
 	void test_glob_two_in_a_row(void);
@@ -282,6 +283,40 @@ void GlobUTest::test_glob_empty_intersection(void)
 
 	Handle response = eval->eval_h(
 		"(SetLink)"
+	);
+	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a glob with empty interval union
+ */
+void GlobUTest::test_glob_empty_union(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle love = eval->eval_h("(cog-execute! love-interval-glob-empty-union)");
+	printf("love-interval-glob-empty-union %s\n", love->to_string().c_str());
+	TS_ASSERT_EQUALS(2, love->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (NumberNode  42)"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (Concept \"you\")"
+		"    (ConceptNode \"also\")))"
 	);
 	TS_ASSERT_EQUALS(love, response);
 

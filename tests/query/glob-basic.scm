@@ -177,6 +177,28 @@
 			(Concept "also"))))
 
 ; -----------------------------------------------------------------
+; Glob with union of interval with empty interval
+
+(define love-interval-glob-empty-union
+	(BindLink
+		(TypedVariable (Glob "$star")
+			(TypeChoice
+				(IntervalLink (Number 1) (Number 1))
+				(IntervalLink (Number 1) (Number 0))
+				(Type "ConceptNode")
+				(Type "NumberNode")))
+		(ListLink
+			(Concept "I")
+			(Concept "love")
+			(Glob "$star"))
+		(ListLink
+			(Concept "Hey!")
+			(Concept "I")
+			(Concept "like")
+			(Glob "$star")
+			(Concept "also"))))
+
+; -----------------------------------------------------------------
 ; Slightly more complicated
 
 (define love-three-globs
