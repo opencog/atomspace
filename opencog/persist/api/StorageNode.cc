@@ -152,6 +152,7 @@ Handle StorageNode::fetch_atom(const Handle& h, AtomSpace* as)
 Handle StorageNode::fetch_value(const Handle& h, const Handle& key,
                                 AtomSpace* as)
 {
+	if (nullptr == as) as = getAtomSpace();
 	Handle lkey = as->add_atom(key);
 	Handle lh = as->add_atom(h);
 	loadValue(lh, lkey);
