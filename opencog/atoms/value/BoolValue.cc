@@ -73,13 +73,16 @@ bool BoolValue::operator==(const Value& other) const
 
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
-	update();
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
-	for (bool v :_value)
+	SAFE_UPDATE(rv,
 	{
-		if (v) rv += " 1";
-		else rv += " 0";
-	}
+		for (bool v :_value)
+		{
+			if (v) rv += " 1";
+			else rv += " 0";
+		}
+	});
+
 	rv += ")";
 	return rv;
 }

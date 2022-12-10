@@ -98,14 +98,17 @@ bool LinkValue::operator==(const Value& other) const
 
 std::string LinkValue::to_string(const std::string& indent) const
 {
-	update();
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
-	for (const ValuePtr& v :_value)
-		rv += v->to_short_string(more_indent) + "\n";
 
-	// Remove trailing newline before writing the last paren
-	rv.pop_back();
+	SAFE_UPDATE(rv,
+	{
+		for (const ValuePtr& v :_value)
+			rv += v->to_short_string(more_indent) + "\n";
+
+		// Remove trailing newline before writing the last paren
+		rv.pop_back();
+	});
 	rv += ")";
 	return rv;
 }

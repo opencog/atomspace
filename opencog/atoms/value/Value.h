@@ -102,6 +102,21 @@ public:
 		{ return not operator==(other); }
 };
 
+// update() might throw an exception, e.g. an IOExcpetion if a
+// StorageNode is not open. The problem is that if this was called
+// from the guile shell, there is no handler that can catch this,
+// and so guile will core-dump. So we install a handler now, and
+// avoid this ugly fate.
+#define SAFE_UPDATE(PRTSTR,PRINTER) \
+try { \
+	update(); \
+	{ PRINTER; } \
+} catch (const StandardException& ex) { \
+	PRTSTR += " \""; \
+	PRTSTR += ex.what(); \
+	PRTSTR += "\""; \
+}
+
 typedef std::vector<ValuePtr> ValueSeq;
 typedef std::set<ValuePtr> ValueSet;
 

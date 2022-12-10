@@ -91,14 +91,17 @@ bool FloatValue::operator==(const Value& other) const
 
 std::string FloatValue::to_string(const std::string& indent, Type t) const
 {
-	update();
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
-	for (double v :_value)
+	SAFE_UPDATE(rv,
 	{
-		char buf[40];
-		snprintf(buf, 40, "%.16g", v);
-		rv += std::string(" ") + buf;
-	}
+		for (double v :_value)
+		{
+			char buf[40];
+			snprintf(buf, 40, "%.16g", v);
+			rv += std::string(" ") + buf;
+		}
+	});
+
 	rv += ")";
 	return rv;
 }
