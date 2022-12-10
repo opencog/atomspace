@@ -349,11 +349,11 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Sparse Matrix tests..."
 	)
-	ADD_CUSTOM_TARGET(test_persist_sql
+	ADD_CUSTOM_TARGET(test_persist
 		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/sql
+		WORKING_DIRECTORY tests/persist/
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running SQL Persistance tests..."
+		COMMENT "Running Persistance tests..."
 	)
 	ADD_CUSTOM_TARGET(test_python
 		WORKING_DIRECTORY tests/cython
