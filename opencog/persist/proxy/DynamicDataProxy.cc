@@ -21,8 +21,6 @@
  */
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/value/FormulaStream.h>
-#include <opencog/atoms/value/FutureStream.h>
 #include <opencog/persist/proxy/DynamicDataProxy.h>
 
 using namespace opencog;
@@ -61,9 +59,8 @@ void DynamicDataProxy::getAtom(const Handle& h)
 // for ProcedureNodes that will generate dynamic data. Basically,
 // we will look for a ProcedureNode on *this proxy*, with the given key.
 // If it is found, then wrap it in an ExecutionOutputLink, using
-// it as the procedure, and the argument Atom as a argument to the
-// procedure. The wrap the whole mess in a Future, so that any access
-// to the value results in an evaluation of the ExOutLink.
+// it as the procedure, and the argument Atom as an argument to the
+// procedure. Then run it on the spot.
 void DynamicDataProxy::loadValue(const Handle& atom, const Handle& key)
 {
 	const ValuePtr& rawvp = getValue(key);
@@ -77,23 +74,14 @@ void DynamicDataProxy::loadValue(const Handle& atom, const Handle& key)
 	}
 
 	// Ah! Its a procedure! Make it executable!
+// XXX TODO ... create this in some temp atomspace...
 	Handle exo = _atom_space->add_link(EXECUTION_OUTPUT_LINK,
 		HandleCast(rawvp),
 		createLink(LIST_LINK, atom));
 
-	// Stick it in a future. Be careful with the type. Anything that
-	// is a NumericOutputLink will normally result in a FloatValue;
-	// thus a FormulaStream is appropriate. Everything else gets the
-	// plainer FutureStream.
-	if (rawvp->is_type(NUMERIC_OUTPUT_LINK))
-	{
-		ValuePtr fut = createFormulaStream(exo);
-		_atom_space->set_value(atom, key, fut);
-		return;
-	}
-
-	ValuePtr fut = createFutureStream(exo);
-	_atom_space->set_value(atom, key, fut);
+	// Run it. Store that result.
+	ValuePtr computed_vp = exo->execute(_atom_space);
+	_atom_space->set_value(atom, key, computed_vp);
 }
 
 DEFINE_NODE_FACTORY(DynamicDataProxy, DYNAMIC_DATA_PROXY_NODE)
