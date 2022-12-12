@@ -21,6 +21,39 @@ but that would be ugly and counter-productive.)
 
 Object Basics
 =============
-The actual code 
+The actual code in matrix is written in scheme, and uses a peculiar OO
+programming style variously called
+[Generic Programming](https://en.wikipedia.org/wiki/Generic_programming),
+[Parametric Polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism)
+or [Traits](https://en.wikipedia.org/wiki/Trait_(computer_programming)).
+In short, it is an OO style similar to that of JavaScript, rather than of
+C++.
+
+
+How might this work in Atomese?  Maybe like this:
+```
+(DefineLink
+	(DefinedMethodLink
+		(PredicateNode "some object instance")
+		(PredicateNode "some method"))
+	(LambdaLink
+		(VariableList ...)
+		... atomese ...))
+```
+The `DefinedMethodLink` isn't really needed; one could just use a
+`ListLink` and this would work just fine, today. But it's convenient to
+have a special link type devoted to this task.
+
+Invocation of the object-instance+method paure is "just like always", with
+the [ExecutionOutputLink](https://wiki.opencog.org/w/ExecutionOutputLink):
+```
+(cog-execute!
+	(ExecutionOutputLink
+		(DefinedMethodLink
+			(PredicateNode "some object instance")
+			(PredicateNode "some method"))
+		(ListLink
+			... method args ...)))
+```
 
 
