@@ -34,7 +34,7 @@ How might this work in Atomese?  Maybe like this:
 ```
 (DefineLink
 	(DefinedMethodLink
-		(PredicateNode "some object instance")
+		(PredicateNode "some object classname")
 		(PredicateNode "some method"))
 	(LambdaLink
 		(VariableList ...)
@@ -50,9 +50,10 @@ the [ExecutionOutputLink](https://wiki.opencog.org/w/ExecutionOutputLink):
 (cog-execute!
 	(ExecutionOutputLink
 		(DefinedMethodLink
-			(PredicateNode "some object instance")
+			(PredicateNode "some object classname")
 			(PredicateNode "some method"))
 		(ListLink
+			(Predicate "some object instance")
 			... method args ...)))
 ```
 
@@ -98,7 +99,110 @@ methods:
 * And many more; See the [object-api.scm](../matrix/object-api.scm] file
   for the starter set.
 
+Example
+-------
+Lets asume the simplest case, where the matrix is in the form of the
+`EvaluationLink` shown above. One would then have:
+
+```
+(DefineLink
+	(DefinedMethodLink
+		(Predicate "*-Basic Pairs Matrix-*")
+		(Predicate "*-left-element-*"))
+	(Lambda
+		(Variable "$matrix-entry") ; This will be the EvaluationLink;
+		(OutgoingOf
+			(OutgoingOf (Variable "$matrix-entry") (Number 1)) ; the ListLink
+			(Number 0))  ; first item in the ListLink.
+	))
+```
+
+To run this:
+```
+(cog-execute!
+	(ExecutionOutputLink
+		(DefinedMethodLink
+			(Predicate "*-Basic Pairs Matrix-*")
+			(Predicate "*-left-element-*"))
+		(EvaluationLink
+			(Predicate "word pairs matrix")
+			(List
+				(Word "blue")
+				(Word "sky")))))
+```
+This would return `(Word "blue")` upon execution.
+
+
+This is perhaps a terrible example, as the definition requires the
+(non-existant) `OutgoingOfLink`.  We could create this link (and maybe we
+should, because it seems so "natural"?) but we could also use MapLink
+to do this (?)
+
+```
+(DefineLink
+	(DefinedMethodLink
+		(Predicate "*-Basic Pairs Matrix-*")
+		(Predicate "*-left-element-*"))
+	(Lambda
+		(Variable "$matrix-entry") ; This will be the EvaluationLink;
+		; The MapLink will extract the left elt.
+		(MapLink
+			(ImplicationScopeLink
+				;; Variables in the pattern
+				(VariableList
+					(Variable "$pred") (Variable "$left") (Variable "$right"))
+				;; The matrix pattern to match.
+				(Evaluation
+					(Variable "$pred")
+					(List (Variable "$left") (Variable "$right")))
+				;; The rewrite -- what to return, after pattern matching.
+				(Variable "$left"))
+			(Variable "$matrix-entry"))))
+```
+
+Also, this form is possible:
+```
+(DefineLink
+	(DefinedMethodLink
+		(Predicate "*-Basic Pairs Matrix-*")
+		(Predicate "*-left-element-*"))
+	(Lambda
+		(Variable "$matrix-entry") ; This will be the EvaluationLink;
+		; The UnifierLink will extract the left elt.
+		(UnifierLink
+			(Lambda
+				;; Variables in the pattern
+				(VariableList
+					(Variable "$pred") (Variable "$left") (Variable "$right"))
+				;; The matrix pattern to match.
+				(Evaluation
+					(Variable "$pred")
+					(List (Variable "$left") (Variable "$right"))))
+
+			;; What to unify against
+			(Variable "$matrix-entry")
+
+			;; The unifer re-write -- What to return, after pattern matching.
+			(Variable "$left"))))
+```
+
+All three of these forms should "just work".
+
 
 Ancillary Nodes and Links
 -------------------------
+A better name for `OutgoingOf` would be `ElementOf` and it would work on
+Values as well as Atoms.  Thus, for example, to draw a random Atom out of
+an AtomSpace, write:
+```
+(ElementOf
+	(AtomSpace "foo")
 
+	;; Draw a random number between 0 and the size of the atomspace.
+	(RandomNumberLink
+		(Number 0)
+		(SizeOf (AtomSpace "foo"))))
+```
+
+
+Also useful would be `IncomingSetOf` which would return a `LinkValue`.
