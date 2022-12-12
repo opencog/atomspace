@@ -204,5 +204,17 @@ an AtomSpace, write:
 		(SizeOf (AtomSpace "foo"))))
 ```
 
+`ElementOf` can work with vectors, and so it is "just like" the
+already-existing `DecimateLink`, except that it specifies the bit locations
+in the decimate mask.
 
 Also useful would be `IncomingSetOf` which would return a `LinkValue`.
+
+TODO
+----
+* Implement ElementOf and IncomingSet Of.
+* Modernize MapLink. Make sure it can work with LinkValues, and so that
+  it works like a filter link.
+* Rename MapLink to FilterMapLink or just FilterLink
+* Change BoolValue so it can create maskes from bit-specs!?
+* Change NumberOfLink so it can convert bool masks to element numbers ??
