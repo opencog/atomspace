@@ -2,7 +2,7 @@
 (use-modules (opencog) (opencog exec))
 
 (define single
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(Variable "$x")
 			(EvaluationLink
@@ -14,7 +14,7 @@
 )
 
 (define single-set
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(Variable "$x")
 			(EvaluationLink
@@ -36,7 +36,7 @@
 
 ; Like above but does filtering.
 (define single-set-filter
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(Variable "$x")
 			(EvaluationLink
@@ -58,7 +58,7 @@
 
 ; Same as above, but implicit scoping
 (define single-set-noscope
-	(MapLink
+	(FilterLink
 		(EvaluationLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Variable "$x")))
@@ -78,7 +78,7 @@
 
 ; Like above but does implicit scope and filtering.
 (define single-set-filter-noscope
-	(MapLink
+	(FilterLink
 		(EvaluationLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Variable "$x")))
@@ -97,7 +97,7 @@
 )
 
 (define single-list
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(Variable "$x")
 			(EvaluationLink
@@ -117,7 +117,7 @@
 )
 
 (define single-type
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
 			(EvaluationLink
@@ -137,7 +137,7 @@
 )
 
 (define single-signature
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(TypedVariable (Variable "$x")
 				(SignatureLink
@@ -170,7 +170,7 @@
 )
 
 (define double-num-set
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
@@ -192,7 +192,7 @@
 )
 
 (define double-con-set
-	(MapLink
+	(FilterLink
 		(ScopeLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
@@ -214,11 +214,11 @@
 )
 
 ;; -------------------------------------------------------------
-;; ImplicationLink tests.
+;; RuleLink tests.
 
 (define imply-map
-	(MapLink
-		(ImplicationScopeLink
+	(FilterLink
+		(RuleLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
@@ -253,8 +253,8 @@
 )
 
 (define imply-eval
-	(MapLink
-		(ImplicationScopeLink
+	(FilterLink
+		(RuleLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
@@ -286,11 +286,11 @@
 )
 
 ;; -------------------------------------------------------------
-;; Implicit-variable ImplicationLink tests.
+;; Implicit-variable RuleLink tests.
 
 (define imply-map-nodecl
-	(MapLink
-		(ImplicationScopeLink
+	(FilterLink
+		(RuleLink
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
@@ -313,8 +313,8 @@
 ; Above expects "imply-expected"
 
 (define imply-glob-nodecl
-	(MapLink
-		(ImplicationScopeLink
+	(FilterLink
+		(RuleLink
 			(EvaluationLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Glob "$y")))
@@ -352,7 +352,7 @@
 ;; Assorted glob tests
 
 (define glob-simple
-	(MapLink
+	(FilterLink
 		(EvaluationLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif")))
 		(SetLink
@@ -374,7 +374,7 @@
 	))
 
 (define glob-simple-tail
-	(MapLink
+	(FilterLink
 		(EvaluationLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x")))
 		(SetLink
@@ -398,7 +398,7 @@
 	))
 
 (define glob-double
-	(MapLink
+	(FilterLink
 		(EvaluationLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
 		(SetLink
@@ -420,7 +420,7 @@
 	))
 
 (define glob-glob
-	(MapLink
+	(FilterLink
 		(EvaluationLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
 		(SetLink
@@ -458,7 +458,7 @@
 	))
 
 (define local-quote-map
-(MapLink
+(FilterLink
   (LambdaLink
     (VariableList
       (VariableNode "$X")
@@ -488,7 +488,7 @@
     (ConceptNode "B") (ConceptNode "A")))
 
 (define quote-arg-map
-(MapLink
+(FilterLink
   (LambdaLink
     (VariableList
       (VariableNode "$X")
