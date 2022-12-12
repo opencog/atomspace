@@ -259,8 +259,8 @@ frames.  It will take some work to do this.)
 In the meanwhile, some awkward examples of searching, querying,
 filtering and mapping, done sideways.
 
-* `filter.scm`         -- Filtering sets of atoms with PutLink.
-* `map.scm`            -- Extracting and re-writing with MapLink.
+* `put-filter.scm`     -- Using PutLink to filter sets of atoms.
+* `filter.scm`         -- Extracting and re-writing with FilterLink.
 
 Unfinished examples
 -------------------
