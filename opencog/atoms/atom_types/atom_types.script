@@ -737,6 +737,13 @@ ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
 // only one connectable thing at a time.
 SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 
+// Short-hand for above: (SignNode 'BlahLink) is shorthand for
+// (SignatureLink (TypeNode 'BlahLink)). This can be used in any
+// pattern match that needs a variable region, but does not need
+// to know what is matched there. That is, an "un-named variable",
+// a variable without a name binding.
+SIGN_NODE <- TYPE_NODE
+
 // A type binder: it binds a type to a VariableNode. Always arity-2,
 // the first position must be a VariableNode, the second must be a type.
 // Note that this is always scoped, i.e. used in lambdas and places
@@ -755,7 +762,8 @@ TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // An arity-2 link, used for specifying numeric intervals, that is,
 // the lower and upper bounds of some range. Currently used for
-// specifying GlobNode counts.
+// specifying GlobNode counts. However, now that NumberNodes are
+// vectors, this isn't really needed, although it is convenient.
 INTERVAL_LINK <- ORDERED_LINK
 
 // ====================================================================
