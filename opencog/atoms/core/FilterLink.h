@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/MapLink.h
+ * opencog/atoms/core/FilterLink.h
  *
  * Copyright (C) 2015,2016 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EXTRACT_LINK_H
-#define _OPENCOG_EXTRACT_LINK_H
+#ifndef _OPENCOG_FILTER_LINK_H
+#define _OPENCOG_FILTER_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/ScopeLink.h>
@@ -33,14 +33,14 @@ namespace opencog
  *  @{
  */
 
-/// The MapLink is a FunctionLink that undoes beta-reduction; it
+/// The FilterLink is a FunctionLink that undoes beta-reduction; it
 /// can be used to "extract" the values that occupy certain variable
 /// locations in a formula.  It is the "opposite" of PutLink, in that
 /// PutLink substitutes values for variables; whereas this link holds
 /// a template pattern, which can be compared to an input, and values 
 /// are extracted for the variable locations.
 ///
-class MapLink : public FunctionLink
+class FilterLink : public FunctionLink
 {
 protected:
 	ScopeLinkPtr _pattern;
@@ -55,7 +55,7 @@ protected:
 
 	void init(void);
 
-	MapLink(Type, const Handle&);
+	FilterLink(Type, const Handle&);
 
 	bool extract(const Handle&, const Handle&, GroundingMap&,
 	             Quotation quotation=Quotation()) const;
@@ -63,10 +63,10 @@ protected:
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 
 public:
-	MapLink(const HandleSeq&&, Type=MAP_LINK);
-	MapLink(const Handle& pattern, const Handle& term);
-	MapLink(const MapLink&) = delete;
-	MapLink operator=(const MapLink&) = delete;
+	FilterLink(const HandleSeq&&, Type=FILTER_LINK);
+	FilterLink(const Handle& pattern, const Handle& term);
+	FilterLink(const FilterLink&) = delete;
+	FilterLink operator=(const FilterLink&) = delete;
 
 	// Align the pattern and the term side-by-side, and extract the
 	// values that match up with the variables.  If the term is not of
@@ -76,10 +76,10 @@ public:
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(MapLink);
-#define createMapLink CREATE_DECL(MapLink)
+LINK_PTR_DECL(FilterLink);
+#define createFilterLink CREATE_DECL(FilterLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_EXTRACT_LINK_H
+#endif // _OPENCOG_FILTER_LINK_H
