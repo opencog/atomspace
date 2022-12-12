@@ -9,12 +9,12 @@ ADD_LIBRARY (atomcore
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
+	FilterLink.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
 	FunctionLink.cc
 	LambdaLink.cc
-	MapLink.cc
 	NumberNode.cc
 	PrenexLink.cc
 	PresentLink.cc
@@ -58,12 +58,12 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
+	FilterLink.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h
 	FunctionLink.h
 	LambdaLink.h
-	MapLink.h
 	NumberNode.h
 	PrenexLink.h
 	PresentLink.h
