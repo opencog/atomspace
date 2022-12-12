@@ -122,7 +122,7 @@ Handle Replacement::substitute_scoped(Handle term,
 	{
 		// GlobNodes are matched with a list of one or more arguments.
 		// Those arguments need to be in-lined, stripping off the list
-		// that wraps them up.  See MapLinkUTest for examples.
+		// that wraps them up.  See FilterLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
 			Handle glst(substitute_scoped(h, args, *index_map_ptr, quotation));

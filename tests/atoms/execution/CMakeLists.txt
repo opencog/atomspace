@@ -1,4 +1,4 @@
 LINK_LIBRARIES(execution smob atomspace)
 
 ADD_CXXTEST(DefinedSchemaUTest)
-ADD_CXXTEST(MapLinkUTest)
+ADD_CXXTEST(FilterLinkUTest)
