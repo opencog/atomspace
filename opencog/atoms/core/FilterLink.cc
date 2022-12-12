@@ -55,17 +55,17 @@ void FilterLink::init(void)
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
 
-	// ImplicationScopeLinks are a special type of ScopeLink.  They specify
-	// a re-write that should be performed.  Viz, ImplicationScopeLinks are
+	// RuleLinks are a special type of ScopeLink.  They specify a
+	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	_is_impl = false;
-	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
+	if (nameserver().isA(tscope, RULE_LINK))
 	{
 		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
 		if (impl.size() < 2)
 			throw SyntaxException(TRACE_INFO,
-				"Expecting ImplicationLink of at least size 2.");
+				"Expecting a RuleLink of at least size 2.");
 
 		// ImplicationScopeLinks have arity 2 only if they have no type
 		// constraints, else they have arity 3.  That is, an

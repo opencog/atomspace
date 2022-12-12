@@ -31,7 +31,7 @@
 		; Define a pattern that will be used to extract a value
 		; from a pattern. The extracted value will correspond to
 		; the place-holder variable $x.
-		(Scope
+		(Lambda
 			(Variable "$x")
 			(Evaluation
 				(Predicate "foo")
@@ -50,7 +50,7 @@
 (define single-set
 	(Filter
 		; The same pattern as above.  Extracts values for variable $x.
-		(Scope
+		(Lambda
 			(Variable "$x")
 			(Evaluation
 				(Predicate "foo")
@@ -84,7 +84,7 @@
 ; of the list is preserved by the mapping.
 (define single-list
 	(Filter
-		(Scope
+		(Lambda
 			(Variable "$x")
 			(Evaluation
 				(Predicate "foo")
@@ -113,7 +113,7 @@
 ; that don't match the type are discarded.
 (define single-type
 	(Filter
-		(Scope
+		(Lambda
 			; The type of the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
 			(Evaluation
@@ -155,7 +155,7 @@
 ;
 (define single-signature
 	(Filter
-		(Scope
+		(Lambda
          ; The variable $x must be an evaluation of a certain form!
 			(TypedVariable (Variable "$x")
 				(Signature
@@ -196,7 +196,7 @@
 ; which is typed to be a concept, and the other a number.
 (define double-num-set
 	(Filter
-		(Scope
+		(Lambda
 			; Two variables, $x and $y, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
@@ -239,7 +239,7 @@
 ; sometimes, we expect two answers, not one.
 (define double-con-set
 	(Filter
-		(Scope
+		(Lambda
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
