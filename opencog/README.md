@@ -227,11 +227,11 @@ This directory contains core AtomSpace code.  Unit tests are in the
 important subdirectories:
 
 <dl>
-<dt>atoms/proto<dd>Defines Values (the base class for Atoms). Defines
-                   the atom type hierarchy.  Everything else depends
-                   on this.
+<dt>atoms/atom_types<dd>Defines the atom type hierarchy.
 
-<dt>atoms/base <dd>Defines the basic atoms: nodes, links, and handles.
+<dt>atoms/value<dd>Defines Values; these are the base class for Atoms.
+
+<dt>atoms/base <dd>Defines the basic atoms: Nodes and Links.
 
 <dt>atoms/core <dd>Assorted special-case atoms, defined as C++ classes.
                    These typically cache some special information,
@@ -240,10 +240,10 @@ important subdirectories:
 
 <dt>atomspace  <dd>The in-RAM database or "symbol table" that holds
                    atoms. It assures that only one version of any
-                   given atom can ever be found.
+                   given atom can ever be found in an AtomSpace.
 
 <dt>persist    <dd>Methods for communication between servers, also,
-                   saving/restoring the atomspace to databases.
+                   saving/restoring the AtomSpace to disk/databases.
 
 <dt>query      <dd>Pattern matching for the atomspace. Allows for
                    specific patterns to be extracted from the atomspace.
@@ -253,6 +253,10 @@ important subdirectories:
                    (sparse) matrix, *e.g.* a covariance/correlation
                    matrix, allowing statistical matrix analysis
                    (PCA, SVD, etc.) to be performed on this subset.
+
+<dt>object-atomese  <dd>Proposal for object-oriention in Atomese.
+                    Goal is to allow porting of the matrix API to pure
+                    Atomese.
 
 <dt>sheaf      <dd>Infer the grammar of a (hidden) dynamic network, by
                    means of sections of sheaves. Intended for generic
