@@ -216,5 +216,6 @@ TODO
 * Modernize MapLink. Make sure it can work with LinkValues, and so that
   it works like a filter link.
 * Rename MapLink to FilterMapLink or just FilterLink
+* RuleLink is the same thing as ImplicationScope
 * Change BoolValue so it can create maskes from bit-specs!?
 * Change NumberOfLink so it can convert bool masks to element numbers ??

@@ -921,6 +921,11 @@ ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 // etc. Declare that, so the static typechecker passes.
 DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 
+// Same as above, but instead of specifying a mask, the input is a
+// vector holding the index offsets of the mask bits. I.e. the input is
+// a list of indexes of items to keep.
+ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
+
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
@@ -947,11 +952,14 @@ COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 // or a Value, return the length of the underlying vector.
 SIZE_OF_LINK <- FLOAT_VALUE_OF_LINK
 
-// Inverse of the above; convert a FloatValue to a NumberNode
-NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
 // Return the type of the wrapped Atom
 TYPE_OF_LINK <- VALUE_OF_LINK
+
+// Grab an InclomingSet of an Atom, and return it as a LinkValue.
+INCOMING_OF_LINK <- VALUE_OF_LINK
+
+// Convert a FloatValue to a NumberNode
+NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Like the above, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either
@@ -1006,12 +1014,16 @@ COND_LINK <- FUNCTION_LINK
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 
-// MapLink could be named UnPutLink ... it undoes a beta-reduction,
-// by extracting Values for a given set of variables.  In many ways,
-// it resembles a GetLink, except that it searches only its argument
-// list, instead of the entire AtomSpace.  It is more-or-less analogous
-// to the standard functional-programming concept of "map".
-MAP_LINK <- FUNCTION_LINK
+// FilterLink was called MapLink (but this name was wrong) or
+// FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
+// reduction, by extracting Values for a given set of variables.
+// In many ways,  it resembles a GetLink, except that it searches
+// only its argument list, instead of the entire AtomSpace.
+//
+// MapLink, because it resembles the standard functional-programming
+// concept of "map", except that it discard unmatchable entries, so
+// it's really FilterMapLink. That's a mouthful, so we go with FilterLink.
+FILTER_LINK <- FUNCTION_LINK
 
 // ==============================================================
 // Procedure and schema nodes.
@@ -1093,21 +1105,22 @@ DIRECTLY_EVALUATABLE_LINK <- LINK
 // for more information
 IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
-// ImplicationScopeLink should be moved to PLN at earliest
-// convenience. XXX FIXME.
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+// ImplicationScopeLink is a synonym for RuleLink, as far as I can tell.
+// It is used by PLN to do more or less the same thig as RuleLink.
+// At any rate, it should be moved there. XXX FIXME.
+IMPLICATION_SCOPE_LINK <- RULE_LINK
 
 INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
 // Logical quantifiers (adjoints to pullbacks of relations). Both are
 // scoped.
 //
-// Exists == left adjoint to the pullback functor of a relation.
-//           Note that PRESENT_LINK below is the unscoped variant
-//           of this, used in the pattern matcher.
-// ForAll == right adjoint to the pullback functor of a relation.
-//           Note that ALWAYS_LINK below is the unscoped variant
-//           of this, used in the pattern matcher.
+// Exists == left adjoint to the pullback functor of a relation. (The
+//           set-membership relation.) Note that PRESENT_LINK above is
+//           the unscoped variant of this, used in the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation. (The
+//           set-membership relation.) Note that ALWAYS_LINK below is
+//           the unscoped variant of this, used in the pattern matcher.
 //
 // At least, that's the fancy definition. It's not used anywhere. The
 // plain definition is just the conventional first-order-logic definition.
@@ -1116,7 +1129,7 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // for knowledge representation.
 //
 // In reality, its a mish-mash. Currently, these are used only in unit
-// tests.  They're somwhate poorly defined. They are currently defined
+// tests.  They're somwhat poorly defined. They are currently defined
 // to inherit from CollectionLink, thus allowing them to be set-valued,
 // and used in probabilistic contexts.
 FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
