@@ -240,5 +240,8 @@ TODO
 * Implement ElementOf and IncomingSet Of.
 * Modernize FilterLink. Make sure it can work with LinkValues, and so that
   it works like a filter link.
+* Handle SignLink
+* Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
 * Change NumberOfLink so it can convert bool masks to element numbers ??
+* Most FunctionLinks need to be able to handle streams i.e. QueueValues.
