@@ -35,10 +35,6 @@ Local subdirectories include:
               with Atomese. That is, it allows complex Atomese scripts
               to be written, that will work with Storage.
 
-* gearman  -- Experimental support for distributed operation, using
-              GearMan. Unused, unsupported, deprecated, more or less.
-              If you are interested in this, contact the mailing list.
-
 * json     -- Read and write Atomese JSON expressions. Suitable for
               web applications. Note, however, the `sexpr` interface
               is superior for performance and function.
