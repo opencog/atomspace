@@ -415,7 +415,6 @@ SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.1)"
 	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
-	"libgearman-dev (>=1.0.6)"
 	"libpq-dev (>=9.3.24)"
 	"libcogutil-dev (>= 2.0.2)"
 )
