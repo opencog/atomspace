@@ -150,20 +150,6 @@ ELSE (FOLLY_FOUND)
 ENDIF (FOLLY_FOUND)
 
 # ----------------------------------------------------------
-# Optional, unused distributed processing framework.
-
-FIND_PACKAGE(LibGearman)
-IF(GEARMAN_FOUND)
-	SET(HAVE_GEARMAN 1)
-	ADD_DEFINITIONS(-DHAVE_GEARMAN)
-	SET(GEARMAN_DIR_MESSAGE "Gearman found.")
-ELSE (GEARMAN_FOUND)
-	SET(HAVE_GEARMAN 0)
-	SET(GEARMAN_DIR_MESSAGE "Gearman not found.")
-ENDIF(GEARMAN_FOUND)
-MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
-
-# ----------------------------------------------------------
 # Find Guile
 include(OpenCogFindGuile)
 
@@ -450,7 +436,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 # SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
-SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
