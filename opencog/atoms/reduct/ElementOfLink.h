@@ -18,14 +18,16 @@ namespace opencog
  */
 
 /**
- * The ElementOfLink implements a sum over a numeric series.
- *    (ElementOf (Number a b c))  is just a+b+c.
+ * The ElementOfLink implements the selection of elements out of a vector
+ *    (ElementOf (Number 0 2 3) (Vector a b c d)) is just (Vector a c d)
+ * The indexes to keep are listed in the first argument. Similar to
+ * DecimateLink, except DecimateLink uses a bitmask.
  */
 class ElementOfLink : public Link
 {
 protected:
 	void init(void);
-	ValuePtr do_execute(const std::vector<bool>&, const ValuePtr&);
+	ValuePtr do_execute(const std::vector<double>&, const ValuePtr&);
 
 public:
 	ElementOfLink(const Handle&, const Handle&);

@@ -18,8 +18,11 @@ namespace opencog
  */
 
 /**
- * The DecimateLink implements a sum over a numeric series.
- *    (Decimate (Number a b c))  is just a+b+c.
+ * The DecimateLink implements the masking out of elements of a vector.
+ * (Decimate (BoolValue 1 0 1 1) (Vector a b c d)) is just (Vector a c d)
+ * The vector elements to keep are given by a bit-mask.  Similar to
+ * ElementOfLink, except that the ElementOfLink specifies the index of
+ * elements to select.
  */
 class DecimateLink : public Link
 {
