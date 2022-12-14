@@ -1,7 +1,7 @@
 ;
-; bool-library.scm -- Test assorted BoolValue logic ops
+; bool-library-test.scm -- Test assorted BoolValue logic ops.
 ;
-; To run by hand, just say `guile -s bool-library.scm`.
+; To run by hand, just say `guile -s bool-library-test.scm`.
 ;
 
 (use-modules (srfi srfi-1))

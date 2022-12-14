@@ -8,4 +8,5 @@ IF(HAVE_GUILE)
 
 	ADD_GUILE_TEST(BoolLibraryTest bool-library-test.scm)
 	ADD_GUILE_TEST(MathLibraryTest math-library-test.scm)
+	ADD_GUILE_TEST(ElementOfTest element-of-test.scm)
 ENDIF(HAVE_GUILE)
