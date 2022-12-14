@@ -1,7 +1,7 @@
 ;
-; math-library.scm -- Test assorted elementary arithmetic functions
+; math-library-test.scm -- Test assorted elementary arithmetic functions
 ;
-; To run by hand, just say `guile -s math-library.scm`.
+; To run by hand, just say `guile -s math-library-test.scm`.
 ;
 
 (use-modules (srfi srfi-1))

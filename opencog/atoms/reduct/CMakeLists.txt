@@ -8,6 +8,7 @@ ADD_LIBRARY (clearbox
 	BoolOpLink.cc
 	DecimateLink.cc
 	DivideLink.cc
+	ElementOfLink.cc
 	FoldLink.cc
 	ImpulseLink.cc
 	MaxLink.cc
@@ -39,6 +40,7 @@ INSTALL (FILES
 	BoolOpLink.h
 	DecimateLink.h
 	DivideLink.h
+	ElementOfLink.h
 	FoldLink.h
 	ImpulseLink.h
 	MaxLink.h
