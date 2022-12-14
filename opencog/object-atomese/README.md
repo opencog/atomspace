@@ -237,7 +237,7 @@ Also useful would be `IncomingSetOf` which would return a `LinkValue`.
 
 TODO
 ----
-* Implement ElementOf and IncomingSet Of.  See #2752 for API
+* Implement IncomingSet Of.  See #2752 for API
 * Modernize FilterLink. Make sure it can work with LinkValues, and so that
   it works like a filter link. See #2201
 * Handle SignLink See issue #2602
