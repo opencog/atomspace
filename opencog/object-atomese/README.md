@@ -135,7 +135,7 @@ This would return `(Word "blue")` upon execution.
 
 This is perhaps a terrible example, as the definition requires the
 (non-existant) `OutgoingOfLink`.  We could create this link (and maybe we
-should, because it seems so "natural"?) but we could also use MapLink
+should, because it seems so "natural"?) but we could also use FilterLink
 to do this (?)
 
 ```
@@ -145,8 +145,8 @@ to do this (?)
 		(Predicate "*-left-element-*"))
 	(Lambda
 		(Variable "$matrix-entry") ; This will be the EvaluationLink;
-		; The MapLink will extract the left elt.
-		(MapLink
+		; The FilterLink will extract the left elt.
+		(FilterLink
 			(ImplicationScopeLink
 				;; Variables in the pattern
 				(VariableList
@@ -186,7 +186,32 @@ Also, this form is possible:
 			(Variable "$left"))))
 ```
 
-All three of these forms should "just work".
+We can get rid of th unused, un-needed variables:
+
+```
+(DefineLink
+	(DefinedMethodLink
+		(Predicate "*-Basic Pairs Matrix-*")
+		(Predicate "*-left-element-*"))
+	(Lambda
+		(Variable "$matrix-entry") ; This will be the EvaluationLink;
+		; The FilterLink will extract the left elt.
+		(FilterLink
+			(ImplicationScopeLink
+				;; Variable that we will bind.
+				(Variable "$left")
+				;; The matrix pattern to match.
+				(Evaluation
+					(SignatureLink (TypeNode 'PredicateNode))
+					(List (Variable "$left") (SignatureLink (TypeNode 'WordNode))))
+				;; The rewrite -- what to return, after pattern matching.
+				(Variable "$left"))
+			(Variable "$matrix-entry"))))
+```
+
+All four of these forms should "just work".
+
+NB SignNode is a synonym for (SignatureLink (TypeNode 'foo))
 
 
 Ancillary Nodes and Links
@@ -212,9 +237,11 @@ Also useful would be `IncomingSetOf` which would return a `LinkValue`.
 
 TODO
 ----
-* Implement ElementOf and IncomingSet Of.
-* Modernize MapLink. Make sure it can work with LinkValues, and so that
-  it works like a filter link.
-* Rename MapLink to FilterMapLink or just FilterLink
+* Implement IncomingSet Of.  See #2752 for API
+* Modernize FilterLink. Make sure it can work with LinkValues, and so that
+  it works like a filter link. See #2201
+* Handle SignLink See issue #2602
+* Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
 * Change NumberOfLink so it can convert bool masks to element numbers ??
+* Most FunctionLinks need to be able to handle streams i.e. QueueValues.

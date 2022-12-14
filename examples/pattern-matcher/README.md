@@ -234,33 +234,32 @@ for them.
 
 Filtering and Mapping
 ---------------------
-Given a set of Atoms, one might want to filter out only portions of that
-set. This can be done with `FilterLink`.  Given a set of Atoms, one
-might want to apply some transformation to that set. This can be done
-with `MapLink`.  This somewhat resembles the filtering predicates and
-mapping functions found in
-[srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `MapLink`
+Given a set or vector or stream of Atoms, one might want to filter out
+only portions of that stream. This can be done with either `PutLink` or
+with `FilterLink`, the latter being more general.  Given a stream or
+vector of Atoms, one might want to apply some transformation to that set.
+This can be done with `FilterLink` in combination with `RuleLink`.  This
+somewhat resembles the filtering predicates and mapping functions found
+in [srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `FilterLink`
 is particularly interesting: it can be though of as an `UnPutLink`, to
 undo the effects of a `PutLink`, that is, to extract data.
 
-These two links are kind-of deprecated. They are a historical
-experiment, and they overlap some of the core pattern matcher
-functionality, but limiting it to just a subspace of the AtomSpace.
-There is an open issue to resolve this situation, by providing a
-unified interface that allows sub-spaces of the AtomSpace to be
-specified. The goal is to allow subspaces to be thought of as contexts
-or as "general frames".
+These link types are similar to, but different from `QueryLink`, `GetLink`,
+`BindLink` and related. The `QueryLink` etal. apply their pattern
+operations to the entire AtomSpace, whereas the `FilterLink` applies it
+only to the provided set or vector or stream. So, conceptually related,
+but used in a different way.
 
-(The pattern matcher implicitly implements a certain kind of modal
-logic, under the covers and invisibly to the user.  May as well come
-out of the closet about that, and allow full-blown contexts and general
-frames.  It will take some work to do this.)
+The code base that implements `FilterLink` is disjoint from that for
+`QueryLink`, and so, although they are conceptually similar, there will be
+defacto differences, including bugs and supported features (e.g. handling
+of `QuoteLink`s.)  Filtering is much (much!) easier than querying, as the
+list of candidates are presented directly to the filter. Filtering is also
+a kind-of one-sided unification, and thus simpler than full-fledged
+(symmetric) unification.
 
-In the meanwhile, some awkward examples of searching, querying,
-filtering and mapping, done sideways.
-
-* `filter.scm`         -- Filtering sets of atoms with PutLink.
-* `map.scm`            -- Extracting and re-writing with MapLink.
+* `put-filter.scm`     -- Using PutLink to filter sets of atoms.
+* `filter.scm`         -- Extracting and re-writing with FilterLink.
 
 Unfinished examples
 -------------------
