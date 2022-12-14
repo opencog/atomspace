@@ -921,6 +921,11 @@ ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 // etc. Declare that, so the static typechecker passes.
 DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 
+// Same as above, but instead of specifying a mask, the input is a
+// vector holding the index offsets of the mask bits. I.e. the input is
+// a list of indexes of items to keep.
+ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
+
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
