@@ -59,16 +59,14 @@ void FilterLink::init(void)
 	// RuleLinks are a special type of ScopeLink.  They specify a
 	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
-	_is_impl = false;
 	if (nameserver().isA(tscope, RULE_LINK))
-	{
-		_is_impl = true;
-		_rewrite = RuleLinkCast(_pattern)->get_implicand()[0];
-	}
+		_rewrite = RuleLinkCast(_pattern)->get_implicand();
 
+	// The URE ControlPolicyUTest makes use of this, and we cannot
+	// yet use RuleLink, above, to handle this, because then
+	// the URE BackwardChainerUTest hangs. Argh...
 	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
-		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
 		if (impl.size() < 2)
 			throw SyntaxException(TRACE_INFO,
@@ -80,14 +78,14 @@ void FilterLink::init(void)
 		// where T(x) is the type constraints on the variables.
 		if (_pattern->get_body() == impl[0])
 		{
-			_rewrite = impl[1];
+			_rewrite.push_back(impl[1]);
 		}
 		else if (_pattern->get_body() == impl[1])
 		{
 			if (impl.size() < 3)
 				throw SyntaxException(TRACE_INFO,
 					"Expecting ImplicationScopeLink of at least size 3.");
-			_rewrite = impl[2];
+			_rewrite.push_back(impl[2]);
 		}
 	}
 
@@ -341,21 +339,27 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 			valseq.emplace_back(valpair->second);
 	}
 
-	// Perform substitution, if it's an ImplicationScopeLink
-	if (_is_impl)
-	{
-		// Beta reduce, and execute. No type-checking during
-		// beta-reduction; we've already done that.
-		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-		return HandleCast(inst.execute(red));
-	}
-
 	// Make sure each variable is grounded. (for real, this time)
 	if (partial)
 		return Handle::UNDEFINED;
 
-	// Wrap up the result in a list only if there is more than one
-	// variable.
+	// Perform substitution, if it's a RuleLink.
+	if (not _rewrite.empty())
+	{
+		HandleSeq rew;
+		// Beta reduce, and execute. No type-checking during
+		// beta-reduction; we've already done that.
+		for (const Handle& impl : _rewrite)
+		{
+			Handle red(_mvars->substitute_nocheck(impl, valseq));
+			rew.emplace_back(HandleCast(inst.execute(red)));
+		}
+
+		valseq.swap(rew);
+	}
+
+	// Wrap up the result in a ListLink only if there is more
+	// than one variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
 		return scratch->add_link(LIST_LINK, std::move(valseq));

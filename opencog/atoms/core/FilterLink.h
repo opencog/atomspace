@@ -50,8 +50,8 @@ protected:
 	// Globby terms are terms that contain a GlobNode
 	HandleSet _globby_terms;     // Smallest term that has a glob.
 
-	bool _is_impl;
-	Handle _rewrite;
+	// Rules will have a rewrite
+	HandleSeq _rewrite;
 
 	void init(void);
 
