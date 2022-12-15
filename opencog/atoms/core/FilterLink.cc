@@ -321,7 +321,7 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// Execute the ground, including consuming its quotation as part of
 	// the FilterLink semantics
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
+	Handle term(HandleCast(inst.execute(cterm)));
 
 	// Extract values for variables.
 	GroundingMap valmap;
@@ -370,9 +370,9 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	const Handle& valh = _outgoing[1];
 
 	// Handle three different cases.
-	// If there is a single value, apply the map to the single value.
-	// If there is a set of values, apply the map to the set.
-	// If there is a list of values, apply the map to the list.
+	// If there is a single value, apply the filter to the single value.
+	// If there is a set of values, apply the filter to the set.
+	// If there is a list of values, apply the filter to the list.
 	Type argtype = valh->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{

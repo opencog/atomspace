@@ -239,7 +239,7 @@ TODO
 ----
 * Implement IncomingSet Of.  See #2752 for API
 * Modernize FilterLink. Make sure it can work with LinkValues, and so that
-  it works like a filter link. See #2201
+  it works like a filter link.
 * Handle SignLink See issue #2602
 * Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
