@@ -87,6 +87,13 @@ void FilterLink::init(void)
 					"Expecting ImplicationScopeLink of at least size 3.");
 			_rewrite.push_back(impl[2]);
 		}
+
+		// The URE ControlPolicyUTest creates rules that declare
+		// variables that are never in the body. As a result, those
+		// variales can never be grounded during filtering. I don't
+		// understand why this happens; I think the URE needs to be
+		// fixed. In the meanwhile, we clean up here.
+		_pattern->trim({_pattern->get_body()});
 	}
 
 	// Locate all GlobNodes in the pattern
