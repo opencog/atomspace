@@ -328,27 +328,17 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
 
-	// Make sure each variable is grounded. Place the groundings
-	// into a sequence, for easy access. Not all variables need to
-	// be grounded, because the re-write might not use all variables.
-	// If it does use a variable, it must have a grounding.
-	bool partial = false;
+	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-		if (valmap.end() == valpair)
-		{
-			partial = true;
-			valseq.emplace_back(Handle::UNDEFINED);
-		}
-		else
-			valseq.emplace_back(valpair->second);
-	}
 
-	// Make sure each variable is grounded. (for real, this time)
-	if (partial)
-		return Handle::UNDEFINED;
+		// Can't ever happen.
+		// if (valmap.end() == valpair) return Handle::UNDEFINED;
+
+		valseq.emplace_back(valpair->second);
+	}
 
 	// Perform substitution, if it's a RuleLink.
 	if (not _rewrite.empty())
