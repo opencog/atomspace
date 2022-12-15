@@ -43,7 +43,8 @@ void TypedVariableLink::init()
 	if (VARIABLE_NODE != stype and
 	    GLOB_NODE != stype)
 		throw SyntaxException(TRACE_INFO,
-			"Sorry, we expect type names to be variables!");
+			"Sorry, we expect type names to be variables! Got=%s",
+			to_short_string().c_str());
 
 	// Allow VARIABLE_NODE, although this is a bug in the URE,
 	// which should be using a SignatureLink for this case. XXX FIXME.

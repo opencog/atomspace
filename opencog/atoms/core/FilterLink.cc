@@ -21,8 +21,9 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/rule/RuleLink.h>
 
 #include "FilterLink.h"
 
@@ -60,6 +61,12 @@ void FilterLink::init(void)
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	_is_impl = false;
 	if (nameserver().isA(tscope, RULE_LINK))
+	{
+		_is_impl = true;
+		_rewrite = RuleLinkCast(_pattern)->get_implicand()[0];
+	}
+
+	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
 		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();

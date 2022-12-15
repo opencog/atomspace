@@ -1112,8 +1112,10 @@ IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
 // ImplicationScopeLink is a synonym for RuleLink, as far as I can tell.
 // It is used by PLN to do more or less the same thig as RuleLink.
+// Oh, but BackwardChainerUTest hangs when it inherits from RuleLink...
 // At any rate, it should be moved there. XXX FIXME.
-IMPLICATION_SCOPE_LINK <- RULE_LINK
+// IMPLICATION_SCOPE_LINK <- RULE_LINK
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
 
 INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
