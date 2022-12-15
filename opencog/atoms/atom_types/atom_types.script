@@ -1011,12 +1011,16 @@ COND_LINK <- FUNCTION_LINK
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 
-// MapLink could be named UnPutLink ... it undoes a beta-reduction,
-// by extracting Values for a given set of variables.  In many ways,
-// it resembles a GetLink, except that it searches only its argument
-// list, instead of the entire AtomSpace.  It is more-or-less analogous
-// to the standard functional-programming concept of "map".
-MAP_LINK <- FUNCTION_LINK
+// FilterLink was called MapLink (but this name was wrong) or
+// FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
+// reduction, by extracting Values for a given set of variables.
+// In many ways,  it resembles a GetLink, except that it searches
+// only its argument list, instead of the entire AtomSpace.
+//
+// MapLink, because it resembles the standard functional-programming
+// concept of "map", except that it discard unmatchable entries, so
+// it's really FilterMapLink. That's a mouthful, so we go with FilterLink.
+FILTER_LINK <- FUNCTION_LINK
 
 // ==============================================================
 // Procedure and schema nodes.
@@ -1107,12 +1111,12 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // Logical quantifiers (adjoints to pullbacks of relations). Both are
 // scoped.
 //
-// Exists == left adjoint to the pullback functor of a relation.
-//           Note that PRESENT_LINK below is the unscoped variant
-//           of this, used in the pattern matcher.
-// ForAll == right adjoint to the pullback functor of a relation.
-//           Note that ALWAYS_LINK below is the unscoped variant
-//           of this, used in the pattern matcher.
+// Exists == left adjoint to the pullback functor of a relation. (The
+//           set-membership relation.) Note that PRESENT_LINK above is
+//           the unscoped variant of this, used in the pattern matcher.
+// ForAll == right adjoint to the pullback functor of a relation. (The
+//           set-membership relation.) Note that ALWAYS_LINK below is
+//           the unscoped variant of this, used in the pattern matcher.
 //
 // At least, that's the fancy definition. It's not used anywhere. The
 // plain definition is just the conventional first-order-logic definition.
@@ -1121,7 +1125,7 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // for knowledge representation.
 //
 // In reality, its a mish-mash. Currently, these are used only in unit
-// tests.  They're somwhate poorly defined. They are currently defined
+// tests.  They're somwhat poorly defined. They are currently defined
 // to inherit from CollectionLink, thus allowing them to be set-valued,
 // and used in probabilistic contexts.
 FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
