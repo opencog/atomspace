@@ -114,21 +114,23 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
                                      const Handle& cargs,
                                      bool silent)
 {
+	// Unknown procedure type
+	if (nullptr == _runner)
+		throw RuntimeException(TRACE_INFO,
+		                       "Cannot evaluate unknown Schema %s",
+		                       to_short_string().c_str());
+
 	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
 	              << "with arguments: " << oc_to_string(cargs);
 
 	// Perform "eager evaluation" instead of "lazy evaluation".
-	if (_eager and _runner)
+	if (_eager)
 	{
 		Handle exargs(force_execute(as, cargs, silent));
 		return _runner->execute(as, exargs, silent);
 	}
-	if (_runner) return _runner->execute(as, cargs, silent);
 
-	// Unknown procedure type
-	throw RuntimeException(TRACE_INFO,
-	                       "Cannot evaluate unknown Schema %s",
-	                       to_short_string().c_str());
+	return _runner->execute(as, cargs, silent);
 }
 
 DEFINE_NODE_FACTORY(GroundedSchemaNode, GROUNDED_SCHEMA_NODE)
