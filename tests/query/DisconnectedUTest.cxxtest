@@ -143,7 +143,9 @@ void DisconnectedUTest::test_variables(void)
 }
 
 // Similar to above, except that the stuff is built up in C++ not in
-// scheme.  See bug #172.
+// scheme.  See bug #172. Note: new trimming code automatically
+// and silently removes declared variables that do not appear in the
+// body. This avoids crazy side-effects and crashes in the URE.
 void DisconnectedUTest::test_cvariables(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -152,6 +154,7 @@ void DisconnectedUTest::test_cvariables(void)
 	bool caught = false;
 	try
 	{
+		// Variable B is bound, but is never used in the body.
 		Handle va(createNode(VARIABLE_NODE, "$A"));
 		Handle vb(createNode(VARIABLE_NODE, "$B"));
 		Handle blv(createLink(VARIABLE_LIST, va, vb));
@@ -166,7 +169,7 @@ void DisconnectedUTest::test_cvariables(void)
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	// TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
