@@ -253,7 +253,10 @@ but used in a different way.
 The code base that implements `FilterLink` is disjoint from that for
 `QueryLink`, and so, although they are conceptually similar, there will be
 defacto differences, including bugs and supported features (e.g. handling
-of `QuoteLink`s.) Perhaps, someday, the code-bases could be united...
+of `QuoteLink`s.)  Filtering is much (much!) easier than querying, as the
+list of candidates are presented directly to the filter. Filtering is also
+a kind-of one-sided unification, and thus simpler than full-fledged
+(symmetric) unification.
 
 * `put-filter.scm`     -- Using PutLink to filter sets of atoms.
 * `filter.scm`         -- Extracting and re-writing with FilterLink.

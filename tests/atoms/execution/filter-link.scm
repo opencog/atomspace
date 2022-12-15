@@ -3,7 +3,7 @@
 
 (define single
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(Variable "$x")
 			(EvaluationLink
 				(Predicate "foo")
@@ -15,7 +15,7 @@
 
 (define single-set
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(Variable "$x")
 			(EvaluationLink
 				(Predicate "foo")
@@ -37,7 +37,7 @@
 ; Like above but does filtering.
 (define single-set-filter
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(Variable "$x")
 			(EvaluationLink
 				(Predicate "foo")
@@ -98,7 +98,7 @@
 
 (define single-list
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(Variable "$x")
 			(EvaluationLink
 				(Predicate "foo")
@@ -118,7 +118,7 @@
 
 (define single-type
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
 			(EvaluationLink
 				(Predicate "foo")
@@ -138,7 +138,7 @@
 
 (define single-signature
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(TypedVariable (Variable "$x")
 				(SignatureLink
 					(EvaluationLink
@@ -171,7 +171,7 @@
 
 (define double-num-set
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
@@ -193,7 +193,7 @@
 
 (define double-con-set
 	(FilterLink
-		(ScopeLink
+		(LambdaLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))

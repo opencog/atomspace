@@ -214,7 +214,7 @@ void FilterLinkUTest::test_implication(void)
     Handle result = eval->eval_h("(cog-execute! imply-map)");
 
     Handle sete = eval->eval_h("imply-expected");
-    printf("got %s", result->to_string().c_str());
+    printf("got %s\n", result->to_string().c_str());
     printf("expected %s\n", sete->to_string().c_str());
 
     TS_ASSERT(result == sete);
