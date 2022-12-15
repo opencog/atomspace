@@ -31,9 +31,9 @@ using namespace opencog;
 
 void FilterLink::init(void)
 {
-	// Maps consist of a function, and the data to apply the function to.
-	// The function can be explicit (inheriting from ScopeLink) or
-	// implicit (we automatically fish out free variables).
+	// Filters consist of a function, and the data to apply the
+	// function to.  The function can be explicit (inheriting from
+	// ScopeLink) or implicit (we automatically fish out free variables).
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"FilterLink is expected to be arity-2 only!");

@@ -105,16 +105,14 @@ struct FreeVariables : Replacement
 	/// ordered link.
 	void find_variables(const HandleSeq& oset, bool ordered_link=true);
 
-	/// Sort the variables in a canonical order determined by their
-	/// positions in the given outgoing set, which is assumed ordered,
-	/// as outgoing sets of scopes are always ordered so far.  In
-	/// ordered link, the ordered is determined by the outgoing set
-	/// order (from left to right).  In unordered links, the ordered is
-	/// determined by some arbitrary, though semantically consistent
-	/// fix order.  The order only depends on variable names as last
-	/// resort, when no semantic property can be used to break the
-	/// symmetry.
-	void canonical_sort(const HandleSeq& outgoings);
+	/// Sort the variables into a canonical order, so that they appear
+	/// in the same order as in the provided HandleSeq.  That is, the
+	/// HandleSeq is presumed to be a list of trees, with variables
+	/// embeded in those trees. Each tree is walked, left-to-right,
+	/// depth-first. The order in which the variables are encountered
+	/// is the "canonical sort order". Behavior is undefined, if there
+	/// are variables that do NOT appear in the HandleSeq.
+	void canonical_sort(const HandleSeq&);
 
 	/// Convert a variable->argument mapping into a sequence of
 	/// "arguments" that are in the same order as the free variables
