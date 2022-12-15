@@ -77,7 +77,6 @@ bool ScopeLink::skip_init(Type t)
 	// Certain derived classes want to have a different initialization
 	// sequence. We can't use virtual init() in the ctor, so just
 	// do an if-statement here.
-	if (IMPLICATION_SCOPE_LINK == t) return true;
 	if (PUT_LINK == t) return true;
 	if (FORMULA_PREDICATE_LINK == t) return true;
 	if (nameserver().isA(t, PATTERN_LINK)) return true;
