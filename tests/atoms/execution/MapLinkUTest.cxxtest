@@ -1,5 +1,5 @@
 /*
- * tests/atoms/FilterLinkUTest.cxxtest
+ * tests/atoms/MapLinkUTest.cxxtest
  *
  * Copyright (C) 2016 Linas Vepstas
  * All Rights Reserved
@@ -27,14 +27,14 @@
 
 using namespace opencog;
 
-class FilterLinkUTest: public CxxTest::TestSuite
+class MapLinkUTest: public CxxTest::TestSuite
 {
 private:
     AtomSpacePtr as;
     SchemeEval* eval;
 
 public:
-    FilterLinkUTest(void)
+    MapLinkUTest(void)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
@@ -45,7 +45,7 @@ public:
         eval->eval("(use-modules (opencog exec))");
     }
 
-    ~FilterLinkUTest()
+    ~MapLinkUTest()
     {
         delete eval;
         // Erase the log file if no assertions failed.
@@ -66,24 +66,24 @@ public:
     void xtest_quote_arg_map(void);
 };
 
-void FilterLinkUTest::tearDown(void)
+void MapLinkUTest::tearDown(void)
 {
     as->clear();
 }
 
-void FilterLinkUTest::setUp(void)
+void MapLinkUTest::setUp(void)
 {
     as->clear();
 }
 
 /*
- * FilterLink unit test.
+ * MapLink unit test.
  */
-void FilterLinkUTest::test_singleton(void)
+void MapLinkUTest::test_singleton(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single)");
 
@@ -158,11 +158,11 @@ void FilterLinkUTest::test_singleton(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_signature(void)
+void MapLinkUTest::test_signature(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single-signature)");
 
@@ -175,11 +175,11 @@ void FilterLinkUTest::test_signature(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_double_set(void)
+void MapLinkUTest::test_double_set(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! double-num-set)");
 
@@ -205,16 +205,16 @@ void FilterLinkUTest::test_double_set(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_implication(void)
+void MapLinkUTest::test_implication(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! imply-map)");
 
     Handle sete = eval->eval_h("imply-expected");
-    printf("got %s\n", result->to_string().c_str());
+    printf("got %s", result->to_string().c_str());
     printf("expected %s\n", sete->to_string().c_str());
 
     TS_ASSERT(result == sete);
@@ -231,11 +231,11 @@ void FilterLinkUTest::test_implication(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_glob(void)
+void MapLinkUTest::test_glob(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! glob-simple)");
 
@@ -275,11 +275,11 @@ void FilterLinkUTest::test_glob(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_implication_nodecl(void)
+void MapLinkUTest::test_implication_nodecl(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! imply-map-nodecl)");
 
@@ -299,11 +299,11 @@ void FilterLinkUTest::test_implication_nodecl(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::test_local_quote_map(void)
+void MapLinkUTest::test_local_quote_map(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Instantiator inst(as.get());
     Handle local_quote_map = eval->eval_h("local-quote-map"),
@@ -320,11 +320,11 @@ void FilterLinkUTest::test_local_quote_map(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void FilterLinkUTest::xtest_quote_arg_map(void)
+void MapLinkUTest::xtest_quote_arg_map(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    eval->eval("(load-from-path \"tests/atoms/execution/filter-link.scm\")");
+    eval->eval("(load-from-path \"tests/atoms/execution/maplink.scm\")");
 
     Instantiator inst(as.get());
     Handle quote_arg_map = eval->eval_h("quote-arg-map"),

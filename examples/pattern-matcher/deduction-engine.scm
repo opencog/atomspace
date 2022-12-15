@@ -6,9 +6,7 @@
 ; in Atomese. That is, one can implement ProLog in Atomese, and the
 ; goal of this example is to show how to do that.
 ;
-;; XXX under construction, incomplete. The correct fix is to remove
-;; BindLink everywhere below, and use UnifierLink instead, according
-;; to the examples demoing the unifier.
+;; XXX under construction, incomplete.
 ;
 ; Critiques:
 ; Aside from being unfinished, this example also avoids using the
@@ -38,7 +36,7 @@
 ;;; Assert implication
 ;;;   |- likes(Tom,$X) -> likes(Bill, $X) 
 ;;; The ImplicationLink is a declarative form of the above.
-(RuleLink
+(ImplicationScopeLink
 	; (VariableNode "$X") ; <-- this variable is implicitly scoped!
 	(EvaluationLink
 		(PredicateNode "likes")
@@ -144,7 +142,7 @@
 ;; and converts them into GetPut imperatives.
 
 (define get-impl
-	;; Search for RuleLinks, and dissect them.
+	;; Search for ImplicationScopeLinks, and dissect them.
 	(GetLink
 		(VariableList
 			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
@@ -154,7 +152,7 @@
 			(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 		)
 		(QuoteLink
-			(RuleLink
+			(ImplicationScopeLink
 				(UnquoteLink
 					(EvaluationLink
 						(VariableNode "$fpred")
@@ -206,7 +204,7 @@
 		(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 	)
 	(QuoteLink
-		(RuleLink
+		(ImplicationScopeLink
 			(UnquoteLink
 				(EvaluationLink
 					(VariableNode "$fpred")
