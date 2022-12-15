@@ -65,6 +65,10 @@ RuleLink::RuleLink(const Handle& body, const Handle& rewrite)
 RuleLink::RuleLink(const HandleSeq&& hseq, Type t)
 	: PrenexLink(std::move(hseq), t)
 {
+	// _quoted is true, that means we are inside a quote,
+	// and so nothing to be done. Skip variable extraction.
+	// This is what ScopeLink does, too.
+	if (_quoted) return;
 	init();
 }
 
