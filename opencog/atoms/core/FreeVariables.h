@@ -110,8 +110,8 @@ struct FreeVariables : Replacement
 	/// HandleSeq is presumed to be a list of trees, with variables
 	/// embeded in those trees. Each tree is walked, left-to-right,
 	/// depth-first. The order in which the variables are encountered
-	/// is the "canonical sort order". Behavior is undefined, if there
-	/// are variables that do NOT appear in the HandleSeq.
+	/// is the "canonical sort order". Variables that do NOT appear
+	/// in the HandleSeq are trimmed (removed) from this object.
 	void canonical_sort(const HandleSeq&);
 
 	/// Convert a variable->argument mapping into a sequence of
