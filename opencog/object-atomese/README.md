@@ -237,8 +237,11 @@ Also useful would be `IncomingSetOf` which would return a `LinkValue`.
 
 TODO
 ----
-* Implement ElementOf and IncomingSet Of.
+* Implement IncomingSet Of.  See #2752 for API
 * Modernize FilterLink. Make sure it can work with LinkValues, and so that
-  it works like a filter link.
+  it works like a filter link. See #2201
+* Handle SignLink See issue #2602
+* Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
 * Change NumberOfLink so it can convert bool masks to element numbers ??
+* Most FunctionLinks need to be able to handle streams i.e. QueueValues.
