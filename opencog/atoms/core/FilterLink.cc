@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/MapLink.cc
+ * opencog/atoms/core/FilterLink.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  *
@@ -24,18 +24,18 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/core/VariableSet.h>
 
-#include "MapLink.h"
+#include "FilterLink.h"
 
 using namespace opencog;
 
-void MapLink::init(void)
+void FilterLink::init(void)
 {
 	// Maps consist of a function, and the data to apply the function to.
 	// The function can be explicit (inheriting from ScopeLink) or
 	// implicit (we automatically fish out free variables).
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"MapLink is expected to be arity-2 only!");
+			"FilterLink is expected to be arity-2 only!");
 
 	// First argument must be a function of some kind.  All functions
 	// are specified using a ScopeLink, to bind the input-variables.
@@ -95,32 +95,32 @@ void MapLink::init(void)
 	// FunctionLink::init();
 }
 
-MapLink::MapLink(const Handle& pattern, const Handle& term)
-	: FunctionLink(HandleSeq({pattern, term}), MAP_LINK)
+FilterLink::FilterLink(const Handle& pattern, const Handle& term)
+	: FunctionLink(HandleSeq({pattern, term}), FILTER_LINK)
 {
 	init();
 }
 
-MapLink::MapLink(Type t, const Handle& body)
+FilterLink::FilterLink(Type t, const Handle& body)
 	: FunctionLink(HandleSeq({body}), t)
 {
 	// Derived types have a different initialization sequence.
-	if (MAP_LINK != t) return;
+	if (FILTER_LINK != t) return;
 	init();
 }
 
-MapLink::MapLink(const HandleSeq&& oset, Type t)
+FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 	: FunctionLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, MAP_LINK))
+	if (not nameserver().isA(t, FILTER_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a MapLink, got %s", tname.c_str());
+			"Expecting a FilterLink, got %s", tname.c_str());
 	}
 
 	// Derived types have a different initialization sequence.
-	if (MAP_LINK != t) return;
+	if (FILTER_LINK != t) return;
 	init();
 }
 
@@ -142,7 +142,7 @@ MapLink::MapLink(const HandleSeq&& oset, Type t)
 /// If false is returned, the contents of valmap are invalid. If true
 /// is returned, valmap contains the extracted values.
 ///
-bool MapLink::extract(const Handle& termpat,
+bool FilterLink::extract(const Handle& termpat,
                       const Handle& ground,
                       GroundingMap& valmap,
                       Quotation quotation) const
@@ -304,10 +304,10 @@ bool MapLink::extract(const Handle& termpat,
 	return (ip == tsz) and (jg == gsz);
 }
 
-Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
+Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
 	// Execute the ground, including consuming its quotation as part of
-	// the MapLink semantics
+	// the FilterLink semantics
 	Instantiator inst(scratch);
 	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
 
@@ -357,7 +357,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	return Handle::UNDEFINED;
 }
 
-ValuePtr MapLink::execute(AtomSpace* as, bool silent)
+ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 {
 	const Handle& valh = _outgoing[1];
 
@@ -382,10 +382,10 @@ ValuePtr MapLink::execute(AtomSpace* as, bool silent)
 	if (mone) return mone;
 
 	// Avoid returning null handle.  This is broken.
-	// I don't like MapLink much any more.
+	// I don't like FilterLink much any more.
 	return as->add_link(SET_LINK);
 }
 
-DEFINE_LINK_FACTORY(MapLink, MAP_LINK)
+DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)
 
 /* ===================== END OF FILE ===================== */
