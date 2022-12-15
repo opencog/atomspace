@@ -214,11 +214,11 @@
 )
 
 ;; -------------------------------------------------------------
-;; ImplicationScopeLink tests.
+;; RuleLink tests.
 
 (define imply-map
 	(FilterLink
-		(ImplicationScopeLink
+		(RuleLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
@@ -254,7 +254,7 @@
 
 (define imply-eval
 	(FilterLink
-		(ImplicationScopeLink
+		(RuleLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
@@ -286,11 +286,11 @@
 )
 
 ;; -------------------------------------------------------------
-;; Implicit-variable ImplicationScopeLink tests.
+;; Implicit-variable RuleLink tests.
 
 (define imply-map-nodecl
 	(FilterLink
-		(ImplicationScopeLink
+		(RuleLink
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
@@ -314,7 +314,7 @@
 
 (define imply-glob-nodecl
 	(FilterLink
-		(ImplicationScopeLink
+		(RuleLink
 			(EvaluationLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Glob "$y")))
