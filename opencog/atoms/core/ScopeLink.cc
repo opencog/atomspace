@@ -23,8 +23,8 @@
 
 #include <string>
 
-// #include <opencog/util/Logger.h>
 #include <opencog/util/random.h>
+
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/hash.h>
 #include <opencog/atoms/core/FindUtils.h>
@@ -177,6 +177,13 @@ void ScopeLink::init_scoped_variables(const Handle& vardecl)
 		HandleSeq owv(std::next(_outgoing.begin()), _outgoing.end());
 		_variables.canonical_sort(owv);
 	}
+}
+
+/* ================================================================= */
+
+void ScopeLink::trim(const HandleSeq& terms)
+{
+	_variables.trim(terms);
 }
 
 /* ================================================================= */
