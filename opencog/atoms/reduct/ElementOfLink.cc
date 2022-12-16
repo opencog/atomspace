@@ -69,7 +69,9 @@ ValuePtr ElementOfLink::execute(AtomSpace* as, bool silent)
 		return do_execute(fvp->value(), vi);
 	}
 
-	throw SyntaxException(TRACE_INFO, "Index list must be a list of numbers!");
+	throw SyntaxException(TRACE_INFO,
+		"Index list must be a list of numbers! Got %s",
+		vm->to_string().c_str());
 }
 
 ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
