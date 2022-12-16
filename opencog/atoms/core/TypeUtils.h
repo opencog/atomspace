@@ -151,6 +151,10 @@ ValuePtr type_compose(const Handle&, const ValuePtr&);
  *
  * The resulting variable declaration will not be added to any
  * AtomSpace, it's up to the user to do that.
+ *
+ * FYI, the Variables::trim() method does almost the same thing, except
+ * that it cuts down the vardecl "in-place", instead of bulding a new
+ * one, like this does.
  */
 Handle filter_vardecl(const Handle& vardecl, const Handle& body);
 

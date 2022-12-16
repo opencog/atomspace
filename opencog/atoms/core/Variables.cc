@@ -546,24 +546,10 @@ void Variables::erase(const Handle& var)
 
 /* ================================================================= */
 
-void Variables::trim(const Handle& term)
-{
-	// Find the vars in the term.
-	FreeVariables fv;
-	fv.find_variables(term);
-
-	// Find all vars not in the term.
-	HandleSeq unused;
-	for (const Handle& hv: varseq)
-		if (not fv.varset_contains(hv))
-			unused.push_back(hv);
-
-	// Get rid of all vars not in the term.
-	for (const Handle& hu: unused)
-		erase(hu);
-}
-
-// Identical to above, except multiple terms are scanned.
+// Remove *all* variables that do not appear in any of the terms.
+// Closely related to this is `filter_vardecl()` in core/TypeUtils.cc
+// which does the same thing conceptually, except that it creates
+// a new, smaller variable declaration.
 void Variables::trim(const HandleSeq& terms)
 {
 	// Find the vars in all of the terms.

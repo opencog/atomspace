@@ -283,6 +283,9 @@ Handle filter_vardecl(const Handle& vardecl, const Handle& body)
 	return filter_vardecl(vardecl, HandleSeq{body});
 }
 
+// See also `Variables::trim()`, which does the same thing,
+// conceptually. The difference is trim() cuts down the vardecl
+// in-place, instead of building a new one, like below.
 Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
 	// Base cases

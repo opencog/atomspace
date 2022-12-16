@@ -155,11 +155,11 @@ struct Variables : public FreeVariables
 	/// Erase the given variable, if it exists.
 	void erase(const Handle&);
 
-	/// Remove *all* variables that do not appear in the term.
-	void trim(const Handle&);
-
 	/// Remove *all* variables that do not appear in any of the terms.
 	void trim(const HandleSeq&);
+
+	/// Remove *all* variables that do not appear in the term.
+	void trim(const Handle& h) { trim({h}); }
 
 	/// Return the TypedVariableLink for the indicated variable.
 	/// Return just the Variable itself, if its not typed.
