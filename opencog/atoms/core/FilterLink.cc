@@ -369,9 +369,17 @@ Handle FilterLink::rewrite_one(const Handle& cterm,
 			if (red->is_executable())
 				rew.emplace_back(HandleCast(red->execute(scratch, silent)));
 			else
-				rew.emplace_back(red);
+			{
+				// Consume quotations.
+				Type rty = red->get_type();
+				if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
+					rew.emplace_back(red->getOutgoingAtom(0));
+				else
+					rew.emplace_back(red);
+			}
 		}
 
+		// Fall through, use the same logic to finish up.
 		valseq.swap(rew);
 	}
 
