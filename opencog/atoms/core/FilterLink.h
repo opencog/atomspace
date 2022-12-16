@@ -60,7 +60,7 @@ protected:
 	bool extract(const Handle&, const Handle&, GroundingMap&,
 	             Quotation quotation=Quotation()) const;
 
-	Handle rewrite_one(const Handle&, AtomSpace*) const;
+	Handle rewrite_one(const Handle&, AtomSpace*, bool) const;
 
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);

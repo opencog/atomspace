@@ -318,7 +318,8 @@ bool FilterLink::extract(const Handle& termpat,
 	return (ip == tsz) and (jg == gsz);
 }
 
-Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
+Handle FilterLink::rewrite_one(const Handle& cterm,
+                               AtomSpace* scratch, bool silent) const
 {
 	// Execute the ground, including consuming its quotation as part of
 	// the FilterLink semantics
@@ -383,7 +384,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 			HandleSeq remap;
 			for (const Handle& h : LinkValueCast(vex)->to_handle_seq())
 			{
-				Handle mone = rewrite_one(h, as);
+				Handle mone = rewrite_one(h, as, silent);
 				if (nullptr != mone) remap.emplace_back(mone);
 			}
 			return createLinkValue(remap);
@@ -407,14 +408,14 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
-			Handle mone = rewrite_one(h, as);
+			Handle mone = rewrite_one(h, as, silent);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
 		return as->add_link(argtype, std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = rewrite_one(valh, as);
+	Handle mone = rewrite_one(valh, as, silent);
 	if (mone) return mone;
 
 	// Avoid returning null pointer!
