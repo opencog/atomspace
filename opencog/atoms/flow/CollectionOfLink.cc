@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "CollectionOfLink.h"
@@ -38,44 +38,38 @@ CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
 			"Expecting an CollectionOfLink, got %s", tname.c_str());
 	}
 
-	size_t sz = _outgoing.size();
-
-	if (1 != sz and 2 != sz)
+	if (1 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
-			"CollectionOfLink expects one or two args, got %lu", sz);
+			"CollectionOfLink expects one args");
 }
 
 // ---------------------------------------------------------------
 
-/// Return a LinkValue vector.
+/// Return a SetLink vector.
 ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
+	// In effectively all cases, we expect it to be executable!
 	Handle base(_outgoing[0]);
-	if (base->is_executable())
-	{
-		base = HandleCast(base->execute(as, silent));
-		if (nullptr == base) return createLinkValue();
-	}
+	if (not base->is_executable())
+		return as->add_link(SET_LINK, base);
 
-	// Simple case. Get CollectionSet.
-	if (1 == _outgoing.size())
-		return createLinkValue(base->getCollectionSet());
+	ValuePtr vp = base->execute(as, silent);
+	if (vp->is_atom())
+		return as->add_link(SET_LINK, HandleCast(vp));
 
-	// Get incoming set by type.
-	Handle tnode(_outgoing[1]);
-	if (tnode->is_executable())
-		tnode = HandleCast(tnode->execute(as, silent));
+	// If its a FloatValue, we could maybe return a NumberNode??
+	// so be linke NumberOfLink ???
+	// if (vp->is_type(FLOAT_VALUE))
 
-	if (not tnode->is_type(TYPE_NODE))
-		throw RuntimeException(TRACE_INFO,
-			"CollectionOfLink expects a type; got %s",
-			tnode->to_string().c_str());
+	if (not vp->is_type(LINK_VALUE))
+		throw InvalidParamException(TRACE_INFO,
+			"CollectionOfLink expects a LinkValue, got %s",
+			vp->to_string().c_str());
 
-	TypeNodePtr tnp = TypeNodeCast(tnode);
-	Type intype = tnp->get_kind();
-	HandleSeq iset(base->getCollectionSetByType(intype));
-	return createLinkValue(iset);
+	LinkValuePtr lvp = LinkValueCast(vp);
+	HandleSeq hs = lvp->to_handle_seq();
+	return as->add_link(SET_LINK, std::move(hs));
 }
 
 DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
