@@ -24,6 +24,8 @@
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/rule/RuleLink.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include "FilterLink.h"
 
@@ -367,12 +369,37 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 
 ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 {
-	const Handle& valh = _outgoing[1];
+	Handle valh(_outgoing[1]);
+
+	if (valh->is_executable())
+	{
+		ValuePtr vex = valh->execute();
+
+		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
+		// then we should construct another Queue as the return value,
+		// and perform filtering on-demand.
+		if (vex->is_type(LINK_VALUE))
+		{
+			HandleSeq remap;
+			for (const Handle& h : LinkValueCast(vex)->to_handle_seq())
+			{
+				Handle mone = rewrite_one(h, as);
+				if (nullptr != mone) remap.emplace_back(mone);
+			}
+			return createLinkValue(remap);
+		}
+
+		// If it is some other Value, we have no clue what to do with it.
+		if (not vex->is_atom())
+			return createVoidValue();
+
+		// Fall through, if execution provided some Atom.
+	}
 
 	// Handle three different cases.
-	// If there is a single value, apply the filter to the single value.
-	// If there is a set of values, apply the filter to the set.
-	// If there is a list of values, apply the filter to the list.
+	// If there is a single Atom, apply the filter to the single Atom.
+	// If there is a set of Atoms, apply the filter to the set.
+	// If there is a list of Atoms, apply the filter to the list.
 	Type argtype = valh->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
@@ -389,9 +416,8 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	Handle mone = rewrite_one(valh, as);
 	if (mone) return mone;
 
-	// Avoid returning null handle.  This is broken.
-	// I don't like FilterLink much any more.
-	return as->add_link(SET_LINK);
+	// Avoid returning null pointer!?
+	return createVoidValue();
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)
