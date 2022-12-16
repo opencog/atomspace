@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/FilterLink.h
+ * opencog/atoms/flow/FilterLink.h
  *
- * Copyright (C) 2015,2016 Linas Vepstas
+ * Copyright (C) 2015,2016,2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
