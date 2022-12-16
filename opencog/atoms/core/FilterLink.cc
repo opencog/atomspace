@@ -157,9 +157,9 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                      const Handle& ground,
-                      GroundingMap& valmap,
-                      Quotation quotation) const
+                         const Handle& ground,
+                         GroundingMap& valmap,
+                         Quotation quotation) const
 {
 	if (termpat == ground) return true;
 
@@ -323,12 +323,21 @@ bool FilterLink::extract(const Handle& termpat,
 Handle FilterLink::rewrite_one(const Handle& cterm,
                                AtomSpace* scratch, bool silent) const
 {
-	// Execute the ground, including consuming its quotation as part of
-	// the FilterLink semantics
+	// Execute the term, first. We use the Instantiator to perform
+	// a "deep" execution, executing stuff deep within the term.
+	// This includes the consumption of embedded QuoteLinks. But why?
+	// I dunno; this is an older design decision, motivated by the URE.
+	// Is it a good design decision? I dunno. For now, there's not
+	// enough experience to say.
+	//
+	// Also, FYI, we could do execution in-line with extraction,
+	// above. This would improve performance and avoid un-needed
+	// execution.
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.execute(cterm)));
+	Handle term(HandleCast(inst.execute(cterm, silent)));
 
-	// Extract values for variables.
+	// See it the term passes pattern matching. If it does, the
+	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
 	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
