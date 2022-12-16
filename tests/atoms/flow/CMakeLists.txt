@@ -7,6 +7,9 @@ LINK_LIBRARIES(
 ADD_CXXTEST(ValueOfUTest)
 ADD_CXXTEST(StreamValueOfUTest)
 
+ADD_GUILE_TEST(CollectionOfTest collection-of-test.scm)
+ADD_GUILE_TEST(IncomingOfTest incoming-of-test.scm)
+
 ADD_CXXTEST(FormulaUTest)
 TARGET_LINK_LIBRARIES(FormulaUTest execution smob)
 

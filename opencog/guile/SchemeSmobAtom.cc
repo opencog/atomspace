@@ -105,14 +105,10 @@ SCM SchemeSmob::ss_number (SCM satom)
 	return num;
 }
 
-SCM SchemeSmob::ss_arity (SCM satom)
+SCM SchemeSmob::ss_arity (SCM svalue)
 {
-	Handle h = verify_handle(satom, "cog-arity");
-	Arity ari = 0;
-	if (h->is_link()) ari = h->get_arity();
-
-	/* Arity is size_t */
-	return scm_from_size_t(ari);
+	ValuePtr pa(verify_protom(svalue, "cog-arity"));
+	return scm_from_size_t(pa->size());
 }
 
 /* ============================================================== */
