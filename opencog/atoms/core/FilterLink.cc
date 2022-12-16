@@ -394,6 +394,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 			return createVoidValue();
 
 		// Fall through, if execution provided some Atom.
+		valh = HandleCast(vex);
 	}
 
 	// Handle three different cases.
@@ -416,7 +417,11 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	Handle mone = rewrite_one(valh, as);
 	if (mone) return mone;
 
-	// Avoid returning null pointer!?
+	// Avoid returning null pointer!
+	// If we were given Atoms, assum the caller wants Atoms back.
+	// Otherwise, avoid polution and return VoidValue.
+	if (valh->is_atom())
+		return as->add_link(SET_LINK);
 	return createVoidValue();
 }
 
