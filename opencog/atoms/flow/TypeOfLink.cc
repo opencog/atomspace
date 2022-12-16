@@ -42,7 +42,7 @@ TypeOfLink::TypeOfLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Return a LinkValue vector.
+/// Return a LinkValue vector of TypeNodes.
 ValuePtr TypeOfLink::execute(AtomSpace* as, bool silent)
 {
 	HandleSeq tipes;

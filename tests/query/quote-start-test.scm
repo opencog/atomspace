@@ -1,5 +1,5 @@
 ;
-; quote-start-test.scm -- Verify a Quote appearin at the tol level works.
+; quote-start-test.scm -- Verify a Quote appearing at the top level works.
 ;
 
 (use-modules (opencog) (opencog exec))

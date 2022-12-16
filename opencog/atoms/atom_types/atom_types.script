@@ -937,6 +937,12 @@ ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
+// Convert a FloatValue to a NumberNode. The argument is presumed to
+// be some executable link that, when executed, returns a FloatValue
+// (or some derived type, e.g. some stream) and now we want an
+// actual NumberNode.
+NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
@@ -960,13 +966,25 @@ COUNT_OF_LINK <- FLOAT_VALUE_OF_LINK
 // or a Value, return the length of the underlying vector.
 SIZE_OF_LINK <- FLOAT_VALUE_OF_LINK
 
-// Inverse of the above; convert a FloatValue to a NumberNode
-NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
 // Return the type of the wrapped Atom
 TYPE_OF_LINK <- VALUE_OF_LINK
 
-// Like the above, but this returns a promise to return a Value
+// Grab an IncomingSet of an Atom, and return it as a LinkValue.
+INCOMING_OF_LINK <- VALUE_OF_LINK
+
+// Convert a LinkValue to a SetLink. The argument is presumed to
+// be some executable link that, when executed, returns a LinkValue
+// (or some derived type, e.g. a QueueValue) and now we want an
+// actual set.
+COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_LINK
+
+// Opposite of the ValueOfLink; attach a Value to an Atom.
+// Verb: "to set", and not noun "a set (collection)"
+SET_VALUE_LINK <- FUNCTION_LINK
+SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
+
+// -----------
+// Similar to ValueOfLink, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either
 // a FutureStream or a FormulaStream when executed. This stream will
 // then cough up the actual Value later on, when interrogated. Used to
@@ -992,9 +1010,16 @@ PROMISE_PREDICATE_LINK <- EVALUATABLE_LINK, PROMISE_LINK
 // the variables.
 FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
-// Opposite of the above; attach a Value to an Atom.
-SET_VALUE_LINK <- FUNCTION_LINK
-SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
+// FilterLink was called MapLink (but this name was wrong) or
+// FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
+// reduction, by extracting Values for a given set of variables.
+// In many ways,  it resembles a GetLink, except that it searches
+// only its argument list, instead of the entire AtomSpace.
+//
+// MapLink, because it resembles the standard functional-programming
+// concept of "map", except that it discard unmatchable entries, so
+// it's really FilterMapLink. That's a mouthful, so we go with FilterLink.
+FILTER_LINK <- FUNCTION_LINK
 
 // --------------------
 // Other kinds of functions.
@@ -1018,17 +1043,6 @@ COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
-
-// FilterLink was called MapLink (but this name was wrong) or
-// FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
-// reduction, by extracting Values for a given set of variables.
-// In many ways,  it resembles a GetLink, except that it searches
-// only its argument list, instead of the entire AtomSpace.
-//
-// MapLink, because it resembles the standard functional-programming
-// concept of "map", except that it discard unmatchable entries, so
-// it's really FilterMapLink. That's a mouthful, so we go with FilterLink.
-FILTER_LINK <- FUNCTION_LINK
 
 // ==============================================================
 // Procedure and schema nodes.

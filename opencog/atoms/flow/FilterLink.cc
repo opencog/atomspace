@@ -25,7 +25,6 @@
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/VoidValue.h>
 
 #include "FilterLink.h"
 
@@ -417,7 +416,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 		// If it is some other Value, we have no clue what to do with it.
 		if (not vex->is_atom())
-			return createVoidValue();
+			return createLinkValue();
 
 		// Fall through, if execution provided some Atom.
 		valh = HandleCast(vex);
@@ -445,10 +444,12 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	// Avoid returning null pointer!
 	// If we were given Atoms, assum the caller wants Atoms back.
-	// Otherwise, avoid polution and return VoidValue.
+	// Otherwise, avoid pollution and return VoidValue.
+	// Actually, return an empty LinkValue; this allows downstream
+	// pipelines to handle it just like any other LinkValue return.
 	if (valh->is_atom())
 		return as->add_link(SET_LINK);
-	return createVoidValue();
+	return createLinkValue();
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)

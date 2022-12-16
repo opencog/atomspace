@@ -237,7 +237,6 @@ Also useful would be `IncomingSetOf` which would return a `LinkValue`.
 
 TODO
 ----
-* Implement IncomingSet Of.  See #2752 for API
 * Handle SignLink See issue #2602
 * Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
