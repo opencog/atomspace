@@ -318,6 +318,8 @@ bool FilterLink::extract(const Handle& termpat,
 	return (ip == tsz) and (jg == gsz);
 }
 
+// ====================================================================
+
 Handle FilterLink::rewrite_one(const Handle& cterm,
                                AtomSpace* scratch, bool silent) const
 {
@@ -348,11 +350,14 @@ Handle FilterLink::rewrite_one(const Handle& cterm,
 	{
 		HandleSeq rew;
 		// Beta reduce, and execute. No type-checking during
-		// beta-reduction; we've already done that.
+		// beta-reduction; we've already done that, during matching.
 		for (const Handle& impl : _rewrite)
 		{
 			Handle red(_mvars->substitute_nocheck(impl, valseq));
-			rew.emplace_back(HandleCast(inst.execute(red)));
+			if (red->is_executable())
+				rew.emplace_back(HandleCast(red->execute(scratch, silent)));
+			else
+				rew.emplace_back(red);
 		}
 
 		valseq.swap(rew);
