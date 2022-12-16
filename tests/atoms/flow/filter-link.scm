@@ -1,5 +1,9 @@
-
+;
+; filter-link.scm -- Data for running the FilterLinkUTest
+;
 (use-modules (opencog) (opencog exec))
+
+; ----------------------------------------------------------
 
 (define single
 	(FilterLink
@@ -136,6 +140,8 @@
 		))
 )
 
+; ----------------------------------------------------------
+
 (define single-signature
 	(FilterLink
 		(LambdaLink
@@ -169,6 +175,8 @@
 	)
 )
 
+; ----------------------------------------------------------
+
 (define double-num-set
 	(FilterLink
 		(LambdaLink
@@ -190,6 +198,8 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+; ----------------------------------------------------------
 
 (define double-con-set
 	(FilterLink
@@ -213,7 +223,7 @@
 		))
 )
 
-;; -------------------------------------------------------------
+;; =============================================================
 ;; RuleLink tests.
 
 (define imply-map
@@ -251,6 +261,8 @@
 			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 	)
 )
+
+; ----------------------------------------------------------
 
 (define imply-eval
 	(FilterLink
@@ -311,6 +323,8 @@
 )
 
 ; Above expects "imply-expected"
+
+; ----------------------------------------------------------
 
 (define imply-glob-nodecl
 	(FilterLink
@@ -373,6 +387,8 @@
 		(ListLink (Concept "baz"))
 	))
 
+; ----------------------------------------------------------
+
 (define glob-simple-tail
 	(FilterLink
 		(EvaluationLink (Predicate "goo")
@@ -397,6 +413,8 @@
 		(ListLink (Concept "baz") (Concept "bif"))
 	))
 
+; ----------------------------------------------------------
+
 (define glob-double
 	(FilterLink
 		(EvaluationLink (Predicate "goo")
@@ -418,6 +436,8 @@
 	(SetLink
 		(ListLink (Concept "baz"))
 	))
+
+; ----------------------------------------------------------
 
 (define glob-glob
 	(FilterLink
@@ -457,26 +477,24 @@
 			(Concept "baz") (Concept "ni") (Concept "goh"))
 	))
 
+; ----------------------------------------------------------
+
 (define local-quote-map
 (FilterLink
   (LambdaLink
     (VariableList
       (VariableNode "$X")
-      (VariableNode "$Y")
-    )
+      (VariableNode "$Y"))
     (LocalQuoteLink
       (AndLink
         (VariableNode "$X")
-        (VariableNode "$Y")
-      )
-    )
-  )
+        (VariableNode "$Y"))))
   (AndLink
     (ConceptNode "A")
-    (ConceptNode "B")
-  )
+    (ConceptNode "B")))
 )
-)
+
+; (cog-execute! local-quote-map)
 
 ;; The order of A and B depends on the canonical, though arbitrary,
 ;; order used to store outgoings in unordered links, consider both.
@@ -487,30 +505,68 @@
   (ListLink
     (ConceptNode "B") (ConceptNode "A")))
 
+; ----------------------------------------------------------
+
 (define quote-arg-map
 (FilterLink
   (LambdaLink
     (VariableList
       (VariableNode "$X")
-      (VariableNode "$Y")
-    )
+      (VariableNode "$Y"))
     (MemberLink
       (VariableNode "$X")
-      (VariableNode "$Y")
-    )
-  )
+      (VariableNode "$Y")))
   (QuoteLink
     (MemberLink
       (DefinedSchemaNode "specialization-rule")
-      (ConceptNode "pm-rbs")
-    )
-  )
+      (ConceptNode "pm-rbs"))))
 )
-)
+; (cog-execute! quote-arg-map)
 
 (define quote-arg-map-result
 (ListLink
   (DefinedSchemaNode "specialization-rule")
-  (ConceptNode "pm-rbs")
+  (ConceptNode "pm-rbs"))
 )
-)
+
+; ----------------------------------------------------------
+
+(define dont-exec-get
+  (Filter
+    (Rule
+      (TypedVariable (Variable "x") (Type "ConceptNode"))
+      (Variable "x")
+      (DontExec (Get (And
+        (Evaluation (GroundedPredicate "scm:filter") (Variable "x"))))))
+    (Set (Concept "a") (Concept "b"))
+  ))
+
+; (cog-execute! dont-exec)
+
+(define quote-get
+  (Filter
+    (Rule
+      (TypedVariable (Variable "x") (Type "ConceptNode"))
+      (Variable "x")
+      (LocalQuote (Get (And
+        (Evaluation (GroundedPredicate "scm:filter") (Variable "x"))))))
+    (Set (Concept "a") (Concept "b"))
+  ))
+
+; (cog-execute! quote-exec)
+
+(define get-expected
+  (Set
+    (Get
+      (And
+        (Evaluation
+          (GroundedPredicate "scm:filter")
+          (Concept "a"))))
+    (Get
+      (And
+        (Evaluation
+          (GroundedPredicate "scm:filter")
+          (Concept "b"))))))
+
+
+; ----------------------------------------------------------

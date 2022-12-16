@@ -64,6 +64,7 @@ public:
     void test_implication_nodecl(void);
     void test_local_quote_map(void);
     void xtest_quote_arg_map(void);
+    void test_dont_exec(void);
 };
 
 void FilterLinkUTest::tearDown(void)
@@ -336,6 +337,27 @@ void FilterLinkUTest::xtest_quote_arg_map(void)
     printf("expected %s\n", expected->to_string().c_str());
 
     TS_ASSERT(result == expected);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test from bug report #2201
+void FilterLinkUTest::test_dont_exec(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
+
+    Handle dont_exec_get = eval->eval_h("(cog-execute! dont-exec-get)");
+    Handle quote_get = eval->eval_h("(cog-execute! quote-get)");
+    Handle expected = eval->eval_h("get-expected");
+
+    printf("exeget %s\n", dont_exec_get->to_short_string().c_str());
+    printf("quoget %s\n", quote_get->to_short_string().c_str());
+    printf("expect %s\n", expected->to_short_string().c_str());
+
+    TS_ASSERT(dont_exec_get == expected);
+    TS_ASSERT(quote_get == expected);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
