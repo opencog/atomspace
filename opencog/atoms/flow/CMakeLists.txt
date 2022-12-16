@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (atomflow
 	FilterLink.cc
 	FormulaPredicateLink.cc
+	IncomingOfLink.cc
 	NumberOfLink.cc
 	PromiseLink.cc
 	SetTVLink.cc
@@ -32,6 +33,7 @@ INSTALL (TARGETS atomflow EXPORT AtomSpaceTargets
 INSTALL (FILES
 	FilterLink.h
 	FormulaPredicateLink.h
+	IncomingOfLink.h
 	NumberOfLink.h
 	PromiseLink.h
 	SetTVLink.h

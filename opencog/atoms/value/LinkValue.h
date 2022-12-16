@@ -48,6 +48,9 @@ protected:
 
 	LinkValue(Type t) : Value(t) {}
 public:
+	LinkValue(void)
+		: Value(LINK_VALUE) {}
+
 	LinkValue(const ValuePtr& vp)
 		: Value(LINK_VALUE) { _value.push_back(vp); }
 

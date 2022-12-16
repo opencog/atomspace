@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "IncomingOfLink.h"
@@ -38,6 +37,12 @@ IncomingOfLink::IncomingOfLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an IncomingOfLink, got %s", tname.c_str());
 	}
+
+	size_t sz = _outgoing.size();
+
+	if (1 != sz and 2 != sz)
+		throw InvalidParamException(TRACE_INFO,
+			"IncomingOfLink expects one or two args, got %lu", sz);
 }
 
 // ---------------------------------------------------------------
@@ -45,15 +50,32 @@ IncomingOfLink::IncomingOfLink(const HandleSeq&& oset, Type t)
 /// Return a LinkValue vector.
 ValuePtr IncomingOfLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq tipes;
-	for (const Handle& h : _outgoing)
+	// If the given Atom is executable, then execute it.
+	Handle base(_outgoing[0]);
+	if (base->is_executable())
 	{
-		ValuePtr vi(NumericFunctionLink::get_value(as, silent, h));
-		Type t = vi->get_type();
-		tipes.emplace_back(createTypeNode(t));
+		base = HandleCast(base->execute(as, silent));
+		if (nullptr == base) return createLinkValue();
 	}
 
-	return createLinkValue(tipes);
+	// Simple case. Get IncomingSet.
+	if (1 == _outgoing.size())
+		return createLinkValue(base->getIncomingSet());
+
+	// Get incoming set by type.
+	Handle tnode(_outgoing[1]);
+	if (tnode->is_executable())
+		tnode = HandleCast(tnode->execute(as, silent));
+
+	if (not tnode->is_type(TYPE_NODE))
+		throw RuntimeException(TRACE_INFO,
+			"IncomingOfLink expects a type; got %s",
+			tnode->to_string().c_str());
+
+	TypeNodePtr tnp = TypeNodeCast(tnode);
+	Type intype = tnp->get_kind();
+	HandleSeq iset(base->getIncomingSetByType(intype));
+	return createLinkValue(iset);
 }
 
 DEFINE_LINK_FACTORY(IncomingOfLink, INCOMING_OF_LINK)
