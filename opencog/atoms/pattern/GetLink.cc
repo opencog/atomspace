@@ -53,16 +53,6 @@ ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
 	HandleSet hs(qv->to_handle_set());
 
-	// If there is an anchor, then attach results to the anchor.
-	// Otherwise, create a SetLink and return that.
-	if (_variables._anchor and as)
-	{
-		for (const Handle& h : hs)
-			as->add_link(MEMBER_LINK, h, _variables._anchor);
-
-		return _variables._anchor;
-	}
-
 	// Create the satisfying set, and cache it.
 	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));
 

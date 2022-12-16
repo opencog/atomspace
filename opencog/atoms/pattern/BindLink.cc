@@ -69,16 +69,6 @@ ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
 	HandleSeq rslt(qv->to_handle_seq());
 
-	// If there is an anchor, then attach results to the anchor.
-	// Otherwise, create a SetLink and return that.
-	if (_variables._anchor and as)
-	{
-		for (const Handle& h: rslt)
-			as->add_link(MEMBER_LINK, h, _variables._anchor);
-
-		return _variables._anchor;
-	}
-
 	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)
 	// Put the set into a SetLink, cache it, and return that.

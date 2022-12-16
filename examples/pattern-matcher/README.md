@@ -84,7 +84,6 @@ Basic Examples
 The first five examples provide a basic introduction to basic
 pattern matching.
 
-* `anchor.scm`       -- Obtaining results incrementally.
 * `satisfaction.scm` -- Determining satisfiability of a query.
 * `unify.scm`        -- Basic term unification.
 * `glob.scm`         -- Matching multiple atoms at once.

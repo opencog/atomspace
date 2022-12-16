@@ -52,12 +52,6 @@ TruthValuePtr SatisfactionLink::evaluate(AtomSpace* as, bool silent)
 	Satisfier sater(as);
 	sater.satisfy(PatternLinkCast(get_handle()));
 
-	// If there is an anchor, then attach results to the anchor.
-	if (_variables._anchor and as)
-	{
-		as->add_link(MEMBER_LINK, sater._ground, _variables._anchor);
-	}
-
 	return sater._result;
 }
 

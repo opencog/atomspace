@@ -59,7 +59,6 @@ ADD_CXXTEST(RecognizerUTest)
 ADD_CXXTEST(ArcanaUTest)
 ADD_CXXTEST(SubstitutionUTest)
 ADD_CXXTEST(GetLinkUTest)
-ADD_CXXTEST(AnchorUTest)
 ADD_CXXTEST(NotLinkUTest)
 ADD_CXXTEST(GetStateUTest)
 ADD_CXXTEST(ClassicalBooleanUTest)
@@ -150,7 +149,6 @@ TARGET_LINK_LIBRARIES(SparseUTest
 )
 
 # -------------------------------------------------------------
-
 # Run only the tests in this subdirectory
 ADD_CUSTOM_TARGET (qtest
 	DEPENDS tests
