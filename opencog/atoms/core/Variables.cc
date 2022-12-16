@@ -139,10 +139,6 @@ void Variables::validate_vardecl(const Handle& hdecls)
 		// variables inference is aborted for now.
 		return;
 	}
-	else if (ANCHOR_NODE == tdecls)
-	{
-		_anchor = hdecls;
-	}
 	else
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -163,10 +159,6 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		else if (TYPED_VARIABLE_LINK == t)
 		{
 			unpack_vartype(h);
-		}
-		else if (ANCHOR_NODE == t)
-		{
-			_anchor = h;
 		}
 		else
 		{
@@ -354,7 +346,7 @@ static const GlobInterval& default_interval(Type t)
 			 var_def_interval;
 }
 
-const GlobInterval& Variables::get_interval(const Handle& var) const
+const GlobInterval Variables::get_interval(const Handle& var) const
 {
 	const auto& decl = _typemap.find(var);
 
@@ -669,31 +661,6 @@ Handle Variables::get_vardecl() const
 	if (_ordered)
 		return HandleCast(createVariableList(std::move(vardecls)));
 	return HandleCast(createVariableSet(std::move(vardecls)));
-}
-
-void Variables::validate_vardecl(const HandleSeq& oset)
-{
-	for (const Handle& h: oset)
-	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE == t or GLOB_NODE == t)
-		{
-			varset.insert(h);
-			varseq.emplace_back(h);
-		}
-		else if (TYPED_VARIABLE_LINK == t)
-		{
-			get_vartype(h);
-		}
-		else
-		{
-			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s"
-				"\nVariableList is %s",
-					nameserver().getTypeName(t).c_str(),
-					to_string().c_str());
-		}
-	}
 }
 
 /* ================================================================= */
