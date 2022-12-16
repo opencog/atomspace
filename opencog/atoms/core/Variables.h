@@ -68,8 +68,8 @@ struct Variables : public FreeVariables
 	/// _typemap holds back-ponters to TypedVariableLinkPtrs
 	VariableTypeMap _typemap;
 
-	/// Anchor, if present, else undefined.
-	Handle _anchor;
+	// See VariableList.cc for comments
+	void get_vartype(const Handle&);
 
 	// Validate the variable decls
 	void validate_vardecl(const Handle&);

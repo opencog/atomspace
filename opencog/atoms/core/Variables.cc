@@ -139,10 +139,6 @@ void Variables::validate_vardecl(const Handle& hdecls)
 		// variables inference is aborted for now.
 		return;
 	}
-	else if (ANCHOR_NODE == tdecls)
-	{
-		_anchor = hdecls;
-	}
 	else
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -163,10 +159,6 @@ void Variables::validate_vardecl(const HandleSeq& oset)
 		else if (TYPED_VARIABLE_LINK == t)
 		{
 			unpack_vartype(h);
-		}
-		else if (ANCHOR_NODE == t)
-		{
-			_anchor = h;
 		}
 		else
 		{
@@ -686,7 +678,6 @@ Handle Variables::get_vardecl() const
 
 	if (_ordered)
 		return HandleCast(createVariableList(std::move(vardecls)));
-
 	return HandleCast(createVariableSet(std::move(vardecls)));
 }
 
