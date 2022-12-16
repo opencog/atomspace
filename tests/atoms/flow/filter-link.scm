@@ -543,6 +543,20 @@
 
 ; (cog-execute! dont-exec)
 
+; (Variable "x") is bound in the Get; it cannot be substituted.
+(define dont-expected
+  (Set
+    (Get
+      (And
+        (Evaluation
+          (GroundedPredicate "scm:filter")
+          (Variable "x"))))
+    (Get
+      (And
+        (Evaluation
+          (GroundedPredicate "scm:filter")
+          (Variable "x"))))))
+
 (define quote-get
   (Filter
     (Rule
@@ -555,7 +569,8 @@
 
 ; (cog-execute! quote-exec)
 
-(define get-expected
+; The (Variable "x") is free, because the quote unbound it.
+(define quote-expected
   (Set
     (Get
       (And

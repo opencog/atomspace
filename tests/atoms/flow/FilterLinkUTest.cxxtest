@@ -349,15 +349,22 @@ void FilterLinkUTest::test_dont_exec(void)
     eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
 
     Handle dont_exec_get = eval->eval_h("(cog-execute! dont-exec-get)");
+    Handle dont_expected = eval->eval_h("dont-expected");
+
+    printf("dontge %s\n\n", dont_exec_get->to_short_string().c_str());
+    printf("expect %s\n\n", dont_expected->to_short_string().c_str());
+
+    TS_ASSERT(dont_exec_get == dont_expected);
+
+    // ----------------------------------------------------------
+
     Handle quote_get = eval->eval_h("(cog-execute! quote-get)");
-    Handle expected = eval->eval_h("get-expected");
+    Handle quote_exp = eval->eval_h("quote-expected");
 
-    printf("exeget %s\n", dont_exec_get->to_short_string().c_str());
     printf("quoget %s\n", quote_get->to_short_string().c_str());
-    printf("expect %s\n", expected->to_short_string().c_str());
+    printf("quoexp %s\n", quote_exp->to_short_string().c_str());
 
-    TS_ASSERT(dont_exec_get == expected);
-    TS_ASSERT(quote_get == expected);
+    TS_ASSERT(quote_get == quote_exp);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
