@@ -19,10 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/VariableSet.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/VoidValue.h>
@@ -157,11 +157,28 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                         const Handle& ground,
+                         const Handle& gnd,
                          GroundingMap& valmap,
+                         AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
-	if (termpat == ground) return true;
+	if (termpat == gnd) return true;
+
+	// Execute the proposed grounding term, first. Notice that this is
+	// a "deep" execution, because there may have been lots of
+	// non-executable stuff above us. Is this deep execution actually
+	// a good idea? I dunno; this is an older design decision, motivated
+	// by the URE. Is it a good design decision? I dunno. For now, there's
+	// not enough experience to say. There is, however, a unit test to
+	// check this behavior.
+	Handle ground;
+	if (gnd->is_executable())
+	{
+		ground = HandleCast(gnd->execute(scratch, silent));
+		if (nullptr == ground) return false;
+	}
+	else
+		ground = gnd;
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -189,9 +206,8 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Consume quotation
 	if (quotation_cp.consumable(t))
-	{
-		return extract(termpat->getOutgoingAtom(0), ground, valmap, quotation);
-	}
+		return extract(termpat->getOutgoingAtom(0), ground, valmap,
+		               scratch, silent, quotation);
 
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
@@ -208,7 +224,7 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap, quotation))
+			if (extract(choice, ground, valmap, scratch, silent, quotation))
 				return true;
 		}
 		return false;
@@ -233,7 +249,7 @@ bool FilterLink::extract(const Handle& termpat,
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
-			if (not extract(tlo[i], glo[i], valmap, quotation))
+			if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
 				return false;
 		}
 
@@ -263,7 +279,7 @@ bool FilterLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap, quotation);
+			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
@@ -275,10 +291,10 @@ bool FilterLink::extract(const Handle& termpat,
 				if (have_post)
 				{
 					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, quotation);
+					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
 					if (tc) break;
 				}
-				tc = extract(glob, glo[jg], valmap, quotation);
+				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 				if (tc) glob_seq.push_back(glo[jg]);
 				jg ++;
 			}
@@ -311,7 +327,7 @@ bool FilterLink::extract(const Handle& termpat,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, quotation))
+			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
 				return false;
 		}
 	}
@@ -323,23 +339,10 @@ bool FilterLink::extract(const Handle& termpat,
 Handle FilterLink::rewrite_one(const Handle& cterm,
                                AtomSpace* scratch, bool silent) const
 {
-	// Execute the term, first. We use the Instantiator to perform
-	// a "deep" execution, executing stuff deep within the term.
-	// This includes the consumption of embedded QuoteLinks. But why?
-	// I dunno; this is an older design decision, motivated by the URE.
-	// Is it a good design decision? I dunno. For now, there's not
-	// enough experience to say.
-	//
-	// Also, FYI, we could do execution in-line with extraction,
-	// above. This would improve performance and avoid un-needed
-	// execution.
-	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.execute(cterm, silent)));
-
-	// See it the term passes pattern matching. If it does, the
+	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
-	if (not extract(_pattern->get_body(), term, valmap))
+	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
 	// Place the groundings into a sequence, for easy access.

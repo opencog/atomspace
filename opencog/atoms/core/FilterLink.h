@@ -58,6 +58,7 @@ protected:
 	FilterLink(Type, const Handle&);
 
 	bool extract(const Handle&, const Handle&, GroundingMap&,
+	             AtomSpace*, bool,
 	             Quotation quotation=Quotation()) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*, bool) const;
