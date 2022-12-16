@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/FilterLink.h
+ * opencog/atoms/flow/FilterLink.h
  *
- * Copyright (C) 2015,2016 Linas Vepstas
+ * Copyright (C) 2015,2016,2022 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,17 +50,18 @@ protected:
 	// Globby terms are terms that contain a GlobNode
 	HandleSet _globby_terms;     // Smallest term that has a glob.
 
-	bool _is_impl;
-	Handle _rewrite;
+	// Rules will have a rewrite
+	HandleSeq _rewrite;
 
 	void init(void);
 
 	FilterLink(Type, const Handle&);
 
 	bool extract(const Handle&, const Handle&, GroundingMap&,
+	             AtomSpace*, bool,
 	             Quotation quotation=Quotation()) const;
 
-	Handle rewrite_one(const Handle&, AtomSpace*) const;
+	Handle rewrite_one(const Handle&, AtomSpace*, bool) const;
 
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);

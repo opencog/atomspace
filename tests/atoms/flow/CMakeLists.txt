@@ -18,3 +18,6 @@ TARGET_LINK_LIBRARIES(SetValueUTest execution smob)
 
 ADD_CXXTEST(DynamicUTest)
 TARGET_LINK_LIBRARIES(DynamicUTest execution smob)
+
+ADD_CXXTEST(FilterLinkUTest)
+TARGET_LINK_LIBRARIES(FilterLinkUTest execution smob)

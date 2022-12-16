@@ -412,7 +412,7 @@ void FreeVariables::canonical_sort(const HandleSeq& hs)
 	// Get free variables
 	HandleSet fv = get_free_variables(hs);
 
-	// Ignore free variables in body not in the FreeVariables object
+	// Ignore free variables in the body that are not in this object.
 	HandleSet ignored_vars = set_symmetric_difference(fv, varset);
 	Context ctx(Quotation(), ignored_vars, false);
 

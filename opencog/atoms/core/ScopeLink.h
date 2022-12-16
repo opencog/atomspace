@@ -81,14 +81,20 @@ public:
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 
+	// Remove any variables that do NOT appear anywhere in the provided
+	// HandleSeq. This can be used to clean up vardecls, when variables
+	// are declared but then never used (thus making them impossible to
+	// ground, or having other nasty side-effects.)
+	void trim(const HandleSeq&);
+
 	// Return an alpha-converted copy of this atom. Optionally, new
 	// variable names can be provided. If none are provided, then new
 	// randomly generated names are created.
 	//
-	// Warning: the atomspace treats all alpha-convertible atoms as
+	// Warning: the AtomSpace treats all alpha-convertible atoms as
 	// identical; if the new copy is inserted into the atomspace, the
 	// original version will be returned.  Alpha-converted atoms can
-	// only be used outside of the atomspace, for temporary operations.
+	// only be used outside of the AtomSpace, for temporary operations.
 	Handle alpha_convert() const;
 	Handle alpha_convert(const HandleSeq& vars) const;
 

@@ -122,6 +122,17 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	_body = oset[boff];
 	for (size_t i=boff+1; i < sz; i++)
 		_implicand.push_back(oset[i]);
+
+	// Remove any declared variables that are NOT in the body!
+	// This is an "unusual" situation, except that the URE does
+	// this regularly, when it constructs rules on the fly.
+	// I don't know why.
+	if (1 == boff)
+	{
+		_implicand.push_back(_body),
+		trim(_implicand);
+		_implicand.pop_back();
+	}
 }
 
 /* ================================================================= */

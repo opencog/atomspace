@@ -571,6 +571,24 @@ void Variables::trim(const Handle& term)
 		erase(hu);
 }
 
+// Identical to above, except multiple terms are scanned.
+void Variables::trim(const HandleSeq& terms)
+{
+	// Find the vars in all of the terms.
+	FreeVariables fv;
+	fv.find_variables(terms);
+
+	// Find all vars not in any of the terms.
+	HandleSeq unused;
+	for (const Handle& hv: varseq)
+		if (not fv.varset_contains(hv))
+			unused.push_back(hv);
+
+	// Get rid of all vars not in any of the terms.
+	for (const Handle& hu: unused)
+		erase(hu);
+}
+
 /* ================================================================= */
 
 /// Return true if the other Variables struct is equal to this one,

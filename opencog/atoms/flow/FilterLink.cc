@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/FilterLink.cc
+ * opencog/atoms/flow/FilterLink.cc
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2015, 2016, 2022 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,10 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/rule/RuleLink.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include "FilterLink.h"
 
@@ -30,9 +33,9 @@ using namespace opencog;
 
 void FilterLink::init(void)
 {
-	// Maps consist of a function, and the data to apply the function to.
-	// The function can be explicit (inheriting from ScopeLink) or
-	// implicit (we automatically fish out free variables).
+	// Filters consist of a function, and the data to apply the
+	// function to.  The function can be explicit (inheriting from
+	// ScopeLink) or implicit (we automatically fish out free variables).
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"FilterLink is expected to be arity-2 only!");
@@ -55,17 +58,21 @@ void FilterLink::init(void)
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
 
-	// ImplicationScopeLinks are a special type of ScopeLink.  They specify
-	// a re-write that should be performed.  Viz, ImplicationScopeLinks are
+	// RuleLinks are a special type of ScopeLink.  They specify a
+	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
-	_is_impl = false;
+	if (nameserver().isA(tscope, RULE_LINK))
+		_rewrite = RuleLinkCast(_pattern)->get_implicand();
+
+	// The URE ControlPolicyUTest makes use of this, and we cannot
+	// yet use RuleLink, above, to handle this, because then
+	// the URE BackwardChainerUTest hangs. Argh...
 	if (nameserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
-		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
 		if (impl.size() < 2)
 			throw SyntaxException(TRACE_INFO,
-				"Expecting ImplicationLink of at least size 2.");
+				"Expecting a RuleLink of at least size 2.");
 
 		// ImplicationScopeLinks have arity 2 only if they have no type
 		// constraints, else they have arity 3.  That is, an
@@ -73,15 +80,22 @@ void FilterLink::init(void)
 		// where T(x) is the type constraints on the variables.
 		if (_pattern->get_body() == impl[0])
 		{
-			_rewrite = impl[1];
+			_rewrite.push_back(impl[1]);
 		}
 		else if (_pattern->get_body() == impl[1])
 		{
 			if (impl.size() < 3)
 				throw SyntaxException(TRACE_INFO,
 					"Expecting ImplicationScopeLink of at least size 3.");
-			_rewrite = impl[2];
+			_rewrite.push_back(impl[2]);
 		}
+
+		// The URE ControlPolicyUTest creates rules that declare
+		// variables that are never in the body. As a result, those
+		// variales can never be grounded during filtering. I don't
+		// understand why this happens; I think the URE needs to be
+		// fixed. In the meanwhile, we clean up here.
+		_pattern->trim({_pattern->get_body()});
 	}
 
 	// Locate all GlobNodes in the pattern
@@ -143,11 +157,28 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                      const Handle& ground,
-                      GroundingMap& valmap,
-                      Quotation quotation) const
+                         const Handle& gnd,
+                         GroundingMap& valmap,
+                         AtomSpace* scratch, bool silent,
+                         Quotation quotation) const
 {
-	if (termpat == ground) return true;
+	if (termpat == gnd) return true;
+
+	// Execute the proposed grounding term, first. Notice that this is
+	// a "deep" execution, because there may have been lots of
+	// non-executable stuff above us. Is this deep execution actually
+	// a good idea? I dunno; this is an older design decision, motivated
+	// by the URE. Is it a good design decision? I dunno. For now, there's
+	// not enough experience to say. There is, however, a unit test to
+	// check this behavior.
+	Handle ground;
+	if (gnd->is_executable())
+	{
+		ground = HandleCast(gnd->execute(scratch, silent));
+		if (nullptr == ground) return false;
+	}
+	else
+		ground = gnd;
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -175,9 +206,8 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Consume quotation
 	if (quotation_cp.consumable(t))
-	{
-		return extract(termpat->getOutgoingAtom(0), ground, valmap, quotation);
-	}
+		return extract(termpat->getOutgoingAtom(0), ground, valmap,
+		               scratch, silent, quotation);
 
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
@@ -194,7 +224,7 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap, quotation))
+			if (extract(choice, ground, valmap, scratch, silent, quotation))
 				return true;
 		}
 		return false;
@@ -219,7 +249,7 @@ bool FilterLink::extract(const Handle& termpat,
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
-			if (not extract(tlo[i], glo[i], valmap, quotation))
+			if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
 				return false;
 		}
 
@@ -249,7 +279,7 @@ bool FilterLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap, quotation);
+			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
@@ -261,10 +291,10 @@ bool FilterLink::extract(const Handle& termpat,
 				if (have_post)
 				{
 					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, quotation);
+					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
 					if (tc) break;
 				}
-				tc = extract(glob, glo[jg], valmap, quotation);
+				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 				if (tc) glob_seq.push_back(glo[jg]);
 				jg ++;
 			}
@@ -297,58 +327,64 @@ bool FilterLink::extract(const Handle& termpat,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, quotation))
+			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
 				return false;
 		}
 	}
 	return (ip == tsz) and (jg == gsz);
 }
 
-Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
-{
-	// Execute the ground, including consuming its quotation as part of
-	// the FilterLink semantics
-	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.instantiate(cterm, GroundingMap())));
+// ====================================================================
 
-	// Extract values for variables.
+Handle FilterLink::rewrite_one(const Handle& cterm,
+                               AtomSpace* scratch, bool silent) const
+{
+	// See if the term passes pattern matching. If it does, the
+	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
-	if (not extract(_pattern->get_body(), term, valmap))
+	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
-	// Make sure each variable is grounded. Place the groundings
-	// into a sequence, for easy access. Not all variables need to
-	// be grounded, because the re-write might not use all variables.
-	// If it does use a variable, it must have a grounding.
-	bool partial = false;
+	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-		if (valmap.end() == valpair)
-		{
-			partial = true;
-			valseq.emplace_back(Handle::UNDEFINED);
-		}
-		else
-			valseq.emplace_back(valpair->second);
+
+		// Can't ever happen.
+		// if (valmap.end() == valpair) return Handle::UNDEFINED;
+
+		valseq.emplace_back(valpair->second);
 	}
 
-	// Perform substitution, if it's an ImplicationScopeLink
-	if (_is_impl)
+	// Perform substitution, if it's a RuleLink.
+	if (not _rewrite.empty())
 	{
+		HandleSeq rew;
 		// Beta reduce, and execute. No type-checking during
-		// beta-reduction; we've already done that.
-		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-		return HandleCast(inst.execute(red));
+		// beta-reduction; we've already done that, during matching.
+		for (const Handle& impl : _rewrite)
+		{
+			Handle red(_mvars->substitute_nocheck(impl, valseq));
+			if (red->is_executable())
+				rew.emplace_back(HandleCast(red->execute(scratch, silent)));
+			else
+			{
+				// Consume quotations.
+				Type rty = red->get_type();
+				if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
+					rew.emplace_back(red->getOutgoingAtom(0));
+				else
+					rew.emplace_back(red);
+			}
+		}
+
+		// Fall through, use the same logic to finish up.
+		valseq.swap(rew);
 	}
 
-	// Make sure each variable is grounded. (for real, this time)
-	if (partial)
-		return Handle::UNDEFINED;
-
-	// Wrap up the result in a list only if there is more than one
-	// variable.
+	// Wrap up the result in a ListLink only if there is more
+	// than one variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
 		return scratch->add_link(LIST_LINK, std::move(valseq));
@@ -359,31 +395,60 @@ Handle FilterLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 
 ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 {
-	const Handle& valh = _outgoing[1];
+	Handle valh(_outgoing[1]);
+
+	if (valh->is_executable())
+	{
+		ValuePtr vex = valh->execute();
+
+		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
+		// then we should construct another Queue as the return value,
+		// and perform filtering on-demand.
+		if (vex->is_type(LINK_VALUE))
+		{
+			HandleSeq remap;
+			for (const Handle& h : LinkValueCast(vex)->to_handle_seq())
+			{
+				Handle mone = rewrite_one(h, as, silent);
+				if (nullptr != mone) remap.emplace_back(mone);
+			}
+			return createLinkValue(remap);
+		}
+
+		// If it is some other Value, we have no clue what to do with it.
+		if (not vex->is_atom())
+			return createVoidValue();
+
+		// Fall through, if execution provided some Atom.
+		valh = HandleCast(vex);
+	}
 
 	// Handle three different cases.
-	// If there is a single value, apply the map to the single value.
-	// If there is a set of values, apply the map to the set.
-	// If there is a list of values, apply the map to the list.
+	// If there is a single Atom, apply the filter to the single Atom.
+	// If there is a set of Atoms, apply the filter to the set.
+	// If there is a list of Atoms, apply the filter to the list.
 	Type argtype = valh->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
-			Handle mone = rewrite_one(h, as);
+			Handle mone = rewrite_one(h, as, silent);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
 		return as->add_link(argtype, std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = rewrite_one(valh, as);
+	Handle mone = rewrite_one(valh, as, silent);
 	if (mone) return mone;
 
-	// Avoid returning null handle.  This is broken.
-	// I don't like FilterLink much any more.
-	return as->add_link(SET_LINK);
+	// Avoid returning null pointer!
+	// If we were given Atoms, assum the caller wants Atoms back.
+	// Otherwise, avoid polution and return VoidValue.
+	if (valh->is_atom())
+		return as->add_link(SET_LINK);
+	return createVoidValue();
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)
