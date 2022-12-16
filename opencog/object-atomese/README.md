@@ -111,8 +111,8 @@ Lets asume the simplest case, where the matrix is in the form of the
 		(Predicate "*-left-element-*"))
 	(Lambda
 		(Variable "$matrix-entry") ; This will be the EvaluationLink;
-		(OutgoingOf
-			(OutgoingOf (Variable "$matrix-entry") (Number 1)) ; the ListLink
+		(ElementOf
+			(ElementOf (Variable "$matrix-entry") (Number 1)) ; the ListLink
 			(Number 0))  ; first item in the ListLink.
 	))
 ```
@@ -147,7 +147,7 @@ to do this (?)
 		(Variable "$matrix-entry") ; This will be the EvaluationLink;
 		; The FilterLink will extract the left elt.
 		(FilterLink
-			(ImplicationScopeLink
+			(RuleLink
 				;; Variables in the pattern
 				(VariableList
 					(Variable "$pred") (Variable "$left") (Variable "$right"))
@@ -197,7 +197,7 @@ We can get rid of th unused, un-needed variables:
 		(Variable "$matrix-entry") ; This will be the EvaluationLink;
 		; The FilterLink will extract the left elt.
 		(FilterLink
-			(ImplicationScopeLink
+			(RuleLink
 				;; Variable that we will bind.
 				(Variable "$left")
 				;; The matrix pattern to match.
@@ -237,6 +237,8 @@ Also useful would be `IncomingSetOf` which would return a `LinkValue`.
 
 TODO
 ----
+* Change Filter to handle all the cases that PutLink does.
+* Change Unifier to reutnr LinkValue not Set
 * Handle SignLink See issue #2602
 * Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
