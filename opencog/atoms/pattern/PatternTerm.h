@@ -113,6 +113,11 @@ protected:
 	// As above, but zero levels deep. This is a glob.
 	bool _is_globby_var;
 
+	// As above, but for anonymous variables AKA SignatureLinks
+	bool _has_any_anon_var;
+	bool _has_anon_var;
+	bool _is_anon_var;
+
 	// As above, but for evaluatables.
 	bool _has_any_evaluatable;
 	bool _has_evaluatable;
@@ -170,6 +175,7 @@ protected:
 
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
+	void addAnyAnonVar();
 	void addAnyEvaluatable();
 	void addUnorderedBelow();
 
@@ -226,6 +232,11 @@ public:
 	bool hasAnyGlobbyVar() const noexcept { return _has_any_globby_var; }
 	bool hasGlobbyVar() const noexcept { return _has_globby_var; }
 	bool isGlobbyVar() const noexcept { return _is_globby_var; }
+
+	void addAnonVar();
+	bool hasAnyAnonVar() const noexcept { return _has_any_anon_var; }
+	bool hasAnonVar() const noexcept { return _has_anon_var; }
+	bool isAnonVar() const noexcept { return _is_anon_var; }
 
 	void addEvaluatable();
 	bool hasAnyEvaluatable() const noexcept { return _has_any_evaluatable; }

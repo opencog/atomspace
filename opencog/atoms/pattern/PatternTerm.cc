@@ -25,6 +25,9 @@ PatternTerm::PatternTerm(void)
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
 	  _is_globby_var(false),
+	  _has_any_anon_var(false),
+	  _has_anon_var(false),
+	  _is_anon_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
@@ -49,6 +52,9 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_any_globby_var(false),
 	  _has_globby_var(false),
 	  _is_globby_var(false),
+	  _has_any_anon_var(false),
+	  _has_anon_var(false),
+	  _is_anon_var(false),
 	  _has_any_evaluatable(false),
 	  _has_evaluatable(false),
 	  _is_virtual(false),
@@ -199,6 +205,30 @@ void PatternTerm::addGlobbyVar()
 	addAnyGlobbyVar();
 }
 
+// ==============================================================
+// Just like above, but for anonymous variables (SignatureLinks).
+
+void PatternTerm::addAnyAnonVar()
+{
+	if (not _has_any_anon_var)
+	{
+		_has_any_anon_var = true;
+		if (_parent->_handle)
+			_parent->addAnyAnonVar();
+	}
+}
+
+void PatternTerm::addAnonVar()
+{
+	if (isQuoted()) return;
+
+	_is_anon_var = true;
+
+	if (_parent->_handle)
+		_parent->_has_anon_var = true;
+
+	addAnyAnonVar();
+}
 
 // ==============================================================
 // Just like above, but for evaluatables.
@@ -357,6 +387,9 @@ std::string PatternTerm::flag_string() const
 	if (_has_any_globby_var) str += "HAGV: ";
 	if (_has_globby_var) str += "HGV: ";
 	if (_is_globby_var) str += "GV: ";
+	if (_has_any_anon_var) str += "HANV: ";
+	if (_has_anon_var) str += "HNV: ";
+	if (_is_anon_var) str += "NV: ";
 	if (_has_any_evaluatable) str += "HE: ";
 	if (_has_evaluatable) str += "E: ";
 	if (_is_virtual) str += "V: ";

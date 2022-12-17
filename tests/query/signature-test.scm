@@ -40,6 +40,13 @@
 			(Variable "$p")
 			(List (Sign 'Number) (Sign 'Number)))))
 
+(define meet-soon
+	(Meet
+		(TypedVariable (Variable "$p") (Type 'PredicateNode))
+		(Evaluation
+			(Variable "$p")
+			(List (Signature (Type 'Number)) (Signature (Type 'Number))))))
+
 (define meet-sfoon
 	(Meet
 		(TypedVariable (Variable "$p") (Type 'PredicateNode))
@@ -57,6 +64,10 @@
 
 (test-assert "got meet-foon"
 	(equal? (cog-execute! (CollectionOf meet-foon))
+		(Set (Predicate "foo"))))
+
+(test-assert "got meet-soon"
+	(equal? (cog-execute! (CollectionOf meet-soon))
 		(Set (Predicate "foo"))))
 
 (test-assert "got meet-sfoon"
