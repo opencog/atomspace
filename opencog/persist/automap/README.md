@@ -18,10 +18,10 @@ It contains *only* the columns that are not foreign keys:
 	Evaluation
 		Predicate "tablename"
 		List
-			Concept "column 1" ; If there are strings
+			Concept "column 1" ; If column type is a string
 			Concept "column 2"
 			...
-			NumberNode NNN	; if there are numbers.
+			NumberNode NNN	; If column type is a number.
 ```
 
 For each row in tablename having a column that is a foreign key:
