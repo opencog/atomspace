@@ -159,7 +159,7 @@ struct Variables : public FreeVariables
 	void trim(const HandleSeq&);
 
 	/// Remove *all* variables that do not appear in the term.
-	void trim(const Handle& h) { trim({h}); }
+	void trim(const Handle& h) { trim(HandleSeq({h})); }
 
 	/// Return the TypedVariableLink for the indicated variable.
 	/// Return just the Variable itself, if its not typed.
