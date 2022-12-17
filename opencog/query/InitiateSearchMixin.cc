@@ -126,11 +126,12 @@ InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
                                   PatternTermPtr& startrm, size_t& width)
 {
 	const Handle& h = ptm->getHandle();
+
 	// If its a node, then we are done.
 	Type t = h->get_type();
 	if (_nameserver.isNode(t))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != t and GLOB_NODE != t and SIGN_NODE != t)
 		{
 			width = h->getIncomingSetSize();
 			startrm = ptm;
@@ -138,6 +139,9 @@ InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
 		}
 		return Handle::UNDEFINED;
 	}
+
+	// Signatures are just anonymous variables.
+	if (SIGNATURE_LINK == t) return Handle::UNDEFINED;
 
 	// If its a link, then find recursively
 	return find_starter_recursive(ptm, depth, startrm, width);
@@ -156,13 +160,16 @@ InitiateSearchMixin::find_starter_recursive(const PatternTermPtr& ptm,
 	Type t = h->get_type();
 	if (_nameserver.isNode(t))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != t and GLOB_NODE != t and SIGN_NODE != t)
 		{
 			width = h->getIncomingSetSize();
 			return h;
 		}
 		return Handle::UNDEFINED;
 	}
+
+	// Signatures are just anonymous variables.
+	if (SIGNATURE_LINK == t) return Handle::UNDEFINED;
 
 	// Ignore all dynamically-evaluatable links up front.
 	// However, we are allowed to start inside of IdenticalLinks.

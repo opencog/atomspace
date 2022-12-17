@@ -27,6 +27,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -1524,6 +1525,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// screwy and indirect trick to check alpha conversion.
 	if (VARIABLE_NODE == tp and not ptm->isQuoted())
 		return _pmc.scope_match(hp, hg);
+
+	// Signatures are just anonymous variables. That is, variables
+	// whose groundings we do not record.
+	if ((SIGN_NODE == tp or SIGNATURE_LINK == tp) and not ptm->isQuoted())
+		return value_is_type(hp, hg);
 
 	// If both are nodes, compare them as such.
 	if (hp->is_node() and hg->is_node())
