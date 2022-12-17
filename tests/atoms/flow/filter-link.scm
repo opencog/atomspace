@@ -611,3 +611,32 @@
         (List (Concept "A") (Concept "B")))))
 
 ; ----------------------------------------------------------
+
+(DefineLink
+   (DefinedSchema "foof-match")
+   (Lambda
+      (VariableList
+         (TypedVariable (Variable "$x") (Type 'ConceptNode))
+         (TypedVariable (Variable "$y") (Type 'ConceptNode)))
+      (Evaluation
+         (PredicateNode "foo")
+         (List (Variable "$x") (Variable "$y")))))
+
+(define defschema
+   (Filter
+      (DefinedSchema "foof-match")
+      (Set
+         (Evaluation
+            (Predicate "foo")
+            (List (Concept "A") (Concept "B")))
+         (Evaluation
+            (PredicateNode "bar")
+            (List (Concept "C") (Concept "D")))
+         (Evaluation
+            (Predicate "foo")
+            (List (Number 5) (Number 6))))))
+
+(define defschema-expect
+  (Set (List (Concept "A") (Concept "B"))))
+
+; ----------------------------------------------------------

@@ -21,6 +21,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/core/VariableSet.h>
@@ -40,16 +41,30 @@ void FilterLink::init(void)
 		throw SyntaxException(TRACE_INFO,
 			"FilterLink is expected to be arity-2 only!");
 
+	Handle termpat = _outgoing[0];
+	Type tscope = termpat->get_type();
+
+	// Expand definitions
+	if (nameserver().isA(tscope, DEFINED_PROCEDURE_NODE))
+	{
+		termpat = DefineLink::get_definition(termpat);
+		if (nullptr == termpat)
+			throw SyntaxException(TRACE_INFO,
+				"FilterLink cannot find defnition for %s",
+				_outgoing[0]->to_string().c_str());
+
+		tscope = termpat->get_type();
+	}
+
 	// First argument must be a function of some kind.  All functions
 	// are specified using a ScopeLink, to bind the input-variables.
-	Type tscope = _outgoing[0]->get_type();
 	if (nameserver().isA(tscope, SCOPE_LINK))
 	{
-		_pattern = ScopeLinkCast(_outgoing[0]);
+		_pattern = ScopeLinkCast(termpat);
 	}
 	else
 	{
-		const Handle& body = _outgoing[0];
+		const Handle& body = termpat;
 		FreeVariables fv;
 		fv.find_variables(body);
 		Handle decl(createVariableSet(std::move(fv.varseq)));
@@ -164,6 +179,8 @@ bool FilterLink::extract(const Handle& termpat,
 {
 	if (termpat == gnd) return true;
 
+	Handle ground(gnd);
+
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
 	// non-executable stuff above us. Is this deep execution actually
@@ -171,14 +188,11 @@ bool FilterLink::extract(const Handle& termpat,
 	// by the URE. Is it a good design decision? I dunno. For now, there's
 	// not enough experience to say. There is, however, a unit test to
 	// check this behavior.
-	Handle ground;
-	if (gnd->is_executable())
+	if (ground->is_executable())
 	{
 		ground = HandleCast(gnd->execute(scratch, silent));
 		if (nullptr == ground) return false;
 	}
-	else
-		ground = gnd;
 
 	// Let the conventional type-checker deal with complicated types.
 	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
