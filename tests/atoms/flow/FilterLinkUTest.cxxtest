@@ -65,6 +65,8 @@ public:
     void test_local_quote_map(void);
     void xtest_quote_arg_map(void);
     void test_dont_exec(void);
+    void test_naked_signature(void);
+    void test_defined_schema(void);
 };
 
 void FilterLinkUTest::tearDown(void)
@@ -365,6 +367,40 @@ void FilterLinkUTest::test_dont_exec(void)
     printf("quoexp %s\n", quote_exp->to_short_string().c_str());
 
     TS_ASSERT(quote_get == quote_exp);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void FilterLinkUTest::test_naked_signature(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
+
+    Handle siggy_filter = eval->eval_h("(cog-execute! siggy-filter)");
+    Handle siggy_expect = eval->eval_h("siggy-expect");
+
+    printf("siggy %s\n\n", siggy_filter->to_short_string().c_str());
+    printf("sigex %s\n\n", siggy_expect->to_short_string().c_str());
+
+    TS_ASSERT(siggy_filter == siggy_expect);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void FilterLinkUTest::test_defined_schema(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
+
+    Handle defschm_filter = eval->eval_h("(cog-execute! defschema)");
+    Handle defschm_expect = eval->eval_h("defschema-expect");
+
+    printf("defschema %s\n\n", defschm_filter->to_short_string().c_str());
+    printf("expschema %s\n\n", defschm_expect->to_short_string().c_str());
+
+    TS_ASSERT(defschm_filter == defschm_expect);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
