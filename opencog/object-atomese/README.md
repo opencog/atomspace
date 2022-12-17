@@ -133,10 +133,8 @@ To run this:
 This would return `(Word "blue")` upon execution.
 
 
-This is perhaps a terrible example, as the definition requires the
-(non-existant) `OutgoingOfLink`.  We could create this link (and maybe we
-should, because it seems so "natural"?) but we could also use FilterLink
-to do this (?)
+This is perhaps a terrible example.  We could (maybe should) use
+FilterLink to do this work.
 
 ```
 (DefineLink
@@ -214,31 +212,8 @@ All four of these forms should "just work".
 NB SignNode is a synonym for (SignatureLink (TypeNode 'foo))
 
 
-Ancillary Nodes and Links
--------------------------
-A better name for `OutgoingOf` would be `ElementOf` and it would work on
-Values as well as Atoms.  Thus, for example, to draw a random Atom out of
-an AtomSpace, write:
-```
-(ElementOf
-	(AtomSpace "foo")
-
-	;; Draw a random number between 0 and the size of the atomspace.
-	(RandomNumberLink
-		(Number 0)
-		(SizeOf (AtomSpace "foo"))))
-```
-
-`ElementOf` can work with vectors, and so it is "just like" the
-already-existing `DecimateLink`, except that it specifies the bit locations
-in the decimate mask.
-
-Also useful would be `IncomingSetOf` which would return a `LinkValue`.
-
 TODO
 ----
-* Change Filter to handle all the cases that PutLink does.
-* Change Unifier to reutnr LinkValue not Set
 * Handle SignLink See issue #2602
 * Handle Signatures in the pattern matcher, plus examples & tests.
 * Change BoolValue so it can create maskes from bit-specs!?
