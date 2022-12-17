@@ -635,7 +635,7 @@ void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
 	if (not clause->isLink()) return;
 
 	// Ignore ChoiceLinks, we cannot start inside of one.
-	if (not clause->isQuoted() and clause->isChoice()) return;
+	if (clause->isChoice()) return;
 
 	// Cannot search SignatureLinks.
 	if (clause->isAnonVar()) return;
