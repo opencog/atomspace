@@ -131,6 +131,7 @@ InitiateSearchMixin::find_starter(const PatternTermPtr& ptm,
 	Type t = h->get_type();
 	if (_nameserver.isNode(t))
 	{
+		// XXX FIXME; we should be using ptm->isVariable() instead !?
 		if (VARIABLE_NODE != t and GLOB_NODE != t and SIGN_NODE != t)
 		{
 			width = h->getIncomingSetSize();
@@ -636,6 +637,9 @@ void InitiateSearchMixin::find_rarest(const PatternTermPtr& clause,
 	// Ignore ChoiceLinks, we cannot start inside of one.
 	if (not clause->isQuoted() and clause->isChoice()) return;
 
+	// Cannot search SignatureLinks.
+	if (clause->isAnonVar()) return;
+
 	Type t = clause->getHandle()->get_type();
 	if (not quotation.consumable(t))
 	{
@@ -899,6 +903,7 @@ bool InitiateSearchMixin::setup_link_type_search(const PatternTermSeq& clauses)
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
 		if (cl->hasAnyEvaluatable()) continue;
+
 		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
