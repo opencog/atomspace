@@ -1528,6 +1528,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Signatures are just anonymous variables. That is, variables
 	// whose groundings we do not record.
+	// XXX FIXME this should be `if (ptm->isAnonymousVariable())`
 	if ((SIGN_NODE == tp or SIGNATURE_LINK == tp) and not ptm->isQuoted())
 		return value_is_type(hp, hg);
 
@@ -1682,7 +1683,18 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 			oset.push_back(gnd->second);
 		}
 		else
+		{
+			// XXX FIXME this should not be a direct check for signature
+			// but instead pp->hasAnyAnonymousVariable() but I'm lazy,
+			// and no one else cares.
+			Type pt = pp->getHandle()->get_type();
+			if (SIGN_NODE == pt or SIGNATURE_LINK == pt)
+			{
+				need_search = true;
+				break;
+			}
 			oset.push_back(pp->getHandle());
+		}
 	}
 	if (not need_search)
 	{
@@ -1696,7 +1708,7 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 
 	// If we are here, then somehow the upward-term is not unique, and
 	// we have to explore the incoming set of the ground to see which
-	// (if any) of the incoming set satsisfies the parent term.
+	// (if any) of the incoming set satisfies the parent term.
 
 	IncomingSet iset = _pmc.get_incoming_set(hg, t);
 	size_t sz = iset.size();
