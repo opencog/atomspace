@@ -115,6 +115,7 @@ ADD_GUILE_TEST(OrBindTest or-bind-test.scm)
 ADD_GUILE_TEST(OrEvalTest or-eval-test.scm)
 ADD_GUILE_TEST(QuoteStartTest quote-start-test.scm)
 ADD_GUILE_TEST(RecursiveTest recursive-test.scm)
+ADD_GUILE_TEST(SignatureTest signature-test.scm)
 ADD_GUILE_TEST(UnifyTest unify-test.scm)
 
 # -------------------------------------------------------------
