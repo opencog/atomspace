@@ -640,3 +640,41 @@
   (Set (List (Concept "A") (Concept "B"))))
 
 ; ----------------------------------------------------------
+
+(DefineLink
+   (DefinedSchema "foo to frob")
+   (Rule
+      (VariableList
+         (TypedVariable (Variable "$x") (Type 'ConceptNode))
+         (TypedVariable (Variable "$y") (Type 'ConceptNode)))
+      (Evaluation
+         (PredicateNode "foo")
+         (List (Variable "$x") (Variable "$y")))
+      (Member (Variable "$x") (Concept "all things frob"))
+      (Member (Variable "$y") (Concept "orange-colored things"))))
+
+(define frob-rule
+   (Filter
+      (DefinedSchema "foo to frob")
+      (Set
+         (Evaluation
+            (Predicate "foo")
+            (List (Concept "A") (Concept "B")))
+         (Evaluation
+            (PredicateNode "bar")
+            (List (Concept "C") (Concept "D")))
+         (Evaluation
+            (Predicate "foo")
+            (List (Number 5) (Number 6))))))
+
+(define frob-expect
+  (Set
+    (List
+      (Member
+        (Concept "A")
+        (Concept "all things frob"))
+      (Member
+        (Concept "B")
+        (Concept "orange-colored things")))))
+
+; ----------------------------------------------------------

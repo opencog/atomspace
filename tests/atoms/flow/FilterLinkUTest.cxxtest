@@ -67,6 +67,7 @@ public:
     void test_dont_exec(void);
     void test_naked_signature(void);
     void test_defined_schema(void);
+    void test_rule_link(void);
 };
 
 void FilterLinkUTest::tearDown(void)
@@ -401,6 +402,23 @@ void FilterLinkUTest::test_defined_schema(void)
     printf("expschema %s\n\n", defschm_expect->to_short_string().c_str());
 
     TS_ASSERT(defschm_filter == defschm_expect);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void FilterLinkUTest::test_rule_link(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
+
+    Handle frob_filter = eval->eval_h("(cog-execute! frob-rule)");
+    Handle frob_expect = eval->eval_h("frob-expect");
+
+    printf("frob-rule %s\n\n", frob_filter->to_short_string().c_str());
+    printf("frob-xpct %s\n\n", frob_expect->to_short_string().c_str());
+
+    TS_ASSERT(frob_filter == frob_expect);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
