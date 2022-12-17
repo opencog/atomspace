@@ -22,6 +22,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -178,6 +179,10 @@ bool FilterLink::extract(const Handle& termpat,
 	}
 	else
 		ground = gnd;
+
+	// Let the conventional type-checker deal with complicated types.
+	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
+		return value_is_type(termpat, ground);
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -343,6 +348,11 @@ Handle FilterLink::rewrite_one(const Handle& cterm,
 	GroundingMap valmap;
 	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
+
+	// Special case for signatures.
+	if (_pattern->get_body()->is_type(TYPE_NODE) or
+	    _pattern->get_body()->is_type(TYPE_OUTPUT_LINK))
+		return cterm;
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;

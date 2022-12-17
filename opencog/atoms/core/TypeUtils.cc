@@ -62,7 +62,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 		dpt = deep->get_type();
 	}
 
-	if (TYPE_NODE == dpt)
+	if (TYPE_NODE == dpt or SIGN_NODE == dpt)
 	{
 		Type deeptype = TypeNodeCast(deep)->get_kind();
 		return (valtype == deeptype);
