@@ -68,6 +68,7 @@ public:
     void test_naked_signature(void);
     void test_defined_schema(void);
     void test_rule_link(void);
+    void test_sign_node(void);
 };
 
 void FilterLinkUTest::tearDown(void)
@@ -419,6 +420,23 @@ void FilterLinkUTest::test_rule_link(void)
     printf("frob-xpct %s\n\n", frob_expect->to_short_string().c_str());
 
     TS_ASSERT(frob_filter == frob_expect);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void FilterLinkUTest::test_sign_node(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
+
+    Handle sign_filter = eval->eval_h("(cog-execute! sign-filter)");
+    Handle sign_expect = eval->eval_h("sign-expect");
+
+    printf("sign-rule %s\n\n", sign_filter->to_short_string().c_str());
+    printf("sign-xpct %s\n\n", sign_expect->to_short_string().c_str());
+
+    TS_ASSERT(sign_filter == sign_expect);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

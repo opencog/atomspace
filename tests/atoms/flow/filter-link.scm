@@ -678,3 +678,38 @@
         (Concept "orange-colored things")))))
 
 ; ----------------------------------------------------------
+
+(DefineLink
+   (DefinedSchema "extract bc")
+   (Rule
+      (Variable "$x")
+      (Evaluation
+         ; (PredicateNode "foo")
+         (Sign 'PredicateNode)
+         (List (Sign 'Concept) (Variable "$x")))
+      (Member (Variable "$x") (Concept "extract things"))))
+
+(define sign-filter
+   (Filter
+      (DefinedSchema "extract bc")
+      (Set
+         (Evaluation
+            (Predicate "foo")
+            (List (Concept "A") (Concept "B")))
+         (Evaluation
+            (PredicateNode "bar")
+            (List (Concept "C") (Concept "D")))
+         (Evaluation
+            (Predicate "foo")
+            (List (Number 5) (Number 6))))))
+
+(define sign-expect
+(SetLink
+  (MemberLink
+    (ConceptNode "D")
+    (ConceptNode "extract things"))
+  (MemberLink
+    (ConceptNode "B")
+    (ConceptNode "extract things"))))
+
+; ----------------------------------------------------------

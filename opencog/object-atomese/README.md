@@ -184,7 +184,7 @@ Also, this form is possible:
 			(Variable "$left"))))
 ```
 
-We can get rid of th unused, un-needed variables:
+We can get rid of the unused, un-needed variables:
 
 ```
 (DefineLink
@@ -194,14 +194,14 @@ We can get rid of th unused, un-needed variables:
 	(Lambda
 		(Variable "$matrix-entry") ; This will be the EvaluationLink;
 		; The FilterLink will extract the left elt.
-		(FilterLink
-			(RuleLink
+		(Filter
+			(Rule
 				;; Variable that we will bind.
 				(Variable "$left")
 				;; The matrix pattern to match.
 				(Evaluation
-					(SignatureLink (TypeNode 'PredicateNode))
-					(List (Variable "$left") (SignatureLink (TypeNode 'WordNode))))
+					(Sign 'PredicateNode)
+					(List (Variable "$left") (Sign 'WordNode)))
 				;; The rewrite -- what to return, after pattern matching.
 				(Variable "$left"))
 			(Variable "$matrix-entry"))))
