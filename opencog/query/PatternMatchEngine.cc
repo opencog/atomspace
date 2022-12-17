@@ -1528,8 +1528,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Signatures are just anonymous variables. That is, variables
 	// whose groundings we do not record.
-	// XXX FIXME this should be `if (ptm->isAnonymousVariable())`
-	if ((SIGN_NODE == tp or SIGNATURE_LINK == tp) and not ptm->isQuoted())
+	if (ptm->isAnonVar())
 		return value_is_type(hp, hg);
 
 	// If both are nodes, compare them as such.
@@ -1682,19 +1681,13 @@ bool PatternMatchEngine::explore_upord_branches(const PatternTermPtr& ptm,
 			}
 			oset.push_back(gnd->second);
 		}
-		else
+		else if (pp->hasAnyAnonVar())
 		{
-			// XXX FIXME this should not be a direct check for signature
-			// but instead pp->hasAnyAnonymousVariable() but I'm lazy,
-			// and no one else cares.
-			Type pt = pp->getHandle()->get_type();
-			if (SIGN_NODE == pt or SIGNATURE_LINK == pt)
-			{
-				need_search = true;
-				break;
-			}
-			oset.push_back(pp->getHandle());
+			need_search = true;
+			break;
 		}
+		else
+			oset.push_back(pp->getHandle());
 	}
 	if (not need_search)
 	{

@@ -1083,6 +1083,14 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		return;
 	}
 
+	// Signatures are just variables without a name. They are simpler
+	// to deal with, overall.
+	if (SIGN_NODE == t or SIGNATURE_LINK == t)
+	{
+		ptm->addAnonVar();
+		return;
+	}
+
 	// If the term is unordered, all parents must know about it.
 	if (nameserver().isA(t, UNORDERED_LINK))
 	{
