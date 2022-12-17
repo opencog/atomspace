@@ -585,3 +585,29 @@
 
 
 ; ----------------------------------------------------------
+
+(define siggy-filter
+   (Filter
+
+   (Signature
+      (Evaluation
+         (PredicateNode "foo")
+         (List (Type 'Concept) (Type 'Concept))))
+  (Set
+     (Evaluation
+        (Predicate "foo")
+        (List (Concept "A") (Concept "B")))
+     (Evaluation
+        (PredicateNode "bar")
+        (List (Concept "C") (Concept "D")))
+     (Evaluation
+        (Predicate "foo")
+        (List (Number 5) (Number 6))))))
+
+(define siggy-expect
+  (Set
+     (Evaluation
+        (Predicate "foo")
+        (List (Concept "A") (Concept "B")))))
+
+; ----------------------------------------------------------
