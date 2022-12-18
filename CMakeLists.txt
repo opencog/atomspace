@@ -297,12 +297,11 @@ IF (CXXTEST_FOUND)
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 			COMMENT "Running tests..."
 		)
-
-		# When CMP00037 is finally turned off, just remove these two
-		# lines.
-		ADD_CUSTOM_TARGET(test)
-		ADD_DEPENDENCIES(test check)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+
+	# When CMP00037 is finally turned off, just remove these two lines.
+	ADD_CUSTOM_TARGET(test)
+	ADD_DEPENDENCIES(test check)
 
 	ADD_CUSTOM_TARGET(test_atomese
 		DEPENDS tests
@@ -392,8 +391,8 @@ EXECUTE_PROCESS(COMMAND  dpkg --print-architecture
 STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 # If 'sudo make install' is run before 'make package', then install_manifest.txt
 # will be owned by root. Creating the file during configuration stage ensures
-# that is owned by the builder thus avoiding 'Permission denied' error when
-# packaging
+# that it is owned by the builder thus avoiding 'Permission denied' error when
+# packaging.
 FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 
 ## Cpack configuration
