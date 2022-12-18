@@ -45,6 +45,7 @@ std::string NumberNode::vector_to_plain(const std::vector<double>& vec)
 
 /// Support multiple formats:
 ///   plain)   "0.1 0.2 0.3"
+///   bool)    "t f t f f" or "true false true"
 ///   csv)     "0.1, 0.2, 0.3"
 ///   tsv)     "0.1\t0.2\t0.3"
 ///   scheme)  "#(0.1 0.2 0.3)"
@@ -63,10 +64,25 @@ std::vector<double> NumberNode::to_vector(const std::string& str)
 	while ((in = str.find_first_not_of(", \t\r\n", in)) != std::string::npos
 	       and (pos = str.find_first_of(", \t", in)) != std::string::npos)
 	{
-		vec.emplace_back(std::stod(str.substr(in, pos - in)));
+		const std::string& sub(str.substr(in, pos - in));
+		if ('f' == sub[0] or 'F' == sub[0])
+			vec.emplace_back(0);
+		else if ('t' == sub[0] or 'T' == sub[0])
+			vec.emplace_back(1);
+		else
+			vec.emplace_back(std::stod(sub));
 		in = pos + 1;
 	}
-	if (in != std::string::npos) vec.emplace_back(std::stod(str.substr(in)));
+	if (in != std::string::npos)
+	{
+		const std::string& sub(str.substr(in));
+		if ('f' == sub[0] or 'F' == sub[0])
+			vec.emplace_back(0);
+		else if ('t' == sub[0] or 'T' == sub[0])
+			vec.emplace_back(1);
+		else
+			vec.emplace_back(std::stod(sub));
+	}
 	return vec;
 }
 
