@@ -64,7 +64,7 @@ std::string Link::to_short_string(const std::string& indent) const
     std::string answer = indent;
     std::string more_indent = indent + "  "; // two spaces
 
-    answer += "(" + nameserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeShortName(_type);
 
     // Print the TV only if its not the default.
     if (getTruthValue() and not getTruthValue()->isDefaultTV())

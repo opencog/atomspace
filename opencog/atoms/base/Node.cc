@@ -89,7 +89,7 @@ std::string Node::to_short_string(const std::string& indent) const
     size_t len = _name.length();
     std::string answer;
     answer.reserve(2*len);
-    answer = indent + '(' + nameserver().getTypeName(_type) + " \"";
+    answer = indent + '(' + nameserver().getTypeShortName(_type) + " \"";
     for (unsigned int i=0; i < len; i++)
     {
         if ('"' == _name[i] or '\\' == _name[i])
