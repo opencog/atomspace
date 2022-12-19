@@ -158,6 +158,7 @@ Type NameServer::declType(const Type parent,
     inheritanceMap.resize(nTypes);
     recursiveMap.resize(nTypes);
     _code2NameMap.resize(nTypes);
+    _code2ShortMap.resize(nTypes);
     _mod.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
