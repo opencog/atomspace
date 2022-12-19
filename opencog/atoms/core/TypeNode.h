@@ -51,12 +51,15 @@ public:
 		// DefinedTypeNode, which inherits from this class,
 		// allows user-defined types which the classerver
 		// currently does not know about.
-		if (TYPE_NODE == t and NOTYPE == _kind)
-			throw InvalidParamException(TRACE_INFO,
-				"Not a valid typename: '%s'", _name.c_str());
+		if (TYPE_NODE == t)
+		{
+			if (NOTYPE == _kind)
+				throw InvalidParamException(TRACE_INFO,
+					"Not a valid typename: '%s'", _name.c_str());
 
-		// Avoid duplication of multiply-named types.
-		_name = nameserver().getTypeName(_kind);
+			// Avoid duplication of multiply-named types.
+			_name = nameserver().getTypeName(_kind);
+		}
 	}
 
 public:
