@@ -99,7 +99,9 @@ void NameServer::endTypeDecls(void)
 	classserver().update_factories();
 }
 
-Type NameServer::declType(const Type parent, const std::string& name)
+Type NameServer::declType(const Type parent,
+                          const std::string& name,
+                          const std::string& short_name)
 {
     if (1 != _tmod%2)
         throw InvalidParamException(TRACE_INFO,
@@ -173,14 +175,16 @@ Type NameServer::declType(const Type parent, const std::string& name)
     if (_maxDepth < maxd) _maxDepth = maxd;
 
     // Short-hand names ... without the trailing "Node", "Link" at the
-    // end.
-    size_t len = name.size();
-    if (4 < len and
-         ((std::string::npos != name.find("Node", len-4)) or
-          (std::string::npos != name.find("Link", len-4))))
+    // end. Must be explicitly declared by the caller, else defaults
+    // to the long name.
+    if (0 < short_name.size())
     {
-        std::string short_name = name.substr(0, len-4);
         name2CodeMap[short_name] = type;
+       _code2ShortMap[type]      = &(name2CodeMap.find(short_name)->first);
+    }
+    else
+    {
+       _code2ShortMap[type]      = &(name2CodeMap.find(name)->first);
     }
 
     // unlock mutex before sending signal which could call
@@ -256,6 +260,20 @@ const std::string& NameServer::getTypeName(Type type) const
 
     std::lock_guard<std::mutex> l(type_mutex);
     const std::string* name = _code2NameMap[type];
+    if (name) return *name;
+    return nullString;
+}
+
+const std::string& NameServer::getTypeShortName(Type type) const
+{
+    static std::string nullString = "*** Unknown Type! ***";
+    static std::string bottomString = "*** Bottom Type! ***";
+
+    if (NOTYPE == type) return bottomString;
+    if (nTypes <= type) return nullString;
+
+    std::lock_guard<std::mutex> l(type_mutex);
+    const std::string* name = _code2ShortMap[type];
     if (name) return *name;
     return nullString;
 }

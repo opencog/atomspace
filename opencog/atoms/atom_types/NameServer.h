@@ -80,6 +80,7 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
+    std::vector<const std::string*> _code2ShortMap;
     std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
@@ -95,7 +96,9 @@ public:
      * Adds a new atom type with the given name and parent type.
      * Return a numeric value that is assigned to the new type.
      */
-    Type declType(const Type parent, const std::string& name);
+    Type declType(const Type parent,
+                  const std::string& name,
+                  const std::string& shrt = "");
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call
@@ -298,9 +301,10 @@ public:
      * Returns the string representation of a given atom type.
      *
      * @param type Atom type code.
-     * @return The string representation of a givenn class.
+     * @return The string representation of a given class.
      */
     const std::string& getTypeName(Type type) const;
+    const std::string& getTypeShortName(Type type) const;
 };
 
 NameServer& nameserver();
