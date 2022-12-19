@@ -214,7 +214,7 @@ void FastLoadUTest::test_value_mix()
     TS_ASSERT_EQUALS(lks[1]->get_type(), FLOAT_VALUE);
 
     Handle lk = HandleCast(lks[0]);
-    TS_ASSERT_EQUALS("Number", lk->get_name());
+    TS_ASSERT_EQUALS("NumberNode", lk->get_name());
 
     FloatValuePtr fvp = FloatValueCast(lks[1]);
     TS_ASSERT_EQUALS(fvp->value().size(), 1);
