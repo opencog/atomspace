@@ -54,6 +54,9 @@ public:
 		if (TYPE_NODE == t and NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", _name.c_str());
+
+		// Avoid duplication of multiply-named types.
+		_name = nameserver().getTypeName(_kind);
 	}
 
 public:
@@ -65,6 +68,9 @@ public:
 		if (NOTYPE == _kind)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
+
+		// Avoid duplication of multiply-named types.
+		_name = nameserver().getTypeName(_kind);
 	}
 
 	TypeNode(Type t)
