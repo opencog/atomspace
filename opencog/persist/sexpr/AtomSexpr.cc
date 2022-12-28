@@ -289,6 +289,6 @@ Handle Sexpr::decode_atom(const std::string& s,
 		return h;
 	}
 	throw SyntaxException(TRACE_INFO,
-		"Syntax error at line %zu Got a Value, not supported: %s",
-		line_cnt, s.c_str());
+		"Syntax error at line %zu unknown Atom type %d >>%s<< in %s",
+		line_cnt, atype, s.substr(l1, r1-l1).c_str(), s.c_str());
 }
