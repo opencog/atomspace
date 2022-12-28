@@ -19,6 +19,9 @@ ADD_CUSTOM_TARGET(opencog_atom_types
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
+# ADD_DEFINITIONS(-DLOAD_ME_FIRST)
+ADD_COMPILE_DEFINITIONS(LOAD_ME_FIRST)
+
 ADD_LIBRARY (atom_types
 	atom_types_init.cc
 	NameServer.cc

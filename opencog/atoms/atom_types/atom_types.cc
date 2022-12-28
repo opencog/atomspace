@@ -6,10 +6,17 @@
  * Copyright (c) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  */
 
-// Library initialization
 // Set constructor priority to 101 because we want this to be
-// the very first one that runs, before any of the factories run.
-static __attribute__ ((constructor (101))) void init(void)
+// the very first one that runs, before any of the other type
+// declarations run, and certainly before the factories run.
+#ifdef LOAD_ME_FIRST
+#define CTOR_PRIO (101)
+#else
+#define CTOR_PRIO (102)
+#endif
+
+// Library initialization
+static __attribute__ ((constructor CTOR_PRIO)) void init(void)
 {
 #define str(x) #x
 #define xstr(x) str(x)
@@ -23,8 +30,10 @@ static __attribute__ ((constructor (101))) void init(void)
 	#endif
 	opencog::nameserver().endTypeDecls();
 
+#ifdef LOAD_ME_FIRST
 	// Backwards compat. Argh...
 	opencog::TYPE_SET_LINK = opencog::TYPE_INTERSECTION_LINK;
+#endif
 }
 
 static __attribute__ ((destructor)) void fini(void)
