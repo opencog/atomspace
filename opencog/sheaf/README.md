@@ -1,10 +1,18 @@
 
 Sheafs and Graph/Network Inference
 ==================================
-This directory provides two sets of tools. One set, the "sheaves",
+This directory provides two things. First and most important: A general
+overview of sheaf concepts, as they apply to graph theory and how they
+are used to represent structure in Atomese. Secondly, so tools are
+provided. The tools are deprecated; a superior framework has been
+created. For the moment, the code is still here.
+
+There are two sets of tools in this directory. One set, the "sheaves",
 provides a simple and easy API for working with graphs. The second
 toolset extracts graphical relationships from linear data, via an MST
-parser.
+parser.  Both of these tools are deprecated, and will be removed in
+2023. The overall theory remains in force: there's a better toolset;
+see the `opencog/learn` project.
 
 Sheafs - Quick Start
 ====================
