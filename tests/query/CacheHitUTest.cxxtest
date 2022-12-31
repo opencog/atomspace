@@ -78,11 +78,11 @@ void CacheHitUTest::add_cruft(char junk)
 "    (EvaluationLink"
 "      (PredicateNode \"*-shape-*\")"
 "      (ConceptNode \"%c\")"
-"      (Connector (ConceptNode \"e\") (ConnectorDir \"-\"))"
-"      (Connector (ConceptNode \"j\") (ConnectorDir \"+\"))"
-"      (Connector (ConceptNode \"g\") (ConnectorDir \"+\"))"
-"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"+\"))"
-"      (Connector (ConceptNode \"!\") (ConnectorDir \"+\"))"
+"      (Connector (ConceptNode \"e\") (Sex \"-\"))"
+"      (Connector (ConceptNode \"j\") (Sex \"+\"))"
+"      (Connector (ConceptNode \"g\") (Sex \"+\"))"
+"      (Connector (VariableNode \"$connector-word\") (Sex \"+\"))"
+"      (Connector (ConceptNode \"!\") (Sex \"+\"))"
 "    ))", junk);
 	eval->eval(buf);
 }
@@ -117,9 +117,9 @@ void CacheHitUTest::test_hit(void)
 		"    (EvaluationLink"
 		"      (PredicateNode \"*-shape-*\")"
 		"      (Concept \"b\")"
-		"      (Connector (Concept \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
-		"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
-		"      (Connector (Concept \"a\") (ConnectorDir \"+\"))))"
+		"      (Connector (Concept \"###LEFT-WALL###\") (Sex \"-\"))"
+		"      (Connector (VariableNode \"$connector-word\") (Sex \"-\"))"
+		"      (Connector (Concept \"a\") (Sex \"+\"))))"
 		""
 		"  (define var (Variable \"$api-right-star\"))"
 		"  (define term "
@@ -148,9 +148,9 @@ void CacheHitUTest::test_hit(void)
 		"    (EvaluationLink"
 		"      (PredicateNode \"*-shape-*\")"
 		"      (ConceptNode \"b\")"
-		"      (Connector (ConceptNode \"###LEFT-WALL###\") (ConnectorDir \"-\"))"
-		"      (Connector (VariableNode \"$connector-word\") (ConnectorDir \"-\"))"
-		"      (Connector (ConceptNode \"a\") (ConnectorDir \"+\")))))"
+		"      (Connector (ConceptNode \"###LEFT-WALL###\") (Sex \"-\"))"
+		"      (Connector (VariableNode \"$connector-word\") (Sex \"-\"))"
+		"      (Connector (ConceptNode \"a\") (Sex \"+\")))))"
 		);
 		TS_ASSERT_EQUALS(expected, crash);
 	}
