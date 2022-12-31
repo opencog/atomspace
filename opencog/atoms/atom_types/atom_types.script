@@ -372,8 +372,8 @@ ANY_NODE <- NODE
 // in a TruthValue (typically a crisp T/F for type specifications.)
 CONNECTOR <- ORDERED_LINK
 
-DIRECTION_NODE <- LEXICAL_NODE "Direction" // Connector direction
-CONNECTOR_DIR_NODE <- DIRECTION_NODE "ConnectorDir" // Deprecated, use above instead.
+SEX_NODE <- LEXICAL_NODE "Sex"      // Connector sexuality (aka "direction")
+CONNECTOR_DIR_NODE <- SEX_NODE "ConnectorDir" // Deprecated, use above instead.
 BOND_NODE <- LEXICAL_NODE "Bond"    // A connection type name.
 CONNECTOR_SEQ <- ORDERED_LINK       // Conjoined sequence of connectors
 CONNECTOR_SET <- UNORDERED_LINK     // Unordered conjunction of connectors
