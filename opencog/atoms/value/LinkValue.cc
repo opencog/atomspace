@@ -104,7 +104,12 @@ std::string LinkValue::to_string(const std::string& indent) const
 	SAFE_UPDATE(rv,
 	{
 		for (const ValuePtr& v :_value)
-			rv += v->to_short_string(more_indent) + "\n";
+		{
+			if (v->is_atom())
+				rv += v->to_short_string(more_indent) + "\n";
+			else
+				rv += v->to_string(more_indent) + "\n";
+		}
 
 		// Remove trailing newline before writing the last paren
 		rv.pop_back();
@@ -113,19 +118,20 @@ std::string LinkValue::to_string(const std::string& indent) const
 	return rv;
 }
 
-/// Identical to above, except that it does not write any newlines.
+/// Similar to above, except that it does not write any newlines.
 /// This avoids cogserver issues, where the newline is interpreted
 /// as an end-of-messege marker by GenericShell. The SchemeShell
 /// deals with pending input just fine, but the SexprShell does not:
 /// its a waste of CPU-cycles to work around newlines by scanning
 /// for balanced parens in strings. So ... no newlines, here.
+/// Also, no indentation. Without newlines, indentation does not make
+/// sense.
 std::string LinkValue::to_short_string(const std::string& indent) const
 {
 	update();
-	std::string more_indent = indent + "  "; // two spaces, same as Link
-	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	std::string rv = "(" + nameserver().getTypeName(_type) + " ";
 	for (const ValuePtr& v :_value)
-		rv += v->to_short_string(more_indent);
+		rv += v->to_short_string("");
 
 	rv += ")";
 	return rv;

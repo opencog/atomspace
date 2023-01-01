@@ -451,7 +451,7 @@ void CommandsUTest::test_execute()
 	com.set_base_space(as);
 	std::string out = com.interpret_command(in);
 	printf("Got >>%s<<\n", out.c_str());
-	TS_ASSERT(0 == out.compare("(QueueValue  (Concept \"a\"))"));
+	TS_ASSERT(0 == out.compare("(QueueValue (Concept \"a\"))"));
 
 	// Verify that the result was placed onto the key.
 #define an as->add_node

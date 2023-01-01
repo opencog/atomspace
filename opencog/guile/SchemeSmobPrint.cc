@@ -69,7 +69,7 @@ std::string SchemeSmob::protom_to_server_string(SCM node)
 			FloatValuePtr fv(FloatValueCast(pa));
 			return fv->FloatValue::to_string();
 		}
-		return pa->to_short_string();
+		return pa->to_string();
 	}
 
 	// Avoid printing atoms that are not in any atomspace.
