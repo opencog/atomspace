@@ -290,8 +290,6 @@
       information applicable to the matrix, as a whole. This includes
       a grand-total count.
 
-  'fetch-pairs - Fetch all pairs from an open database.
-
   'provides - Return a list of methods that should be used in place of
       the default stars implementation.
 
