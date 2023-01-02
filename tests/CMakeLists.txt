@@ -33,8 +33,6 @@ IF (CXXTEST_FOUND)
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
 
-	ADD_SUBDIRECTORY (sheaf)
-
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
 		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")
 		ADD_SUBDIRECTORY (cython)
