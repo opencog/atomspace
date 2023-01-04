@@ -40,6 +40,10 @@
 ; The storage API should be "below" the marginal API; the marginal API
 ; will use it to perform the storage.
 ;
+; The API's support both single (scalar) numbers and counts that are
+; vectors. For example, it can be useful to maintain a simple count and
+; a weighted count at the same time.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -60,17 +64,26 @@
   are NOT updated; nor are Atoms fetch from storage prior to update.
   Use the `add-storage-count` API to get storage updates.
 
+  In particular, the 'inc-count method is thread-safe: it will perform
+  an atomic increment: an atomic read-modify-write.
+
+  Counts may be single numeric scalars (floats) or they may be a vector
+  of floats. Vectors can be useful when working with weighted counts.
+
   The provided methods are:
 
   'pair-count L R - Returns the total observed count on the pair (L,R)
       L must be an Atom of type 'left-type on the base object LLOBJ,
       and likewise for R. Returns zero if such a pair does not exist.
+      For vector counts, #f ir returned if the pair does not exist.
 
   'pair-set L R N - Sets the total observed count to N on the pair (L,R).
-      Creates the pair, if it does not yet exist.
+      Creates the pair, if it does not yet exist. N may be a single
+      number (a scalar) or a vector.
 
   'pair-inc L R N - Increments the total observed count by N on the
-      pair (L,R).  Creates the pair, if it does not yet exist.
+      pair (L,R).  Creates the pair, if it does not yet exist. N may
+      be a single number (a scalar) or a vector.
 
    The above three methods are built on the three below. These do the
    same as above, but take the pair Atom directly, instead of the two
@@ -113,11 +126,16 @@
        as this is the only type capable of holding numbers.
 
    'count-ref - Return the offset into the vector of the Value holding
-       the count. If the base class LLOBJ provides this method, then
-       this offset will be used when setting or incrementing the count.
-       If the base class does not provide this, then the default of 2
-       will be used. This default is the location of the count field on
-       `CountTruthValue`'s and is thus backwards-compat with older code.
+       the scalar count. If the base class LLOBJ provides this method,
+       then this offset will be used when setting or incrementing the
+       scalar count.  If the base class does not provide this, then the
+       default of 2 will be used. This default is the location of the
+       count field on `CountTruthValue`'s and is thus backwards-compat
+       with older code.
+
+       If 'count-ref is provided and returns #f, then all counts will
+       be treated as vectors, so that gets, sets and increments all
+       operate on vectors.
 "
 	; By default, the count is stored as a CountTruthValue.
 	; That means that it is on the TruthValue Key, and is the
