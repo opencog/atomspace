@@ -40,6 +40,10 @@
 ; The storage API should be "below" the marginal API; the marginal API
 ; will use it to perform the storage.
 ;
+; The API's support both single (scalar) numbers and counts that are
+; vectors. For example, it can be useful to maintain a simple count and
+; a weighted count at the same time.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -60,17 +64,26 @@
   are NOT updated; nor are Atoms fetch from storage prior to update.
   Use the `add-storage-count` API to get storage updates.
 
+  In particular, the 'inc-count method is thread-safe: it will perform
+  an atomic increment: an atomic read-modify-write.
+
+  Counts may be single numeric scalars (floats) or they may be a vector
+  of floats. Vectors can be useful when working with weighted counts.
+
   The provided methods are:
 
   'pair-count L R - Returns the total observed count on the pair (L,R)
       L must be an Atom of type 'left-type on the base object LLOBJ,
       and likewise for R. Returns zero if such a pair does not exist.
+      For vector counts, #f ir returned if the pair does not exist.
 
   'pair-set L R N - Sets the total observed count to N on the pair (L,R).
-      Creates the pair, if it does not yet exist.
+      Creates the pair, if it does not yet exist. N may be a single
+      number (a scalar) or a vector.
 
   'pair-inc L R N - Increments the total observed count by N on the
-      pair (L,R).  Creates the pair, if it does not yet exist.
+      pair (L,R).  Creates the pair, if it does not yet exist. N may
+      be a single number (a scalar) or a vector.
 
    The above three methods are built on the three below. These do the
    same as above, but take the pair Atom directly, instead of the two
@@ -113,11 +126,16 @@
        as this is the only type capable of holding numbers.
 
    'count-ref - Return the offset into the vector of the Value holding
-       the count. If the base class LLOBJ provides this method, then
-       this offset will be used when setting or incrementing the count.
-       If the base class does not provide this, then the default of 2
-       will be used. This default is the location of the count field on
-       `CountTruthValue`'s and is thus backwards-compat with older code.
+       the scalar count. If the base class LLOBJ provides this method,
+       then this offset will be used when setting or incrementing the
+       scalar count.  If the base class does not provide this, then the
+       default of 2 will be used. This default is the location of the
+       count field on `CountTruthValue`'s and is thus backwards-compat
+       with older code.
+
+       If 'count-ref is provided and returns #f, then all counts will
+       be treated as vectors, so that gets, sets and increments all
+       operate on vectors.
 "
 	; By default, the count is stored as a CountTruthValue.
 	; That means that it is on the TruthValue Key, and is the
@@ -145,15 +163,15 @@
 			"Count type must be a FloatValue; got ~A!" (list cnt-type))))
 
 	; -------------------------------------------------------
-	; The three basic routines to access counts.
+	; The three basic routines to access scalar counts.
 
 	; Return the observed count for the pair PAIR.
-	(define (get-count PAIR)
+	(define (get-scalar-count PAIR)
 		(define cv (cog-value PAIR cnt-key))
 		(if cv (cog-value-ref cv cnt-ref) 0))
 
 	; Explicitly set location to value
-	(define (set-count PAIR CNT)
+	(define (set-scalar-count PAIR CNT)
 		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
 			(cog-set-value! PAIR cnt-key
 				(cog-new-value cnt-type (make-list (+ cnt-ref 1) 0))))
@@ -161,22 +179,43 @@
 
 	; Increment location. Unlike cog-set-value-ref!, this will
 	; automatically create the FloatValue (or CountTruthValue).
-	(define (inc-count PAIR CNT)
+	(define (inc-scalar-count PAIR CNT)
 		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
 
 	; -------------------------------------------------------
-	; Return default, only if LLOBJ does not provide symbol
-	(define (overload symbol default)
+	; The three basic routines to access vector counts.
+	; This are "trivial", and provide little utility, other than
+	; providing a uniform counting interface. Not clear if we should
+	; have bothered...
+
+	; Return the observed count for the pair PAIR.
+	(define (get-vector-count PAIR) (cog-value PAIR cnt-key))
+
+	; Explicitly set location to value.
+	(define (set-vector-count PAIR VEC)
+		(cog-set-value! PAIR cnt-key VEC))
+
+	; Increment vector
+	(define (inc-vector-count PAIR VEC)
+		(cog-update-value! PAIR cnt-key VEC))
+
+	; -------------------------------------------------------
+	; If LLOBJ does not provides the symbol, return that.
+	; If LLOBJ does not provide it, then return the scalar default
+	; if cnt-ref is defined and is non-negative. Else use the vector.
+	(define (verload symbol scalar-default vector-default)
 		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
+		(if fp fp
+			(if (and cnt-ref (<= 0 cnt-ref))
+				scalar-default vector-default)))
 
 	; Use the functions defined above, but only if the low-level
 	; object does not already provide them. If it does, use what
 	; is provided. We need these three, to finish the rest of the
 	; implementation, below.
-	(define f-get-count     (overload 'get-count get-count))
-	(define f-set-count     (overload 'set-count set-count))
-	(define f-inc-count     (overload 'inc-count inc-count))
+	(define f-get-count     (verload 'get-count get-scalar-count get-vector-count))
+	(define f-set-count     (verload 'set-count set-scalar-count set-vector-count))
+	(define f-inc-count     (verload 'inc-count inc-scalar-count inc-vector-count))
 
 	; -------------------------------------------------------
 
@@ -231,6 +270,10 @@
 	; -------------------------------------------------------
 	; Provide default methods, but only if the low-level object
 	; does not already provide them.
+	(define (overload symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
+
 	(define f-count-type    (overload 'count-type count-type))
 	(define f-count-key     (overload 'count-key count-key))
 	(define f-count-ref     (overload 'count-ref count-ref))
