@@ -163,15 +163,15 @@
 			"Count type must be a FloatValue; got ~A!" (list cnt-type))))
 
 	; -------------------------------------------------------
-	; The three basic routines to access counts.
+	; The three basic routines to access scalar counts.
 
 	; Return the observed count for the pair PAIR.
-	(define (get-count PAIR)
+	(define (get-scalar-count PAIR)
 		(define cv (cog-value PAIR cnt-key))
 		(if cv (cog-value-ref cv cnt-ref) 0))
 
 	; Explicitly set location to value
-	(define (set-count PAIR CNT)
+	(define (set-scalar-count PAIR CNT)
 		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
 			(cog-set-value! PAIR cnt-key
 				(cog-new-value cnt-type (make-list (+ cnt-ref 1) 0))))
@@ -179,22 +179,46 @@
 
 	; Increment location. Unlike cog-set-value-ref!, this will
 	; automatically create the FloatValue (or CountTruthValue).
-	(define (inc-count PAIR CNT)
+	(define (inc-scalar-count PAIR CNT)
 		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
 
 	; -------------------------------------------------------
-	; Return default, only if LLOBJ does not provide symbol
-	(define (overload symbol default)
+	; The three basic routines to access vector counts.
+
+	; Return the observed count for the pair PAIR.
+	(define (get-vector-count PAIR)
+		(define cv (cog-value PAIR cnt-key))
+		(if cv (cog-value-ref cv cnt-ref) 0))
+
+	; Explicitly set location to value
+	(define (set-vector-count PAIR CNT)
+		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(cog-set-value! PAIR cnt-key
+				(cog-new-value cnt-type (make-list (+ cnt-ref 1) 0))))
+		(cog-set-value-ref! PAIR cnt-key CNT cnt-ref))
+
+	; Increment location. Unlike cog-set-value-ref!, this will
+	; automatically create the FloatValue (or CountTruthValue).
+	(define (inc-vector-count PAIR CNT)
+		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
+
+	; -------------------------------------------------------
+	; If LLOBJ does not provides the symbol, return that.
+	; If LLOBJ does not provide it, then return the scalar default
+	; if cnt-ref is defined and is non-negative. Else use the vector.
+	(define (overload symbol scalar-default vector-default)
 		(define fp (LLOBJ 'provides symbol))
-		(if fp fp default))
+		(if fp fp
+			(if (and cnt-ref (<= 0 cnt-ref))
+				scalar-default vector-default)))
 
 	; Use the functions defined above, but only if the low-level
 	; object does not already provide them. If it does, use what
 	; is provided. We need these three, to finish the rest of the
 	; implementation, below.
-	(define f-get-count     (overload 'get-count get-count))
-	(define f-set-count     (overload 'set-count set-count))
-	(define f-inc-count     (overload 'inc-count inc-count))
+	(define f-get-count     (overload 'get-count get-scalar-count get-vector-count))
+	(define f-set-count     (overload 'set-count set-scalar-count set-vector-count))
+	(define f-inc-count     (overload 'inc-count inc-scalar-count inc-vector-count))
 
 	; -------------------------------------------------------
 
