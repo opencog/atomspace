@@ -184,23 +184,20 @@
 
 	; -------------------------------------------------------
 	; The three basic routines to access vector counts.
+	; This are "trivial", and provide little utility, other than
+	; providing a uniform counting interface. Not clear if we should
+	; have bothered...
 
 	; Return the observed count for the pair PAIR.
-	(define (get-vector-count PAIR)
-		(define cv (cog-value PAIR cnt-key))
-		(if cv (cog-value-ref cv cnt-ref) 0))
+	(define (get-vector-count PAIR) (cog-value PAIR cnt-key))
 
-	; Explicitly set location to value
-	(define (set-vector-count PAIR CNT)
-		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
-			(cog-set-value! PAIR cnt-key
-				(cog-new-value cnt-type (make-list (+ cnt-ref 1) 0))))
-		(cog-set-value-ref! PAIR cnt-key CNT cnt-ref))
+	; Explicitly set location to value.
+	(define (set-vector-count PAIR VEC)
+		(cog-set-value! PAIR cnt-key VEC))
 
-	; Increment location. Unlike cog-set-value-ref!, this will
-	; automatically create the FloatValue (or CountTruthValue).
-	(define (inc-vector-count PAIR CNT)
-		(cog-inc-value! PAIR cnt-key CNT cnt-ref))
+	; Increment vector
+	(define (inc-vector-count PAIR VEC)
+		(cog-update-value! PAIR cnt-key VEC))
 
 	; -------------------------------------------------------
 	; If LLOBJ does not provides the symbol, return that.
