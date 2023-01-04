@@ -203,7 +203,7 @@
 	; If LLOBJ does not provides the symbol, return that.
 	; If LLOBJ does not provide it, then return the scalar default
 	; if cnt-ref is defined and is non-negative. Else use the vector.
-	(define (overload symbol scalar-default vector-default)
+	(define (verload symbol scalar-default vector-default)
 		(define fp (LLOBJ 'provides symbol))
 		(if fp fp
 			(if (and cnt-ref (<= 0 cnt-ref))
@@ -213,9 +213,9 @@
 	; object does not already provide them. If it does, use what
 	; is provided. We need these three, to finish the rest of the
 	; implementation, below.
-	(define f-get-count     (overload 'get-count get-scalar-count get-vector-count))
-	(define f-set-count     (overload 'set-count set-scalar-count set-vector-count))
-	(define f-inc-count     (overload 'inc-count inc-scalar-count inc-vector-count))
+	(define f-get-count     (verload 'get-count get-scalar-count get-vector-count))
+	(define f-set-count     (verload 'set-count set-scalar-count set-vector-count))
+	(define f-inc-count     (verload 'inc-count inc-scalar-count inc-vector-count))
 
 	; -------------------------------------------------------
 
@@ -270,6 +270,10 @@
 	; -------------------------------------------------------
 	; Provide default methods, but only if the low-level object
 	; does not already provide them.
+	(define (overload symbol default)
+		(define fp (LLOBJ 'provides symbol))
+		(if fp fp default))
+
 	(define f-count-type    (overload 'count-type count-type))
 	(define f-count-key     (overload 'count-key count-key))
 	(define f-count-ref     (overload 'count-ref count-ref))
