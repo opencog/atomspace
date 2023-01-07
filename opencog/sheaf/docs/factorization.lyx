@@ -1028,6 +1028,209 @@ Note that
  captures something more.
 \end_layout
 
+\begin_layout Subsubsection*
+Connectors
+\end_layout
+
+\begin_layout Standard
+Syntactic relations are not just pair-wise connections, though.
+ Syntactic elements have more complex structure.
+ Thus, the above factorization might be more correctly written as
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx\left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}\right]\times\left[\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
+\]
+
+\end_inset
+
+so that half of 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ rides along with word 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ as the probability of making a connection to word 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ and the other half rides with the other word.
+ This introduces the concept of a connector probability: that it can be
+ convenient to think in terms of connectors that have the potential to make
+ a connection, rather than in terms of the actual connection.
+\end_layout
+
+\begin_layout Standard
+The square-root term 
+\begin_inset Formula $\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}$
+\end_inset
+
+ will be refered to as the 
+\begin_inset Quotes eld
+\end_inset
+
+connector probability
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This concept is needed to recognize the fact that grammatical relations
+ are not just pair-wise word relations, they are, in general, more complex.
+ For example, a transitive verb 
+\emph on
+must
+\emph default
+ make a connection to both a subject on the left and an object on the right.
+ This is effectively a triple 
+\begin_inset Formula $\left(S,V,O\right)$
+\end_inset
+
+ and so, in principle, we should have instead factored as a tri-variable
+ 
+\begin_inset Formula $p\left(\mbox{TrVb}\left\{ S,V,O\right\} \right)$
+\end_inset
+
+ instead of individual pair-wise word-links.
+ The goal here is to recognize that a transitive verb 
+\begin_inset Formula $V$
+\end_inset
+
+ has the potential to connect to a subject 
+\begin_inset Formula $S$
+\end_inset
+
+, and the potential to connect to an object 
+\begin_inset Formula $O$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+This is kind of a sneaky way of saying 
+\begin_inset Quotes eld
+\end_inset
+
+the grammar is actually Link Grammar
+\begin_inset Quotes erd
+\end_inset
+
+, and the grammatical relation is 
+\begin_inset Formula $\mbox{TrVb}\left\{ S,V,O\right\} =\mathtt{V:S-\,\&\,O+}$
+\end_inset
+
+.
+ This is the conventional Link Grammar notation stating that the lexical
+ entry 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+ has the connector 
+\begin_inset Formula $\mathtt{S-}$
+\end_inset
+
+ pointing to the left, and the connector 
+\begin_inset Formula $\mathtt{O+}$
+\end_inset
+
+ pointing to the right.
+ The combined expression 
+\begin_inset Formula $\mathtt{S-\,\&\,O+}$
+\end_inset
+
+ is called a 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+; that is because it is disjoined from other lexical entries for the verb
+ 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The other sneaky thing done above was to introduce the idea of a 
+\begin_inset Quotes eld
+\end_inset
+
+word class
+\begin_inset Quotes erd
+\end_inset
+
+ (subjects, verbs, objects).
+ The intended factorization, for transitive verbs, is to have written 
+\begin_inset Formula 
+\[
+p
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be further strengthened by introducing the idea of a 
+\begin_inset Quotes eld
+\end_inset
+
+word class
+\begin_inset Quotes erd
+\end_inset
+
+, and writing the above as
+\begin_inset Formula 
+\begin{align*}
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx & \left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},V\right\} \right)}p\left(w_{j}\in V\right)\right]\times\\
+ & \qquad\qquad\left[p\left(w_{i}\in A\right)\sqrt{p\left(r\left\{ A,w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
+\end{align*}
+
+\end_inset
+
+where 
+\begin_inset Formula $V$
+\end_inset
+
+ and 
+\begin_inset Formula $A$
+\end_inset
+
+ are classes of words.
+ For the earlier example, 
+\begin_inset Formula $V$
+\end_inset
+
+ would be a collection of verbs that take auxilliaries, and 
+\begin_inset Formula $A$
+\end_inset
+
+ would be the (small, almost closed set) of auxilliaries: have, be, may,
+ do, shall, can, must.
+\end_layout
+
+\begin_layout Standard
+The goal here is to allow factorization along the lines of conventional
+ linguistic grammars, which work with word classes rather than single words.
+ The first rough cut is provided by the conventional grammar, then an adjustment
+ is made for the actual words employed.
+\end_layout
+
+\begin_layout Subsubsection*
+Retracts
+\end_layout
+
+\begin_layout Subsubsection*
+Twines
+\end_layout
+
 \begin_layout Section*
 Factorization as Dimensional Embedding
 \end_layout
