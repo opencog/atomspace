@@ -10,7 +10,7 @@ There are several files here:
 
 * The [connectors-and-variables.pdf](connectors-and-variables.pdf) file.
   It is complementary to the above, repeating some material. It is meant to
-  provide a more detailed footing. To avoid a snowball of ever-increaing
+  provide a more detailed footing. To avoid a snowball of ever-increasing
   length, it is split into bite-sized chapters. The chapters are currently,
   in serial order:
 
@@ -38,6 +38,12 @@ There are several files here:
    storing graphs, than graph databases are. The representational
    differences are minor, but the side effects are major. This is a
    pre-req for understanding sheaf stores.
+
+* The [factorization.lyx](factorization.lyx) file (under construction)
+  attempts to provide a mathematical foundation for the use of grammar
+  and syntax in the extraction of structure in high-dimensional
+  probability theory. (under construction, recently started, not
+  finished.)
 
 * The [ccg.pdf](ccg.pdf) file demonstrates that Combinatorial Categorial
   Grammars (CCG) are equivalent to Link Grammars (LG). This also
