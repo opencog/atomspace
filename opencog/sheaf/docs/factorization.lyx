@@ -874,11 +874,158 @@ But there is also a second lesson here: the binomial MI formula is not sutiable
  more chaos into the mix.
  Basically, one has a series of small and large terms summing up and mostly
  cancelling one-another.
- The quest is to find a similar expression, ideally, an exact expression,
- where most of the terms are strictly positive.
+ (Literally: try this experimentally, if possible.
+ You will find that the various MI's bounce around, getting large and small,
+ and that the sum is almost always smaller than the largest term.) The quest
+ is to find a similar expression, ideally, an exact expression, where most
+ of the terms are strictly positive.
  This would allow the structure, the factorization to be approached perturbative
 ly, as a strictly convergent sequence of corrections, each applied to the
  last.
+\end_layout
+
+\begin_layout Subsection*
+Example: Syntactic Factorization
+\end_layout
+
+\begin_layout Standard
+Parses imply factorizations.
+ Consider a sentence with a fixed single parse.
+ Suppose that there is a location 
+\begin_inset Formula $i$
+\end_inset
+
+ in this parse, such that when considering the block of all words to the
+ left of 
+\begin_inset Formula $i$
+\end_inset
+
+, and the block of all words to the right of 
+\begin_inset Formula $i$
+\end_inset
+
+, there is only a single edge connecting the two sides.
+ For example, this might be the edge connecting word 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+, say, the verb, to word 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+, say, the object.
+ (One cannot assume that 
+\begin_inset Formula $j=i+1$
+\end_inset
+
+ since the object might have adjectives and determiners that precede it.)
+ Then this parse implies a factorization 
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+The is, the likelihood of the block of words to the left is effectively
+ independent of the block of words on the right.
+ 
+\end_layout
+
+\begin_layout Standard
+This factorization follows from the intuitive grammatical structure of natural
+ language.
+ Consider the sentence fragment 
+\begin_inset Quotes eld
+\end_inset
+
+On alternate Tuesdays, John goes ...
+\begin_inset Quotes erd
+\end_inset
+
+ How can it be completed? One imagines almost anything can complete it:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+...
+ fishing in Georgetown.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+...
+ to the doctor.
+\begin_inset Quotes erd
+\end_inset
+
+ That is, the completion of the sentence seems indpendent of the start of
+ the sentence, and so the probability expression should factor like this
+ as well.
+\end_layout
+
+\begin_layout Standard
+Yet, this is just an approximation.
+ Realizing that the first half of the sentence implies activity undertaken
+ by a human, then the last half of the sentence must be an activity that
+ humans can perform.
+ So there is a linkage, a connection between these two parts of the sentence
+ that extend beyond the grammatical relations between pairs of words.
+ So again: the proposal here is to first factor according to syntax, providing
+ a baseline, and then consider corrections to that initial factorization.
+\end_layout
+
+\begin_layout Standard
+The above was written with a factor 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ specifically tying together the two specific words 
+\begin_inset Formula $w_{i},w_{j}$
+\end_inset
+
+ connected by the parse edge.
+ This factor is made explicit because one imagines that the specific word-choice
+ connecting the left and right halves helps further isolate or make independent
+ these two halves.
+ In the example, it is presumed that 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ might capture at least some of the idea that the left side of the sentence
+ is about humans, and the right side is about human activities.
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)\ne p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ and that the probability depends on the relation 
+\begin_inset Formula $r$
+\end_inset
+
+.
+ That is, this factor is presumed to not be a simple word-pair co-occurance
+ probability 
+\begin_inset Formula $p\left(\mbox{"goes"},\mbox{"fishing"}\right)$
+\end_inset
+
+, but also includes a weighting for this word-pair being an auxiliary-verb
+ pair.
+ This now gives a first hint of the appearance of semantics in a syntactic
+ discussion: The 
+\begin_inset Formula $p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ captures a syntactic relation between a pair of words; the 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ captures something more.
 \end_layout
 
 \begin_layout Section*
