@@ -486,7 +486,7 @@ As a concrete example of the above, consider the mutual information
 \end_inset
 
  variables.
- It is defined asxxxxx
+ It is defined as
 \begin_inset Formula 
 \begin{equation}
 MI\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{k=0}^{n}\left(-1\right)^{n-k}\sum_{w\backslash k}\log_{2}p\left(\left\{ w\backslash k\right\} \right)\label{eq:binomial-MI}
@@ -535,7 +535,7 @@ summed over
  is removed, then
 \begin_inset Formula 
 \[
-p\left(\left\{ w\backslash w_{2}\right\} \right)=p\left(w_{1},*,w_{3},\cdots,w_{n}\right)=\sum_{w_{2}}p\left(w_{1},w_{2},\cdots,w_{n}\right)
+p\left(\left\{ w\backslash w_{2}\right\} \right)=p\left(w_{1},*,w_{3},\cdots,w_{n}\right)=\sum_{w_{2}}p\left(w_{1},w_{2},w_{3},\cdots,w_{n}\right)
 \]
 
 \end_inset
@@ -553,7 +553,8 @@ anything
 \end_inset
 
  can occupy that slot, and that, for probabilites, that slot should be summed
- over.eeeeee dddxxxFormally, 
+ over.
+ Formally, 
 \begin_inset Formula $\left\{ w\backslash w_{2}\right\} =\left(w_{1},*,w_{3},\cdots,w_{n}\right)$
 \end_inset
 
@@ -565,9 +566,13 @@ cylinder set
 \begin_inset Quotes erd
 \end_inset
 
-.
+ and 
+\begin_inset Formula $p\left(\left\{ w\backslash w_{2}\right\} \right)$
+\end_inset
+
+ is a cylinder set measure.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See Wikipedia,
@@ -605,6 +610,42 @@ literal "false"
 \uwave default
 \noun default
 \color inherit
+ and
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Cylinder set measure"
+target "https://en.wikipedia.org/wiki/Cylinder_set_measure"
+literal "false"
+
+\end_inset
+
+.
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
  
 \end_layout
 
@@ -614,7 +655,7 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-and the sum over 
+The sum over 
 \begin_inset Formula $w\backslash k$
 \end_inset
 
@@ -622,7 +663,7 @@ and the sum over
 \begin_inset Formula $k=1$
 \end_inset
 
- is
+ is then a sum over all possible wildcard locations, for a single wildcard:
 \begin_inset Formula 
 \[
 \sum_{w\backslash1}\log_{2}p\left(\left\{ w\backslash1\right\} \right)=\sum_{i=1}^{n}\log_{2}p\left(\left\{ w\backslash w_{i}\right\} \right)
@@ -634,7 +675,7 @@ Likewise, for
 \begin_inset Formula $k=2$
 \end_inset
 
-,
+ wildcards,
 \begin_inset Formula 
 \[
 \sum_{w\backslash2}\log_{2}p\left(\left\{ w\backslash2\right\} \right)=\sum_{i=1}^{n}\sum_{j=1;j\ne i}^{n}\log_{2}p\left(\left\{ w\backslash\left\{ w_{i},w_{j}\right\} \right\} \right)
@@ -652,29 +693,48 @@ The alternating sign is such that the singletons
 
  always have a minus sign in front of their log, while the first term is
  for the total space 
-\begin_inset Formula $p\left(\left\{ w\backslash w\right\} \right)=p\left(\varnothing\right)=p\left(*,*,\cdots,*\right)$
+\begin_inset Formula $p\left(\left\{ w\backslash w\right\} \right)=p\left(\left\{ \varnothing\right\} \right)=p\left(*,*,\cdots,*\right)$
 \end_inset
 
 .
  If 
-\begin_inset Formula $p\left(\varnothing\right)=1$
+\begin_inset Formula $p\left(\left\{ \varnothing\right\} \right)=1$
 \end_inset
 
  is a conventional probability, then of course 
-\begin_inset Formula $\log_{2}p\left(\varnothing\right)=0$
+\begin_inset Formula $\log_{2}p\left(\left\{ \varnothing\right\} \right)=0$
 \end_inset
 
 .
  However, this MI sum works just fine if 
-\begin_inset Formula $p\left(\varnothing\right)\ne1$
+\begin_inset Formula $p\left(\left\{ \varnothing\right\} \right)\ne1$
 \end_inset
 
- (for example, if 
-\begin_inset Formula $p=N$
+.
+ For example, the binomial formula eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:binomial-MI"
+plural "false"
+caps "false"
+noprefix "false"
+
 \end_inset
 
- is a count) because the normalizing factor can be pulled back through all
- of the terms.
+ still holds if 
+\begin_inset Formula $N$
+\end_inset
+
+ a count is used instead of 
+\begin_inset Formula $p$
+\end_inset
+
+.
+ This is because the normalizing factor 
+\begin_inset Formula $N\left(\left\{ \varnothing\right\} \right)$
+\end_inset
+
+ can be pulled back through all of the terms.
 \end_layout
 
 \begin_layout Standard
@@ -683,6 +743,25 @@ The size of the set
 \end_inset
 
  is given by the binomial coefficient:
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Binomial coefficient"
+target "https://en.wikipedia.org/wiki/Binomial_coefficient"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \begin_inset Formula 
 \[
 \left|\left\{ w\backslash k\right\} \right|={n \choose k}
@@ -691,6 +770,24 @@ The size of the set
 \end_inset
 
 Note the resemblance of the formula for MI to the binomial theorem.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Binomial Theorem"
+target "https://en.wikipedia.org/wiki/Binomial_theorem"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
  This is not accidental; it is a generalization of the binomial formula
  that holds for non-uniform intervals and non-independent correlations.
  It reduces to exactly the binomial formula if all probabilities are independent
@@ -712,13 +809,13 @@ Note the resemblance of the formula for MI to the binomial theorem.
 \begin_inset Formula 
 \begin{align*}
 MI\left(w_{1},w_{2},\cdots,w_{n}\right)= & \sum_{k=0}^{n}\left(-1\right)^{n-k}{n \choose k}\log_{2}\frac{1}{n^{k}}\\
-= & \log_{2}n\cdot\sum_{k=0}^{n}\left(-1\right)^{n-k}k{n \choose k}\\
+= & -\log_{2}n\cdot\sum_{k=0}^{n}\left(-1\right)^{n-k}k{n \choose k}\\
 = & 0
 \end{align*}
 
 \end_inset
 
-which follows from 
+The last part follows from 
 \begin_inset Formula 
 \[
 \frac{d}{dx}\left(1+x\right)^{n}=n\left(1+x\right)^{n-1}=\sum_{k=1}^{n}k{n \choose k}x^{k-1}
@@ -737,6 +834,34 @@ and setting
 \begin_layout Standard
 More generally, the binomial-MI formula follows from the Cartesian-product
  nature of the topology of sequences.
+ It is a formula that holds generically for cylinder set measures; there
+ is nothing language-specific in this example.
+\end_layout
+
+\begin_layout Standard
+The point of this example is to show that something seemingly 
+\begin_inset Quotes eld
+\end_inset
+
+large
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+complex
+\begin_inset Quotes erd
+\end_inset
+
+, such as 
+\begin_inset Formula $MI\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ can be reduced into smaller, perhaps more manageable components, which
+ can then be recombined back into the whole, with an exact (not approximate)
+ expression, a summation over pieces-parts.
 \end_layout
 
 \begin_layout Section*
