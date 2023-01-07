@@ -472,7 +472,274 @@ With such a factorization in hand, one can now aim for higher and more abstract
  for the next.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
+Example: the Binomial MI Formula
+\end_layout
+
+\begin_layout Standard
+As a concrete example of the above, consider the mutual information 
+\begin_inset Formula $MI\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ over 
+\begin_inset Formula $n$
+\end_inset
+
+ variables.
+ It is defined asxxxxx
+\begin_inset Formula 
+\begin{equation}
+MI\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{k=0}^{n}\left(-1\right)^{n-k}\sum_{w\backslash k}\log_{2}p\left(\left\{ w\backslash k\right\} \right)\label{eq:binomial-MI}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\{ w\backslash k\right\} $
+\end_inset
+
+ is the set of words 
+\begin_inset Formula $\left\{ w\right\} =\left\{ w_{1},w_{2},\cdots,w_{n}\right\} $
+\end_inset
+
+ with 
+\begin_inset Formula $k$
+\end_inset
+
+ of them removed.
+ The sum over 
+\begin_inset Formula $w\backslash k$
+\end_inset
+
+ is a sum over every combinatoric possibility of removal.
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+removed
+\begin_inset Quotes erd
+\end_inset
+
+, it is meant 
+\begin_inset Quotes eld
+\end_inset
+
+summed over
+\begin_inset Quotes erd
+\end_inset
+
+, so that, for example, if 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ is removed, then
+\begin_inset Formula 
+\[
+p\left(\left\{ w\backslash w_{2}\right\} \right)=p\left(w_{1},*,w_{3},\cdots,w_{n}\right)=\sum_{w_{2}}p\left(w_{1},w_{2},\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $*$
+\end_inset
+
+ is the wild-card; it just denotes that 
+\begin_inset Quotes eld
+\end_inset
+
+anything
+\begin_inset Quotes erd
+\end_inset
+
+ can occupy that slot, and that, for probabilites, that slot should be summed
+ over.eeeeee dddxxxFormally, 
+\begin_inset Formula $\left\{ w\backslash w_{2}\right\} =\left(w_{1},*,w_{3},\cdots,w_{n}\right)$
+\end_inset
+
+ is called a 
+\begin_inset Quotes eld
+\end_inset
+
+cylinder set
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+See Wikipedia,
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\xout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Cylinder set"
+target "https://en.wikipedia.org/wiki/Cylinder_set"
+literal "false"
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\xout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and the sum over 
+\begin_inset Formula $w\backslash k$
+\end_inset
+
+ for 
+\begin_inset Formula $k=1$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\sum_{w\backslash1}\log_{2}p\left(\left\{ w\backslash1\right\} \right)=\sum_{i=1}^{n}\log_{2}p\left(\left\{ w\backslash w_{i}\right\} \right)
+\]
+
+\end_inset
+
+Likewise, for 
+\begin_inset Formula $k=2$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+\sum_{w\backslash2}\log_{2}p\left(\left\{ w\backslash2\right\} \right)=\sum_{i=1}^{n}\sum_{j=1;j\ne i}^{n}\log_{2}p\left(\left\{ w\backslash\left\{ w_{i},w_{j}\right\} \right\} \right)
+\]
+
+\end_inset
+
+and so on.
+\end_layout
+
+\begin_layout Standard
+The alternating sign is such that the singletons 
+\begin_inset Formula $p\left(w_{j}\right)=p\left(*,*,\cdots,w_{j},\cdots,*\right)$
+\end_inset
+
+ always have a minus sign in front of their log, while the first term is
+ for the total space 
+\begin_inset Formula $p\left(\left\{ w\backslash w\right\} \right)=p\left(\varnothing\right)=p\left(*,*,\cdots,*\right)$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $p\left(\varnothing\right)=1$
+\end_inset
+
+ is a conventional probability, then of course 
+\begin_inset Formula $\log_{2}p\left(\varnothing\right)=0$
+\end_inset
+
+.
+ However, this MI sum works just fine if 
+\begin_inset Formula $p\left(\varnothing\right)\ne1$
+\end_inset
+
+ (for example, if 
+\begin_inset Formula $p=N$
+\end_inset
+
+ is a count) because the normalizing factor can be pulled back through all
+ of the terms.
+\end_layout
+
+\begin_layout Standard
+The size of the set 
+\begin_inset Formula $\left\{ w\backslash k\right\} $
+\end_inset
+
+ is given by the binomial coefficient:
+\begin_inset Formula 
+\[
+\left|\left\{ w\backslash k\right\} \right|={n \choose k}
+\]
+
+\end_inset
+
+Note the resemblance of the formula for MI to the binomial theorem.
+ This is not accidental; it is a generalization of the binomial formula
+ that holds for non-uniform intervals and non-independent correlations.
+ It reduces to exactly the binomial formula if all probabilities are independent
+ and uniform in size,
+\emph on
+ i.e.
+
+\emph default
+ if 
+\begin_inset Formula $p\left(a,b\right)=p\left(a\right)p\left(b\right)$
+\end_inset
+
+ and if 
+\begin_inset Formula $p\left(w_{j}\right)=1/n$
+\end_inset
+
+.
+ In this case, it becomes
+\begin_inset Formula 
+\begin{align*}
+MI\left(w_{1},w_{2},\cdots,w_{n}\right)= & \sum_{k=0}^{n}\left(-1\right)^{n-k}{n \choose k}\log_{2}\frac{1}{n^{k}}\\
+= & \log_{2}n\cdot\sum_{k=0}^{n}\left(-1\right)^{n-k}k{n \choose k}\\
+= & 0
+\end{align*}
+
+\end_inset
+
+which follows from 
+\begin_inset Formula 
+\[
+\frac{d}{dx}\left(1+x\right)^{n}=n\left(1+x\right)^{n-1}=\sum_{k=1}^{n}k{n \choose k}x^{k-1}
+\]
+
+\end_inset
+
+and setting 
+\begin_inset Formula $x=-1$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+More generally, the binomial-MI formula follows from the Cartesian-product
+ nature of the topology of sequences.
+\end_layout
+
+\begin_layout Section*
 Factorization as change of variable
 \end_layout
 
@@ -717,204 +984,6 @@ Consider now a vector space of dimension
  However, this time, the space is much larger, and so the accidental intersectio
 n of two different paths is much less likely.
  There's disambiguation.
-\end_layout
-
-\begin_layout Subsubsection*
-Binomial MI formula
-\end_layout
-
-\begin_layout Standard
-Of particular interest is the mutual information 
-\begin_inset Formula $MI\left(w_{1},w_{2},\cdots,w_{n}\right)$
-\end_inset
-
- over 
-\begin_inset Formula $n$
-\end_inset
-
- variables, and it's interpretation for large 
-\begin_inset Formula $n$
-\end_inset
-
-, the practical and theoretical limits to computing it, and it's interpretation
- (especially in the face of smaller data sets).
- It is defined as
-\begin_inset Formula 
-\begin{equation}
-MI\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{k=0}^{n}\left(-1\right)^{n-k}\sum_{w\backslash k}\log_{2}p\left(\left\{ w\backslash k\right\} \right)\label{eq:binomial-MI}
-\end{equation}
-
-\end_inset
-
-where 
-\begin_inset Formula $\left\{ w\backslash k\right\} $
-\end_inset
-
- is the set of words 
-\begin_inset Formula $\left\{ w\right\} =\left\{ w_{1},w_{2},\cdots,w_{n}\right\} $
-\end_inset
-
- with 
-\begin_inset Formula $k$
-\end_inset
-
- of them removed.
- The sum over 
-\begin_inset Formula $w\backslash k$
-\end_inset
-
- is a sum over every combinatoric possibility of removal.
- By 
-\begin_inset Quotes eld
-\end_inset
-
-removed
-\begin_inset Quotes erd
-\end_inset
-
-, it is meant 
-\begin_inset Quotes eld
-\end_inset
-
-summed over
-\begin_inset Quotes erd
-\end_inset
-
-, so that, for example, if 
-\begin_inset Formula $w_{2}$
-\end_inset
-
- is removed, then
-\begin_inset Formula 
-\[
-p\left(\left\{ w\backslash w_{2}\right\} \right)=p\left(w_{1},*,w_{3},\cdots,w_{n}\right)=\sum_{w_{2}}p\left(w_{1},w_{2},\cdots,w_{n}\right)
-\]
-
-\end_inset
-
-and the sum over 
-\begin_inset Formula $w\backslash k$
-\end_inset
-
- for 
-\begin_inset Formula $k=1$
-\end_inset
-
- is
-\begin_inset Formula 
-\[
-\sum_{w\backslash1}\log_{2}p\left(\left\{ w\backslash1\right\} \right)=\sum_{i=1}^{n}\log_{2}p\left(\left\{ w\backslash w_{i}\right\} \right)
-\]
-
-\end_inset
-
-Likewise, for 
-\begin_inset Formula $k=2$
-\end_inset
-
-,
-\begin_inset Formula 
-\[
-\sum_{w\backslash2}\log_{2}p\left(\left\{ w\backslash2\right\} \right)=\sum_{i=1}^{n}\sum_{j=1;j\ne i}^{n}\log_{2}p\left(\left\{ w\backslash\left\{ w_{i},w_{j}\right\} \right\} \right)
-\]
-
-\end_inset
-
-and so on.
-\end_layout
-
-\begin_layout Standard
-The alternating sign is such that the singletons 
-\begin_inset Formula $p\left(w_{j}\right)=p\left(*,*,\cdots,w_{j},\cdots,*\right)$
-\end_inset
-
- always have a minus sign in front of their log, while the first term is
- for the total space 
-\begin_inset Formula $p\left(\left\{ w\backslash w\right\} \right)=p\left(\varnothing\right)=p\left(*,*,\cdots,*\right)$
-\end_inset
-
-.
- If 
-\begin_inset Formula $p\left(\varnothing\right)=1$
-\end_inset
-
- is a conventional probability, then of course 
-\begin_inset Formula $\log_{2}p\left(\varnothing\right)=0$
-\end_inset
-
-.
- However, this MI sum works just fine if 
-\begin_inset Formula $p\left(\varnothing\right)\ne1$
-\end_inset
-
- (for example, if 
-\begin_inset Formula $p=N$
-\end_inset
-
- is a count) because the normalizing factor can be pulled back through all
- of the terms.
-\end_layout
-
-\begin_layout Standard
-The size of the set 
-\begin_inset Formula $\left\{ w\backslash k\right\} $
-\end_inset
-
- is given by the binomial coefficient:
-\begin_inset Formula 
-\[
-\left|\left\{ w\backslash k\right\} \right|={n \choose k}
-\]
-
-\end_inset
-
-Note the resemblance of the formula for MI to the binomial theorem.
- This is not accidental; it is a generalization of the binomial formula
- that holds for non-uniform intervals and non-independent correlations.
- It reduces to exactly the binomial formula if all probabilities are independent
- and uniform in size,
-\emph on
- i.e.
-
-\emph default
- if 
-\begin_inset Formula $p\left(a,b\right)=p\left(a\right)p\left(b\right)$
-\end_inset
-
- and if 
-\begin_inset Formula $p\left(w_{j}\right)=1/n$
-\end_inset
-
-.
- In this case, it becomes
-\begin_inset Formula 
-\begin{align*}
-MI\left(w_{1},w_{2},\cdots,w_{n}\right)= & \sum_{k=0}^{n}\left(-1\right)^{n-k}{n \choose k}\log_{2}\frac{1}{n^{k}}\\
-= & \log_{2}n\cdot\sum_{k=0}^{n}\left(-1\right)^{n-k}k{n \choose k}\\
-= & 0
-\end{align*}
-
-\end_inset
-
-which follows from 
-\begin_inset Formula 
-\[
-\frac{d}{dx}\left(1+x\right)^{n}=n\left(1+x\right)^{n-1}=\sum_{k=1}^{n}k{n \choose k}x^{k-1}
-\]
-
-\end_inset
-
-and setting 
-\begin_inset Formula $x=-1$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-More generally, the binomial-MI formula follows from the Cartesian-product
- nature of the topology of sequences.
 \end_layout
 
 \begin_layout Subsubsection*
