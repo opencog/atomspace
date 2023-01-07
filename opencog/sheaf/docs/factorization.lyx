@@ -1,0 +1,747 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\usepackage{slashed}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "cmtt" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures false
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "basicstyle={\ttfamily},basewidth={0.45em}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Language Learning Diary - Part Nine
+\end_layout
+
+\begin_layout Date
+Oct 2022 – Present
+\end_layout
+
+\begin_layout Author
+Linas Vepštas
+\end_layout
+
+\begin_layout Abstract
+The language-learning effort involves research and software development
+ to implement the ideas concerning unsupervised learning of grammar, syntax
+ and semantics from corpora.
+ This document contains supplementary notes and a loosely-organized semi-chronol
+ogical diary of results.
+ The notes here might not always makes sense; they are a short-hand for
+ my own benefit, rather than aimed at you, dear reader!
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Part Nine of the diary explores continuous learning.
+\end_layout
+
+\begin_layout Section*
+Factorization
+\end_layout
+
+\begin_layout Standard
+The goal of parsing into pairs, and then building up disjuncts is to factorize
+ a complex relationship graph into block factors.
+ The factorization is necessarily approximate: we are using word-pairs only
+ as a first order approximation, and then using MST/MPG to attempt to identify
+ larger blocks or 
+\begin_inset Quotes eld
+\end_inset
+
+almost-cliques
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Lets try to capture this idea using mathematical notation.
+ To recap the story so far: Let 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ be the probability of observing 
+\begin_inset Formula $n$
+\end_inset
+
+ words in a sentence (or block of text).
+ The space of sequences 
+\begin_inset Formula $\left\{ \left(w_{1},w_{2},\cdots,w_{n}\right)\right\} $
+\end_inset
+
+ is a Cartesian product space, and 
+\begin_inset Formula $p$
+\end_inset
+
+ is a measure upon that space.
+ 
+\end_layout
+
+\begin_layout Standard
+The goal of factorization is to approximate this measure by factorizing
+ it into parts, where the parts are given by parsing via conventional linguistic
+ theory.
+ That is, we presume that the following holds, approximately:
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(r_{1}\left\{ w_{j}\right\} \right)p\left(r_{2}\left\{ w_{j}\right\} \right)\cdots p\left(r_{k}\left\{ w_{j}\right\} \right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $r_{1},r_{2},\cdots,r_{k}$
+\end_inset
+
+ are syntactic relations (subject, verb, object...) and the 
+\begin_inset Formula $\left\{ w_{j}\right\} $
+\end_inset
+
+ is the set of words taking part in that relationship.
+\end_layout
+
+\begin_layout Standard
+The factorization is successful if 
+\begin_inset Formula 
+\[
+\log_{2}\frac{p\left(w_{1},w_{2},\cdots,w_{n}\right)}{p\left(r_{1}\right)p\left(r_{2}\right)\cdots p\left(r_{k}\right)}\approx0
+\]
+
+\end_inset
+
+At this time, I've not been tracking the probabilities of n-grams, and so
+ evaluating the above experimentally is not currently possible, not currently
+ performed.
+\end_layout
+
+\begin_layout Subsubsection*
+Factorization as change of variable
+\end_layout
+
+\begin_layout Standard
+Of course, syntax is not enough to convey the meaning in an expression,
+ so the above approximations are necessarily mediocre.
+ The factorization we are groping for should more properly be written as
+ a change of variable
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(r_{1},r_{2},\cdots,r_{k}\right)
+\]
+
+\end_inset
+
+where the variables 
+\begin_inset Formula $r_{1},r_{2},\cdots,r_{k}$
+\end_inset
+
+ are in some sense 
+\begin_inset Quotes eld
+\end_inset
+
+more independent
+\begin_inset Quotes erd
+\end_inset
+
+ than the word-sequence 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Note that in general, 
+\begin_inset Formula $k\ne n$
+\end_inset
+
+.
+ For spanning tree parses, the 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ are understood to be links between word-pairs, and so 
+\begin_inset Formula $k$
+\end_inset
+
+ is counting the number of links in the parse.
+ Thus 
+\begin_inset Formula $k=n-1$
+\end_inset
+
+ for word-pair relationships.
+ If the parse has fundamental cycles (loops), then 
+\begin_inset Formula $k=n-1+\ell$
+\end_inset
+
+ where 
+\begin_inset Formula $\ell$
+\end_inset
+
+ is the number of fundamental cycles (
+\emph on
+e.g.
+
+\emph default
+ in an MPG parse).
+\end_layout
+
+\begin_layout Standard
+Note that parsing performs a 
+\begin_inset Quotes eld
+\end_inset
+
+dimensional oxidation
+\begin_inset Quotes erd
+\end_inset
+
+: there are far more 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+'s than there are 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+'s.
+ If the size of the base vocabulary is 
+\begin_inset Formula $\mathcal{O}\left(\left|w\right|\right)\sim N$
+\end_inset
+
+ then 
+\begin_inset Formula $\mathcal{O}\left(\left|r\right|\right)\sim N^{2}$
+\end_inset
+
+ where I'm using 
+\begin_inset Formula $\mathcal{O}$
+\end_inset
+
+ notation because counting the size of the vocabulary is hard, when vocabulary
+ words have a Zipfian distribution.
+ Also, the claim that 
+\begin_inset Formula $\mathcal{O}\left(\left|r\right|\right)\sim N^{2}$
+\end_inset
+
+ is somewhat misleading.
+ Its actually more like 
+\begin_inset Formula $\mathcal{O}\left(\left|r\right|\right)\sim N^{\gamma}$
+\end_inset
+
+ for some 
+\begin_inset Formula $\gamma<2$
+\end_inset
+
+ because this is what the Zipfian distributions do to us.
+ We've seen this experimentally, when we measure the sparsity and rarity,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See e.g.
+ page 34 or Diary Part Five for rarity.
+ I could have sworn I had this in othr tables, but I can't find it right
+ now.
+\end_layout
+
+\end_inset
+
+ but we haven't explicitly measured this.
+\end_layout
+
+\begin_layout Standard
+Thus, MST parsing is a form of dimensional embedding, where the strings
+ living in the relatively low-dimensional space 
+\begin_inset Formula $\mathcal{O}\left(\left|\left(w_{1},w_{2},\cdots,w_{n}\right)\right|\right)\sim N^{n}$
+\end_inset
+
+ are embeded into the vastly larger space 
+\begin_inset Formula $\mathcal{O}\left(\left|r_{1},r_{2},\cdots,r_{k}\right|\right)\sim N^{2k}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In Link Grammar parsing, the embedding is not into a word-pair space, but
+ into a disjunct space, which is explosively larger.
+ That is, the relations 
+\begin_inset Formula $r$
+\end_inset
+
+ are actually disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ I assume its 
+\begin_inset Formula $\mathcal{O}\left(\left|d\right|\right)\sim N^{\gamma}$
+\end_inset
+
+ for some 
+\begin_inset Formula $\gamma>2$
+\end_inset
+
+, but again, we've monitored this size without actually ever emasuring it's
+ scaling dependence.
+ Got to fix that.
+\end_layout
+
+\begin_layout Subsubsection*
+Paths in hyperspace
+\end_layout
+
+\begin_layout Standard
+Lets try to paint a mental image of this.
+ Consider a vector space of dimension 
+\begin_inset Formula $N$
+\end_inset
+
+, with 
+\begin_inset Formula $N$
+\end_inset
+
+ the size of the vocabulary.
+ Each 
+\begin_inset Formula $w_{k}$
+\end_inset
+
+ is then a unit vector 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ in this space.
+ The word-sequence 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+ is a path in this space.
+ The probabilities 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ are hard to factorize, because there are many of these paths, and they
+ overlap a lot.
+\end_layout
+
+\begin_layout Standard
+Consider now a vector space of dimension 
+\begin_inset Formula $D$
+\end_inset
+
+, with 
+\begin_inset Formula $D$
+\end_inset
+
+ being the number of disjuncts.
+ Very roughly, 
+\begin_inset Formula $D\sim N^{\gamma}$
+\end_inset
+
+ for some 
+\begin_inset Formula $\gamma>2$
+\end_inset
+
+ or somethig like that.
+ So this is a much larger space.
+ A single Link Grammar parse of a sentence 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+ provides a unique sequence of disjuncts 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+ fixed by that parse.
+ As before, 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+ specifies a path through the disjunct space.
+ However, this time, the space is much larger, and so the accidental intersectio
+n of two different paths is much less likely.
+ There's disambiguation.
+\end_layout
+
+\begin_layout Subsubsection*
+Binomial MI formula
+\end_layout
+
+\begin_layout Standard
+Of particular interest is the mutual information 
+\begin_inset Formula $MI\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ over 
+\begin_inset Formula $n$
+\end_inset
+
+ variables, and it's interpretation for large 
+\begin_inset Formula $n$
+\end_inset
+
+, the practical and theoretical limits to computing it, and it's interpretation
+ (especially in the face of smaller data sets).
+ It is defined as
+\begin_inset Formula 
+\begin{equation}
+MI\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{k=0}^{n}\left(-1\right)^{n-k}\sum_{w\backslash k}\log_{2}p\left(\left\{ w\backslash k\right\} \right)\label{eq:binomial-MI}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\{ w\backslash k\right\} $
+\end_inset
+
+ is the set of words 
+\begin_inset Formula $\left\{ w\right\} =\left\{ w_{1},w_{2},\cdots,w_{n}\right\} $
+\end_inset
+
+ with 
+\begin_inset Formula $k$
+\end_inset
+
+ of them removed.
+ The sum over 
+\begin_inset Formula $w\backslash k$
+\end_inset
+
+ is a sum over every combinatoric possibility of removal.
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+removed
+\begin_inset Quotes erd
+\end_inset
+
+, it is meant 
+\begin_inset Quotes eld
+\end_inset
+
+summed over
+\begin_inset Quotes erd
+\end_inset
+
+, so that, for example, if 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ is removed, then
+\begin_inset Formula 
+\[
+p\left(\left\{ w\backslash w_{2}\right\} \right)=p\left(w_{1},*,w_{3},\cdots,w_{n}\right)=\sum_{w_{2}}p\left(w_{1},w_{2},\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+and the sum over 
+\begin_inset Formula $w\backslash k$
+\end_inset
+
+ for 
+\begin_inset Formula $k=1$
+\end_inset
+
+ is
+\begin_inset Formula 
+\[
+\sum_{w\backslash1}\log_{2}p\left(\left\{ w\backslash1\right\} \right)=\sum_{i=1}^{n}\log_{2}p\left(\left\{ w\backslash w_{i}\right\} \right)
+\]
+
+\end_inset
+
+Likewise, for 
+\begin_inset Formula $k=2$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+\sum_{w\backslash2}\log_{2}p\left(\left\{ w\backslash2\right\} \right)=\sum_{i=1}^{n}\sum_{j=1;j\ne i}^{n}\log_{2}p\left(\left\{ w\backslash\left\{ w_{i},w_{j}\right\} \right\} \right)
+\]
+
+\end_inset
+
+and so on.
+\end_layout
+
+\begin_layout Standard
+The alternating sign is such that the singletons 
+\begin_inset Formula $p\left(w_{j}\right)=p\left(*,*,\cdots,w_{j},\cdots,*\right)$
+\end_inset
+
+ always have a minus sign in front of their log, while the first term is
+ for the total space 
+\begin_inset Formula $p\left(\left\{ w\backslash w\right\} \right)=p\left(\varnothing\right)=p\left(*,*,\cdots,*\right)$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $p\left(\varnothing\right)=1$
+\end_inset
+
+ is a conventional probability, then of course 
+\begin_inset Formula $\log_{2}p\left(\varnothing\right)=0$
+\end_inset
+
+.
+ However, this MI sum works just fine if 
+\begin_inset Formula $p\left(\varnothing\right)\ne1$
+\end_inset
+
+ (for example, if 
+\begin_inset Formula $p=N$
+\end_inset
+
+ is a count) because the normalizing factor can be pulled back through all
+ of the terms.
+\end_layout
+
+\begin_layout Standard
+The size of the set 
+\begin_inset Formula $\left\{ w\backslash k\right\} $
+\end_inset
+
+ is given by the binomial coefficient:
+\begin_inset Formula 
+\[
+\left|\left\{ w\backslash k\right\} \right|={n \choose k}
+\]
+
+\end_inset
+
+Note the resemblance of the formula for MI to the binomial theorem.
+ This is not accidental; it is a generalization of the binomial formula
+ that holds for non-uniform intervals and non-independent correlations.
+ It reduces to exactly the binomial formula if all probabilities are independent
+ and uniform in size,
+\emph on
+ i.e.
+
+\emph default
+ if 
+\begin_inset Formula $p\left(a,b\right)=p\left(a\right)p\left(b\right)$
+\end_inset
+
+ and if 
+\begin_inset Formula $p\left(w_{j}\right)=1/n$
+\end_inset
+
+.
+ In this case, it becomes
+\begin_inset Formula 
+\begin{align*}
+MI\left(w_{1},w_{2},\cdots,w_{n}\right)= & \sum_{k=0}^{n}\left(-1\right)^{n-k}{n \choose k}\log_{2}\frac{1}{n^{k}}\\
+= & \log_{2}n\cdot\sum_{k=0}^{n}\left(-1\right)^{n-k}k{n \choose k}\\
+= & 0
+\end{align*}
+
+\end_inset
+
+which follows from 
+\begin_inset Formula 
+\[
+\frac{d}{dx}\left(1+x\right)^{n}=n\left(1+x\right)^{n-1}=\sum_{k=1}^{n}k{n \choose k}x^{k-1}
+\]
+
+\end_inset
+
+and setting 
+\begin_inset Formula $x=-1$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+More generally, the binomial-MI formula follows from the Cartesian-product
+ nature of the topology of sequences.
+\end_layout
+
+\begin_layout Subsubsection*
+MST
+\end_layout
+
+\begin_layout Standard
+The MST factorization is effectively the presumption that
+\begin_inset Formula 
+\[
+MI\left(w_{1},w_{2},\cdots,w_{n}\right)\approx\sum_{\left(w_{i},w_{j}\right)\in MST}MI\left(w_{i},w_{j}\right)
+\]
+
+\end_inset
+
+This sum runs only over the maximum spanning tree, and contains only 
+\begin_inset Formula $n-1$
+\end_inset
+
+ links.
+ The complete graph would have 
+\begin_inset Formula $n\left(n-1\right)/2$
+\end_inset
+
+ links in it, and so most of these are ignored.
+ Specifically, the presumption is that these ignored links actually cancel
+ higher-order terms in the full MI expansion.
+\end_layout
+
+\begin_layout Standard
+Put more plainly, it appears that
+\begin_inset Formula 
+\[
+\log_{2}\frac{p\left(w_{1},w_{2},\cdots,w_{n}\right)}{p\left(w_{1}\right)p\left(w_{2}\right)\cdots p\left(w_{n}\right)}
+\]
+
+\end_inset
+
+is, in general, 
+\begin_inset Quotes eld
+\end_inset
+
+freakishly high
+\begin_inset Quotes erd
+\end_inset
+
+, and that much of it can be 
+\begin_inset Quotes eld
+\end_inset
+
+knocked down to size
+\begin_inset Quotes erd
+\end_inset
+
+ by using the MST, instead.
+ 
+\end_layout
+
+\begin_layout Standard
+What appears to be lacking is a coherent theoretical argument as to 
+\emph on
+why
+\emph default
+ an MST parse provides a reasonable approximation to the factorization.
+ The next step is, of course, to use disjuncts, but again, without any clear
+ argument about why the disjuncts provide a good approximation to the higher
+ order terms in the sum of binomial-MI equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:binomial-MI"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+More precisely, the binomial-MI equation is correct, but unweildy, because
+ it contains large cancelling terms.
+ What is unclear is why these terms cancel, and how to best obtain a diagonalize
+d, factorized perturbative expansion.
+ The MST->disjunct path is just a gut-feel approach to obtaining that perturbati
+ve expansion.
+ It lacks formal justification for why it works.
+\end_layout
+
+\begin_layout Section*
+The End
+\end_layout
+
+\begin_layout Standard
+This is the end of Part Nine of the diary.
+ 
+\end_layout
+
+\end_body
+\end_document
