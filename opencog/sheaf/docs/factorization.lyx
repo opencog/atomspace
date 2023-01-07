@@ -92,11 +92,11 @@
 \begin_body
 
 \begin_layout Title
-Language Learning Diary - Part Nine
+Factoring with Statistical Linguistics
 \end_layout
 
 \begin_layout Date
-Oct 2022 – Present
+January 2023
 \end_layout
 
 \begin_layout Author
@@ -104,13 +104,35 @@ Linas Vepštas
 \end_layout
 
 \begin_layout Abstract
-The language-learning effort involves research and software development
- to implement the ideas concerning unsupervised learning of grammar, syntax
- and semantics from corpora.
- This document contains supplementary notes and a loosely-organized semi-chronol
-ogical diary of results.
- The notes here might not always makes sense; they are a short-hand for
- my own benefit, rather than aimed at you, dear reader!
+An attempt is made to develop a mathematical formalism for factoring large
+ language graphs into factors that have a symbolic interpretation.
+ The OpenCog language learning effort has been attempting to induce grammar,
+ syntax and semantics from corpora.
+ Most of this work is purely experimental, 
+\begin_inset Quotes eld
+\end_inset
+
+seat of the pants
+\begin_inset Quotes erd
+\end_inset
+
+ exploration.
+ This document attempts to provide a mathematical notation for that work,
+ thus perhaps making it clearer and easier to grasp.
+\end_layout
+
+\begin_layout Abstract
+The primary focus is on exploring the nature of probability in extremely
+ high-dimensional spaces (
+\begin_inset Quotes eld
+\end_inset
+
+hyperspaces
+\begin_inset Quotes erd
+\end_inset
+
+), and how traditional linguistic ideas can be applied to factorize probability
+ distributions into components.
 \end_layout
 
 \begin_layout Section*
@@ -118,7 +140,46 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Part Nine of the diary explores continuous learning.
+A probabilistic description of natural language posits that probability
+ theory can be validly applied to word-sequences.
+ Given a sequence of words 
+\begin_inset Formula $\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ representing a sentence, a paragraph, or a longer text..., one make the
+\emph on
+ a priori
+\emph default
+ assummption that it is possible to assign a probability 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ to this sequence.
+ It is not philosophically or scientifically obvious that this is a valid
+ assumption: the collection of sayable sentences is presumably infinite;
+ language changes over time; ever human speaker internalizes slightly different
+ grammars and idiomatic expressions.
+ Vocabularies are different for technical texts and literary texts.
+ While it is true that present-day computers can gather up billions of sentences
+ by scraping the web, it can hardly be assumed that these are converging
+ to some overall stable probability distribution 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+.
+ Thus, assuming that 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ exists is intellectually dangerous.
+\end_layout
+
+\begin_layout Standard
+None-the-less, we make this assumption, for two reasons.
+ First, it is useful.
+ Second, if a specific finite-sized corpus is selected and fixed, it is
+ a simple and unambiguous matter of counting words and phrases to obtain
+ frequency distributions.
 \end_layout
 
 \begin_layout Section*
