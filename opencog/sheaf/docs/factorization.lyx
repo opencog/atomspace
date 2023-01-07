@@ -348,19 +348,24 @@ Factorization
 \end_layout
 
 \begin_layout Standard
-The goal of parsing into pairs, and then building up disjuncts is to factorize
- a complex relationship graph into block factors.
- The factorization is necessarily approximate: we are using word-pairs only
- as a first order approximation, and then using MST/MPG to attempt to identify
- larger blocks or 
+The notion of factorization is to take some large blob, and pick it apart
+ into components: to factor a matrix into block-diagonal components, to
+ factor an integer into primes.
+ Probability distributions over statistically independent variables factorize
+ trivially: this is what is meant by the words 
 \begin_inset Quotes eld
 \end_inset
 
-almost-cliques
+statistically indepenent
 \begin_inset Quotes erd
 \end_inset
 
 .
+ Probability distributions over language are not, of course, statistically
+ independent, and thus are not strictly factorizable.
+ None-the-less, they are almost so; the goal is to identify the strongly
+ connected components and separate them from one-another, identifying the
+ weaker connections.
 \end_layout
 
 \begin_layout Standard
@@ -390,10 +395,15 @@ Lets try to capture this idea using mathematical notation.
 The goal of factorization is to approximate this measure by factorizing
  it into parts, where the parts are given by parsing via conventional linguistic
  theory.
- That is, we presume that the following holds, approximately:
+ That is, we presume that relations 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ between small sets of words can be found, such that the following holds,
+ approximately:
 \begin_inset Formula 
 \[
-p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(r_{1}\left\{ w_{j}\right\} \right)p\left(r_{2}\left\{ w_{j}\right\} \right)\cdots p\left(r_{k}\left\{ w_{j}\right\} \right)
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(r_{1}\left\{ w\right\} \right)p\left(r_{2}\left\{ w\right\} \right)\cdots p\left(r_{k}\left\{ w\right\} \right)
 \]
 
 \end_inset
@@ -403,10 +413,44 @@ where
 \end_inset
 
  are syntactic relations (subject, verb, object...) and the 
-\begin_inset Formula $\left\{ w_{j}\right\} $
+\begin_inset Formula $\left\{ w\right\} $
 \end_inset
 
- is the set of words taking part in that relationship.
+ are the set of words taking part in that particular relationship.
+ For example, the relation might be a subject-verb-object relationship;
+ the set 
+\begin_inset Formula $\left\{ w\right\} $
+\end_inset
+
+ then consists of only three words.
+ The point here is that the 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+small
+\begin_inset Quotes erd
+\end_inset
+
+, whereas 
+\begin_inset Formula $\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+large
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The goal is to grapple wth complexity be finding sutiable recurring patterns.
+ Lingusits have already shown what these patterns should be; now the task
+ is to actually extract them from text.
 \end_layout
 
 \begin_layout Standard
@@ -418,9 +462,14 @@ The factorization is successful if
 
 \end_inset
 
-At this time, I've not been tracking the probabilities of n-grams, and so
- evaluating the above experimentally is not currently possible, not currently
- performed.
+With such a factorization in hand, one can now aim for higher and more abstract
+ levels of structure, using the 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ as the building blocks, rather than individual words.
+ One should imagine a perturbative structure, each level givein a foundation
+ for the next.
 \end_layout
 
 \begin_layout Subsubsection*
