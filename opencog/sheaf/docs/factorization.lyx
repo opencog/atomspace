@@ -1169,7 +1169,36 @@ word class
  The intended factorization, for transitive verbs, is to have written 
 \begin_inset Formula 
 \[
-p
+p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in V\right)\sqrt{p\left(w_{i}\in S\right)p\left(w_{k}\in O\right)}
+\]
+
+\end_inset
+
+where there is a probability assigned to observing the lexical entry 
+\begin_inset Formula $\mathtt{V:S-\,\&\,O+}$
+\end_inset
+
+ along with a square-root probability of a word belonging to a specific
+ word-class.
+ The square-root appears because presumably there are other lexical entries
+ for subjects and objects: the full linkage must include the disjuncts 
+\begin_inset Formula $\mathtt{N:S+\,or\,O-}$
+\end_inset
+
+ indicating that there is a word-class called 
+\begin_inset Quotes eld
+\end_inset
+
+noun
+\begin_inset Quotes erd
+\end_inset
+
+ that can act as a subject, when it is to the left of a verb, or can act
+ as an object, when to the right of a verb.
+ That is, for the subject,
+\begin_inset Formula 
+\[
+p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)\sqrt{p\left(w_{i}\in S\right)}
 \]
 
 \end_inset
@@ -1178,42 +1207,7 @@ p
 \end_layout
 
 \begin_layout Standard
-This can be further strengthened by introducing the idea of a 
-\begin_inset Quotes eld
-\end_inset
-
-word class
-\begin_inset Quotes erd
-\end_inset
-
-, and writing the above as
-\begin_inset Formula 
-\begin{align*}
-p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx & \left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},V\right\} \right)}p\left(w_{j}\in V\right)\right]\times\\
- & \qquad\qquad\left[p\left(w_{i}\in A\right)\sqrt{p\left(r\left\{ A,w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
-\end{align*}
-
-\end_inset
-
-where 
-\begin_inset Formula $V$
-\end_inset
-
- and 
-\begin_inset Formula $A$
-\end_inset
-
- are classes of words.
- For the earlier example, 
-\begin_inset Formula $V$
-\end_inset
-
- would be a collection of verbs that take auxilliaries, and 
-\begin_inset Formula $A$
-\end_inset
-
- would be the (small, almost closed set) of auxilliaries: have, be, may,
- do, shall, can, must.
+XXX This is broken...
 \end_layout
 
 \begin_layout Standard
