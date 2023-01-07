@@ -864,8 +864,25 @@ complex
  expression, a summation over pieces-parts.
 \end_layout
 
+\begin_layout Standard
+But there is also a second lesson here: the binomial MI formula is not sutiable
+ for natural language tasks.
+ Although it is an exact expression, and individual words and word pairs
+ appear in the lower summation terms, one gains no insight applying this
+ to natural language.
+ MI values can be both negative and positive; the alternating sign introduces
+ more chaos into the mix.
+ Basically, one has a series of small and large terms summing up and mostly
+ cancelling one-another.
+ The quest is to find a similar expression, ideally, an exact expression,
+ where most of the terms are strictly positive.
+ This would allow the structure, the factorization to be approached perturbative
+ly, as a strictly convergent sequence of corrections, each applied to the
+ last.
+\end_layout
+
 \begin_layout Section*
-Factorization as change of variable
+Factorization as Dimensional Embedding
 \end_layout
 
 \begin_layout Standard
