@@ -1029,7 +1029,7 @@ Note that
 \end_layout
 
 \begin_layout Subsubsection*
-Connectors
+Connectors and Disjuncts
 \end_layout
 
 \begin_layout Standard
@@ -1047,26 +1047,13 @@ so that half of
 \begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
 \end_inset
 
- rides along with word 
-\begin_inset Formula $w_{i}$
-\end_inset
-
- as the probability of making a connection to word 
-\begin_inset Formula $w_{j}$
-\end_inset
-
- and the other half rides with the other word.
- This introduces the concept of a connector probability: that it can be
- convenient to think in terms of connectors that have the potential to make
- a connection, rather than in terms of the actual connection.
-\end_layout
-
-\begin_layout Standard
-The square-root term 
+ rides along with the left side, as the probability of making a connection,
+ and the other half rides with the other side.
+ This square root 
 \begin_inset Formula $\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}$
 \end_inset
 
- will be refered to as the 
+ term can be refered as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1075,8 +1062,23 @@ connector probability
 \end_inset
 
 .
- This concept is needed to recognize the fact that grammatical relations
- are not just pair-wise word relations, they are, in general, more complex.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+ are then locations in the factorized tensor that have the potential to
+ make a connection.
+ This apportions the probability away from the actual connection, from the
+ actual linkage, and moves it to the two endpoints of the connection.
+\end_layout
+
+\begin_layout Standard
+Of course, real grammatical relations are more complex; they are not just
+ a compendium of pair-wise relationships.
  For example, a transitive verb 
 \emph on
 must
@@ -1086,21 +1088,22 @@ must
 \begin_inset Formula $\left(S,V,O\right)$
 \end_inset
 
- and so, in principle, we should have instead factored as a tri-variable
- 
+.
+ Any factorizations involving transitive verbs should be factored in terms
+ of a tri-variable 
 \begin_inset Formula $p\left(\mbox{TrVb}\left\{ S,V,O\right\} \right)$
 \end_inset
 
- instead of individual pair-wise word-links.
- The goal here is to recognize that a transitive verb 
+.
+ A transitive verb 
 \begin_inset Formula $V$
 \end_inset
 
- has the potential to connect to a subject 
+ has the possibility of connecting to a subject 
 \begin_inset Formula $S$
 \end_inset
 
-, and the potential to connect to an object 
+, and the possibility of connecting to an object 
 \begin_inset Formula $O$
 \end_inset
 
@@ -1109,21 +1112,14 @@ must
 \end_layout
 
 \begin_layout Standard
-This is kind of a sneaky way of saying 
-\begin_inset Quotes eld
-\end_inset
-
-the grammar is actually Link Grammar
-\begin_inset Quotes erd
-\end_inset
-
-, and the grammatical relation is 
+This last paragraph is a sneaky introduction to Link Grammar.
+ The specific grammatical relation is 
 \begin_inset Formula $\mbox{TrVb}\left\{ S,V,O\right\} =\mathtt{V:S-\,\&\,O+}$
 \end_inset
 
 .
- This is the conventional Link Grammar notation stating that the lexical
- entry 
+ The right-hand side is the conventional Link Grammar notation stating that
+ the lexical entry 
 \begin_inset Formula $\mathtt{V}$
 \end_inset
 
@@ -1148,8 +1144,8 @@ disjunct
 \begin_inset Quotes erd
 \end_inset
 
-; that is because it is disjoined from other lexical entries for the verb
- 
+; the name stems from it's being disjoined from other lexical entries for
+ the verb 
 \begin_inset Formula $\mathtt{V}$
 \end_inset
 
@@ -1157,7 +1153,7 @@ disjunct
 \end_layout
 
 \begin_layout Standard
-The other sneaky thing done above was to introduce the idea of a 
+The other sneaky thing being done above is to introduce the idea of a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1166,10 +1162,98 @@ word class
 \end_inset
 
  (subjects, verbs, objects).
- The intended factorization, for transitive verbs, is to have written 
+ Thus, during factorization, we expect to see indicator functions, such
+ as 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+ which takes a value of 1 if 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ is verb, and zero, otherwise.
+ Keep in mind, though, that it might be useful to assign fractional values
+ to 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+, for any number of technical reasons.
+ It is premature to sketch these reasons, just yet.
+\end_layout
+
+\begin_layout Standard
+The intendeed factorization, for transitive verbs, is to say that a tri-variable
+ probability 
+\begin_inset Formula $p\left(w_{i,}w_{j},w_{k}\right)$
+\end_inset
+
+ can be factored into a a probability of 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ belonging to some (any) class of words that can make subject-type connections,
+ a probability of 
+\begin_inset Formula $w_{k}$
+\end_inset
+
+ belonging to some (any) class of words that can make object-type connections,
+ a probability of 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ belonging explicitly to the transitive verb class 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+, and an overall probability of observing the relation 
+\begin_inset Formula $p\left(\mathtt{V:S-\,\&\,O+}\right)$
+\end_inset
+
+.
+ How should this be written? In particular, how can this be made consistent
+ with the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+connector probabilities
+\begin_inset Quotes erd
+\end_inset
+
+? There is a consistency condition, in that there is a lexical entry of
+ the form 
+\begin_inset Formula $\mathtt{N:S+\,or\,O-}$
+\end_inset
+
+, indicating that there is a word-class called 
+\begin_inset Quotes eld
+\end_inset
+
+common noun
+\begin_inset Quotes erd
+\end_inset
+
+ that can act as a subject, when it is to the left of a verb, or can act
+ as an object, when to the right of a verb.
+ But this is not the only such lexical entry with 
+\begin_inset Formula $\mathtt{S+}$
+\end_inset
+
+ or with 
+\begin_inset Formula $\mathtt{O-}$
+\end_inset
+
+ connectors: certainly, pronouns can make these connections as well.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+The intended factorization, for transitive verbs, is to have written 
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in V\right)\sqrt{p\left(w_{i}\in S\right)p\left(w_{k}\in O\right)}
+p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)\sqrt{p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)}
 \]
 
 \end_inset
@@ -1178,8 +1262,8 @@ where there is a probability assigned to observing the lexical entry
 \begin_inset Formula $\mathtt{V:S-\,\&\,O+}$
 \end_inset
 
- along with a square-root probability of a word belonging to a specific
- word-class.
+ along with a square-root probability of a word participating in a specific
+ linkage.
  The square-root appears because presumably there are other lexical entries
  for subjects and objects: the full linkage must include the disjuncts 
 \begin_inset Formula $\mathtt{N:S+\,or\,O-}$
@@ -1198,7 +1282,7 @@ noun
  That is, for the subject,
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)\sqrt{p\left(w_{i}\in S\right)}
+p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)\sqrt{p\left(w_{i}\in\mathtt{S+}\right)}
 \]
 
 \end_inset
@@ -1218,11 +1302,20 @@ The goal here is to allow factorization along the lines of conventional
 \end_layout
 
 \begin_layout Subsubsection*
-Retracts
+Deformation Retracts
+\end_layout
+
+\begin_layout Standard
+Homotopy, basically, on trees, resolves the factorization problem.
+ However, cycles in graphs create an issue.
 \end_layout
 
 \begin_layout Subsubsection*
 Twines
+\end_layout
+
+\begin_layout Standard
+Cutting across multiple links at once.
 \end_layout
 
 \begin_layout Section*
