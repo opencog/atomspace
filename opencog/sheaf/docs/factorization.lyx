@@ -1253,7 +1253,7 @@ xxx
 The intended factorization, for transitive verbs, is to have written 
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)\sqrt{p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)}
+p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
 \]
 
 \end_inset
@@ -1282,7 +1282,7 @@ noun
  That is, for the subject,
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)\sqrt{p\left(w_{i}\in\mathtt{S+}\right)}
+p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{S+}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
 \]
 
 \end_inset
