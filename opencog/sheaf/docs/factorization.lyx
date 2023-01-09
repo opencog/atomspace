@@ -2026,16 +2026,107 @@ with
 
 \begin_layout Standard
 Alternately, this loop is clearly composed four three-point vertexes and
- so following the earlier conventions, there is a square-root for each exposed
- connector, and a vertex factor for each vertex:
+ so following the earlier conventions, there is a pair probability for each
+ linkage (there are four links: R,B,C and S), a square-root for each exposed
+ connector (there are two: D for determiner, and S), and a vertex factor
+ for each vertex:
+\begin_inset Formula 
+\begin{align*}
+p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)= & p\left(\mathtt{R}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{C}\left\{ w_{j},w_{k}\right\} \right)\times\\
+ & \qquad p\left(\mathtt{S}\left\{ w_{k},w_{m}\right\} \right)p\left(\mathtt{B}\left\{ w_{i},w_{m}\right\} \right)\times\\
+ & \qquad p\left(\mbox{Vertex}\right)\times\\
+ & \qquad\sqrt{p\left(\mathtt{D}\left\{ \mathtt{the},w_{i}\right\} \right)p\left(\mathtt{O}\left\{ w_{i,}\mathtt{was}\right\} \right)}
+\end{align*}
+
+\end_inset
+
+the factors ofwhich follows from the fuller diagram:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+          +----------S-------+
+\end_layout
+
+\begin_layout Plain Layout
+
+          +------B------+    |
+\end_layout
+
+\begin_layout Plain Layout
+
+      +-D-+-R-+-C-+--S--+    |
+\end_layout
+
+\begin_layout Plain Layout
+
+      |   |   |   |     |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+     the dog who  I  chased was black   
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to not clog the above, it was written with a vertex factor:
+\begin_inset Formula 
+\begin{align*}
+p\left(\mbox{Vertex}\right)= & p\left(\mathtt{who:R-\,\&\,C+}\right)\times\\
+ & \quad p\left(\mathtt{I:C-\,\&\,S+}\right)\times\\
+ & \quad p\left(\mathtt{chased:S-\,\&\,B-}\right)\times\\
+ & \quad p\left(\mathtt{dog:D-\,\&\,R+\,\&\,B+\,\&\,S+}\right)
+\end{align*}
+
+\end_inset
+
+As before, the individual word-mentions could have been pulled out into
+ grammatical classes, so that, for example:
 \begin_inset Formula 
 \[
-p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)=\sqrt{}
+p\left(\mathtt{chased:S-\,\&\,B-}\right)=p\left(\mathtt{chased}\in\mathtt{V}\right)p\left(\mathtt{V:S-\,\&\,B-}\right)
 \]
 
 \end_inset
 
-which follows
+and so on.
+\end_layout
+
+\begin_layout Subsubsection*
+Summary.
+\end_layout
+
+\begin_layout Standard
+In this way, and ordinary seven-word sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the dog I chased was black
+\begin_inset Quotes erd
+\end_inset
+
+, having a joint probability 
+\begin_inset Formula $p\left(w_{1},\cdots,w_{7}\right)$
+\end_inset
+
+ can be factored into independent blocks.
+ This factorization is more complex than a conventional Hidden Markov Model,
+ and, more properly, might be called a Bayesian Network.
+ The 
+\end_layout
+
+\begin_layout Standard
+Boltzmann and MaxEnt etc.
 \end_layout
 
 \begin_layout Section*
