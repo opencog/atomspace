@@ -1660,9 +1660,9 @@ where
  That is, some of the pair-wise terms in the product should have been written
  as triples or quads: 
 \begin_inset Formula 
-\[
-p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{r\in T}p\left(r\left\{ w_{i},w_{j},\cdots,w_{k}\right\} \right)
-\]
+\begin{equation}
+p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{r\in T}p\left(r\left\{ w_{i},w_{j},\cdots,w_{k}\right\} \right)\label{eq:factorization}
+\end{equation}
 
 \end_inset
 
@@ -1683,9 +1683,9 @@ If there is more than one possible parse of a sentence, then presumably
 .
  Each of these contributes to the overall analysis of the sentence:
 \begin_inset Formula 
-\[
-p\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{T\in\left\{ T\right\} }p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)
-\]
+\begin{equation}
+p\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{T\in\left\{ T\right\} }p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)\label{eq:summation}
+\end{equation}
 
 \end_inset
 
@@ -1839,7 +1839,11 @@ A more problematic situation arises for graphs that have cycles.
  a triangle: there are three edges.
  H is used to indicate both the dominant noun (the subject) and also the
  dominant verb.
- Perhaps this can be seen more clearly in dependent or relative clauses.
+ 
+\end_layout
+
+\begin_layout Standard
+Perhaps this can be seen more clearly in dependent or relative clauses.
  An example from the Link Grammar documentation:
 \begin_inset Foot
 status collapsed
@@ -1957,15 +1961,35 @@ status open
 \end_layout
 
 \begin_layout Standard
-The C link connects to subordinating conjunctions.
+The C link connects head nouns to subordinating conjunctions.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikitionary, 
+\begin_inset CommandInset href
+LatexCommand href
+name "subordinating conjunction"
+target "https://en.wiktionary.org/wiki/subordinating_conjunction"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 Such loops present a potential complication to factoring.
  In order to factor a block of text into a left and a right component, there
  are now two links to be cut.
- There are several ways in thich to imagine this probem.
- One is to presume that there is an irreducible block of the form 
+ There are several ways in which to imagine this issue.
+ One is to presume that the relative clause is an irreducible block of the
+ form 
 \begin_inset Formula 
 \[
 p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)
@@ -2035,7 +2059,7 @@ Alternately, this loop is clearly composed four three-point vertexes and
 p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)= & p\left(\mathtt{R}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{C}\left\{ w_{j},w_{k}\right\} \right)\times\\
  & \qquad p\left(\mathtt{S}\left\{ w_{k},w_{m}\right\} \right)p\left(\mathtt{B}\left\{ w_{i},w_{m}\right\} \right)\times\\
  & \qquad p\left(\mbox{Vertex}\right)\times\\
- & \qquad\sqrt{p\left(\mathtt{D}\left\{ \mathtt{the},w_{i}\right\} \right)p\left(\mathtt{O}\left\{ w_{i,}\mathtt{was}\right\} \right)}
+ & \qquad\sqrt{p\left(\mathtt{D}\left\{ \mathtt{the},w_{i}\right\} \right)p\left(\mathtt{S}\left\{ w_{i,}\mathtt{was}\right\} \right)}
 \end{align*}
 
 \end_inset
@@ -2079,7 +2103,7 @@ status open
 \end_layout
 
 \begin_layout Standard
-In order to not clog the above, it was written with a vertex factor:
+In order to not clog the above, the vertex factor was separated out:
 \begin_inset Formula 
 \begin{align*}
 p\left(\mbox{Vertex}\right)= & p\left(\mathtt{who:R-\,\&\,C+}\right)\times\\
@@ -2225,22 +2249,197 @@ literal "false"
 \end_inset
 
  which are conventionally formulated in terms of priors.
+ Another reason to avoid Bayesian formulations is the problem of ambiguity,
+ sketched below.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Many Worlds
 \end_layout
 
 \begin_layout Standard
-This is perhaps a matter of taste; the substance, if any, is unclear to
- the author.
- The Gibbs measure 
+The factorizations being described above are 
+\emph on
+not those of maximum entropy approaches
+\emph default
+! 
+\emph on
+Nor are they Bayesian
+\emph default
+! We must now be careful not to discard the baby with the bathwater: most
+ of the equations above are a stream of bathwater; the baby is eqn.
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ That is, we are 
+\emph on
+not pursing a singular and best parse
+\emph default
+ (arrived by via MaxEnt or via Bayesian inference.) The goal is to explicitly
+ avoid a single model.
+ Avoid some Bayesian distribution over likelihoods.
+ The central and key idea that we are struggling to expose is that one must
+ insist that all of the various likelihoods are not only possible, but are
+ intertwined.
+ There is no one true reality that is merely unknown and needs to be found
+ out; there are many, and they are necessarily tangled together.
+\end_layout
+
+\begin_layout Standard
+Perhaps this sounds like philosophical quantum woo.
+ It is not meant to be; it needs to be unpacked.
+ Linguistics is relatively arid, but there are a few examples: again , the
+ classic 
 \begin_inset Quotes eld
 \end_inset
 
-plays nice
+I saw the man with the telescope.
 \begin_inset Quotes erd
 \end_inset
 
- with concepts of mutual information, and mutual information is readily
- computed simply by counting.
- This is algorithmically straight-forward, or at least, seems to be simpler.
+ In a spy thriller, perhaps the protagonist is looking through the telescope.
+ In the biography of a famous astronomer, the proganist may be standing
+ in an observatory.
+ Without that context, it is ambiguous.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Ah ha!
+\begin_inset Quotes erd
+\end_inset
+
+ you may say, 
+\begin_inset Quotes eld
+\end_inset
+
+but eventually it becomes clear, one or the other! And we can update our
+ priors when it becomes clear!
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Alas, it will never become clear.
+ I will not tell you which context I am actually thinking of; you will be
+ left hanging.
+ I won't tell you, not because I'm secretive or coy, but because this is
+ a meta-conversation about linguistics and not about telescopes.
+ In this situation, it is fundamentally impossible for you to update your
+ priors.
+\end_layout
+
+\begin_layout Standard
+Poetry provides a richer example: what was the poet thinking, when he, she,
+ wrote those verses? What did they want you, the reader, to think? A good
+ poet will want you to think of a multitude of things, to feel many emotions,
+ all at once, at the same time.
+ The name of the game is not to update our Bayesian priors and select one
+ and only one emotion on which we will fiercely focus (unless, of course,
+ it is nationalistic poetry 😃😃).
+\end_layout
+
+\begin_layout Standard
+More broadly, ambiguity is primal to common sense: our visual field is filled
+ with a myriad of items, a rainbow of events and happenings.
+ There's (usually) no particular reason for focus attention on one or another;
+ the brain, in default mode, wanders across the field of possibilities.
+ A mathematical formulation of AGI must also capture this freedom to wander
+ about.
+ And yet, also, some things are distinct.
+ Distinctness is captured in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorization"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+: my coffee cup is distinct from my coffee.
+ The world of possibilities is captured in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+: there are many and they compete with one-another.
+\end_layout
+
+\begin_layout Standard
+If one is given only the string 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ and the task of factoring it, then sure, use eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorization"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and be prepared to lose, whenever there are any admixtures of anything
+ else in there.
+ But there always will be admixtures of something else! Those admixtures
+ cloud the factors, because the admixtures are entangled into the total.
+ In the end, all language is necessarily poetry, an artful attempt to capture
+ vague thoughts and set them into words, in such a way that someone else
+ might happen upon them, and perhaps extract something meaningful, perhaps
+ what the author meant, and yet unavoidably unclear, because the author
+ was never precise enough, and the reader was never clever enough to understand.
+ This is the human condition.
+\end_layout
+
+\begin_layout Standard
+To reiterate: the goal here is both to factor, to obtain factors that are
+ relatively unambiguous, and then at the same time, bracket the ambiguities
+ so that they are each corraled in their own paddock, and can be recombined
+ as needed.
+ This need is what makes the machinery daunting.
+\end_layout
+
+\begin_layout Standard
+Although neuroscientists will eventually find the neurological basis for
+ human ambiguity, the origin of amiguity is not the human mind.
+ Ambiguity is fundamental, in nature, as it stands.
+ This is the message delivered by eqn.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:binomial-MI"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and eqn.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section*
