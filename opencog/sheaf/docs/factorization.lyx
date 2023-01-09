@@ -970,8 +970,12 @@ Parses imply factorizations.
 \begin_inset Formula $j=i+1$
 \end_inset
 
- since the object might have adjectives and determiners that precede it.)
- Then this parse implies a factorization 
+ since the object might have adjectives and determiners that precede it.
+ One should assume that 
+\begin_inset Formula $i<j$
+\end_inset
+
+.) Then this parse implies a factorization 
 \begin_inset Formula 
 \[
 p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{n}\right)
@@ -1735,11 +1739,91 @@ literal "false"
 \end_inset
 
  concerns the structure of spaces with non-trivial topologies.
+ In the present situation, the primary concern is how to work with graphs
+ that have cycles (loops) in them, as opposed to those that do not.
+ Trees are the prototypical example of a graph that has a trivial homotopy:
+ the edges can always be shortened, until the two end-points have been collapsed
+ into one.
+ This is termed a 
+\begin_inset Quotes eld
+\end_inset
+
+deformation retract
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the present case, it can be understood to mean that the factorization
+ of a graph along an edge can be written as if the edge has shrunk to a
+ point.
+ Explicitly:
+\begin_inset Formula 
+\[
+p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{j},\cdots,w_{n}\right)=p\left(w_{1},\cdots,K\right)p\left(K\right)p\left(w_{i+1},\cdots,K,\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+where a new kind of 
+\begin_inset Quotes eld
+\end_inset
+
+word
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $K$
+\end_inset
+
+ has been introduced.
+ It's a compound word, a multi-word expression, a set phrase, a phraseme,
+ an idiomatic expression, an institutional expression.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Phraseme"
+target "https://en.wikipedia.org/wiki/Phraseme"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Multiword expression"
+target "https://en.wikipedia.org/wiki/Multiword_expression"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Idiom"
+target "https://en.wikipedia.org/wiki/Idiom"
+literal "false"
+
+\end_inset
+
+.
 \end_layout
 
-\begin_layout Standard
-Homotopy, basically, on trees, resolves the factorization problem.
- However, cycles in graphs create an issue.
+\end_inset
+
+ Collections of words can be 
+\begin_inset Quotes eld
+\end_inset
+
+retracted
+\begin_inset Quotes erd
+\end_inset
+
+, congealed down to single lexical units.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1747,7 +1831,211 @@ Twines
 \end_layout
 
 \begin_layout Standard
-Cutting across multiple links at once.
+A more problematic situation arises for graphs that have cycles.
+ Although conventional phrase-structure and and dependency parses are trees,
+ loops can appear in depdenency parses.
+ The very simplest case would be an HSV parse, where H is the left-wall
+ or head of the parse, S is the subject, a noun, and V is a verb: this forms
+ a triangle: there are three edges.
+ H is used to indicate both the dominant noun (the subject) and also the
+ dominant verb.
+ Perhaps this can be seen more clearly in dependent or relative clauses.
+ An example from the Link Grammar documentation:
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See the Link Grammar Guide-to-Links 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section R"
+target "https://www.abisource.com/projects/link-grammar/dict/section-R.html"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section B"
+target "https://www.abisource.com/projects/link-grammar/dict/section-B.html"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section S"
+target "https://www.abisource.com/projects/link-grammar/dict/section-S.html"
+literal "false"
+
+\end_inset
+
+, and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section C"
+target "https://www.abisource.com/projects/link-grammar/dict/section-C.html"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+             +--B------+
+\end_layout
+
+\begin_layout Plain Layout
+
+             +-R-+--S--+
+\end_layout
+
+\begin_layout Plain Layout
+
+             |   |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+        The dog  I  chased was black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above the R link points at the head noun of the relative clause;
+ the B link connects to the head verb of the relative clause, and the S
+ link is the conventional subject-verb link.
+ Loops may be larger than triangles:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+             +-----B------+
+\end_layout
+
+\begin_layout Plain Layout
+
+             +-R--+C-+-S--+
+\end_layout
+
+\begin_layout Plain Layout
+
+             |    |  |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+        The dog  who I chased was black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The C link connects to subordinating conjunctions.
+\end_layout
+
+\begin_layout Standard
+Such loops present a potential complication to factoring.
+ In order to factor a block of text into a left and a right component, there
+ are now two links to be cut.
+ There are several ways in thich to imagine this probem.
+ One is to presume that there is an irreducible block of the form 
+\begin_inset Formula 
+\[
+p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $i,j$
+\end_inset
+
+ linking to the left-hand block and 
+\begin_inset Formula $k,m$
+\end_inset
+
+ linking to the right.
+ In te last example, it would be 
+\begin_inset Formula $w_{i}=\mathtt{dog}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{j}=\mathtt{who}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{k}=\mathtt{I}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{m}=\mathtt{chased}$
+\end_inset
+
+, so that the entire loop of the relative clause is unreduced, and has four
+ connectors grand-total, emanating from it: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/loop-4-legs.eps
+	width 40text%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Alternately, this loop is clearly composed four three-point vertexes and
+ so following the earlier conventions, there is a square-root for each exposed
+ connector, and a vertex factor for each vertex:
+\begin_inset Formula 
+\[
+p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)=\sqrt{}
+\]
+
+\end_inset
+
+which follows
 \end_layout
 
 \begin_layout Section*
