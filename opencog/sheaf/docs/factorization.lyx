@@ -343,6 +343,58 @@ a relationship
  Thus, a general acquiantance with Link Grammar is strongly recommended.
 \end_layout
 
+\begin_layout Subsection*
+Literature Review
+\end_layout
+
+\begin_layout Standard
+The goal of the present text is to talk about the factorization of graphs,
+ in general.
+ There has been, of course, much related prior work.
+\end_layout
+
+\begin_layout Standard
+The idea of statistical parsing
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Statistical parsing"
+target "https://en.wikipedia.org/wiki/Statistical_parsing"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ has been around for decades.
+ Among the earliest work is Charniak's Maximum Entropy Parser.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Charniak2000"
+literal "false"
+
+\end_inset
+
+ No lit review, XXX reference wikipedia instead? 
+\end_layout
+
+\begin_layout Standard
+The idea of matrix factorization is central large consumer businesses, who
+ wish to estimate future shopping patterns as a function of prior behavior.
+ Vast numbers of papers have been written...
+\end_layout
+
+\begin_layout Standard
+Hypervectors are a relatively newer approach to computing ...
+\end_layout
+
 \begin_layout Section*
 Factorization
 \end_layout
@@ -874,11 +926,1520 @@ But there is also a second lesson here: the binomial MI formula is not sutiable
  more chaos into the mix.
  Basically, one has a series of small and large terms summing up and mostly
  cancelling one-another.
- The quest is to find a similar expression, ideally, an exact expression,
- where most of the terms are strictly positive.
+ (Literally: try this experimentally, if possible.
+ You will find that the various MI's bounce around, getting large and small,
+ and that the sum is almost always smaller than the largest term.) The quest
+ is to find a similar expression, ideally, an exact expression, where most
+ of the terms are strictly positive.
  This would allow the structure, the factorization to be approached perturbative
 ly, as a strictly convergent sequence of corrections, each applied to the
  last.
+\end_layout
+
+\begin_layout Subsection*
+Example: Syntactic Factorization
+\end_layout
+
+\begin_layout Standard
+Parses imply factorizations.
+ Consider a sentence with a fixed single parse.
+ Suppose that there is a location 
+\begin_inset Formula $i$
+\end_inset
+
+ in this parse, such that when considering the block of all words to the
+ left of 
+\begin_inset Formula $i$
+\end_inset
+
+, and the block of all words to the right of 
+\begin_inset Formula $i$
+\end_inset
+
+, there is only a single edge connecting the two sides.
+ For example, this might be the edge connecting word 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+, say, the verb, to word 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+, say, the object.
+ (One cannot assume that 
+\begin_inset Formula $j=i+1$
+\end_inset
+
+ since the object might have adjectives and determiners that precede it.
+ One should assume that 
+\begin_inset Formula $i<j$
+\end_inset
+
+.) Then this parse implies a factorization 
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+The is, the likelihood of the block of words to the left is effectively
+ independent of the block of words on the right.
+ 
+\end_layout
+
+\begin_layout Standard
+This factorization follows from the intuitive grammatical structure of natural
+ language.
+ Consider the sentence fragment 
+\begin_inset Quotes eld
+\end_inset
+
+On alternate Tuesdays, John goes ...
+\begin_inset Quotes erd
+\end_inset
+
+ How can it be completed? One imagines almost anything can complete it:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+...
+ fishing in Georgetown.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+...
+ to the doctor.
+\begin_inset Quotes erd
+\end_inset
+
+ That is, the completion of the sentence seems indpendent of the start of
+ the sentence, and so the probability expression should factor like this
+ as well.
+\end_layout
+
+\begin_layout Standard
+Yet, this is just an approximation.
+ Realizing that the first half of the sentence implies activity undertaken
+ by a human, then the last half of the sentence must be an activity that
+ humans can perform.
+ So there is a linkage, a connection between these two parts of the sentence
+ that extend beyond the grammatical relations between pairs of words.
+ So again: the proposal here is to first factor according to syntax, providing
+ a baseline, and then consider corrections to that initial factorization.
+\end_layout
+
+\begin_layout Standard
+The above was written with a factor 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ specifically tying together the two specific words 
+\begin_inset Formula $w_{i},w_{j}$
+\end_inset
+
+ connected by the parse edge.
+ This factor is made explicit because one imagines that the specific word-choice
+ connecting the left and right halves helps further isolate or make independent
+ these two halves.
+ In the example, it is presumed that 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ might capture at least some of the idea that the left side of the sentence
+ is about humans, and the right side is about human activities.
+\end_layout
+
+\begin_layout Standard
+Note that 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)\ne p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ and that the probability depends on the relation 
+\begin_inset Formula $r$
+\end_inset
+
+.
+ That is, this factor is presumed to not be a simple word-pair co-occurance
+ probability 
+\begin_inset Formula $p\left(\mbox{"goes"},\mbox{"fishing"}\right)$
+\end_inset
+
+, but also includes a weighting for this word-pair being an auxiliary-verb
+ pair.
+ This now gives a first hint of the appearance of semantics in a syntactic
+ discussion: The 
+\begin_inset Formula $p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ captures a syntactic relation between a pair of words; the 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ captures something more.
+\end_layout
+
+\begin_layout Standard
+The notation 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ may feel strange; a more conventional approach would be to write this as
+ a conditional probability: 
+\begin_inset Formula $\left(w_{i},w_{j}\vert r\right)$
+\end_inset
+
+ and read this as 
+\begin_inset Quotes eld
+\end_inset
+
+the pair 
+\begin_inset Formula $\left(w_{i},w_{j}\right)$
+\end_inset
+
+ conditioned on the relation 
+\begin_inset Formula $r\left(w_{i},w_{j}\right)$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But this seems awkward, and invites inappropriate applications of Bayes
+ theorem.
+ For the present case, the non-standard notation used here seems easier
+ to write and more direct to think about.
+ It can always be re-imagined as conditional probabilities, on an as-needed
+ basis.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Connectors and Disjuncts
+\end_layout
+
+\begin_layout Standard
+Syntactic relations are not just pair-wise connections, though.
+ Syntactic elements have more complex structure.
+ Thus, the above factorization might be more correctly written as
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx\left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}\right]\times\left[\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
+\]
+
+\end_inset
+
+so that half of 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ rides along with the left side, as the probability of making a connection,
+ and the other half rides with the other side.
+ This square root 
+\begin_inset Formula $\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}$
+\end_inset
+
+ term can be refered as the 
+\begin_inset Quotes eld
+\end_inset
+
+connector probability
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+ are then locations in the factorized tensor that have the potential to
+ make a connection.
+ This apportions the probability away from the actual connection, from the
+ actual linkage, and moves it to the two endpoints of the connection.
+\end_layout
+
+\begin_layout Standard
+Of course, real grammatical relations are more complex; they are not just
+ a compendium of pair-wise relationships.
+ For example, a transitive verb 
+\emph on
+must
+\emph default
+ make a connection to both a subject on the left and an object on the right.
+ This is effectively a triple 
+\begin_inset Formula $\left(S,V,O\right)$
+\end_inset
+
+.
+ Any factorizations involving transitive verbs should be factored in terms
+ of a tri-variable 
+\begin_inset Formula $p\left(\mbox{TrVb}\left\{ S,V,O\right\} \right)$
+\end_inset
+
+.
+ A transitive verb 
+\begin_inset Formula $V$
+\end_inset
+
+ has the possibility of connecting to a subject 
+\begin_inset Formula $S$
+\end_inset
+
+, and the possibility of connecting to an object 
+\begin_inset Formula $O$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+This last paragraph is a sneaky introduction to Link Grammar.
+ The specific grammatical relation is 
+\begin_inset Formula $\mbox{TrVb}\left\{ S,V,O\right\} =\mathtt{V:S-\,\&\,O+}$
+\end_inset
+
+.
+ The right-hand side is the conventional Link Grammar notation stating that
+ the lexical entry 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+ has the connector 
+\begin_inset Formula $\mathtt{S-}$
+\end_inset
+
+ pointing to the left, and the connector 
+\begin_inset Formula $\mathtt{O+}$
+\end_inset
+
+ pointing to the right.
+ The combined expression 
+\begin_inset Formula $\mathtt{S-\,\&\,O+}$
+\end_inset
+
+ is called a 
+\begin_inset Quotes eld
+\end_inset
+
+disjunct
+\begin_inset Quotes erd
+\end_inset
+
+; the name stems from it's being disjoined from other lexical entries for
+ the verb 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The other sneaky thing being done above is to introduce the idea of a 
+\begin_inset Quotes eld
+\end_inset
+
+word class
+\begin_inset Quotes erd
+\end_inset
+
+ (subjects, verbs, objects).
+ Thus, during factorization, we expect to see indicator functions, such
+ as 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+ which takes a value of 1 if 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ is verb, and zero, otherwise.
+ Keep in mind, though, that it might be useful to assign fractional values
+ to 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+, for any number of technical reasons.
+ It is premature to sketch these reasons, just yet.
+\end_layout
+
+\begin_layout Standard
+The intendeed factorization, for transitive verbs, is to say that a tri-variable
+ probability 
+\begin_inset Formula $p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)$
+\end_inset
+
+ can be factored into a a probability 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{S+}\right)$
+\end_inset
+
+ of 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ belonging to some (any) class of words that can make subject-type connections,
+ a probability 
+\begin_inset Formula $p\left(w_{k}\in\mathtt{O-}\right)$
+\end_inset
+
+ of 
+\begin_inset Formula $w_{k}$
+\end_inset
+
+ belonging to some (any) class of words that can make object-type connections,
+ a probability 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+ of 
+\begin_inset Formula $w_{j}$
+\end_inset
+
+ belonging explicitly to the transitive verb class 
+\begin_inset Formula $\mathtt{V}$
+\end_inset
+
+, and an overall probability of observing the relation 
+\begin_inset Formula $p\left(\mathtt{V:S-\,\&\,O+}\right)$
+\end_inset
+
+.
+ How should this be writen? The resulting factorization must be consistent
+ with the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+connector probabilities
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It must also be consitent with the lexical entry 
+\begin_inset Formula $\mathtt{N:S+\,or\,O-}$
+\end_inset
+
+, which states that there is a word-class of common nouns that can act as
+ a subject, when to the left of a verb, or as an object, when to the right
+ of a verb.
+ But this is not the only such lexical entry with 
+\begin_inset Formula $\mathtt{S+}$
+\end_inset
+
+ or with 
+\begin_inset Formula $\mathtt{O-}$
+\end_inset
+
+ connectors: certainly, pronouns can make these connections as well.
+ This is the reason for writing 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{S+}\right)$
+\end_inset
+
+ instead of 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{N}\right)$
+\end_inset
+
+: what matters is not that 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ is a noun, but that 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ can serve as the subject of a sentence.
+\end_layout
+
+\begin_layout Standard
+One concludes that transitive verbs contribute a factor 
+\begin_inset Formula 
+\begin{align*}
+p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)= & p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
+ & \qquad\qquad\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
+\end{align*}
+
+\end_inset
+
+where each of the first four 
+\begin_inset Formula $p$
+\end_inset
+
+'s can be imagined to be zero or one, exactly, and a square-root probability
+ for each word participating in a specific linkage.
+ The square-root appears because there is a corresponding square root at
+ the other side of the link.
+\end_layout
+
+\begin_layout Standard
+To complete the example, consider the case where the subject and object
+ are common nouns.
+ Then these are covered by the lexical entry 
+\begin_inset Formula $\mathtt{N:S+\,or\,O-}$
+\end_inset
+
+ consisting of two disjoined disjuncts: one that says common nouns can act
+ as a subject: 
+\begin_inset Formula $\mathtt{N:S+}$
+\end_inset
+
+ and another where they act as objects: 
+\begin_inset Formula $\mathtt{N:O-}$
+\end_inset
+
+.
+ That is, for the subject,
+\begin_inset Formula 
+\[
+p\left(\mbox{Subj}\left\{ w_{i,}w_{j}\right\} \right)=p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{N}\right)p\left(w_{j}\in\mathtt{S-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
+\]
+
+\end_inset
+
+and similarly for the object.
+ A three-word sentence 
+\begin_inset Formula $\left(w_{1},w_{2},w_{3}\right)$
+\end_inset
+
+ which has 
+\emph on
+exactly one parse
+\emph default
+ as SVO then has the probability
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p\left(w_{1,}w_{2},w_{3}\right)=p\left(\mbox{Subj}\left\{ w_{1,}w_{2}\right\} \right)p\left(\mbox{TrVb}\left\{ w_{1,}w_{2},w_{3}\right\} \right)p\left(\mbox{Obj}\left\{ w_{2,}w_{3}\right\} \right)
+\]
+
+\end_inset
+
+A longer sentence, say, one with adverbs, adjectives and determiners, having
+ a transitive verb will then have a block factor 
+\begin_inset Formula $p\left(w_{i,}w_{j},w_{k}\right)$
+\end_inset
+
+ of this same form.
+ 
+\end_layout
+
+\begin_layout Standard
+The goal here is to describe factorization along the lines of conventional
+ linguistic grammars.
+ Although an explicit Link Grammar notation is used, the arguments above
+ can be transposed to any grammatical theory.
+ The building blocks are simply the vertexes and edges that are drawn by
+ that grammatical theory.
+ The factorization above is two-fold.
+ First, a graph corresponding to the links drawn by a (single) parse in
+ that grammatical theory, in terms of grammatical classes, and an adjustment
+ for the actual words employed.
+\end_layout
+
+\begin_layout Subsubsection*
+Phrase Structure
+\end_layout
+
+\begin_layout Standard
+The descriptions above are primarily couched in a Dependency Grammar
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Dependency grammar"
+target "https://en.wikipedia.org/wiki/Dependency_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ setting.
+ A few words are in order about Chomksian-style production grammars, such
+ as Phrase-Structure Grammars
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Phrase sturcture grammar"
+target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+.
+ Such grammars consist of production rules, the first of which is conventionally
+ 
+\begin_inset Formula $S\to NP,S\backslash NP$
+\end_inset
+
+, stating that a sentence 
+\begin_inset Formula $S$
+\end_inset
+
+ consists of a noun phrase 
+\begin_inset Formula $NP$
+\end_inset
+
+ and the rest of the sentence 
+\begin_inset Formula $S\backslash NP$
+\end_inset
+
+.
+ This can be directly mapped to the assertion that 
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)=p\left(NP\left\{ w_{1},\cdots,w_{i}\right\} \right)p\left(S\backslash NP\left\{ w_{i+1},\cdots,w_{n}\right\} \right)
+\]
+
+\end_inset
+
+for some yet-to-be-determined word index 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Such phrase structure grammars are necessarily trees, as production rules
+ do not allow the creation of graphs with loops.
+ The leaves of these trees are necessarily the words in the (fully-parsed)
+ sentence.
+ These trees, however, are not strict dependency trees: they also have non-leaf
+ vertexes, labelled by the production rule that produced everything below.
+ This does nothing to change the overall conception of factorization: in
+ the example above, the factor 
+\begin_inset Formula $p\left(\mathtt{V:S-\,\&\,O+}\right)$
+\end_inset
+
+ plays the same role as a production rule vertex.
+\end_layout
+
+\begin_layout Subsubsection*
+Cliques and Spanning Trees
+\end_layout
+
+\begin_layout Standard
+What if there are multiple parses? How should this be understood? In short,
+ as a many-worlds summation.
+\end_layout
+
+\begin_layout Standard
+Given 
+\begin_inset Formula $n$
+\end_inset
+
+ words in a sentence, consider first the clique or complete graph
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Complete graph"
+target "https://en.wikipedia.org/wiki/Complete_graph"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ of degree 
+\begin_inset Formula $n$
+\end_inset
+
+: this is the graph where every word, a vertex, is joined to every other
+ word by an edge.
+ A specific parse of the sentence then corresponds to a spanning tree
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Spanning tree"
+target "https://en.wikipedia.org/wiki/Spanning_tree"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ of this graph.
+ This tree can be described in terms of an indicator function
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Indicator function"
+target "https://en.wikipedia.org/wiki/Indicator_function"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ on the edges of the clique.
+ That is, make a list 
+\begin_inset Formula $\left\{ E\right\} $
+\end_inset
+
+ of all of the edges 
+\begin_inset Formula $E$
+\end_inset
+
+ in the complete graph, and then provide a function 
+\begin_inset Formula $\delta\left(E\right)$
+\end_inset
+
+ that is zero or one on each edge.
+ A specific parse 
+\begin_inset Formula $T$
+\end_inset
+
+ then corresponds to a specific indicator function 
+\begin_inset Formula $\delta_{T}:\left\{ E\right\} \to\left\{ 0,1\right\} $
+\end_inset
+
+.
+ As a block factorization, one has that 
+\begin_inset Formula 
+\[
+p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{\left(w_{i},w_{j}\right)\in T}p\left(r\left\{ w_{i},w_{j}\right\} \right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $T$
+\end_inset
+
+ is the set of edges where the indicator function is one.
+ The per-edge factors 
+\begin_inset Formula $p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ may be indicator functions themselves, or may be weighted, or may be the
+ result of a more complex factorization, as described in the previous section.
+ That is, some of the pair-wise terms in the product should have been written
+ as triples or quads: 
+\begin_inset Formula 
+\begin{equation}
+p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{r\in T}p\left(r\left\{ w_{i},w_{j},\cdots,w_{k}\right\} \right)\label{eq:factorization}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If there is more than one possible parse of a sentence, then presumably
+ one parse is prefered over another, and each can be weighted, with some
+ probability 
+\begin_inset Formula $p\left(T\right)$
+\end_inset
+
+ for each parse 
+\begin_inset Formula $T$
+\end_inset
+
+.
+ Each of these contributes to the overall analysis of the sentence:
+\begin_inset Formula 
+\begin{equation}
+p\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{T\in\left\{ T\right\} }p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)\label{eq:summation}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This summation implies that, in general, 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ probably cannot be factored into blocks, although each term in the sum
+ is explicitly block-factored.
+ It might happen that all parses have a common sub-block; in this case,
+ the sub-block can be pulled out of the summation, leaving only the ambiguous
+ part inside the summation.
+ Classic ambiguous parses are 
+\begin_inset Quotes eld
+\end_inset
+
+I saw the man with the telescope
+\begin_inset Quotes erd
+\end_inset
+
+, and so on.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Deformation Retracts
+\end_layout
+
+\begin_layout Standard
+In mathematics, Homotopy Theory
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Homotopy theory"
+target "https://en.wikipedia.org/wiki/Homotopy_theory"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ concerns the structure of spaces with non-trivial topologies.
+ In the present situation, the primary concern is how to work with graphs
+ that have cycles (loops) in them, as opposed to those that do not.
+ Trees are the prototypical example of a graph that has a trivial homotopy:
+ the edges can always be shortened, until the two end-points have been collapsed
+ into one.
+ This is termed a 
+\begin_inset Quotes eld
+\end_inset
+
+deformation retract
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the present case, it can be understood to mean that the factorization
+ of a graph along an edge can be written as if the edge has shrunk to a
+ point.
+ Explicitly:
+\begin_inset Formula 
+\[
+p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{j},\cdots,w_{n}\right)=p\left(w_{1},\cdots,K\right)p\left(K\right)p\left(w_{i+1},\cdots,K,\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+where a new kind of 
+\begin_inset Quotes eld
+\end_inset
+
+word
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $K$
+\end_inset
+
+ has been introduced.
+ It's a compound word, a multi-word expression, a set phrase, a phraseme,
+ an idiomatic expression, an institutional expression.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Phraseme"
+target "https://en.wikipedia.org/wiki/Phraseme"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Multiword expression"
+target "https://en.wikipedia.org/wiki/Multiword_expression"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Idiom"
+target "https://en.wikipedia.org/wiki/Idiom"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ Collections of words can be 
+\begin_inset Quotes eld
+\end_inset
+
+retracted
+\begin_inset Quotes erd
+\end_inset
+
+, congealed down to single lexical units.
+\end_layout
+
+\begin_layout Subsubsection*
+Twines
+\end_layout
+
+\begin_layout Standard
+A more problematic situation arises for graphs that have cycles.
+ Although conventional phrase-structure and and dependency parses are trees,
+ loops can appear in depdenency parses.
+ The very simplest case would be an HSV parse, where H is the left-wall
+ or head of the parse, S is the subject, a noun, and V is a verb: this forms
+ a triangle: there are three edges.
+ H is used to indicate both the dominant noun (the subject) and also the
+ dominant verb.
+ 
+\end_layout
+
+\begin_layout Standard
+Perhaps this can be seen more clearly in dependent or relative clauses.
+ An example from the Link Grammar documentation:
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See the Link Grammar Guide-to-Links 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section R"
+target "https://www.abisource.com/projects/link-grammar/dict/section-R.html"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section B"
+target "https://www.abisource.com/projects/link-grammar/dict/section-B.html"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section S"
+target "https://www.abisource.com/projects/link-grammar/dict/section-S.html"
+literal "false"
+
+\end_inset
+
+, and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Section C"
+target "https://www.abisource.com/projects/link-grammar/dict/section-C.html"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+             +--B------+
+\end_layout
+
+\begin_layout Plain Layout
+
+             +-R-+--S--+
+\end_layout
+
+\begin_layout Plain Layout
+
+             |   |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+        The dog  I  chased was black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above the R link points at the head noun of the relative clause;
+ the B link connects to the head verb of the relative clause, and the S
+ link is the conventional subject-verb link.
+ Loops may be larger than triangles:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+             +-----B------+
+\end_layout
+
+\begin_layout Plain Layout
+
+             +-R--+C-+-S--+
+\end_layout
+
+\begin_layout Plain Layout
+
+             |    |  |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+        The dog  who I chased was black 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The C link connects head nouns to subordinating conjunctions.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikitionary, 
+\begin_inset CommandInset href
+LatexCommand href
+name "subordinating conjunction"
+target "https://en.wiktionary.org/wiki/subordinating_conjunction"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Such loops present a potential complication to factoring.
+ In order to factor a block of text into a left and a right component, there
+ are now two links to be cut.
+ There are several ways in which to imagine this issue.
+ One is to presume that the relative clause is an irreducible block of the
+ form 
+\begin_inset Formula 
+\[
+p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $i,j$
+\end_inset
+
+ linking to the left-hand block and 
+\begin_inset Formula $k,m$
+\end_inset
+
+ linking to the right.
+ In te last example, it would be 
+\begin_inset Formula $w_{i}=\mathtt{dog}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{j}=\mathtt{who}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{k}=\mathtt{I}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{m}=\mathtt{chased}$
+\end_inset
+
+, so that the entire loop of the relative clause is unreduced, and has four
+ connectors grand-total, emanating from it: 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/loop-4-legs.eps
+	width 40text%
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Alternately, this loop is clearly composed four three-point vertexes and
+ so following the earlier conventions, there is a pair probability for each
+ linkage (there are four links: R,B,C and S), a square-root for each exposed
+ connector (there are two: D for determiner, and S), and a vertex factor
+ for each vertex:
+\begin_inset Formula 
+\begin{align*}
+p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)= & p\left(\mathtt{R}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{C}\left\{ w_{j},w_{k}\right\} \right)\times\\
+ & \qquad p\left(\mathtt{S}\left\{ w_{k},w_{m}\right\} \right)p\left(\mathtt{B}\left\{ w_{i},w_{m}\right\} \right)\times\\
+ & \qquad p\left(\mbox{Vertex}\right)\times\\
+ & \qquad\sqrt{p\left(\mathtt{D}\left\{ \mathtt{the},w_{i}\right\} \right)p\left(\mathtt{S}\left\{ w_{i,}\mathtt{was}\right\} \right)}
+\end{align*}
+
+\end_inset
+
+the factors ofwhich follows from the fuller diagram:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+          +----------S-------+
+\end_layout
+
+\begin_layout Plain Layout
+
+          +------B------+    |
+\end_layout
+
+\begin_layout Plain Layout
+
+      +-D-+-R-+-C-+--S--+    |
+\end_layout
+
+\begin_layout Plain Layout
+
+      |   |   |   |     |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+     the dog who  I  chased was black   
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to not clog the above, the vertex factor was separated out:
+\begin_inset Formula 
+\begin{align*}
+p\left(\mbox{Vertex}\right)= & p\left(\mathtt{who:R-\,\&\,C+}\right)\times\\
+ & \quad p\left(\mathtt{I:C-\,\&\,S+}\right)\times\\
+ & \quad p\left(\mathtt{chased:S-\,\&\,B-}\right)\times\\
+ & \quad p\left(\mathtt{dog:D-\,\&\,R+\,\&\,B+\,\&\,S+}\right)
+\end{align*}
+
+\end_inset
+
+As before, the individual word-mentions could have been pulled out into
+ grammatical classes, so that, for example:
+\begin_inset Formula 
+\[
+p\left(\mathtt{chased:S-\,\&\,B-}\right)=p\left(\mathtt{chased}\in\mathtt{V}\right)p\left(\mathtt{V:S-\,\&\,B-}\right)
+\]
+
+\end_inset
+
+and so on.
+\end_layout
+
+\begin_layout Subsubsection*
+Summary
+\end_layout
+
+\begin_layout Standard
+In this way, and ordinary seven-word sentence 
+\begin_inset Quotes eld
+\end_inset
+
+the dog I chased was black
+\begin_inset Quotes erd
+\end_inset
+
+, having a joint probability 
+\begin_inset Formula $p\left(w_{1},\cdots,w_{7}\right)$
+\end_inset
+
+ can be factored into independent blocks.
+ This factorization is more complex than a conventional Hidden Markov Model,
+ and properly should be called a Markov random field.
+ 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hidden Markov model"
+target "https://en.wikipedia.org/wiki/Hidden_Markov_model"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Markov random field"
+target "https://en.wikipedia.org/wiki/Markov_random_field"
+literal "false"
+
+\end_inset
+
+and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Bayesian network"
+target "https://en.wikipedia.org/wiki/Bayesian_network"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ We stop short of calling this a Bayesian Network, because we've stopped
+ short of using any Bayesian priors 
+\begin_inset Formula $p\left(\theta\right)$
+\end_inset
+
+, nor of combining them with liklihoods 
+\begin_inset Formula $p\left(x\vert\theta\right)$
+\end_inset
+
+ to obtain posteriors 
+\begin_inset Formula $p\left(\theta\vert x\right)\sim p\left(x\vert\theta\right)p\left(\theta\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+One reason to avoid Bayesian priors is to instead allow the use of Gibbs
+ measure
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Gibbs measure"
+target "https://en.wikipedia.org/wiki/Gibbs_measure"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ and so to rephrase the probabilities in terms of entropies (or free energies):
+\begin_inset Formula 
+\[
+p\left(x_{i}\right)=\frac{1}{Z}e^{-\beta_{i}E_{i}}
+\]
+
+\end_inset
+
+This also distinguishes the graphs here from the concept of Conditional
+ Random Fields
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Conditional random field"
+target "https://en.wikipedia.org/wiki/Conditional_random_field"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ which are conventionally formulated in terms of priors.
+ Another reason to avoid Bayesian formulations is the problem of ambiguity,
+ sketched below.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Many Worlds
+\end_layout
+
+\begin_layout Standard
+The factorizations being described above are 
+\emph on
+not those of maximum entropy approaches
+\emph default
+! 
+\emph on
+Nor are they Bayesian
+\emph default
+! We must now be careful not to discard the baby with the bathwater: most
+ of the equations above are a stream of bathwater; the baby is eqn.
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ That is, we are 
+\emph on
+not pursing a singular and best parse
+\emph default
+ (arrived by via MaxEnt or via Bayesian inference.) The goal is to explicitly
+ avoid a single model.
+ Avoid some Bayesian distribution over likelihoods.
+ The central and key idea that we are struggling to expose is that one must
+ insist that all of the various likelihoods are not only possible, but are
+ intertwined.
+ There is no one true reality that is merely unknown and needs to be found
+ out; there are many, and they are necessarily tangled together.
+\end_layout
+
+\begin_layout Standard
+Perhaps this sounds like philosophical quantum woo.
+ It is not meant to be; it needs to be unpacked.
+ Linguistics is relatively arid, but there are a few examples: again , the
+ classic 
+\begin_inset Quotes eld
+\end_inset
+
+I saw the man with the telescope.
+\begin_inset Quotes erd
+\end_inset
+
+ In a spy thriller, perhaps the protagonist is looking through the telescope.
+ In the biography of a famous astronomer, the proganist may be standing
+ in an observatory.
+ Without that context, it is ambiguous.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Ah ha!
+\begin_inset Quotes erd
+\end_inset
+
+ you may say, 
+\begin_inset Quotes eld
+\end_inset
+
+but eventually it becomes clear, one or the other! And we can update our
+ priors when it becomes clear!
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Alas, it will never become clear.
+ I will not tell you which context I am actually thinking of; you will be
+ left hanging.
+ I won't tell you, not because I'm secretive or coy, but because this is
+ a meta-conversation about linguistics and not about telescopes.
+ In this situation, it is fundamentally impossible for you to update your
+ priors.
+\end_layout
+
+\begin_layout Standard
+Poetry provides a richer example: what was the poet thinking, when he, she,
+ wrote those verses? What did they want you, the reader, to think? A good
+ poet will want you to think of a multitude of things, to feel many emotions,
+ all at once, at the same time.
+ The name of the game is not to update our Bayesian priors and select one
+ and only one emotion on which we will fiercely focus (unless, of course,
+ it is nationalistic poetry 😃😃).
+\end_layout
+
+\begin_layout Standard
+More broadly, ambiguity is primal to common sense: our visual field is filled
+ with a myriad of items, a rainbow of events and happenings.
+ There's (usually) no particular reason for focus attention on one or another;
+ the brain, in default mode, wanders across the field of possibilities.
+ A mathematical formulation of AGI must also capture this freedom to wander
+ about.
+ And yet, also, some things are distinct.
+ Distinctness is captured in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorization"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+: my coffee cup is distinct from my coffee.
+ The world of possibilities is captured in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+: there are many and they compete with one-another.
+\end_layout
+
+\begin_layout Standard
+If one is given only the string 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ and the task of factoring it, then sure, use eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:factorization"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and be prepared to lose, whenever there are any admixtures of anything
+ else in there.
+ But there always will be admixtures of something else! Those admixtures
+ cloud the factors, because the admixtures are entangled into the total.
+ In the end, all language is necessarily poetry, an artful attempt to capture
+ vague thoughts and set them into words, in such a way that someone else
+ might happen upon them, and perhaps extract something meaningful, perhaps
+ what the author meant, and yet unavoidably unclear, because the author
+ was never precise enough, and the reader was never clever enough to understand.
+ This is the human condition.
+\end_layout
+
+\begin_layout Standard
+To reiterate: the goal here is both to factor, to obtain factors that are
+ relatively unambiguous, and then at the same time, bracket the ambiguities
+ so that they are each corraled in their own paddock, and can be recombined
+ as needed.
+ This need is what makes the machinery daunting.
+\end_layout
+
+\begin_layout Standard
+Although neuroscientists will eventually find the neurological basis for
+ human ambiguity, the origin of amiguity is not the human mind.
+ Ambiguity is fundamental, in nature, as it stands.
+ This is the message delivered by eqn.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:binomial-MI"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and eqn.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:summation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section*
@@ -1223,6 +2784,18 @@ The End
 \begin_layout Standard
 This is the end of Part Nine of the diary.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
