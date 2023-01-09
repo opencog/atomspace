@@ -343,6 +343,58 @@ a relationship
  Thus, a general acquiantance with Link Grammar is strongly recommended.
 \end_layout
 
+\begin_layout Subsection*
+Literature Review
+\end_layout
+
+\begin_layout Standard
+The goal of the present text is to talk about the factorization of graphs,
+ in general.
+ There has been, of course, much related prior work.
+\end_layout
+
+\begin_layout Standard
+The idea of statistical parsing
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Statistical parsing"
+target "https://en.wikipedia.org/wiki/Statistical_parsing"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ has been around for decades.
+ Among the earliest work is Charniak's Maximum Entropy Parser.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Charniak2000"
+literal "false"
+
+\end_inset
+
+ No lit review, XXX reference wikipedia instead? 
+\end_layout
+
+\begin_layout Standard
+The idea of matrix factorization is central large consumer businesses, who
+ wish to estimate future shopping patterns as a function of prior behavior.
+ Vast numbers of papers have been written...
+\end_layout
+
+\begin_layout Standard
+Hypervectors are a relatively newer approach to computing ...
+\end_layout
+
 \begin_layout Section*
 Factorization
 \end_layout
@@ -1391,6 +1443,97 @@ The goal here is to describe factorization along the lines of conventional
 \end_layout
 
 \begin_layout Subsubsection*
+Phrase Structure
+\end_layout
+
+\begin_layout Standard
+The descriptions above are primarily couched in a Dependency Grammar
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Dependency grammar"
+target "https://en.wikipedia.org/wiki/Dependency_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ setting.
+ A few words are in order about Chomksian-style production grammars, such
+ as Phrase-Structure Grammars
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Phrase sturcture grammar"
+target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+.
+ Such grammars consist of production rules, the first of which is conventionally
+ 
+\begin_inset Formula $S\to NP,S\backslash NP$
+\end_inset
+
+, stating that a sentence 
+\begin_inset Formula $S$
+\end_inset
+
+ consists of a noun phrase 
+\begin_inset Formula $NP$
+\end_inset
+
+ and the rest of the sentence 
+\begin_inset Formula $S\backslash NP$
+\end_inset
+
+.
+ This can be directly mapped to the assertion that 
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)=p\left(NP\left\{ w_{1},\cdots,w_{i}\right\} \right)p\left(S\backslash NP\left\{ w_{i+1},\cdots,w_{n}\right\} \right)
+\]
+
+\end_inset
+
+for some yet-to-be-determined word index 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Such phrase structure grammars are necessarily trees, as production rules
+ do not allow the creation of graphs with loops.
+ The leaves of these trees are necessarily the words in the (fully-parsed)
+ sentence.
+ These trees, however, are not strict dependency trees: they also have non-leaf
+ vertexes, labelled by the production rule that produced everything below.
+ This does nothing to change the overall conception of factorization: in
+ the example above, the factor 
+\begin_inset Formula $p\left(\mathtt{V:S-\,\&\,O+}\right)$
+\end_inset
+
+ plays the same role as a production rule vertex.
+\end_layout
+
+\begin_layout Subsubsection*
 Cliques and Spanning Trees
 \end_layout
 
@@ -1572,7 +1715,7 @@ Deformation Retracts
 \end_layout
 
 \begin_layout Standard
-The descriptions above are primarily couched in a Dependency Grammar
+In mathematics, Homotopy Theory
 \begin_inset Foot
 status collapsed
 
@@ -1580,8 +1723,8 @@ status collapsed
 See Wikipedia, 
 \begin_inset CommandInset href
 LatexCommand href
-name "Dependency grammar"
-target "https://en.wikipedia.org/wiki/Dependency_grammar"
+name "Homotopy theory"
+target "https://en.wikipedia.org/wiki/Homotopy_theory"
 literal "false"
 
 \end_inset
@@ -1591,35 +1734,7 @@ literal "false"
 
 \end_inset
 
- setting.
- A few words are in order about Chomksian-style production grammars, such
- as Phrase-Structure Grammars
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-See Wikipedia, 
-\begin_inset CommandInset href
-LatexCommand href
-name "Phrase sturcture grammar"
-target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
-literal "false"
-
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
-.
- Such grammars consist of production rules, the first of which is conventionally
- 
-\begin_inset Formula $S\to NP,S/NP$
-\end_inset
-
-.
- 
+ concerns the structure of spaces with non-trivial topologies.
 \end_layout
 
 \begin_layout Standard
@@ -1977,6 +2092,18 @@ The End
 \begin_layout Standard
 This is the end of Part Nine of the diary.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "lang"
+options "tufte"
+
+\end_inset
+
+
 \end_layout
 
 \end_body
