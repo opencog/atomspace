@@ -2103,7 +2103,7 @@ and so on.
 \end_layout
 
 \begin_layout Subsubsection*
-Summary.
+Summary
 \end_layout
 
 \begin_layout Standard
@@ -2121,12 +2121,126 @@ the dog I chased was black
 
  can be factored into independent blocks.
  This factorization is more complex than a conventional Hidden Markov Model,
- and, more properly, might be called a Bayesian Network.
- The 
+ and properly should be called a Markov random field.
+ 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hidden Markov model"
+target "https://en.wikipedia.org/wiki/Hidden_Markov_model"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Markov random field"
+target "https://en.wikipedia.org/wiki/Markov_random_field"
+literal "false"
+
+\end_inset
+
+and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Bayesian network"
+target "https://en.wikipedia.org/wiki/Bayesian_network"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ We stop short of calling this a Bayesian Network, because we've stopped
+ short of using any Bayesian priors 
+\begin_inset Formula $p\left(\theta\right)$
+\end_inset
+
+, nor of combining them with liklihoods 
+\begin_inset Formula $p\left(x\vert\theta\right)$
+\end_inset
+
+ to obtain posteriors 
+\begin_inset Formula $p\left(\theta\vert x\right)\sim p\left(x\vert\theta\right)p\left(\theta\right)$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-Boltzmann and MaxEnt etc.
+One reason to avoid Bayesian priors is to instead allow the use of Gibbs
+ measure
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Gibbs measure"
+target "https://en.wikipedia.org/wiki/Gibbs_measure"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ and so to rephrase the probabilities in terms of entropies (or free energies):
+\begin_inset Formula 
+\[
+p\left(x_{i}\right)=\frac{1}{Z}e^{-\beta_{i}E_{i}}
+\]
+
+\end_inset
+
+This also distinguishes the graphs here from the concept of Conditional
+ Random Fields
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Conditional random field"
+target "https://en.wikipedia.org/wiki/Conditional_random_field"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ which are conventionally formulated in terms of priors.
+\end_layout
+
+\begin_layout Standard
+This is perhaps a matter of taste; the substance, if any, is unclear to
+ the author.
+ The Gibbs measure 
+\begin_inset Quotes eld
+\end_inset
+
+plays nice
+\begin_inset Quotes erd
+\end_inset
+
+ with concepts of mutual information, and mutual information is readily
+ computed simply by counting.
+ This is algorithmically straight-forward, or at least, seems to be simpler.
 \end_layout
 
 \begin_layout Section*
