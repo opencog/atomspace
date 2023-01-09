@@ -1187,17 +1187,29 @@ The intendeed factorization, for transitive verbs, is to say that a tri-variable
 \begin_inset Formula $p\left(w_{i,}w_{j},w_{k}\right)$
 \end_inset
 
- can be factored into a a probability of 
+ can be factored into a a probability 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{S+}\right)$
+\end_inset
+
+ of 
 \begin_inset Formula $w_{i}$
 \end_inset
 
  belonging to some (any) class of words that can make subject-type connections,
- a probability of 
+ a probability 
+\begin_inset Formula $p\left(w_{k}\in\mathtt{O-}\right)$
+\end_inset
+
+ of 
 \begin_inset Formula $w_{k}$
 \end_inset
 
  belonging to some (any) class of words that can make object-type connections,
- a probability of 
+ a probability 
+\begin_inset Formula $p\left(w_{j}\in\mathtt{V}\right)$
+\end_inset
+
+ of 
 \begin_inset Formula $w_{j}$
 \end_inset
 
@@ -1210,7 +1222,7 @@ The intendeed factorization, for transitive verbs, is to say that a tri-variable
 \end_inset
 
 .
- How should this be written? In particular, how can this be made consistent
+ How should this be writen? The resulting factorization must be consistent
  with the notion of 
 \begin_inset Quotes eld
 \end_inset
@@ -1219,21 +1231,14 @@ connector probabilities
 \begin_inset Quotes erd
 \end_inset
 
-? There is a consistency condition, in that there is a lexical entry of
- the form 
+.
+ It must also be consitent with the lexical entry 
 \begin_inset Formula $\mathtt{N:S+\,or\,O-}$
 \end_inset
 
-, indicating that there is a word-class called 
-\begin_inset Quotes eld
-\end_inset
-
-common noun
-\begin_inset Quotes erd
-\end_inset
-
- that can act as a subject, when it is to the left of a verb, or can act
- as an object, when to the right of a verb.
+, which states that there is a word-class of common nouns that can act as
+ a subject, when to the left of a verb, or as an object, when to the right
+ of a verb.
  But this is not the only such lexical entry with 
 \begin_inset Formula $\mathtt{S+}$
 \end_inset
@@ -1243,46 +1248,66 @@ common noun
 \end_inset
 
  connectors: certainly, pronouns can make these connections as well.
+ This is the reason for writing 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{S+}\right)$
+\end_inset
+
+ instead of 
+\begin_inset Formula $p\left(w_{i}\in\mathtt{N}\right)$
+\end_inset
+
+: what matters is not that 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ is a noun, but that 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+ can serve as the subject of a sentence.
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-The intended factorization, for transitive verbs, is to have written 
+The intended factorization, for transitive verbs, is then 
 \begin_inset Formula 
-\[
-p\left(w_{i,}w_{j},w_{k}\right)\approx p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
-\]
+\begin{align*}
+p\left(w_{i,}w_{j},w_{k}\right)\approx & p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
+ & \qquad\qquad\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
+\end{align*}
 
 \end_inset
 
-where there is a probability assigned to observing the lexical entry 
-\begin_inset Formula $\mathtt{V:S-\,\&\,O+}$
+where each of the first four 
+\begin_inset Formula $p$
 \end_inset
 
- along with a square-root probability of a word participating in a specific
- linkage.
- The square-root appears because presumably there are other lexical entries
- for subjects and objects: the full linkage must include the disjuncts 
+'s can be imagined to be zero or one, exactly, and a square-root probability
+ for each word participating in a specific linkage.
+ The square-root appears because there is a corresponding square root at
+ the other side of the link.
+\end_layout
+
+\begin_layout Standard
+To complete the example, consider the case where the subject and object
+ are common nouns.
+ Then these are covered by the lexical entry 
 \begin_inset Formula $\mathtt{N:S+\,or\,O-}$
 \end_inset
 
- indicating that there is a word-class called 
-\begin_inset Quotes eld
+ consisting of two disjoined disjuncts: one that says common nouns can act
+ as a subject: 
+\begin_inset Formula $\mathtt{N:S+}$
 \end_inset
 
-noun
-\begin_inset Quotes erd
+ and another where they act as objects: 
+\begin_inset Formula $\mathtt{N:O-}$
 \end_inset
 
- that can act as a subject, when it is to the left of a verb, or can act
- as an object, when to the right of a verb.
+.
  That is, for the subject,
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{S+}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
+p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{N}\right)p\left(w_{j}\in\mathtt{S-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
 \]
 
 \end_inset
