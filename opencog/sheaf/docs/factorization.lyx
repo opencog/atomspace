@@ -1184,7 +1184,7 @@ word class
 \begin_layout Standard
 The intendeed factorization, for transitive verbs, is to say that a tri-variable
  probability 
-\begin_inset Formula $p\left(w_{i,}w_{j},w_{k}\right)$
+\begin_inset Formula $p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)$
 \end_inset
 
  can be factored into a a probability 
@@ -1268,10 +1268,10 @@ connector probabilities
 \end_layout
 
 \begin_layout Standard
-The intended factorization, for transitive verbs, is then 
+One concludes that transitive verbs contribute a factor 
 \begin_inset Formula 
 \begin{align*}
-p\left(w_{i,}w_{j},w_{k}\right)\approx & p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
+p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)= & p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
  & \qquad\qquad\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
 \end{align*}
 
@@ -1307,23 +1307,55 @@ To complete the example, consider the case where the subject and object
  That is, for the subject,
 \begin_inset Formula 
 \[
-p\left(w_{i,}w_{j}\right)\approx p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{N}\right)p\left(w_{j}\in\mathtt{S-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
+p\left(\mbox{Subj}\left\{ w_{i,}w_{j}\right\} \right)=p\left(\mathtt{N:S+}\right)p\left(w_{i}\in\mathtt{N}\right)p\left(w_{j}\in\mathtt{S-}\right)\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)}
 \]
 
 \end_inset
 
+and similarly for the object.
+ A three-word sentence 
+\begin_inset Formula $\left(w_{1},w_{2},w_{3}\right)$
+\end_inset
 
+ which has 
+\emph on
+exactly one parse
+\emph default
+ as SVO then has the probability
 \end_layout
 
 \begin_layout Standard
-XXX This is broken...
+\begin_inset Formula 
+\[
+p\left(w_{1,}w_{2},w_{3}\right)=p\left(\mbox{Subj}\left\{ w_{1,}w_{2}\right\} \right)p\left(\mbox{TrVb}\left\{ w_{1,}w_{2},w_{3}\right\} \right)p\left(\mbox{Obj}\left\{ w_{2,}w_{3}\right\} \right)
+\]
+
+\end_inset
+
+A longer sentence, say, one with adverbs, adjectives and determiners, having
+ a transitive verb will then have a block factor 
+\begin_inset Formula $p\left(w_{i,}w_{j},w_{k}\right)$
+\end_inset
+
+ of this same form.
+ 
 \end_layout
 
 \begin_layout Standard
-The goal here is to allow factorization along the lines of conventional
- linguistic grammars, which work with word classes rather than single words.
- The first rough cut is provided by the conventional grammar, then an adjustment
- is made for the actual words employed.
+The goal here is to describe factorization along the lines of conventional
+ linguistic grammars.
+ Although an explicit Link Grammar notation is used, the arguments above
+ can be transposed to any grammatical theory.
+ The building blocks are simply the vertexes and edges that are drawn by
+ that grammatical theory.
+ The factorization above is two-fold.
+ First, a graph corresponding to the links drawn by a (single) parse in
+ that grammatical theory, in terms of grammatical classes, and an adjustment
+ for the actual words employed.
+\end_layout
+
+\begin_layout Subsubsection*
+Cliques and Spanning Trees
 \end_layout
 
 \begin_layout Subsubsection*
