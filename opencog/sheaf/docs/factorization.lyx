@@ -1028,6 +1028,42 @@ Note that
  captures something more.
 \end_layout
 
+\begin_layout Standard
+The notation 
+\begin_inset Formula $p\left(r\left\{ w_{i},w_{j}\right\} \right)$
+\end_inset
+
+ may feel strange; a more conventional approach would be to write this as
+ a conditional probability: 
+\begin_inset Formula $\left(w_{i},w_{j}\vert r\right)$
+\end_inset
+
+ and read this as 
+\begin_inset Quotes eld
+\end_inset
+
+the pair 
+\begin_inset Formula $\left(w_{i},w_{j}\right)$
+\end_inset
+
+ conditioned on the relation 
+\begin_inset Formula $r\left(w_{i},w_{j}\right)$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But this seems awkward, and invites inappropriate applications of Bayes
+ theorem.
+ For the present case, the non-standard notation used here seems easier
+ to write and more direct to think about.
+ It can always be re-imagined as conditional probabilities, on an as-needed
+ basis.
+ 
+\end_layout
+
 \begin_layout Subsubsection*
 Connectors and Disjuncts
 \end_layout
@@ -1356,6 +1392,179 @@ The goal here is to describe factorization along the lines of conventional
 
 \begin_layout Subsubsection*
 Cliques and Spanning Trees
+\end_layout
+
+\begin_layout Standard
+What if there are multiple parses? How should this be understood? In short,
+ as a many-worlds summation.
+\end_layout
+
+\begin_layout Standard
+Given 
+\begin_inset Formula $n$
+\end_inset
+
+ words in a sentence, consider first the clique or complete graph
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Complete graph"
+target "https://en.wikipedia.org/wiki/Complete_graph"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ of degree 
+\begin_inset Formula $n$
+\end_inset
+
+: this is the graph where every word, a vertex, is joined to every other
+ word by an edge.
+ A specific parse of the sentence then corresponds to a spanning tree
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Spanning tree"
+target "https://en.wikipedia.org/wiki/Spanning_tree"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ of this graph.
+ This tree can be described in terms of an indicator function
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Indicator function"
+target "https://en.wikipedia.org/wiki/Indicator_function"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ on the edges of the clique.
+ That is, make a list 
+\begin_inset Formula $\left\{ E\right\} $
+\end_inset
+
+ of all of the edges 
+\begin_inset Formula $E$
+\end_inset
+
+ in the complete graph, and then provide a function 
+\begin_inset Formula $\delta\left(E\right)$
+\end_inset
+
+ that is zero or one on each edge.
+ A specific parse 
+\begin_inset Formula $T$
+\end_inset
+
+ then corresponds to a specific indicator function 
+\begin_inset Formula $\delta_{T}:\left\{ E\right\} \to\left\{ 0,1\right\} $
+\end_inset
+
+.
+ As a block factorization, one has that 
+\begin_inset Formula 
+\[
+p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{\left(w_{i},w_{j}\right)\in T}p\left(r\left\{ w_{i},w_{j}\right\} \right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $T$
+\end_inset
+
+ is the set of edges where the indicator function is one.
+ The per-edge factors 
+\begin_inset Formula $p\left(w_{i},w_{j}\right)$
+\end_inset
+
+ may be indicator functions themselves, or may be weighted, or may be the
+ result of a more complex factorization, as described in the previous section.
+ That is, some of the pair-wise terms in the product should have been written
+ as triples or quads: 
+\begin_inset Formula 
+\[
+p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{r\in T}p\left(r\left\{ w_{i},w_{j},\cdots,w_{k}\right\} \right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If there is more than one possible parse of a sentence, then presumably
+ one parse is prefered over another, and each can be weighted, with some
+ probability 
+\begin_inset Formula $p\left(T\right)$
+\end_inset
+
+ for each parse 
+\begin_inset Formula $T$
+\end_inset
+
+.
+ Each of these contributes to the overall analysis of the sentence:
+\begin_inset Formula 
+\[
+p\left(w_{1},w_{2},\cdots,w_{n}\right)=\sum_{T\in\left\{ T\right\} }p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This summation implies that, in general, 
+\begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ probably cannot be factored into blocks, although each term in the sum
+ is explicitly block-factored.
+ It might happen that all parses have a common sub-block; in this case,
+ the sub-block can be pulled out of the summation, leaving only the ambiguous
+ part inside the summation.
+ Classic ambiguous parses are 
+\begin_inset Quotes eld
+\end_inset
+
+I saw the man with the telescope
+\begin_inset Quotes erd
+\end_inset
+
+, and so on.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
