@@ -1572,6 +1572,57 @@ Deformation Retracts
 \end_layout
 
 \begin_layout Standard
+The descriptions above are primarily couched in a Dependency Grammar
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Dependency grammar"
+target "https://en.wikipedia.org/wiki/Dependency_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ setting.
+ A few words are in order about Chomksian-style production grammars, such
+ as Phrase-Structure Grammars
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Phrase sturcture grammar"
+target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+.
+ Such grammars consist of production rules, the first of which is conventionally
+ 
+\begin_inset Formula $S\to NP,S/NP$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
 Homotopy, basically, on trees, resolves the factorization problem.
  However, cycles in graphs create an issue.
 \end_layout
