@@ -2569,8 +2569,8 @@ Factorization as Dimensional Embedding
 \end_layout
 
 \begin_layout Standard
-Of course, syntax is not enough to convey the meaning in an expression,
- so the above approximations are necessarily mediocre.
+Syntax alone is not enough to convey the meaning of an expression, and so
+ the above approximations, of working with parses, are necessarily mediocre.
  The factorization we are groping for should more properly be written as
  a change of variable
 \begin_inset Formula 
@@ -2730,9 +2730,9 @@ In Link Grammar parsing, the embedding is not into a word-pair space, but
 \begin_inset Formula $\gamma>2$
 \end_inset
 
-, but again, we've monitored this size without actually ever emasuring it's
+, but again, we've monitored this size without actually ever measuring it's
  scaling dependence.
- Got to fix that.
+ This is an experimental to-do: got to fix that.
 \end_layout
 
 \begin_layout Subsection*
@@ -2793,11 +2793,11 @@ Consider now a vector space of dimension
  or somethig like that.
  So this is a much larger space.
  A single Link Grammar parse of a sentence 
-\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\begin_inset Formula $S=\left(w_{1},w_{2},\cdots,w_{n}\right)$
 \end_inset
 
  provides a unique sequence of disjuncts 
-\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\begin_inset Formula $G=\left(d_{1},d_{2},\cdots,d_{n}\right)$
 \end_inset
 
  fixed by that parse.
@@ -2811,16 +2811,137 @@ n of two different paths is much less likely.
  There's disambiguation.
 \end_layout
 
+\begin_layout Standard
+Another difference is that the path 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+ is constrained.
+ A syntactically valid path 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+ is necessarily one where 
+\emph on
+all
+\emph default
+ of the connectors on all of the disjuncts 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+ in that path are fully connected.
+ Other paths are simply not valid.
+ This stands in sharp contrast to word sequences 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+ which are unconstrainted: one is free to write any word-sequence, even
+ if it's nonsense.
+\end_layout
+
 \begin_layout Subsection*
-MST
+Metric spaces
 \end_layout
 
 \begin_layout Standard
-xxx
+The space of words is endowed with several metrics.
+ One of the simplest ones is given by the word-pair MI.
+ Fixing a word 
+\begin_inset Formula $w$
+\end_inset
+
+, consider the vector 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ of length 
+\begin_inset Formula $2N$
+\end_inset
+
+, whose vector components are given by 
+\begin_inset Formula $x_{j}=MI\left(w,w_{j}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $j<N$
+\end_inset
+
+ and by 
+\begin_inset Formula $x_{j}=MI\left(w_{j},w\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $N\le j<2N$
+\end_inset
+
+.
+ That is, using entirely conventional notation, write 
+\begin_inset Formula $\vec{w}=\sum_{j}x_{j}\hat{e}_{j}$
+\end_inset
+
+ with the 
+\begin_inset Formula $x_{j}$
+\end_inset
+
+ being just real numbers, and the 
+\begin_inset Formula $\hat{e}_{j}$
+\end_inset
+
+ being the unit basis vector for the vector space.
+ 
 \end_layout
 
-\begin_layout Subsubsection*
-Nearby
+\begin_layout Standard
+Experimentally, it has been seem that the distribution of the MI of word-pairs
+ is approximately Gaussian, perhaps even to a surprising degree.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Diary part Five, Part Nine, the 2008 word-pairs report and also the
+ AGI 2022 paper.
+\end_layout
+
+\end_inset
+
+ This implies that the word vectors 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ are uniformly randomly distributed on a unit sphere: that is, the word-vectors
+ form a Gaussian Orthogonal Ensemble (GOE).
+ Because these vectors are distributed on a sphere, the cosine distance
+ between the vectors can be used as a metric.
+ Intuitively, this metric judges two words to be similar, when they have
+ similar neighbors.
+\end_layout
+
+\begin_layout Standard
+This is not the only such metric.
+ One can construct a different word-pair MI, from disjuncts.
+ This is obtained by considering a pair-wise correlation 
+\begin_inset Formula $f\left(w_{i},w_{j}\right)=\sum_{d}p\left(w_{i},d\right)p\left(w_{j},d\right)$
+\end_inset
+
+ and then constructing an MI from 
+\begin_inset Formula $f$
+\end_inset
+
+.
+ The sum over 
+\begin_inset Formula $d$
+\end_inset
+
+ is the sum over disjuncts.
+ This, too, appears to be dscribed by a GOE.
+ Intuitively, this metric judges two words to be similar, when they appear
+ in similar grammatical contexts.
+ This is a bit stronger and more constrained than saying the words have
+ similar neighbors: they must also be grammatically similar.
+\end_layout
+
+\begin_layout Subsection*
+Nearby paths
 \end_layout
 
 \begin_layout Section*
