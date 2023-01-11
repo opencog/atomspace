@@ -2934,14 +2934,89 @@ This is not the only such metric.
 
  is the sum over disjuncts.
  This, too, appears to be dscribed by a GOE.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is reviewed in Diary Part Eight, if I recall correctly.
+\end_layout
+
+\end_inset
+
  Intuitively, this metric judges two words to be similar, when they appear
  in similar grammatical contexts.
  This is a bit stronger and more constrained than saying the words have
  similar neighbors: they must also be grammatically similar.
+ Experimentally, these two different distances are correlated; I don't have
+ r values offhand.
+ 
+\end_layout
+
+\begin_layout Standard
+Presumably, the metric obtained from disjuncts is semantically more accurate,
+ although we don't have any way of measuring semantic similarity.
+ 
 \end_layout
 
 \begin_layout Subsection*
 Nearby paths
+\end_layout
+
+\begin_layout Standard
+These word-pair metrics, together with disjunct sequences, provide an opportunit
+y to explore similar sentences.
+ Given a grammatically correct sentence 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+ one can now explore other nearby words to obtain other sequences.
+ In general, though, these other nearby strings will not be grammatically
+ correct.
+ Several possibilities exist.
+ One is to just sample such sequences, parse them, and hope to stumble across
+ a sequence that parses.
+ 
+\end_layout
+
+\begin_layout Standard
+A more clever approach is to start with the path 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+, as this is already grammatically correct.
+ For any fixed 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+, one then examines the set of word pairs 
+\begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
+\end_inset
+
+ and order these according to the cosinge distance between 
+\begin_inset Formula $w$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{i}$
+\end_inset
+
+.
+ The result is then necessarily a grammatically correct sentence.
+ In fact, it will have exactly the same parse as the original sentence,
+ so this is perhaps annoying.
+ By necessity, it will also be of exactly the same length, s only a word-for-wor
+d substitution is done.
+ BTW, this assumes that connectors have been classified into grammatical
+ classes, as otherwise the set 
+\begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
+\end_inset
+
+ will contain exactly one element.
+\end_layout
+
+\begin_layout Standard
+Syntactically similar sentences, with a different number of words, and a
+ different 
 \end_layout
 
 \begin_layout Section*
