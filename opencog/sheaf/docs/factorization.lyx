@@ -9,8 +9,9 @@
 \usepackage{url} 
 \usepackage{slashed}
 
-\usepackage{fontspec}
-\newfontfamily\DejaSans{DejaVu Sans}
+%%% \usepackage{fontspec}
+%%% \newfontfamily\DejaSans{DejaVu Sans}
+\usepackage{tikzsymbols}
 \end_preamble
 \use_default_options false
 \maintain_unincluded_children false
@@ -2354,7 +2355,11 @@ status open
 
 {
 \backslash
-DejaSans 😃😃}
+dSmiley
+\backslash
+nolinebreak
+\backslash
+dSmiley}
 \end_layout
 
 \end_inset
