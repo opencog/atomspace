@@ -3089,7 +3089,7 @@ decorated
 
  with extra words.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 The word 
@@ -3163,13 +3163,133 @@ does the mutual information of the total sentence increase?
  
 \end_layout
 
-\begin_layout Subsection*
-Ideas
+\begin_layout Standard
+Now, most of what has been written in the three paragraphs above is old
+ hat; ideas such as this have been articulated in linguistic theory for
+ many decades.
+ What is differrent here (what I hope is different) is the provision of
+ an actual metric, a way of actually measuring the distances between sentences
+ that moves beyond the concepts of a Hamming distance or a Levenshtein distance,
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hamming distance"
+target "https://en.wikipedia.org/wiki/Hamming_distance"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Levenshtein distance"
+target "https://en.wikipedia.org/wiki/Levenshtein_distance"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ and gets us closer to a semantic distance.
+ 
 \end_layout
 
 \begin_layout Standard
-The task, however, is that of a writer, who wishes to express an idea, and
- searches for different collections of sentences that convey the same meaning.
+The metric above is a 
+\begin_inset Quotes eld
+\end_inset
+
+syntax-respecting distance
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Lets write down a formal formula for it.
+ Given two strings 
+\begin_inset Formula $W=\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $V=\left(v_{1},v_{2},\cdots,v_{n}\right)$
+\end_inset
+
+ having the same parse 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+, the syntax-respecting distance srd is 
+\begin_inset Formula 
+\[
+\mbox{srd}\left(W,V\right)=\sum_{i}f\left(w_{i},v_{i}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $f$
+\end_inset
+
+ is a word-pair distance, presumably just the MI between the two words (which
+ is why it is summed, instead of e.g.
+ taking the Euclidean sum-of-squares distance.) This strict distance can
+ even be extended to accomodate idioms, adjectives, etc.
+ as described above.
+\end_layout
+
+\begin_layout Standard
+Note that the MI tools also allow the definition of 
+\begin_inset Formula $MI\left(d_{i},d_{j}\right)$
+\end_inset
+
+ so that, for any given disjunct 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+, there is also a local neighborhood of 
+\begin_inset Quotes eld
+\end_inset
+
+similar
+\begin_inset Quotes erd
+\end_inset
+
+ disjuncts 
+\begin_inset Formula $d_{j}$
+\end_inset
+
+.
+ However, these are necessarily grammatically different.
+ Thus, one cannot take a syntactically valid parse, and just substitute
+ 
+\begin_inset Formula $d_{i}\mapsto d_{j}$
+\end_inset
+
+ without braking the parse.
+ But perhaps this can be rescued in some way.
+ At this time, there is no experimental characterization of 
+\begin_inset Formula $MI\left(d_{i},d_{j}\right)$
+\end_inset
+
+ beyond the fact that it is distributed as a Gaussian (and so again is a
+ GOE).
+ Experimental results remain a bottleneck to theorizing.
+\end_layout
+
+\begin_layout Subsection*
+Representing ideas with word sequences
+\end_layout
+
+\begin_layout Standard
+Consider the task of a writer who wishes to express an idea.
+ At the basic level, this requires a search for different collections of
+ sentences that convey the same meaning.
  At this point, we do not have any precise definition of what 
 \begin_inset Quotes eld
 \end_inset
@@ -3315,6 +3435,85 @@ space of words and sentences
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection*
+Recursive relationships
+\end_layout
+
+\begin_layout Standard
+The ultimate hypothesis presented here is that these ideas can be applied
+ recursively.
+ Starting with word-pair MI, we arrive at MST parses.
+ Starting with MST parses, we arrive at disjuncts and structural analysis
+ of sentences.
+ This process can be repeated again.
+ Specifically, the 
+\begin_inset Formula $MI\left(d_{i},d_{j}\right)$
+\end_inset
+
+ between a pair of disjunts is directly avaiable, from direct observation.
+ Given a parse 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+ of a sentence, we can now obtain the MST parse of 
+\begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
+\end_inset
+
+.
+ Where does this lead? In what sense does this provide the higher-order
+ perturbative expansion of the original object of study, 
+\begin_inset Formula $MI\left(w_{1},w_{2},\cdots,w_{n}\right)$
+\end_inset
+
+?
+\end_layout
+
+\begin_layout Standard
+Let's not lose sight of the meta-goals.
+ At short range, we wish to obtain structure across multiple sentences,
+ at the paragraph level.
+ Insofar as human communication is about topics, then the goal is to identify
+ a common theme.
+ This can be reduced to collecting assertions made about objects: a very
+ traditional KR task.
+ At longer range, the grammatical relationships between objects is nothing
+ other than 
+\begin_inset Quotes eld
+\end_inset
+
+common sense
+\begin_inset Quotes erd
+\end_inset
+
+: if you hit your thumb with a hammer, it will hurt.
+ This is not a 
+\begin_inset Quotes eld
+\end_inset
+
+logical deduction
+\begin_inset Quotes erd
+\end_inset
+
+, this is the perception of a structural relationship in sensory data.
+ Is the procurement of MST parses of disjuncts the next step in the automated
+ extraction of common sense?
+\end_layout
+
+\begin_layout Standard
+The answer is cloudy.
+ Certainly, hypothesis can be readily cooked up for all of this.
+ We can limit the kinds of hypothesis to those involving MI analysis across
+ larger expanses of text.
+ But still, there are many of these; which work best? Can we go meta at
+ this level, also? To ask for an algorithm that generates hypothesis, involving
+ the factorizations of MI, that automatically explores the various alternatives?
+ Perhaps.
+ For me, the limiting factors are not an ability to hypothesize and theorize,
+ but to perform actual experiments and measure results.
+ This is in turn limited by lack of sutiable infrastructure.
+ The degree to which this aligns with the meta-goal of AGI remains unknown.
 \end_layout
 
 \begin_layout Section*
