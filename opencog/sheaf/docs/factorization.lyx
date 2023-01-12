@@ -150,13 +150,13 @@ A probabilistic description of natural language posits that probability
 \emph on
  a priori
 \emph default
- assummption that it is possible to assign a probability 
+ assumption that it is possible to assign a probability 
 \begin_inset Formula $p\left(w_{1},w_{2},\cdots,w_{n}\right)$
 \end_inset
 
  to this sequence.
  It is not philosophically or scientifically obvious that this is a valid
- assumption: the collection of sayable sentences is presumably infinite;
+ assumption: the collection of say-able sentences is presumably infinite;
  language changes over time; ever human speaker internalizes slightly different
  grammars and idiomatic expressions.
  Vocabularies are different for technical texts and literary texts.
@@ -182,11 +182,11 @@ None-the-less, we make this assumption, for two reasons.
  frequency distributions.
  However, even in this case, one should not be naive: the probability space
  of of all sentences in a modest sized corpus is immense.
- It would be nice if one could work with smallar factors.
+ It would be nice if one could work with smaller factors.
  Linguists have already exposed what these factors could be: nouns, verbs,
  grammatical relationships.
  One goal of this text is to formalize the relationship between grammar
- and proability spaces, using mathematical notation rather than hot air.
+ and probability spaces, using mathematical notation rather than hot air.
  It is hoped this will make things clearer.
  Another goal is to extend this analysis into the domain of semantics and
  
@@ -203,7 +203,7 @@ common sense
  can also be applied, again, at more abstract levels.
  A third goal is to use this mathematical machinery to guide the development
  of software for performing this analysis, to guide future experiments,
- and to provde a better theoretical foundation for what has so far been
+ and to provide a better theoretical foundation for what has so far been
  a seat-of-the-pants effort.
 \end_layout
 
@@ -212,15 +212,15 @@ Parsing
 \end_layout
 
 \begin_layout Standard
-The seat-of-the-pants effort so far has been forcused on the automated extractio
-n of a grammar from a text corpus.
+The seat-of-the-pants effort so far has been focused on the automated extraction
+ of a grammar from a text corpus.
  Issues of text segmentation are completely avoided: it is assumed that
- the corpus consists of words, unabiguously separated by blank spaces.
+ the corpus consists of words, unambiguously separated by blank spaces.
  These are avoided because segmentation is a deep, difficult and interesting
  problem, and tackling it takes us afield.
  Likewise, issues of morphology are also ignored.
  Both of these are fundamentally important.
- It is hoped (beleived by the author) that the techniques described here
+ It is hoped (believed by the author) that the techniques described here
  will also be applicable there.
  But for now, its easiest to presume that there is a text corpus, consisting
  of well-defined 
@@ -281,7 +281,7 @@ jigsaw puzzle pieces
 \end_inset
 
  of Link Grammar.
- These can be reassmbled again, to obtain syntactic parses of sentences.
+ These can be reassembled again, to obtain syntactic parses of sentences.
  Link Grammar works: there are extensive hand-curated dictionaries for English,
  Russian and Thai, with smaller dictionaries for another dozen natural languages.
  The English dictionary might be the most accurate/sophisticated parsing
@@ -295,7 +295,7 @@ Link Grammar grammars can be converted to other formalisms;
 e.g.
 
 \emph default
- Head-Phrase Sturcture Grammar (HPSG) and so on.
+ Head-Phrase Structure Grammar (HPSG) and so on.
  It can be shown that Link Grammar is 
 \begin_inset Quotes eld
 \end_inset
@@ -336,11 +336,11 @@ a relationship
 \begin_inset Quotes erd
 \end_inset
 
- you are free to imagine any grammar formlism that you wish, involving subjects,
- verbs and objects and so on.
+ you are free to imagine any grammar formalism that you wish, involving
+ subjects, verbs and objects and so on.
  However, Link Grammar will remain the touchstone, as it is the most compatible
  with probability theory.
- Thus, a general acquiantance with Link Grammar is strongly recommended.
+ Thus, a general acquaintance with Link Grammar is strongly recommended.
 \end_layout
 
 \begin_layout Subsection*
@@ -382,7 +382,7 @@ literal "false"
 
 \end_inset
 
- No lit review, XXX reference wikipedia instead? 
+ No lit review, XXX reference Wikipedia instead? 
 \end_layout
 
 \begin_layout Standard
@@ -408,7 +408,7 @@ The notion of factorization is to take some large blob, and pick it apart
 \begin_inset Quotes eld
 \end_inset
 
-statistically indepenent
+statistically independent
 \begin_inset Quotes erd
 \end_inset
 
@@ -500,8 +500,8 @@ large
 \end_inset
 
 .
- The goal is to grapple wth complexity be finding sutiable recurring patterns.
- Lingusits have already shown what these patterns should be; now the task
+ The goal is to grapple with complexity be finding suitable recurring patterns.
+ Linguists have already shown what these patterns should be; now the task
  is to actually extract them from text.
 \end_layout
 
@@ -520,7 +520,7 @@ With such a factorization in hand, one can now aim for higher and more abstract
 \end_inset
 
  as the building blocks, rather than individual words.
- One should imagine a perturbative structure, each level givein a foundation
+ One should imagine a perturbative structure, each level giving a foundation
  for the next.
 \end_layout
 
@@ -604,8 +604,8 @@ anything
 \begin_inset Quotes erd
 \end_inset
 
- can occupy that slot, and that, for probabilites, that slot should be summed
- over.
+ can occupy that slot, and that, for probabilities, that slot should be
+ summed over.
  Formally, 
 \begin_inset Formula $\left\{ w\backslash w_{2}\right\} =\left(w_{1},*,w_{3},\cdots,w_{n}\right)$
 \end_inset
@@ -917,7 +917,7 @@ complex
 \end_layout
 
 \begin_layout Standard
-But there is also a second lesson here: the binomial MI formula is not sutiable
+But there is also a second lesson here: the binomial MI formula is not suitable
  for natural language tasks.
  Although it is an exact expression, and individual words and word pairs
  appear in the lower summation terms, one gains no insight applying this
@@ -925,7 +925,7 @@ But there is also a second lesson here: the binomial MI formula is not sutiable
  MI values can be both negative and positive; the alternating sign introduces
  more chaos into the mix.
  Basically, one has a series of small and large terms summing up and mostly
- cancelling one-another.
+ canceling one-another.
  (Literally: try this experimentally, if possible.
  You will find that the various MI's bounce around, getting large and small,
  and that the sum is almost always smaller than the largest term.) The quest
@@ -1018,8 +1018,8 @@ On alternate Tuesdays, John goes ...
 \begin_inset Quotes erd
 \end_inset
 
- That is, the completion of the sentence seems indpendent of the start of
- the sentence, and so the probability expression should factor like this
+ That is, the completion of the sentence seems independent of the start
+ of the sentence, and so the probability expression should factor like this
  as well.
 \end_layout
 
@@ -1065,7 +1065,7 @@ Note that
 \end_inset
 
 .
- That is, this factor is presumed to not be a simple word-pair co-occurance
+ That is, this factor is presumed to not be a simple word-pair co-occurrence
  probability 
 \begin_inset Formula $p\left(\mbox{"goes"},\mbox{"fishing"}\right)$
 \end_inset
@@ -1145,7 +1145,7 @@ so that half of
 \begin_inset Formula $\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}$
 \end_inset
 
- term can be refered as the 
+ term can be referred to as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1274,7 +1274,7 @@ word class
 \end_layout
 
 \begin_layout Standard
-The intendeed factorization, for transitive verbs, is to say that a tri-variable
+The intended factorization, for transitive verbs, is to say that a tri-variable
  probability 
 \begin_inset Formula $p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)$
 \end_inset
@@ -1314,7 +1314,7 @@ The intendeed factorization, for transitive verbs, is to say that a tri-variable
 \end_inset
 
 .
- How should this be writen? The resulting factorization must be consistent
+ How should this be written? The resulting factorization must be consistent
  with the notion of 
 \begin_inset Quotes eld
 \end_inset
@@ -1324,7 +1324,7 @@ connector probabilities
 \end_inset
 
 .
- It must also be consitent with the lexical entry 
+ It must also be consistent with the lexical entry 
 \begin_inset Formula $\mathtt{N:S+\,or\,O-}$
 \end_inset
 
@@ -1471,7 +1471,7 @@ literal "false"
 \end_inset
 
  setting.
- A few words are in order about Chomksian-style production grammars, such
+ A few words are in order about Chomsky-style production grammars, such
  as Phrase-Structure Grammars
 \begin_inset Foot
 status collapsed
@@ -1528,7 +1528,7 @@ for some yet-to-be-determined word index
  The leaves of these trees are necessarily the words in the (fully-parsed)
  sentence.
  These trees, however, are not strict dependency trees: they also have non-leaf
- vertexes, labelled by the production rule that produced everything below.
+ vertexes, labeled by the production rule that produced everything below.
  This does nothing to change the overall conception of factorization: in
  the example above, the factor 
 \begin_inset Formula $p\left(\mathtt{V:S-\,\&\,O+}\right)$
@@ -1671,7 +1671,7 @@ p\left(T\left\{ w_{1},w_{2},\cdots,w_{n}\right\} \right)=\prod_{r\in T}p\left(r\
 
 \begin_layout Standard
 If there is more than one possible parse of a sentence, then presumably
- one parse is prefered over another, and each can be weighted, with some
+ one parse is preferred over another, and each can be weighted, with some
  probability 
 \begin_inset Formula $p\left(T\right)$
 \end_inset
@@ -1833,7 +1833,7 @@ Twines
 \begin_layout Standard
 A more problematic situation arises for graphs that have cycles.
  Although conventional phrase-structure and and dependency parses are trees,
- loops can appear in depdenency parses.
+ loops can appear in dependency parses.
  The very simplest case would be an HSV parse, where H is the left-wall
  or head of the parse, S is the subject, a noun, and V is a verb: this forms
  a triangle: there are three edges.
@@ -1966,7 +1966,7 @@ The C link connects head nouns to subordinating conjunctions.
 status collapsed
 
 \begin_layout Plain Layout
-See Wikitionary, 
+See Wiktionary, 
 \begin_inset CommandInset href
 LatexCommand href
 name "subordinating conjunction"
@@ -2006,7 +2006,7 @@ with
 \end_inset
 
  linking to the right.
- In te last example, it would be 
+ In the last example, it would be 
 \begin_inset Formula $w_{i}=\mathtt{dog}$
 \end_inset
 
@@ -2064,7 +2064,7 @@ p\left(\mbox{RelCl}\left\{ w_{i},w_{j};w_{k},w_{m}\right\} \right)= & p\left(\ma
 
 \end_inset
 
-the factors ofwhich follows from the fuller diagram:
+the factors of which follows from the fuller diagram:
 \end_layout
 
 \begin_layout Standard
@@ -2188,7 +2188,7 @@ literal "false"
 \begin_inset Formula $p\left(\theta\right)$
 \end_inset
 
-, nor of combining them with liklihoods 
+, nor of combining them with likelihoods 
 \begin_inset Formula $p\left(x\vert\theta\right)$
 \end_inset
 
@@ -2306,7 +2306,7 @@ I saw the man with the telescope.
 \end_inset
 
  In a spy thriller, perhaps the protagonist is looking through the telescope.
- In the biography of a famous astronomer, the proganist may be standing
+ In the biography of a famous astronomer, the protagonist may be standing
  in an observatory.
  Without that context, it is ambiguous.
  
@@ -2408,14 +2408,14 @@ noprefix "false"
 \begin_layout Standard
 To reiterate: the goal here is both to factor, to obtain factors that are
  relatively unambiguous, and then at the same time, bracket the ambiguities
- so that they are each corraled in their own paddock, and can be recombined
+ so that they are each corralled in their own paddock, and can be recombined
  as needed.
  This need is what makes the machinery daunting.
 \end_layout
 
 \begin_layout Standard
 Although neuroscientists will eventually find the neurological basis for
- human ambiguity, the origin of amiguity is not the human mind.
+ human ambiguity, the origin of ambiguity is not the human mind.
  Ambiguity is fundamental, in nature, as it stands.
  This is the message delivered by eqn.
  
@@ -2448,7 +2448,7 @@ MST Factorization
 
 \begin_layout Standard
 The sections above provide theoretical arguments.
- Let quiickly review the experimental situation.
+ Let quickly review the experimental situation.
  The Yuret-style MST factorization being used in the language-learning effort
  is effectively the presumption that
 \begin_inset Formula 
@@ -2555,8 +2555,8 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-More precisely, the binomial-MI equation is correct, but unweildy, because
- it contains large cancelling terms.
+More precisely, the binomial-MI equation is correct, but unwieldy, because
+ it contains large canceling terms.
  What is unclear is why these terms cancel, and how to best obtain a diagonalize
 d, factorized perturbative expansion.
  The MST->disjunct path is just a gut-feel approach to obtaining that perturbati
@@ -2688,7 +2688,7 @@ status collapsed
 \begin_layout Plain Layout
 See e.g.
  page 34 or Diary Part Five for rarity.
- I could have sworn I had this in othr tables, but I can't find it right
+ I could have sworn I had this in other tables, but I can't find it right
  now.
 \end_layout
 
@@ -2703,7 +2703,7 @@ Thus, MST parsing is a form of dimensional embedding, where the strings
 \begin_inset Formula $\mathcal{O}\left(\left|\left(w_{1},w_{2},\cdots,w_{n}\right)\right|\right)\sim N^{n}$
 \end_inset
 
- are embeded into the vastly larger space 
+ are embedded into the vastly larger space 
 \begin_inset Formula $\mathcal{O}\left(\left|r_{1},r_{2},\cdots,r_{k}\right|\right)\sim N^{2k}$
 \end_inset
 
@@ -2790,7 +2790,7 @@ Consider now a vector space of dimension
 \begin_inset Formula $\gamma>2$
 \end_inset
 
- or somethig like that.
+ or something like that.
  So this is a much larger space.
  A single Link Grammar parse of a sentence 
 \begin_inset Formula $S=\left(w_{1},w_{2},\cdots,w_{n}\right)$
@@ -2835,8 +2835,8 @@ all
 \begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
 \end_inset
 
- which are unconstrainted: one is free to write any word-sequence, even
- if it's nonsense.
+ which are unconstrained: one is free to write any word-sequence, even if
+ it's nonsense.
 \end_layout
 
 \begin_layout Subsection*
@@ -2933,7 +2933,7 @@ This is not the only such metric.
 \end_inset
 
  is the sum over disjuncts.
- This, too, appears to be dscribed by a GOE.
+ This, too, appears to be described by a GOE.
 \begin_inset Foot
 status collapsed
 
@@ -2992,7 +2992,7 @@ A more clever approach is to start with the path
 \begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
 \end_inset
 
- and order these according to the cosinge distance between 
+ and order these according to the cosine distance between 
 \begin_inset Formula $w$
 \end_inset
 
@@ -3003,8 +3003,8 @@ A more clever approach is to start with the path
 .
  The result is then necessarily a grammatically correct sentence.
  In fact, it will have exactly the same parse as the original sentence.
- This is perhaps overly strict: it turns into an excerise of finding synonyms
- that can work as drop-in syntactic replacaments.
+ This is perhaps overly strict: it turns into an exercise of finding synonyms
+ that can work as drop-in syntactic replacements.
  By necessity, the resulting sentence will also be of exactly the same length,
  as only a word-for-word substitution is done.
  BTW, this assumes that connectors have been classified into grammatical
@@ -3042,7 +3042,7 @@ institutional phrases
 
 .
  Fishing from this set allows syntactically identical sentences to be constructe
-d, with varying numbers of words (syncatically identical, ignoring syntacic
+d, with varying numbers of words (syntactically identical, ignoring syntactic
  structure in the phrase itself).
 \end_layout
 
@@ -3167,8 +3167,8 @@ does the mutual information of the total sentence increase?
 Now, most of what has been written in the three paragraphs above is old
  hat; ideas such as this have been articulated in linguistic theory for
  many decades.
- What is differrent here (what I hope is different) is the provision of
- an actual metric, a way of actually measuring the distances between sentences
+ What is different here (what I hope is different) is the provision of an
+ actual metric, a way of actually measuring the distances between sentences
  that moves beyond the concepts of a Hamming distance or a Levenshtein distance,
 \begin_inset Foot
 status collapsed
@@ -3239,7 +3239,7 @@ where
  is a word-pair distance, presumably just the MI between the two words (which
  is why it is summed, instead of e.g.
  taking the Euclidean sum-of-squares distance.) This strict distance can
- even be extended to accomodate idioms, adjectives, etc.
+ even be extended to accommodate idioms, adjectives, etc.
  as described above.
 \end_layout
 
@@ -3307,7 +3307,7 @@ idea
 \begin_inset Quotes erd
 \end_inset
 
- is some region of space, a valume, and an expression of the idea is a collectio
+ is some region of space, a volume, and an expression of the idea is a collectio
 n of sentences, paragraphs, that form a space-filling curve through this
  space.
  The sentences are the flight of a moth about a light-bulb, filling the
@@ -3378,7 +3378,7 @@ visit all of the space
 \end_inset
 
 , some Hausdorff topology of balls, with a sense of the volume of the balls:
- the matric gives us this.
+ the metric gives us this.
  For the second, a sense of separation or distance, to maximize distance
  between sentence-strings (while staying within the concept-space).
  We want two sentences to repel each other, when they get too close.
@@ -3452,7 +3452,7 @@ The ultimate hypothesis presented here is that these ideas can be applied
 \begin_inset Formula $MI\left(d_{i},d_{j}\right)$
 \end_inset
 
- between a pair of disjunts is directly avaiable, from direct observation.
+ between a pair of disjuncts is directly available, from direct observation.
  Given a parse 
 \begin_inset Formula $d_{1},d_{2},\cdots,d_{n}$
 \end_inset
@@ -3512,7 +3512,7 @@ The answer is cloudy.
  Perhaps.
  For me, the limiting factors are not an ability to hypothesize and theorize,
  but to perform actual experiments and measure results.
- This is in turn limited by lack of sutiable infrastructure.
+ This is in turn limited by lack of suitable infrastructure.
  The degree to which this aligns with the meta-goal of AGI remains unknown.
 \end_layout
 
@@ -3521,7 +3521,7 @@ The End
 \end_layout
 
 \begin_layout Standard
-This is the end of the factring paper, for now.
+This is the end of the factoring paper, for now.
  Perhaps more will be added, later.
  A suitable conclusion must be written.
  
