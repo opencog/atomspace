@@ -8,6 +8,9 @@
 \begin_preamble
 \usepackage{url} 
 \usepackage{slashed}
+
+\usepackage{fontspec}
+\newfontfamily\DejaSans{DejaVu Sans}
 \end_preamble
 \use_default_options false
 \maintain_unincluded_children false
@@ -2037,7 +2040,7 @@ with
 \align center
 \begin_inset Graphics
 	filename graphics/loop-4-legs.eps
-	width 40text%
+	width 17text%
 
 \end_inset
 
@@ -2343,7 +2346,20 @@ Poetry provides a richer example: what was the poet thinking, when he, she,
  all at once, at the same time.
  The name of the game is not to update our Bayesian priors and select one
  and only one emotion on which we will fiercely focus (unless, of course,
- it is nationalistic poetry 😃😃).
+ it is nationalistic poetry 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+DejaSans 😃😃}
+\end_layout
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Standard
