@@ -39,7 +39,7 @@ There are several files here:
    differences are minor, but the side effects are major. This is a
    pre-req for understanding sheaf stores.
 
-* The [factorization.lyx](factorization.lyx) file (under construction)
+* The [factorization.pdf](factorization.pdf) file (under construction)
   attempts to provide a mathematical foundation for the use of grammar
   and syntax in the extraction of structure in high-dimensional
   probability theory. (under construction, recently started, not
