@@ -2948,7 +2948,7 @@ This is reviewed in Diary Part Eight, if I recall correctly.
  This is a bit stronger and more constrained than saying the words have
  similar neighbors: they must also be grammatically similar.
  Experimentally, these two different distances are correlated; I don't have
- r values offhand.
+ r-values offhand.
  
 \end_layout
 
@@ -2988,7 +2988,7 @@ A more clever approach is to start with the path
 \begin_inset Formula $d_{i}$
 \end_inset
 
-, one then examines the set of word pairs 
+, one then examines the set of words 
 \begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
 \end_inset
 
@@ -3002,10 +3002,11 @@ A more clever approach is to start with the path
 
 .
  The result is then necessarily a grammatically correct sentence.
- In fact, it will have exactly the same parse as the original sentence,
- so this is perhaps annoying.
- By necessity, it will also be of exactly the same length, s only a word-for-wor
-d substitution is done.
+ In fact, it will have exactly the same parse as the original sentence.
+ This is perhaps overly strict: it turns into an excerise of finding synonyms
+ that can work as drop-in syntactic replacaments.
+ By necessity, the resulting sentence will also be of exactly the same length,
+ as only a word-for-word substitution is done.
  BTW, this assumes that connectors have been classified into grammatical
  classes, as otherwise the set 
 \begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
@@ -3015,8 +3016,305 @@ d substitution is done.
 \end_layout
 
 \begin_layout Standard
-Syntactically similar sentences, with a different number of words, and a
- different 
+Syntactically similar sentences, with a different number of words, can be
+ obtained by means of idioms and 
+\begin_inset Quotes eld
+\end_inset
+
+institutional phrases
+\begin_inset Quotes erd
+\end_inset
+
+.
+ These would be word-sequences that, taken as a unit, have a disjunct 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+.
+ That is, all of the unconnected connectors on the idiom provide 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+.
+ Thus, we expand the set of nearby words to nearby phrases: 
+\begin_inset Formula $\left\{ \mbox{phr}\vert\left(\mbox{phr},d_{i}\right)\mbox{ exists}\right\} $
+\end_inset
+
+.
+ Fishing from this set allows syntactically identical sentences to be constructe
+d, with varying numbers of words (syncatically identical, ignoring syntacic
+ structure in the phrase itself).
+\end_layout
+
+\begin_layout Standard
+Loosening the concept of idiom to, say a 
+\begin_inset Quotes eld
+\end_inset
+
+common noun with a adjective
+\begin_inset Quotes erd
+\end_inset
+
+, or a 
+\begin_inset Quotes eld
+\end_inset
+
+verb with an adverb
+\begin_inset Quotes erd
+\end_inset
+
+, we can consider the set 
+\begin_inset Formula $\left\{ w\vert\left(w,c_{A}-\&\,d_{i}\right)\mbox{ exists}\right\} $
+\end_inset
+
+ where 
+\begin_inset Formula $c_{A}-$
+\end_inset
+
+ is an adjectival connector.
+ That is, the 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+ connects to the rest of the sentence, as before, but that now, there is
+ an adjective connector, to which an adjective can be connected.
+ Thus, again, we explore the space of nearby sentences, but now with locations
+ that can be 
+\begin_inset Quotes eld
+\end_inset
+
+decorated
+\begin_inset Quotes erd
+\end_inset
+
+ with extra words.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+decorated
+\begin_inset Quotes erd
+\end_inset
+
+ here is similar to the idea of mutation in genetic programming.
+ There, one takes an existing expression tree, and randomly adds 
+\begin_inset Quotes eld
+\end_inset
+
+knobs
+\begin_inset Quotes erd
+\end_inset
+
+ to it, in various places.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+knobs
+\begin_inset Quotes erd
+\end_inset
+
+ can be 
+\begin_inset Quotes eld
+\end_inset
+
+turned
+\begin_inset Quotes erd
+\end_inset
+
+ to have different settings, and the fitness of the expression tree, with
+ a given knob-setting is then evaluated.
+ The fitness is used for evolutionary guidance of a population of individuals.
+ In the present case, the 
+\begin_inset Quotes eld
+\end_inset
+
+knob
+\begin_inset Quotes erd
+\end_inset
+
+ would be the vacant slot for an adjective.
+ The knob setting would be the selection of a specific adjective.
+ The fitness can be evaluated extrinsically: 
+\begin_inset Quotes eld
+\end_inset
+
+does this new sentence express the idea better?
+\begin_inset Quotes erd
+\end_inset
+
+ or intrinsically: 
+\begin_inset Quotes eld
+\end_inset
+
+does the mutual information of the total sentence increase?
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection*
+Ideas
+\end_layout
+
+\begin_layout Standard
+The task, however, is that of a writer, who wishes to express an idea, and
+ searches for different collections of sentences that convey the same meaning.
+ At this point, we do not have any precise definition of what 
+\begin_inset Quotes eld
+\end_inset
+
+an idea
+\begin_inset Quotes erd
+\end_inset
+
+ is, or how to thread sentences through it.
+ Presumably, an 
+\begin_inset Quotes eld
+\end_inset
+
+idea
+\begin_inset Quotes erd
+\end_inset
+
+ is some region of space, a valume, and an expression of the idea is a collectio
+n of sentences, paragraphs, that form a space-filling curve through this
+ space.
+ The sentences are the flight of a moth about a light-bulb, filling the
+ surrounding space with a trajectory.
+\end_layout
+
+\begin_layout Standard
+Given the present set of developments, what could an 
+\begin_inset Quotes eld
+\end_inset
+
+idea
+\begin_inset Quotes erd
+\end_inset
+
+ be? Well, per usual, a concept: 
+\begin_inset Quotes eld
+\end_inset
+
+a chair
+\begin_inset Quotes erd
+\end_inset
+
+, with all of it's extensive and intensive properties: has legs, can be
+ sat on, is movable, has a flat surface, etc.
+ This can be treated as a 
+\begin_inset Quotes eld
+\end_inset
+
+bag of words
+\begin_inset Quotes erd
+\end_inset
+
+: {legs, sit, movable, flat}, a primary word 
+\begin_inset Quotes eld
+\end_inset
+
+chair
+\begin_inset Quotes erd
+\end_inset
+
+, the associated relations: {has, can be, is}.
+ The description & expression of a chair is then the threading of this space
+ by strings of words, visiting all of the space, without repetition.
+ These last two: 
+\begin_inset Quotes eld
+\end_inset
+
+visit all of the space
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+without repetition
+\begin_inset Quotes erd
+\end_inset
+
+, require a metric space.
+ For the first, 
+\begin_inset Quotes eld
+\end_inset
+
+visit all of the space
+\begin_inset Quotes erd
+\end_inset
+
+, some Hausdorff topology of balls, with a sense of the volume of the balls:
+ the matric gives us this.
+ For the second, a sense of separation or distance, to maximize distance
+ between sentence-strings (while staying within the concept-space).
+ We want two sentences to repel each other, when they get too close.
+ Again, this is provided by the metric.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Would it be better to have a 
+\begin_inset Quotes eld
+\end_inset
+
+Pauli exclusion principle
+\begin_inset Quotes erd
+\end_inset
+
+? To disallow two sentences from occupying the same space? This is not the
+ same as saying that two sentences are repulsive, when they are too near
+ each other.
+ How might this work? I am not aware of any description of any (measure-preservi
+ng) dynamical system that exhibits or makes use of some exclusion principle.
+ In Riemannian geometry, the exclusion principle arises from fermions, which
+ provide a certain square-root of a connection, i.e.
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+spin manifold
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+spin structure
+\begin_inset Quotes erd
+\end_inset
+
+ as mild generalizations of Riemannian manifolds.
+ But we have not defined this 
+\begin_inset Quotes eld
+\end_inset
+
+space of words and sentences
+\begin_inset Quotes erd
+\end_inset
+
+ closely enough to map it into the machinery of fiber bundles and connections,
+ from which we could describe spin structures.
+ So, for the moment, this idea remains out of grasp.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
@@ -3024,7 +3322,9 @@ The End
 \end_layout
 
 \begin_layout Standard
-This is the end of Part Nine of the diary.
+This is the end of the factring paper, for now.
+ Perhaps more will be added, later.
+ A suitable conclusion must be written.
  
 \end_layout
 
