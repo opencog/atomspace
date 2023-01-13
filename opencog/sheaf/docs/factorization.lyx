@@ -1134,9 +1134,10 @@ Syntactic relations are not just pair-wise connections, though.
  Syntactic elements have more complex structure.
  Thus, the above factorization might be more correctly written as
 \begin_inset Formula 
-\[
-p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx\left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}\right]\times\left[\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
-\]
+\begin{align*}
+p\left(w_{1},w_{2},\cdots,w_{n}\right)\approx & \left[p\left(w_{1},\cdots,w_{i}\right)\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}\right]\times\\
+ & \qquad\qquad\left[\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}p\left(w_{i+1},\cdots,w_{n}\right)\right]
+\end{align*}
 
 \end_inset
 
@@ -1146,11 +1147,15 @@ so that half of
 
  rides along with the left side, as the probability of making a connection,
  and the other half rides with the other side.
- This square root 
-\begin_inset Formula $\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}$
+ This square root term 
+\begin_inset Formula 
+\[
+\sqrt{p\left(r\left\{ w_{i},w_{j}\right\} \right)}
+\]
+
 \end_inset
 
- term can be referred to as the 
+ can be referred to as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1368,7 +1373,8 @@ connector probabilities
 One concludes that transitive verbs contribute a factor 
 \begin_inset Formula 
 \begin{align*}
-p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)= & p\left(\mathtt{V:S-\,\&\,O+}\right)p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
+p\left(\mbox{TrVb}\left\{ w_{i,}w_{j},w_{k}\right\} \right)= & p\left(\mathtt{V:S-\,\&\,O+}\right)\times\\
+ & \qquad p\left(w_{j}\in\mathtt{V}\right)p\left(w_{i}\in\mathtt{S+}\right)p\left(w_{k}\in\mathtt{O-}\right)\times\\
  & \qquad\qquad\sqrt{p\left(\mathtt{S}\left\{ w_{i},w_{j}\right\} \right)p\left(\mathtt{O}\left\{ w_{j,}w_{k}\right\} \right)}
 \end{align*}
 
@@ -1763,9 +1769,10 @@ deformation retract
  point.
  Explicitly:
 \begin_inset Formula 
-\[
-p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right)p\left(w_{i+1},\cdots,w_{j},\cdots,w_{n}\right)=p\left(w_{1},\cdots,K\right)p\left(K\right)p\left(w_{i+1},\cdots,K,\cdots,w_{n}\right)
-\]
+\begin{align*}
+p\left(w_{1},\cdots,w_{i}\right)p\left(r\left\{ w_{i},w_{j}\right\} \right) & p\left(w_{i+1},\cdots,w_{j},\cdots,w_{n}\right)=\\
+ & \quad p\left(w_{1},\cdots,K\right)p\left(K\right)p\left(w_{i+1},\cdots,K,\cdots,w_{n}\right)
+\end{align*}
 
 \end_inset
 
@@ -3062,10 +3069,14 @@ A more clever approach is to start with the path
 \end_inset
 
 , one then examines the set of words 
-\begin_inset Formula $\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} $
+\begin_inset Formula 
+\[
+\left\{ w\vert\left(w,d_{i}\right)\mbox{ exists}\right\} 
+\]
+
 \end_inset
 
- and order these according to the cosine distance between 
+and order these according to the cosine distance between 
 \begin_inset Formula $w$
 \end_inset
 
