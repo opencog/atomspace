@@ -355,6 +355,7 @@ Literature Review
 The goal of the present text is to talk about the factorization of graphs,
  in general.
  There has been, of course, much related prior work.
+ Is it even possible to provide a literature review?
 \end_layout
 
 \begin_layout Standard
@@ -386,12 +387,12 @@ literal "false"
 
 \end_inset
 
- No lit review, XXX reference Wikipedia instead? 
+ Better idea: just look at the Wikipedia article, instead.
 \end_layout
 
 \begin_layout Standard
-The idea of matrix factorization is central large consumer businesses, who
- wish to estimate future shopping patterns as a function of prior behavior.
+The idea of matrix factorization is central to large consumer businesses,
+ who wish to estimate future shopping patterns as a function of prior behavior.
  Vast numbers of papers have been written...
 \end_layout
 
@@ -2541,7 +2542,7 @@ pretty good
 , but no one has characterized the structure of the difference
 \begin_inset Formula 
 \[
-\Delta\left(w_{1},w_{2},\cdots,w_{n}\right)=MI\left(w_{1},w_{2},\cdots,w_{n}\right)-\sum_{\left(w_{i},w_{j}\right)\in MST}MI\left(w_{i},w_{j}\right)
+\Delta_{MST}\left(w_{1},w_{2},\cdots,w_{n}\right)=MI\left(w_{1},w_{2},\cdots,w_{n}\right)-\sum_{\left(w_{i},w_{j}\right)\in MST}MI\left(w_{i},w_{j}\right)
 \]
 
 \end_inset
@@ -2559,9 +2560,60 @@ When is
 \end_layout
 
 \begin_layout Standard
-The next step is, of course, to use disjuncts, but again, without any clear
- argument about why the disjuncts provide a good approximation to the higher
- order terms in the sum of binomial-MI equation 
+The next step is, of course, to use disjuncts: a Link Grammar parse, resulting
+ in word-disjunt pairs 
+\begin_inset Formula $MI\left(w_{i},d_{i}\right)$
+\end_inset
+
+.
+ A basic premise here is that
+\begin_inset Formula 
+\[
+\Delta_{LG}\left(w_{1},w_{2},\cdots,w_{n}\right)<\Delta_{MST}\left(w_{1},w_{2},\cdots,w_{n}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\Delta_{LG}$
+\end_inset
+
+ is the disjunctive parse:
+\begin_inset Formula 
+\[
+\Delta_{LG}\left(w_{1},w_{2},\cdots,w_{n}\right)=MI\left(w_{1},w_{2},\cdots,w_{n}\right)-\sum_{\left(w_{i},d_{i}\right)\in LG}MI\left(w_{i},d_{i}\right)
+\]
+
+\end_inset
+
+However, this is a premise, a hypothesis, a 
+\begin_inset Quotes eld
+\end_inset
+
+gut feel
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That 
+\begin_inset Formula $\Delta_{LG}<\Delta_{MST}$
+\end_inset
+
+ must be true is a foundation-stone of the last seventy years of the linguistics
+ of natural language.
+ Linguistics is 
+\begin_inset Quotes eld
+\end_inset
+
+nothing more
+\begin_inset Quotes erd
+\end_inset
+
+ than the filling in of details of exactly how this works, in various special
+ cases.
+ What is lacking is any clear mathematical argument about why the disjuncts
+ provide a good approximation to the higher order terms in the sum of binomial-M
+I equation 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:binomial-MI"
@@ -3301,6 +3353,150 @@ similar
  beyond the fact that it is distributed as a Gaussian (and so again is a
  GOE).
  Experimental results remain a bottleneck to theorizing.
+\end_layout
+
+\begin_layout Standard
+Consider a concrete example:
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+    This is no accident.
+\end_layout
+
+\begin_layout Plain Layout
+
+    This is not accidental.
+\end_layout
+
+\end_inset
+
+These two are more or less semantically equivalent.
+ But, in terms of classical linguistics, they differ syntactically: 
+\begin_inset Quotes eld
+\end_inset
+
+no accident
+\begin_inset Quotes erd
+\end_inset
+
+ is an object (
+\begin_inset Quotes eld
+\end_inset
+
+accident
+\begin_inset Quotes erd
+\end_inset
+
+ is a noun); whereas 
+\begin_inset Quotes eld
+\end_inset
+
+not accidental
+\begin_inset Quotes erd
+\end_inset
+
+ is a predicative adjective (an adjective modifying the subject of 
+\begin_inset Quotes eld
+\end_inset
+
+to be
+\begin_inset Quotes erd
+\end_inset
+
+).
+ Given some dataset, the distance metric above will provide a numeric distance
+ between this pair of sentences.
+ But what is that distance actually measuring? Syntax? Semantics? A combination?
+ Something else?
+\end_layout
+
+\begin_layout Standard
+Of course, the verb 
+\begin_inset Quotes eld
+\end_inset
+
+to be
+\begin_inset Quotes erd
+\end_inset
+
+ is a copula; these sentences express an intensional quality of some referenced
+ 
+\begin_inset Quotes eld
+\end_inset
+
+this
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But we are not told what 
+\begin_inset Quotes eld
+\end_inset
+
+this
+\begin_inset Quotes erd
+\end_inset
+
+ is; at this stage of the analysis, reference resolution is not yet available.
+ At this stage, the most we can find out about the two sentences above is
+ that they have a high four-word MI, higher than the MST parse.
+ These two sentences are 
+\begin_inset Quotes eld
+\end_inset
+
+set phrases
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula 
+\[
+MI\left(\mbox{this},\mbox{is},\mbox{no},\mbox{accident}\right)\gg\sum_{\left(w_{i},w_{j}\right)\in MST\left(\mbox{this is no accident}\right)}MI\left(w_{i},w_{j}\right)
+\]
+
+\end_inset
+
+mostly because the copula 
+\begin_inset Formula $MI\left(w_{i},\mbox{is}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $MI\left(\mbox{is},w_{j}\right)$
+\end_inset
+
+ will be small, and likewise 
+\begin_inset Formula $MI\left(\mbox{this},w_{k}\right)$
+\end_inset
+
+ will be small.
+ The most we can hope for is that 
+\begin_inset Formula $MI\left(\mbox{no},\mbox{accident}\right)$
+\end_inset
+
+ is large, but this won't be enough to capture the reality that 
+\begin_inset Quotes eld
+\end_inset
+
+this is no accident
+\begin_inset Quotes erd
+\end_inset
+
+ is a set phrase.
+ That is, MST parses alone are insufficient to capture idiomatic expressions.
+ It seems unlikely that disjunctive parses do any batter: viz.
+ it seems likely that
+\begin_inset Formula 
+\[
+MI\left(\mbox{this},\mbox{is},\mbox{no},\mbox{accident}\right)\gg\sum_{\left(w_{i},d_{i}\right)\in LG\left(\mbox{this is no accident}\right)}MI\left(w_{i},d_{i}\right)
+\]
+
+\end_inset
+
+for a disjunctive parse.
 \end_layout
 
 \begin_layout Subsection*
