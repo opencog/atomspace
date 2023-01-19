@@ -1016,6 +1016,10 @@
 		(if (null-list? stk-top)
 			(throw 'badpop "More pops than pushes!"))
 
+		; User might have done intervening cog-set-atomspace! to
+		; who-knows-where, so go back to the stack to now.
+		(cog-set-atomspace! stk-top)
+
 		; Guile gc should eventually garbage-collect this atomspace,
 		; which will clear it. But ... even when brute-forcing the
 		; gc to run (as done below), the atomspace seems to hang
