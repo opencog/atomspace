@@ -34,11 +34,6 @@ ADD_GUILE_MODULE (FILES
 )
 
 ADD_GUILE_MODULE (FILES
-	opencog/query.scm
-#	COMPILE
-)
-
-ADD_GUILE_MODULE (FILES
 	opencog/test-runner.scm
 #	COMPILE
 )
