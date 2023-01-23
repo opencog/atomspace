@@ -992,6 +992,7 @@
 ; ---------------------------------------------------------------------
 
 (define-public cog-atomspace-stack (make-fluid '()))
+(define-public cog-atomspace-stack-top (make-fluid #f))
 (define-public (cog-push-atomspace)
 "
  cog-push-atomspace -- Create a temporary atomspace.
@@ -1003,7 +1004,9 @@
 "
 	(fluid-set! cog-atomspace-stack
 		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))
-	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
+	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace)))
+	(fluid-set! cog-atomspace-stack-top (cog-atomspace))
+)
 
 ; ---------------------------------------------------------------------
 
@@ -1012,8 +1015,9 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(let ((stk-top (fluid-ref cog-atomspace-stack)))
-		(if (null-list? stk-top)
+	(let ((stk-top (fluid-ref cog-atomspace-stack-top))
+			(stk-nxt (fluid-ref cog-atomspace-stack)))
+		(if (null-list? stk-nxt)
 			(throw 'badpop "More pops than pushes!"))
 
 		; User might have done intervening cog-set-atomspace! to
@@ -1026,14 +1030,15 @@
 		; around anyway, undeleted. So we brute-force clear it now,
 		; so that at least the atoms do not chew up RAM.
 		(cog-atomspace-clear)
-		(cog-set-atomspace! (car stk-top))
-		(fluid-set! cog-atomspace-stack (cdr stk-top))
+		(cog-set-atomspace! (car stk-nxt))
+		(fluid-set! cog-atomspace-stack-top (cog-atomspace))
+		(fluid-set! cog-atomspace-stack (cdr stk-nxt))
 
 		; Try to force garbage-collection of the atomspace.
-		(set-car! stk-top '())
-		(set-cdr! stk-top '())
-		(gc)
-	))
+		(set-car! stk-nxt '())
+		(set-cdr! stk-nxt '())
+		(gc))
+)
 
 ; ---------------------------------------------------------------------
 
