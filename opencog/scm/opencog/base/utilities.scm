@@ -1002,10 +1002,14 @@
     after popping, all of the atoms placed into it will also be
     deleted (unless they are referred to in some way).
 "
+	(define base-as (cog-atomspace))
 	(fluid-set! cog-atomspace-stack
-		(cons (cog-atomspace) (fluid-ref cog-atomspace-stack)))
-	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace)))
-	(fluid-set! cog-atomspace-stack-top (cog-atomspace))
+		(cons base-as (fluid-ref cog-atomspace-stack)))
+	(cog-set-atomspace! (cog-new-atomspace base-as))
+	(fluid-set! cog-atomspace-stack-top base-as)
+
+	; Return the original (old) atomspace.
+	base-as
 )
 
 ; ---------------------------------------------------------------------
@@ -1015,8 +1019,8 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(let ((stk-top (fluid-ref cog-atomspace-stack-top))
-			(stk-nxt (fluid-ref cog-atomspace-stack)))
+	(let* ((stk-top (fluid-ref cog-atomspace-stack-top))
+			 (stk-nxt (fluid-ref cog-atomspace-stack)))
 		(if (null-list? stk-nxt)
 			(throw 'badpop "More pops than pushes!"))
 
@@ -1031,13 +1035,15 @@
 		; so that at least the atoms do not chew up RAM.
 		(cog-atomspace-clear)
 		(cog-set-atomspace! (car stk-nxt))
-		(fluid-set! cog-atomspace-stack-top (cog-atomspace))
+		(fluid-set! cog-atomspace-stack-top (car stk-nxt))
 		(fluid-set! cog-atomspace-stack (cdr stk-nxt))
 
 		; Try to force garbage-collection of the atomspace.
 		(set-car! stk-nxt '())
 		(set-cdr! stk-nxt '())
 		(gc))
+
+	*unspecified*
 )
 
 ; ---------------------------------------------------------------------
