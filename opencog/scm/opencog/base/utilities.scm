@@ -1006,7 +1006,7 @@
 	(fluid-set! cog-atomspace-stack
 		(cons base-as (fluid-ref cog-atomspace-stack)))
 	(cog-set-atomspace! (cog-new-atomspace base-as))
-	(fluid-set! cog-atomspace-stack-top base-as)
+	(fluid-set! cog-atomspace-stack-top (cog-atomspace))
 
 	; Return the original (old) atomspace.
 	base-as
