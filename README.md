@@ -626,7 +626,7 @@ Essentially all Linux distributions will provide these packages.
 
 ###### cmake
 * Build management tool; v3.0.2 or higher recommended.
-* https://www.cmake.org/ | `apt install cmake3`
+* https://www.cmake.org/ | `apt install cmake`
 
 ###### cogutil
 * Common OpenCog C++ utilities.
