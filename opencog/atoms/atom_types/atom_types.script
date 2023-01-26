@@ -952,11 +952,12 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // Return the indicated Value on the indicated Atom.
 // The BoolValueOf and FloatValueOf links exist only to provide
 // creation-time type checking; otherwise, they behave just like
-// the ValueOfLink.
+// the ValueOfLink. The StreamValueOf can return non-number streams,
+// but we lie about this to keep the static typechecker happy.
 VALUE_OF_LINK <- FUNCTION_LINK
 BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,BOOLEAN_OUTPUT_LINK
 FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-STREAM_VALUE_OF_LINK <- VALUE_OF_LINK
+STREAM_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
 TRUTH_VALUE_OF_LINK <- FLOAT_VALUE_OF_LINK
 STRENGTH_OF_LINK <- FLOAT_VALUE_OF_LINK
 CONFIDENCE_OF_LINK <- FLOAT_VALUE_OF_LINK
