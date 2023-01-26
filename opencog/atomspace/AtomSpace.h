@@ -118,7 +118,7 @@ class AtomSpace : public Frame
     virtual ContentHash compute_hash() const;
 
     // Private helper function.
-    void shadow_by_type(HandleSet&,
+    void shadow_by_type(UnorderedHandleSet&,
                         Type type,
                         bool subclass,
                         bool parent,
@@ -480,14 +480,14 @@ public:
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
      *
-     * @param hset the HandleSet into which to insert handles.
+     * @param hseq the HandleSeq into which to insert handles.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
      *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
      * @code
-     *         HandleSet atoms;
+     *         HandleSeq atoms;
      *         atomSpace.get_handles_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
@@ -499,7 +499,7 @@ public:
                         const AtomSpace* = nullptr) const;
 
     void
-    get_handles_by_type(HandleSet&,
+    get_handles_by_type(UnorderedHandleSet&,
                         Type type,
                         bool subclass=false,
                         bool parent=true,
@@ -509,14 +509,14 @@ public:
      * Gets a set of handles that matches with the given type,
      * but ONLY if they have an empty incoming set! 
      *
-     * @param hset the HandleSet into which to insert handles.
+     * @param hset the HandleSeq into which to insert handles.
      * @param The desired type.
      * @param Whether type subclasses should be considered.
      *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
      * @code
-     *         HandleSet atoms;
+     *         HandleSeq atoms;
      *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
