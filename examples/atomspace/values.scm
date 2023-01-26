@@ -144,7 +144,7 @@
 (cog-execute!
    (Get
       (GreaterThan
-         (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+         (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
          (Number "10"))))
 ;
 ; The problem here is that this search will examine *every* Atom in the
@@ -160,7 +160,7 @@
       (And
          (Member (Variable "dog_node") (Concept "things that have weight"))
          (GreaterThan
-            (ValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+            (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
             (Number "10")))))
 ;
 ; The above will only look at Atoms that have a weight. One can go

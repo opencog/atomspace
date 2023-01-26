@@ -28,8 +28,14 @@
 (define vo (ValueOf a k))
 (cog-execute! vo)
 
+; Fetch it again, using the FloatValueOfLink. Values can be strings,
+; lists or other Atoms; asking for FloatValueOf can expose type errors
+; earlier, making debugging easiesr.
+(define fvo (FloatValueOf a k))
+(cog-execute! fvo)
+
 ; Numeric computations can be performed on that value...
-(define tym (Times (Plus vo (Number 6)) (Number 2)))
+(define tym (Times (Plus fvo (Number 6)) (Number 2)))
 (cog-execute! tym)
 
 ; Now, do it again, with the RandomStream
@@ -72,7 +78,7 @@
 (cog-set-value! c k (RandomStream 1)) ; Just one random number
 
 (define flipkey (PredicateNode "*-coinflip-*"))
-(cog-set-value! c flipkey (GreaterThan (Number 0.5) (ValueOf c k)))
+(cog-set-value! c flipkey (GreaterThan (Number 0.5) (FloatValueOf c k)))
 
 ; The flipkey above should generate a stream of true and false TruthValues
 ; Note that cog-evaluate! is being used here, to get truth values, and not
