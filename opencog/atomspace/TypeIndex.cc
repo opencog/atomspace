@@ -102,7 +102,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 }
 
 // Same as above, except using an unordered set.
-void TypeIndex::get_handles_by_type(HandleSet& hset,
+void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
                                     Type type,
                                     bool subclass) const
 {

@@ -453,7 +453,7 @@ size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
     // If the flag is set, we need to deduplicate the atoms,
     // and then count them.
     if (_copy_on_write) {
-        HandleSet hset;
+        UnorderedHandleSet hset;
         shadow_by_type(hset, type, subclass, true, this);
         return hset.size();
     }
@@ -628,7 +628,7 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // returning the shallowest version of each Atom.
     if (_copy_on_write)
     {
-        HandleSet rawset;
+        UnorderedHandleSet rawset;
         shadow_by_type(rawset, type, subclass, parent, cas);
 
         // Look for the shallowest version of each Atom.
@@ -690,7 +690,7 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
 // duplicate atoms due to shadowing of child spaces by parent spaces.
 // However, the returned set is NOT guaranteed to contain the shallowest
 // Atoms! These need to be obtained with a distinct step.
-void AtomSpace::shadow_by_type(HandleSet& hset,
+void AtomSpace::shadow_by_type(UnorderedHandleSet& hset,
                                Type type,
                                bool subclass,
                                bool parent,
@@ -731,7 +731,7 @@ void AtomSpace::shadow_by_type(HandleSet& hset,
     }
 }
 
-void AtomSpace::get_handles_by_type(HandleSet& hset,
+void AtomSpace::get_handles_by_type(UnorderedHandleSet& hset,
                                     Type type,
                                     bool subclass,
                                     bool parent,
@@ -741,7 +741,7 @@ void AtomSpace::get_handles_by_type(HandleSet& hset,
     // returning the shallowest version of each Atom.
     if (_copy_on_write)
     {
-        HandleSet rawset;
+        UnorderedHandleSet rawset;
         shadow_by_type(rawset, type, subclass, parent, cas);
 
         // Look for the shallowest version of each Atom.
