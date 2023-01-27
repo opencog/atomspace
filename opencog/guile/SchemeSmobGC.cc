@@ -28,7 +28,7 @@ size_t SchemeSmob::free_misc(SCM node)
 	switch (misctype)
 	{
 		case COG_PROTOM:
-			*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
+			SCM_SMOB_VALUE_PTR_LOC(node)->reset(); // std::shared_ptr<>::reset()
 			scm_remember_upto_here_1(node);
 			return 0;
 

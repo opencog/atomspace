@@ -60,7 +60,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 			return h->to_string();
 
 		h = Handle::UNDEFINED;
-		*(SCM_SMOB_VALUE_PTR_LOC(node)) = nullptr;
+		SCM_SMOB_VALUE_PTR_LOC(node)->reset(); // std::shared_ptr<>::reset()
 		scm_remember_upto_here_1(node);
 		return "#<Invalid handle>";
 	}
@@ -132,7 +132,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (nullptr == h->getAtomSpace() and
 	    not (ATOM_SPACE == h->get_type()))
 	{
-		*(SCM_SMOB_VALUE_PTR_LOC(sh)) = nullptr;
+		SCM_SMOB_VALUE_PTR_LOC(sh)->reset(); // std::shared_ptr<>::reset()
 		scm_remember_upto_here_1(sh);
 		return Handle::UNDEFINED;
 	}
@@ -764,7 +764,7 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 	if (rc)
 	{
 		// Clobber the handle, too.
-		*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
+		SCM_SMOB_VALUE_PTR_LOC(satom)->reset(); // std::shared_ptr<>::reset()
 		scm_remember_upto_here_1(satom);
 		return SCM_BOOL_T;
 	}
@@ -789,7 +789,7 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 	bool rc = asp->extract_atom(h, true);
 
 	// Clobber the handle, too.
-	*(SCM_SMOB_VALUE_PTR_LOC(satom)) = nullptr;
+	SCM_SMOB_VALUE_PTR_LOC(satom)->reset(); // std::shared_ptr<>::reset()
 	scm_remember_upto_here_1(satom);
 
 	if (rc) return SCM_BOOL_T;
