@@ -439,8 +439,7 @@ void Atom::drop_incoming_set()
 {
     if (nullptr == _incoming_set) return;
     INCOMING_UNIQUE_LOCK;
-    // _incoming_set->_iset.clear();
-    _incoming_set = nullptr;
+    _incoming_set.reset();
 }
 
 /// Add an atom to the incoming set.
