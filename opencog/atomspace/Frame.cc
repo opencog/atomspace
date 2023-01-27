@@ -51,8 +51,7 @@ Frame::~Frame()
 		FrameCast(h)->scrub_incoming_set();
 }
 
-/// Place `this` into the incoming set of each outgoing frame
-///
+/// Place `this` into the incoming set of each outgoing frame.
 void Frame::install()
 {
 	Handle llc(get_handle());
@@ -70,7 +69,7 @@ void Frame::remove()
 /// Remove all dead frames in the incoming set.
 void Frame::scrub_incoming_set(void)
 {
-	if (nullptr == _incoming_set) return;
+	if (not _use_iset) return;
 	INCOMING_UNIQUE_LOCK;
 
 	// Iterate over all frame types
@@ -78,7 +77,7 @@ void Frame::scrub_incoming_set(void)
 	nameserver().getChildrenRecursive(FRAME, back_inserter(framet));
 	for (Type t : framet)
 	{
-		auto bucket = _incoming_set->_iset.find(t);
+		auto bucket = _incoming_set._iset.find(t);
 		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
 		{
 			if (0 == bi->use_count())
