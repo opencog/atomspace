@@ -231,3 +231,92 @@
    ...
 }
 #
+# -----------------------------------------------------------
+# New in latest python3.9
+#
+# Invalid read of size 4
+{
+   <py3_initialize_ex>
+   Memcheck:Addr4
+   ...
+   fun:Py_InitializeEx
+   ...
+}
+{
+   <py3_list_append_read4>
+   Memcheck:Addr4
+   ...
+   fun:PyList_Append
+   ...
+}
+{
+   <py3_type_ready>
+   Memcheck:Addr4
+   ...
+   fun:PyType_Ready
+   ...
+}
+
+# Invalid read of size 8
+{
+   <py3_list_append_read>
+   Memcheck:Addr8
+   ...
+   fun:PyList_Append
+   ...
+}
+
+# Use of uninitialised value of size 8
+{
+   <py3_list_append_use>
+   Memcheck:Value8
+   ...
+   fun:PyList_Append
+   ...
+}
+{
+   <py3_ast_compile>
+   Memcheck:Value8
+   ...
+   fun:PyAST_CompileObject
+   ...
+}
+{
+   <py3_bytes_resize>
+   Memcheck:Value8
+   ...
+   fun:_PyBytes_Resize
+   ...
+}
+{
+   <py3_string_flags>
+   Memcheck:Value8
+   ...
+   fun:PyRun_StringFlags
+   ...
+}
+{
+   <py3_eval_frame>
+   Memcheck:Value8
+   ...
+   fun:_PyEval_EvalFrameDefault
+   ...
+}
+
+# Conditional jump or move depends on uninitialised value(s)
+{
+   <py3_list_append>
+   Memcheck:Cond
+   ...
+   fun:PyList_Append
+   ...
+}
+{
+   <py3_cond_string_flags>
+   Memcheck:Cond
+   ...
+   fun:PyRun_StringFlags
+   ...
+}
+#
+# -----------------------------------------------------------
