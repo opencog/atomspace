@@ -19,6 +19,17 @@ namespace opencog
 
 class AtomSpace;
 
+/**
+ * EvaluationLinks are 120 Bytes larger than ordinary links, because
+ * the FreeLinks needs that space to hold variables found inside
+ * expressions. To avoid this RAM usage, use EdgeLink instead. It's
+ * the same idea, but without the RAM overhead.
+ *
+ * FWIW: a "naked" EdgeLink is 224 Bytes; an EdgeLink with a FloatValue
+ * on it, stored in the AtomSpace is about 496 Bytes; see Atom.h for
+ * details. So using EvaluationLink costs 120/496=25% extra RAM over
+ * EdgeLink's. Ooof.
+ */
 class EvaluationLink : public FreeLink
 {
 public:

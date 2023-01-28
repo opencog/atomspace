@@ -324,18 +324,22 @@ ALWAYS_LINK <- PRESENT_LINK
 CONTINUATION_LINK <- EVALUATABLE_LINK
 
 // ====================================================================
-// Performance scripting links.
+// Basic Graph Theory
 //
-// ParallelLink launches multiple threads, but does not wait for any of
-// them to return.  ThreadJoinLink launches multiple threads, and waits
-// for all of them to return, and then returns the boolean And of their
-// TruthValues.
-PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-THREAD_JOIN_LINK <- PARALLEL_LINK
-
-// Somewhat like ThreadJoinLink, except that this works with executable,
-// not evaluatable links.
-EXECUTE_THREADED_LINK <- ORDERED_LINK
+// An EdgeLink is used to represent labelled graph edges. The intended
+// use is to write graph edges as
+//
+//      EdgeLink
+//         PredicateNode "some edge type" // Or a LexicalNode or BondNode
+//         ListLink  // always a pair
+//            Atom   // from-vertex
+//            Atom   // to-vertex
+//
+// This is the base class for EvaluationLink, below. It is smaller in
+// size, because the C++ EvaluationLink chews up an extra 120 Bytes to
+// store free variables (from FreeLink). So Edge is .. the same thing,
+// but slightly more RAM-efficient.
+EDGE_LINK <- ORDERED_LINK
 
 // ====================================================================
 // Connectors and sections.
@@ -676,7 +680,7 @@ DUAL_LINK <- SATISFYING_LINK
 // EvaluationLinks record the result of evaluating a predicate.
 // That is, given some elements, they indicate whether the predicate is
 // true or false (or has some other TruthValue) on those elements.
-EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
+EVALUATION_LINK <- FREE_LINK,EDGE_LINK,EVALUATABLE_LINK
 
 // ==============================================================
 // Types and type constructors. Variables and other Atoms can be
@@ -1044,6 +1048,20 @@ COND_LINK <- FUNCTION_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
+
+// ====================================================================
+// Performance scripting links.
+//
+// ParallelLink launches multiple threads, but does not wait for any of
+// them to return.  ThreadJoinLink launches multiple threads, and waits
+// for all of them to return, and then returns the boolean And of their
+// TruthValues.
+PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+THREAD_JOIN_LINK <- PARALLEL_LINK
+
+// Somewhat like ThreadJoinLink, except that this works with executable,
+// not evaluatable links.
+EXECUTE_THREADED_LINK <- ORDERED_LINK
 
 // ==============================================================
 // Procedure and schema nodes.
