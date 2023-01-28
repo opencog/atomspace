@@ -28,7 +28,7 @@ class AtomSpace;
  * FWIW: a "naked" EdgeLink is 224 Bytes; an EdgeLink with a FloatValue
  * on it, stored in the AtomSpace is about 496 Bytes; see Atom.h for
  * details. So using EvaluationLink costs 120/496=25% extra RAM over
- * EdgeLink's. Ooof.
+ * EdgeLinks. Ooof.
  */
 class EvaluationLink : public FreeLink
 {
