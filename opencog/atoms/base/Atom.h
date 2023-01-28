@@ -178,9 +178,38 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
- * represents nodes and links. In terms of C++ inheritance, nodes and
- * links are specializations of atoms, that is, they inherit all
- * properties from atoms.
+ * represents nodes and links. In terms of C++ inheritance, Nodes and
+ * Links are specializations of Atoms, that is, they inherit all
+ * properties from Atoms.
+ *
+ * A "typical" atom is about 500 Bytes in size. The RAM usage breakdown is as
+ * follows:
+ * -- 24 Bytes std::enable_shared_from_this<Value>
+ * --  8 Bytes Type _type plus 4 bool flags.
+ * --  8 Bytes ContentHash _content_hash;
+ * --  8 Bytes AtomSpace *_atom_space;
+ * -- 48 Bytes std::map<const Handle, ValuePtr> _values;
+ * -- 56 Bytes std::shared_mutex _mtx;
+ * -- 48 Bytes std::map<Type, WincomingSet> _incoming_set;
+ * Total: 200 Bytes for a base naked Atom.
+ *
+ * Node: Additional 32 Bytes for std::string _name + sizeof(chars of string)
+ * Link: Additional 24 Bytes for std::vector _outgoing + 16*(_outgoing.size());
+ *       A "typical" Link of size 2 is 256 Bytes, outside of AtomSpace
+ *
+ * Inserted into the AtomSpace: ?? per hash bucket. I guess 24 or 32
+ * Per addition to incoming set: 64 per std::_Rb_tree node
+ * Per non-default truth value, e.g. CountTruthValue:
+ * -- 24 Bytes std::enable_shared_from_this<Value>
+ * --  8 Bytes Type _type plus padding
+ * -- 24 Bytes std::vector<double> _value
+ * -- 24 Bytes 3*sizeof(double)
+ * -- 64 std::_Rb_tree node in the Atom holding the TV
+ * Total: 144 Bytes per CountTV (ouch).
+ *
+ * A "typical" Link of size 2, held in one other Link, in AtomSpace, holding
+ *   a CountTV in it: 496 Bytes.  This is indeed what is measured in real-life
+ *   large datasets.
  */
 class Atom
     : public Value
@@ -213,10 +242,10 @@ protected:
     mutable std::map<const Handle, ValuePtr> _values;
 
     // Lock, used to serialize changes.
-    // This costs 40 bytes per atom.  Tried using a single, global lock,
+    // This costs 56 bytes per atom.  Tried using a single, global lock,
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
-    // kind-of fat.
+    // fatter.
     mutable std::shared_mutex _mtx;
 
     /**
