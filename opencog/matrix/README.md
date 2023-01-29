@@ -114,7 +114,7 @@ does.
 The prototypical example is that of word-pairs. These are stored in the
 AtomSpace as
 ```
-    EvaluationLink   (count=6789)
+    EdgeLink   (count=6789)
         PredicateNode "word-pair"
         ListLink
             WordNode "foo"
@@ -161,8 +161,8 @@ The tools implemented here include:
 
 To use these tools, all you need to do is to specify a low-level
 object that describes the matrix. If the matrix is in the form of an
-`EvaluationLink`, as shown above, then it is sufficient to use the
-`make-evaluation-pair-api` to describe the types of the left and right
+`EdgeLink`, as shown above, then it is sufficient to use the
+`make-edge-pair-api` to describe the types of the left and right
 (row and column) atoms, and the `PredicateNode` identifying the pair;
 everything else is automated. If the matrix is not of the above form,
 then it is quite easy to write a small, custom matrix-access object

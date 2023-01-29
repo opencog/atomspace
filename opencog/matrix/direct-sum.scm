@@ -186,7 +186,7 @@
 		(define (fetch-all-pairs)
 			(LLA 'fetch-pairs)
 			(LLB 'fetch-pairs)
-			(fetch-incoming-by-type pred-node 'EvaluationLink)
+			(fetch-incoming-by-type pred-node 'EdgeLink)
 			*unspecified*
 		)
 
@@ -268,7 +268,7 @@
 			; If PAIR is a wildcard, then extract the wild-left.
 			; We used disjoint-left to construct it, so use same to test it.
 			(if (and (not disjoint-left)
-					(equal? 'EvaluationLink (cog-type PAIR))
+					(equal? 'EdgeLink (cog-type PAIR))
 					(cog-equal? pred-node (cog-outgoing-atom PAIR 0)))
 				(cog-outgoing-atom PAIR 1)
 
@@ -283,7 +283,7 @@
 			; If PAIR is a wildcard, then extract the wild-right.
 			; We used disjoint-right to construct it, so use same to test it.
 			(if (and (not disjoint-right)
-					(equal? 'EvaluationLink (cog-type PAIR))
+					(equal? 'EdgeLink (cog-type PAIR))
 					(cog-equal? pred-node (cog-outgoing-atom PAIR 0)))
 				(cog-outgoing-atom PAIR 2)
 
@@ -327,7 +327,7 @@
 				(if (type-a? R-ATOM R-ATOM)
 					(LLA 'left-wildcard R-ATOM)
 					(LLB 'left-wildcard R-ATOM))
-				(EvaluationLink pred-node left-wnode R-ATOM)))
+				(EdgeLink pred-node left-wnode R-ATOM)))
 
 		(define (right-wildcard L-ATOM)
 			(init-a-base)
@@ -335,10 +335,10 @@
 				(if (type-a? L-ATOM L-ATOM)
 					(LLA 'right-wildcard L-ATOM)
 					(LLB 'right-wildcard L-ATOM))
-				(EvaluationLink pred-node L-ATOM right-wnode)))
+				(EdgeLink pred-node L-ATOM right-wnode)))
 
 		(define (get-wild-wild)
-			(EvaluationLink pred-node left-wnode right-wnode))
+			(EdgeLink pred-node left-wnode right-wnode))
 
 		; ===================================================
 		; Overloaded stars functions

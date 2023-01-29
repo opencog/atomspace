@@ -75,7 +75,7 @@
 ; Most users will find it easiest to use the `make-evaluation-pair-api`
 ; to provide the low-level API.  This provides a default, generic pair
 ; object of the form
-;    `EvaluationLink PredicateNode "..." ListLink ...`.
+;    `EdgeLink PredicateNode "..." ListLink ...`.
 ; where the PredicateNode identifies what kind of object it is, and the
 ; ListLink specifies the specific pair.  See `eval-pair.scm` for details.
 ;
@@ -101,12 +101,12 @@
 ;
 ;     ; Return the type of the link that holds the pair.  In this
 ;     ; example, each pair will be held in the form
-;     ;  (Evaluation (Predicate "foo") (List (Word "row") (Word "col")))
-;     (define (get-pair-type) 'EvaluationLink)
+;     ;  (Edge (Predicate "foo") (List (Word "row") (Word "col")))
+;     (define (get-pair-type) 'EdgeLink)
 ;
 ;     ; Return the atom for a matrix (row,column) pair, if it exists,
 ;     ; else return nil. In this example, the matrix is defined by an
-;     ; EvaluationLink holding the ListLink. This atom is where all
+;     ; EdgeLink holding the ListLink. This atom is where all
 ;     ; values associated with this matrix are held.  This includes not
 ;     ; only the count (the number of observations of the pair) but also
 ;     ; any derived values, such as frequency, mutual information, and
@@ -116,13 +116,13 @@
 ;     (define (get-pair L-ATOM R-ATOM)
 ;        (define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
 ;        (if (nil? maybe-list) #f
-;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
+;           (cog-link 'EdgeLink (Predicate "foo") maybe-list)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'get-pair
 ;     ; method (the get-pair function, above).
 ;     (define (make-pair L-ATOM R-ATOM)
-;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
+;        (Edge (Predicate "foo") (List L-ATOM R-ATOM)))
 ;
 ;     ; Return the atom that forms the left, resp. right side of
 ;     ; the pair. These undo what 'make-pair does.
@@ -134,7 +134,7 @@
 ;     ; denotes a column, and the star is on the left (the star
 ;     ; ranging over all rows).
 ;     (define (get-left-wildcard ITEM)
-;        (EvaluationLink (Predicate "foo")
+;        (EdgeLink (Predicate "foo")
 ;           (ListLink (AnyNode "left-wild") ITEM)))
 ;
 ;     ; Return an atom to which row subtotals can be attached,
@@ -142,7 +142,7 @@
 ;     ; denotes a row, and the star is on the right (the star
 ;     ; ranging over all columns).
 ;     (define (get-right-wildcard ITEM)
-;        (EvaluationLink (Predicate "foo")
+;        (EdgeLink (Predicate "foo")
 ;           (ListLink ITEM (AnyNode "right-wild"))))
 ;
 ;     ; Return an atom to which matrix totals can be attached,
@@ -150,7 +150,7 @@
 ;     ; atom, but must be unique to the specific matrix. It's
 ;     ; convenient to use the same style as the subtotals.
 ;     (define (get-wild-wild)
-;        (EvaluationLink (Predicate "foo")
+;        (EdgeLink (Predicate "foo")
 ;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
 ;
 ;     ; Retrieve, from storage, the entire matrix, including the
@@ -158,7 +158,7 @@
 ;     ; are stored).  In this example, its enough to get the incoming
 ;     ; set of (Predicate "foo"), but this need not generally be the case.
 ;     (define (fetch-all-pairs)
-;        (fetch-incoming-by-type (Predicate "foo") 'EvaluationLink))
+;        (fetch-incoming-by-type (Predicate "foo") 'EdgeLink))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
