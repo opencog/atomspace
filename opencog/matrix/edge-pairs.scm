@@ -58,7 +58,7 @@
 
   (Historically, the EvaluationLink was used for this; however, the C++
   implementation of the EvaluationLink uses 120 Bytes more RAM than
-  plain Link types. Since "typical" Links require 500 Bytes, this is an
+  plain Link types. Since \"typical\" Links require 500 Bytes, this is an
   additional 120/500 = 25% RAM penalty. The EvaluationLink uses this
   memory to store free variables, used during grounded evaluations.)
 
@@ -110,7 +110,7 @@
 
 		; Create an atom to hold the count (if it doesn't exist already).
 		(define (make-pair L-ATOM R-ATOM)
-			(cog-new-link EDGE-LINK PRED-NODE (List L-ATOM R-ATOM)))
+			(cog-new-link EDGE-TYPE PRED-NODE (List L-ATOM R-ATOM)))
 
 		; Return the left member of the pair. Given the pair-atom,
 		; locate the left-side atom.
