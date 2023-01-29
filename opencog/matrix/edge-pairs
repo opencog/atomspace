@@ -36,13 +36,13 @@
 ;
 ; ---------------------------------------------------------------------
 
-(define-public (make-evaluation-pair-api PRED-NODE LEFT-TYPE RIGHT-TYPE
-               ANY-LEFT ANY-RIGHT ID NAME)
+(define-public (make-edge-pair-api EDGE-TYPE PRED-NODE
+                LEFT-TYPE RIGHT-TYPE ANY-LEFT ANY-RIGHT ID NAME)
 "
-  make-evaluation-pair-api -- Pair access methods for EdgeLinks.
+  make-edge-pair-api -- Pair access methods for generic pairs.
 
-  This implements a matrix object representing atom-pairs, when these
-  are encoded in an EdgeLink in the usual style.  An atom pair is
+  This implements a matrix object representing atom-pairs, using a
+  conventional pair encoding. For example, an atom pair can be
   represented as:
 
     EdgeLink
@@ -51,15 +51,25 @@
           SomeAtom \"some thing on left (in a row)\"
           OtherNode \"other thing on right (in a column)\"
 
-  This Atom (the EdgeLink) be used to record counts, frequencies,
+  This Atom (the EdgeLink) can be used to record counts, frequencies,
   entropies, etc pertaining to this particular pair, simply by placing
   them, as values, on the EdgeLink. The EdgeLink serves as a well-known
   location in a sparse rank-2 matrix; arbitrary data can be placed there.
 
-  The PRED-NODE should be the `PredicateNode` encoding the relation.
-  The LEFT-TYPE should be the atom type of the row-atoms.
-  The RIGHT-TYPE should be the atom type of the column-atoms.
-    (Atom types are scheme symbols, for example 'ConceptNode.)
+  (Historically, the EvaluationLink was used for this; however, the C++
+  implementation of the EvaluationLink uses 120 Bytes more RAM than
+  plain Link types. Since "typical" Links require 500 Bytes, this is an
+  additional 120/500 = 25% RAM penalty. The EvaluationLink uses this
+  memory to store free variables, used during grounded evaluations.)
+
+  The EDGE-TYPE should be the Link type encoding the pair; it is
+      'EdgeLink in the example above.
+  The PRED-NODE should be the Atom labelling the pair; it is
+      (PredicateNode \"Some named relation\") in the example above.
+  The LEFT-TYPE should be the Atom type of the row-atoms.
+  The RIGHT-TYPE should be the Atom type of the column-atoms.
+      Atom types are scheme symbols, for example 'ConceptNode.
+      The left and right types can be Nodes or Links.
 
   The ID should be a short string that serves as a unique id for
   this particular matrix. It is used when constructing submatrixes
@@ -81,13 +91,11 @@
 
   The corresponding usage for this object would then be:
 
-    (make-evaluation-pair-api (Predicate \"Some named relation\")
+    (make-edge-pair-api 'EdgeLink (Predicate \"Some named relation\")
        'GeneNode 'GeneNode (Any \"left-gene\") (Any \"right-gene\")
        \"gene-pairs\" \"Interacting pairs of genes\")
 "
 	(let ((all-pairs '()))
-
-		(define EDGE-TYPE 'EvaluationLink)
 
 		(define (get-left-type) LEFT-TYPE)
 		(define (get-right-type) RIGHT-TYPE)
@@ -229,6 +237,19 @@
 					((describe)         describe)
 					(else (error "Bad method call on evaluation-api:" message)))
 				args)))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-evaluation-pair-api PRED-NODE LEFT-TYPE RIGHT-TYPE
+               ANY-LEFT ANY-RIGHT ID NAME)
+"
+  make-evaluation-pair-api -- Pair access methods for EvaluationLinks.
+
+  See make-edge-pair-api for documentation.
+"
+	(make-edge-pair-api 'EvaluationLink
+		PRED-NODE LEFT-TYPE RIGHT-TYPE ANY-LEFT ANY-RIGHT ID NAME)
 )
 
 ; ---------------------------------------------------------------------
