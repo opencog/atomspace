@@ -1,7 +1,7 @@
 ;
-; eval-pairs.scm
+; edge-pairs.scm
 ;
-; Define an EvaluationLink matrix API object.
+; Define an EdgeLink matrix API object.
 ;
 ; Copyright (c) 2013, 2014, 2017, 2020 Linas Vepstas
 ;
@@ -9,7 +9,7 @@
 ; OVERVIEW
 ; --------
 ; The object below provides a matrix API to access pairs of Atoms, held
-; in an EvaluationLink. This API unlocks a suite of tools for computing
+; in an EdgeLink. This API unlocks a suite of tools for computing
 ; various properties of the matrix, including frequencies, marginal
 ; probabilities and assorted vector-space properties.  By "matrix" it
 ; is meant a rank-2 sparse matrix, a matrix of (left,right) paris or
@@ -19,15 +19,14 @@
 ;
 ; To be explicit: a sparse matrix can be encoded in the AtomSpace as
 ;
-;     EvaluationLink
+;     EdgeLink
 ;         PredicateNode "some named relationship"
 ;         ListLink
 ;             SomeAtom "Some thing on the left (row)"
 ;             OtherNode "some other atom on right (column)"
 ;
-; Matrix entries N(x,y) are stored as counts (numbers) on the
-; EvaluationLink, with the `x` being the left atom, and `y`
-; being the right atom.
+; Matrix entries N(x,y) are stored as counts (numbers) on the EdgeLink,
+; with the `x` being the left atom, and `y` being the right atom.
 ;
 ; Given the generic API, the matrx system will compute marginals N(x,*)
 ; and N(*,y), a grand total N(*,*) and then probabilities:
@@ -37,31 +36,40 @@
 ;
 ; ---------------------------------------------------------------------
 
-(define-public (make-evaluation-pair-api PRED-NODE LEFT-TYPE RIGHT-TYPE
-               ANY-LEFT ANY-RIGHT ID NAME)
+(define-public (make-edge-pair-api EDGE-TYPE PRED-NODE
+                LEFT-TYPE RIGHT-TYPE ANY-LEFT ANY-RIGHT ID NAME)
 "
-  make-evaluation-pair-api -- Pair access methods for EvaluationLinks.
+  make-edge-pair-api -- Pair access methods for generic pairs.
 
-  This implements a matrix object representing atom-pairs, when these
-  are encoded in an EvaluationLink in the usual style.  An atom pair is
+  This implements a matrix object representing atom-pairs, using a
+  conventional pair encoding. For example, an atom pair can be
   represented as:
 
-    EvaluationLink
+    EdgeLink
        PredicateNode \"Some named relation\"
        ListLink
           SomeAtom \"some thing on left (in a row)\"
           OtherNode \"other thing on right (in a column)\"
 
-  This Atom (the EvaluationLink) be used to record counts, frequencies,
+  This Atom (the EdgeLink) can be used to record counts, frequencies,
   entropies, etc pertaining to this particular pair, simply by placing
-  them, as values, on the EvaluationLink. The EvaluationLink serves as
-  a well-known location in a sparse rank-2 matrix; arbitrary data can
-  be placed there.
+  them, as values, on the EdgeLink. The EdgeLink serves as a well-known
+  location in a sparse rank-2 matrix; arbitrary data can be placed there.
 
-  The PRED-NODE should be the `PredicateNode` encoding the relation.
-  The LEFT-TYPE should be the atom type of the row-atoms.
-  The RIGHT-TYPE should be the atom type of the column-atoms.
-    (Atom types are scheme symbols, for example 'ConceptNode.)
+  (Historically, the EvaluationLink was used for this; however, the C++
+  implementation of the EvaluationLink uses 120 Bytes more RAM than
+  plain Link types. Since \"typical\" Links require 500 Bytes, this is an
+  additional 120/500 = 25% RAM penalty. The EvaluationLink uses this
+  memory to store free variables, used during grounded evaluations.)
+
+  The EDGE-TYPE should be the Link type encoding the pair; it is
+      'EdgeLink in the example above.
+  The PRED-NODE should be the Atom labelling the pair; it is
+      (PredicateNode \"Some named relation\") in the example above.
+  The LEFT-TYPE should be the Atom type of the row-atoms.
+  The RIGHT-TYPE should be the Atom type of the column-atoms.
+      Atom types are scheme symbols, for example 'ConceptNode.
+      The left and right types can be Nodes or Links.
 
   The ID should be a short string that serves as a unique id for
   this particular matrix. It is used when constructing submatrixes
@@ -75,7 +83,7 @@
   purpose. Thus, for example, marginal probabilities for rows of
   genomic data might be encoded as:
 
-    EvaluationLink
+    EdgeLink
        PredicateNode \"Some named relation\"
        ListLink
           AnyNode \"left-gene\"
@@ -83,7 +91,7 @@
 
   The corresponding usage for this object would then be:
 
-    (make-evaluation-pair-api (Predicate \"Some named relation\")
+    (make-edge-pair-api 'EdgeLink (Predicate \"Some named relation\")
        'GeneNode 'GeneNode (Any \"left-gene\") (Any \"right-gene\")
        \"gene-pairs\" \"Interacting pairs of genes\")
 "
@@ -91,18 +99,18 @@
 
 		(define (get-left-type) LEFT-TYPE)
 		(define (get-right-type) RIGHT-TYPE)
-		(define (get-pair-type) 'EvaluationLink)
+		(define (get-pair-type) EDGE-TYPE)
 
 		; Return the atom holding the count, if it exists, else
 		; return nil.
 		(define (get-pair L-ATOM R-ATOM)
 			(define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
 			(if (null? maybe-list) '()
-				(cog-link 'EvaluationLink PRED-NODE maybe-list)))
+				(cog-link EDGE-TYPE PRED-NODE maybe-list)))
 
 		; Create an atom to hold the count (if it doesn't exist already).
 		(define (make-pair L-ATOM R-ATOM)
-			(EvaluationLink PRED-NODE (List L-ATOM R-ATOM)))
+			(cog-new-link EDGE-TYPE PRED-NODE (List L-ATOM R-ATOM)))
 
 		; Return the left member of the pair. Given the pair-atom,
 		; locate the left-side atom.
@@ -133,7 +141,7 @@
 					(and
 						(equal? LEFT-TYPE (cog-type (gadr pair)))
 						(equal? RIGHT-TYPE (cog-type (gddr pair)))))
-				(cog-incoming-by-type PRED-NODE 'EvaluationLink)))
+				(cog-incoming-by-type PRED-NODE EDGE-TYPE)))
 
 		(define (get-all-pairs)
 			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
@@ -169,9 +177,9 @@
 			(format #t
 				(string-append
 "This is the `make-evaluation-pair-api` object. It provides a matrix API\n"
-"for the EvaluationLinks of the following form:\n"
+"for the EdgeLinks of the following form:\n"
 "\n"
-"     EvaluationLink\n"
+"     EdgeLink\n"
 "         PredicateNode \"~A\"\n"
 "         ListLink\n"
 "             ~A ...\n"
@@ -183,14 +191,14 @@
 "    id               The string ID of the object\n"
 "    left-type        The type of the row Atoms\n"
 "    right-type       The type of the column Atoms\n"
-"    pair-type        Returns 'EvalutionLink\n"
-"    get-pair L R     Returns Evaluation Pred List L R, if it exists, else null\n"
-"    make-pair L R    Unconditionally make Evaluation Pred List L R\n"
-"    left-element E   Return the row Atom of the EvaluationLink E\n"
-"    right-element E  Return the column Atom of the EvaluationLink E\n"
-"    left-wildcard R  Return Evaluation Pred List ANY R\n"
-"    right-wildcard L Return Evaluation Pred List L ANY\n"
-"    wild-wild        Return Evaluation Pred List ANY ANY\n"
+"    pair-type        Returns 'EdgeLink\n"
+"    get-pair L R     Returns Edge Pred List L R, if it exists, else null\n"
+"    make-pair L R    Unconditionally make EdgeLink Pred List L R\n"
+"    left-element E   Return the row Atom of the EdgeLink E\n"
+"    right-element E  Return the column Atom of the EdgeLink E\n"
+"    left-wildcard R  Return EdgeLink Pred List ANY R\n"
+"    right-wildcard L Return EdgeLink Pred List L ANY\n"
+"    wild-wild        Return EdgeLink Pred List ANY ANY\n"
 "    all-pairs        Return a list of all non-zero entries in the matrix\n"
 "    fetch-pairs      Fetch all matrix entries from currently-open database\n"
 "    delete-pairs     Delete all pairs for this matrix in the AtomSpace\n"
@@ -229,6 +237,19 @@
 					((describe)         describe)
 					(else (error "Bad method call on evaluation-api:" message)))
 				args)))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-evaluation-pair-api PRED-NODE LEFT-TYPE RIGHT-TYPE
+               ANY-LEFT ANY-RIGHT ID NAME)
+"
+  make-evaluation-pair-api -- Pair access methods for EvaluationLinks.
+
+  See make-edge-pair-api for documentation.
+"
+	(make-edge-pair-api 'EvaluationLink
+		PRED-NODE LEFT-TYPE RIGHT-TYPE ANY-LEFT ANY-RIGHT ID NAME)
 )
 
 ; ---------------------------------------------------------------------

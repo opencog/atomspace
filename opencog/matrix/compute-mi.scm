@@ -20,8 +20,8 @@
 ; counts attached to each. The prototypical example is a word-pair,
 ; connected with an "ANY" link-grammar link:
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;   EdgeLink
+;      BondNode "ANY"
 ;      ListLink
 ;         WordNode "some-word"
 ;         WordNode "other-word"
@@ -30,7 +30,7 @@
 ; on the "low-level API". These include:
 ;   'left-type and 'right-type, both of which should return 'WordNode
 ;         for the above.
-;   'get-pair, which should return the EvaluationLink, given the
+;   'get-pair, which should return the EdgeLink, given the
 ;        ListLink
 ;   'left-wildcard and 'right-wildcard, indicating where the partial
 ;        sums, such as N(x,*) and N(*,y) should be stored.
@@ -38,10 +38,10 @@
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
 ; example above.  Properly speaking, this count is conditioned on the
-; LinkGrammarRelationshipNode "ANY", so the correct notation would be
-; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
-; relationship is always assumed to be the same, and is thus dropped.
-; (the relationship is provided through the GET-PAIR function).
+; BondNode "ANY", so the correct notation would be N(rel, wl, wr) with
+; `rel` the relationship.  In what follows, the relationship is always
+; assumed to be the same, and is thus dropped (The relationship is
+; provided through the GET-PAIR function).
 ;
 ; The mutual information for a pair is defined as follows:  Given
 ; two items, wl and wr, define three probabilities:
@@ -67,20 +67,20 @@
 ; For example, for word-pair counts, the wild-card sums are stored
 ; with the atoms
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;   EdgeLink
+;      BondNode "ANY"
 ;      ListLink
 ;         AnyNode "left-word"
 ;         WordNode "bird"
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;   EdgeLink
+;      BondNode "ANY"
 ;      ListLink
 ;         WordNode "word"
 ;         AnyNode "right-word"
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;   EdgeLink
+;      BondNode "ANY"
 ;      ListLink
 ;         AnyNode "left-word"
 ;         AnyNode "right-word"

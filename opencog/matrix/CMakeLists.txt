@@ -6,8 +6,8 @@ ADD_GUILE_MODULE (FILES
 	count-api.scm
 	direct-sum.scm
 	dynamic.scm
+	edge-pairs.scm
 	entropy.scm
-	eval-pairs.scm
 	filter.scm
 	fold-api.scm
 	frequency.scm

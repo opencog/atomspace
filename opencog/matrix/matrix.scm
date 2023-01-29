@@ -36,7 +36,7 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (include-from-path "opencog/matrix/progress.scm")
-(include-from-path "opencog/matrix/eval-pairs.scm")
+(include-from-path "opencog/matrix/edge-pairs.scm")
 (include-from-path "opencog/matrix/object-api.scm")
 (include-from-path "opencog/matrix/count-api.scm")
 (include-from-path "opencog/matrix/futures.scm")
