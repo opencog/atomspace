@@ -168,7 +168,7 @@
 		; However, we don't currently have a "fetch all atoms that have
 		; this key on it" callback into storage nodes, so fixing it this
 		; way is ... hard. An alternative encoding is to encode
-		; similarities as (Evaluation (Predicate id-string) (Similarity ...))
+		; similarities as (Edge (Predicate id-string) (Similarity ...))
 		; but that doubles the number of atoms... This encoding, if used,
 		; should be done outside of this object, somewhere else.
 		(define (fetch-sim-pairs)

@@ -176,11 +176,11 @@
 		(define (help)
 			(format #t
 				(string-append
-"This is the `make-evaluation-pair-api` object. It provides a matrix API\n"
-"for the EdgeLinks of the following form:\n"
+"This is the `make-edge-pair-api` object. It provides a matrix API\n"
+"for the Atom pairs of the following form:\n"
 "\n"
-"     EdgeLink\n"
-"         PredicateNode \"~A\"\n"
+"     ~A\n"
+"         ~A \"~A\"\n"
 "         ListLink\n"
 "             ~A ...\n"
 "             ~A ...\n"
@@ -191,25 +191,25 @@
 "    id               The string ID of the object\n"
 "    left-type        The type of the row Atoms\n"
 "    right-type       The type of the column Atoms\n"
-"    pair-type        Returns 'EdgeLink\n"
+"    pair-type        Returns the edge type\n"
 "    get-pair L R     Returns Edge Pred List L R, if it exists, else null\n"
-"    make-pair L R    Unconditionally make EdgeLink Pred List L R\n"
-"    left-element E   Return the row Atom of the EdgeLink E\n"
-"    right-element E  Return the column Atom of the EdgeLink E\n"
-"    left-wildcard R  Return EdgeLink Pred List ANY R\n"
-"    right-wildcard L Return EdgeLink Pred List L ANY\n"
-"    wild-wild        Return EdgeLink Pred List ANY ANY\n"
+"    make-pair L R    Unconditionally make Edge Pred List L R\n"
+"    left-element E   Return the row Atom of the Edge E\n"
+"    right-element E  Return the column Atom of the Edge E\n"
+"    left-wildcard R  Return Edge Pred List ANY R\n"
+"    right-wildcard L Return Edge Pred List L ANY\n"
+"    wild-wild        Return Edge Pred List ANY ANY\n"
 "    all-pairs        Return a list of all non-zero entries in the matrix\n"
 "    fetch-pairs      Fetch all matrix entries from currently-open database\n"
 "    delete-pairs     Delete all pairs for this matrix in the AtomSpace\n"
 "    help             Print this message\n"
-"    describe         Print documentation for make-evaluation-pair-api\n"
+"    describe         Print documentation for make-edge-pair-api\n"
 )
-				(cog-name PRED-NODE) LEFT-TYPE RIGHT-TYPE)
+				EDGE-TYPE (cog-type PRED-NODE) (cog-name PRED-NODE) LEFT-TYPE RIGHT-TYPE)
 			*unspecified*)
 
 		(define (describe)
-			(display (procedure-property make-evaluation-pair-api 'documentation)))
+			(display (procedure-property make-edge-pair-api 'documentation)))
 
       ;-------------------------------------------
 
@@ -235,7 +235,7 @@
 					((filters?)         (lambda () #f))
 					((help)             help)
 					((describe)         describe)
-					(else (error "Bad method call on evaluation-api:" message)))
+					(else (error "Bad method call on make-edge-pair-api:" message)))
 				args)))
 )
 
@@ -247,6 +247,8 @@
   make-evaluation-pair-api -- Pair access methods for EvaluationLinks.
 
   See make-edge-pair-api for documentation.
+
+  Deprecated; do not use in new code!
 "
 	(make-edge-pair-api 'EvaluationLink
 		PRED-NODE LEFT-TYPE RIGHT-TYPE ANY-LEFT ANY-RIGHT ID NAME)
