@@ -40,22 +40,22 @@ text-editor to the guile prompt: this gives you a chance to see what
 happens, and how the system reacts. (But read the "Introduction" below,
 first).
 
-* `basic.scm`          -- How to start the guile shell.
-* `knowledge.scm`      -- Representing knowledge.
-* `bindlink.scm`       -- Queries and inference with the pattern matcher.
-* `get-put.scm`        -- The two halves of a query: Get and Put.
-* `assert-retract.scm` -- Asserting facts in the AtomSpace.
-* `state.scm`          -- Maintaining unique state.
-* `property.scm`       -- Designing Atoms with properties.
-* `truthvalues.scm`    -- Declaring the truth of a proposition.
-* `values.scm`         -- Using Values and attaching them to Atoms.
-* `stream.scm`         -- Using a stream of time-varying Values.
-* `formulas.scm`       -- Representing arithmetic and computing Values.
-* `flows.scm`          -- Flowing Values around.
-* `flow-formulas.scm`  -- Dynamically updating TruthValues.
-* `flow-futures.scm`   -- Dynamically updating FloatValues.
-* `table.scm`          -- Fetching Values from a CSV/TSV table.
-* `multi-space.scm`    -- Using multiple AtomSpaces at once.
+* [`basic.scm`](basic.scm)          -- How to start the guile shell.
+* [`knowledge.scm`](knowledge.scm)      -- Representing knowledge.
+* [`bindlink.scm`](bindlink.scm`)       -- Queries and inference with the pattern matcher.
+* [`get-put.scm`](get-put.scm)        -- The two halves of a query: Get and Put.
+* [`assert-retract.scm`](assert-retract.scm) -- Asserting facts in the AtomSpace.
+* [`state.scm`](state.scm)          -- Maintaining unique state.
+* [`property.scm`](property.scm)       -- Designing Atoms with properties.
+* [`truthvalues.scm`](truthvalues.scm)    -- Declaring the truth of a proposition.
+* [`values.scm`](values.scm)         -- Using Values and attaching them to Atoms.
+* [`stream.scm`](stream.scm)         -- Using a stream of time-varying Values.
+* [`formulas.scm`](formulas.scm)       -- Representing arithmetic and computing Values.
+* [`flows.scm`](flows.scm)          -- Flowing Values around.
+* [`flow-formulas.scm`](flow-formulas.scm)  -- Dynamically updating TruthValues.
+* [`flow-futures.scm`](flow-futures.scm)   -- Dynamically updating FloatValues.
+* [`table.scm`](table.scm)          -- Fetching Values from a CSV/TSV table.
+* [`multi-space.scm`](multi-space.scm)    -- Using multiple AtomSpaces at once.
 
 After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
@@ -67,24 +67,24 @@ Advanced Demos
 System programmers will need to know the following examples in order to
 be effective.
 
-* `recursive-loop.scm` -- Writing tail-recursive loops.
-* `random-choice.scm`  -- Numerical programming, including loops.
-* `factorial.scm`      -- Recursive numerical programming.
-* `logging.scm`        -- Using the cogutils logger.
-* `python.scm`         -- Mixing Python and Scheme together.
-* `execute.scm`        -- Callbacks written in python or scheme.
-* `threaded.scm`       -- Multi-threading in Atomese.
-* `parallel.scm`       -- Multi-threading in Atomese.
-* `except.scm`         -- Throwing and catching exceptions.
-* `persist-file.scm`   -- Dump and load Atoms to a plain-text file.
-* `persist-store.scm`  -- StorageNode API to a plain-text file.
-* `persistence.scm`    -- StorageNode API to an SQL database.
-* `persist-query.scm`  -- Fetching sets of Atoms with queries.
-* `persist-multi.scm`  -- Work with multiple databases/servers at once.
-* `persist-proxy.scm`  -- Work with proxy agents to access multiple dbs.
-* `copy-on-write.scm`  -- Read-only AtomSpace, with r/w overlays.
-* `frame.scm`          -- Using StateLink in overlays.
-* `gperf.scm`          -- Some very crude performance measurements.
+* [`recursive-loop.scm`](recursive-loop.scm) -- Writing tail-recursive loops.
+* [`random-choice.scm`](random-choice.scm)  -- Numerical programming, including loops.
+* [`factorial.scm`](factorial.scm)      -- Recursive numerical programming.
+* [`logging.scm`](logging.scm)        -- Using the cogutils logger.
+* [`python.scm`](python.scm)         -- Mixing Python and Scheme together.
+* [`execute.scm`](execute.scm)        -- Callbacks written in python or scheme.
+* [`threaded.scm`](threaded.scm)       -- Multi-threading in Atomese.
+* [`parallel.scm`](parallel.scm)       -- Multi-threading in Atomese.
+* [`except.scm`](except.scm)         -- Throwing and catching exceptions.
+* [`persist-file.scm`](persist-file.scm)   -- Dump and load Atoms to a plain-text file.
+* [`persist-store.scm`](persist-store.scm)  -- StorageNode API to a plain-text file.
+* [`persistence.scm`](persistence.scm)    -- StorageNode API to an SQL database.
+* [`persist-query.scm`](persist-query.scm)  -- Fetching sets of Atoms with queries.
+* [`persist-multi.scm`](persist-multi.scm)  -- Work with multiple databases/servers at once.
+* [`persist-proxy.scm`](persist-proxy.scm)  -- Work with proxy agents to access multiple dbs.
+* [`copy-on-write.scm`](copy-on-write.scm)  -- Read-only AtomSpace, with r/w overlays.
+* [`frame.scm`](frame.scm)          -- Using StateLink in overlays.
+* [`gperf.scm`](gperf.scm)          -- Some very crude performance measurements.
 
 Documentation
 -------------
