@@ -160,6 +160,7 @@ Type NameServer::declType(const Type parent,
     _code2NameMap.resize(nTypes);
     _code2ShortMap.resize(nTypes);
     _mod.resize(nTypes);
+    _hash.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
     for (auto& bv: recursiveMap) bv.resize(nTypes, false);
@@ -170,6 +171,7 @@ Type NameServer::declType(const Type parent,
     name2CodeMap[name]           = type;
     _code2NameMap[type]          = &(name2CodeMap.find(name)->first);
     _mod[type]                   = _tmod;
+    _hash[type]                  = std::hash<std::string>{}(name);
 
     Type maxd = 1;
     setParentRecursively(parent, type, maxd);

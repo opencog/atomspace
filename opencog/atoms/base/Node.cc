@@ -176,7 +176,9 @@ ContentHash Node::compute_hash() const
 	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// 1<<43 - 369 is a prime number.
-	hsh += (hsh<<5) + ((1ULL<<43)-369) * get_type();
+	// The nameserver().getTypeHash() returns hash of the type string name,
+	// and is thus independent of other types in the tree.
+	hsh += (hsh<<5) + ((1ULL<<43)-369) * nameserver().getTypeHash(get_type());
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1));
