@@ -21,8 +21,10 @@ ROCKS_STORAGE_NODE <- STORAGE_NODE
 COG_SIMPLE_STORAGE_NODE <- STORAGE_NODE
 COG_STORAGE_NODE <- STORAGE_NODE
 
-// Experimental SQL I/O interfaces in atomspace-automap git repo
+// Experimental SQL I/O interfaces in atomspace-bridge git repo
+// Remove FOREIGN_STORAGE_NODE after April 2023
 FOREIGN_STORAGE_NODE <- STORAGE_NODE
+BRIDGE_STORAGE_NODE <- STORAGE_NODE
 
 // There is no IPFS_STORAGE_NODE nor DHT_STORAGE_NODE because these
 // are currently deeply, fundamentally broken. Whoops!
