@@ -654,15 +654,7 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 		if (not ptm->isLiteral() and not ptm->isPresent() and
 		    not ptm->isChoice() and not ptm->isAbsent()) continue;
 
-		const Handle& claw = ptm->getQuote();
-
-		if (1 == num_unquoted_unscoped_in_tree(claw, _variables.varset))
-		{
-			// The cache uses getHandle() not getQuote()
-			// and so we must as well.
-			_pat.cacheable_clauses.insert(ptm->getHandle());
-			continue;
-		}
+		const Handle& claw = ptm->getHandle();
 
 		// Caching works fine, if there are UnorderedLinks. However,
 		// if there is a lot of them, so that the engine is exploring
@@ -674,7 +666,7 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 		// that most ussers will surely almost never do :-)
 		if (4 < contains_atomtype_count(claw, UNORDERED_LINK)) continue;
 
-		_pat.cacheable_multi.insert(claw);
+		_pat.cacheable_clauses.insert(claw);
 	}
 }
 
