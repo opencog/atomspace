@@ -6864,7 +6864,7 @@ the same thing
 .
  There is an IETF draft standard for references,
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 See 
@@ -6873,7 +6873,7 @@ status open
 
 \begin_layout Plain Layout
 
-https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html
+https://datatracker.ietf.org/doc/html/draft-pbryan-zyp-json-ref-03
 \end_layout
 
 \end_inset
