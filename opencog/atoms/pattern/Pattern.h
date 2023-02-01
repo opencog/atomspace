@@ -107,12 +107,8 @@ struct Pattern
 	/// Clauses that can be grounded in only one way; thus the
 	/// result of that grounding can be cached, to avoid rechecking.
 	/// These clauses cannot contain evaluatable elements (as these
-	/// have context-dependent valuations), and can only contain one
-	/// variable (for lookup performance.)
+	/// have context-dependent valuations).
 	HandleSet cacheable_clauses;
-
-	/// As above, but clauses that hold two or more variables.
-	HandleSet cacheable_multi;
 
 	/// For each clause, the list of variables that appear in that clause.
 	/// Used in conjunction with the `cacheable_multi` above.
