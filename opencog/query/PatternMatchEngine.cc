@@ -3081,9 +3081,17 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (pclause->isChoice())
 		return explore_clause_direct(term, grnd, pclause);
 
+	// If its not cacheable, then we must search directly.
 	const Handle& clause = pclause->getHandle();
 	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
 		return explore_clause_direct(term, grnd, pclause);
+
+	// If we are here, then we *might* be able to find a previous grounding
+	// in the cache. Here's how it works. We look to see if we have groundings
+	// for ALL of the variables in the clause. If we do, then those groundings,
+	// plus the clause itself, form a key for the cache. If we find that key,
+	// then we are done with this clause. Every term in within the clause
+	// is uniquely determined by the variable groundings.
 
 	// Build the cache lookup key
 	const HandleSeq& varseq = _pat->clause_variables.at(pclause);
