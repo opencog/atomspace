@@ -251,6 +251,7 @@ private:
 		CALL_UNORDER,
 		CALL_PRESENT,
 		CALL_CHOICE,
+		CALL_CACHE,
 		CALL_SOLN
 	} Caller;   // debug-print call-tracing.
 

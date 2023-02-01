@@ -3092,8 +3092,12 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	// plus the clause itself, form a key for the cache. If we find that key,
 	// then we are done with this clause. Every term in within the clause
 	// is uniquely determined by the variable groundings.
+	//
+	// In particular, this means that we can safely ignore both the term,
+	// and it's proposed grounding. The QDEBUG shortly below checks this
+	// assumption.
 
-	// Build the cache lookup key
+	// Build the cache lookup key.
 	const HandleSeq& varseq = _pat->clause_variables.at(pclause);
 	HandleSeq key = clause_grounding_key(clause, varseq);
 
@@ -3105,6 +3109,18 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (cac != _gnd_cache.end())
 	{
 		logmsg("Cache hit!");
+
+// #ifdef QDEBUG
+#if 1 // Enable this for now, see if we hit this in the wild... (Jan 2023)
+		// Lets double-check that the term that was offered up is actually
+		// consistent with the cached grounding. There's a problem, if it
+		// is not.
+		bool check = tree_compare(term, grnd, CALL_CACHE);
+		OC_ASSERT(check, "Internal Error: term inconsistent with cache!");
+		OC_ASSERT(var_grounding.find(term->getHandle()) != var_grounding.end(),
+			"Warning: term not yet recorded!");
+		var_grounding[term->getHandle()] = grnd;
+#endif
 
 		// Record the clause grounding.
 		var_grounding[clause] = cac->second;
