@@ -82,6 +82,7 @@ private:
     std::vector<const std::string*> _code2NameMap;
     std::vector<const std::string*> _code2ShortMap;
     std::vector<int> _mod;
+    std::vector<size_t> _hash;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
@@ -305,6 +306,17 @@ public:
      */
     const std::string& getTypeName(Type type) const;
     const std::string& getTypeShortName(Type type) const;
+
+    /**
+     * Returns a hash for the atom type. The hash does not depend on
+     * the type number, and thus remains stable as types are added
+     * and removed from the type hierarchy. The hash is computed from
+     * the string name of the type.
+     *
+     * @param type Atom type code.
+     * @return A corresponding hash.
+     */
+    size_t getTypeHash(Type type) const { return _hash[type]; }
 };
 
 NameServer& nameserver();
