@@ -10,7 +10,8 @@
 ;
 ; Then, scroll to the bottom, and try some of the commented-out examples.
 
-(use-modules (opencog))
+(use-modules (opencog)(opencog exec))
+(use-modules (opencog persist))
 
 (define my-trans (Concept "My FSM's Transition Rule"))
 (define my-state (Anchor  "My FSM's Current State"))
