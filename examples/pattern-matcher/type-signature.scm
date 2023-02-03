@@ -8,6 +8,7 @@
 ; groundings must respect the variable type.
 ;
 (use-modules (opencog) (opencog exec))
+(use-modules (opencog type-utils))
 
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))
