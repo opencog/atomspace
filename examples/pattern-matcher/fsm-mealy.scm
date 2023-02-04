@@ -11,7 +11,6 @@
 ; Then, scroll to the bottom, and try some of the commented-out examples.
 
 (use-modules (opencog)(opencog exec))
-(use-modules (opencog persist))
 
 (define my-trans (Concept "My FSM's Transition Rule"))
 (define my-state (Anchor  "My FSM's Current State"))
@@ -155,7 +154,7 @@
 ; Set the direction
 (define (move-dir dir)
 	; First, delete the current external state
-	(cog-delete (Evaluation extern-anchor (show-environment-state)))
+	(cog-extract! (Evaluation extern-anchor (show-environment-state)))
 	; Next, set the new direction
 	(Evaluation extern-anchor dir))
 
