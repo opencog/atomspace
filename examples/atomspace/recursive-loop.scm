@@ -23,7 +23,7 @@
 
 ; Define a predicate that tests to see if the sum of three random
 ; values is less than 2.5 or not.
-(define uniform (ValueOfLink someplace key))
+(define uniform (FloatValueOfLink someplace key))
 (Define (DefinedPredicate "keep going?")
    (GreaterThan (Number 2.5) (Plus uniform uniform uniform)))
 

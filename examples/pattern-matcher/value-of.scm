@@ -51,7 +51,7 @@
 			; Divide by twelve, then see if its more than 3.
 			(GreaterThan
 				(Divide
-					(ValueOf (Variable "$X") key)
+					(FloatValueOf (Variable "$X") key)
 					(Number 12))
 				(Number 3)))
 		(Variable "$X")))
