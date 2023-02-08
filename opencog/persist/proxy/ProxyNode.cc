@@ -88,7 +88,15 @@ StorageNodeSeq ProxyNode::setup(void)
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return stolist;
 
-	// If there is only one, grab it.
+	// Don't know what to do if there are two or more paramter sets.
+	if (1 != dli.size())
+	{
+		throw SyntaxException(TRACE_INFO,
+			"Expecting only one set of parameters for a ProxyNode. Got %lu of them:\n%s\n",
+			dli.size(), oc_to_string(dli).c_str());
+	}
+
+	// If there is no ListLink, then just grab that.
 	Handle params = dli[0]->getOutgoingAtom(1);
 	if (params->is_type(STORAGE_NODE))
 	{
@@ -106,9 +114,24 @@ StorageNodeSeq ProxyNode::setup(void)
 	{
 		StorageNodePtr stnp = StorageNodeCast(h);
 		if (nullptr == stnp)
+		{
+			// If its a StorageNode but the cast failed, that
+			// means the type defintion was not loaded. Print a
+			// user-friendly error message for this case.
+			if (nameserver().isA(h->get_type(), STORAGE_NODE))
+			{
+				throw SyntaxException(TRACE_INFO,
+					"There is no definition for %s.\n"
+					"Did you forget to load the module that deffines this?\n"
+					"For example: `(use-modules (opencog persist-rocks))`\n"
+					"Config was %s\n",
+					h->to_short_string().c_str(),
+					dli[0]->to_short_string().c_str());
+			}
 			throw SyntaxException(TRACE_INFO,
-				"Expecting a list of ProxyNodes! Got\n%s\n",
+				"Expecting a list of Storage or ProxyNodes! Got\n%s\n",
 				dli[0]->to_short_string().c_str());
+		}
 
 		stolist.emplace_back(stnp);
 	}
