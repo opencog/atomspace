@@ -151,7 +151,7 @@
 		; from the currently-open database.
 		(define (fetch-all-pairs)
 			(define elapsed-secs (make-elapsed-secs))
-			(fetch-incoming-set PRED-NODE)
+			(fetch-incoming-by-type PRED-NODE EDGE-TYPE)
 			(format #t "Elapsed time to load pairs: ~A secs\n"
 				(elapsed-secs))
 		)
