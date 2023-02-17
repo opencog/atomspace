@@ -327,7 +327,7 @@ CONTINUATION_LINK <- EVALUATABLE_LINK
 // Basic Graph Theory
 //
 // An EdgeLink is used to represent labelled graph edges. The intended
-// use is to write graph edges as
+// use is to represent graph edges as
 //
 //      EdgeLink
 //         PredicateNode "some edge type" // Or a LexicalNode or BondNode
@@ -555,7 +555,9 @@ DELETE_LINK <- FREE_LINK
 UNIQUE_LINK <- FREE_LINK
 
 // Inserting a StateLink into the AtomSpace causes the previous
-// state to be removed from the AtomSpace.
+// state to be removed from the AtomSpace. Uniqueness applies only to
+// closed terms; thus, StateLinks with variables in the defintion can
+// be created for search patterns.
 STATE_LINK <- UNIQUE_LINK
 
 // Uniquely naming things, tagging things. Attempting to insert a
@@ -566,7 +568,9 @@ DEFINE_LINK <- UNIQUE_LINK
 // Unqiue, exclusive relationships. Attempting to insert a second relation
 // into the AtomSpace will silently fail, and the original relation is
 // returned. No error is thrown. Allows first-come-first-serve atomic
-// mutex relationships to be placed in the AtomSpace.
+// mutex relationships to be placed in the AtomSpace. These cannot be
+// hidden by Frames. Applies only to closed terms; thus, GrantLinks with
+// variables in the defintion can be created for search patterns.
 GRANT_LINK <- UNIQUE_LINK
 
 // The ScopeLink is used to identify an open term, i.e. a link
@@ -1134,7 +1138,7 @@ PYTHON_AST <- FOREIGN_AST
 
 // ==============================================================
 // Assorted miscellaneous link types with an unclear future.
-//
+// Some of these need to be moved to the URE.
 
 // This is a marker used to avoid type-checking in the static type
 // checker. See `atoms/core/Checkers.cc`
