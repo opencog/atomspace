@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-void DefineLink::init()
+void DefineLink::init(void)
 {
 	if (not nameserver().isA(get_type(), DEFINE_LINK))
 		throw SyntaxException(TRACE_INFO,

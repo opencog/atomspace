@@ -560,6 +560,7 @@ STATE_LINK <- UNIQUE_LINK
 
 // Uniquely naming things, tagging things. Attempting to insert a
 // second definition into the AtomSpace will throw an exception.
+// Restricted to DefinedProcedure, DefinedSchema, etc.
 DEFINE_LINK <- UNIQUE_LINK
 
 // The ScopeLink is used to identify an open term, i.e. a link
