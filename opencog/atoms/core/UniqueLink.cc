@@ -50,6 +50,10 @@ void UniqueLink::init(bool allow_open)
 		if (0 < _vars.varseq.size()) return;
 	}
 
+	// Hmm. Should probably be doing the below in the AtomSpace,
+	// and not here. In particular, incoming sets are only set
+	// up in the AtomSpace, anyway, so it is too early to do it
+	// here. Needs to work more like StateLink... XXX FIXME.
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
 	for (const Handle& def : defs)
@@ -83,7 +87,11 @@ UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 	init(true);
 }
 
-/// Get the unique link for this alias.
+/// Get the unique link for this alias. The implementatation here allows
+/// UniqueLinks to be hidden by other UniqueLinks in different frames.
+/// That is, the association remains unique, per AtomSpace, but deeper
+/// unique links can be hidden by shallower ones (that are different).
+/// This is particlalry useful for the StateLinks.
 Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
                                  bool disallow_open, const AtomSpace* as)
 {

@@ -79,7 +79,7 @@ Handle StateLink::get_link(const AtomSpace* as)
 void StateLink::install()
 {
 	// If the handlset is closed (no free variables), then
-	// only one copy of the atom can exist in the atomspace.
+	// only one copy of the atom can exist in the AtomSpace.
 	if (not is_closed())
 	{
 		Link::install();
