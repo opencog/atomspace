@@ -563,6 +563,12 @@ STATE_LINK <- UNIQUE_LINK
 // Restricted to DefinedProcedure, DefinedSchema, etc.
 DEFINE_LINK <- UNIQUE_LINK
 
+// Unqiue, exclusive relationships. Attempting to insert a second relation
+// into the AtomSpace will silently fail, and the original relation is
+// returned. No error is thrown. Allows first-come-first-serve atomic
+// mutex relationships to be placed in the AtomSpace.
+GRANT_LINK <- UNIQUE_LINK
+
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
