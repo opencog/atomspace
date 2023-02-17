@@ -1,7 +1,7 @@
 /*
- * DefineLink.cc
+ * GrantLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2023 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  May 2015
  *
@@ -23,15 +23,15 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
-#include "DefineLink.h"
+#include "GrantLink.h"
 
 using namespace opencog;
 
-void DefineLink::init(void)
+void GrantLink::init(void)
 {
-	if (not nameserver().isA(get_type(), DEFINE_LINK))
+	if (not nameserver().isA(get_type(), GRANT_LINK))
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a DefineLink, got %s",
+			"Expecting a GrantLink, got %s",
 				nameserver().getTypeName(get_type()).c_str());
 
 	// Must have name and body
@@ -41,48 +41,36 @@ void DefineLink::init(void)
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
-
-	// Type-check. The execution and FunctionLink's only expand
-	// definitions anchored with these types; other definitions won't
-	// work during execution.
-	Type dtype = _outgoing[0]->get_type();
-	if (DEFINED_PROCEDURE_NODE != dtype and
-	    DEFINED_SCHEMA_NODE != dtype and
-	    DEFINED_PREDICATE_NODE != dtype and
-	    DEFINED_TYPE_NODE != dtype)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting Defined(Procedure/Schema/Predicate/Type)Node, got %s",
-				nameserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq&& oset, Type t)
+GrantLink::GrantLink(const HandleSeq&& oset, Type t)
 	: UniqueLink(std::move(oset), t)
 {
 	init();
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), DEFINE_LINK)
+GrantLink::GrantLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), GRANT_LINK)
 {
 	init();
 }
 
 /**
  * Get the definition associated with the alias.
- * This will be the second atom of some DefineLink, where
+ * This will be the second atom of some GrantLink, where
  * `alias` is the first.
  */
-Handle DefineLink::get_definition(const Handle& alias, const AtomSpace* as)
+Handle GrantLink::get_definition(const Handle& alias, const AtomSpace* as)
 {
-	Handle uniq(get_unique(alias, DEFINE_LINK, false, as));
+	Handle uniq(get_unique(alias, GRANT_LINK, false, as));
 	return uniq->getOutgoingAtom(1);
 }
 
-Handle DefineLink::get_link(const Handle& alias, const AtomSpace* as)
+Handle GrantLink::get_link(const Handle& alias, const AtomSpace* as)
 {
-	return get_unique(alias, DEFINE_LINK, false, as);
+	return get_unique(alias, GRANT_LINK, false, as);
 }
 
-DEFINE_LINK_FACTORY(DefineLink, DEFINE_LINK)
+DEFINE_LINK_FACTORY(GrantLink, GRANT_LINK)
 
 /* ===================== END OF FILE ===================== */

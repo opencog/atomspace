@@ -13,6 +13,7 @@ ADD_LIBRARY (atomcore
 	FreeLink.cc
 	FreeVariables.cc
 	FunctionLink.cc
+	GrantLink.cc
 	LambdaLink.cc
 	NumberNode.cc
 	PrenexLink.cc
@@ -61,6 +62,7 @@ INSTALL (FILES
 	FreeLink.h
 	FreeVariables.h
 	FunctionLink.h
+	GrantLink.h
 	LambdaLink.h
 	NumberNode.h
 	PrenexLink.h

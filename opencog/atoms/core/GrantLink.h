@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/DefineLink.h
+ * opencog/atoms/GrantLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2023 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DEFINE_LINK_H
-#define _OPENCOG_DEFINE_LINK_H
+#ifndef _OPENCOG_GRANT_LINK_H
+#define _OPENCOG_GRANT_LINK_H
 
 #include <opencog/atoms/core/UniqueLink.h>
 
@@ -31,36 +31,29 @@ namespace opencog
  *  @{
  */
 
-/// The DefineLink is used to define procedures, predicates and schemas.
-/// It is intended to allow procedures, predicates and schemas to be
-/// invoked by name, instead of anonymously.
+/// The GrantLink is used to create unique, thread-safe, mutually-
+/// exclusive, atomic, first-come-first-serve relationships between
+/// pairs of Atoms. The first Atom in a GrantLink can be thought of
+/// as a name; the rest as a definition. Once a name has been "granted",
+/// it cannot be re-used again. Attempts to create a second GrantLink
+/// (of the same name) will simply return the first.  No errors are
+/// thrown.
 ///
-/// Only one definition is allowed; any attempt to create a second
-/// conflicting definition (of the same name) will throw an error.
-/// Only one DefineLink with a given name can exist at a time; to
-/// change a definition, the original DefineLink must be deleted first.
+/// The intended use of the GrantLink is to provide for thread-safe
+/// unique relationships between pairs of Atoms, without risk of thread
+/// races creating two relationships for the same thing.
 ///
-/// DefineLinks enable the construction of recursive procedures, schemas
-/// and predicates. A defined procedure can refer to itself by name.
-///
-/// The GrantLink is similar, except that it allows any pair of atoms
-/// to be associated, with the first acting as a name. GrantLinks will
-/// not throw an error if an attempt is made to redefine them; instead,
-/// the original defintion will be returned. Thus, GrantLinks are used
-/// to create race-free first-come-first-served exclusive (mutex)
-/// relationships.
-///
-class DefineLink : public UniqueLink
+class GrantLink : public UniqueLink
 {
 protected:
 	void init(void);
 public:
-	DefineLink(const HandleSeq&&, Type=DEFINE_LINK);
+	GrantLink(const HandleSeq&&, Type=GRANT_LINK);
 
-	DefineLink(const Handle& alias, const Handle& body);
+	GrantLink(const Handle& alias, const Handle& body);
 
-	DefineLink(const DefineLink&) = delete;
-	DefineLink& operator=(const DefineLink&) = delete;
+	GrantLink(const GrantLink&) = delete;
+	GrantLink& operator=(const GrantLink&) = delete;
 
 	Handle get_alias(void) const { return _outgoing.at(0); }
 	Handle get_definition(void) const { return _outgoing.at(1); }
@@ -68,7 +61,7 @@ public:
 	/**
 	 * Given a Handle pointing to <name> in
 	 *
-	 * DefineLink
+	 * GrantLink
 	 *    <name>
 	 *    <body>
 	 *
@@ -81,21 +74,21 @@ public:
 	/**
 	 * Given a Handle pointing to <name> in
 	 *
-	 * DefineLink
+	 * GrantLink
 	 *    <name>
 	 *    <body>
 	 *
-	 * return the DefineLink for the given AtomSpace.
+	 * return the GrantLink for the given AtomSpace.
 	 */
 	static Handle get_link(const Handle& alias, const AtomSpace*);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(DefineLink)
-#define createDefineLink CREATE_DECL(DefineLink)
+LINK_PTR_DECL(GrantLink)
+#define createGrantLink CREATE_DECL(GrantLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_DEFINE_LINK_H
+#endif // _OPENCOG_GRANT_LINK_H
