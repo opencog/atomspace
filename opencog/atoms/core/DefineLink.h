@@ -31,31 +31,24 @@ namespace opencog
  *  @{
  */
 
-/// The DefineLink is used to give a name to a hypergraph (schema,
-/// pattern, concept, predicate, etc).  The name is unique, in that,
-/// any attempt to make a different definition with the same name will
-/// throw an error.  Thus, only ONE DefineLink with a given name can
-/// exist at a time.
+/// The DefineLink is used to define procedures, predicates and schemas.
+/// It is intended to allow procedures, predicates and schemas to be
+/// invoked by name, instead of anonymously.
 ///
-/// This class is intended to be used for anything that needs to be
-/// accessed by name: for, if there were two things with the same name,
-/// it would be ambiguous as to which to access. (It would not make
-/// sense to access both: would the result of access have 'and'
-/// semantics? 'or' semantics ??)  Thus, names are unique.
+/// Only one definition is allowed; any attempt to create a second
+/// conflicting definition (of the same name) will throw an error.
+/// Only one DefineLink with a given name can exist at a time; to
+/// change a definition, the original DefineLink must be deleted first.
 ///
-/// This is useful for three different purposes. These are:
-/// -- The definition of new predicates and schemas. Yes, the 
-///    EquivalenceLink could be used for this; but right now, we are
-///    experimenting with DefineLink.
-/// -- A programmer/use convenience. Handy for tagging some atom with
-///    a name, and then referring to that atom by it's name, later on.
-/// -- Enabling recursion. A definition can occur within itself, and
-///    can thus specify an infinitely-recursive pattern.  When evaluated
-///    or executed, this infinite pattern must, of course terminate,
-///    or your code will hang.  Bummer if your code hangs.
+/// DefineLinks enable the construction of recursive procedures, schemas
+/// and predicates. A defined procedure can refer to itself by name.
 ///
-/// Of the three, the last is the most important, as, right now, there
-/// is no other way of specifying recursive functions in the atomspace.
+/// The GrantLink is similar, except that it allows any pair of atoms
+/// to be associated, with the first acting as a name. GrantLinks will
+/// not throw an error if an attempt is made to redefine them; instead,
+/// the original defintion will be returned. Thus, GrantLinks are used
+/// to create race-free first-come-first-served exclusive (mutex)
+/// relationships.
 ///
 class DefineLink : public UniqueLink
 {
