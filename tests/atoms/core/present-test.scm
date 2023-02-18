@@ -12,7 +12,7 @@
 (Inheritance (Concept "chordate") (Concept "bilateria"))
 (Inheritance (Concept "vertebrate") (Concept "chordate"))
 
-; Run the EvaluatiionLink, lambda style
+; Run the EvaluationLink, lambda style
 (define (run-lamb-eval type str)
 	(cog-evaluate!
 		(Evaluation
