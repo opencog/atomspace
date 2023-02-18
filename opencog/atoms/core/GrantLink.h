@@ -47,6 +47,8 @@ class GrantLink : public UniqueLink
 {
 protected:
 	void init(void);
+	virtual ContentHash compute_hash() const;
+
 public:
 	GrantLink(const HandleSeq&&, Type=GRANT_LINK);
 
@@ -54,6 +56,9 @@ public:
 
 	GrantLink(const GrantLink&) = delete;
 	GrantLink& operator=(const GrantLink&) = delete;
+
+	/** Content-based compare. */
+	virtual bool operator==(const Atom&) const;
 
 	Handle get_alias(void) const { return _outgoing.at(0); }
 	Handle get_definition(void) const { return _outgoing.at(1); }

@@ -168,8 +168,8 @@ bool Link::operator<(const Atom& other) const
 /// chains the hash values of the child atoms, as well.
 ContentHash Link::compute_hash() const
 {
-   // The nameserver().getTypeHash() returns hash of the type string name,
-   // and is thus independent of other types in the tree.
+	// The nameserver().getTypeHash() returns hash of the type name
+	// string, and is thus independent of all other type declarations.
 	// 1<<44 - 377 is prime
 	ContentHash hsh = ((1ULL<<44) - 377) * nameserver().getTypeHash(get_type());
 
