@@ -37,7 +37,7 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 	// The handleset must contain a variable in it, somewhere.
 	// If it doesn't, then the entire handleset is to be deleted
 	// (removed from the atomspace).
-	if (0 <= _vars.varseq.size())
+	if (0 < _vars.varseq.size())
 	{
 		Atom::setAtomSpace(as);
 		return;
@@ -45,12 +45,20 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 
 	for (const Handle& h : _outgoing)
 		as->extract_atom(h, true);
+
+	throw DeleteException();
 }
 
 ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 {
+	// Self-delete only when fully-grounded. Do nothing, if there
+	// are variables. The goal is to allow DeleteLinks to be used in
+	// query patterns (where they will have ... variables in them!)
+	if (0 < _vars.varseq.size())
+		return nullptr;
+
 	// In general, neither this link, nor it's outgoing set will be in
-	// any AtomSpace at all. So in order for the delete to be successful,
+	// any AtomSpace at all. So, in order for the delete to be successful,
 	// an AtomSpace to delete from must be explicitly specified. The
 	// reason the outgoing set is not in any AtomSpace is because this
 	// DeleteLink got assembled on the fly, usually by a PutLink, and
@@ -63,12 +71,11 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 	for (const Handle& h : oset)
 	{
 		Type t = h->get_type();
-		if (VARIABLE_NODE == t or GLOB_NODE == t) continue;
+		if (VARIABLE_NODE == t or GLOB_NODE == t) continue; // wtf!?
 
 		AtomSpace* oas = h->getAtomSpace();
 		if (nullptr == oas) oas = as;
-		if (oas)
-			oas->extract_atom(h, true);
+		oas->extract_atom(h, true);
 	}
 	return nullptr;
 }
