@@ -78,8 +78,8 @@ Handle StateLink::get_link(const AtomSpace* as)
 
 void StateLink::install()
 {
-	// If the handlset is closed (no free variables), then
-	// only one copy of the atom can exist in the AtomSpace.
+	// If the handlset is not closed (if it has free variables in it),
+	// then allow it in. This allows query patterns for StateLinks.
 	if (not is_closed())
 	{
 		Link::install();
@@ -88,9 +88,9 @@ void StateLink::install()
 
 	// Find all existing copies of this particular StateLink.
 	// There should be only one, **in this atomspace**.
-	// We do allow child atomspaces to over-ride the state in
-	// the parent; the net effect is that the state in the child
-	// will hide the state in the parent.
+	// We do allow child atomspaces (child frames) to over-ride the
+	// state in the parent; the net effect is that the state in the
+	// child will hide the state in the parent.
 	//
 	// Perform an atomic swap, replacing the old with the new.
 	bool swapped = false;

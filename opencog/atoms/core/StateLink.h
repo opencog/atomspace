@@ -61,13 +61,6 @@ public:
 	Handle get_state(void) const { return _outgoing.at(1); }
 
 	/**
-	 * Return false, if the state contains a variable.
-	 * The atomspace can contain multiple open StateLinks,
-	 * but must never have more than one closed StateLink.
-	 */
-	bool is_closed(void) const { return 0 == _vars.varseq.size(); }
-
-	/**
 	 * Given a Handle pointing to <name> in
 	 *
 	 * StateLink

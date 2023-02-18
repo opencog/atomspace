@@ -53,6 +53,11 @@ public:
 	const FreeVariables& get_vars() const
 	{ return  _vars; }
 
+	/**
+	 * Return false, if the FreeLink contains a variable.
+	 */
+	bool is_closed(void) const { return 0 == _vars.varseq.size(); }
+
 	static Handle factory(const Handle&);
 };
 
