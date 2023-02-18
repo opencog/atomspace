@@ -32,13 +32,14 @@ namespace opencog
  *  @{
  */
 
-/// The DeleteLink is used to delete any atom that does not contain a
-/// VariableNode.  That is, if one attempts to insert a DeleteLink into
-/// the atomspace, and the DeleteLink does not have any VariableNodes
-/// in it, the insertion will fail, and furthermore, the atom(s)
-/// that it is holding (in its outgoing set) will be deleted from the
-/// atomspace!  In essence, the DeleteLink is a link that can never be
-/// grounded!
+/// The DeleteLink is designed to delete any closed, grounded Atom that
+/// it wraps, when an attempt is made to put the DeleteLink into the
+/// AtomSpace. A closed, grounded Atom is one that does not have any
+/// free variables (VariableNodes or GlobNodes) in it.  In essence, the
+/// DeleteLink is a link that can never be grounded!
+///
+/// DeleteLinks with free variables are allowed, as these are needed
+/// for pattern queries and rewriting.
 ///
 class DeleteLink : public FreeLink
 {
