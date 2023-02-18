@@ -33,6 +33,7 @@ void UniqueLink::init(bool allow_open)
 	if (UNIQUE_LINK == _type)
 		throw InvalidParamException(TRACE_INFO,
 			"UniqueLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(_type, UNIQUE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(_type);
@@ -40,20 +41,26 @@ void UniqueLink::init(bool allow_open)
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
 
-	if (allow_open)
-	{
-		FreeLink::init();
+	FreeLink::init();
+}
 
-		// The name must not be used in another definition,
-		// but only if it has no free variables in the definition.
-		// That is, "closed sentences" must be unique.
-		if (0 < _vars.varseq.size()) return;
-	}
+UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
+	: FreeLink(std::move(oset), type)
+{
+	// Derived types have their own initialization
+	if (UNIQUE_LINK != type) return;
+	init(true);
+}
 
-	// Hmm. Should probably be doing the below in the AtomSpace,
-	// and not here. In particular, incoming sets are only set
-	// up in the AtomSpace, anyway, so it is too early to do it
-	// here. Needs to work more like StateLink... XXX FIXME.
+UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
+	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
+{
+	init(true);
+}
+
+// Force uniqueness at the time of insertion into the AtomSpace.
+void UniqueLink::setAtomSpace(AtomSpace* as)
+{
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
 	for (const Handle& def : defs)
@@ -71,20 +78,9 @@ void UniqueLink::init(bool allow_open)
 			}
 		}
 	}
-}
 
-UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
-	: FreeLink(std::move(oset), type)
-{
-	// Derived types have their own initialization
-	if (UNIQUE_LINK != type) return;
-	init(true);
-}
-
-UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
-	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
-{
-	init(true);
+	// If we are here, its all OK.
+	Link::setAtomSpace(as);
 }
 
 /// Get the unique link for this alias. The implementatation here allows
