@@ -122,16 +122,33 @@ void GrantLink::setAtomSpace(AtomSpace* as)
 {
 	Atom::setAtomSpace(as);
 
-	// Sanity check; this cannot ever happen. The AtomSpace::check()
-	// method should have noticed that this and some other instance
-	// are identical (due to hash/content-compare) and thus should
-	// never have advanced to calling this method.
+	// Sanity check. This will trigger if the user does this:
+	//    (Grant (Concept "A") (Concept "B"))
+	//    (cog-push-atomspace)
+	//    (Grant (Concept "A") (Concept "foo"))
+	// and "foo" is not in the base space. The cog-push creates
+	// a COW Frame, and in that Frame, the AtomSpace will try to
+	// honor the COW and insert the second grant.
+	//
+	// Well ... is that OK, and should we allow it? Or should it be
+	// prevented? I don't know. An argument could be made either way.
+	// Currently, there are no users who need it this or that way.
+	//
+	// To allow the hiding of grants, just allow the COW, delete the
+	// code below, and do nothing. To disable grant hiding, let the
+	// throw go through (better yet, convert it to a SilentException
+	// or similar), and catch it in the AtomSpace::add_atom() method,
+	// and just ignore the failed add, return the original. Not hard
+	// to do.
+	//
+	// Either solution works. Disallowing COW hiding seems better.
+	//
 	if (is_closed())
 	{
 		try {
 			UniqueLink::setAtomSpace(as);
 		} catch (...) {
-			OC_ASSERT(false, "Internal Error: Can't happen!")
+			OC_ASSERT(false, "Internal Error: Not allowed right now!")
 		}
 	}
 }
