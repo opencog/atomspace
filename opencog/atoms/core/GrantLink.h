@@ -62,20 +62,6 @@ public:
 	virtual bool operator==(const Atom&) const;
 
 	Handle get_alias(void) const { return _outgoing.at(0); }
-	Handle get_definition(void) const { return _outgoing.at(1); }
-
-	/**
-	 * Given a Handle pointing to <name> in
-	 *
-	 * GrantLink
-	 *    <name>
-	 *    <body>
-	 *
-	 * return <body>
-	 */
-	static Handle get_definition(const Handle& alias, const AtomSpace*);
-	static Handle get_definition(const Handle& alias)
-	{ return get_definition(alias, alias->getAtomSpace()); }
 
 	/**
 	 * Given a Handle pointing to <name> in

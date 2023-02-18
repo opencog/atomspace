@@ -36,11 +36,6 @@ void GrantLink::init(void)
 			"Expecting a GrantLink, got %s",
 				nameserver().getTypeName(get_type()).c_str());
 
-	// Must have name and body
-	if (2 != _outgoing.size())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting name and definition, got size %d", _outgoing.size());
-
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init();
 }
@@ -152,17 +147,6 @@ void GrantLink::setAtomSpace(AtomSpace* as)
 			throw SilentException();
 		}
 	}
-}
-
-/**
- * Get the definition associated with the alias.
- * This will be the second atom of some GrantLink, where
- * `alias` is the first.
- */
-Handle GrantLink::get_definition(const Handle& alias, const AtomSpace* as)
-{
-	Handle uniq(get_unique(alias, GRANT_LINK, false, as));
-	return uniq->getOutgoingAtom(1);
 }
 
 Handle GrantLink::get_link(const Handle& alias, const AtomSpace* as)
