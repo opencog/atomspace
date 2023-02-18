@@ -49,8 +49,9 @@ namespace opencog
 class StateLink : public UniqueLink
 {
 protected:
-	void init();
-	virtual void install();
+	void init(void);
+	virtual void setAtomSpace(AtomSpace*);
+	virtual void install(void);
 public:
 	StateLink(const HandleSeq&&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
@@ -59,13 +60,6 @@ public:
 	StateLink& operator=(const StateLink&) = delete;
 	Handle get_alias(void) const { return _outgoing.at(0); }
 	Handle get_state(void) const { return _outgoing.at(1); }
-
-	/**
-	 * Return false, if the state contains a variable.
-	 * The atomspace can contain multiple open StateLinks,
-	 * but must never have more than one closed StateLink.
-	 */
-	bool is_closed(void) const { return 0 == _vars.varseq.size(); }
 
 	/**
 	 * Given a Handle pointing to <name> in

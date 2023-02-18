@@ -642,15 +642,18 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
         return;
     }
 
-    // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
+    // For STATE_LINK, and most things inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
     // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
-    // XXX FIXME do this for all UniqueLinks.
+    // Do NOT DO THIS for GrantLink; grants must be unique over all
+    // frames.
+    //
     // XXX Also, a minor bug, not sure if it matters: if parent is set
     // to true, then any UniqueLinks appearing here and in the parent
     // will be duplicated repeatedly in the result. Might be nice to
     // deduplicate, but that would cost CPU time. (The copy_on_write
-    // variant immediately above should handle this correctly, I think.)
+    // variant immediately above should haved handled this correctly,
+    // I think. Not sure. Confused.)
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
@@ -770,10 +773,11 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
     // cut-n-paste of above.
     if (nullptr == cas) cas = this;
 
-    // For STATE_LINK, and anything else inheriting from UNIQUE_LINK,
+    // For STATE_LINK, and most things inheriting from UNIQUE_LINK,
     // we only want the shallowest state, i.e. the state in *this*
     // AtomSpace. It hides/over-rides any state in any deeper atomspaces.
-    // XXX FIXME do this for all UniqueLinks.
+    // DO NOT DO THIS for GrantLinks! Grants must remain unique, over
+    // all AtomSpace frames.
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;

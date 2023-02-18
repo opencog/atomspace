@@ -196,7 +196,7 @@ public:
 
     /**
      * Provides an ordering operator, based on the atom hash.
-     * performs a simple numeric comparison on the hashes of
+     * Performs a simple numeric comparison on the hashes of
      * this and the other atom. If the hashes are equal, then
      * it performs a content-based compare.
      *

@@ -28,11 +28,12 @@
 
 using namespace opencog;
 
-void UniqueLink::init(bool allow_open)
+void UniqueLink::init()
 {
 	if (UNIQUE_LINK == _type)
 		throw InvalidParamException(TRACE_INFO,
 			"UniqueLinks are private and cannot be instantiated.");
+
 	if (not nameserver().isA(_type, UNIQUE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(_type);
@@ -40,16 +41,26 @@ void UniqueLink::init(bool allow_open)
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
 
-	if (allow_open)
-	{
-		FreeLink::init();
+	FreeLink::init();
+}
 
-		// The name must not be used in another definition,
-		// but only if it has no free variables in the definition.
-		// That is, "closed sentences" must be unique.
-		if (0 < _vars.varseq.size()) return;
-	}
+UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
+	: FreeLink(std::move(oset), type)
+{
+	// Derived types have their own initialization
+	if (UNIQUE_LINK != type) return;
+	init();
+}
 
+UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
+	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
+{
+	init();
+}
+
+// Force uniqueness at the time of insertion into the AtomSpace.
+void UniqueLink::setAtomSpace(AtomSpace* as)
+{
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
 	for (const Handle& def : defs)
@@ -67,23 +78,16 @@ void UniqueLink::init(bool allow_open)
 			}
 		}
 	}
+
+	// If we are here, its all OK.
+	Link::setAtomSpace(as);
 }
 
-UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
-	: FreeLink(std::move(oset), type)
-{
-	// Derived types have their own initialization
-	if (UNIQUE_LINK != type) return;
-	init(true);
-}
-
-UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
-	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
-{
-	init(true);
-}
-
-/// Get the unique link for this alias.
+/// Get the unique link for this alias. The implementatation here allows
+/// UniqueLinks to be hidden by other UniqueLinks in different frames.
+/// That is, the association remains unique, per AtomSpace, but deeper
+/// unique links can be hidden by shallower ones (that are different).
+/// This is particlalry useful for the StateLinks.
 Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
                                  bool disallow_open, const AtomSpace* as)
 {

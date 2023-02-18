@@ -33,7 +33,7 @@ void StateLink::init()
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and state, got size %d", _outgoing.size());
 
-	FreeLink::init();
+	UniqueLink::init();
 }
 
 StateLink::StateLink(const HandleSeq&& oset, Type t)
@@ -76,10 +76,17 @@ Handle StateLink::get_link(const AtomSpace* as)
 	return get_handle();
 }
 
-void StateLink::install()
+// Over-ride what UniqueLink is doing, set it back to default.
+// We handle uniqueness slithgly later, at the install() step.
+void StateLink::setAtomSpace(AtomSpace* as)
 {
-	// If the handlset is closed (no free variables), then
-	// only one copy of the atom can exist in the atomspace.
+	Link::setAtomSpace(as);
+}
+
+void StateLink::install(void)
+{
+	// If the handlset is not closed (if it has free variables in it),
+	// then allow it in. This allows query patterns for StateLinks.
 	if (not is_closed())
 	{
 		Link::install();
@@ -88,9 +95,9 @@ void StateLink::install()
 
 	// Find all existing copies of this particular StateLink.
 	// There should be only one, **in this atomspace**.
-	// We do allow child atomspaces to over-ride the state in
-	// the parent; the net effect is that the state in the child
-	// will hide the state in the parent.
+	// We do allow child atomspaces (child frames) to over-ride the
+	// state in the parent; the net effect is that the state in the
+	// child will hide the state in the parent.
 	//
 	// Perform an atomic swap, replacing the old with the new.
 	bool swapped = false;

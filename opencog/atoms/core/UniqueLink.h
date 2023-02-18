@@ -31,12 +31,15 @@ namespace opencog
  *  @{
  */
 
-/// The UniqueLink is used to force uniqueness of a link from a given
-/// atom, appearing as the first member of the outgoing set, to the
-/// rest of the outgoing set.  Any attempt to make another UniqueLink
-/// with the same atom in the first outgoing slot will throw an error.
-/// Thus, only ONE UniqueLink with a given first-atom can exist at a
-/// time.
+/// The UniqueLink is used to guarantee uniqueness of a relationship
+/// between the first Atom in the outgoing set, and the rest of the
+/// outgoing set. This uniqueness constraint is enforced at the time
+/// of AtomSpace insertion. Thus, only ONE UniqueLink, with a given
+/// first-Atom, can exist in a AtomSpace at a time.
+///
+/// The uniqueness constraint is thread-safe: in general, the first
+/// such UniqueLink "wins", and blocks subsequnt ones. Thus, they can
+/// be used to build more complex thread-safe Link types.
 ///
 /// This class is intended to be the base class for GrantLink, which
 /// is used to issue unique names for things, the DefineLink, which
@@ -45,10 +48,20 @@ namespace opencog
 /// TypedAtomLink to ensure that an atom, if it is typed, has a single,
 /// unique type definition.
 ///
+/// This is a "private" Link type, means as a building block for other
+/// Link types that enforce different kinds of uniqueness semantics.
+/// This includes mutatibility within a single AtomSpace (StateLinks
+/// are mutable, DefineLinks and GrantLinks are not) and mutability
+/// via Frames (StateLinks and DefineLinks in deeper Frames can be
+/// hidden by shallower StateLinks and DefineLinks; however, GrantLinks
+/// are the same in all frames.)
+///
 class UniqueLink : public FreeLink
 {
 protected:
-	void init(bool);
+	void init(void);
+	virtual void setAtomSpace(AtomSpace *);
+
 	static Handle get_unique_nt(const Handle&, Type, bool, const AtomSpace*);
 	static Handle get_unique(const Handle&, Type, bool, const AtomSpace*);
 
