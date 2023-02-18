@@ -364,6 +364,7 @@ Handle AtomSpace::add_atom(const Handle& h)
     if (_read_only) return get_atom(h);
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
+    // If its a GrantLink, addition might require extra care.
     Handle rh;
     try {
         rh = add(h);
@@ -371,6 +372,12 @@ Handle AtomSpace::add_atom(const Handle& h)
     catch (const DeleteException& ex) {
         // Hmmm. Need to notify the backing store
         // about the deleted atom. But how?
+    }
+    catch (const SilentException& ex) {
+        // The SilentException is thrown by GrantLink, when the
+        // user attempts grants in non-base Frames. We want to
+        // disallow hiding of grants, so we end up here.
+        return lookupHide(h, false);  // Do not allow hiding!
     }
     return rh;
 }
@@ -398,6 +405,7 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
         return lookupHandle(createLink(std::move(outgoing), t));
 
     // If it is a DeleteLink, then the addition will fail. Deal with it.
+    // If its a GrantLink, addition might require extra care.
     Handle h(createLink(std::move(outgoing), t));
     try {
         return add(h);
@@ -405,6 +413,12 @@ Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
     catch (const DeleteException& ex) {
         // Hmmm. Need to notify the backing store
         // about the deleted atom. But how?
+    }
+    catch (const SilentException& ex) {
+        // The SilentException is thrown by GrantLink, when the
+        // user attempts grants in non-base Frames. We want to
+        // disallow hiding of grants, so we end up here.
+        return lookupHide(h, false);  // Do not allow hiding!
     }
     return Handle::UNDEFINED;
 }

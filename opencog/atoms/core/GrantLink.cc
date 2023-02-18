@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/ClassServer.h>
 
@@ -130,25 +131,25 @@ void GrantLink::setAtomSpace(AtomSpace* as)
 	// a COW Frame, and in that Frame, the AtomSpace will try to
 	// honor the COW and insert the second grant.
 	//
-	// Well ... is that OK, and should we allow it? Or should it be
-	// prevented? I don't know. An argument could be made either way.
-	// Currently, there are no users who need it this or that way.
+	// Well ... is that OK? Should we allow it? My gut instinct says
+	// no: This is supposed to be an atomic thread-safe relation;
+	// allowing it to get hidden in COW spaces seems ... wrong.
 	//
-	// To allow the hiding of grants, just allow the COW, delete the
-	// code below, and do nothing. To disable grant hiding, let the
-	// throw go through (better yet, convert it to a SilentException
-	// or similar), and catch it in the AtomSpace::add_atom() method,
-	// and just ignore the failed add, return the original. Not hard
-	// to do.
+	// The solution is to throw a SilentException(), and to catch
+	// it in the AtomSpace::add_atom() method, which then returns
+	// the original atom.
 	//
-	// Either solution works. Disallowing COW hiding seems better.
+	// The semantics here is still dicey. The user could hide the
+	// thing, by "deleting" it in a COW space, and then later, add
+	// a grant with a different value. We don't check for that, we
+	// don't prevent it. The correct semantics here is... unclear.
 	//
 	if (is_closed())
 	{
 		try {
 			UniqueLink::setAtomSpace(as);
 		} catch (...) {
-			OC_ASSERT(false, "Internal Error: Not allowed right now!")
+			throw SilentException();
 		}
 	}
 }
