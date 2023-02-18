@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/ClassServer.h>
 
 #include "GrantLink.h"
@@ -58,8 +59,14 @@ GrantLink::GrantLink(const Handle& name, const Handle& defn)
 /// Content-based comparison. Due to the uniqueness constraint,
 /// Two GrantLinks are "identical" if and only if the first outgoing
 /// Atom is the same. The second one does not affect results.
+/// But this is done only for closed grants (containing no variables);
+/// the open ones do not have to be unique (as variales are needed for
+/// query patterns &c.)
 bool GrantLink::operator==(const Atom& other) const
 {
+	if (not is_closed())
+		return Link::operator==(other);
+
 	// If other points to this, then have equality.
 	if (this == &other) return true;
 
@@ -76,9 +83,15 @@ bool GrantLink::operator==(const Atom& other) const
 }
 
 /// We hash only the first Atom in the OutgoingSet; it is the one
-/// that dtermines uniqueness. The second Atom does not matter.
+/// that determines uniqueness. The second Atom does not matter.
+/// But this is done only for closed Atoms; there is no uniqueness
+/// constraint on open grants (containing variables). This allows
+/// GrantLinks to appear in query terms.
 ContentHash GrantLink::compute_hash() const
 {
+	if (not is_closed())
+		return Link::compute_hash();
+
    // The nameserver().getTypeHash() returns hash of the type name
 	// string, and is thus independent of all other type declarations.
 	// 1<<44 - 377 is prime
@@ -101,6 +114,26 @@ ContentHash GrantLink::compute_hash() const
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	return hsh;
+}
+
+/// Overload the UniqueLink::setAtomSpace() method, and just do the
+/// ordinary thing. Uniqueness is done via hashing.
+void GrantLink::setAtomSpace(AtomSpace* as)
+{
+	Atom::setAtomSpace(as);
+
+	// Sanity check; this cannot ever happen. The AtomSpace::check()
+	// method should have noticed that this and some other instance
+	// are identical (due to hash/content-compare) and thus should
+	// never have advanced to calling this method.
+	if (is_closed())
+	{
+		try {
+			UniqueLink::setAtomSpace(as);
+		} catch (...) {
+			OC_ASSERT(false, "Internal Error: Can't happen!")
+		}
+	}
 }
 
 /**
