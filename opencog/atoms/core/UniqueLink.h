@@ -59,7 +59,7 @@ namespace opencog
 class UniqueLink : public FreeLink
 {
 protected:
-	void init(bool);
+	void init(void);
 	virtual void setAtomSpace(AtomSpace *);
 
 	static Handle get_unique_nt(const Handle&, Type, bool, const AtomSpace*);

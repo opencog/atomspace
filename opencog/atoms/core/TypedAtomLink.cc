@@ -35,9 +35,6 @@ void TypedAtomLink::init()
 			"Expecting atom and type specification; got %s",
 			to_string().c_str());
 
-	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init(false);
-
 	// Type-check.
 	Type stype = _outgoing[0]->get_type();
 	if (VARIABLE_NODE == stype or
@@ -55,6 +52,8 @@ void TypedAtomLink::init()
 			"Expecting type definition, got %s",
 				nameserver().getTypeName(dtype).c_str());
 
+	// Perform some additional checks in the UniqueLink init method
+	UniqueLink::init();
 }
 
 TypedAtomLink::TypedAtomLink(const HandleSeq&& oset, Type t)

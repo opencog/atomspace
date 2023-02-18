@@ -33,7 +33,7 @@ void StateLink::init()
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and state, got size %d", _outgoing.size());
 
-	FreeLink::init();
+	UniqueLink::init();
 }
 
 StateLink::StateLink(const HandleSeq&& oset, Type t)
@@ -76,7 +76,14 @@ Handle StateLink::get_link(const AtomSpace* as)
 	return get_handle();
 }
 
-void StateLink::install()
+// Over-ride what UniqueLink is doing, set it back to default.
+// We handle uniqueness slithgly later, at the install() step.
+void StateLink::setAtomSpace(AtomSpace* as)
+{
+	Link::setAtomSpace(as);
+}
+
+void StateLink::install(void)
 {
 	// If the handlset is not closed (if it has free variables in it),
 	// then allow it in. This allows query patterns for StateLinks.

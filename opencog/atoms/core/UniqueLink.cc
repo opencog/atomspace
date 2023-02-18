@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-void UniqueLink::init(bool allow_open)
+void UniqueLink::init()
 {
 	if (UNIQUE_LINK == _type)
 		throw InvalidParamException(TRACE_INFO,
@@ -49,13 +49,13 @@ UniqueLink::UniqueLink(const HandleSeq&& oset, Type type)
 {
 	// Derived types have their own initialization
 	if (UNIQUE_LINK != type) return;
-	init(true);
+	init();
 }
 
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
 	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
 {
-	init(true);
+	init();
 }
 
 // Force uniqueness at the time of insertion into the AtomSpace.

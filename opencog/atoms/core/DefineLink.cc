@@ -39,9 +39,6 @@ void DefineLink::init(void)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting name and definition, got size %d", _outgoing.size());
 
-	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init(false);
-
 	// Type-check. The execution and FunctionLink's only expand
 	// definitions anchored with these types; other definitions won't
 	// work during execution.
@@ -53,6 +50,9 @@ void DefineLink::init(void)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting Defined(Procedure/Schema/Predicate/Type)Node, got %s",
 				nameserver().getTypeName(dtype).c_str());
+
+	// Perform some additional checks in the UniqueLink init method
+	UniqueLink::init();
 }
 
 DefineLink::DefineLink(const HandleSeq&& oset, Type t)

@@ -40,7 +40,7 @@ void GrantLink::init(void)
 			"Expecting name and definition, got size %d", _outgoing.size());
 
 	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init(false);
+	UniqueLink::init();
 }
 
 GrantLink::GrantLink(const HandleSeq&& oset, Type t)

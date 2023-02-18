@@ -49,8 +49,9 @@ namespace opencog
 class StateLink : public UniqueLink
 {
 protected:
-	void init();
-	virtual void install();
+	void init(void);
+	virtual void setAtomSpace(AtomSpace*);
+	virtual void install(void);
 public:
 	StateLink(const HandleSeq&&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
