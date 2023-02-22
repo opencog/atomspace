@@ -351,7 +351,10 @@ jobs:
           command: cd build && make tests
       - run:
           name: Run tests
-          command: cd build && make test ARGS="$MAKEFLAGS"
+          # Running tests in parallel seems to result in test failures.
+          # I don't know why
+          # command: cd build && make test ARGS="$MAKEFLAGS"
+          command: cd build && make test
       - run:
           name: Install AS-MOSES
           command: cd build && make install && ldconfig
