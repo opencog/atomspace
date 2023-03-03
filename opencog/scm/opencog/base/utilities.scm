@@ -995,14 +995,22 @@
 (define-public cog-atomspace-stack-top (make-fluid #f))
 (define-public (cog-push-atomspace)
 "
- cog-push-atomspace -- Create a temporary atomspace.
-    This creates a new atomspace, derived from the current atomspace,
+ cog-push-atomspace -- Create a temporary AtomSpace.
+
+    This creates a new AtomSpace, derived from the current AtomSpace,
     and makes it current.  Thus, all subsequent atom operations will
-    create atoms in this new atomspace. To delete it, simply pop it;
-    after popping, all of the atoms placed into it will also be
+    create Atoms in this new AtomSpace. To delete it, simply pop it;
+    after popping, all of the Atoms placed into it will also be
     deleted (unless they are referred to in some way).
+
+    The stack of AtomSpaces is per-thread; a push in one thread does
+    not affect the current AtomSpace in other threads.  There is only
+    one stack per thread; changing the current AtomSpace after a push
+    does not alter the stack.
 "
-	(define base-as (cog-atomspace))
+	(define base-as (fluid-ref cog-atomspace-stack-top))
+	(if (not base-as) (set! base-as (cog-atomspace)))
+
 	(fluid-set! cog-atomspace-stack
 		(cons base-as (fluid-ref cog-atomspace-stack)))
 	(cog-set-atomspace! (cog-new-atomspace base-as))
@@ -1016,7 +1024,8 @@
 
 (define-public (cog-pop-atomspace)
 "
- cog-pop-atomspace -- Delete a temporary atomspace.
+ cog-pop-atomspace -- Delete a temporary AtomSpace.
+
     See cog-push-atomspace for an explanation.
 "
 	(let* ((stk-top (fluid-ref cog-atomspace-stack-top))
