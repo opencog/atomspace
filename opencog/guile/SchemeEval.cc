@@ -569,7 +569,11 @@ void* SchemeEval::c_wrap_poll(void* p)
 std::string SchemeEval::poll_result()
 {
 	scm_with_guile(c_wrap_poll, this);
-	return _answer;
+
+	// Swap, to avoid holding a long-term reference.
+	std::string rv;
+	swap(rv, _answer);
+	return rv;
 }
 
 void* SchemeEval::c_wrap_eval(void* p)
@@ -1218,7 +1222,11 @@ void* SchemeEval::c_wrap_get_atomspace(void * p)
 AtomSpacePtr SchemeEval::get_scheme_as(void)
 {
 	scm_with_guile(c_wrap_get_atomspace, this);
-	return _retas;
+
+	// Swap, to avoid holding a long-term reference.
+	AtomSpacePtr rv;
+	swap(rv, _retas);
+	return rv;
 }
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
