@@ -235,13 +235,13 @@
 	;         = sum_x h_left(x)
 	;         = sum_y h_right(y)
 	; It throws an error if the two are not equal (to within guessed
-	; rounding errors.)
+	; rounding errors.) Don't throw, if run on an empty dataset.
 	(define (compute-total-entropy)
 		(define lsum (left-sum
 				(lambda (x) (frqobj 'left-wild-entropy x))))
 		(define rsum (right-sum
 				(lambda (x) (frqobj 'right-wild-entropy x))))
-		(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+		(if (and (0 < lsum) (< 1.0e-8 (/ (abs (- lsum rsum)) lsum)))
 			(throw 'bad-summation 'compute-total-entropy
 				(format #f
 					"Left and right entropy sums fail to be equal: ~A ~A\n"
