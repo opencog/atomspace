@@ -241,7 +241,7 @@
 				(lambda (x) (frqobj 'left-wild-entropy x))))
 		(define rsum (right-sum
 				(lambda (x) (frqobj 'right-wild-entropy x))))
-		(if (and (0 < lsum) (< 1.0e-8 (/ (abs (- lsum rsum)) lsum)))
+		(if (and (< 0 lsum) (< 1.0e-8 (/ (abs (- lsum rsum)) lsum)))
 			(throw 'bad-summation 'compute-total-entropy
 				(format #f
 					"Left and right entropy sums fail to be equal: ~A ~A\n"
