@@ -517,7 +517,7 @@ public:
      * in the AtomSpace:
      * @code
      *         HandleSeq atoms;
-     *         atomSpace.get_rootset_by_type(atoms, CONCEPT_NODE);
+     *         atomSpacePtr->get_root_set_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
     void
