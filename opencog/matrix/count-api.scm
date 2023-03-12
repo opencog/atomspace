@@ -46,6 +46,7 @@
 ;
 ; ---------------------------------------------------------------------
 
+(use-modules (ice-9 threads))
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 
@@ -346,21 +347,39 @@
 	(define cnt-type (count-obj 'count-type))
 	(define cnt-key (count-obj 'count-key))
 
+	(define mtx (make-mutex))
+
 	; Return the observed count for the pair PAIR.
 	; If the pair has nothing at the storage key, fetch it.
 	; If the pair has the wrong type, e.g. SimpleTV instead of CountTV
 	; then fetch it. Be surgical w/ the fetch. Get only what we need.
+	;
+	; This uses a mutex to minimize, but not avoid a race window
+	; involving fetch-and-add. Users that try to fetch non-existant
+	; values, and then increment them will need to use locks to avoid
+	; fetch-after-increment.
 	(define (get-count PAIR)
-		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
-			(fetch-value PAIR cnt-key))
+		(when (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(lock-mutex mtx)
+			(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+				(fetch-value PAIR cnt-key))
+			(unlock-mutex mtx))
 		(count-obj 'get-count PAIR))
 
 	(define (set-count PAIR CNT)
 		(count-obj 'set-count PAIR CNT)
 		(store-value PAIR cnt-key))
 
+	; Fully thread-safe fetch-and-increment.
 	(define (inc-count PAIR CNT)
-		(count-obj 'inc-count PAIR CNT)
+		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+			(begin
+				(lock-mutex mtx)
+				(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+					(fetch-value PAIR cnt-key))
+				(count-obj 'inc-count PAIR CNT)
+				(unlock-mutex mtx))
+			(count-obj 'inc-count PAIR CNT))
 		(store-value PAIR cnt-key))
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM).
