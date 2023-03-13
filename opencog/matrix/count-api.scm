@@ -370,7 +370,9 @@
 		; FYI count-obj returns a pair which might be PAIR, or it
 		; might be a copy of PAIR. If its a copy, its in a different
 		; AtomSpace. Store that one, and not the original.
-		(store-value (count-obj 'set-count PAIR CNT) cnt-key))
+		(define npr (count-obj 'set-count PAIR CNT))
+		(store-value npr cnt-key)
+		npr)
 
 	; Fully thread-safe fetch-and-increment.
 	(define (inc-count PAIR CNT)
@@ -387,7 +389,8 @@
 						(unlock-mutex mtx)
 						npr))
 				(count-obj 'inc-count PAIR CNT)))
-		(store-value ipr cnt-key))
+		(store-value ipr cnt-key)
+		ipr)
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM).
 	; Be careful to not create tha pair, if it doesn't exist.
