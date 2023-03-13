@@ -367,20 +367,27 @@
 		(count-obj 'get-count PAIR))
 
 	(define (set-count PAIR CNT)
-		(count-obj 'set-count PAIR CNT)
-		(store-value PAIR cnt-key))
+		; FYI count-obj returns a pair which might be PAIR, or it
+		; might be a copy of PAIR. If its a copy, its in a different
+		; AtomSpace. Store that one, and not the original.
+		(store-value (count-obj 'set-count PAIR CNT) cnt-key))
 
 	; Fully thread-safe fetch-and-increment.
 	(define (inc-count PAIR CNT)
-		(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
-			(begin
-				(lock-mutex mtx)
-				(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
-					(fetch-value PAIR cnt-key))
-				(count-obj 'inc-count PAIR CNT)
-				(unlock-mutex mtx))
-			(count-obj 'inc-count PAIR CNT))
-		(store-value PAIR cnt-key))
+		; FYI count-obj returns a pair which might be PAIR, or it
+		; might be a copy of PAIR. If its a copy, its in a different
+		; AtomSpace. Store that one, and not the original.
+		(define ipr
+			(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+				(begin
+					(lock-mutex mtx)
+					(if (not (equal? cnt-type (cog-value-type PAIR cnt-key)))
+							(fetch-value PAIR cnt-key))
+					(let ((npr (count-obj 'inc-count PAIR CNT)))
+						(unlock-mutex mtx)
+						npr))
+				(count-obj 'inc-count PAIR CNT)))
+		(store-value ipr cnt-key))
 
 	; Return the observed count for the pair (L-ATOM, R-ATOM).
 	; Be careful to not create tha pair, if it doesn't exist.
