@@ -54,6 +54,16 @@ MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
                 -DPROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
+
+# Version string is the git hash
+EXECUTE_PROCESS(
+	COMMAND git rev-parse --short HEAD
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	OUTPUT_VARIABLE GIT_COMMIT_HASH
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+ADD_DEFINITIONS(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
