@@ -3,6 +3,14 @@ SQL Persist Design
 This reviews the design goals and philosophy behind the driver, as
 well as a TODO list of open work items.
 
+Status
+------
+As of 2022, the Postgres backend is deprecated. This is because a better
+design has been discovered: the RocksDB AtomSpace backend.  One could
+obtain a superior SQL backend by porting the RocksDB driver (from the
+`opencopg/atomspace-rocks` github repo.) This document is still
+accurate, except that implementing the todo-list is obviously pointless.
+
 Design Goals
 ============
 The goal of this implementation is to:

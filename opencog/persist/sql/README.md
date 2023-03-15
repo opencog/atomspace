@@ -8,19 +8,29 @@ a distributed AtomSpace.
 
 Status
 ======
-It works and has been used with databases containing up to 100 million
-atoms (at about 1.5KByte/atom, this requires 150GBytes RAM). It has been
-accessed by AtomSpace processes (cogservers) that ran for months to
-perform computations, modifying more than 100's of millions of atoms,
-without crashes or other overt trouble.  It has scaled, trouble-free,
-without any slowdown, up to four cogservers.  No one has tried anything
-larger than that, yet.
+(2022) Deprecated. Do not use in new projects. The reasons are spelled
+out further below.
+
+This backend works and has been used with databases containing up to
+100 million atoms (at about 1.5KByte/atom, this requires 150GBytes RAM).
+It has been accessed by AtomSpace processes (CogServers) that ran for
+months to perform computations, modifying more than 100's of millions
+of atoms, without crashes or other overt trouble.  It has scaled,
+trouble-free, without any slowdown, up to four cogservers.  No one has
+tried anything larger than that, yet.
 
 Unfortunately, its slow: typical save and restore speeds are in the
 general ballpark of 4K Atoms/sec. This can be speeded up almost five-fold,
 by tuning the Postgres server, using SSD disks, and using HugePages.
 Tuning details are given below. The [performance diary](README-perf.md)
 provides some benchmarking results.
+
+This AtomSpace Postgres backend implementation was created in 2008, and
+since that time, the architecture of the AtomSpace changed dramatically,
+several times over. The original design, which seemed to make sense at
+the time, has proven to be slow and awkward. There is now an obviously
+superior design, which can be obtained by porting the Rocks backend to
+Postgres. See below for more.
 
 Meta-Status
 -----------
@@ -47,9 +57,9 @@ Postgres backend.
 
 Mapping the AtomSpace to RocksDB was actually quite easy, and the data
 structures are simple. In retrospect, the Postgres mapping now feels
-over-engineered and badly designed. It's possible (likely even?) that if
-a new SQL driver was written, using the atomspace-rocks mapping, that it
-would be just as fast.
+over-engineered and badly designed. It now seems clear that one could
+obtain a superior Postgres backend design by porting the atomspace-rocks
+codebase to Postgres (or other database of choice).
 
 In a futuristic world, there would be one nice feature to have: pattern
 matching in the file-backed database. But this would have to somehow be
@@ -66,10 +76,7 @@ Features
 
 Missing features/ToDo items
 ---------------------------
- * Add incoming-set caching support.  Issue #1373
- * Provide optimized table layout for EvaluationLinks.
- * Provide optimized layout for sheaf sections.
- * Add support for multiple atom spaces.
+ * Support for multiple atom spaces.
 
 A general review of the design, the design goals and the operational
 philosophy is given in the [Design README](README-design.md).
