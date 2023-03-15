@@ -65,17 +65,12 @@ Local subdirectories include:
               These are used to provide high-speed network I/O for the
               CogServer to provide network-distributed AtomSpaces.
 
-* sql      -- Postgres, for now. Works OK for most uses -- with caveats.
-              Mostly, it's slow, running 3x slower than the RocksDB
-              backend. It also fails to support some newer AtomSpace
-              features. It really needs to rewritten from scratch.
-              The best rewrite would start with the RocksDB backend,
-              and port it to Postgres.
-
-* sql      -- The only "good thing" about the Postgres backend is that
-              multiple networked machines can attach to a single Postgres
-              server, and thus they can share Atoms via Postgres. So,
-              simple distributed operation.
+* sql      -- Postgres backend. Deprecated for new uses. It works,
+              but is no longer supported.  It's slow, running 3x slower
+              than the RocksDB backend. It's missing support for Frames.
+              If you really, really need SQL or Postgres, then it would
+              be best to star with the RocksDB backend, and port it (to
+              Postgres or the SQL of your choice.)
 
 * tlb      -- Implements a table that issues a unique integer ID for an
               Atom. Useful, if you think your code needs to substitute
@@ -97,17 +92,6 @@ unit tests.
 
 Right now, you are provided with mechanism, not policy. You have the
 tools, and you can implement whatever policy you want.
-
-
-TODO
-----
-Create a `ProxyBackingStore` and/or `ProxyStorageNode` that implements
-various different kinds of storage policies. This includes:
-* Multiplexing reads & writes to other backends.
-* Providing an expiring cache (old atomspace contents are cleared out
-  and thus are re-fetched as needed, else the cache is used.)
-* Providing non-trivial data access authorization, including read-only
-  access.
 
 Future directions
 -----------------
