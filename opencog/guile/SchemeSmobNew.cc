@@ -61,8 +61,15 @@ h->to_string().c_str());
 		if (ATOM_SPACE == h->get_type())
 			return h->to_string();
 
+pa = nullptr;
 		h = Handle::UNDEFINED;
+printf("duuude guile whack  %p use=%lu\n", 
+SCM_SMOB_VALUE_PTR_LOC(node)->get(),
+SCM_SMOB_VALUE_PTR_LOC(node)->use_count());
 		SCM_SMOB_VALUE_PTR_LOC(node)->reset(); // std::shared_ptr<>::reset()
+printf("duuude guile post reset  %p use=%lu\n", 
+SCM_SMOB_VALUE_PTR_LOC(node)->get(),
+SCM_SMOB_VALUE_PTR_LOC(node)->use_count());
 		scm_remember_upto_here_1(node);
 		return "#<Invalid handle>";
 	}
