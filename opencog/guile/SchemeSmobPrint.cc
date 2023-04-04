@@ -83,6 +83,8 @@ std::string SchemeSmob::protom_to_server_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
+printf("duude guile whacking %p use=%lu %s\n", h.get(), h.use_count(),
+h->to_string().c_str());
 		h = Handle::UNDEFINED;
 		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
 		scm_remember_upto_here_1(node);

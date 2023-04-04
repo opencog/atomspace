@@ -56,6 +56,8 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	Handle h(HandleCast(pa));
 	if (nullptr == h->getAtomSpace())
 	{
+printf("duude guile to strin whacking %p use=%lu %s\n", h.get(), h.use_count(),
+h->to_string().c_str());
 		if (ATOM_SPACE == h->get_type())
 			return h->to_string();
 

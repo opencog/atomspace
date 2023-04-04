@@ -91,10 +91,18 @@ class TypeIndex
 		// Else, return nullptr
 		Handle insertAtom(const Handle& h)
 		{
+printf("duuude typind insert %p use=%lu %s\n", h.get(), h.use_count(),
+h->to_string().c_str());
 			AtomSet& s(_idx.at(h->get_type()));
 			TYPE_INDEX_UNIQUE_LOCK;
 			auto iter = s.find(h);
-			if (s.end() != iter) return *iter;
+			if (s.end() != iter) 
+{
+printf("duuude typind prior existing insert %p use=%lu %s\n",
+iter->get(), iter->use_count(),
+(*iter)->to_string().c_str());
+return *iter;
+}
 			s.insert(h);
 			return Handle::UNDEFINED;
 		}

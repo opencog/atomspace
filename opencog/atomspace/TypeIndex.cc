@@ -39,6 +39,7 @@ void TypeIndex::resize(void)
 
 void TypeIndex::clear(void)
 {
+printf("duuude type insted clear!\n");
 	std::vector<AtomSet> dead;
 	{
 		TYPE_INDEX_UNIQUE_LOCK;
@@ -61,7 +62,11 @@ void TypeIndex::clear(void)
 	for (auto& s : dead)
 	{
 		for (auto& h : s)
+{
+printf("duude type index remov %p use=%lu %s\n", h.get(), h.use_count(),
+h->to_string().c_str());
 			h->remove();
+}
 		s.clear();
 	}
 }

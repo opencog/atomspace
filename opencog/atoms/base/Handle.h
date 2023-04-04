@@ -82,26 +82,34 @@ public:
     static const Handle UNDEFINED;
 
     // Copy constructor
-    explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
+    explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {
+printf("duude hande copy %p use=%lu\n", get(), use_count());
+}
 
     // Move constructor
-    explicit Handle(AtomPtr&& atom) : AtomPtr(atom) {}
+    explicit Handle(AtomPtr&& atom) : AtomPtr(atom) {
+printf("duude hande copy %p use=%lu\n", get(), use_count());
+}
 
     explicit Handle() {}
 
-    ~Handle() {}
+    ~Handle() {
+printf("duude hande dtor %p use=%lu\n", get(), use_count());
+}
 
     ContentHash value(void) const;
 
     // Copy assign operator
     inline Handle& operator=(const AtomPtr& a) {
         this->AtomPtr::operator=(a);
+printf("duude hande copy ass %p use=%lu\n", get(), use_count());
         return *this;
     }
 
     // Move assign operator
     inline Handle& operator=(AtomPtr&& a) {
         this->AtomPtr::operator=(a);
+printf("duude hande move ass %p use=%lu\n", get(), use_count());
         return *this;
     }
 
