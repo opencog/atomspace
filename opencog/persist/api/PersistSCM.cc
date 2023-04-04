@@ -183,6 +183,14 @@ void PersistSCM::open(Handle hsn)
 			"StorageNode %s is already open!",
 			hsn->to_short_string().c_str());
 
+	// It can happen that _sn was deleted earlier. Clobber
+	// the smart pointer so use count goes to zero, and the
+	// StorageNode dtor runs (which then closes the connection.)
+	if (_sn and nullptr == _sn->getAtomSpace()) _sn = nullptr;
+
+	// Like above, but the same StorageNode in a different AtomSpace!?
+	// if (_sn and *_sn == *stnp) _sn = nullptr;
+
 	stnp->open();
 
 	if (nullptr == _sn) _sn = stnp;
