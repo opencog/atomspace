@@ -83,15 +83,17 @@ public:
 
     // Copy constructor
     explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {
-printf("duude hande copy %p use=%lu\n", get(), use_count());
+printf("duude hande copy ctor %p use=%lu\n", get(), use_count());
 }
 
     // Move constructor
     explicit Handle(AtomPtr&& atom) : AtomPtr(atom) {
-printf("duude hande copy %p use=%lu\n", get(), use_count());
+printf("duude hande move ctor %p use=%lu\n", get(), use_count());
 }
 
-    explicit Handle() {}
+    explicit Handle() {
+printf("duude hande empty ctor %p use=%lu\n", get(), use_count());
+}
 
     ~Handle() {
 printf("duude hande dtor %p use=%lu\n", get(), use_count());

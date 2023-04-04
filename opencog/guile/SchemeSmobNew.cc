@@ -92,6 +92,9 @@ SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
 	*(SCM_SMOB_VALUE_PTR_LOC(smob)) = pa;
 
+printf("duuude set smob use count now is  %p use=%lu\n", 
+(SCM_SMOB_VALUE_PTR_LOC(smob))->get(),
+(SCM_SMOB_VALUE_PTR_LOC(smob))->use_count());
 	return smob;
 }
 
@@ -112,6 +115,9 @@ ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
 		return nullptr;
 
+printf("duuude protom from msmoxbs is  %p use=%lu\n", 
+(SCM_SMOB_VALUE_PTR_LOC(sh))->get(),
+(SCM_SMOB_VALUE_PTR_LOC(sh))->use_count());
 	return *(SCM_SMOB_VALUE_PTR_LOC(sh));
 }
 
