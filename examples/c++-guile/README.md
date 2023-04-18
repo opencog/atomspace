@@ -12,6 +12,8 @@ Note: running the example prints a hefty stack trace, *on purpose*!
 Do not be alarmed!
 
 To make such functions accessible to scheme programs, they need to be
-encapsulated in a guile module.  The `ExampleSCM.cc` file demonstrates
-how to create a new guile module; the `opencog/example.scm` file shows
-the scheme boilerplate to initialize that module.
+encapsulated in a guile module.  This is done in three parts:
+* `ExampleSCM.cc` shows the C++ code, and how to wrap it into a module.
+* `opencog/example.scm` shows the scheme boilerplate to load and
+  initialize that module.
+* `run-example.scm` shows how users can run the wrappers.
