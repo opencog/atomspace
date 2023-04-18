@@ -1,7 +1,7 @@
 /*
  * PrimitiveExample.cc
  *
- * Example code showing how declare a C++ method so that it can
+ * Example code showing how wrap C++ methods so that they can
  * be called from scheme.
  *
  * Copyright (C) 2009 Linas Vepstas
@@ -19,11 +19,11 @@ using namespace opencog;
 class MyTestClass
 {
 	private:
-		AtomSpace *_as;
+		AtomSpacePtr _as;
 		int _id;  // some value in the instance
 	public:
 
-		MyTestClass(AtomSpace* as, int id) : _as(as), _id(id) {}
+		MyTestClass(AtomSpacePtr as, int id) : _as(as), _id(id) {}
 
 		// An example method -- accepts a handle, and wraps it
 		// with a ListLink.
@@ -48,7 +48,7 @@ class MyTestClass
 
 		Handle my_other_func(Handle h)
 		{
-			throw (RuntimeException(TRACE_INFO, "I threw an exception %d", _id));
+			throw RuntimeException(TRACE_INFO, "I threw an exception %d", _id);
 			return Handle::UNDEFINED;
 		}
 };
@@ -56,7 +56,7 @@ class MyTestClass
 int main ()
 {
 	// Need to access the atomspace to get it to initialize itself.
-	AtomSpace* as = new AtomSpace();
+	AtomSpacePtr as = createAtomSpace();
 
 	// Do this early, so that guile is initialized.
 	SchemeEval* eval = new SchemeEval(as);
@@ -94,6 +94,7 @@ int main ()
 	printf("Info: Intentional throw gave the following output:\n%s", rslt.c_str());
 
 	delete eval;
+	printf("\nInfo: The big stack trace above is intentional!\n");
 	printf("\nInfo: We are done, bye!\n");
 	return  0;
 }
