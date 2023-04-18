@@ -23,7 +23,7 @@ int main()
 	printf("The new Atom and its hash: %s\n\n", h->to_string().c_str());
 
 	// Print the atomspace contents.
-	// Note that the unique Atom ID's (64-bit hashes) are printed.
+	// Note that Atom ID's (64-bit hashes) are printed.
 	printf("The AtomSpace contains this:\n%s\n", as->to_string().c_str());
 
 	// Create an EvaluationLink Atom, place it in the AtomSpace.
