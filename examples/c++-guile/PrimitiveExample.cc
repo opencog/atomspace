@@ -3,10 +3,7 @@
  *
  * Example code showing how wrap C++ methods so that they can
  * be called from scheme.
- *
- * Copyright (C) 2009 Linas Vepstas
  */
-
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Node.h>
