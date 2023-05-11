@@ -589,6 +589,12 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
 {
     getLocalInc(as, hs, t);
     AtomSpace* eva = _atom_space;
+
+    // If we are a FRAME, then it is possible that the owning
+    // _atom_space is not set. Avoid a null-pointer deref. See
+    // https://github.com/opencog/atomspace-rocks/issues/20
+    if (nullptr == eva) return;
+
     while (true)
     {
         size_t asz = eva->size();
