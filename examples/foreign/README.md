@@ -43,8 +43,12 @@ experimental and very incomplete.  The demos explore the limits of what
 is actually possible.
 
 * `sexpr-query.scm`         -- Working with s-expressions.
-* `metta-lisp.scm`          -- MeTTa emulation example.
 * `prolog-datalog.scm`      -- ProLog-compatible expressions.
+
+The following has moved:
+* `metta-lisp.scm`          -- MeTTa emulation example.
+
+See the https://github.com/opencog/atomspace-metta repo.
 
 TODO
 ----
