@@ -1125,7 +1125,7 @@ FOREIGN_AST <- LINK
 SEXPR_AST <- FOREIGN_AST
 
 // Storge for LISP-style, quasi-MeTTa-compatible expressions
-LISP_AST <- SEXPR_AST
+METTA <- SEXPR_AST
 
 // Storage for DataLog subset of Prolog
 DATALOG_AST <- FOREIGN_AST

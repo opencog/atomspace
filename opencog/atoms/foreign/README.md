@@ -58,28 +58,8 @@ Proper engineering would fix this.
 
 MeTTa
 -----
-One version of MeTTa uses a lisp-like notation. An attempt to explore
-this notation is provieded in the `LispAst*` files. It only supports
-basic arithmetic, logic and functions. See the
-[metta-lisp example](../../../examples/foreign/metta-lisp.scm).
-
-MeTTa emulation TODO:
-`match`, `ground`, and multivalued propagation
-
-* `match` takes some space, a pattern, and a template does two-sided
-  matching of the pattern on the space (i.e. unification) and fills
-  in the bindings in the template, and returns all results. So, like
-  `MeetLink` but it also unifies.
-
-* `ground` takes some Python/C/Rust function and binds it to a symbol
-
-* Multivalued propagation means a function can return than one thing
-  and its arguments can be multi-valued too, and it will expand that
-  appropriately.  So, for example,
-  `(= A x); (= A y); !(P A A)` returns
-  `{(P x x), (P x y), (P y x), (P y y)}`
-  Cartesian product.
-
+This code has been moved to
+https://github.com/opencog/metta
 
 Datalog
 -------
