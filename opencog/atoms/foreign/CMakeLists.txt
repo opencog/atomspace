@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (foreign
 	DatalogAST.cc
 	ForeignAST.cc
-	LispAST.cc
 	SexprAST.cc
 )
 
@@ -14,7 +13,6 @@ ADD_DEPENDENCIES(foreign opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(foreign
 	datalog
-	metta
 	atombase
 	${COGUTIL_LIBRARY}
 )
@@ -26,7 +24,6 @@ INSTALL (TARGETS foreign EXPORT AtomSpaceTargets
 INSTALL (FILES
 	DatalogAST.h
 	ForeignAST.h
-	LispAST.h
 	SexprAST.h
 	DESTINATION "include/opencog/atoms/foreign"
 )
