@@ -1124,16 +1124,13 @@ FOREIGN_AST <- LINK
 // Abstract syntax trees, in the form of s-expressions
 SEXPR_AST <- FOREIGN_AST
 
-// Storge for LISP-style, quasi-MeTTa-compatible expressions
-METTA <- SEXPR_AST
-
-// Storage for DataLog subset of Prolog
+// AST for DataLog subset of Prolog
 DATALOG_AST <- FOREIGN_AST
 
-// Storage for JSON.
+// AST for JSON.
 JSON_AST <- FOREIGN_AST
 
-// Storage for Python programs
+// AST for Python programs
 PYTHON_AST <- FOREIGN_AST
 
 // ==============================================================
