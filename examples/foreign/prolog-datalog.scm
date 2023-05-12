@@ -2,10 +2,13 @@
 ; prolog-datalog.scm
 ;
 ; DataLog is a subset of ProLog, consisting of declarative statements
-; only. This demo shows how DataLog statements extand into Atomese.
+; only. This demo shows how DataLog statements expand into Atomese.
 ;
 ; ---------------
-;
+
+(use-modules (opencog))
+
+
 ; Create some simple declarations. Syntax-compatible with SWI-Prolog.
 ;
 ; Assertion of fact.
