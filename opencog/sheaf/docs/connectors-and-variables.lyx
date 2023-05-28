@@ -1042,7 +1042,15 @@ slot
 -ary predicate), the instances of which are rows in a table.
  Yet it is famously the case that SQL and key-value databases are categorial
  opposites to one-another: if one takes the arrow relationships in one,
- and reverses the sense of the arrows, one obtains the other (Meyer 2011).
+ and reverses the sense of the arrows, one obtains the other.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Meijer2011"
+literal "false"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2888,23 +2896,6 @@ Artificial chemistry experiments with chemlambda, lambda calculus, interaction
 \end_inset
 
  https://arxiv.org/abs/2003.14332
-\end_layout
-
-\begin_layout Itemize
-Erik Meijer and Gavin Bierman (2011).
- 
-\begin_inset Quotes eld
-\end_inset
-
-A co-Relational Model of Data for Large Shared Data Banks.
-\begin_inset Quotes erd
-\end_inset
-
- 
-\emph on
-ACM Databases
-\emph default
- Volume 9, issue 3.
 \end_layout
 
 \begin_layout Standard
