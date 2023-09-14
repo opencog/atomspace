@@ -1145,9 +1145,9 @@ std::string PythonEval::build_python_error_message(
         {
             int line_number = pyTracebackObject-> tb_lineno;
             const char* filename = PyUnicode_AsUTF8(
-                    pyTracebackObject->tb_frame->f_code->co_filename);
+                PyFrame_GetCode(pyTracebackObject->tb_frame)->co_filename);
             const char* code_name = PyUnicode_AsUTF8(
-                    pyTracebackObject->tb_frame->f_code->co_name);
+                PyFrame_GetCode(pyTracebackObject->tb_frame)->co_name);
 
             errorStringStream << "File \"" << filename <<"\", ";
             errorStringStream << "line " << line_number <<", ";
