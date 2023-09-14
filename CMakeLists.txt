@@ -172,10 +172,17 @@ include(OpenCogFindPython)
 # ----------------------------------------------------------
 # OCaml (optional; needed for the OCaml bindings.)
 
+# At this time, OCaml does not build, because the cmake scripts fail to
+# set up the include directory correctly. The work-around is to stub
+# things out, below. Since the OCaml bindings are deprecated, anyway,
+# this seems like an appropriate thing to do. A proper fix would be
+# to tweak cogutils/cmake/FindOCaml.cmake so that it sets the include
+# directory.
 FIND_PACKAGE(OCaml)
 IF (OCAML_FOUND)
-	ADD_DEFINITIONS(-DHAVE_OCAML)
-	SET(HAVE_OCAML 1)
+	# ADD_DEFINITIONS(-DHAVE_OCAML)
+	# SET(HAVE_OCAML 1)
+	MESSAGE(STATUS "OCaml was found, but will not be built, due to bit-rot.")
 ENDIF (OCAML_FOUND)
 
 # ----------------------------------------------------------
