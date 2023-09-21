@@ -113,34 +113,111 @@ linasvepstas@gmail.com
 \end_layout
 
 \begin_layout Date
-2 Sept 2020 Version 1.0
-\begin_inset Newline newline
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 Sept 2020
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Version 1.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22 Nov 2021
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Version 2.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5 Dec 2021
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Version 2.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21 Sept 2023
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Version 2.1.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
 \end_inset
 
-22 Nov 2021 Version 2.0
-\begin_inset Newline newline
-\end_inset
 
-5 Dec 2021 Version 2.1
-\begin_inset Newline newline
-\end_inset
-
-21 Sept 2023 Version 2.1.1
 \end_layout
 
 \begin_layout Abstract
 This text reviews the concepts of a graph store, starting from the fundamental
  question of how to efficiently represent a graph in RAM (that is, in storage).
  Starting with a naive conception of a graph database, it arrives at hypergraphs
- and metagraphs minor modifications to the definition of a graph.
+ and metagraphs as minor modifications to the storage format of a graph.
  The resulting structure proves to be simpler and more efficient for representin
-g graphical data.
+g graph data.
 \end_layout
 
 \begin_layout Abstract
-This starts a domino chain of claims.
- Metagraphs are more flexible than either graph stores or SQL-style table
- stores or JSON-stores for storing data.
+This starts a domino chain of claims: Metagraphs are more flexible than
+ either graph stores or SQL-style table stores or JSON-stores for storing
+ data.
  Metagraphs have a natural query language that is more powerful and easier
  to use than SQL-inspired query languages, mostly because the table-join
  concept is obviated and replaced by isomorphism.
@@ -162,15 +239,15 @@ Metagraphs are naturally typed, in the sense of type theory.
 \end_layout
 
 \begin_layout Abstract
-Metagraphs can be used to specify a programming system/language, but that
- language is low-level, and not really suitable for humans.
+Metagraphs can be used to specify a programming system/programming language,
+ but that language is low-level, and not really suitable for humans.
  It is ideal for algorithmic (machine) manipulation, analogous to intermediate
  languages inside of compilers.
 \end_layout
 
 \begin_layout Abstract
-Most of these claims are experimental results, rather than assertions or
- theoretical results.
+Most of these claims are founded on experimental results, rather than assertions
+ of theoretical analysis.
  The experimental platform is the OpenCog AtomSpace and Atomese language.
 \end_layout
 
@@ -182,12 +259,25 @@ a la
  sheaf theory).
  It is a prerequisite for understanding the practical foundations on which
  sheaves can be built.
+ It is useful, but not necessary, for understanding the actual AtomSpace
+ implementation.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
 
+\end_inset
+
+
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -2157,7 +2247,7 @@ https://en.wikipedia.org/wiki/Non-uniform_memory_access
  it is too much for this text to dive into the issues that these pose.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Naive RAM Representations
 \end_layout
 
