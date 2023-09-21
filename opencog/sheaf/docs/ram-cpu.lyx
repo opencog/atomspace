@@ -122,6 +122,10 @@ linasvepstas@gmail.com
 \end_inset
 
 5 Dec 2021 Version 2.1
+\begin_inset Newline newline
+\end_inset
+
+21 Sept 2023 Version 2.1.1
 \end_layout
 
 \begin_layout Abstract
@@ -180,7 +184,16 @@ a la
  sheaves can be built.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
 Introduction
 \end_layout
 
@@ -462,7 +475,7 @@ https://github.com/opencog/atomspace
 
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Graph Representations
 \end_layout
 
@@ -521,7 +534,7 @@ typical
 
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Attributes
 \end_layout
 
@@ -580,7 +593,7 @@ In a graph store, one has these three basic choices for storing attributes,
  This is reviewed in a distinct section later on.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Emulating Tables
 \end_layout
 
@@ -936,7 +949,7 @@ It is this last example that makes clear that an s-expression store can
  This is shown in the next section.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 OGRE: Open Generic Representation
 \end_layout
 
@@ -1112,7 +1125,7 @@ on and CPU use, is quite dramatic.
  This is a more complex topic, and will be returned to later in this text.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Tables and Algebraic Data Types
 \end_layout
 
@@ -1433,7 +1446,7 @@ If this starts feeling circular, that is because it is: the SQL statement
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Category Theory and Coproducts
 \end_layout
 
@@ -1793,7 +1806,7 @@ literal "false"
  metagraph queries, to e explained in later sections.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Graphs for Storing Data
 \end_layout
 
@@ -1878,7 +1891,7 @@ As before, the graph explicitly includes a description of the schema used
  representation.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Mixed Representations
 \end_layout
 
@@ -1970,7 +1983,7 @@ e.g.
  complex attribute systems attached to each edge/vertex.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Related Work
 \end_layout
 
@@ -1986,7 +1999,7 @@ literal "false"
  for a description of a dynamic edge-vertex database with inverted indexes.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Representing Graphs in RAM
 \end_layout
 
@@ -2144,7 +2157,7 @@ https://en.wikipedia.org/wiki/Non-uniform_memory_access
  it is too much for this text to dive into the issues that these pose.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection*
 Naive RAM Representations
 \end_layout
 
@@ -2756,7 +2769,7 @@ Table updates must be both thread safe and fast.
  more compact storage format when tables are small.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsection
 Prelude to indexing
 \end_layout
 
@@ -2812,7 +2825,7 @@ favorite song
 .
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Hypergraphs
 \end_layout
 
@@ -2932,7 +2945,7 @@ atoms
  Links are thus lists of atoms.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Hypergraph representations
 \end_layout
 
@@ -3769,7 +3782,7 @@ The boxes denote the fact that the hyperedges are ordered lists.
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 RAM Utilization
 \end_layout
 
@@ -4017,7 +4030,7 @@ Comparing the this to the expression for the hypertable, we see that the
  so.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Storing hypergraphs in graphs, and vice-versa
 \end_layout
 
@@ -4183,7 +4196,7 @@ XXX TODO This is making some rather strong claims about RAM usage, and really
  XXX TODO.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Metagraph representations
 \end_layout
 
@@ -4763,7 +4776,7 @@ Clearly, the metagraph, having the general shape of a DAG, can be wedged
  penalty.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Indexing
 \end_layout
 
@@ -4867,7 +4880,7 @@ However, in a metagraph database, just as in a table-based database, there
  they might work.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Single attribute queries
 \end_layout
 
@@ -5217,7 +5230,7 @@ per se
  of the index is explicit, and can be walked.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Space and Time
 \end_layout
 
@@ -5454,7 +5467,7 @@ sales
  desired information from the record attributes.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Partial indexes and metagraphs
 \end_layout
 
@@ -5559,7 +5572,7 @@ on top of tables
 , one can go further: indexes of indexes: namely, the metagraph.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Normalization
 \end_layout
 
@@ -5781,7 +5794,7 @@ easy
 
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Index Maintenance
 \end_layout
 
@@ -5871,7 +5884,7 @@ is
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Data Migration and Graph Rewriting
 \end_layout
 
@@ -5971,7 +5984,7 @@ To make data migration easy, one needs to be able to represent the graph
  query system in which the queries themselves live as data within the database.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Graph Rewriting and Indexes
 \end_layout
 
@@ -6519,7 +6532,7 @@ keep your indexes straight, and you'll be OK.
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 A Data Migration Example
 \end_layout
 
@@ -6528,7 +6541,7 @@ TODO: provide worked example.
  Conclude: its still tables, in the end.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Metatrees and String Representations
 \end_layout
 
@@ -6901,7 +6914,7 @@ https://redoc.ly/docs/resources/ref-guide/
  That is, one must replace all repeated objects by universally unique references.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 S-expressions
 \end_layout
 
@@ -7086,7 +7099,7 @@ https://en.wikipedia.org/wiki/Representation_(mathematics)
 
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 UUID's
 \end_layout
 
@@ -7235,7 +7248,7 @@ To conclude: having hashes around can be useful, as hashes are needed for
  UUID's are horrible; s-expressions are smart.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Insertion, Deletion and Mutability
 \end_layout
 
@@ -7377,7 +7390,7 @@ Within the OpenCog system, the mutable form has been historically called
  for something that can be either a Node or a Link.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Metagraph mutability vs.
  SQL table mutability
 \end_layout
@@ -7574,7 +7587,7 @@ automatic
  Nice!
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Metagraph mutability vs.
  Graph databases
 \end_layout
@@ -7603,7 +7616,7 @@ The answer to be supplied here is utterly opaque.
  lack.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Query Languages and Graph Traversal
 \end_layout
 
@@ -7705,7 +7718,7 @@ The aim of this section is to make this thought process overt, and show
  and then examines how they compare to conventional table queries.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Weak Pointers
 \end_layout
 
@@ -7884,7 +7897,7 @@ The new root
  the metagraph itself.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Queries and Tables
 \end_layout
 
@@ -8445,7 +8458,7 @@ literal "false"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Query planning
 \end_layout
 
@@ -8513,7 +8526,7 @@ There are also more mundane reasons to run the query top-down: the particular
  It might lack the sophistication to do anything fancy.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Example: OGRE QL
 \end_layout
 
@@ -8852,7 +8865,7 @@ Perhaps the most innovative aspect of the OGRE query language is that it
  and it is natural to want to do list operations on them.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 A Meta-Query Language
 \end_layout
 
@@ -10036,7 +10049,7 @@ Choice
  logic.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Metatree Query vs.
  String Pattern Matching
 \end_layout
@@ -10345,7 +10358,7 @@ pattern matchers
  of recursive multi-component graph walks.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Query Analysis
 \end_layout
 
@@ -10421,7 +10434,7 @@ Always
  all possible groundings have been obtained (They can fail early, though.)
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Query Planning
 \end_layout
 
@@ -10466,7 +10479,7 @@ ected tight nucleus.
 The OpenCog query engine makes use of these query optimizations.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Attributes (Tags)
 \end_layout
 
@@ -10580,7 +10593,7 @@ truth values
  attributes, or tags.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Chatbots, Rule Engines and Inverted Queries
 \end_layout
 
@@ -11219,7 +11232,7 @@ That chatbots can be unified with conventional query is perhaps one of the
  more entertaining aspects coming out of metaqueries.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Types
 \end_layout
 
@@ -11525,7 +11538,7 @@ de facto
  types.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Examples of Types
 \end_layout
 
@@ -12033,7 +12046,7 @@ PartOfLink
  that is forcing certain types upon the user, over other types.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Properties of a Metagraph Type System
 \end_layout
 
@@ -12103,7 +12116,7 @@ exist
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Signatures and Arrows
 \end_layout
 
@@ -12540,7 +12553,7 @@ That is, the arrow points from a list of the input types to a list of the
  output types.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Jigsaw Puzzle Pieces and Sheaves
 \end_layout
 
@@ -12701,7 +12714,7 @@ To conclude: metatrees are naturally typed; those types are naturally reified;
  the imagination.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Evaluation / Execution
 \end_layout
 
@@ -12874,7 +12887,7 @@ A subset of metatrees can be considered to be a programming language.
 y is demonstrated in the comments below.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Fexprs, Macros and Rewriting
 \end_layout
 
@@ -13146,7 +13159,7 @@ What is new here is that, if the metagraphs are represented as s-expressions,
  evaluator.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 ProLog
 \end_layout
 
@@ -13356,7 +13369,7 @@ separation of concerns
  even cloudier.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Intermediate Languages
 \end_layout
 
@@ -13467,7 +13480,7 @@ Of course, what happens inside a compiler is very narrow, and very carefully
  writing inferences in prolog really is a lot easier than writing SQL statements.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Human-oriented vs.
  Machine-oriented
 \end_layout
@@ -13724,7 +13737,7 @@ https://wiki.opencog.org/w/Hyperon:Atomese
  live in a machine age, this is perhaps a not unexpected twist.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Atomese
 \end_layout
 
@@ -13753,7 +13766,7 @@ If the reader of this text finds any of the above concepts to be dubious,
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Conclusion
 \end_layout
 
@@ -13843,7 +13856,7 @@ tional properties (including CPU and RAM usage).
  This text gives a flavor of where it has arrived.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Thanks
 \end_layout
 
