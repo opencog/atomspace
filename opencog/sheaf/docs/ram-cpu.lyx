@@ -10889,8 +10889,10 @@ less than
 \begin_layout Standard
 A full-fledged query language can include an '
 \family sans
+\size footnotesize
 Absent
 \family default
+\size default
 ' predicate, indicating one or more clauses that must be absent in the dataset,
  in order for the query to be satisfied.
  Such clauses are extracted and set aside during the analysis phase.
@@ -10900,8 +10902,10 @@ Absent
 \begin_layout Standard
 A full-fledged query language can include an '
 \family sans
+\size footnotesize
 Always
 \family default
+\size default
 ' predicate, required to be present in not just one grounding, but in every
  grounding.
  They resemble evaluatable clauses, but they cannot be evaluated until after
@@ -10974,7 +10978,7 @@ But why?
 \begin_inset Quotes eld
 \end_inset
 
-why can't everything be encoded as as metagraph?
+why can't everything be encoded as as metagraph? Why are attributes needed?
 \begin_inset Quotes erd
 \end_inset
 
@@ -11076,9 +11080,9 @@ Here's something SQL cannot do: it cannot search for SQL.
  Absurd, right? One of the early chatbot technologies is called SRAI (Stimulus-R
 esponse AI), and the scripting language for SRAI is known as AIML (AI Markup
  Language).
- A snippet of AIML is given below.
+ An example snippet of AIML is given below.
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -11221,16 +11225,20 @@ I love you
 , and the goal is to find all 'queries' which can be satisfied by that answer.
  In this example, the two queries are '
 \family sans
+\size footnotesize
 <pattern>I love *</pattern>
 \family default
+\size default
 ' and '
 \family sans
+\size footnotesize
 <pattern>I * you</pattern>
 \family default
+\size default
 '.
  Abandoning the XML markup in favor of s-expressions, the two patterns are
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -11319,7 +11327,7 @@ All this can be expressed in the Atomese meta-query language.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -11503,13 +11511,17 @@ The reading of this content is as follows:
 \begin_layout Itemize
 '
 \family sans
+\size footnotesize
 Query
 \family default
+\size default
 ' is a special keyword defining the rewrite rule.
  It is much like '
 \family sans
+\size footnotesize
 Meet
 \family default
+\size default
 ', introduced previously, except that, this time, instead of delivering
  a grounding, it delivers a rewrite making use of that grounding.
  The first Atom following the query is the pattern to be matched.
@@ -11520,26 +11532,34 @@ Meet
 \begin_layout Itemize
 The '
 \family sans
+\size footnotesize
 Variable
 \family default
+\size default
 ' and '
 \family sans
+\size footnotesize
 Present
 \family default
+\size default
 ' keywords are just as before.
 \end_layout
 
 \begin_layout Itemize
 The '
 \family sans
+\size footnotesize
 Word
 \family default
+\size default
 ' is a handy variant of a Node, reminding readers that the indicated string
  is a natural language word.
  One could have just as easily said '
 \family sans
+\size footnotesize
 Node
 \family default
+\size default
 ', here; this is just some visual bling.
  
 \end_layout
@@ -11560,7 +11580,7 @@ statements
  are just sitting there, waiting for their day in the sun.
  The actual query to be performed looks like this:
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -11633,11 +11653,13 @@ No!
 \emph default
  It is saying that only two queries are run: first, the '
 \family sans
+\size footnotesize
 Dual
 \family default
+\size default
 ', to find some candidates, and then one of the candidates is chosen and
  run on a tiny, itsy-bitsy dataset consisting of one sentence.
- Its fast.
+ It's fast.
  Insofar as all of this content is stored as metatrees, all of the prior
  considerations about RAM usage, search performance and tree walking apply.
 \end_layout
@@ -11797,6 +11819,7 @@ This is eerily similar to atomic physics.
 The description of the meta-query language introduces a Variable, which
  is obviously a kind of Node, but is distinguished from a conventional Node,
  in that it has special semantics in the context of a query.
+ It is a different kind of Node.
 \end_layout
 
 \begin_layout Itemize
@@ -11998,13 +12021,14 @@ The second bullet point above idly wondered about a monotyped system, where
  everything is a Link, and Links have a string name.
  This would bring the system closer to a Lisp/Scheme conception of the world.
  Yet, this changes nothing: there is still a need to have variables, as
- well as and, or, not, set, member, plus, minus, 
+ well as atoms for algebraic operations: and, or, not, set, member, plus,
+ minus, 
 \emph on
 etc.
 
 \emph default
- atoms.
- These would then have to be demarcated in the string name...
+ If there were only Links with a string name, then these would then have
+ to be demarcated in the string name...
  and thus have to be recognized 
 \emph on
 de facto
@@ -12120,7 +12144,7 @@ The cat sat on the mat.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12238,9 +12262,11 @@ numbers
 .
  Likewise here, 
 \family sans
+\size footnotesize
 \emph on
 SittingLink
 \family default
+\size default
 \emph default
  is just some metatree sitting in RAM.
  It has no inherent meaning by itself; its meaning emerges only in relation
@@ -12261,6 +12287,7 @@ Philosophically, this is a pan-psychic view of the world: individual ur-items
 \begin_layout Standard
 The '
 \family sans
+\size footnotesize
 (ObjectNode 
 \begin_inset Quotes eld
 \end_inset
@@ -12271,12 +12298,16 @@ cat
 
 )
 \family default
+\size default
 ' could be replaced by a 
 \family sans
+\size footnotesize
 CatNode
 \family default
+\size default
 , although the usage would appear to change: one would then write '
 \family sans
+\size footnotesize
 (CatNode 
 \begin_inset Quotes eld
 \end_inset
@@ -12287,13 +12318,14 @@ Fuzzykins
 
 )
 \family default
+\size default
 '.
  Alternately, one could choose to move in the opposite direction, and write:
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12333,8 +12365,10 @@ cat
 which denotes that cats are objects.
  The '
 \family sans
+\size footnotesize
 PredicateNode
 \family default
+\size default
 ' denotes something that behaves like a truth value; the assertion is that
  it is true that cats are objects.
  But there is also a different denotational idea lurking here: The above
@@ -12361,7 +12395,7 @@ Object
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12401,6 +12435,7 @@ ObjectNode
 After this type definition is provided, it appears to be appropriate to
  write things like '
 \family sans
+\size footnotesize
 (CatNode 
 \begin_inset Quotes eld
 \end_inset
@@ -12411,20 +12446,23 @@ Fuzzykins
 
 )
 \family default
+\size default
 '.
 \end_layout
 
 \begin_layout Standard
 To round out this example, it might also be useful to define a '
 \family sans
+\size footnotesize
 CatLink
 \family default
+\size default
 ', which could then be used to link together disparate properties:
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12505,23 +12543,29 @@ best
  way to represent knowledge.
  A more conventional approach would be to define '
 \family sans
+\size footnotesize
 IsALink
 \family default
+\size default
 ' and '
 \family sans
+\size footnotesize
 HasALink
 \family default
+\size default
 ' and '
 \family sans
+\size footnotesize
 PartOfLink
 \family default
+\size default
 ': holonyms and meronyms, and use those in one's lexical ontology.
  There is freedom in how this can be done; there is nothing in the metatrees
  that is forcing certain types upon the user, over other types.
 \end_layout
 
 \begin_layout Subsection
-Properties of a Metagraph Type System
+Dynamic Typing
 \end_layout
 
 \begin_layout Standard
@@ -12587,7 +12631,17 @@ exist
 
 .
  At least this particular reason for static type-safety seems to disappear.
- 
+\end_layout
+
+\begin_layout Standard
+Once a type has been defined, it does not seem reasonable to allow it to
+ be re-defined.
+ Re-definition of a type risks corrupting the meaning, if not the actual
+ structure of the data held in the metagraph.
+ For example, one would not want to redefine CatNode to allow the description
+ of fish; existing assertions about fur and tails become invalidated.
+ Thus, types are immutable: they can be created, they can be destroyed;
+ they cannot be altered.
 \end_layout
 
 \begin_layout Subsection
@@ -12622,7 +12676,7 @@ https://en.wikipedia.org/wiki/Reification_(computer_science)
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12696,7 +12750,7 @@ https://en.wikipedia.org/wiki/Type_signature
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12727,7 +12781,7 @@ It has two other signatures as well:
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12766,7 +12820,7 @@ and
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12808,14 +12862,16 @@ This kind of easy reification makes it possible to easily attach complex
  types to type definitions.
  Returning to the previous example of a '
 \family sans
+\size footnotesize
 CatLink
 \family default
+\size default
 ', one could write
 \end_layout
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12856,21 +12912,29 @@ CatLink
 
 which indicates that the only valid way to use a '
 \family sans
+\size footnotesize
 CatLink
 \family default
+\size default
 ' is as a binary Link, where the first element of the outgoing pair must
  be a '
 \family sans
+\size footnotesize
 PredicateNode
 \family default
+\size default
 ' and the second must be a '
 \family sans
+\size footnotesize
 Node
 \family default
+\size default
 ' (and not a '
 \family sans
+\size footnotesize
 Link
 \family default
+\size default
 ').
  There does not appear to be anything challenging to introducing sigma types:
  one could have written 
@@ -12878,7 +12942,7 @@ Link
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12940,7 +13004,7 @@ To round out the above examples, we present the very common case of the
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -12992,7 +13056,7 @@ obviously must have the signature of
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -13079,7 +13143,7 @@ There is one extremely important alternative, discussed in other texts in
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
