@@ -346,7 +346,7 @@ How graphs can be represented in memory (RAM), and how much storage is used
 
 \begin_layout Itemize
 Modifications to the representation that result in hypergraphs and metagraphs,
- including a n analysis of memory usage.
+ including an analysis of memory usage.
  A formal definition of a metatree, the core component of a metagraph.
  A key result is that metatrees are more compact than graphs for most data
  representation problems.
@@ -374,7 +374,7 @@ opposite category
 \begin_inset Quotes erd
 \end_inset
 
- best termed coSQL.
+, best termed coSQL.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Meijer2011"
@@ -427,7 +427,7 @@ databases
 
 .
  Since they are both metatrees, they can be layered, nested, hierarchically
- stacked however desired.
+ stacked, however desired.
 \end_layout
 
 \begin_layout Itemize
@@ -437,7 +437,7 @@ ed viewpoint of SQL.
  This in turn causes one to think in terms of table joins, which, in a graph
  setting, looks like a graph walk, chaining from one edge to the next.
  This is explicitly seen on systems such as GraphQL, SparQL, Neo4J or grakn.ai
- (TypeDB), which explicitly present graph queries in terms edge walks.
+ (TypeDB), which explicitly present graph queries in terms of edge walks.
 \end_layout
 
 \begin_layout Itemize
@@ -1153,11 +1153,13 @@ This last statement resembles a conventional table-database table declaration.
 
 \begin_layout Standard
 One can go farther: there is no particular need to tag each row with the
- row-label '
-\family typewriter
-student
+ row-label 
+\family sans
+\size small
+'student'
 \family default
-'.
+\size default
+.
  The most compact representation then appears to be the following: 
 \end_layout
 
@@ -1563,18 +1565,20 @@ https://en.wikipedia.org/wiki/Coproduct
 
 \end_inset
 
- Examples of coproducts in programming is the 
+ Examples of coproducts in programming are the 
 \family sans
+\size small
 
 \begin_inset Quotes eld
 \end_inset
 
 union
-\family default
-
 \begin_inset Quotes erd
 \end_inset
 
+
+\family default
+\size default
  statement in C/C++, or the variant type in other programming languages.
 \begin_inset Foot
 status collapsed
@@ -1826,8 +1830,11 @@ projection morphisms
 \begin_inset Quotes eld
 \end_inset
 
+
+\size small
 union
 \family default
+\size default
 
 \begin_inset Quotes erd
 \end_inset
@@ -1877,12 +1884,16 @@ d as category-theoretic arrows.
  The most important examples of arrows that can be interpreted as category-theor
 etic arrows are the indexes on SQL tables (
 \family sans
+\size small
 PRIMARY KEY
 \family default
+\size default
  and 
 \family sans
+\size small
 FOREIGN KEY
 \family default
+\size default
 ) and the opposite arrows in noSQL key-value databases.
  This is gleefully articulated by Meijer and Bierman.
 \begin_inset CommandInset citation
@@ -1893,7 +1904,7 @@ literal "false"
 \end_inset
 
  We shall need arrows going in both directions in order to perform efficient
- metagraph queries, to e explained in later sections.
+ metagraph queries, to be explained in later sections.
 \end_layout
 
 \begin_layout Subsection
@@ -2055,7 +2066,7 @@ Of course, things get interesting as soon as one leaves the domain of crisp-logi
 c T/F values, and considers instead valuations that are Bayesian probabilities.
  Some monkeying around then leads one to distinguish Bayesian probabilities
  from fuzzy logic valuations.
- Other kinds of data worms it's way in: confidence intervals; frequentist
+ Other kinds of data worms its way in: confidence intervals; frequentist
  counts; marginals.
  Some of this data is non-numeric, but are choices (
 \emph on
@@ -2161,7 +2172,7 @@ https://dbdb.io/db/leveldb
 
 \end_inset
 
- and Facebook's extensions RocksDB.
+ and Facebook's extension RocksDB.
 \begin_inset Foot
 status collapsed
 
@@ -2844,7 +2855,7 @@ Note that the incoming and outgoing columns hold sets: any given vertex
  They are not 'multisets': any given edge appears at most once in the incoming/o
 utgoing sets.
  Suitable representations for sets include hash-tables and trees, each with
- it's own distinct RAM and access-time profile.
+ its own distinct RAM and access-time profile.
 \end_layout
 
 \begin_layout Standard
@@ -4820,8 +4831,8 @@ noprefix "false"
 \end_layout
 
 \begin_layout Standard
-Perhaps we making the wrong comparison? Oddly, it also resembles the edge
- table (
+Perhaps we are making the wrong comparison? Oddly, it also resembles the
+ edge table (
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "graph edge table"
@@ -4871,10 +4882,14 @@ Indexing
 \end_layout
 
 \begin_layout Standard
-More interesting is the structure of indexes, or rather, the alternatives
+The above reviewed the basic structure of hypergraphs.
+ Database performance depends strongly on the use of indexes.
+ Thus, a practical hypergraph database design must address the use of indexes
+ oand how they moderate performance.
+ This section will review the structure of indexes, or rather, the alternatives
  one has for index representation.
  The whole point of using a graph database, as opposed to a collection of
- tables, or key-value database, or a JSON-database is that the graph structure
+ tables, or key-value database, or a JSON-database, is that the graph structure
  encodes something important about the problem, something that cannot be
  easily achieved by doing table joins or key-value look-ups.
  Some examples of 
@@ -4939,8 +4954,8 @@ op.
 \end_layout
 
 \begin_layout Standard
-This is also the place to make a heretical claim: SQL or it's variants (GraphQL,
- SparQL...) are 
+This is a good place to make a heretical claim: SQL or it's variants (GraphQL,
+ SparQL, ...) are 
 \emph on
 NOT
 \emph default
@@ -4963,9 +4978,9 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-However, in a metagraph database, just as in a table-based database, there
- will be certain types of queries that are used a lot, and speeding these
- up through indexing is a key ability.
+In a metagraph database, just as in a table-based database, there will be
+ certain types of queries that are used a lot, and speeding these up through
+ indexing is a key requirement.
  How might this work, in practice? Let's examine some queries, and see how
  they might work.
 \end_layout
