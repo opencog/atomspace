@@ -13142,7 +13142,7 @@ There is one extremely important alternative, discussed in other texts in
 
 \begin_layout Standard
 The two pieces can be connected together only if the connector types match:
- the slot and the tab must have opposite types.
+ the slot and the tab must have matching types but opposite sexes.
  This ensures the type-safety of beta-reduction.
  Observe the coloring of the vertexes in the above diagram.
  At the bottom, there are two black (
@@ -13183,8 +13183,8 @@ Full-fledged jigsaw puzzle pieces can connect in every-which way (provided
  For computer programming (functional or imperative), one thinks about calling
  functions and methods with arguments, leading to the notion of an abstract
  syntax tree.
- Function calls and arrow types naturally construct trees, or DAGs, more
- generally.
+ Function calls and arrow types naturally construct trees, or, more generally,
+ DAGs.
  Graphs with loops, or graphs with undirected edges do not naturally occur
  in lambda calculus or functional programming.
 \end_layout
@@ -13313,7 +13313,7 @@ output
  in biology (mating types of fungii) and in medicine (infectious disease
  transmission.) Examples from computer science include polymorphic types.
  A particularly strong example comes from linguistics: the Link Grammar,
- where the notion of jigsaw puzzle pieces is made explicitly.
+ where the notion of jigsaw puzzle pieces is made explicit.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
