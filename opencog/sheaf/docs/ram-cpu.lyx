@@ -7922,18 +7922,18 @@ Query Languages and Graph Traversal
 
 \begin_layout Standard
 The majority of popular query languages (QL) are modeled on SQL, taking
- SQL as not just as an inspiration, but rather directly borrowing (stealing)
+ SQL as not just an inspiration, but rather directly borrowing (stealing)
  most of its keywords and syntax.
  This is good, in that it makes it easy for users who are already familiar
  with SQL to learn the new system.
- This is good, in that it acts as a guidepost to the developer of the NewQL:
+ This is good, in that it acts as a guidepost to the architect of the NewQL:
  if things get confusing, just take a look at how SQL did it, and make NewQL
  do it more-or-less the same way.
 \end_layout
 
 \begin_layout Standard
-This is bad, in that, when the QL is to be applied to a new domain, such
- as graphs, hypergraphs or metagraphs, the mind-set that was suitable for
+This is bad, in that, when the QL is to be applied to a new domain (such
+ as graphs, hypergraphs or metagraphs), the mind-set that was suitable for
  table queries might not be appropriate for graphs.
  But this is not obvious: just half an hour with GraphQL documentation and
  examples will easily leave you with the impression that you can do anything
@@ -8013,7 +8013,7 @@ if that's the case, then why graphs?
 
 \begin_layout Standard
 The aim of this section is to make this thought process overt, and show
- how there might be QL's that are not SQL clones.
+ how there might be QL's that are not SQL siblings.
  It begins by (once again) reviewing the actual structure of metagraphs,
  and then examines how they compare to conventional table queries.
 \end_layout
@@ -8080,19 +8080,20 @@ The dotted arrows are back-pointers from lower levels to higher levels:
 \end_layout
 
 \begin_layout Standard
-The back-pointers are needed to make the graph fully traversable; that is
- the topic of this section.
+The back-pointers are needed to make the graph fully traversable; the need
+ for this is the topic of this section.
  The back-pointers do eat up RAM; but this RAM usage has already been counted,
- above.
+ in a previous section.
  Here, it is only the diagram that has been corrected to more appropriately
  show the actual situation.
- In actual implementations, the dotted arrows are weak pointers.
- This is required for memory management, whether through garage collection
- (GC), or through reference counting (RC) with smart pointers.
+ In actual implementations, the dotted arrows are weak pointers (as opposed
+ to regular pointers).
+ Weak pointers are required for memory management, whether through garage
+ collection (GC), or through reference counting (RC) with smart pointers.
  Both kinds of systems (GC and RC) can only work with DAG's, and do not
  tolerate loops, as these cannot be freed.
- Yet programmers need to sometimes create loops of pointers; weak pointers
- are provided for this use.
+ Yet, programmers sometimes need to create loops of pointers; thus, programming
+ languages provide weak pointers for this use.
  That is what is shown here.
 \end_layout
 
@@ -8111,7 +8112,7 @@ It is natural to use weak pointers for the incoming set, and regular pointers
 \begin_inset Graphics
 	filename graphics/metagraph-new.eps
 	lyxscale 60
-	width 45col%
+	width 38col%
 
 \end_inset
 
@@ -8150,7 +8151,7 @@ not
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -8167,7 +8168,7 @@ The diagram above shows two metatrees.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -8453,7 +8454,7 @@ Dean of Students
 \begin_inset Text
 
 \begin_layout Plain Layout
-Whatsamatta University
+Wossamatta University
 \end_layout
 
 \end_inset
@@ -8549,7 +8550,7 @@ what schools does Rachel attend?
 \begin_inset Formula $n_{3}$
 \end_inset
 
-, one can trace upwards to find that Rachel attends both Whatsamatta U.
+, one can trace upwards to find that Rachel attends both Wossamatta U.
  and ASCII.
  
 \end_layout
@@ -8734,7 +8735,7 @@ The above has the form of an explicit path walk.
  Representing this properly requires a few more tables, and an additional
  clause in the 
 \family sans
-\size small
+\size footnotesize
 SELECT
 \family default
 \size default
@@ -8779,7 +8780,7 @@ This query works precisely because the DBA who is creating the query has
  The reason that the SQL database engine can execute the query is because
  the DBA explicitly inserted 
 \family sans
-\size small
+\size footnotesize
 FOREIGN KEY
 \family default
 \size default
@@ -8831,10 +8832,18 @@ Query planning concerns the topic of how the database engine will actually
  perform the query.
  The above example was written in a fashion that highlights an obviously
  efficient and easy way to run the query.
- Start at the join '
+ Start at the literal '
 \family sans
 \shape italic
-\size small
+\size footnotesize
+Rachel
+\family default
+\shape default
+\size default
+', use the join '
+\family sans
+\shape italic
+\size footnotesize
 Students.name = 'Rachel'
 \family default
 \shape default
@@ -8848,7 +8857,7 @@ Of course, there is no guarantee that the SQL engine will actually do this.
  It might decide to start with '
 \family sans
 \shape italic
-\size small
+\size footnotesize
 TABLE Schools
 \family default
 \shape default
@@ -8889,13 +8898,16 @@ Why would an SQL engine run this query in an unexpected or inefficient way?
  Why would it decide that the dashed arrows are too expensive? Well, it
  might have looked at all the tables, noted that they are all very small,
  and that a direct downward-recursive query could be performed rapidly.
- Why splurge on indexes if they are not needed? 
+ Why splurge on indexes if the tables are small and directly searchable?
+ 
 \end_layout
 
 \begin_layout Standard
 There are also more mundane reasons to run the query top-down: the particular
  SQL engine may not even have much of a query planner.
  It might lack the sophistication to do anything fancy.
+ The reality is that it is difficult to create a good SQL query planner.
+ Not every system will take the effort.
 \end_layout
 
 \begin_layout Subsubsection
@@ -8946,7 +8958,13 @@ Well, the OGRE s-expressions are just that: strings.
  Because of this, there is no particularly compelling reason to automatically
  manage the incoming sets for these trees.
  Or rather, there is no particularly compelling reason, until one considers
- the implementation of the 'JOIN' keyword.
+ the implementation of the '
+\family sans
+\size footnotesize
+JOIN
+\family default
+\size default
+' keyword.
  In OGRE, there are no overt primary keys, and no foreign keys, so these
  need to be generated implicitly, as needed, to perform a query that joins
  together multiple s-expressions.
@@ -8962,7 +8980,7 @@ Does OGRE actually auto-create these primary-key/foreign-key relations,
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9023,7 +9041,7 @@ As noted in the introduction to this text, an s-expression such as
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9039,7 +9057,7 @@ can be shortened to
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9063,7 +9081,7 @@ predicate
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9081,7 +9099,7 @@ This last statement resembles a conventional table-database table declaration.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9250,7 +9268,7 @@ How else could the query about the schools that Rachel attends could be
 \begin_inset Graphics
 	filename graphics/metagraph-new.eps
 	lyxscale 60
-	width 25col%
+	width 37col%
 
 \end_inset
 
@@ -9258,11 +9276,12 @@ How else could the query about the schools that Rachel attends could be
 \end_layout
 
 \begin_layout Standard
+\noindent
 and once again noting that the presence of the dotted arrows allows rapid
  graph traversal starting from any Atom, we can offer the following as a
  possibility: 
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9337,9 +9356,11 @@ The reading of this query is as follows:
 
 \begin_layout Itemize
 '
-\family typewriter
+\family sans
+\size footnotesize
 Meet
 \family default
+\size default
 ' is a special keyword defining the query.
 \begin_inset Foot
 status collapsed
@@ -9347,8 +9368,10 @@ status collapsed
 \begin_layout Plain Layout
 The name '
 \family sans
+\size footnotesize
 Meet
 \family default
+\size default
 ' comes from the mathematical concept of meets and joins on a lattice.
  See 
 \begin_inset Flex URL
@@ -9364,8 +9387,10 @@ https://en.wikipedia.org/wiki/Join_and_meet
 .
  The '
 \family sans
+\size footnotesize
 Present
 \family default
+\size default
 ' link is a listing of several points in a lattice, all of which must be
  met by any solution to the query.
 \end_layout
@@ -9377,22 +9402,28 @@ Present
 
 \begin_layout Itemize
 '
-\family typewriter
+\family sans
+\size footnotesize
 Variable
 \family default
+\size default
 ' is a special keyword, that, when it follows a '
-\family typewriter
+\family sans
+\size footnotesize
 Meet
 \family default
-', it indicates what is to be returned.
+\size default
+', it indicates what the query is to return.
  It has other (related) meanings in other contexts.
 \end_layout
 
 \begin_layout Itemize
 '
-\family typewriter
+\family sans
+\size footnotesize
 Present
 \family default
+\size default
 ' is a special keyword, asking that all of the clauses must explicitly appear
  in the database.
  They must be matched, as patterns in a pattern matcher.
@@ -9402,22 +9433,28 @@ Present
 
 \begin_layout Itemize
 The '
-\family typewriter
+\family sans
+\size footnotesize
 Node
 \family default
+\size default
 ' and '
-\family typewriter
+\family sans
+\size footnotesize
 Link
 \family default
+\size default
 ' keywords are special keywords, explicitly denoting the Nodes and Links
  about which we've been talking all along.
 \end_layout
 
 \begin_layout Standard
 The intent is that the '
-\family typewriter
+\family sans
+\size footnotesize
 (Variable ?course?)
 \family default
+\size default
 ' is grounded by 
 \begin_inset Formula $e_{2}$
 \end_inset
@@ -9428,9 +9465,11 @@ The intent is that the '
 
 ) is attending.
  The '
-\family typewriter
+\family sans
+\size footnotesize
 (Variable ?what-school?)
 \family default
+\size default
 ' is grounded by 
 \begin_inset Formula $e_{5}$
 \end_inset
@@ -9444,7 +9483,7 @@ This should be contrasted with the earlier SQL query:
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9472,14 +9511,18 @@ status open
 
 The most notable difference is that the meta-query does not need to explicitly
  name the '
-\family typewriter
+\family sans
+\size footnotesize
 Schools
 \family default
+\size default
 ' table.
  Indeed, the metagraph does not have a '
-\family typewriter
+\family sans
+\size footnotesize
 Schools
 \family default
+\size default
 ' table, and so it is not nameable (this could be 
 \begin_inset Quotes eld
 \end_inset
@@ -9558,7 +9601,8 @@ write down anything
 \end_inset
 
 , as long as the parenthesis balance.
- Both s-expressions and Prolog can be taken to be examples of free theories.
+ Both s-expressions and the Datalog subset of Prolog can be taken to be
+ examples of free theories.
  The theory of pure equality adds the equals sign, and says 
 \begin_inset Quotes eld
 \end_inset
@@ -9622,23 +9666,31 @@ this variable appearing in this predicate is equal to this other variable
 \end_inset
 
  The SQL statement has implicit variables in it: the expression '
-\family typewriter
+\family sans
+\size footnotesize
 Students.course_id
 \family default
+\size default
 ' is meant to be understood as a variable, ranging over all possible values
  of '
-\family typewriter
+\family sans
+\size footnotesize
 course_id
 \family default
+\size default
 ' in the '
-\family typewriter
+\family sans
+\size footnotesize
 Students
 \family default
+\size default
 ' table.
  The '
-\family typewriter
+\family sans
+\size footnotesize
 Courses.uuid
 \family default
+\size default
 ' is another implicit variable.
  The equals sign is needed, because of the way that the variables appeared
  implicitly.
@@ -9693,7 +9745,8 @@ s to relational algebras and query languages.
  The meta-query made use of the property of meta-graphs that any given Atom
  is always the same Atom.
  That is, the '
-\family typewriter
+\family sans
+\size footnotesize
 (Variable 
 \begin_inset Quotes eld
 \end_inset
@@ -9704,6 +9757,7 @@ s to relational algebras and query languages.
 
 )
 \family default
+\size default
 ' is the same Atom in both subtrees.
  There is no need to use an equals sign to equate these two positions; they
  are already 
@@ -9744,9 +9798,11 @@ A third fundamental difference is that the metaquery did not require any
  Thanks to the implicit presence of the dashed arrows, there is no need
  to explicitly define indexes (i.e.
  there is no '
-\family typewriter
+\family sans
+\size footnotesize
 CREATE INDEX ON Students(name);
 \family default
+\size default
 ' which would be needed if we wanted to have fast-running SQL queries on
  student names.
  The primary keys, of course, did not need explicit index declarations.)
@@ -9761,19 +9817,23 @@ i.e.
 
 \emph default
  it must begin with '
-\family typewriter
+\family sans
+\size footnotesize
 Meet
 \family default
+\size default
 ', it must have some variable declarations and use the '
-\family typewriter
+\family sans
+\size footnotesize
 Present
 \family default
+\size default
 ' link, and so on) but that syntax is a sub-language within the language
  of free s-expressions.
  The fact that the metaquery is itself a metatree opens the possibility
  of querying for queries.
  This may sound utterly absurd, but is in fact very commonplace in chat-bots
- and rule engines! This is expanded on below.
+ and rule engines! This is expanded on, in the next section.
 \end_layout
 
 \begin_layout Standard
@@ -9785,7 +9845,7 @@ It is perhaps instructive to draw the metatree diagram for this query:
 \begin_inset Graphics
 	filename graphics/metaquery.eps
 	lyxscale 60
-	width 25col%
+	width 22col%
 
 \end_inset
 
@@ -10254,9 +10314,24 @@ Rachel
 \end_layout
 
 \begin_layout Standard
-It is not entirely obvious, but performing this query requires solving a
- subgraph isomorphism problem.
- Clearly, the query implicitly demands that the variables should be grounded.
+Drawing the query as a graph makes it clear that performing this query requires
+ solving a subgraph isomorphism problem.
+ That is, satisfying this query requires searching for a subgraph of the
+ input-data graph that has exactly the same shape as the query.
+ After matching up the shapes, one performs a 
+\begin_inset Quotes eld
+\end_inset
+
+fill in the blanks
+\begin_inset Quotes erd
+\end_inset
+
+ to find the variable groundings.
+\end_layout
+
+\begin_layout Standard
+More formally: The query implicitly demands that the variables should be
+ grounded.
  The variables are to be grounded by Atoms, which may be either Nodes or
  Links.
  In the case of Links, these are (by definition) metatrees themselves, and
