@@ -13125,7 +13125,23 @@ There is one extremely important alternative, discussed in other texts in
 
  to the jigsaw-puzzle tab 42.
  That is, beta reduction is an example of jigsaw-puzzle assembly.
- Now, full-fledged jigsaw puzzle pieces can connect in every-which way (provided
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename graphics/puzzle-beta-reduce.eps
+	lyxscale 70
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, full-fledged jigsaw puzzle pieces can connect in every-which way (provided
  that the tabs and slots are correctly mated).
  This is more general than term algebras, in which term trees are always
  DAGs.
