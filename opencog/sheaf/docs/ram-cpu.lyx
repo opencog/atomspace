@@ -13141,16 +13141,56 @@ There is one extremely important alternative, discussed in other texts in
 \end_layout
 
 \begin_layout Standard
-Now, full-fledged jigsaw puzzle pieces can connect in every-which way (provided
+The two pieces can be connected together only if the connector types match:
+ the slot and the tab must have opposite types.
+ This ensures the type-safety of beta-reduction.
+ Observe the coloring of the vertexes in the above diagram.
+ At the bottom, there are two black (
+\begin_inset Quotes eld
+\end_inset
+
+full
+\begin_inset Quotes erd
+\end_inset
+
+) vertexes, connected by a (full) edge.
+ At the top, the open-colored vertexes are (unconnected) 
+\begin_inset Quotes eld
+\end_inset
+
+connectors
+\begin_inset Quotes erd
+\end_inset
+
+, and the edges are 
+\begin_inset Quotes eld
+\end_inset
+
+half-edges
+\begin_inset Quotes erd
+\end_inset
+
+, not yet fully formed until the connection is made.
+\end_layout
+
+\begin_layout Standard
+Full-fledged jigsaw puzzle pieces can connect in every-which way (provided
  that the tabs and slots are correctly mated).
  This is more general than term algebras, in which term trees are always
  DAGs.
  That is, a lambda is an anonymous term, an arrow is a component of a term
  tree.
- For computer programming (functional or imperative), one always thinks
- in terms of calling functions, methods with arguments, leading to the notion
- of an abstract syntax tree.
- For knowledge representation, it does not have to be that way.
+ For computer programming (functional or imperative), one thinks about calling
+ functions and methods with arguments, leading to the notion of an abstract
+ syntax tree.
+ Function calls and arrow types naturally construct trees, or DAGs, more
+ generally.
+ Graphs with loops, or graphs with undirected edges do not naturally occur
+ in lambda calculus or functional programming.
+\end_layout
+
+\begin_layout Standard
+For knowledge representation, it does not have to be that way.
  The directionality of the arrow can be discarded, and mating can be indicated
  with the connectors themselves.
  That is, the ArrowLink is a special case of a more general jigsaw-puzzle-piece
@@ -13239,8 +13279,15 @@ output
 
 \end_inset
 
-This example fails to show that there can be a vast multitude of directions,
- beyond just 
+This example shows only two direction types (direction 
+\begin_inset Quotes eld
+\end_inset
+
+sexes
+\begin_inset Quotes erd
+\end_inset
+
+): 
 \begin_inset Quotes eld
 \end_inset
 
@@ -13257,9 +13304,39 @@ output
 \end_inset
 
 .
- The rules for allowed connectivity patterns of connectors lie outside of
- the definition of individual jigsaw pieces.
- 
+ There is no particular need to restrict to such heterosexual connection
+ types or mating rules.
+ One can have a single sex, which, when connected, gives undirected edges.
+ One can have three or more sexes, with peculiar mating rules for which
+ can attach to which.
+ Natural examples occur in chemistry (bonds), in biochemistry (reactomes),
+ in biology (mating types of fungii) and in medicine (infectious disease
+ transmission.) Examples from computer science include polymorphic types.
+ A particularly strong example comes from linguistics: the Link Grammar,
+ where the notion of jigsaw puzzle pieces is made explicitly.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+What is the point of all of this? It is to reformulate or generalize the
+ notion of beta reduction and functional programming into a general setting,
+ more sutiable for general knowledge prepresentation.
+ One can, of course, fall back to earlier concepts of a directed edge, and
+ represent everything in terms of vertices and edges.
+ But the shortfalls of a conventional graph representation have already
+ been discussed: not just representational shortfalls, but also algorithmic
+ issues, with RAM and CPU consumption.
+ The point of the jigsaw puzzle paradigm is that it provides locality of
+ data and ease of assembly.
+ Partially assembled jigsaws obey the sheaf axioms.
+ Sheaves are generically useful for representing knowledge.
 \end_layout
 
 \begin_layout Standard
@@ -13305,15 +13382,17 @@ https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
  The denotational semantics of abstract syntax trees is that they are executable
  programs.
- Thus an expression such as 
+ Thus, an expression such as 
 \begin_inset Quotes eld
 \end_inset
 
 
 \family sans
+\size footnotesize
 \emph on
 if (a > b) return a+b;
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13324,7 +13403,7 @@ if (a > b) return a+b;
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -13422,7 +13501,8 @@ Let's not be silly.
 \end_inset
 
  In the end, a lisp program is always executable (evaluatable); if it is
- not, that is because it is broken in some way.
+ not, that is because it is broken in some way (or you just quoted the whole
+ thing).
  This is not the case here: there is nothing about metatrees that makes
  them inherently evaluatable or executable.
  Indeed, the above fragment is not executable until the variables are bound
@@ -13438,7 +13518,7 @@ Let's not be silly.
 \begin_layout Standard
 A subset of metatrees can be considered to be a programming language.
  This may appear to be self-evident; that this has not been the case historicall
-y is demonstrated in the comments below.
+y is demonstrated below.
 \end_layout
 
 \begin_layout Subsection
@@ -13619,7 +13699,7 @@ data processing
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -13746,7 +13826,7 @@ cut operator
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -13791,9 +13871,11 @@ This last observation becomes truly bizarre, if one imagines some non-trivial
 
 
 \family sans
+\size footnotesize
 \emph on
 sibling
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13807,9 +13889,11 @@ sibling
 
 
 \family sans
+\size footnotesize
 \emph on
 parent_child(Z, X)
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13821,9 +13905,11 @@ parent_child(Z, X)
 
 
 \family sans
+\size footnotesize
 \emph on
 parent_child(Z, Y)
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13835,9 +13921,11 @@ parent_child(Z, Y)
 
 
 \family sans
+\size footnotesize
 \emph on
 sibling(X, Y)
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13851,9 +13939,11 @@ sibling(X, Y)
 
 
 \family sans
+\size footnotesize
 \emph on
 SELECT INTO
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -13865,9 +13955,11 @@ SELECT INTO
 
 
 \family sans
+\size footnotesize
 \emph on
 JOIN
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -14076,7 +14168,7 @@ It appears that any kind of programming language constructed from raw metatree
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -14155,17 +14247,20 @@ is stunningly verbose, as compared to the far more succinct
 
 
 \family sans
+\size footnotesize
 \emph on
 if (a > b) return a+b;
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
 \end_inset
 
 .
- Although humans could write metagraph programs using the s-expression represent
-ation, it would be rather tedious to type up, and rather painful to read.
+ Although humans can (and do) write metagraph programs using the s-expression
+ representation, it is rather tedious to type up, and rather painful to
+ read.
 \begin_inset Foot
 status collapsed
 
@@ -14192,8 +14287,8 @@ do as I say, not as I do
 \begin_layout Standard
 To conclude: although some metatrees might be executable or evaluatable,
  and thus constitute a programming language, it does not appear to be a
- language that is particularly human-friendly, at least, not in it's s-expressio
-n representation.
+ language that is particularly human-friendly, at least, not in its s-expression
+ representation.
 \end_layout
 
 \begin_layout Standard
@@ -14317,7 +14412,31 @@ If the reader of this text finds any of the above concepts to be dubious,
  contact the mailing list.
  The AtomSpace, and Atomese are malleable.
  Bad ideas do need to be replaced by good ones.
- 
+\end_layout
+
+\begin_layout Standard
+If the reader of this text finds any of the above concepts to be vague,
+ then please note that AtomSpace source code repo contains a large variety
+ of example demos of each of the discussed features.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://github.com/opencog/atomspace/tree/master/examples"
+target "https://github.com/opencog/atomspace/tree/master/examples"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -14325,7 +14444,7 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-Several important claims were made here about metagraphs and metagraph stores.
+Several important claims were made about metagraphs and metagraph stores.
  These were:
 \end_layout
 
