@@ -183,7 +183,7 @@ Version 2.1
 \begin_inset Text
 
 \begin_layout Plain Layout
-21 Sept 2023
+22 Sept 2023
 \end_layout
 
 \end_inset
@@ -703,7 +703,7 @@ Consider the need to store data about some students.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -754,7 +754,7 @@ The square brackets denote a list; as is conventional with a list, all list
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -974,7 +974,7 @@ There does not appear to be any way of representing a row-store in JSON,
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1065,7 +1065,7 @@ Thus, the previous example can be written as
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1102,7 +1102,7 @@ As written, this has a distinctly JSONic feel to it, in that every value
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1133,7 +1133,7 @@ provided that one already knows the column structure of the data.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1165,7 +1165,7 @@ One can go farther: there is no particular need to tag each row with the
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1317,7 +1317,7 @@ An SQL Table declaration corresponding to the above example is
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1356,7 +1356,7 @@ ion floating point number.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -1831,7 +1831,7 @@ projection morphisms
 \end_inset
 
 
-\size small
+\size footnotesize
 union
 \family default
 \size default
@@ -1884,13 +1884,13 @@ d as category-theoretic arrows.
  The most important examples of arrows that can be interpreted as category-theor
 etic arrows are the indexes on SQL tables (
 \family sans
-\size small
+\size footnotesize
 PRIMARY KEY
 \family default
 \size default
  and 
 \family sans
-\size small
+\size footnotesize
 FOREIGN KEY
 \family default
 \size default
@@ -3859,7 +3859,7 @@ almost
 \begin_inset Graphics
 	filename graphics/hypergraph.eps
 	lyxscale 60
-	width 40col%
+	width 45col%
 
 \end_inset
 
@@ -5002,6 +5002,7 @@ Suppose one wishes to find all nodes with some specific attribute.
 
 
 \family sans
+\size footnotesize
 \emph on
 SELECT name,salary FROM employees WHERE department='sales';
 \family default
@@ -5039,7 +5040,7 @@ The author would like to apologize for this seemingly non-sexy example.
 
 
 \family sans
-\size small
+\size footnotesize
 CREATE INDEX ON employees(department);
 \family default
 \shape default
@@ -5063,7 +5064,7 @@ CREATE INDEX ON employees(department);
  the set of all records having that value.
  The 
 \family sans
-\size small
+\size footnotesize
 \emph on
 SELECT
 \family default
@@ -5158,7 +5159,7 @@ privileged
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5184,7 +5185,7 @@ noprefix "false"
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5250,7 +5251,7 @@ This is not meant to be a psychological assessment; rather it is meant to
 \align center
 \begin_inset Graphics
 	filename graphics/partial-index.eps
-	width 75col%
+	width 80col%
 
 \end_inset
 
@@ -5287,7 +5288,7 @@ This diagram exposes some unusual possibilities: If one is interested only
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5311,6 +5312,7 @@ sales
 
 
 \family sans
+\size footnotesize
 CREATE INDEX ON employees(department) WHERE department=sales;
 \family default
 \shape default
@@ -5440,7 +5442,7 @@ The explicit hypergraph representation does cost more than its implicit
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 SELECT INTO
 \family default
@@ -5456,7 +5458,7 @@ SELECT INTO
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 JOIN
 \family default
@@ -5500,9 +5502,9 @@ CPU usage considerations are harder to dissect.
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
-SELECT name,salary FROM employees WHERE department='sales';
+SELECT name, salary FROM employees WHERE department='sales';
 \family default
 \size default
 \emph default
@@ -5527,7 +5529,7 @@ what to do
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5546,7 +5548,7 @@ sales
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5575,7 +5577,7 @@ sales
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5592,7 +5594,7 @@ sales
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 sales
 \family default
@@ -5649,7 +5651,7 @@ Conventionally, corporations, political and military organizations are organized
 \begin_inset Graphics
 	filename graphics/org-chart.eps
 	lyxscale 70
-	width 30col%
+	width 35col%
 
 \end_inset
 
@@ -5790,7 +5792,7 @@ ad hoc
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 SELECT employees.name FROM employees, orgchart WHERE employees.department
  = orgchart.dept AND orgchart.division = 'marketing & sales';
@@ -6051,7 +6053,7 @@ It is often the case that the data is so voluminous, and so valuable, that
  Mistakes are not hard to make: some important 
 \family sans
 \shape italic
-\size small
+\size footnotesize
 PRIMARY KEY
 \family default
 \shape default
@@ -6059,7 +6061,7 @@ PRIMARY KEY
  - 
 \family sans
 \shape italic
-\size small
+\size footnotesize
 FOREIGN KEY
 \family default
 \shape default
@@ -6713,7 +6715,7 @@ TODO: provide worked example.
  The functors just tell you how to not accidentally lose 
 \family sans
 \shape italic
-\size small
+\size footnotesize
 PRIMARY KEY
 \family default
 \shape default
@@ -6721,7 +6723,7 @@ PRIMARY KEY
  - 
 \family sans
 \shape italic
-\size small
+\size footnotesize
 FOREIGN KEY
 \family default
 \shape default
@@ -6749,7 +6751,7 @@ The discusion of metagraphs above has presented their abstract graphical
 \begin_inset Graphics
 	filename graphics/metagraph.eps
 	lyxscale 60
-	width 25col%
+	width 23col%
 
 \end_inset
 
@@ -6836,7 +6838,7 @@ Either of these requires understanding indentation.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -7069,7 +7071,7 @@ the same thing
 .
  There is an IETF draft standard for references,
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See 
@@ -7123,7 +7125,7 @@ Let return to the string expression
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -7145,23 +7147,29 @@ This is not exactly an 'ordinary' s-expression, though.
 
 \begin_layout Itemize
 Every open-paren must be followed by a link '
-\family typewriter
+\family sans
+\size footnotesize
 ek
 \family default
+\size default
 ': this is what a meta-edge must necessarily be.
 \end_layout
 
 \begin_layout Itemize
 Every node is globally unique.
  That is, each time the node '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n2
 \family default
-2' appears in this expression, it is exactly the same '
-\family typewriter
-n
+\size default
+' appears in this expression, it is exactly the same '
+\family sans
+\size footnotesize
+n2
 \family default
-2', instead of being a different instance.
+\size default
+', instead of being a different instance.
  Referring back to the metagraph node table (
 \begin_inset CommandInset ref
 LatexCommand vpageref
@@ -7173,21 +7181,30 @@ noprefix "false"
 \end_inset
 
 ), we see that there is only one true instance of '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n2
 \family default
-2': it just has one set of attributes on it.
+\size default
+': it just has one set of attributes on it.
  When parsing the s-expression, whichever apparent copy of '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n2
 \family default
-2' that we grab hold of, the attributes attached to it will be the same.
+\size default
+' that we grab hold of, the attributes attached to it will be the same.
 \end_layout
 
 \begin_layout Itemize
 Every link is globally unique.
- For example, the sub-expression '(e2 n2 n3)' appears twice; in both cases,
- it is exactly the same subexpression.
+ For example, the sub-expression '
+\family sans
+\size footnotesize
+(e2 n2 n3)
+\family default
+\size default
+' appears twice; in both cases, it is exactly the same subexpression.
  This is clear by referring to the metagraph link table (
 \begin_inset CommandInset ref
 LatexCommand vpageref
@@ -7401,23 +7418,41 @@ noprefix "false"
 
  bytes.
  Plus three bytes each for the null terminated strings '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n1
 \family default
-1', '
-\family typewriter
-n
+\size default
+', '
+\family sans
+\size footnotesize
+n2
 \family default
-2' ...
- 'e1', 'e2' for a total of 
+\size default
+' ...
+ '
+\family sans
+\size footnotesize
+e1
+\family default
+\size default
+', '
+\family sans
+\size footnotesize
+e2
+\family default
+\size default
+' for a total of 
 \begin_inset Formula $160+24=184$
 \end_inset
 
  bytes minimum.
  The string-length of the string '
-\family typewriter
+\family sans
+\size footnotesize
 (e4 (e3 (e1 n1 n2) (e2 n2 n3) n1 (e2 n2 n3)) n3)
 \family default
+\size default
 ' is 48 characters: 48 bytes.
  The s-expression representation is four times more compact than the in-RAM
  representation!
@@ -7478,7 +7513,7 @@ The word 'mutable' was used several times in the last few sentences.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -7502,30 +7537,40 @@ just one
 \end_inset
 
  of the '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n3
 \family default
-3's into an '
-\family typewriter
-n
+\size default
+'s into an '
+\family sans
+\size footnotesize
+n5
 \family default
-5'.
+\size default
+'.
  But which one? They are, after all, all the same '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n3
 \family default
-3', so if edited, they all change together, atomically.
+\size default
+', so if edited, they all change together, atomically.
  Suppose now that this meta-tree is a subtree of something larger and more
  complex.
  Performing an edit, changing the '
-\family typewriter
-n
+\family sans
+\size footnotesize
+n3
 \family default
-3' into an '
-\family typewriter
-n
+\size default
+' into an '
+\family sans
+\size footnotesize
+n5
 \family default
-5' in this meta-tree requires examining the incoming set of this tree, and
+\size default
+' in this meta-tree requires examining the incoming set of this tree, and
  determining what to do in each case.
  This might be a non-trivial decision procedure.
  Should each of these larger trees get the new, modified version, or should
@@ -8016,7 +8061,7 @@ It is natural to use weak pointers for the incoming set, and regular pointers
 \begin_inset Graphics
 	filename graphics/metagraph-new.eps
 	lyxscale 60
-	width 25col%
+	width 45col%
 
 \end_inset
 
@@ -8493,6 +8538,10 @@ status open
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\begin_layout Plain Layout
+
 	CREATE TABLE Courses (
 \end_layout
 
@@ -8509,6 +8558,10 @@ status open
 \begin_layout Plain Layout
 
 		uuid INT PRIMARY KEY);
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
