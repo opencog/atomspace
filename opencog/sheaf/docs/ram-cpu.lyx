@@ -10314,8 +10314,8 @@ Rachel
 \end_layout
 
 \begin_layout Standard
-Drawing the query as a graph makes it clear that performing this query requires
- solving a subgraph isomorphism problem.
+Drawing the query as a graph should make it clear that performing this query
+ requires solving a subgraph isomorphism problem.
  That is, satisfying this query requires searching for a subgraph of the
  input-data graph that has exactly the same shape as the query.
  After matching up the shapes, one performs a 
@@ -10337,9 +10337,11 @@ More formally: The query implicitly demands that the variables should be
  In the case of Links, these are (by definition) metatrees themselves, and
  so the grounding matches a variable to a subgraph.
  The collection of subgraphs must be those specified in the '
-\family typewriter
+\family sans
+\size footnotesize
 Present
 \family default
+\size default
 ' link: 
 \emph on
 i.e.
@@ -10484,13 +10486,17 @@ Rachel
 
 The above introduces the '
 \family sans
+\size footnotesize
 Choice
 \family default
+\size default
 ' Link.
  For the most part, it can be read as a logical-OR of the two predicates
  that it wraps.
  More precisely, it denotes a menu-choice: pick one or pick the other (but
  not both).
+ It resembles an exclusive-OR, but is not the same: exclusive-OR returns
+ a truth value, whereas a menu-choice returns the chosen item.
  Choice commonly appears as a fragment of intuitionist logic and of linear
  logic.
 \end_layout
@@ -10512,7 +10518,7 @@ Since metatrees can be written as s-expression strings, and since metaqueries
 \begin_layout Standard
 This is doubly unfortunate, since pattern matching is well-understood and
  widely developed.
- Besides regex and pcre syntax case scheme
+ Besides regex and pcre,
 \begin_inset Foot
 status collapsed
 
@@ -10534,7 +10540,7 @@ http://www.pcre.org/
 
 \end_inset
 
- itself, the `syntax-case` subset
+ one has the `syntax-case` subset
 \begin_inset Foot
 status collapsed
 
@@ -10563,8 +10569,8 @@ hygienic macros
 \begin_inset Quotes erd
 \end_inset
 
- in the scheme programming language provides rudimentary pattern matching
- and term rewriting.
+ in the scheme programming language.
+ Syntax case provides rudimentary pattern matching and term rewriting.
  In that direction, most (all?) functional programming languages include
  pattern matchers as a basic utility.
 \begin_inset Foot
@@ -10614,8 +10620,8 @@ https://docs.scala-lang.org/tour/pattern-matching.html
 \end_layout
 
 \begin_layout Standard
-(Metatree) querying is not just (string) pattern matching.
- Key differences are listed below.
+Metatree querying is not just (string) pattern matching.
+ Key differences are:
 \end_layout
 
 \begin_layout Itemize
@@ -10699,13 +10705,17 @@ t keywords in the pattern.
  For example, one might want to search for all expressions that contain
  the term '
 \family sans
+\size footnotesize
 Variable
 \family default
+\size default
 ' in it.
  Obviously, this would have to be quoted (say, as '
 \family sans
+\size footnotesize
 (Quote (Variable ?x?))
 \family default
+\size default
 ') as otherwise, the variable would be interpreted as a variable in the
  pattern, instead of a constant term to be matched.
 \end_layout
@@ -10714,16 +10724,29 @@ Variable
 Practical metatree matching requires the ability to match lambda expressions.
  This requires the ability to find bound variables, and not only treat them
  as constants, but also to alpha-rewrite them.
- Consider, for example, the lambda expression '
+ Consider, for example, the lambda expression 
+\begin_inset Formula $\lambda x.\left(x+2\right)$
+\end_inset
+
+ written as a metatree: '
 \family sans
+\size footnotesize
 (Lambda (Variable $x) (Plus (Variable $x) (Number 2)))
 \family default
+\size default
 '.
- This expression is obviously equivalent to '
+ This expression is obviously equivalent to 
+\begin_inset Formula $\lambda y.\left(y+2\right)$
+\end_inset
+
+ or '
 \family sans
+\size footnotesize
 (Lambda (Variable $y) (Plus (Variable $y) (Number 2)))
 \family default
-' – the formal name for this kind of equivalence is 
+\size default
+'.
+ The formal name for this kind of equivalence is 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10734,17 +10757,21 @@ alpha equivalence
 .
  Any pattern that is searching for lambdas that involve '
 \family sans
+\size footnotesize
 Plus
 \family default
+\size default
 ' and the number 2 must be able to determine the alpha-equivalence of the
  match to the pattern.
  This is no longer a simple string match: the pattern matcher needs to be
  aware that '
 \family sans
+\size footnotesize
 Lambda
 \family default
+\size default
 ' is a special keyword that binds its variable declarations.
- And that bound variables can be alpha-rewritten.
+ It needs to know that bound variables can be alpha-rewritten.
 \end_layout
 
 \begin_layout Standard
@@ -10756,15 +10783,15 @@ After reading the above, the reader might feel as if there was a bit of
  This means representing not only 'simple' graphs and metagraphs, but also
  quotidian systems like ontologies, phylogenies, first-order logic, Bayesian
  networks, lambda calculus, probabilistic programs, functional programs,
- declarative programs, genes, proteins, natural language, visual objects,
- sounds, 3D spaces, ...
+ declarative programs, genes, proteins, chemistry, natural language, visual
+ objects, sounds, 3D spaces, ...
  As such, a knowledge representation system has to be practical and utilitarian,
  useful as a tool for the day-to-day knowledge worker.
  Thus, funny business like quotes and lambdas and alpha-rewrites and unordered
  sets must necessarily enter into the picture, and be supportable in the
  query system.
  Users ask for these things, users want them.
- You can't say no to users and expect them to come back anyway.
+ You can't say no to users and expect them to come back.
 \end_layout
 
 \begin_layout Standard
@@ -10777,7 +10804,8 @@ Note, by the way, that the goals of a knowledge representation system resemble
  Sheaves are actually useful in mathematics.
  At this time, it is not yet widely understood that sheaves are also useful
  in knowledge representation.
- But we wander off-track, here; this is a different topic.
+ But we wander off-track, here; this is a different topic, covered in other
+ texts in this series.
 \end_layout
 
 \begin_layout Standard
