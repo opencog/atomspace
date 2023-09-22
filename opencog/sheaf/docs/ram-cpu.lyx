@@ -4995,6 +4995,8 @@ Suppose one wishes to find all nodes with some specific attribute.
  structure, extracting a named field from the attributes, and examining
  the value of that field.
  This is a task that SQL databases excel at - for example, 
+\size small
+
 \begin_inset Quotes eld
 \end_inset
 
@@ -5003,6 +5005,7 @@ Suppose one wishes to find all nodes with some specific attribute.
 \emph on
 SELECT name,salary FROM employees WHERE department='sales';
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5029,13 +5032,18 @@ The author would like to apologize for this seemingly non-sexy example.
  A graph database is not needed for this task.
  Nonetheless, this is a plausible task, even for a graph database.
  The traditional solution would be 
+\shape italic
+
 \begin_inset Quotes eld
 \end_inset
 
 
 \family sans
+\size small
 CREATE INDEX ON employees(department);
 \family default
+\shape default
+\size default
 
 \begin_inset Quotes erd
 \end_inset
@@ -5054,10 +5062,12 @@ CREATE INDEX ON employees(department);
 
  the set of all records having that value.
  The 
-\family typewriter
+\family sans
+\size small
 \emph on
 SELECT
 \family default
+\size default
 \emph default
  is then straight-forward: given 
 \begin_inset Formula $D$
@@ -5090,7 +5100,7 @@ Well, in practice, they often do; but now imagine the task of finding all
 
 \end_inset
 
- The point of the index with to replace an 
+ The point of the index is to replace an 
 \begin_inset Formula $O\left(N\right)$
 \end_inset
 
@@ -5101,6 +5111,10 @@ Well, in practice, they often do; but now imagine the task of finding all
  cpu-time search.
  The price of doing so was an 
 \begin_inset Formula $O\left(N\right)$
+\end_inset
+
+ or 
+\begin_inset Formula $O\left(N\log N\right)$
 \end_inset
 
  RAM structure.
@@ -5144,9 +5158,11 @@ privileged
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5168,9 +5184,11 @@ noprefix "false"
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5269,9 +5287,11 @@ This diagram exposes some unusual possibilities: If one is interested only
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5283,6 +5303,9 @@ sales
  explicitly supports partial indexes.
  As it happens, most-all SQL systems do.
  An experienced SQL DBA knows exactly how to achieve this effect: 
+\shape italic
+\size small
+
 \begin_inset Quotes eld
 \end_inset
 
@@ -5290,6 +5313,8 @@ sales
 \family sans
 CREATE INDEX ON employees(department) WHERE department=sales;
 \family default
+\shape default
+\size default
 
 \begin_inset Quotes erd
 \end_inset
@@ -5415,9 +5440,11 @@ The explicit hypergraph representation does cost more than its implicit
 
 
 \family sans
+\size small
 \emph on
 SELECT INTO
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5429,9 +5456,11 @@ SELECT INTO
 
 
 \family sans
+\size small
 \emph on
 JOIN
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5447,7 +5476,7 @@ ed DBAs.
 \begin_layout Standard
 Suppose you are clever enough to write deep table joins in SQL.
  Is your query planner as clever as you? Most SQL systems have a query analyzer
- or query compiler, which takes a given SQL statement, analyzes it's structure,
+ or query compiler, which takes a given SQL statement, analyzes its structure,
  and then creates a plan as to which data shall be fetched first, and in
  what order.
  Poor planning results in poor performance, sometimes disastrously poor
@@ -5471,9 +5500,11 @@ CPU usage considerations are harder to dissect.
 
 
 \family sans
+\size small
 \emph on
 SELECT name,salary FROM employees WHERE department='sales';
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5496,9 +5527,11 @@ what to do
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5513,9 +5546,11 @@ sales
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5540,9 +5575,11 @@ sales
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5555,9 +5592,11 @@ sales
 
 
 \family sans
+\size small
 \emph on
 sales
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5751,10 +5790,12 @@ ad hoc
 
 
 \family sans
+\size small
 \emph on
 SELECT employees.name FROM employees, orgchart WHERE employees.department
  = orgchart.dept AND orgchart.division = 'marketing & sales';
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -5854,8 +5895,8 @@ easy
 \begin_inset Quotes erd
 \end_inset
 
- if you are willing to write PL/SQL, or, if your database supports it, then
- embedded Python.
+ if you are willing to write PL/SQL, or embedded Python, if your database
+ supports it.
  Otherwise, you have to descend into C/C++ (or your favorite programming
  language of choice), and once you are 
 \begin_inset Quotes eld
@@ -6009,12 +6050,20 @@ It is often the case that the data is so voluminous, and so valuable, that
  that nothing is lost or corrupted.
  Mistakes are not hard to make: some important 
 \family sans
+\shape italic
+\size small
 PRIMARY KEY
 \family default
+\shape default
+\size default
  - 
 \family sans
+\shape italic
+\size small
 FOREIGN KEY
 \family default
+\shape default
+\size default
  constraint might be accidentally dropped.
  Maybe some column will be forgotten about.
  Maybe normalization will be broken, resulting in duplicated data appearing
@@ -6644,6 +6693,41 @@ A Data Migration Example
 \begin_layout Standard
 TODO: provide worked example.
  Conclude: its still tables, in the end.
+ That is, FQL/CQL is formulated explicitly in terms of tables.
+ The abstraction, in terms of category theory, does not escape the underlying
+ table structure.
+ Yes, the schema mapping 
+\begin_inset Formula $F:\mathcal{C}\to\mathcal{D}$
+\end_inset
+
+ is a pure graph re-write.
+ However, the functor 
+\begin_inset Formula $\Delta_{F}$
+\end_inset
+
+ acts on tables, by design, since 
+\begin_inset Formula $\mathcal{C}\mbox{-}\mathbf{Inst}$
+\end_inset
+
+ consists of populated tables (by design).
+ The functors just tell you how to not accidentally lose 
+\family sans
+\shape italic
+\size small
+PRIMARY KEY
+\family default
+\shape default
+\size default
+ - 
+\family sans
+\shape italic
+\size small
+FOREIGN KEY
+\family default
+\shape default
+\size default
+ constraints.
+ It does not provide particular insight into graph rewriting, in general.
 \end_layout
 
 \begin_layout Section
@@ -6651,8 +6735,11 @@ Metatrees and String Representations
 \end_layout
 
 \begin_layout Standard
-The proper way of representing a meta-tree as a text string can be mildly
- confusing.
+The discusion of metagraphs above has presented their abstract graphical
+ structure, and what the corresponding in-RAM data structure looks like.
+ Another important representation is the string representation: how can
+ a meta-tree be written as a text string? The proper representation as a
+ string can be mildly confusing.
  Articulating this carefully is rewarding.
  Consider again the generic example:
 \end_layout
@@ -6743,7 +6830,7 @@ e_{4}/ & e_{3}/ & e_{1}/ & n_{1}\\
 
 Either of these requires understanding indentation.
  Yuck.
- This is still hard to read.
+ Even if you understand the indentation, the above are still hard to read.
  Perhaps JSON will do:
 \end_layout
 
@@ -7220,13 +7307,19 @@ oh, hey, just use universally unique identifiers
 
  (UUID's).
  This is good enough for local address spaces; if nothing else, then an
- ordinary C/C++ pointer is a UUID for the object.
- But, when writing a text string, what UUID shall one use? 
+ ordinary C/C++ pointer can be (effecitvely is) a UUID for the object.
+ But, when writing a text string, what UUID shall one use? How should they
+ be issued? Where should they be kept? These are difficult questions, with
+ no easy or obvious answers.
 \end_layout
 
 \begin_layout Standard
-Much worse, UUID's cause major, fundamental problems when considering network-di
-stributed storage; this is the problem of UUID collision.
+It gets worse.
+ What happens if there are two users, on opposite sides of the planet, and
+ they need to issue a UUID for an Atom? This is a famous issue in computing:
+ UUIDs cause major, fundamental problems when considering network-distributed
+ storage.
+ The problem is of UUID collision.
  One solution to avoid UUID collision is to have a single centralized atomic
  issuer of ID's that can guarantee uniqueness.
  This introduces a single, centralized bottleneck.
