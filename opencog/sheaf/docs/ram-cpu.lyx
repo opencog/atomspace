@@ -7580,15 +7580,23 @@ n5
 de facto
 \emph default
  immutable, and the new, modified version just becomes a completely new
- meta-tree.
+ meta-tree (
+\begin_inset Quotes eld
+\end_inset
+
+copy on write.
+\begin_inset Quotes erd
+\end_inset
+
+)
 \end_layout
 
 \begin_layout Standard
-So immutable meta-trees are quite all right.
+So, immutable meta-trees are quite all right.
  Besides avoiding the decision problem of what to do with the incoming set,
  there are some much more mundane advantages.
  Immutable meta-trees can be traversed lock-free; there is no concern that
- one thread is traversing it even as another thread is altering it.
+ one thread is traversing it, even as another thread is altering it.
  The importance of having small structures being lock-free cannot be overstated.
 \end_layout
 
@@ -7609,7 +7617,7 @@ must
 
 \begin_layout Standard
 Yet, oddly, this top-level index/table looks exactly like any other metatree.
- Yes, its large: it may have many millions of (immutable) subtrees in it.
+ Yes, it's large: it may have many millions of (immutable) subtrees in it.
  But it itself is just another tree, and there is no particular reason why
  it cannot be the subtree of yet other trees.
  The only difference is that it is mutable.
@@ -7627,8 +7635,8 @@ Thus, we've identified two fundamentally different utilities, serving different
 \begin_layout Standard
 Within the OpenCog system, the mutable form has been historically called
  the 'AtomSpace'.
- It can be stacked and nested and used to form diamond-shaped inheritance
- diagrams, however one wishes.
+ It can be stacked and nested and used to form linear or Y-shaped or diamond-sha
+ped inheritance diagrams, however one wishes.
  The immutable Nodes and Links have been called 'Atoms', as a stand-in term
  for something that can be either a Node or a Link.
 \end_layout
@@ -7646,7 +7654,7 @@ There are two ways to delete a row from an SQL table.
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 PRIMARY KEY
 \family default
@@ -7663,7 +7671,7 @@ PRIMARY KEY
 
 
 \family sans
-\size small
+\size footnotesize
 \emph on
 SELECT key FROM employees WHERE name='Agent Smith';
 \family default
@@ -7682,6 +7690,7 @@ SELECT key FROM employees WHERE name='Agent Smith';
 
 
 \family sans
+\size footnotesize
 \emph on
 DELETE FROM employees WHERE name='Agent Smith';
 \family default
@@ -7697,7 +7706,7 @@ DELETE FROM employees WHERE name='Agent Smith';
 \begin_layout Standard
 In SQL, effectively all tables have a primary key: it is the master key
  for each row.
- For the discussion above, it is effectively the UUID.
+ For the discussion above, it is effectively the UUID of the row.
  As the 
 \emph on
 de facto
@@ -7705,9 +7714,25 @@ de facto
  UUID of SQL systems, it suffers from all the UUID drawbacks previously
  reviewed.
  SQL databases are notoriously hard to shard across multiple network nodes.
- Consistency and atomic updates are hard: there is effectively one centralized
- bottleneck.
- This is the foundation stone on which the ACID vs.
+ Consistency and atomic updates are hard: this is because there is effectively
+ one centralized bottleneck for issuing and locking UUIDs.
+ Such locks are needed during updates, even if only for the 
+\begin_inset Quotes eld
+\end_inset
+
+short
+\begin_inset Quotes erd
+\end_inset
+
+ duration of the '
+\family sans
+\size footnotesize
+COMMIT
+\family default
+\size default
+'.
+ This bottleneck, and the difficulty of resolving it, is the foundation
+ stone on which the ACID vs.
  BASE debates are built.
 \end_layout
 
@@ -7736,7 +7761,21 @@ If the master index is a hash table or a tree of abstract indicators, and
  what it's Merkle tree hash will be.
  It is not 'unique', in the sense that there might be hash collisions.
  However, for practical use in the database, being collision-free is not
- so important; being computable in a decentralized fashion is.
+ so important;
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+It's not so important, because one does not blindly delete everything with
+ the same hash.
+ One first checks to verify that the right thing is being deleted.
+ The hash only served to quickly find a small list of candidates.
+ This is as always.
+\end_layout
+
+\end_inset
+
+ being computable in a decentralized fashion is.
  It avoids the UUID/primary-key pitfall.
  This certainly turns the ACID vs.
  BASE debate a bit on it's side.
@@ -7843,8 +7882,8 @@ Metagraph mutability vs.
 \end_layout
 
 \begin_layout Standard
-Compared to a graph database ...
- well, how, exactly is one supposed to say that 
+Lets compare the metagraph store to a graph database.
+ In a graph store, how, exactly is one supposed to say that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7852,16 +7891,27 @@ this vertex is the same as that vertex
 \begin_inset Quotes erd
 \end_inset
 
- in a graph store? This is non-trivial; it requires either references or
- some other technique; if one is not careful, one finds oneself performing
- queries at the same time that one is inserting data.
+? Finding a suitable solution is non-trivial; it requires either references
+ or some other technique to indicate sameness.
+ How is this to be managed in a graph store? If one is not careful, one
+ finds oneself performing queries at the same time that one is inserting
+ data.
  
 \end_layout
 
 \begin_layout Standard
-The answer to be supplied here is utterly opaque.
- This section is short because the problem is a bit mind-boggling.
- To conclude: we seem to have discovered, quite accidentally, with no explicit
+There is a large variety of graph stores that are generally available.
+ Each has unique API's and differing implementations.
+ It is beyond the scope of this text to review them all.
+ Thus, the answer to be supplied here is utterly opaque.
+ How can one retro-fit this primary property of metagraphs, of global metatree
+ uniqueness, onto a graph store? What's the answer? This section is short
+ because the problem is a bit mind-boggling.
+ 
+\end_layout
+
+\begin_layout Standard
+To conclude: we seem to have discovered, quite accidentally, with no explicit
  intent, that hypergraphs offer an elegant property that graph databases
  lack.
 \end_layout
