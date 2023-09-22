@@ -7452,7 +7452,7 @@ Insertion, Deletion and Mutability
 
 \begin_layout Standard
 When a metatree is added to a metagraph, a scan must be made to determine
- if the tree, or any subtree already occurs in the metagraph.
+ if the tree, or any subtree, already occurs in the metagraph.
  How might we know this? By looking it up! But where is this stored? 
 \end_layout
 
@@ -7601,9 +7601,11 @@ There are two ways to delete a row from an SQL table.
 
 
 \family sans
+\size small
 \emph on
 PRIMARY KEY
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -7616,9 +7618,11 @@ PRIMARY KEY
 
 
 \family sans
+\size small
 \emph on
 SELECT key FROM employees WHERE name='Agent Smith';
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -7626,6 +7630,8 @@ SELECT key FROM employees WHERE name='Agent Smith';
 
  and present the resulting key to be deleted.
  Yes, of course, this can be done with a single statement: 
+\size small
+
 \begin_inset Quotes eld
 \end_inset
 
@@ -7634,6 +7640,7 @@ SELECT key FROM employees WHERE name='Agent Smith';
 \emph on
 DELETE FROM employees WHERE name='Agent Smith';
 \family default
+\size default
 \emph default
 
 \begin_inset Quotes erd
@@ -8459,13 +8466,23 @@ How might this have worked in conventional SQL? Well, for starters, we need
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Schools (name TEXT, uuid INT PRIMARY KEY);
+	CREATE TABLE Schools (
+\end_layout
+
+\begin_layout Plain Layout
+
+		name TEXT,
+\end_layout
+
+\begin_layout Plain Layout
+
+		uuid INT PRIMARY KEY);
 \end_layout
 
 \begin_layout Plain Layout
@@ -8476,14 +8493,42 @@ status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Courses (name TEXT, school_uuid INT FOREIGN KEY, uuid INT
- PRIMARY KEY);
+	CREATE TABLE Courses (
 \end_layout
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Students (name TEXT, course_id INT FOREIGN KEY, student_id
- INT PRIMARY KEY);
+		name TEXT,
+\end_layout
+
+\begin_layout Plain Layout
+
+		school_uuid INT FOREIGN KEY,
+\end_layout
+
+\begin_layout Plain Layout
+
+		uuid INT PRIMARY KEY);
+\end_layout
+
+\begin_layout Plain Layout
+
+	CREATE TABLE Students (
+\end_layout
+
+\begin_layout Plain Layout
+
+		name TEXT,
+\end_layout
+
+\begin_layout Plain Layout
+
+		course_id INT FOREIGN KEY,
+\end_layout
+
+\begin_layout Plain Layout
+
+		student_id INT PRIMARY KEY);
 \end_layout
 
 \end_inset
@@ -8496,14 +8541,28 @@ One continues in this fashion, creating a few more tables.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Employment (name TEXT, employer TEXT, taxpayer_id INT PRIMARY
- KEY);
+	CREATE TABLE Employment (
+\end_layout
+
+\begin_layout Plain Layout
+
+		name TEXT,
+\end_layout
+
+\begin_layout Plain Layout
+
+		employer TEXT,
+\end_layout
+
+\begin_layout Plain Layout
+
+		taxpayer_id INT PRIMARY KEY);
 \end_layout
 
 \end_inset
@@ -8524,7 +8583,7 @@ How does the query work?
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -8571,9 +8630,11 @@ The above has the form of an explicit path walk.
  is jointly managed both by ASCII and by the Dean of WU.
  Representing this properly requires a few more tables, and an additional
  clause in the 
-\family typewriter
+\family sans
+\size small
 SELECT
 \family default
+\size default
  statement.
 \begin_inset Foot
 status collapsed
@@ -8614,9 +8675,11 @@ This query works precisely because the DBA who is creating the query has
  an explicit path between the tables.
  The reason that the SQL database engine can execute the query is because
  the DBA explicitly inserted 
-\family typewriter
+\family sans
+\size small
 FOREIGN KEY
 \family default
+\size default
  constraints into appropriate locations.
  These foreign keys have the side effect of defining an index that manifests
  the dashed arrows in the metagraph diagram.
@@ -8666,9 +8729,13 @@ Query planning concerns the topic of how the database engine will actually
  The above example was written in a fashion that highlights an obviously
  efficient and easy way to run the query.
  Start at the join '
-\family typewriter
+\family sans
+\shape italic
+\size small
 Students.name = 'Rachel'
 \family default
+\shape default
+\size default
 ' and trace the dashed arrows upwards, to immediately arrive at the desired
  answer.
 \end_layout
@@ -8676,9 +8743,13 @@ Students.name = 'Rachel'
 \begin_layout Standard
 Of course, there is no guarantee that the SQL engine will actually do this.
  It might decide to start with '
-\family typewriter
+\family sans
+\shape italic
+\size small
 TABLE Schools
 \family default
+\shape default
+\size default
 ', examine each school in turn, and then trace downwards from the top, until
  it eventually reaches Rachel, and is able to satisfy this final constraint.
  Table joins are a constraint satisfaction problem.
@@ -8794,8 +8865,8 @@ status open
 
 \begin_layout Plain Layout
 
-	( <attribute-name> <v1> <v2> ...
- <vM> )
+	(<attribute-name> <v1> <v2> ...
+ <vM>)
 \end_layout
 
 \end_inset
@@ -8913,13 +8984,12 @@ status open
 
 \begin_layout Plain Layout
 
-	declaration ::= ( declare <attribute-name> <field> <field> ...
- )
+	declaration ::= (declare <attribute-name> <field> <field> ...)
 \end_layout
 
 \begin_layout Plain Layout
 
-	field ::= ( <field-name> <field-type> )
+	field ::= (<field-name> <field-type>)
 \end_layout
 
 \begin_layout Plain Layout
@@ -9668,7 +9738,7 @@ S-expression
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9711,7 +9781,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9754,7 +9824,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9797,7 +9867,7 @@ Rachel
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9858,7 +9928,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -9919,7 +9989,7 @@ Rachel
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3,linewidth=40pt"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3,linewidth=40pt"
 inline false
 status open
 
@@ -9996,7 +10066,7 @@ Rachel
 
 \begin_layout Plain Layout
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -10111,7 +10181,7 @@ The careful reader may have noticed that the above query only returns that
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\small\sffamily},tabsize=3"
+lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
 inline false
 status open
 
