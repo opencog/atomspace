@@ -28,6 +28,11 @@
 #include <opencog/atoms/grounded/DLPython.h>
 #include <opencog/atoms/grounded/PythonRunner.h>
 
+// Avoid cryptic fails due to users forcing broken configurations.
+#ifndef HAVE_CYTHON
+#error "Error: The Makefiles or CMakefiles are misconfigured, and failed to detect Cython correctly."
+#endif
+
 using namespace opencog;
 
 PythonRunner::PythonRunner(std::string s)
