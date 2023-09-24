@@ -34,7 +34,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (query)
 
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
-		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")
+		MESSAGE(STATUS "Found cython and nosetests, enabling python unit tests")
 		ADD_SUBDIRECTORY (cython)
 	ENDIF (HAVE_CYTHON AND HAVE_NOSETESTS)
 
