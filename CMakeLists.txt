@@ -8,21 +8,10 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-# cogutils already requires 2.8.12.2, so may as well ask for that.
+# cogutils already requires 3.12, so may as well ask for that.
 # Correct handling of guile module install requires cmake version 3.12
-# or newer, but ubuntu bionic 18.04 only has 3.10. Bummer about that.
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12.2)
-IF (COMMAND CMAKE_POLICY)
-	CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF (COMMAND CMAKE_POLICY)
-
-IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
-	CMAKE_POLICY(SET CMP0037 NEW)
-	CMAKE_POLICY(SET CMP0042 NEW)
-ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
-IF (CMAKE_VERSION VERSION_GREATER 3.9.0)
-	CMAKE_POLICY(SET CMP0068 NEW)
-ENDIF (CMAKE_VERSION VERSION_GREATER 3.9.0)
+# or newer, but Ubuntu Bionic 18.04 only has 3.10. Bummer about that.
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 PROJECT(atomspace)
 
@@ -315,10 +304,6 @@ IF (CXXTEST_FOUND)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-
-	# When CMP00037 is finally turned off, just remove these two lines.
-	ADD_CUSTOM_TARGET(test)
-	ADD_DEPENDENCIES(test check)
 
 	ADD_CUSTOM_TARGET(test_atomese
 		DEPENDS tests

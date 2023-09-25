@@ -108,7 +108,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make test
+          command: cd build && make check
       - run:
           name: Install AtomSpaceRocks
           command: cd build && make -j2 install && ldconfig
@@ -160,7 +160,7 @@ jobs:
 # negatives.
 #      - run:
 #          name: Run tests
-#          command: cd build && make test ARGS="$MAKEFLAGS"
+#          command: cd build && make check ARGS="$MAKEFLAGS"
 #      - run:
 #          name: Print test log
 #          command: cat build/tests/Testing/Temporary/LastTest.log
@@ -204,7 +204,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make -j2 check ARGS=-j2
       - run:
           name: Install spacetime
           command: cd build && make -j2 install && ldconfig
@@ -249,7 +249,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make -j2 check ARGS=-j2
       - run:
           name: Install Unify
           command: cd build && make -j2 install && ldconfig
@@ -297,7 +297,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make -j2 check ARGS=-j2
       - run:
           name: Install URE
           command: cd build && make -j2 install && ldconfig
@@ -354,7 +354,7 @@ jobs:
           # Running tests in parallel seems to result in test failures.
           # I don't know why
           # command: cd build && make test ARGS="$MAKEFLAGS"
-          command: cd build && make test
+          command: cd build && make check
       - run:
           name: Install AS-MOSES
           command: cd build && make install && ldconfig
@@ -412,7 +412,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make -j2 check ARGS=-j2
       - run:
           name: Install Miner
           command: cd build && make -j2 install && ldconfig
@@ -516,7 +516,7 @@ jobs:
           command: cd build && make tests
       - run:
           name: Run tests
-          command: cd build && make test ARGS="$MAKEFLAGS"
+          command: cd build && make check ARGS="$MAKEFLAGS"
       - run:
           name: Install Attention
           command: cd build && make install && ldconfig
