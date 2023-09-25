@@ -713,7 +713,6 @@ Specific subsets of the unit tests can be run:
     make test_persist_sql
     make test_python
     make test_query
-    make test_sheaf
 ```
 
 ### Install
