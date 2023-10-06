@@ -144,8 +144,17 @@ class BackingStore
 			removeAtom(as, h, recursive);
 		}
 
+		/**
+		 * The postRemoveAtom() method is called after the Atom has been
+		 * extracted from the AtomSpace. That extraction might fail, for
+		 * a large number of reasons, having to do with read-only, framing
+		 * and shadowing. Thus, the result of the extraction is passed in
+		 * as an argument: if `extracted` is false, then the Atom was never
+		 * removed from the AtomSpace (and shouldn't be removed from the
+		 * backend, either.)
+		 */
 		virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
-		                            bool recursive)
+		                            bool recursive, bool extracted)
 		{}
 
 		/**
