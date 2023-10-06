@@ -142,13 +142,18 @@ void ReadWriteProxy::storeAtom(const Handle& h, bool synchronous)
 	_writer->barrier();
 }
 
-void ReadWriteProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
+void ReadWriteProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
+                                   bool recursive)
 {
 	CHECK_OPEN
-	// XXX FIXME this is deeply fundamentally broken if there's more
-	// than one target; because StorageNode::remove_atom() is broken.
-	// See the comments in that code for additional guidance.
-	_writer->remove_atom(as, h, recursive);
+	_writer->preRemoveAtom(as, h, recursive);
+}
+
+void ReadWriteProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
+                                    bool recursive, bool extract_ok)
+{
+	CHECK_OPEN
+	_writer->postRemoveAtom(as, h, recursive, extract_ok);
 }
 
 void ReadWriteProxy::storeValue(const Handle& atom, const Handle& key)

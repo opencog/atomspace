@@ -116,12 +116,49 @@ class BackingStore
 		 * If the recursive flag is set, then incoming set of the Atom
 		 * will also be removed.  If the recursive flag is not set, and
 		 * the Atom has a non-empty incoming set, then this method will
-		 * (usually) not be called.  However, if another thread is adding
-		 * the same Atom at the same time, all bets are off. Thus, the
-		 * behavior of calling this with recursive==false and a non-empty
-		 * incoming set is undefined (and implementation-dependent).
+		 * (usually) not be called.  However, if another thread is
+		 * altering the incoming set, race conditions can result. Thus,
+		 * the behavior of calling this with recursive==false and a
+		 * non-empty incoming set is undefined. Implementations must not
+		 * crash or assert, but are otherwise free to do whatever.
+		 * Ignoring the call if the incoming-set is non-empty is generally
+		 * a safe response.
 		 */
-		virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) = 0;
+		virtual void removeAtom(AtomSpace*, const Handle&, bool recursive)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
+
+		/**
+		 * Same as above, except providing a two-step removal API.
+		 *
+		 * When the user asks to remove an Atom, the preRemoveAtom()
+		 * method is called first. When it is called, the Atom is still in
+		 * the AtomSpace. Next, the Atom is removed from the AtomSpace,
+		 * and finally, the postRemoveAtom() method is called. This
+		 * two-step process gives the backend the freedom to implement
+		 * algorithms that would be difficult with a one-step process.
+		 *
+		 * A default implementation is provided for backwards compat.
+		 */
+		virtual void preRemoveAtom(AtomSpace* as, const Handle& h,
+		                           bool recursive)
+		{
+			removeAtom(as, h, recursive);
+		}
+
+		/**
+		 * The postRemoveAtom() method is called after the Atom has been
+		 * extracted from the AtomSpace. That extraction might fail, for
+		 * a large number of reasons, having to do with read-only, framing
+		 * and shadowing. Thus, the result of the extraction is passed in
+		 * as an argument: if `extracted` is false, then the Atom was never
+		 * removed from the AtomSpace (and shouldn't be removed from the
+		 * backend, either.)
+		 */
+		virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
+		                            bool recursive, bool extracted)
+		{}
 
 		/**
 		 * Store the value located at `key` on `atom` to the remote
