@@ -124,7 +124,10 @@ class BackingStore
 		 * Ignoring the call if the incoming-set is non-empty is generally
 		 * a safe response.
 		 */
-		virtual void removeAtom(AtomSpace*, const Handle&, bool recursive) = 0;
+		virtual void removeAtom(AtomSpace*, const Handle&, bool recursive)
+		{
+			throw IOException(TRACE_INFO, "Not implemented!");
+		}
 
 		/**
 		 * Same as above, except providing a two-step removal API.

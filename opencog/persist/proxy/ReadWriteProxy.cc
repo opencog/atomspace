@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/persist/proxy/ReadWriteProxy.h>
 
 using namespace opencog;
@@ -141,11 +140,6 @@ void ReadWriteProxy::storeAtom(const Handle& h, bool synchronous)
 	if (not synchronous) return;
 
 	_writer->barrier();
-}
-
-void ReadWriteProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
-{
-	OC_ASSERT(false, "Internal Error: Unexpected call to removeAtom()");
 }
 
 void ReadWriteProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
