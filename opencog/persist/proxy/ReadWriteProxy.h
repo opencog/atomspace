@@ -58,6 +58,9 @@ protected:
 
 	virtual void storeAtom(const Handle&, bool synchronous = false);
 	virtual void removeAtom(AtomSpace*, const Handle&, bool recursive);
+	virtual void preRemoveAtom(AtomSpace*, const Handle&, bool recursive);
+	virtual void postRemoveAtom(AtomSpace*, const Handle&,
+	                            bool recursive, bool extracted_ok);
 	virtual void storeValue(const Handle& atom, const Handle& key);
 	virtual void updateValue(const Handle& atom, const Handle& key,
 	                         const ValuePtr& delta);

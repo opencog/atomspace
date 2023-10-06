@@ -37,6 +37,10 @@ namespace opencog
  */
 class StorageNode : public Node, protected BackingStore
 {
+	// The write-thru proxies need to call into the BackingStore
+	// directly. We declare them as friends.
+	friend class WriteThruProxy;
+	friend class ReadWriteProxy;
 protected:
 	Handle add_nocheck(AtomSpace* as, const Handle& h) const
 		{ return as->add(h); }
