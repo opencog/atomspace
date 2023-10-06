@@ -103,36 +103,32 @@ bool StorageNode::remove_atom(AtomSpace* as, Handle h, bool recursive)
 	// Removal is done with a two-step process. First, we tell storage
 	// about the Atom that is going away. It's still in the AtomSpace at
 	// this point, so storage can grab whatever data it needs from the
-	// AtomSpace (e.g. grab the IncomingSet). Next, we remove from the
+	// AtomSpace (e.g. grab the IncomingSet). Next, we extract from the
 	// AtomSpace, and then finally, we tell storage that we're done.
 	//
-	// The postRemove call is called only if the AtomSpace remove
-	// succeeds! One reason for this is that the AtomSpace remove logic
-	// is complex, and its too hard to ask each storage to try to
-	// replicate it. The solution used here is minimalist: do only as
-	// much as needed to stay compatible with the docs.
-	//
-	// Unfortunately, this means the code won't be thread-safe. If one
-	// thread is adding atoms while another is deleting them, we will
-	// easily and rapidly arrive in a situation where the storage and
-	// the AtomSpace are not in sync: they won't have the same Atoms.
-	// This is a Caveat-Emptor situation: its up to the user to solve
-	// these races.
+	// The postRemove call gets the return code from the AtomSpace
+	// extract. This is because the AtomSpace extract logic is complex,
+	// with success & failure depending on subtle interactions between
+	// read-only, framing, hiding and other concerns. It is too hard to
+	// ask each kind of storage to try to replicate this logic. The
+	// solution used here is minimalist: if the AtomSpace extract worked,
+	// let storage know. If the AtomSpace extract worked, storage should
+	// finish the remove. Otherwise, it should keep the atom.
 
 	if (not recursive and not h->isIncomingSetEmpty()) return false;
 
-	// Removal of atoms from read-only databases is not allowed.
-	// It is OK to remove atoms from a read-only AtomSpace, because
+	// Removal of atoms from read-only storage is not allowed. However,
+	// it is OK to remove atoms from a read-only AtomSpace, because
 	// it is acting as a cache for the database, and removal is used
 	// used to free up RAM storage.
-	if (not _atom_space->get_read_only())
-		preRemoveAtom(as, h, recursive);
+	if (_atom_space->get_read_only())
+		return as->extract_atom(h, recursive);
 
+	// Warn storage about upcoming extraction; do the extraction, then
+	// tell storage how it all worked out.
+	preRemoveAtom(as, h, recursive);
 	bool exok = as->extract_atom(h, recursive);
-
-	// Tell the backend that we're done. Pass the status code.
-	if (not _atom_space->get_read_only())
-		postRemoveAtom(as, h, recursive, exok);
+	postRemoveAtom(as, h, recursive, exok);
 
 	return exok;
 }
