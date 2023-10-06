@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/persist/proxy/WriteThruProxy.h>
 
 using namespace opencog;
@@ -78,13 +79,25 @@ void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)
 		stnp->barrier();
 }
 
-void WriteThruProxy::removeAtom(AtomSpace* as, const Handle& h, bool recursive)
+void WriteThruProxy::removeAtom(AtomSpace* as, const Handle& h,
+                                bool recursive)
 {
-	// XXX FIXME this is deeply fundamentally broken if there's more
-	// than one target; because StorageNode::remove_atom() is broken.
-	// See the comments in that code for additional guidance.
+	OC_ASSERT(false, "Internal Error: Unexpected call to removeAtom()");
+}
+
+// Two-step remove. Just pass the two steps down to the children.
+void WriteThruProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
+                                   bool recursive)
+{
 	for (const StorageNodePtr& stnp : _targets)
-		stnp->remove_atom(as, h, recursive);
+		stnp->preRemoveAtom(as, h, recursive);
+}
+
+void WriteThruProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
+                                    bool recursive, bool extracted_ok)
+{
+	for (const StorageNodePtr& stnp : _targets)
+		stnp->postRemoveAtom(as, h, recursive, extracted_ok);
 }
 
 void WriteThruProxy::storeValue(const Handle& atom, const Handle& key)
