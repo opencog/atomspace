@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/oc_assert.h>
 #include <opencog/persist/proxy/WriteThruProxy.h>
 
 using namespace opencog;
@@ -77,12 +76,6 @@ void WriteThruProxy::storeAtom(const Handle& h, bool synchronous)
 
 	for (const StorageNodePtr& stnp : _targets)
 		stnp->barrier();
-}
-
-void WriteThruProxy::removeAtom(AtomSpace* as, const Handle& h,
-                                bool recursive)
-{
-	OC_ASSERT(false, "Internal Error: Unexpected call to removeAtom()");
 }
 
 // Two-step remove. Just pass the two steps down to the children.
