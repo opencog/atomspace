@@ -353,12 +353,6 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Pattern Engine tests..."
 	)
-	ADD_CUSTOM_TARGET(test_sheaf
-		DEPENDS tests
-		WORKING_DIRECTORY tests/sheaf
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running parser tests..."
-	)
 ENDIF (CXXTEST_FOUND)
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
