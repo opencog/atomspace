@@ -318,6 +318,22 @@ public:
 	bool remove_atom(AtomSpace*, Handle h, bool recursive=false);
 	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ return remove_atom(as.get(), h, recursive); }
+
+	/**
+	 * comment 
+	*/
+	virtual void preRemoveAtom(AtomSpace* as, const Handle& h,
+		                           bool recursive)
+	{
+		removeAtom(as, h, recursive);
+	}
+
+	/**
+	 * comment 
+	*/
+	virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
+		                            bool recursive, bool extracted)
+	{}
 };
 
 NODE_PTR_DECL(StorageNode)
