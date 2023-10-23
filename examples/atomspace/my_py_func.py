@@ -17,7 +17,7 @@ def my_py_func(atoma, atomb):
     av = float(atoma.name)
     bv = float(atomb.name)
     cv = av + bv       # Add numeric values!
-    print('The sum is ' + str(cv))
+    print(f'The sum is {str(cv)}')
     return asp.add_node(types.ConceptNode, str(cv))
 
 # Similar to the above, but returning a truth value.
@@ -25,5 +25,4 @@ def my_py_predicate(atoma, atomb):
     print('Python predicate received two arguments:\n' + str(atoma) + str(atomb))
     av = float(atoma.name)
     bv = float(atomb.name)
-    TV = TruthValue(1.0/av, 1.0/bv)
-    return TV
+    return TruthValue(1.0/av, 1.0/bv)

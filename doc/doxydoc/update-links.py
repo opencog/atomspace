@@ -53,15 +53,14 @@ def    readLayout(lay_p):
 
     return True
 
-def    pageLink(page_name, link_text):
+def pageLink(page_name, link_text):
     ''' get the text to be used as a link to the page
     '''
     if ( page_name == "main" ):
         ret_txt = "\\ref index"
-        if ( len(link_text) != 0 ):
-            ret_txt += " \"" + link_text + "\""
-        else:
-            ret_txt += " \"Index\""
+        ret_txt += (
+            " \"" + link_text + "\"" if (len(link_text) != 0) else " \"Index\""
+        )
     else:
         ret_txt = "\\ref " + page_name
         if ( len(link_text) != 0 ):
@@ -141,7 +140,7 @@ def    updateAFile(dox_file_p,fileindex):
     print( "    ... done" )
     return True
 
-def    main():
+def main():
     ''' Main function that is called when the module is loaded by itself
 
     The function assumes that the documentation is in the same directory.
@@ -155,7 +154,7 @@ def    main():
     lay_tree.insert(0,[0,"main"])
     idx = 0
     for itr_lay in lay_tree:
-        updateAFile(itr_lay[1]+".dox", idx)
+        updateAFile(f"{itr_lay[1]}.dox", idx)
         idx = idx + 1
 
     return 0

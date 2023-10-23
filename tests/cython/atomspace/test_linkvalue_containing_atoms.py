@@ -56,7 +56,7 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
     def test_str(self):
         value = LinkValue([FloatValue(1), StringValue('foo'),
                            ConceptNode('bar')])
-        print(str(value))
+        print(value)
         self.assertTrue(re.fullmatch(
             '\(LinkValue\n'
             '  \(FloatValue 1\)\n'

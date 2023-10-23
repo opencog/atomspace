@@ -26,7 +26,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("Expecting" in str(e))
 
     def test_bogus_path(self):
@@ -36,7 +36,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("Unable to find" in str(e))
 
 

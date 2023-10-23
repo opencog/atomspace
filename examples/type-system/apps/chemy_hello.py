@@ -18,7 +18,7 @@ from opencog.chempydemo import *
 spa = AtomSpace()
 set_default_atomspace(spa)
 
-print ('Hello! The AtomSpace is ' + str(spa))
+print(f'Hello! The AtomSpace is {str(spa)}')
 
 # Lets create a Magnesium atom named 'foo'
 Mg('foo')
@@ -26,11 +26,11 @@ Mg('foo')
 # Uhh, well, lets grab hold of it
 x = Mg('foo')
 
-print ('The Magnesium atom is ' + str(x))
+print(f'The Magnesium atom is {str(x)}')
 
 # Demo of using a link.
 ch = SB(C('some carbon atom'), H('just a proton, ok?'))
-print ('The CH bond is ' + str(ch))
+print(f'The CH bond is {str(ch)}')
 
 # A demo methane molecule.
 methane = Molecule( \
@@ -39,13 +39,13 @@ methane = Molecule( \
   SB(C('1'), H('3')), \
   SB(C('1'), H('4')))
 
-print ('Methane is a molecule: ' + str(methane))
+print(f'Methane is a molecule: {str(methane)}')
 
 c14 = Carbon14Node('found in wood')
 
-print ('The carbon-14 atom is ' + str(c14))
+print(f'The carbon-14 atom is {str(c14)}')
 decay_products = execute_atom(spa, c14)
-print ('The carbon-14 decay products are ' + str(decay_products))
+print(f'The carbon-14 decay products are {str(decay_products)}')
 
 # The end.
 # That's all, folks!

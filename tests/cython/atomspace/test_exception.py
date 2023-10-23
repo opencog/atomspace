@@ -20,12 +20,12 @@ class TestExceptions(unittest.TestCase):
     def test_bogus_get(self):
         atom1 = ConceptNode("atom1")
         try:
-           GetLink(atom1, atom1, atom1)
-           self.assertFalse("call should fail")
+            GetLink(atom1, atom1, atom1)
+            self.assertFalse("call should fail")
         except RuntimeError as e:
-           # Use `nosetests3 --nocapture` to see this print...
-           print("The exception message is " + str(e))
-           self.assertTrue("Expecting" in str(e))
+                   # Use `nosetests3 --nocapture` to see this print...
+            print(f"The exception message is {str(e)}")
+            self.assertTrue("Expecting" in str(e))
 
     # --------------------------------------------------------------
     # First, make sure that evaluation works.
@@ -36,7 +36,7 @@ class TestExceptions(unittest.TestCase):
         okay = evaluate_atom(self.space, eval_link)
 
         # Use `nosetests3 --nocapture` to see this print...
-        print("The good TV is " + str(okay))
+        print(f"The good TV is {str(okay)}")
         expect = TruthValue(0.5, 0.5)
         self.assertTrue(okay == expect)
 
@@ -47,12 +47,12 @@ class TestExceptions(unittest.TestCase):
         eval_link = EvaluationLink(GroundedPredicateNode("py:foobar"),
                                         atom1, atom1, atom1)
         try:
-           evaluate_atom(self.space, eval_link)
-           self.assertFalse("call should fail")
+            evaluate_atom(self.space, eval_link)
+            self.assertFalse("call should fail")
         except RuntimeError as e:
-           # Use `nosetests3 --nocapture` to see this print...
-           print("The exception message is " + str(e))
-           self.assertTrue("not found in module" in str(e))
+                   # Use `nosetests3 --nocapture` to see this print...
+            print(f"The exception message is {str(e)}")
+            self.assertTrue("not found in module" in str(e))
 
     # Call function that returns None
     def test_pass_evaluation(self):
@@ -64,7 +64,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_num_evaluation(self):
@@ -76,7 +76,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_str_evaluation(self):
@@ -88,7 +88,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_nil_evaluation(self):
@@ -100,7 +100,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_lst_evaluation(self):
@@ -112,7 +112,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     # --------------------------------------------------------------
@@ -124,7 +124,7 @@ class TestExceptions(unittest.TestCase):
         okay = execute_atom(self.space, exec_link)
 
         # Use `nosetests3 --nocapture` to see this print...
-        print("The good TV is " + str(okay))
+        print(f"The good TV is {str(okay)}")
         expect = TruthValue(0.5, 0.5)
         self.assertTrue(okay == expect)
 
@@ -139,7 +139,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("not found in module" in str(e))
 
     # Call function that returns None
@@ -152,7 +152,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_num_execution(self):
@@ -164,7 +164,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_str_execution(self):
@@ -176,7 +176,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_nil_execution(self):
@@ -188,7 +188,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
     def test_lst_execution(self):
@@ -200,7 +200,7 @@ class TestExceptions(unittest.TestCase):
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
-            print("The exception message is " + str(e))
+            print(f"The exception message is {str(e)}")
             self.assertTrue("did not return Atomese" in str(e))
 
 
@@ -211,7 +211,6 @@ def good_tv(*args):
 
 def no_ret(*args):
     print(args)
-    pass
 
 def ret_num(*args):
     print(args)
