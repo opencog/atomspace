@@ -334,6 +334,12 @@ public:
 	virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
 		                            bool recursive, bool extracted)
 	{}
+
+	/**
+	 * Wrapper neccessary for RocksStorage
+	*/
+	bool isAtomAbsent(const Handle& atom)
+		{ return atom->isAbsent(); }
 };
 
 NODE_PTR_DECL(StorageNode)
