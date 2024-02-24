@@ -104,10 +104,11 @@ Linas Vepštas
 status open
 
 \begin_layout Plain Layout
-linasvepstas@gmail.com 
+OpenCog Foundation linasvepstas@gmail.com 
 \begin_inset CommandInset href
 LatexCommand href
 target "https://orcid.org/0000-0002-2557-740X"
+literal "false"
 
 \end_inset
 
@@ -121,70 +122,10 @@ target "https://orcid.org/0000-0002-2557-740X"
 
 \begin_layout Date
 \begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="2">
+<lyxtabular version="3" rows="1" columns="2">
 <features tabularvalignment="middle">
 <column alignment="right" valignment="top">
 <column alignment="left" valignment="top">
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2 Sept 2020
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Version 1.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-22 Nov 2021
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Version 2.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5 Dec 2021
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Version 2.1
-\end_layout
-
-\end_inset
-</cell>
-</row>
 <row>
 <cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
@@ -256,18 +197,6 @@ Metagraphs can be used to specify a programming system/programming language,
 Most of these claims are founded on experimental results, rather than assertions
  of theoretical analysis.
  The experimental platform is the OpenCog AtomSpace and Atomese language.
-\end_layout
-
-\begin_layout Abstract
-This is part of a sequence of texts on sheaves (
-\emph on
-a la
-\emph default
- sheaf theory).
- It is a prerequisite for understanding the practical foundations on which
- sheaves can be built.
- It is useful, but not necessary, for understanding the actual AtomSpace
- implementation.
 \end_layout
 
 \begin_layout Abstract
@@ -622,7 +551,7 @@ typical
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/directed-graph.png
+	filename ../graphics/directed-graph.png
 	lyxscale 40
 	width 30col%
 
@@ -1751,7 +1680,7 @@ co-
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/product.eps
+	filename ../graphics/product.eps
 	width 40col%
 
 \end_inset
@@ -1774,7 +1703,7 @@ the coproduct can be drawn as
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/coproduct.eps
+	filename ../graphics/coproduct.eps
 	width 40col%
 
 \end_inset
@@ -1800,7 +1729,7 @@ It is common in category theory to leave the dots and arrows unlabeled,
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/product-students.eps
+	filename ../graphics/product-students.eps
 	width 40col%
 
 \end_inset
@@ -1945,7 +1874,7 @@ graphical
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/joe-mary-v1.eps
+	filename ../graphics/joe-mary-v1.eps
 	width 60col%
 
 \end_inset
@@ -1979,7 +1908,7 @@ Below shows another alternative, this time with labeled edges:
 
 
 \begin_inset Graphics
-	filename graphics/joe-mary-v2.eps
+	filename ../graphics/joe-mary-v2.eps
 	width 35col%
 
 \end_inset
@@ -3864,7 +3793,7 @@ almost
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/hypergraph.eps
+	filename ../graphics/hypergraph.eps
 	lyxscale 60
 	width 45col%
 
@@ -4297,13 +4226,6 @@ ons for graph stores.
  There is a huge cost of jamming a hypergraph into an ordinary graph store.
 \end_layout
 
-\begin_layout Standard
-XXX TODO This is making some rather strong claims about RAM usage, and really
- needs to be quadruple-checked and strengthened.
- It's a bit breezy and casual, as written.
- XXX TODO.
-\end_layout
-
 \begin_layout Subsection
 Metagraph representations
 \end_layout
@@ -4318,7 +4240,7 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metagraph.eps
+	filename ../graphics/metagraph.eps
 	lyxscale 60
 	width 25col%
 
@@ -5257,7 +5179,7 @@ This is not meant to be a psychological assessment; rather it is meant to
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/partial-index.eps
+	filename ../graphics/partial-index.eps
 	width 80col%
 
 \end_inset
@@ -5656,7 +5578,7 @@ Conventionally, corporations, political and military organizations are organized
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/org-chart.eps
+	filename ../graphics/org-chart.eps
 	lyxscale 70
 	width 35col%
 
@@ -6756,7 +6678,7 @@ The discusion of metagraphs above has presented their abstract graphical
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metagraph.eps
+	filename ../graphics/metagraph.eps
 	lyxscale 60
 	width 23col%
 
@@ -8049,7 +7971,7 @@ noprefix "false"
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metagraph.eps
+	filename ../graphics/metagraph.eps
 	lyxscale 60
 	width 25col%
 
@@ -8061,7 +7983,7 @@ noprefix "false"
 
 
 \begin_inset Graphics
-	filename graphics/metagraph-weak.eps
+	filename ../graphics/metagraph-weak.eps
 	lyxscale 60
 	width 25col%
 
@@ -8117,7 +8039,7 @@ It is natural to use weak pointers for the incoming set, and regular pointers
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metagraph-new.eps
+	filename ../graphics/metagraph-new.eps
 	lyxscale 60
 	width 38col%
 
@@ -9273,7 +9195,7 @@ How else could the query about the schools that Rachel attends could be
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metagraph-new.eps
+	filename ../graphics/metagraph-new.eps
 	lyxscale 60
 	width 37col%
 
@@ -9850,7 +9772,7 @@ It is perhaps instructive to draw the metatree diagram for this query:
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/metaquery.eps
+	filename ../graphics/metaquery.eps
 	lyxscale 60
 	width 22col%
 
@@ -13138,7 +13060,7 @@ There is one extremely important alternative, discussed in other texts in
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/puzzle-beta-reduce.eps
+	filename ../graphics/puzzle-beta-reduce.eps
 	lyxscale 70
 	width 40col%
 
