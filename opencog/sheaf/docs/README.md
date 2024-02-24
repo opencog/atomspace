@@ -1,4 +1,6 @@
 
+Theoretical Papers
+==================
 This directory contains an alternative, more rigorous, more precise
 description of what the code below is all about. Its under construction
 and very incomplete, just right now.
@@ -51,3 +53,13 @@ There are several files here:
   resolve real-world interpretational problems in computational
   linguistics. The most interesting question it poses is about the
   relationship between connector sexuality and type constructors.
+
+Publication Venues
+------------------
+* ACM Transactions of Database Systems
+  https://dl.acm.org/journal/tods
+
+* Journal of Database Management (JDM)
+   ++ Open Acess
+   ++ Requires payment of $3,500 open access processing charge
+   ++ https://www.igi-global.com/open-access-journal/journal-database-management/1072
