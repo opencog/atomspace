@@ -7394,7 +7394,7 @@ Just how big is a 64-bit hash, vs.
  are about a million of them, if you include geographical place names, product
  and corporate names, historical events and a smattering of Latin and foreign
  loan-words.) The average length of these is about six letters, thus six
- byes; seven if including the null terminator.
+ bytes; seven if including the null terminator.
  How about the names of genes and proteins? These are not particularly lengthy
  either.
  
@@ -14601,6 +14601,10 @@ The second revision of this text has benefited from the (witting or unwitting)
 irchen, Adam Vandervorst and Steven Wiley.
  Absolutely none of this would have been possible without a decade's worth
  of gracious support and tutelage of Ben Goertzel.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
