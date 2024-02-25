@@ -473,7 +473,7 @@ A discussion of human-oriented programming languages vs.
 \begin_layout Standard
 As a conclusion, it is noted that the OpenCog AtomSpace has been the experimenta
 l platform on which all of the above results have been obtained, and embodies
- the most of the ideas presented here.
+ most of the ideas presented here.
 \begin_inset Foot
 status collapsed
 
@@ -1767,7 +1767,7 @@ projection morphisms
 
  of the product.
  The union type or coproduct will not be illustrated.
- The reader is encourages to imagine a C/C++ 
+ The reader is encouraged to imagine a C/C++ 
 \family sans
 
 \begin_inset Quotes eld
@@ -1815,7 +1815,7 @@ https://en.wikipedia.org/wiki/Algebraic_data_type
  A more formal presentation of the type theory is deferred to a different
  text in this series, describing the jigsaw puzzle-piece metaphor, and how
  it is used to construct sheaves.
- 
+ XXX Extern Ref! XXX
 \end_layout
 
 \begin_layout Standard
@@ -4821,7 +4821,7 @@ Indexing
 The above reviewed the basic structure of hypergraphs.
  Database performance depends strongly on the use of indexes.
  Thus, a practical hypergraph database design must address the use of indexes
- oand how they moderate performance.
+ and how they moderate performance.
  This section will review the structure of indexes, or rather, the alternatives
  one has for index representation.
  The whole point of using a graph database, as opposed to a collection of
