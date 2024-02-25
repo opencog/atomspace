@@ -544,7 +544,7 @@ A discussion of human-oriented programming languages vs.
 \begin_layout Standard
 As a conclusion, it is noted that the OpenCog AtomSpace has been the experimenta
 l platform on which all of the above results have been obtained, and embodies
- the most of the ideas presented here.
+ most of the ideas presented here.
 \begin_inset Foot
 status collapsed
 
@@ -574,6 +574,10 @@ https://github.com/opencog/atomspace
 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -1838,7 +1842,7 @@ projection morphisms
 
  of the product.
  The union type or coproduct will not be illustrated.
- The reader is encourages to imagine a C/C++ 
+ The reader is encouraged to imagine a C/C++ 
 \family sans
 
 \begin_inset Quotes eld
@@ -2112,6 +2116,10 @@ literal "false"
 \end_inset
 
  for a description of a dynamic edge-vertex database with inverted indexes.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -2938,6 +2946,10 @@ favorite song
 \end_inset
 
 .
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -4889,6 +4901,10 @@ Clearly, the metagraph, having the general shape of a DAG, can be wedged
  We can conclude that it is quite efficient to store a graph in a metagraph,
  but that storing a metagraph in an ordinary graph database pays a large
  penalty.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -4899,7 +4915,7 @@ Indexing
 The above reviewed the basic structure of hypergraphs.
  Database performance depends strongly on the use of indexes.
  Thus, a practical hypergraph database design must address the use of indexes
- oand how they moderate performance.
+ and how they moderate performance.
  This section will review the structure of indexes, or rather, the alternatives
  one has for index representation.
  The whole point of using a graph database, as opposed to a collection of
@@ -6744,6 +6760,10 @@ FOREIGN KEY
 \size default
  constraints.
  It does not provide particular insight into graph rewriting, in general.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -7493,6 +7513,10 @@ To conclude: having hashes around can be useful, as hashes are needed for
  cost! If forgotten, it can be recreated! And it's ASCII representation,
  compressed with bog-standard compression routines, is formidably tiny.
  UUID's are horrible; s-expressions are smart.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -7928,6 +7952,10 @@ There is a large variety of graph stores that are generally available.
 To conclude: we seem to have discovered, quite accidentally, with no explicit
  intent, that hypergraphs offer an elegant property that graph databases
  lack.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -9266,6 +9294,10 @@ Perhaps the most innovative aspect of the OGRE query language is that it
  or at least of the SRFI-1 list iterators.
  This is perhaps not entirely unexpected: s-expressions do look like lists,
  and it is natural to want to do list operations on them.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -11740,6 +11772,10 @@ ncing chainers.
 \begin_layout Standard
 That chatbots can be unified with conventional query is perhaps one of the
  more entertaining aspects coming out of metaqueries.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -13357,6 +13393,10 @@ What is the point of all of this? It is to reformulate or generalize the
 To conclude: metatrees are naturally typed; those types are naturally reified;
  the reifications are recursive, and the level of recursion is limited by
  the imagination.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -14398,6 +14438,10 @@ https://wiki.opencog.org/w/Hyperon:Atomese
  It is easy to parse, making it ideal for algorithmic manipulation.
  It is too low-level to make it comfortable for humans; but given that we
  live in a machine age, this is perhaps a not unexpected twist.
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -14448,6 +14492,10 @@ literal "false"
 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Newpage pagebreak
 \end_inset
 
 
