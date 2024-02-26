@@ -56,7 +56,7 @@ figs-within-sections
 \pdf_backref false
 \pdf_pdfusetitle true
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_package amsmath 2
 \use_package amssymb 2
 \use_package cancel 1
@@ -81,6 +81,13 @@ figs-within-sections
 \shortcut idx
 \color #008000
 \end_index
+\leftmargin 2.4cm
+\topmargin 2.4cm
+\rightmargin 2.4cm
+\bottommargin 4cm
+\headheight 0.5cm
+\headsep 1cm
+\footskip 0.1cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -149,26 +156,6 @@ Metagraphs can be used to specify a programming system/programming language,
 Most of these claims are founded on experimental results, rather than assertions
  of theoretical analysis.
  The experimental platform is the OpenCog AtomSpace and Atomese language.
-\end_layout
-
-\begin_layout Abstract
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset toc
-LatexCommand tableofcontents
-
-\end_inset
-
-
-\begin_inset Newpage pagebreak
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -509,7 +496,7 @@ typical
 \begin_inset Graphics
 	filename ../graphics/directed-graph.png
 	lyxscale 40
-	width 30col%
+	width 20col%
 
 \end_inset
 
@@ -1627,45 +1614,30 @@ co-
  is prepended to names: thus products are dual to coproducts.
  The coproduct type and the sum type are the same thing.
  Insofar as the product can be drawn as
-\begin_inset VSpace defskip
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename ../graphics/product.eps
-	width 40col%
+	width 20col%
 
-\end_inset
-
-
-\begin_inset VSpace defskip
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
+\align left
 the coproduct can be drawn as 
-\begin_inset VSpace defskip
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename ../graphics/coproduct.eps
-	width 40col%
+	width 20col%
 
-\end_inset
-
-
-\begin_inset VSpace defskip
 \end_inset
 
 
@@ -1676,22 +1648,14 @@ It is common in category theory to leave the dots and arrows unlabeled,
  as often it is more interesting to just talk about the shapes, rather than
  the labels.
  But to make it clear, here is the product type again, with the labels:
-\begin_inset VSpace defskip
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename ../graphics/product-students.eps
-	width 40col%
+	width 25col%
 
-\end_inset
-
-
-\begin_inset VSpace defskip
 \end_inset
 
 
@@ -1830,7 +1794,7 @@ graphical
 \align center
 \begin_inset Graphics
 	filename ../graphics/joe-mary-v1.eps
-	width 60col%
+	width 40col%
 
 \end_inset
 
@@ -1864,7 +1828,7 @@ Below shows another alternative, this time with labeled edges:
 
 \begin_inset Graphics
 	filename ../graphics/joe-mary-v2.eps
-	width 35col%
+	width 22col%
 
 \end_inset
 
@@ -3750,7 +3714,7 @@ almost
 \begin_inset Graphics
 	filename ../graphics/hypergraph.eps
 	lyxscale 60
-	width 45col%
+	width 30col%
 
 \end_inset
 
@@ -4197,7 +4161,7 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \begin_inset Graphics
 	filename ../graphics/metagraph.eps
 	lyxscale 60
-	width 25col%
+	width 16col%
 
 \end_inset
 
@@ -5135,7 +5099,7 @@ This is not meant to be a psychological assessment; rather it is meant to
 \align center
 \begin_inset Graphics
 	filename ../graphics/partial-index.eps
-	width 80col%
+	width 55col%
 
 \end_inset
 
@@ -5535,7 +5499,7 @@ Conventionally, corporations, political and military organizations are organized
 \begin_inset Graphics
 	filename ../graphics/org-chart.eps
 	lyxscale 70
-	width 35col%
+	width 21col%
 
 \end_inset
 
@@ -6622,7 +6586,7 @@ The discusion of metagraphs above has presented their abstract graphical
 \begin_inset Graphics
 	filename ../graphics/metagraph.eps
 	lyxscale 60
-	width 23col%
+	width 14col%
 
 \end_inset
 
@@ -7915,7 +7879,7 @@ noprefix "false"
 \begin_inset Graphics
 	filename ../graphics/metagraph.eps
 	lyxscale 60
-	width 25col%
+	width 14col%
 
 \end_inset
 
@@ -7927,7 +7891,7 @@ noprefix "false"
 \begin_inset Graphics
 	filename ../graphics/metagraph-weak.eps
 	lyxscale 60
-	width 25col%
+	width 14col%
 
 \end_inset
 
@@ -7983,7 +7947,7 @@ It is natural to use weak pointers for the incoming set, and regular pointers
 \begin_inset Graphics
 	filename ../graphics/metagraph-new.eps
 	lyxscale 60
-	width 38col%
+	width 23col%
 
 \end_inset
 
@@ -9139,7 +9103,7 @@ How else could the query about the schools that Rachel attends could be
 \begin_inset Graphics
 	filename ../graphics/metagraph-new.eps
 	lyxscale 60
-	width 37col%
+	width 23col%
 
 \end_inset
 
@@ -9716,7 +9680,7 @@ It is perhaps instructive to draw the metatree diagram for this query:
 \begin_inset Graphics
 	filename ../graphics/metaquery.eps
 	lyxscale 60
-	width 22col%
+	width 14col%
 
 \end_inset
 
@@ -13004,7 +12968,7 @@ There is one extremely important alternative, discussed in other texts in
 \begin_inset Graphics
 	filename ../graphics/puzzle-beta-reduce.eps
 	lyxscale 70
-	width 40col%
+	width 25col%
 
 \end_inset
 
@@ -14404,7 +14368,7 @@ tional properties (including CPU and RAM usage).
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
-bibfiles "lang"
+bibfiles "../lang"
 options "tufte"
 
 \end_inset
