@@ -91,13 +91,18 @@
 
 \begin_body
 
-\begin_layout Author
-Linas Vepštas
-\begin_inset Foot
-status open
+\begin_layout Standard
+Please consider the attached manuscript for publication.
+\end_layout
 
-\begin_layout Plain Layout
-OpenCog Foundation linasvepstas@gmail.com 
+\begin_layout Paragraph
+Authors:
+\end_layout
+
+\begin_layout Standard
+Linas Vepstas.
+ Sole author.
+ email: linasvepstas@gmail.com Affiliation: OpenCog Foundation 
 \begin_inset CommandInset href
 LatexCommand href
 target "https://orcid.org/0000-0002-2557-740X"
@@ -108,9 +113,64 @@ literal "false"
 
 \end_layout
 
-\end_inset
+\begin_layout Paragraph
+Conflicts of Interest:
+\end_layout
 
+\begin_layout Standard
+I am not aware of any potential conflicts of interest with any potential
+ reviewer; my work is sufficiently removed from the mainstream, that it
+ is unlikely that I will have had prior contact with potential reviewers.
+ Any exceptions would be employees of Singularity.AI, associates of the OpenCog
+ Foundation and users of and contributors to the OpenCog system.
+ Among these are various grad students and professors; to the best of my
+ knowledge, knowing their fields of expertise and interest, it is unlikely
+ that they would be chosen as reviewers.
+ These are not database geeks.
+\end_layout
 
+\begin_layout Paragraph
+Well-known or Unique Systems:
+\end_layout
+
+\begin_layout Standard
+The OpenCog system is well-known.
+ It is an open source project, with hundreds of contributors.
+ I am one of the more prominent and active contributors; some quality time
+ with a search engine, together with some basic sleuthing common-sense,
+ would quickly narrow things down to my being the likely author.
+ I don't live under a bushel.
+\end_layout
+
+\begin_layout Paragraph
+Prior Publication:
+\end_layout
+
+\begin_layout Standard
+This work has been disseminated to a small number of people; primarily,
+ the employees at Singularity.AI and associates of the OpenCog Foundation.
+ In it's original form, it was meant to be a limited techical report; but
+ there have been repeated suggestions that it should be published in a prominent
+ journal.
+ The techical report can be found on github, as a part of project documentation.
+\end_layout
+
+\begin_layout Paragraph
+Novelty:
+\end_layout
+
+\begin_layout Standard
+None of the contents, nor paraphrasings or variations thereof, have appeared
+ in any journal before.
+\end_layout
+
+\begin_layout Paragraph
+Discolsure:
+\end_layout
+
+\begin_layout Standard
+None of the contents, nor paraphrasings or variations thereof, have been
+ submitted to any other journal or conference for publication.
 \end_layout
 
 \end_body
