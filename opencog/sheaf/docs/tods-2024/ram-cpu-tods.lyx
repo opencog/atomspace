@@ -105,61 +105,6 @@ figs-within-sections
 Graphs, Metagraphs, RAM, CPU
 \end_layout
 
-\begin_layout Author
-Linas Vepštas
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-OpenCog Foundation linasvepstas@gmail.com 
-\begin_inset CommandInset href
-LatexCommand href
-target "https://orcid.org/0000-0002-2557-740X"
-literal "false"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Date
-\begin_inset Tabular
-<lyxtabular version="3" rows="1" columns="2">
-<features tabularvalignment="middle">
-<column alignment="right" valignment="top">
-<column alignment="left" valignment="top">
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-22 Sept 2023
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Version 2.1.1
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Abstract
 This text reviews the concepts of a graph store, starting from the fundamental
  question of how to efficiently represent a graph in RAM (that is, in storage).
@@ -505,6 +450,10 @@ https://github.com/opencog/atomspace
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 
 \end_layout
 
@@ -1812,10 +1761,9 @@ https://en.wikipedia.org/wiki/Algebraic_data_type
  and backwards.
  These can all be understood in terms of the type-theoretic foundations
  sketched here.
- A more formal presentation of the type theory is deferred to a different
- text in this series, describing the jigsaw puzzle-piece metaphor, and how
- it is used to construct sheaves.
- XXX Extern Ref! XXX
+ A more formal presentation of the type theory requires the development
+ of sheaf theory in the context of knowledge representation, and is outside
+ the current scope of this text.
 \end_layout
 
 \begin_layout Standard
@@ -6620,20 +6568,7 @@ keep your indexes straight, and you'll be OK.
 \begin_inset Quotes erd
 \end_inset
 
- Understanding this is best served by an example.
- 
-\end_layout
-
-\begin_layout Subsubsection
-A Data Migration Example
-\end_layout
-
-\begin_layout Standard
-TODO: provide worked example.
- Conclude: its still tables, in the end.
- That is, FQL/CQL is formulated explicitly in terms of tables.
- The abstraction, in terms of category theory, does not escape the underlying
- table structure.
+ The abstraction in FQL/CQL is formulated capture the semantics of tables.
  Yes, the schema mapping 
 \begin_inset Formula $F:\mathcal{C}\to\mathcal{D}$
 \end_inset
@@ -14463,18 +14398,6 @@ tional properties (including CPU and RAM usage).
  fairly mature, having more than a decade of implementation and use experience
  behind it.
  This text gives a flavor of where it has arrived.
-\end_layout
-
-\begin_layout Section
-Thanks
-\end_layout
-
-\begin_layout Standard
-The second revision of this text has benefited from the (witting or unwitting)
- helpful input of Amirouche Boubekki, Kino Coursey, John Cowan, Marc Nieper-Wißk
-irchen, Adam Vandervorst and Steven Wiley.
- Absolutely none of this would have been possible without a decade's worth
- of gracious support and tutelage of Ben Goertzel.
 \end_layout
 
 \begin_layout Standard
