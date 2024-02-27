@@ -114,6 +114,24 @@ literal "false"
 \end_layout
 
 \begin_layout Paragraph
+Acknowledgements:
+\end_layout
+
+\begin_layout Standard
+The following acknowledgments paragraph was removed from the text:
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+The second revision of this text has benefited from the (witting or unwitting)
+ helpful input of Amirouche Boubekki, Kino Coursey, John Cowan, Marc Nieper-Wißk
+irchen, Adam Vandervorst and Steven Wiley.
+ Absolutely none of this would have been possible without a decade's worth
+ of gracious support and tutelage of Ben Goertzel.
+\end_layout
+
+\begin_layout Paragraph
 Conflicts of Interest:
 \end_layout
 

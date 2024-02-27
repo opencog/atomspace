@@ -526,8 +526,8 @@ databases
 \end_inset
 
 .
- Since they are both metatrees, they can be layered, nested, hierarchically
- stacked, however desired.
+ Since they are both metatrees, they can be layered, nested, stacked, as
+ desired.
 \end_layout
 
 \begin_layout Itemize
@@ -535,19 +535,21 @@ A review of query languages and graph traversal.
  A primary result is that all SQL-inspired query languages inherit the table-bas
 ed viewpoint of SQL.
  This in turn causes one to think in terms of table joins, which, in a graph
- setting, looks like a graph walk, chaining from one edge to the next.
- This is explicitly seen on systems such as GraphQL, SparQL, Neo4J or grakn.ai
- (TypeDB), which explicitly present graph queries in terms of edge walks.
+ setting, looks like an explicitly-specified graph walk, chaining from one
+ edge to the next.
+ This is seen in systems such as GraphQL, SparQL, Neo4J or grakn.ai (TypeDB),
+ which present graph queries in terms of explicit edge walks.
 \end_layout
 
 \begin_layout Itemize
 An example of a metagraph query language, which hops outside of the *QL
- paradigm of edge walks (aka table joins), into a query mode that more closely
- resembles pattern matching.
- Conventional pattern matching is implemented in terms of a state machine,
- and so it is not enough for a proper graph query.
- A true graph walk requires a stack machine; it requires a recursive walk
- of a graph.
+ paradigm of edge walks (
+\emph on
+aka
+\emph default
+ table joins), into a query mode that more closely resembles pattern matching.
+ Unlike conventional pattern matching, graph query must be recursive, and
+ thus cannot be implemented as a state machine.
 \end_layout
 
 \begin_layout Itemize
@@ -574,15 +576,14 @@ question
 \end_inset
 
 .
- That is, they are queries that consist entirely of constant terms, that
- can be matched to forward-queries having variables in them.
+ They consist entirely of constant terms, to be matched to forward-queries
+ having variables in them.
  Inverted queries are the bread-and-butter of chat-bots and rule engines.
- The key observation here is that metatrees represent inverted queries just
- as readily and naturally as forward queries.
- That is because a partial index on a metatree can be understood as a kind
- of trie.
- Metatrees are therefore able to unify both database concepts, and rule
- engine concepts with the same framework.
+ Metatrees represent inverted queries just as readily and naturally as forward
+ queries; this is because a partial index on a metatree can be understood
+ as a kind of trie.
+ Metatrees unify database concepts with rule engine concepts within the
+ same framework.
 \end_layout
 
 \begin_layout Itemize
@@ -813,37 +814,17 @@ status open
 
 \begin_layout Plain Layout
 
-	{ grades:
+	{ grades: [	{ student: {name: Joe},    {gpa: 3.5}},
 \end_layout
 
 \begin_layout Plain Layout
 
-		[
+					{ student: {name: Mary},   {gpa: 3.6}},
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ student: {name: Joe},    {gpa: 3.5}},
-\end_layout
-
-\begin_layout Plain Layout
-
-			{ student: {name: Mary},   {gpa: 3.6}},
-\end_layout
-
-\begin_layout Plain Layout
-
-			{ student: {name: Rachel}, {gpa: 3.0}}
-\end_layout
-
-\begin_layout Plain Layout
-
-		]
-\end_layout
-
-\begin_layout Plain Layout
-
-	}
+					{ student: {name: Rachel}, {gpa: 3.0}} ]}
 \end_layout
 
 \end_inset
@@ -864,31 +845,17 @@ status open
 
 \begin_layout Plain Layout
 
-		{ table:
+		{ table:	{ schema: {name: string}, {gpa: float}}
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ schema: {name: string}, {gpa: float}}
+					{ names:  [Joe, Mary, Rachel ] },
 \end_layout
 
 \begin_layout Plain Layout
 
-			{ names:  [Joe, Mary, Rachel] },
-\end_layout
-
-\begin_layout Plain Layout
-
-			{ gpa:    [3.5, 3.6, 3.0 ] }
-\end_layout
-
-\begin_layout Plain Layout
-
-		}
-\end_layout
-
-\begin_layout Plain Layout
-
+					{ gpa:    [3.5, 3.6, 3.0 ] }}
 \end_layout
 
 \end_inset
@@ -932,7 +899,7 @@ record
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="2">
+<lyxtabular version="3" rows="5" columns="2">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -957,31 +924,11 @@ Students
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-name
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-gpa
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-string
+name : string
 \end_layout
 
 \end_inset
@@ -990,7 +937,7 @@ string
 \begin_inset Text
 
 \begin_layout Plain Layout
-float
+gpa : float
 \end_layout
 
 \end_inset
@@ -1094,42 +1041,17 @@ status open
 
 \begin_layout Plain Layout
 
-		{ students:
+		{ students: [	(Joe,    3.5),		# This is not valid JSON!
 \end_layout
 
 \begin_layout Plain Layout
 
-			[
+						(Mary,   3.6),
 \end_layout
 
 \begin_layout Plain Layout
 
-				(Joe,    3.5),		# This is not valid JSON!
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Mary,   3.6),
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Rachel, 3.0)
-\end_layout
-
-\begin_layout Plain Layout
-
-			]
-\end_layout
-
-\begin_layout Plain Layout
-
-		}
-\end_layout
-
-\begin_layout Plain Layout
-
-	}
+						(Rachel, 3.0) ]}}
 \end_layout
 
 \end_inset
@@ -1161,10 +1083,7 @@ literal "false"
  in generic ways.
  In short, any s-expression is a valid record.
  Records do not need to be of the same length, or of the same type.
-\end_layout
-
-\begin_layout Standard
-Thus, the previous example can be written as
+ Thus, the previous example can be written as
 \end_layout
 
 \begin_layout Standard
@@ -1188,19 +1107,11 @@ status open
 		(student (name Rachel) (gpa 3.0))
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 Note that these are three distinct records, and are NOT a list of three
- rows!
-\end_layout
-
-\begin_layout Standard
-As written, this has a distinctly JSONic feel to it, in that every value
- is tagged with the field type that names it.
+ rows! As written, this has a distinctly JSONic feel to it, in that every
+ value is tagged with the field type that names it.
  But then, the OGRE documentation notes that this is equivalent to 
 \end_layout
 
@@ -1225,10 +1136,6 @@ status open
 		(student Rachel 3.0)
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 provided that one already knows the column structure of the data.
@@ -1246,17 +1153,10 @@ status open
 		(declare student (name str) (gpa float))
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 This last statement resembles a conventional table-database table declaration.
-\end_layout
-
-\begin_layout Standard
-One can go farther: there is no particular need to tag each row with the
+ One can go farther: there is no particular need to tag each row with the
  row-label 
 \family sans
 \size small
@@ -1275,37 +1175,24 @@ status open
 
 \begin_layout Plain Layout
 
-		(students-table
+		(students-table	(Joe    3.5)
 \end_layout
 
 \begin_layout Plain Layout
 
-			(Joe    3.5)
+								(Mary   3.6)
 \end_layout
 
 \begin_layout Plain Layout
 
-			(Mary   3.6)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Rachel 3.0))
-\end_layout
-
-\begin_layout Plain Layout
-
+								(Rachel 3.0))
 \end_layout
 
 \end_inset
 
 This last form now obviously has the shape of a row-store.
  Each row is a tuple, all tuples look alike.
- 
-\end_layout
-
-\begin_layout Standard
-This last form enables a rather conventional SQL query system to be defined.
+ This last form enables a rather conventional SQL query system to be defined.
  There is a table definition, providing column types, and column labels
  (the labels are needed for query/search), and the individual records (rows)
  in the table are uniform.
@@ -1445,10 +1332,6 @@ status open
 		)
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 The interpretation is meant to be straight-forward: a table with two columns,
@@ -1482,10 +1365,6 @@ status open
 \begin_layout Plain Layout
 
 		};
-\end_layout
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
@@ -2359,7 +2238,7 @@ The vertex table is straight-forward:
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="2">
+<lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -2424,7 +2303,7 @@ attr-data
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2433,31 +2312,11 @@ attr-data
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+...
 \end_layout
 
 \end_inset
@@ -2486,7 +2345,7 @@ universally unique id
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="4">
+<lyxtabular version="3" rows="4" columns="4">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -2607,7 +2466,7 @@ attr-data
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2616,7 +2475,7 @@ attr-data
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2625,7 +2484,7 @@ attr-data
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2634,49 +2493,11 @@ attr-data
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+...
 \end_layout
 
 \end_inset
@@ -6837,24 +6658,8 @@ significant whitespace
 \begin_inset Quotes erd
 \end_inset
 
-): 
-\begin_inset Formula 
-\[
-\begin{array}{cccc}
-e_{4}: & e_{3}: & e_{1}: & n_{1}\\
- &  &  & n_{2}\\
- &  & e_{2}: & n_{2}\\
- &  &  & n_{3}\\
- &  & n_{1}\\
- &  & e_{2}: & n_{2}\\
- &  &  & n_{3}\\
- & n_{3}
-\end{array}
-\]
-
-\end_inset
-
-Alternately, in Unix directory style (URLs), with slashes.
+).
+ Alternately, in Unix directory style (URLs), with slashes.
  Each 
 \begin_inset Formula $e_{k}$
 \end_inset
@@ -6864,7 +6669,7 @@ Alternately, in Unix directory style (URLs), with slashes.
 \begin_inset Formula $n_{k}$
 \end_inset
 
- denoting a file: the terminal leaf in the tree.
+ denoting a file, the terminal leaf in the tree.
  Observe that the same file appears in multiple locations in the directory
  tree.
  This is accomplished with either hard or soft links ('
@@ -6874,26 +6679,10 @@ man ln
 ').
  It is somewhat uncommon for ordinary users to do this, but is a widespread
  technique used in package installs.
-\begin_inset Formula 
-\[
-\begin{array}{cccc}
-e_{4}/ & e_{3}/ & e_{1}/ & n_{1}\\
- &  &  & n_{2}\\
- &  & e_{2}/ & n_{2}\\
- &  &  & n_{3}\\
- &  & n_{1}\\
- &  & e_{2}/ & n_{2}\\
- &  &  & n_{3}\\
- & n_{3}
-\end{array}
-\]
-
-\end_inset
-
-Either of these requires understanding indentation.
+ Either of these notations require understanding indentation.
  Yuck.
- Even if you understand the indentation, the above are still hard to read.
- Perhaps JSON will do:
+ Even if you understand the indentation, they are still hard to read.
+ Perhaps JSON will do?
 \end_layout
 
 \begin_layout Standard
@@ -6904,27 +6693,7 @@ status open
 
 \begin_layout Plain Layout
 
-	{
-\end_layout
-
-\begin_layout Plain Layout
-
-		Link: {
-\end_layout
-
-\begin_layout Plain Layout
-
-			Link: {
-\end_layout
-
-\begin_layout Plain Layout
-
-				Link: {
-\end_layout
-
-\begin_layout Plain Layout
-
-					Node: 
+	{ Link: { Link: { Link: {	Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6937,7 +6706,7 @@ one
 
 \begin_layout Plain Layout
 
-					Node: 
+										Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6945,22 +6714,12 @@ two
 \begin_inset Quotes erd
 \end_inset
 
-
+ },
 \end_layout
 
 \begin_layout Plain Layout
 
-				},
-\end_layout
-
-\begin_layout Plain Layout
-
-				Link: {
-\end_layout
-
-\begin_layout Plain Layout
-
-					Node: 
+							Link: {	Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6973,7 +6732,7 @@ two
 
 \begin_layout Plain Layout
 
-					Node: 
+										Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6981,17 +6740,12 @@ three
 \begin_inset Quotes erd
 \end_inset
 
-
+ },
 \end_layout
 
 \begin_layout Plain Layout
 
-				},
-\end_layout
-
-\begin_layout Plain Layout
-
-				Node: 
+							Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7004,12 +6758,7 @@ one
 
 \begin_layout Plain Layout
 
-				Link: {
-\end_layout
-
-\begin_layout Plain Layout
-
-					Node: 
+							Link: {	Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7022,7 +6771,7 @@ two
 
 \begin_layout Plain Layout
 
-					Node: 
+										Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7030,22 +6779,12 @@ three
 \begin_inset Quotes erd
 \end_inset
 
-
+ }},
 \end_layout
 
 \begin_layout Plain Layout
 
-				}
-\end_layout
-
-\begin_layout Plain Layout
-
-			},
-\end_layout
-
-\begin_layout Plain Layout
-
-			Node: 
+							Node: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -7053,17 +6792,7 @@ three
 \begin_inset Quotes erd
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
-
-		}
-\end_layout
-
-\begin_layout Plain Layout
-
-	}
+ }}
 \end_layout
 
 \end_inset
