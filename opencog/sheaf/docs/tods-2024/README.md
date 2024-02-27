@@ -38,8 +38,10 @@ Errors:
   configure panel: Language: Enclding change from default to utf8
 
   Ah hah:
+```
 \usepackage{listings}
 \renewcommand{\lstlistingname}{\inputencoding{latin9}Listing}
+```
 Go to listings, change from listing to minted  Nope. Doesnt; fix it.
 Ahh
 \inputencoding{latin9}\begin{lstlisting}[basicstyle={\footnotesize\sffamily},tabsize=3]
@@ -57,6 +59,19 @@ But lutatex still stries to load it with different options.
 acmart-primary/acmart.cls:\RequirePackage[bookmarksnumbered,unicode]{hyperref}
 
 Edit above change to unicode=true and copy into place.
+
+```
+LaTeX Warning: Unused global option(s):
+    [format=acmsmall].
+```
+
+* Abstract must come before title!!
+
+* Glyphs
+  Missing character: There is no Ï (U+00CF) in font zptmcm7y!
+  grep $'\u00CF'
+
+
 
 
 
