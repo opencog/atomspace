@@ -12746,17 +12746,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(Connector
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(DirectionNode 
+		(Connector (TypeNode 'ConceptNode) (DirectionNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12769,17 +12759,7 @@ input
 
 \begin_layout Plain Layout
 
-		(Connector
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(DirectionNode 
+		(Connector (TypeNode 'ConceptNode) (DirectionNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12792,17 +12772,7 @@ input
 
 \begin_layout Plain Layout
 
-		(Connector
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'FooBarBodyLink)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(DirectionNode 
+		(Connector (TypeNode 'FooBarBodyLink) (DirectionNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12945,17 +12915,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(IfLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(GreaterThanLink
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
+		(IfLink (GreaterThanLink (VariableNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12963,12 +12923,7 @@ a
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
+) (VariableNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12981,12 +12936,7 @@ b
 
 \begin_layout Plain Layout
 
-			(PlusLink
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
+			(PlusLink (VariableNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12994,12 +12944,7 @@ a
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
+) (VariableNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -13009,6 +12954,13 @@ b
 
 )))
 \end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "abstract syntax example"
 
 \end_inset
 
@@ -13699,85 +13651,17 @@ n, the rearrangement of terms that enables fast assembly? Some compiler
 \begin_layout Standard
 It appears that any kind of programming language constructed from raw metatree
  s-expressions is more machine friendly than it is human-friendly.
- The example given earlier:
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-		(IfLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(GreaterThanLink
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
-\begin_inset Quotes eld
-\end_inset
-
-a
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
-\begin_inset Quotes eld
-\end_inset
-
-b
-\begin_inset Quotes erd
-\end_inset
-
-))
-\end_layout
-
-\begin_layout Plain Layout
-
-			(PlusLink
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
-\begin_inset Quotes eld
-\end_inset
-
-a
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(VariableNode 
-\begin_inset Quotes eld
-\end_inset
-
-b
-\begin_inset Quotes erd
-\end_inset
-
-)))
-\end_layout
+ The example abstract syntax tree given earlier, 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "abstract syntax example"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
-is stunningly verbose, as compared to the far more succinct 
+, is stunningly verbose, as compared to the far more succinct 
 \begin_inset Quotes eld
 \end_inset
 
@@ -13923,37 +13807,18 @@ https://wiki.opencog.org/w/Hyperon:Atomese
 \end_layout
 
 \begin_layout Section
-Atomese
+Conclusion
 \end_layout
 
 \begin_layout Standard
-Almost all of the various ideas articulated in this text have been implemented
+All of the various ideas articulated in this text have been implemented
  in the OpenCog AtomSpace, nominally going under the name of Atomese.
- Historically, it was created to be a knowledge representation system in
- which probabilistic reasoning could be performed.
+ Historically, the AtomSpace was created to be a knowledge representation
+ system in which probabilistic reasoning could be performed.
  Regular use and the pressures of user demands have forced the sharpening
- of various concepts and features, most of which have been reviewed above.
-\end_layout
-
-\begin_layout Standard
-The platform continues to be deployed in production systems, while also
- being an experimental platform for the development of new ideas.
- As these are found to be sound, the system does, as a whole, mutate.
- 
-\end_layout
-
-\begin_layout Standard
-If the reader of this text finds any of the above concepts to be dubious,
- or perhaps ill-defined and in need of sharpening, they are encouraged to
- contact the mailing list.
- The AtomSpace, and Atomese are malleable.
- Bad ideas do need to be replaced by good ones.
-\end_layout
-
-\begin_layout Standard
-If the reader of this text finds any of the above concepts to be vague,
- then please note that AtomSpace source code repo contains a large variety
- of example demos of each of the discussed features.
+ of various concepts and features.
+ The AtomSpace source code repo contains a large variety of example demos
+ of each of the discussed features.
 \begin_inset Foot
 status collapsed
 
@@ -13972,11 +13837,7 @@ literal "false"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Section
-Conclusion
+ 
 \end_layout
 
 \begin_layout Standard
@@ -13990,18 +13851,15 @@ Metagraphs are a simple and relatively minor generalization of graphs.
 
 \begin_layout Itemize
 Metagraphs are more representationally compact than graphs.
- They are more efficient at representing data.
 \end_layout
 
 \begin_layout Itemize
 Metagraph query is more general than SQL-inspired query systems, and breaks
- out of the table-join paradigm that is most commonly offered in graph-query
- systems.
+ out of the table-join paradigm found in graph-query systems.
 \end_layout
 
 \begin_layout Itemize
-Table normalization, normally an intellectually demanding task for relational
- database design, comes 
+Table normalization comes 
 \begin_inset Quotes eld
 \end_inset
 
@@ -14028,14 +13886,14 @@ Metatrees are naturally (even trivially) reified.
 \end_layout
 
 \begin_layout Itemize
-Metatrees are naturally abstract syntax trees; this is possible but not
- natural when working with ordinary graphs.
+Metatrees are naturally abstract syntax trees.
+ Ordinary graphs are not.
 \end_layout
 
 \begin_layout Itemize
-Metagraphs are foundational, providing a common platform for a broad variety
- of computing tasks: ranging from data storage, to symbolic computing and
- inference, to functional (or imperative) programming.
+Metagraphs are foundational and provide a common platform for a variety
+ of computing tasks: data srepresentation, symbolic computing and inference,
+ and functional programming.
 \end_layout
 
 \begin_layout Itemize
@@ -14054,14 +13912,20 @@ This text started out as an attempt to describe the RAM and CPU usage properties
  that went into the OpenCog AtomSpace, which is the primary research vehicle
  for these ideas.
  Even so, it is not the culmination of the journey.
- The series of chapters in this directory are about sheaves.
- These provide a general connectionist approach to data representation,
- and the sheaf approach is different from metagraphs, having distinct representa
-tional properties (including CPU and RAM usage).
- Understanding metagraphs is a key gateway to the sheaves project.
- Fortunately, the metagraph approach, taken by the current AtomSpace is
- fairly mature, having more than a decade of implementation and use experience
- behind it.
+ Work with metagraphs has lead to the concept of sheaves, hinted at here
+ with the 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw puzzle pieces
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Sheaves have distinct representational properties, including CPU and RAM
+ usage.
+ The metagraph approach taken by the AtomSpace is mature, having more than
+ a decade of implementation and use experience behind it.
  This text gives a flavor of where it has arrived.
 \end_layout
 
