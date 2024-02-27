@@ -441,7 +441,7 @@ databases
 
 .
  Since they are both metatrees, they can be layered, nested, hierarchically
- stacked, however desired.
+ stacked, as desired.
 \end_layout
 
 \begin_layout Itemize
@@ -449,15 +449,19 @@ A review of query languages and graph traversal.
  A primary result is that all SQL-inspired query languages inherit the table-bas
 ed viewpoint of SQL.
  This in turn causes one to think in terms of table joins, which, in a graph
- setting, looks like a graph walk, chaining from one edge to the next.
- This is explicitly seen on systems such as GraphQL, SparQL, Neo4J or grakn.ai
- (TypeDB), which explicitly present graph queries in terms of edge walks.
+ setting, looks like an explicitly-specified graph walk, chaining from one
+ edge to the next.
+ This is seen in systems such as GraphQL, SparQL, Neo4J or grakn.ai (TypeDB),
+ which present graph queries in terms of explicit edge walks.
 \end_layout
 
 \begin_layout Itemize
 An example of a metagraph query language, which hops outside of the *QL
- paradigm of edge walks (aka table joins), into a query mode that more closely
- resembles pattern matching.
+ paradigm of edge walks (
+\emph on
+aka
+\emph default
+ table joins), into a query mode that more closely resembles pattern matching.
  Conventional pattern matching is implemented in terms of a state machine,
  and so it is not enough for a proper graph query.
  A true graph walk requires a stack machine; it requires a recursive walk
@@ -488,15 +492,14 @@ question
 \end_inset
 
 .
- That is, they are queries that consist entirely of constant terms, that
- can be matched to forward-queries having variables in them.
+ They consist entirely of constant terms, to be matched to forward-queries
+ having variables in them.
  Inverted queries are the bread-and-butter of chat-bots and rule engines.
  The key observation here is that metatrees represent inverted queries just
- as readily and naturally as forward queries.
- That is because a partial index on a metatree can be understood as a kind
- of trie.
- Metatrees are therefore able to unify both database concepts, and rule
- engine concepts with the same framework.
+ as readily and naturally as forward queries; this is because a partial
+ index on a metatree can be understood as a kind of trie.
+ Metatrees unify database concepts with rule engine concepts within the
+ same framework.
 \end_layout
 
 \begin_layout Itemize
