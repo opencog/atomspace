@@ -14,8 +14,12 @@ ACM Latex HOWTO
 * Copy *layout to `~/.lyx/layouts/`
 * Run reconfigure and restart LyX
 * Select amsart in document config
-* Custom config `format=acmsmall`
+* Custom config `acmsmall`
   See https://tex.stackexchange.com/questions/481052/lyx-choose-option-from-cls-file
+
+* Place title after authors, abstract and ACM classifications. That's
+  because LyX issues \maketitle right after title, and acmart expects
+  all the other stuff to come beforehand.
 
 vi HOWTO
 --------
@@ -71,7 +75,16 @@ LaTeX Warning: Unused global option(s):
   Missing character: There is no Ï (U+00CF) in font zptmcm7y!
   grep $'\u00CF'
 
+Maybe 
+\RequirePackage[T1]{fontenc}
+should be 
+\RequirePackage[TU]{fontenc}
 
+\usepackage[T1]{fontenc}
+
+0x4d 0x69 0x73 0x73 0x69 0x6e 0x67 0x20 0x63 0x68 0x61 0x72 0x61 0x63 0x74 0x65 0x72 0x3a 0x20 0x54 0x68 0x65 0x72 0x65 0x20 0x69 0x73 0x20 0x6e 0x6f 0x20 0xb9 0x20 0x69 0x6e 0x20 0x66 0x6f 0x6e 0x74 0x20 0x7a 0x70 0x74 0x6d 0x63 0x6d 0x37 0x79 0x21
+
+Missing character: There is no 0xb9 in font zpt
 
 
 
