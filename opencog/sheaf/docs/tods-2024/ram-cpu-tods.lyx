@@ -81,10 +81,6 @@
 
 \begin_body
 
-\begin_layout Title
-Graphs, Metagraphs, RAM, CPU
-\end_layout
-
 \begin_layout Abstract
 This text reviews the concepts of a graph store, starting from the fundamental
  question of how to efficiently represent a graph in RAM (that is, in storage).
@@ -129,6 +125,10 @@ Metagraphs can be used to specify a programming system/programming language,
 Most of these claims are founded on experimental results, rather than assertions
  of theoretical analysis.
  The experimental platform is the OpenCog AtomSpace and Atomese language.
+\end_layout
+
+\begin_layout Title
+Graphs, Metagraphs, RAM, CPU
 \end_layout
 
 \begin_layout Section
