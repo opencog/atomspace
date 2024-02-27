@@ -9628,9 +9628,9 @@ It is perhaps instructive to draw the metatree diagram for this query:
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../graphics/metaquery.eps
+	filename ../graphics/metaquery-wide.eps
 	lyxscale 60
-	width 14col%
+	width 25col%
 
 \end_inset
 
