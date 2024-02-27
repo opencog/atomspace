@@ -4212,6 +4212,13 @@ The metagraph differs from the hypergraph in that now a hyperedge (link)
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "metagraph diagram"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6624,23 +6631,21 @@ The discusion of metagraphs above has presented their abstract graphical
  a meta-tree be written as a text string? The proper representation as a
  string can be mildly confusing.
  Articulating this carefully is rewarding.
- Consider again the generic example:
 \end_layout
 
 \begin_layout Standard
-\align center
-\begin_inset Graphics
-	filename ../graphics/metagraph.eps
-	lyxscale 60
-	width 14col%
+Consider again the generic example, depicted 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "metagraph diagram"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-This can be written as 
+.
+ This diagram can be written as 
 \begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
 \end_inset
 
@@ -6926,11 +6931,7 @@ status open
 \end_inset
 
 Can't get any shorter than that.
- 
-\end_layout
-
-\begin_layout Standard
-This is not exactly an 'ordinary' s-expression, though.
+ This is not exactly an 'ordinary' s-expression, though.
  Key differences:
 \end_layout
 
@@ -6959,7 +6960,7 @@ n2
 \family default
 \size default
 ', instead of being a different instance.
- Referring back to the metagraph node table (
+ Referring back to the metagraph node table 
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "metagraph node table"
@@ -6969,7 +6970,7 @@ noprefix "false"
 
 \end_inset
 
-), we see that there is only one true instance of '
+, we see that there is only one true instance of '
 \family sans
 \size footnotesize
 n2
@@ -6994,7 +6995,7 @@ Every link is globally unique.
 \family default
 \size default
 ' appears twice; in both cases, it is exactly the same subexpression.
- This is clear by referring to the metagraph link table (
+ This is clear by referring to the metagraph link table 
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "metagraph link table"
@@ -7004,7 +7005,7 @@ noprefix "false"
 
 \end_inset
 
-): there is really just one copy.
+: there is really just one copy.
 \end_layout
 
 \begin_layout Standard
@@ -7902,6 +7903,13 @@ It is natural to use weak pointers for the incoming set, and regular pointers
 	filename ../graphics/metagraph-new.eps
 	lyxscale 60
 	width 23col%
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "edited diagram"
 
 \end_inset
 
@@ -9049,24 +9057,17 @@ A Meta-Query Language
 
 \begin_layout Standard
 How else could the query about the schools that Rachel attends could be
- formulated? Returning to the example diagram
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Graphics
-	filename ../graphics/metagraph-new.eps
-	lyxscale 60
-	width 23col%
+ formulated? Returning to the example diagram 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "edited diagram"
+plural "false"
+caps "false"
+noprefix "false"
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-and once again noting that the presence of the dotted arrows allows rapid
+ and once again noting that the presence of the dotted arrows allows rapid
  graph traversal starting from any Atom, we can offer the following as a
  possibility: 
 \begin_inset listings
@@ -9089,12 +9090,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(Present
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Link (Variable 
+		(Present	(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9115,7 +9111,7 @@ status open
 
 \begin_layout Plain Layout
 
-			(Link (Variable 
+					(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9825,12 +9821,7 @@ status open
 
 \begin_layout Plain Layout
 
-(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-    (Variable 
+(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9838,12 +9829,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-    (Variable 
+) (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9886,12 +9872,7 @@ status open
 
 \begin_layout Plain Layout
 
-(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-    (Variable 
+(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9899,12 +9880,7 @@ status open
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-    (Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9947,12 +9923,7 @@ status open
 
 \begin_layout Plain Layout
 
-(Present
-\end_layout
-
-\begin_layout Plain Layout
-
-   (Link (Variable 
+(Present (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -9973,7 +9944,7 @@ status open
 
 \begin_layout Plain Layout
 
-   (Link (Variable 
+         (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10042,12 +10013,7 @@ status open
 
 \begin_layout Plain Layout
 
-   (Present
-\end_layout
-
-\begin_layout Plain Layout
-
-      (Link (Variable 
+   (Present (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10068,7 +10034,7 @@ status open
 
 \begin_layout Plain Layout
 
-      (Link (Variable 
+            (Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10169,12 +10135,7 @@ status open
 
 \begin_layout Plain Layout
 
-		(Present
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Link (Variable 
+		(Present(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10200,12 +10161,7 @@ Rachel
 
 \begin_layout Plain Layout
 
-			(Present
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Link (Variable 
+			(Present	(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10226,12 +10182,7 @@ Rachel
 
 \begin_layout Plain Layout
 
-			(Present
-\end_layout
-
-\begin_layout Plain Layout
-
-				(Link (Variable 
+			(Present	(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10252,7 +10203,7 @@ Rachel
 
 \begin_layout Plain Layout
 
-				(Link (Variable 
+						(Link (Variable 
 \begin_inset Quotes eld
 \end_inset
 
@@ -10882,47 +10833,22 @@ status open
 
 \begin_layout Plain Layout
 
-		<category>
+		<category> <pattern>I love *</pattern>
 \end_layout
 
 \begin_layout Plain Layout
 
-			<pattern>I love *</pattern>
+			<template>I like <star/> a lot.</template> </category>
 \end_layout
 
 \begin_layout Plain Layout
 
-			<template>I like <star/> a lot.</template>
+		<category> <pattern>I * you</pattern>
 \end_layout
 
 \begin_layout Plain Layout
 
-		</category>
-\end_layout
-
-\begin_layout Plain Layout
-
-		<category>
-\end_layout
-
-\begin_layout Plain Layout
-
-			<pattern>I * you</pattern>
-\end_layout
-
-\begin_layout Plain Layout
-
-			<template>Well, I <star/> you, too!</template>
-\end_layout
-
-\begin_layout Plain Layout
-
-		</category>
-\end_layout
-
-\begin_layout Plain Layout
-
-	</aiml>
+			<template>Well, I <star/> you, too!</template> </category> </aiml>
 \end_layout
 
 \end_inset
@@ -11122,12 +11048,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(Query
-\end_layout
-
-\begin_layout Plain Layout
-
-		(Present (Word 
+	(Query (Present (Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11180,12 +11101,7 @@ like
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Word 
+) (Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11206,16 +11122,7 @@ lot
 
 \begin_layout Plain Layout
 
-\end_layout
-
-\begin_layout Plain Layout
-
-	(Query
-\end_layout
-
-\begin_layout Plain Layout
-
-		(Present (Word 
+	(Query (Present (Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11268,12 +11175,7 @@ I
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(Word 
+) (Word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11928,7 +11830,7 @@ The cat sat on the mat.
 
 \emph default
  This encodes some information; how might it be encoded as a metagraph?
- There are many possible choices, but one of the simplest is shown here:
+ There are many possible choices, but one of the simplest is
 \end_layout
 
 \begin_layout Standard
@@ -11939,12 +11841,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(SittingLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ObjectNode 
+	(SittingLink (ObjectNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -11952,12 +11849,7 @@ cat
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ObjectNode 
+) (ObjectNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12109,7 +12001,7 @@ Fuzzykins
 \family default
 \size default
 '.
- Alternately, one could choose to move in the opposite direction, and write:
+ Alternately, one could choose to move in the opposite direction, and write
 \end_layout
 
 \begin_layout Standard
@@ -12120,12 +12012,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(Link
-\end_layout
-
-\begin_layout Plain Layout
-
-		(PredicateNode 
+	(Link (PredicateNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12133,12 +12020,7 @@ Object
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12190,12 +12072,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(TypeDefinitionLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(TypeNode 
+	(TypeDefinitionLink (TypeNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12203,12 +12080,7 @@ CatNode
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(TypeNode 
+) (TypeNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12257,12 +12129,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(CatLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(PredicateNode 
+	(CatLink (PredicateNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12270,12 +12137,7 @@ has
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12288,12 +12150,7 @@ fur
 
 \begin_layout Plain Layout
 
-	(CatLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(PredicateNode 
+	(CatLink (PredicateNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12301,12 +12158,7 @@ URL
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(Node 
+) (Node 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12471,12 +12323,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(ListLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ConceptNode 
+	(ListLink (ConceptNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12484,12 +12331,7 @@ some
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ConceptNode 
+) (ConceptNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12545,22 +12387,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(SignatureLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ListLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode))
+	(SignatureLink (ListLink (TypeNode 'ConceptNode) (TypeNode 'ConceptNode))
 \end_layout
 
 \end_inset
@@ -12576,17 +12403,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(SignatureLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ListLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(ConceptNode 
+	(SignatureLink (ListLink (ConceptNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12594,12 +12411,7 @@ some
 \begin_inset Quotes erd
 \end_inset
 
-)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode))
+) (TypeNode 'ConceptNode))
 \end_layout
 
 \end_inset
@@ -12615,22 +12427,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(SignatureLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(ListLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(ConceptNode 
+	(SignatureLink (ListLink (TypeNode 'ConceptNode) (ConceptNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12666,12 +12463,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(TypeDefinitionLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(TypeNode 
+	(TypeDefinitionLink (TypeNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12684,17 +12476,7 @@ CatLink
 
 \begin_layout Plain Layout
 
-		(SignatureLink
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'PredicateNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'Node)))
+		(SignatureLink (TypeNode 'PredicateNode) (TypeNode 'Node)))
 \end_layout
 
 \end_inset
@@ -12737,12 +12519,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(TypeDefinitionLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(TypeNode 
+	(TypeDefinitionLink (TypeNode 
 \begin_inset Quotes eld
 \end_inset
 
@@ -12765,17 +12542,7 @@ CatLink
 
 \begin_layout Plain Layout
 
-			(TypeChoice
-\end_layout
-
-\begin_layout Plain Layout
-
-				(TypeNode 'Node)
-\end_layout
-
-\begin_layout Plain Layout
-
-				(TypeNode 'Link))))
+			(TypeChoice (TypeNode 'Node) (TypeNode 'Link))))
 \end_layout
 
 \end_inset
@@ -12799,12 +12566,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(LambdaLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(VariableList
+	(LambdaLink (VariableList
 \end_layout
 
 \begin_layout Plain Layout
@@ -12851,22 +12613,7 @@ status open
 
 \begin_layout Plain Layout
 
-	(ArrowLink
-\end_layout
-
-\begin_layout Plain Layout
-
-		(VariableList
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode)
-\end_layout
-
-\begin_layout Plain Layout
-
-			(TypeNode 'ConceptNode))
+	(ArrowLink (VariableList (TypeNode 'ConceptNode) (TypeNode 'ConceptNode))
 \end_layout
 
 \begin_layout Plain Layout
