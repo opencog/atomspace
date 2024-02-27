@@ -10,11 +10,6 @@
 \end_preamble
 \options format=acmsmall
 \use_default_options false
-\begin_modules
-theorems-ams
-eqs-within-sections
-figs-within-sections
-\end_modules
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -52,7 +47,7 @@ figs-within-sections
 \papersize default
 \use_geometry false
 \use_package amsmath 2
-\use_package amssymb 2
+\use_package amssymb 0
 \use_package cancel 1
 \use_package esint 0
 \use_package mathdots 1
@@ -75,13 +70,6 @@ figs-within-sections
 \shortcut idx
 \color #008000
 \end_index
-\leftmargin 2.4cm
-\topmargin 2.4cm
-\rightmargin 2.4cm
-\bottommargin 4cm
-\headheight 0.5cm
-\headsep 1cm
-\footskip 0.1cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
