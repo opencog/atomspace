@@ -12667,9 +12667,9 @@ There is one extremely important alternative, discussed in other texts in
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../graphics/puzzle-beta-reduce.eps
+	filename ../graphics/puzzle-beta-reduce-wide.eps
 	lyxscale 70
-	width 25col%
+	width 45col%
 
 \end_inset
 
