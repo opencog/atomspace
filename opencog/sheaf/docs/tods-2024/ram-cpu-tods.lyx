@@ -13,7 +13,7 @@
 \maintain_unincluded_children false
 \language english
 \language_package default
-\inputencoding auto
+\inputencoding utf8
 \fontencoding global
 \font_roman "times" "default"
 \font_sans "helvet" "default"
@@ -34,16 +34,7 @@
 \index_command default
 \paperfontsize default
 \spacing single
-\use_hyperref true
-\pdf_bookmarks true
-\pdf_bookmarksnumbered false
-\pdf_bookmarksopen false
-\pdf_bookmarksopenlevel 1
-\pdf_breaklinks false
-\pdf_pdfborder false
-\pdf_colorlinks false
-\pdf_backref false
-\pdf_pdfusetitle true
+\use_hyperref false
 \papersize default
 \use_geometry false
 \use_package amsmath 2

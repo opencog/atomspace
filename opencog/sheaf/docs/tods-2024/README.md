@@ -34,6 +34,34 @@ Errors:
   /usr/share/lyx
   /usr/share/texlive/
 
+  PDFlatex uses latin9 so does luatex but xetex does not
+  configure panel: Language: Enclding change from default to utf8
+
+  Ah hah:
+\usepackage{listings}
+\renewcommand{\lstlistingname}{\inputencoding{latin9}Listing}
+Go to listings, change from listing to minted  Nope. Doesnt; fix it.
+Ahh
+\inputencoding{latin9}\begin{lstlisting}[basicstyle={\footnotesize\sffamily},tabsize=3]
+
+/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+\lst@Key{inputencoding}\relax{\def\lst@inputenc{#1}}
+
+Go to listings, set `inputencoding=utf8`  No not enough
+switches input encoding before the listing.
+exporting as luatex instead of pdflatex avoids this.
+
+Go to PDF properties, disable "Use Hyperref support"
+But lutatex still stries to load it with different options.
+
+acmart-primary/acmart.cls:\RequirePackage[bookmarksnumbered,unicode]{hyperref}
+
+Edit above change to unicode=true and copy into place.
+
+
+
+
+
 
 TODO:
 -----
