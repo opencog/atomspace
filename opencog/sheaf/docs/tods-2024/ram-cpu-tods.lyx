@@ -3840,11 +3840,7 @@ Counting the memory usage is instructive.
 
 \begin_layout Standard
 For the general case, one has
-\begin_inset Formula 
-\[
-N_{V}\left(1+\left\langle J\right\rangle +\left\langle N_{I}\right\rangle \right)+N_{E}\left(1+\left\langle J\right\rangle +\left\langle N_{O}\right\rangle \right)
-\]
-
+\begin_inset Formula $N_{V}\left(1+\left\langle J\right\rangle +\left\langle N_{I}\right\rangle \right)+N_{E}\left(1+\left\langle J\right\rangle +\left\langle N_{O}\right\rangle \right)$
 \end_inset
 
  where
@@ -3991,19 +3987,16 @@ The average count of the incoming set is equal to the average count of the
 \end_layout
 
 \begin_layout Standard
-The equivalent representation as a graph requires
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\left(N_{V}+N_{E}\right)\left(1+\left\langle J\right\rangle \right)+N_{V}\left\langle N_{I}\right\rangle +N_{E}\left\langle N_{O}\right\rangle  & \quad\mbox{ for the vertex table}\\
-N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right) & \quad\mbox{ for the edge table}
-\end{align*}
-
+The equivalent representation as a graph requires 
+\begin_inset Formula $\left(N_{V}+N_{E}\right)\left(1+\left\langle J\right\rangle \right)+N_{V}\left\langle N_{I}\right\rangle +N_{E}\left\langle N_{O}\right\rangle $
 \end_inset
 
-Comparing the this to the expression for the hypertable, we see that the
+ for the vertex table, and 
+\begin_inset Formula $N_{V}\left\langle N_{I}\right\rangle \left(3+\left\langle J_{nil}\right\rangle \right)$
+\end_inset
+
+ for the edge table.
+ Comparing the this to the expression for the hypertable, we see that the
  vertex table is the same size as the entire hypertable.
  The ordinary graph representation also requires the overhead of the edge
  table; here the 
