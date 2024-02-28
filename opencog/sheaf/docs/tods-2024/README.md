@@ -94,4 +94,3 @@ Missing character: There is no 0xb9 in font zpt
 TODO:
 -----
 * rename file to todssubmission.pdf
-* Trim string expressions section.
