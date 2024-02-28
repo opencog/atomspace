@@ -3942,9 +3942,9 @@ almost
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../graphics/hypergraph.eps
+	filename ../graphics/hypergraph-wide.eps
 	lyxscale 60
-	width 30col%
+	width 40col%
 
 \end_inset
 
