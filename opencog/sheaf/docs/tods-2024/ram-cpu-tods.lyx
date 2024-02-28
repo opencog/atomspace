@@ -1897,8 +1897,8 @@ graphical
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../graphics/joe-mary-v1.eps
-	width 40col%
+	filename ../graphics/joe-mary-v1-wide.eps
+	width 80col%
 
 \end_inset
 
