@@ -7,13 +7,6 @@
 \textclass acmart
 \begin_preamble
 \usepackage{tikz-cd}
-
-%% I hopes this would fix stuff but it doesn't.
-%% \let\Bbbk\relax
-%% \usepackage{amssymb} 
-
-%% \usepackage{unicode-math}
-%% \setmathfont{TeX Gyre Schola Math}
 \end_preamble
 \options acmsmall
 \use_default_options false
@@ -25,7 +18,7 @@
 \font_roman "times" "default"
 \font_sans "helvet" "default"
 \font_typewriter "courier" "default"
-\font_math "auto" "auto"
+\font_math "default" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
@@ -897,14 +890,9 @@ record
 \end_layout
 
 \begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
 <features tabularvalignment="middle">
@@ -915,6 +903,8 @@ record
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Students
 \end_layout
 
@@ -935,6 +925,8 @@ Students
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 name : string
 \end_layout
 
@@ -944,6 +936,8 @@ name : string
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 gpa : float
 \end_layout
 
@@ -955,6 +949,8 @@ gpa : float
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Joe
 \end_layout
 
@@ -964,6 +960,8 @@ Joe
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 3.5
 \end_layout
 
@@ -975,6 +973,8 @@ Joe
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Mary
 \end_layout
 
@@ -984,6 +984,8 @@ Mary
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 3.6
 \end_layout
 
@@ -995,6 +997,8 @@ Mary
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Rachel
 \end_layout
 
@@ -1004,6 +1008,8 @@ Rachel
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 3.0
 \end_layout
 
@@ -1012,13 +1018,6 @@ Rachel
 </row>
 </lyxtabular>
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
 \end_inset
 
 
@@ -1053,12 +1052,12 @@ status open
 
 \begin_layout Plain Layout
 
-						(Mary,   3.6),
+							(Mary,   3.6),
 \end_layout
 
 \begin_layout Plain Layout
 
-						(Rachel, 3.0) ]}}
+							(Rachel, 3.0) ]}}
 \end_layout
 
 \end_inset
