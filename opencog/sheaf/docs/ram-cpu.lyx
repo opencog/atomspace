@@ -4414,8 +4414,8 @@ metatree
 \end_layout
 
 \begin_layout Standard
-The node table for a metagraph is effectively the same as the vertex table
- for the hypergraph (
+The node table for a metagraph is effectively the same as the hyper-vertex
+ table 
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "hyper vertex table"
@@ -4425,8 +4425,8 @@ noprefix "false"
 
 \end_inset
 
-) for the hypergraph, before.
- For the example metatree, it is
+.
+ For the example metatree diagram, it is
 \end_layout
 
 \begin_layout Standard
