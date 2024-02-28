@@ -21,6 +21,9 @@ ACM Latex HOWTO
   because LyX issues \maketitle right after title, and acmart expects
   all the other stuff to come beforehand.
 
+* Holy Cow: There's an `acmart.lyx` article template that would have
+  resolved all of the above! Yow!
+
 
 vi HOWTO
 --------
