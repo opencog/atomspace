@@ -12200,8 +12200,9 @@ Caution: the idea of Lambdas, and of Arrows, while extremely widespread
 \end_layout
 
 \begin_layout Standard
-There is one extremely important alternative, discussed in other texts in
- this series: the jigsaw puzzle piece, and its tab and slot connectors.
+There is one extremely important alternative, the conept of sheaves.
+ This can be understood by analogy to the jigsaw puzzle piece, and its tab
+ and slot connectors.
  Telegraphically: if one has a function 
 \begin_inset Formula $f\left(x\right)$
 \end_inset
@@ -12240,7 +12241,7 @@ The two pieces can be connected together only if the connector types match:
  the slot and the tab must have matching types but opposite sexes.
  This ensures the type-safety of beta-reduction.
  Observe the coloring of the vertexes in the above diagram.
- At the bottom, there are two black (
+ One the right, there are two black (
 \begin_inset Quotes eld
 \end_inset
 
@@ -12249,7 +12250,7 @@ full
 \end_inset
 
 ) vertexes, connected by a (full) edge.
- At the top, the open-colored vertexes are (unconnected) 
+ On the left, the open-colored vertexes are (unconnected) 
 \begin_inset Quotes eld
 \end_inset
 
