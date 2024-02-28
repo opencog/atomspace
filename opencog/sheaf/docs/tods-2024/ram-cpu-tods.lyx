@@ -4043,9 +4043,13 @@ metatree
 \end_layout
 
 \begin_layout Standard
-The node and link tables for a metagraph is effectively the same as the
- hyper-vertex table.
- For the example metatree diagram, it is
+The node table for a metagraph is effectively the same as the hyper-vertex
+ table.
+ The link table now requires both an outgoing-atom list, and an incoming-link
+ set.
+ The incoming set can only consist of links; the outgoing list can consist
+ of either nodes or links.
+ For the example metatree diagram, these are
 \end_layout
 
 \begin_layout Standard
@@ -4230,19 +4234,16 @@ name "metagraph node table"
 \end_inset
 
 
-\end_layout
+\begin_inset space \qquad{}
+\end_inset
 
-\begin_layout Standard
-The link table now requires both an outgoing-atom list, and an incoming-link
- set.
- The incoming set can only consist of links; the outgoing list can consist
- of either nodes or links.
-\end_layout
 
-\begin_layout Standard
-\align center
+\begin_inset space \qquad{}
+\end_inset
+
 
 \size footnotesize
+
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
@@ -4531,7 +4532,8 @@ name "metagraph link table"
 \end_layout
 
 \begin_layout Standard
-Notice how this link-table resembles the vertex-table (
+The link table adds a column, as compared to the hypergraphs, and thus resembles
+ the vertex table 
 \begin_inset CommandInset ref
 LatexCommand vpageref
 reference "graph vertex table"
@@ -4541,51 +4543,22 @@ noprefix "false"
 
 \end_inset
 
-) of an ordinary graph store.
- It has both 'incoming' and 'outgoing' sets, as before.
+ for an ordinary graph store: It has both 'incoming' and 'outgoing' sets.
  There are two differences: the outgoing set is no longer a set, but a list.
  The other is even stranger: the first column (the column of vertexes) has
- been replaced by a column of links!
-\end_layout
-
-\begin_layout Standard
-Perhaps we are making the wrong comparison? Oddly, it also resembles the
- edge table (
-\begin_inset CommandInset ref
-LatexCommand vpageref
-reference "graph edge table"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
-).
- For ordinary directed graphs, each edge is a vertex pair.
- The vertices of an edge may be termed the 'head vertex' and the 'tail vertex';
- equivalently, the outgoing vertex and the incoming vertex (or 
-\emph on
-vice-versa
-\emph default
-, depending on how one envisions the arrows).
- These two endpoints are replaced by the incoming set and the outgoing list.
- Now, the first column remains the same: a column of edges, in both cases.
- The overall four-column form remains the same.
-\end_layout
-
-\begin_layout Standard
-Looking at this table, one might imagine that the naive graph tables, the
- hypergraph tables, and the metagraph tables seem to have much in common.
- This is, however, perhaps a bit deceptive, as performance considerations
- dictate the finer aspects of the design.
+ been replaced by a column of links! Looking at these, one imagines the
+ naive graph tables, the hypergraph tables, and the metagraph tables have
+ much in common.
+ This is deceptive, as performance considerations dictate the finer aspects
+ of the design.
  This will be looked at next.
 \end_layout
 
 \begin_layout Standard
-Clearly, the metagraph, having the general shape of a DAG, can be wedged
+The metagraph, having the general shape of a DAG, can clearly be wedged
  into an ordinary graph store.
  Conversely, an ordinary graph is merely a metagraph that never goes more
- than one-level deep, and whose links always have arity-two.
+ than one-level deep, and whose links are always arity-two.
  Either format is adequate for representing the other.
  The metagraph, much like the hypergraph, has no need to explicitly declare
  the arrows in the tree; they are not stored, nor do they have attributes.
