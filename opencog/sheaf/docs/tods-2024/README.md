@@ -31,6 +31,9 @@ Errors:
   Solution: stop loading amssymb See
   https://tex.stackexchange.com/questions/564490/command-bbbk-already-defined-ol-bbbk-mathordamsb7c-when-i-try-t
 
+* Missing integral sign in footnote.
+  Solution: load esint in Math Options config panel!
+
 * `LaTeXError: Missing \begin{document}.`
   Remove `\usepackage[latin9]{inputenc}`
   https://tex.stackexchange.com/questions/527719/latex-error-using-lyx-missing-begindocument
