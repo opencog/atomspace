@@ -8050,23 +8050,13 @@ How might this have worked in conventional SQL? Well, for starters, we need
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
+lstparams "basicstyle={\scriptsize\sffamily},tabsize=3"
 inline false
 status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Schools (
-\end_layout
-
-\begin_layout Plain Layout
-
-		name TEXT,
-\end_layout
-
-\begin_layout Plain Layout
-
-		uuid INT PRIMARY KEY);
+	CREATE TABLE Schools (name TEXT, uuid INT PRIMARY KEY);
 \end_layout
 
 \begin_layout Plain Layout
@@ -8077,42 +8067,14 @@ status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Courses (
+	CREATE TABLE Courses (name TEXT, school_uuid INT FOREIGN KEY, uuid INT
+ PRIMARY KEY);
 \end_layout
 
 \begin_layout Plain Layout
 
-		name TEXT,
-\end_layout
-
-\begin_layout Plain Layout
-
-		school_uuid INT FOREIGN KEY,
-\end_layout
-
-\begin_layout Plain Layout
-
-		uuid INT PRIMARY KEY);
-\end_layout
-
-\begin_layout Plain Layout
-
-	CREATE TABLE Students (
-\end_layout
-
-\begin_layout Plain Layout
-
-		name TEXT,
-\end_layout
-
-\begin_layout Plain Layout
-
-		course_id INT FOREIGN KEY,
-\end_layout
-
-\begin_layout Plain Layout
-
-		student_id INT PRIMARY KEY);
+	CREATE TABLE Students (name TEXT, course_id INT FOREIGN KEY, student_id
+ INT PRIMARY KEY);
 \end_layout
 
 \end_inset
@@ -8125,28 +8087,14 @@ One continues in this fashion, creating a few more tables.
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
+lstparams "basicstyle={\scriptsize\sffamily},tabsize=3"
 inline false
 status open
 
 \begin_layout Plain Layout
 
-	CREATE TABLE Employment (
-\end_layout
-
-\begin_layout Plain Layout
-
-		name TEXT,
-\end_layout
-
-\begin_layout Plain Layout
-
-		employer TEXT,
-\end_layout
-
-\begin_layout Plain Layout
-
-		taxpayer_id INT PRIMARY KEY);
+	CREATE TABLE Employment (name TEXT, employer TEXT, taxpayer_id INT PRIMARY
+ KEY);
 \end_layout
 
 \end_inset
@@ -8167,7 +8115,7 @@ How does the query work?
 
 \begin_layout Standard
 \begin_inset listings
-lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
+lstparams "basicstyle={\scriptsize\sffamily},tabsize=3"
 inline false
 status open
 
@@ -8637,8 +8585,7 @@ The need for explicit declarations, and the explicit identification of concrete
 \end_layout
 
 \begin_layout Standard
-Note, by the way, that the declaration statement is of fixed length, and
- is 
+Note that the declaration statement is of fixed length, and is 
 \emph on
 NOT
 \emph default
