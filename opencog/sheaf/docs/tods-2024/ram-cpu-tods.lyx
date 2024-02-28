@@ -1888,10 +1888,6 @@ graphical
 \end_inset
 
  if it is drawn as follows:
-\begin_inset VSpace defskip
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1900,10 +1896,6 @@ graphical
 	filename ../graphics/joe-mary-v1-wide.eps
 	width 80col%
 
-\end_inset
-
-
-\begin_inset VSpace defskip
 \end_inset
 
 
@@ -1926,18 +1918,10 @@ Below shows another alternative, this time with labeled edges:
 
 \begin_layout Standard
 \align center
-\begin_inset VSpace defskip
-\end_inset
-
-
 \begin_inset Graphics
-	filename ../graphics/joe-mary-v2.eps
-	width 22col%
+	filename ../graphics/joe-mary-v2-wide.eps
+	width 42col%
 
-\end_inset
-
-
-\begin_inset VSpace defskip
 \end_inset
 
 
