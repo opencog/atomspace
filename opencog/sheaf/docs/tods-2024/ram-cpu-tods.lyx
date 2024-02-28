@@ -11024,8 +11024,7 @@ Types
 \end_layout
 
 \begin_layout Standard
-It was observed above that metatrees have a natural string representation
- as s-expressions.
+Metatrees have a natural string representation as s-expressions.
  Every system that works with s-expressions gives a privileged interpretation
  to the first word after an open parenthesis.
  In Lisp and Scheme, that first word is an operator.
@@ -11055,20 +11054,14 @@ https://fexpr.blogspot.com/2011/04/fexpr.html
 \end_layout
 
 \begin_layout Standard
-What is the first element for metatrees?
-\end_layout
-
-\begin_layout Standard
-The answer appears to be that it is a type, a type-theoretical type.
- This is not a proclamation or a theoretical result, this is an experimental
+What is the first element for metatrees? The answer appears to be that it
+ is a type, a type-theoretical type.
+ This is not a proclamation or a theoretical result; this is an experimental
  result.
  After working with meta-trees for a decade, and examining how they represent
  data, it appears that there isn't any other obvious interpretation than
  to say that it is a type.
-\end_layout
-
-\begin_layout Standard
-The observational evidence is as follows:
+ The observational evidence is as follows:
 \end_layout
 
 \begin_layout Itemize
@@ -11211,11 +11204,10 @@ https://wiki.opencog.org/w/LambdaLink_and_ScopeLink
 \begin_layout Itemize
 For many (but not all) of these Nodes and Links, it became convenient to
  create a corresponding C++ class that performs some function.
- A silly example is the PlusLink: when this is executed, the arguments are
- added together, if the arguments are numeric.
+ An example is the PlusLink: when executed, the arguments are added together,
+ if the arguments are numeric.
  The C++ class performs this addition.
- Now, it is generally regarded that C++ classes are types.
- By extension, PlusLink must also be a type.
+ Since C++ classes are types, by extension, PlusLink must also be a type.
 \end_layout
 
 \begin_layout Itemize
@@ -11289,22 +11281,8 @@ compiled
  into the database: they are merely being inserted.
  There is a long-running REPL loop, and nothing is gained by preventing
  users from defining new types at runtime.
- Note that this does make the type system clash with that of OCaml, Haskell,
- Scala, all of which deploy a static type system.
- 
-\end_layout
-
-\begin_layout Standard
-As a practical example: Nodes and Links are of type Atom.
- The biology subsystem uses GeneNodes and ProteinNodes, since these are
- useful for biological data representations.
- These are also type Atom.
- The biology subsystem is a distinct subsystem, and not part of the core:
- it is dynamically loaded.
- This creates issues for the OCaml binding, which might have known about
- Atoms at compile time, but had no clue about GeneNodes and ProteinNodes
- at compile time.
- Static types and metatree types do not play well together.
+ This does clash with the type system of OCaml, Haskell, Scala, all of which
+ deploy a static type system.
 \end_layout
 
 \begin_layout Standard
@@ -11411,8 +11389,8 @@ product types
  Function calls have a type signature too, this is the arrow type, pointing
  from the input arguments to the output type.
  The ML, CaML, Haskell, Scala and F# programming languages provide an explicit
- type system, allowing the programmer to define new types (In OO languages,
- new types can only be defined by defining a new OO class).
+ type system, allowing the programmer to define new types.
+ In OO languages, new types can only be defined by defining a new OO class.
 \end_layout
 
 \begin_layout Standard
