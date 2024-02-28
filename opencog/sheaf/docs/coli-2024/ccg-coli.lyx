@@ -4,11 +4,12 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass article
+\textclass clv3
 \begin_preamble
 \usepackage{url} 
 \usepackage{slashed}
 \end_preamble
+\options shortpaper
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -92,14 +93,6 @@
 
 \begin_layout Title
 Combinatory Categorial Grammar and Link Grammar are Equivalent
-\end_layout
-
-\begin_layout Author
-Linas Vepstas
-\end_layout
-
-\begin_layout Date
-Updated 14 July 2022
 \end_layout
 
 \begin_layout Abstract
