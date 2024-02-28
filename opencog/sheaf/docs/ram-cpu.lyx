@@ -636,9 +636,9 @@ typical
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/directed-graph.png
-	lyxscale 40
-	width 30col%
+	filename graphics/graph-6.eps
+	lyxscale 70
+	width 40col%
 
 \end_inset
 
