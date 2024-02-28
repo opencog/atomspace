@@ -1,0 +1,5 @@
+#% Do not delete the line below; configure depends on this      
+#  \DeclareLaTeXClass[clv3]{CoLi_Article}
+
+# Read the definitions from article.layout (yes, really)
+Input stdclass.inc

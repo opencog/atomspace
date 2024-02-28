@@ -12,9 +12,9 @@ Manuscript ID: TODS-2024-0011
 
 ACM Latex HOWTO
 ---------------
-* Copy *cls to `/usr/share/texmf/tex/latex/`
+* Copy `acmart.cls` to `/usr/share/texmf/tex/latex/`
 * Run `sudo texhash`
-* Copy *layout to `~/.lyx/layouts/`
+* Copy `acmart.layout` to `~/.lyx/layouts/`
 * Run reconfigure and restart LyX
 * Select acmart in Document->Settings->Document Class
   Custom config `acmsmall`
