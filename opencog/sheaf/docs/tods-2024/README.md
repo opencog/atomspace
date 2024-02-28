@@ -1,11 +1,14 @@
 
-24 February 2024
-
-Submitted to ACM Transactions on Database Systems
-
+ACM Transactions on Database Systems
+------------------------------------
+https://mc.manuscriptcentral.com/tods
 Manuscript ID: TODS-2024-0011
 
-https://mc.manuscriptcentral.com/tods
+* 24 February 2024
+  Submitted to ACM Transactions on Database Systems
+
+* 28 Feb revised submission per author guidelines.
+
 
 ACM Latex HOWTO
 ---------------
