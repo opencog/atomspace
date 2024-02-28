@@ -56,6 +56,9 @@ There are several files here:
 
 Publication Venues
 ------------------
+* Beall's List of Potential Predatory Journals and Publishers
+  https://beallslist.net/
+
 * ACM Transactions of Database Systems
   https://dl.acm.org/journal/tods
 
@@ -63,3 +66,16 @@ Publication Venues
    ++ Open Acess
    ++ Requires payment of $3,500 open access processing charge
    ++ https://www.igi-global.com/open-access-journal/journal-database-management/1072
+
+ * Natural Language and Linguistic Theory
+   https://link.springer.com/journal/11049
+   ++ Bridge theory and observation
+   ++ Short articles, up to 15 pages; long, up to 40
+
+ * Computational Linguistics
+   https://direct.mit.edu/coli
+   ++ 30-40 pages (longer than conference proceedings)
+
+Publications
+------------
+ * tods-2024: submission to TODS.
