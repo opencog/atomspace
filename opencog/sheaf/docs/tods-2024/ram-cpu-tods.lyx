@@ -6198,34 +6198,24 @@ A schema mapping is a functor
 \end_inset
 
 where a specific database instance 
-\begin_inset Formula 
-\[
-I:\mathcal{C}\to\mathbf{Set}
-\]
-
+\begin_inset Formula $I:\mathcal{C}\to\mathbf{Set}$
 \end_inset
 
 is mapped to 
-\begin_inset Formula 
-\[
-\Delta_{F}I:F\left(\mathcal{C}\right)\to\mathbf{Set}
-\]
-
+\begin_inset Formula $\Delta_{F}I:F\left(\mathcal{C}\right)\to\mathbf{Set}$
 \end_inset
 
-where (of course, by definition) 
+.
+ By definition 
 \begin_inset Formula $\mathcal{D}=F\left(\mathcal{C}\right)$
 \end_inset
 
-, and so one can write
-\begin_inset Formula 
-\[
-\Delta_{F}I:\mathcal{D}\to\mathbf{Set}
-\]
-
+ and so one can write
+\begin_inset Formula $\Delta_{F}I:\mathcal{D}\to\mathbf{Set}$
 \end_inset
 
-This is perhaps clearer with a diagram:
+.
+ This is perhaps clearer with a diagram:
 \end_layout
 
 \begin_layout Standard
@@ -6403,7 +6393,7 @@ FOREIGN KEY
 \end_layout
 
 \begin_layout Section
-Metatrees and String Representations
+String Representations
 \end_layout
 
 \begin_layout Standard
@@ -6427,12 +6417,18 @@ noprefix "false"
 \end_inset
 
 .
- This diagram can be written as a string 
+ This diagram can be written as as an s-expression-like string 
 \begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
 \end_inset
 
 .
- A strange thing has happened here: the nodes 
+ It can also be expressed as a JSON or YAML string.
+ JSON, however, is verbose; there is no way to write the above in a single
+ line.
+\end_layout
+
+\begin_layout Standard
+A strange thing has happened here: the nodes 
 \begin_inset Formula $n_{1},n_{2}$
 \end_inset
 
@@ -6458,175 +6454,9 @@ the same thing
 \end_inset
 
  both times.
-\end_layout
-
-\begin_layout Standard
-xxxxxxxxx
-\end_layout
-
-\begin_layout Standard
-How else might one write this? One might employ indentation with 
-\begin_inset Quotes eld
-\end_inset
-
-significant whitespace
-\begin_inset Quotes erd
-\end_inset
-
-, 
-\emph on
-a la
-\emph default
- Python, but this does not improve readability.
- Another alternative is to indicate hierarchy in the Unix directory style,
- with slashes.
- Each 
-\begin_inset Formula $e_{k}$
-\end_inset
-
- and its trailing slash denotes a subdirectory; each 
-\begin_inset Formula $n_{k}$
-\end_inset
-
- denotes a file, the terminal leaf in the tree.
- The analogy is apt: one file may appear in multiple locations in a directory
- tree; the unix file system is 
-\emph on
-de facto
-\emph default
- a metragraph store.
- However, directory listings are still hard to read.
- Perhaps JSON will do?
-\end_layout
-
-\begin_layout Standard
-\begin_inset listings
-lstparams "basicstyle={\footnotesize\sffamily},tabsize=3"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-	{ Link: { Link: { Link: {	Node: 
-\begin_inset Quotes eld
-\end_inset
-
-one
-\begin_inset Quotes erd
-\end_inset
-
-,
-\end_layout
-
-\begin_layout Plain Layout
-
-										Node: 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
- },
-\end_layout
-
-\begin_layout Plain Layout
-
-							Link: {	Node: 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
-,
-\end_layout
-
-\begin_layout Plain Layout
-
-										Node: 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
- },
-\end_layout
-
-\begin_layout Plain Layout
-
-							Node: 
-\begin_inset Quotes eld
-\end_inset
-
-one
-\begin_inset Quotes erd
-\end_inset
-
-,
-\end_layout
-
-\begin_layout Plain Layout
-
-							Link: {	Node: 
-\begin_inset Quotes eld
-\end_inset
-
-two
-\begin_inset Quotes erd
-\end_inset
-
-,
-\end_layout
-
-\begin_layout Plain Layout
-
-										Node: 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
- }},
-\end_layout
-
-\begin_layout Plain Layout
-
-							Node: 
-\begin_inset Quotes eld
-\end_inset
-
-three
-\begin_inset Quotes erd
-\end_inset
-
- }}
-\end_layout
-
-\end_inset
-
-Still awkward.
- Perhaps all the links can be replaced with square brackets, so an array
- of arrays? Doing this will convert the JSON into funny-looking s-expression.
- This will be presented shortly, below; in the meantime, it is left to the
- reader's imagination.
-\end_layout
-
-\begin_layout Standard
-Consider representing the metatree with JSON (or something similar, 
-\emph on
-e.g.
-
-\emph default
- YAML) The duplication presents a difficulty for JSON.
- Ordinary JSON does not support object references; there is no way to say
- the multiple 
+ This presents implementation difficulties for naive string-parsing systems.
+ For example, ordinary JSON does not support object references; there is
+ no way to say that the multiple 
 \begin_inset Formula $e_{2}$
 \end_inset
 
@@ -6676,10 +6506,8 @@ https://redoc.ly/docs/resources/ref-guide/
 \end_inset
 
  but it is not widely used.
- Thus, although metatrees can be represented with JSON, some care must be
- taken when parsing them: one must find all repeated objects and understand
- them to be universally unique.
- That is, one must replace all repeated objects by universally unique references.
+ Pursuing this line of thought, perhaps one can find all repeated objects
+ and replace them by UUID's? This turns out to be a sublimely bad idea.
 \end_layout
 
 \begin_layout Subsection
@@ -6687,14 +6515,9 @@ S-expressions
 \end_layout
 
 \begin_layout Standard
-Let return to the string expression 
-\begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
-\end_inset
-
-.
- What's wrong with just writing it as a basic s-expression? It appears to
- be entirely unambiguous to just drop the colon and the comma.
- It becomes:
+The basic s-expression representation drops the colon and the comma in the
+ string above.
+ This is entirely unambiguous:
 \end_layout
 
 \begin_layout Standard
@@ -6722,7 +6545,7 @@ Every open-paren must be followed by a link '
 ek
 \family default
 \size default
-': this is what a meta-edge must necessarily be.
+': it is necessarily a meta-edge.
 \end_layout
 
 \begin_layout Itemize
