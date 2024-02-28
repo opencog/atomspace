@@ -7,6 +7,13 @@
 \textclass acmart
 \begin_preamble
 \usepackage{tikz-cd}
+
+%% I hopes this would fix stuff but it doesn't.
+%% \let\Bbbk\relax
+%% \usepackage{amssymb} 
+
+%% \usepackage{unicode-math}
+%% \setmathfont{TeX Gyre Schola Math}
 \end_preamble
 \options acmsmall
 \use_default_options false
@@ -40,7 +47,7 @@
 \use_package amsmath 2
 \use_package amssymb 0
 \use_package cancel 1
-\use_package esint 0
+\use_package esint 2
 \use_package mathdots 1
 \use_package mathtools 1
 \use_package mhchem 1
