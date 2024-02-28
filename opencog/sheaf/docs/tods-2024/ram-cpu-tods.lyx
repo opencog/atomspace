@@ -4577,8 +4577,7 @@ The above reviewed the basic structure of hypergraphs.
  Database performance depends strongly on the use of indexes.
  Thus, a practical hypergraph database design must address the use of indexes
  and how they moderate performance.
- This section will review the structure of indexes, or rather, the alternatives
- one has for index representation.
+ This section will review the alternatives available for index representation.
  The whole point of using a graph database, as opposed to a collection of
  tables, or key-value database, or a JSON-database, is that the graph structure
  encodes something important about the problem, something that cannot be
@@ -4603,10 +4602,10 @@ impossible
 \end_layout
 
 \begin_layout Standard
-It is worth remarking that the so-called noSQL databases are effectively
- 'identical' to SQL databases.
- They are 'identical' in the sense of being categorical opposites: the direction
-s of all arrows are reversed.
+The text below will make use of SQL-style notation to make points.
+ There is no loss of generality with respect to noSQL key-value systems.
+ These are are effectively 'identical' to SQL databases, in the sense of
+ being categorical opposites: the directions of all arrows are reversed.
  This was explicitly articulated in a famous paper by Meijer and Bierman.
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -4615,16 +4614,12 @@ literal "false"
 
 \end_inset
 
- Much of the following uses an SQL-style notation; if the reader is more
- familiar with key-value databases, then simply reverse the directions of
- all arrows to obtain the equivalent discussion.
+
 \end_layout
 
 \begin_layout Standard
-A few comments are in order regarding the SQL-style query notation.
- It has become dominant.
- One can look at systems as different as SparQL and GraphQL, or even the
- OGRE query language
+SQL-style query notation has become dominant.
+ Systems as different as SparQL and GraphQL, or even the OGRE query language
 \begin_inset CommandInset citation
 LatexCommand cite
 key "OGRE"
@@ -4637,16 +4632,13 @@ literal "false"
 op.
  cit.
 \emph default
-) and clearly see not just the influence of SQL, but in fact a nearly verbatim
- copy of it.
- There is a reason for this dominance, and it is not (just) history.
- The reason is anchored (once again) in table representations, and the presence
- (or rather, lack thereof) of inbuilt indexes in the tables.
-\end_layout
-
-\begin_layout Standard
-This is a good place to make a heretical claim: SQL or it's variants (GraphQL,
- SparQL, ...) are 
+) are not just under the influence of SQL, but are a nearly verbatim copy
+ of it.
+ The reason for this dominance is not (just) history, but due to the use
+ of table representations for data, and the presence (or rather, lack thereof)
+ of inbuilt indexes in the tables.
+ This is a good place to make a heretical claim: SQL and it's variants are
+ 
 \emph on
 NOT
 \emph default
@@ -6435,17 +6427,45 @@ noprefix "false"
 \end_inset
 
 .
- This diagram can be written as 
+ This diagram can be written as a string 
 \begin_inset Formula $\left(e_{4}:\left(e_{3}:\left(e_{1}:n_{1},n_{2}\right),\left(e_{2}:n_{2},n_{3}\right),n_{1},\left(e_{2}:n_{2},n_{3}\right)\right),n_{3}\right)$
 \end_inset
 
- or perhaps, with indentation, but without parenthesis, so as to improve
- readability (so, Python-style, 
-\emph on
-i.e.
+.
+ A strange thing has happened here: the nodes 
+\begin_inset Formula $n_{1},n_{2}$
+\end_inset
 
-\emph default
- with 
+ and 
+\begin_inset Formula $n_{3}$
+\end_inset
+
+ appear in multiple places, yet they are supposed to be 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Likewise for 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+, which appears twice, but is meant to be the same 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ both times.
+\end_layout
+
+\begin_layout Standard
+xxxxxxxxx
+\end_layout
+
+\begin_layout Standard
+How else might one write this? One might employ indentation with 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6453,30 +6473,29 @@ significant whitespace
 \begin_inset Quotes erd
 \end_inset
 
-).
- Alternately, in Unix directory style (URLs), with slashes.
+, 
+\emph on
+a la
+\emph default
+ Python, but this does not improve readability.
+ Another alternative is to indicate hierarchy in the Unix directory style,
+ with slashes.
  Each 
 \begin_inset Formula $e_{k}$
 \end_inset
 
- and its trailing slash denotes a subdirectory.
- Each 
+ and its trailing slash denotes a subdirectory; each 
 \begin_inset Formula $n_{k}$
 \end_inset
 
- denoting a file, the terminal leaf in the tree.
- Observe that the same file appears in multiple locations in the directory
- tree.
- This is accomplished with either hard or soft links ('
-\family typewriter
-man ln
-\family default
-').
- It is somewhat uncommon for ordinary users to do this, but is a widespread
- technique used in package installs.
- Either of these notations require understanding indentation.
- Yuck.
- Even if you understand the indentation, they are still hard to read.
+ denotes a file, the terminal leaf in the tree.
+ The analogy is apt: one file may appear in multiple locations in a directory
+ tree; the unix file system is 
+\emph on
+de facto
+\emph default
+ a metragraph store.
+ However, directory listings are still hard to read.
  Perhaps JSON will do?
 \end_layout
 
@@ -6592,40 +6611,11 @@ three
 
 \end_inset
 
-Better, but still a bit awkward.
+Still awkward.
  Perhaps all the links can be replaced with square brackets, so an array
  of arrays? Doing this will convert the JSON into funny-looking s-expression.
  This will be presented shortly, below; in the meantime, it is left to the
  reader's imagination.
-\end_layout
-
-\begin_layout Standard
-A strange thing has happened here: the nodes 
-\begin_inset Formula $n_{1},n_{2}$
-\end_inset
-
- and 
-\begin_inset Formula $n_{3}$
-\end_inset
-
- appear in multiple places, yet they are supposed to be 
-\begin_inset Quotes eld
-\end_inset
-
-the same thing
-\begin_inset Quotes erd
-\end_inset
-
-.
- Likewise for 
-\begin_inset Formula $e_{2}$
-\end_inset
-
-, which appears twice, but is meant to be the same 
-\begin_inset Formula $e_{2}$
-\end_inset
-
- both times.
 \end_layout
 
 \begin_layout Standard
