@@ -2948,10 +2948,7 @@ edges
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-Formally, a hypergraph is:
+ Formally, a hypergraph is:
 \end_layout
 
 \begin_layout Itemize
@@ -3022,20 +3019,9 @@ Hypergraph representations
 \end_layout
 
 \begin_layout Standard
-The naive representation for the hypergraph is a straight-forward extension
- of the edge table (the table 
-\begin_inset CommandInset ref
-LatexCommand vpageref
-reference "graph edge table"
-plural "false"
-caps "false"
-noprefix "false"
-
-\end_inset
-
- above).
- The table below provides an example that is shown in the figure following
- below.
+The naive representation of a hypergraph is provided by straight-forward
+ extensions of the graph edge and vertex tables.
+ For example, the diagram further below is encoded by a pair of tables:
 \end_layout
 
 \begin_layout Standard
@@ -3250,457 +3236,14 @@ attr-data
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-The vertex list may be empty, may hold one, or more vertexes.
- It is necessarily ordered (and thus not a set) and may contain repeated
- entries (a vertex may appear more than once in the list).
- In other respects, this edge table is quite similar to the edge table for
- ordinary graphs.
-\end_layout
-
-\begin_layout Standard
-As before, the ability to traverse the hypergraph (quickly) is a core requiremen
-t.
- This means that, given a vertex, one must be able to quickly find the edges
- attached to it.
- This requires modification to the vertex table given before.
- 
-\end_layout
-
-\begin_layout Standard
-Several choices are possible.
- One is to add a new column for each positional location in the vertex list.
- That is, 0'th column holds the edges which have the corresponding vertex
- in the 0'th position of the vertex list, the 1'th column likewise.
- This can be read off from the table above:
-\end_layout
-
-\begin_layout Standard
-\align center
-
-\size footnotesize
-\begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="6">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-vertex id
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-edge-set-0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-edge-set-1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-edge-set-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-...
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-attr-data
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $v_{1}$
+\begin_inset space \qquad{}
 \end_inset
 
 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
+\begin_inset space \qquad{}
 \end_inset
 
 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ e_{4}\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $v_{2}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $v_{3}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $v_{4}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ e_{2}\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\size footnotesize
-\begin_inset Formula $\left\{ \cdot\right\} $
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-To actually store this table, one must have a data-structure that is a list-of-s
-ets, which can be a bit over-complex and challenging to use.
- It is easier to just mash all of these into one set; that is all that is
- needed for hypergraph traversal.
- If the positional location is needed, then it can always be looked up per-hyper
-edge.
- This is neither technically challenging nor CPU-intensive: the arity of
- hyperedges is typically small, based on real-world mappings with interesting
- datasets.
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-We've worked with natural language, genomics and robotics datasets.
-\end_layout
-
-\end_inset
-
- Thus, the vertex table can take the simpler form
-\end_layout
-
-\begin_layout Standard
-\align center
-
-\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="3">
 <features tabularvalignment="middle">
@@ -3921,9 +3464,23 @@ name "hyper vertex table"
 \end_layout
 
 \begin_layout Standard
-Note that the vertex table looks a lot like the edge table, the only difference
- being that the vertex-list in the edge table is an ordered list, while
- the incoming-set (the edge-set) really is a set.
+On the left, the hyperedge table replaces the head/tail vertex columns by
+ an ordered list of vertexes.
+ The list may be empty, or of any length.
+ It is necessarily ordered (and thus not a set) and may contain repeated
+ entries (a vertex may appear more than once in the list).
+ In other respects, this hyper-edge table is quite similar to the edge table
+ for ordinary graphs.
+\end_layout
+
+\begin_layout Standard
+On the right is the hyper-vertex table.
+ It's structure is driven by the reqirement to traverse hypergraphs quickly.
+ This can be acheived several diffeerent ways; the simplest is to create
+ a set of all edges attached to a vertex.
+ The vertex table looks a lot like the edge table, the only difference being
+ that the vertex-list in the edge table is an ordered list, whereas the
+ incoming-set (the edge-set) really is a set.
  Effectively, this is because a hypergraph is 
 \begin_inset Quotes eld
 \end_inset
@@ -3937,6 +3494,7 @@ almost
 \end_inset
 
  on the left being the set of hyperedges.
+ The above tables are represented graphically, below.
 \end_layout
 
 \begin_layout Standard
@@ -3961,7 +3519,7 @@ The boxes denote the fact that the hyperedges are ordered lists.
 \begin_inset Formula $V$
 \end_inset
 
- ellipses are the hyperedge and vertex tables.
+ ellipses are the hyperedge and hypervertex tables.
  If the boxes could be collapsed to single points, this would be a 'true'
  bipartite graph; but they cannot be.
  The ordering is needed and important.
