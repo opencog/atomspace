@@ -2216,11 +2216,13 @@ Storing a set of vertexes in RAM is straight-forward.
 \end_layout
 
 \begin_layout Standard
-The vertex table is straight-forward:
+The vertex and edge tables are straight-forward:
 \end_layout
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
@@ -2231,6 +2233,8 @@ The vertex table is straight-forward:
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 vertex id
 \end_layout
 
@@ -2240,6 +2244,8 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -2251,6 +2257,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 1
 \end_layout
 
@@ -2260,6 +2268,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2271,6 +2281,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 2
 \end_layout
 
@@ -2280,6 +2292,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2291,6 +2305,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 3
 \end_layout
 
@@ -2300,6 +2316,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2307,6 +2325,215 @@ attr-data
 </cell>
 </row>
 </lyxtabular>
+
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+edge id
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+head-vertex
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+tail-vertex
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+attr-data
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+77
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+99
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size footnotesize
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\size default
+
+\begin_inset CommandInset label
+LatexCommand label
+name "graph edge table"
 
 \end_inset
 
@@ -2323,186 +2550,7 @@ universally unique id
 \end_inset
 
  or uuid) is that it is required by the edge table.
- In the most obvious, direct form, the edge table will have the shape
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="4">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<column alignment="center" valignment="top">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-edge id
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-head-vertex
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-tail-vertex
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-attr-data
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-77
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-88
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-99
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-...
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\begin_inset CommandInset label
-LatexCommand label
-name "graph edge table"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This representation is perhaps too naive.
+ This representation is perhaps too naive.
  To perform a graph traversal, i.e.
  to walk from vertex to vertex, following only connecting edges, one needs
  to know which edges come in, and which edges go out.
@@ -2522,6 +2570,8 @@ This representation is perhaps too naive.
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
@@ -2534,6 +2584,8 @@ This representation is perhaps too naive.
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 vertex id
 \end_layout
 
@@ -2543,6 +2595,8 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 outgoing
 \end_layout
 
@@ -2552,6 +2606,8 @@ outgoing
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 incoming
 \end_layout
 
@@ -2561,6 +2617,8 @@ incoming
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -2572,6 +2630,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 1
 \end_layout
 
@@ -2581,6 +2641,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {}
 \end_layout
 
@@ -2590,6 +2652,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {77}
 \end_layout
 
@@ -2599,6 +2663,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2610,6 +2676,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 2
 \end_layout
 
@@ -2619,6 +2687,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {77}
 \end_layout
 
@@ -2628,6 +2698,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {88,99}
 \end_layout
 
@@ -2637,6 +2709,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2648,6 +2722,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 3
 \end_layout
 
@@ -2657,6 +2733,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {88}
 \end_layout
 
@@ -2675,6 +2753,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -2686,6 +2766,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 4
 \end_layout
 
@@ -2695,6 +2777,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 {88}
 \end_layout
 
@@ -2723,6 +2807,8 @@ attr-data
 
 \end_inset
 
+
+\size default
 
 \begin_inset CommandInset label
 LatexCommand label
@@ -2954,6 +3040,8 @@ noprefix "false"
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="3">
 <features tabularvalignment="middle">
@@ -2965,6 +3053,8 @@ noprefix "false"
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 hyper-edge id
 \end_layout
 
@@ -2974,6 +3064,8 @@ hyper-edge id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 vertex-list
 \end_layout
 
@@ -2983,6 +3075,8 @@ vertex-list
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -2994,6 +3088,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{1}$
 \end_inset
 
@@ -3006,6 +3102,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(v_{1}\right)$
 \end_inset
 
@@ -3018,6 +3116,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3029,6 +3129,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{2}$
 \end_inset
 
@@ -3041,6 +3143,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(v_{1},v_{2}\right)$
 \end_inset
 
@@ -3053,6 +3157,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3064,6 +3170,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{3}$
 \end_inset
 
@@ -3076,6 +3184,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(v_{3},v_{4}\right)$
 \end_inset
 
@@ -3088,6 +3198,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3099,6 +3211,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{4}$
 \end_inset
 
@@ -3111,6 +3225,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(v_{3},v_{2},v_{1}\right)$
 \end_inset
 
@@ -3163,6 +3279,8 @@ Several choices are possible.
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="6">
 <features tabularvalignment="middle">
@@ -3177,6 +3295,8 @@ Several choices are possible.
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 vertex id
 \end_layout
 
@@ -3186,6 +3306,8 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 edge-set-0
 \end_layout
 
@@ -3195,6 +3317,8 @@ edge-set-0
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 edge-set-1
 \end_layout
 
@@ -3204,6 +3328,8 @@ edge-set-1
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 edge-set-2
 \end_layout
 
@@ -3213,6 +3339,8 @@ edge-set-2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3222,6 +3350,8 @@ edge-set-2
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -3233,6 +3363,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{1}$
 \end_inset
 
@@ -3245,6 +3377,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
 \end_inset
 
@@ -3257,6 +3391,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3269,6 +3405,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{4}\right\} $
 \end_inset
 
@@ -3290,6 +3428,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3301,6 +3441,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{2}$
 \end_inset
 
@@ -3313,6 +3455,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3325,6 +3469,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
 \end_inset
 
@@ -3337,6 +3483,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3358,6 +3506,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3369,6 +3519,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{3}$
 \end_inset
 
@@ -3381,6 +3533,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
 \end_inset
 
@@ -3393,6 +3547,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3405,6 +3561,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3426,6 +3584,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3437,6 +3597,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{4}$
 \end_inset
 
@@ -3449,6 +3611,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3461,6 +3625,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{2}\right\} $
 \end_inset
 
@@ -3473,6 +3639,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -3531,6 +3699,8 @@ We've worked with natural language, genomics and robotics datasets.
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="3">
 <features tabularvalignment="middle">
@@ -3542,6 +3712,8 @@ We've worked with natural language, genomics and robotics datasets.
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 vertex id
 \end_layout
 
@@ -3551,6 +3723,8 @@ vertex id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 incoming-set
 \end_layout
 
@@ -3560,6 +3734,8 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -3571,6 +3747,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{1}$
 \end_inset
 
@@ -3583,6 +3761,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{1},e_{2},e_{4}\right\} $
 \end_inset
 
@@ -3595,6 +3775,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3606,6 +3788,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{2}$
 \end_inset
 
@@ -3618,6 +3802,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
 \end_inset
 
@@ -3630,6 +3816,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3641,6 +3829,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{3}$
 \end_inset
 
@@ -3653,6 +3843,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{3},e_{4}\right\} $
 \end_inset
 
@@ -3665,6 +3857,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -3676,6 +3870,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $v_{4}$
 \end_inset
 
@@ -3688,6 +3884,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{2}\right\} $
 \end_inset
 
@@ -3710,6 +3908,8 @@ attr-data
 
 \end_inset
 
+
+\size default
 
 \begin_inset CommandInset label
 LatexCommand label
@@ -3848,6 +4048,8 @@ For the general case, one has
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
 <features tabularvalignment="middle">
@@ -3858,6 +4060,8 @@ For the general case, one has
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $N_{V}$
 \end_inset
 
@@ -3870,6 +4074,8 @@ For the general case, one has
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Number of vertexes
 \end_layout
 
@@ -3881,6 +4087,8 @@ Number of vertexes
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $N_{E}$
 \end_inset
 
@@ -3893,6 +4101,8 @@ Number of vertexes
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Number of hyperedges
 \end_layout
 
@@ -3904,6 +4114,8 @@ Number of hyperedges
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\langle J\right\rangle $
 \end_inset
 
@@ -3916,6 +4128,8 @@ Number of hyperedges
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Average size of attributes
 \end_layout
 
@@ -3927,6 +4141,8 @@ Average size of attributes
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\langle N_{I}\right\rangle $
 \end_inset
 
@@ -3939,6 +4155,8 @@ Average size of attributes
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Average size of the incoming set
 \end_layout
 
@@ -3950,6 +4168,8 @@ Average size of the incoming set
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\langle N_{O}\right\rangle $
 \end_inset
 
@@ -3962,6 +4182,8 @@ Average size of the incoming set
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Average size of the vertex list
 \end_layout
 
@@ -4280,6 +4502,8 @@ noprefix "false"
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="3">
 <features tabularvalignment="middle">
@@ -4291,6 +4515,8 @@ noprefix "false"
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 node id
 \end_layout
 
@@ -4300,6 +4526,8 @@ node id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 incoming-set
 \end_layout
 
@@ -4309,6 +4537,8 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -4320,6 +4550,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{1}$
 \end_inset
 
@@ -4332,6 +4564,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{1},e_{3}\right\} $
 \end_inset
 
@@ -4344,6 +4578,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4355,6 +4591,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{2}$
 \end_inset
 
@@ -4367,6 +4605,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{1},e_{2}\right\} $
 \end_inset
 
@@ -4379,6 +4619,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4390,6 +4632,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{3}$
 \end_inset
 
@@ -4402,6 +4646,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{2},e_{4}\right\} $
 \end_inset
 
@@ -4414,6 +4660,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4424,6 +4672,8 @@ attr-data
 
 \end_inset
 
+
+\size default
 
 \begin_inset CommandInset label
 LatexCommand label
@@ -4443,6 +4693,8 @@ The link table now requires both an outgoing-atom list, and an incoming-link
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
@@ -4455,6 +4707,8 @@ The link table now requires both an outgoing-atom list, and an incoming-link
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 link id
 \end_layout
 
@@ -4464,6 +4718,8 @@ link id
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 outgoing-list
 \end_layout
 
@@ -4473,6 +4729,8 @@ outgoing-list
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 incoming-set
 \end_layout
 
@@ -4482,6 +4740,8 @@ incoming-set
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 attr-data
 \end_layout
 
@@ -4493,6 +4753,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{1}$
 \end_inset
 
@@ -4505,6 +4767,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(n_{1},n_{2}\right)$
 \end_inset
 
@@ -4517,6 +4781,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{3}\right\} $
 \end_inset
 
@@ -4529,6 +4795,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4540,6 +4808,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{2}$
 \end_inset
 
@@ -4552,6 +4822,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(n_{2},n_{3}\right)$
 \end_inset
 
@@ -4564,6 +4836,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{3}\right\} $
 \end_inset
 
@@ -4576,6 +4850,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4587,6 +4863,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{3}$
 \end_inset
 
@@ -4599,6 +4877,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(e_{1},e_{2},n_{1},e_{2}\right)$
 \end_inset
 
@@ -4611,6 +4891,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ e_{4}\right\} $
 \end_inset
 
@@ -4623,6 +4905,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 ...
 \end_layout
 
@@ -4634,6 +4918,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{4}$
 \end_inset
 
@@ -4646,6 +4932,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left(e_{3},n_{3}\right)$
 \end_inset
 
@@ -4658,6 +4946,8 @@ attr-data
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $\left\{ \cdot\right\} $
 \end_inset
 
@@ -4680,6 +4970,8 @@ attr-data
 
 \end_inset
 
+
+\size default
 
 \begin_inset CommandInset label
 LatexCommand label
@@ -8048,6 +8340,8 @@ But is this relevant in any real-world application? Consider the following
 
 \begin_layout Standard
 \align center
+
+\size footnotesize
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="2">
 <features tabularvalignment="middle">
@@ -8058,6 +8352,8 @@ But is this relevant in any real-world application? Consider the following
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Atom
 \end_layout
 
@@ -8067,6 +8363,8 @@ Atom
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Interpretation
 \end_layout
 
@@ -8078,6 +8376,8 @@ Interpretation
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{1}$
 \end_inset
 
@@ -8090,6 +8390,8 @@ Interpretation
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Joe
 \end_layout
 
@@ -8101,6 +8403,8 @@ Joe
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{2}$
 \end_inset
 
@@ -8113,6 +8417,8 @@ Joe
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Mary
 \end_layout
 
@@ -8124,6 +8430,8 @@ Mary
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $n_{3}$
 \end_inset
 
@@ -8136,6 +8444,8 @@ Mary
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Rachel
 \end_layout
 
@@ -8147,6 +8457,8 @@ Rachel
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{1}$
 \end_inset
 
@@ -8159,6 +8471,8 @@ Rachel
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Intro Computer Science
 \end_layout
 
@@ -8170,6 +8484,8 @@ Intro Computer Science
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{2}$
 \end_inset
 
@@ -8182,6 +8498,8 @@ Intro Computer Science
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Intro Beauty and Hair Care
 \end_layout
 
@@ -8193,6 +8511,8 @@ Intro Beauty and Hair Care
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{3}$
 \end_inset
 
@@ -8205,6 +8525,8 @@ Intro Beauty and Hair Care
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Dean of Students
 \end_layout
 
@@ -8216,6 +8538,8 @@ Dean of Students
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{4}$
 \end_inset
 
@@ -8228,6 +8552,8 @@ Dean of Students
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Wossamatta University
 \end_layout
 
@@ -8239,6 +8565,8 @@ Wossamatta University
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{5}$
 \end_inset
 
@@ -8251,6 +8579,8 @@ Wossamatta University
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Ayurvedic School of Cosmetology II
 \end_layout
 
@@ -8262,6 +8592,8 @@ Ayurvedic School of Cosmetology II
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{3}-n_{1}$
 \end_inset
 
@@ -8274,6 +8606,8 @@ Ayurvedic School of Cosmetology II
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Joe assists in the Dean's Office
 \end_layout
 
@@ -8285,6 +8619,8 @@ Joe assists in the Dean's Office
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 \begin_inset Formula $e_{5}-n_{3}$
 \end_inset
 
@@ -8297,6 +8633,8 @@ Joe assists in the Dean's Office
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\size footnotesize
 Rachel is a TA in cosmetology
 \end_layout
 
@@ -12646,7 +12984,7 @@ There is one extremely important alternative, discussed in other texts in
 \begin_inset Graphics
 	filename ../graphics/puzzle-beta-reduce-wide.eps
 	lyxscale 70
-	width 45col%
+	width 55col%
 
 \end_inset
 
