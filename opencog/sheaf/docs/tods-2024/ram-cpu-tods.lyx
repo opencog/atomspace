@@ -1314,22 +1314,7 @@ status open
 
 \begin_layout Plain Layout
 
-		CREATE TABLE student (
-\end_layout
-
-\begin_layout Plain Layout
-
-			name text,
-\end_layout
-
-\begin_layout Plain Layout
-
-			gpa real
-\end_layout
-
-\begin_layout Plain Layout
-
-		)
+		CREATE TABLE student (name text, gpa real)
 \end_layout
 
 \end_inset
@@ -1349,22 +1334,7 @@ status open
 
 \begin_layout Plain Layout
 
-		class student {
-\end_layout
-
-\begin_layout Plain Layout
-
-			char* name;
-\end_layout
-
-\begin_layout Plain Layout
-
-			float gpa;
-\end_layout
-
-\begin_layout Plain Layout
-
-		};
+		class student { char* name; float gpa; };
 \end_layout
 
 \end_inset
@@ -5332,9 +5302,9 @@ Conventionally, corporations, political and military organizations are organized
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename ../graphics/org-chart.eps
+	filename ../graphics/org-chart-wide.eps
 	lyxscale 70
-	width 21col%
+	width 40col%
 
 \end_inset
 
@@ -6201,7 +6171,7 @@ where a specific database instance
 \begin_inset Formula $I:\mathcal{C}\to\mathbf{Set}$
 \end_inset
 
-is mapped to 
+ is mapped to 
 \begin_inset Formula $\Delta_{F}I:F\left(\mathcal{C}\right)\to\mathbf{Set}$
 \end_inset
 
@@ -6210,12 +6180,12 @@ is mapped to
 \begin_inset Formula $\mathcal{D}=F\left(\mathcal{C}\right)$
 \end_inset
 
- and so one can write
+ and so one can write 
 \begin_inset Formula $\Delta_{F}I:\mathcal{D}\to\mathbf{Set}$
 \end_inset
 
 .
- This is perhaps clearer with a diagram:
+ This is clearer with a commuting diagram:
 \end_layout
 
 \begin_layout Standard
