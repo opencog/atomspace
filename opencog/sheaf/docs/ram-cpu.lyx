@@ -1548,7 +1548,7 @@ tuples
 \end_inset
 
 , for the obvious reason that the comma is a great way of writing lists
- of things, which incidentally are Cartesian products.
+ of things: lists are Cartesian products.
  
 \end_layout
 
@@ -2006,11 +2006,9 @@ Below shows another alternative, this time with labeled edges:
 \end_layout
 
 \begin_layout Standard
-As before, the graph explicitly includes a description of the schema used
- in another part of the graph.
- For the first time, a non-trivial graph is drawn.
- It begins to give a hint of the utility of graphs for general knowledge
- representation.
+The encoded data is the same; the encoding is different.
+ Here, the schema makes an explicit reference to the object being described.
+ The cost is that the graph is no longer of a uniform shape.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2155,7 +2153,7 @@ https://en.wikipedia.org/wiki/Berkeley_DB
 
 \end_inset
 
-, and the Gnu gdbm.
+ and the Gnu gdbm.
 \begin_inset Foot
 status collapsed
 
@@ -2248,8 +2246,8 @@ One must resist one wide-spread and common temptation: layering an in-RAM
 \end_layout
 
 \begin_layout Standard
-Effectively all the discussion in this text assumes uniform memory access;
- that is, a 
+All the discussion in this text assumes uniform memory access; that is,
+ a 
 \begin_inset Quotes eld
 \end_inset
 
