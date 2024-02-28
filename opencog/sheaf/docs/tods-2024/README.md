@@ -13,13 +13,14 @@ ACM Latex HOWTO
 * Run `sudo texhash`
 * Copy *layout to `~/.lyx/layouts/`
 * Run reconfigure and restart LyX
-* Select amsart in document config
-* Custom config `acmsmall`
+* Select acmart in Document->Settings->Document Class
+  Custom config `acmsmall`
   See https://tex.stackexchange.com/questions/481052/lyx-choose-option-from-cls-file
 
 * Place title after authors, abstract and ACM classifications. That's
   because LyX issues \maketitle right after title, and acmart expects
   all the other stuff to come beforehand.
+
 
 vi HOWTO
 --------
@@ -61,16 +62,11 @@ switches input encoding before the listing.
 exporting as luatex instead of pdflatex avoids this.
 
 Go to PDF properties, disable "Use Hyperref support"
-But lutatex still stries to load it with different options.
+But lutatex still tries to load it with different options.
 
 acmart-primary/acmart.cls:\RequirePackage[bookmarksnumbered,unicode]{hyperref}
 
 Edit above change to unicode=true and copy into place.
-
-```
-LaTeX Warning: Unused global option(s):
-    [format=acmsmall].
-```
 
 * Solution: Abstract must come before title!!
   That's because Lyx issues a \maketitle too early and acmart chokes
