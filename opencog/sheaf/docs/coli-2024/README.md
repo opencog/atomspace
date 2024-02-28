@@ -14,3 +14,8 @@ CoLi LaTeX HOWTO
 * Run reconfigure and restart LyX
 * Select clv3 in Document->Settings->Document Class
 
+
+Errors:
+-------
+* `Use of \x doesn't match its definition.`
+   Document Settings -> PDF Properties -> disable Hyperref support

@@ -6,7 +6,7 @@
 \origin unavailable
 \textclass clv3
 \begin_preamble
-\usepackage{url} 
+% \usepackage{url} 
 \usepackage{slashed}
 \end_preamble
 \options shortpaper
@@ -35,7 +35,7 @@
 \index_command default
 \paperfontsize default
 \spacing single
-\use_hyperref true
+\use_hyperref false
 \pdf_bookmarks true
 \pdf_bookmarksnumbered false
 \pdf_bookmarksopen false
@@ -355,7 +355,7 @@ Recall how I talk about "jigsaw pieces" all the time? Some example LG jigsaw
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/link-grammar.png
+	filename ../graphics/link-grammar.png
 	lyxscale 60
 	width 100col%
 
@@ -647,7 +647,7 @@ connectable connectors can connect, if the connector types are identical,
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/LG-inference.eps
+	filename ../graphics/LG-inference.eps
 	lyxscale 60
 	width 35col%
 
@@ -2701,7 +2701,7 @@ This is, oddly enough, just another jigsaw.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename graphics/inference.eps
+	filename ../graphics/inference.eps
 	lyxscale 50
 	width 15col%
 
@@ -3455,8 +3455,8 @@ The story does not end there; lets leave off with some hazy futuristic scifi:
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
-bibfiles "lang"
-options "tufte"
+bibfiles "../lang"
+options "plainnat"
 
 \end_inset
 
