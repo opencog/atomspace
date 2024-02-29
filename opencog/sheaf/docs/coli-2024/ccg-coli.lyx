@@ -292,7 +292,8 @@ literal "false"
  overlapping categories.
  To improve on this situation and tighten up the conversion, several rather
  complex algorithms are provided.
- In the course of the work, she notes a property of 
+ In the course of the work, she notes that government binding (GB) leads
+ to a property of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -307,7 +308,7 @@ ee starting point.
 \end_layout
 
 \begin_layout Standard
-The original Link Grammar (LG) publications describe LG as a novel grammatical
+The 1991 Link Grammar (LG) publications describe LG as a novel grammatical
  theory, akin to a DG, except that links are not directional; there is no
  explicit head or dependent.
 \begin_inset CommandInset citation
@@ -317,12 +318,90 @@ literal "false"
 
 \end_inset
 
- The software implementation provides an optional mode for generating PSG
- parses compatible with Penn Treebank markup.
- The precise algorithm is not closely described.
- LG also differs from DG in that it allows loops in the relations between
- words: such loops serve to significantly tighten and restrict possible
- parses, and introduce a weak form of context sensitivity.
+ After LG parsing is performed, Penn Treebank compatible markup can be generated.
+ The conversion is 
+\begin_inset Quotes eld
+\end_inset
+
+rule-driven
+\begin_inset Quotes erd
+\end_inset
+
+, rather than 
+\begin_inset Quotes eld
+\end_inset
+
+algorithmic
+\begin_inset Quotes erd
+\end_inset
+
+: a text file encodes approximately fifty rules, falling into six different
+ classes, that specify this conversion.
+ One of the more interesting properties of LG is that it allows loops in
+ the linkages: linkages need not be trees.
+ This has two important effects.
+ One is that loops allow 
+\begin_inset Quotes eld
+\end_inset
+
+secondary dependencies
+\begin_inset Quotes erd
+\end_inset
+
+ to be specified, thus significantly tightening and restricting the number
+ of possible parses.
+ A secondary effect is that this allows for non-projective structure dependencie
+s: much as (flat, planar, two-dimensional) drawings of electrical circuits
+ allow a pair of wires to cross by 
+\begin_inset Quotes eld
+\end_inset
+
+hopping over
+\begin_inset Quotes erd
+\end_inset
+
+, so also do loop structures allow dependencies to propagate through a graph.
+ This will be seen as equivalent to type-rasing in CCG, shortly below.
+ As a side effect, this induces a weak form of context sensitivity.
+\end_layout
+
+\begin_layout Standard
+In 1992, Micheal Covington notes that both GB and DG make a common claim:
+ every phrase has a head.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Covington1992"
+literal "false"
+
+\end_inset
+
+ The difference is that X-bar phrase structures encode dependencies by forcing
+ maximal projections, whereas DG acheives the same effect by proliferating
+ many different types of dependencies.
+ Otherwise, government in phrases is identical to dependency by individual
+ words (lexical items).
+\end_layout
+
+\begin_layout Standard
+By 2001, Xia and Palmer
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Xia2001"
+literal "false"
+
+\end_inset
+
+ consider the problem of converting DG to PSG from a 
+\begin_inset Quotes eld
+\end_inset
+
+practical
+\begin_inset Quotes erd
+\end_inset
+
+ standpoint, proposing several different algorithms and then experimentally
+ measuring accuracy on a TreeBank corpus.
+ They review three different algorithms: 
 \end_layout
 
 \begin_layout Standard
@@ -343,15 +422,7 @@ There have been publications that demonstrate how to convert between DG
  and CG and back.
  It provides a simple algo to do this.
  Sadly, I have misplaced the reference.
- A paper by Xia and Palmer
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Xia2001"
-literal "false"
-
-\end_inset
-
- is not quite as extensive, but gives a flavor of the idea.
+ 
 \end_layout
 
 \begin_layout Section
