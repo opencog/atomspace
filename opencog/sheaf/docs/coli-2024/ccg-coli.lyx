@@ -130,12 +130,25 @@ sexuality
  and implicit assumptions.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+This text arose in response to a question about the relationship between
+ syntax, logical inference, semantics and the tractability of computational
+ linguistics frameworks in the face of modern results on large language
+ models.
+ In lieu of a formal introduction, the question and response cut to the
+ quick of the matter.
+\end_layout
+
+\begin_layout Subsubsection*
 A Question posed on a Discord chat channel
 \end_layout
 
 \begin_layout Standard
-@Adam Vandervorst asks: 
+@Adam asks: 
 \emph on
 Does anyone here know about 
 \begin_inset Newline newline
@@ -194,12 +207,10 @@ cally expressive grammar formalism.
 
 
 \emph on
-I talked to its inventor last week (who has since moved on to do learning
- in linguistics) and it was really interesting — Today at 9:31 AM 13 July
- 2022
+I talked to its inventor last week and it was really interesting.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Subsubsection*
 Prelude
 \end_layout
 
@@ -210,8 +221,8 @@ The difference between physicists and mathematicians is that the physicists
 \begin_inset Quotes eld
 \end_inset
 
-ah, whatever, I get the general idea, let's just assume this is right, and
- proceed, and see where we get.
+Ah! I see the general idea! Let's just assume this is correct, and proceed,
+ and see where we get.
 \begin_inset Quotes erd
 \end_inset
 
@@ -219,7 +230,7 @@ ah, whatever, I get the general idea, let's just assume this is right, and
  along is just ...
  a loss of time.
  Physicists focus on those details that seem to be wrong or inconclusive.
- That's where you dig for gold.
+ That is where one digs for gold.
 \end_layout
 
 \begin_layout Standard
@@ -229,25 +240,22 @@ This paper is a physics paper, not a math paper.
  There are proofs in here, they're just not formal.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Subsubsection*
 The Nature of Grammar
 \end_layout
 
 \begin_layout Standard
-To open, there's this thing about grammars that you should know.
- 
-\end_layout
-
-\begin_layout Standard
-As far as I can tell, all of the different (formal) grammar formalisms are
- inter-convertible into one-another, by purely algorithmic means.
- That is, given the collection of symbols and rules that are used to define
- one formalism (
+There appears to be a well-known fact, or perhaps folk-wisdom, that is rarely
+ discussed in the linguistics community: all of the different computational
+ grammar formalisms are inter-convertible into one-another, by purely algorithmi
+c means.
+ Given the collection of symbols and rules that are used to define one formalism
+ (
 \emph on
 e.g.
 
 \emph default
- constituency grammars, CG) one can convert that into a different formalism
+ constituency grammars, CG), one can convert that into a different formalism
  (
 \emph on
 e.g.
@@ -264,8 +272,35 @@ vice versa
 \end_layout
 
 \begin_layout Standard
-Somewhere out there is a nice paper that explains how to convert between
- DG and CG and back.
+The original Link Grammar publications
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+literal "false"
+
+\end_inset
+
+ describe Link Grammar as a novel system; the software implementation also
+ provides an optional mode for generating phrase structure parses compatible
+ with the Penn Treebank markup.
+\end_layout
+
+\begin_layout Standard
+Marneffe et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Merneffe2006"
+literal "false"
+
+\end_inset
+
+ describe a system for obtaining Stanford-style dependency parses from phrase-st
+ructure parses, and make an explicit comparison to Link Grammar.
+\end_layout
+
+\begin_layout Standard
+There have been publications that demonstrate how to convert between DG
+ and CG and back.
  It provides a simple algo to do this.
  Sadly, I have misplaced the reference.
  A paper by Xia and Palmer
@@ -279,7 +314,7 @@ literal "false"
  is not quite as extensive, but gives a flavor of the idea.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
 CCG is Equivalent to LG
 \end_layout
 
