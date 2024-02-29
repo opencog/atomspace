@@ -269,6 +269,46 @@ e.g.
 vice versa
 \emph default
 , and that machine is rather simple.
+ To go with the folk-wisdom is a folk industry, of converting from representatio
+nal format to another.
+\end_layout
+
+\begin_layout Standard
+This is in contrast to the distinct, hard-headed and hotly debated problem
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+strong generative capacity
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This debate happens at multiple levels.
+ At the superficial level, it poses questions as to the equivalence of two
+ different grammars belonging to the same framework.
+ At the meta level, it argues about how different formalisms can be compared,
+ and when they might be considered to be similar.
+ The strictest mathematical result is to demonstrate isomorphism: one can
+ be mapped to the other, preserving all deep structure.
+ Isomorphism is a mathematical claim.
+\end_layout
+
+\begin_layout Standard
+This text falls somewhere in between.
+ It stops short of claiming a strict mathematical isomorphism between Combinator
+y Categorial Grammar and Link Grammar: there are several details to be wrestled
+ with, and several choices to be made.
+ Yet broadly, it does claim they are the same, and that the primary difference
+ is that of notation.
+ The reward is in the journey, not the destination; the devil is in the
+ details.
+ The details here concern the syntax of proof trees, generative syntax viewed
+ as a kind of (pre-)sheaf, where type-theoretical type connectors are to
+ be mated following grammatical rules.
+ Roughly speaking, if the algorithm for converting one grammar formalism
+ into another can be expressed as a set of rules, then that algorithm itself
+ can be reduced to a grammar, operating at the meta-level.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -292,8 +332,10 @@ literal "false"
  overlapping categories.
  To improve on this situation and tighten up the conversion, several rather
  complex algorithms are provided.
- In the course of the work, she notes that government binding (GB) leads
- to a property of 
+ In the course of this work, she discovers issues with strong generative
+ capacity, and notes that grammars naturally provide heads and governors
+ when they are context-free.
+ The issue is termed one of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -301,10 +343,9 @@ structure sensitivity
 \begin_inset Quotes erd
 \end_inset
 
-, roughly analogous to context sensitivity, remarkable perhaps as the context-fr
-ee starting point.
- For English, this appears to arise when nouns are taken to govern a sentence,
- rather than verbs.
+.
+ It appears to be minimized when nouns, instead of verbs, are taken to head
+ sentences.
 \end_layout
 
 \begin_layout Standard
@@ -383,15 +424,17 @@ literal "false"
 \end_layout
 
 \begin_layout Standard
-By 2001, Xia and Palmer
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Xia2001"
-literal "false"
+Strong generative capacty
+\end_layout
 
-\end_inset
+\begin_layout Standard
+In 2000, Philip Miller places a nail in the coffin, by providing an entire
+ book to 
+\end_layout
 
- consider the problem of converting DG to PSG from a 
+\begin_layout Standard
+By 2001, Xia and Palmer consider the problem of converting DG to PSG from
+ a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -401,10 +444,17 @@ practical
 
  standpoint, proposing several different algorithms and then experimentally
  measuring accuracy on a TreeBank corpus.
- They review three different algorithms: the first two are Covington's maximal
- projections, and a second algorithm that produces the flatest possible
- trees.
- The first two are 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Xia2001"
+literal "false"
+
+\end_inset
+
+ They review three different algorithms.
+ One is Covington's maximal projections, and a second algorithm that produces
+ the flatest possible trees.
+ These two are 
 \begin_inset Quotes eld
 \end_inset
 
@@ -412,24 +462,30 @@ linguistically sound
 \begin_inset Quotes erd
 \end_inset
 
-, in that they do not incorporate any language-specific information.
- That this produces markup at odds with the reference treebank echoes Robinsons
+, in that they apply abstractly to the grammar, and do not incorporate any
+ language-specific information.
+ That this produces markup at odds with the reference treebank echoes Robinson's
  complaints from 35 years earlier.
- Xia and Plamer then evaluate a third algorithm, one which explicitly recognizes
+ Xia and Palmer then evaluate a third algorithm, one which explicitly recognizes
  differing levels of projections for different dependents and categories.
 \end_layout
 
 \begin_layout Standard
-Marneffe et al.
+Marneffe 
+\emph on
+et al.
+
+\emph default
+ describe a system for obtaining Stanford-style dependency parses from phrase-st
+ructure parses, and make an explicit comparison to Link Grammar.
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Merneffe2006"
+key "Marneffe2006"
 literal "false"
 
 \end_inset
 
- describe a system for obtaining Stanford-style dependency parses from phrase-st
-ructure parses, and make an explicit comparison to Link Grammar.
+
 \end_layout
 
 \begin_layout Standard
