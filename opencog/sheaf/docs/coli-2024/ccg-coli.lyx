@@ -140,7 +140,7 @@ This text arose in response to a question about the relationship between
  linguistics frameworks in the face of modern results on large language
  models.
  In lieu of a formal introduction, the question and response cut to the
- quick of the matter.
+ quick.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -245,8 +245,8 @@ The Nature of Grammar
 \end_layout
 
 \begin_layout Standard
-There appears to be a well-known fact, or perhaps folk-wisdom, that is rarely
- discussed in the linguistics community: all of the different computational
+There appears to be a well-known fact, or perhaps folk-wisdom, that is infrequen
+tly discussed in the linguistics community: all of the different computational
  grammar formalisms are inter-convertible into one-another, by purely algorithmi
 c means.
  Given the collection of symbols and rules that are used to define one formalism
@@ -271,8 +271,30 @@ vice versa
 , and that machine is rather simple.
 \end_layout
 
+\begin_layout Subsubsection*
+A Short History
+\end_layout
+
 \begin_layout Standard
-The original Link Grammar publications
+The general history of this idea is quite old.
+ In 1967, Jane Robinson notes that phrase structure grammar (PSG) and dependency
+ grammar (DG) are weakly equivalent as context-free languages, and posits
+ that the automated translation from the one framework to the other can
+ aid research into either.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Robinson1967"
+literal "false"
+
+\end_inset
+
+ Robinson notes that although such conversion is easy, in principle, it
+ is of relatively low fidelity unless additional constraints are imposed.
+\end_layout
+
+\begin_layout Standard
+The original Link Grammar (LG) publications describe LG as a novel grammatical
+ theory, akin to a dependency grammar, but symmetric in it's linkage.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
@@ -280,9 +302,10 @@ literal "false"
 
 \end_inset
 
- describe Link Grammar as a novel system; the software implementation also
- provides an optional mode for generating phrase structure parses compatible
- with the Penn Treebank markup.
+ The software implementation provides an optional mode for generating phrase
+ structure parses compatible with the Penn Treebank markup.
+ The techniques for identifying heads are described; the precise algorithm
+ is omitted.
 \end_layout
 
 \begin_layout Standard
@@ -2041,7 +2064,7 @@ The root cause of both of these bugs was a failure to attend the polarity
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Section
 Homotopic Equivalence
 \end_layout
 
@@ -2072,7 +2095,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2691,7 +2714,7 @@ cal inference-bar notation).
  "landmark transitivity" become hard to talk about in CCG.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Proof Theory
 \end_layout
 
@@ -3452,7 +3475,7 @@ The definition of CCG involved seemingly mono-sexed types, and two type
  mechanics of this in a general setting are not clear.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Conclusion
 \end_layout
 
