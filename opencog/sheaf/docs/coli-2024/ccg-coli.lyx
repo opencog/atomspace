@@ -277,10 +277,10 @@ A Short History
 
 \begin_layout Standard
 The general history of this idea is quite old.
- In 1967, Jane Robinson notes that phrase structure grammar (PSG) and dependency
- grammar (DG) are weakly equivalent as context-free languages, and posits
- that the automated translation from the one framework to the other can
- aid research into either.
+ By 1961, it is already apparent that phrase structure grammar (PSG) and
+ dependency grammar (DG) are weakly equivalent as context-free languages:
+ In 1967, Jane Robinson references work by Haim Gaifman in 1961 that gives
+ a general method for converting between the two.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Robinson1967"
@@ -288,13 +288,28 @@ literal "false"
 
 \end_inset
 
- Robinson notes that although such conversion is easy, in principle, it
- is of relatively low fidelity unless additional constraints are imposed.
+ She critiques the method for producing sometimes superfluous rules and
+ overlapping categories.
+ To improve on this situation and tighten up the conversion, several rather
+ complex algorithms are provided.
+ In the course of the work, she notes a property of 
+\begin_inset Quotes eld
+\end_inset
+
+structure sensitivity
+\begin_inset Quotes erd
+\end_inset
+
+, roughly analogous to context sensitivity, remarkable perhaps as the context-fr
+ee starting point.
+ For English, this appears to arise when nouns are taken to govern a sentence,
+ rather than verbs.
 \end_layout
 
 \begin_layout Standard
 The original Link Grammar (LG) publications describe LG as a novel grammatical
- theory, akin to a dependency grammar, but symmetric in it's linkage.
+ theory, akin to a DG, except that links are not directional; there is no
+ explicit head or dependent.
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sleator1991,Sleator1993"
@@ -302,10 +317,12 @@ literal "false"
 
 \end_inset
 
- The software implementation provides an optional mode for generating phrase
- structure parses compatible with the Penn Treebank markup.
- The techniques for identifying heads are described; the precise algorithm
- is omitted.
+ The software implementation provides an optional mode for generating PSG
+ parses compatible with Penn Treebank markup.
+ The precise algorithm is not closely described.
+ LG also differs from DG in that it allows loops in the relations between
+ words: such loops serve to significantly tighten and restrict possible
+ parses, and introduce a weak form of context sensitivity.
 \end_layout
 
 \begin_layout Standard
