@@ -401,7 +401,22 @@ practical
 
  standpoint, proposing several different algorithms and then experimentally
  measuring accuracy on a TreeBank corpus.
- They review three different algorithms: 
+ They review three different algorithms: the first two are Covington's maximal
+ projections, and a second algorithm that produces the flatest possible
+ trees.
+ The first two are 
+\begin_inset Quotes eld
+\end_inset
+
+linguistically sound
+\begin_inset Quotes erd
+\end_inset
+
+, in that they do not incorporate any language-specific information.
+ That this produces markup at odds with the reference treebank echoes Robinsons
+ complaints from 35 years earlier.
+ Xia and Plamer then evaluate a third algorithm, one which explicitly recognizes
+ differing levels of projections for different dependents and categories.
 \end_layout
 
 \begin_layout Standard
