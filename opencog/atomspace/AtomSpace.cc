@@ -232,9 +232,11 @@ bool AtomSpace::operator==(const Atom& other) const
     if (this == &other) return true;
 
     if (ATOM_SPACE != other.get_type()) return false;
-    AtomSpace* asp = (AtomSpace*) &other;
-    return compare_atomspaces(*this, *asp, CHECK_VALUES,
-            DONT_EMIT_DIAGNOSTICS);
+
+    // Compare the AtomSpace names, only. This will make them behave
+    // like Nodes, when being inserted or removed. We can't do a
+    // content compare, because it's too slow for insertion/removal.
+    return get_name() == other.get_name();
 }
 
 bool AtomSpace::operator<(const Atom& other) const
