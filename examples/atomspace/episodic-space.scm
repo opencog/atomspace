@@ -49,3 +49,30 @@
 (cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 
 
+(use-modules (opencog persist))
+(use-modules (opencog persist-file))
+
+(define fsn (FileStorageNode "file:/tmp/foo"))
+
+(cog-open fsn)
+(store-atomspace)
+(cog-close fsn)
+(use-modules (opencog persist-rocks))
+
+(define rsn (RocksStorageNode "rocks://tmp/blob"))
+
+(cog-open rsn)
+(store-atomspace)
+(cog-close rsn)
+
+
+(use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-rocks))
+
+(define rsn (RocksStorageNode "rocks://tmp/blob"))
+
+(cog-open rsn)
+(load-atomspace)
+(cog-close rsn)
+(cog-prt-atomspace)
+
