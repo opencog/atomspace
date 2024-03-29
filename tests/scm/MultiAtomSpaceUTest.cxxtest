@@ -59,7 +59,6 @@ public:
 	void test_load(void);
 	void test_nest(void);
 	void test_nest_scm(void);
-	void test_arg_scm(void);
 	void test_pm_scm(void);
 	void test_as_of_atom_scm(void);
 	void test_readonly_scm(void);
@@ -420,122 +419,6 @@ void MultiAtomSpace::test_nest_scm(void)
 	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
 
 	evaluator->eval("(set! nest-as #f) (gc)(sleep 1)(gc)");
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// Very similar to above, but the al atomspace is specified explicitly
-// as arg. XXX This is ... broken, because the AtomSpace-as-an-arg
-// was never implemented in the guile wrappers.  Instead, what is
-// actually happening is that a link is being created, with one of
-// the outgoing set being an AtomSpace! Which ... works, because
-// AtomSpaces are now Atoms, and so Links containing them can be
-// created!
-//
-// This is counter to what is currently documented in the scheme API.
-// It is not clear whatt the best strategic design should be: to do
-// what is documented, or to allow AtomSpaces to be stored in Links.
-// So, for now... do nothing.
-//
-void MultiAtomSpace::test_arg_scm(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	// Define an alternate atomspace
-	evaluator->eval("(define arg-as (cog-new-atomspace (cog-atomspace)))");
-	std::string msg = evaluator->eval("arg-as");
-	printf("Arg atomspace is: %s\n", msg.c_str());
-
-	// Define a function that performs a thunk in the nested atomspace.
-	evaluator->eval("(define (arg-env f) "
-   	"(let ((curr-as (cog-set-atomspace! arg-as)) "
-		"      (result (f))) "
-   	"   (cog-set-atomspace! curr-as) result))");
-
-	msg = evaluator->eval("(cog-atomspace)");
-	printf("Primary atomspace is: %s\n", msg.c_str());
-
-	msg = evaluator->eval("(arg-env cog-atomspace)");
-	printf("Check arg atomspace is: %s\n", msg.c_str());
-
-	// Populate atomspace with some misc junk
-	Handle ha = evaluator->eval_h("(ConceptNode \"aaa-arg-stuff\")");
-	CHKERR;
-	Handle hb = evaluator->eval_h("(ConceptNode \"bbb-arg-stuff\")");
-	CHKERR;
-
-	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
-	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->get_type());
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->get_type());
-
-	// Create a link in the arg atomspace. XXX No, that is not what
-	// this does! This creates a link of arity=3, where the 3rd elt
-	// of the outgoing set is an atomspace!
-	Handle hl = evaluator->eval_h(
-		"(ListLink "
-		"	(ConceptNode \"aaa-arg-stuff\")"
-		"	(ConceptNode \"bbb-arg-stuff\")"
-		"	arg-as)");
-	CHKERR;
-
-	// Get these same atoms, again in the nested space
-	Handle hpa = evaluator->eval_h(
-		"(arg-env (lambda () (ConceptNode \"aaa-arg-stuff\")))");
-	CHKERR;
-	Handle hpb = evaluator->eval_h(
-		"(arg-env (lambda () (ConceptNode \"bbb-arg-stuff\")))");
-	CHKERR;
-	TSM_ASSERT_EQUALS("Expect the same atom", ha, hpa);
-	TSM_ASSERT_EQUALS("Expect the same atom", hb, hpb);
-
-	// The Link should NOT be in the primary atomspace.
-	Handle hnol = evaluator->eval_h(
-		"(cog-link 'ListLink "
-		"	(ConceptNode \"aaa-arg-stuff\")"
-		"	(ConceptNode \"bbb-arg-stuff\")"
-		")");
-	CHKERR;
-	TSM_ASSERT_EQUALS("Expect undefined handle", hnol, Handle::UNDEFINED);
-
-	// The Link should be in the nested atomspace. XXX That is not what
-	// is actually being tested here. Instea, we are testing to see if
-	// the base-space contains a link of arity 3, where the third elt of
-	// the oset is an atomspace! Whoops!  This is certainly NOT what the
-	// documentation says is supposed to happen. But who is right? What
-	// should have happened?
-	Handle hnestl = evaluator->eval_h(
-		"(cog-link 'ListLink "
-		"	(ConceptNode \"aaa-arg-stuff\")"
-		"	(ConceptNode \"bbb-arg-stuff\")"
-		"	arg-as)");
-	CHKERR;
-	TSM_ASSERT_EQUALS("Expect list handle", hnestl, hl);
-
-#if 0
-	// The Link should be in the nested atomspace. XXX At least, it
-	// should have been, if that is what the code above was doing.
-	// But that is not what got implemented in the guile wrappers,
-	// and so the test below fails (and is thus stubbed out.) Fixing
-	// this requires a design change, which we may not want to make...
-	Handle hargl = evaluator->eval_h(
-		"(arg-env (lambda ()"
-		"  (cog-link 'ListLink "
-		"	  (ConceptNode \"aaa-arg-stuff\")"
-		"	  (ConceptNode \"bbb-arg-stuff\"))))");
-	CHKERR;
-	TSM_ASSERT_EQUALS("Expect list handle", hargl, hl);
-#endif
-
-	// The Link should STILL NOT be in the primary atomspace.
-	Handle hsil = evaluator->eval_h(
-		"(cog-link 'ListLink "
-		"	(ConceptNode \"aaa-arg-stuff\")"
-		"	(ConceptNode \"bbb-arg-stuff\")"
-		")");
-	CHKERR;
-	TSM_ASSERT_EQUALS("Expect undefined handle", hsil, Handle::UNDEFINED);
-
-	evaluator->eval("(set! arg-as #f) (gc)(sleep 1)(gc)");
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
