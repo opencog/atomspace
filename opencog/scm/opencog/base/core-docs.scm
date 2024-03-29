@@ -1132,19 +1132,94 @@
     Returns the new atomspace.
 
     AtomSpaces are automatically deleted when no more references to
-    them remain.
+    them remain. To prevent this, either keep a guile variable pointing
+    to it, or insert it into a Link, or insert it directly into another
+    AtomSpace (using `cog-add-atomspace`).
 
     Note that this does NOT set the current atomspace to the new one;
     to do that, you need to use cog-set-atomspace!
 
     The name of the AtomSpace can be obtained with `cog-name`.
 
+    Most users will want to call `cog-add-atomspace` on the returned
+    space. The function `AtomSpace` is a wrapper for these two combined;
+    so `(AtomSpace x)` is equivalent to (is defined as)
+    `(cog-add-atomspace (cog-new-atomspace x))`
+
     See also:
+       AtomSpace -- create an AtomSpace and insert it into this one.
        cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-add-atomspace -- Insert an AtomSpace reference into this one.
        cog-atomspace-env -- Get the subspaces.
        cog-atomspace-uuid -- Get the UUID of the AtomSpace.
        cog-atomspace-ro! -- Mark the AtomSpace as read-only.
        cog-atomspace-cow! -- Mark the AtomSpace as copy-on-write.
+")
+
+(set-procedure-property! cog-add-atomspace 'documentation
+"
+ cog-add-atomspace ATOMSPACE
+    Insert ATOMSPACE into the current AtomSpace. This inserts a
+    reference (a pointer) to ATOMSPACE into the current AtomSpace.
+    The behavior is similar to creating a Node, except that Nodes
+    are always automatically inserted. The string name of ATOMSPACE
+    will be used to index the reference; thus, AtomSpaces can be found
+    by name.
+
+    This is not the same thing as subframes (subspaces). The inserted
+    ATOMSPACE is neither a superspace, subspace or copy (although it
+    could be, that's up to you.) The contents of ATOMSPACE are NOT
+    merged into the current AtomSpace, nor are they otherwise shared or
+    unified. The only goal of this function is to add a reference, and
+    have it be kept.
+
+    If the current AtomSpace does not contain some AtomSpace having the
+    same string name as ATOMSPACE, then ATOMSPACE is inserted, and
+    ATOMPSACE is returned. Otherwise, the existing AtomSpace having the
+    same name is returned.
+
+    The name of the AtomSpace can be obtained with `cog-name`.
+    The uuid the AtomSpace can be obtained with `cog-atomspace-uuid`.
+
+    Example:
+        guile> (define x (cog-new-atomspace \"foo\"))
+        guile> (cog-atomspace-uuid x)
+        13
+        guile> (define y (cog-add-atomspace x))
+        guile> (cog-atomspace-uuid y)
+        13
+        guile> (equal? x y)
+        #t
+        guile> (define z (cog-new-atomspace \"foo\"))
+        guile> (cog-atomspace-uuid z)
+        14
+        guile> (equal? z x)
+        #f
+        guile> (define w (cog-add-atomspace z))
+        guile> (cog-atomspace-uuid w)
+        13
+        guile> (equal? w x)
+        #t
+
+    See also:
+       AtomSpace -- create an AtomSpace and insert it into this one.
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-new-atomspace -- Create a new AtomSpace.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
+")
+
+(set-procedure-property! AtomSpace 'documentation
+"
+ AtomSpace [NAME]
+    Create a new AtomSpace; optionally give it the name NAME, and
+    insert it into the current AtomSpace. This is shorthand for
+    `(cog-add-atomspace (cog-new-atomspace NAME))`
+
+    See also:
+       cog-new-atomspace -- Create a new AtomSpace.
+       cog-add-atomspace -- Insert an AtomSpace reference into this one.
+       cog-atomspace -- Get the current AtomSpace in this thread.
+       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-env 'documentation
