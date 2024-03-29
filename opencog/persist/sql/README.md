@@ -231,16 +231,19 @@ try doing this, replacing 'alex' with your username.
    $ psql template1
    template1=# CREATE ROLE alex WITH SUPERUSER;
    template1=# ALTER ROLE alex WITH LOGIN;
+   template1=# CREATE ROLE opencog_tester WITH CREATEDB;
+   template1=# ALTER ROLE opencog_tester WITH LOGIN;
 ```
 
 Verify that worked out by typing `\dg` to see:
 
 ```
-                             List of roles
- Role name |                   Attributes                   | Member of
------------+------------------------------------------------+-----------
- alex      | Superuser                                      | {}
- postgres  | Superuser, Create role, Create DB, Replication | {}
+                                  List of roles
+   Role name    |                   Attributes                   | Member of
+----------------+------------------------------------------------+-----------
+ alex           | Superuser                                      | {}
+ opencog_tester | Create DB                                      | {}
+ postgres       | Superuser, Create role, Create DB, Replication | {}
 ```
 
 Then do Ctrl+D to exit, ignoring any message about `psql_history`, and
@@ -405,7 +408,7 @@ password logins for all local users. (A local user is a user on the
 same machine, connecting to the database by means of unix-domain
 sockets, instead of tcp/ip sockets.)
 ```
-   local   all      all           md5
+   local   all      opencog_tester          md5
 ```
 Be sure to reload or restart the postgres server after the above change:
 ```
