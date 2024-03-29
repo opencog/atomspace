@@ -42,7 +42,11 @@ class LargeFlatUTest :  public CxxTest::TestSuite
 // 75000 * 7 == half-a-million atoms (> 512K)
 // 37000 * 7 == 259K atoms (> 256K)
 // 19000 * 7 == 133K atoms (> 128K)
-#define NCOPIES 37000
+
+// Default out-of-box Postgresql 15 with no tuning takes over an hour
+// to run NCOPIES 37000. With tuning, it's 15x faster. Assume that a
+// beginner user has done no tuning.
+#define NCOPIES 2200
 		NodePtr n1[NCOPIES];
 		NodePtr n2[NCOPIES];
 		NodePtr n3[NCOPIES];
