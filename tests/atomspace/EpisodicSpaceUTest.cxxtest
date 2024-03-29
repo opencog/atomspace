@@ -1,0 +1,84 @@
+/*
+ * tests/atomspace/EpisodicSpaceUTest.cxxtest
+ *
+ * Copyright (C) 2014,2015,2024 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+// Test support for indicating AtomSpaces in Links.
+//
+class EpisodicSpaceUTest :  public CxxTest::TestSuite
+{
+private:
+
+	AtomSpacePtr asp;
+	AtomSpacePtr as1;
+	AtomSpacePtr as2;
+
+public:
+	EpisodicSpaceUTest() :
+		asp(createAtomSpace()),
+		as1(createAtomSpace()),
+		as2(createAtomSpace())
+	{
+		asp->set_name("main space");
+		as1->set_name("memory one");
+		as2->set_name("memory two");
+	}
+
+	void setUp() {}
+	void tearDown() {}
+
+	// Simple test to see if AtomSpaces can be stored in links.
+	void testSimple()
+	{
+		Handle hc1 = asp->add_node(CONCEPT_NODE, "id mem 1");
+		Handle hc2 = asp->add_node(CONCEPT_NODE, "id mem 2");
+
+		Handle hl1 = asp->add_link(LIST_LINK, hc1, Handle(as1));
+		Handle hl2 = asp->add_link(LIST_LINK, hc2, Handle(as2));
+
+		// Verify size of links
+		TS_ASSERT(2 == hl1->get_arity());
+		TS_ASSERT(2 == hl2->get_arity());
+
+		// Verify size of AtomSpace. Should be six:
+		// two concepts, two lists, two atomspaces.
+		TS_ASSERT(asp->get_size() == 6);
+
+		// Make sure we get can access them
+		HandleSeq spaces;
+		asp->get_handles_by_type(spaces, ATOM_SPACE);
+		TS_ASSERT(spaces.size() == 2);
+
+		// Verify the names, at least.
+		std::string nama = spaces[0]->get_name();
+		std::string namb = spaces[1]->get_name();
+		if (nama != "memory one") nama.swap(namb);
+		TS_ASSERT(nama == "memory one");
+		TS_ASSERT(namb == "memory two");
+	}
+};

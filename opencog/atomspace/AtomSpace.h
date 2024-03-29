@@ -215,24 +215,23 @@ public:
     void set_name(const std::string&);
 
     /**
-     * Compare atomspaces for equality. Useful during testing.
-     */
-    static bool compare_atomspaces(const AtomSpace& first,
-                                   const AtomSpace& second,
-                                   bool check_values=CHECK_VALUES,
-                                   bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
-    bool operator==(const AtomSpace& other) const;
-    bool operator!=(const AtomSpace& other) const;
-
-    /**
-     * Perform a content-based comparison of two AtomSpaces.
-     * Wrapper around above.
+     * AtomSpaces are identified by their name, and so behave like
+     * Nodes when being maniupulated and inserted. Such insertion
+     * needs operator==() and thus a string compare of the name is
+     * done here. Use content_compare() below if you want that.
      */
     virtual bool operator==(const Atom&) const;
 
     /** Ordering operator for AtomSpaces. */
     virtual bool operator<(const Atom&) const;
 
+    /**
+     * Compare contents for equality. Useful during testing.
+     */
+    static bool content_compare(const AtomSpace& first,
+                                const AtomSpace& second,
+                                bool check_values=CHECK_VALUES,
+                                bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     /**
      * Return the number of atoms contained in the space.
      */
