@@ -77,9 +77,10 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 		ENDIF (NOT SHORT_NAME STREQUAL "")
 	ENDIF (ISLINK STREQUAL "LINK")
 
+	# Create and then add.
 	IF (ISATOMSPACE STREQUAL "ATOM_SPACE")
 		FILE(APPEND "${SCM_FILE}"
-			"(define-public AtomSpace cog-new-atomspace)\n"
+			"(define-public (AtomSpace . x) (cog-add-atomspace (cog-new-atomspace x)))\n"
 		)
 	ENDIF (ISATOMSPACE STREQUAL "ATOM_SPACE")
 
