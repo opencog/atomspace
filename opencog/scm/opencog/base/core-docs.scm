@@ -104,10 +104,9 @@
 
 (set-procedure-property! cog-new-link 'documentation
 "
- cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE] [TV]
+ cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [TV]
     Create a new Link, of Type LINK-TYPE, holding the given Atoms.
-    Optionally, place it in ATOMSPACE and/or assign a TruthValue TV
-    to it.
+    Optionally, assign a TruthValue TV to it.
 
     Throws errors if LINK-TYPE is not a valid Link Type, or if any of
     the arguments after the Link Type are not Atoms, TruthValues or
@@ -130,11 +129,6 @@
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
-
-        ; Creates a new atomspace, and places the link there:
-        guile> (define spacex (cog-new-atomspace))
-        guile> (cog-new-link 'Link x y spacex)
-        guile> (cog-prt-atomspace spacex)
 ")
 
 (set-procedure-property! cog-link 'documentation
