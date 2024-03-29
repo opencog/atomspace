@@ -241,7 +241,13 @@ bool AtomSpace::operator<(const Atom& other) const
 
 ContentHash AtomSpace::compute_hash() const
 {
-	return _uuid;
+	if (_name.empty()) return _uuid;
+	ContentHash hsh = std::hash<std::string>()(get_name());
+
+	// Nodes will never have the MSB set.
+	ContentHash mask = ~(((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1));
+	hsh &= mask;
+	return hsh;
 }
 
 // ====================================================================
@@ -258,6 +264,7 @@ const std::string& AtomSpace::get_name() const
 void AtomSpace::set_name(const std::string& newna)
 {
 	_name = newna;
+	_content_hash = compute_hash();
 }
 
 Handle AtomSpace::getOutgoingAtom(Arity n) const
