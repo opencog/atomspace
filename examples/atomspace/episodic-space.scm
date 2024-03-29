@@ -1,4 +1,18 @@
-
+;
+; episodic-space.scm -- Demo of storing AtomSpaces within Atoms
+;
+; There are many ways to represent episodic memories; one particularly
+; intersting one is to store them into AtomSpaces that are then attached
+; as a Value on an Atom. This offers several benefits over other
+; representations: the entire collection can be treated as a coherent
+; whole, and thus added or removed at will. Atoms located in such spaces
+; are not in the mainspace, and thus do not pollute the mainspace,
+; avoiding cross-talk and naming collisions. Searches can be limited to
+; the episodic subspace. Different episodic subspaces can be joined
+; together, using the frame concept. Thus, storing AtomSpaces as values
+; provides multiple advantages over using one giant AtomSpace for
+; everything. This demo example shows how this can be done.
+;
 
 (use-modules (opencog))
 
@@ -48,15 +62,17 @@
 (cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
 (cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 
+; ------------------------------------------------------
 
 (use-modules (opencog persist))
 (use-modules (opencog persist-file))
 
-(define fsn (FileStorageNode "file:/tmp/foo"))
+(define fsn (FileStorageNode "/tmp/foo"))
 
 (cog-open fsn)
 (store-atomspace)
 (cog-close fsn)
+
 (use-modules (opencog persist-rocks))
 
 (define rsn (RocksStorageNode "rocks://tmp/blob"))
@@ -65,6 +81,7 @@
 (store-atomspace)
 (cog-close rsn)
 
+; ------------------------------------------------------
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
@@ -76,3 +93,13 @@
 (cog-close rsn)
 (cog-prt-atomspace)
 
+; ------------------------------------------------------
+(use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-file))
+
+(define fsn (FileStorageNode "/tmp/foo"))
+
+(cog-open fsn)
+(load-atomspace)
+(cog-close fsn)
+(cog-prt-atomspace)
