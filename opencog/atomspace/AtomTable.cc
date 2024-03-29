@@ -29,7 +29,6 @@
 #include "AtomSpace.h"
 
 #include <atomic>
-
 #include <stdlib.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -298,12 +297,6 @@ Handle AtomSpace::add(const Handle& orig, bool force,
 {
     // Can be null, if its a Value
     if (nullptr == orig) return Handle::UNDEFINED;
-
-    // Atomspaces themselves are now Atoms. So it's not impossible for
-    // someone to try to add them. But we don't actually want that to
-    // happen, at least, not right now. Unsupported, because its not
-    // really clear how this should work or how it should be used.
-    if (ATOM_SPACE == orig->get_type()) return orig;
 
     // Check to see if we already have this atom in the atomspace.
     // If this is a top-level add, then copy the values over. If it's
