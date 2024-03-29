@@ -42,10 +42,9 @@
 
 (set-procedure-property! cog-new-node 'documentation
 "
- cog-new-node NODE-TYPE NODE-NAME [ATOMSPACE] [TV]
+ cog-new-node NODE-TYPE NODE-NAME [TV]
     Create a new Node of Type NODE-TYPE and name NODE-NAME.
-    Optionally, place it in ATOMSPACE and/or assign a TruthValue TV
-    to it.
+    Optionally, assign a TruthValue TV to it.
 
     Throws errors if NODE-TYPE is not a valid Atom Type for a Node,
     and if NODE-NAME is not a string. Use (cog-get-types) to get a
@@ -60,11 +59,6 @@
         guile> (cog-new-node 'Concept \"another node\"
                       (SimpleTruthValue 0.8 0.9))
         (ConceptNode \"another node\" (SimpleTruthValue 0.8 0.9))
-
-        ; Creates a new atomspace, and places the node there:
-        guile> (define spacex (cog-new-atomspace))
-        guile> (Concept \"foo\" spacex)
-        guile> (cog-prt-atomspace spacex)
 ")
 
 (set-procedure-property! cog-node 'documentation
@@ -104,10 +98,9 @@
 
 (set-procedure-property! cog-new-link 'documentation
 "
- cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE] [TV]
+ cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [TV]
     Create a new Link, of Type LINK-TYPE, holding the given Atoms.
-    Optionally, place it in ATOMSPACE and/or assign a TruthValue TV
-    to it.
+    Optionally, assign a TruthValue TV to it.
 
     Throws errors if LINK-TYPE is not a valid Link Type, or if any of
     the arguments after the Link Type are not Atoms, TruthValues or
@@ -130,11 +123,6 @@
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
-
-        ; Creates a new atomspace, and places the link there:
-        guile> (define spacex (cog-new-atomspace))
-        guile> (cog-new-link 'Link x y spacex)
-        guile> (cog-prt-atomspace spacex)
 ")
 
 (set-procedure-property! cog-link 'documentation

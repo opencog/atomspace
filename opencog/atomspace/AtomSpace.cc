@@ -52,10 +52,10 @@ void AtomSpace::set_read_write(void)
     _read_only = false;
 }
 
-bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
-                                   const AtomSpace& space_second,
-                                   bool check_values,
-                                   bool emit_diagnostics)
+bool AtomSpace::content_compare(const AtomSpace& space_first,
+                                const AtomSpace& space_second,
+                                bool check_values,
+                                bool emit_diagnostics)
 {
     // Compare sizes
     if (space_first.get_size() != space_second.get_size())
@@ -215,26 +215,18 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     return true;
 }
 
-bool AtomSpace::operator==(const AtomSpace& other) const
-{
-    return compare_atomspaces(*this, other, CHECK_VALUES,
-            DONT_EMIT_DIAGNOSTICS);
-}
-
-bool AtomSpace::operator!=(const AtomSpace& other) const
-{
-    return not operator==(other);
-}
-
+// Name-compare only. No content-compare.
 bool AtomSpace::operator==(const Atom& other) const
 {
     // If other points to this, then have equality.
     if (this == &other) return true;
 
     if (ATOM_SPACE != other.get_type()) return false;
-    AtomSpace* asp = (AtomSpace*) &other;
-    return compare_atomspaces(*this, *asp, CHECK_VALUES,
-            DONT_EMIT_DIAGNOSTICS);
+
+    // Compare the AtomSpace names, only. This will make them behave
+    // like Nodes, when being inserted or removed. We can't do a
+    // content compare, because it's too slow for insertion/removal.
+    return get_name() == other.get_name();
 }
 
 bool AtomSpace::operator<(const Atom& other) const

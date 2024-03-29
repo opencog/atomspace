@@ -416,9 +416,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		name = verify_string (sname, "cog-new-node", 2,
 			"string name for the node");
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
-	const AtomSpacePtr& asp = asg ? asg :
-		ss_get_env_as("cog-new-node");
+	const AtomSpacePtr& asp = ss_get_env_as("cog-new-node");
 
 	try
 	{
