@@ -42,22 +42,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-// Uncomment the following to check at run-time atom hash collisions,
-// that is whether 2 different atoms a1 and a2 have the same hash,
-// formally
-//
-// a1 != a2 and a1->get_hash() == a1->get_hash()
-//
-// Atom hash collision is unavoidable in principle but should be rare,
-// this code may be useful for discovering pathological hash
-// collisions. If enable, any hash collision should be warn logged.
-// #define CHECK_ATOM_HASH_COLLISION
-
-// If CHECK_ATOM_HASH_COLLISION is enabled, uncomment the following to
-// that to abort if a collision is detected. This is an extreme yet
-// convenient way to check whether a collision has occurred.
-// #define HALT_ON_COLLISON
-
 using namespace opencog;
 
 // ====================================================================
