@@ -176,6 +176,7 @@ private:
 
 	// Atom Spaces
 	static SCM ss_new_as(SCM);
+	static SCM ss_add_as(SCM);
 	static SCM ss_as_p(SCM);
 	static SCM ss_as(SCM);
 	static SCM ss_set_as(SCM);
