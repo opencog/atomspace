@@ -41,9 +41,15 @@ class LargeZipfTest :  public CxxTest::TestSuite
 		const char * username;
 		const char * passwd;
 
-#define NWORDS 35000
+// Default out-of-box Postgresql 15 with no tuning takes over 90 minutes
+// to run NWORDS 35000 and NPAIRS 257000. With tuning, it's 15x faster.
+// Assume that a beginner tester has done no tuning.
+// #define NWORDS 35000
+// #define NPAIRS 257000
+
+#define NWORDS 1500
+#define NPAIRS 8700
 		Handle hword[NWORDS];
-#define NPAIRS 257000
 		Handle hpair[NPAIRS];
 		int npairs; // actual number of pairs created.
 
