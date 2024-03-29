@@ -63,6 +63,35 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 
 /* ============================================================== */
 /**
+ * Add an AtomSpace to the current AtomSpace. Unlike ss_new_node,
+ * the ss_new_as() call above does NOT add the new AtomSpace to any
+ * existing AtomSpace. It just ... hangs there in the void. This is
+ * usually just fine, and is the historic behavior. But in order to
+ * get naming uniqueness guarantees, it has to be actually inserted
+ * somewhere, where naming uniqueness is provided. So that's what this
+ * method does.
+ *
+ * Note that this might be crazy-making for a naive user: if two
+ * atomspaces are created with exactly the same name, and both are
+ * inserted, the second insert will return the first atomspace.
+ * Which is exactly the whole point of this function; but it also
+ * means that the second atomspace might be garbage-collected, which
+ * might come as a surprise to the user, esp. if it isn't empty.
+ */
+SCM SchemeSmob::ss_add_as (SCM sas)
+{
+	Handle hasp(verify_handle(sas, "cog-add-atomspace"));
+
+	if (hasp->get_type() != ATOM_SPACE)
+		scm_wrong_type_arg_msg("cog-add-atomspace", 1, sas, "opencog atomspace");
+
+	const AtomSpacePtr& asp = ss_get_env_as("cog-add-atomspace");
+	Handle h(asp->add_atom(hasp));
+	return handle_to_scm(h);
+}
+
+/* ============================================================== */
+/**
  * Return true if the scm is an AtomSpace
  */
 SCM SchemeSmob::ss_as_p (SCM s)

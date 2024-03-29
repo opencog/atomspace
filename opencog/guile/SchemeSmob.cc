@@ -296,6 +296,21 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
+	// The three numbers are these:
+	// First, the number of mandatory arguments,
+	// Next, the number of fixed optional arguments,
+	// Finally, boolean t/f if API allows a variable-length list
+	// of additional arguments.
+	//
+	// For example, ss_new_value takes a type (mandatory) followed
+	// by a variable length list of values (its a vector). So, 1,0,1.
+	//
+	// Compare to cog-incoming-set, which takes an atom, followed by
+	// exactly one optional argument. Thus, 1,1,0.
+	//
+	// Note cog-atomspace, which takes zero mandatory args, and one
+	// optional arg: thus, 0,1,0.
+	//
 	register_proc("cog-version",           0, 0, 0, C(ss_version));
 	register_proc("cog-set-server-mode!",  1, 0, 0, C(ss_set_server_mode));
 
@@ -367,6 +382,7 @@ void SchemeSmob::register_procs()
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 0, 1, C(ss_new_as));
+	register_proc("cog-add-atomspace",     1, 0, 0, C(ss_add_as));
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
 	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));
