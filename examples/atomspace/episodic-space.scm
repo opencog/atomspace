@@ -35,7 +35,7 @@
 
 (cog-set-value!
 	(ConceptNode "foo") (Predicate "some atoms")
-		(ListValue (Concept "dog") (Concept "cat") (Concept "mouse")))
+		(LinkValue (Concept "dog") (Concept "cat") (Concept "mouse")))
 
 ; Verify that the above worked. `cog-keys` returns all the keys
 ; attached to the Atom, and `cog-value` returns the value for a
@@ -77,6 +77,7 @@
 (cog-prt-atomspace)
 
 ; Switch to the other AtomSpace.
+(cog-set-atomspace! base-space)
 (cog-set-atomspace!
 	(cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 
@@ -94,25 +95,68 @@
 (cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
 (cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 
-; Now for some (very important!) commentary about AtomSpace naming and
-; AtomSpace uniqueness, and AtomSpace collisions. You'll get a mess, if
-; you don't understand this clearly. So, first of all, every time you
-; say `(AtomSpace "blah")` in scheme, a brand-new AtomSpace gets created.
-; If you say `(AtomSpace "blah")` twice, you will get *two* different
-; AtomSpaces. This is not how Nodes ordinarily behave: if you were to say
-; ... Hmmm Lets change this.
-; to you to avoid naming collisions
+; Some commentary about AtomSpace management (this is important!) The
+; `AtomSpace` function is defined as
+;      (define-public (AtomSpace x)
+;          (cog-add-atomspace (cog-new-atomspace x)))
+; This it creates a new AtomSpace *and* inserts it into the current
+; AtomSpace. The name is used to identify it, and so it behave a lot
+; like a Node. For example, saying `(AtomSpace "bar")` twice in a row
+; will return the *same* AtomSpace. Thus (just like a Node) it is enough
+; to know it's name.
+;
+; By contrast, `(cog-new-atomspace x)` create a new AtomSpace every time
+; it is called, so calling `(cog-new-atomspace "blah")` twice in a row
+; will give you two *different* AtomSpaces, having the same name. Both
+; of them will be floating in the void, and so if you drop references to
+; them, they will be garbage-collected. To get one unique copy, you must
+; use `cog-add-atomspace`, with will return the oldest AtomSpace having
+; the given name.
+;
 ; ------------------------------------------------------
+; All of the above is very interesting, but useless if we can't save
+; and restore contents. So the rest of this demo examines how to do that.
 
+; As usual, load the modules that provide storage.
 (use-modules (opencog persist))
 (use-modules (opencog persist-file))
 
+; We'll store to a file in the temp directory.
+; Open it, save, and close
 (define fsn (FileStorageNode "/tmp/foo"))
-
 (cog-open fsn)
 (store-atomspace)
 (cog-close fsn)
 
+; Now, edit `/tmp/foo` with your favorite file editor. Notice that
+; it contains the contents of the main space, but NOT of the episodic
+; spaces. These need to be saved explicitly, and in seperate files.
+; Why? The whole point of episodic memory is that you don't have to
+; deal with one giant ball with everything in it; instead, you can work
+; with only those chunks that you want and need, when you want them,
+; and as you need them.
+
+; So, let's save the other two parts.
+(define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
+(define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+(define fsa (FileStorageNode "/tmp/foo-one"))
+(define fsb (FileStorageNode "/tmp/foo-two"))
+(cog-open fsa)
+(cog-open fsb)
+(cog-set-atomspace! as-one)
+(store-atomspace fsa)
+(cog-close fsa)
+(cog-set-atomspace! as-two)
+(store-atomspace fsb)
+(cog-close fsb)
+
+; Return to home base.
+(cog-set-atomspace! base-space)
+
+; View `/tmp/foo-one` and `/tmp/foo-two` and verify that they contain
+; what is expected.
+
+; ------------------------------------------------------
 (use-modules (opencog persist-rocks))
 
 (define rsn (RocksStorageNode "rocks://tmp/blob"))
