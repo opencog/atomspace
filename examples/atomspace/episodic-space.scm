@@ -160,9 +160,15 @@
 ; For the next part of the demo, you should exit the guile shell,
 ; and restart it from scratch. The goal here is to restore the contents
 ; from the saved files.
+;
+; The code below is nearly identical to the store code above, except
+; that it loads, instead of storing. Otherise, its just a cut-n-paste.
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-file))
+
+; Save a reference to our main working space.
+(define base-space (cog-atomspace))
 
 (define fsn (FileStorageNode "/tmp/foo"))
 
@@ -174,6 +180,28 @@
 (cog-prt-atomspace)
 (cog-keys (Concept "foo"))
 (cog-value (Concept "foo") (Predicate "real life"))
+
+; Now, restore the two batches of episodic memories.
+(define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
+(define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+(define fsa (FileStorageNode "/tmp/foo-one"))
+(define fsb (FileStorageNode "/tmp/foo-two"))
+(cog-open fsa)
+(cog-open fsb)
+(cog-set-atomspace! as-one)
+(load-atomspace fsa)
+(cog-close fsa)
+(cog-set-atomspace! as-two)
+(load-atomspace fsb)
+(cog-close fsb)
+
+; Return to home base.
+(cog-set-atomspace! base-space)
+
+; Verify that the contents are as expected
+(cog-prt-atomspace)
+(cog-prt-atomspace as-one)
+(cog-prt-atomspace as-two)
 
 ; ------------------------------------------------------
 (use-modules (opencog persist-rocks))
