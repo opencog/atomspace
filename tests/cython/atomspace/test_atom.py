@@ -65,7 +65,7 @@ class AtomTest(TestCase):
 
         incoming = atom.incoming
 
-        self.assertEqual(set(incoming), set([a, b]))
+        self.assertEqual(set(incoming), {a, b})
 
     def test_invalid_key(self):
         string_node = ConceptNode("String")

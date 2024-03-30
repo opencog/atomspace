@@ -14,8 +14,7 @@ def print_arguments(argOne, argTwo):
     return atom
 
 def add_link(atom_one, atom_two):
-    link_atom = atom_one.atomspace.add_link(types.ListLink, [atom_one, atom_two])
-    return link_atom
+    return atom_one.atomspace.add_link(types.ListLink, [atom_one, atom_two])
 
 def bogus_tv(atom_one, atom_two):
     return TruthValue(0.6, 0.234)

@@ -89,7 +89,7 @@ class BindlinkTest(unittest.TestCase):
 
     def test_bindlink(self):
         atom = execute_atom(self.atomspace, self.bindlink_atom)
-        print("Bindlink found: " + str(atom))
+        print(f"Bindlink found: {str(atom)}")
         self._check_result_setlink(atom, 3)
 
     def test_satisfying_set(self):
