@@ -56,6 +56,7 @@ first).
 * [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating FloatValues.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
+* [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
 
 After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching

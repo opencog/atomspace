@@ -204,12 +204,19 @@
 (cog-prt-atomspace as-two)
 
 ; ------------------------------------------------------
+; Much as above, except that RocksDB is used, instead of a flat file.
+(use-modules (opencog persist))
 (use-modules (opencog persist-rocks))
 
-(define rsn (RocksStorageNode "rocks://tmp/blob"))
+(define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
 (cog-open rsn)
 (store-atomspace)
+(cog-close rsn)
+
+(cog-open rsn)
+(store-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
+(store-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 (cog-close rsn)
 
 ; ------------------------------------------------------
@@ -217,10 +224,12 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
-(define rsn (RocksStorageNode "rocks://tmp/blob"))
+(define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
 (cog-open rsn)
 (load-atomspace)
 (cog-close rsn)
 (cog-prt-atomspace)
 
+(cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
+(cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
