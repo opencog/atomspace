@@ -318,6 +318,28 @@ public:
 	bool remove_atom(AtomSpace*, Handle h, bool recursive=false);
 	bool remove_atom(const AtomSpacePtr& as, Handle h, bool recursive=false)
 		{ return remove_atom(as.get(), h, recursive); }
+
+	/**
+	 * comment 
+	*/
+	virtual void preRemoveAtom(AtomSpace* as, const Handle& h,
+		                           bool recursive)
+	{
+		removeAtom(as, h, recursive);
+	}
+
+	/**
+	 * comment 
+	*/
+	virtual void postRemoveAtom(AtomSpace* as, const Handle& h,
+		                            bool recursive, bool extracted)
+	{}
+
+	/**
+	 * Wrapper neccessary for RocksStorage
+	*/
+	bool isAtomAbsent(const Handle& atom)
+		{ return atom->isAbsent(); }
 };
 
 NODE_PTR_DECL(StorageNode)
