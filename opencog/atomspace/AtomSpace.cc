@@ -557,7 +557,7 @@ std::string AtomSpace::to_string(const std::string& indent) const
 	std::string sexpr = indent + "(AtomSpace \"" + _name + "\"";
 	size_t szo = _outgoing.size();
 	if (0 == szo)
-		return sexpr + ")";
+		return sexpr + ")\n";
 
 	if (1 == szo)
 		return sexpr + "\n   " + _outgoing[0]->to_string(indent) + ")";
