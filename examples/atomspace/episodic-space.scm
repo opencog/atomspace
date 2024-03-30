@@ -157,6 +157,25 @@
 ; what is expected.
 
 ; ------------------------------------------------------
+; For the next part of the demo, you should exit the guile shell,
+; and restart it from scratch. The goal here is to restore the contents
+; from the saved files.
+
+(use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-file))
+
+(define fsn (FileStorageNode "/tmp/foo"))
+
+(cog-open fsn)
+(load-atomspace)
+(cog-close fsn)
+
+; Verify that the contents are as expected.
+(cog-prt-atomspace)
+(cog-keys (Concept "foo"))
+(cog-value (Concept "foo") (Predicate "real life"))
+
+; ------------------------------------------------------
 (use-modules (opencog persist-rocks))
 
 (define rsn (RocksStorageNode "rocks://tmp/blob"))
@@ -177,13 +196,3 @@
 (cog-close rsn)
 (cog-prt-atomspace)
 
-; ------------------------------------------------------
-(use-modules (opencog) (opencog persist))
-(use-modules (opencog persist-file))
-
-(define fsn (FileStorageNode "/tmp/foo"))
-
-(cog-open fsn)
-(load-atomspace)
-(cog-close fsn)
-(cog-prt-atomspace)
