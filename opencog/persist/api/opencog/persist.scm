@@ -416,15 +416,18 @@
 	(if STORAGE (sn-monitor STORAGE) (dflt-monitor))
 )
 
-(define*-public (load-atomspace #:optional (STORAGE #f))
+(define*-public (load-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
 "
- load-atomspace [STORAGE] - load all atoms from storage.
+ load-atomspace [ATOMSPACE] [STORAGE] - load all atoms from storage.
 
     This will cause ALL of the atoms in the open storage server to be
     loaded into the current AtomSpace. This can be a very time-consuming
     operation.  In normal operation, it is rarely necessary to load all
     atoms; there are several ways to fetch subsets of atoms, or even one
     at a time, when needed.
+
+    If the optional ATOMSPACE argument is provided, then the data will
+    be restored to that AtomSpace, instead of the current AtomSpace.
 
     If the optional STORAGE argument is provided, then it will be
     used as the source of the load. It must be a StorageNode.
@@ -439,18 +442,23 @@
     load-frames -- load DAG of AtomSpaces.
     store-atomspace -- store all Atoms in the AtomSpace.
 "
-	(if STORAGE (sn-load-atomspace STORAGE) (dflt-load-atomspace))
+	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
+	(if STORAGE (sn-load-atomspace ATOMSPACE STORAGE)
+		(dflt-load-atomspace ATOMSPACE))
 )
 
-(define*-public (store-atomspace #:optional (STORAGE #f))
+(define*-public (store-atomspace #:optional (ATOMSPACE #f) (STORAGE #f))
 "
- store-atomspace [STORAGE] - Store all atoms in the AtomSpace to storage.
+ store-atomspace [ATOMSPACE] [STORAGE] - Store all atoms to storage.
 
     This will dump the ENTIRE contents of the current AtomSpace to the
     the currently-open storage.  Depending on the size of the AtomSpace,
     this may take a lot of time.  During normal operation, a bulk-save
     is rarely required, as individual atoms can always be stored, one
     at a time.
+
+    If the optional ATOMSPACE argument is provided, then it will be
+    stored, instead of the current AtomSpace.
 
     If the optional STORAGE argument is provided, then it will be
     used as the target of the store. It must be a StorageNode.
@@ -468,7 +476,9 @@
     store-atom ATOM -- store one ATOM and all of the values on it.
     store-referrers ATOM -- store all graphs that contain ATOM.
 "
-	(if STORAGE (sn-store-atomspace STORAGE) (dflt-store-atomspace))
+	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
+	(if STORAGE (sn-store-atomspace ATOMSPACE STORAGE)
+		(dflt-store-atomspace ATOMSPACE))
 )
 
 (define*-public (load-frames #:optional (STORAGE #f))
