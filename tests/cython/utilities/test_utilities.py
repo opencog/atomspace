@@ -14,7 +14,7 @@ __author__ = 'Curtis Faith'
 
 def write_sorted_file(path, atomspace):
     with open(path, 'wt') as f:
-        for atom in sorted([x for x in atomspace]):
+        for atom in sorted(list(atomspace)):
             f.write(str(atom))
             f.write('\n')
 
@@ -71,7 +71,7 @@ class UtilitiesTest(TestCase):
 def gen_name():
     tmp = []
     ascii = [chr(x) for x in range(32, 127)]
-    for i in range(10):
+    for _ in range(10):
         char = random.choice(ascii)
         if char == '"':
             char = '\\"'
@@ -82,8 +82,14 @@ def gen_name():
 
 
 def gen_atoms(atomspace, num=100000):
-    predicates = [atomspace.add_node(types.PredicateNode, 'predicate' + str(x)) for x in range(1)]
-    concepts = [atomspace.add_node(types.ConceptNode, 'concept' + gen_name()) for x in range(1000)]
+    predicates = [
+        atomspace.add_node(types.PredicateNode, f'predicate{str(x)}')
+        for x in range(1)
+    ]
+    concepts = [
+        atomspace.add_node(types.ConceptNode, f'concept{gen_name()}')
+        for _ in range(1000)
+    ]
     link_types = [types.ListLink, types.InheritanceLink, types.MemberLink]
     while(len(atomspace) < num):
         c1 = random.choice(concepts)

@@ -48,7 +48,7 @@ class SchemeTest(TestCase):
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
         self.assertEquals(a1.tv, expected)
-        print("Got=" + str(a1.tv) + " expected=" + str(expected))
+        print(f"Got={str(a1.tv)} expected={str(expected)}")
 
     # Create lots of large, random strings, try to trick guile gc
     # into running, while in the python context. We want to make

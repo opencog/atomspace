@@ -292,18 +292,28 @@ void PersistSCM::sn_load_type(Type t, Handle hsn)
 	stnp->fetch_all_atoms_of_type(t, asp.get());
 }
 
-void PersistSCM::sn_load_atomspace(Handle hsn)
+void PersistSCM::sn_load_atomspace(Handle space, Handle hsn)
 {
 	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
-	stnp->load_atomspace(asp.get());
+	if (space and space->get_type() == ATOM_SPACE)
+		stnp->load_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
+		stnp->load_atomspace(asp.get());
+	}
 }
 
-void PersistSCM::sn_store_atomspace(Handle hsn)
+void PersistSCM::sn_store_atomspace(Handle space, Handle hsn)
 {
 	GET_STNP;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
-	stnp->store_atomspace(asp.get());
+	if (space and space->get_type() == ATOM_SPACE)
+		stnp->store_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
+		stnp->store_atomspace(asp.get());
+	}
 }
 
 HandleSeq PersistSCM::sn_load_frames(Handle hsn)
@@ -455,18 +465,28 @@ void PersistSCM::dflt_load_type(Type t)
 	_sn->fetch_all_atoms_of_type(t, asp.get());
 }
 
-void PersistSCM::dflt_load_atomspace(void)
+void PersistSCM::dflt_load_atomspace(Handle space)
 {
 	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
-	_sn->load_atomspace(asp.get());
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->load_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("load-atomspace");
+		_sn->load_atomspace(asp.get());
+	}
 }
 
-void PersistSCM::dflt_store_atomspace(void)
+void PersistSCM::dflt_store_atomspace(Handle space)
 {
 	CHECK;
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
-	_sn->store_atomspace(asp.get());
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->store_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("store-atomspace");
+		_sn->store_atomspace(asp.get());
+	}
 }
 
 HandleSeq PersistSCM::dflt_load_frames(void)
