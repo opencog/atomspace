@@ -288,6 +288,18 @@ Handle Sexpr::decode_atom(const std::string& s,
 
 		return h;
 	}
+	if (namer.isA(atype, ATOM_SPACE))
+	{
+		// Get the AtomSpace name
+		l1 = l;
+		r1 = r;
+		const std::string name = get_node_name(s, l1, r1, atype, line_cnt);
+
+		AtomSpacePtr asp(createAtomSpace());
+		asp->set_name(name);
+		Handle h(asp);
+		return h;
+	}
 	throw SyntaxException(TRACE_INFO,
 		"Syntax error at line %zu unknown Atom type %d >>%s<< in %s",
 		line_cnt, atype, s.substr(l1, r1-l1).c_str(), s.c_str());
