@@ -214,6 +214,9 @@
 (store-atomspace)
 (cog-close rsn)
 
+(define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
+(define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+
 (cog-open rsn)
 (store-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
 (store-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
@@ -224,9 +227,11 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
+(define base-space (cog-atomspace))
 (define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
 (cog-open rsn)
+(load-frames)
 (load-atomspace)
 (cog-close rsn)
 (cog-prt-atomspace)
