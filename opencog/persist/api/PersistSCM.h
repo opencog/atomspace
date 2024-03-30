@@ -51,8 +51,8 @@ private:
 	static void sn_store_value(Handle, Handle, Handle);
 	static void sn_update_value(Handle, Handle, ValuePtr, Handle);
 	static void sn_load_type(Type, Handle);
-	static void sn_load_atomspace(Handle);
-	static void sn_store_atomspace(Handle);
+	static void sn_load_atomspace(Handle, Handle);
+	static void sn_store_atomspace(Handle, Handle);
 	static HandleSeq sn_load_frames(Handle);
 	static void sn_store_frames(Handle, Handle);
 	static void sn_delete_frame(Handle, Handle);
@@ -83,8 +83,8 @@ private:
 	void dflt_store_value(Handle, Handle);
 	void dflt_update_value(Handle, Handle, ValuePtr);
 	void dflt_load_type(Type);
-	void dflt_load_atomspace(void);
-	void dflt_store_atomspace(void);
+	void dflt_load_atomspace(Handle);
+	void dflt_store_atomspace(Handle);
 	HandleSeq dflt_load_frames(void);
 	void dflt_store_frames(Handle);
 	void dflt_delete_frame(Handle);
