@@ -97,7 +97,7 @@
 (cog-prt-atomspace as-one)
 (cog-prt-atomspace as-two)
 
-; clober temps
+; Clobber temps
 (set! as-one #f)
 (set! as-two #f)
 (set! fsa #f)
@@ -124,7 +124,7 @@
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
 
-; 11 loaded plus three FileStoreageNodes
+; 11 loaded plus three FileStorageNodes
 (test-assert "base-count" (equal? 14 (count-all)))
 (test-assert "space1-count" (equal? 0
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
