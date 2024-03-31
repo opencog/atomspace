@@ -57,7 +57,7 @@
 ; Return to the main space.
 (cog-set-atomspace! base-space)
 
-(format #t "Actual counts are ~A ~A ~A\n"
+(format #t "Atom counts in subspaces are ~A ~A ~A\n"
 	(count-all)
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
 	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
@@ -119,7 +119,13 @@
 (load-atomspace)
 (cog-close gsn)
 
-(test-assert "base-count" (equal? 11 (count-all)))
+(format #t "Loaded Atom counts ~A ~A ~A\n"
+	(count-all)
+	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
+	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
+
+; 11 loaded plus three FileStoreageNodes
+(test-assert "base-count" (equal? 14 (count-all)))
 (test-assert "space1-count" (equal? 0
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 0
@@ -140,7 +146,7 @@
 ; Return to home base.
 (cog-set-atomspace! base-space)
 
-(test-assert "base-count" (equal? 11 (count-all)))
+(test-assert "base-count" (equal? 14 (count-all)))
 (test-assert "space1-count" (equal? 8
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 6
