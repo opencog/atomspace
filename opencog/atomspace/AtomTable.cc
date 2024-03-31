@@ -316,7 +316,10 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     // that should have gone through a factory, but did not.
     // (We can solve this by setting a factory flag.)
     Handle atom(orig);
-    if (atom->is_link()) {
+    if (ATOM_SPACE == atom->get_type()) {
+        /* No-op. Just avoid the other branches, below. */
+    }
+    else if (atom->is_link()) {
         bool need_copy = false;
         if (atom->getAtomSpace())
             need_copy = true;
@@ -360,6 +363,8 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     }
     else if (atom->getAtomSpace())
     {
+        // If we are here, its a Node AND its in some other AtomSpace!
+        // So we need to make a copy.
         std::string name(atom->get_name());
         atom = createNode(atom->get_type(), std::move(name));
     }

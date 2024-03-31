@@ -280,10 +280,21 @@ ValuePtr AtomSpace::value_at_index(size_t idx) const
 
 void AtomSpace::setAtomSpace(AtomSpace* as)
 {
-	// No-op. AtomSpaces cannot be "owned" by other AtomSpaces.
-	// Why? Well, right now, allowing this seems like an awkward
-	// thing to do. It's not clear how to think about this correctly.
-	// So we'll just pre-emptively disallow it.
+	if (as == _atom_space) return;
+
+	// This is identical to the code in Atom::setAtomSpace() except that
+	// we print a different error message. I see nothing wrong with
+	// having one AtomSpace be placed as a member into many others,
+	// except that we don't have any viable mechanisms for such multiple
+	// membership, and so I don't know how to treat this right now.
+	// Fixme maybe later someday, if/when this is needed.
+	if (not (nullptr == _atom_space or as == nullptr))
+		throw RuntimeException(TRACE_INFO,
+			"At this time, an AtomSpace can only be placed in one other\n"
+			"AtomSpace. If you are reading this error message and you don't\n"
+			"like it, please open a bug report\n");
+
+	_atom_space = as;
 }
 
 // ====================================================================
