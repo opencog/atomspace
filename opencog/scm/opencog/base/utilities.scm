@@ -205,7 +205,6 @@
 		(filter-map rpt tlist)
 	)
 )
-
 ; --------------------------------------------------------------------
 (define*-public (count-all #:optional (ATOMSPACE (cog-atomspace)))
 "
@@ -220,7 +219,8 @@
      cog-count-atoms -- which counts atoms of a given type.
      cog-report-counts -- which reports counts by type.
 "
-	(fold (lambda (typ cnt) (+ cnt (cog-count-atoms typ))) 0 (cog-get-types))
+	(fold (lambda (typ cnt) (+ cnt (cog-count-atoms typ ATOMSPACE)))
+		0 (cog-get-types))
 )
 
 ; -----------------------------------------------------------------------

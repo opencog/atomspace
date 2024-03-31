@@ -14,6 +14,13 @@
         #t
         guile> (cog-type? 'FlorgleBarf)
         #f
+
+    See also:
+        cog-type ATOM -- return the type of ATOM
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+        cog-link-type? TYPE -- return #t if TYPE is a Link type
+        cog-node-type? TYPE -- return #t if TYPE is a Node type
+        cog-value-type? TYPE -- return #t if TYPE is a Value type
 "
 	(cog-subtype? 'Value SYMBOL)
 )
@@ -31,6 +38,13 @@
         #f
         guile> (cog-node-type? 'FlorgleBarf)
         #f
+
+    See also:
+        cog-type? TYPE -- return #t if TYPE is a type
+        cog-type ATOM -- return the type of ATOM
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+        cog-link-type? TYPE -- return #t if TYPE is a Link type
+        cog-value-type? TYPE -- return #t if TYPE is a Value type
 "
 	(cog-subtype? 'Node SYMBOL)
 )
@@ -48,6 +62,13 @@
         #t
         guile> (cog-link-type? 'FlorgleBarf)
         #f
+
+    See also:
+        cog-node-type? TYPE -- return #t if TYPE is a Node type
+        cog-type? TYPE -- return #t if TYPE is a type
+        cog-type ATOM -- return the type of ATOM
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+        cog-value-type? TYPE -- return #t if TYPE is a Value type
 "
 	(cog-subtype? 'Link SYMBOL)
 )
@@ -68,6 +89,13 @@
         #t
         guile> (cog-type? 'FlorgleBarf)
         #f
+
+    See also:
+        cog-link-type? TYPE -- return #t if TYPE is a Link type
+        cog-node-type? TYPE -- return #t if TYPE is a Node type
+        cog-type? TYPE -- return #t if TYPE is a type
+        cog-type ATOM -- return the type of ATOM
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 "
 	(and (cog-subtype? 'Value SYMBOL) (not (cog-subtype? 'Atom SYMBOL)))
 )

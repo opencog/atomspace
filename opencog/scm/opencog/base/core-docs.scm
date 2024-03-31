@@ -337,6 +337,10 @@
 
     See also:
         cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+        cog-subtype? TYPE SUBTYPE -- return #t if SUBTYPE is a TYPE
+        cog-link-type? TYPE -- return #t if TYPE is a Link type
+        cog-node-type? TYPE -- return #t if TYPE is a Node type
+        cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
 (set-procedure-property! cog-arity 'documentation
@@ -1018,12 +1022,16 @@
 
     Example:
         guile> (cog-get-types)
+
+    See also:
+        cog-get-subtypes TYPE -- Return list of subtypes of TYPE.
 ")
 
 (set-procedure-property! cog-type->int 'documentation
 "
  cog-type->int TYPE
     Return the C++ internal type number assigned to an Atom TYPE.
+
     This provides access to the type numbering in the current C++
     AtomSpace session. The value is not universally unique, and may
     change from one session to the next. This function is for
@@ -1055,6 +1063,13 @@
         #t
         guile> (cog-subtype? 'Atom 'ConceptNode)
         #t
+
+    See also:
+        cog-type ATOM -- return the type of ATOM
+        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
+        cog-link-type? TYPE -- return #t if TYPE is a Link type
+        cog-node-type? TYPE -- return #t if TYPE is a Node type
+        cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
 (set-procedure-property! cog-map-type 'documentation
