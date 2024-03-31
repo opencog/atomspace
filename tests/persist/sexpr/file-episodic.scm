@@ -57,8 +57,13 @@
 ; Return to the main space.
 (cog-set-atomspace! base-space)
 
+(format #t "Actual counts are ~A ~A ~A\n"
+	(count-all)
+	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))
+	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem"))))
+
 ; Verify contents
-(test-assert "base-count" (equal? 13 (count-all)))
+(test-assert "base-count" (equal? 11 (count-all)))
 (test-assert "space1-count" (equal? 8
 	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
 (test-assert "space2-count" (equal? 6
@@ -87,11 +92,17 @@
 ; Return to home base.
 (cog-set-atomspace! base-space)
 
+; Verify that the contents are as expected
+(cog-prt-atomspace)
+(cog-prt-atomspace as-one)
+(cog-prt-atomspace as-two)
+
 ; clober temps
 (set! as-one #f)
 (set! as-two #f)
 (set! fsa #f)
 (set! fsb #f)
+(set! fsn #f)
 (gc) (gc)
 
 (cog-atomspace-clear)
@@ -100,33 +111,40 @@
 
 ; Load everything from the file.
 
-(define fsn (FileStorageNode "/tmp/foo"))
+(define gsn (FileStorageNode fbase))
+(define gsa (FileStorageNode fsub1))
+(define gsb (FileStorageNode fsub2))
 
-(cog-open fsn)
+(cog-open gsn)
 (load-atomspace)
-(cog-close fsn)
+(cog-close gsn)
 
-; Verify that the contents are as expected.
-(cog-prt-atomspace)
-(cog-keys (Concept "foo"))
-(cog-value (Concept "foo") (Predicate "real life"))
+(test-assert "base-count" (equal? 11 (count-all)))
+(test-assert "space1-count" (equal? 0
+	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
+(test-assert "space2-count" (equal? 0
+	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem")))))
 
 ; Now, restore the two batches of episodic memories.
 (define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
-(define fsa (FileStorageNode "/tmp/foo-one"))
-(define fsb (FileStorageNode "/tmp/foo-two"))
-(cog-open fsa)
-(cog-open fsb)
+(cog-open gsa)
+(cog-open gsb)
 (cog-set-atomspace! as-one)
-(load-atomspace fsa)
-(cog-close fsa)
+(load-atomspace gsa)
+(cog-close gsa)
 (cog-set-atomspace! as-two)
-(load-atomspace fsb)
-(cog-close fsb)
+(load-atomspace gsb)
+(cog-close gsb)
 
 ; Return to home base.
 (cog-set-atomspace! base-space)
+
+(test-assert "base-count" (equal? 11 (count-all)))
+(test-assert "space1-count" (equal? 8
+	(count-all (cog-value (ConceptNode "foo") (Predicate "real life")))))
+(test-assert "space2-count" (equal? 6
+	(count-all (cog-value (ConceptNode "foo") (Predicate "repressed mem")))))
 
 ; Verify that the contents are as expected
 (cog-prt-atomspace)
