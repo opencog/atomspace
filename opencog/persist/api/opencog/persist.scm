@@ -443,7 +443,7 @@
     store-atomspace -- store all Atoms in the AtomSpace.
 "
 	; Sort out which of two opional args showed up.
-	(if (cog-subtype? 'StorageNode (cog-type ATOMSPACE))
+	(if (and ATOMSPACE (cog-subtype? 'StorageNode (cog-type ATOMSPACE)))
 		(begin
 			(set! STORAGE ATOMSPACE)
 			(set! ATOMSPACE (cog-atomspace))))
@@ -483,7 +483,7 @@
     store-referrers ATOM -- store all graphs that contain ATOM.
 "
 	; Sort out which of two opional args showed up.
-	(if (cog-subtype? 'StorageNode (cog-type ATOMSPACE))
+	(if (and ATOMSPACE (cog-subtype? 'StorageNode (cog-type ATOMSPACE)))
 		(begin
 			(set! STORAGE ATOMSPACE)
 			(set! ATOMSPACE (cog-atomspace))))
