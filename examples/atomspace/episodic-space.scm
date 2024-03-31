@@ -212,17 +212,18 @@
 
 (cog-open rsn)
 (store-atomspace)
-(cog-close rsn)
+; The store-atomspace function will accept an AtomSpace as an optional
+; argument, in which case it will be stored, instead of the current
+; AtomSpace. So, for example:
+(store-atomspace (AtomSpace "happy thoughts"))
 
-(define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
-(define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
-
-(cog-open rsn)
-(store-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
+; This also works:
 (store-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 (cog-close rsn)
 
 ; ------------------------------------------------------
+; As above, exit guile, and then restart from scratch. The below will
+; restore everything that was saved.
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
@@ -231,10 +232,30 @@
 (define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
 (cog-open rsn)
-(load-frames)
 (load-atomspace)
 (cog-close rsn)
 (cog-prt-atomspace)
 
-(cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "real life")))
-(cog-prt-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+; Don't need to actually call `(cog-close rsn)` above, but it does show
+; that it's harmles to close & reopen the database.
+
+; Some short-hand, convenient defines.
+(define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
+(define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+
+(cog-open rsn)
+; Here's one way to restore:
+(load-atomspace as-one)
+
+; Here's anothe way. It results in the same thing.
+(cog-set-atomspace! as-two)
+(load-atomspace)
+(cog-set-atomspace! base-space)
+(cog-close rsn)
+
+; Verify that everything looks as expected.
+(cog-prt-atomspace as-one)
+(cog-prt-atomspace as-two)
+(cog-prt-atomspace)
+
+; ---- THE END. That's all, folks! ----
