@@ -442,6 +442,12 @@
     load-frames -- load DAG of AtomSpaces.
     store-atomspace -- store all Atoms in the AtomSpace.
 "
+	; Sort out which of two opional args showed up.
+	(if (cog-subtype? 'StorageNode (cog-type ATOMSPACE))
+		(begin
+			(set! STORAGE ATOMSPACE)
+			(set! ATOMSPACE (cog-atomspace))))
+
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
 	(if STORAGE (sn-load-atomspace ATOMSPACE STORAGE)
 		(dflt-load-atomspace ATOMSPACE))
@@ -476,6 +482,12 @@
     store-atom ATOM -- store one ATOM and all of the values on it.
     store-referrers ATOM -- store all graphs that contain ATOM.
 "
+	; Sort out which of two opional args showed up.
+	(if (cog-subtype? 'StorageNode (cog-type ATOMSPACE))
+		(begin
+			(set! STORAGE ATOMSPACE)
+			(set! ATOMSPACE (cog-atomspace))))
+
 	(if (not ATOMSPACE) (set! ATOMSPACE (cog-atomspace)))
 	(if STORAGE (sn-store-atomspace ATOMSPACE STORAGE)
 		(dflt-store-atomspace ATOMSPACE))
