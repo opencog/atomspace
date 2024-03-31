@@ -2,7 +2,7 @@
 ; episodic-space.scm -- Demo of storing AtomSpaces within Atoms
 ;
 ; There are many ways to represent episodic memories; one particularly
-; intersting one is to store them into AtomSpaces that are then attached
+; interesting one is to store them into AtomSpaces that are then attached
 ; as a Value on an Atom. This offers several benefits over other
 ; representations: the entire collection can be treated as a coherent
 ; whole, and thus added or removed at will. Atoms located in such spaces
@@ -22,8 +22,8 @@
 ; Add some Atom. Anything will do.
 (ConceptNode "foo")
 
-; Breif review of how Values work. Values can be vectors of numbers,
-; srings, or even of other Atoms. In just a moment, we'll also be
+; Brief review of how Values work. Values can be vectors of numbers,
+; strings, or even of other Atoms. In just a moment, we'll also be
 ; attaching AtomSpaces, as well.
 (cog-set-value!
 	(ConceptNode "foo") (Predicate "bunch o numbers")
@@ -65,7 +65,7 @@
 
 ; To continue with the demo, populate these AtomSpaces with some data.
 ; Since the guile bindings always work with a current atomspace (per
-; thread), we have to swtich to that to use it.
+; thread), we have to switch to that to use it.
 (define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
 (cog-set-atomspace! as-one)
 
@@ -130,7 +130,7 @@
 
 ; Now, edit `/tmp/foo` with your favorite file editor. Notice that
 ; it contains the contents of the main space, but NOT of the episodic
-; spaces. These need to be saved explicitly, and in seperate files.
+; spaces. These need to be saved explicitly, and in separate files.
 ; Why? The whole point of episodic memory is that you don't have to
 ; deal with one giant ball with everything in it; instead, you can work
 ; with only those chunks that you want and need, when you want them,
@@ -162,7 +162,7 @@
 ; from the saved files.
 ;
 ; The code below is nearly identical to the store code above, except
-; that it loads, instead of storing. Otherise, its just a cut-n-paste.
+; that it loads, instead of storing. Otherwise, its just a cut-n-paste.
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-file))
@@ -247,7 +247,7 @@
 ; Here's one way to restore:
 (load-atomspace as-one)
 
-; Here's anothe way. It results in the same thing.
+; Here's another way. It results in the same thing.
 (cog-set-atomspace! as-two)
 (load-atomspace)
 (cog-set-atomspace! base-space)
