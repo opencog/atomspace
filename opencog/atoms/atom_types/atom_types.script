@@ -1072,7 +1072,7 @@ THREAD_JOIN_LINK <- PARALLEL_LINK
 
 // Somewhat like ThreadJoinLink, except that this works with executable,
 // not evaluatable links.
-EXECUTE_THREADED_LINK <- ORDERED_LINK
+EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
 
 // Everything under a PureExecLink is executed in a different AtomSpace.
 // This is used to isolate the present AtomSpace from the execution
