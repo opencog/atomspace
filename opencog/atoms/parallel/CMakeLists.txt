@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (parallel
 	ExecuteThreadedLink.cc
 	ParallelLink.cc
+	PureExecLink.cc
 	ThreadJoinLink.cc
 )
 
@@ -23,6 +24,7 @@ INSTALL (TARGETS parallel
 INSTALL (FILES
 	ExecuteThreadedLink.h
 	ParallelLink.h
+	PureExecLink.h
 	ThreadJoinLink.h
 	DESTINATION "include/opencog/atoms/parallel"
 )
