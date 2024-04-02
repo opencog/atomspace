@@ -380,7 +380,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	}
 
 	// LambdaLink may get special treatment in case it is used for
-	// pattern matching. For instance if a connector is quoted, we
+	// pattern matching. For instance, if a connector is quoted, we
 	// don't want to consume that quote otherwise the connector will
 	// serve as a logic connector to the pattern matcher instead of
 	// serving as self-match.
@@ -448,13 +448,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
 
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		Handle eolh = reduce_exout(expr, ist);
-		return HandleCast(eolh->execute(_as, ist._silent));
-	}
-
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
 	{
@@ -467,26 +460,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
 
 		return HandleCast(flh->execute(_as, ist._silent));
-	}
-
-	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
-	// we have to perform it and return the satisfying set.
-	if (nameserver().isA(t, SATISFYING_LINK))
-	{
-		// XXX I don't get it... don't we need to perform var
-		// substitution here? Is this just not tested?
-		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, ist._silent));
-	}
-
-	// If there is a JoinLink
-	// we have to perform it and return the satisfying set.
-	if (nameserver().isA(t, JOIN_LINK))
-	{
-		// XXX I don't get it... don't we need to perform var
-		// substitution here? Is this just not tested?
-		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, ist._silent));
 	}
 
 	// Do not reduce FormulaPredicateLink. That is because it contains
@@ -704,6 +677,14 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		throw RuntimeException(TRACE_INFO,
 			"Can't execute: current AtomSpace is %lu but atom is in AtomSpace %lu",
 			_as->get_uuid(), exas->get_uuid());
+
+	// Expand on the spot.
+	if (expr->is_type(DEFINED_SCHEMA_NODE))
+	{
+		Handle dex = DefineLink::get_definition(expr);
+		if (dex->is_type(EXECUTABLE_LINK))
+			return dex->execute(_as, silent);
+	}
 
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet. The ones that are, we've tagged as

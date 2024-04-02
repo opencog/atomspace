@@ -77,7 +77,7 @@
 	(NumberNode 2)))
 
 ; ---------------------------------
-; AS-MOSES uses this to simplify kobby trees
+; AS-MOSES uses PutLink to simplify knobby trees
 
 (define sub-expr
    (AndLink

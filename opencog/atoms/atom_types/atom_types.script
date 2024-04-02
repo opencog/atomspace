@@ -1052,7 +1052,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 
 // Conditional if-then-else list. First term must evaluate to crisp
 // true/false. If true, then the second term is returned, else the
-// third term If there are more than three terms, this repeats: so
+// third term. If there are more than three terms, this repeats: so
 // odd terms must evaluate to true/false, resulting in the return of
 // the first even term which followed the first true evaluation.
 COND_LINK <- FUNCTION_LINK
