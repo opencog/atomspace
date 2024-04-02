@@ -469,26 +469,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return HandleCast(flh->execute(_as, ist._silent));
 	}
 
-	// If there is a SatisfyingLink (e.g. GetLink, BindLink, etc.),
-	// we have to perform it and return the satisfying set.
-	if (nameserver().isA(t, SATISFYING_LINK))
-	{
-		// XXX I don't get it... don't we need to perform var
-		// substitution here? Is this just not tested?
-		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, ist._silent));
-	}
-
-	// If there is a JoinLink
-	// we have to perform it and return the satisfying set.
-	if (nameserver().isA(t, JOIN_LINK))
-	{
-		// XXX I don't get it... don't we need to perform var
-		// substitution here? Is this just not tested?
-		// beta_reduce(expr, ist._varmap);
-		return HandleCast(expr->execute(_as, ist._silent));
-	}
-
 	// Do not reduce FormulaPredicateLink. That is because it contains
 	// formulas that we will need to re-evaluate in the future, so we
 	// must not clobber them.

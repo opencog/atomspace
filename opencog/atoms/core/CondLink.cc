@@ -48,9 +48,9 @@ void CondLink::init(void)
 			continue;
 		}
 
-		// If cond_link starts wrapping conds and exps in list_link, then it is
-		// expected to be consistent. If one wants to have a default expression
-		// using true_link as condition should do it.
+		// If CondLink starts wrapping conds and exprs in ListLink,
+		//	then it is expected to be consistent. If one wants to have
+		// a default expression, using TrueLink as condition should do it.
 		if (i != 0 && LIST_LINK == _outgoing[i - 1]->get_type())
 			throw SyntaxException(TRACE_INFO,
 			                      "CondLink is expected to wrap expressions in LIST_LINK.");
