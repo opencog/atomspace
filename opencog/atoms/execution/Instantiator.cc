@@ -678,6 +678,14 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 			"Can't execute: current AtomSpace is %lu but atom is in AtomSpace %lu",
 			_as->get_uuid(), exas->get_uuid());
 
+	// Expand on the spot.
+	if (expr->is_type(DEFINED_SCHEMA_NODE))
+	{
+		Handle dex = DefineLink::get_definition(expr);
+		if (dex->is_type(EXECUTABLE_LINK))
+			return dex->execute(_as, silent);
+	}
+
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet. The ones that are, we've tagged as
 	// being of type EXECUTABLE_LINK in the type definitions.
