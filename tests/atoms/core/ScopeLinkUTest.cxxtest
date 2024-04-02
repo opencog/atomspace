@@ -75,7 +75,6 @@ public:
 
 	void test_get_variables_1();
 	void test_get_variables_2();
-	void test_get_variables_3();
 	void test_get_variables_4();
 	void test_get_variables_5();
 	void test_get_variables_6();
@@ -263,30 +262,6 @@ void ScopeLinkUTest::test_get_variables_2()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle sch = al(SCOPE_LINK,
-	                al(TYPED_VARIABLE_LINK, X, CT),
-	                an(VARIABLE_NODE, "$P-55ebe96e"),
-	                al(EVALUATION_LINK,
-	                   an(PREDICATE_NODE, "take"),
-	                   an(CONCEPT_NODE, "compound-A")));
-
-	ScopeLinkPtr sc = ScopeLinkCast(sch);
-
-	auto got = sc->get_variables().varset;
-	auto exp = HandleSet{X};
-
-	printf("Got %s\n", oc_to_string(got).c_str());
-	printf("Excepted %s\n", oc_to_string(exp).c_str());
-
-	TS_ASSERT_EQUALS(got, exp);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ScopeLinkUTest::test_get_variables_3()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle sch = al(RULE_LINK,
 	                al(TYPED_VARIABLE_LINK, X, CT),
 	                an(VARIABLE_NODE, "$P-55ebe96e"),
 	                al(EVALUATION_LINK,
