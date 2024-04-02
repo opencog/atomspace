@@ -631,14 +631,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return eolh->execute(_as, silent);
 	}
 
-	// ExecuteThreadedLinks
-	if (EXECUTE_THREADED_LINK == t)
-	{
-		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
-		return expr->execute(_as, silent);
-	}
-
 	// The thread-links are ambiguously executable/evaluatable.
 	if (nameserver().isA(t, PARALLEL_LINK))
 	{
