@@ -79,6 +79,8 @@ void FilterLink::init(void)
 	if (nameserver().isA(tscope, RULE_LINK))
 		_rewrite = RuleLinkCast(_pattern)->get_implicand();
 
+#ifdef IMPLICATION_SCOPE_LINK
+// XXX Remove this one URE is truly dead. Perhaps in 2025?
 	// The URE ControlPolicyUTest makes use of this, and we cannot
 	// yet use RuleLink, above, to handle this, because then
 	// the URE BackwardChainerUTest hangs. Argh...
@@ -112,6 +114,7 @@ void FilterLink::init(void)
 		// fixed. In the meanwhile, we clean up here.
 		_pattern->trim({_pattern->get_body()});
 	}
+#endif //IMPLICATION_SCOPE_LINK
 
 	// Locate all GlobNodes in the pattern
 	FindAtoms fgn(GLOB_NODE, true);
