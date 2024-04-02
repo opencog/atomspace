@@ -380,7 +380,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	}
 
 	// LambdaLink may get special treatment in case it is used for
-	// pattern matching. For instance if a connector is quoted, we
+	// pattern matching. For instance, if a connector is quoted, we
 	// don't want to consume that quote otherwise the connector will
 	// serve as a logic connector to the pattern matcher instead of
 	// serving as self-match.
@@ -447,13 +447,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
-
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		Handle eolh = reduce_exout(expr, ist);
-		return HandleCast(eolh->execute(_as, ist._silent));
-	}
 
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
