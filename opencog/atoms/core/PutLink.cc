@@ -254,7 +254,13 @@ void PutLink::static_typecheck_arguments(void)
 static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
-	return subs->beta_reduce(oset);
+	Handle h(subs->beta_reduce(oset));
+	// DontExecUTest wants is to eat DontExecLink's.
+	// I'm not convinced this is a wise idea, but that's what's
+	// tested, for now. I guess the URE was expecting this. Beats me.
+	if (DONT_EXEC_LINK == h->get_type())
+		return h->getOutgoingAtom(0);
+	return h;
 }
 
 // If arg is executable, then run it, and unwrap the set link, too.
@@ -577,6 +583,9 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 		return as->add_atom(h);
 	}
 	ValuePtr vex = h->execute(as, silent);
+	// Put's into DeleteLink will return null pointer.
+	if (nullptr == vex) return vex;
+
 	if (vex->is_atom())
 		return as->add_atom(HandleCast(vex));
 	return vex;
