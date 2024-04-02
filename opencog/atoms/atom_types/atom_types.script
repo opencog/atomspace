@@ -1074,6 +1074,11 @@ THREAD_JOIN_LINK <- PARALLEL_LINK
 // not evaluatable links.
 EXECUTE_THREADED_LINK <- ORDERED_LINK
 
+// Everything under a PureExecLink is executed in a different AtomSpace.
+// This is used to isolate the present AtomSpace from the execution
+// results. If no AtomSpace is specified, a temporary is created.
+PURE_EXEC_LINK <- ORDERED_LINK
+
 // ==============================================================
 // Procedure and schema nodes.
 //
