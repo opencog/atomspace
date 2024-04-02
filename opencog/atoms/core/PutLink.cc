@@ -23,6 +23,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "DefineLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
@@ -573,9 +574,12 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	    nameserver().isA(t, SET_VALUE_LINK) or
 	    (DONT_EXEC_LINK == t))
 	{
-		return h;
+		return as->add_atom(h);
 	}
-	return h->execute(as, silent);
+	ValuePtr vex = h->execute(as, silent);
+	if (vex->is_atom())
+		return as->add_atom(HandleCast(vex));
+	return vex;
 #endif
 }
 
