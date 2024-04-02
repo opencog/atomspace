@@ -286,7 +286,7 @@ void ScopeLinkUTest::test_get_variables_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle sch = al(IMPLICATION_SCOPE_LINK,
+	Handle sch = al(RULE_LINK,
 	                al(TYPED_VARIABLE_LINK, X, CT),
 	                an(VARIABLE_NODE, "$P-55ebe96e"),
 	                al(EVALUATION_LINK,
@@ -411,7 +411,7 @@ void ScopeLinkUTest::test_get_variables_7()
 	Handle vardecl = al(VARIABLE_SET, U, V);
 	Handle ante = al(SIMILARITY_LINK, U, V);
 	Handle cnse = alt_al(INHERITANCE_LINK, altU, altV);
-	Handle sch = alt_al(IMPLICATION_SCOPE_LINK, vardecl, ante, cnse);
+	Handle sch = alt_al(RULE_LINK, vardecl, ante, cnse);
 #undef alt_al
 #undef alt_an
 

@@ -26,7 +26,7 @@
 ;; This is to make sure that the following ill-formed scope link isn't
 ;; created
 ;;
-;; (ImplicationScopeLink
+;; (RuleLink
 ;;   (TypedVariableLink
 ;;     (ConceptNode "ChurchOfEngland")
 ;;     (TypeChoice
@@ -67,7 +67,7 @@
          (VariableNode "?C")
          (ConceptNode "AnglicanChurch")
       )
-      (ImplicationScopeLink
+      (RuleLink
          (TypedVariableLink
             (VariableNode "?C")
             (TypeChoice

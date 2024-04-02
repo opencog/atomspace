@@ -411,7 +411,7 @@ void StateLinkUTest::test_scope()
 	// -------------------------------------------
 	// Alternate data
 	Handle scoped =
-	L(IMPLICATION_SCOPE_LINK,
+	L(RULE_LINK,
 			L(EVALUATION_LINK,
 				N(PREDICATE_NODE, "predatory"),
 				L(LIST_LINK, N(VARIABLE_NODE, "$foo"))),
@@ -421,7 +421,7 @@ void StateLinkUTest::test_scope()
 	Handle scoped_get =
 		L(GET_LINK,
 			L(TYPED_VARIABLE_LINK,
-				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "ImplicationScopeLink")),
+				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "RuleLink")),
 			L(STATE_LINK, N(ANCHOR_NODE, "rule"), N(VARIABLE_NODE, "$x")));
 
 	Handle sgotten = HandleCast(inst.execute(scoped_get));

@@ -71,7 +71,7 @@ public:
 	void test_function(void);
 	void test_lambda(void);
 	void test_lambda_get(void);
-	void test_implication_scope(void);
+	void test_rule(void);
 	void test_variable_schema(void);
 	void test_exec_variable(void);
 };
@@ -506,19 +506,19 @@ void ExecutionOutputUTest::test_lambda_get(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test not touching a closed ImplicationScope in argument of the
+// Test not touching a closed Rule in argument of the
 // ExecutionOutputLink, the rewriting term of a BindLink.
-void ExecutionOutputUTest::test_implication_scope(void)
+void ExecutionOutputUTest::test_rule(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec-implication-scope.scm\")");
+	eval.eval("(load-from-path \"tests/query/exec-rule.scm\")");
 	Handle bl = eval.eval_h("bl");
 
 	Instantiator inst(as.get());
 	Handle result = HandleCast(inst.execute(bl));
 	Handle expect = al(SET_LINK,
-	                   al(IMPLICATION_SCOPE_LINK,
+	                   al(RULE_LINK,
 	                      al(EVALUATION_LINK,
 	                         an(PREDICATE_NODE, "P"),
 	                         an(VARIABLE_NODE, "$X")),

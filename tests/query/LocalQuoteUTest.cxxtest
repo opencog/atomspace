@@ -105,20 +105,20 @@ void LocalQuoteUTest::test_get()
 }
 
 /**
- * LocalQuoteLink unit test on a ImplicationScope rewrite using a Put
+ * LocalQuoteLink unit test on a RuleLink rewrite using a Put
  */
 void LocalQuoteUTest::test_put()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle
-		body = al(LOCAL_QUOTE_LINK, al(IMPLICATION_SCOPE_LINK, P_X, P_X)),
+		body = al(LOCAL_QUOTE_LINK, al(RULE_LINK, P_X, P_X)),
 		vardecl = al(TYPED_VARIABLE_LINK, X, CT),
 		put = al(PUT_LINK, al(LAMBDA_LINK, vardecl, body), A);
 
 	Instantiator inst(_as.get());
 	Handle putted = HandleCast(inst.execute(put));
-	Handle expected = al(IMPLICATION_SCOPE_LINK, P_A, P_A);
+	Handle expected = al(RULE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->to_string().c_str());
 	printf("Expecting %s\n", expected->to_string().c_str());
@@ -132,24 +132,24 @@ void LocalQuoteUTest::test_put()
 // variables in clause has been fixed.
 //
 // /**
-//  * LocalQuoteLink unit test on a ImplicationScope rewrite using a Bind
+//  * LocalQuoteLink unit test on a Rule rewrite using a Bind
 //  */
 // void LocalQuoteUTest::test_bind()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	// Meta rule, given an ImplicationScopeLink creates a
+// 	// Meta rule, given an RuleLink creates a
 // 	// corresponding BindLink
 // 	Handle bl = al(BIND_LINK,
 // 	               al(LOCAL_QUOTE_LINK,
-// 	                  al(IMPLICATION_SCOPE_LINK,
+// 	                  al(RULE_LINK,
 // 	                     vardecl_var, body_var, rewrite_var)),
 // 	               al(LOCAL_QUOTE_LINK,
 // 	                  al(BIND_LINK,
 // 	                     vardecl_var, body_var, rewrite_var)));
 
 // 	// Implication to serve as grounding for the meta rule
-// 	Handle impl = al(IMPLICATION_SCOPE_LINK,
+// 	Handle impl = al(RULE_LINK,
 // 	                 al(TYPED_VARIABLE_LINK, X, CT), P_X, Q_X);
 
 // 	// Result

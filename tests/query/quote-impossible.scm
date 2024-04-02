@@ -12,7 +12,7 @@
       (TypeNode "PredicateNode"))
     (AndLink
       (VariableNode "$A")
-      (ImplicationScopeLink
+      (RuleLink
         (VariableNode "$A")
         (QuoteLink
           (InheritanceLink

@@ -6,7 +6,7 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
-(ImplicationScopeLink (stv .99 .99)
+(RuleLink (stv .99 .99)
     (AndLink
         (InheritanceLink
             (VariableNode "$x")
