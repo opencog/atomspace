@@ -1150,15 +1150,6 @@ DIRECTLY_EVALUATABLE_LINK <- LINK
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink
 // for more information
 IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
-
-// ImplicationScopeLink is a synonym for RuleLink, as far as I can tell.
-// It is used by PLN to do more or less the same thing as RuleLink.
-// Except that BackwardChainerUTest hangs when it inherits from
-// RuleLink, because RuleLink::execute() does something that URE isn't
-// expecting. At any rate, it should be moved there. XXX FIXME.
-// IMPLICATION_SCOPE_LINK <- RULE_LINK
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK
-
 INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
 // Logical quantifiers (adjoints to pullbacks of relations). Both are
@@ -1178,7 +1169,7 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // for knowledge representation.
 //
 // In reality, its a mish-mash. Currently, these are used only in unit
-// tests.  They're somwhat poorly defined. They are currently defined
+// tests.  They're somewhat poorly defined. They are currently defined
 // to inherit from CollectionLink, thus allowing them to be set-valued,
 // and used in probabilistic contexts.
 FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
@@ -1194,18 +1185,5 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 // Used only in unit tests, at this time.
 EQUIVALENCE_LINK <- UNORDERED_LINK
 
-// A poorly-defined link that is used for something in some way.
-// Seems to be of central importance to the URE, but is not otherwise
-// documented! We define it here, because the URE does not define
-// any custom types itself.
+// Undocumented mystery link. Used in unit tests.
 EXECUTION_LINK <- ORDERED_LINK
-
-// Mystery link used by URE in it's unit tests. It is not documented
-// anywhere that I know of. But since URE does not define it's own
-// custom Atom types ... we keep it here, for now. XXX FIXME
-ATTRACTION_LINK <- ORDERED_LINK
-
-// Used in the URE unit tests. XXX FIXME the URE unit tests should
-// define their own custom test types, rather than expecting us to
-// provide them XXX FIXME
-INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK

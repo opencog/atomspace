@@ -1180,7 +1180,7 @@ void PutLinkUTest::test_eval_inheritance()
  *          (VariableNode "$X")
  *          (TypeNode "ConceptNode")
  *       )
- *       (ImplicationScopeLink
+ *       (RuleLink
  *          (EvaluationLink
  *             (PredicateNode "P")
  *             (VariableNode "$X")
@@ -1205,7 +1205,7 @@ void PutLinkUTest::test_eval_implication_1()
 		P_X = L(EVALUATION_LINK, P, X),
 		P_A = L(EVALUATION_LINK, P, A),
 		body = L(QUOTE_LINK,
-		         L(IMPLICATION_SCOPE_LINK,
+		         L(RULE_LINK,
 		           L(UNQUOTE_LINK, P_X),
 		           L(UNQUOTE_LINK, P_X))),
 		vardecl = L(TYPED_VARIABLE_LINK, X, CT),
@@ -1213,7 +1213,7 @@ void PutLinkUTest::test_eval_implication_1()
 
 	Instantiator inst(_asp.get());
 	Handle putted = HandleCast(inst.execute(put));
-	Handle expected = L(IMPLICATION_SCOPE_LINK, P_A, P_A);
+	Handle expected = L(RULE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->to_string().c_str());
 	printf("Expecting %s\n", expected->to_string().c_str());

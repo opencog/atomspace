@@ -5,7 +5,7 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-(ImplicationScope
+(Rule
 	(TypedVariable (Variable "X") (Type 'Concept))
 	(Member (Variable "X") (Concept "foo"))
 	(Member (Concept "bar") (Variable "X")))
@@ -20,7 +20,7 @@
 				(TypeChoice (Type "TypedVariable") (Type "VariableList"))))
 		(Present
 			(Quote
-				(ImplicationScope
+				(Rule
 					(Unquote (Variable "$TyVs"))
 					(Unquote (Variable "$P"))
 					(Unquote (Variable "$Q")))))))

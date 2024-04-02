@@ -67,7 +67,7 @@ public:
 	void test_quote();
 	void test_hide_1();
 	void test_hide_2();
-	void test_implication_scope();
+	void test_rule();
 	void test_ill_bind();
 	void test_trivial_scope();
 };
@@ -281,12 +281,12 @@ void ScopeUTest::test_hide_2()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void ScopeUTest::test_implication_scope()
+void ScopeUTest::test_rule()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle ground = eval->eval_h(
-		"(ImplicationScopeLink"
+		"(RuleLink"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$A\")"
 		"    (TypeNode \"BindLink\"))"
@@ -298,7 +298,7 @@ void ScopeUTest::test_implication_scope()
 		"  (TypedVariableLink"
 		"    (VariableNode \"$Rule\")"
 		"    (TypeNode \"DefinedSchemaNode\"))"
-		"  (ImplicationScopeLink"
+		"  (RuleLink"
 		"    (TypedVariableLink"
 		"      (VariableNode \"$A\")"
 		"      (TypeNode \"BindLink\"))"
