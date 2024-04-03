@@ -635,6 +635,9 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		// Handle grounded(HandleCast(reduced));
 		Handle grounded(walk_tree(HandleCast(reduced), ist));
 
+		// (PutLink (DeleteLink ...)) returns nullptr
+		if (nullptr == grounded) return nullptr;
+
 		// Handle the case where (Put (Lambda...)) is being used
 		// for (Query vars body (Put (Lambda ...) query-results))
 		Type lt = expr->getOutgoingAtom(0)->get_type();
