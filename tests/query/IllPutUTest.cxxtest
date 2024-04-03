@@ -82,17 +82,17 @@ void IllPutUTest::test_ill_put()
 	Handle get_put = _eval.eval_h("get-put");
 
 	bool caught = false;
-   try 
-   {
+	try
+	{
 		Handle results = satisfying_set(_as, get_put);
-   }
-   catch (const RuntimeException& ex) 
-   {
-       logger().set_level(Logger::INFO);
-       logger().info("Caught exception, just as expected: %s", ex.get_message());
-       caught = true;
-   }
-   TSM_ASSERT("Failed to catch expected exception", caught);
+	}
+	catch (const RuntimeException& ex)
+	{
+		 logger().set_level(Logger::INFO);
+		 logger().info("Caught exception, just as expected: %s", ex.get_message());
+		 caught = true;
+	}
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
