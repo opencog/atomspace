@@ -274,9 +274,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			return expr;
 		}
 
+#if 1 // Needed for DefinedSchemaUTest
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 			return walk_tree(DefineLink::get_definition(expr), ist);
+#endif
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
@@ -326,6 +328,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return HandleCast(grounded->execute(_as, true));
 	}
 
+#if 1 // Needed for QuotationUTest
 	// LambdaLink may get special treatment in case it is used for
 	// pattern matching. For instance, if a connector is quoted, we
 	// don't want to consume that quote otherwise the connector will
@@ -376,7 +379,9 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		}
 		return expr;
 	}
+#endif
 
+#if 1 // Needed for FiniteStateMachineUTest
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
 	if (DELETE_LINK == t)
@@ -391,9 +396,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		}
 		return Handle::UNDEFINED;
 	}
+#endif
 
+#if 1 // tested in ExecutionOutputUTest EvaluationUTest
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
+#endif
 
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
