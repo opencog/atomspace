@@ -320,63 +320,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		goto mere_recursive_call;
 	}
 
-	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		// Avoid infinite recursion expanding Schema inside of PutLinks.
-		if (ist._inside_evaluation and
-		    DEFINED_SCHEMA_NODE == expr->getOutgoingAtom(0)->get_type())
-			return expr;
-
-		// Step one: perform variable substitutions
-		Handle hexpr(beta_reduce(expr, ist._varmap));
-		PutLinkPtr ppp(PutLinkCast(hexpr));
-
-		// Step two: beta-reduce.
-		// Beta reduction of DeleteLink will return a null pointer.
-		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
-		if (nullptr == red)
-			return red;
-
-		// Step three: execute the resulting body.
-		// (unless its not executable)
-		if (DONT_EXEC_LINK == red->get_type())
-			return red->getOutgoingAtom(0);
-
-		// In some perfect world, calling execute() on the PutLink
-		// should have been enough. Unfortunately, the PutLinkUTest
-		// has many tests where PutLinks appear at random locations
-		// in non-execuatable contexts, and the only way to find them
-		// and run them is to call walk_tree(). So we must make this
-		// call. Were it not for this, much of this code would simplify.
-		Handle rex(walk_tree(red, ist));
-
-		// Rewalk of things returning ValuePtr's and not handles
-		// will look like null pointers. We're done, in this case.
-		if (nullptr == rex) return red;
-
-		// Step four: XXX this is awkward, but seems to be needed...
-		// If the result is evaluatable, then evaluate it. e.g. if the
-		// result has a GroundedPredicateNode, we need to run it now.
-		// Anyway, do_evaluate() will throw if rex is not evaluatable.
-		//
-		// The DontExecLink is a weird hack to halt evaluation.
-		// We unwrap it and throw it away when encountered.
-		// Some long-term fix is needed that avoids this step-four
-		// entirely. Wouldn't QuoteLink be better? Why not use QuoteLink?
-		if (SET_LINK == rex->get_type())
-		{
-			HandleSeq unwrap;
-			for (const Handle& plo : rex->getOutgoingSet())
-			{
-				if (DONT_EXEC_LINK == plo->get_type())
-					unwrap.push_back(plo->getOutgoingAtom(0));
-				else
-					unwrap.push_back(plo);
-			}
-			return createLink(std::move(unwrap), SET_LINK);
-		}
-		return rex;
+		Handle grounded(HandleCast(beta_reduce(expr, ist._varmap)));
+		return HandleCast(grounded->execute(_as, true));
 	}
 
 	// LambdaLink may get special treatment in case it is used for
