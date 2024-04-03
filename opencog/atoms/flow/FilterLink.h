@@ -61,7 +61,7 @@ protected:
 	             AtomSpace*, bool,
 	             Quotation quotation=Quotation()) const;
 
-	Handle rewrite_one(const Handle&, AtomSpace*, bool) const;
+	ValuePtr rewrite_one(const ValuePtr&, AtomSpace*, bool) const;
 
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);

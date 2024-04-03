@@ -320,9 +320,12 @@ bool FilterLink::extract(const Handle& termpat,
 
 // ====================================================================
 
-Handle FilterLink::rewrite_one(const Handle& cterm,
+ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
                                AtomSpace* scratch, bool silent) const
 {
+	// temp hack
+	Handle cterm(HandleCast(vterm));
+
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
@@ -395,10 +398,10 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		// and perform filtering on-demand.
 		if (vex->is_type(LINK_VALUE))
 		{
-			HandleSeq remap;
-			for (const Handle& h : LinkValueCast(vex)->to_handle_seq())
+			ValueSeq remap;
+			for (const ValuePtr& vp : LinkValueCast(vex)->value())
 			{
-				Handle mone = rewrite_one(h, as, silent);
+				ValuePtr mone = rewrite_one(vp, as, silent);
 				if (nullptr != mone) remap.emplace_back(mone);
 			}
 			return createLinkValue(remap);
@@ -422,14 +425,14 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
-			Handle mone = rewrite_one(h, as, silent);
+			Handle mone = HandleCast(rewrite_one(h, as, silent));
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
 		return as->add_link(argtype, std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = rewrite_one(valh, as, silent);
+	Handle mone = HandleCast(rewrite_one(valh, as, silent));
 	if (mone) return mone;
 
 	// Avoid returning null pointer!
