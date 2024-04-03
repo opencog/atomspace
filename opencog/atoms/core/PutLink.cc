@@ -255,6 +255,7 @@ static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
 	Handle h(subs->beta_reduce(oset));
+
 	// DontExecUTest wants is to eat DontExecLink's.
 	// I'm not convinced this is a wise idea, but that's what's
 	// tested, for now. I guess the URE was expecting this. Beats me.
@@ -408,8 +409,9 @@ Handle PutLink::do_reduce(void) const
 	Type vtype = vargs->get_type();
 	size_t nvars = vars.varseq.size();
 
-	// FunctionLinks behave like pointless lambdas; that is, one can
-	// create valid beta-redexes with them. We handle that here.
+	// FunctionLinks behave like locale-less (pointless) lambdas;
+	// that is, one can create valid beta-redexes with them.
+	// We handle that here.
 	//
 	// At this time, we don't know the number of arguments any given
 	// FunctionLink might take.  Atomese does have the mechanisms
@@ -582,8 +584,10 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	{
 		return as->add_atom(h);
 	}
+
 	ValuePtr vex = h->execute(as, silent);
-	// Put's into DeleteLink will return null pointer.
+
+	// (PutlLink (DeleteLink will return null pointer.
 	if (nullptr == vex) return vex;
 
 	if (vex->is_atom())
