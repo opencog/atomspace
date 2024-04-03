@@ -462,12 +462,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return HandleCast(flh->execute(_as, ist._silent));
 	}
 
-	// Do not reduce FormulaPredicateLink. That is because it contains
-	// formulas that we will need to re-evaluate in the future, so we
-	// must not clobber them.
-	if (FORMULA_PREDICATE_LINK == t)
-		return expr;
-
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 mere_recursive_call:
