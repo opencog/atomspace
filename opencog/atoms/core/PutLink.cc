@@ -393,6 +393,14 @@ Handle PutLink::do_reduce(void) const
 		nested_put->make_silent(_silent);
 		bods = nested_put->do_reduce();
 		btype = bods->get_type();
+		try {
+			subs = createPutLink(HandleSeq({bods, args}));
+		}
+		catch (const InvalidParamException& ex) {
+			throw InvalidParamException(TRACE_INFO,
+				"Bad syntax for %s",
+				to_string().c_str());
+		}
 	}
 
 	// If the body is a lambda, work with that.
@@ -584,10 +592,8 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	{
 		return as->add_atom(h);
 	}
-
 	ValuePtr vex = h->execute(as, silent);
-
-	// (PutlLink (DeleteLink will return null pointer.
+	// (PutLink (DeleteLink will return null pointer.
 	if (nullptr == vex) return vex;
 
 	if (vex->is_atom())
