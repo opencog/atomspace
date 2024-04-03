@@ -85,13 +85,50 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 		return TypeChoiceCast(deep)->is_type(val);
 	}
 
-	// If it is not a link, then it is a type-constant,
-	// and thus must match perfectly.
-	if (not deep->is_link())
-		return (deep == val);
+	if (LINK_SIGNATURE_LINK != dpt)
+	{
+		// If it is not a link, then it is a type-constant,
+		// (Node or Value) and thus must match perfectly.
+		if (not deep->is_link())
+			return (deep == val);
 
-	// If it is a link, then both must be same link type.
-	if (valtype != dpt) return false;
+		// If it is a link, then both must be same link type.
+		if (valtype != dpt) return false;
+
+		// Fall-thru and do link compares, below.
+	}
+	else
+	{
+		// If we are here, its a LINK_SIGNATURE
+		// Expecting a Link or a LinkValue of the named type.
+		deep = deep->getOutgoingAtom(0);
+		Type deeptype = TypeNodeCast(deep)->get_kind();
+
+		bool islink = nameserver().isA(deeptype, LINK);
+		bool islnkv = nameserver().isA(deeptype, LINK_VALUE);
+		bool istych = (TYPE_CHOICE == deeptype);
+		// First atom must name a type of Link or LinkValue
+		if ((not islink) and (not islnkv) and (not istych))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a Link or LinkValue type!");
+
+		if (istych and not TypeChoiceCast(deep)->is_type(val))
+			return false;
+		if ((islink or islnkv) and not nameserver().isA(valtype, deeptype))
+			return false;
+
+		// Arities must match, for now. I guess we could someday do
+		// globbing here, if someone ever needs this.
+		size_t sz = spec->get_arity() - 1;
+		if (sz != val->size()) return false;
+
+		// Loop over the rest. Off-by-one requires a regular counter.
+		for (uint i=0; i<sz; i++)
+		{
+		}
+
+		return true;
+	}
 
 	const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
 	const HandleSeq& dpo = deep->getOutgoingSet();
