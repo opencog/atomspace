@@ -578,25 +578,6 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 {
 	_silent = silent;
 
-	// The do_reduce() function performs the beta-reduction only. We
-	// could also execute the reults of that reduction (it does seem to
-	// make sense...) except that it causes trouble. The problem is that
-	// the PutLinkUTest places PutLinks deep into non-executable
-	// structures, and it expects them to be reduced. It is able to do
-	// this with `Instantiator::walk_tree()`, and that's fine, except
-	// that `walk_tree()` works only with Handles, and not Values.
-	// So we cannot execute anything that returns a Value. So we may
-	// as well not execute anything at all, and leave that decision
-	// for someone else.
-	//
-	// This seems less than elegant, but given the way that PutLink is
-	// being used by the URE, this appears to be unavoidable at this
-	// time. Basically, I tried to untangle things, but there are way
-	// too many unit tests that expect the Instantiator to both
-	// beta-reduce and also execute in that tangled way that it does.
-#if 1
-	return do_reduce();
-#else
 	Handle h(do_reduce());
 	Type t = h->get_type();
 
@@ -616,7 +597,6 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 		return h;
 	}
 	return h->execute(as, silent);
-#endif
 }
 
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)

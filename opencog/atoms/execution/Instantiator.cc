@@ -631,39 +631,11 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		// Nothing more to do, if not an atom.
 		if (not reduced->is_atom()) return reduced;
 
-		// Hmm. Somehow AbsentUTest fails if we don't also walk.
-		// Handle grounded(HandleCast(reduced));
-		Handle grounded(walk_tree(HandleCast(reduced), ist));
-
-		// (PutLink (DeleteLink ...)) returns nullptr
-		if (nullptr == grounded) return nullptr;
-
-		// Handle the case where (Put (Lambda...)) is being used
-		// for (Query vars body (Put (Lambda ...) query-results))
-		Type lt = expr->getOutgoingAtom(0)->get_type();
-		if (LAMBDA_LINK == lt and grounded->is_executable())
-		{
-			ValuePtr vp(grounded->execute(_as, silent));
-			if (_as and vp->is_atom())
-				return _as->add_atom(HandleCast(vp));
-			return vp;
-		}
-
-		// The walk_tree() code cannot work with executable atoms that
-		// return values when executed. On the other hand, we cannot just
-		// execute indiscriminately, because of complex Quote/Unquote
-		// semantics in walk_tree(). So, for a small handful of links
-		// that we care about, we shall execute by hand. Yes, this is
-		// just more spaghetti code, but I see no other way right now.
-		Type rt = grounded->get_type();
-		if (nameserver().isA(rt, VALUE_OF_LINK) or
-		    nameserver().isA(rt, SET_VALUE_LINK))
-		{
-			return grounded->execute(_as, silent);
-		}
-
-		if (_as) grounded = _as->add_atom(grounded);
-		return grounded;
+		Handle grounded(HandleCast(reduced));
+		ValuePtr vp(grounded->execute(_as, silent));
+		if (_as and vp->is_atom())
+			return _as->add_atom(HandleCast(vp));
+		return vp;
 	}
 
 	// Instantiate.
