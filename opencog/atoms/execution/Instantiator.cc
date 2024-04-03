@@ -274,9 +274,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			return expr;
 		}
 
+#if 1 // Needed for DefinedSchemaUTest
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 			return walk_tree(DefineLink::get_definition(expr), ist);
+#endif
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
@@ -320,65 +322,13 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		goto mere_recursive_call;
 	}
 
-	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		// Avoid infinite recursion expanding Schema inside of PutLinks.
-		if (ist._inside_evaluation and
-		    DEFINED_SCHEMA_NODE == expr->getOutgoingAtom(0)->get_type())
-			return expr;
-
-		// Step one: perform variable substitutions
-		Handle hexpr(beta_reduce(expr, ist._varmap));
-		PutLinkPtr ppp(PutLinkCast(hexpr));
-
-		// Step two: beta-reduce.
-		// Beta reduction of DeleteLink will return a null pointer.
-		Handle red(HandleCast(ppp->execute(_as, ist._silent)));
-		if (nullptr == red)
-			return red;
-
-		// Step three: execute the resulting body.
-		// (unless its not executable)
-		if (DONT_EXEC_LINK == red->get_type())
-			return red->getOutgoingAtom(0);
-
-		// In some perfect world, calling execute() on the PutLink
-		// should have been enough. Unfortunately, the PutLinkUTest
-		// has many tests where PutLinks appear at random locations
-		// in non-execuatable contexts, and the only way to find them
-		// and run them is to call walk_tree(). So we must make this
-		// call. Were it not for this, much of this code would simplify.
-		Handle rex(walk_tree(red, ist));
-
-		// Rewalk of things returning ValuePtr's and not handles
-		// will look like null pointers. We're done, in this case.
-		if (nullptr == rex) return red;
-
-		// Step four: XXX this is awkward, but seems to be needed...
-		// If the result is evaluatable, then evaluate it. e.g. if the
-		// result has a GroundedPredicateNode, we need to run it now.
-		// Anyway, do_evaluate() will throw if rex is not evaluatable.
-		//
-		// The DontExecLink is a weird hack to halt evaluation.
-		// We unwrap it and throw it away when encountered.
-		// Some long-term fix is needed that avoids this step-four
-		// entirely. Wouldn't QuoteLink be better? Why not use QuoteLink?
-		if (SET_LINK == rex->get_type())
-		{
-			HandleSeq unwrap;
-			for (const Handle& plo : rex->getOutgoingSet())
-			{
-				if (DONT_EXEC_LINK == plo->get_type())
-					unwrap.push_back(plo->getOutgoingAtom(0));
-				else
-					unwrap.push_back(plo);
-			}
-			return createLink(std::move(unwrap), SET_LINK);
-		}
-		return rex;
+		Handle grounded(HandleCast(beta_reduce(expr, ist._varmap)));
+		return HandleCast(grounded->execute(_as, true));
 	}
 
+#if 1 // Needed for QuotationUTest
 	// LambdaLink may get special treatment in case it is used for
 	// pattern matching. For instance, if a connector is quoted, we
 	// don't want to consume that quote otherwise the connector will
@@ -429,7 +379,9 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		}
 		return expr;
 	}
+#endif
 
+#if 1 // Needed for FiniteStateMachineUTest
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
 	if (DELETE_LINK == t)
@@ -444,9 +396,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		}
 		return Handle::UNDEFINED;
 	}
+#endif
 
+#if 1 // tested in ExecutionOutputUTest EvaluationUTest
 	if (nameserver().isA(t, VIRTUAL_LINK))
 		return beta_reduce(expr, ist._varmap);
+#endif
 
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK))
@@ -460,26 +415,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
 
 		return HandleCast(flh->execute(_as, ist._silent));
-	}
-
-	// Do not reduce FormulaPredicateLink. That is because it contains
-	// formulas that we will need to re-evaluate in the future, so we
-	// must not clobber them.
-	if (FORMULA_PREDICATE_LINK == t)
-		return expr;
-
-	// If an atom is wrapped by the DontExecLink, then unwrap it,
-	// beta-reduce it, but don't execute it. Consume the DontExecLink.
-	// Actually, don't consume it. See discussion at issue #1303.
-	// XXX FIXME -- not consuming it seems wrong; this needs more
-	// analysis and experimentation.
-	if (DONT_EXEC_LINK == t)
-	{
-#ifdef CONSUME_THE_EXEC
-		return beta_reduce(expr->getOutgoingAtom(0), ist._varmap);
-#else
-		return beta_reduce(expr, ist._varmap);
-#endif
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
