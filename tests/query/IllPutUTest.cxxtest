@@ -79,14 +79,20 @@ void IllPutUTest::test_ill_put()
 
 	_eval.eval("(load-from-path \"tests/query/ill-put.scm\")");
 
-	Handle get_put = _eval.eval_h("get-put"),
-		results = satisfying_set(_as, get_put),
-		expected = al(SET_LINK, _eval.eval_h("put-1"));
+	Handle get_put = _eval.eval_h("get-put");
 
-	logger().debug() << "results = " << oc_to_string(results);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(results, expected);
+	bool caught = false;
+   try 
+   {
+		Handle results = satisfying_set(_as, get_put);
+   }
+   catch (const RuntimeException& ex) 
+   {
+       logger().set_level(Logger::INFO);
+       logger().info("Caught exception, just as expected: %s", ex.get_message());
+       caught = true;
+   }
+   TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

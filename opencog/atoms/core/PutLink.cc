@@ -397,8 +397,8 @@ Handle PutLink::do_reduce(void) const
 			subs = createPutLink(HandleSeq({bods, args}));
 		}
 		catch (const InvalidParamException& ex) {
-			throw InvalidParamException(TRACE_INFO,
-				"Bad syntax for %s",
+			throw SyntaxException(TRACE_INFO,
+				"Can't execute: bad syntax: %s",
 				to_string().c_str());
 		}
 	}
