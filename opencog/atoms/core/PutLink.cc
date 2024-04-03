@@ -560,6 +560,20 @@ Handle PutLink::do_reduce(void) const
 	return createLink(std::move(bset), SET_LINK);
 }
 
+static inline Handle do_exec(AtomSpace* as, bool silent, const Handle& h)
+{
+	Type t = h->get_type();
+	if (not h->is_executable() or
+	    nameserver().isA(t, VALUE_OF_LINK) or
+	    nameserver().isA(t, SET_VALUE_LINK) or
+	    (DONT_EXEC_LINK == t))
+	{
+		return h;
+	}
+	ValuePtr vex = h->execute(as, silent);
+	return HandleCast(vex);
+}
+
 ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 {
 	_silent = silent;
@@ -585,6 +599,15 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 #else
 	Handle h(do_reduce());
 	Type t = h->get_type();
+
+	if ((SET_LINK == t) or (LIST_LINK == t))
+	{
+		HandleSeq oset;
+		for (const Handle& ho : h->getOutgoingSet())
+			oset.emplace_back(do_exec(as, silent, ho));
+		return as->add_link(t, std::move(oset));
+	}
+
 	if (not h->is_executable() or
 	    nameserver().isA(t, VALUE_OF_LINK) or
 	    nameserver().isA(t, SET_VALUE_LINK) or
