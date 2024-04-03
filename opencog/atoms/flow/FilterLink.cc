@@ -138,14 +138,14 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                         const Handle& gnd,
+                         const ValuePtr& gnd,
                          GroundingMap& valmap,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
 	if (termpat == gnd) return true;
 
-	Handle ground(gnd);
+	Handle ground(HandleCast(gnd));
 
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
@@ -156,7 +156,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// check this behavior.
 	if (ground->is_executable())
 	{
-		ground = HandleCast(gnd->execute(scratch, silent));
+		ground = HandleCast(ground->execute(scratch, silent));
 		if (nullptr == ground) return false;
 	}
 
@@ -332,10 +332,11 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
-	// Special case for signatures.
+	// Special case for signatures. The extract already rejected
+	// mis-matches, if any. Thus, we are done, here.
 	if (_pattern->get_body()->is_type(TYPE_NODE) or
 	    _pattern->get_body()->is_type(TYPE_OUTPUT_LINK))
-		return cterm;
+		return vterm;
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;

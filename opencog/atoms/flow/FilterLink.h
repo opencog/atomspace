@@ -57,7 +57,7 @@ protected:
 
 	FilterLink(Type, const Handle&);
 
-	bool extract(const Handle&, const Handle&, GroundingMap&,
+	bool extract(const Handle&, const ValuePtr&, GroundingMap&,
 	             AtomSpace*, bool,
 	             Quotation quotation=Quotation()) const;
 
