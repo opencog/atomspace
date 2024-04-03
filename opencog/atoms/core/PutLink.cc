@@ -613,15 +613,9 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	    nameserver().isA(t, SET_VALUE_LINK) or
 	    (DONT_EXEC_LINK == t))
 	{
-		return as->add_atom(h);
+		return h;
 	}
-	ValuePtr vex = h->execute(as, silent);
-	// (PutLink (DeleteLink will return null pointer.
-	if (nullptr == vex) return vex;
-
-	if (vex->is_atom())
-		return as->add_atom(HandleCast(vex));
-	return vex;
+	return h->execute(as, silent);
 #endif
 }
 
