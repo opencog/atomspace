@@ -154,7 +154,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// by the URE. Is it a good design decision? I dunno. For now, there's
 	// not enough experience to say. There is, however, a unit test to
 	// check this behavior.
-	if (ground->is_executable())
+	if (ground and ground->is_executable())
 	{
 		ground = HandleCast(ground->execute(scratch, silent));
 		if (nullptr == ground) return false;
@@ -162,7 +162,7 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Let the conventional type-checker deal with complicated types.
 	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
-		return value_is_type(termpat, ground);
+		return value_is_type(termpat, gnd);
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -329,7 +329,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
-	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
+	if (not extract(_pattern->get_body(), vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
 	// Special case for signatures. The extract already rejected
