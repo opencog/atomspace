@@ -759,6 +759,15 @@ SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 // a variable without a name binding.
 SIGN_NODE <- TYPE_NODE
 
+// Signature for a typed link. This is needed for encoding signatures
+// involving LinkValue and similar. It also simplifies polymorphsm.
+// Thus, for example, the siggnature of
+// (LinkValue (FloatValue...) (Concept ...)) cannot be encoded with
+// a regular SignatureLink, because the LinkValue blocks this. However,
+// it can be encoded as
+// (LinkSignature (Type 'LinkValue) (Type 'FloatValue) (Type 'Concept))
+LINK_SIGNATURE_LINK <- SIGNATURE_LINK
+
 // A type binder: it binds a type to a VariableNode. Always arity-2,
 // the first position must be a VariableNode, the second must be a type.
 // Note that this is always scoped, i.e. used in lambdas and places
