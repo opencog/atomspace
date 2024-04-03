@@ -623,37 +623,20 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, ist));
+		ValuePtr reduced(beta_reduce(expr, ist._varmap));
 
 		// (PutLink (DeleteLink ...)) returns nullptr
-		if (nullptr == grounded) return nullptr;
+		if (nullptr == reduced) return nullptr;
 
-		// Handle the case where (Put (Lambda...)) is being used
-		// for (Query vars body (Put (Lambda ...) query-results))
-		Type lt = expr->getOutgoingAtom(0)->get_type();
-		if (LAMBDA_LINK == lt and grounded->is_executable())
-		{
-			ValuePtr vp(grounded->execute(_as, silent));
-			if (_as and vp->is_atom())
-				return _as->add_atom(HandleCast(vp));
-			return vp;
-		}
+		// Nothing more to do, if not an atom.
+		if (not reduced->is_atom()) return reduced;
 
-		// The walk_tree() code cannot work with executable atoms that
-		// return values when executed. On the other hand, we cannot just
-		// execute indiscriminately, because of complex Quote/Unquote
-		// semantics in walk_tree(). So, for a small handful of links
-		// that we care about, we shall execute by hand. Yes, this is
-		// just more spaghetti code, but I see no other way right now.
-		Type rt = grounded->get_type();
-		if (nameserver().isA(rt, VALUE_OF_LINK) or
-		    nameserver().isA(rt, SET_VALUE_LINK))
-		{
-			return grounded->execute(_as, silent);
-		}
+		Handle grounded(HandleCast(reduced));
+		ValuePtr vp(grounded->execute(_as, silent));
 
-		if (_as) grounded = _as->add_atom(grounded);
-		return grounded;
+		if (_as and vp and vp->is_atom())
+			return _as->add_atom(HandleCast(vp));
+		return vp;
 	}
 
 	// Instantiate.
@@ -685,6 +668,12 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		if (dex->is_type(EXECUTABLE_LINK))
 			return dex->execute(_as, silent);
 	}
+
+#if NOT_YET
+	// This is what we want to do. But unit tests fail if we do this.
+	if (expr->is_type(PUT_LINK))
+		return expr->execute(_as, silent);
+#endif
 
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet. The ones that are, we've tagged as

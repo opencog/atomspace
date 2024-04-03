@@ -23,6 +23,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "DefineLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
@@ -253,7 +254,14 @@ void PutLink::static_typecheck_arguments(void)
 static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
-	return subs->beta_reduce(oset);
+	Handle h(subs->beta_reduce(oset));
+
+	// DontExecUTest wants is to eat DontExecLink's.
+	// I'm not convinced this is a wise idea, but that's what's
+	// tested, for now. I guess the URE was expecting this. Beats me.
+	if (DONT_EXEC_LINK == h->get_type())
+		return h->getOutgoingAtom(0);
+	return h;
 }
 
 // If arg is executable, then run it, and unwrap the set link, too.
@@ -385,6 +393,14 @@ Handle PutLink::do_reduce(void) const
 		nested_put->make_silent(_silent);
 		bods = nested_put->do_reduce();
 		btype = bods->get_type();
+		try {
+			subs = createPutLink(HandleSeq({bods, args}));
+		}
+		catch (const InvalidParamException& ex) {
+			throw SyntaxException(TRACE_INFO,
+				"Can't execute: bad syntax: %s",
+				to_string().c_str());
+		}
 	}
 
 	// If the body is a lambda, work with that.
@@ -401,8 +417,9 @@ Handle PutLink::do_reduce(void) const
 	Type vtype = vargs->get_type();
 	size_t nvars = vars.varseq.size();
 
-	// FunctionLinks behave like pointless lambdas; that is, one can
-	// create valid beta-redexes with them. We handle that here.
+	// FunctionLinks behave like locale-less (pointless) lambdas;
+	// that is, one can create valid beta-redexes with them.
+	// We handle that here.
 	//
 	// At this time, we don't know the number of arguments any given
 	// FunctionLink might take.  Atomese does have the mechanisms
@@ -543,30 +560,8 @@ Handle PutLink::do_reduce(void) const
 	return createLink(std::move(bset), SET_LINK);
 }
 
-ValuePtr PutLink::execute(AtomSpace* as, bool silent)
+static inline Handle do_exec(AtomSpace* as, bool silent, const Handle& h)
 {
-	_silent = silent;
-
-	// The do_reduce() function performs the beta-reduction only. We
-	// could also execute the reults of that reduction (it does seem to
-	// make sense...) except that it causes trouble. The problem is that
-	// the PutLinkUTest places PutLinks deep into non-executable
-	// structures, and it expects them to be reduced. It is able to do
-	// this with `Instantiator::walk_tree()`, and that's fine, except
-	// that `walk_tree()` works only with Handles, and not Values.
-	// So we cannot execute anything that returns a Value. So we may
-	// as well not execute anything at all, and leave that decision
-	// for someone else.
-	//
-	// This seems less than elegant, but given the way that PutLink is
-	// being used by the URE, this appears to be unavoidable at this
-	// time. Basically, I tried to untangle things, but there are way
-	// too many unit tests that expect the Instantiator to both
-	// beta-reduce and also execute in that tangled way that it does.
-#if 1
-	return do_reduce();
-#else
-	Handle h(do_reduce());
 	Type t = h->get_type();
 	if (not h->is_executable() or
 	    nameserver().isA(t, VALUE_OF_LINK) or
@@ -575,8 +570,33 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	{
 		return h;
 	}
+	ValuePtr vex = h->execute(as, silent);
+	return HandleCast(vex);
+}
+
+ValuePtr PutLink::execute(AtomSpace* as, bool silent)
+{
+	_silent = silent;
+
+	Handle h(do_reduce());
+	Type t = h->get_type();
+
+	if ((SET_LINK == t) or (LIST_LINK == t))
+	{
+		HandleSeq oset;
+		for (const Handle& ho : h->getOutgoingSet())
+			oset.emplace_back(do_exec(as, silent, ho));
+		return as->add_link(t, std::move(oset));
+	}
+
+	if (not h->is_executable() or
+	    nameserver().isA(t, VALUE_OF_LINK) or
+	    nameserver().isA(t, SET_VALUE_LINK) or
+	    (DONT_EXEC_LINK == t))
+	{
+		return h;
+	}
 	return h->execute(as, silent);
-#endif
 }
 
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)
