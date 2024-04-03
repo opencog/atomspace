@@ -633,7 +633,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 		Handle grounded(HandleCast(reduced));
 		ValuePtr vp(grounded->execute(_as, silent));
-		if (_as and vp->is_atom())
+
+		if (_as and vp and vp->is_atom())
 			return _as->add_atom(HandleCast(vp));
 		return vp;
 	}
