@@ -623,10 +623,17 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, ist));
+		ValuePtr reduced(beta_reduce(expr, ist._varmap));
 
 		// (PutLink (DeleteLink ...)) returns nullptr
-		if (nullptr == grounded) return nullptr;
+		if (nullptr == reduced) return nullptr;
+
+		// Nothing more to do, if not an atom.
+		if (not reduced->is_atom()) return reduced;
+
+		// Hmm. Somehow AbsentUTest fails if we don't also walk.
+		// Handle grounded(HandleCast(reduced));
+		Handle grounded(walk_tree(HandleCast(reduced), ist));
 
 		// Handle the case where (Put (Lambda...)) is being used
 		// for (Query vars body (Put (Lambda ...) query-results))
@@ -685,6 +692,12 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 		if (dex->is_type(EXECUTABLE_LINK))
 			return dex->execute(_as, silent);
 	}
+
+#if NOT_YET
+	// This is what we want to do. But unit tests fail if we do this.
+	if (expr->is_type(PUT_LINK))
+		return expr->execute(_as, silent);
+#endif
 
 	// Try to execute directly, if possible. Not everything is
 	// capable of this, yet. The ones that are, we've tagged as
