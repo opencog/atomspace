@@ -354,3 +354,9 @@
 ; This example is currently broken, because lazy evaluation does not
 ; work!
 (cog-execute! summation)
+
+; Another (as yet unimplemented) design choice would be to use
+; AccumulateLink. But this also is currently unsupported (because
+; its not clear if Accumulate should act in parallel on Link contents,
+; or if it should accumulate everything in the Link.)
+; (cog-execute! (Accumulate summation))
