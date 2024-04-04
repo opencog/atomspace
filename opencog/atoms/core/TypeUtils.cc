@@ -106,7 +106,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 				"Not implemented! TODO XXX FIXME");
 
 		// Fall-thru and do link compares, below. Setup first.
-		sz = spec->get_arity();
+		sz = deep->get_arity();
 		off = 0;
 	}
 	else
@@ -130,7 +130,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 			return false;
 
 		// Fall-thru and do link compares, below. Setup first.
-		sz = spec->get_arity() - 1;
+		sz = deep->get_arity() - 1;
 		off = 1;
 	}
 
