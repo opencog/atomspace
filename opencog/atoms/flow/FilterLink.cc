@@ -138,14 +138,14 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                         const Handle& gnd,
+                         const ValuePtr& gnd,
                          GroundingMap& valmap,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
 	if (termpat == gnd) return true;
 
-	Handle ground(gnd);
+	Handle ground(HandleCast(gnd));
 
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
@@ -154,15 +154,15 @@ bool FilterLink::extract(const Handle& termpat,
 	// by the URE. Is it a good design decision? I dunno. For now, there's
 	// not enough experience to say. There is, however, a unit test to
 	// check this behavior.
-	if (ground->is_executable())
+	if (ground and ground->is_executable())
 	{
-		ground = HandleCast(gnd->execute(scratch, silent));
+		ground = HandleCast(ground->execute(scratch, silent));
 		if (nullptr == ground) return false;
 	}
 
 	// Let the conventional type-checker deal with complicated types.
 	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
-		return value_is_type(termpat, ground);
+		return value_is_type(termpat, gnd);
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -320,19 +320,23 @@ bool FilterLink::extract(const Handle& termpat,
 
 // ====================================================================
 
-Handle FilterLink::rewrite_one(const Handle& cterm,
+ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
                                AtomSpace* scratch, bool silent) const
 {
+	// temp hack
+	Handle cterm(HandleCast(vterm));
+
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	GroundingMap valmap;
-	if (not extract(_pattern->get_body(), cterm, valmap, scratch, silent))
+	if (not extract(_pattern->get_body(), vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
-	// Special case for signatures.
+	// Special case for signatures. The extract already rejected
+	// mis-matches, if any. Thus, we are done, here.
 	if (_pattern->get_body()->is_type(TYPE_NODE) or
 	    _pattern->get_body()->is_type(TYPE_OUTPUT_LINK))
-		return cterm;
+		return vterm;
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
@@ -395,10 +399,10 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		// and perform filtering on-demand.
 		if (vex->is_type(LINK_VALUE))
 		{
-			HandleSeq remap;
-			for (const Handle& h : LinkValueCast(vex)->to_handle_seq())
+			ValueSeq remap;
+			for (const ValuePtr& vp : LinkValueCast(vex)->value())
 			{
-				Handle mone = rewrite_one(h, as, silent);
+				ValuePtr mone = rewrite_one(vp, as, silent);
 				if (nullptr != mone) remap.emplace_back(mone);
 			}
 			return createLinkValue(remap);
@@ -422,14 +426,14 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
-			Handle mone = rewrite_one(h, as, silent);
+			Handle mone = HandleCast(rewrite_one(h, as, silent));
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
 		return as->add_link(argtype, std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = rewrite_one(valh, as, silent);
+	Handle mone = HandleCast(rewrite_one(valh, as, silent));
 	if (mone) return mone;
 
 	// Avoid returning null pointer!
