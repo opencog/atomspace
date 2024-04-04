@@ -30,6 +30,7 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include "FindUtils.h"
 
@@ -112,8 +113,8 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	{
 		// If we are here, its a LINK_SIGNATURE
 		// Expecting a Link or a LinkValue of the named type.
-		deep = deep->getOutgoingAtom(0);
-		Type deeptype = TypeNodeCast(deep)->get_kind();
+		const Handle& lsig = deep->getOutgoingAtom(0);
+		Type deeptype = TypeNodeCast(lsig)->get_kind();
 
 		bool islink = nameserver().isA(deeptype, LINK);
 		bool islnkv = nameserver().isA(deeptype, LINK_VALUE);
@@ -137,15 +138,25 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 	// globbing here, if someone ever needs this.
 	if (sz != val->size()) return false;
 
-#if 0
 	// Loop over the rest, doing a side-by-side compare.
-	for (uint i=0; i<sz; i++)
-	{
-		if (not value_is_type(dpo[i], vlo[i])) return false;
-	}
-	const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
 	const HandleSeq& dpo = deep->getOutgoingSet();
-#endif
+
+	if (val->is_atom())
+	{
+		const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
+		for (uint i=0; i<sz; i++)
+		{
+			if (not value_is_type(dpo[i+off], vlo[i])) return false;
+		}
+	}
+	else
+	{
+		const std::vector<ValuePtr>& vlo = LinkValueCast(val)->value();
+		for (uint i=0; i<sz; i++)
+		{
+			if (not value_is_type(dpo[i+off], vlo[i])) return false;
+		}
+	}
 
 	// If we are here, all checks must hav passed.
 	return true;
