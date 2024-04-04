@@ -138,14 +138,14 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                         const ValuePtr& gnd,
-                         GroundingMap& valmap,
+                         const ValuePtr& vgnd,
+                         ValueMap& valmap,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
-	if (termpat == gnd) return true;
+	if (termpat == vgnd) return true;
 
-	Handle ground(HandleCast(gnd));
+	Handle ground(HandleCast(vgnd));
 
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
@@ -162,7 +162,7 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Let the conventional type-checker deal with complicated types.
 	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
-		return value_is_type(termpat, gnd);
+		return value_is_type(termpat, vgnd);
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -173,14 +173,15 @@ bool FilterLink::extract(const Handle& termpat,
 		if (valmap.end() != val)
 		{
 			// If we already have a value, the value must be identical.
-			return (val->second == ground);
+			return (val->second == vgnd);
 		}
 
 		// Check the type of the value.
+//xxx
 		if (not _mvars->is_type(termpat, ground)) return false;
 
 		// If we are here, everything looks good. Record and return.
-		valmap.emplace(std::make_pair(termpat, ground));
+		valmap.emplace(std::make_pair(termpat, vgnd));
 		return true;
 	}
 
@@ -293,7 +294,8 @@ bool FilterLink::extract(const Handle& termpat,
 			if (valmap.end() != val)
 			{
 				// Have to have same arity and contents.
-				const Handle& already = val->second;
+				const Handle& already = HandleCast(val->second);
+// xxxxxxxxx
 				const HandleSeq& alo = already->getOutgoingSet();
 				size_t asz = alo.size();
 				if (asz != glob_seq.size()) return false;
@@ -328,7 +330,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
-	GroundingMap valmap;
+	ValueMap valmap;
 	if (not extract(_pattern->get_body(), vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
@@ -347,7 +349,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		// Can't ever happen.
 		// if (valmap.end() == valpair) return Handle::UNDEFINED;
 
-		valseq.emplace_back(valpair->second);
+		valseq.emplace_back(HandleCast(valpair->second));
 	}
 
 	// Perform substitution, if it's a RuleLink.
