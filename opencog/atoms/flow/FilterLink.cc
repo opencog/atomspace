@@ -23,6 +23,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
@@ -164,7 +165,10 @@ bool FilterLink::extract(const Handle& termpat,
 	}
 
 	// Let the conventional type-checker deal with complicated types.
-	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
+	// LinkSignatureLinks might contain vars; deal with these below.
+	if (termpat->is_type(TYPE_NODE) or
+	    (termpat->is_type(TYPE_OUTPUT_LINK) and
+	       (not termpat->is_type(LINK_SIGNATURE_LINK))))
 		return value_is_type(termpat, vgnd);
 
 	Type t = termpat->get_type();
@@ -211,21 +215,45 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, vgnd, valmap, scratch, silent, quotation))
+			// Push and pop valmap each go-around; some choices
+			// might partly work, and corrupt the map.
+			ValueMap vcopy(valmap);
+			if (extract(choice, vgnd, vcopy, scratch, silent, quotation))
+			{
+				valmap.swap(vcopy);
 				return true;
+			}
 		}
 		return false;
 	}
-
-	// Whatever they are, the type must agree.
-	if (t != vgnd->get_type()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
 	if (not termpat->is_link())
 		return (termpat == vgnd);
 
+	// Type of LinkSig is encoded in the first atom.
+	Type lit = t;
+	if (LINK_SIGNATURE_LINK == t)
+	{
+		// XXX FIXME. LinkSignatureLink should be a C++ class,
+		// it can static-check the corrrect structure, and it can
+		// dynamic-compare the type correctly. Someday, not today.
+		TypeNodePtr tn(TypeNodeCast(termpat->getOutgoingAtom(0)));
+		if (nullptr == tn)
+			throw SyntaxException(TRACE_INFO,
+				"Expecting first atom in LinkSignature to be a Type!");
+		lit = tn->get_kind();
+	}
+
+	// Whatever they are, the type must agree.
+	if (lit != vgnd->get_type()) return false;
+
+	// From here on out, we prepare to compare Links.
 	const HandleSeq& tlo = termpat->getOutgoingSet();
 	size_t tsz = tlo.size();
+	size_t off = 0;
+	if (LINK_SIGNATURE_LINK == t)
+		{ tsz--; off = 1; }
 
 	// If no glob nodes, just compare links side-by-side.
 	if (0 == _globby_terms.count(termpat))
@@ -235,31 +263,27 @@ bool FilterLink::extract(const Handle& termpat,
 			const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
 			size_t gsz = glo.size();
 			// If the sizes are mismatched, should we do a fuzzy match?
-			if (gsz != tsz) return false;
+			if (tsz != gsz) return false;
 			for (size_t i=0; i<tsz; i++)
 			{
-				if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
+				if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
 					return false;
 			}
 			return true;
 		}
 
-		// If we are here, 
-printf("duuuude xxxxxxxxxxxxxxxxxxxxx\n");
-#if 0
-		const HandleSeq& glo = ground->getOutgoingSet();
+		// If we are here, vgnd is a LinkValue. Loop just like above,
+		// except that the outgoing set is a vector of Values.
+		const auto& glo = LinkValueCast(vgnd)->value();
 		size_t gsz = glo.size();
 		// If the sizes are mismatched, should we do a fuzzy match?
-		if (gsz != tsz) return false;
+		if (tsz != gsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
-			if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
+			if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
 				return false;
 		}
-
 		return true;
-#endif
-return false;
 	}
 
 	Handle ground(HandleCast(vgnd));

@@ -44,14 +44,13 @@
 		; from the tree list.
 		(Lambda
 			(Variable "$x")
-			(Signature
+			(LinkSignature
+				(Type 'LinkValue)
 				(LinkSignature
 					(Type 'LinkValue)
-					(LinkSignature
-						(Type 'LinkValue)
-						(Concept "sentence")
-						(Variable "$x"))
-					(Type 'LinkValue))))
+					(Concept "sentence")
+					(Variable "$x"))
+				(Type 'LinkValue)))
 
 		; The sequence of Values to be filterd by above.
 		; The result should be a match of Variable $x to the
