@@ -29,6 +29,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
@@ -119,6 +120,7 @@ try { \
 
 typedef std::vector<ValuePtr> ValueSeq;
 typedef std::set<ValuePtr> ValueSet;
+typedef std::map<Handle, ValuePtr> ValueMap;
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
@@ -157,8 +159,9 @@ CastToValue(const std::shared_ptr<const T>& value)
 class Atom;
 
 /**
- * Create Value of specific type using appropriate constructor. This function
- * is defined only for T which are subclasses of Value.
+ * createValue() function. Creates Values of a specific type, using
+ * the appropriate constructor. This function is defined only for
+ * C++ types T which are subclasses of Value.
  */
 template<typename T, typename ... Args>
 static inline

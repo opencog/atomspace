@@ -43,11 +43,6 @@
 #include <opencog/util/Counter.h>
 #include <opencog/atoms/atom_types/types.h>
 
-// Comment this out if you want to enforce more determinism in the
-// AtomSpace. For instance atoms are indexed according to content
-// rather address, etc.
-// #define REPRODUCIBLE_ATOMSPACE
-
 /** \addtogroup grp_atomspace
  *  @{
  */
