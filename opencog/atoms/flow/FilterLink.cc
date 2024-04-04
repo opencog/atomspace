@@ -133,19 +133,21 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// variable).
 ///
 /// Any executable terms in `ground` are executed prior to comparison.
+/// XXX Is the above a good design choice? I dunno. It's the historical
+/// choice. So it goes.
 ///
 /// If false is returned, the contents of valmap are invalid. If true
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
-                         const ValuePtr& vgnd,
+                         const ValuePtr& gnd,
                          ValueMap& valmap,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
-	if (termpat == vgnd) return true;
+	if (termpat == gnd) return true;
 
-	Handle ground(HandleCast(vgnd));
+	ValuePtr vgnd(gnd);
 
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
@@ -154,10 +156,11 @@ bool FilterLink::extract(const Handle& termpat,
 	// by the URE. Is it a good design decision? I dunno. For now, there's
 	// not enough experience to say. There is, however, a unit test to
 	// check this behavior.
-	if (ground and ground->is_executable())
+	Handle hgnd(HandleCast(gnd));
+	if (hgnd and hgnd->is_executable())
 	{
-		ground = HandleCast(ground->execute(scratch, silent));
-		if (nullptr == ground) return false;
+		vgnd = hgnd->execute(scratch, silent);
+		if (nullptr == vgnd) return false;
 	}
 
 	// Let the conventional type-checker deal with complicated types.
@@ -190,13 +193,13 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Consume quotation
 	if (quotation_cp.consumable(t))
-		return extract(termpat->getOutgoingAtom(0), ground, valmap,
+		return extract(termpat->getOutgoingAtom(0), vgnd, valmap,
 		               scratch, silent, quotation);
 
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
 		// Check the type of the value.
-		if (not _mvars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, vgnd)) return false;
 		return true;
 	}
 
@@ -208,27 +211,44 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap, scratch, silent, quotation))
+			if (extract(choice, vgnd, valmap, scratch, silent, quotation))
 				return true;
 		}
 		return false;
 	}
 
 	// Whatever they are, the type must agree.
-	if (t != ground->get_type()) return false;
+	if (t != vgnd->get_type()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
 	if (not termpat->is_link())
-		return (termpat == ground);
+		return (termpat == vgnd);
 
 	const HandleSeq& tlo = termpat->getOutgoingSet();
-	const HandleSeq& glo = ground->getOutgoingSet();
 	size_t tsz = tlo.size();
-	size_t gsz = glo.size();
 
 	// If no glob nodes, just compare links side-by-side.
 	if (0 == _globby_terms.count(termpat))
 	{
+		if (vgnd->is_atom())
+		{
+			const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
+			size_t gsz = glo.size();
+			// If the sizes are mismatched, should we do a fuzzy match?
+			if (gsz != tsz) return false;
+			for (size_t i=0; i<tsz; i++)
+			{
+				if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
+					return false;
+			}
+			return true;
+		}
+
+		// If we are here, 
+printf("duuuude xxxxxxxxxxxxxxxxxxxxx\n");
+#if 0
+		const HandleSeq& glo = ground->getOutgoingSet();
+		size_t gsz = glo.size();
 		// If the sizes are mismatched, should we do a fuzzy match?
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
@@ -238,7 +258,17 @@ bool FilterLink::extract(const Handle& termpat,
 		}
 
 		return true;
+#endif
+return false;
 	}
+
+	Handle ground(HandleCast(vgnd));
+	if (not ground)
+		throw RuntimeException(TRACE_INFO,
+			"Globbing for Values not implemented! FIXME!");
+
+	const HandleSeq& glo = ground->getOutgoingSet();
+	size_t gsz = glo.size();
 
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
