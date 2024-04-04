@@ -38,22 +38,24 @@
 (cog-set-value!
 	(Node "some place") (Predicate "some key") tree-list)
 
-(define get-parse-edges
+(define get-parse-sentences
 	(Filter
-		; Define a pattern that will extract all of the edges from
-		; the tree list.
+		; Define a pattern that will extract all of the sentences
+		; from the tree list.
 		(Lambda
-			(LinkSignature
-				(Type 'LinkValue)
-				(Variable "$x")
-			))
+			(Variable "$x")
+			(Signature
+				(LinkSignature
+					(Type 'LinkValue)
+					(Concept "sentence")
+					(Variable "$x"))
+				(Type 'LinkValue)))
 
-		; The graph from which a value is to be extracted.  Clearly,
-		; the variable $x corresponds to Concept "baz"
+		; The sequence of Values to be filterd by above.
+		; The result should be a match of Variable $x to the
+		; LinkValue containing the words in the sentence.
 		(ValueOf (Node "some place") (Predicate "some key")))
 )
 
-; This should return ...
-; as that is the extracted value
-; for the variable $x.
-(cog-execute! get-parse-edges)
+; This should return lists of words in each sentence.
+(cog-execute! get-parse-sentences)
