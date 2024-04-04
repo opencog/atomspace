@@ -177,8 +177,7 @@ bool FilterLink::extract(const Handle& termpat,
 		}
 
 		// Check the type of the value.
-//xxx
-		if (not _mvars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, vgnd)) return false;
 
 		// If we are here, everything looks good. Record and return.
 		valmap.emplace(std::make_pair(termpat, vgnd));

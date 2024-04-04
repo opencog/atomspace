@@ -248,6 +248,15 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	return tit->second->is_type(val);
 }
 
+// Identical to above, but for straight-up ValuePtr's
+bool Variables::is_type(const Handle& var, const ValuePtr& val) const
+{
+	if (varset.end() == varset.find(var)) return false;
+	VariableTypeMap::const_iterator tit = _typemap.find(var);
+	if (_typemap.end() == tit) return true;
+	return tit->second->is_type(val);
+}
+
 /**
  * Return true if we contain just a single variable, and this one
  * variable is of type gtype (or is untyped). A typical use is that
