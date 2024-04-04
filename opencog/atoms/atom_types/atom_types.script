@@ -1064,7 +1064,10 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 // third term. If there are more than three terms, this repeats: so
 // odd terms must evaluate to true/false, resulting in the return of
 // the first even term which followed the first true evaluation.
-COND_LINK <- FUNCTION_LINK
+//
+// We don't really know what it returns, but it might be a number.
+// The static type checker will complain, unless we all NumericOutput.
+COND_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Sleep link pauses execution for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
