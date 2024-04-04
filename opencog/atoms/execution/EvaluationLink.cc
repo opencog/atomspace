@@ -860,6 +860,11 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
 		ValuePtr pap(evelnk->execute());
+
+		// There might not be a Value at the given key.
+		if (nullptr == pap)
+			return TruthValue::FALSE_TV();
+
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
 			return EvaluationLink::do_eval_scratch(as,
