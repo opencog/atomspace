@@ -293,16 +293,23 @@ bool FilterLink::extract(const Handle& termpat,
 			if (valmap.end() != val)
 			{
 				// Have to have same arity and contents.
-				const Handle& already = HandleCast(val->second);
-// xxxxxxxxx
-				const HandleSeq& alo = already->getOutgoingSet();
-				size_t asz = alo.size();
-				if (asz != glob_seq.size()) return false;
-				for (size_t i=0; i< asz; i++)
+				if (val->second->is_atom())
 				{
-					if (glob_seq[i] != alo[i]) return false;
+					const Handle& already = HandleCast(val->second);
+					const HandleSeq& alo = already->getOutgoingSet();
+					size_t asz = alo.size();
+					if (asz != glob_seq.size()) return false;
+					for (size_t i=0; i< asz; i++)
+					{
+						if (glob_seq[i] != alo[i]) return false;
+					}
+					return true;
 				}
-				return true;
+				else
+				{
+					throw RuntimeException(TRACE_INFO,
+						"Globbing for Values not implemented! FIXME!");
+				}
 			}
 
 			// If we are here, we've got a match. Record it.
