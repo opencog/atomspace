@@ -114,6 +114,7 @@ struct Variables : public FreeVariables
 	// Return true if we are holding the variable `var`, and `val`
 	// satisfies the type restrictions that apply to `var`.
 	bool is_type(const Handle& var, const Handle& val) const;
+	bool is_type(const Handle& var, const ValuePtr& val) const;
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type

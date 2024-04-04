@@ -67,7 +67,6 @@ public:
 	Handle get_variable(void) const { return _outgoing.at(0); }
 	TypeChoicePtr get_typedecl(void) const { return _typech; }
 
-#if 1
 	TypeSet get_simple_typeset(void) const
 		{ return _typech->get_simple_typeset(); }
 	HandleSet get_deep_typeset(void) const
@@ -82,11 +81,12 @@ public:
 	bool is_upper_bound(size_t n) const
 		{ return _typech->is_upper_bound(n); }
 
+	bool is_type(const ValuePtr& vp) const
+		{ return _typech->is_type(vp); }
 	bool is_type(const Handle& h) const
 		{ return _typech->is_type(h); }
 	bool is_type(Type t) const
 		{ return _typech->is_type(t); }
-#endif
 
 	// The default interval for glob matching.
 	const GlobInterval default_interval(void) const;

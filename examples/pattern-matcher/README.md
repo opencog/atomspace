@@ -259,6 +259,7 @@ a kind-of one-sided unification, and thus simpler than full-fledged
 
 * `put-filter.scm`     -- Using PutLink to filter sets of atoms.
 * `filter.scm`         -- Extracting and re-writing with FilterLink.
+* `filter-value.scm`   -- Using FilterLink on data streams.
 
 Unfinished examples
 -------------------

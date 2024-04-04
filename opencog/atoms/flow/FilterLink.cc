@@ -23,6 +23,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
@@ -121,6 +122,18 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
+// XXX FIXME. LinkSignatureLink should be a C++ class,
+// it can static-check the correct structure, and it can
+// dynamic-compare the type correctly. Someday, not today.
+static inline Type link_sig_kind(const Handle& termpat)
+{
+	TypeNodePtr tn(TypeNodeCast(termpat->getOutgoingAtom(0)));
+	if (nullptr == tn)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting first atom in LinkSignature to be a Type!");
+	return tn->get_kind();
+}
+
 /// Recursive tree-compare-and-extract grounding values.
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
@@ -133,19 +146,21 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 /// variable).
 ///
 /// Any executable terms in `ground` are executed prior to comparison.
+/// XXX Is the above a good design choice? I dunno. It's the historical
+/// choice. So it goes.
 ///
 /// If false is returned, the contents of valmap are invalid. If true
 /// is returned, valmap contains the extracted values.
 ///
 bool FilterLink::extract(const Handle& termpat,
                          const ValuePtr& gnd,
-                         GroundingMap& valmap,
+                         ValueMap& valmap,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
 	if (termpat == gnd) return true;
 
-	Handle ground(HandleCast(gnd));
+	ValuePtr vgnd(gnd);
 
 	// Execute the proposed grounding term, first. Notice that this is
 	// a "deep" execution, because there may have been lots of
@@ -154,15 +169,19 @@ bool FilterLink::extract(const Handle& termpat,
 	// by the URE. Is it a good design decision? I dunno. For now, there's
 	// not enough experience to say. There is, however, a unit test to
 	// check this behavior.
-	if (ground and ground->is_executable())
+	Handle hgnd(HandleCast(gnd));
+	if (hgnd and hgnd->is_executable())
 	{
-		ground = HandleCast(ground->execute(scratch, silent));
-		if (nullptr == ground) return false;
+		vgnd = hgnd->execute(scratch, silent);
+		if (nullptr == vgnd) return false;
 	}
 
 	// Let the conventional type-checker deal with complicated types.
-	if (termpat->is_type(TYPE_NODE) or termpat->is_type(TYPE_OUTPUT_LINK))
-		return value_is_type(termpat, gnd);
+	// LinkSignatureLinks might contain vars; deal with these below.
+	if (termpat->is_type(TYPE_NODE) or
+	    (termpat->is_type(TYPE_OUTPUT_LINK) and
+	       (not termpat->is_type(LINK_SIGNATURE_LINK))))
+		return value_is_type(termpat, vgnd);
 
 	Type t = termpat->get_type();
 	// If its a variable, then see if we know its value already;
@@ -173,14 +192,14 @@ bool FilterLink::extract(const Handle& termpat,
 		if (valmap.end() != val)
 		{
 			// If we already have a value, the value must be identical.
-			return (val->second == ground);
+			return (val->second == vgnd);
 		}
 
 		// Check the type of the value.
-		if (not _mvars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, vgnd)) return false;
 
 		// If we are here, everything looks good. Record and return.
-		valmap.emplace(std::make_pair(termpat, ground));
+		valmap.emplace(std::make_pair(termpat, vgnd));
 		return true;
 	}
 
@@ -190,13 +209,13 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// Consume quotation
 	if (quotation_cp.consumable(t))
-		return extract(termpat->getOutgoingAtom(0), ground, valmap,
+		return extract(termpat->getOutgoingAtom(0), vgnd, valmap,
 		               scratch, silent, quotation);
 
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
 		// Check the type of the value.
-		if (not _mvars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, vgnd)) return false;
 		return true;
 	}
 
@@ -208,37 +227,75 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap, scratch, silent, quotation))
+			// Push and pop valmap each go-around; some choices
+			// might partly work, and corrupt the map.
+			ValueMap vcopy(valmap);
+			if (extract(choice, vgnd, vcopy, scratch, silent, quotation))
+			{
+				valmap.swap(vcopy);
 				return true;
+			}
 		}
 		return false;
 	}
 
-	// Whatever they are, the type must agree.
-	if (t != ground->get_type()) return false;
-
 	// If they are (non-variable) nodes, they must be identical.
 	if (not termpat->is_link())
-		return (termpat == ground);
+		return (termpat == vgnd);
 
+	// Type of LinkSig is encoded in the first atom.
+	Type lit = t;
+	if (LINK_SIGNATURE_LINK == t)
+		lit = link_sig_kind(termpat);
+
+	// Whatever they are, the type must agree.
+	if (lit != vgnd->get_type()) return false;
+
+	// From here on out, we prepare to compare Links.
 	const HandleSeq& tlo = termpat->getOutgoingSet();
-	const HandleSeq& glo = ground->getOutgoingSet();
 	size_t tsz = tlo.size();
-	size_t gsz = glo.size();
+	size_t off = 0;
+	if (LINK_SIGNATURE_LINK == t)
+		{ tsz--; off = 1; }
 
 	// If no glob nodes, just compare links side-by-side.
 	if (0 == _globby_terms.count(termpat))
 	{
-		// If the sizes are mismatched, should we do a fuzzy match?
-		if (gsz != tsz) return false;
-		for (size_t i=0; i<tsz; i++)
+		if (vgnd->is_atom())
 		{
-			if (not extract(tlo[i], glo[i], valmap, scratch, silent, quotation))
-				return false;
+			const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
+			size_t gsz = glo.size();
+			// If the sizes are mismatched, should we do a fuzzy match?
+			if (tsz != gsz) return false;
+			for (size_t i=0; i<tsz; i++)
+			{
+				if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
+					return false;
+			}
+			return true;
 		}
 
+		// If we are here, vgnd is a LinkValue. Loop just like above,
+		// except that the outgoing set is a vector of Values.
+		const auto& glo = LinkValueCast(vgnd)->value();
+		size_t gsz = glo.size();
+		// If the sizes are mismatched, should we do a fuzzy match?
+		if (tsz != gsz) return false;
+		for (size_t i=0; i<tsz; i++)
+		{
+			if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
+				return false;
+		}
 		return true;
 	}
+
+	Handle ground(HandleCast(vgnd));
+	if (not ground)
+		throw RuntimeException(TRACE_INFO,
+			"Globbing for Values not implemented! FIXME!");
+
+	const HandleSeq& glo = ground->getOutgoingSet();
+	size_t gsz = glo.size();
 
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
@@ -293,15 +350,23 @@ bool FilterLink::extract(const Handle& termpat,
 			if (valmap.end() != val)
 			{
 				// Have to have same arity and contents.
-				const Handle& already = val->second;
-				const HandleSeq& alo = already->getOutgoingSet();
-				size_t asz = alo.size();
-				if (asz != glob_seq.size()) return false;
-				for (size_t i=0; i< asz; i++)
+				if (val->second->is_atom())
 				{
-					if (glob_seq[i] != alo[i]) return false;
+					const Handle& already = HandleCast(val->second);
+					const HandleSeq& alo = already->getOutgoingSet();
+					size_t asz = alo.size();
+					if (asz != glob_seq.size()) return false;
+					for (size_t i=0; i< asz; i++)
+					{
+						if (glob_seq[i] != alo[i]) return false;
+					}
+					return true;
 				}
-				return true;
+				else
+				{
+					throw RuntimeException(TRACE_INFO,
+						"Globbing for Values not implemented! FIXME!");
+				}
 			}
 
 			// If we are here, we've got a match. Record it.
@@ -328,15 +393,46 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
-	GroundingMap valmap;
+	ValueMap valmap;
 	if (not extract(_pattern->get_body(), vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
 	// Special case for signatures. The extract already rejected
 	// mis-matches, if any. Thus, we are done, here.
-	if (_pattern->get_body()->is_type(TYPE_NODE) or
-	    _pattern->get_body()->is_type(TYPE_OUTPUT_LINK))
+	const Handle& body(_pattern->get_body());
+	if (body->is_type(TYPE_NODE) or
+	    (body->is_type(TYPE_OUTPUT_LINK) and
+	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
+
+	// Special case for Values. This is minimalist, and does not support
+	// RuleLink (see note below), which it should. It also assumes a
+	// very minimalist structure for the LinkSignature kind, which is
+	// also probably not correct. Someday, when users demand this, it
+	// should be fixed.
+	if (body->is_type(LINK_SIGNATURE_LINK))
+	{
+		if (valmap.size() == 1) return valmap.begin()->second;
+
+		Type kind = link_sig_kind(body);
+		if (LINK_VALUE == kind)
+		{
+			ValueSeq valseq;
+			for (const Handle& var : _mvars->varseq)
+			{
+				auto valpair = valmap.find(var);
+				valseq.emplace_back(valpair->second);
+			}
+			return createLinkValue(valseq);
+		}
+
+		// Fall through. Handle regular atoms.
+	}
+
+	// XXX FIXME. Everything below assumes we're working with Atoms not
+	// Values, and that the RuleLink only has Atoms (not Values) in it's
+	// rewrite. That's historically OK, but we do want to support the
+	// general case of LinkValues, someday. Just not today.
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
@@ -347,7 +443,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		// Can't ever happen.
 		// if (valmap.end() == valpair) return Handle::UNDEFINED;
 
-		valseq.emplace_back(valpair->second);
+		valseq.emplace_back(HandleCast(valpair->second));
 	}
 
 	// Perform substitution, if it's a RuleLink.

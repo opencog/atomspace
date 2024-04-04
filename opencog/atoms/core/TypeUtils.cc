@@ -86,7 +86,7 @@ bool value_is_type(const Handle& spec, const ValuePtr& val)
 		return TypeChoiceCast(deep)->is_type(val);
 	}
 
-	// From here on, we prepae to compare Links. The next if block
+	// From here on, we prepare to compare Links. The next if-block
 	// deals with what's left of nodes, and preps for link compare.
 	size_t sz;
 	size_t off;

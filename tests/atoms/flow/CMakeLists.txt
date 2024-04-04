@@ -24,3 +24,5 @@ TARGET_LINK_LIBRARIES(DynamicUTest execution smob)
 
 ADD_CXXTEST(FilterLinkUTest)
 TARGET_LINK_LIBRARIES(FilterLinkUTest execution smob)
+
+ADD_GUILE_TEST(FilterValueTest filter-value-test.scm)
