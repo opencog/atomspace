@@ -122,6 +122,18 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
+// XXX FIXME. LinkSignatureLink should be a C++ class,
+// it can static-check the correct structure, and it can
+// dynamic-compare the type correctly. Someday, not today.
+static inline Type link_sig_kind(const Handle& termpat)
+{
+	TypeNodePtr tn(TypeNodeCast(termpat->getOutgoingAtom(0)));
+	if (nullptr == tn)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting first atom in LinkSignature to be a Type!");
+	return tn->get_kind();
+}
+
 /// Recursive tree-compare-and-extract grounding values.
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
@@ -234,16 +246,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// Type of LinkSig is encoded in the first atom.
 	Type lit = t;
 	if (LINK_SIGNATURE_LINK == t)
-	{
-		// XXX FIXME. LinkSignatureLink should be a C++ class,
-		// it can static-check the corrrect structure, and it can
-		// dynamic-compare the type correctly. Someday, not today.
-		TypeNodePtr tn(TypeNodeCast(termpat->getOutgoingAtom(0)));
-		if (nullptr == tn)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting first atom in LinkSignature to be a Type!");
-		lit = tn->get_kind();
-	}
+		lit = link_sig_kind(termpat);
 
 	// Whatever they are, the type must agree.
 	if (lit != vgnd->get_type()) return false;
@@ -396,9 +399,40 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 	// Special case for signatures. The extract already rejected
 	// mis-matches, if any. Thus, we are done, here.
-	if (_pattern->get_body()->is_type(TYPE_NODE) or
-	    _pattern->get_body()->is_type(TYPE_OUTPUT_LINK))
+	const Handle& body(_pattern->get_body());
+	if (body->is_type(TYPE_NODE) or
+	    (body->is_type(TYPE_OUTPUT_LINK) and
+	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
+
+	// Special case for Values. This is minimalist, and does not support
+	// RuleLink (see note below), which it should. It also assumes a
+	// very minimalist structure for the LinkSignature kind, which is
+	// also probably not correct. Someday, when users demand this, it
+	// should be fixed.
+	if (body->is_type(LINK_SIGNATURE_LINK))
+	{
+		if (valmap.size() == 1) return valmap.begin()->second;
+
+		Type kind = link_sig_kind(body);
+		if (LINK_VALUE == kind)
+		{
+			ValueSeq valseq;
+			for (const Handle& var : _mvars->varseq)
+			{
+				auto valpair = valmap.find(var);
+				valseq.emplace_back(valpair->second);
+			}
+			return createLinkValue(valseq);
+		}
+
+		// Fall through. Handle regular atoms.
+	}
+
+	// XXX FIXME. Everything below assumes we're working with Atoms not
+	// Values, and that the RuleLink only has Atoms (not Values) in it's
+	// rewrite. That's historically OK, but we do want to support the
+	// general case of LinkValues, someday. Just not today.
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
