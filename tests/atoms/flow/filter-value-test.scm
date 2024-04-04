@@ -1,14 +1,13 @@
 ;
-; filter-value.scm -- Using FilterLink for processing data streams
+; filter-value-test.scm -- Verify that the demo filter-value.scm works.
 ;
-; The FilterLink implements a link type analogous to the `filter-map`
-; function commonly found in functional programming languages, such as
-; the scheme srfi-1 `filter-map`, or `map` in haskell.
-;
-; This demo focuses on filtering data streams; please review `filter.scm`
-; for a more basic introduction to filtering.
-;
+
 (use-modules (opencog) (opencog exec))
+(use-modules (opencog test-runner))
+
+(opencog-test-runner)
+(define tname "filter-value-test")
+(test-begin tname)
 
 ; Begin by creating a mockup of a complicated data stream. What makes
 ; this "complicated" is that it will consist of nested LinkValues,
@@ -42,9 +41,6 @@
 ; from the tree list. The tree-list is a list of pairs.
 ; The first elt in the pair has a label called (Concept "sentence")
 ; and so the filter pattern reaches into the pair to grab that.
-;
-; The result should be a match of (Variable $x) to the LinkValue
-; containing the list of words in the sentence.
 (define get-parse-sentences
 	(Filter
 		(Lambda
@@ -62,30 +58,11 @@
 )
 
 ; This should return lists of words in each sentence.
-(cog-execute! get-parse-sentences)
+(define wrd-list (cog-execute! get-parse-sentences))
 
-; THE END. That's all folks! Everything below is broken (unimplemented)!
-; ----------------------------------------------------------
+(test-assert "pair of sentences"
+	(equal? wrd-list (LinkValue word-list-a word-list-b)))
 
-; Same as above, but extract the list of edges. This uses a GlobNode
-; because the number of edges is variable.
-(define get-parse-edges
-	(Filter
-		(Lambda
-			(Variable "$x")
-			(LinkSignature
-				(Type 'LinkValue)
-				(Type 'LinkValue)
-				(LinkSignature
-					(Type 'LinkValue)
-					(Concept "parse")
-					(Glob "$x"))))
+(test-end tname)
 
-		; The sequence of Values to be filterd by above.
-		(ValueOf (Node "some place") (Predicate "some key")))
-)
-
-; This should return lists of words in each sentence.
-;(cog-execute! get-parse-edges)
-
-; THE END. That's all folks!
+(opencog-test-end)
