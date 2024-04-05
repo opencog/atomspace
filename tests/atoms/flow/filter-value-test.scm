@@ -37,6 +37,7 @@
 (cog-set-value!
 	(Node "some place") (Predicate "some key") tree-list)
 
+; -----------
 ; Define a pattern that will extract all of the sentences
 ; from the tree list. The tree-list is a list of pairs.
 ; The first elt in the pair has a label called (Concept "sentence")
@@ -62,6 +63,33 @@
 
 (test-assert "pair of sentences"
 	(equal? wrd-list (LinkValue word-list-a word-list-b)))
+
+; -----------
+; Same as above, but extract the list of edges. This uses a GlobNode
+; because the number of edges is variable.
+(define get-parse-edges
+	(Filter
+		(Lambda
+			(Glob "$x")
+			(LinkSignature
+				(Type 'LinkValue)
+				(Type 'LinkValue)
+				(LinkSignature
+					(Type 'LinkValue)
+					(Concept "parse")
+					(Glob "$x"))))
+
+		; The sequence of Values to be filterd by above.
+		(ValueOf (Node "some place") (Predicate "some key")))
+)
+
+; This should return lists of edges in each sentence.
+(define edge-list (cog-execute! get-parse-edges))
+(test-assert "edge list"
+	(equal? edge-list
+		(LinkValue
+			(LinkValue edge-a1 edge-a2 edge-a3)
+			(LinkValue edge-b1 edge-b2))))
 
 (test-end tname)
 
