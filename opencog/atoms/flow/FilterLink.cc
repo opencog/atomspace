@@ -239,6 +239,11 @@ static ValuePtr make_list(const HandleSeq&& v)
 	return createLink(std::move(v), LIST_LINK);
 }
 
+static ValuePtr make_lnkv(const ValueSeq&& v)
+{
+	return createLinkValue(std::move(v));
+}
+
 // ===============================================================
 
 // XXX FIXME. LinkSignatureLink should be a C++ class,
@@ -412,15 +417,17 @@ bool FilterLink::extract(const Handle& termpat,
 		return true;
 	}
 
-	Handle ground(HandleCast(vgnd));
-	if (not ground)
-		throw RuntimeException(TRACE_INFO,
-			"Globbing for Values not implemented! FIXME!");
-
-	const HandleSeq& glo = ground->getOutgoingSet();
-
+	// If we are here, then there's a glob to be matched. As just above,
+	// the HandleSeq and ValueSeq variants are effectively identical.
+	if (vgnd->is_link())
+	{
+		const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
+		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
+		                    make_list, tsz, off);
+	}
+	const ValueSeq& glo = LinkValueCast(vgnd)->value();
 	return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
-	                    make_list, tsz, off);
+	                    make_lnkv, tsz, off);
 }
 
 // ====================================================================
