@@ -93,7 +93,11 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 	for (unsigned i = 0; i < conds.size(); ++i)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(scratch, conds[i]));
-		if (tvp->get_mean() > 0.5)
+
+		// If the do_evaluate worked, but the result is NOT a TV,
+		// then assume that a non-empty result is same as TRUE.
+		// Empty results cause do_evaluate() to return FALSE_TV.
+		if (nullptr == tvp or tvp->get_mean() > 0.5)
 		{
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
