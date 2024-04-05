@@ -44,11 +44,15 @@ ValueOfLink::ValueOfLink(const HandleSeq&& oset, Type t)
 void ValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
+	if (0 == ary)
+		throw SyntaxException(TRACE_INFO, "Expecting one or more atoms!");
+
 	if (1 == ary and
 		 (nameserver().isA(_type, TRUTH_VALUE_OF_LINK) or
 		  nameserver().isA(_type, STRENGTH_OF_LINK) or
 		  nameserver().isA(_type, CONFIDENCE_OF_LINK) or
-		  nameserver().isA(_type, COUNT_OF_LINK)))
+		  nameserver().isA(_type, COUNT_OF_LINK) or
+		  nameserver().isA(_type, FLOAT_VALUE_OF_LINK)))
 	{
 		return;
 	}
@@ -117,8 +121,24 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 /// When executed, this will return the value at the indicated key.
 ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
-	if (2 == _outgoing.size())
+	// Very special case: If no key is given, *and* its a FloatValueOf,
+	// *and* the atom is a NumberNode, then case the number to a Float.
+	size_t ary = _outgoing.size();
+	if (1 == ary)
+	{
+		if (FLOAT_VALUE_OF_LINK == _type and
+		    NUMBER_NODE == _outgoing[0]->get_type())
+		{
+			return createFloatValue(NumberNodeCast(_outgoing[0])->value());
+		}
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an Atom and a key");
+	}
+
+	if (2 == ary)
 		return do_execute(as, silent, -1);
+
+	// Assume ary == 3
 	return do_execute(as, silent, 2);
 }
 
