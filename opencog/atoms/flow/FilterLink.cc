@@ -122,6 +122,111 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
+/// Direct side-by-side compare, for VECT being either
+/// std::vector<Handle> or std::vector<Value>
+template<typename VECT>
+bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
+                              ValueMap& valmap,
+                              AtomSpace* scratch, bool silent,
+                              Quotation quotation,
+                              size_t tsz, size_t off) const
+{
+	size_t gsz = glo.size();
+
+	// If we are here, there is a glob node in the pattern.  A glob can
+	// match one or more atoms in a row. Thus, we have a more
+	// complicated search ...
+	size_t ip=0, jg=0;
+	for (ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
+	{
+		Type ptype = tlo[ip]->get_type();
+		if (GLOB_NODE == ptype)
+		{
+			HandleSeq glob_seq;
+			Handle glob(tlo[ip]);
+			// Globs at the end are handled differently than globs
+			// which are followed by other stuff. So, is there
+			// anything after the glob?
+			Handle post_glob;
+			bool have_post = false;
+			if (ip+1 < tsz)
+			{
+				have_post = true;
+				post_glob = tlo[ip+1];
+			}
+
+			// Match at least one.
+			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
+			if (not tc) return false;
+
+			glob_seq.push_back(glo[jg]);
+			jg++;
+
+			// Can we match more?
+			while (tc and jg<gsz)
+			{
+				if (have_post)
+				{
+					// If the atom after the glob matches, then we are done.
+					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
+					if (tc) break;
+				}
+				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
+				if (tc) glob_seq.push_back(glo[jg]);
+				jg ++;
+			}
+			jg --;
+			if (not tc)
+			{
+				return false;
+			}
+
+			// If we already have a value, the value must be identical.
+			auto val = valmap.find(glob);
+			if (valmap.end() != val)
+			{
+				// Have to have same arity and contents.
+				if (val->second->is_atom())
+				{
+					const Handle& already = HandleCast(val->second);
+					const HandleSeq& alo = already->getOutgoingSet();
+					size_t asz = alo.size();
+					if (asz != glob_seq.size()) return false;
+					for (size_t i=0; i< asz; i++)
+					{
+						if (glob_seq[i] != alo[i]) return false;
+					}
+					return true;
+				}
+				else
+				{
+					throw RuntimeException(TRACE_INFO,
+						"Globbing for Values not implemented! FIXME!");
+				}
+			}
+
+			// If we are here, we've got a match. Record it.
+			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
+			valmap.emplace(std::make_pair(glob, glp));
+		}
+		else
+		{
+			// If we are here, we are not comparing to a glob.
+			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
+				return false;
+		}
+	}
+	return (ip == tsz) and (jg == gsz);
+}
+
+template
+bool FilterLink::glob_compare<HandleSeq>
+                    (const HandleSeq&, const HandleSeq&,
+                     ValueMap&, AtomSpace*, bool, Quotation,
+                     size_t, size_t) const;
+
+// ===============================================================
+
 // XXX FIXME. LinkSignatureLink should be a C++ class,
 // it can static-check the correct structure, and it can
 // dynamic-compare the type correctly. Someday, not today.
@@ -261,6 +366,11 @@ bool FilterLink::extract(const Handle& termpat,
 	// If no glob nodes, just compare links side-by-side.
 	if (0 == _globby_terms.count(termpat))
 	{
+		// This and the next block are nearly identical, except that
+		// in the first, glo is std::vector<Handle> while the second
+		// is std::vector<Value>. We could handle this with a template,
+		// but the blocks are so short, that the template boilerplate
+		// is longer than the block.
 		if (vgnd->is_atom())
 		{
 			const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
@@ -295,98 +405,14 @@ bool FilterLink::extract(const Handle& termpat,
 			"Globbing for Values not implemented! FIXME!");
 
 	const HandleSeq& glo = ground->getOutgoingSet();
-	size_t gsz = glo.size();
 
-	// If we are here, there is a glob node in the pattern.  A glob can
-	// match one or more atoms in a row. Thus, we have a more
-	// complicated search ...
-	size_t ip=0, jg=0;
-	for (ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
-	{
-		Type ptype = tlo[ip]->get_type();
-		if (GLOB_NODE == ptype)
-		{
-			HandleSeq glob_seq;
-			Handle glob(tlo[ip]);
-			// Globs at the end are handled differently than globs
-			// which are followed by other stuff. So, is there
-			// anything after the glob?
-			Handle post_glob;
-			bool have_post = false;
-			if (ip+1 < tsz)
-			{
-				have_post = true;
-				post_glob = tlo[ip+1];
-			}
-
-			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-			if (not tc) return false;
-
-			glob_seq.push_back(glo[jg]);
-			jg++;
-
-			// Can we match more?
-			while (tc and jg<gsz)
-			{
-				if (have_post)
-				{
-					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
-					if (tc) break;
-				}
-				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-				if (tc) glob_seq.push_back(glo[jg]);
-				jg ++;
-			}
-			jg --;
-			if (not tc)
-			{
-				return false;
-			}
-
-			// If we already have a value, the value must be identical.
-			auto val = valmap.find(glob);
-			if (valmap.end() != val)
-			{
-				// Have to have same arity and contents.
-				if (val->second->is_atom())
-				{
-					const Handle& already = HandleCast(val->second);
-					const HandleSeq& alo = already->getOutgoingSet();
-					size_t asz = alo.size();
-					if (asz != glob_seq.size()) return false;
-					for (size_t i=0; i< asz; i++)
-					{
-						if (glob_seq[i] != alo[i]) return false;
-					}
-					return true;
-				}
-				else
-				{
-					throw RuntimeException(TRACE_INFO,
-						"Globbing for Values not implemented! FIXME!");
-				}
-			}
-
-			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
-			valmap.emplace(std::make_pair(glob, glp));
-		}
-		else
-		{
-			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
-				return false;
-		}
-	}
-	return (ip == tsz) and (jg == gsz);
+	return glob_compare(tlo, glo, valmap, scratch, silent, quotation, tsz, off);
 }
 
 // ====================================================================
 
 ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
-                               AtomSpace* scratch, bool silent) const
+                                 AtomSpace* scratch, bool silent) const
 {
 	// temp hack
 	Handle cterm(HandleCast(vterm));
