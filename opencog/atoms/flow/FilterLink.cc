@@ -129,6 +129,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
                               ValueMap& valmap,
                               AtomSpace* scratch, bool silent,
                               Quotation quotation,
+                              ValuePtr (*makeval)(const VECT&&),
                               size_t tsz, size_t off) const
 {
 	size_t gsz = glo.size();
@@ -142,7 +143,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 		Type ptype = tlo[ip]->get_type();
 		if (GLOB_NODE == ptype)
 		{
-			HandleSeq glob_seq;
+			VECT glob_seq;
 			Handle glob(tlo[ip]);
 			// Globs at the end are handled differently than globs
 			// which are followed by other stuff. So, is there
@@ -205,8 +206,8 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 				}
 			}
 
-			// If we are here, we've got a match. Record it.
-			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
+//			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
+			ValuePtr glp(makeval(std::move(glob_seq)));
 			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else
@@ -223,7 +224,20 @@ template
 bool FilterLink::glob_compare<HandleSeq>
                     (const HandleSeq&, const HandleSeq&,
                      ValueMap&, AtomSpace*, bool, Quotation,
+                     ValuePtr (*)(const HandleSeq&&),
                      size_t, size_t) const;
+
+template
+bool FilterLink::glob_compare<ValueSeq>
+                    (const HandleSeq&, const ValueSeq&,
+                     ValueMap&, AtomSpace*, bool, Quotation,
+                     ValuePtr (*)(const ValueSeq&&),
+                     size_t, size_t) const;
+
+static ValuePtr make_list(const HandleSeq&& v)
+{
+	return createLink(std::move(v), LIST_LINK);
+}
 
 // ===============================================================
 
@@ -366,11 +380,10 @@ bool FilterLink::extract(const Handle& termpat,
 	// If no glob nodes, just compare links side-by-side.
 	if (0 == _globby_terms.count(termpat))
 	{
-		// This and the next block are nearly identical, except that
-		// in the first, glo is std::vector<Handle> while the second
-		// is std::vector<Value>. We could handle this with a template,
-		// but the blocks are so short, that the template boilerplate
-		// is longer than the block.
+		// This and the next block are nearly identical, except that in
+		// the first, glo is HandleSeq while the second  is ValueSeq.
+		// We could handle this with a template, but the blocks are so
+		// short, that the template boilerplate is longer than the block.
 		if (vgnd->is_atom())
 		{
 			const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
@@ -406,7 +419,8 @@ bool FilterLink::extract(const Handle& termpat,
 
 	const HandleSeq& glo = ground->getOutgoingSet();
 
-	return glob_compare(tlo, glo, valmap, scratch, silent, quotation, tsz, off);
+	return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
+	                    make_list, tsz, off);
 }
 
 // ====================================================================

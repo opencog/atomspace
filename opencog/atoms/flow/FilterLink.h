@@ -66,8 +66,9 @@ protected:
 	// Handy utility
 	template<typename VECT>
 	bool glob_compare(const HandleSeq&, const VECT&,
-                     ValueMap&, AtomSpace*, bool, Quotation,
-                     size_t, size_t) const;
+	                  ValueMap&, AtomSpace*, bool, Quotation,
+	                  ValuePtr (*)(const VECT&&),
+	                  size_t, size_t) const;
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);
 	FilterLink(const Handle& pattern, const Handle& term);
