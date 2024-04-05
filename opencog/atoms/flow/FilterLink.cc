@@ -137,8 +137,8 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
 	// complicated search ...
-	size_t ip=0, jg=0;
-	for (ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
+	size_t ip=off, jg=0;
+	for (ip=off, jg=0; ip<tsz+off and jg<gsz; ip++, jg++)
 	{
 		Type ptype = tlo[ip]->get_type();
 		if (GLOB_NODE == ptype)
@@ -150,7 +150,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 			// anything after the glob?
 			Handle post_glob;
 			bool have_post = false;
-			if (ip+1 < tsz)
+			if (ip+1 < tsz+off)
 			{
 				have_post = true;
 				post_glob = tlo[ip+1];
@@ -217,7 +217,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 				return false;
 		}
 	}
-	return (ip == tsz) and (jg == gsz);
+	return (ip == tsz+off) and (jg == gsz);
 }
 
 template
