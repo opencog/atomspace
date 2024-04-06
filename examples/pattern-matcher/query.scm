@@ -20,7 +20,7 @@
 ; results, even while others are still being found.
 ;
 ; This example uses an AnchorNode to establish a "well-known location",
-; a QueryLink to attache them there, and a DeleteLink to detach results
+; a QueryLink to attach them there, and a DeleteLink to detach results
 ; from the AnchorNode. The  ParallelLink is used to run multiple threads,
 ; and SleepLink to slow it down enough to see what is happening.
 ;

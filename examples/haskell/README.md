@@ -21,7 +21,7 @@ export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghci --ghc-options -lhaskell-atomspace
 ```
 
-If when running an example you get an error: "...cannont open shared object
+If when running an example you get an error: "...cannot open shared object
 file: No such file or directory ...":
   - Remember to add: "/usr/local/lib/opencog" to your */etc/ld.so.conf* file.
   - Check if the file: */usr/local/lib/opencog/libhaskell-atomspace.so* exists.
