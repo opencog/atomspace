@@ -1008,6 +1008,15 @@ COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_LINK
 SET_VALUE_LINK <- FUNCTION_LINK
 SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
+// Internal-use-only wrapper for Values. Older code for function
+// application and beta reduction only works with Atoms, not Values.
+// Rewriting it to flow Values is really hard: we don't have a good
+// strategy for applying functions to Values. This is the work-around:
+// It can be placed inside a Link, so beta-reduction works. It holds
+// a Value, which functions can get. It *cannot* be placed in the
+// AtomSpace, so is not quite a "real" Atom.
+VALUE_SHIM_LINK <- LINK
+
 // -----------
 // Similar to ValueOfLink, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either
