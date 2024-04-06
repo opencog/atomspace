@@ -25,6 +25,11 @@
 
 using namespace opencog;
 
+ValueShimLink::ValueShimLink(Type t)
+	: Link(t)
+{
+}
+
 ValueShimLink::ValueShimLink(const HandleSeq& oset, Type t)
 	: Link(t)
 {

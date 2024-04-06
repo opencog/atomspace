@@ -30,6 +30,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "FilterLink.h"
+#include "ValueShimLink.h"
 
 using namespace opencog;
 
@@ -456,7 +457,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// and return them.
 	if (_rewrite.empty())
 	{
-		if (1 == valmap.size()) valmap.begin()->second;
+		if (1 == valmap.size()) return valmap.begin()->second;
 
 		// Multiple Values to return. Two generic cases: the return
 		// value is a set of Atoms, or a set of non-Atom Values.
@@ -480,7 +481,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 			const auto& valpair = valmap.find(var);
 			valseq.emplace_back(HandleCast(valpair->second));
 		}
-		return scratch->add_link(LIST_LINK, std::move(valseq))
+		return scratch->add_link(LIST_LINK, std::move(valseq));
 	}
 
 	// If we are there, then there's a rule to fire. Two generic
@@ -493,38 +494,55 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	//    might be either Values or Atoms; in either case, they're
 	//    arguments for the function to be executed.
 
-#if 0
 	// Place the groundings into a sequence, for easy access.
-	ValueSeq valseq;
+	HandleSeq valseq;
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-		valseq.emplace_back(valpair->second);
-	}
-
-		ValueSeq rew;
-		// Beta reduce, and execute. No type-checking during
-		// beta-reduction; we've already done that, during matching.
-		for (const Handle& impl : _rewrite)
+		if (valpair->second->is_atom())
+			valseq.emplace_back(HandleCast(valpair->second));
+		else
 		{
-			ValuePtr red(_mvars->sub_values_nocheck(impl, valseq));
-			if (red->is_atom() and HandleCast(red)->is_executable())
-				rew.emplace_back(HandleCast(red)->execute(scratch, silent));
-			else
-			{
-				// Consume quotations.
-				Type rty = red->get_type();
-				if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
-					rew.emplace_back(HandleCast(red)->getOutgoingAtom(0));
-				else
-					rew.emplace_back(red);
-			}
+			ValueShimLinkPtr wrap(createValueShimLink());
+			wrap->set_value(valpair->second);
+			valseq.emplace_back(wrap);
 		}
-
-		// Fall through, use the same logic to finish up.
-		valseq.swap(rew);
 	}
-#endif
+
+	ValueSeq rew;
+	// Beta reduce, and execute. No type-checking during
+	// beta-reduction; we've already done that, during matching.
+	for (const Handle& impl : _rewrite)
+	{
+		ValuePtr red(_mvars->substitute_nocheck(impl, valseq));
+		if (red->is_atom() and HandleCast(red)->is_executable())
+			rew.emplace_back(HandleCast(red)->execute(scratch, silent));
+		else
+		{
+			// Consume quotations.
+			Type rty = red->get_type();
+			if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
+				rew.emplace_back(HandleCast(red)->getOutgoingAtom(0));
+			else
+				rew.emplace_back(red);
+		}
+	}
+
+	if (1 == rew.size()) return rew[0];
+
+	// Multiple Values to return. Two generic cases: the return
+	// value is a set of Atoms, or a set of non-Atom Values.
+	if (body->is_type(LINK_SIGNATURE_LINK))
+	{
+		// Type kind = link_sig_kind(body);
+		// if (LINK_VALUE == kind) ...
+		return createLinkValue(rew);
+	}
+
+	// A list of Handles.
+	HandleSeq hseq;
+	for (const ValuePtr& v : rew) hseq.emplace_back(HandleCast(v));
+	return scratch->add_link(LIST_LINK, std::move(hseq));
 }
 
 ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
