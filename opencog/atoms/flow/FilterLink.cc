@@ -551,7 +551,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	if (valh->is_executable())
 	{
-		ValuePtr vex = valh->execute();
+		ValuePtr vex = valh->execute(); // XXX why are we not providing the as ?
 
 		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
 		// then we should construct another Queue as the return value,
@@ -575,10 +575,11 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		valh = HandleCast(vex);
 	}
 
-	// Handle three different cases.
+	// Handle four different cases.
 	// If there is a single Atom, apply the filter to the single Atom.
 	// If there is a set of Atoms, apply the filter to the set.
 	// If there is a list of Atoms, apply the filter to the list.
+	// If there is a LinkValue, iterate on that.
 	Type argtype = valh->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
@@ -589,6 +590,22 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
 		return as->add_link(argtype, std::move(remap));
+	}
+
+	// If we're getting a shime, we MUST unwrap it. If the shim
+	// wraps a LinkValue, iterate over that.
+	if (VALUE_SHIM_LINK == argtype)
+	{
+		ValuePtr svp(valh->execute(as, silent));
+		if (LINK_VALUE != svp->get_type()) return svp;
+
+		ValueSeq remap;
+		const ValueSeq& vsq(LinkValueCast(svp)->value());
+		for (const ValuePtr& v: vsq)
+			remap.emplace_back(rewrite_one(v, as, silent));
+
+		if (1 == remap.size()) return remap[0];
+		return createLinkValue(remap);
 	}
 
 	// Its a singleton. Just remap that.
