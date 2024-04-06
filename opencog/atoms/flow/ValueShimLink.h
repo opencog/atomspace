@@ -31,9 +31,13 @@ namespace opencog
  *  @{
  */
 
-/// The ValueShimLink returns the value on the indicated atom (first
-/// argument) at the indicated key (second argument).
-///
+/// Internal-use-only wrapper for Values. Older code for function
+/// application and beta reduction only works with Atoms, not Values.
+/// Rewriting it to flow Values is really hard: we don't have a good
+/// strategy for applying functions to Values. This is the work-around:
+/// It can be placed inside a Link, so beta-reduction works. It holds
+/// a Value, which functions can get. It *cannot* be placed in the
+/// AtomSpace, so is not quite a "real" Atom.
 class ValueShimLink : public Link
 {
 private:
@@ -50,6 +54,7 @@ public:
 	virtual ValuePtr execute(AtomSpace*, bool) { return val; }
 
 	virtual void setAtomSpace(AtomSpace *);
+	virtual std::string to_short_string(const std::string& indent) const;
 
 	static Handle factory(const Handle&);
 };

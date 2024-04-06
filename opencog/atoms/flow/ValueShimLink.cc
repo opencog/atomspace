@@ -42,6 +42,12 @@ void ValueShimLink::setAtomSpace(AtomSpace *)
 	throw RuntimeException(TRACE_INFO, "Cannot be placed into AtomSpace!");
 }
 
+std::string ValueShimLink::to_short_string(const std::string& indent) const
+{
+	std::string more_indent = indent + "  ";
+	return indent + "(ValueShim\n" + val->to_string(more_indent) + ")";
+}
+
 DEFINE_LINK_FACTORY(ValueShimLink, VALUE_SHIM_LINK)
 
 /* ===================== END OF FILE ===================== */
