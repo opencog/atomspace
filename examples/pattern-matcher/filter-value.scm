@@ -8,6 +8,17 @@
 ; This demo focuses on filtering data streams; please review `filter.scm`
 ; for a more basic introduction to filtering.
 ;
+; The goal of this demo is to show how to perform processing on live
+; data streams. A "data stream" is meant to be some sensory device: some
+; interface to the external environment, delivering measurement signals
+; of some kind. It is presumed to have been turned into a stream of
+; Values by the time it gets to this demo.  This demo applies a filter
+; to that stream, and then performs some processing on the result. The
+; last demo, at the bottom of this file, increments a count attached
+; to Atoms held in the AtomSpace, based on what arrived in the stream.
+; This is an "observation count": how many times was his input observed
+; in the input steam?
+;
 ; See https://wiki.opencog.org/w/FilterLink for general documentation.
 ;
 (use-modules (opencog) (opencog exec))
