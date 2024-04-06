@@ -32,7 +32,7 @@ in the example above do not need to be defined. A query on this dataset
 might be "find all expressions containing the word 'cherry'" or "find
 all expressions containing the symbol 'print'".  Careful, though: the
 goal here is not to just store "source code"; that would be silly. Every
-competent programmer has thier favorite tools for searching source code
+competent programmer has their favorite tools for searching source code
 for certain expressions. The point here is that vast oceans of trees can
 be stored, and very complex queries can be performed on the data.
 Explcitly, the data is represented as a graph, and the queries are

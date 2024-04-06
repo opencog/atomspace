@@ -859,7 +859,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
-		ValuePtr pap(evelnk->execute());
+		ValuePtr pap(evelnk->execute(scratch));
 
 		// There might not be a Value at the given key.
 		if (nullptr == pap)

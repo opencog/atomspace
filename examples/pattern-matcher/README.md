@@ -58,7 +58,7 @@ external stimuli into Atomese predicates.
 These "active" link types can be composed to describe processing
 pipelines and systems that are both accessible to reasoning and learning
 (because they encode "knowledge" of the pipeline) and at the same time,
-these processing pipleines can actually "do" whatever it is they are
+these processing pipelines can actually "do" whatever it is they are
 wired up to do.  One can imagine the Atoms as describing pipes or
 plumbing, and the values flowing through them as water flowing through
 the pipes. The AtomSpace holds the current configuration of the pipes;

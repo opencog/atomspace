@@ -16,6 +16,7 @@ ADD_LIBRARY (atomflow
 	TruthValueOfLink.cc
 	TypeOfLink.cc
 	ValueOfLink.cc
+	ValueShimLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -45,5 +46,6 @@ INSTALL (FILES
 	TruthValueOfLink.h
 	TypeOfLink.h
 	ValueOfLink.h
+	ValueShimLink.h
 	DESTINATION "include/opencog/atoms/flow"
 )

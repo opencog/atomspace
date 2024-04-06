@@ -30,6 +30,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "FilterLink.h"
+#include "ValueShimLink.h"
 
 using namespace opencog;
 
@@ -452,81 +453,96 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
 
-	// Special case for Values. This is minimalist, and does not support
-	// RuleLink (see note below), which it should. It also assumes a
-	// very minimalist structure for the LinkSignature kind, which is
-	// also probably not correct. Someday, when users demand this, it
-	// should be fixed.
-	if (body->is_type(LINK_SIGNATURE_LINK))
+	// If there is no RuleLink to fire, then just wrap up the results
+	// and return them.
+	if (_rewrite.empty())
 	{
-		if (valmap.size() == 1) return valmap.begin()->second;
+		if (1 == valmap.size()) return valmap.begin()->second;
 
-		Type kind = link_sig_kind(body);
-		if (LINK_VALUE == kind)
+		// Multiple Values to return. Two generic cases: the return
+		// value is a set of Atoms, or a set of non-Atom Values.
+		if (body->is_type(LINK_SIGNATURE_LINK))
 		{
+			// Type kind = link_sig_kind(body);
+			// if (LINK_VALUE == kind) ...
 			ValueSeq valseq;
 			for (const Handle& var : _mvars->varseq)
 			{
-				auto valpair = valmap.find(var);
+				const auto& valpair = valmap.find(var);
 				valseq.emplace_back(valpair->second);
 			}
 			return createLinkValue(valseq);
 		}
 
-		// Fall through. Handle regular atoms.
+		// A list of Handles.
+		HandleSeq valseq;
+		for (const Handle& var : _mvars->varseq)
+		{
+			const auto& valpair = valmap.find(var);
+			valseq.emplace_back(HandleCast(valpair->second));
+		}
+		return scratch->add_link(LIST_LINK, std::move(valseq));
 	}
 
-	// XXX FIXME. Everything below assumes we're working with Atoms not
-	// Values, and that the RuleLink only has Atoms (not Values) in it's
-	// rewrite. That's historically OK, but we do want to support the
-	// general case of LinkValues, someday. Just not today.
+	// If we are there, then there's a rule to fire. Two generic
+	// cases to be handled:
+	// 1) If the rewrite rule is not executable, then the grounding
+	//    must consist of Atoms only. The grounding is plugged into
+	//    the rewrite, i.e. beta-reduced.
+	// 2) If the rewrite rule is executable, then the grounding
+	//    is handed to that, without any further ado. The grounding
+	//    might be either Values or Atoms; in either case, they're
+	//    arguments for the function to be executed.
 
 	// Place the groundings into a sequence, for easy access.
 	HandleSeq valseq;
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-
-		// Can't ever happen.
-		// if (valmap.end() == valpair) return Handle::UNDEFINED;
-
-		valseq.emplace_back(HandleCast(valpair->second));
-	}
-
-	// Perform substitution, if it's a RuleLink.
-	if (not _rewrite.empty())
-	{
-		HandleSeq rew;
-		// Beta reduce, and execute. No type-checking during
-		// beta-reduction; we've already done that, during matching.
-		for (const Handle& impl : _rewrite)
+		if (valpair->second->is_atom())
+			valseq.emplace_back(HandleCast(valpair->second));
+		else
 		{
-			Handle red(_mvars->substitute_nocheck(impl, valseq));
-			if (red->is_executable())
-				rew.emplace_back(HandleCast(red->execute(scratch, silent)));
-			else
-			{
-				// Consume quotations.
-				Type rty = red->get_type();
-				if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
-					rew.emplace_back(red->getOutgoingAtom(0));
-				else
-					rew.emplace_back(red);
-			}
+			ValueShimLinkPtr wrap(createValueShimLink());
+			wrap->set_value(valpair->second);
+			valseq.emplace_back(wrap);
 		}
-
-		// Fall through, use the same logic to finish up.
-		valseq.swap(rew);
 	}
 
-	// Wrap up the result in a ListLink only if there is more
-	// than one variable.
-	size_t nv = valseq.size();
-	if (1 < nv)
-		return scratch->add_link(LIST_LINK, std::move(valseq));
-	else if (1 == nv)
-		return valseq[0];
-	return Handle::UNDEFINED;
+	ValueSeq rew;
+	// Beta reduce, and execute. No type-checking during
+	// beta-reduction; we've already done that, during matching.
+	for (const Handle& impl : _rewrite)
+	{
+		ValuePtr red(_mvars->substitute_nocheck(impl, valseq));
+		if (red->is_atom() and HandleCast(red)->is_executable())
+			rew.emplace_back(HandleCast(red)->execute(scratch, silent));
+		else
+		{
+			// Consume quotations.
+			Type rty = red->get_type();
+			if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
+				rew.emplace_back(HandleCast(red)->getOutgoingAtom(0));
+			else
+				rew.emplace_back(red);
+		}
+	}
+
+	if (1 == rew.size()) return rew[0];
+
+	// Multiple Values to return. Two generic cases: the return
+	// value is a set of Atoms, or a set of non-Atom Values.
+	if (body->is_type(LINK_SIGNATURE_LINK))
+	{
+		// Type kind = link_sig_kind(body);
+		// if (LINK_VALUE == kind) ...
+		return createLinkValue(rew);
+	}
+
+	// A list of Handles.
+	HandleSeq hseq;
+	for (const ValuePtr& v : rew) hseq.emplace_back(HandleCast(v));
+	return scratch->add_link(LIST_LINK, std::move(hseq));
 }
 
 ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
@@ -535,7 +551,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	if (valh->is_executable())
 	{
-		ValuePtr vex = valh->execute();
+		ValuePtr vex = valh->execute(); // XXX why are we not providing the as ?
 
 		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
 		// then we should construct another Queue as the return value,
@@ -559,10 +575,11 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		valh = HandleCast(vex);
 	}
 
-	// Handle three different cases.
+	// Handle four different cases.
 	// If there is a single Atom, apply the filter to the single Atom.
 	// If there is a set of Atoms, apply the filter to the set.
 	// If there is a list of Atoms, apply the filter to the list.
+	// If there is a LinkValue, iterate on that.
 	Type argtype = valh->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
@@ -575,18 +592,24 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		return as->add_link(argtype, std::move(remap));
 	}
 
-	// Its a singleton. Just remap that.
-	Handle mone = HandleCast(rewrite_one(valh, as, silent));
-	if (mone) return mone;
+	// If we're getting a shime, we MUST unwrap it. If the shim
+	// wraps a LinkValue, iterate over that.
+	if (VALUE_SHIM_LINK == argtype)
+	{
+		ValuePtr svp(valh->execute(as, silent));
+		if (LINK_VALUE != svp->get_type()) return svp;
 
-	// Avoid returning null pointer!
-	// If we were given Atoms, assum the caller wants Atoms back.
-	// Otherwise, avoid pollution and return VoidValue.
-	// Actually, return an empty LinkValue; this allows downstream
-	// pipelines to handle it just like any other LinkValue return.
-	if (valh->is_atom())
-		return as->add_link(SET_LINK);
-	return createLinkValue();
+		ValueSeq remap;
+		const ValueSeq& vsq(LinkValueCast(svp)->value());
+		for (const ValuePtr& v: vsq)
+			remap.emplace_back(rewrite_one(v, as, silent));
+
+		if (1 == remap.size()) return remap[0];
+		return createLinkValue(remap);
+	}
+
+	// Its a singleton. Just remap that.
+	return rewrite_one(valh, as, silent);
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)

@@ -27,7 +27,7 @@
 (Evaluation (Predicate "domestic") (Concept "cat") (CountTruthValue 1 0 5))
 
 ; Define a Query that looks for the basis elements on the "dog" and
-; "cat" vectors. Once these are found, obtain the counts, and mutiply
+; "cat" vectors. Once these are found, obtain the counts, and multiply
 ; them together.
 (define qdot-math
 	(Query
