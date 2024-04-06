@@ -54,6 +54,7 @@ public:
 	virtual ValuePtr execute(AtomSpace*, bool) { return val; }
 
 	virtual void setAtomSpace(AtomSpace *);
+	virtual std::string to_string(const std::string& indent) const;
 	virtual std::string to_short_string(const std::string& indent) const;
 
 	static Handle factory(const Handle&);
