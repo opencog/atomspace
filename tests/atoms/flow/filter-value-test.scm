@@ -91,6 +91,67 @@
 			(LinkValue edge-a1 edge-a2 edge-a3)
 			(LinkValue edge-b1 edge-b2))))
 
+; -----------
+; Same as above, but increment.
+(define (incr-cnt edge)
+	(SetValue edge (Predicate "count")    ; Set vector on the Atom "edge"
+		(Plus (Number 0 0 1)               ; Add a vector to the count vect.
+			(Cond (FloatValueOf edge (Predicate "count")) ; Is there a key?
+				(FloatValueOf edge (Predicate "count"))    ; If yes, get it.
+				(FloatValueOf (Number 0 0 0))))))          ; If no, set to zero.
+
+; Extract edges from the stream, and use above to increment.
+(define (extract stuff)
+	(Filter
+		(Rule                               ; Definition of rewrite rule.
+			(Variable "$edge")               ; Variable declaration.
+			(Variable "$edge")               ; What to match. (Everything)
+			(incr-cnt (Variable "$edge")))   ; What to do with it.
+		stuff))                             ; What to apply the rule to.
+
+(define increment-parse-edges
+	(Filter
+		(Rule                               ; Just as in earlier demo
+			(Glob "$x")
+			(LinkSignature
+				(Type 'LinkValue)
+				(Type 'LinkValue)
+				(LinkSignature
+					(Type 'LinkValue)
+					(Concept "parse")
+					(Glob "$x")))
+			(extract (Glob "$x")))           ; The complicate rewrite
+
+		; The sequence of Values to be filterd by above.
+		(ValueOf (Node "some place") (Predicate "some key")))
+)
+
+(cog-execute! increment-parse-edges)
+
+; Verify that the count really was incremented.
+(define key (Predicate "count"))
+(test-assert "cnt-a1" (equal?  (cog-value edge-a1 key) (FloatValue 0 0 1)))
+(test-assert "cnt-a2" (equal?  (cog-value edge-a2 key) (FloatValue 0 0 1)))
+(test-assert "cnt-a3" (equal?  (cog-value edge-a3 key) (FloatValue 0 0 1)))
+(test-assert "cnt-b1" (equal?  (cog-value edge-b1 key) (FloatValue 0 0 1)))
+(test-assert "cnt-b2" (equal?  (cog-value edge-b2 key) (FloatValue 0 0 1)))
+
+; Do it again.
+(cog-execute! increment-parse-edges)
+(test-assert "cnt-a1" (equal?  (cog-value edge-a1 key) (FloatValue 0 0 2)))
+(test-assert "cnt-a2" (equal?  (cog-value edge-a2 key) (FloatValue 0 0 2)))
+(test-assert "cnt-a3" (equal?  (cog-value edge-a3 key) (FloatValue 0 0 2)))
+(test-assert "cnt-b1" (equal?  (cog-value edge-b1 key) (FloatValue 0 0 2)))
+(test-assert "cnt-b2" (equal?  (cog-value edge-b2 key) (FloatValue 0 0 2)))
+
+; Do it again.
+(cog-execute! increment-parse-edges)
+(test-assert "cnt-a1" (equal?  (cog-value edge-a1 key) (FloatValue 0 0 3)))
+(test-assert "cnt-a2" (equal?  (cog-value edge-a2 key) (FloatValue 0 0 3)))
+(test-assert "cnt-a3" (equal?  (cog-value edge-a3 key) (FloatValue 0 0 3)))
+(test-assert "cnt-b1" (equal?  (cog-value edge-b1 key) (FloatValue 0 0 3)))
+(test-assert "cnt-b2" (equal?  (cog-value edge-b2 key) (FloatValue 0 0 3)))
+
 (test-end tname)
 
 (opencog-test-end)
