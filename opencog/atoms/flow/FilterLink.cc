@@ -592,17 +592,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Its a singleton. Just remap that.
-	Handle mone = HandleCast(rewrite_one(valh, as, silent));
-	if (mone) return mone;
-
-	// Avoid returning null pointer!
-	// If we were given Atoms, assum the caller wants Atoms back.
-	// Otherwise, avoid pollution and return VoidValue.
-	// Actually, return an empty LinkValue; this allows downstream
-	// pipelines to handle it just like any other LinkValue return.
-	if (valh->is_atom())
-		return as->add_link(SET_LINK);
-	return createLinkValue();
+	return rewrite_one(valh, as, silent);
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)
