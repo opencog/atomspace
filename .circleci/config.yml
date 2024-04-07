@@ -640,10 +640,13 @@ workflows:
           requires:
             - atomspace
             - unify
-      - as-moses:
-          requires:
-            - atomspace
-            - ure
+# Disable as-moses Apr 2024 Works fine, AtomSpace unlikely to break it,
+# takes wayy too long to run, and the debug message logs overflow
+# circle-ci and so cirle-ci complains. So just disable.
+#      - as-moses:
+#          requires:
+#            - atomspace
+#            - ure
       - miner:
           requires:
             - atomspace
