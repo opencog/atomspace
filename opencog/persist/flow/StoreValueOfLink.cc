@@ -43,8 +43,8 @@ void StoreValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
 
-	if (3 != ary and 4 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
+	if (3 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
 
 	if (not _outgoing[2]->is_type(STORAGE_NODE))
 		throw SyntaxException(TRACE_INFO, "Expecting a StorageNode, got %s",
@@ -69,10 +69,7 @@ ValuePtr StoreValueOfLink::execute(AtomSpace* as, bool silent)
 	// either throw, or do something else. Not our decision.
 	stnp->store_value(ah, ak);
 
-	// Let the base class do the rest of the work.
-	if (3 == _outgoing.size())
-		return ValueOfLink::do_execute(as, silent, -1);
-	return ValueOfLink::do_execute(as, silent, 3);
+	return ah->getValue(ak);
 }
 
 DEFINE_LINK_FACTORY(StoreValueOfLink, STORE_VALUE_OF_LINK)

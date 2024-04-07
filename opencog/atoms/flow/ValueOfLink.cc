@@ -47,6 +47,10 @@ void ValueOfLink::init(void)
 	if (0 == ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one or more atoms!");
 
+	return;
+
+#if 0
+	// Nothing to do, here.
 	if (1 == ary and
 		 (nameserver().isA(_type, TRUTH_VALUE_OF_LINK) or
 		  nameserver().isA(_type, STRENGTH_OF_LINK) or
@@ -60,13 +64,13 @@ void ValueOfLink::init(void)
 	// Argh. FETCH_VALUE_OF can have 4 args.
 	//if (3 < ary)
 	//	throw SyntaxException(TRACE_INFO, "Expecting two or three atoms!");
+#endif
 }
 
 // ---------------------------------------------------------------
 
 /// When executed, this will return the value at the indicated key.
-/// The idx_of_idx is where we can find the optional index atom.
-ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
+ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 {
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the
@@ -84,29 +88,23 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 	Handle ak(as->add_atom(_outgoing[1]));
 
 	ValuePtr pap = ah->getValue(ak);
-	if (pap)
+	if (pap) return pap;
+
+	// If we are here, then no Value was found. If there is a
+	// third Atom, then it specifies a default to use instead.
+	if (2 < _outgoing.size())
 	{
-		// If there's no third reference, we are done.
-		if (0 > idx_of_idx)
-			return pap;
-
-		double offset = 0.0;
-		ValuePtr nvp(NumericFunctionLink::get_value(as, silent, _outgoing[idx_of_idx]));
-		if (nvp->is_type(NUMBER_NODE))
-			offset = NumberNodeCast(nvp)->value()[0];
-		else if (nvp->is_type(FLOAT_VALUE))
-			offset = FloatValueCast(nvp)->value()[0];
-
-		size_t idx = (size_t) (round (offset));
-		return pap->value_at_index(idx);
+		Handle adflt(as->add_atom(_outgoing[2]));
+		pap = ah->getValue(adflt);
+		if (pap) return pap;
 	}
 
-#if 0
 	// Hmm. If there's no value, it might be because it was deleted.
 	// There are many reasons for that. So, instead of throwing, we're
 	// going to return a nullptr instead, and assume that all upstream
 	// users are smart enough to check for that. It think they are,
 	// but you never know...
+#if 0
 	if (silent)
 		throw SilentException();
 
@@ -122,7 +120,7 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent, int idx_of_idx)
 ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	// Very special case: If no key is given, *and* its a FloatValueOf,
-	// *and* the atom is a NumberNode, then case the number to a Float.
+	// *and* the atom is a NumberNode, then cast the number to a Float.
 	size_t ary = _outgoing.size();
 	if (1 == ary)
 	{
@@ -135,11 +133,7 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 			"Expecting an Atom and a key");
 	}
 
-	if (2 == ary)
-		return do_execute(as, silent, -1);
-
-	// Assume ary == 3
-	return do_execute(as, silent, 2);
+	return do_execute(as, silent);
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

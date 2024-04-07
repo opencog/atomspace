@@ -179,8 +179,8 @@ class BackingStore
 		 * Perform an atomic read-modify-write of the Value located at
 		 * `key` on `atom`.  The existing Value at that location is
 		 * modified by `delta`. The goal of this method is to provide
-		 * an atomic operation for that multiple racing updators can
-		 * safely use.
+		 * an atomic operation that multiple racing updators can safely
+		 * use.
 		 *
 		 * At this time, the only workable/working updates are the atomic
 		 * increment of FloatValues (usually, of CountTruthValues). The

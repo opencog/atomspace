@@ -40,7 +40,7 @@ private:
 	void init(void);
 
 protected:
-	ValuePtr do_execute(AtomSpace*, bool, int);
+	ValuePtr do_execute(AtomSpace*, bool);
 
 public:
 	ValueOfLink(const HandleSeq&&, Type=VALUE_OF_LINK);
