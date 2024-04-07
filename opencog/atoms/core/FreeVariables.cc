@@ -173,8 +173,7 @@ HandlePathsMap VarScraper::variables_paths(Type itype, const HandleSeq& hs)
 	HandlePathsMap paths;
 	for (Arity i = 0; i < hs.size(); i++)
 	{
-		// Append (itype, i) to each path, i is zero if itype is
-		// unordered.
+		// Append (itype, i) to each path; i is zero if itype is unordered.
 		for (const auto& vpp : variables_paths(hs[i]))
 		{
 			for (auto path : vpp.second)

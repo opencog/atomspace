@@ -92,12 +92,11 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 
 	// If we are here, then no Value was found. If there is a
 	// third Atom, then it specifies a default to use instead.
+	// XXX Is there ever a case where this needs to be executed?
+	// Current unit tests & apps go through NumericFunctionLink,
+	// which does execute it for us.
 	if (2 < _outgoing.size())
-	{
-		Handle adflt(as->add_atom(_outgoing[2]));
-		pap = ah->getValue(adflt);
-		if (pap) return pap;
-	}
+		return _outgoing[2];
 
 	// Hmm. If there's no value, it might be because it was deleted.
 	// There are many reasons for that. So, instead of throwing, we're
