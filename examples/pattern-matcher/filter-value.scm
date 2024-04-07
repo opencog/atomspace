@@ -175,9 +175,8 @@
 (define (incr-cnt edge)
 	(SetValue edge (Predicate "count")    ; Set vector on the Atom "edge"
 		(Plus (Number 0 0 1)               ; Add a vector to the count vect.
-			(Cond (FloatValueOf edge (Predicate "count")) ; Is there a key?
-				(FloatValueOf edge (Predicate "count"))    ; If yes, get it.
-				(FloatValueOf (Number 0 0 0))))))          ; If no, set to zero.
+			(FloatValueOf edge (Predicate "count")
+				(FloatValueOf (Number 0 0 0)))))) ; Default for first time.
 
 ; Extract edges from the stream, and use above to increment.
 (define (extract stuff)
