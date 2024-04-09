@@ -326,7 +326,11 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
  */
 SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-new-atom");
+	ValuePtr pa(verify_protom(satom, "cog-new-atom"));
+	if (not pa->is_atom())
+		scm_wrong_type_arg_msg("cog-new-atom", 1, satom, "opencog atom");
+
+	Handle h(HandleCast(pa));
 
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
