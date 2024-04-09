@@ -355,7 +355,11 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-atom");
+	ValuePtr pa(verify_protom(satom, "cog-atom"));
+	if (not pa->is_atom())
+		scm_wrong_type_arg_msg("cog-atom", 1, satom, "opencog atom");
+
+	Handle h(HandleCast(pa));
 
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
