@@ -36,30 +36,23 @@ using namespace opencog;
 /// requires having a temporary atomspace, treated as a scratch space,
 /// to hold temporary results. These are then discarded, after the
 /// match is confirmed or denied. The issue is that creating an
-/// atomspace is CPU-intensive, so its cheaper to just have a cache
-/// of empty atomspaces, hanging around, and ready to go. The code
-/// in this section implements this.
+/// atomspace (was) CPU-intensive (it's pretty small, now), so its
+/// cheaper to just have a cache of empty atomspaces, hanging around,
+/// and ready to go. The code in this section implements this.
 ///
-/// XXX The last statement may be false; using this code may offer
-/// no performance advantage whatsoever! I mean, what the heck,
-/// AtomSpaces are not fat pigs! It might be easier to just ...
-/// create new AtomSpaces as needed!  For now, we keep this code,
-/// but performance should be measured, and this code should be
-/// trashed if it offers no benefit.
-
-// XXX TODO This should be changed to use an use-counting AtomSpacePtr
-// so that the transients are automatically released back to the pool.
-// This will avoid mem leakage due to bad exception handling and other
-// programming bugs.
+/// XXX FIXME. Performance has not been recently measured; there
+/// have been a lot of redesigns since when this utility was created.
+/// It is not at all clear that the code here takes less CPU/RAM than
+/// simply creating new AtomSpaces on the fly. For now, we keep this
+/// code, as a historical precedent. But performance measurements should
+/// be done, and if there is no savings, this code should be trashed.
 
 const bool TRANSIENT_SPACE = true;
-const int MAX_CACHED_TRANSIENTS = 32;
+const int MAX_CACHED_TRANSIENTS = 1024;
 
 // Allocated storage for the transient atomspace cache static variables.
 static std::mutex s_transient_cache_mutex;
 static std::vector<AtomSpacePtr> s_transient_cache;
-static std::set<AtomSpacePtr> s_issued;
-
 static std::atomic_int num_issued = 0;
 
 AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
@@ -82,48 +75,39 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 
 			// Ready it for the new parent atomspace.
 			tranny->ready_transient(parent);
-			s_issued.insert(tranny);
 			num_issued ++;
 		}
 	}
 
 	// If we didn't get one from the cache, then create a new one.
-	// We stick it into `s_issued` to avoid use-count decrement.
 	if (!tranny)
 	{
 		tranny = createAtomSpace(parent, TRANSIENT_SPACE);
-
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
-		s_issued.insert(tranny);
 		num_issued ++;
 	}
 
 	if (MAX_CACHED_TRANSIENTS < num_issued.load())
-		throw FatalErrorException(TRACE_INFO, "Transient space memleak!");
+		logger().warn("Possible transient space memleak!");
 
 	return tranny.get();
 }
 
 void opencog::release_transient_atomspace(AtomSpace* atomspace)
 {
-	// If the cache is not full...
+	num_issued--;
+
+	// Grab the mutex lock.
+	std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
+
+	// Don't bother, if there are alreeady plenty.
 	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
 	{
-		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
+		// Clear this transient atomspace.
+		atomspace->clear_transient();
 
-		// Check it again since we only now have the mutex locked.
-		if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
-		{
-			// Clear this transient atomspace.
-			atomspace->clear_transient();
-
-			// Place this transient into the cache.
-			AtomSpacePtr tranny(AtomSpaceCast(atomspace));
-			s_transient_cache.push_back(tranny);
-			s_issued.erase(tranny);
-			num_issued--;
-		}
+		// Place this transient into the cache.
+		AtomSpacePtr tranny(AtomSpaceCast(atomspace));
+		s_transient_cache.push_back(tranny);
 	}
 }
 
