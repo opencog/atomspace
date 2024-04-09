@@ -296,6 +296,9 @@
 				(lambda (x) (frqobj 'left-wild-mi x))))
 		(define rsum (right-sum
 				(lambda (x) (frqobj 'right-wild-mi x))))
+		(if (> 1.0e-4 (abs lsum))
+			(throw 'bad-summation 'compute-total-mi
+				(format #f "No MI available on the dataset!\n")))
 		(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
 			(throw 'bad-summation 'compute-total-mi
 				(format #f
