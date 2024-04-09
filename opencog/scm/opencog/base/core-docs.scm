@@ -241,19 +241,47 @@
     See also: cog-extract!
 ")
 
+(set-procedure-property! cog-atom 'documentation
+"
+ cog-atom ATOM [ATOMSPACE]
+    Return #f if ATOM is not in the current AtomSpace, or, if the
+    optional argument ATOMSPACE is given, then if it is not in that.
+    If it is present, then return ATOM.
+
+    Example:
+       ; Define a node.
+       guile> (define x (Concept \"abc\"))
+       guile> (cog-atom x)
+       #t
+       guile> (cog-push-atomspace)
+       guile> (define y (Concept \"def\"))
+       guile> (cog-pop-atomspace)
+       ; Now, y is an Atom, but it is not in any AtomSpace.
+       guile> (cog-atom? y)
+       #t
+       guile> (cog-atom y)
+       #f
+
+    See also:
+       cog-atom? -- return #t if an expression is an Atom.
+")
+
 (set-procedure-property! cog-atom? 'documentation
 "
  cog-atom? EXP
     Return #t if EXP is an atom, else return #f
 
     Example:
-       ; Define a node
+       ; Define a node.
        guile> (define x (Concept \"abc\"))
        guile> (define y (+ 2 2))
        guile> (cog-atom? x)
        #t
        guile> (cog-atom? y)
        #f
+
+    See also:
+       cog-atom -- return #f if an Atom is not in the current AtomSpace.
 ")
 
 (set-procedure-property! cog-node? 'documentation

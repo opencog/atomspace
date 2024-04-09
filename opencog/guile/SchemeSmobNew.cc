@@ -201,11 +201,11 @@ SCM SchemeSmob::ss_atom_p (SCM s)
 
 SCM SchemeSmob::ss_node_p (SCM s)
 {
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
 		return SCM_BOOL_F;
 
-	if (h->is_node()) return SCM_BOOL_T;
+	if (pa->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -215,11 +215,11 @@ SCM SchemeSmob::ss_node_p (SCM s)
 
 SCM SchemeSmob::ss_link_p (SCM s)
 {
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
 		return SCM_BOOL_F;
 
-	if (h->is_link()) return SCM_BOOL_T;
+	if (pa->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
@@ -762,7 +762,16 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-extract!");
+	// Don't use scm_to_handle here, because it clobbers handles
+	// that point at atoms that are in no space at all. Such a
+	// clobber prevents issuing the correct error message.
+	ValuePtr pa(scm_to_protom(satom));
+	if (nullptr == pa)
+		scm_wrong_type_arg_msg("cog-extract!", 1, satom, "opencog atom");
+
+	Handle h(HandleCast(pa));
+	if (nullptr == h)
+		scm_wrong_type_arg_msg("cog-extract!", 1, satom, "opencog atom");
 
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
