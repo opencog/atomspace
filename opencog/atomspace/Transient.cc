@@ -53,6 +53,7 @@ const int MAX_CACHED_TRANSIENTS = 1024;
 // Allocated storage for the transient atomspace cache static variables.
 static std::mutex s_transient_cache_mutex;
 static std::vector<AtomSpacePtr> s_transient_cache;
+static std::set<AtomSpacePtr> s_issued;
 static std::atomic_int num_issued = 0;
 
 AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
@@ -75,14 +76,18 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 
 			// Ready it for the new parent atomspace.
 			tranny->ready_transient(parent);
+			s_issued.insert(tranny);
 			num_issued ++;
 		}
 	}
 
 	// If we didn't get one from the cache, then create a new one.
+	// We stick it into `s_issued` to avoid use-count decrement.
 	if (!tranny)
 	{
 		tranny = createAtomSpace(parent, TRANSIENT_SPACE);
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
+		s_issued.insert(tranny);
 		num_issued ++;
 	}
 
@@ -94,19 +99,18 @@ AtomSpace* opencog::grab_transient_atomspace(AtomSpace* parent)
 
 void opencog::release_transient_atomspace(AtomSpace* atomspace)
 {
-	num_issued--;
-
 	// Grab the mutex lock.
 	std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
 
-	// Don't bother, if there are alreeady plenty.
+	num_issued--;
+	AtomSpacePtr tranny(AtomSpaceCast(atomspace));
+	s_issued.erase(tranny);
+
+	// Don't bother keeping it, if we already have plenty.
 	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
 	{
 		// Clear this transient atomspace.
 		atomspace->clear_transient();
-
-		// Place this transient into the cache.
-		AtomSpacePtr tranny(AtomSpaceCast(atomspace));
 		s_transient_cache.push_back(tranny);
 	}
 }
