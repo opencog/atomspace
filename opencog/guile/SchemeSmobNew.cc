@@ -186,7 +186,11 @@ SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	if (nullptr == scm_to_handle(s))
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
+		return SCM_BOOL_F;
+
+	if (not pa->is_atom())
 		return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
