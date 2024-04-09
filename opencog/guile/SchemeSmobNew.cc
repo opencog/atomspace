@@ -201,11 +201,11 @@ SCM SchemeSmob::ss_atom_p (SCM s)
 
 SCM SchemeSmob::ss_node_p (SCM s)
 {
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
 		return SCM_BOOL_F;
 
-	if (h->is_node()) return SCM_BOOL_T;
+	if (pa->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -215,11 +215,11 @@ SCM SchemeSmob::ss_node_p (SCM s)
 
 SCM SchemeSmob::ss_link_p (SCM s)
 {
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
 		return SCM_BOOL_F;
 
-	if (h->is_link()) return SCM_BOOL_T;
+	if (pa->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
