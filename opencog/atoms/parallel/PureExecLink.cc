@@ -54,14 +54,20 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 	if (not _outgoing[0]->is_executable()) return _outgoing[0];
 
 	// Is there an AtomSpace? If so, use that.
-	// If none specified, then create a temporary.
-	AtomSpace* tas;
 	if (1 < _outgoing.size() and _outgoing[1]->get_type() == ATOM_SPACE)
-		tas = AtomSpaceCast(_outgoing[1]).get();
-	else
-		tas = grab_transient_atomspace(as);
+	{
+		AtomSpace* tas = AtomSpaceCast(_outgoing[1]).get();
+		return _outgoing[0]->execute(tas, silent);
+	}
 
-	return _outgoing[0]->execute(tas, silent);
+	// No AtomSpace provided. Use a temporary.
+	// XXX Note that this leaks, if the execute throws.
+	// The transient code will catch the leak, and complain.
+	// (There's no actual memleak; just a complaint about counting.)
+	AtomSpace* tas = grab_transient_atomspace(as);
+	ValuePtr evp(_outgoing[0]->execute(tas, silent));
+	release_transient_atomspace(tas);
+	return evp;
 }
 
 DEFINE_LINK_FACTORY(PureExecLink, PURE_EXEC_LINK)
