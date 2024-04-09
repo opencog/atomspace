@@ -186,7 +186,11 @@ SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	if (nullptr == scm_to_handle(s))
+	ValuePtr pa(scm_to_protom(s));
+	if (nullptr == pa)
+		return SCM_BOOL_F;
+
+	if (not pa->is_atom())
 		return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
@@ -326,7 +330,11 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
  */
 SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-new-atom");
+	ValuePtr pa(verify_protom(satom, "cog-new-atom"));
+	if (not pa->is_atom())
+		scm_wrong_type_arg_msg("cog-new-atom", 1, satom, "opencog atom");
+
+	Handle h(HandleCast(pa));
 
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
@@ -351,7 +359,11 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-atom");
+	ValuePtr pa(verify_protom(satom, "cog-atom"));
+	if (not pa->is_atom())
+		scm_wrong_type_arg_msg("cog-atom", 1, satom, "opencog atom");
+
+	Handle h(HandleCast(pa));
 
 	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
 	const AtomSpacePtr& asp = asg ? asg :
