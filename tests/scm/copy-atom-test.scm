@@ -100,8 +100,8 @@
 (define num-again (count-all))
 (test-assert "no change" (equal? 0 (- num-again num-new)))
 
-(test-assert "Same atom 1" (equal? (first alist) (first blist)))
-(test-assert "Same atom 2" (equal? (second alist) (second blist)))
+(test-assert "Same atom 1" (equal? (first alst) (first blst)))
+(test-assert "Same atom 2" (equal? (second alst) (second blst)))
 
 (test-end tname)
 
