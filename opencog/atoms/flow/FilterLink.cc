@@ -547,11 +547,11 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 {
-	Handle valh(_outgoing[1]);
+	ValuePtr vex(_outgoing[1]);
 
-	if (valh->is_executable())
+	if (_outgoing[1]->is_executable())
 	{
-		ValuePtr vex = valh->execute(); // XXX why are we not providing the as ?
+		vex = _outgoing[1]->execute(); // XXX why are we not providing the as ?
 
 		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
 		// then we should construct another Queue as the return value,
@@ -566,13 +566,6 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 			}
 			return createLinkValue(remap);
 		}
-
-		// If it is some other Value, we have no clue what to do with it.
-		if (not vex->is_atom())
-			return createLinkValue();
-
-		// Fall through, if execution provided some Atom.
-		valh = HandleCast(vex);
 	}
 
 	// Handle four different cases.
@@ -580,9 +573,10 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	// If there is a set of Atoms, apply the filter to the set.
 	// If there is a list of Atoms, apply the filter to the list.
 	// If there is a LinkValue, iterate on that.
-	Type argtype = valh->get_type();
+	Type argtype = vex->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
+		Handle valh(HandleCast(vex));
 		HandleSeq remap;
 		for (const Handle& h : valh->getOutgoingSet())
 		{
@@ -596,6 +590,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	// wraps a LinkValue, iterate over that.
 	if (VALUE_SHIM_LINK == argtype)
 	{
+		Handle valh(HandleCast(vex));
 		ValuePtr svp(valh->execute(as, silent));
 		if (LINK_VALUE != svp->get_type()) return svp;
 
@@ -609,7 +604,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	}
 
 	// Its a singleton. Just remap that.
-	return rewrite_one(valh, as, silent);
+	return rewrite_one(vex, as, silent);
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)
