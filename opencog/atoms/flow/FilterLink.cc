@@ -516,13 +516,17 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	{
 		ValuePtr red(_mvars->substitute_nocheck(impl, valseq));
 		if (red->is_atom() and HandleCast(red)->is_executable())
-			rew.emplace_back(HandleCast(red)->execute(scratch, silent));
+		{
+			ValuePtr v(HandleCast(red)->execute(scratch, silent));
+			if (v) rew.emplace_back(v);
+		}
 		else
 		{
 			// Consume quotations.
 			Type rty = red->get_type();
 			if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
-				rew.emplace_back(HandleCast(red)->getOutgoingAtom(0));
+				for (const Handle& ho : HandleCast(red)->getOutgoingSet())
+					rew.emplace_back(ho);
 			else
 				rew.emplace_back(red);
 		}
@@ -531,7 +535,9 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	if (1 == rew.size()) return rew[0];
 
 	bool have_vals = false;
-	for (const ValuePtr& v : rew) { have_vals = true; break; }
+	for (const ValuePtr& v : rew)
+		if (v and not v->is_atom())
+		{ have_vals = true; break; }
 
 	// Multiple Values to return. Two generic cases: the return
 	// value is a set of Atoms, or a set of non-Atom Values.
