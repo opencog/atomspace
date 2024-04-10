@@ -52,6 +52,7 @@ public:
 
 	void set_value(const ValuePtr& v) { val = v; }
 	virtual ValuePtr execute(AtomSpace*, bool) { return val; }
+	virtual bool is_executable() const { return true; }
 
 	virtual void setAtomSpace(AtomSpace *);
 	virtual std::string to_string(const std::string& indent) const;
