@@ -530,9 +530,12 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 	if (1 == rew.size()) return rew[0];
 
+	bool have_vals = false;
+	for (const ValuePtr& v : rew) { have_vals = true; break; }
+
 	// Multiple Values to return. Two generic cases: the return
 	// value is a set of Atoms, or a set of non-Atom Values.
-	if (body->is_type(LINK_SIGNATURE_LINK))
+	if (have_vals or body->is_type(LINK_SIGNATURE_LINK))
 	{
 		// Type kind = link_sig_kind(body);
 		// if (LINK_VALUE == kind) ...
