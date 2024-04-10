@@ -63,10 +63,51 @@
 			(Plus (Variable "$x") (Number 1))
 			(Plus (Variable "$x") (Number 2)))
 		(Time)))))
-(test-assert "cnt-rulemulti" (equal? 1 (length rulemulti)))
-(define trulemulti (- (car rulemulti) 2))
-(test-assert "low-rulemulti" (< start-time trulemulti))
-(test-assert "high-rulemulti" (< trulemulti end-time))
+(test-assert "cnt-rulemulti" (equal? 5 (length rulemulti)))
+
+(define tmulti-0 (+ (cog-value-ref (list-ref rulemulti 0) 0) 2))
+(test-assert "low-rulemulti" (< start-time tmulti-0))
+(test-assert "high-rulemulti" (< tmulti-0 end-time))
+
+(define tmulti-1 (+ (cog-value-ref (list-ref rulemulti 1) 0) 1))
+(test-assert "low-rulemulti" (< start-time tmulti-1))
+(test-assert "high-rulemulti" (< tmulti-1 end-time))
+
+(define tmulti-2 (+ (cog-value-ref (list-ref rulemulti 2) 0) 0))
+(test-assert "low-rulemulti" (< start-time tmulti-2))
+(test-assert "high-rulemulti" (< tmulti-2 end-time))
+
+(define tmulti-3 (+ (cog-value-ref (list-ref rulemulti 3) 0) -1))
+(test-assert "low-rulemulti" (< start-time tmulti-3))
+(test-assert "high-rulemulti" (< tmulti-3 end-time))
+
+(define tmulti-4 (+ (cog-value-ref (list-ref rulemulti 4) 0) -2))
+(test-assert "low-rulemulti" (< start-time tmulti-4))
+(test-assert "high-rulemulti" (< tmulti-4 end-time))
+
+; All have the same time exactly (pico-second level)
+(define eps 1e-12)
+(test-assert "rulemulti-equal-01" (< (abs (- tmulti-1 tmulti-0)) eps))
+(test-assert "rulemulti-equal-02" (< (abs (- tmulti-2 tmulti-0)) eps))
+(test-assert "rulemulti-equal-03" (< (abs (- tmulti-3 tmulti-0)) eps))
+(test-assert "rulemulti-equal-04" (< (abs (- tmulti-4 tmulti-0)) eps))
+
+; --------------------
+; Promise Multi-target filtering
+(define prom
+	(Promise
+		(TypeNode 'FutureStream)
+		(Filter
+			(Rule
+				(TypedVariable (Variable "$x") (TypeNode 'FloatValue))
+				(Variable "$x")  ;  body
+				(Plus (Variable "$x") (Number -2))
+				(Plus (Variable "$x") (Number -1))
+				(Variable "$x")
+				(Plus (Variable "$x") (Number 1))
+				(Plus (Variable "$x") (Number 2)))
+			(Time))))
+(define promset (cog-execute! prom))
 
 (test-end tname)
 
