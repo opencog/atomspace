@@ -26,3 +26,4 @@ ADD_CXXTEST(FilterLinkUTest)
 TARGET_LINK_LIBRARIES(FilterLinkUTest execution smob)
 
 ADD_GUILE_TEST(FilterValueTest filter-value-test.scm)
+ADD_GUILE_TEST(FilterFloatTest filter-float-test.scm)
