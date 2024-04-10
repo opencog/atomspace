@@ -109,6 +109,76 @@
 			(Time))))
 (define promset (cog-execute! prom))
 
+(define linkset (cog-value->list promset))
+(test-assert "cnt-promise-linkset" (equal? 1 (length linkset)))
+
+(define rulepromise (cog-value->list (list-ref linkset 0)))
+(test-assert "cnt-rulepromise" (equal? 5 (length rulepromise)))
+
+(define tpromise-0 (+ (cog-value-ref (list-ref rulepromise 0) 0) 2))
+(test-assert "low-rulepromise" (< start-time tpromise-0))
+(test-assert "high-rulepromise" (< tpromise-0 end-time))
+
+(define tpromise-1 (+ (cog-value-ref (list-ref rulepromise 1) 0) 1))
+(test-assert "low-rulepromise" (< start-time tpromise-1))
+(test-assert "high-rulepromise" (< tpromise-1 end-time))
+
+(define tpromise-2 (+ (cog-value-ref (list-ref rulepromise 2) 0) 0))
+(test-assert "low-rulepromise" (< start-time tpromise-2))
+(test-assert "high-rulepromise" (< tpromise-2 end-time))
+
+(define tpromise-3 (+ (cog-value-ref (list-ref rulepromise 3) 0) -1))
+(test-assert "low-rulepromise" (< start-time tpromise-3))
+(test-assert "high-rulepromise" (< tpromise-3 end-time))
+
+(define tpromise-4 (+ (cog-value-ref (list-ref rulepromise 4) 0) -2))
+(test-assert "low-rulepromise" (< start-time tpromise-4))
+(test-assert "high-rulepromise" (< tpromise-4 end-time))
+
+; All have the same time exactly (pico-second level)
+; (define eps 1e-12)
+(test-assert "rulepromise-equal-01" (< (abs (- tpromise-1 tpromise-0)) eps))
+(test-assert "rulepromise-equal-02" (< (abs (- tpromise-2 tpromise-0)) eps))
+(test-assert "rulepromise-equal-03" (< (abs (- tpromise-3 tpromise-0)) eps))
+(test-assert "rulepromise-equal-04" (< (abs (- tpromise-4 tpromise-0)) eps))
+
+; sleep and try again
+(sleep 1)
+
+(define linkset2 (cog-value->list promset))
+(test-assert "cnt-promise-linkset2" (equal? 1 (length linkset2)))
+
+(define rulepromise2 (cog-value->list (list-ref linkset2 0)))
+(test-assert "cnt-rulepromise2" (equal? 5 (length rulepromise2)))
+
+(define tpromise2-0 (+ (cog-value-ref (list-ref rulepromise2 0) 0) 2))
+(test-assert "low-rulepromise2" (< start-time tpromise2-0))
+(test-assert "high-rulepromise2" (< tpromise2-0 end-time))
+
+(define tpromise2-1 (+ (cog-value-ref (list-ref rulepromise2 1) 0) 1))
+(test-assert "low-rulepromise2" (< start-time tpromise2-1))
+(test-assert "high-rulepromise2" (< tpromise2-1 end-time))
+
+(define tpromise2-2 (+ (cog-value-ref (list-ref rulepromise2 2) 0) 0))
+(test-assert "low-rulepromise2" (< start-time tpromise2-2))
+(test-assert "high-rulepromise2" (< tpromise2-2 end-time))
+
+(define tpromise2-3 (+ (cog-value-ref (list-ref rulepromise2 3) 0) -1))
+(test-assert "low-rulepromise2" (< start-time tpromise2-3))
+(test-assert "high-rulepromise2" (< tpromise2-3 end-time))
+
+(define tpromise2-4 (+ (cog-value-ref (list-ref rulepromise2 4) 0) -2))
+(test-assert "low-rulepromise2" (< start-time tpromise2-4))
+(test-assert "high-rulepromise2" (< tpromise2-4 end-time))
+
+; All have the same time exactly (pico-second level)
+; (define eps 1e-12)
+(test-assert "rulepromise2-equal-01" (< (abs (- tpromise2-1 tpromise2-0)) eps))
+(test-assert "rulepromise2-equal-02" (< (abs (- tpromise2-2 tpromise2-0)) eps))
+(test-assert "rulepromise2-equal-03" (< (abs (- tpromise2-3 tpromise2-0)) eps))
+(test-assert "rulepromise2-equal-04" (< (abs (- tpromise2-4 tpromise2-0)) eps))
+
+
 (test-end tname)
 
 (opencog-test-end)
