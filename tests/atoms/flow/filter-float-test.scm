@@ -1,6 +1,8 @@
 ;
 ; filter-float-test.scm -- Verify that various wiki pages don't lie.
-;
+; Specifically, that the demo in
+; https://wiki.opencog.org/w/PromiseLink
+; works as promised.
 
 (use-modules (opencog) (opencog exec))
 (use-modules (srfi srfi-1))

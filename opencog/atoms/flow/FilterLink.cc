@@ -536,8 +536,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 	bool have_vals = false;
 	for (const ValuePtr& v : rew)
-		if (v and not v->is_atom())
-		{ have_vals = true; break; }
+		if (v and not v->is_atom()) { have_vals = true; break; }
 
 	// Multiple Values to return. Two generic cases: the return
 	// value is a set of Atoms, or a set of non-Atom Values.
