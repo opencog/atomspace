@@ -2,6 +2,8 @@
 Submission to Computational Linguistics
 ---------------------------------------
 https://cljournal.org/
+https://cljournal.org/submissions.html
+https://direct.mit.edu/coli
 
 My ORCID: https://orcid.org/0000-0002-2557-740X
 
