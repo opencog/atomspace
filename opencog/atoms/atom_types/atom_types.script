@@ -885,18 +885,20 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 
 // XXX TODO-FIXME: Many of the link types below are derived from
-// FunctionLink, but it's not clear that they need to be, and that
-// maybe all they really need is ExecutableLink? That's because the
-// FunctionLink runs the FreeLink constructor (to find the free
-// variables) and most of these link types don't actually need that
-// ability. Right? I'm confused by this.
+// FunctionLink, but the gains are marginal. Here's the tradeoff:
+// * The FreeLink ctor takes CPU-time to run, so that costs.
+// * The benefit is that FunctionLinks get beta-reduction capability for
+//   free. This is used in half-a-dozen unit tests. It makes Atomese
+//   expressions simpler to write and easier to read: the alternative
+//   would be to force users to always use Lambda to explicitly declare
+//   the variables that will appear as the function API. The cost is
+//   then one more Atom in the AtomSpace, plus more cognitive load on
+//   the human author of Atomese.
 //
-// The main block to fixing the above is that ExecutionOutputLink
-// treats the function as if it were a PutLink: it locates all the
-// free vars in the function (by casting to FreeLink) then plugs in
-// the argument list into those free vars, then finally calls execute
-// on the result. It's definitely a "cool trick bro", but does any unit
-// test need this? And Wouldn't it be better handled with a Lambda?
+// How widespread is this? The ExecutionOutputLink makes use of this,
+// and so does FormulaPredicateLink.cc. Altering the first is easy.
+// The second is easy to stub out, but then siz unit tests fail. Sooo
+// leave as-is seems like the correct choice.
 
 // --------------------
 // Boolean-valued functions
