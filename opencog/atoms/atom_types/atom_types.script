@@ -890,6 +890,13 @@ FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 // FunctionLink runs the FreeLink constructor (to find the free
 // variables) and most of these link types don't actually need that
 // ability. Right? I'm confused by this.
+//
+// The main block to fixing the above is that ExecutionOutputLink
+// treats the function as if it were a PutLink: it locates all the
+// free vars in the function (by casting to FreeLink) then plugs in
+// the argument list into those free vars, then finally calls execute
+// on the result. It's definitely a "cool trick bro", but does any unit
+// test need this? And Wouldn't it be better handled with a Lambda?
 
 // --------------------
 // Boolean-valued functions
