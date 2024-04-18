@@ -81,7 +81,10 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 ///             SomeAtom
 ///             OtherAtom
 ///
-/// The "lang:" should be either "scm:" for scheme, or "py:" for python.
+/// The "lang:" should be "scm:" for scheme, "py:" for python, or
+/// "lib:" for an unix (gnu elf) shared library. See GroundedSchema
+/// for details on supported formats.
+///
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
