@@ -3,9 +3,11 @@
 // a collection of types suitable for defining distributed storage
 // interconnects.
 //
-// The base type for all storage nodes. Seems like BondNode is a
-// suitable base, I guess .. !?
-STORAGE_NODE <- BOND_NODE
+// What's the right base type for all StorageNodes?
+// LexicalNode, cause there's a collection of them.
+// TagNode cause base AtomSpace already calls them "data streams".
+// BondNode cause they are connector-like?
+STORAGE_NODE <- TAG_NODE
 //
 // Specific storage nodes. Most of these are implemented in other git
 // repos, and not here. Look for git repos called "atomspace-xxx" for
