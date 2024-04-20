@@ -594,7 +594,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 		return as->add_link(argtype, std::move(remap));
 	}
 
-	// If we're getting a shime, we MUST unwrap it. If the shim
+	// If we're getting a shim, we MUST unwrap it. If the shim
 	// wraps a LinkValue, iterate over that.
 	if (VALUE_SHIM_LINK == argtype)
 	{
