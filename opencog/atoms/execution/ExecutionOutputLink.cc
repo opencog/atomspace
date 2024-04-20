@@ -37,11 +37,14 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	// Derived types do their own validation.
 	if (EXECUTION_OUTPUT_LINK != get_type()) return;
 
-	if (not nameserver().isA(schema->get_type(), PROCEDURE_NODE) and
-	    LAMBDA_LINK != schema->get_type() and
+	Type st = schema->get_type();
+	if ((not schema->is_type(FUNCTION_LINK)) and
+	    LAMBDA_LINK != st and
+	    RULE_LINK != st and
+	    (not schema->is_type(PROCEDURE_NODE)) and
 	    // In case it is a pattern matcher query
-	    VARIABLE_NODE != schema->get_type() and
-	    UNQUOTE_LINK != schema->get_type())
+	    VARIABLE_NODE != st and
+	    UNQUOTE_LINK != st)
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
@@ -190,13 +193,14 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		return vp;
 	}
 
-	if (LAMBDA_LINK == sn->get_type())
+	Type st = sn->get_type();
+	if (LAMBDA_LINK == st or RULE_LINK == st)
 	{
 		// Unpack and beta-reduce the Lambda link.
 		// Execute the args before plugging them in.
-		LambdaLinkPtr flp(LambdaLinkCast(sn));
-		Handle body(flp->get_body());
-		Variables vars(flp->get_variables());
+		ScopeLinkPtr slp(ScopeLinkCast(sn));
+		Handle body(slp->get_body());
+		Variables vars(slp->get_variables());
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
