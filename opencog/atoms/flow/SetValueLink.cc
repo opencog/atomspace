@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/value/FormulaStream.h>
+#include <opencog/atoms/value/FutureStream.h>
 #include "SetValueLink.h"
 
 using namespace opencog;
@@ -71,9 +72,16 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	// provided as a convenience function. Note that SetTV works the
 	// same way.
 
-	Handle exo(createExecutionOutputLink(_outgoing[2], _outgoing[3]));
+	const Handle& args(_outgoing[3]);
+	Handle exo(createExecutionOutputLink(_outgoing[2], args));
 	exo = as->add_atom(exo);
-	ValuePtr fsp = createFormulaStream(exo);
+
+	ValuePtr fsp;
+	if (args->is_type(NUMERIC_OUTPUT_LINK))
+		fsp = createFormulaStream(exo);
+	else
+		fsp = createFutureStream(exo);
+
 	as->set_value(_outgoing[0], _outgoing[1], fsp);
 	return fsp;
 }
