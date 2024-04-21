@@ -110,8 +110,6 @@ std::string FutureStream::to_string(const std::string& indent) const
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	for (const Handle& h : _formula)
 		rv += "\n" + h->to_short_string(indent + "   ");
-	rv += "\n" + indent + "   ; Current sample:\n";
-	rv += LinkValue::to_string(indent + "   ; ");
 	rv += "\n)";
 	return rv;
 }
