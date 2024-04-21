@@ -157,7 +157,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		HandleSeq chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(oset[i]);
-		return createLink(chopped, vitype);
+		return createLink(std::move(chopped), vitype);
 	}
 
 	// WTF. Should never be reached.

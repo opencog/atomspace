@@ -87,7 +87,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		HandleSeq chopped;
 		for (double d : vindex)
 			chopped.push_back(oset.at((int)(d+0.5)));
-		return createLink(chopped, vitype);
+		return createLink(std::move(chopped), vitype);
 	}
 
 	// A vector of values or atoms.

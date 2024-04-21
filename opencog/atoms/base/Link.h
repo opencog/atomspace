@@ -67,7 +67,7 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq oset, Type t=LINK)
+    Link(const HandleSeq&& oset, Type t=LINK)
         : Atom(t), _outgoing(std::move(oset))
     {
         init();
