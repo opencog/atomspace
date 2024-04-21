@@ -7,6 +7,7 @@ ADD_LIBRARY (atomflow
 	FilterLink.cc
 	FormulaPredicateLink.cc
 	IncomingOfLink.cc
+	LinkSignatureLink.cc
 	NumberOfLink.cc
 	PromiseLink.cc
 	SetTVLink.cc
@@ -37,6 +38,7 @@ INSTALL (FILES
 	FilterLink.h
 	FormulaPredicateLink.h
 	IncomingOfLink.h
+	LinkSignatureLink.h
 	NumberOfLink.h
 	PromiseLink.h
 	SetTVLink.h
