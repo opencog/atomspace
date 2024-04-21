@@ -52,13 +52,23 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Return either a Link or a LinkValue of the desired type.
-ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
+/// Return a LinkValue of the desired type.
+ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 {
-	HandleSeq noset;
-	for (size_t i=1; i < _outgoing.size(); i++)
-		noset.emplace_back(_outgoing[i]);
+	if (LINK_VALUE == _kind)
+		return createLinkValue(newset);
 
+	// Should support other kinds too.
+	const std::string& tname = nameserver().getTypeName(_kind);
+	throw InvalidParamException(TRACE_INFO,
+		"Unsupported type %s", tname.c_str());
+}
+
+// ---------------------------------------------------------------
+
+/// Return either a Link or a LinkValue of the desired type.
+ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
+{
 	if (LINK_VALUE == _kind)
 		return createLinkValue(noset);
 
@@ -69,6 +79,18 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
 		"Unsupported type %s", tname.c_str());
+}
+
+// ---------------------------------------------------------------
+
+/// Return either a Link or a LinkValue of the desired type.
+ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
+{
+	HandleSeq noset;
+	for (size_t i=1; i < _outgoing.size(); i++)
+		noset.emplace_back(_outgoing[i]);
+
+	return construct(std::move(noset));
 }
 
 DEFINE_LINK_FACTORY(LinkSignatureLink, LINK_SIGNATURE_LINK)

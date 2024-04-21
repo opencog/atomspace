@@ -64,6 +64,10 @@ public:
 	// Construct new Value or Link of the given kind.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
+	// Construct new Value from arguments
+	ValuePtr construct(const ValueSeq&&);
+	ValuePtr construct(const HandleSeq&&);
+
 	static Handle factory(const Handle&);
 };
 
