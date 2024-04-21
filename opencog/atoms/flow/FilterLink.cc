@@ -452,15 +452,13 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		// value is a set of Atoms, or a set of non-Atom Values.
 		if (body->is_type(LINK_SIGNATURE_LINK))
 		{
-			// Type kind = LinkSignatureLinkCast(body)->get_kind();
-			// if (LINK_VALUE == kind) ...
 			ValueSeq valseq;
 			for (const Handle& var : _mvars->varseq)
 			{
 				const auto& valpair = valmap.find(var);
 				valseq.emplace_back(valpair->second);
 			}
-			return createLinkValue(valseq);
+			return LinkSignatureLinkCast(body)->construct(std::move(valseq));
 		}
 
 		// A list of Handles.
