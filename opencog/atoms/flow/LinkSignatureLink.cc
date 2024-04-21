@@ -29,7 +29,7 @@
 using namespace opencog;
 
 LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: Link(std::move(oset), t)
 {
 	if (not nameserver().isA(t, LINK_SIGNATURE_LINK))
 	{
@@ -37,21 +37,37 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LinkSignatureLink, got %s", tname.c_str());
 	}
+
+	if (oset.size() < 1)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting LinkSignatureLink with at least one argument");
+
+	if (TYPE_NODE != oset[0]->get_type())
+		throw InvalidParamException(TRACE_INFO,
+			"LinkSignatureLink only supports TypeNode at this time, got %s",
+			oset[0]->to_string().c_str());
 }
 
 // ---------------------------------------------------------------
 
-/// Return a LinkValue vector of TypeNodes.
+/// Return either a Link or a LinkValue of the desired type.
 ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 {
 	HandleSeq noset;
-	for (const Handle& h : _outgoing)
-	{
-		Type t = vi->get_type();
-		// tipes.emplace_back(createTypeNode(t));
-	}
+	for (size_t i=1; i < _outgoing.size(); i++)
+		noset.emplace_back(_outgoing[i]);
 
-	return createLinkValue(noset);
+	Type t = TypeNodeCast(_outgoing[0])->get_kind();
+	if (LINK_VALUE == t)
+		return createLinkValue(noset);
+
+	if (nameserver().isA(t, LINK))
+		return createLink(noset, t);
+
+	// Should support other kinds too.
+	const std::string& tname = nameserver().getTypeName(t);
+	throw InvalidParamException(TRACE_INFO,
+		"Unsupported type %s", tname.c_str());
 }
 
 DEFINE_LINK_FACTORY(LinkSignatureLink, LINK_SIGNATURE_LINK)
