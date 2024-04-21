@@ -30,6 +30,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "FilterLink.h"
+#include "LinkSignatureLink.h"
 #include "ValueShimLink.h"
 
 using namespace opencog;
@@ -247,18 +248,6 @@ static ValuePtr make_lnkv(const ValueSeq&& v)
 
 // ===============================================================
 
-// XXX FIXME. LinkSignatureLink should be a C++ class,
-// it can static-check the correct structure, and it can
-// dynamic-compare the type correctly. Someday, not today.
-static inline Type link_sig_kind(const Handle& termpat)
-{
-	TypeNodePtr tn(TypeNodeCast(termpat->getOutgoingAtom(0)));
-	if (nullptr == tn)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting first atom in LinkSignature to be a Type!");
-	return tn->get_kind();
-}
-
 /// Recursive tree-compare-and-extract grounding values.
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
@@ -371,7 +360,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// Type of LinkSig is encoded in the first atom.
 	Type lit = t;
 	if (LINK_SIGNATURE_LINK == t)
-		lit = link_sig_kind(termpat);
+		lit = LinkSignatureLinkCast(termpat)->get_kind();
 
 	// Whatever they are, the type must agree.
 	if (lit != vgnd->get_type()) return false;
@@ -463,15 +452,13 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		// value is a set of Atoms, or a set of non-Atom Values.
 		if (body->is_type(LINK_SIGNATURE_LINK))
 		{
-			// Type kind = link_sig_kind(body);
-			// if (LINK_VALUE == kind) ...
 			ValueSeq valseq;
 			for (const Handle& var : _mvars->varseq)
 			{
 				const auto& valpair = valmap.find(var);
 				valseq.emplace_back(valpair->second);
 			}
-			return createLinkValue(valseq);
+			return LinkSignatureLinkCast(body)->construct(std::move(valseq));
 		}
 
 		// A list of Handles.
@@ -542,7 +529,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// value is a set of Atoms, or a set of non-Atom Values.
 	if (have_vals or body->is_type(LINK_SIGNATURE_LINK))
 	{
-		// Type kind = link_sig_kind(body);
+		// Type kind = LinkSignatureLinkCast(body)->get_kind();
 		// if (LINK_VALUE == kind) ...
 		return createLinkValue(rew);
 	}
