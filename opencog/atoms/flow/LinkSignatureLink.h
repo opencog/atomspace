@@ -59,6 +59,7 @@ public:
 	LinkSignatureLink& operator=(const LinkSignatureLink&) = delete;
 
 	Type get_kind(void) const { return _kind; }
+	virtual bool is_executable(void) const { return true; }
 
 	// Construct new Value or Link of the given kind.
 	virtual ValuePtr execute(AtomSpace*, bool);
