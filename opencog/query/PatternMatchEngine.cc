@@ -1029,7 +1029,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			{
 				HandleSeq osg_seq = HandleSeq(osg.begin() + jg,
 				                              osg.begin() + i + jg);
-				Handle wr_h = createLink(std::move(osg_seq), LIST_LINK);
+				Handle wr_h = createLink(osg_seq, LIST_LINK);
 
 				auto tc = tree_compare(glob, wr_h, CALL_GLOB);
 				if (tc)

@@ -251,7 +251,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a->get_handle());
     hvec.push_back(a2->get_handle());
 
-    Handle l(createLink(std::move(hvec), LIST_LINK));
+    Handle l(createLink(hvec, LIST_LINK));
     store->storeAtom(l->get_handle(), true);
     store->barrier();
 
