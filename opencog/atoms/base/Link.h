@@ -67,7 +67,10 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(const HandleSeq oset, Type t=LINK)
+    // The argument is on stack very nearly 100% of the time, so
+    // using the move constructor does not seem to make any sense.
+    // Link(HandleSeq&& oset, Type t=LINK)
+    Link(HandleSeq oset, Type t=LINK)
         : Atom(t), _outgoing(std::move(oset))
     {
         init();
