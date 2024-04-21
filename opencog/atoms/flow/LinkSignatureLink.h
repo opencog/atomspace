@@ -32,6 +32,10 @@ namespace opencog
  */
 
 /// The LinkSignatureLink returns Value of the indicated type.
+/// It is effectively a Link constructor.  It is a bit experimental
+/// in form, and is used only in a few places.
+/// It could be called LinkConstructorLink, except that it is also
+/// used for pattern matching in assorted places.
 ///
 /// For example,
 ///
@@ -46,12 +50,17 @@ namespace opencog
 ///
 class LinkSignatureLink : public Link
 {
+private:
+	Type _kind;
+
 public:
 	LinkSignatureLink(const HandleSeq&&, Type = LINK_SIGNATURE_LINK);
 	LinkSignatureLink(const LinkSignatureLink&) = delete;
 	LinkSignatureLink& operator=(const LinkSignatureLink&) = delete;
 
-	// Return a pointer to the Type of Atoms in the OutgoingSet.
+	Type get_kind(void) const { return _kind; }
+
+	// Construct new Value or Link of the given kind.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);

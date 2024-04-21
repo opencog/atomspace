@@ -46,6 +46,8 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"LinkSignatureLink only supports TypeNode at this time, got %s",
 			oset[0]->to_string().c_str());
+
+	_kind = TypeNodeCast(oset[0])->get_kind();
 }
 
 // ---------------------------------------------------------------
@@ -57,15 +59,14 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 	for (size_t i=1; i < _outgoing.size(); i++)
 		noset.emplace_back(_outgoing[i]);
 
-	Type t = TypeNodeCast(_outgoing[0])->get_kind();
-	if (LINK_VALUE == t)
+	if (LINK_VALUE == _kind)
 		return createLinkValue(noset);
 
-	if (nameserver().isA(t, LINK))
-		return createLink(noset, t);
+	if (nameserver().isA(_kind, LINK))
+		return createLink(noset, _kind);
 
 	// Should support other kinds too.
-	const std::string& tname = nameserver().getTypeName(t);
+	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
 		"Unsupported type %s", tname.c_str());
 }
