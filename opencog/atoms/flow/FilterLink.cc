@@ -330,6 +330,7 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		// Check the type of the value.
 		if (not _mvars->is_type(termpat, vgnd)) return false;
+		valmap.emplace(std::make_pair(termpat, vgnd));
 		return true;
 	}
 
