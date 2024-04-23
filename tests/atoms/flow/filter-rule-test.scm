@@ -31,9 +31,9 @@
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$from") (Variable "$to") (Variable "$msg"))
 			(LinkSignature (Type 'LinkValue)
-				(StringValue "PRIVMSG")
+				(Item "PRIVMSG")
 				(Variable "$from")
-				(StringValue "you said: ")
+				(Item "you said: ")
 				(Variable "$msg")))
 		(LinkSignature (Type 'LinkValue)
 			(ValueOf (Concept "a") (Predicate "k")))))
@@ -42,10 +42,22 @@
 (test-assert "filter rule"
 	(equal? e-frule (LinkValue
 		(LinkValue
-			(StringValue "PRIVMSG")
+			(Item "PRIVMSG")
 			(Concept "baz")
-			(StringValue "you said: ")
+			(Item "you said: ")
 			(Concept "goh")))))
+
+(cog-set-value! (Concept "a") (Predicate "k")
+	(LinkValue (StringValue "first") (StringValue "sec") (StringValue "third")))
+
+(define e-srule (cog-execute! frule))
+(test-assert "filter string rule"
+	(equal? e-srule (LinkValue
+		(LinkValue
+			(Item "PRIVMSG")
+			(StringValue "baz")
+			(Item "you said: ")
+			(StringValue "goh")))))
 
 ; -----------
 
