@@ -99,11 +99,18 @@ ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
 /// Return either a Link or a LinkValue of the desired type.
 ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 {
-	HandleSeq noset;
+	ValueSeq voset;
 	for (size_t i=1; i < _outgoing.size(); i++)
-		noset.emplace_back(_outgoing[i]);
+	{
+		// As always, propagate execution down to leaves.
+		// FYI, some of these may be ValueShimLinks. (Yuck)
+		if (_outgoing[i]->is_executable())
+			voset.emplace_back(_outgoing[i]->execute(as, silent));
+		else
+			voset.emplace_back(_outgoing[i]);
+	}
 
-	return construct(std::move(noset));
+	return construct(std::move(voset));
 }
 
 DEFINE_LINK_FACTORY(LinkSignatureLink, LINK_SIGNATURE_LINK)
