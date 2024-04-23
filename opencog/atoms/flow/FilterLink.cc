@@ -416,8 +416,14 @@ bool FilterLink::extract(const Handle& termpat,
 		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
 		                    make_list, tsz, off);
 	}
-	const ValueSeq& glo = LinkValueCast(vgnd)->value();
-	return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
+	if (vgnd->is_type(LINK_VALUE))
+	{
+		const ValueSeq& glo = LinkValueCast(vgnd)->value();
+		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
+		                    make_lnkv, tsz, off);
+	}
+
+	return glob_compare(tlo, ValueSeq({vgnd}), valmap, scratch, silent, quotation,
 	                    make_lnkv, tsz, off);
 }
 
