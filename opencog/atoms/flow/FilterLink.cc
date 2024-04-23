@@ -139,6 +139,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 	// The vector to match has to be at least as long as the template.
 	if (gsz < tsz) return false;
 
+	_recursive_glob = true;
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
 	// complicated search ...
@@ -334,6 +335,12 @@ bool FilterLink::extract(const Handle& termpat,
 		// Check the type of the value.
 		if (not _mvars->is_type(termpat, vgnd)) return false;
 
+		// If we are deep in doing glob compares, then all that was
+		// needed is the result of the the type compare. However,
+		// if this is a top-level glob that is wrapping everything,
+		// then we need to record it (immediately below).
+		if (_recursive_glob) return true;
+
 		// Globs are always wrapped, no matter what, by a List or
 		// a LinkValue, because for the general case, the arity
 		// is unknown (even though its exactly one, here.)
@@ -460,6 +467,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	ValueMap valmap;
+	_recursive_glob = false;
 	if (not extract(_pattern->get_body(), vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 

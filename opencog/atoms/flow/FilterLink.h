@@ -69,6 +69,7 @@ protected:
 	                  ValueMap&, AtomSpace*, bool, Quotation,
 	                  ValuePtr (*)(const VECT&&),
 	                  size_t, size_t) const;
+	mutable bool _recursive_glob;
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);
 	FilterLink(const Handle& pattern, const Handle& term);
