@@ -136,6 +136,9 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 {
 	size_t gsz = glo.size();
 
+	// The vector to match has to be at least as long as the template.
+	if (gsz < tsz) return false;
+
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
 	// complicated search ...
@@ -331,7 +334,9 @@ bool FilterLink::extract(const Handle& termpat,
 		// Check the type of the value.
 		if (not _mvars->is_type(termpat, vgnd)) return false;
 
-		// Globs are always wrapped, no matter what, by a List
+		// Globs are always wrapped, no matter what, by a List or
+		// a LinkValue, because for the general case, the arity
+		// is unknown (even though its exactly one, here.)
 		if (vgnd->is_atom())
 			valmap.emplace(std::make_pair(termpat,
 			               createLink(LIST_LINK, HandleCast(vgnd))));
