@@ -131,6 +131,8 @@ std::string oc_to_string(const ValuePtr& vp,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const ValueSeq& vs,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const ValueMap& vs,
+                         const std::string& indent=empty_string);
 
 /**
  * Cast ValuePtr to the specific Value subclass. This function is defined only
