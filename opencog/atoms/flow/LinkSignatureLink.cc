@@ -58,6 +58,19 @@ ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 	if (LINK_VALUE == _kind)
 		return createLinkValue(newset);
 
+	// Yuck. User should have called the other constructor.
+	// But this is rare, so we'll allow.
+	if (nameserver().isA(_kind, LINK))
+	{
+		HandleSeq oset;
+		for (const ValuePtr& vp : newset)
+		{
+			const Handle& h(HandleCast(vp));
+			if (h) oset.push_back(h);
+		}
+		return createLink(oset, _kind);
+	}
+
 	// Should support other kinds too.
 	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
