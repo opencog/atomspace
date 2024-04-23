@@ -330,7 +330,13 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		// Check the type of the value.
 		if (not _mvars->is_type(termpat, vgnd)) return false;
-		valmap.emplace(std::make_pair(termpat, vgnd));
+
+		// Globs are always wrapped, no matter what, by a List
+		if (vgnd->is_atom())
+			valmap.emplace(std::make_pair(termpat,
+			               createLink(LIST_LINK, HandleCast(vgnd))));
+		else
+			valmap.emplace(std::make_pair(termpat, createLinkValue(vgnd)));
 		return true;
 	}
 
