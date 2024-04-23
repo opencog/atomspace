@@ -55,9 +55,9 @@
 	(equal? e-srule (LinkValue
 		(LinkValue
 			(Item "PRIVMSG")
-			(StringValue "baz")
+			(StringValue "first")
 			(Item "you said: ")
-			(StringValue "goh")))))
+			(StringValue "third")))))
 
 ; -----------
 
