@@ -394,17 +394,28 @@ bool FilterLink::extract(const Handle& termpat,
 			return true;
 		}
 
-		// If we are here, vgnd is a LinkValue. Loop just like above,
-		// except that the outgoing set is a vector of Values.
-		const auto& glo = LinkValueCast(vgnd)->value();
-		size_t gsz = glo.size();
-		// If the sizes are mismatched, should we do a fuzzy match?
-		if (tsz != gsz) return false;
-		for (size_t i=0; i<tsz; i++)
+		if (vgnd->is_type(LINK_VALUE))
 		{
-			if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
-				return false;
+			// Loop just like above.
+			const auto& glo = LinkValueCast(vgnd)->value();
+			size_t gsz = glo.size();
+			// If the sizes are mismatched, should we do a fuzzy match?
+			if (tsz != gsz) return false;
+			for (size_t i=0; i<tsz; i++)
+			{
+				if (not extract(tlo[i+off], glo[i], valmap, scratch, silent, quotation))
+					return false;
+			}
+			return true;
 		}
+
+		// If we are here, we have a solitary Value. We already know
+		// that it has the right type; else we would not have gotten
+		// here. Do some paranoid checks, anyway.
+		if ((LINK_SIGNATURE_LINK != t) or (1 != tsz))
+			return false;
+
+		valmap.emplace(std::make_pair(tlo[1], vgnd));
 		return true;
 	}
 
