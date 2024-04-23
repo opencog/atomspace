@@ -88,7 +88,10 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 	if (stream->is_type(LINK_VALUE))
 	{
 		LinkValuePtr lvp = LinkValueCast(stream);
-      return createLinkValue(lvp->value());
+		const ValueSeq& vseq = lvp->value();
+		if (vseq.size() == 1)
+			return vseq[0];
+		return createLinkValue(vseq);
 	}
 
 	if (silent)
