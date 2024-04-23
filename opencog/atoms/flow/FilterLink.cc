@@ -260,8 +260,8 @@ static ValuePtr make_lnkv(const ValueSeq&& v)
 /// variable).
 ///
 /// Any executable terms in `ground` are executed prior to comparison.
-/// XXX Is the above a good design choice? I dunno. It's the historical
-/// choice. So it goes.
+/// XXX Is executing the ground a good design choice? I dunno. It's the
+/// historical choice. So it goes.
 ///
 /// If false is returned, the contents of valmap are invalid. If true
 /// is returned, valmap contains the extracted values.
@@ -330,7 +330,9 @@ bool FilterLink::extract(const Handle& termpat,
 	{
 		// Check the type of the value.
 		if (not _mvars->is_type(termpat, vgnd)) return false;
-		valmap.emplace(std::make_pair(termpat, vgnd));
+
+		// Not the right place to record a grounding...
+		// valmap.emplace(std::make_pair(termpat, vgnd));
 		return true;
 	}
 
