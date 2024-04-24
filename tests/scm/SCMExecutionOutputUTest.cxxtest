@@ -688,6 +688,15 @@ void SCMExecutionOutputUTest::test_bad_gsn(void)
 	);
 	CHKEV(eval);
 
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"blorpaxxs\")"));
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: aasdfasdf\")"));
+
+#if 0
+	// No longer tested. The API has been changed to run the function,
+	// but return VoidValue for all of these cases. This seems much more
+	// user freindly. A future rainy-day project is to convert the scheme
+	// return values to some mostly-appropriate Atomese of some kind.
+
 	eval->eval("(define (no-ret x) *unspecified*)");
 	CHKEV(eval);
 	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: no-ret\")"));
@@ -707,6 +716,7 @@ void SCMExecutionOutputUTest::test_bad_gsn(void)
 	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
 	CHKEV(eval);
 	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gsn \"scm: ret-lst\")"));
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -723,6 +733,12 @@ void SCMExecutionOutputUTest::test_bad_gpn(void)
 	   "         (Concept \"A\"))))"
 	);
 	CHKEV(eval);
+
+#if 0
+	// No longer tested. The API has been changed to run the function,
+	// but return VoidValue for all of these cases. This seems much more
+	// user freindly. A future rainy-day project is to convert the scheme
+	// return values to some mostly-appropriate Atomese of some kind.
 
 	eval->eval("(define (no-ret x) *unspecified*)");
 	CHKEV(eval);
@@ -743,6 +759,7 @@ void SCMExecutionOutputUTest::test_bad_gpn(void)
 	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
 	CHKEV(eval);
 	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: ret-lst\")"));
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
