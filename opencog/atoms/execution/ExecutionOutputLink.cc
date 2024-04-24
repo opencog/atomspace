@@ -176,6 +176,11 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 	if (sn->is_type(GROUNDED_PROCEDURE_NODE))
 	{
 		GroundedProcedureNodePtr gsn = GroundedProcedureNodeCast(sn);
+		if (nullptr == gsn)
+			throw SyntaxException(TRACE_INFO,
+				"ExecutionOutputLink: Cannot use naked %s",
+				sn->to_string().c_str());
+
 		return gsn->execute(as, args, silent);
 	}
 
