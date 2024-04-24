@@ -108,7 +108,7 @@ ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
-		return nullptr;
+		return Handle::UNDEFINED;
 
 	return *(SCM_SMOB_VALUE_PTR_LOC(sh));
 }

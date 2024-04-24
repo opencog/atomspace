@@ -25,6 +25,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include <opencog/atoms/grounded/SCMRunner.h>
 #include "DLScheme.h"
@@ -34,16 +35,6 @@ using namespace opencog;
 SCMRunner::SCMRunner(std::string s)
 	: _fname(s)
 {
-}
-
-static void throwSyntaxException(bool silent, const char* message...)
-{
-	if (silent)
-		throw NotEvaluatableException();
-	va_list args;
-	va_start(args, message);
-	throw SyntaxException(TRACE_INFO, message, args);
-	va_end(args);
 }
 
 // ----------------------------------------------------------
@@ -76,13 +67,12 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	if (saved_as)
 		applier->set_scheme_as(saved_as);
 
-	// Hmmm... well, a bad scheme function can end up returning a
-	// null pointer. We can convert this to a VoidValue... or we
-	// can throw an exception. Currently, unit test and code expect
-	// a throw.
-	if (nullptr == vp)
-		throwSyntaxException(TRACE_INFO,
-			"Failed call to the scheme function %s", _fname.c_str());
+	// In general, we expect the scheme fuction to return some Value,
+	// maybe a TruthValue for predicates, or Atoms for Schemas. But
+	// user-written functions can return anything, e.g. scheme
+	// expressions. These are converted by scm_to_protom() into
+	// null pointers. Here, we convert them to VoidValue.
+	if (nullptr == vp) return createVoidValue();
 
 	return vp;
 }
