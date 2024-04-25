@@ -1021,12 +1021,12 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // Internal-use-only wrapper for Values. Older code for function
 // application and beta reduction only works with Atoms, not Values.
-// Rewriting it to flow Values is really hard: we don't have a good
-// strategy for applying functions to Values. This is the work-around:
+// Rewriting it to flow Values is really hard: we don't have a strategy
+// for applying functions to Values. This is the tactical work-around:
 // It can be placed inside a Link, so beta-reduction works. It holds
-// a Value, which functions can get. It *cannot* be placed in the
-// AtomSpace, so is not quite a "real" Atom.
-VALUE_SHIM_LINK <- VALUABLE_LINK,NUMERIC_OUTPUT_LINK
+// a Value, which functions can obtain by calling execute(). It *cannot*
+// be placed in the AtomSpace, so is not quite a "real" Atom.
+VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_LINK
 
 // -----------
 // Similar to ValueOfLink, but this returns a promise to return a Value
