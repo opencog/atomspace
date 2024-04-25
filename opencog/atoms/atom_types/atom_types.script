@@ -640,8 +640,9 @@ MAXIMAL_JOIN_LINK <- JOIN_LINK
 // a base class that provides ctor-time analyis of the PrenexLink, adds
 // a virtual method to get the conclusion(s). It avoids the overhead
 // for constructing an actual PatternLink, and so is faster to create.
-// It is more appropriate for systems like the URE, which are mostly
-// just manipulating rules, instead of actually running them (as queries).
+// It is more appropriate for filtering streams of graphs, and for
+// systems like the URE, which are mostly just manipulating rules,
+// instead of actually running them (as queries).
 RULE_LINK <- PRENEX_LINK,EXECUTABLE_LINK
 
 // Links that can return the components of a RuleLink. They allow a
@@ -653,11 +654,12 @@ CONCLUSION_OF_LINK <- VARDECL_OF_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
-// the pattern matcher will traverse.  Its primary role in life is to
+// the query engine will traverse.  Its primary role in life is to
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
 // of itself, it just holds machinery and a cache of the pre-compiled
-// pattern.
+// pattern. This is optimized specifically for use with the query engine
+// and is not really appropriate for handling streams.
 PATTERN_LINK <- RULE_LINK
 
 // We subdivide patterns into two types: one type returns a TV when it
