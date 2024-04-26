@@ -25,6 +25,7 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include "ValueOfLink.h"
 
 using namespace opencog;
@@ -98,11 +99,11 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	if (2 < _outgoing.size())
 		return _outgoing[2];
 
-	// Hmm. If there's no value, it might be because it was deleted.
-	// There are many reasons for that. So, instead of throwing, we're
-	// going to return a nullptr instead, and assume that all upstream
-	// users are smart enough to check for that. It think they are,
-	// but you never know...
+	// Hmm. If there's no value, it might be because it was deleted,
+	// or maybe it was never set. There are many reasons for that.
+	// So, instead of throwing, we're going to return a VoidValue
+	// instead. This is bettre than returning a nullptr, which has
+	// a way of making upstream callers do a null pointer deref.
 #if 0
 	if (silent)
 		throw SilentException();
@@ -112,7 +113,8 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	   ak->to_string().c_str(), ah->to_string().c_str());
 #endif
 
-	return nullptr;
+	return createVoidValue();
+	// return nullptr;
 }
 
 /// When executed, this will return the value at the indicated key.
