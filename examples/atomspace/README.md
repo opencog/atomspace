@@ -231,8 +231,6 @@ into action for when they are next needed:
 (use-modules (opencog bioscience))
 (use-modules (opencog cheminformatics))
 (use-modules (opencog generate))
-(use-modules (opencog pln))
-(use-modules (opencog ure))
 (use-modules (opencog vision))
 ```
 
@@ -253,6 +251,8 @@ again.
 (use-modules (opencog nlp sureal))
 (use-modules (opencog octomap))
 (use-modules (opencog openpsi))
+(use-modules (opencog pln))
 (use-modules (opencog reduct))
 (use-modules (opencog spacetime))
+(use-modules (opencog ure))
 ```
