@@ -768,7 +768,7 @@ SIGN_NODE <- TYPE_NODE
 // a regular SignatureLink, because the LinkValue blocks this. However,
 // it can be encoded as
 // (LinkSignature (Type 'LinkValue) (Type 'FloatValue) (Type 'Concept))
-LINK_SIGNATURE_LINK <- SIGNATURE_LINK
+LINK_SIGNATURE_LINK <- SIGNATURE_LINK, EXECUTABLE_LINK
 
 // A type binder: it binds a type to a VariableNode. Always arity-2,
 // the first position must be a VariableNode, the second must be a type.
