@@ -583,7 +583,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	if (_outgoing[1]->is_executable())
 	{
-		vex = _outgoing[1]->execute(); // XXX why are we not providing the as ?
+		vex = _outgoing[1]->execute(as, silent);
 
 		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
 		// then we should construct another Queue as the return value,
@@ -602,9 +602,9 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	// Handle four different cases.
 	// If there is a single Atom, apply the filter to the single Atom.
-	// If there is a set of Atoms, apply the filter to the set.
-	// If there is a list of Atoms, apply the filter to the list.
-	// If there is a LinkValue, iterate on that.
+	// If there is a Set of Atoms, apply the filter to the set members.
+	// If there is a List of Atoms, apply the filter to the list elts.
+	// If there is a LinkValue, apply the filter to its elts.
 	Type argtype = vex->get_type();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
