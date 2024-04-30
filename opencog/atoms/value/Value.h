@@ -103,7 +103,7 @@ public:
 		{ return not operator==(other); }
 };
 
-// update() might throw an exception, e.g. an IOExcpetion if a
+// update() might throw an exception, e.g. an IOException if a
 // StorageNode is not open. The problem is that if this was called
 // from the guile shell, there is no handler that can catch this,
 // and so guile will core-dump. So we install a handler now, and
