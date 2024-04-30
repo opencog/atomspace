@@ -6,6 +6,10 @@
  * Copyright (c) 2009, 2014 Linas Vepstas <linasvepstas@gmail.com>
  */
 
+// To use this file, include it in another `atom_types_init.cc` file,
+// which sets up the needed definition of INHERITANCE_FILE and of
+// INITNAME and any required include files.
+
 // Set constructor priority to 101 because we want this to be
 // the very first one that runs, before any of the other type
 // declarations run, and certainly before the factories run.
@@ -58,7 +62,7 @@ static __attribute__ ((destructor)) void fini(void)
 }
 
 extern "C" {
-// Calling this forces this shared-lib to load, thus calling the 
+// Calling this forces this shared-lib to load, thus calling the
 // constructor above, thus causing the atom types to be loaded into
 // the atomspace.
 //
