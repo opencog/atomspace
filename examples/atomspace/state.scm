@@ -50,7 +50,7 @@
 
 ; Ahhh! This time, there are two StateLinks for "fruit"!  How can that
 ; be?  Didn't StateLink promise to be unique? Well, yes, it did, but
-; only when the state is full grounded, i.e. is a "ground term" having
+; only when the state is fully grounded, i.e. is a "ground term" having
 ; no variables in it.  So, StateLinks still operate as expected: they
 ; associate a single key to a single ground-term. An unlimited number
 ; of ungrounded terms are allowed, so that arbitrary queries can be
