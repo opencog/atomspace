@@ -7,7 +7,7 @@
 ; The AtomSpace guile module is called `opencog`, and not `atomspace`,
 ; as you might expect. This is a historical artifact, meant to preserve
 ; backwards compatibility with the earliest versions of OpenCog. Thus,
-; you will see the string "opencog" litering the code, everywhere.
+; you will see the string "opencog" littering the code, everywhere.
 ; Wherever you see it, keep in mind that it refers to the AtomSpace.
 ; All OpenCog modules are always AtomSpace sub-modules. There is nothing
 ; in the OpenCog project that can work without the AtomSpace!
@@ -64,7 +64,7 @@ fff
 ; The ConceptNode is an Atom type. All Atom types are "types" in
 ; the mathematical sense of "Type Theory". More plainly, this is
 ; more-or-less the same thing as a "type" in ordinary programming
-; languagues. Atomese is a typed language. All Atom types have a
+; languages. Atomese is a typed language. All Atom types have a
 ; matching C++ class that runs "under the covers". The Atom type
 ; inheritance hierarchy runs more-or-less the same as the C++ class
 ; hierarchy; there are some subtle exceptions.
@@ -105,7 +105,7 @@ fff
 ; The above can be shortened to just ,a:
 ,a cog
 
-; Get the documentation of a a given function
+; Get the documentation of a given function:
 ,describe cog-new-node
 ,describe cog-node
 
