@@ -523,12 +523,43 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-		if (valpair->second->is_atom())
-			valseq.emplace_back(HandleCast(valpair->second));
+
+		// Under rare circumstances, a grounding cannot be found for
+		// a variable. This happens in one of two ways:
+		// * There is a bug in the extract() code, and it should have
+		//   returned false.
+		// * There is a bug/feature in the FreeLink code that finds
+		//   variables in the consequent of a RuleLink that are NOT
+		//   in the implicand. The FreeLink code should probably be
+		//   modified to call RuleLink::extract_variables() so that
+		//   "the right thing happens". For now, we punt.
+		//
+		// The user can trip over this second thing, if they accidentally
+		// write a rule P(x)->Q(y) when they intended to write P(x)->Q(x).
+		// What happens here is that FreeLink finds y as a variable, but
+		// since it is not in P(x), the extract() above never grounds it.
+		//
+		// So what we do here is punt: until the FreeLink+RuleLink combo
+		// is fixed, we'll pretend ungrounded vars don't need to be
+		// grounded.
+		//
+		// Why is there a bug? I dunno. FreeLink is not supposed to look
+		// inside of Lambda's, and Rule is a kind of Lambda. So wtf.
+
+		ValuePtr gnding;
+		if (valmap.end() == valpair)
+		{
+			// throw FatalErrorException(TRACE_INFO,
+			//      "Internal error; bug in filtering code");
+			gnding = var;
+		}
+
+		if (gnding->is_atom())
+			valseq.emplace_back(HandleCast(gnding));
 		else
 		{
 			ValueShimLinkPtr wrap(createValueShimLink());
-			wrap->set_value(valpair->second);
+			wrap->set_value(gnding);
 			valseq.emplace_back(wrap);
 		}
 	}
