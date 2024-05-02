@@ -67,6 +67,9 @@
 		(ValueOf (Concept "a") (Predicate "b"))))
 
 (cog-execute! glob-match)
+(define uhohh (cog-execute! glob-match))
+(test-assert "bad grounding glob"
+	(equal? uhohh (LinkValue (Glob "$uh-ohhhh"))))
 
 ; -----------
 
