@@ -548,11 +548,9 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 
 		ValuePtr gnding;
 		if (valmap.end() == valpair)
-		{
-			// throw FatalErrorException(TRACE_INFO,
-			//      "Internal error; bug in filtering code");
 			gnding = var;
-		}
+		else
+			gnding = valpair->second;
 
 		if (gnding->is_atom())
 			valseq.emplace_back(HandleCast(gnding));
