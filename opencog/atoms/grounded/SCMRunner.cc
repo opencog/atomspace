@@ -57,7 +57,7 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	// argument will not be (in general) in any atomspace.
 	// That's because it was constructed on the fly, and
 	// we're trying to stick to lazy evaluation. But we have
-	// draw the line here: the callee necesssarily expects
+	// draw the line here: the callee necessarily expects
 	// arguments to be in the atomspace. So we add now.
 	Handle asargs = as->add_atom(cargs);
 
