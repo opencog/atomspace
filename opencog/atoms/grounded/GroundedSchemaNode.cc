@@ -111,7 +111,7 @@ GroundedSchemaNode::~GroundedSchemaNode()
 /// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
 ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
-                                     const Handle& cargs,
+                                     const ValuePtr& cargs,
                                      bool silent)
 {
 	// Unknown procedure type
@@ -121,12 +121,12 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 		                       to_short_string().c_str());
 
 	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
-	              << "with arguments: " << oc_to_string(cargs);
+	              << " with arguments: " << oc_to_string(cargs);
 
 	// Perform "eager evaluation" instead of "lazy evaluation".
 	if (_eager)
 	{
-		Handle exargs(force_execute(as, cargs, silent));
+		Handle exargs(force_execute(as, HandleCast(cargs), silent));
 		return _runner->execute(as, exargs, silent);
 	}
 
