@@ -50,9 +50,11 @@ SCMRunner::SCMRunner(std::string s)
 /// and the predicate as a whole is then evaluated.
 ///
 ValuePtr SCMRunner::execute(AtomSpace* as,
-                            const Handle& cargs,
+                            const ValuePtr& vargs,
                             bool silent)
 {
+	Handle cargs = HandleCast(vargs);
+
 	// If we arrive here from queries or other places, the
 	// argument will not be (in general) in any atomspace.
 	// That's because it was constructed on the fly, and

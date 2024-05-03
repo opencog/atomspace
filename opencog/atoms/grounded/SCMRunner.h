@@ -43,8 +43,8 @@ public:
 	SCMRunner(const SCMRunner&) = delete;
 	SCMRunner& operator=(const SCMRunner&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false);
-	virtual ValuePtr evaluate(AtomSpace* as, const Handle& args, bool silent=false)
+	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool=false);
+	virtual ValuePtr evaluate(AtomSpace* as, const ValuePtr& args, bool silent=false)
 	{ return execute(as, args, silent); }
 };
 
