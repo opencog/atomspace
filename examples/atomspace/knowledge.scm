@@ -90,5 +90,5 @@
 ;     https://wiki.opencog.org/w/SignatureLink
 ; and
 ;     https://wiki.opencog.org/w/TypedAtomLink
-; for more info. Again -- signautes are a very advanced topic; you can
+; for more info. Again -- signatures are an advanced topic; you can
 ; ignore this for now. Just know that they exist.
