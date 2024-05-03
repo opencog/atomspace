@@ -50,16 +50,24 @@ SCMRunner::SCMRunner(std::string s)
 /// and the predicate as a whole is then evaluated.
 ///
 ValuePtr SCMRunner::execute(AtomSpace* as,
-                            const Handle& cargs,
+                            const ValuePtr& vargs,
                             bool silent)
 {
+	ValuePtr asargs = vargs;
+
 	// If we arrive here from queries or other places, the
 	// argument will not be (in general) in any atomspace.
 	// That's because it was constructed on the fly, and
 	// we're trying to stick to lazy evaluation. But we have
 	// draw the line here: the callee necessarily expects
 	// arguments to be in the atomspace. So we add now.
-	Handle asargs = as->add_atom(cargs);
+	if (vargs->is_atom())
+	{
+		if (vargs->get_type() == VALUE_SHIM_LINK)
+			asargs = HandleCast(vargs)->execute();
+		else
+			asargs = as->add_atom(HandleCast(vargs));
+	}
 
 	SchemeEval* applier = get_evaluator_for_scheme(as);
 	AtomSpacePtr saved_as = applier->get_scheme_as();

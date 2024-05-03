@@ -43,7 +43,7 @@ LibraryRunner::LibraryRunner(std::string s)
 
 // ----------------------------------------------------------
 
-static void throwSyntaxException(bool silent, const char* message...)
+static void throwSyntaxEx(bool silent, const char* message...)
 {
 	if (silent)
 		throw NotEvaluatableException();
@@ -61,9 +61,15 @@ static void throwSyntaxException(bool silent, const char* message...)
 ///     substituted into the predicate.
 ///
 ValuePtr LibraryRunner::execute(AtomSpace* as,
-                               const Handle& cargs,
+                               const ValuePtr& vargs,
                                bool silent)
 {
+	if (not vargs->is_atom())
+		throw SyntaxException(TRACE_INFO,
+			"LibraryRunner: Expecting Handle; got %s",
+			vargs->to_string().c_str());
+
+	Handle cargs = HandleCast(vargs);
 	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
@@ -81,7 +87,7 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	}
 
 	if (nullptr == result)
-		throwSyntaxException(silent,
+		throwSyntaxEx(silent,
 	        "Invalid return value from grounded schema %s\nArgs: %s",
 		        _fname.c_str(),
 		        cargs->to_short_string().c_str());
@@ -90,9 +96,15 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 }
 
 ValuePtr LibraryRunner::evaluate(AtomSpace* as,
-                                const Handle& cargs,
+                                const ValuePtr& vargs,
                                 bool silent)
 {
+	if (not vargs->is_atom())
+		throw SyntaxException(TRACE_INFO,
+			"LibraryRunner: Expecting Handle; got %s",
+			vargs->to_string().c_str());
+
+	Handle cargs = HandleCast(vargs);
 	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
@@ -109,7 +121,7 @@ ValuePtr LibraryRunner::evaluate(AtomSpace* as,
 	}
 
 	if (nullptr == result)
-		throwSyntaxException(silent,
+		throwSyntaxEx(silent,
 	        "Invalid return value from grounded predicate %s\nArgs: %s",
 		        _fname.c_str(),
 		        cargs->to_short_string().c_str());

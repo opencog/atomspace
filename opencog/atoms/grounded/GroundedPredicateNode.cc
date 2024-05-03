@@ -118,13 +118,13 @@ void GroundedPredicateNode::init()
 /// will be evaluated.
 ///
 ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
-                                        const Handle& cargs,
+                                        const ValuePtr& cargs,
                                         bool silent)
 {
 	// Perform "eager evaluation" instead of "lazy evaluation".
 	if (_eager and _runner)
 	{
-		Handle exargs(force_execute(as, cargs, silent));
+		Handle exargs(force_execute(as, HandleCast(cargs), silent));
 		return _runner->evaluate(as, exargs, silent);
 	}
 

@@ -45,8 +45,8 @@ public:
 	LibraryRunner(const LibraryRunner&) = delete;
 	LibraryRunner& operator=(const LibraryRunner&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const Handle&, bool=false);
-	virtual ValuePtr evaluate(AtomSpace*, const Handle&, bool=false);
+	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool=false);
+	virtual ValuePtr evaluate(AtomSpace*, const ValuePtr&, bool=false);
 };
 
 /** @}*/

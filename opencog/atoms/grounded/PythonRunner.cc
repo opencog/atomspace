@@ -48,15 +48,21 @@ PythonRunner::PythonRunner(std::string s)
 ///     substituted into the predicate.
 ///
 ValuePtr PythonRunner::execute(AtomSpace* as,
-                               const Handle& cargs,
+                               const ValuePtr& vargs,
                                bool silent)
 {
+	if (not vargs->is_atom())
+		throw SyntaxException(TRACE_INFO,
+			"PythonRunner: Expecting Handle; got %s",
+			vargs->to_string().c_str());
+
 	// If we arrive here from queries or other places, the
 	// argument will not be (in general) in any atomspace.
 	// That's because it was constructed on the fly, and
 	// we're trying to stick to lazy evaluation. But we have
 	// draw the line here: the callee necesssarily expects
 	// arguments to be in the atomspace. So we add now.
+	Handle cargs = HandleCast(vargs);
 	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
@@ -65,9 +71,15 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 }
 
 ValuePtr PythonRunner::evaluate(AtomSpace* as,
-                                const Handle& cargs,
+                                const ValuePtr& vargs,
                                 bool silent)
 {
+	if (not vargs->is_atom())
+		throw SyntaxException(TRACE_INFO,
+			"PythonRunner: Expecting Handle; got %s",
+			vargs->to_string().c_str());
+
+	Handle cargs = HandleCast(vargs);
 	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
