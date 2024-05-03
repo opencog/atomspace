@@ -53,7 +53,7 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
                             const ValuePtr& vargs,
                             bool silent)
 {
-	Handle cargs = HandleCast(vargs);
+	ValuePtr asargs = vargs;
 
 	// If we arrive here from queries or other places, the
 	// argument will not be (in general) in any atomspace.
@@ -61,7 +61,8 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	// we're trying to stick to lazy evaluation. But we have
 	// draw the line here: the callee necessarily expects
 	// arguments to be in the atomspace. So we add now.
-	Handle asargs = as->add_atom(cargs);
+	if (vargs->is_atom())
+		asargs = as->add_atom(HandleCast(vargs));
 
 	SchemeEval* applier = get_evaluator_for_scheme(as);
 	AtomSpacePtr saved_as = applier->get_scheme_as();
