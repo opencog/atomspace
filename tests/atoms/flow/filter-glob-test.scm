@@ -53,6 +53,26 @@
 
 ; -----------
 
+(cog-set-value! (Concept "a") (Predicate "b")
+	(LinkValue (LinkValue (StringValue "d" "e" "f"))))
+
+; Earlier versions of the code core dumped when executing the below,
+; with a null-pointer deref, because `(Glob "$uh-ohhhh")` was never
+; grounded. This test passes if there is no crash.
+(define glob-match
+   (Filter
+      (Rule
+			(LinkSignature (Type 'LinkValue) (Glob "$x"))
+			(Glob "$uh-ohhhh"))
+		(ValueOf (Concept "a") (Predicate "b"))))
+
+(cog-execute! glob-match)
+(define uhohh (cog-execute! glob-match))
+(test-assert "bad grounding glob"
+	(equal? uhohh (LinkValue (Glob "$uh-ohhhh"))))
+
+; -----------
+
 (test-end tname)
 
 (opencog-test-end)

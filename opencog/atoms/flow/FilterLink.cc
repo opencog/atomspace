@@ -523,12 +523,19 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
-		if (valpair->second->is_atom())
-			valseq.emplace_back(HandleCast(valpair->second));
+
+		if (valmap.end() == valpair)
+			throw FatalErrorException(TRACE_INFO,
+				"Internal error; bug in filtering code");
+
+		const ValuePtr& gnding(valpair->second);
+
+		if (gnding->is_atom())
+			valseq.emplace_back(HandleCast(gnding));
 		else
 		{
 			ValueShimLinkPtr wrap(createValueShimLink());
-			wrap->set_value(valpair->second);
+			wrap->set_value(gnding);
 			valseq.emplace_back(wrap);
 		}
 	}
