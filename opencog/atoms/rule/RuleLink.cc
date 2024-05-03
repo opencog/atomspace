@@ -75,7 +75,7 @@ RuleLink::RuleLink(const HandleSeq&& hseq, Type t)
 /* ================================================================= */
 ///
 /// Find and unpack variable declarations, if any; otherwise, just
-/// find all free variables.
+/// find all free variables in the body (but not the implicand).
 ///
 /// On top of that, initialize _body and _implicand with the
 /// clauses and the rewrite rule(s). (Multiple implicands are
@@ -89,7 +89,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a non-empty outgoing set");
 
-	// Old-style declarations had variables in the first
+	// Old-style declarations have variables in the first
 	// slot. If they are there, then respect that.
 	// Otherwise, the first slot holds the body.
 	size_t boff = 0;
@@ -106,18 +106,17 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 	}
 	else
 	{
-		// Hunt for variables only if they were not declared.
-		// Mixing both styles together breaks unit tests.
-		_variables.find_variables(oset);
-
-		// Setting this breaks unit tests. Don't know why.
-		// _vardecl = _variables.get_vardecl();
+		// Hunt for variables in the main body, only.
+		// Do not hunt for them in the implicand clauses that follow.
+		// This is because those implicands might hold other free
+		// variables not appearing in the body.
+		_variables.find_variables(oset[0]);
 	}
 
 	// We already know that sz==1 or greater, so if boff is that oh no
 	if (sz == boff)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a delcaration of a body/premise!");
+			"Expecting a declaration of a body/premise!");
 
 	_body = oset[boff];
 	for (size_t i=boff+1; i < sz; i++)
