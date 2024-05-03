@@ -1028,7 +1028,7 @@ static SCM thunk_scm_eval(void * expr)
  * atom handles. This list is unpacked, and then the function func
  * is applied to them. The SCM value returned by the function is returned.
  */
-SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
+SCM SchemeEval::do_apply_scm(const std::string& func, const ValuePtr& varargs)
 {
 	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
@@ -1038,15 +1038,21 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 	{
 		// If varargs is a ListLink, its elements are passed to the
 		// function, otherwise the single argument is passed.
-		HandleSeq single_arg{varargs};
-		const HandleSeq &oset = varargs->get_type() == LIST_LINK ?
-			varargs->getOutgoingSet() : single_arg;
-
-		// Iterate in reverse, because cons chains in reverse.
-		size_t sz = oset.size();
-		for (size_t i=sz; i>0; i--)
+		if (varargs->get_type() == LIST_LINK)
 		{
-			SCM sh = SchemeSmob::handle_to_scm(oset[i-1]);
+			const HandleSeq& oset = HandleCast(varargs)->getOutgoingSet();
+
+			// Iterate in reverse, because cons chains in reverse.
+			size_t sz = oset.size();
+			for (size_t i=sz; i>0; i--)
+			{
+				SCM sh = SchemeSmob::handle_to_scm(oset[i-1]);
+				expr = scm_cons(sh, expr);
+			}
+		}
+		else
+		{
+			SCM sh = SchemeSmob::protom_to_scm(varargs);
 			expr = scm_cons(sh, expr);
 		}
 	}
@@ -1074,7 +1080,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
  * not return a ProtoAtom, or if n error occurred during evaluation,
  * then a C++ exception is thrown.
  */
-ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
+ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.

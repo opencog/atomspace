@@ -128,10 +128,10 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_eval_as(void *);
 
 		// Apply function to arguments, returning Handle or TV
-		Handle _hargs;
+		ValuePtr _hargs;
 		ValuePtr _retval;
 		AtomSpacePtr _retas;
-		SCM do_apply_scm(const std::string& func, const Handle& varargs);
+		SCM do_apply_scm(const std::string& func, const ValuePtr& varargs);
 		static void * c_wrap_apply_v(void *);
 
 		// Exception and error handling stuff
@@ -198,7 +198,7 @@ class SchemeEval : public GenericEval
 		AtomSpacePtr eval_as(const std::string&);
 
 		// Apply expression to args, returning Handle or TV
-		virtual ValuePtr apply_v(const std::string& func, Handle varargs);
+		virtual ValuePtr apply_v(const std::string& func, ValuePtr varargs);
 		Handle apply(const std::string& func, Handle varargs) {
 			return HandleCast(apply_v(func, varargs)); }
 
