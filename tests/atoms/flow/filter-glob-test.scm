@@ -27,8 +27,8 @@
 
 ; -----------
 (define glob-of
-   (Filter
-      (Rule (Glob "$x")(Glob "$x")(Glob "$x"))
+	(Filter
+		(Rule (Glob "$x")(Glob "$x")(Glob "$x"))
 		(ValueOf (Concept "a") (Predicate "b"))))
 
 (cog-set-value! (Concept "a") (Predicate "b") (Concept "vc"))
@@ -60,8 +60,8 @@
 ; with a null-pointer deref, because `(Glob "$uh-ohhhh")` was never
 ; grounded. This test passes if there is no crash.
 (define glob-match
-   (Filter
-      (Rule
+	(Filter
+		(Rule
 			(LinkSignature (Type 'LinkValue) (Glob "$x"))
 			(Glob "$uh-ohhhh"))
 		(ValueOf (Concept "a") (Predicate "b"))))
@@ -70,6 +70,32 @@
 (define uhohh (cog-execute! glob-match))
 (test-assert "bad grounding glob"
 	(equal? uhohh (LinkValue (Glob "$uh-ohhhh"))))
+
+; -----------
+
+; Same as before, but set it again, just in case.
+(cog-set-value! (Concept "a") (Predicate "b")
+	(LinkValue (LinkValue (StringValue "d" "e" "f"))))
+
+(define (print-atom x) (format #t "Printer function got ~A" x))
+(define (debug-prt x)
+	(ExecutionOutput (GroundedSchema "scm: print-atom") x))
+
+; Earlier versions of the code puked because GroundedSchema got
+; a Value instead of an Atom. This is now fixed.
+(define glob-print
+	(Filter
+		(Rule
+			(LinkSignature (Type 'LinkValue) (Glob "$x"))
+			(debug-prt (Glob "$x")))
+		(ValueOf (Concept "a") (Predicate "b"))))
+
+(define prt-result (cog-execute! glob-print))
+
+; The "scm: print-atom" returns #f which the guile code converts
+; into VoidValue.
+(test-assert "bad printing glob"
+	(equal? prt-result (LinkValue (VoidValue))))
 
 ; -----------
 
