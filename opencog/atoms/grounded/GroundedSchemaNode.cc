@@ -121,7 +121,8 @@ ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
 		                       to_short_string().c_str());
 
 	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
-	              << " with arguments: " << oc_to_string(cargs);
+	              << " with arguments: " << oc_to_string(cargs)
+	              << std::endl;
 
 	// Perform "eager evaluation" instead of "lazy evaluation".
 	if (_eager)
