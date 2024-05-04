@@ -632,7 +632,6 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 
 	// PutLink is incompletely evaluated, above. Finish the job here.
 	if (expr->get_type() == PUT_LINK
-	    and expr->getOutgoingAtom(0)->get_type() != DONT_EXEC_LINK
 	    and vp and vp->is_atom())
 	{
 		Handle h(HandleCast(vp));

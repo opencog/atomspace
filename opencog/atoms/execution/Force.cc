@@ -83,13 +83,6 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 		}
 
 		Handle nh(HandleCast(vp));
-
-		// Unwrap the top-most DontExecLink's.  Lower ones are left
-		// untouched.  We do this as a sop for issue opencog/atomspace#704
-		// but maybe we should not?
-		if (DONT_EXEC_LINK == nh->get_type())
-			nh = nh->getOutgoingAtom(0);
-
 		new_oset.emplace_back(nh);
 		if (nh != ho) changed = true;
 	}

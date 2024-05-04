@@ -9,6 +9,7 @@ ADD_LIBRARY (atomcore
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
+	DontExecLink.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
@@ -58,6 +59,7 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
+	DontExecLink.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h

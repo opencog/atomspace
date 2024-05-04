@@ -54,8 +54,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	if (not base->is_executable())
 	{
 		// Consume quotes
-		Type bt = base->get_type();
-		if (DONT_EXEC_LINK != bt and LOCAL_QUOTE_LINK != bt)
+		if (LOCAL_QUOTE_LINK != base->get_type())
 			return as->add_link(SET_LINK, base);
 
 		return as->add_link(SET_LINK, base->getOutgoingAtom(0));

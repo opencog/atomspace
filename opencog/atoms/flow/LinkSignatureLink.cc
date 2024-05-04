@@ -106,12 +106,6 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 		// FYI, some of these may be ValueShimLinks. (Yuck)
 		if (_outgoing[i]->is_executable())
 			voset.emplace_back(_outgoing[i]->execute(as, silent));
-
-		// Ugh. Ugly hackery. Maybe DontExecLink should be executable,
-		// and return what it wraps, when executed? Yes, we should.
-		// XXX FIXME
-		else if (DONT_EXEC_LINK == _outgoing[i]->get_type())
-			voset.emplace_back(_outgoing[i]->getOutgoingAtom(0));
 		else
 			voset.emplace_back(_outgoing[i]);
 	}

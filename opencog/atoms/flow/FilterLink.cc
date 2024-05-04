@@ -554,8 +554,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		else
 		{
 			// Consume quotations.
-			Type rty = red->get_type();
-			if (LOCAL_QUOTE_LINK == rty or DONT_EXEC_LINK == rty)
+			if (LOCAL_QUOTE_LINK == red->get_type())
 				for (const Handle& ho : HandleCast(red)->getOutgoingSet())
 					rew.emplace_back(ho);
 			else

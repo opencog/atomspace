@@ -60,8 +60,7 @@ ValuePtr IncomingOfLink::execute(AtomSpace* as, bool silent)
 	else
 	{
 		// consume quotes
-		Type bt = base->get_type();
-		if (DONT_EXEC_LINK == bt or LOCAL_QUOTE_LINK == bt)
+		if (LOCAL_QUOTE_LINK == base->get_type())
 			base = base->getOutgoingAtom(0);
 	}
 

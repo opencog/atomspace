@@ -85,13 +85,8 @@ void DontExecUTest::test_DontExecLink_simple()
 	Handle want_band = eval.eval_h("(cog-execute! dont-and)");
 
 	logger().debug() << "simple result = " << oc_to_string(want_band);
-	// Hmm. Actually, we are not consuming this right now.
-	// logger().debug() << "simple expected = " << oc_to_string(band);
-	logger().debug() << "simple expected = " << oc_to_string(dand);
-
-	// Hmm. Actually, we are not consuming this right now.
-	// TS_ASSERT_EQUALS(want_band, band);
-	TS_ASSERT_EQUALS(want_band, dand);
+	logger().debug() << "simple expected = " << oc_to_string(band);
+	TS_ASSERT_EQUALS(want_band, band);
 
 	Handle put_band = eval.eval_h("(cog-execute! put-and)");
 
