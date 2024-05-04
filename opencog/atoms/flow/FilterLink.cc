@@ -552,14 +552,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 			if (v) rew.emplace_back(v);
 		}
 		else
-		{
-			// Consume quotations.
-			if (LOCAL_QUOTE_LINK == red->get_type())
-				for (const Handle& ho : HandleCast(red)->getOutgoingSet())
-					rew.emplace_back(ho);
-			else
-				rew.emplace_back(red);
-		}
+			rew.emplace_back(red);
 	}
 
 	if (1 == rew.size()) return rew[0];

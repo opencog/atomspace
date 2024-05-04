@@ -57,12 +57,6 @@ ValuePtr IncomingOfLink::execute(AtomSpace* as, bool silent)
 		base = HandleCast(base->execute(as, silent));
 		if (nullptr == base) return createLinkValue();
 	}
-	else
-	{
-		// consume quotes
-		if (LOCAL_QUOTE_LINK == base->get_type())
-			base = base->getOutgoingAtom(0);
-	}
 
 	// Simple case. Get IncomingSet.
 	if (1 == _outgoing.size())

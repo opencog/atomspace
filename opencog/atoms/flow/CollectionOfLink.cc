@@ -52,13 +52,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	// In effectively all cases, we expect it to be executable!
 	Handle base(_outgoing[0]);
 	if (not base->is_executable())
-	{
-		// Consume quotes
-		if (LOCAL_QUOTE_LINK != base->get_type())
-			return as->add_link(SET_LINK, base);
-
-		return as->add_link(SET_LINK, base->getOutgoingAtom(0));
-	}
+		return as->add_link(SET_LINK, base);
 
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_atom())
