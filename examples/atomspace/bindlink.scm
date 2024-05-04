@@ -10,12 +10,22 @@
 ;
 ; Because BindLink performs graph re-writing, it resembles logical
 ; implication `P->Q`, that is an if-then statement, `IF P THEN Q`.
-; However, since it can match a pattern, it is more more like
-; an implication with a variable in it, so: `P(x)->Q(x)`.  Since it
+; However, since it can match a pattern, it is more like an
+; implication with a variable in it, so: `P(x)->Q(x)`.  Since it
 ; searches all of the AtomSpace, it is effectively adding a "for all x"
 ; to the implication, so that it states `ForAll x, P(x)->Q(x)` (with
 ; "x" being a bound variable).  In this way, the BindLink can represent
 ; a very basic form of implication or logical inference.
+;
+; Although BindLink resembles implication, it is intended for query,
+; not reasoning. If pure logical inference, without the query is needed,
+; then RuleLink is better suited for that task. This is a practical
+; recommendtation: the BindLink performs some heavyweight and expensive
+; pattern compilation, and caches the results. This makes BindLink
+; initialization fat and slow, which is OK because it pays for itself
+; during the query. But if the query is never done, then BindLik is
+; merely fat and slow. Use RuleLink is you need inference without the
+; query.
 ;
 ; Unlike most query languages (SQL, etc.) Atomese queries are stored
 ; in the AtomSpace itself, as graphs. Thus BindLink is just another
