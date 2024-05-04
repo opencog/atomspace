@@ -18,7 +18,7 @@
 (cog-erase! sto)
 
 (define fvof (FetchValueOf (Concept "a") (Predicate "foo") sto))
-(test-assert "No val" (nil? (cog-execute! fvof)))
+(test-assert "No val" (equal? (cog-execute! fvof) (VoidValue)))
 
 (define sv (StringValue "a" "b" "c"))
 (cog-set-value! (Concept "a") (Predicate "foo") sv)

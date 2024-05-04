@@ -31,7 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The FetchValueOfLink gets a Value from and open StorageNode,
+/// The FetchValueOfLink gets a Value from an open StorageNode,
 /// sets it at the key, and then returns that Value.
 ///
 class FetchValueOfLink : public ValueOfLink

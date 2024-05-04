@@ -82,9 +82,14 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	// trickle out properly in the end.
 	//
 	// XXX TODO FIXME ... if either of these are executable, then
-	// they need to be executed, first, right? Because that's the
-	// usual intent. Else they'd be wrapped in a DontExecLink, right?
-	// I'm confused.
+	// they need to be executed, first, right? Yes, they do! We
+	// can currently get away with not doing this for two reasons:
+	// In all existing code, the first Atom is always an anchor,
+	// and is thus never executable. The second Atom always ends
+	// inside some FunctionLink, where it does eventually get
+	// executed, as needed. So in the current apps, this all works
+	// fine. In the future... well, I'm not fiddling with this today.
+	// Worst case scenario, app can use a DontExecLink.
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 
@@ -93,16 +98,13 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 
 	// If we are here, then no Value was found. If there is a
 	// third Atom, then it specifies a default to use instead.
-	// XXX Is there ever a case where this needs to be executed?
-	// Current unit tests & apps go through NumericFunctionLink,
-	// which does execute it for us.
 	if (2 < _outgoing.size())
 		return _outgoing[2];
 
 	// Hmm. If there's no value, it might be because it was deleted,
 	// or maybe it was never set. There are many reasons for that.
 	// So, instead of throwing, we're going to return a VoidValue
-	// instead. This is bettre than returning a nullptr, which has
+	// instead. This is better than returning a nullptr, which has
 	// a way of making upstream callers do a null pointer deref.
 #if 0
 	if (silent)
