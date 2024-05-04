@@ -254,14 +254,7 @@ void PutLink::static_typecheck_arguments(void)
 static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
-	Handle h(subs->beta_reduce(oset));
-
-	// DontExecUTest wants is to eat DontExecLink's.
-	// I'm not convinced this is a wise idea, but that's what's
-	// tested, for now. I guess the URE was expecting this. Beats me.
-	if (DONT_EXEC_LINK == h->get_type())
-		return h->getOutgoingAtom(0);
-	return h;
+	return subs->beta_reduce(oset);
 }
 
 // If arg is executable, then run it, and unwrap the set link, too.
@@ -565,8 +558,7 @@ static inline Handle do_exec(AtomSpace* as, bool silent, const Handle& h)
 	Type t = h->get_type();
 	if (not h->is_executable() or
 	    nameserver().isA(t, VALUE_OF_LINK) or
-	    nameserver().isA(t, SET_VALUE_LINK) or
-	    (DONT_EXEC_LINK == t))
+	    nameserver().isA(t, SET_VALUE_LINK))
 	{
 		return h;
 	}
@@ -591,8 +583,7 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 
 	if (not h->is_executable() or
 	    nameserver().isA(t, VALUE_OF_LINK) or
-	    nameserver().isA(t, SET_VALUE_LINK) or
-	    (DONT_EXEC_LINK == t))
+	    nameserver().isA(t, SET_VALUE_LINK))
 	{
 		return h;
 	}
