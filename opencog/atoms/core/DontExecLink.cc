@@ -34,7 +34,7 @@ DontExecLink::DontExecLink(const HandleSeq&& oset, Type t)
 			"Expecting an DontExecLink, got %s", tname.c_str());
 	}
 
-	if (1 == oset.size())
+	if (1 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"DontExecLink expects only one argument");
 }
