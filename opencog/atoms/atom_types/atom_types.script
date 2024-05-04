@@ -503,7 +503,8 @@ LOCAL_QUOTE_LINK <- ORDERED_LINK
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
 // instead of blocking beta-reduction, it blocks execution.
-DONT_EXEC_LINK <- ORDERED_LINK
+// It's executable itself; executing it just returns what it wraps.
+DONT_EXEC_LINK <- ORDERED_LINK,EXECUTABLE_LINK
 
 // Substitution - replace first arg by second arg. Used in JoinLink.
 // Could be used in PatternLink too.
