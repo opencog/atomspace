@@ -22,6 +22,7 @@
  */
 
 #include <opencog/persist/api/StorageNode.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include "FetchValueOfLink.h"
 
@@ -43,8 +44,8 @@ void FetchValueOfLink::init(void)
 {
 	size_t ary = _outgoing.size();
 
-	if (3 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
+	if (3 != ary and 4 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
 
 	if (not _outgoing[2]->is_type(STORAGE_NODE))
 		throw SyntaxException(TRACE_INFO, "Expecting a StorageNode, got %s",
@@ -53,15 +54,16 @@ void FetchValueOfLink::init(void)
 
 // ---------------------------------------------------------------
 
-/// Fetch the Value first, and then return it.
+/// Fetch the Value, and then return it. If it's not found,
+/// then use the optional default.
 ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	StorageNodePtr stnp = StorageNodeCast(_outgoing[2]);
 
 	// XXX TODO FIXME ... if either of _outgoing[0] or _outgoing[1]
 	// are executable, then they need to be executed, first, right?
-	// Because that's the usual intent. Else they'd be wrapped in a
-	// DontExecLink, right? I'm confused.
+	// Yes, they do. But, for just right now, we don't, to stay
+	// compatible with ValueOfLink. See comments in that code.
 
 	// If the StorageNode is not open for reading, it will
 	// either throw, or do something else. Not our decision.
@@ -70,7 +72,20 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 	stnp->fetch_value(ah, ak, as);
 	stnp->barrier();
 
-	return ah->getValue(ak);
+	ValuePtr pap = ah->getValue(ak);
+	if (pap) return pap;
+
+	// If we are here, then no Value was found. If there is a
+	// fourth Atom, then it specifies a default to use instead.
+	if (3 < _outgoing.size())
+		return _outgoing[3];
+
+	// Hmm. If there's no value, it might be because it was deleted,
+	// or maybe it was never set. There are many reasons for that.
+	// So, instead of throwing, we're going to return a VoidValue
+	// instead. This is better than returning a nullptr, which has
+	// a way of making upstream callers do a null pointer deref.
+	return createVoidValue();
 }
 
 DEFINE_LINK_FACTORY(FetchValueOfLink, FETCH_VALUE_OF_LINK)
