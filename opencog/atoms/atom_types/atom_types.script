@@ -494,17 +494,17 @@ QUOTE_LINK <- ORDERED_LINK
 // above it. We should ...)
 UNQUOTE_LINK <- ORDERED_LINK
 
-// Like QuoteLink but only affects the direct child, not its
-// descendants. It has the same effect as wrapping the child with a
-// QuoteLink and each Atom of the its outgoing set with an UnquoteLink.
-LOCAL_QUOTE_LINK <- ORDERED_LINK
-
 // Everything under a DontExecLink is not executed. This is typically
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
 // instead of blocking beta-reduction, it blocks execution.
 // It's executable itself; executing it just returns what it wraps.
 DONT_EXEC_LINK <- ORDERED_LINK,EXECUTABLE_LINK
+
+// Like QuoteLink but only affects the direct child, not its
+// descendants. It has the same effect as wrapping the child with a
+// QuoteLink and each Atom of the its outgoing set with an UnquoteLink.
+LOCAL_QUOTE_LINK <- DONT_EXEC_LINK
 
 // Substitution - replace first arg by second arg. Used in JoinLink.
 // Could be used in PatternLink too.
