@@ -35,10 +35,38 @@
 ; Short names also work:
 (Concept "foo")
 
+; The part inside the quotes can be any UTF-8 string. The ConceptNode
+; is the name of one of several dozen different Node types. Nodes
+; *always* carry a string label, like the above. All Node types are
+; backed by a C++ class that "does stuff", when executed; some of these
+; are more interesting than others. This will come in later demos.
+; Some special examples include Nodes that hold numbers and URL's.
+
+; Nodes exist as objects in the AtomSpace, so if you say
+(Concept "foo")
+; a second time it will be exactly the same Node as before: nothing was
+; added to the AtomSpace, because (Concept "foo") is already in it.
+; That is, Nodes are globally unique, and are identified by their node
+; type, and the string name. See
+;    https://wiki.opencog.org/w/Node
+; for more details.
+
+; -----------------
 ; Links are lists of Atoms (which can be Nodes or Links).
 (ListLink (Concept "foo") (Concept "bar"))
 (ListLink (Concept "foo") (ListLink (Concept "bar") (Concept "bar")))
 
+; Just like Nodes, Links are globally unique: saying
+(ListLink (Concept "foo") (Concept "bar"))
+; a second time does nothing; only the first utterance placed it into
+; the AtomSpace. Each utterance gives exactly the same Link.
+;
+; See
+;    https://wiki.opencog.org/w/Link
+;    https://wiki.opencog.org/w/Atom
+; for more details.
+
+; -----------------
 ; Atoms can be accessed in such a way that they are not created if
 ; they do not already exist. Access the above:
 (cog-node 'ConceptNode "asdf")
@@ -47,6 +75,7 @@
 (cog-node 'ConceptNode "qwerty")
 (cog-link 'ListLink (cog-node 'ConceptNode "Oh no!"))
 
+; -----------------
 ; All Atoms are ordinary scheme objects, and so conventional scheme
 ; can be used to hold references to them:
 (define f (Concept "foo"))
@@ -61,6 +90,7 @@ fff
 (symbol? 'foo)
 (symbol? "bar")
 
+; -----------------
 ; The ConceptNode is an Atom type. All Atom types are "types" in
 ; the mathematical sense of "Type Theory". More plainly, this is
 ; more-or-less the same thing as a "type" in ordinary programming
@@ -72,6 +102,10 @@ fff
 ; Get a list of all Atomese types:
 (cog-get-types)
 
+; For more info, see
+;    https://wiki.opencog.org/w/Atom_types
+;
+; -----------------
 ; In the above, note that the type hierarchy begins with `Value` and
 ; not with `Atom`. This distinction is important: Atoms can be stored
 ; in the AtomSpace, Values cannot. Atoms are globally unique; there
@@ -96,6 +130,31 @@ fff
 (cog-set-value! (Concept "asdf") (Predicate "some key") (FloatValue 4 5 6))
 (cog-value (Concept "asdf") (Predicate "some key"))
 
+; -----------------
+; The above set and get can be done in pure Atomese. We'll need to load
+; one more module:
+(use-modules (opencog exec))
+
+(cog-execute! (ValueOf (Concept "asdf") (Predicate "some key")))
+(cog-execute! (SetValue
+	(Concept "asdf") (Predicate "some key")
+	(Node "this is the new thing")))
+(cog-execute! (ValueOf (Concept "asdf") (Predicate "some key")))
+
+; Unlike the above `cog-set-value!`, one cannot legally say
+;   (SetValue (Concept "asdf") (Predicate "some key") (FloatValue 4 5 6))
+; because the FloatValue is NOT an Atom! Only Atoms may appear in here.
+; This is not much of a limitation; later demos expand on how to work
+; with these.
+;
+; For more info, see
+;    https://wiki.opencog.org/w/FloatValue
+;    https://wiki.opencog.org/w/StringValue
+;    https://wiki.opencog.org/w/ValueOf
+;    https://wiki.opencog.org/w/SetValue
+;    https://wiki.opencog.org/w/Execution
+
+; -----------------
 ; The guile REPL shell has built-in commands that assist with
 ; documentation. For example, the following will print a list of
 ; all functions having the string "cog" in them. Note the comma
@@ -111,3 +170,10 @@ fff
 
 ; The above can also be shortened:
 ,d cog-link
+
+; Atoms are paired with links to the wiki:
+,d ConceptNode
+
+; The End.
+; That's all, Folks!
+; ------------------

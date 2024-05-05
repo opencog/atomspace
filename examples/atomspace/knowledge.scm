@@ -54,7 +54,7 @@
 ; edge exists, and is otherwise false.
 ;
 ; A hypergraph replaces the concept of an edge with a "Link", which can
-; contain zero, one, two, three, or more vertexes; roughtly speaking, a
+; contain zero, one, two, three, or more vertices; roughly speaking, a
 ; link is a set. A further generalization allows links to contain other
 ; links, as well as vertices. This is much as sets can contain other
 ; sets. To distinguish from ordinary graphs, verteces are called "Nodes"
@@ -66,7 +66,7 @@
 ; variables, such as P(a,b,c,x,y,z). Note that both constants and
 ; variables look like (labelled) vertices, thus Nodes, while a function
 ; looks like a (named) set, thus a Link. Relations look similar, except
-; that relations are given a true/false value, so that a=b is ture or
+; that relations are given a true/false value, so that a=b is true or
 ; false if a is or is not equal to be. Equivalently, equality can be
 ; thought of as a graph edge, with a vertex "a", another vertex "b",
 ; and the equals sign being an edge carrying the label "=". This label
@@ -80,7 +80,7 @@
 ; come with a large variety of conventional mappings, but none of these
 ; are manditory; you can do them in other ways.
 ;
-; The below takes a simple example, taken from natural langauge
+; The below takes a simple example, taken from natural language
 ; processing.
 ;
 
