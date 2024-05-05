@@ -115,6 +115,21 @@
 
 ; Nodes always have string names.
 ; Links are always collections of Nodes or of other Links.
+
+; The above may seem verbose, and surely, you might think, there are
+; freindlier and more compact ways to encode the sentence "Susan
+; makes pottery". But this misses the point: the AtomSpace is designed
+; to hold millions if not billions of expressions. The intent is that
+; automated tools add and manipulate the Atoms in the AtomSpace, at
+; the rate of tens of thousands per second. The above is not
+; particularly "human readable"; the AtomSpace was designed to be
+; "machine readable". The goal is to make it very easy and very fast
+; for algorithms to read, write and alter the AtomSpace. So, although
+; these demos show how to create Atomese, and explain what it means,
+; the Atomese language itself is more like assembly code, or perhaps,
+; more like a compiler intermediate language: for example:
+;    https://en.wikipedia.org/wiki/Common_Intermediate_Language
+; We think that Atomese is a *lot* more human readable than CIL !!
 ;
 ; --------------------------------------------------------
 ; Schemas.
