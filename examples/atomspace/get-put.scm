@@ -7,11 +7,11 @@
 ; part that performs the query, and a "Put" part that performs the
 ; graph re-writing.
 ;
-; If BindLink is thought of as logical implication:
+; The BindLink can be thought of as logical implication:
 ;	 For all x, P(x) implies Q(x)
-; then GetLink is the first half:
+; The GetLink is the first half:
 ;	 For all x, P(x) implies a set {all x that satisfy P(x)}
-; while PutLink is the second half:
+; The PutLink is the second half:
 ;	 Create the set {Q(x)} given some other set {x}
 ; The PutLink is a form of "beta-reduction" or "substitution" or
 ; "pasting": for each `x` in the set {x} it just pastes `x` into `Q(x)`.

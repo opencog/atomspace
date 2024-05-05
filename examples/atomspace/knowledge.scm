@@ -1,14 +1,87 @@
 ;
 ; knowledge.scm - Representing data with Predicates and Evaluations
 ;
-; The atomspace is primarily a knowledge-representation database
-; (a "knowledgebase"). That is, you have a collection of statements:
-; some "semantic triples" or maybe some "ontology". A "semantic network"
-; or some "frames" or some "rules" or maybe even some "axioms".
+; The AtomSpace can be thought of as a database for (hyper-)graphs.
+; The reason for using graphs, and, more specifically, hypergraphs,
+; is to gain flexibility and freedom that is absent in conventional
+; databases.
 ;
-; There is a tremendous variety of ways that the above can be
-; represented in the Atomspace. This example reviews a few of the
-; most basic, most common forms.
+; Thus, a quick sketch and critique of other database styles is in
+; order. Starting the SQL: one issue is that SQL tables need to be
+; defined, before putting data in. The tables have a fixed number of
+; columns, so that if you discover later that you need more columns,
+; you have to start all over. If you have more than a few hundreds
+; different kinds of tables, you're in trouble.
+;
+; You can avoid the fixed-table problem by using JSON or YAML, but
+; then you give up searchability. You can make up for that by using
+; GraphQL or maybe SparQL, but then you fall back into the *QL query
+; style. The AtomSpace query system is more powerful than the *QL style;
+; the next few demos will make this clear. A formal treament can be
+; found in the PDF "Graphs, Metagraphs, RAM, CPU" in this repo, at
+; opencog/sheaf/docs/ram-cpu.pdf or alternately, online:
+;   https://github.com/opencog/atomspace/raw/master/opencog/sheaf/docs/ram-cpu.pdf
+;
+; The so-called "nosql" databases, or key-value databases avoid some of
+; the hassle of SQL, but have the downside of making complex structures
+; hard to represent. The typical graph databases, such as Neo4J, allow
+; complex structures, but lack the tools for simple & fast query,
+; forcing the user to walk from one vertex to another, following edges.
+;
+; A different rebellion against the strictures of SQL were the so-called
+; "triple stores". This is exactly what is needed to store an arbitrary
+; graph. It falters under the weight of being two low-level. What if you
+; want to store four things, instead of three? You can; it can be broken
+; up into triples, but then things get verbose and awkward.
+;
+; The goal of the AtomSpace is to offer freedom and flexibility that
+; runs far beyond what can ordinarily be found in graph databases.
+;
+; It is assumed that the reader is familiar with the basic concepts
+; of knowlede representation. This includes ideas such as "semantic
+; network", "frame", "rule", "RDF", "axiom", "schema", "predicate"
+; "term algebra", "term rewriting", "inference", "atomic sentence". The
+; reader is strongly encouraged to review Wikipedia articles on these
+; topics, as necessary, to acquaint themselves with why the AtomSpace
+; works the way it does. The goal of the AtomSpace is to make working
+; with any (and every) of the above concepts simple and easy.
+;
+; Never-the-less, some basic terminology:
+;
+; A "graph" is a collection of vertices and edges; each edge is a pair
+; of vertices, thus asserting a relationship between them. Such a
+; relationship can be thought of as a "predicate", which is true, if the
+; edge exists, and is otherwise false.
+;
+; A hypergraph replaces the concept of an edge with a "Link", which can
+; contain zero, one, two, three, or more vertexes; roughtly speaking, a
+; link is a set. A further generalization allows links to contain other
+; links, as well as vertices. This is much as sets can contain other
+; sets. To distinguish from ordinary graphs, verteces are called "Nodes"
+; in the AtomSpace. Something which can be either a node or a link is
+; called an Atom. Note the capitalization convention.
+;
+; Recall some of the basic concepts of a "term algebra": a "term" may be
+; a constant or a variable, or a functional grouping of constants and
+; variables, such as P(a,b,c,x,y,z). Note that both constants and
+; variables look like (labelled) vertices, thus Nodes, while a function
+; looks like a (named) set, thus a Link. Relations look similar, except
+; that relations are given a true/false value, so that a=b is ture or
+; false if a is or is not equal to be. Equivalently, equality can be
+; thought of as a graph edge, with a vertex "a", another vertex "b",
+; and the equals sign being an edge carrying the label "=". This label
+; is a predicate: it is true or it is false.
+;
+; Effectively all concepts from logic, including axioms and schemas
+; and inference rules, can also be mapped to graphs in a relatively
+; straightforward fashion. It is even easier to represent them as
+; hypergraphs.  There is a huge freedom in doing this, and it is up
+; to you, the user, as to how to do that mapping. The AtomSpace does
+; come with a large variety of conventional mappings, but none of these
+; are manditory; you can do them in other ways.
+;
+; The below takes a simple example, taken from natural langauge
+; processing.
 ;
 
 (use-modules (opencog))
@@ -24,7 +97,7 @@
 		(Concept "make")
 		(Concept "pottery")))
 
-; There is no need to write this on five lines;
+; There is no need to write this on five lines, nor to indent:
 ; you can write it on just one:
 ;
 (Evaluation (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
@@ -91,4 +164,5 @@
 ; and
 ;     https://wiki.opencog.org/w/TypedAtomLink
 ; for more info. Again -- signatures are an advanced topic; you can
-; ignore this for now. Just know that they exist.
+; ignore this for now. Just know that they exist, and are sometimes
+; actually useful.
