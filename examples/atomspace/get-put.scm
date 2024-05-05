@@ -94,8 +94,8 @@
 ; Define a beta-reduction.
 (define reduction-rule
 	(PutLink
-		; A variable declaration is mandatory, whenever there are
-		; more than one variables. It is required, so that one can
+		; A variable declaration is mandatory, whenever there is
+		; more than one variable. It is required, so that one can
 		; know the order (the sequence) of the variables. If there
 		; is only one variable, it does not need to be declared.
 		(VariableList
@@ -137,7 +137,7 @@
 			(Predicate "make_from")
 			(List (Variable "thing") (Variable "stuff")))
 
-		; The is the GetLink, defined earlier.
+		; This is the GetLink, defined earlier.
 		get-satisfying-set
 	))
 
