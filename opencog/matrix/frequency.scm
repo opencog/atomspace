@@ -130,7 +130,7 @@
 		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 		(define ln2 (* -1.4426950408889634 (log FREQ)))
 		; zero log zero is zero, not NaN.  ln2 zero is +inf.0 which is OK.
-		(define ent (if (finite? ln2) (* FREQ ln2) 0))
+		(define ent (if (and (real? ln2) (finite? ln2)) (* FREQ ln2) 0))
 		(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
 	; ----------------------------------------------------
