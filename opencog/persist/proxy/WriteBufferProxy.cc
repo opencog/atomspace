@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/persist/proxy/WriteBufferProxy.h>
 
 using namespace opencog;
@@ -42,20 +43,40 @@ WriteBufferProxy::~WriteBufferProxy()
 
 void WriteBufferProxy::init(void)
 {
-	have_removeAtom = true;
-	have_storeValue = true;
-	have_storeAtom = true;
-	have_updateValue = true;
+	// Default decay time of 30 seconds
+	_decay = 30.0;
 }
 
-// Get our configuration from the DefineLink we live in.
+// Get our configuration from the ProxyParametersLink we live in.
 void WriteBufferProxy::open(void)
 {
+	// Let ProxyNode::setup() do the basic work.
 	WriteThruProxy::open();
+
+	// Now fish out the rate parameter, if it is there.
+	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
+	const Handle& pxy = dli[0];
+	if (2 == pxy->size()) return;
+
+	const Handle& hdecay = pxy->getOutgoingAtom(2);
+	if (not hdecay->is_type(NUMBER_NODE))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting decay time in a NumberNode, got %s",
+			hdecay->to_short_string().c_str());
+
+	NumberNodePtr nnp = NumberNodeCast(hdecay);
+	_decay = nnp->get_value();
+}
+
+void WriteBufferProxy::close(void)
+{
+printf("you close\n");
+	WriteThruProxy::close();
 }
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
+printf("yo store atom %s\n", h->to_string().c_str());
 	WriteThruProxy::storeAtom(h, synchronous);
 }
 
@@ -74,6 +95,7 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
+printf("yo store value %s\n", atom->to_string().c_str());
 	WriteThruProxy::storeValue(atom, key);
 }
 

@@ -21,27 +21,28 @@
 
 (ProxyParameters
 	(WriteBufferProxy "wthru buffer")
-	(List
-		(RocksStorageNode "rocks:///tmp/foo.rdb")))
+	(RocksStorageNode "rocks:///tmp/foo.rdb")
+	(Number 42))
 
 (cog-open (WriteBufferProxy "wthru buffer"))
 
-; Now store some stuff. You might want to do a `(cog-prt-atomspace)`
-; back at the CogServer, just to see what's going on there.
-;
-; Store the whole Atom
-(store-atom (Concept "foo" (stv 0.3 0.6)))
+; Store a bunch of values in rapid succession
+(for-each
+	(lambda (N)
+		(cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 N))
+		(store-value (Concept "foo") (Predicate "bar")))
+	(iota 10))
 
-; Store a single Value.
-(cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 3))
-(store-value (Concept "foo") (Predicate "bar"))
-
-; Store the whole Atom
-(cog-set-value! (Concept "foo") (Predicate "fizz") (FloatValue 4 5 6))
-(store-atom (Concept "foo"))
+; Store the whole Atom, repeatedly
+(for-each
+	(lambda (N)
+		(cog-set-value! (Concept "foo") (Predicate "fizz")
+			(FloatValue 4 (* 5 N) (+ N 6)))
+		(store-atom (Concept "foo")))
+	(iota 10))
 
 ; Close the connection.
-(cog-close sto)
+(cog-close (WriteBufferProxy "wthru buffer"))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------
