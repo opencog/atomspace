@@ -34,6 +34,20 @@ namespace opencog
  */
 class WriteBufferProxy : public WriteThruProxy
 {
+private:
+	// Performance-monitoring stats
+	void reset_stats(void);
+	size_t _nstall;
+	size_t _nbars;
+	size_t _astore;
+	size_t _vstore;
+	double _mavg_in_atoms;
+	double _mavg_in_values;
+	double _mavg_qu_atoms;
+	double _mavg_qu_values;
+	double _mavg_out_atoms;
+	double _mavg_out_values;
+
 protected:
 	double _decay;
 	concurrent_set<Handle> _atom_queue;
@@ -69,6 +83,7 @@ protected:
 	                         const ValuePtr& delta);
 
 	virtual void barrier(AtomSpace* = nullptr);
+	virtual std::string monitor(void);
 
 public:
 	static Handle factory(const Handle&);

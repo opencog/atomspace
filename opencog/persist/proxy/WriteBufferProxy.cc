@@ -46,9 +46,10 @@ WriteBufferProxy::~WriteBufferProxy()
 
 void WriteBufferProxy::init(void)
 {
-	// Default decay time of 30 seconds
-	_decay = 30.0;
+	// Default decay time of 60 seconds
+	_decay = 60.0;
 	_stop = false;
+	reset_stats();
 }
 
 // Get configuration from the ProxyParametersLink we live in.
@@ -109,10 +110,12 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 		return;
 	}
 	_atom_queue.insert(h);
+	_astore ++;
 
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _atom_queue.size())
 	{
+		_nstall ++;
 		while ((MAX_QUEUE_SIZE/2) < _atom_queue.size())
 			sleep(_decay);
 	}
@@ -163,10 +166,12 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
 	_value_queue.insert({atom, key});
+	_vstore ++;
 
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _value_queue.size())
 	{
+		_nstall ++;
 		while ((MAX_QUEUE_SIZE/2) < _value_queue.size())
 			sleep(_decay);
 	}
@@ -191,6 +196,8 @@ void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
 
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
+	_nbars ++;
+
 	// Unconditionally drain both queues.
 	std::pair<Handle, Handle> pr;
 	while (_value_queue.try_get(pr))
@@ -201,6 +208,33 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 		WriteThruProxy::storeAtom(atom, false);
 
 	WriteThruProxy::barrier(as);
+}
+
+// ==============================================================
+
+void WriteBufferProxy::reset_stats(void)
+{
+	_nstall = 0;
+	_nbars = 0;
+	_astore = 0;
+	_vstore = 0;
+	_mavg_in_atoms = 0.0;
+	_mavg_in_values = 0.0;
+	_mavg_qu_atoms = 0.0;
+	_mavg_qu_values = 0.0;
+	_mavg_out_atoms = 0.0;
+	_mavg_out_values = 0.0;
+}
+
+std::string WriteBufferProxy::monitor(void)
+{
+	std::string rpt;
+	rpt += "Write Buffer Proxy: ";
+	rpt += "barrier calls: " + std::to_string(_nbars);
+	rpt += "stalls: " + std::to_string(_nstall);
+	rpt += "\n";
+
+	return rpt;
 }
 
 // ==============================================================
