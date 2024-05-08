@@ -79,7 +79,9 @@ void WriteBufferProxy::open(void)
 
 void WriteBufferProxy::close(void)
 {
-	// Stop writing
+	// Stop writing. The thread may be sleeping, so the join() might
+	// hang for a fraction of _decay seconds. It does not seem worthwhile
+	// to try to speed this up, e.g. with a condition variable.
 	_stop = true;
 	_write_thread.join();
 
@@ -88,7 +90,6 @@ void WriteBufferProxy::close(void)
 	_atom_queue.close();
 	_value_queue.close();
 
-printf("duuuuude close\n");
 	WriteThruProxy::close();
 }
 
