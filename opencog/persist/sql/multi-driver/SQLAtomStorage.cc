@@ -580,7 +580,7 @@ void SQLAtomStorage::print_stats(void)
 	       _write_queue._in_drain, _write_queue.get_busy_writers(),
 	       _write_queue.get_size());
 
-	printf("current conn_pool free=%u of %d\n", conn_pool.size(),
+	printf("current conn_pool free=%lu of %d\n", conn_pool.size(),
 	       _initial_conn_pool_size);
 
 	// Some basic TLB statistics; could be improved;
