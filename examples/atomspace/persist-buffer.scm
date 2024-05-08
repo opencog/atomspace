@@ -16,20 +16,15 @@
 ; repeatedly in a short period of time, the write is held off for a
 ; while, and then, later, only the most recent copy is written out.
 
-$ guile
-scheme@(guile-user)>
-
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
-(cog-set-proxy!
-	(ProxyParameters
-		(WriteBufferProxy "wthru mirror")
-		(List
-			(RocksStorageNode "rocks:///tmp/foo.rdb"))))
+(ProxyParameters
+	(WriteBufferProxy "wthru buffer")
+	(List
+		(RocksStorageNode "rocks:///tmp/foo.rdb")))
 
-; ... start using this proxy.
-(cog-proxy-open)
+(cog-open (WriteBufferProxy "wthru buffer"))
 
 ; Now store some stuff. You might want to do a `(cog-prt-atomspace)`
 ; back at the CogServer, just to see what's going on there.
