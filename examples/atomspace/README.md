@@ -83,6 +83,7 @@ be effective.
 * [`persist-query.scm`](persist-query.scm)    -- Fetching sets of Atoms with queries.
 * [`persist-multi.scm`](persist-multi.scm)    -- Work with multiple databases/servers at once.
 * [`persist-proxy.scm`](persist-proxy.scm)    -- Work with proxy agents to access multiple dbs.
+* [`persist-buffer.scm`](persist-buffer.scm)  -- Delay repeated writes so as to limit I/O.
 * [`copy-on-write.scm`](copy-on-write.scm)    -- Read-only AtomSpace, with r/w overlays.
 * [`frame.scm`](frame.scm)                    -- Using StateLink in overlays.
 * [`gperf.scm`](gperf.scm)                    -- Some very crude performance measurements.
