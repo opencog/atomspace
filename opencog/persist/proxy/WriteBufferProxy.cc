@@ -249,6 +249,10 @@ std::string WriteBufferProxy::monitor(void)
 	rpt += "    Values: " + std::to_string(_mavg_out_values);
 	rpt += "\n";
 
+	// Duty cycle is the amount of time that the write thread
+	// is actually writing, vs. the elapsed wallclock time.
+	// Anything over 100 will lead to buffer overflows.
+	rpt += "Timescale " + std::to_string(_decay) + " secs;  ";
 	rpt += "Duty cycle (load avg): " + std::to_string(_mavg_load);
 	rpt += "\n";
 
