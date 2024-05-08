@@ -1,7 +1,7 @@
 /*
  * WriteBufferProxy.cc
  *
- * Copyright (C) 2022 Linas Vepstas
+ * Copyright (C) 2024 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,9 +27,6 @@
 #include <opencog/persist/proxy/WriteBufferProxy.h>
 
 using namespace opencog;
-
-// One writeback queue should be enough.
-#define NUM_WB_QUEUES 1
 
 WriteBufferProxy::WriteBufferProxy(const std::string&& name) :
 	WriteThruProxy(WRITE_BUFFER_PROXY_NODE, std::move(name))
@@ -75,7 +72,7 @@ void WriteBufferProxy::open(void)
 		_decay = nnp->get_value();
 	}
 
-	// Start the writer
+	// Start the writer.
 	_stop = false;
 	_write_thread = std::thread(&WriteBufferProxy::write_loop, this);
 }
@@ -95,6 +92,13 @@ printf("duuuuude close\n");
 	WriteThruProxy::close();
 }
 
+// It can happen that, if WriteThruProxy::storeAtom() is really slow,
+// that the buffering will outrun the real writer. Which will be bad.
+// So hard-code a max size of a million; if this is exceeded, stall
+// until the queue drains. A million atoms are a bit under 1GB RAM,
+// depending, so this should cover present-day systems.
+#define MAX_QUEUE_SIZE 1000123
+
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
 	if (synchronous)
@@ -103,6 +107,13 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 		return;
 	}
 	_atom_queue.insert(h);
+
+	// Stall if oversize
+	if (MAX_QUEUE_SIZE < _atom_queue.size())
+	{
+		while ((MAX_QUEUE_SIZE/4) < _atom_queue.size())
+			sleep(_decay);
+	}
 }
 
 // Two-step remove. Just pass the two steps down to the children.
@@ -122,6 +133,13 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
 	_value_queue.insert({atom, key});
+
+	// Stall if oversize
+	if (MAX_QUEUE_SIZE < _value_queue.size())
+	{
+		while ((MAX_QUEUE_SIZE/4) < _value_queue.size())
+			sleep(_decay);
+	}
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
