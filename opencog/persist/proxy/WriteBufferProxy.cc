@@ -46,9 +46,10 @@ WriteBufferProxy::~WriteBufferProxy()
 
 void WriteBufferProxy::init(void)
 {
-	// Default decay time of 30 seconds
-	_decay = 30.0;
+	// Default decay time of 60 seconds
+	_decay = 60.0;
 	_stop = false;
+	reset_stats();
 }
 
 // Get configuration from the ProxyParametersLink we live in.
@@ -95,10 +96,11 @@ void WriteBufferProxy::close(void)
 
 // It can happen that, if WriteThruProxy::storeAtom() is really slow,
 // that the buffering will outrun the real writer. Which will be bad.
-// So hard-code a max size of a million; if this is exceeded, stall
-// until the queue drains. A million atoms are a bit under 1GB RAM,
-// depending, so this should cover present-day systems.
-#define MAX_QUEUE_SIZE 1000123
+// So hard-code a max size of 16 million; if this is exceeded, stall
+// until the queue drains. A pair of Handles is about 64 bytes(?) so
+// 16 million key-value pairs are approx 1GB RAM, which seems
+// reasonable on present-day systems
+#define MAX_QUEUE_SIZE 16000123
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
@@ -108,11 +110,13 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 		return;
 	}
 	_atom_queue.insert(h);
+	_astore ++;
 
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _atom_queue.size())
 	{
-		while ((MAX_QUEUE_SIZE/4) < _atom_queue.size())
+		_nstalls ++;
+		while ((MAX_QUEUE_SIZE/2) < _atom_queue.size())
 			sleep(_decay);
 	}
 }
@@ -162,11 +166,13 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
 	_value_queue.insert({atom, key});
+	_vstore ++;
 
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _value_queue.size())
 	{
-		while ((MAX_QUEUE_SIZE/4) < _value_queue.size())
+		_nstalls ++;
+		while ((MAX_QUEUE_SIZE/2) < _value_queue.size())
 			sleep(_decay);
 	}
 }
@@ -190,6 +196,8 @@ void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
 
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
+	_nbars ++;
+
 	// Unconditionally drain both queues.
 	std::pair<Handle, Handle> pr;
 	while (_value_queue.try_get(pr))
@@ -204,21 +212,69 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 
 // ==============================================================
 
+void WriteBufferProxy::reset_stats(void)
+{
+	_nstalls = 0;
+	_nbars = 0;
+	_ndumps = 0;
+	_astore = 0;
+	_vstore = 0;
+	_mavg_in_atoms = 0.0;
+	_mavg_in_values = 0.0;
+	_mavg_qu_atoms = 0.0;
+	_mavg_qu_values = 0.0;
+	_mavg_out_atoms = 0.0;
+	_mavg_out_values = 0.0;
+	_mavg_load = 0.0;
+}
+
+std::string WriteBufferProxy::monitor(void)
+{
+	std::string rpt;
+	rpt += "Write Buffer Proxy: ";
+	rpt += "writes: " + std::to_string(_ndumps);
+	rpt += "   barriers: " + std::to_string(_nbars);
+	rpt += "   stalls: " + std::to_string(_nstalls);
+	rpt += "\n";
+
+	rpt += "Avg incoming, Atoms: " + std::to_string(_mavg_in_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_in_values);
+	rpt += "\n";
+
+	rpt += "Avg queue size, Atoms: " + std::to_string(_mavg_qu_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_qu_values);
+	rpt += "\n";
+
+	rpt += "Avg written, Atoms: " + std::to_string(_mavg_out_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_out_values);
+	rpt += "\n";
+
+	// Duty cycle is the amount of time that the write thread
+	// is actually writing, vs. the elapsed wallclock time.
+	// Anything over 100 will lead to buffer overflows.
+	rpt += "Timescale " + std::to_string(_decay) + " secs;  ";
+	rpt += "Duty cycle (load avg): " + std::to_string(_mavg_load);
+	rpt += "\n";
+
+	return rpt;
+}
+
+// ==============================================================
+
 // This runs in it's own thread, and drains a fraction of the queue.
 void WriteBufferProxy::write_loop(void)
 {
+	// Keep a moving average queue size. This is used to determine
+	// when the queue is almost empty, by historical standards, which
+	// is then used to flsuh out the remainer of the queue.
+	reset_stats();
+
 	using namespace std::chrono;
 
 	// Keep distinct clocks for atoms and values.
 	// That's because the first writer delays the second writer
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
-
-	// Keep a moving average queue size. This is used to determine
-	// when the queue is almost empty, by historical standards, which
-	// is then used to flsuh out the remainer of the queue.
-	double mavg_atoms = 0.0;
-	double mavg_vals = 0.0;
 
 #define POLLY 4.0
 	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
@@ -233,9 +289,12 @@ void WriteBufferProxy::write_loop(void)
 	{
 		if (0 < nappy) std::this_thread::sleep_for(milliseconds(nappy));
 
+		bool wrote = false;
 		steady_clock::time_point awake = steady_clock::now();
 		if (not _atom_queue.is_empty())
 		{
+			wrote = true;
+
 			// How long have we slept, in seconds?
 			double waited = duration_cast<duration<double>>(awake-atostart).count();
 			// What fraction of the decay time is that?
@@ -243,8 +302,8 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many Atoms awaiting to be written?
 			double qsz = (double) _atom_queue.size();
-#define WEI (0.3 / POLLY)
-			mavg_atoms = (1.0-WEI) * mavg_atoms + WEI * qsz;
+#define WEI (0.7 / POLLY)
+			_mavg_qu_atoms = (1.0-WEI) * _mavg_qu_atoms + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
@@ -252,7 +311,7 @@ void WriteBufferProxy::write_loop(void)
 			// Whats the min to write? The goal here is to not
 			// dribble out the tail, but to push it out, if its
 			// almost all gone anyway.
-			uint mwr = ceil(0.5 * minfrac * mavg_atoms);
+			uint mwr = ceil(0.5 * minfrac * _mavg_qu_atoms);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -263,8 +322,14 @@ void WriteBufferProxy::write_loop(void)
 				if (not got) break;
 				WriteThruProxy::storeAtom(atom);
 			}
+
+			// Collect performance stats
+			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
+			_astore = 0;
+			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * nwrite;
 		}
 		atostart = awake;
+
 
 		// re-measure, because above may have taken a long time.
 		steady_clock::time_point vwake = steady_clock::now();
@@ -272,6 +337,8 @@ void WriteBufferProxy::write_loop(void)
 		// cut-n-paste of above.
 		if (not _value_queue.is_empty())
 		{
+			wrote = true;
+
 			// How long have we slept, in seconds?
 			double waited = duration_cast<duration<double>>(vwake-valstart).count();
 			// What fraction of the decay time is that?
@@ -279,13 +346,13 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
-			mavg_vals = (1.0-WEI) * mavg_vals + WEI * qsz;
+			_mavg_qu_values = (1.0-WEI) * _mavg_qu_values + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
 			// Min to write.
-			uint mwr = ceil(0.5 * minfrac * mavg_vals);
+			uint mwr = ceil(0.5 * minfrac * _mavg_qu_values);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -296,6 +363,11 @@ void WriteBufferProxy::write_loop(void)
 				if (not got) break;
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
 			}
+
+			// Collect performance stats
+			_mavg_in_values = (1.0-WEI) * _mavg_in_values + WEI * _vstore;
+			_vstore = 0;
+			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * nwrite;
 		}
 		valstart = vwake;
 
@@ -306,6 +378,9 @@ void WriteBufferProxy::write_loop(void)
 		double left = ticker - used;
 		if (0.0 > left) left = 0.0;
 		nappy = floor(1000.0 * left);
+
+		if (wrote) _ndumps ++;
+		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / ticker;
 	}
 }
 

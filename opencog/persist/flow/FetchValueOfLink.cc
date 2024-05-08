@@ -70,7 +70,6 @@ ValuePtr FetchValueOfLink::execute(AtomSpace* as, bool silent)
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 	stnp->fetch_value(ah, ak, as);
-	stnp->barrier();
 
 	ValuePtr pap = ah->getValue(ak);
 	if (pap) return pap;

@@ -45,6 +45,12 @@
 ; the (barrier) command. For example:
 (barrier)
 
+; View performance stats:
+(display (monitor-storage (WriteBufferProxy "write buffer")))
+
+; There are also perf stats for the base server:
+(display (monitor-storage (RocksStorageNode "rocks:///tmp/foo.rdb")))
+
 ; Store the whole Atom, repeatedly.
 (for-each
 	(lambda (N)
