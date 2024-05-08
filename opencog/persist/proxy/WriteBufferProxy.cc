@@ -25,14 +25,17 @@
 
 using namespace opencog;
 
-WriteBufferProxy::WriteBufferProxy(const std::string&& name)
-	: WriteThruProxy(WRITE_BUFFER_PROXY_NODE, std::move(name))
+// One writeback queue should be enough.
+#define NUM_WB_QUEUES 1
+
+WriteBufferProxy::WriteBufferProxy(const std::string&& name) :
+	WriteThruProxy(WRITE_BUFFER_PROXY_NODE, std::move(name))
 {
 	init();
 }
 
-WriteBufferProxy::WriteBufferProxy(Type t, const std::string&& name)
-	: WriteThruProxy(t, std::move(name))
+WriteBufferProxy::WriteBufferProxy(Type t, const std::string&& name) :
+	WriteThruProxy(t, std::move(name))
 {
 	init();
 }
@@ -66,12 +69,17 @@ void WriteBufferProxy::open(void)
 
 	NumberNodePtr nnp = NumberNodeCast(hdecay);
 	_decay = nnp->get_value();
+printf("decay time now %f\n", _decay);
 }
 
 void WriteBufferProxy::close(void)
 {
 printf("you close\n");
 	WriteThruProxy::close();
+
+	barrier();
+	_atom_queue.close();
+	_value_queue.close();
 }
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)

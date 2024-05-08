@@ -95,9 +95,13 @@ cog_define
 
 Status & TODO
 -------------
-***Version 0.9.0*** -- Seems to work. Has not been stressed.
+***Version 0.9.1*** -- Seems to work. Has not been stressed.
 
 Some open TODO items:
+
+ * Move ProxyParametersLink from being a DefineLink to a StateLink.
+   DefineLinks are a freakin pain in the neck. However, they do force
+   the user to not screw around...
 
  * Multi-atomspace (frame) support is missing. Some basic work
    in this direction has been done, but it is not been completed.  The
@@ -110,24 +114,6 @@ Some open TODO items:
    the ability to limit to a max AtomSpace size, and the ability to
    expire old/stale data. This would allow the cache to be used with
    HUGE disk DB's, without the risk of running out of RAM.
-
- * Implement a "LazyWriter". This does NOT immediately write-out
-   (pass on) the Atoms that it is given, but instead sticks them into
-   a buffer (or queue).  The queue is drained at a later time, by
-   different threads.  Implementing this is actually easy: cogutils
-   already has a thread-safe `async_buffer.h` which provides a
-   write-back buffer: push stuff into it, and it eventually writes
-   out. Not clear how useful this really is, since RocksDB already
-   has a mess of threads to to stuff. On the other hand, maybe there's
-   some savings possible from moving the atomspace-rocks code so it
-   executes in the buffer, instead of slowing down the main AtomSpace
-   processing thread(s). On the other hand, the main AtomSpace
-   bottleneck appears to be the C++ `std::shard_ptr<>` template:
-   it uses atomic cache-line locks, and most CPU's seem to have a
-   shortage of these (they are in the CPU cache hardware. Proprietary
-   design; its hard to find out who has what, but it can be measured,
-   e.g. with the [AtomSpace benchmarks](https://github.com/opencog/benchmark).)
-   Might be worth a try, cause this is "easy".
 
  * Create a "Remembering Agent", which would be like the "CachingProxy
    in reverse" -- once RAM usage got too large, Atoms would be

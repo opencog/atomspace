@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_WRITE_BUFFER_PROXY_H
 #define _OPENCOG_WRITE_BUFFER_PROXY_H
 
+#include <opencog/util/concurrent_set.h>
 #include <opencog/persist/proxy/WriteThruProxy.h>
 
 namespace opencog
@@ -32,8 +33,12 @@ namespace opencog
  */
 class WriteBufferProxy : public WriteThruProxy
 {
-private:
+protected:
 	double _decay;
+	concurrent_set<Handle> _atom_queue;
+	concurrent_set<HandleSeq> _value_queue;
+
+private:
 	void init(void);
 
 public:
