@@ -1,39 +1,51 @@
 ;
 ; persist-buffer.scm -- Using WriteBufferProxy
 ;
-; This demo illustrates using the WriteBufferProxy to rate-limit writes
-; to disk (or network) by buffering up repeated writes of the same Atom,
-; and writing it out less frequently.
+; This demo illustrates the use of the WriteBufferProxy to coalesce
+; rapid repeated writes of the same Atom, so as to reduce overall
+; disk or network traffic.
 ;
 ; Please review the demos in `persist-proxy.scm` for a general overview.
 ;
-; Whenever some algorithm uses StorageNodes, it typically wants to save
-; changed Atoms to the disk. It is easiest to write such algos by just
-; changing the value; say, incremeneting it, and then writing. However,
-; if it is the same Atom (or small set of Atoms) being constantly
-; updated, this can become very inefficient. Buffering aims to solve
-; this, by holding off on writes for a while, so that if a value changes
-; repeatedly in a short period of time, the write is held off for a
-; while, and then, later, only the most recent copy is written out.
+; The easiest way to write Atomese algos that do stuff and store to disk,
+; is to just do stuff, and store to disk, and not worry about it. This
+; will typically result in some small set of Atoms being written to disk,
+; over and over, at a very fast rate. This can be a performance bottleneck.
+;
+; The WriteBufferProxy can be used to eliminate this bottlneck. This is
+; generally much easier than redesigning an algo to write less often.
+;
+; The WriteBufferProxy uses a time-delay mechanism to write out a portion
+; of the buffer over time. It uses an exponential decay strategy, so that
+; a portion exp(-t/T0) of the buffer is written out after t seconds. The
+; default time constant T0 is 30 seconds; this means that most writes in
+; a 30-second window will be buffered up, but about exp(-30/30)=exp(-1)=0.22
+; of them will be actually written out.
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
+; The default write buffer size is 30 seconds; change it to 42. This
+; parameter is optional, and can be skipped.
 (ProxyParameters
-	(WriteBufferProxy "wthru buffer")
+	(WriteBufferProxy "write buffer")
 	(RocksStorageNode "rocks:///tmp/foo.rdb")
-	(Number 4))
+	(Number 42))
 
-(cog-open (WriteBufferProxy "wthru buffer"))
+(cog-open (WriteBufferProxy "write buffer"))
 
-; Store a bunch of values in rapid succession
+; Store a bunch of values in rapid succession.
 (for-each
 	(lambda (N)
 		(cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 N))
 		(store-value (Concept "foo") (Predicate "bar")))
 	(iota 10))
 
-; Store the whole Atom, repeatedly
+; The buffer will drain itself, eventually. The drain can be forced with
+; the (barrier) command. For example:
+(barrier)
+
+; Store the whole Atom, repeatedly.
 (for-each
 	(lambda (N)
 		(cog-set-value! (Concept "foo") (Predicate "fizz")
@@ -41,8 +53,9 @@
 		(store-atom (Concept "foo")))
 	(iota 10))
 
-; Close the connection.
-(cog-close (WriteBufferProxy "wthru buffer"))
+; Close the connection. This will automatically flush the buffer,
+; before returning.
+(cog-close (WriteBufferProxy "write buffer"))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------
