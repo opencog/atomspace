@@ -80,15 +80,17 @@ printf("decay time now %f\n", _decay);
 
 void WriteBufferProxy::close(void)
 {
+	// Stop writing
 	_stop = true;
 	_write_thread.join();
 
-printf("you close\n");
-	WriteThruProxy::close();
-
+	// Drain the queues
 	barrier();
 	_atom_queue.close();
 	_value_queue.close();
+
+printf("you close\n");
+	WriteThruProxy::close();
 }
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
@@ -129,13 +131,27 @@ void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
 
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
+	// Drain both queues.
+	std::pair<Handle, Handle> pr;
+	while (_value_queue.try_get(pr))
+		WriteThruProxy::storeValue(pr.first, pr.second);
+
+	Handle atom;
+	while (_atom_queue.try_get(atom))
+		WriteThruProxy::storeAtom(atom, false);
+
 	WriteThruProxy::barrier(as);
 }
+
+// ==============================================================
 
 void WriteBufferProxy::write_loop(void)
 {
 	while(not _stop)
 	{
+		if (not _atom_queue.is_empty())
+		{
+		}
 usleep(1000);
 sleep(1);
 printf("duude write\n");
