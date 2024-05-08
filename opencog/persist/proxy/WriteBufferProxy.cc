@@ -91,7 +91,7 @@ void WriteBufferProxy::close(void)
 	_atom_queue.close();
 	_value_queue.close();
 
-printf("you close\n");
+printf("duuuuude close\n");
 	WriteThruProxy::close();
 }
 
@@ -102,7 +102,6 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 		WriteThruProxy::storeAtom(h, synchronous);
 		return;
 	}
-printf("yo store atom %s\n", h->to_string().c_str());
 	_atom_queue.insert(h);
 }
 
@@ -116,24 +115,26 @@ void WriteBufferProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
 void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
                                     bool recursive, bool extracted_ok)
 {
+// XXX FIXME, remove this from the concurrent set!
 	WriteThruProxy::postRemoveAtom(as, h, recursive, extracted_ok);
 }
 
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
-printf("yo store value %s\n", atom->to_string().c_str());
 	_value_queue.insert({atom, key});
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
-                            const ValuePtr& delta)
+                                   const ValuePtr& delta)
 {
+// XXX FIXME We can buffer these, if we do an atom increment
+// of what's in the queue.
 	WriteThruProxy::updateValue(atom, key, delta);
 }
 
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
-	// Drain both queues.
+	// Unconditionally drain both queues.
 	std::pair<Handle, Handle> pr;
 	while (_value_queue.try_get(pr))
 		WriteThruProxy::storeValue(pr.first, pr.second);
@@ -157,12 +158,15 @@ void WriteBufferProxy::write_loop(void)
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
 
-	// Keep a moving average queue size.
+	// Keep a moving average queue size. This is used to determine
+	// when the queue is almost empty, by historical standards, which
+	// is then used to flsuh out the remainer of the queue.
 	double mavg_atoms = 0.0;
 	double mavg_vals = 0.0;
 
 #define POLLY 4.0
 	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
+	// This is used to set a minimum write value, at half of this.
 	static const double minfrac = 1.0 - exp(-1.0/POLLY);
 
 	// After opening, sleep for the first fourth of the decay time.
@@ -181,17 +185,17 @@ void WriteBufferProxy::write_loop(void)
 			// What fraction of the decay time is that?
 			double frac = waited / _decay;
 
-			// How many Atoms awiting to be written?
+			// How many Atoms awaiting to be written?
 			double qsz = (double) _atom_queue.size();
-#define WEI 0.2
+#define WEI (0.3 / POLLY)
 			mavg_atoms = (1.0-WEI) * mavg_atoms + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
 			// Whats the min to write? The goal here is to not
-			// dribble out the tail, but to push it out if its almot all
-			// gone anyway.
+			// dribble out the tail, but to push it out, if its
+			// almost all gone anyway.
 			uint mwr = ceil(0.5 * minfrac * mavg_atoms);
 			if (nwrite < mwr) nwrite = mwr;
 
@@ -203,7 +207,6 @@ void WriteBufferProxy::write_loop(void)
 				if (not got) break;
 				WriteThruProxy::storeAtom(atom);
 			}
-printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
 		atostart = awake;
 
@@ -218,15 +221,14 @@ printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 			// What fraction of the decay time is that?
 			double frac = waited / _decay;
 
+			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
 			mavg_vals = (1.0-WEI) * mavg_vals + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
-			// Whats the min to write? The goal here is to not
-			// dribble out the tail, but to push it out if its almot all
-			// gone anyway.
+			// Min to write.
 			uint mwr = ceil(0.5 * minfrac * mavg_vals);
 			if (nwrite < mwr) nwrite = mwr;
 
@@ -238,7 +240,6 @@ printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 				if (not got) break;
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
 			}
-printf("duude vait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
 		valstart = vwake;
 
