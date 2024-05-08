@@ -41,6 +41,7 @@ protected:
 	std::thread _write_thread;
 	bool _stop;
 	void write_loop();
+	void erase_recursive(const Handle&);
 
 private:
 	void init(void);

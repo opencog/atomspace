@@ -123,10 +123,25 @@ void WriteBufferProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
 	WriteThruProxy::preRemoveAtom(as, h, recursive);
 }
 
-void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
-                                    bool recursive, bool extracted_ok)
+void WriteBufferProxy::erase_recursive(const Handle& h)
 {
-// XXX FIXME, remove this from the concurrent set!
+	// _value_queue.erase(h);
+	_atom_queue.erase(h);
+	IncomingSet ris(h->getIncomingSet());
+	for (const Handle& hi : ris)
+		erase_recursive(hi);
+}
+
+void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
+                                      bool recursive, bool extracted_ok)
+{
+	if (recursive)
+		erase_recursive(h);
+	else
+	{
+		// _value_queue.erase(h);
+		_atom_queue.erase(h);
+	}
 	WriteThruProxy::postRemoveAtom(as, h, recursive, extracted_ok);
 }
 
