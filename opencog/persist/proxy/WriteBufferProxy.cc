@@ -115,7 +115,7 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _atom_queue.size())
 	{
-		_nstall ++;
+		_nstalls ++;
 		while ((MAX_QUEUE_SIZE/2) < _atom_queue.size())
 			sleep(_decay);
 	}
@@ -171,7 +171,7 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _value_queue.size())
 	{
-		_nstall ++;
+		_nstalls ++;
 		while ((MAX_QUEUE_SIZE/2) < _value_queue.size())
 			sleep(_decay);
 	}
@@ -214,8 +214,9 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 
 void WriteBufferProxy::reset_stats(void)
 {
-	_nstall = 0;
+	_nstalls = 0;
 	_nbars = 0;
+	_ndumps = 0;
 	_astore = 0;
 	_vstore = 0;
 	_mavg_in_atoms = 0.0;
@@ -224,14 +225,16 @@ void WriteBufferProxy::reset_stats(void)
 	_mavg_qu_values = 0.0;
 	_mavg_out_atoms = 0.0;
 	_mavg_out_values = 0.0;
+	_mavg_load = 0.0;
 }
 
 std::string WriteBufferProxy::monitor(void)
 {
 	std::string rpt;
 	rpt += "Write Buffer Proxy: ";
-	rpt += "barrier calls: " + std::to_string(_nbars);
-	rpt += "   stalls: " + std::to_string(_nstall);
+	rpt += "writes: " + std::to_string(_ndumps);
+	rpt += "   barriers: " + std::to_string(_nbars);
+	rpt += "   stalls: " + std::to_string(_nstalls);
 	rpt += "\n";
 
 	rpt += "Avg incoming, Atoms: " + std::to_string(_mavg_in_atoms);
@@ -246,6 +249,9 @@ std::string WriteBufferProxy::monitor(void)
 	rpt += "    Values: " + std::to_string(_mavg_out_values);
 	rpt += "\n";
 
+	rpt += "Duty cycle (load avg): " + std::to_string(_mavg_load);
+	rpt += "\n";
+
 	return rpt;
 }
 
@@ -254,18 +260,17 @@ std::string WriteBufferProxy::monitor(void)
 // This runs in it's own thread, and drains a fraction of the queue.
 void WriteBufferProxy::write_loop(void)
 {
+	// Keep a moving average queue size. This is used to determine
+	// when the queue is almost empty, by historical standards, which
+	// is then used to flsuh out the remainer of the queue.
+	reset_stats();
+
 	using namespace std::chrono;
 
 	// Keep distinct clocks for atoms and values.
 	// That's because the first writer delays the second writer
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
-
-	// Keep a moving average queue size. This is used to determine
-	// when the queue is almost empty, by historical standards, which
-	// is then used to flsuh out the remainer of the queue.
-	_mavg_qu_atoms = 0.0;
-	_mavg_qu_values = 0.0;
 
 #define POLLY 4.0
 	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
@@ -280,9 +285,12 @@ void WriteBufferProxy::write_loop(void)
 	{
 		if (0 < nappy) std::this_thread::sleep_for(milliseconds(nappy));
 
+		bool wrote = false;
 		steady_clock::time_point awake = steady_clock::now();
 		if (not _atom_queue.is_empty())
 		{
+			wrote = true;
+
 			// How long have we slept, in seconds?
 			double waited = duration_cast<duration<double>>(awake-atostart).count();
 			// What fraction of the decay time is that?
@@ -290,7 +298,7 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many Atoms awaiting to be written?
 			double qsz = (double) _atom_queue.size();
-#define WEI (0.3 / POLLY)
+#define WEI (0.7 / POLLY)
 			_mavg_qu_atoms = (1.0-WEI) * _mavg_qu_atoms + WEI * qsz;
 
 			// How many should we write?
@@ -325,6 +333,8 @@ void WriteBufferProxy::write_loop(void)
 		// cut-n-paste of above.
 		if (not _value_queue.is_empty())
 		{
+			wrote = true;
+
 			// How long have we slept, in seconds?
 			double waited = duration_cast<duration<double>>(vwake-valstart).count();
 			// What fraction of the decay time is that?
@@ -364,6 +374,9 @@ void WriteBufferProxy::write_loop(void)
 		double left = ticker - used;
 		if (0.0 > left) left = 0.0;
 		nappy = floor(1000.0 * left);
+
+		if (wrote) _ndumps ++;
+		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / ticker;
 	}
 }
 

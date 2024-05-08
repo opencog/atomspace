@@ -37,8 +37,9 @@ class WriteBufferProxy : public WriteThruProxy
 private:
 	// Performance-monitoring stats
 	void reset_stats(void);
-	size_t _nstall;
+	size_t _nstalls;
 	size_t _nbars;
+	size_t _ndumps;
 	size_t _astore;
 	size_t _vstore;
 	double _mavg_in_atoms;
@@ -47,6 +48,7 @@ private:
 	double _mavg_qu_values;
 	double _mavg_out_atoms;
 	double _mavg_out_values;
+	double _mavg_load;
 
 protected:
 	double _decay;
