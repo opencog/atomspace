@@ -153,6 +153,10 @@ public:
 	 *
 	 * This method is more granular than `fetch_atom()`, as it
 	 * operates only on one particular key.
+	 *
+	 * This fetch is synchronous: the value at `key` will be updated
+	 * before this method returns. Existing code depends on this
+	 * synchronous behavior.
 	 */
 	Handle fetch_value(const Handle& atom, const Handle& key,
 	                   AtomSpace* = nullptr);
