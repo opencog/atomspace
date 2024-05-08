@@ -95,10 +95,11 @@ void WriteBufferProxy::close(void)
 
 // It can happen that, if WriteThruProxy::storeAtom() is really slow,
 // that the buffering will outrun the real writer. Which will be bad.
-// So hard-code a max size of a million; if this is exceeded, stall
-// until the queue drains. A million atoms are a bit under 1GB RAM,
-// depending, so this should cover present-day systems.
-#define MAX_QUEUE_SIZE 1000123
+// So hard-code a max size of 16 million; if this is exceeded, stall
+// until the queue drains. A pair of Handles is about 64 bytes(?) so
+// 16 million key-value pairs are approx 1GB RAM, which seems
+// reasonable on present-day systems
+#define MAX_QUEUE_SIZE 16000123
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
@@ -112,7 +113,7 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _atom_queue.size())
 	{
-		while ((MAX_QUEUE_SIZE/4) < _atom_queue.size())
+		while ((MAX_QUEUE_SIZE/2) < _atom_queue.size())
 			sleep(_decay);
 	}
 }
@@ -166,7 +167,7 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 	// Stall if oversize
 	if (MAX_QUEUE_SIZE < _value_queue.size())
 	{
-		while ((MAX_QUEUE_SIZE/4) < _value_queue.size())
+		while ((MAX_QUEUE_SIZE/2) < _value_queue.size())
 			sleep(_decay);
 	}
 }
