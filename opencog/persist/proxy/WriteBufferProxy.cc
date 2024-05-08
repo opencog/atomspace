@@ -231,7 +231,19 @@ std::string WriteBufferProxy::monitor(void)
 	std::string rpt;
 	rpt += "Write Buffer Proxy: ";
 	rpt += "barrier calls: " + std::to_string(_nbars);
-	rpt += "stalls: " + std::to_string(_nstall);
+	rpt += "   stalls: " + std::to_string(_nstall);
+	rpt += "\n";
+
+	rpt += "Avg incoming, Atoms: " + std::to_string(_mavg_in_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_in_values);
+	rpt += "\n";
+
+	rpt += "Avg queue size, Atoms: " + std::to_string(_mavg_qu_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_qu_values);
+	rpt += "\n";
+
+	rpt += "Avg written, Atoms: " + std::to_string(_mavg_out_atoms);
+	rpt += "    Values: " + std::to_string(_mavg_out_values);
 	rpt += "\n";
 
 	return rpt;
@@ -252,8 +264,8 @@ void WriteBufferProxy::write_loop(void)
 	// Keep a moving average queue size. This is used to determine
 	// when the queue is almost empty, by historical standards, which
 	// is then used to flsuh out the remainer of the queue.
-	double mavg_atoms = 0.0;
-	double mavg_vals = 0.0;
+	_mavg_qu_atoms = 0.0;
+	_mavg_qu_values = 0.0;
 
 #define POLLY 4.0
 	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
@@ -279,7 +291,7 @@ void WriteBufferProxy::write_loop(void)
 			// How many Atoms awaiting to be written?
 			double qsz = (double) _atom_queue.size();
 #define WEI (0.3 / POLLY)
-			mavg_atoms = (1.0-WEI) * mavg_atoms + WEI * qsz;
+			_mavg_qu_atoms = (1.0-WEI) * _mavg_qu_atoms + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
@@ -287,7 +299,7 @@ void WriteBufferProxy::write_loop(void)
 			// Whats the min to write? The goal here is to not
 			// dribble out the tail, but to push it out, if its
 			// almost all gone anyway.
-			uint mwr = ceil(0.5 * minfrac * mavg_atoms);
+			uint mwr = ceil(0.5 * minfrac * _mavg_qu_atoms);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -298,8 +310,14 @@ void WriteBufferProxy::write_loop(void)
 				if (not got) break;
 				WriteThruProxy::storeAtom(atom);
 			}
+
+			// Collect performance stats
+			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
+			_astore = 0;
+			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * nwrite;
 		}
 		atostart = awake;
+
 
 		// re-measure, because above may have taken a long time.
 		steady_clock::time_point vwake = steady_clock::now();
@@ -314,13 +332,13 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
-			mavg_vals = (1.0-WEI) * mavg_vals + WEI * qsz;
+			_mavg_qu_values = (1.0-WEI) * _mavg_qu_values + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
 			// Min to write.
-			uint mwr = ceil(0.5 * minfrac * mavg_vals);
+			uint mwr = ceil(0.5 * minfrac * _mavg_qu_values);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -331,6 +349,11 @@ void WriteBufferProxy::write_loop(void)
 				if (not got) break;
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
 			}
+
+			// Collect performance stats
+			_mavg_in_values = (1.0-WEI) * _mavg_in_values + WEI * _vstore;
+			_vstore = 0;
+			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * nwrite;
 		}
 		valstart = vwake;
 
