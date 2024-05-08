@@ -57,10 +57,10 @@ void WriteBufferProxy::open(void)
 	// Let ProxyNode::setup() do the basic work.
 	WriteThruProxy::open();
 
-	// Now fish out the rate parameter, if it is there.
+	// Now fish out the time decay const, if it is there.
 	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
 	const Handle& pxy = dli[0];
-	if (2 <= pxy->size())
+	if (2 < pxy->size())
 	{
 		const Handle& hdecay = pxy->getOutgoingAtom(2);
 		if (not hdecay->is_type(NUMBER_NODE))
