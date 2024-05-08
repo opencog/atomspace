@@ -125,7 +125,6 @@ void WriteBufferProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
 
 void WriteBufferProxy::erase_recursive(const Handle& h)
 {
-	// _value_queue.erase(h);
 	_atom_queue.erase(h);
 	IncomingSet ris(h->getIncomingSet());
 	for (const Handle& hi : ris)
@@ -139,9 +138,23 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 		erase_recursive(h);
 	else
 	{
-		// _value_queue.erase(h);
 		_atom_queue.erase(h);
 	}
+
+	// There is no effective way of doing a remove from the value queue,
+	// because we don't have the associated key. (We could try looping,
+	// but that would be a huge waste of CPU). So instead, just flush
+	// the queue. We could ask the user to call barrier(), but the user
+	// might forget, so we do it for them.
+	if (not _value_queue.is_empty())
+	{
+		std::pair<Handle, Handle> pr;
+		while (_value_queue.try_get(pr))
+			WriteThruProxy::storeValue(pr.first, pr.second);
+
+		WriteThruProxy::barrier();
+	}
+
 	WriteThruProxy::postRemoveAtom(as, h, recursive, extracted_ok);
 }
 
