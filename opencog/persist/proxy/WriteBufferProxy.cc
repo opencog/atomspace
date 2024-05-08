@@ -21,6 +21,7 @@
  */
 
 #include <chrono>
+#include <math.h>
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/persist/proxy/WriteBufferProxy.h>
@@ -156,8 +157,16 @@ void WriteBufferProxy::write_loop(void)
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
 
+	// Keep a moving average queue size.
+	double mavg_atoms = 0.0;
+	double mavg_vals = 0.0;
+
+#define POLLY 4.0
+	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
+	static const double minfrac = 1.0 - exp(-1.0/POLLY);
+
 	// After opening, sleep for the first fourth of the decay time.
-	uint nappy = 1 + (uint) (1000.0 * _decay / 4.0);
+	uint nappy = 1 + (uint) (1000.0 * _decay / POLLY);
 
 	while(not _stop)
 	{
@@ -172,21 +181,28 @@ void WriteBufferProxy::write_loop(void)
 			double frac = waited / _decay;
 
 			// How many Atoms awiting to be written?
-			size_t qsz = _atom_queue.size();
+			double qsz = (double) _atom_queue.size();
+#define WEI 0.2
+			mavg_atoms = (1.0-WEI) * mavg_atoms + WEI * qsz;
 
 			// How many should we write?
-			double to_write = frac * ((double) qsz);
-			uint nwrite = ceil(to_write);
+			uint nwrite = ceil(frac * qsz);
+
+			// Whats the min to write? The goal here is to not
+			// dribble out the tail, but to push it out if its almot all
+			// gone anyway.
+			uint mwr = ceil(0.5 * minfrac * mavg_atoms);
+			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			for (int i=0; i < nwrite; i++)
+			for (uint i=0; i < nwrite; i++)
 			{
 				Handle atom;
 				bool got = _atom_queue.try_get(atom);
 				if (not got) break;
 				WriteThruProxy::storeAtom(atom);
 			}
-printf("duude wait=%f qsz=%lu nwrite=%lu\n", waited, qsz, nwrite);
+printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
 		atostart = wake;
 
@@ -201,22 +217,27 @@ printf("duude wait=%f qsz=%lu nwrite=%lu\n", waited, qsz, nwrite);
 			// What fraction of the decay time is that?
 			double frac = waited / _decay;
 
-			// How many Atoms awiting to be written?
-			size_t qsz = _value_queue.size();
+			double qsz = (double) _value_queue.size();
+			mavg_vals = (1.0-WEI) * mavg_vals + WEI * qsz;
 
 			// How many should we write?
-			double to_write = frac * ((double) qsz);
-			uint nwrite = ceil(to_write);
+			uint nwrite = ceil(frac * qsz);
+
+			// Whats the min to write? The goal here is to not
+			// dribble out the tail, but to push it out if its almot all
+			// gone anyway.
+			uint mwr = ceil(0.5 * minfrac * mavg_vals);
+			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			for (int i=0; i < nwrite; i++)
+			for (uint i=0; i < nwrite; i++)
 			{
 				std::pair<Handle, Handle> kvp;
 				bool got = _value_queue.try_get(kvp);
 				if (not got) break;
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
 			}
-printf("duude vait=%f qsz=%lu nwrite=%lu\n", waited, qsz, nwrite);
+printf("duude vait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
 		valstart = wake;
 	}
