@@ -48,9 +48,10 @@ void WriteBufferProxy::init(void)
 {
 	// Default decay time of 30 seconds
 	_decay = 30.0;
+	_stop = false;
 }
 
-// Get our configuration from the ProxyParametersLink we live in.
+// Get configuration from the ProxyParametersLink we live in.
 void WriteBufferProxy::open(void)
 {
 	// Let ProxyNode::setup() do the basic work.
@@ -59,21 +60,29 @@ void WriteBufferProxy::open(void)
 	// Now fish out the rate parameter, if it is there.
 	IncomingSet dli(getIncomingSetByType(PROXY_PARAMETERS_LINK));
 	const Handle& pxy = dli[0];
-	if (2 == pxy->size()) return;
+	if (2 <= pxy->size())
+	{
+		const Handle& hdecay = pxy->getOutgoingAtom(2);
+		if (not hdecay->is_type(NUMBER_NODE))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting decay time in a NumberNode, got %s",
+				hdecay->to_short_string().c_str());
 
-	const Handle& hdecay = pxy->getOutgoingAtom(2);
-	if (not hdecay->is_type(NUMBER_NODE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting decay time in a NumberNode, got %s",
-			hdecay->to_short_string().c_str());
-
-	NumberNodePtr nnp = NumberNodeCast(hdecay);
-	_decay = nnp->get_value();
+		NumberNodePtr nnp = NumberNodeCast(hdecay);
+		_decay = nnp->get_value();
 printf("decay time now %f\n", _decay);
+	}
+
+	// Start the writer
+	_stop = false;
+	_write_thread = std::thread(&WriteBufferProxy::write_loop, this);
 }
 
 void WriteBufferProxy::close(void)
 {
+	_stop = true;
+	_write_thread.join();
+
 printf("you close\n");
 	WriteThruProxy::close();
 
@@ -84,8 +93,13 @@ printf("you close\n");
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
+	if (synchronous)
+	{
+		WriteThruProxy::storeAtom(h, synchronous);
+		return;
+	}
 printf("yo store atom %s\n", h->to_string().c_str());
-	WriteThruProxy::storeAtom(h, synchronous);
+	_atom_queue.insert(h);
 }
 
 // Two-step remove. Just pass the two steps down to the children.
@@ -104,7 +118,7 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
 printf("yo store value %s\n", atom->to_string().c_str());
-	WriteThruProxy::storeValue(atom, key);
+	_value_queue.insert({atom, key});
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
@@ -116,6 +130,16 @@ void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
 	WriteThruProxy::barrier(as);
+}
+
+void WriteBufferProxy::write_loop(void)
+{
+	while(not _stop)
+	{
+usleep(1000);
+sleep(1);
+printf("duude write\n");
+	}
 }
 
 DEFINE_NODE_FACTORY(WriteBufferProxy, WRITE_BUFFER_PROXY_NODE)
