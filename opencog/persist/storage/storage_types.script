@@ -53,10 +53,12 @@ WRITE_THRU_PROXY_NODE <- PROXY_NODE
 // Combo of ReadtThru and WriteThru
 READ_WRITE_PROXY_NODE <- PROXY_NODE
 
-// Write buffer Proxy. Deduplicates multiple writes by maintaining a
+// WriteBufferProxy. Deduplicates multiple writes by maintaining a
 // pending buffer. Goal is to avoid excess writes of the same atom in
-// a short time-frame.
-WRITE_BUFFER_PROXY_NODE <- PROXY_NODE
+// a short time-frame. Inherits from WriteThruProxy, because it also
+// needs to maintain a list of targets, so may as well use WriteThru
+// for that.
+WRITE_BUFFER_PROXY_NODE <- WRITE_THRU_PROXY_NODE
 
 // Read-caching Proxy. Goes to Storage only if the requested item is
 // not in the local AtomSpace. Configurable to expire the data after

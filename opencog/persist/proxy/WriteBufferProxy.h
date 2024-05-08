@@ -23,17 +23,16 @@
 #ifndef _OPENCOG_WRITE_BUFFER_PROXY_H
 #define _OPENCOG_WRITE_BUFFER_PROXY_H
 
-#include <opencog/persist/proxy/ProxyNode.h>
+#include <opencog/persist/proxy/WriteThruProxy.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class WriteBufferProxy : public ProxyNode
+class WriteBufferProxy : public WriteThruProxy
 {
 private:
-	StorageNodeSeq _targets;
 	void init(void);
 
 public:
@@ -43,16 +42,12 @@ public:
 
 	// ----------------------------------------------------------------
 	virtual void open(void);
-	virtual void close(void);
 	virtual bool connected(void) { return  0 < _targets.size(); }
 
 protected:
 	// ----------------------------------------------------------------
 	// BackingStore virtuals.
 
-	virtual void getAtom(const Handle&) {}
-	virtual void fetchIncomingSet(AtomSpace*, const Handle&) {}
-	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type) {}
 	virtual void storeAtom(const Handle&, bool synchronous = false);
 	virtual void preRemoveAtom(AtomSpace*, const Handle&, bool recursive);
 	virtual void postRemoveAtom(AtomSpace*, const Handle&,
@@ -60,11 +55,7 @@ protected:
 	virtual void storeValue(const Handle& atom, const Handle& key);
 	virtual void updateValue(const Handle& atom, const Handle& key,
 	                         const ValuePtr& delta);
-	virtual void loadValue(const Handle& atom, const Handle& key) {}
 
-	virtual void loadType(AtomSpace*, Type) {}
-	virtual void loadAtomSpace(AtomSpace*) {}
-	virtual void storeAtomSpace(const AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr);
 
 public:

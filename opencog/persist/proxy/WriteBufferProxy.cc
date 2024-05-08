@@ -25,13 +25,13 @@
 using namespace opencog;
 
 WriteBufferProxy::WriteBufferProxy(const std::string&& name)
-	: ProxyNode(WRITE_BUFFER_PROXY_NODE, std::move(name))
+	: WriteThruProxy(WRITE_BUFFER_PROXY_NODE, std::move(name))
 {
 	init();
 }
 
 WriteBufferProxy::WriteBufferProxy(Type t, const std::string&& name)
-	: ProxyNode(t, std::move(name))
+	: WriteThruProxy(t, std::move(name))
 {
 	init();
 }
@@ -51,65 +51,41 @@ void WriteBufferProxy::init(void)
 // Get our configuration from the DefineLink we live in.
 void WriteBufferProxy::open(void)
 {
-	StorageNodeSeq sns = setup();
-	_targets.swap(sns);
-
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->open();
-}
-
-void WriteBufferProxy::close(void)
-{
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->close();
-
-	// Get rid of them for good. The `connected()` method needs this.
-	_targets.resize(0);
+	WriteThruProxy::open();
 }
 
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->store_atom(h);
-
-	if (not synchronous) return;
-
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->barrier();
+	WriteThruProxy::storeAtom(h, synchronous);
 }
 
 // Two-step remove. Just pass the two steps down to the children.
 void WriteBufferProxy::preRemoveAtom(AtomSpace* as, const Handle& h,
-                                   bool recursive)
+                                     bool recursive)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->preRemoveAtom(as, h, recursive);
+	WriteThruProxy::preRemoveAtom(as, h, recursive);
 }
 
 void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
                                     bool recursive, bool extracted_ok)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->postRemoveAtom(as, h, recursive, extracted_ok);
+	WriteThruProxy::postRemoveAtom(as, h, recursive, extracted_ok);
 }
 
 void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->store_value(atom, key);
+	WriteThruProxy::storeValue(atom, key);
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
                             const ValuePtr& delta)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->update_value(atom, key, delta);
+	WriteThruProxy::updateValue(atom, key, delta);
 }
 
 void WriteBufferProxy::barrier(AtomSpace* as)
 {
-	for (const StorageNodePtr& stnp : _targets)
-		stnp->barrier(as);
+	WriteThruProxy::barrier(as);
 }
 
 DEFINE_NODE_FACTORY(WriteBufferProxy, WRITE_BUFFER_PROXY_NODE)

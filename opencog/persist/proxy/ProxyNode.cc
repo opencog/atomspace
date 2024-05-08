@@ -88,7 +88,7 @@ StorageNodeSeq ProxyNode::setup(void)
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return stolist;
 
-	// Don't know what to do if there are two or more paramter sets.
+	// Don't know what to do if there are two or more parameter sets.
 	if (1 != dli.size())
 	{
 		throw SyntaxException(TRACE_INFO,
@@ -116,7 +116,7 @@ StorageNodeSeq ProxyNode::setup(void)
 		if (nullptr == stnp)
 		{
 			// If its a StorageNode but the cast failed, that
-			// means the type defintion was not loaded. Print a
+			// means the type definition was not loaded. Print a
 			// user-friendly error message for this case.
 			if (nameserver().isA(h->get_type(), STORAGE_NODE))
 			{
