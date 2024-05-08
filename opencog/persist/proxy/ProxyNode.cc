@@ -79,6 +79,20 @@ std::string ProxyNode::monitor(void)
 }
 
 // Get our configuration from the DefineLink we live in.
+// Hmm, perhaps this should be a StateLink?
+//
+// XXX FIXME. Using this ProxyParametersLink thing is a kind of
+// cheesy hack, to pass parameters to the ProxyNode. It vaguely
+// resembles the structure of an ExecutionLink, but instead of
+// writing (Execution (Predicate "foo") (List (args...)))
+// we write (ProxyParameters (Proxy "foo") (List (params...)))
+// Except that we don't have a C++ class for ProxyParameters
+// and it is not executable. So ... I dunno. I'm not happy with
+// this design.
+//
+// More generally there is the work in sensory to create a DTD/IDL
+// to describe parameters. The design work there is not done, but
+// when it is, this should convert to that.
 StorageNodeSeq ProxyNode::setup(void)
 {
 	StorageNodeSeq stolist;
@@ -88,7 +102,7 @@ StorageNodeSeq ProxyNode::setup(void)
 	// We could throw an error here ... or we can just no-op.
 	if (0 == dli.size()) return stolist;
 
-	// Don't know what to do if there are two or more paramter sets.
+	// Don't know what to do if there are two or more parameter sets.
 	if (1 != dli.size())
 	{
 		throw SyntaxException(TRACE_INFO,
@@ -97,7 +111,7 @@ StorageNodeSeq ProxyNode::setup(void)
 	}
 
 	// If there is no ListLink, then just grab that.
-	Handle params = dli[0]->getOutgoingAtom(1);
+	const Handle& params = dli[0]->getOutgoingAtom(1);
 	if (params->is_type(STORAGE_NODE))
 	{
 		stolist.emplace_back(StorageNodeCast(params));
@@ -116,7 +130,7 @@ StorageNodeSeq ProxyNode::setup(void)
 		if (nullptr == stnp)
 		{
 			// If its a StorageNode but the cast failed, that
-			// means the type defintion was not loaded. Print a
+			// means the type definition was not loaded. Print a
 			// user-friendly error message for this case.
 			if (nameserver().isA(h->get_type(), STORAGE_NODE))
 			{

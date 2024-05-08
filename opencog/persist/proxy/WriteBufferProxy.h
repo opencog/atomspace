@@ -1,5 +1,5 @@
 /*
- * opencog/persist/proxy/WriteThruProxy.h
+ * opencog/persist/proxy/WriteBufferProxy.h
  *
  * Copyright (C) 2022 Linas Vepstas
  * All Rights Reserved
@@ -20,28 +20,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_WRITE_THRU_PROXY_H
-#define _OPENCOG_WRITE_THRU_PROXY_H
+#ifndef _OPENCOG_WRITE_BUFFER_PROXY_H
+#define _OPENCOG_WRITE_BUFFER_PROXY_H
 
-#include <opencog/persist/proxy/ProxyNode.h>
+#include <thread>
+#include <opencog/util/concurrent_set.h>
+#include <opencog/persist/proxy/WriteThruProxy.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class WriteThruProxy : public ProxyNode
+class WriteBufferProxy : public WriteThruProxy
 {
 protected:
-	StorageNodeSeq _targets;
+	double _decay;
+	concurrent_set<Handle> _atom_queue;
+	concurrent_set<std::pair<Handle,Handle>> _value_queue;
+	std::thread _write_thread;
+	bool _stop;
+	void write_loop();
+	void erase_recursive(const Handle&);
 
 private:
 	void init(void);
 
 public:
-	WriteThruProxy(const std::string&&);
-	WriteThruProxy(Type, const std::string&&);
-	virtual ~WriteThruProxy();
+	WriteBufferProxy(const std::string&&);
+	WriteBufferProxy(Type, const std::string&&);
+	virtual ~WriteBufferProxy();
 
 	// ----------------------------------------------------------------
 	virtual void open(void);
@@ -52,9 +60,6 @@ protected:
 	// ----------------------------------------------------------------
 	// BackingStore virtuals.
 
-	virtual void getAtom(const Handle&) {}
-	virtual void fetchIncomingSet(AtomSpace*, const Handle&) {}
-	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type) {}
 	virtual void storeAtom(const Handle&, bool synchronous = false);
 	virtual void preRemoveAtom(AtomSpace*, const Handle&, bool recursive);
 	virtual void postRemoveAtom(AtomSpace*, const Handle&,
@@ -62,21 +67,17 @@ protected:
 	virtual void storeValue(const Handle& atom, const Handle& key);
 	virtual void updateValue(const Handle& atom, const Handle& key,
 	                         const ValuePtr& delta);
-	virtual void loadValue(const Handle& atom, const Handle& key) {}
 
-	virtual void loadType(AtomSpace*, Type) {}
-	virtual void loadAtomSpace(AtomSpace*) {}
-	virtual void storeAtomSpace(const AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr);
 
 public:
 	static Handle factory(const Handle&);
 };
 
-NODE_PTR_DECL(WriteThruProxy)
-#define createWriteThruProxy CREATE_DECL(WriteThruProxy)
+NODE_PTR_DECL(WriteBufferProxy)
+#define createWriteBufferProxy CREATE_DECL(WriteBufferProxy)
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_WRITE_THRU_PROXY_H
+#endif // _OPENCOG_WRITE_BUFFER_PROXY_H

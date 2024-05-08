@@ -63,6 +63,9 @@
 ;      is more than one target, the write will be made to all of
 ;      them.
 ;
+; * WriteBufferProxy -- Delays repeated write requests of the same
+;      atom, and only later writes the most recent value.
+;
 ; * ReadWriteProxy -- Combines reading and writing into one. It does
 ;      NOT do mirroring or load-balancing; do get that, just chain in
 ;      the above!
