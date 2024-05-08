@@ -173,9 +173,18 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
                                    const ValuePtr& delta)
 {
-// XXX FIXME We can buffer these, if we do an atom increment
-// of what's in the queue.
-	WriteThruProxy::updateValue(atom, key, delta);
+	// XXX FIXME. Buffering these naively, like this, voilates the
+	// intent of how this method should work. However, for the
+	// RocksStorageNode, doing this is harmless. And the
+	// CogStorageNode is just a pass-through. So there are no
+	// existing StorageNodes that actually depend on delta.
+	// (The Value at key has already been atomically incremented,
+	// by the time we get here.) So just buffer these like regular
+	// storeValue() calls. This may result in incorrect behavior
+	// in some futuristic scenario that involves StorageNodes that
+	// don't yet exist. But I'm not gonna write complicated code to
+	// handle some hypothetical future case that may never exist.
+	storeValue(atom, key);
 }
 
 void WriteBufferProxy::barrier(AtomSpace* as)
