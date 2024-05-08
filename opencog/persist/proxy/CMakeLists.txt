@@ -10,6 +10,7 @@ ADD_LIBRARY (persist-proxy
 	ReadThruProxy.cc
 	ReadWriteProxy.cc
 	SequentialReadProxy.cc
+	WriteBufferProxy.cc
 	WriteThruProxy.cc
 )
 
@@ -40,6 +41,7 @@ INSTALL (FILES
 	ReadThruProxy.h
 	ReadWriteProxy.h
 	SequentialReadProxy.h
+	WriteBufferProxy.h
 	WriteThruProxy.h
 	DESTINATION "include/opencog/persist/proxy"
 )
