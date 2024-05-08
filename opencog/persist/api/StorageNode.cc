@@ -62,7 +62,7 @@ void StorageNode::set_proxy(const Handle&)
 
 std::string StorageNode::monitor(void)
 {
-	return "This StorageNode does not implement a monitor.";
+	return "This StorageNode does not implement a monitor.\n";
 }
 
 // ====================================================================
