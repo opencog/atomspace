@@ -49,7 +49,7 @@ WriteBufferProxy::~WriteBufferProxy()
 void WriteBufferProxy::init(void)
 {
 	// Default decay time of 30 seconds
-	_decay_ms = 30 * 1000;
+	_decay = 30.0;
 	_stop = false;
 }
 
@@ -71,7 +71,7 @@ void WriteBufferProxy::open(void)
 				hdecay->to_short_string().c_str());
 
 		NumberNodePtr nnp = NumberNodeCast(hdecay);
-		_decay_ms = (unsigned long int) (1000.0 * nnp->get_value());
+		_decay = nnp->get_value();
 	}
 
 	// Start the writer
@@ -151,22 +151,74 @@ void WriteBufferProxy::write_loop(void)
 {
 	using namespace std::chrono;
 
-	steady_clock::time_point start = steady_clock::now();
+	// Keep distinct clocks for atoms and values.
+	// That's because the first writer delays the second writer
+	steady_clock::time_point atostart = steady_clock::now();
+	steady_clock::time_point valstart = atostart;
 
 	// After opening, sleep for the first fourth of the decay time.
-	unsigned long int nappy = 1 + _decay_ms / 4;
+	uint nappy = 1 + (uint) (1000.0 * _decay / 4.0);
 
 	while(not _stop)
 	{
 		std::this_thread::sleep_for(milliseconds(nappy));
+
+		steady_clock::time_point wake = steady_clock::now();
 		if (not _atom_queue.is_empty())
 		{
+			// How long have we slept, in seconds?
+			double waited = duration_cast<duration<double>>(wake-atostart).count();
+			// What fraction of the decay time is that?
+			double frac = waited / _decay;
+
+			// How many Atoms awiting to be written?
 			size_t qsz = _atom_queue.size();
-printf("duude qsz=%lu\n", qsz);
+
+			// How many should we write?
+			double to_write = frac * ((double) qsz);
+			uint nwrite = ceil(to_write);
+
+			// Store that many
+			for (int i=0; i < nwrite; i++)
+			{
+				Handle atom;
+				bool got = _atom_queue.try_get(atom);
+				if (not got) break;
+				WriteThruProxy::storeAtom(atom);
+			}
+printf("duude wait=%f qsz=%lu nwrite=%lu\n", waited, qsz, nwrite);
 		}
-	steady_clock::time_point wake = steady_clock::now();
-	duration<double> time_span = duration_cast<duration<double>>(wake-start);
-printf("duude write %f\n", time_span.count());
+		atostart = wake;
+
+		// re-measure, because above may have taken a long time.
+		wake = steady_clock::now();
+
+		// cut-n-paste of above.
+		if (not _value_queue.is_empty())
+		{
+			// How long have we slept, in seconds?
+			double waited = duration_cast<duration<double>>(wake-valstart).count();
+			// What fraction of the decay time is that?
+			double frac = waited / _decay;
+
+			// How many Atoms awiting to be written?
+			size_t qsz = _value_queue.size();
+
+			// How many should we write?
+			double to_write = frac * ((double) qsz);
+			uint nwrite = ceil(to_write);
+
+			// Store that many
+			for (int i=0; i < nwrite; i++)
+			{
+				std::pair<Handle, Handle> kvp;
+				bool got = _value_queue.try_get(kvp);
+				if (not got) break;
+				WriteThruProxy::storeValue(kvp.first, kvp.second);
+			}
+printf("duude vait=%f qsz=%lu nwrite=%lu\n", waited, qsz, nwrite);
+		}
+		valstart = wake;
 	}
 }
 

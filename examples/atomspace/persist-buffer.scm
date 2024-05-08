@@ -22,7 +22,7 @@
 (ProxyParameters
 	(WriteBufferProxy "wthru buffer")
 	(RocksStorageNode "rocks:///tmp/foo.rdb")
-	(Number 42))
+	(Number 4))
 
 (cog-open (WriteBufferProxy "wthru buffer"))
 
