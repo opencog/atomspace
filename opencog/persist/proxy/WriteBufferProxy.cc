@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <chrono>
+
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/persist/proxy/WriteBufferProxy.h>
 
@@ -47,7 +49,7 @@ WriteBufferProxy::~WriteBufferProxy()
 void WriteBufferProxy::init(void)
 {
 	// Default decay time of 30 seconds
-	_decay = 30.0;
+	_decay_ms = 30 * 1000;
 	_stop = false;
 }
 
@@ -69,8 +71,7 @@ void WriteBufferProxy::open(void)
 				hdecay->to_short_string().c_str());
 
 		NumberNodePtr nnp = NumberNodeCast(hdecay);
-		_decay = nnp->get_value();
-printf("decay time now %f\n", _decay);
+		_decay_ms = (unsigned long int) (1000.0 * nnp->get_value());
 	}
 
 	// Start the writer
@@ -145,16 +146,27 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 
 // ==============================================================
 
+// This runs in it's own thread, and drains a fraction of the queue.
 void WriteBufferProxy::write_loop(void)
 {
+	using namespace std::chrono;
+
+	steady_clock::time_point start = steady_clock::now();
+
+	// After opening, sleep for the first fourth of the decay time.
+	unsigned long int nappy = 1 + _decay_ms / 4;
+
 	while(not _stop)
 	{
+		std::this_thread::sleep_for(milliseconds(nappy));
 		if (not _atom_queue.is_empty())
 		{
+			size_t qsz = _atom_queue.size();
+printf("duude qsz=%lu\n", qsz);
 		}
-usleep(1000);
-sleep(1);
-printf("duude write\n");
+	steady_clock::time_point wake = steady_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(wake-start);
+printf("duude write %f\n", time_span.count());
 	}
 }
 

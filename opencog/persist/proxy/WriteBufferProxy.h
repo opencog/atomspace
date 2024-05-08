@@ -35,7 +35,7 @@ namespace opencog
 class WriteBufferProxy : public WriteThruProxy
 {
 protected:
-	double _decay;
+	unsigned long int _decay_ms;
 	concurrent_set<Handle> _atom_queue;
 	concurrent_set<std::pair<Handle,Handle>> _value_queue;
 	std::thread _write_thread;
