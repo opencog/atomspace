@@ -166,17 +166,18 @@ void WriteBufferProxy::write_loop(void)
 	static const double minfrac = 1.0 - exp(-1.0/POLLY);
 
 	// After opening, sleep for the first fourth of the decay time.
-	uint nappy = 1 + (uint) (1000.0 * _decay / POLLY);
+	double ticker = _decay / POLLY;
+	uint nappy = 1 + ceil(1000.0 * ticker);
 
 	while(not _stop)
 	{
-		std::this_thread::sleep_for(milliseconds(nappy));
+		if (0 < nappy) std::this_thread::sleep_for(milliseconds(nappy));
 
-		steady_clock::time_point wake = steady_clock::now();
+		steady_clock::time_point awake = steady_clock::now();
 		if (not _atom_queue.is_empty())
 		{
 			// How long have we slept, in seconds?
-			double waited = duration_cast<duration<double>>(wake-atostart).count();
+			double waited = duration_cast<duration<double>>(awake-atostart).count();
 			// What fraction of the decay time is that?
 			double frac = waited / _decay;
 
@@ -204,16 +205,16 @@ void WriteBufferProxy::write_loop(void)
 			}
 printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
-		atostart = wake;
+		atostart = awake;
 
 		// re-measure, because above may have taken a long time.
-		wake = steady_clock::now();
+		steady_clock::time_point vwake = steady_clock::now();
 
 		// cut-n-paste of above.
 		if (not _value_queue.is_empty())
 		{
 			// How long have we slept, in seconds?
-			double waited = duration_cast<duration<double>>(wake-valstart).count();
+			double waited = duration_cast<duration<double>>(vwake-valstart).count();
 			// What fraction of the decay time is that?
 			double frac = waited / _decay;
 
@@ -239,7 +240,15 @@ printf("duude wait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 			}
 printf("duude vait=%f qsz=%f nwrite=%u\n", waited, qsz, nwrite);
 		}
-		valstart = wake;
+		valstart = vwake;
+
+		// How much time have we used up so far?
+		steady_clock::time_point elap = steady_clock::now();
+		double used = duration_cast<duration<double>>(elap-awake).count();
+		// How much time do we have left to sleep?
+		double left = ticker - used;
+		if (0.0 > left) left = 0.0;
+		nappy = floor(1000.0 * left);
 	}
 }
 
