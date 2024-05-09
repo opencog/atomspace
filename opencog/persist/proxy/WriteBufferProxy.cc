@@ -210,8 +210,8 @@ void WriteBufferProxy::reset_stats(void)
 	_vstore = 0;
 	_mavg_in_atoms = 0.0;
 	_mavg_in_values = 0.0;
-	_mavg_qu_atoms = 0.0;
-	_mavg_qu_values = 0.0;
+	_mavg_buf_atoms = 0.0;
+	_mavg_buf_values = 0.0;
 	_mavg_out_atoms = 0.0;
 	_mavg_out_values = 0.0;
 	_mavg_load = 0.0;
@@ -228,15 +228,15 @@ std::string WriteBufferProxy::monitor(void)
 
 	// std::to_string prints six decimal places but we want zero.
 #define PFLO(X) std::to_string((int)round(X))
-	rpt += "Avg incoming, Atoms: " + PFLO(_mavg_in_atoms);
+	rpt += "Avg inflow, Atoms: " + PFLO(_mavg_in_atoms);
 	rpt += "    Values: " + PFLO(_mavg_in_values);
 	rpt += "\n";
 
-	rpt += "Avg queue size, Atoms: " + PFLO(_mavg_qu_atoms);
-	rpt += "    Values: " + PFLO(_mavg_qu_values);
+	rpt += "Avg buffer size, Atoms: " + PFLO(_mavg_buf_atoms);
+	rpt += "    Values: " + PFLO(_mavg_buf_values);
 	rpt += "\n";
 
-	rpt += "Avg written, Atoms: " + PFLO(_mavg_out_atoms);
+	rpt += "Avg outflow, Atoms: " + PFLO(_mavg_out_atoms);
 	rpt += "    Values: " + PFLO(_mavg_out_values);
 	rpt += "\n";
 
@@ -301,7 +301,7 @@ void WriteBufferProxy::write_loop(void)
 
 			// Moving average of the last ten writes. Is that OK?
 #define WEI 0.1
-			_mavg_qu_atoms = (1.0-WEI) * _mavg_qu_atoms + WEI * qsz;
+			_mavg_buf_atoms = (1.0-WEI) * _mavg_buf_atoms + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
@@ -309,7 +309,7 @@ void WriteBufferProxy::write_loop(void)
 			// Whats the min to write? The goal here is to not
 			// dribble out the tail, but to push it out, if its
 			// almost all gone anyway.
-			uint mwr = ceil(0.5 * minfrac * _mavg_qu_atoms);
+			uint mwr = ceil(0.5 * minfrac * _mavg_buf_atoms);
 			if (mwr < 1000) mwr = 1000;
 			if (nwrite < mwr) nwrite = mwr;
 
@@ -346,13 +346,13 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
-			_mavg_qu_values = (1.0-WEI) * _mavg_qu_values + WEI * qsz;
+			_mavg_buf_values = (1.0-WEI) * _mavg_buf_values + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
 			// Min to write.
-			uint mwr = ceil(0.5 * minfrac * _mavg_qu_values);
+			uint mwr = ceil(0.5 * minfrac * _mavg_buf_values);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many

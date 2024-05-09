@@ -44,8 +44,8 @@ private:
 	size_t _vstore;
 	double _mavg_in_atoms;
 	double _mavg_in_values;
-	double _mavg_qu_atoms;
-	double _mavg_qu_values;
+	double _mavg_buf_atoms;
+	double _mavg_buf_values;
 	double _mavg_out_atoms;
 	double _mavg_out_values;
 	double _mavg_load;
