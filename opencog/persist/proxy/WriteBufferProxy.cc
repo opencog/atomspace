@@ -310,6 +310,7 @@ void WriteBufferProxy::write_loop(void)
 			// dribble out the tail, but to push it out, if its
 			// almost all gone anyway.
 			uint mwr = ceil(0.5 * minfrac * _mavg_qu_atoms);
+			if (mwr < 1000) mwr = 1000;
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
