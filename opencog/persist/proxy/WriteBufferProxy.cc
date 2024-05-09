@@ -314,7 +314,8 @@ void WriteBufferProxy::write_loop(void)
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			for (uint i=0; i < nwrite; i++)
+			uint i=0;
+			for (; i < nwrite; i++)
 			{
 				Handle atom;
 				// Try-get from the back end every now and then.
@@ -326,10 +327,9 @@ void WriteBufferProxy::write_loop(void)
 			// Collect performance stats
 			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
 			_astore = 0;
-			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * nwrite;
+			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * (++i);
 		}
 		atostart = awake;
-
 
 		// re-measure, because above may have taken a long time.
 		steady_clock::time_point vwake = steady_clock::now();
@@ -356,7 +356,8 @@ void WriteBufferProxy::write_loop(void)
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			for (uint i=0; i < nwrite; i++)
+			uint i = 0;
+			for (; i < nwrite; i++)
 			{
 				std::pair<Handle, Handle> kvp;
 				// Try-get from the back end every now and then.
@@ -368,7 +369,7 @@ void WriteBufferProxy::write_loop(void)
 			// Collect performance stats
 			_mavg_in_values = (1.0-WEI) * _mavg_in_values + WEI * _vstore;
 			_vstore = 0;
-			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * nwrite;
+			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * (++i);
 		}
 		valstart = vwake;
 
