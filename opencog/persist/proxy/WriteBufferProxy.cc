@@ -317,7 +317,8 @@ void WriteBufferProxy::write_loop(void)
 			for (uint i=0; i < nwrite; i++)
 			{
 				Handle atom;
-				bool got = _atom_queue.try_get(atom);
+				// Try-get from the back end every now and then.
+				bool got = _atom_queue.try_get(atom, 0 == i%8);
 				if (not got) break;
 				WriteThruProxy::storeAtom(atom);
 			}
@@ -358,7 +359,8 @@ void WriteBufferProxy::write_loop(void)
 			for (uint i=0; i < nwrite; i++)
 			{
 				std::pair<Handle, Handle> kvp;
-				bool got = _value_queue.try_get(kvp);
+				// Try-get from the back end every now and then.
+				bool got = _value_queue.try_get(kvp, 0 == i%8);
 				if (not got) break;
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
 			}
