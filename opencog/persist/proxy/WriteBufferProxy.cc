@@ -391,6 +391,7 @@ void WriteBufferProxy::write_loop(void)
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
 			_high_water_mark = worst * _decay / ticker;
+			_nstalls ++;
 		}
 
 		if (wrote) _ndumps ++;
