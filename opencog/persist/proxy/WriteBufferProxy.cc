@@ -396,12 +396,24 @@ void WriteBufferProxy::write_loop(void)
 			// _mavg_out is how many we are able to actually write,
 			// per "used" interval. Scaling sets a buffer size that
 			// should be able to clear at exactly that rate. So this
-			// should be able to hold the duty cycle to 1.0 as the
-			// mean value.
+			// should be able to hold the duty cycle to #define DUTY
+			// as the mean value. By setting DUTY_CYCLE to greater
+			// than one, this will keep the write rate saturated
+			// at max possible, so that we are *always* stalling.
+			// And that's OK, because the _high_water_mark will
+			// rate limit the inflow. And the average buffer size
+			// will then be ("exactly") equal to _high_water_mark.
+			// The only thing that _decay does is to increase the
+			// high-water mark. Other than that, the system runs
+			// maxed out.  An alternative API would allow the user
+			// to set the watermark directly, and we reverse all
+			// these calculations to get a _decay value that's
+			// suitable. Right? Same thing in the end ...
 			nappy = 0;
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
-			_high_water_mark = worst * _decay / used;
+#define DUTY_CYCLE 1.1
+			_high_water_mark = DUTY_CYCLE * worst * _decay / used;
 			_nstalls ++;
 		}
 
