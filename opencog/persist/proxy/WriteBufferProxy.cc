@@ -272,13 +272,13 @@ void WriteBufferProxy::write_loop(void)
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
 
-#define POLLY 4.0
-	// POLLY=4, minfrac = 1-exp(-0.25) = 1-0.7788 = 0.2212;
-	// This is used to set a minimum write value, at half of this.
-	static const double minfrac = 1.0 - exp(-1.0/POLLY);
+	double ticker = 0.25 * _decay;
+	if (10.0 < ticker) ticker = 10.0;
 
-	// After opening, sleep for the first fourth of the decay time.
-	double ticker = _decay / POLLY;
+	// Set a minimum write value, at half of this.
+	double minfrac = ticker / _decay;
+
+	// After opening, sleep for a little while
 	uint nappy = 1 + ceil(1000.0 * ticker);
 
 	while(not _stop)
@@ -298,7 +298,9 @@ void WriteBufferProxy::write_loop(void)
 
 			// How many Atoms awaiting to be written?
 			double qsz = (double) _atom_queue.size();
-#define WEI (0.7 / POLLY)
+
+			// Moving average of the last ten writes. Is that OK?
+#define WEI 0.1
 			_mavg_qu_atoms = (1.0-WEI) * _mavg_qu_atoms + WEI * qsz;
 
 			// How many should we write?
