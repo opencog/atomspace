@@ -48,6 +48,8 @@ void WriteBufferProxy::init(void)
 {
 	// Default decay time of 60 seconds
 	_decay = 60.0;
+#define HIMAX 64123123   // approx 4GBytes
+	_high_water_mark = HIMAX;
 	_stop = false;
 	reset_stats();
 }
@@ -73,6 +75,9 @@ void WriteBufferProxy::open(void)
 		_decay = nnp->get_value();
 	}
 
+	// Reset the high-water mark.
+	_high_water_mark = HIMAX;
+
 	// Start the writer.
 	_stop = false;
 	_write_thread = std::thread(&WriteBufferProxy::write_loop, this);
@@ -94,14 +99,6 @@ void WriteBufferProxy::close(void)
 	WriteThruProxy::close();
 }
 
-// It can happen that, if WriteThruProxy::storeAtom() is really slow,
-// that the buffering will outrun the real writer. Which will be bad.
-// So hard-code a max size of 16 million; if this is exceeded, stall
-// until the queue drains. A pair of Handles is about 64 bytes(?) so
-// 16 million key-value pairs are approx 1GB RAM, which seems
-// reasonable on present-day systems
-#define MAX_QUEUE_SIZE 16000123
-
 void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 {
 	if (synchronous)
@@ -113,12 +110,8 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 	_astore ++;
 
 	// Stall if oversize
-	if (MAX_QUEUE_SIZE < _atom_queue.size())
-	{
-		_nstalls ++;
-		while ((MAX_QUEUE_SIZE/2) < _atom_queue.size())
-			sleep(_decay);
-	}
+	if (_high_water_mark < _atom_queue.size())
+		sleep(_decay);
 }
 
 // Two-step remove. Just pass the two steps down to the children.
@@ -169,12 +162,8 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 	_vstore ++;
 
 	// Stall if oversize
-	if (MAX_QUEUE_SIZE < _value_queue.size())
-	{
-		_nstalls ++;
-		while ((MAX_QUEUE_SIZE/2) < _value_queue.size())
-			sleep(_decay);
-	}
+	if (_high_water_mark < _value_queue.size())
+		sleep(_decay);
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
@@ -378,8 +367,26 @@ void WriteBufferProxy::write_loop(void)
 		double used = duration_cast<duration<double>>(elap-awake).count();
 		// How much time do we have left to sleep?
 		double left = ticker - used;
-		if (0.0 > left) left = 0.0;
-		nappy = floor(1000.0 * left);
+		if (0.0 < left)
+		{
+			nappy = floor(1000.0 * left);
+
+			// I guess we're good. Relax the high-water mark a bit.
+			if (_high_water_mark < HIMAX)
+			{
+				_high_water_mark *= 5;
+				_high_water_mark /= 4;
+			}
+		}
+		else
+		{
+			// Oh no! Cannot keep up with the requested time limit!
+			// Pause readers until the queue drains down a bit.
+			nappy = 0;
+			left = 0.0;
+			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
+			_high_water_mark = worst * _decay / ticker;
+		}
 
 		if (wrote) _ndumps ++;
 		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / ticker;

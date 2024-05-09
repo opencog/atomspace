@@ -52,6 +52,7 @@ private:
 
 protected:
 	double _decay;
+	size_t _high_water_mark;
 	concurrent_set<Handle> _atom_queue;
 	concurrent_set<std::pair<Handle,Handle>> _value_queue;
 	std::thread _write_thread;
