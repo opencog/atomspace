@@ -111,7 +111,7 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 
 	// Stall if oversize
 	if (_high_water_mark < _atom_queue.size())
-		sleep(_decay);
+		sleep(_ticker);
 }
 
 // Two-step remove. Just pass the two steps down to the children.
@@ -163,7 +163,7 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 
 	// Stall if oversize
 	if (_high_water_mark < _value_queue.size())
-		sleep(_decay);
+		sleep(_ticker);
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
@@ -272,14 +272,14 @@ void WriteBufferProxy::write_loop(void)
 	steady_clock::time_point atostart = steady_clock::now();
 	steady_clock::time_point valstart = atostart;
 
-	double ticker = 0.25 * _decay;
-	if (10.0 < ticker) ticker = 10.0;
+	_ticker = 0.25 * _decay;
+	if (10.0 < _ticker) _ticker = 10.0;
 
 	// Set a minimum write value, at half of this.
-	double minfrac = ticker / _decay;
+	double minfrac = _ticker / _decay;
 
 	// After opening, sleep for a little while
-	uint nappy = 1 + ceil(1000.0 * ticker);
+	uint nappy = 1 + ceil(1000.0 * _ticker);
 
 	while(not _stop)
 	{
@@ -376,7 +376,7 @@ void WriteBufferProxy::write_loop(void)
 		steady_clock::time_point elap = steady_clock::now();
 		double used = duration_cast<duration<double>>(elap-awake).count();
 		// How much time do we have left to sleep?
-		double left = ticker - used;
+		double left = _ticker - used;
 		if (0.0 < left)
 		{
 			nappy = floor(1000.0 * left);
@@ -395,12 +395,12 @@ void WriteBufferProxy::write_loop(void)
 			nappy = 0;
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
-			_high_water_mark = worst * _decay / ticker;
+			_high_water_mark = worst * _decay / _ticker;
 			_nstalls ++;
 		}
 
 		if (wrote) _ndumps ++;
-		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / ticker;
+		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / _ticker;
 	}
 }
 
