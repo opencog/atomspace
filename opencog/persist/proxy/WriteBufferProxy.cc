@@ -78,6 +78,18 @@ void WriteBufferProxy::open(void)
 	// Reset the high-water mark.
 	_high_water_mark = HIMAX;
 
+	// Remove all previous pending writes (if any).
+	// This can happen if this was open for reading previously,
+	// and some crazy error was thrown, and somehow the buffer
+	// was closed before the writes flushed. Not sure how this
+	// can happen, but safety first ...
+	_atom_queue.clear();
+	_value_queue.clear();
+
+	// Open the queues
+	_atom_queue.open();
+	_value_queue.open();
+
 	// Start the writer.
 	_stop = false;
 	_write_thread = std::thread(&WriteBufferProxy::write_loop, this);
