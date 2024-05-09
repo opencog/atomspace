@@ -424,7 +424,7 @@ void WriteBufferProxy::write_loop(void)
 			nappy = 0;
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
-#define DUTY_CYCLE 1.1
+#define DUTY_CYCLE 1.2
 			_high_water_mark = DUTY_CYCLE * worst * _decay / used;
 			_nstalls ++;
 		}
