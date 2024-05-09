@@ -237,22 +237,24 @@ std::string WriteBufferProxy::monitor(void)
 	rpt += "   stalls: " + std::to_string(_nstalls);
 	rpt += "\n";
 
-	rpt += "Avg incoming, Atoms: " + std::to_string(_mavg_in_atoms);
-	rpt += "    Values: " + std::to_string(_mavg_in_values);
+	// std::to_string prints six decimal places but we want zero.
+#define PFLO(X) std::to_string((int)round(X))
+	rpt += "Avg incoming, Atoms: " + PFLO(_mavg_in_atoms);
+	rpt += "    Values: " + PFLO(_mavg_in_values);
 	rpt += "\n";
 
-	rpt += "Avg queue size, Atoms: " + std::to_string(_mavg_qu_atoms);
-	rpt += "    Values: " + std::to_string(_mavg_qu_values);
+	rpt += "Avg queue size, Atoms: " + PFLO(_mavg_qu_atoms);
+	rpt += "    Values: " + PFLO(_mavg_qu_values);
 	rpt += "\n";
 
-	rpt += "Avg written, Atoms: " + std::to_string(_mavg_out_atoms);
-	rpt += "    Values: " + std::to_string(_mavg_out_values);
+	rpt += "Avg written, Atoms: " + PFLO(_mavg_out_atoms);
+	rpt += "    Values: " + PFLO(_mavg_out_values);
 	rpt += "\n";
 
 	// Duty cycle is the amount of time that the write thread
 	// is actually writing, vs. the elapsed wallclock time.
 	// Anything over 100 will lead to buffer overflows.
-	rpt += "Timescale " + std::to_string(_decay) + " secs;  ";
+	rpt += "Timescale " + PFLO(_decay) + " secs;  ";
 	rpt += "Duty cycle (load avg): " + std::to_string(_mavg_load);
 	rpt += "\n";
 
