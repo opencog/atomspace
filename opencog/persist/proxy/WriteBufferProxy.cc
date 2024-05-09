@@ -253,6 +253,11 @@ std::string WriteBufferProxy::monitor(void)
 // ==============================================================
 
 // This runs in it's own thread, and drains a fraction of the queue.
+// Currently, only one thread is used for draining the queue. The
+// assumption is that additional threads will not help, because of
+// lock contention in the target. But I don't know for sure. Indirect
+// evidence from RocksStorage indicates that bombarding it from multiple
+// threads does not improve throughput. So, for now, just one thread.
 void WriteBufferProxy::write_loop(void)
 {
 	// Keep a moving average queue size. This is used to determine
