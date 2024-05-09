@@ -1,5 +1,5 @@
 /*
- * UniqueLink.cc
+ * opencog/atoms/core/UniqueLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -73,8 +73,12 @@ void UniqueLink::setAtomSpace(AtomSpace* as)
 			if (def->getOutgoingAtom(i) != _outgoing[i])
 			{
 				throw InvalidParamException(TRACE_INFO,
-				      "Already defined: %s\n",
-				       alias->to_string().c_str());
+				      "Already defined: %s\n"
+				      "Previous definition: %s\n"
+				      "New defintion: %s\n",
+				       alias->to_string().c_str(),
+				       def->to_string().c_str(),
+				       this->to_string().c_str());
 			}
 		}
 	}
