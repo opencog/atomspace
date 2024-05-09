@@ -394,13 +394,14 @@ void WriteBufferProxy::write_loop(void)
 			// Oh no! Cannot keep up with the requested time limit!
 			// Pause readers until the queue drains down a bit.
 			// _mavg_out is how many we are able to actually write,
-			// per ticker. Scaling sets a buffer size that should
-			// be able to clear at exactly that rate. So this should
-			// be able to hold the duty cycle to 1.0 as the mean value.
+			// per "used" interval. Scaling sets a buffer size that
+			// should be able to clear at exactly that rate. So this
+			// should be able to hold the duty cycle to 1.0 as the
+			// mean value.
 			nappy = 0;
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
-			_high_water_mark = worst * _decay / _ticker;
+			_high_water_mark = worst * _decay / used;
 			_nstalls ++;
 		}
 
