@@ -75,7 +75,11 @@ void ProxyNode::set_proxy(const Handle&)
 
 std::string ProxyNode::monitor(void)
 {
-	return "This proxy has not implemented monitoring.";
+	std::string rpt;
+	rpt += "The ";
+	rpt += nameserver().getTypeName(_type);
+	rpt += " has not implemented monitoring.\n";
+	return rpt;
 }
 
 // Get our configuration from the DefineLink we live in.

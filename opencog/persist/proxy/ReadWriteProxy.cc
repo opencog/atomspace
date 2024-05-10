@@ -169,4 +169,15 @@ void ReadWriteProxy::updateValue(const Handle& atom, const Handle& key,
 	_writer->update_value(atom, key, delta);
 }
 
+std::string ReadWriteProxy::monitor(void)
+{
+	std::string rpt;
+	rpt += "ReadWriteProxy reader stats:\n";
+	rpt += _reader->monitor();
+	rpt += "\n";
+	rpt += "ReadWriteProxy writer stats:\n";
+	rpt += _writer->monitor();
+	return rpt;
+}
+
 DEFINE_NODE_FACTORY(ReadWriteProxy, READ_WRITE_PROXY_NODE)

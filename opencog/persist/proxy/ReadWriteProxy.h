@@ -70,6 +70,8 @@ protected:
 	virtual void storeAtomSpace(const AtomSpace*) {}
 	virtual void barrier(AtomSpace* = nullptr);
 
+	virtual std::string monitor(void);
+
 public:
 	static Handle factory(const Handle&);
 };
