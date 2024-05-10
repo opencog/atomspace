@@ -105,6 +105,10 @@
 (fetch-atom (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
 (store-atom (Concept "foo"))
+
+; Look at the cache statistics:
+(display (monitor-storage (ReadWriteProxy "full cache")))
+
 (cog-close (ReadWriteProxy "full cache"))
 
 ; That's All, Folks!

@@ -172,10 +172,21 @@ void ReadWriteProxy::updateValue(const Handle& atom, const Handle& key,
 std::string ReadWriteProxy::monitor(void)
 {
 	std::string rpt;
-	rpt += "ReadWriteProxy reader stats:\n";
+	rpt += to_short_string().substr(1);
+	rpt.pop_back();
+
+	if (nullptr == _reader)
+	{
+		rpt += " is closed; no stats available\n";
+		return rpt;
+	}
+
+	rpt += " reader stats:\n";
 	rpt += _reader->monitor();
 	rpt += "\n";
-	rpt += "ReadWriteProxy writer stats:\n";
+	rpt += to_short_string().substr(1);
+	rpt.pop_back();
+	rpt += " writer stats:\n";
 	rpt += _writer->monitor();
 	return rpt;
 }

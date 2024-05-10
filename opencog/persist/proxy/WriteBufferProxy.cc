@@ -239,8 +239,9 @@ void WriteBufferProxy::reset_stats(void)
 std::string WriteBufferProxy::monitor(void)
 {
 	std::string rpt;
-	rpt += "Write Buffer Proxy: ";
-	rpt += "writes: " + std::to_string(_ndumps);
+	rpt += to_short_string().substr(1);
+	rpt.pop_back();
+	rpt += "   writes: " + std::to_string(_ndumps);
 	rpt += "   barriers: " + std::to_string(_nbars);
 	rpt += "   stalls: " + std::to_string(_nstalls);
 	rpt += "   overtime: " + std::to_string(_novertime);

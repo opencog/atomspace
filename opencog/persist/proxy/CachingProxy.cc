@@ -126,8 +126,9 @@ void CachingProxy::loadType(AtomSpace* as, Type t)
 std::string CachingProxy::monitor(void)
 {
 	std::string rpt;
-	rpt += "Caching Proxy: ";
-	rpt += "hits: " + std::to_string(_nhits);
+	rpt += to_short_string().substr(1);
+	rpt.pop_back();
+	rpt += "   hits: " + std::to_string(_nhits);
 	rpt += "   misses: " + std::to_string(_nmisses);
 	rpt += "\n";
 	return rpt;

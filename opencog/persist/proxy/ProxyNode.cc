@@ -76,9 +76,10 @@ void ProxyNode::set_proxy(const Handle&)
 std::string ProxyNode::monitor(void)
 {
 	std::string rpt;
-	rpt += "The ";
-	rpt += nameserver().getTypeName(_type);
-	rpt += " has not implemented monitoring.\n";
+	rpt += "Monitoring not implemented for ";
+	rpt += to_short_string().substr(1);
+	rpt.pop_back();
+	rpt += "\n";
 	return rpt;
 }
 
