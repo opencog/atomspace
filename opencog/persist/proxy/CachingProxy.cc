@@ -49,6 +49,8 @@ void CachingProxy::init(void)
 // size and whatever other whizzy caching ideas we might want.
 void CachingProxy::open(void)
 {
+	_nhits = 0;
+	_nmisses = 0;
 	ReadThruProxy::open();
 }
 
@@ -80,32 +82,36 @@ void CachingProxy::getAtom(const Handle& h)
 {
 	CHECK_OPEN;
 
-	if (h->haveValues()) return;
+	if (h->haveValues()) { _nhits++; return; }
 
+	_nmisses ++;
 	ReadThruProxy::getAtom(h);
 }
 
 void CachingProxy::fetchIncomingSet(AtomSpace* as, const Handle& h)
 {
 	CHECK_OPEN;
-	if (0 < h->getIncomingSetSize(as)) return;
+	if (0 < h->getIncomingSetSize(as)) { _nhits++; return; }
 
+	_nmisses ++;
 	ReadThruProxy::fetchIncomingSet(as, h);
 }
 
 void CachingProxy::fetchIncomingByType(AtomSpace* as, const Handle& h, Type t)
 {
 	CHECK_OPEN;
-	if (0 < h->getIncomingSetSizeByType(t, as)) return;
+	if (0 < h->getIncomingSetSizeByType(t, as)) { _nhits++; return; }
 
+	_nmisses ++;
 	ReadThruProxy::fetchIncomingByType(as, h, t);
 }
 
 void CachingProxy::loadValue(const Handle& atom, const Handle& key)
 {
 	CHECK_OPEN;
-	if (nullptr != atom->getValue(key)) return;
+	if (nullptr != atom->getValue(key)) { _nhits++; return; }
 
+	_nmisses ++;
 	ReadThruProxy::loadValue(atom, key);
 }
 
@@ -113,7 +119,18 @@ void CachingProxy::loadValue(const Handle& atom, const Handle& key)
 void CachingProxy::loadType(AtomSpace* as, Type t)
 {
 	CHECK_OPEN;
+	_nmisses ++;
 	ReadThruProxy::loadType(as, t);
+}
+
+std::string CachingProxy::monitor(void)
+{
+	std::string rpt;
+	rpt += "Caching Proxy: ";
+	rpt += "hits: " + std::to_string(_nhits);
+	rpt += "   misses: " + std::to_string(_nmisses);
+	rpt += "\n";
+	return rpt;
 }
 
 DEFINE_NODE_FACTORY(CachingProxy, CACHING_PROXY_NODE)

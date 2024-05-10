@@ -34,6 +34,8 @@ class CachingProxy : public ReadThruProxy
 {
 private:
 	void init(void);
+	size_t _nhits;
+	size_t _nmisses;
 
 public:
 	CachingProxy(const std::string&&);
@@ -53,6 +55,8 @@ protected:
 	virtual void fetchIncomingByType(AtomSpace*, const Handle&, Type);
 	virtual void loadValue(const Handle& atom, const Handle& key);
 	virtual void loadType(AtomSpace*, Type);
+
+	virtual std::string monitor(void);
 
 public:
 	static Handle factory(const Handle&);
