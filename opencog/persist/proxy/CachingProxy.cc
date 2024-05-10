@@ -128,6 +128,7 @@ std::string CachingProxy::monitor(void)
 	std::string rpt;
 	rpt += to_short_string().substr(1);
 	rpt.pop_back();
+	rpt += ":";
 	rpt += "   hits: " + std::to_string(_nhits);
 	rpt += "   misses: " + std::to_string(_nmisses);
 	rpt += "\n";

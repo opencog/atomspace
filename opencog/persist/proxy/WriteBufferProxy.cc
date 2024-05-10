@@ -241,7 +241,8 @@ std::string WriteBufferProxy::monitor(void)
 	std::string rpt;
 	rpt += to_short_string().substr(1);
 	rpt.pop_back();
-	rpt += "   writes: " + std::to_string(_ndumps);
+	rpt += " stats:\n";
+	rpt += "writes: " + std::to_string(_ndumps);
 	rpt += "   barriers: " + std::to_string(_nbars);
 	rpt += "   stalls: " + std::to_string(_nstalls);
 	rpt += "   overtime: " + std::to_string(_novertime);
@@ -249,23 +250,22 @@ std::string WriteBufferProxy::monitor(void)
 
 	// std::to_string prints six decimal places but we want zero.
 #define PFLO(X) std::to_string((int)round(X))
-	rpt += "Avg inflow, Atoms: " + PFLO(_mavg_in_atoms);
-	rpt += "    Values: " + PFLO(_mavg_in_values);
+	rpt += "Avg. Atoms  inflow: " + PFLO(_mavg_in_atoms);
+	rpt += "    bufsize: " + PFLO(_mavg_buf_atoms);
+	rpt += "    outflow: " + PFLO(_mavg_out_atoms);
 	rpt += "\n";
 
-	rpt += "Avg buffer size, Atoms: " + PFLO(_mavg_buf_atoms);
-	rpt += "    Values: " + PFLO(_mavg_buf_values);
-	rpt += "\n";
-
-	rpt += "Avg outflow, Atoms: " + PFLO(_mavg_out_atoms);
-	rpt += "    Values: " + PFLO(_mavg_out_values);
+	rpt += "Avg. Values inflow: " + PFLO(_mavg_in_values);
+	rpt += "    bufsize: " + PFLO(_mavg_buf_values);
+	rpt += "    outflow: " + PFLO(_mavg_out_values);
 	rpt += "\n";
 
 	// Duty cycle is the amount of time that the write thread
 	// is actually writing, vs. the elapsed wallclock time.
 	// Anything over 100 will lead to buffer overflows.
-	rpt += "Timescale " + PFLO(_decay) + " secs;  ";
-	rpt += "Duty cycle (load avg): " + std::to_string(_mavg_load);
+	rpt += "Timescale (secs): " + PFLO(_decay);
+	rpt += "   Ticker (secs): " + PFLO(_ticker);
+	rpt += "   Duty cycle (load avg): " + std::to_string(_mavg_load);
 	rpt += "\n";
 
 	return rpt;
