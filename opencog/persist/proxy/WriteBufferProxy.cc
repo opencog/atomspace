@@ -287,13 +287,14 @@ void WriteBufferProxy::write_loop(void)
 
 	using namespace std::chrono;
 
+	// Cycle time. Write-outs happen at least every ten seconds.
 	_ticker = 0.25 * _decay;
 	if (10.0 < _ticker) _ticker = 10.0;
 
-	// Set amount to write per cycle.
+	// Amount to write per cycle, scaled by exponential time constant.
 	double frac = _ticker / _decay;
 
-	// After opening, sleep for a little while
+	// First time through: after opening, sleep for a little while.
 	uint nappy = 1 + ceil(1000.0 * _ticker);
 	std::this_thread::sleep_for(milliseconds(nappy));
 
@@ -305,6 +306,7 @@ void WriteBufferProxy::write_loop(void)
 	_mavg_out_atoms = frac * _mavg_buf_atoms;
 	_mavg_out_values = frac * _mavg_buf_values;
 
+	// Loop forever.
 	while (not _stop)
 	{
 		steady_clock::time_point awake = steady_clock::now();
@@ -320,7 +322,7 @@ void WriteBufferProxy::write_loop(void)
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
-			// Moving average of the last ten writes. Is that OK?
+			// Moving average of the last ten writes.
 #define WEI 0.1
 			_mavg_buf_atoms = (1.0-WEI) * _mavg_buf_atoms + WEI * qsz;
 
@@ -331,12 +333,12 @@ void WriteBufferProxy::write_loop(void)
 			if (mwr < 1000) mwr = 1000;
 			if (nwrite < mwr) nwrite = mwr;
 
-			// Store that many
+			// Store that many.
 			HandleSeq avec = _atom_queue.try_get(nwrite, 0 == nwrite%7);
 			for (const Handle& h : avec)
 				WriteThruProxy::storeAtom(h);
 
-			// Collect performance stats
+			// Collect performance stats.
 			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
 			_astore = 0;
 			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * avec.size();
@@ -353,11 +355,12 @@ void WriteBufferProxy::write_loop(void)
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
-			// Moving avg
+			// Moving avg.
 			_mavg_buf_values = (1.0-WEI) * _mavg_buf_values + WEI * qsz;
 
 			// Min to write.
 			uint mwr = ceil(0.5 * frac * _mavg_buf_values);
+			if (mwr < 1000) mwr = 1000;
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -373,7 +376,7 @@ void WriteBufferProxy::write_loop(void)
 		}
 		if (wrote) _ndumps ++;
 
-		// How much time have we used up so far?
+		// How much time did it take to write everything?
 		steady_clock::time_point wrdone = steady_clock::now();
 		double wrtime = duration_cast<duration<double>>(wrdone-awake).count();
 
@@ -384,41 +387,50 @@ void WriteBufferProxy::write_loop(void)
 		double left = _ticker - wrtime;
 		if (0.0 < left)
 		{
-			nappy = floor(1000.0 * left);
-
 			// I guess we're good. Relax the high-water mark a bit.
 			if (_high_water_mark < HIMAX)
 			{
 				_high_water_mark *= 17;
 				_high_water_mark /= 16;
 			}
-			std::this_thread::sleep_for(milliseconds(nappy));
+			uint naptime = floor(1000.0 * left);
+			std::this_thread::sleep_for(milliseconds(naptime));
 		}
 		else
 		{
 			// Oh no! Cannot keep up with the requested time limit!
 			// Pause readers until the queue drains down a bit.
 			// _mavg_out is how many we are able to actually write,
-			// per "used" interval. Scaling sets a buffer size that
+			// per `rwtime` interval. Scaling sets a buffer size that
 			// should be able to clear at exactly that rate. So this
 			// should be able to hold the duty cycle to #define DUTY
 			// as the mean value. By setting DUTY_CYCLE to greater
-			// than one, this will keep the write rate saturated
+			// than one, this should keep the write rate saturated
 			// at max possible, so that we are *always* stalling.
 			// And that's OK, because the _high_water_mark will
-			// rate limit the inflow. And the average buffer size
+			// rate limit the inflow. Then the average buffer size
 			// will then be ("exactly") equal to _high_water_mark.
-			// The only thing that _decay does is to increase the
-			// high-water mark. Other than that, the system runs
-			// maxed out.  An alternative API would allow the user
-			// to set the watermark directly, and we reverse all
-			// these calculations to get a _decay value that's
-			// suitable. Right? Same thing in the end ...
-			nappy = 0;
-			left = 0.0;
+			// The only thing that a larger _decay does is to
+			// increase the high-water mark. Other than that, the
+			// system runs maxed out.  An alternative API would
+			// allow the user to set the watermark directly, and
+			// then we'd reverse all these calculations to get a
+			// `_decay` value that's suitable. This just gives the
+			// same behavior in the end, just a different API.
+
+			// Averge amount of time taken to write `frac` of buffer.
+			double avg_write_time = _ticker * _mavg_load;
+
+			// Moving averge of fraction actually written
+			// Should be more-or-less equal to `frac`, defined at top.
+			double actual_frac = avg_write_time / _decay;
+
+			// We want to clamp down on the larger of the two.
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
+
 #define DUTY_CYCLE 1.2
-			_high_water_mark = DUTY_CYCLE * worst * _decay / wrtime;
+			// Based on clearing rate, the number we can manage in cache.
+			_high_water_mark = DUTY_CYCLE * worst / actual_frac;
 			_novertime ++;
 		}
 	}
