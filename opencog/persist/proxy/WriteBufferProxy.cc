@@ -326,27 +326,21 @@ void WriteBufferProxy::write_loop(void)
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			uint i=0;
-			for (; i < nwrite; i++)
-			{
-				Handle atom;
-				// Try-get from the back end every now and then.
-				bool got = _atom_queue.try_get(atom, 0 == i%8);
-				if (not got) break;
-				WriteThruProxy::storeAtom(atom);
-			}
+			HandleSeq avec = _atom_queue.try_get(nwrite, 0 == nwrite%7);
+			for (const Handle& h : avec)
+				WriteThruProxy::storeAtom(h);
 
 			// Collect performance stats
 			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
 			_astore = 0;
-			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * (++i);
+			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * avec.size();
 		}
 		atostart = awake;
 
-		// re-measure, because above may have taken a long time.
+		// Re-measure, because above may have taken a long time.
 		steady_clock::time_point vwake = steady_clock::now();
 
-		// cut-n-paste of above.
+		// Cut-n-paste of above.
 		if (not _value_queue.is_empty())
 		{
 			wrote = true;
@@ -368,20 +362,15 @@ void WriteBufferProxy::write_loop(void)
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
-			uint i = 0;
-			for (; i < nwrite; i++)
-			{
-				std::pair<Handle, Handle> kvp;
-				// Try-get from the back end every now and then.
-				bool got = _value_queue.try_get(kvp, 0 == i%8);
-				if (not got) break;
+			std::vector<std::pair<Handle, Handle>> vav =
+				_value_queue.try_get(nwrite, 0 == nwrite%7);
+			for (const std::pair<Handle, Handle>& kvp : vav)
 				WriteThruProxy::storeValue(kvp.first, kvp.second);
-			}
 
 			// Collect performance stats
 			_mavg_in_values = (1.0-WEI) * _mavg_in_values + WEI * _vstore;
 			_vstore = 0;
-			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * (++i);
+			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * vav.size();
 		}
 		valstart = vwake;
 
