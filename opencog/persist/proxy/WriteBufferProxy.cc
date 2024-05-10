@@ -279,49 +279,47 @@ void WriteBufferProxy::write_loop(void)
 
 	using namespace std::chrono;
 
-	// Keep distinct clocks for atoms and values.
-	// That's because the first writer delays the second writer
-	steady_clock::time_point atostart = steady_clock::now();
-	steady_clock::time_point valstart = atostart;
-
 	_ticker = 0.25 * _decay;
 	if (10.0 < _ticker) _ticker = 10.0;
 
-	// Set a minimum write value, at half of this.
-	double minfrac = _ticker / _decay;
+	// Set amount to write per cycle.
+	double frac = _ticker / _decay;
 
 	// After opening, sleep for a little while
 	uint nappy = 1 + ceil(1000.0 * _ticker);
+	std::this_thread::sleep_for(milliseconds(nappy));
 
-	while(not _stop)
+	// Start with non-zero moving avg, approximating what it should be.
+	_mavg_in_atoms = _astore;
+	_mavg_in_values = _vstore;
+	_mavg_buf_atoms = (double) _atom_queue.size();
+	_mavg_buf_values = (double) _value_queue.size();
+	_mavg_out_atoms = frac * _mavg_buf_atoms;
+	_mavg_out_values = frac * _mavg_buf_values;
+
+	while (not _stop)
 	{
-		if (0 < nappy) std::this_thread::sleep_for(milliseconds(nappy));
+		steady_clock::time_point awake = steady_clock::now();
 
 		bool wrote = false;
-		steady_clock::time_point awake = steady_clock::now();
 		if (not _atom_queue.is_empty())
 		{
 			wrote = true;
 
-			// How long have we slept, in seconds?
-			double waited = duration_cast<duration<double>>(awake-atostart).count();
-			// What fraction of the decay time is that?
-			double frac = waited / _decay;
-
-			// How many Atoms awaiting to be written?
+			// How many Atoms waiting to be written?
 			double qsz = (double) _atom_queue.size();
+
+			// How many should we write?
+			uint nwrite = ceil(frac * qsz);
 
 			// Moving average of the last ten writes. Is that OK?
 #define WEI 0.1
 			_mavg_buf_atoms = (1.0-WEI) * _mavg_buf_atoms + WEI * qsz;
 
-			// How many should we write?
-			uint nwrite = ceil(frac * qsz);
-
 			// Whats the min to write? The goal here is to not
 			// dribble out the tail, but to push it out, if its
 			// almost all gone anyway.
-			uint mwr = ceil(0.5 * minfrac * _mavg_buf_atoms);
+			uint mwr = ceil(0.5 * frac * _mavg_buf_atoms);
 			if (mwr < 1000) mwr = 1000;
 			if (nwrite < mwr) nwrite = mwr;
 
@@ -335,30 +333,23 @@ void WriteBufferProxy::write_loop(void)
 			_astore = 0;
 			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * avec.size();
 		}
-		atostart = awake;
-
-		// Re-measure, because above may have taken a long time.
-		steady_clock::time_point vwake = steady_clock::now();
 
 		// Cut-n-paste of above.
 		if (not _value_queue.is_empty())
 		{
 			wrote = true;
 
-			// How long have we slept, in seconds?
-			double waited = duration_cast<duration<double>>(vwake-valstart).count();
-			// What fraction of the decay time is that?
-			double frac = waited / _decay;
-
 			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
-			_mavg_buf_values = (1.0-WEI) * _mavg_buf_values + WEI * qsz;
 
 			// How many should we write?
 			uint nwrite = ceil(frac * qsz);
 
+			// Moving avg
+			_mavg_buf_values = (1.0-WEI) * _mavg_buf_values + WEI * qsz;
+
 			// Min to write.
-			uint mwr = ceil(0.5 * minfrac * _mavg_buf_values);
+			uint mwr = ceil(0.5 * frac * _mavg_buf_values);
 			if (nwrite < mwr) nwrite = mwr;
 
 			// Store that many
@@ -372,13 +363,17 @@ void WriteBufferProxy::write_loop(void)
 			_vstore = 0;
 			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * vav.size();
 		}
-		valstart = vwake;
+		if (wrote) _ndumps ++;
 
 		// How much time have we used up so far?
-		steady_clock::time_point elap = steady_clock::now();
-		double used = duration_cast<duration<double>>(elap-awake).count();
+		steady_clock::time_point wrdone = steady_clock::now();
+		double wrtime = duration_cast<duration<double>>(wrdone-awake).count();
+
+		// Moving averge duty factor.
+		_mavg_load = (1.0-WEI) * _mavg_load + WEI * wrtime / _ticker;
+
 		// How much time do we have left to sleep?
-		double left = _ticker - used;
+		double left = _ticker - wrtime;
 		if (0.0 < left)
 		{
 			nappy = floor(1000.0 * left);
@@ -389,6 +384,7 @@ void WriteBufferProxy::write_loop(void)
 				_high_water_mark *= 17;
 				_high_water_mark /= 16;
 			}
+			std::this_thread::sleep_for(milliseconds(nappy));
 		}
 		else
 		{
@@ -414,12 +410,9 @@ void WriteBufferProxy::write_loop(void)
 			left = 0.0;
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
 #define DUTY_CYCLE 1.2
-			_high_water_mark = DUTY_CYCLE * worst * _decay / used;
+			_high_water_mark = DUTY_CYCLE * worst * _decay / wrtime;
 			_nstalls ++;
 		}
-
-		if (wrote) _ndumps ++;
-		_mavg_load = (1.0-WEI) * _mavg_load + WEI * used / _ticker;
 	}
 }
 
