@@ -38,6 +38,7 @@ private:
 	// Performance-monitoring stats
 	void reset_stats(void);
 	size_t _nstalls;
+	size_t _novertime;
 	size_t _nbars;
 	size_t _ndumps;
 	size_t _astore;

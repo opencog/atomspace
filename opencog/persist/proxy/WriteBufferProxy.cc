@@ -123,7 +123,10 @@ void WriteBufferProxy::storeAtom(const Handle& h, bool synchronous)
 
 	// Stall if oversize
 	if (_high_water_mark < _atom_queue.size())
+	{
+		_nstalls ++;
 		sleep(_ticker);
+	}
 }
 
 // Two-step remove. Just pass the two steps down to the children.
@@ -175,7 +178,10 @@ void WriteBufferProxy::storeValue(const Handle& atom, const Handle& key)
 
 	// Stall if oversize
 	if (_high_water_mark < _value_queue.size())
+	{
+		_nstalls ++;
 		sleep(_ticker);
+	}
 }
 
 void WriteBufferProxy::updateValue(const Handle& atom, const Handle& key,
@@ -216,6 +222,7 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 void WriteBufferProxy::reset_stats(void)
 {
 	_nstalls = 0;
+	_novertime = 0;
 	_nbars = 0;
 	_ndumps = 0;
 	_astore = 0;
@@ -236,6 +243,7 @@ std::string WriteBufferProxy::monitor(void)
 	rpt += "writes: " + std::to_string(_ndumps);
 	rpt += "   barriers: " + std::to_string(_nbars);
 	rpt += "   stalls: " + std::to_string(_nstalls);
+	rpt += "   overtime: " + std::to_string(_novertime);
 	rpt += "\n";
 
 	// std::to_string prints six decimal places but we want zero.
@@ -411,7 +419,7 @@ void WriteBufferProxy::write_loop(void)
 			double worst = fmax(_mavg_out_atoms, _mavg_out_values);
 #define DUTY_CYCLE 1.2
 			_high_water_mark = DUTY_CYCLE * worst * _decay / wrtime;
-			_nstalls ++;
+			_novertime ++;
 		}
 	}
 }
