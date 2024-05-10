@@ -18,14 +18,16 @@
 ; The WriteBufferProxy uses a time-delay mechanism to write out a portion
 ; of the buffer over time. It uses an exponential decay strategy, so that
 ; a portion exp(-t/T0) of the buffer is written out after t seconds. The
-; default time constant T0 is 30 seconds; this means that most writes in
-; a 30-second window will be buffered up, but about exp(-30/30)=exp(-1)=0.22
+; default time constant T0 is 60 seconds; this means that most writes in
+; a 60-second window will be buffered up, but about exp(-60/60)=exp(-1)=0.22
 ; of them will be actually written out.
+;
+; ---------------------------------------------------------------------
 
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
-; The default write buffer size is 30 seconds; change it to 42. This
+; The default write buffer size is 60 seconds; change it to 42. This
 ; parameter is optional, and can be skipped.
 (ProxyParameters
 	(WriteBufferProxy "write buffer")
@@ -45,7 +47,9 @@
 ; the (barrier) command. For example:
 (barrier)
 
-; View performance stats:
+; View performance stats. (But these will be zero, because 42 seconds
+; haven't passed by yet. The average rate is also rounded to the nearest
+; integer, and so will round down to zero.)
 (display (monitor-storage (WriteBufferProxy "write buffer")))
 
 ; There are also perf stats for the base server:
@@ -62,6 +66,46 @@
 ; Close the connection. This will automatically flush the buffer,
 ; before returning.
 (cog-close (WriteBufferProxy "write buffer"))
+
+; ---------------------------------------------------------------------
+; The WriteBuffer only buffers writes. It completely ignores reads.
+; In most cases, one wants to both read and write. This is arranged
+; for by using the ReadWriteProxy, to gang together one reader and
+; one writer.
+
+(ProxyParameters
+	(ReadWriteProxy "read w/write buffer")
+	(List
+		(RocksStorageNode "rocks:///tmp/foo.rdb")   ;; target for reads
+		(WriteBufferProxy "write buffer")))         ;; target for writes
+
+(cog-open (ReadWriteProxy "read w/write buffer"))
+(fetch-atom (Concept "foo"))
+(cog-set-value! (Concept "foo") (Predicate "fizz") (Concept "oh hi"))
+(store-atom (Concept "foo")))
+(cog-close (ReadWriteProxy "read w/write buffer"))
+
+; One can get fancier: the reader always goes to the target to read
+; Atoms and Values. The CachingProxy will cache reads, avoiding a
+; fetch from storage, if the given Atom/Value is already in the
+; AtomSpace. The can be ganged up with the write-buffer, to offer
+; caching both ways.
+
+(ProxyParameters
+	(CachingProxy "read cache")
+	(RocksStorageNode "rocks:///tmp/foo.rdb"))
+
+(ProxyParameters
+	(ReadWriteProxy "full cache")
+	(List
+		(CachingProxy "read cache")           ;; target for reads
+		(WriteBufferProxy "write buffer")))   ;; target for writes
+
+(cog-open (ReadWriteProxy "full cache"))
+(fetch-atom (Concept "foo")))
+(cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
+(store-atom (Concept "foo")))
+(cog-close (ReadWriteProxy "full cache"))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------
