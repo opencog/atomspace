@@ -82,7 +82,7 @@
 (cog-open (ReadWriteProxy "read w/write buffer"))
 (fetch-atom (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Concept "oh hi"))
-(store-atom (Concept "foo")))
+(store-atom (Concept "foo"))
 (cog-close (ReadWriteProxy "read w/write buffer"))
 
 ; One can get fancier: the reader always goes to the target to read
@@ -102,9 +102,9 @@
 		(WriteBufferProxy "write buffer")))   ;; target for writes
 
 (cog-open (ReadWriteProxy "full cache"))
-(fetch-atom (Concept "foo")))
+(fetch-atom (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
-(store-atom (Concept "foo")))
+(store-atom (Concept "foo"))
 (cog-close (ReadWriteProxy "full cache"))
 
 ; That's All, Folks!
