@@ -208,13 +208,16 @@ void WriteBufferProxy::barrier(AtomSpace* as)
 	_nbars ++;
 
 	// Unconditionally drain both queues.
-	std::pair<Handle, Handle> pr;
-	while (_value_queue.try_get(pr))
-		WriteThruProxy::storeValue(pr.first, pr.second);
+	size_t bufsz = _value_queue.size();
+	std::vector<std::pair<Handle, Handle>> vav =
+		_value_queue.try_get(bufsz);
+	for (const std::pair<Handle, Handle>& kvp : vav)
+		WriteThruProxy::storeValue(kvp.first, kvp.second);
 
-	Handle atom;
-	while (_atom_queue.try_get(atom))
-		WriteThruProxy::storeAtom(atom, false);
+	bufsz = _atom_queue.size();
+	HandleSeq avec = _atom_queue.try_get(bufsz);
+	for (const Handle& h : avec)
+		WriteThruProxy::storeAtom(h);
 
 	WriteThruProxy::barrier(as);
 }
