@@ -320,10 +320,11 @@ void WriteBufferProxy::drain_loop(void)
 		steady_clock::time_point awake = steady_clock::now();
 
 		bool wrote = false;
-		if (not _atom_queue.is_empty())
-		{
-			wrote = true;
 
+		// Exec block unconditionally. Need to do this to have
+		// the moving avg's update correctly.
+		if (true)
+		{
 			// How many Atoms waiting to be written?
 			double qsz = (double) _atom_queue.size();
 
@@ -350,13 +351,13 @@ void WriteBufferProxy::drain_loop(void)
 			_mavg_in_atoms = (1.0-WEI) * _mavg_in_atoms + WEI * _astore;
 			_astore = 0;
 			_mavg_out_atoms = (1.0-WEI) * _mavg_out_atoms + WEI * avec.size();
+
+			if (0 < avec.size()) wrote = true;
 		}
 
 		// Cut-n-paste of above.
-		if (not _value_queue.is_empty())
+		if (true)
 		{
-			wrote = true;
-
 			// How many values are waiting to be written?
 			double qsz = (double) _value_queue.size();
 
@@ -381,7 +382,10 @@ void WriteBufferProxy::drain_loop(void)
 			_mavg_in_values = (1.0-WEI) * _mavg_in_values + WEI * _vstore;
 			_vstore = 0;
 			_mavg_out_values = (1.0-WEI) * _mavg_out_values + WEI * vav.size();
+
+			if (0 < vav.size()) wrote = true;
 		}
+
 		if (wrote) _ndumps ++;
 
 		// How much time did it take to write everything?
