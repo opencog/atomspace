@@ -163,9 +163,11 @@ void WriteBufferProxy::postRemoveAtom(AtomSpace* as, const Handle& h,
 	// might forget, so we do it for them.
 	if (not _value_queue.is_empty())
 	{
-		std::pair<Handle, Handle> pr;
-		while (_value_queue.try_get(pr))
-			WriteThruProxy::storeValue(pr.first, pr.second);
+		size_t bufsz = _value_queue.size();
+		std::vector<std::pair<Handle, Handle>> vav =
+			_value_queue.try_get(bufsz);
+		for (const std::pair<Handle, Handle>& kvp : vav)
+			WriteThruProxy::storeValue(kvp.first, kvp.second);
 
 		WriteThruProxy::barrier();
 	}
