@@ -57,9 +57,9 @@ protected:
 	size_t _high_water_mark;
 	concurrent_set<Handle> _atom_queue;
 	concurrent_set<std::pair<Handle,Handle>> _value_queue;
-	std::thread _write_thread;
+	std::thread _drain_thread;
 	bool _stop;
-	void write_loop();
+	void drain_loop();
 	void erase_recursive(const Handle&);
 
 private:

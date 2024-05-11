@@ -92,21 +92,23 @@ void WriteBufferProxy::open(void)
 
 	// Start the writer.
 	_stop = false;
-	_write_thread = std::thread(&WriteBufferProxy::write_loop, this);
+	_drain_thread = std::thread(&WriteBufferProxy::drain_loop, this);
 }
 
 void WriteBufferProxy::close(void)
 {
-	// Stop writing. The thread may be sleeping, so the join() might
-	// hang for a fraction of _decay seconds. It does not seem worthwhile
-	// to try to speed this up, e.g. with a condition variable.
+	// Close. Threads that are still writing will catch an exception.
+	_atom_queue.close();
+	_value_queue.close();
+
+	// Stop draining. The drain thread may be sleeping, so the join()
+	// might hang for a fraction of _ticker seconds. It does not seem
+	// worthwhile to try to speed this up, e.g. with a condition variable.
 	_stop = true;
-	_write_thread.join();
+	_drain_thread.join();
 
 	// Drain the queues
 	barrier();
-	_atom_queue.close();
-	_value_queue.close();
 
 	WriteThruProxy::close();
 }
@@ -279,7 +281,7 @@ std::string WriteBufferProxy::monitor(void)
 // lock contention in the target. But I don't know for sure. Indirect
 // evidence from RocksStorage indicates that bombarding it from multiple
 // threads does not improve throughput. So, for now, just one thread.
-void WriteBufferProxy::write_loop(void)
+void WriteBufferProxy::drain_loop(void)
 {
 	// Keep a moving average queue size. This is used to determine
 	// when the queue is almost empty, by historical standards, which
