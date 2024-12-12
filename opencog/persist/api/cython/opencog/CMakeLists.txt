@@ -22,16 +22,16 @@ ADD_LIBRARY(storage_cython SHARED
 ADD_DEPENDENCIES(storage_cython storage_types)
 
 TARGET_LINK_LIBRARIES(storage_cython
-   ${NO_AS_NEEDED}
-   atomspace
-   ${PYTHON_LIBRARIES}
+	${NO_AS_NEEDED}
+	atomspace
+	${PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(storage_cython PROPERTIES
-   PREFIX ""
-   OUTPUT_NAME storage)
+	PREFIX ""
+	OUTPUT_NAME storage)
 
 ### install the modules ###
 INSTALL(TARGETS
-   storage_cython
-   DESTINATION "${PYTHON_DEST}")
+	storage_cython
+	DESTINATION "${PYTHON_DEST}")
