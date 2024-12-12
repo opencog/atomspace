@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PersistCython.h"
+#include "opencog/cython/opencog/Utilities.h"
 
 using namespace opencog;
 
@@ -58,6 +59,9 @@ namespace opencog {
 	}
 
 // =====================================================================
+
+// Single global default storage node. This is used whenever the
+// API does not provide an explicit storage node to use.
 StorageNodePtr _sn;
 
 void storage_open(const Handle& hsn)
@@ -95,5 +99,38 @@ void storage_close(const Handle& hsn)
 	if (stnp == _sn) _sn = nullptr;
 }
 
+bool storage_connected(const Handle& hsn)
+{
+	StorageNodePtr stnp = StorageNodeCast(hsn);
+	if (nullptr == stnp) return false;
+	return stnp->connected();
+}
+
+// =====================================================================
+
+#define CHECK \
+	if (nullptr == _sn) \
+		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
+
+
+/**
+ * Store the single atom to the backing store hanging off the
+ * atom-space.
+ */
+Handle dflt_store_atom(const Handle& h)
+{
+	CHECK;
+	_sn->store_atom(h);
+	return h;
+}
+
+Handle dflt_fetch_atom(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_atom(h, as);
+}
+
 };
+
 // =================== END OF FILE ====================

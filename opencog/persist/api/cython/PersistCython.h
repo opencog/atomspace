@@ -32,6 +32,10 @@ using namespace opencog;
 namespace opencog {
 void storage_open(const Handle&);
 void storage_close(const Handle&);
+
+bool storage_connected(const Handle&);
+Handle dflt_store_atom(const Handle&);
+Handle dflt_fetch_atom(const Handle&);
 };
 
 #endif // _OPENCOG_PERSIST_CYTHON_H
