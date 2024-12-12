@@ -16,8 +16,11 @@ regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
 
+# cdef storage_open(const cHandle&)
+
 def cog_open(stonode) :
 	print("want to open ", stonode)
+	#storage_open(stonode)
 
 def cog_close(stonode) :
 	print("want to close ", stonode)
