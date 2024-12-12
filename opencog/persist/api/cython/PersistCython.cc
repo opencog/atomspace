@@ -82,9 +82,7 @@ void storage_open(const Handle& hsn)
 	if (nullptr == _sn) _sn = stnp;
 }
 
-};
-
-void cog_close(Handle hsn)
+void storage_close(const Handle& hsn)
 {
 	GET_STNP;
 	if (not stnp->connected())
@@ -97,4 +95,5 @@ void cog_close(Handle hsn)
 	if (stnp == _sn) _sn = nullptr;
 }
 
+};
 // =================== END OF FILE ====================

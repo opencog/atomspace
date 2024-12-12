@@ -16,14 +16,15 @@ from opencog.utilities import add_node, add_link
 from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
 from opencog.atomspace cimport Atom
 
+# The list of Atom Types that python knows about has to be rebuilt,
+# before much else can be done.
 regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
 
 def cog_open(Atom stonode) :
-	print("want to open ", stonode)
 	storage_open(deref(stonode.handle))
 
-def cog_close(stonode) :
-	print("want to close ", stonode)
+def cog_close(Atom stonode) :
+	storage_close(deref(stonode.handle))
 
