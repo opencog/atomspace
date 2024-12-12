@@ -62,7 +62,6 @@ StorageNodePtr _sn;
 
 void storage_open(const Handle& hsn)
 {
-	printf("you askfor it: %s\n", hsn->to_string().c_str());
 	GET_STNP;
 
 	if (stnp->connected())
