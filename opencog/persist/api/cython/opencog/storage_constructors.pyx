@@ -9,5 +9,6 @@
 import warnings
 
 from opencog.atomspace import types, AtomSpace
+from opencog.utilities import add_node, add_link
 
 include "opencog/persist/storage/storage_types.pyx"

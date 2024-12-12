@@ -7,24 +7,23 @@ INCLUDE_DIRECTORIES(
 
 SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
 
-CYTHON_ADD_MODULE_PYX(storage
-	"storage_types.pyx"
-	storage_types
-)
+CYTHON_ADD_MODULE_PYX(storage_constructors
+	"../../../storage/storage_types.pyx"
+	"../../../storage/storage_types.h")
 
-ADD_LIBRARY(storage
+ADD_LIBRARY(storage_cython SHARED
 	stub.cc
-	# storage_types.cpp
+	storage_constructors.cpp
 )
 
-ADD_DEPENDENCIES(storage storage_types)
+ADD_DEPENDENCIES(storage_cython storage_types)
 
-TARGET_LINK_LIBRARIES(storage
+TARGET_LINK_LIBRARIES(storage_cython
    ${NO_AS_NEEDED}
    atomspace
    ${PYTHON_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(storage PROPERTIES
+SET_TARGET_PROPERTIES(storage_cython PROPERTIES
    PREFIX ""
    OUTPUT_NAME storage)
