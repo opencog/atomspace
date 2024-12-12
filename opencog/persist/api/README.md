@@ -12,6 +12,10 @@ Provides a C++ interface for access to (disk, network) AtomSpace storage.
   Right now, space-frame support is ad-hoc, in `Commands.cc` and in
   to RocksStorageNode. It probably needs to be generic!?
 
+Perist Python API
+-----------------
+See the cython directory for info.
+
 Persist Guile API
 -----------------
 Provides a scheme module for the generic persistence API.

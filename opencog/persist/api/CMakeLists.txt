@@ -1,4 +1,7 @@
 
+# Python bindings
+ADD_SUBDIRECTORY (cython)
+
 ADD_LIBRARY (persist
 	BackingQuery.cc
 	BackingStore.cc
