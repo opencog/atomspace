@@ -1,7 +1,12 @@
+#
+# nameserver.pyx
+#
+
 # from atomspace cimport cNameServer, nameserver, NOTYPE, Type
 from libc.string cimport strcmp
 from libcpp cimport string
 import sys
+import warnings
 from contextlib import contextmanager
 
 # Dynamically construct a "types" module.
@@ -58,6 +63,20 @@ cdef generate_type_module():
 
 types = type('atom_types', (), generate_type_module())
 
+# Update/refresh list of types. This needs to be called whenever
+# additional atom types were declared in other atomspace modules.
+# i.e. when new types were added to the C++ nameserver.
+def regenerate_types():
+    global types
+    types = type('atom_types', (), generate_type_module())
+    return types
+
+def get_refreshed_types():
+    warnings.warn('get_refreshed_types is deprecated; use regenerate_types instead',
+            DeprecationWarning)
+    return regenerate_types()
+
+# Provide API so that new atom types can be added with python.
 def begin_type_decls(module):
     return nameserver().beginTypeDecls(module.encode('UTF-8'))
 
@@ -78,14 +97,6 @@ def decl_type(parent, name):
     type_id = nameserver().declType(parent, name.encode('UTF-8'))
     setattr(types, name, type_id)
     return type_id
-
-# Update/refresh list of types. This needs to be called whenever
-# additional atom types were declared in other atomspace modules.
-# i.e. when new types were added to the C++ nameserver.
-def get_refreshed_types():
-    global types
-    types = type('atom_types', (), generate_type_module())
-    return types
 
 cdef create_python_value_from_c_value(const cValuePtr& value):
     if value.get() == NULL:
