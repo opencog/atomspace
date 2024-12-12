@@ -7,20 +7,22 @@
 # This imports all the python wrappers for atom creation.
 #
 import warnings
+from cython.operator cimport dereference as deref
 
 from opencog.atomspace import types
 from opencog.atomspace import regenerate_types
 from opencog.utilities import add_node, add_link
 
+from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
+from opencog.atomspace cimport Atom
+
 regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
 
-# cdef storage_open(const cHandle&)
-
-def cog_open(stonode) :
+def cog_open(Atom stonode) :
 	print("want to open ", stonode)
-	#storage_open(stonode)
+	storage_open(deref(stonode.handle))
 
 def cog_close(stonode) :
 	print("want to close ", stonode)
