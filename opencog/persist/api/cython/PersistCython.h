@@ -20,13 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _OPENCOG_PERSIST_CYTHON_H
+#define _OPENCOG_PERSIST_CYTHON_H
+
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/persist/api/StorageNode.h>
 
 using namespace opencog;
 
 namespace opencog {
 void storage_open(const Handle&);
-
+void storage_close(const Handle&);
 };
 
-// =================== END OF FILE ====================
+#endif // _OPENCOG_PERSIST_CYTHON_H

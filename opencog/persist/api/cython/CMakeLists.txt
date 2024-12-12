@@ -28,6 +28,7 @@ ADD_DEPENDENCIES(storage_cython storage_types)
 
 TARGET_LINK_LIBRARIES(storage_cython
 	${NO_AS_NEEDED}
+	storage-types
 	atomspace
 	${PYTHON_LIBRARIES}
 )
