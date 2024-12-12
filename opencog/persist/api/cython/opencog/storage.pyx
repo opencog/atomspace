@@ -15,3 +15,10 @@ from opencog.utilities import add_node, add_link
 regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
+
+def cog_open(stonode) :
+	print("want to open ", stonode)
+
+def cog_close(stonode) :
+	print("want to close ", stonode)
+
