@@ -21,15 +21,19 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include "PersistCython.h"
 
 using namespace opencog;
 
+namespace opencog {
+
 // =====================================================================
 
-void storage_open(Handle hsn)
+void storage_open(const Handle& hsn)
 {
 	printf("hello\n");
 	printf("you askfor it: %s\n", hsn->to_string().c_str());
 }
 
+};
 // =================== END OF FILE ====================

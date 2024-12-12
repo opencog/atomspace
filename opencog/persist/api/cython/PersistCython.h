@@ -25,7 +25,7 @@
 using namespace opencog;
 
 namespace opencog {
-void storage_open(Handle);
+void storage_open(const Handle&);
 
 };
 
