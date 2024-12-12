@@ -27,3 +27,8 @@ TARGET_LINK_LIBRARIES(storage_cython
 SET_TARGET_PROPERTIES(storage_cython PROPERTIES
    PREFIX ""
    OUTPUT_NAME storage)
+
+### install the modules ###
+INSTALL(TARGETS
+   storage_cython
+   DESTINATION "${PYTHON_DEST}")
