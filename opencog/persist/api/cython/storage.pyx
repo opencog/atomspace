@@ -43,7 +43,7 @@ def fetch_atom(Atom atm) :
 def store_atom(Atom atm) :
 	return pfromh (dflt_store_atom(deref(atm.handle)))
 
-def fetch_incomng_set(Atom atm) :
+def fetch_incoming_set(Atom atm) :
 	return pfromh (dflt_fetch_incoming_set(deref(atm.handle)))
 
 def load_atomspace() :
