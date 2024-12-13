@@ -37,12 +37,17 @@ A simple example of a "behavior tree" implemented in
 AtomSpace contents.
 
 ## Scheme through python
-The following examples show how to use the scheme bindings through python
+Atomese has both scheme and python bindings, and the two programming
+langauges and styles can be freely intermixed. That is, you can call
+scheme from python, and python from scheme, and everything "just works".
+
+The examples below show how this can be done.
 
 ### scheme/atom_type_names.py
-The scheme Atomese bindings can be accessed from python, and vice-versa;
-the two languages can be freely intermixed. The examples below show how
-this can be done.
+Example of how to obtain atom type names and atom type IDs.
+
+### scheme/bindlink.py
+Example of how to use the pattern matcher BindLink functionality.
 
 ### scheme/scheme_timer.py
 Simple measurement of the performance of invoking the scheme (guile)
