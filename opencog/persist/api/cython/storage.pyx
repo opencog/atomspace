@@ -15,6 +15,7 @@ from opencog.utilities import add_node, add_link
 
 from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
 from opencog.atomspace cimport Atom
+from opencog.atomspace cimport create_python_value_from_c_value
 
 # The list of Atom Types that python knows about has to be rebuilt,
 # before much else can be done.
@@ -28,3 +29,14 @@ def cog_open(Atom stonode) :
 def cog_close(Atom stonode) :
 	storage_close(deref(stonode.handle))
 
+def cog_connected(Atom stonode) :
+	return storage_connected(deref(stonode.handle))
+
+def fetch_atom(Atom atm) :
+	cdef cHandle result = dflt_fetch_atom(deref(atm.handle))
+	if result == result.UNDEFINED: return None
+	atom = create_python_value_from_c_value(<cValuePtr&>result)
+	return atom
+
+#def store_atom(Atom atm) :
+#	return dflt_store_atom(deref(atm.handle))
