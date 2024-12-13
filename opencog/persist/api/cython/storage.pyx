@@ -15,15 +15,41 @@ from opencog.utilities import add_node, add_link
 
 from opencog.atomspace cimport cValuePtr, cHandle, cAtomSpace
 from opencog.atomspace cimport Atom
+from opencog.atomspace cimport create_python_value_from_c_value
 
+# The list of Atom Types that python knows about has to be rebuilt,
+# before much else can be done.
 regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
 
 def cog_open(Atom stonode) :
-	print("want to open ", stonode)
 	storage_open(deref(stonode.handle))
 
-def cog_close(stonode) :
-	print("want to close ", stonode)
+def cog_close(Atom stonode) :
+	storage_close(deref(stonode.handle))
 
+def cog_connected(Atom stonode) :
+	return storage_connected(deref(stonode.handle))
+
+cdef pfromh(cHandle result) :
+	if result == result.UNDEFINED: return None
+	atom = create_python_value_from_c_value(<cValuePtr&>result)
+	return atom
+
+def fetch_atom(Atom atm) :
+	return pfromh (dflt_fetch_atom(deref(atm.handle)))
+
+def store_atom(Atom atm) :
+	return pfromh (dflt_store_atom(deref(atm.handle)))
+
+def fetch_incoming_set(Atom atm) :
+	return pfromh (dflt_fetch_incoming_set(deref(atm.handle)))
+
+def load_atomspace() :
+	cdef cHandle zilch  # cHandle.UNDEFINED
+	dflt_load_atomspace(zilch)
+
+def store_atomspace() :
+	cdef cHandle zilch  # cHandle.UNDEFINED
+	dflt_store_atomspace(zilch)

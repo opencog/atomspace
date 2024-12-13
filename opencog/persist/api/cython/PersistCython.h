@@ -32,6 +32,34 @@ using namespace opencog;
 namespace opencog {
 void storage_open(const Handle&);
 void storage_close(const Handle&);
+
+bool storage_connected(const Handle&);
+Handle dflt_store_atom(const Handle&);
+Handle dflt_fetch_atom(const Handle&);
+
+Handle dflt_fetch_value(const Handle& h, const Handle& key);
+Handle dflt_fetch_incoming_set(const Handle& h);
+Handle dflt_fetch_incoming_by_type(const Handle& h, Type t);
+Handle dflt_fetch_query2(const Handle& query, const Handle& key);
+Handle dflt_fetch_query4(const Handle& query, const Handle& key,
+                                Handle meta, bool fresh);
+void dflt_store_value(const Handle& h, const Handle& key);
+void dflt_update_value(const Handle& h, const Handle& key, ValuePtr delta);
+void dflt_load_type(Type t);
+void dflt_load_atomspace(const Handle& space);
+void dflt_store_atomspace(const Handle& space);
+HandleSeq dflt_load_frames(void);
+void dflt_store_frames(const Handle& has);
+void dflt_delete_frame(const Handle& has);
+bool dflt_delete(const Handle& h);
+bool dflt_delete_recursive(const Handle& h);
+void dflt_barrier(void);
+void dflt_erase(void);
+void dflt_proxy_open(void);
+void dflt_proxy_close(void);
+void dflt_set_proxy(const Handle& h);
+std::string dflt_monitor(void);
+Handle current_storage(void);
 };
 
 #endif // _OPENCOG_PERSIST_CYTHON_H

@@ -1,4 +1,11 @@
-
+#
+# Need to use -fno-strict-aliasing when compiling cython code, in order
+# to avoid nasty compiler warnings about aliasing.  Cython explicitly
+# performs aliasing, in order to emulate python object inheritance.
+# See, for example,
+# https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
+#
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -27,6 +34,7 @@ ADD_LIBRARY(storage_cython SHARED
 ADD_DEPENDENCIES(storage_cython storage_types)
 
 TARGET_LINK_LIBRARIES(storage_cython
+	utilities_cython
 	# ${NO_AS_NEEDED}
 	persist
 	storage-types

@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PersistCython.h"
+#include "opencog/cython/opencog/Utilities.h"
 
 using namespace opencog;
 
@@ -58,6 +59,9 @@ namespace opencog {
 	}
 
 // =====================================================================
+
+// Single global default storage node. This is used whenever the
+// API does not provide an explicit storage node to use.
 StorageNodePtr _sn;
 
 void storage_open(const Handle& hsn)
@@ -82,9 +86,7 @@ void storage_open(const Handle& hsn)
 	if (nullptr == _sn) _sn = stnp;
 }
 
-};
-
-void cog_close(Handle hsn)
+void storage_close(const Handle& hsn)
 {
 	GET_STNP;
 	if (not stnp->connected())
@@ -96,5 +98,193 @@ void cog_close(Handle hsn)
 
 	if (stnp == _sn) _sn = nullptr;
 }
+
+bool storage_connected(const Handle& hsn)
+{
+	StorageNodePtr stnp = StorageNodeCast(hsn);
+	if (nullptr == stnp) return false;
+	return stnp->connected();
+}
+
+// =====================================================================
+
+#define CHECK \
+	if (nullptr == _sn) \
+		throw RuntimeException(TRACE_INFO, "No open connection to storage!");
+
+
+/**
+ * Store the single atom to the backing store hanging off the
+ * atom-space.
+ */
+Handle dflt_store_atom(const Handle& h)
+{
+	CHECK;
+	_sn->store_atom(h);
+	return h;
+}
+
+Handle dflt_fetch_atom(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_atom(h, as);
+}
+
+Handle dflt_fetch_value(const Handle& h, const Handle& key)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_value(h, key, as);
+}
+
+Handle dflt_fetch_incoming_set(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	// The "false" flag here means that the fetch is NOT recursive.
+	return _sn->fetch_incoming_set(h, false, as);
+}
+
+Handle dflt_fetch_incoming_by_type(const Handle& h, Type t)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_incoming_by_type(h, t, as);
+}
+
+Handle dflt_fetch_query2(const Handle& query, const Handle& key)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, as);
+}
+
+Handle dflt_fetch_query4(const Handle& query, const Handle& key,
+                                Handle meta, bool fresh)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_query(query, key, meta, fresh, as);
+}
+
+void dflt_store_value(const Handle& h, const Handle& key)
+{
+	CHECK;
+	_sn->store_value(h, key);
+}
+
+void dflt_update_value(const Handle& h, const Handle& key, ValuePtr delta)
+{
+	CHECK;
+	_sn->update_value(h, key, delta);
+}
+
+void dflt_load_type(Type t)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	_sn->fetch_all_atoms_of_type(t, as);
+}
+
+void dflt_load_atomspace(const Handle& space)
+{
+	CHECK;
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->load_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		AtomSpace* as = get_context_atomspace();
+		_sn->load_atomspace(as);
+	}
+}
+
+void dflt_store_atomspace(const Handle& space)
+{
+	CHECK;
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->store_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		AtomSpace* as = get_context_atomspace();
+		_sn->store_atomspace(as);
+	}
+}
+
+HandleSeq dflt_load_frames(void)
+{
+	CHECK;
+	return _sn->load_frames();
+}
+
+void dflt_store_frames(const Handle& has)
+{
+	CHECK;
+	_sn->store_frames(has);
+}
+
+void dflt_delete_frame(const Handle& has)
+{
+	CHECK;
+	_sn->delete_frame(has);
+}
+
+bool dflt_delete(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->remove_atom(as, h, false);
+}
+
+bool dflt_delete_recursive(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->remove_atom(as, h, true);
+}
+
+void dflt_barrier(void)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	_sn->barrier(as);
+}
+
+void dflt_erase(void)
+{
+	CHECK;
+	_sn->erase();
+}
+
+void dflt_proxy_open(void)
+{
+	CHECK;
+	_sn->proxy_open();
+}
+
+void dflt_proxy_close(void)
+{
+	CHECK;
+	_sn->proxy_close();
+}
+
+void dflt_set_proxy(const Handle& h)
+{
+	CHECK;
+	_sn->set_proxy(h);
+}
+
+std::string dflt_monitor(void)
+{
+	if (nullptr == _sn)
+		return "No open connection to storage!";
+	return _sn->monitor();
+}
+
+Handle current_storage(void)
+{
+	return Handle(_sn);
+}
+};
 
 // =================== END OF FILE ====================
