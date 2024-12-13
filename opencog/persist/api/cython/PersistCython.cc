@@ -131,6 +131,160 @@ Handle dflt_fetch_atom(const Handle& h)
 	return _sn->fetch_atom(h, as);
 }
 
+Handle dflt_fetch_value(const Handle& h, const Handle& key)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_value(h, key, as);
+}
+
+Handle dflt_fetch_incoming_set(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	// The "false" flag here means that the fetch is NOT recursive.
+	return _sn->fetch_incoming_set(h, false, as);
+}
+
+Handle dflt_fetch_incoming_by_type(const Handle& h, Type t)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_incoming_by_type(h, t, as);
+}
+
+Handle dflt_fetch_query2(const Handle& query, const Handle& key)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, as);
+}
+
+Handle dflt_fetch_query4(const Handle& query, const Handle& key,
+                                Handle meta, bool fresh)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->fetch_query(query, key, meta, fresh, as);
+}
+
+void dflt_store_value(const Handle& h, const Handle& key)
+{
+	CHECK;
+	_sn->store_value(h, key);
+}
+
+void dflt_update_value(const Handle& h, const Handle& key, ValuePtr delta)
+{
+	CHECK;
+	_sn->update_value(h, key, delta);
+}
+
+void dflt_load_type(Type t)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	_sn->fetch_all_atoms_of_type(t, as);
+}
+
+void dflt_load_atomspace(const Handle& space)
+{
+	CHECK;
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->load_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		AtomSpace* as = get_context_atomspace();
+		_sn->load_atomspace(as);
+	}
+}
+
+void dflt_store_atomspace(const Handle& space)
+{
+	CHECK;
+	if (space and space->get_type() == ATOM_SPACE)
+		_sn->store_atomspace(AtomSpaceCast(space).get());
+	else
+	{
+		AtomSpace* as = get_context_atomspace();
+		_sn->store_atomspace(as);
+	}
+}
+
+HandleSeq dflt_load_frames(void)
+{
+	CHECK;
+	return _sn->load_frames();
+}
+
+void dflt_store_frames(const Handle& has)
+{
+	CHECK;
+	_sn->store_frames(has);
+}
+
+void dflt_delete_frame(const Handle& has)
+{
+	CHECK;
+	_sn->delete_frame(has);
+}
+
+bool dflt_delete(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->remove_atom(as, h, false);
+}
+
+bool dflt_delete_recursive(const Handle& h)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	return _sn->remove_atom(as, h, true);
+}
+
+void dflt_barrier(void)
+{
+	CHECK;
+	AtomSpace* as = get_context_atomspace();
+	_sn->barrier(as);
+}
+
+void dflt_erase(void)
+{
+	CHECK;
+	_sn->erase();
+}
+
+void dflt_proxy_open(void)
+{
+	CHECK;
+	_sn->proxy_open();
+}
+
+void dflt_proxy_close(void)
+{
+	CHECK;
+	_sn->proxy_close();
+}
+
+void dflt_set_proxy(const Handle& h)
+{
+	CHECK;
+	_sn->set_proxy(h);
+}
+
+std::string dflt_monitor(void)
+{
+	if (nullptr == _sn)
+		return "No open connection to storage!";
+	return _sn->monitor();
+}
+
+Handle current_storage(void)
+{
+	return Handle(_sn);
+}
 };
 
 // =================== END OF FILE ====================
