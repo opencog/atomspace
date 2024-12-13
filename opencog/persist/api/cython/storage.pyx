@@ -32,11 +32,13 @@ def cog_close(Atom stonode) :
 def cog_connected(Atom stonode) :
 	return storage_connected(deref(stonode.handle))
 
-def fetch_atom(Atom atm) :
-	cdef cHandle result = dflt_fetch_atom(deref(atm.handle))
+cdef pfromh(cHandle result) :
 	if result == result.UNDEFINED: return None
 	atom = create_python_value_from_c_value(<cValuePtr&>result)
 	return atom
 
-#def store_atom(Atom atm) :
-#	return dflt_store_atom(deref(atm.handle))
+def fetch_atom(Atom atm) :
+	return pfromh (dflt_fetch_atom(deref(atm.handle)))
+
+def store_atom(Atom atm) :
+	return pfromh (dflt_store_atom(deref(atm.handle)))
