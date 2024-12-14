@@ -215,9 +215,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cValuePtr createAtomSpace(cAtomSpace *parent)
 
 
-cdef AtomSpace_factory(cAtomSpace *to_wrap)
 cdef AtomSpace_factoid(cValuePtr to_wrap)
-
 
 cdef class AtomSpace(Value):
     cdef cValuePtr asp

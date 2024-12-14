@@ -78,8 +78,8 @@ cdef class AtomSpace(Value):
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
         cdef AtomSpace atomspace_2 = <AtomSpace>as_1
 
-        cdef cAtomSpace* c_atomspace_1 = atomspace_1.atomspace
-        cdef cAtomSpace* c_atomspace_2 = atomspace_2.atomspace
+        cdef cValuePtr c_atomspace_1 = atomspace_1.asp
+        cdef cValuePtr c_atomspace_2 = atomspace_2.asp
 
         is_equal = True
         if c_atomspace_1 != c_atomspace_2:
@@ -267,8 +267,8 @@ cdef class AtomSpace(Value):
         return result != result.UNDEFINED
 
 
-cdef api object py_atomspace(cAtomSpace* c_atomspace) with gil:
-    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
     return atomspace
 
 cdef api object py_atom(const cHandle& h):
