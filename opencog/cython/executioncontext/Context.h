@@ -9,6 +9,7 @@ namespace opencog {
 
     AtomSpacePtr get_context_atomspace();
     void push_context_atomspace(AtomSpacePtr atomspace);
+    void push_context_atomspace(ValuePtr atomspace);
     AtomSpacePtr pop_context_atomspace();
     void clear_context();
 }
