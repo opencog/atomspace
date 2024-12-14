@@ -5,7 +5,7 @@
 #define _OPENCOG_CONTEXT_H
 
 namespace opencog {
-    extern thread_local std::deque<AtomSpace*> current;
+    extern thread_local std::deque<AtomSpacePtr> current;
 
     AtomSpace * get_context_atomspace();
     void push_context_atomspace(AtomSpace *atomspace);
