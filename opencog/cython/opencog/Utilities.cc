@@ -32,7 +32,7 @@ void opencog::finalize_python()
 }
 
 Handle opencog::add_node(Type t, std::string name) {
-    AtomSpace * atomspace = get_context_atomspace();
+    AtomSpacePtr atomspace = get_context_atomspace();
     if (atomspace == nullptr){
         throw std::runtime_error("current atomspace is not set");
     }
@@ -41,7 +41,7 @@ Handle opencog::add_node(Type t, std::string name) {
 }
 
 Handle opencog::add_link(Type t, HandleSeq outgoing) {
-    AtomSpace * atomspace = get_context_atomspace();
+    AtomSpacePtr atomspace = get_context_atomspace();
     if (atomspace == nullptr){
         throw std::runtime_error("current atomspace is not set");
     }

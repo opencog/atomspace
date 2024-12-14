@@ -31,7 +31,7 @@ void initialize_python();
 void finalize_python();
 Handle add_node(Type, std::string);
 Handle add_link(Type, HandleSeq);
-AtomSpace* get_context_atomspace(void);
+AtomSpacePtr get_context_atomspace(void);
 
 } // namespace opencog
 
