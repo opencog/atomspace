@@ -3,7 +3,7 @@ from libcpp.string cimport string
 from libcpp.set cimport set as cpp_set
 from opencog.atomspace cimport AtomSpace, Atom, TruthValue, Value
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
-from opencog.atomspace cimport AtomSpace_factory
+from opencog.atomspace cimport AtomSpace_factoid
 
 from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
@@ -103,21 +103,19 @@ def push_default_atomspace(AtomSpace new_atomspace):
     """
     Set default atomspace for current threads
     """
-    push_context_atomspace(new_atomspace.atomspace)
+    push_context_atomspace(new_atomspace.asp)
 
 
 def get_default_atomspace():
     """
     Get default atomspace
     """
-    cdef cAtomSpace * context = get_context_atomspace()
-    if context is NULL:
-        return None
-    return AtomSpace_factory(context)
+    cdef cValuePtr context = get_context_atomspace()
+    return AtomSpace_factoid(context)
 
 
 def pop_default_atomspace():
-    return AtomSpace_factory(pop_context_atomspace())
+    return AtomSpace_factoid(pop_context_atomspace())
 
 
 def load_file(path, AtomSpace atomspace):
