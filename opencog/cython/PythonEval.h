@@ -50,6 +50,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
 
 
@@ -77,7 +78,7 @@ class PythonEval : public GenericEval
 
         // Python utility functions
         void add_to_sys_path(std::string path);
-        PyObject * atomspace_py_object(AtomSpace *);
+        PyObject * atomspace_py_object(AtomSpacePtr);
         void print_dictionary(PyObject*);
         PyObject* find_object(PyObject* pyModule,
                               const std::string& objectName);

@@ -477,7 +477,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
         __FUNCTION__);
 }
 
-PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
+PyObject* PythonEval::atomspace_py_object(AtomSpacePtr asp)
 {
     // The py_atomspace function pointer will be NULL if the
     // opencog.atomspace cython module failed to load. Avert
@@ -489,16 +489,7 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         return NULL;
     }
 
-/***********
-    Weird ... I guess NULL atomspaces are OK!?
-    if (NULL == atomspace) {
-        logger().warn("PythonEval::%s No atomspace specified!",
-                       __FUNCTION__);
-        return NULL;
-    }
-************/
-
-    PyObject * pyAtomSpace = py_atomspace(atomspace);
+    PyObject * pyAtomSpace = py_atomspace(asp);
 
     if (!pyAtomSpace) {
         if (PyErr_Occurred())
@@ -1085,7 +1076,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = this->atomspace_py_object(as_argument);
+    PyObject* pyAtomSpace = this->atomspace_py_object(AtomSpacePtr(as_argument));
 
     PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
     // Py_DECREF(pyAtomSpace);

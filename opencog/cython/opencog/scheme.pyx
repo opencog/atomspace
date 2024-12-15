@@ -13,7 +13,7 @@ Also refer to the list of .scm type definition files in opencog.conf
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport (cValuePtr, Value, cAtomSpace,
                                 Atom, AtomSpace, cAtom, cHandle,
-                                AtomSpace_factory)
+                                AtomSpace_factoid)
 
 
 # basic wrapping for std::string conversion
@@ -83,7 +83,7 @@ def scheme_eval_h(AtomSpace a, str pys):
     return Atom.createAtom(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    cAtomSpace* eval_scheme_as(const string& s) except +
+    cValuePtr eval_scheme_as(const string& s) except +
 
 def scheme_eval_as(str pys):
     """Evaluate Scheme program when expected result is AtomSpace.
@@ -95,11 +95,11 @@ def scheme_eval_as(str pys):
         RuntimeError: if result of Scheme program is not AtomSpace or
             in case of evaluation error
     """
-    cdef cAtomSpace* ret
+    cdef cValuePtr ret
     cdef string expr
     expr = pys.encode('UTF-8')
     ret = eval_scheme_as(expr)
-    return AtomSpace_factory(ret)
+    return AtomSpace_factoid(ret)
 
 cdef extern from "opencog/cython/opencog/load-file.h" namespace "opencog":
     int load_scm_file_relative (cAtomSpace& as, char* filename) except +

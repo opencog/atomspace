@@ -12,7 +12,7 @@ namespace opencog
 std::string eval_scheme(AtomSpace*, const std::string &);
 ValuePtr eval_scheme_v(AtomSpace*, const std::string &);
 Handle eval_scheme_h(AtomSpace*, const std::string &);
-AtomSpace* eval_scheme_as(const std::string &);
+ValuePtr eval_scheme_as(const std::string &);
 
 } // namespace opencog
 

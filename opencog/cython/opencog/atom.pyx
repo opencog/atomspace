@@ -24,7 +24,7 @@ cdef class Atom(Value):
     @property
     def atomspace(self):
         cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
-        return AtomSpace_factory(a)
+        return AtomSpace_factoid(as_cast(a))
 
     @property
     def name(self):

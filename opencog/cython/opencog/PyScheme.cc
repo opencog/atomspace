@@ -120,7 +120,7 @@ Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 }
 
 // Convenience wrapper, for stand-alone usage.
-AtomSpace* opencog::eval_scheme_as(const std::string &s)
+ValuePtr opencog::eval_scheme_as(const std::string &s)
 {
 #ifdef HAVE_GUILE
 	do_init();
@@ -136,7 +136,7 @@ AtomSpace* opencog::eval_scheme_as(const std::string &s)
 		throw RuntimeException(TRACE_INFO,
 		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
 
-	return asp.get();
+	return asp;
 #else // HAVE_GUILE
 	return nullptr;
 #endif // HAVE_GUILE

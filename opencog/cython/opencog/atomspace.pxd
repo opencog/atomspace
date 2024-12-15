@@ -213,11 +213,10 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         bint extract_atom(cHandle h, bint recursive)
 
     cdef cValuePtr createAtomSpace(cAtomSpace *parent)
+    cdef cValuePtr as_cast "AtomSpaceCast"(cAtomSpace *) except +
 
 
-cdef AtomSpace_factory(cAtomSpace *to_wrap)
 cdef AtomSpace_factoid(cValuePtr to_wrap)
-
 
 cdef class AtomSpace(Value):
     cdef cValuePtr asp
