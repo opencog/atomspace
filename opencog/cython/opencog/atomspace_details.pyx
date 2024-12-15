@@ -61,9 +61,9 @@ cdef class AtomSpace(Value):
     def __init__(self, long addr = 0, object parent=None):
         if (addr == 0) :
             self.asp = createAtomSpace(<cAtomSpace*> NULL)
-            self.atomspace = <cAtomSpace*> self.asp.get()
         else :
-            self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
+            self.asp = as_cast(<cAtomSpace*> PyLong_AsVoidPtr(addr))
+        self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
 
     def __richcmp__(as_1, as_2, int op):
