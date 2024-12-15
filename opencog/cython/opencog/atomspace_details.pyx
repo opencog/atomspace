@@ -48,11 +48,8 @@ cdef AtomSpace_factoid(cValuePtr to_wrap):
 
 cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:
-    #cdef cAtomSpace *atomspace
-    #cdef object parent_atomspace
-
-    #def __cinit__(self):
-    #    self.owns_atomspace = False
+    # cdef cAtomSpace *atomspace
+    # cdef object parent_atomspace
 
     # A tacky hack to pass in a pointer to an atomspace from C++-land.
     # basically, pass an int, and cast it to the C++ pointer.  This
@@ -106,7 +103,7 @@ cdef class AtomSpace(Value):
         @returns the newly created Atom
         """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         cdef string name = atom_name.encode('UTF-8')
         cdef cHandle result = self.atomspace.xadd_node(t, name)
 
@@ -123,7 +120,7 @@ cdef class AtomSpace(Value):
         @returns handle referencing the newly created Atom
         """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
@@ -138,7 +135,7 @@ cdef class AtomSpace(Value):
         """ Check whether the passed handle refers to an actual atom
         """
         if self.atomspace == NULL:
-            return False
+            raise RuntimeError("Null AtomSpace!")
         try:
             assert isinstance(atom, Atom)
         except AssertionError:
@@ -159,21 +156,21 @@ cdef class AtomSpace(Value):
 
         """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         cdef bint recurse = recursive
         return self.atomspace.extract_atom(deref(atom.handle),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         self.atomspace.clear()
 
     def set_value(self, Atom atom, Atom key, Value value):
         """ Set the value on the atom at key
         """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         self.atomspace.set_value(deref(atom.handle), deref(key.handle),
                                  value.get_c_value_ptr())
 
@@ -181,7 +178,7 @@ cdef class AtomSpace(Value):
         """ Set the truth value on atom
         """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         self.atomspace.set_truthvalue(deref(atom.handle), deref(tv._tvptr()))
 
     # Methods to make the atomspace act more like a standard Python container
@@ -206,19 +203,19 @@ cdef class AtomSpace(Value):
     def __iter__(self):
         """ Support iterating across all atoms in the atomspace """
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         return iter(self.get_atoms_by_type(0))
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
         if self.atomspace == NULL:
-            return 0
+            raise RuntimeError("Null AtomSpace!")
         return self.atomspace.get_size()
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
         if self.atomspace == NULL:
-            return None
+            raise RuntimeError("Null AtomSpace!")
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         self.atomspace.get_handles_by_type(handle_vector,t,subt)
