@@ -2,7 +2,7 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
 from libcpp.set cimport set as cpp_set
-from opencog.atomspace cimport cAtomSpace, Type, tv_ptr, cHandle
+from opencog.atomspace cimport cAtomSpace, Type, tv_ptr, cHandle, cValuePtr
 
 
 cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
@@ -15,9 +15,9 @@ cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
 
 
 cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog":
-    cAtomSpace * get_context_atomspace();
-    void push_context_atomspace(cAtomSpace * atomspace);
-    cAtomSpace * pop_context_atomspace();
+    cValuePtr get_context_atomspace();
+    void push_context_atomspace(cValuePtr atomspace);
+    cValuePtr pop_context_atomspace();
     void c_clear_context "opencog::clear_context" ();
 
 

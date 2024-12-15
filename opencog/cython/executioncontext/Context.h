@@ -7,9 +7,10 @@
 namespace opencog {
     extern thread_local std::deque<AtomSpacePtr> current;
 
-    AtomSpace * get_context_atomspace();
-    void push_context_atomspace(AtomSpace *atomspace);
-    AtomSpace * pop_context_atomspace();
+    AtomSpacePtr get_context_atomspace();
+    void push_context_atomspace(AtomSpacePtr atomspace);
+    void push_context_atomspace(ValuePtr atomspace);
+    AtomSpacePtr pop_context_atomspace();
     void clear_context();
 }
 

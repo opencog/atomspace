@@ -127,45 +127,45 @@ Handle dflt_store_atom(const Handle& h)
 Handle dflt_fetch_atom(const Handle& h)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->fetch_atom(h, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->fetch_atom(h, asp.get());
 }
 
 Handle dflt_fetch_value(const Handle& h, const Handle& key)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->fetch_value(h, key, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->fetch_value(h, key, asp.get());
 }
 
 Handle dflt_fetch_incoming_set(const Handle& h)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
+	AtomSpacePtr asp = get_context_atomspace();
 	// The "false" flag here means that the fetch is NOT recursive.
-	return _sn->fetch_incoming_set(h, false, as);
+	return _sn->fetch_incoming_set(h, false, asp.get());
 }
 
 Handle dflt_fetch_incoming_by_type(const Handle& h, Type t)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->fetch_incoming_by_type(h, t, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->fetch_incoming_by_type(h, t, asp.get());
 }
 
 Handle dflt_fetch_query2(const Handle& query, const Handle& key)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->fetch_query(query, key, Handle::UNDEFINED, false, asp.get());
 }
 
 Handle dflt_fetch_query4(const Handle& query, const Handle& key,
                                 Handle meta, bool fresh)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->fetch_query(query, key, meta, fresh, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->fetch_query(query, key, meta, fresh, asp.get());
 }
 
 void dflt_store_value(const Handle& h, const Handle& key)
@@ -183,8 +183,8 @@ void dflt_update_value(const Handle& h, const Handle& key, ValuePtr delta)
 void dflt_load_type(Type t)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	_sn->fetch_all_atoms_of_type(t, as);
+	AtomSpacePtr asp = get_context_atomspace();
+	_sn->fetch_all_atoms_of_type(t, asp.get());
 }
 
 void dflt_load_atomspace(const Handle& space)
@@ -194,8 +194,8 @@ void dflt_load_atomspace(const Handle& space)
 		_sn->load_atomspace(AtomSpaceCast(space).get());
 	else
 	{
-		AtomSpace* as = get_context_atomspace();
-		_sn->load_atomspace(as);
+		AtomSpacePtr asp = get_context_atomspace();
+		_sn->load_atomspace(asp.get());
 	}
 }
 
@@ -206,8 +206,8 @@ void dflt_store_atomspace(const Handle& space)
 		_sn->store_atomspace(AtomSpaceCast(space).get());
 	else
 	{
-		AtomSpace* as = get_context_atomspace();
-		_sn->store_atomspace(as);
+		AtomSpacePtr asp = get_context_atomspace();
+		_sn->store_atomspace(asp.get());
 	}
 }
 
@@ -232,22 +232,22 @@ void dflt_delete_frame(const Handle& has)
 bool dflt_delete(const Handle& h)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->remove_atom(as, h, false);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->remove_atom(asp.get(), h, false);
 }
 
 bool dflt_delete_recursive(const Handle& h)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	return _sn->remove_atom(as, h, true);
+	AtomSpacePtr asp = get_context_atomspace();
+	return _sn->remove_atom(asp.get(), h, true);
 }
 
 void dflt_barrier(void)
 {
 	CHECK;
-	AtomSpace* as = get_context_atomspace();
-	_sn->barrier(as);
+	AtomSpacePtr asp = get_context_atomspace();
+	_sn->barrier(asp.get());
 }
 
 void dflt_erase(void)
