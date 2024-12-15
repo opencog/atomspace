@@ -991,7 +991,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
                              Handle varargs)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    push_context_atomspace(AtomSpacePtr(as));
+    push_context_atomspace(AtomSpaceCast(as));
     BOOST_SCOPE_EXIT(void) {
         pop_context_atomspace();
     } BOOST_SCOPE_EXIT_END
