@@ -80,7 +80,15 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     """
     Add Node to the atomspace from the current context
     """
-    cdef string name = atom_name.encode('UTF-8')
+    # Valid strings include those coming from e.g. iso8859-NN
+    # filenames, which break when shoved through UTF-8 because
+    # they cotain bytes that cannot be converted to UTF-8 using
+    # default encoding tables. Such string typically come from
+    # Microsoft, which had a habit of spewing screwball characters
+    # into random texts. So, rather than catching python's exception,
+    # just escape these bytes. The result is a valid UTF-8 string
+    # with the screwy byte properly encoded.
+    cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
     cdef cHandle result = c_add_node(t, name)
 
     if result == result.UNDEFINED: return None

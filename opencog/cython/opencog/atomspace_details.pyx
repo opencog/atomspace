@@ -104,7 +104,10 @@ cdef class AtomSpace(Value):
         """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        cdef string name = atom_name.encode('UTF-8')
+
+        # See comments on encoding "invalid" bytes in utilities.pyx
+        # These bytes are from Microsoft Windows doggie litter.
+        cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
         cdef cHandle result = self.atomspace.xadd_node(t, name)
 
         if result == result.UNDEFINED: return None
@@ -248,7 +251,7 @@ cdef class AtomSpace(Value):
                 [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
 
     def is_node_in_atomspace(self, Type t, s):
-        cdef string name = s.encode('UTF-8')
+        cdef string name = s.encode('UTF-8', 'surrogateescape')
         result = self.atomspace.get_handle(t, name)
         return result != result.UNDEFINED
 
