@@ -39,17 +39,11 @@ cdef vector[cHandle] atom_list_to_vector(list lst):
     return handle_vector
 
 
-cdef AtomSpace_factory(cAtomSpace *to_wrap):
-    cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.atomspace = to_wrap
-    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap)
-    return instance
-
 cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
-    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get())
+    # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
 
 cdef class AtomSpace(Value):
