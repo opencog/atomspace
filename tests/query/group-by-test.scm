@@ -25,7 +25,7 @@
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(And
 			(Group (Variable "$Y"))
-			(Present 
+			(Present
 				(Edge (Predicate "property")
 					(List (Variable "$X") (Variable "$Y")))))
 		(List (Variable "$Y") (Variable "$X"))))

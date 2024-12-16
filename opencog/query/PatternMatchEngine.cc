@@ -2758,7 +2758,7 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	// If there is no for-all clause (no AlwaysLink clause)
 	// then report groundings as they are found.
 	if (_pat->always.size() == 0)
-		return _pmc.grounding(var_soln, term_soln);
+		return _pmc.propose_grounding(var_soln, term_soln);
 
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
@@ -2785,8 +2785,8 @@ bool PatternMatchEngine::report_forall(void)
 		OC_ASSERT(_term_ground_cache.size() == nitems);
 		for (size_t i=0; i<nitems; i++)
 		{
-			halt = _pmc.grounding(_var_ground_cache[i],
-			                      _term_ground_cache[i]);
+			halt = _pmc.propose_grounding(_var_ground_cache[i],
+			                              _term_ground_cache[i]);
 			if (halt) break;
 		}
 	}

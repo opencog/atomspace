@@ -69,8 +69,8 @@ class RewriteMixin :
 		HandleSeq implicand;
 		size_t max_results;
 
-		virtual bool grounding(const GroundingMap &var_soln,
-		                       const GroundingMap &term_soln);
+		virtual bool propose_grounding(const GroundingMap &var_soln,
+		                               const GroundingMap &term_soln);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

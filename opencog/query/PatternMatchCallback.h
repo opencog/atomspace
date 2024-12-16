@@ -275,8 +275,8 @@ class PatternMatchCallback
 		 * the same result.  This can happen, for example, if there are
 		 * multiple ways for the pattern to match up to the result.
 		 */
-		virtual bool grounding(const GroundingMap &var_soln,
-		                       const GroundingMap &term_soln) = 0;
+		virtual bool propose_grounding(const GroundingMap &var_soln,
+		                               const GroundingMap &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

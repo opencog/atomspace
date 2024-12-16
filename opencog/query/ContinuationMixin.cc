@@ -143,7 +143,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 			if (crispy)
 			{
 				GroundingMap empty;
-				grounding(empty, empty);
+				propose_grounding(empty, empty);
 				return search_finished(false);
 			}
 			return false;

@@ -43,8 +43,8 @@ RewriteMixin::RewriteMixin(AtomSpace* as)
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool RewriteMixin::grounding(const GroundingMap &var_soln,
-                             const GroundingMap &term_soln)
+bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
+                                     const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);

@@ -31,8 +31,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const GroundingMap &var_soln,
-                          const GroundingMap &term_soln)
+bool Satisfier::propose_grounding(const GroundingMap &var_soln,
+                                  const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
@@ -127,8 +127,8 @@ bool Satisfier::search_finished(bool done)
 // ===========================================================
 
 // MeetLink and GetLink groundings go through here.
-bool SatisfyingSet::grounding(const GroundingMap &var_soln,
-                              const GroundingMap &term_soln)
+bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
+                                      const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
