@@ -240,7 +240,8 @@ private:
 	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
-	std::vector<GroundingMap> _grouping;
+	// The second argument is an ID number. For now, an int seems OK.
+	std::map<GroundingMap, size_t> _grouping;
 	bool assign_grouping(const GroundingMap &var_soln,
 	                     const GroundingMap &term_soln);
 

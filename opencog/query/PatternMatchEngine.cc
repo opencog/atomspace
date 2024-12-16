@@ -2805,22 +2805,14 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
 	}
 
 	// Next, see if we already have this grouping.
-	// These are ordered into a vector instead of a set, mostly because
-	// I think I want to pass some group ID num in the API. Maybe the
-	// API should be fixed. I dunno. At any rate, we pay a linear
-	// search penalty, which I think is small for "most cases", whatever
-	// that is :-) So maybe FIXME someday. I dunno.
-	size_t grpnum = 0;
-	for (const GroundingMap& grpm : _grouping)
-	{
-		if (grpm == grp)
-			return _pmc.propose_grouping(var_soln, term_soln, grpm, grpnum);
-		grpnum ++;
-	}
+	const auto& git = _grouping.find(grp);
+	if (git != _grouping.end())
+		return _pmc.propose_grouping(var_soln, term_soln, git->first, git->second);
 
 	// Start a new group.
-	_grouping.push_back(grp);
-	return _pmc.propose_grouping(var_soln, term_soln, grp, grpnum);
+	size_t idnum = _grouping.size();
+	_grouping[grp] = idnum;
+	return _pmc.propose_grouping(var_soln, term_soln, grp, idnum);
 }
 
 bool PatternMatchEngine::report_forall(void)
