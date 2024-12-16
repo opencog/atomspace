@@ -82,10 +82,18 @@
 			(Group (Variable "$Y")))
 
 		; The QueryLink is a kind of rewrite-rule; the variable
-		; groundings can be used to create new structures.
-		(Edge (Predicate "go together")
-			(List (Variable "$Y") (Variable "$X")))))
+		; groundings can be used to create new structures. For this
+		; demo, some nonsense Implication & Evaluation links are
+		; created. You don't want to use Implication like this in
+		; practice, but visually, it works for this demo.
+		(Evaluation (Concept "things that go together")
+			(Implication (Variable "$Y") (Variable "$X")))))
 
+; Perform the query, and put the results in a scheme object.
 (define query-results (cog-execute! grp-query))
-(format #t "There are ~A results\n" (length (cog-value->list query-results)))
-(format #t "The query results are ~A\n" query-results)
+
+; Print a report.
+(format #t "There are ~A results.\n" (length (cog-value->list query-results)))
+(format #t "The query results are:\n~A\n" query-results)
+
+; ------------ That's All, Folks! The End. ------------------
