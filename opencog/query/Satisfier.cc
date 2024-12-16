@@ -226,6 +226,10 @@ bool SatisfyingSet::start_search(void)
 
 bool SatisfyingSet::search_finished(bool done)
 {
+	// If there are groupings, report them now.
+	for (const auto& gset : _groups)
+		_result_queue->push(createLinkValue(gset.second));
+
 	_result_queue->close();
 	return done;
 }
