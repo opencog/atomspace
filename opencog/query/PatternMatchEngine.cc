@@ -2760,6 +2760,12 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	if (_pat->always.size() == 0)
 		return _pmc.propose_grounding(var_soln, term_soln);
 
+	// If the groundings need to be grouped together, pass that off to
+	// some out-of-line code.
+	if (_pat->grouping.size() > 0)
+		return assign_grouping(var_soln, term_soln);
+
+	// We are here if there's an always clause.
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
@@ -2769,6 +2775,12 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	_term_ground_cache.push_back(term_soln);
 
 	// Keep going.
+	return false;
+}
+
+bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
+                                         const GroundingMap &term_soln)
+{
 	return false;
 }
 

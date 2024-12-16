@@ -240,6 +240,10 @@ private:
 	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
+	std::vector<GroundingMap> _grouping;
+	bool assign_grouping(const GroundingMap &var_soln,
+	                     const GroundingMap &term_soln);
+
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
