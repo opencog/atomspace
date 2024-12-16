@@ -96,4 +96,22 @@
 (format #t "There are ~A results.\n" (length (cog-value->list query-results)))
 (format #t "The query results are:\n~A\n" query-results)
 
+; -------------------------------------------------------------
+; Part the second.
+; This is a variant of the above, perhaps showing more clearly and
+; distinctly thr grouping effect.
+
+(define grp-set
+	(Bind
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(And
+			(Present
+				(Edge (Predicate "property")
+					(List (Variable "$X") (Variable "$Y"))))
+			(Group (Variable "$Y")))
+		(Variable "$X")))
+
+(define set-results (cog-execute! grp-set))
+(format #t "The groupings are:\n~A\n" set-results)
+
 ; ------------ That's All, Folks! The End. ------------------
