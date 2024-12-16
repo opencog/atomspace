@@ -41,6 +41,7 @@ void PatternLink::common_init(void)
 	locate_defines(_pat.pmandatory);
 	locate_defines(_pat.absents);
 	locate_defines(_pat.always);
+	locate_defines(_pat.grouping);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -99,11 +100,13 @@ void PatternLink::common_init(void)
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
 	clauses_get_variables(_pat.always);
+	clauses_get_variables(_pat.grouping);
 
 	// Find prunable terms.
 	locate_cacheable(_pat.pmandatory);
 	locate_cacheable(_pat.absents);
 	locate_cacheable(_pat.always);
+	locate_cacheable(_pat.grouping);
 }
 
 
@@ -151,12 +154,13 @@ void PatternLink::disjointed_init(void)
 		// Unfortunately, unbundle_clauses sets all sorts of other
 		// stuff that we don't need/want, so we have to clobber that
 		// every time through the loop.
-		// BTW, any `absents` and `always` are probably handled
-		// incorrectly, so that's a bug that needs fixing.
+		// BTW, any `absents`, `always` and `grouping` are probably
+		// handled incorrectly, so that's a bug that needs fixing.
 		unbundle_clauses(h);
 
 		// Each component consists of the assorted parts.
-		// XXX FIXME, this handles `absents` and `always` incorrectly.
+		// XXX FIXME, this handles `absents`, `always` and `grouping`
+		// incorrectly.
 		HandleSeq clseq;
 		for (const PatternTermPtr& ptm: _pat.pmandatory)
 			clseq.push_back(ptm->getHandle());
@@ -1296,6 +1300,7 @@ void PatternLink::debug_log(std::string msg) const
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
 	logger().fine("%lu absent clauses", _pat.absents.size());
 	logger().fine("%lu always clauses", _pat.always.size());
+	logger().fine("%lu grouping clauses", _pat.grouping.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
@@ -1322,6 +1327,15 @@ void PatternLink::debug_log(std::string msg) const
 	for (const PatternTermPtr& ptm : _pat.always)
 	{
 		str += "================ Always clause " + std::to_string(num) + ":";
+		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
+		str += "\n";
+		str += ptm->to_full_string() + "\n\n";
+		num++;
+	}
+
+	for (const PatternTermPtr& ptm : _pat.grouping)
+	{
+		str += "================ Grouping clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
 		str += ptm->to_full_string() + "\n\n";
