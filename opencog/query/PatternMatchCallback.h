@@ -279,6 +279,22 @@ class PatternMatchCallback
 		                               const GroundingMap &term_soln) = 0;
 
 		/**
+		 * Same as above, but called when there is a non-empty GroupLink
+		 * in the pattern. In this case, the grounding is assigned to a
+		 * grouping. That grouping is passed as the third argument, and
+		 * and index as the fourth arg. All groundings within a grouping
+		 * form a connected graph. All groudnings with distinct indexes
+		 * are disjoint from one-another.
+		 */
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &grouping,
+		                              size_t group_index)
+		{
+			return propose_grounding(var_soln, term_soln);
+		}
+
+		/**
 		 * Called whenever the incoming set of an atom is to be explored.
 		 * This callback allows the search space to be prioritized, by
 		 * returning (all or some of) the incoming set in some sorted
