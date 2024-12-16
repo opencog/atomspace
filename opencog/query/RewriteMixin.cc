@@ -29,7 +29,7 @@
 using namespace opencog;
 
 RewriteMixin::RewriteMixin(AtomSpace* as)
-	: _as(as), inst(as), _num_results(0), max_results(SIZE_MAX)
+	: _as(as), _num_results(0), inst(as), max_results(SIZE_MAX)
 {
 }
 
@@ -91,6 +91,8 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 	// Do not accept new solution if maximum number has been already reached
 	if (_num_results >= max_results)
 		return true;
+
+	_num_results ++;
 
 	// Obtain the grouping that we'll stuff values into.
 	ValueSet& grp = _groups[grouping];

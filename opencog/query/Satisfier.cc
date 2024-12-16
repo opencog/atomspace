@@ -199,11 +199,8 @@ bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
 		return true;
 
 	// Place the result into the indicated grouping.
-	const auto& it = _groups.find(grouping);
-	if (_groups.end() == it)
-		_groups[grouping] = ValueSet({wrap_result(var_soln)});
-	else
-		it->second.insert(wrap_result(var_soln));
+	ValueSet& grp = _groups[grouping];
+	grp.insert(wrap_result(var_soln));
 
 	return false;
 }
