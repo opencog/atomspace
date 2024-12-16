@@ -2807,12 +2807,11 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
 	// Next, see if we already have this grouping.
 	const auto& git = _grouping.find(grp);
 	if (git != _grouping.end())
-		return _pmc.propose_grouping(var_soln, term_soln, git->first, git->second);
+		return _pmc.propose_grouping(var_soln, term_soln, *git);
 
 	// Start a new group.
-	size_t idnum = _grouping.size();
-	_grouping[grp] = idnum;
-	return _pmc.propose_grouping(var_soln, term_soln, grp, idnum);
+	_grouping.insert(grp);
+	return _pmc.propose_grouping(var_soln, term_soln, grp);
 }
 
 bool PatternMatchEngine::report_forall(void)

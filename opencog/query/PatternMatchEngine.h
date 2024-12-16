@@ -241,7 +241,7 @@ private:
 	bool report_forall(void);
 
 	// The second argument is an ID number. For now, an int seems OK.
-	std::map<GroundingMap, size_t> _grouping;
+	std::set<GroundingMap> _grouping;
 	bool assign_grouping(const GroundingMap &var_soln,
 	                     const GroundingMap &term_soln);
 
