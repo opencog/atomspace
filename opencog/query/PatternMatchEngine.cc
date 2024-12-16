@@ -2755,15 +2755,15 @@ void PatternMatchEngine::solution_drop(void)
 bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
                                           const GroundingMap &term_soln)
 {
-	// If there is no for-all clause (no AlwaysLink clause)
-	// then report groundings as they are found.
-	if (_pat->always.size() == 0)
-		return _pmc.propose_grounding(var_soln, term_soln);
-
 	// If the groundings need to be grouped together, pass that off to
 	// some out-of-line code.
 	if (_pat->grouping.size() > 0)
 		return assign_grouping(var_soln, term_soln);
+
+	// If there is no for-all clause (no AlwaysLink clause)
+	// then report groundings as they are found.
+	if (_pat->always.size() == 0)
+		return _pmc.propose_grounding(var_soln, term_soln);
 
 	// We are here if there's an always clause.
 	// Don't even bother caching, if we know we are losing.
@@ -2781,6 +2781,15 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
                                          const GroundingMap &term_soln)
 {
+	GroundingMap grp;
+	for (const PatternTermPtr& ptm : _pat->grouping)
+	{
+		const Handle& grpt = ptm->getHandle();
+		const auto& it = var_soln.find(grpt);
+		if (var_soln.end() == it)
+		{
+		}
+	}
 	return false;
 }
 
