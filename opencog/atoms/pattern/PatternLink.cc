@@ -492,6 +492,20 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		return true;
 	}
 
+	// Pull clauses out of an GroupByLink
+	if (not reverse and GROUP_BY_LINK == typ)
+	{
+		for (PatternTermPtr term: clause->getOutgoingSet())
+		{
+			const Handle& ah = term->getQuote();
+			if (is_constant(_variables.varset, ah)) continue;
+			pin_term(term);
+			term->markGrouping();
+			_pat.grouping.push_back(term);
+		}
+		return true;
+	}
+
 	// Handle in-line variable declarations.
 	if (not reverse and TYPED_VARIABLE_LINK == typ)
 	{
@@ -833,6 +847,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
+	if (GROUP_BY_LINK) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
 
@@ -1161,8 +1176,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		// because they involve variables that are bound to some other
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
-		bool chk_const =
-			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
+		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
+		chk_const = chck_const or ALWAYS_LINK == t or GROUP_BY_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 

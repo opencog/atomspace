@@ -37,6 +37,7 @@ std::string Pattern::to_string(const std::string& indent) const
 	ss << indent << "pmandatory:\n" << oc_to_string(pmandatory) << std::endl;
 	ss << indent << "absents:\n" << oc_to_string(absents) << std::endl;
 	ss << indent << "always:\n" << oc_to_string(always) << std::endl;
+	ss << indent << "group-by:\n" << oc_to_string(grouping) << std::endl;
 
 	return ss.str();
 }
