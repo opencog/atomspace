@@ -365,6 +365,16 @@ void PatternTerm::markAlways()
 
 // ==============================================================
 
+void PatternTerm::markGrouping()
+{
+	// If its quoted, it has no effect.
+	if (isQuoted()) return;
+
+	_is_grouping = true;
+}
+
+// ==============================================================
+
 std::string PatternTerm::to_short_string() const { return to_string(": "); }
 
 std::string PatternTerm::to_short_string(const std::string& sep) const

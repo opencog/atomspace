@@ -175,8 +175,7 @@ protected:
 
 	// True if this is a term that must have exactly the same value in
 	// grouping of groundings. This behaves like a local "always" in the
-	// group. It corresponds to the GROUP_BY_LINK in the default
-	// implementation.
+	// group. It corresponds to the GROUP_LINK in the default implementation.
 	bool _is_grouping;
 
 	void addAnyBoundVar();

@@ -492,8 +492,8 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		return true;
 	}
 
-	// Pull clauses out of an GroupByLink
-	if (not reverse and GROUP_BY_LINK == typ)
+	// Pull clauses out of a GroupLink
+	if (not reverse and GROUP_LINK == typ)
 	{
 		for (PatternTermPtr term: clause->getOutgoingSet())
 		{
@@ -847,7 +847,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
-	if (GROUP_BY_LINK) return false;
+	if (GROUP_LINK == t) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
 
@@ -1177,7 +1177,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
 		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
-		chk_const = chk_const or ALWAYS_LINK == t or GROUP_BY_LINK == t;
+		chk_const = chk_const or ALWAYS_LINK == t or GROUP_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
