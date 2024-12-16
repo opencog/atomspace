@@ -23,10 +23,11 @@
 (define grp-query
 	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
-		(Group (Variable "$Y"))
-		(Present 
-			(Edge (Predicate "property")
-				(List (Variable "$X") (Variable "$Y"))))
+		(And
+			(Group (Variable "$Y"))
+			(Present 
+				(Edge (Predicate "property")
+					(List (Variable "$X") (Variable "$Y")))))
 		(List (Variable "$Y") (Variable "$X"))))
 
 (define grp-results (cog-execute! grp-query))
