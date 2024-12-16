@@ -321,7 +321,11 @@ ALWAYS_LINK <- PRESENT_LINK
 // and intended to have similar semantics & effects. Results having a
 // common grouping will be placed in the same LinkValue. Disjoint
 // results will be presented disjointly.
-GROUP_BY_LINK <- PRESENT_LINK
+//
+// The inheritance from AlwaysLink is meant to indicate that the
+// grouping behave like an AlwaysLink, in that every member of the
+// grouping always has the same groundings.
+GROUP_BY_LINK <- ALWAYS_LINK
 
 // Continuations are used in the Pattern Engine to implement infinite
 // recursion. They currently behave like an explicit declaration of tail
