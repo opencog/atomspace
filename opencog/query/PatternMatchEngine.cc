@@ -2790,13 +2790,18 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
 	{
 		const Handle& grpt = ptm->getHandle();
 
-		// At this time, assume groupings are given by single variables
-		// which act to pin the group. Complex clauses are TBD.
-		const auto& it = var_soln.find(grpt);
-		OC_ASSERT(it != var_soln.end(), "Internal Error (? Maybe user error?)");
-
-		// Record it.
-		grp[grpt] = it->second;
+		const auto& vit = var_soln.find(grpt);
+		if (vit != var_soln.end())
+			grp[grpt] = vit->second;
+		else
+		{
+			const auto& tit = term_soln.find(grpt);
+			// The grouping term must be grounded. It must have appeared
+			// in some Present clause. (Perhaps Pattern.c should have
+			// copied it there, to a 'mandatory' clause?)
+			OC_ASSERT (tit != term_soln.end(), "Internal Error!");
+			grp[grpt] = tit->second;
+		}
 	}
 
 	// Next, see if we already have this grouping.
