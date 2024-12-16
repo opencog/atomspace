@@ -261,9 +261,10 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
-// engine; they are used to specify what is searched for.
+// engine; they are used to specify what is searched for, and how
+// results are presented.
 
-// The 'intuitionist logic' version of OR_LINK is 'multiple choice'
+// The 'intuitionist logic' version of OR_LINK is 'multiple choice'.
 // The ChoiceLink states that a choice must be made.  Like a restaurant
 // menu, it lists a menu of things: you can pick one (and only one).
 // Thus, ChoiceLink is an exclusive choice: you can only choose one of
@@ -314,6 +315,13 @@ ABSENT_LINK <- PRESENT_LINK
 // case" condition during matching. It's a kind-of `ForAll`, just like
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
+
+// A collection of variables or clauses that should be grouped together
+// when presenting results. Inspired by the "GROUP BY" statement in SQL,
+// and intended to have similar semantics & effects. Results having a
+// common grouping will be placed in the same LinkValue. Disjoint
+// results will be presented disjointly.
+GROUP_BY_LINK <- PRESENT_LINK
 
 // Continuations are used in the Pattern Engine to implement infinite
 // recursion. They currently behave like an explicit declaration of tail
@@ -484,11 +492,6 @@ VARIABLE_SET <- CONNECTOR_SET
 // sequence. All this really does is to name a variable, such that
 // the default type cnstructor for it will accept multiple matches.
 GLOB_NODE <- VARIABLE_NODE
-
-// A collection of variables that must share a common grounding, when
-// reporting pattern-match results. Inspired by the "GROUP BY" statement
-// in SQL, and intended to have similar semantics & effects.
-GROUP_BY <- VARIABLE_LIST
 
 // Everything under a QuoteLink is interpreted literally. Variable
 // substitution (beta-reduction) is not performed into quoted variables.

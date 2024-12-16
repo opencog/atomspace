@@ -23,7 +23,7 @@
 (define grp-query
 	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
-		; (GroupBy (Variable "$Y"))
+		(GroupBy (Variable "$Y"))
 		(Present 
 			(Edge (Predicate "property")
 				(List (Variable "$X") (Variable "$Y"))))
