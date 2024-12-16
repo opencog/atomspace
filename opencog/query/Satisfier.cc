@@ -76,13 +76,6 @@ bool Satisfier::propose_grounding(const GroundingMap &var_soln,
 	return true;
 }
 
-bool Satisfier::propose_grouping(const GroundingMap &var_soln,
-                                 const GroundingMap &term_soln,
-                                 const GroundingMap &grouping)
-{
-	return propose_grounding(var_soln, term_soln);
-}
-
 /// This method handles the case of SequentialAnd, SequentialOr with
 /// embedded AbsentLinks, NotLink-PresentLink and some weird
 /// combinations of NotLink-ChoiceLink, and so-on.  The idea here is
