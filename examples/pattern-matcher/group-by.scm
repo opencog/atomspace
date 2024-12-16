@@ -24,6 +24,14 @@
 ; these trees differ in various ways from one-another, but they have
 ; this kernel in common. In this respect, they are all similar.
 ;
+; A third way of thinking of groupings is as "local for-all clauses".
+; Thus, for all members in a group, the property specified in the
+; grouping kernel holds. In this sense, GroupLink is a "local" version
+; of AlwaysLink. The AlwaysLink asks that all search results must have
+; in common the specified clause, or, equivalently, that there must be
+; one and only one group. The GroupLink relaxes this demand for there
+; to be only one, and presents several groupings, as these occur.
+;
 ; This demo will use a single, simple grouping variable. Multiple
 ; variables and complex terms can be used to define a grouping kernel;
 ; this demo shows only the simplest case.

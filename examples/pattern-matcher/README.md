@@ -111,6 +111,7 @@ are the logics of theorem-proving, in general.)
 * `presence.scm`     -- Testing for presence of an Atom ("there-exists").
 * `absent.scm`       -- Using the AbsentLink ("there-does-not-exist").
 * `always.scm`       -- Testing if a clause always holds ("for-all").
+* `group-by.scm`     -- Grouping results together ("local for-all").
 * `recursive.scm`    -- Recursive pattern matching aka forward chaining.
 * `value-of.scm`     -- Looking for high or low TruthValues.
 * `dot-product.scm`  -- Numeric computations on query results.
