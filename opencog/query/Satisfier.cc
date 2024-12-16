@@ -31,8 +31,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const GroundingMap &var_soln,
-                          const GroundingMap &term_soln)
+bool Satisfier::propose_grounding(const GroundingMap &var_soln,
+                                  const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
@@ -126,23 +126,16 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-// MeetLink and GetLink groundings go through here.
-bool SatisfyingSet::grounding(const GroundingMap &var_soln,
-                              const GroundingMap &term_soln)
+ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 {
-	LOCK_PE_MUTEX;
-	// PatternMatchEngine::log_solution(var_soln, term_soln);
-
-	// Do not accept new solution if maximum number has been already reached
-	if (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results)
-		return true;
+	_num_results ++;
 
 	if (1 == _varseq.size())
 	{
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			_result_queue->push(var_soln.at(_varseq[0]));
+			return var_soln.at(_varseq[0]);
 		}
 		catch (...)
 		{
@@ -150,9 +143,6 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 				"Internal error: ungrounded variable %s\n",
 				_varseq[0]->to_string().c_str());
 		}
-
-		// If we found as many as we want, then stop looking for more.
-		return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
 	}
 
 	// If more than one variable, encapsulate in sequential order,
@@ -172,12 +162,47 @@ bool SatisfyingSet::grounding(const GroundingMap &var_soln,
 			vargnds.push_back(hv);
 		}
 	}
-	ValuePtr gnds(createLinkValue(std::move(vargnds)));
+	return createLinkValue(std::move(vargnds));
+}
 
-	_result_queue->push(std::move(gnds));
+// MeetLink and GetLink groundings go through here.
+bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
+                                      const GroundingMap &term_soln)
+{
+	LOCK_PE_MUTEX;
+	// PatternMatchEngine::log_solution(var_soln, term_soln);
+
+	// Do not accept new solution if maximum number has been already reached
+	if (_num_results >= max_results)
+		return true;
+
+	_result_queue->push(wrap_result(var_soln));
 
 	// If we found as many as we want, then stop looking for more.
-	return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
+	return (_num_results >= max_results);
+}
+
+/// Much like the above, but groundings are organized into groupings.
+/// The primary technical problem here is that we cannot report any
+/// search results, until after the search has completed. This is
+/// because the very last item to be reported may belong to the very
+/// first group. So we sit here, stupidly, and wait for search results
+/// to dribble in. Perhaps the engine search could be modified in some
+/// clever way to find groupings in a single batch; but for now, I don't
+/// see how this could be done.
+bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
+                                     const GroundingMap &term_soln,
+                                     const GroundingMap &grouping)
+{
+	// Do not accept new solution if maximum number has been already reached
+	if (_num_results >= max_results)
+		return true;
+
+	// Place the result into the indicated grouping.
+	ValueSet& grp = _groups[grouping];
+	grp.insert(wrap_result(var_soln));
+
+	return false;
 }
 
 bool SatisfyingSet::start_search(void)
@@ -191,6 +216,10 @@ bool SatisfyingSet::start_search(void)
 
 bool SatisfyingSet::search_finished(bool done)
 {
+	// If there are groupings, report them now.
+	for (const auto& gset : _groups)
+		_result_queue->push(createLinkValue(gset.second));
+
 	_result_queue->close();
 	return done;
 }

@@ -97,8 +97,8 @@ class TestPMCB :
 		return anch == grnd;
 	}
 
-	virtual bool grounding(const HandleMap &var_soln,
-	                       const HandleMap &pred_soln)
+	virtual bool propose_grounding(const HandleMap &var_soln,
+	                               const HandleMap &pred_soln)
 	{
 		scnt ++;
 		return false;

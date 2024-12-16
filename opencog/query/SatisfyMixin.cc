@@ -131,8 +131,8 @@ class PMCGroundings : public SatisfyMixin
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
-		bool grounding(const GroundingMap &var_soln,
-		               const GroundingMap &term_soln)
+		bool propose_grounding(const GroundingMap &var_soln,
+		                       const GroundingMap &term_soln)
 		{
 			LOCK_PE_MUTEX;
 			_term_groundings.push_back(term_soln);
@@ -263,7 +263,7 @@ bool SatisfyMixin::cartesian_product(
 #endif
 		// Yay! We found one! We now have a fully and completely grounded
 		// pattern! See what the callback thinks of it.
-		return grounding(var_gnds, term_gnds);
+		return propose_grounding(var_gnds, term_gnds);
 	}
 #ifdef QDEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
@@ -512,7 +512,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		{
 			for (size_t j = 0; j < comp_var_gnds[i].size(); j++)
 			{
-				bool done = grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
+				bool done = propose_grounding(comp_var_gnds[i][j], comp_term_gnds[i][j]);
 				if (done) return done;
 			}
 		}

@@ -261,9 +261,10 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
-// engine; they are used to specify what is searched for.
+// engine; they are used to specify what is searched for, and how
+// results are presented.
 
-// The 'intuitionist logic' version of OR_LINK is 'multiple choice'
+// The 'intuitionist logic' version of OR_LINK is 'multiple choice'.
 // The ChoiceLink states that a choice must be made.  Like a restaurant
 // menu, it lists a menu of things: you can pick one (and only one).
 // Thus, ChoiceLink is an exclusive choice: you can only choose one of
@@ -314,6 +315,17 @@ ABSENT_LINK <- PRESENT_LINK
 // case" condition during matching. It's a kind-of `ForAll`, just like
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
+
+// A collection of variables or clauses that should be grouped together
+// when presenting results. Inspired by the "GROUP BY" statement in SQL,
+// and intended to have similar semantics & effects. Results having a
+// common grouping will be placed in the same LinkValue. Disjoint
+// results will be presented disjointly.
+//
+// The inheritance from AlwaysLink is meant to indicate that the
+// grouping behave like an AlwaysLink, in that every member of the
+// grouping always has the same groundings.
+GROUP_LINK <- ALWAYS_LINK
 
 // Continuations are used in the Pattern Engine to implement infinite
 // recursion. They currently behave like an explicit declaration of tail
@@ -470,7 +482,8 @@ TAG_LINK <- ORDERED_LINK // <- MEMBER_LINK
 // A Variable.  Use Lambda's to hide these. Use types to type them.
 VARIABLE_NODE <- ANY_NODE
 
-// A list of variables or variable declarations.
+// A list of variables or variable declarations. These may be typed,
+// with possibly complex types, such as signatures.
 VARIABLE_LIST <- CONNECTOR_SEQ
 
 // A set (thus unordered) of variables or variable declarations. This
@@ -626,7 +639,7 @@ PUT_LINK <- PRENEX_LINK
 
 // The JoinLink searches for containing links that satsify the specified
 // predicates. This is the AtomSpace version of "join and meet" in a
-// partially ordered set. See wikipedia "meet and join".
+// partially ordered set. See Wikipedia "meet and join".
 // The MinimalJoin is the supremum.
 // The MaximalJoin is the top.
 // The UpperSet is everything in between.

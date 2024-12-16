@@ -240,6 +240,11 @@ private:
 	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
+	// The second argument is an ID number. For now, an int seems OK.
+	std::set<GroundingMap> _grouping;
+	bool assign_grouping(const GroundingMap &var_soln,
+	                     const GroundingMap &term_soln);
+
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.

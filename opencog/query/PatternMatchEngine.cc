@@ -2755,11 +2755,17 @@ void PatternMatchEngine::solution_drop(void)
 bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
                                           const GroundingMap &term_soln)
 {
+	// If the groundings need to be grouped together, pass that off to
+	// some out-of-line code.
+	if (_pat->grouping.size() > 0)
+		return assign_grouping(var_soln, term_soln);
+
 	// If there is no for-all clause (no AlwaysLink clause)
 	// then report groundings as they are found.
 	if (_pat->always.size() == 0)
-		return _pmc.grounding(var_soln, term_soln);
+		return _pmc.propose_grounding(var_soln, term_soln);
 
+	// We are here if there's an always clause.
 	// Don't even bother caching, if we know we are losing.
 	if (not _forall_state) return false;
 
@@ -2770,6 +2776,42 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 
 	// Keep going.
 	return false;
+}
+
+/// Assign the proposed grounding to a group. It will look exactly like
+/// some previously-seen group, or a new grouping will be created.
+bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
+                                         const GroundingMap &term_soln)
+{
+	GroundingMap grp;
+
+	// First, construct a group grounding.
+	for (const PatternTermPtr& ptm : _pat->grouping)
+	{
+		const Handle& grpt = ptm->getHandle();
+
+		const auto& vit = var_soln.find(grpt);
+		if (vit != var_soln.end())
+			grp[grpt] = vit->second;
+		else
+		{
+			const auto& tit = term_soln.find(grpt);
+			// The grouping term must be grounded. It must have appeared
+			// in some Present clause. (Perhaps Pattern.c should have
+			// copied it there, to a 'mandatory' clause?)
+			OC_ASSERT (tit != term_soln.end(), "Internal Error!");
+			grp[grpt] = tit->second;
+		}
+	}
+
+	// Next, see if we already have this grouping.
+	const auto& git = _grouping.find(grp);
+	if (git != _grouping.end())
+		return _pmc.propose_grouping(var_soln, term_soln, *git);
+
+	// Start a new group.
+	_grouping.insert(grp);
+	return _pmc.propose_grouping(var_soln, term_soln, grp);
 }
 
 bool PatternMatchEngine::report_forall(void)
@@ -2785,8 +2827,8 @@ bool PatternMatchEngine::report_forall(void)
 		OC_ASSERT(_term_ground_cache.size() == nitems);
 		for (size_t i=0; i<nitems; i++)
 		{
-			halt = _pmc.grounding(_var_ground_cache[i],
-			                      _term_ground_cache[i]);
+			halt = _pmc.propose_grounding(_var_ground_cache[i],
+			                              _term_ground_cache[i]);
 			if (halt) break;
 		}
 	}

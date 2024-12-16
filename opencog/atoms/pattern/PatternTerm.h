@@ -173,6 +173,11 @@ protected:
 	// the ALWAYS_LINK in the default interpretation.
 	bool _is_always;
 
+	// True if this is a term that must have exactly the same value in
+	// grouping of groundings. This behaves like a local "always" in the
+	// group. It corresponds to the GROUP_LINK in the default implementation.
+	bool _is_grouping;
+
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
 	void addAnyAnonVar();
@@ -222,6 +227,9 @@ public:
 
 	void markAlways();
 	bool isAlways() const noexcept { return _is_always; }
+
+	void markGrouping();
+	bool isGrouping() const noexcept { return _is_grouping; }
 
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }

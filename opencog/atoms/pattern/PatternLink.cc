@@ -41,6 +41,7 @@ void PatternLink::common_init(void)
 	locate_defines(_pat.pmandatory);
 	locate_defines(_pat.absents);
 	locate_defines(_pat.always);
+	locate_defines(_pat.grouping);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -99,11 +100,13 @@ void PatternLink::common_init(void)
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
 	clauses_get_variables(_pat.always);
+	clauses_get_variables(_pat.grouping);
 
 	// Find prunable terms.
 	locate_cacheable(_pat.pmandatory);
 	locate_cacheable(_pat.absents);
 	locate_cacheable(_pat.always);
+	locate_cacheable(_pat.grouping);
 }
 
 
@@ -151,12 +154,13 @@ void PatternLink::disjointed_init(void)
 		// Unfortunately, unbundle_clauses sets all sorts of other
 		// stuff that we don't need/want, so we have to clobber that
 		// every time through the loop.
-		// BTW, any `absents` and `always` are probably handled
-		// incorrectly, so that's a bug that needs fixing.
+		// BTW, any `absents`, `always` and `grouping` are probably
+		// handled incorrectly, so that's a bug that needs fixing.
 		unbundle_clauses(h);
 
 		// Each component consists of the assorted parts.
-		// XXX FIXME, this handles `absents` and `always` incorrectly.
+		// XXX FIXME, this handles `absents`, `always` and `grouping`
+		// incorrectly.
 		HandleSeq clseq;
 		for (const PatternTermPtr& ptm: _pat.pmandatory)
 			clseq.push_back(ptm->getHandle());
@@ -488,6 +492,20 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			pin_term(term);
 			term->markAlways();
 			_pat.always.push_back(term);
+		}
+		return true;
+	}
+
+	// Pull clauses out of a GroupLink
+	if (not reverse and GROUP_LINK == typ)
+	{
+		for (PatternTermPtr term: clause->getOutgoingSet())
+		{
+			const Handle& ah = term->getQuote();
+			if (is_constant(_variables.varset, ah)) continue;
+			pin_term(term);
+			term->markGrouping();
+			_pat.grouping.push_back(term);
 		}
 		return true;
 	}
@@ -833,6 +851,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
+	if (GROUP_LINK == t) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
 
@@ -1161,8 +1180,8 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		// because they involve variables that are bound to some other
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
-		bool chk_const =
-			(PRESENT_LINK == t or ABSENT_LINK == t or ALWAYS_LINK == t);
+		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
+		chk_const = chk_const or ALWAYS_LINK == t or GROUP_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
@@ -1281,6 +1300,7 @@ void PatternLink::debug_log(std::string msg) const
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
 	logger().fine("%lu absent clauses", _pat.absents.size());
 	logger().fine("%lu always clauses", _pat.always.size());
+	logger().fine("%lu grouping clauses", _pat.grouping.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
@@ -1307,6 +1327,15 @@ void PatternLink::debug_log(std::string msg) const
 	for (const PatternTermPtr& ptm : _pat.always)
 	{
 		str += "================ Always clause " + std::to_string(num) + ":";
+		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
+		str += "\n";
+		str += ptm->to_full_string() + "\n\n";
+		num++;
+	}
+
+	for (const PatternTermPtr& ptm : _pat.grouping)
+	{
+		str += "================ Grouping clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
 		str += ptm->to_full_string() + "\n\n";

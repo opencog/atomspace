@@ -29,7 +29,7 @@
 using namespace opencog;
 
 RewriteMixin::RewriteMixin(AtomSpace* as)
-	: _as(as), inst(as), max_results(SIZE_MAX)
+	: _as(as), _num_results(0), inst(as), max_results(SIZE_MAX)
 {
 }
 
@@ -43,11 +43,17 @@ RewriteMixin::RewriteMixin(AtomSpace* as)
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool RewriteMixin::grounding(const GroundingMap &var_soln,
-                             const GroundingMap &term_soln)
+bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
+                                     const GroundingMap &term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
+
+	// If we found as many as we want, then stop looking for more.
+	if (_num_results >= max_results)
+		return true;
+
+	_num_results ++;
 
 	// Catch and ignore SilentExceptions. This arises when
 	// running with the URE, which creates ill-formed links
@@ -67,7 +73,46 @@ bool RewriteMixin::grounding(const GroundingMap &var_soln,
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
-	return (_result_set.size() >= max_results);
+	return (_num_results >= max_results);
+}
+
+/// Much like the above, but groundings are organized into groupings.
+/// The primary technical problem here is that we cannot report any
+/// search results, until after the search has completed. This is
+/// because the very last item to be reported may belong to the very
+/// first group. So we sit here, stupidly, and wait for search results
+/// to dribble in. Perhaps the engine search could be modified in some
+/// clever way to find groupings in a single batch; but for now, I don't
+/// see how this could be done.
+bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
+                                    const GroundingMap &term_soln,
+                                    const GroundingMap &grouping)
+{
+	// Do not accept new solution if maximum number has been already reached
+	if (_num_results >= max_results)
+		return true;
+
+	_num_results ++;
+
+	// Obtain the grouping that we'll stuff values into.
+	ValueSet& grp = _groups[grouping];
+
+	try {
+		for (const Handle& himp: implicand)
+		{
+			ValuePtr v(inst.instantiate(himp, var_soln, true));
+
+			// Insert atom into the atomspace immediately. This avoids having
+			// the atom appear twice, once unassigned to any AS, and the other
+			// in the AS.
+			if (v->is_atom())
+				v = _as->add_atom(HandleCast(v));
+
+			grp.insert(v);
+		}
+	} catch (const SilentException& ex) {}
+
+	return false;
 }
 
 void RewriteMixin::insert_result(ValuePtr v)
@@ -75,8 +120,9 @@ void RewriteMixin::insert_result(ValuePtr v)
 	if (nullptr == v) return;
 	if (_result_set.end() != _result_set.find(v)) return;
 
-	// Insert atom into the atomspace immediately, so that it
-	// becomes visible in other threads. XXX Is this really needed?
+	// Insert atom into the atomspace immediately. This avoids having
+	// the atom appear twice, once unassigned to any AS, and the other
+	// in the AS.
 	if (v->is_atom())
 		v = _as->add_atom(HandleCast(v));
 
@@ -97,6 +143,10 @@ bool RewriteMixin::start_search(void)
 
 bool RewriteMixin::search_finished(bool done)
 {
+	// If there are groupings, report them now.
+	for (const auto& gset : _groups)
+		_result_queue->push(createLinkValue(gset.second));
+
 	_result_queue->close();
 	return done;
 }

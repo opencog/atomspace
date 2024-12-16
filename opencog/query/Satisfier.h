@@ -76,8 +76,8 @@ class Satisfier :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const GroundingMap &var_soln,
-		                       const GroundingMap &term_soln);
+		virtual bool propose_grounding(const GroundingMap &var_soln,
+		                               const GroundingMap &term_soln);
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
@@ -104,10 +104,14 @@ class SatisfyingSet :
 		HandleSeq _varseq;
 		QueueValuePtr _result_queue;
 
+		ValuePtr wrap_result(const GroundingMap &var_soln);
+		size_t _num_results;
+		std::map<GroundingMap, ValueSet> _groups;
+
 	public:
 		SatisfyingSet(AtomSpace* as) :
 			ContinuationMixin(as),
-			_as(as), max_results(SIZE_MAX) {}
+			_as(as), _num_results(0), max_results(SIZE_MAX) {}
 
 		size_t max_results;
 
@@ -123,8 +127,11 @@ class SatisfyingSet :
 		// groundings, this will usually return false, so the
 		// patternMatchEngine can keep looking for ever more
 		// groundings.
-		virtual bool grounding(const GroundingMap &var_soln,
-		                       const GroundingMap &term_soln);
+		virtual bool propose_grounding(const GroundingMap &var_soln,
+		                               const GroundingMap &term_soln);
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &group);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

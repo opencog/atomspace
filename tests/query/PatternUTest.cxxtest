@@ -117,8 +117,8 @@ class PMCB :
 		}
 
 		virtual bool node_match(Node *, Node *);
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &pred_soln);
+		virtual bool propose_grounding(const HandleMap &var_soln,
+		                               const HandleMap &pred_soln);
 
 		int found;
 		HandleMap preds;
@@ -142,8 +142,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	return npat == nsoln;
 }
 
-bool PMCB::grounding(const HandleMap &var_soln,
-                     const HandleMap &pred_soln)
+bool PMCB::propose_grounding(const HandleMap &var_soln,
+                             const HandleMap &pred_soln)
 {
 	found ++;
 	preds = pred_soln;

@@ -95,6 +95,11 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
+	/// The group-by (for-all-in-this-group) clauses have to always be
+	/// grounded the same way, in the grouping. All groundings in a
+	/// grouping will have *identical* groundings for the grouping.
+	PatternTermSeq grouping;
+
 	/// Evaluatable terms are those that need to be evaluated to
 	/// find out if they hold true. For example, GreaterThanLink,
 	/// and anything with a GroundedPredicateNode (GPN) in them.

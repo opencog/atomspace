@@ -63,14 +63,20 @@ class RewriteMixin :
 		QueueValuePtr _result_queue;
 		void insert_result(ValuePtr);
 
+		size_t _num_results;
+		std::map<GroundingMap, ValueSet> _groups;
+
 	public:
 		RewriteMixin(AtomSpace*);
 		Instantiator inst;
 		HandleSeq implicand;
 		size_t max_results;
 
-		virtual bool grounding(const GroundingMap &var_soln,
-		                       const GroundingMap &term_soln);
+		virtual bool propose_grounding(const GroundingMap &var_soln,
+		                               const GroundingMap &term_soln);
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &grouping);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);
