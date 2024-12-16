@@ -29,7 +29,7 @@
 using namespace opencog;
 
 RewriteMixin::RewriteMixin(AtomSpace* as)
-	: _as(as), inst(as), max_results(SIZE_MAX)
+	: _as(as), inst(as), _num_results(0), max_results(SIZE_MAX)
 {
 }
 
@@ -49,6 +49,12 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
+	// If we found as many as we want, then stop looking for more.
+	if (_num_results >= max_results)
+		return true;
+
+	_num_results ++;
+
 	// Catch and ignore SilentExceptions. This arises when
 	// running with the URE, which creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
@@ -67,7 +73,7 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
-	return (_result_set.size() >= max_results);
+	return (_num_results >= max_results);
 }
 
 bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,

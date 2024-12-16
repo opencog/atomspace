@@ -111,7 +111,7 @@ class SatisfyingSet :
 	public:
 		SatisfyingSet(AtomSpace* as) :
 			ContinuationMixin(as),
-			_as(as), max_results(SIZE_MAX) {}
+			_as(as), _num_results(0), max_results(SIZE_MAX) {}
 
 		size_t max_results;
 

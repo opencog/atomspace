@@ -63,6 +63,9 @@ class RewriteMixin :
 		QueueValuePtr _result_queue;
 		void insert_result(ValuePtr);
 
+		size_t _num_results;
+		std::map<GroundingMap, ValueSet> _groups;
+
 	public:
 		RewriteMixin(AtomSpace*);
 		Instantiator inst;
