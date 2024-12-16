@@ -80,15 +80,15 @@ class PMCB :
 			TermMatchMixin::set_pattern(vars, pat);
 		}
 
-		virtual bool grounding(const HandleMap &var_soln,
-		                       const HandleMap &pred_soln);
+		virtual bool propose_grounding(const HandleMap &var_soln,
+		                               const HandleMap &pred_soln);
 
 		HandleMap preds;
 		HandleMap vars;
 };
 
-bool PMCB::grounding(const HandleMap &var_soln,
-                     const HandleMap &pred_soln)
+bool PMCB::propose_grounding(const HandleMap &var_soln,
+                             const HandleMap &pred_soln)
 {
 	logger().debug("Inside grounding with %z var_soln", var_soln.size());
 
