@@ -2782,15 +2782,31 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
                                          const GroundingMap &term_soln)
 {
 	GroundingMap grp;
+
+	// First, construct the grounding for the group.
 	for (const PatternTermPtr& ptm : _pat->grouping)
 	{
 		const Handle& grpt = ptm->getHandle();
+
+		// At this time, assume groupings are given by single variables
+		// which act to pin the group. Complex clauses are TBD.
 		const auto& it = var_soln.find(grpt);
-		if (var_soln.end() == it)
-		{
-		}
+		OC_ASSERT(it != var_soln.end(), "Internal Error (? Maybe user error?)");
+
+		// Record it.
+		grp[grpt] = it->second;
 	}
-	return false;
+
+	// Next, see if we already have this grouping.
+	size_t grpnum = 0;
+	for (const GroundingMap& grpm : _grouping)
+	{
+		if (grpm == grp)
+			return _pmc.propose_grouping(var_soln, term_soln, grpm, grpnum);
+		grpnum ++;
+	}
+	_grouping.push_back(grp);
+	return _pmc.propose_grouping(var_soln, term_soln, grp, grpnum);
 }
 
 bool PatternMatchEngine::report_forall(void)
