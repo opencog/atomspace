@@ -76,6 +76,13 @@ bool Satisfier::propose_grounding(const GroundingMap &var_soln,
 	return true;
 }
 
+bool Satisfier::propose_grouping(const GroundingMap &var_soln,
+                                 const GroundingMap &term_soln,
+                                 const GroundingMap &grouping)
+{
+	return propose_grounding(var_soln, term_soln);
+}
+
 /// This method handles the case of SequentialAnd, SequentialOr with
 /// embedded AbsentLinks, NotLink-PresentLink and some weird
 /// combinations of NotLink-ChoiceLink, and so-on.  The idea here is
@@ -178,6 +185,13 @@ bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
+}
+
+bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
+                                     const GroundingMap &term_soln,
+                                     const GroundingMap &grouping)
+{
+	return propose_grounding(var_soln, term_soln);
 }
 
 bool SatisfyingSet::start_search(void)

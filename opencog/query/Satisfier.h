@@ -78,6 +78,9 @@ class Satisfier :
 		// groundings.
 		virtual bool propose_grounding(const GroundingMap &var_soln,
 		                               const GroundingMap &term_soln);
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &group);
 
 		// Final pass, if no grounding was found.
 		virtual bool search_finished(bool);
@@ -125,6 +128,9 @@ class SatisfyingSet :
 		// groundings.
 		virtual bool propose_grounding(const GroundingMap &var_soln,
 		                               const GroundingMap &term_soln);
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &group);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

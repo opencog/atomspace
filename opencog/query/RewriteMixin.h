@@ -71,6 +71,9 @@ class RewriteMixin :
 
 		virtual bool propose_grounding(const GroundingMap &var_soln,
 		                               const GroundingMap &term_soln);
+		virtual bool propose_grouping(const GroundingMap &var_soln,
+		                              const GroundingMap &term_soln,
+		                              const GroundingMap &grouping);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

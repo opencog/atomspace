@@ -70,6 +70,13 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	return (_result_set.size() >= max_results);
 }
 
+bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
+                                    const GroundingMap &term_soln,
+                                    const GroundingMap &grouping)
+{
+	return propose_grounding(var_soln, term_soln);
+}
+
 void RewriteMixin::insert_result(ValuePtr v)
 {
 	if (nullptr == v) return;
