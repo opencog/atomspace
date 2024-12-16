@@ -470,7 +470,8 @@ TAG_LINK <- ORDERED_LINK // <- MEMBER_LINK
 // A Variable.  Use Lambda's to hide these. Use types to type them.
 VARIABLE_NODE <- ANY_NODE
 
-// A list of variables or variable declarations.
+// A list of variables or variable declarations. These may be typed,
+// with possibly complex types, such as signatures.
 VARIABLE_LIST <- CONNECTOR_SEQ
 
 // A set (thus unordered) of variables or variable declarations. This
@@ -483,6 +484,11 @@ VARIABLE_SET <- CONNECTOR_SET
 // sequence. All this really does is to name a variable, such that
 // the default type cnstructor for it will accept multiple matches.
 GLOB_NODE <- VARIABLE_NODE
+
+// A collection of variables that must share a common grounding, when
+// reporting pattern-match results. Inspired by the "GROUP BY" statement
+// in SQL, and intended to have similar semantics & effects.
+GROUP_BY <- VARIABLE_LIST
 
 // Everything under a QuoteLink is interpreted literally. Variable
 // substitution (beta-reduction) is not performed into quoted variables.
@@ -626,7 +632,7 @@ PUT_LINK <- PRENEX_LINK
 
 // The JoinLink searches for containing links that satsify the specified
 // predicates. This is the AtomSpace version of "join and meet" in a
-// partially ordered set. See wikipedia "meet and join".
+// partially ordered set. See Wikipedia "meet and join".
 // The MinimalJoin is the supremum.
 // The MaximalJoin is the top.
 // The UpperSet is everything in between.
