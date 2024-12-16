@@ -39,7 +39,8 @@ PatternTerm::PatternTerm(void)
 	  _is_absent(false),
 	  _is_choice(false),
 	  _has_choice(false),
-	  _is_always(false)
+	  _is_always(false),
+	  _is_grouping(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -66,7 +67,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_absent(false),
 	  _is_choice(false),
 	  _has_choice(false),
-	  _is_always(false)
+	  _is_always(false),
+	  _is_grouping(false)
 {
 	Type t = h->get_type();
 
@@ -411,6 +413,7 @@ std::string PatternTerm::flag_string() const
 	if (_is_choice) str += "C: ";
 	if (_has_choice) str += "HC: ";
 	if (_is_always) str += "ALW: ";
+	if (_is_grouping) str += "GRP: ";
 	str += _handle->id_to_string();
 	return str;
 }
