@@ -1177,7 +1177,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
 		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
-		chk_const = chck_const or ALWAYS_LINK == t or GROUP_BY_LINK == t;
+		chk_const = chk_const or ALWAYS_LINK == t or GROUP_BY_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
