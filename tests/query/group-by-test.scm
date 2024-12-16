@@ -2,6 +2,8 @@
 ; group-by-test.scm
 ;
 ; Unit test for the GroupBy link
+;
+; Run this manually by saying "guile -s group-by-test.scm"
 
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
@@ -21,9 +23,12 @@
 (define grp-query
 	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
-		(GroupBy (Variable "$Y"))
+		; (GroupBy (Variable "$Y"))
 		(Present 
 			(Edge (Predicate "property")
 				(List (Variable "$X") (Variable "$Y"))))
-		(Edge (Predicate "property")
-			(List (Variable "$X") (Variable "$Y")))))
+		(List (Variable "$Y") (Variable "$X"))))
+
+(define grp-results (cog-execute! grp-query))
+
+(format #t "The results are ~A\n" grp-results)
