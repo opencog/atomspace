@@ -135,6 +135,8 @@ bool Satisfier::search_finished(bool done)
 
 ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 {
+	_num_results ++;
+
 	if (1 == _varseq.size())
 	{
 		// std::map::at() can throw. Rethrow for easier deubugging.
@@ -178,20 +180,39 @@ bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
-	if (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results)
+	if (_num_results >= max_results)
 		return true;
 
 	_result_queue->push(wrap_result(var_soln));
 
 	// If we found as many as we want, then stop looking for more.
-	return (_result_queue->concurrent_queue<ValuePtr>::size() >= max_results);
+	return (_num_results >= max_results);
 }
 
+/// Much like the above, but groundings are organized into groupings.
+/// The primary technical problem here is that we cannot report any
+/// search results, until after the search has completed. This is
+/// because the very last item to be reported may belong to the very
+/// first group. So we sit here, stupidly, and wait for search results
+/// to dribble in. Perhaps the engine search could be modified in some
+/// clever way to find groupings in a single batch; but for now, I don't
+/// see how this could be done.
 bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
                                      const GroundingMap &term_soln,
                                      const GroundingMap &grouping)
 {
-	return propose_grounding(var_soln, term_soln);
+	// Do not accept new solution if maximum number has been already reached
+	if (_num_results >= max_results)
+		return true;
+
+	// Place the result into the indicated grouping.
+	const auto& it = _groups.find(grouping);
+	if (_groups.end() == it)
+		_groups[grouping] = ValueSet({wrap_result(var_soln)});
+	else
+		it->second.insert(wrap_result(var_soln));
+
+	return false;
 }
 
 bool SatisfyingSet::start_search(void)

@@ -108,6 +108,8 @@ class SatisfyingSet :
 		QueueValuePtr _result_queue;
 
 		ValuePtr wrap_result(const GroundingMap &var_soln);
+		size_t _num_results;
+		std::map<GroundingMap, ValueSet> _groups;
 
 	public:
 		SatisfyingSet(AtomSpace* as) :
