@@ -2778,12 +2778,14 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 	return false;
 }
 
+/// Assign the proposed grounding to a group. It will look exactly like
+/// some previously-seen group, or a new grouping will be created.
 bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
                                          const GroundingMap &term_soln)
 {
 	GroundingMap grp;
 
-	// First, construct the grounding for the group.
+	// First, construct a group grounding.
 	for (const PatternTermPtr& ptm : _pat->grouping)
 	{
 		const Handle& grpt = ptm->getHandle();
@@ -2798,6 +2800,11 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
 	}
 
 	// Next, see if we already have this grouping.
+	// These are ordered into a vector instead of a set, mostly because
+	// I think I want to pass some group ID num in the API. Maybe the
+	// API should be fixed. I dunno. At any rate, we pay a linear
+	// search penalty, which I think is small for "most cases", whatever
+	// that is :-) So maybe FIXME someday. I dunno.
 	size_t grpnum = 0;
 	for (const GroundingMap& grpm : _grouping)
 	{
@@ -2805,6 +2812,8 @@ bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
 			return _pmc.propose_grouping(var_soln, term_soln, grpm, grpnum);
 		grpnum ++;
 	}
+
+	// Start a new group.
 	_grouping.push_back(grp);
 	return _pmc.propose_grouping(var_soln, term_soln, grp, grpnum);
 }
