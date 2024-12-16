@@ -107,6 +107,8 @@ class SatisfyingSet :
 		HandleSeq _varseq;
 		QueueValuePtr _result_queue;
 
+		ValuePtr wrap_result(const GroundingMap &var_soln);
+
 	public:
 		SatisfyingSet(AtomSpace* as) :
 			ContinuationMixin(as),
