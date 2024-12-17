@@ -64,14 +64,6 @@ InitiateSearchMixin::InitiateSearchMixin(AtomSpace* as) :
 	_as = as;
 }
 
-void InitiateSearchMixin::set_pattern(const Variables& vars,
-                                      const Pattern& pat)
-{
-	_variables = &vars;
-	_pattern = &pat;
-}
-
-
 /* ======================================================== */
 
 // Find a good place to start the search.

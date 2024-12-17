@@ -52,7 +52,6 @@ public:
 	 * assumptions about the kind of things that might be matched,
 	 * in order to drive a reasonably-fast search.
 	 */
-	virtual void set_pattern(const Variables&, const Pattern&);
 	virtual bool perform_search(PatternMatchCallback&);
 
 	virtual void push(void);
@@ -66,8 +65,6 @@ protected:
 
 	NameServer& _nameserver;
 
-	const Variables* _variables;
-	const Pattern* _pattern;
 	bool _recursing;
 
 	PatternTermPtr _root;
