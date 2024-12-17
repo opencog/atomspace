@@ -28,6 +28,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 #include "BindLink.h"
 #include "DualLink.h"
@@ -502,6 +503,15 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		for (PatternTermPtr term: clause->getOutgoingSet())
 		{
 			const Handle& ah = term->getQuote();
+			if (INTERVAL_LINK == ah->get_type()) {
+				NumberNodePtr nlo(NumberNodeCast(ah->getOutgoingAtom(0)));
+				NumberNodePtr nhi(NumberNodeCast(ah->getOutgoingAtom(1)));
+				long ilo = (long) std::round(nlo->get_value());
+				long ihi = (long) std::round(nhi->get_value());
+				if (_pat.group_min_size > ilo) _pat.group_min_size = ilo;
+				if (_pat.group_max_size < ihi) _pat.group_max_size = ihi;
+				continue;
+			}
 			if (is_constant(_variables.varset, ah)) continue;
 			pin_term(term);
 			term->markGrouping();
