@@ -530,6 +530,7 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			long ihi = (long) std::round(nhi->get_value());
 			if (glo > ilo) glo = ilo;
 			if (ghi < ihi) ghi = ihi;
+			if (ihi < 0) ghi = LONG_MAX;
 		}
 		if (0 != ghi)
 		{
