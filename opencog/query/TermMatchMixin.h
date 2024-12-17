@@ -55,7 +55,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 	public:
 		TermMatchMixin(AtomSpace*);
 		~TermMatchMixin();
-		virtual void set_pattern(const Variables&, const Pattern&);
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
@@ -104,8 +103,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 
 	protected:
 		NameServer& _nameserver;
-
-		const Variables* _vars = nullptr;
 
 		bool is_self_ground(const Handle&, const Handle&,
 		                    const GroundingMap&, const HandleSet&,

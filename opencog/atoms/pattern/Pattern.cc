@@ -38,6 +38,8 @@ std::string Pattern::to_string(const std::string& indent) const
 	ss << indent << "absents:\n" << oc_to_string(absents) << std::endl;
 	ss << indent << "always:\n" << oc_to_string(always) << std::endl;
 	ss << indent << "group-by:\n" << oc_to_string(grouping) << std::endl;
+	ss << indent << "group-min/max: " << std::to_string(group_min_size)
+	             << " : " << std::to_string(group_max_size) << std::endl;
 
 	return ss.str();
 }

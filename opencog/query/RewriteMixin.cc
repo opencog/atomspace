@@ -144,8 +144,16 @@ bool RewriteMixin::start_search(void)
 bool RewriteMixin::search_finished(bool done)
 {
 	// If there are groupings, report them now.
+	// Report only those groupings in the requested size range.
+	size_t gmin = _pattern->group_min_size;
+	size_t gmax = ULONG_MAX;
+	if (0 < _pattern->group_max_size) gmax = _pattern->group_max_size;
 	for (const auto& gset : _groups)
-		_result_queue->push(createLinkValue(gset.second));
+	{
+		size_t gsz = gset.second.size();
+		if (gmin <= gsz and gsz <= gmax)
+			_result_queue->push(createLinkValue(gset.second));
+	}
 
 	_result_queue->close();
 	return done;
