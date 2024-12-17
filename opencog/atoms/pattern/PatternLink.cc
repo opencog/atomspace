@@ -498,24 +498,43 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 	}
 
 	// Pull clauses out of a GroupLink
+	// GroupLinks will have terms that are the groundings that should be
+	// grouped together, and also an optional IntervalLink to specify
+	// min/max grouping sizes.
 	if (not reverse and GROUP_LINK == typ)
 	{
 		for (PatternTermPtr term: clause->getOutgoingSet())
 		{
 			const Handle& ah = term->getQuote();
-			if (INTERVAL_LINK == ah->get_type()) {
-				NumberNodePtr nlo(NumberNodeCast(ah->getOutgoingAtom(0)));
-				NumberNodePtr nhi(NumberNodeCast(ah->getOutgoingAtom(1)));
-				long ilo = (long) std::round(nlo->get_value());
-				long ihi = (long) std::round(nhi->get_value());
-				if (_pat.group_min_size > ilo) _pat.group_min_size = ilo;
-				if (_pat.group_max_size < ihi) _pat.group_max_size = ihi;
-				continue;
-			}
+
+			// In the current code base, there shouldn't be any constants
+			// so this check should not be needed.
 			if (is_constant(_variables.varset, ah)) continue;
 			pin_term(term);
 			term->markGrouping();
 			_pat.grouping.push_back(term);
+		}
+
+		// Look for IntervalLinks. They've been scrubbed from the
+		// Pattern term because they're constants; we have to look
+		// at the GrouplLink itself to find them.
+		long glo = LONG_MAX;
+		long ghi = 0;
+		for (const Handle& ah: h->getOutgoingSet())
+		{
+			if (INTERVAL_LINK != ah->get_type())
+				continue;
+			NumberNodePtr nlo(NumberNodeCast(ah->getOutgoingAtom(0)));
+			NumberNodePtr nhi(NumberNodeCast(ah->getOutgoingAtom(1)));
+			long ilo = (long) std::round(nlo->get_value());
+			long ihi = (long) std::round(nhi->get_value());
+			if (glo > ilo) glo = ilo;
+			if (ghi < ihi) ghi = ihi;
+		}
+		if (0 != ghi)
+		{
+			_pat.group_min_size = glo;
+			_pat.group_max_size = ghi;
 		}
 		return true;
 	}
