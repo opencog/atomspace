@@ -217,6 +217,7 @@ bool SatisfyingSet::start_search(void)
 bool SatisfyingSet::search_finished(bool done)
 {
 	// If there are groupings, report them now.
+	// Report only those groupings in the requested size range.
 	size_t gmin = _pattern->group_min_size;
 	size_t gmax = ULONG_MAX;
 	if (0 < _pattern->group_max_size) gmax = _pattern->group_max_size;
