@@ -396,8 +396,8 @@ class PatternMatchCallback
 		 * that will be searched for, and the variables to be grounded
 		 * during the search.
 		 */
-		const Variables* _variables;
-		const Pattern* _pattern;
+		const Variables* _variables = nullptr;
+		const Pattern* _pattern = nullptr;
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{

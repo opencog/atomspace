@@ -53,8 +53,6 @@ class Recognizer :
 		bool match = false;
 
 	protected:
-		const Pattern* _pattern;
-
 		DECLARE_PE_MUTEX;
 		PatternTermPtr _root;
 		PatternTermPtr _starter_term;
@@ -67,16 +65,8 @@ class Recognizer :
 
 		Recognizer(AtomSpace* as) :
 		    TermMatchMixin(as),
-		    _pattern(nullptr),
 		    _cnt(0)
 		{}
-
-		virtual void set_pattern(const Variables& vars,
-		                         const Pattern& pat)
-		{
-			_pattern = &pat;
-			TermMatchMixin::set_pattern(vars, pat);
-		}
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const PatternTermPtr&, const Handle&);

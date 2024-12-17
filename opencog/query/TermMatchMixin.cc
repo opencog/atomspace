@@ -69,12 +69,6 @@ TermMatchMixin::~TermMatchMixin()
 	}
 }
 
-void TermMatchMixin::set_pattern(const Variables& vars,
-                                 const Pattern& pat)
-{
-	_vars = &vars;
-}
-
 /* ======================================================== */
 
 /**
@@ -114,7 +108,7 @@ bool TermMatchMixin::variable_match(const Handle& npat_h,
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
-	return _vars->is_type(npat_h, nsoln_h);
+	return _variables->is_type(npat_h, nsoln_h);
 }
 
 bool TermMatchMixin::scope_match(const Handle& npat_h,
@@ -406,7 +400,7 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		return crispy;
 	}
 
-	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
+	return not is_self_ground(ptrn, grnd, term_gnds, _variables->varset);
 }
 
 /**
@@ -426,7 +420,7 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
 	// If any grounding at all was found, reject it.
 	if (grnd)
 	{
-		if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
+		if (not is_self_ground(ptrn, grnd, term_gnds, _variables->varset))
 			_optionals_present = true;
 		return false;
 	}
@@ -465,7 +459,7 @@ bool TermMatchMixin::always_clause_match(const Handle& ptrn,
                                          const GroundingMap& term_gnds)
 {
 	return grnd != nullptr;
-		// and not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
+		// and not is_self_ground(ptrn, grnd, term_gnds, _variables->varset);
 }
 
 /* ======================================================== */
