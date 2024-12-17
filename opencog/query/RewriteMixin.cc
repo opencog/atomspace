@@ -97,6 +97,12 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 	// Obtain the grouping that we'll stuff values into.
 	ValueSet& grp = _groups[grouping];
 
+	// Count the group size. After performing the rewrite below
+	// (in the instantiate code) the reults might collapse to just
+	// one instance per group, thus mis-characterizing the actual
+	// group size. So count explicitly.
+	_group_sizes[grouping] ++;
+
 	try {
 		for (const Handle& himp: implicand)
 		{
@@ -150,7 +156,8 @@ bool RewriteMixin::search_finished(bool done)
 	if (0 < _pattern->group_max_size) gmax = _pattern->group_max_size;
 	for (const auto& gset : _groups)
 	{
-		size_t gsz = gset.second.size();
+		// size_t gsz = gset.second.size();
+		size_t gsz = _group_sizes[gset.first];
 		if (gmin <= gsz and gsz <= gmax)
 			_result_queue->push(createLinkValue(gset.second));
 	}

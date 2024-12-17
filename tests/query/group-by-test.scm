@@ -76,5 +76,26 @@
 (test-assert "range group size"
 	(equal? 2 (length (cog-value->list range-results))))
 
+; -------------------------------------------------------------
+
+(define collapse-range
+	(Query
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(And
+			(Group
+				(Variable "$Y")
+				(Interval (Number 2) (Number 4)))
+			(Present
+				(Edge (Predicate "property")
+					(List (Variable "$X") (Variable "$Y")))))
+		(Variable "$Y")))
+
+(define collapse-results (cog-execute! collapse-range))
+(format #t "The collapse results are ~A\n" collapse-results)
+(test-assert "range collapse size"
+	(equal? 2 (length (cog-value->list collapse-results))))
+
+; -------------------------------------------------------------
+
 (test-end tname)
 (opencog-test-end)

@@ -65,6 +65,7 @@ class RewriteMixin :
 
 		size_t _num_results;
 		std::map<GroundingMap, ValueSet> _groups;
+		std::map<GroundingMap, size_t> _group_sizes;
 
 	public:
 		RewriteMixin(AtomSpace*);
