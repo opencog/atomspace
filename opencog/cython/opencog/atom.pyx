@@ -32,7 +32,7 @@ cdef class Atom(Value):
         if self._name is None:
             atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
-                return None
+                raise RuntimeError("Null Atom!")
             if atom_ptr.is_node():
                 self._name = atom_ptr.get_name().decode('UTF-8')
             else:
@@ -44,7 +44,7 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         cdef tv_ptr tvp
         if atom_ptr == NULL:   # avoid null-pointer deref
-            return None
+            raise RuntimeError("Null Atom!")
         tvp = atom_ptr.getTruthValue()
         if (not tvp.get()):
             raise AttributeError('cAtom returned NULL TruthValue pointer')
@@ -58,7 +58,7 @@ cdef class Atom(Value):
             raise TypeError("atom.tv property needs a TruthValue object")
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
-            return
+            raise RuntimeError("Null Atom!")
         atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
     def id_string(self):
@@ -74,7 +74,7 @@ cdef class Atom(Value):
         cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))
         if value.get() == NULL:
-            return None
+            raise RuntimeError("Null Atom!")
         return create_python_value_from_c_value(value)
 
     def get_keys(self):
@@ -89,7 +89,7 @@ cdef class Atom(Value):
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
-            return None
+            raise RuntimeError("Null Atom!")
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
         return convert_handle_seq_to_python_list(handle_vector)
 
@@ -98,7 +98,7 @@ cdef class Atom(Value):
         if self._outgoing is None:
             atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
-                return None
+                raise RuntimeError("Null Atom!")
             if atom_ptr.is_link():
                 self._outgoing = self.get_out()
             else:
@@ -114,7 +114,7 @@ cdef class Atom(Value):
         cdef vector[cHandle] handle_vector
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
-            return None
+            raise RuntimeError("Null Atom!")
         atom_ptr.getIncomingIter(back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector)
 
@@ -122,7 +122,7 @@ cdef class Atom(Value):
         cdef vector[cHandle] handle_vector
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
-            return None
+            raise RuntimeError("Null Atom!")
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
         return convert_handle_seq_to_python_list(handle_vector)
 
