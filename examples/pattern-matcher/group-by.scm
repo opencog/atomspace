@@ -107,10 +107,10 @@
 ; -------------------------------------------------------------
 ; Part the second.
 ; This is a variant of the above, perhaps showing more clearly and
-; distinctly thr grouping effect.
+; distinctly the grouping effect.
 
 (define grp-set
-	(Bind
+	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(And
 			(Present
@@ -121,5 +121,26 @@
 
 (define set-results (cog-execute! grp-set))
 (format #t "The groupings are:\n~A\n" set-results)
+
+; Groupings can be interesting when their sizes can be constrained.
+; The IntervalLink can be used to do this. In the below, groups with
+; fewer than 2 members will not be provided.
+;
+; The IntervalLink behaves as in other contexts. Setting the upper
+; limit to -1 is interpreted as no upper bound.
+(define grp-range
+	(Query
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(And
+			(Present
+				(Edge (Predicate "property")
+					(List (Variable "$X") (Variable "$Y"))))
+			(Group
+				(Variable "$Y")
+				(Interval (Number 2) (Number 5))))
+		(Variable "$X")))
+
+(define range-results (cog-execute! grp-range))
+(format #t "The groupings are:\n~A\n" range-results)
 
 ; ------------ That's All, Folks! The End. ------------------
