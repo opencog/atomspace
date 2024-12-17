@@ -91,7 +91,7 @@
 		(Variable "$Y")))
 
 (define collapse-results (cog-execute! collapse-range))
-(format #t "The collapse results are ~A\n" collapse-results)
+; (format #t "The collapse results are ~A\n" collapse-results)
 (test-assert "range collapse size"
 	(equal? 2 (length (cog-value->list collapse-results))))
 

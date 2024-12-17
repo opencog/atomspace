@@ -143,4 +143,25 @@
 (define range-results (cog-execute! grp-range))
 (format #t "The groupings are:\n~A\n" range-results)
 
+; The grouping size constraint applies to the group before the rewrite,
+; and not after. Below, only the group name is reported, and since there
+; is only one name per group, all group members collapsed down to this
+; one name. In general, one is interested in the size of the group,
+; before the collapse, not after. Thus, names are reported for those
+; groups with two or more members.
+(define grp-collapse
+	(Query
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(And
+			(Present
+				(Edge (Predicate "property")
+					(List (Variable "$X") (Variable "$Y"))))
+			(Group
+				(Variable "$Y")
+				(Interval (Number 2) (Number 5))))
+		(Variable "$Y")))
+
+(define collapse-results (cog-execute! grp-collapse))
+(format #t "The group names are:\n~A\n" collapse-results)
+
 ; ------------ That's All, Folks! The End. ------------------
