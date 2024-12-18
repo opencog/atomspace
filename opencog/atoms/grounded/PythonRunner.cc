@@ -66,7 +66,6 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
-
 	return applier->apply_v(as, _fname, asargs);
 }
 
@@ -83,6 +82,5 @@ ValuePtr PythonRunner::evaluate(AtomSpace* as,
 	Handle asargs = as->add_atom(cargs);
 
 	PythonEval* applier = get_evaluator_for_python(as);
-
-	return CastToValue(applier->apply_tv(as, _fname, asargs));
+	return applier->apply_v(as, _fname, asargs);
 }
