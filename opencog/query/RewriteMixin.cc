@@ -65,10 +65,20 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	// See issue #950 and pull req #962. XXX FIXME later.
 	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
 	try {
-		for (const Handle& himp: implicand)
+		if (1 == implicand.size())
 		{
-			ValuePtr v(inst.instantiate(himp, var_soln, true));
+			ValuePtr v(inst.instantiate(implicand[0], var_soln, true));
 			insert_result(v);
+		}
+		else
+		{
+			ValueSeq vs;
+			for (const Handle& himp: implicand)
+			{
+				ValuePtr v(inst.instantiate(himp, var_soln, true));
+				vs.emplace_back(v);
+			}
+			insert_result(createLinkValue(vs));
 		}
 	} catch (const SilentException& ex) {}
 

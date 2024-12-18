@@ -335,7 +335,9 @@ void ImplicationUTest::test_exec(void)
 	// Result should be a ListLink w/ three solutions
 	result = bindlink(as, restrict_multi);
 	logger().debug("sixth result is %s\n", oc_to_string(result).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+	Handle packet = result->getOutgoingAtom(0);
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(packet));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
