@@ -93,8 +93,7 @@ cdef class Atom(Value):
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
         return convert_handle_seq_to_python_list(handle_vector)
 
-    @property
-    def out(self):
+    def to_list(self):
         if self._outgoing is None:
             atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
@@ -104,6 +103,10 @@ cdef class Atom(Value):
             else:
                 self._outgoing = []
         return self._outgoing
+
+    @property
+    def out(self):
+        return self.to_list()
 
     @property
     def arity(self):
