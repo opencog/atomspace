@@ -1,6 +1,8 @@
 
 # Python bindings
-ADD_SUBDIRECTORY (cython)
+IF (HAVE_CYTHON)
+	ADD_SUBDIRECTORY (cython)
+ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (persist
 	BackingQuery.cc
