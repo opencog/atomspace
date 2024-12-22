@@ -91,18 +91,40 @@ ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 	if (_outgoing[0]->is_type(TYPE_NODE))
 		to_type = TypeNodeCast(_outgoing[0])->get_kind();
 
+	bool isnode = nameserver().isNode(to_type);
+	if (not isnode and not nameserver().isA(to_type, STRING_VALUE))
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a Node or StringValue, got %s",
+			nameserver().getTypeName(to_type).c_str());
+
 	if (_outgoing[1]->is_executable())
 	{
 		ValuePtr vp = _outgoing[1]->execute();
 		if (vp->is_type(NODE))
-			return createNode(to_type, HandleCast(vp)->get_name());
+		{
+			if (isnode)
+				return createNode(to_type, HandleCast(vp)->get_name());
+			else
+				return createStringValue(HandleCast(vp)->get_name());
+		}
 		if (vp->is_type(STRING_VALUE))
-			return createNode(to_type,
-				StringValueCast(vp)->value()[0]);
-		else
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting a Node, got %s",
-				vp->to_string().c_str());
+		{
+			if (isnode)
+				return createNode(to_type,
+					StringValueCast(vp)->value()[0]);
+			else
+				// Recase to an explicit (concrete) StringValue,
+				// to handle the case where the from-value is
+				// a stream or something dynamic ... XXX ???
+				// Or maybe we want to cast *to* something dynamic?
+				// XXX FIXME this is unclear, under-specified and
+				// under-used at the moment.
+				return createStringValue(
+					StringValueCast(vp)->value());
+		}
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a Node, got %s",
+			vp->to_string().c_str());
 	}
 	else
 
