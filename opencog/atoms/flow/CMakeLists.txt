@@ -14,6 +14,7 @@ ADD_LIBRARY (atomflow
 	SetValueLink.cc
 	SizeOfLink.cc
 	StreamValueOfLink.cc
+	StringOfLink.cc
 	TruthValueOfLink.cc
 	TypeOfLink.cc
 	ValueOfLink.cc
