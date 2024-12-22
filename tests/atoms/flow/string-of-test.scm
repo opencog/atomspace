@@ -65,6 +65,19 @@
 
 (format #t "Flow string got ~A\n" flow-string)
 
+; An earlier filter bug failed to place the filter result in the
+; AtomSpace. Check that this works.
+(define query
+	(Meet
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		(Edge (Predicate "foobar") (List (Variable "$x")))))
+
+(define atms-contents (cog-execute! query))
+(format #t "AtomSpace contents ~A\n" atms-contents)
+
+(test-assert "atms-contents"
+	(equal? (cog-value-ref atms-contents 0) (Concept "scoobey")))
+
 (test-assert "flow-string"
 	(equal? flow-string
 		(Edge (Predicate "foobar")
