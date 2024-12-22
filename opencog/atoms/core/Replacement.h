@@ -61,6 +61,7 @@ struct Replacement
 protected:
 	static Handle substitute_scoped(Handle, const HandleSeq&,
 	                                const IndexMap&,
+	                                bool do_exec = false,
 	                                Quotation quotation=Quotation());
 	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
 	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
