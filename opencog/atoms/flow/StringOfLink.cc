@@ -25,6 +25,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/value/StringValue.h>
 #include "StringOfLink.h"
 
 using namespace opencog;
@@ -75,22 +76,39 @@ void StringOfLink::init(void)
 /// the requested type
 ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 {
-	Type to_type = NODE;
+	Type to_type = NOTYPE;
 
-	if (_outgoing[0]->is_type(TYPE_NODE))
-		to_type = TypeNodeCast(_outgoing[0])->get_kind();
-	else
 	if (_outgoing[0]->is_executable())
 	{
 		ValuePtr vp = _outgoing[0]->execute();
 		if (not vp->is_type(TYPE_NODE))
 			throw InvalidParamException(TRACE_INFO,
-	   		"Expecting a TypeNode, got %s",
-	   		vp->to_string().c_str());
+				"Expecting a TypeNode, got %s",
+				vp->to_string().c_str());
 		to_type = TypeNodeCast(HandleCast(vp))->get_kind();
 	}
+	else
+	if (_outgoing[0]->is_type(TYPE_NODE))
+		to_type = TypeNodeCast(_outgoing[0])->get_kind();
 
-	return createNode(to_type, "asdf");
+	std::string name;
+	if (_outgoing[1]->is_executable())
+	{
+		ValuePtr vp = _outgoing[1]->execute();
+		if (vp->is_type(NODE))
+			name = HandleCast(vp)->get_name();
+		if (vp->is_type(STRING_VALUE))
+			name = StringValueCast(vp)->value()[0];
+		else
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting a Node, got %s",
+				vp->to_string().c_str());
+	}
+	else
+	if (_outgoing[1]->is_type(NODE))
+		name = NodeCast(_outgoing[1])->get_name();
+
+	return createNode(to_type, name);
 }
 
 DEFINE_LINK_FACTORY(StringOfLink, STRING_OF_LINK)
