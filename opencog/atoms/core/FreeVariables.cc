@@ -459,16 +459,18 @@ void FreeVariables::erase(const Handle& var)
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleSeq& args,
-                                         bool silent) const
+                                         bool silent,
+                                         bool do_exec) const
 {
-	return substitute_scoped(term, args, index);
+	return substitute_scoped(term, args, index, do_exec);
 }
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleMap& vm,
-                                         bool silent) const
+                                         bool silent,
+                                         bool do_exec) const
 {
-	return substitute_scoped(term, make_sequence(vm), index);
+	return substitute_scoped(term, make_sequence(vm), index, do_exec);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const
