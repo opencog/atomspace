@@ -33,7 +33,8 @@ namespace opencog {
 /* ================================================================= */
 
 Handle Replacement::replace_nocheck(const Handle& term,
-                                    const HandleMap& vm)
+                                    const HandleMap& vm,
+                                    bool do_exec)
 {
 	HandleSeq to_insert;
 	IndexMap insert_index;
@@ -44,7 +45,7 @@ Handle Replacement::replace_nocheck(const Handle& term,
 		insert_index.insert({pr.first, idx});
 		idx++;
 	}
-	return substitute_scoped(term, to_insert, insert_index);
+	return substitute_scoped(term, to_insert, insert_index, do_exec);
 }
 
 /* ================================================================= */
@@ -158,8 +159,8 @@ Handle Replacement::substitute_scoped(Handle term,
 					if (evp->is_atom())
 						sub = HandleCast(evp);
 					else
-						throw InvalidParamterException(TRACE_INFO,
-							"Wanted Atom as result of execution, got %s!"
+						throw InvalidParamException(TRACE_INFO,
+							"Wanted Atom as result of execution, got %s!",
 							evp->to_string().c_str());
 				}
 			}
