@@ -132,8 +132,17 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 		{
 			return createFloatValue(NumberNodeCast(_outgoing[0])->value());
 		}
+
+		// Well, we could also be wrapping a unary ValueShim.
+		// I think this only happens when there's a bug somewhere
+		// else, but ... well, its not totally preposterous, so
+		// go ahead and handle it.
+		if (VALUE_SHIM_LINK == _outgoing[0]->get_type())
+		{
+			return _outgoing[0]->execute(as, silent);
+		}
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an Atom and a key");
+			"Expecting an Atom and a key; got %s", to_string().c_str());
 	}
 
 	return do_execute(as, silent);
