@@ -54,6 +54,7 @@ first).
 * [`flows.scm`](flows.scm)                   -- Flowing Values around.
 * [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically updating TruthValues.
 * [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating FloatValues.
+* [`string-of.scm`](string-of.scm)           -- Flowing strings.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
