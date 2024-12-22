@@ -45,5 +45,31 @@
 	(equal? string-from-node (StringValue "do-da")))
 
 ; -----------
+
+(cog-set-value! (Anchor "anch") (Predicate "flokey")
+	(StringValue "scoobey"))
+
+(define filter-string
+	(Filter
+		(Rule
+			(Variable "$strv")
+			(Variable "$strv")
+			(Edge (Predicate "foobar")
+				(List
+					(StringOf (Type 'Concept)
+						(ValueOf (Variable "$strv"))))))
+		(ValueOf (Anchor "anch") (Predicate "flokey"))))
+
+(define flow-string
+	(cog-execute! filter-string))
+
+(format #t "Flow string got ~A\n" flow-string)
+
+(test-assert "flow-string"
+	(equal? flow-string
+		(Edge (Predicate "foobar")
+			(List (Concept "scoobey")))))
+
+; -----------
 (test-end tname)
 (opencog-test-end)
