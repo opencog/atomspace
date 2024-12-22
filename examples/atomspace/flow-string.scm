@@ -1,12 +1,12 @@
 ;
-; string-of.scm -- Converting StringValues into Nodes & vice-versa
+; flow-string.scm -- Converting StringValues into Nodes & vice-versa
 ;
 ; The FilterLink can be used to rewrite streaming data from one format
 ; into another ... when that data is a sequence of Links or LinkValues.
 ; Converting from a StringValue to a Node presents a challenge, because
 ; there is no way to get "naked strings" in Atomese.
 ;
-; The need to convert stransient StringValue streams into concrete
+; The need to convert transient StringValue streams into concrete
 ; Nodes stored in the AtomSpace is fulfilled by the StringOfLink
 ; It will convert between different Node types, and also between
 ; Nodes and StringValues.
@@ -14,14 +14,21 @@
 ; More abstractly: Given dynamic data sources that are flowing streams
 ; of strings, such as chat servers or web-page chat interfaces, there
 ; can be a need to capture some or all of the string stream as Atomese
-; Atoms, so that, for example, they become searchable using the standard
-; query engine interfaces. To become searchable, the strings need to be
-; converted into Nodes, typically ConceptNodes, ItemNodes or WordNodes.
-; The StringOfLink provides that conversion.
+; Nodes. As Nodes, they can be stored to disk (as a form of "memory")
+; and become available for conventional AtomSpace processing, such as
+; with searches and queries. The StringOfLink provides the conversion
+; from flowing streams to static Nodes.
+;
+; The technical jargon for this is that the AtomSpace becomes a "sink"
+; for the flow. Everything that flowed in stops and turns into Nodes.
+; One can think of the flow as freezing into place, with the Nodes as
+; the remaining evidence of what had flowed in.
 ;
 ; Conversely, there might be a need to stream the contents of the
 ; AtomSpace back out to a chat interface; the StringOfLink can provide
 ; the needed conversion from AtomSpace Nodes to string streams.
+; Here, the AtomSpace becomes a "source" (opposite of "sink") for
+; a stream.
 ;
 (use-modules (opencog) (opencog exec))
 
