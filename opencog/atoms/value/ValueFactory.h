@@ -130,8 +130,9 @@ public:
             argnames += std::string(t.name()) + " ";
 
         throw IndexErrorException(TRACE_INFO,
-            "No factory found for Value type %d and arguments %s.",
-            vtype, argnames.c_str());
+            "No factory found for Value type %d - %s and arguments %s.",
+            vtype, nameserver().getTypeName(vtype).c_str(),
+            argnames.c_str());
     }
 };
 
