@@ -91,8 +91,8 @@ ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 	if (_outgoing[0]->is_type(TYPE_NODE))
 		to_type = TypeNodeCast(_outgoing[0])->get_kind();
 
-	bool isnode = nameserver().isNode(to_type);
-	if (not isnode and not nameserver().isA(to_type, STRING_VALUE))
+	bool to_node = nameserver().isNode(to_type);
+	if (not to_node and not nameserver().isA(to_type, STRING_VALUE))
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a Node or StringValue, got %s",
 			nameserver().getTypeName(to_type).c_str());
@@ -102,14 +102,14 @@ ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 		ValuePtr vp = _outgoing[1]->execute();
 		if (vp->is_type(NODE))
 		{
-			if (isnode)
+			if (to_node)
 				return createNode(to_type, HandleCast(vp)->get_name());
 			else
 				return createStringValue(HandleCast(vp)->get_name());
 		}
 		if (vp->is_type(STRING_VALUE))
 		{
-			if (isnode)
+			if (to_node)
 				return createNode(to_type,
 					StringValueCast(vp)->value()[0]);
 			else
@@ -126,10 +126,14 @@ ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 			"Expecting a Node, got %s",
 			vp->to_string().c_str());
 	}
-	else
 
 	if (_outgoing[1]->is_type(NODE))
-		return createNode(to_type, _outgoing[1]->get_name());
+	{
+		if (to_node)
+			return createNode(to_type, _outgoing[1]->get_name());
+		else
+			return createStringValue(_outgoing[1]->get_name());
+	}
 
 	/* Not reached */
 	throw RuntimeException(TRACE_INFO,
