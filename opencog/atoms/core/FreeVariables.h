@@ -131,12 +131,14 @@ struct FreeVariables : Replacement
 	/// almost-pure because it does honour the semantics of QuoteLink.
 	Handle substitute_nocheck(const Handle&,
 	                          const HandleSeq&,
-	                          bool silent=false) const;
+	                          bool silent=false,
+	                          bool do_exec=false) const;
 
 	/// Like the above, but takes a mapping from variables to arguments.
 	Handle substitute_nocheck(const Handle&,
 	                          const HandleMap&,
-	                          bool silent=false) const;
+	                          bool silent=false,
+	                          bool do_exec=false) const;
 
 	/// Comparison operator. Used to enable containers holding
 	/// this class.

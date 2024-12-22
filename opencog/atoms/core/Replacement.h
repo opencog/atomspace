@@ -45,6 +45,14 @@ namespace opencog
 /// but performs type-checking before doing so. (It just calls this
 /// class to do the actual work, if type-checks pass.)
 ///
+/// If the `do_exec` flag is set, and the grounding Atom is executable,
+/// while the wrapping Link is not, then the groudning Atom is executed,
+/// with the resulting Atom used for the substitution. This allows
+/// streams to be terminated in ordinary non-executable Links. Doing
+/// execution this way seems to be a bit cleaner and more precise than
+/// what `class Instantiator` does: it just executes everything it finds
+/// rather indiscriminantly, which is perhaps (??) not a good idea.
+///
 /// See also `class Instantiator`, which does a similar replacement,
 /// except that it also executes any executable links that it encounters
 /// along the way, and places the results into an AtomSpace.
@@ -56,11 +64,13 @@ struct Replacement
 	/// any atoms that occur in the map by their mapped value.
 	/// It has the name "nocheck" because no type-checking is
 	/// performed before replacement.
-	static Handle replace_nocheck(const Handle&, const HandleMap&);
+	static Handle replace_nocheck(const Handle&, const HandleMap&,
+	                              bool do_exec = false);
 
 protected:
 	static Handle substitute_scoped(Handle, const HandleSeq&,
 	                                const IndexMap&,
+	                                bool do_exec,
 	                                Quotation quotation=Quotation());
 	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
 	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);

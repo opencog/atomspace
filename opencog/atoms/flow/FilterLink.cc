@@ -545,7 +545,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// beta-reduction; we've already done that, during matching.
 	for (const Handle& impl : _rewrite)
 	{
-		ValuePtr red(_mvars->substitute_nocheck(impl, valseq));
+		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, false, true));
 		if (red->is_atom() and HandleCast(red)->is_executable())
 		{
 			ValuePtr v(HandleCast(red)->execute(scratch, silent));
