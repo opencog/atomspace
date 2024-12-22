@@ -546,10 +546,16 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	for (const Handle& impl : _rewrite)
 	{
 		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, false, true));
-		if (red->is_atom() and HandleCast(red)->is_executable())
+		if (red->is_atom())
 		{
-			ValuePtr v(HandleCast(red)->execute(scratch, silent));
-			if (v) rew.emplace_back(v);
+			Handle hred = scratch->add_atom(HandleCast(red));
+			if (hred->is_executable())
+			{
+				ValuePtr v(hred->execute(scratch, silent));
+				if (v) rew.emplace_back(v);
+			}
+			else
+				rew.emplace_back(hred);
 		}
 		else
 			rew.emplace_back(red);
