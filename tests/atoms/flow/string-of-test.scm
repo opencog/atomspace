@@ -9,12 +9,39 @@
 (test-begin tname)
 ; -----------
 
-(define node-to-node
+(define node-from-node
 	(cog-execute! (StringOf (Type 'Concept) (Predicate "bar"))))
-(format #t "Got ~A\n" node-to-node)
+; (format #t "Node from node got ~A\n" node-to-node)
 
-(test-assert "Node-to-node"
-	(equal? node-to-node (Concept "bar")))
+(test-assert "Node-from-node"
+	(equal? node-from-node (Concept "bar")))
+
+; -----------
+
+(cog-set-value! (Anchor "anch") (Predicate "key")
+	(StringValue "a" "b" "c"))
+
+(define node-from-string
+	(cog-execute! (StringOf (Type 'Concept)
+		(ValueOf (Anchor "anch") (Predicate "key")))))
+
+(format #t "Got node from string ~A\n" node-from-string)
+
+(test-assert "Node-from-string"
+	(equal? node-from-string (Concept "a")))
+
+; -----------
+
+(cog-execute!
+	(SetValue (Anchor "anch") (Predicate "strkey")
+		(StringOf (Type 'StringValue)
+			(Concept "do-da"))))
+
+(define string-from-node
+(format #t "Got string from node ~A\n" string-from-node)
+
+;(test-assert "string-from-node"
+;	(equal? string-from-node (Concept "a")))
 
 ; -----------
 (test-end tname)
