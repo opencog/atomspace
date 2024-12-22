@@ -38,6 +38,7 @@
 			(Concept "do-da"))))
 
 (define string-from-node
+	(cog-value (Anchor "anch") (Predicate "strkey")))
 (format #t "Got string from node ~A\n" string-from-node)
 
 ;(test-assert "string-from-node"

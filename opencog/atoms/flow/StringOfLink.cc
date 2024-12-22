@@ -91,24 +91,27 @@ ValuePtr StringOfLink::execute(AtomSpace* as, bool silent)
 	if (_outgoing[0]->is_type(TYPE_NODE))
 		to_type = TypeNodeCast(_outgoing[0])->get_kind();
 
-	std::string name;
 	if (_outgoing[1]->is_executable())
 	{
 		ValuePtr vp = _outgoing[1]->execute();
 		if (vp->is_type(NODE))
-			name = HandleCast(vp)->get_name();
+			return createNode(to_type, HandleCast(vp)->get_name());
 		if (vp->is_type(STRING_VALUE))
-			name = StringValueCast(vp)->value()[0];
+			return createNode(to_type,
+				StringValueCast(vp)->value()[0]);
 		else
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting a Node, got %s",
 				vp->to_string().c_str());
 	}
 	else
-	if (_outgoing[1]->is_type(NODE))
-		name = NodeCast(_outgoing[1])->get_name();
 
-	return createNode(to_type, name);
+	if (_outgoing[1]->is_type(NODE))
+		return createNode(to_type, _outgoing[1]->get_name());
+
+	/* Not reached */
+	throw RuntimeException(TRACE_INFO,
+		"Can't happen but it did %s", to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(StringOfLink, STRING_OF_LINK)
