@@ -198,7 +198,7 @@
 					(Type 'LinkValue)
 					(Concept "parse")
 					(Glob "$x")))
-			(extract (Glob "$x")))           ; The complicate rewrite
+			(extract (Glob "$x")))           ; The complicated rewrite
 
 		; The sequence of Values to be filtered by above.
 		(ValueOf (Node "some place") (Predicate "some key")))
