@@ -22,20 +22,41 @@
 	(LinkValue (StringValue "/dev/tty0") (StringValue "char"))))
 
 ; Place the stream where it can be found.
-(set-value! (Anchor "rock") (Predicate "key") stream)
+(cog-set-value! (Anchor "rock") (Predicate "key") stream)
 
 ; A search pattern to filter the stream.
 (define find-files
 	(Filter
+		; The rule is applied to each item in the input stream
 		(Rule
+			; A variable declaratio for the variables used in the rule.
 			(Variable "$filename")
+
+			; The pattern to be matched. Look for direntries that are
+			; regular files, having file type (StringValue "reg").
+			; The StringOfLink is an Atom and can be placed in the
+			; pattern. It grabs the Node name, and constructs a
+			; a StringValue which is then used in the search pattern.
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$filename")
 				(StringOf (Type 'StringValue) (Node "reg")))
+
+			; The rewrite to be applied to all matching items. In this
+			; case, the filename is converted from a StringValue to a
+			; concrete Node, an ItemNode, and placed in the AtomSpace.
+			; It is also tagged as a file with a Predicate tag. This
+			; allows all file URL's in the AtomSpace to be found at
+			; some later time, without looking at the external world
+			; again. The AtomSpace now "remembers" what was seen.
 			(Edge
 				(Predicate "is-a file URL")
 				(StringOf (Type 'ItemNode) (Variable "$filename"))))
+
+		; The location of the input stream, to which the filter
+		; pattern will be applied.
 		(ValueOf (Anchor "rock") (Predicate "key"))))
 
+; Apply the filter to the input stream.
 (cog-execute! find-files)
 
+; That's all, folks! The End.
