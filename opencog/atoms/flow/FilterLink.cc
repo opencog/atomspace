@@ -372,6 +372,17 @@ bool FilterLink::extract(const Handle& termpat,
 		return false;
 	}
 
+	// Search for a specific StringValue. There's not way to
+	// place StringValues directly into the pattern, but it
+	// can be encoded with StringOfLink. Note this is a content
+	// compare, not a pointer compare, because values are not
+	// de-duped.
+	if (STRING_OF_LINK == t)
+	{
+		ValuePtr patval = termpat->execute();
+		return (*patval == *vgnd);
+	}
+
 	// If they are (non-variable) nodes, they must be identical.
 	if (not termpat->is_link())
 		return (termpat == vgnd);
