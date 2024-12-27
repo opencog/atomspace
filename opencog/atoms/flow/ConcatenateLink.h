@@ -37,6 +37,9 @@ namespace opencog
 ///
 class ConcatenateLink : public CollectionOfLink
 {
+protected:
+	ValuePtr flatten(AtomSpace*, const Handle&);
+
 public:
 	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);
 	ConcatenateLink(const ConcatenateLink&) = delete;

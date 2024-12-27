@@ -44,6 +44,29 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Return a concatenation of lists.
+ValuePtr ConcatenateLink::flatten(AtomSpace* as, const Handle& base)
+{
+	// We expect a link. We can throw, or we can be silent!?
+	// I dunno. Flip a coin.
+	if (not base->is_link()) return base;
+	HandleSeq oset;
+	for (const Handle& oli : base->getOutgoingSet())
+	{
+		if (oli->is_link())
+		{
+			const HandleSeq& los = oli->getOutgoingSet();
+			oset.insert(oset.end(), los.begin(), los.end());
+		}
+		else
+			oset.push_back(oli);
+	}
+	if (not _have_typespec) _out_type = base->get_type();
+	return as->add_link(_out_type, std::move(oset));
+}
+
+// ---------------------------------------------------------------
+
+/// Return a concatenation of lists.
 ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
@@ -53,32 +76,13 @@ ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 	// simplest case of just collapsing a plain link.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-	{
-		// We expect a link. We can throw, or we can be silent!?
-		// I dunno. Flip a coin.
-		if (not base->is_link()) return base;
-		HandleSeq oset;
-		for (const Handle& oli : base->getOutgoingSet())
-		{
-			if (oli->is_link())
-			{
-				const HandleSeq& los = oli->getOutgoingSet();
-				oset.insert(oset.end(), los.begin(), los.end());
-			}
-			else
-				oset.push_back(oli);
-		}
-		if (not _have_typespec) _out_type = base->get_type();
-		return as->add_link(_out_type, std::move(oset));
-	}
+		return flatten(as, base);
 
+	// Same as above, but this time, we execute, and branch
+	// over all the various possibilities.
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_atom())
-		return as->add_link(_out_type, HandleCast(vp));
-
-	// If its a FloatValue, we could maybe return a NumberNode??
-	// so be linke NumberOfLink ???
-	// if (vp->is_type(FLOAT_VALUE))
+		return flatten(as, HandleCast(vp));
 
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
