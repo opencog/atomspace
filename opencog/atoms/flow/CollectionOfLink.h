@@ -46,6 +46,9 @@ protected:
 	// be added someday?
 	Type _out_type;
 	bool _out_is_link;
+	bool _have_typespec;
+
+	void check_typespec(void);
 
 public:
 	CollectionOfLink(const HandleSeq&&, Type = COLLECTION_OF_LINK);

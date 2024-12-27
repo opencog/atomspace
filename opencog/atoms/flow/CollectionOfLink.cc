@@ -39,13 +39,48 @@ CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
 			"Expecting an CollectionOfLink, got %s", tname.c_str());
 	}
 
-	if (1 != _outgoing.size() and 2 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO,
-			"CollectionOfLink expects one or two args, got %s",
-				to_string().c_str());
-
 	_out_type = SET_LINK;
 	_out_is_link = true;
+	_have_typespec = false;
+
+	check_typespec();
+}
+
+// ---------------------------------------------------------------
+
+/// Check for valid form
+void CollectionOfLink::check_typespec(void)
+{
+	if (1 == _outgoing.size())
+	{
+		_have_typespec = false;
+		return;
+	}
+
+	// If there are two args, then the first one specifies the
+	// output type.
+	if (2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting one or two args, got %s",
+				to_string().c_str());
+
+
+	// FIXME: _outoging[0] could be executable, in which case
+	// is should be executed, first. But I'm lazy. Also:
+	// instead of being a simple type, the output could be
+	// a complicated signature. Again, I'm lazy.
+	if (not _outgoing[0]->is_type(TYPE_NODE))
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting first arg to be a type, got %s",
+				to_string().c_str());
+	_out_type = TypeNodeCast(_outgoing[0])->get_kind();
+
+	_out_is_link = nameserver().isLink(_out_type);
+	if (not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE))
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting type to be a Link or LinkValue, got %s for %s",
+				nameserver().getTypeName(_out_type).c_str(),
+				to_string().c_str());
 }
 
 // ---------------------------------------------------------------
@@ -54,29 +89,7 @@ CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
 ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
-
-	// If there are two args, then the first one specifies the
-	// output type.
-	if (2 == _outgoing.size())
-	{
-		coff = 1;
-
-		// FIXME: _outoging[0] could be executable, in which case
-		// is should be executed, first. But I'm lazy. Also:
-		// instead of being a simple type, the output could be
-		// a complicated signature. Again, I'm lazy.
-		if (not _outgoing[0]->is_type(TYPE_NODE))
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting first arg of a CollectionOfLink to be a type, got %s",
-					to_string().c_str());
-		_out_type = TypeNodeCast(_outgoing[0])->get_kind();
-
-		_out_is_link = nameserver().isLink(_out_type);
-		if (not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE))
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting type of a CollectionOfLink to be a Link or LinkValue %s",
-					nameserver().getTypeName(_out_type).c_str());
-	}
+	if (_have_typespec) coff = 1;
 
 	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
