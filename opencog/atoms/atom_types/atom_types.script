@@ -1022,7 +1022,9 @@ TYPE_OF_LINK <- VALUE_OF_LINK
 // Grab an IncomingSet of an Atom, and return it as a LinkValue.
 INCOMING_OF_LINK <- VALUE_OF_LINK
 
-// Convert a LinkValue to a SetLink. The argument is presumed to
+// Convert between Link/LinkValue types. If no type is specified,
+// then convert to SetLink. Primarily intended to convert a LinkValue
+// to a SetLink, but can go other ways. The argument is presumed to
 // be some executable link that, when executed, returns a LinkValue
 // (or some derived type, e.g. a QueueValue) and now we want an
 // actual set.

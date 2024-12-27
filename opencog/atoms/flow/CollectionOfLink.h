@@ -31,13 +31,25 @@ namespace opencog
  *  @{
  */
 
-/// The CollectionOfLink returns a SetLink holding the contents of
-/// a LinkValue that resulted from the execution of whatever was
+/// The CollectionOfLink performs a conversion between different
+/// Link types and LinkValues.
+///
+/// In the default mode, it returns a SetLink holding the contents
+/// of a LinkValue that resulted from the execution of whatever was
 /// wrapped. Thus, if a pipeline produces a LinkValue, and you
 /// wanted a SetLink instead, just wrap it with this.
 ///
 class CollectionOfLink : public FunctionLink
 {
+protected:
+	// Only simple types are handled; perhaps complex types could
+	// be added someday?
+	Type _out_type;
+	bool _out_is_link;
+	bool _have_typespec;
+
+	void check_typespec(void);
+
 public:
 	CollectionOfLink(const HandleSeq&&, Type = COLLECTION_OF_LINK);
 	CollectionOfLink(const CollectionOfLink&) = delete;
