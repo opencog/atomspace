@@ -35,23 +35,30 @@
 ; Same as above, but do type conversion.
 
 (define get-qry-edge
-	(Type 'EdgeLink)
-	(Get
-		(TypedVariable (Variable "X") (Type 'Concept))
-		(Evaluation (Predicate "foo") (Variable "X"))))
-
-(define set-qry-edge
-	(Type 'EdgeLink)
 	(CollectionOf
+		(Type 'EdgeLink)
+		(Get
+			(TypedVariable (Variable "X") (Type 'Concept))
+			(Evaluation (Predicate "foo") (Variable "X")))))
+
+(define meet-qry-edge
+	(CollectionOf
+		(Type 'EdgeLink)
 		(Meet
 			(TypedVariable (Variable "X") (Type 'Concept))
 			(Evaluation (Predicate "foo") (Variable "X")))))
 
-(test-assert "get edge"
-	(equal? (cog-execute! get-qry-edge) (Edge (Concept "bar"))))
+(define qry-edge (cog-execute! get-qry-edge))
+(format #t "Get edge is ~A" qry-edge)
 
-(test-assert "collection edcge"
-	(equal? (cog-execute! set-qry0edge) (Edge (Concept "bar"))))
+(define meet-edge (cog-execute! meet-qry-edge))
+(format #t "Meet edge is ~A" meet-edge)
+
+(test-assert "get edge"
+	(equal? qry-edge (Edge (Concept "bar"))))
+
+(test-assert "meet edge"
+	(equal? meet-edge (Edge (Concept "bar"))))
 
 (test-end tname)
 
