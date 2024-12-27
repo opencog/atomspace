@@ -913,7 +913,7 @@ FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 //
 // How widespread is this? The ExecutionOutputLink makes use of this,
 // and so does FormulaPredicateLink.cc. Altering the first is easy.
-// The second is easy to stub out, but then siz unit tests fail. Sooo
+// The second is easy to stub out, but then six unit tests fail. Sooo
 // leave as-is seems like the correct choice.
 
 // --------------------
@@ -1042,11 +1042,11 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // Internal-use-only wrapper for Values. Older code for function
 // application and beta reduction only works with Atoms, not Values.
-// Rewriting it to flow Values is really hard: we don't have a strategy
-// for applying functions to Values. This is the tactical work-around:
-// It can be placed inside a Link, so beta-reduction works. It holds
-// a Value, which functions can obtain by calling execute(). It *cannot*
-// be placed in the AtomSpace, so is not quite a "real" Atom.
+// Rewriting that code to flow Values is really hard: we don't have a
+// strategy for applying functions to Values. This is the tactical
+// work-around: It can be placed inside a Link, so beta-reduction works.
+// It holds a Value, which functions can obtain by calling execute().
+// It *cannot* be placed in the AtomSpace, so is not quite a "real" Atom.
 VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_LINK
 
 // -----------
@@ -1083,9 +1083,21 @@ FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 // only its argument list, instead of the entire AtomSpace.
 //
 // MapLink, because it resembles the standard functional-programming
-// concept of "map", except that it discard unmatchable entries, so
+// concept of "map", except that it discards unmatchable entries, so
 // it's really FilterMapLink. That's a mouthful, so we go with FilterLink.
 FILTER_LINK <- FUNCTION_LINK
+
+// ConcatenateLink concatenates a list-of-lists, flattening a two-level
+// nesting down to one. Like the FilterLink above, this is another
+// list-processing type. Until now, Atomese has managed to avoid
+// implementing SRFI-1-like list processing primitives, but the the
+// introduction of the concept of Value Streams makes that subsystem
+// look like "list processing", and so a lisp-like insfrastructure
+// seems unavoidable. Unlike lisp/scheme, our primitives continue to be
+// Atoms, so its not like we can avoid re-inventing SRFI-1 by providing
+// a bunch of callouts to scheme. So this journey seems unavoidable,
+// for now, and is driven by necessity.
+CONCATENATE_LINK <- COLLECTION_OF_LINK
 
 // --------------------
 // Other kinds of functions.

@@ -64,6 +64,7 @@ void CollectionOfLink::check_typespec(void)
 			"Expecting one or two args, got %s",
 				to_string().c_str());
 
+	_have_typespec = true;
 
 	// FIXME: _outoging[0] could be executable, in which case
 	// is should be executed, first. But I'm lazy. Also:
