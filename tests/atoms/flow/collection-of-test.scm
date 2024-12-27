@@ -11,6 +11,9 @@
 
 (Evaluation (Predicate "foo") (Concept "bar"))
 
+; -------------------------------------------------------------
+; Base function: convert to set.
+
 (define get-qry
 	(Get
 		(TypedVariable (Variable "X") (Type 'Concept))
@@ -27,6 +30,28 @@
 
 (test-assert "collection set"
 	(equal? (cog-execute! set-qry) (Set (Concept "bar"))))
+
+; -------------------------------------------------------------
+; Same as above, but do type conversion.
+
+(define get-qry-edge
+	(Type 'EdgeLink)
+	(Get
+		(TypedVariable (Variable "X") (Type 'Concept))
+		(Evaluation (Predicate "foo") (Variable "X"))))
+
+(define set-qry-edge
+	(Type 'EdgeLink)
+	(CollectionOf
+		(Meet
+			(TypedVariable (Variable "X") (Type 'Concept))
+			(Evaluation (Predicate "foo") (Variable "X")))))
+
+(test-assert "get edge"
+	(equal? (cog-execute! get-qry-edge) (Edge (Concept "bar"))))
+
+(test-assert "collection edcge"
+	(equal? (cog-execute! set-qry0edge) (Edge (Concept "bar"))))
 
 (test-end tname)
 
