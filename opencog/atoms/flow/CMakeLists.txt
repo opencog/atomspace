@@ -36,6 +36,7 @@ INSTALL (TARGETS atomflow EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	CollectionOfLink.h
+	ConcatenateLink.h
 	FilterLink.h
 	FormulaPredicateLink.h
 	IncomingOfLink.h
@@ -46,6 +47,7 @@ INSTALL (FILES
 	SetValueLink.h
 	SizeOfLink.h
 	StreamValueOfLink.h
+	StringOfLink.h
 	TruthValueOfLink.h
 	TypeOfLink.h
 	ValueOfLink.h
