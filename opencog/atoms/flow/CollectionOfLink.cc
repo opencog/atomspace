@@ -52,6 +52,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
 	Type otype = SET_LINK;
+	bool type_is_link = true;
 
 	// If there are two args, then the first one specifies the
 	// output type.
@@ -68,13 +69,24 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 				"Expecting first arg of a CollectionOfLink to be a type, got %s",
 					to_string().c_str());
 		otype = TypeNodeCast(_outgoing[0])->get_kind();
+
+		type_is_link = nameserver().isLink(otype);
+		if (not type_is_link and not nameserver().isA(otype, LINK_VALUE))
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting type of a CollectionOfLink to be a Link or LinkValue %s",
+					nameserver().getTypeName(otype).c_str());
 	}
 
 	// If the given Atom is executable, then execute it.
 	// In effectively all cases, we expect it to be executable!
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-		return as->add_link(otype, base);
+	{
+		if (type_is_link)
+			return as->add_link(otype, base);
+		else
+			return createLinkValue(otype, ValueSeq({base}));
+	}
 
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_atom())
