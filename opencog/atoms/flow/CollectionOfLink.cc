@@ -77,8 +77,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 					nameserver().getTypeName(otype).c_str());
 	}
 
-	// If the given Atom is executable, then execute it.
-	// In effectively all cases, we expect it to be executable!
+	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
 	{
@@ -88,13 +87,31 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 			return createLinkValue(otype, ValueSeq({base}));
 	}
 
+	// If the given Atom is executable, then execute it.
+	// In effectively all cases, we expect it to be executable!
+	// How we re-wrap it depends on the execution output.
 	ValuePtr vp = base->execute(as, silent);
-	if (vp->is_atom())
-		return as->add_link(otype, HandleCast(vp));
+	if (vp->is_node())
+	{
+		if (type_is_link)
+			return as->add_link(otype, HandleCast(vp));
+		else
+			return createLinkValue(otype, ValueSeq({vp}));
+	}
 
-	// If its a FloatValue, we could maybe return a NumberNode??
-	// so be linke NumberOfLink ???
-	// if (vp->is_type(FLOAT_VALUE))
+	if (vp->is_link())
+	{
+		if (type_is_link)
+			return as->add_link(otype,
+				HandleSeq(HandleCast(vp)->getOutgoingSet()));
+		else
+		{
+			ValueSeq vs;
+			for (const Handle& h : HandleCast(vp)->getOutgoingSet())
+				vs.push_back(h);
+			return createLinkValue(otype, std::move(vs));
+		}
+	}
 
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
@@ -102,8 +119,17 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 			vp->to_string().c_str());
 
 	LinkValuePtr lvp = LinkValueCast(vp);
-	HandleSeq hs = lvp->to_handle_seq();
-	return as->add_link(otype, std::move(hs));
+
+	if (type_is_link)
+	{
+		HandleSeq hs = lvp->to_handle_seq();
+		return as->add_link(otype, std::move(hs));
+	}
+
+	if (vp->get_type() == otype)
+		return vp;
+
+	return createLinkValue(otype, lvp->value());
 }
 
 DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
