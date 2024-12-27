@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_CONCATENATE_LINK_H
 #define _OPENCOG_CONCATENATE_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/flow/CollectionOfLink.h>
 
 namespace opencog
 {
@@ -35,7 +35,7 @@ namespace opencog
 /// one level. Here, the lists may be either LinkValues or
 /// Links.
 ///
-class ConcatenateLink : public FunctionLink
+class ConcatenateLink : public CollectionOfLink
 {
 public:
 	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);

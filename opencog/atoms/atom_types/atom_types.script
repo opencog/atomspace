@@ -1097,7 +1097,7 @@ FILTER_LINK <- FUNCTION_LINK
 // Atoms, so its not like we can avoid re-inventing SRFI-1 by providing
 // a bunch of callouts to scheme. So this journey seems unavoidable,
 // for now, and is driven by necessity.
-CONCATENATE_LINK <- FUNCTION_LINK
+CONCATENATE_LINK <- COLLECTION_OF_LINK
 
 // --------------------
 // Other kinds of functions.
