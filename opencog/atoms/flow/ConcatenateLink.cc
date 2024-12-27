@@ -38,7 +38,8 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 			"Expecting an ConcatenateLink, got %s", tname.c_str());
 	}
 
-	_out_type = LINK_VALUE;
+	if (not _have_typespec)
+		_out_type = LINK_VALUE;
 }
 
 // ---------------------------------------------------------------
