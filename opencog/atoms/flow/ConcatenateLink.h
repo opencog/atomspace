@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_COCATENATE_LINK_H
-#define _OPENCOG_COCATENATE_LINK_H
+#ifndef _OPENCOG_CONCATENATE_LINK_H
+#define _OPENCOG_CONCATENATE_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -38,7 +38,7 @@ namespace opencog
 class ConcatenateLink : public FunctionLink
 {
 public:
-	ConcatenateLink(const HandleSeq&&, Type = COCATENATE_LINK);
+	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);
 	ConcatenateLink(const ConcatenateLink&) = delete;
 	ConcatenateLink& operator=(const ConcatenateLink&) = delete;
 
@@ -54,4 +54,4 @@ LINK_PTR_DECL(ConcatenateLink)
 /** @}*/
 }
 
-#endif // _OPENCOG_COCATENATE_LINK_H
+#endif // _OPENCOG_CONCATENATE_LINK_H
