@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/flow/ConcatenateLink.h
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

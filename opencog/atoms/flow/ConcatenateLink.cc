@@ -1,7 +1,7 @@
 /*
- * CollectionOfLink.cc
+ * ConcatenateLink.cc
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -24,29 +24,29 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 
-#include "CollectionOfLink.h"
+#include "ConcatenateLink.h"
 
 using namespace opencog;
 
-CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
+ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 	: FunctionLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, COLLECTION_OF_LINK))
+	if (not nameserver().isA(t, CONCATENATE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an CollectionOfLink, got %s", tname.c_str());
+			"Expecting an ConcatenateLink, got %s", tname.c_str());
 	}
 
 	if (1 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
-			"CollectionOfLink expects one arg.");
+			"ConcatenateLink expects one arg");
 }
 
 // ---------------------------------------------------------------
 
 /// Return a SetLink vector.
-ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
+ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
 	// In effectively all cases, we expect it to be executable!
@@ -64,7 +64,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
-			"CollectionOfLink expects a LinkValue, got %s",
+			"ConcatenateLink expects a LinkValue, got %s",
 			vp->to_string().c_str());
 
 	LinkValuePtr lvp = LinkValueCast(vp);
@@ -72,6 +72,6 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	return as->add_link(SET_LINK, std::move(hs));
 }
 
-DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
+DEFINE_LINK_FACTORY(ConcatenateLink, CONCATENATE_LINK)
 
 /* ===================== END OF FILE ===================== */

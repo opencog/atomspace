@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomflow
 	CollectionOfLink.cc
+	ConcatenateLink.cc
 	FilterLink.cc
 	FormulaPredicateLink.cc
 	IncomingOfLink.cc
