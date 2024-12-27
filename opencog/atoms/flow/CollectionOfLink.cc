@@ -43,6 +43,9 @@ CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"CollectionOfLink expects one or two args, got %s",
 				to_string().c_str());
+
+	_out_type = SET_LINK;
+	_out_is_link = true;
 }
 
 // ---------------------------------------------------------------
@@ -51,8 +54,6 @@ CollectionOfLink::CollectionOfLink(const HandleSeq&& oset, Type t)
 ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
-	Type otype = SET_LINK;
-	bool type_is_link = true;
 
 	// If there are two args, then the first one specifies the
 	// output type.
@@ -68,23 +69,23 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting first arg of a CollectionOfLink to be a type, got %s",
 					to_string().c_str());
-		otype = TypeNodeCast(_outgoing[0])->get_kind();
+		_out_type = TypeNodeCast(_outgoing[0])->get_kind();
 
-		type_is_link = nameserver().isLink(otype);
-		if (not type_is_link and not nameserver().isA(otype, LINK_VALUE))
+		_out_is_link = nameserver().isLink(_out_type);
+		if (not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE))
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting type of a CollectionOfLink to be a Link or LinkValue %s",
-					nameserver().getTypeName(otype).c_str());
+					nameserver().getTypeName(_out_type).c_str());
 	}
 
 	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
 	{
-		if (type_is_link)
-			return as->add_link(otype, base);
+		if (_out_is_link)
+			return as->add_link(_out_type, base);
 		else
-			return createLinkValue(otype, ValueSeq({base}));
+			return createLinkValue(_out_type, ValueSeq({base}));
 	}
 
 	// If the given Atom is executable, then execute it.
@@ -93,23 +94,23 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_node())
 	{
-		if (type_is_link)
-			return as->add_link(otype, HandleCast(vp));
+		if (_out_is_link)
+			return as->add_link(_out_type, HandleCast(vp));
 		else
-			return createLinkValue(otype, ValueSeq({vp}));
+			return createLinkValue(_out_type, ValueSeq({vp}));
 	}
 
 	if (vp->is_link())
 	{
-		if (type_is_link)
-			return as->add_link(otype,
+		if (_out_is_link)
+			return as->add_link(_out_type,
 				HandleSeq(HandleCast(vp)->getOutgoingSet()));
 		else
 		{
 			ValueSeq vs;
 			for (const Handle& h : HandleCast(vp)->getOutgoingSet())
 				vs.push_back(h);
-			return createLinkValue(otype, std::move(vs));
+			return createLinkValue(_out_type, std::move(vs));
 		}
 	}
 
@@ -120,16 +121,16 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 
 	LinkValuePtr lvp = LinkValueCast(vp);
 
-	if (type_is_link)
+	if (_out_is_link)
 	{
 		HandleSeq hs = lvp->to_handle_seq();
-		return as->add_link(otype, std::move(hs));
+		return as->add_link(_out_type, std::move(hs));
 	}
 
-	if (vp->get_type() == otype)
+	if (vp->get_type() == _out_type)
 		return vp;
 
-	return createLinkValue(otype, lvp->value());
+	return createLinkValue(_out_type, lvp->value());
 }
 
 DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
