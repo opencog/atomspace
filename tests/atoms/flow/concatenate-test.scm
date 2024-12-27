@@ -24,8 +24,29 @@
 
 (test-assert "flat set"
 	(equal? flat-set
-		(Set (Concept "c") (Concept "a") (Concept "b"))))
+		(Set (Concept "b") (Concept "c") (Concept "a") (Concept "b"))))
+
+; -------------------------------------------------------------
+; Base function: flatten LinkValues
+(define link-link
+	(LinkValue
+		(LinkValue (Concept "a") (Concept "b"))
+		(LinkValue (Concept "c") (Concept "b"))))
+
+(cog-set-value! (Anchor "rock") (Predicate "key") link-link)
+
+(define flatten-val
+	(Concatenate
+		(ValueOf (Anchor "rock") (Predicate "key"))))
+
+(define flat-val (cog-execute! flatten-val))
+(format #t "flat val is ~A" flat-val)
+
+(test-assert "flat val"
+	(equal? flat-val
+		(LinkValue (Concept "a") (Concept "b") (Concept "c") (Concept "b"))))
+
+; -------------------------------------------------------------
 
 (test-end tname)
-
 (opencog-test-end)
