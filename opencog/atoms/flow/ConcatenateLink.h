@@ -39,6 +39,7 @@ class ConcatenateLink : public CollectionOfLink
 {
 protected:
 	ValuePtr flatten(AtomSpace*, const Handle&);
+	ValuePtr vlatten(const ValuePtr&);
 
 public:
 	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);

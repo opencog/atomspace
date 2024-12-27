@@ -67,6 +67,30 @@ ValuePtr ConcatenateLink::flatten(AtomSpace* as, const Handle& base)
 // ---------------------------------------------------------------
 
 /// Return a concatenation of lists.
+ValuePtr ConcatenateLink::vlatten(const ValuePtr& vp)
+{
+	if (not vp->is_type(LINK_VALUE))
+		throw InvalidParamException(TRACE_INFO,
+			"ConcatenateLink expects a LinkValue, got %s",
+			vp->to_string().c_str());
+
+	ValueSeq vseq;
+	for (const ValuePtr& vli : LinkValueCast(vp)->value())
+	{
+		if (vli->is_type(LINK_VALUE))
+		{
+			const ValueSeq& vos = LinkValueCast(vli)->value();
+			vseq.insert(vseq.end(), vos.begin(), vos.end());
+		}
+		else
+			vseq.push_back(vli);
+	}
+	return createLinkValue(_out_type, std::move(vseq));
+}
+
+// ---------------------------------------------------------------
+
+/// Return a concatenation of lists.
 ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
@@ -84,14 +108,7 @@ ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 	if (vp->is_atom())
 		return flatten(as, HandleCast(vp));
 
-	if (not vp->is_type(LINK_VALUE))
-		throw InvalidParamException(TRACE_INFO,
-			"ConcatenateLink expects a LinkValue, got %s",
-			vp->to_string().c_str());
-
-	LinkValuePtr lvp = LinkValueCast(vp);
-	HandleSeq hs = lvp->to_handle_seq();
-	return as->add_link(_out_type, std::move(hs));
+	return vlatten(vp);
 }
 
 DEFINE_LINK_FACTORY(ConcatenateLink, CONCATENATE_LINK)
