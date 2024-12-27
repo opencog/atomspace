@@ -39,7 +39,10 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 	}
 
 	if (not _have_typespec)
+	{
 		_out_type = LINK_VALUE;
+		_out_is_link = false;
+	}
 }
 
 // ---------------------------------------------------------------
@@ -106,6 +109,16 @@ ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 	// Same as above, but this time, we execute, and branch
 	// over all the various possibilities.
 	ValuePtr vp = base->execute(as, silent);
+
+	// Hmmm. FilterLink returns null pointer when the filter
+	// is empty. Is this a bug in FilterLink? Not sure any more.
+	if (nullptr == vp)
+	{
+		if (_out_is_link)
+			return createLink(_out_type);
+		return createLinkValue(_out_type, ValueSeq({}));
+	}
+
 	if (vp->is_atom())
 		return flatten(as, HandleCast(vp));
 
