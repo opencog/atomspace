@@ -86,7 +86,7 @@ void CollectionOfLink::check_typespec(void)
 
 // ---------------------------------------------------------------
 
-ValuePtr CollectionOfLink::collect_h(AtomSpace* as, const Handle& base)
+ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
 	if (base->is_node())
 	{
@@ -107,7 +107,7 @@ ValuePtr CollectionOfLink::collect_h(AtomSpace* as, const Handle& base)
 
 // ---------------------------------------------------------------
 
-ValuePtr CollectionOfLink::collect_v(const ValuePtr& base)
+ValuePtr CollectionOfLink::rewrap_v(const ValuePtr& base)
 {
 }
 
@@ -122,14 +122,14 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-		return collect_h(as, base);
+		return rewrap_h(as, base);
 
 	// If the given Atom is executable, then execute it.
 	// In effectively all cases, we expect it to be executable!
 	// How we re-wrap it depends on the execution output.
 	ValuePtr vp = base->execute(as, silent);
 	if (vp->is_atom())
-		return collect_h(as, HandleCast(vp));
+		return rewrap_h(as, HandleCast(vp));
 
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
