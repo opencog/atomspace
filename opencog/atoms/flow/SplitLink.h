@@ -36,6 +36,12 @@ namespace opencog
 ///
 class SplitLink : public CollectionOfLink
 {
+protected:
+	std::string _sep;
+
+	ValuePtr split(AtomSpace*, const Handle&);
+	ValuePtr splat(const ValuePtr&);
+
 public:
 	SplitLink(const HandleSeq&&, Type = SPLIT_LINK);
 	SplitLink(const SplitLink&) = delete;

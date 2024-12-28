@@ -1,7 +1,7 @@
 /*
  * CollectionOfLink.cc
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *

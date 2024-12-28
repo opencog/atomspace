@@ -1,5 +1,5 @@
 /*
- * ConcatenateLink.cc
+ * SplitLink.cc
  *
  * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  *
@@ -24,18 +24,18 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 
-#include "ConcatenateLink.h"
+#include "SplitLink.h"
 
 using namespace opencog;
 
-ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
+SplitLink::SplitLink(const HandleSeq&& oset, Type t)
 	: CollectionOfLink(std::move(oset), t)
 {
-	if (not nameserver().isA(t, CONCATENATE_LINK))
+	if (not nameserver().isA(t, SPLIT_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an ConcatenateLink, got %s", tname.c_str());
+			"Expecting an SplitLink, got %s", tname.c_str());
 	}
 
 	if (not _have_typespec)
@@ -43,68 +43,24 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 		_out_type = LINK_VALUE;
 		_out_is_link = false;
 	}
+
+	// Split on whitespace
+	_sep = " \t\n\r\v";
 }
 
 // ---------------------------------------------------------------
 
-/// Return a concatenation of lists.
-ValuePtr ConcatenateLink::flatten(AtomSpace* as, const Handle& base)
-{
-	// We expect a link. We can throw, or we can be silent!?
-	// I dunno. Flip a coin.
-	if (not base->is_link()) return base;
-	HandleSeq oset;
-	for (const Handle& oli : base->getOutgoingSet())
-	{
-		if (oli->is_link())
-		{
-			const HandleSeq& los = oli->getOutgoingSet();
-			oset.insert(oset.end(), los.begin(), los.end());
-		}
-		else
-			oset.push_back(oli);
-	}
-	if (not _have_typespec) _out_type = base->get_type();
-	return as->add_link(_out_type, std::move(oset));
-}
-
-// ---------------------------------------------------------------
-
-/// Return a concatenation of lists.
-ValuePtr ConcatenateLink::vlatten(const ValuePtr& vp)
-{
-	if (not vp->is_type(LINK_VALUE))
-		throw InvalidParamException(TRACE_INFO,
-			"ConcatenateLink expects a LinkValue, got %s",
-			vp->to_string().c_str());
-
-	ValueSeq vseq;
-	for (const ValuePtr& vli : LinkValueCast(vp)->value())
-	{
-		if (vli->is_type(LINK_VALUE))
-		{
-			const ValueSeq& vos = LinkValueCast(vli)->value();
-			vseq.insert(vseq.end(), vos.begin(), vos.end());
-		}
-		else
-			vseq.push_back(vli);
-	}
-	return createLinkValue(_out_type, std::move(vseq));
-}
-
-// ---------------------------------------------------------------
-
-/// Return a concatenation of lists.
-ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
+/// Split a Node name or a StringValue
+ValuePtr SplitLink::execute(AtomSpace* as, bool silent)
 {
 	int coff = 0;
 	if (_have_typespec) coff = 1;
 
-	// If the given Atom is not executable, we deal with a the
-	// simplest case of just collapsing a plain link.
+	// If the given Atom is not executable, then it is just
+	// a node. Split the node name.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-		return flatten(as, base);
+		return split(as, base);
 
 	// Same as above, but this time, we execute, and branch
 	// over all the various possibilities.
@@ -120,11 +76,11 @@ ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
 	}
 
 	if (vp->is_atom())
-		return flatten(as, HandleCast(vp));
+		return split(as, HandleCast(vp));
 
-	return vlatten(vp);
+	return splat(vp);
 }
 
-DEFINE_LINK_FACTORY(ConcatenateLink, CONCATENATE_LINK)
+DEFINE_LINK_FACTORY(SplitLink, SPLIT_LINK)
 
 /* ===================== END OF FILE ===================== */
