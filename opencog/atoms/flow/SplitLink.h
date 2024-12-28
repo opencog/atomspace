@@ -39,16 +39,13 @@ class SplitLink : public CollectionOfLink
 protected:
 	std::string _sep;
 
-	ValuePtr split(AtomSpace*, const Handle&);
-	ValuePtr splat(const ValuePtr&);
+	virtual ValuePtr rewrap_h(AtomSpace*, const Handle&);
+	virtual ValuePtr rewrap_v(AtomSpace*, const ValuePtr&);
 
 public:
 	SplitLink(const HandleSeq&&, Type = SPLIT_LINK);
 	SplitLink(const SplitLink&) = delete;
 	SplitLink& operator=(const SplitLink&) = delete;
-
-	// Return a LinkValue
-	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };

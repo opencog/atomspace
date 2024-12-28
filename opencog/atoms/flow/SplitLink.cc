@@ -50,36 +50,17 @@ SplitLink::SplitLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Split a Node name or a StringValue
-ValuePtr SplitLink::execute(AtomSpace* as, bool silent)
+ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
-	int coff = 0;
-	if (_have_typespec) coff = 1;
-
-	// If the given Atom is not executable, then it is just
-	// a node. Split the node name.
-	Handle base(_outgoing[coff]);
-	if (not base->is_executable())
-		return split(as, base);
-
-	// Same as above, but this time, we execute, and branch
-	// over all the various possibilities.
-	ValuePtr vp = base->execute(as, silent);
-
-	// Hmmm. FilterLink returns null pointer when the filter
-	// is empty. Is this a bug in FilterLink? Not sure any more.
-	if (nullptr == vp)
-	{
-		if (_out_is_link)
-			return createLink(_out_type);
-		return createLinkValue(_out_type, ValueSeq({}));
-	}
-
-	if (vp->is_atom())
-		return split(as, HandleCast(vp));
-
-	return splat(vp);
 }
+
+// ---------------------------------------------------------------
+
+ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
+{
+}
+
+// ---------------------------------------------------------------
 
 DEFINE_LINK_FACTORY(SplitLink, SPLIT_LINK)
 
