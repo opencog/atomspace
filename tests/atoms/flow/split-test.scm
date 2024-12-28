@@ -46,6 +46,52 @@
 (test-assert "eat-list" (equal? words expected))
 
 ; -------------------------------------------------------------
+; Like above, but for a node
+
+(define splatter
+	(Split (Concept "  this  \t\t   is  a  test  and so  \r\n\t  is this  ")))
+
+(define words (cog-execute! splatter))
+(format #t "Splatter into words: ~A" words)
+
+(define expected
+	(LinkValue
+		(Concept "this")
+		(Concept "is")
+		(Concept "a")
+		(Concept "test")
+		(Concept "and")
+		(Concept "so")
+		(Concept "is")
+		(Concept "this")))
+
+(test-assert "splatter-list" (equal? words expected))
+
+; -------------------------------------------------------------
+; Like above, but specifying the output type.
+
+(define splutter
+	(Split
+		(Type 'ListLink)
+		(Concept "  this  \t\t   is  a  test  and so  \r\n\t  is this  ")))
+
+(define words (cog-execute! splutter))
+(format #t "Splutter into words: ~A" words)
+
+(define expected
+	(ListLink
+		(Concept "this")
+		(Concept "is")
+		(Concept "a")
+		(Concept "test")
+		(Concept "and")
+		(Concept "so")
+		(Concept "is")
+		(Concept "this")))
+
+(test-assert "splutter-list" (equal? words expected))
+
+; -------------------------------------------------------------
 (test-end tname)
 
 (opencog-test-end)
