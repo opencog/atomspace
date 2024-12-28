@@ -334,83 +334,112 @@ material for what this is all about, and why.
 
 A Theoretical Overview
 ======================
-The AtomSpace is a mashup of a large variety of concepts from
-mathematical logic, theorem proving, graph theory, database theory,
-type theory, model theory and knowledge representation. Its hard to
-provide a coherent overview without throwing around a lot of "big words"
-and "big concepts".  We're trying to get a lot of things done, here,
-and there's no particularly simple or effective way of explaining it
-without a lot of foundational theory.
+Atomese is a collection of structural primitives meant to describe
+structural relationships as they are witnessed in "reality". This
+includes descriptions of physical nature, biological nature,
+psychological, social, cultural, political and economic, and, of course,
+mathematical and technological. So, software and programming.
 
-### Atom Types
-There are pre-defined Atoms for many basic knowledge-representation and
-computer-science concepts. These include Atoms for relations, such as
-similarity, inheritance and subsets; for logic, such as Boolean and, or,
-for-all, there-exists; for Bayesian and other probabilistic relations;
-for intuitionist logic, such as absence and choice; for parallel
-(threaded) synchronous and asynchronous execution; for expressions with
-variables and for lambda expressions and for beta-reduction and mapping;
-for uniqueness constraints, state and a messaging "blackboard"; for
-searching and satisfiability and graph re-writing; for the specification
-of types and type signatures, including type polymorphism and type
-construction. See [Atom types](https://wiki.opencog.org/w/Atom_types).
+### Motivation
 
-### Atomese
-Because of these many and varied Atom types, constructing graphs to
-represent knowledge looks kind-of-like "programming"; the programming
-language is informally referred to as "Atomese".  It vaguely resembles
-a strange mash-up of SQL (due to queriability), prolog/datalog (due to
-the logic and reasoning components), lisp/scheme (due to lambda
-expressions), Haskell/CaML (due to the type system) and rule engines
-(due to the graph rewriting and forward/backward chaining inference
-systems).  This "programming language" is NOT designed for use by
-human programmers (it is too verbose and awkward for that); it is
-designed for automation and machine learning.  That is, like any
-knowledge representation system, the data and procedures encoded
-in "Atomese" are meant to be accessed by other automated subsystems
-manipulating and querying and inferencing over the data/programs.
-See [Atomese](https://wiki.opencog.org/w/Atomese).
+The idea of representing "everything" is as old as Aristotle. Set theory
+is an early mathematical framework. This is followed by combinators and
+lambda calulus, by means of which "anything sayable can be said". Modern
+math offers Category Theory and Topos Theory, along with Proof Theory
+and Model Theory as ways of talking about "anything". The goals of
+mathematicians, however, are not the same as the more
+entrepreneurial-minded, and the latter have created the trillion dollar
+computer industry, with only token acknowledgement of the mathematical
+foundations. The computer industry gives us relational databases,
+knowledge representation, upper ontologies, and now LLM's, transformers
+and weights as mechanisms by which "anything" can be represented.
 
-Aside from the various advanced features, Atomese also has some very
-basic and familiar atom types: atoms for arithmetic operations like
-"plus" and "times", conditional operators, like "greater-than" or
-"equals", control operations like "sequential and" and "cond", as
-well as settable state. This makes Atomese resemble a kind of
-intermediate language, something you might find inside of a compiler,
-a bit like CIL or Gimple. However, it is both far more flexible and
-powerful than these, and also far less efficient. Adventurous souls
-are invited to create a compiler to GNU Lighting, CIL, Java bytecode
-or the bytecode of your choice; or maybe to a GPU backend, or even
-more complex data-processing systems, such as TensorFlow.
+Atomese is an ongoing attempt to roll all of this up into one, and to do
+so in a way that makes general intelligence algorithmically accessible.
+Until now, all attempts to extract structure from the universe are
+complex systems hand-crafted by human engineers. These might be
+financial credit-worthiness rating systems, or astronomical
+stellar-redshift analysis tools. The software for these systems are
+written by humans, applying conventional software development
+methodologies, using conventional programming languages, designed to
+make it easy for the human software engineer to perform their task.
 
-In its current form, Atomese was primarily designed to allow the
-generalized manipulation of large networks of probabilistic data by
-means of rules and inferences and reasoning systems.  It extends the
-idea of probabilistic logic networks to a generalized system for
-algorithmically manipulating and managing data. The current, actual
-design has been heavily influenced by practical experience with
-natural-language processing, question answering, inferencing and
-the specific needs of robot control.
+What if, instead, we ask: what would it take to make it easy for
+algorithmic systems to automatically explore and extract structure? To
+create world-models that can be stored in short-term or long-term
+memory, to process and transform sensory information, to drive motors
+and perform actions in the real world? That is, rather than having a
+small army of humans hand-crafting custom robots for others to use, to
+instead provide a recursive infrastructure to allow, umm, err, robots to
+craft themselves? This is the driving vision of Atomese.
 
-The use of the AtomSpace, and the operation and utility of Atomese,
-remains a topic of ongoing research and design experimentation, as
-various AI and knowledge-processing subsystems are developed. These
-include machine learning, natural language processing, motion control
-and animation, deep-learning networks and vision processing,
-constraint solving and planning, pattern mining and data mining,
-question answering and common-sense systems, and emotional and
-behavioral psychological systems.  Each of these impose sharply
-conflicting requirements on the AtomSpace architecture; the AtomSpace
-and "Atomese" is the current best-effort KR system for satisfying
-all these various needs in an integrated way.  It is likely to
-change, as the various current short-comings, design flaws,
-performance and scalability issues are corrected.
+### History
 
-Active researchers and theoreticians are invited to join! The current
-codebase is *finally* clean and well-organized enough that a large
-number of possibilities have opened up, offering many different and
-exciting directions to pursue. The system is clean and flexible, and
-ready to move up to the next level.
+Atomese originally arose as an attempt by Ben Goertzel and company to
+combine symbolic AI methods with probability theory, resulting in the
+definition of PLN, Probabilistic Logic Networks, articulated in several
+books devoted to the topic. In this articulation, the primitives of
+knowledge representation theory are mashed up with mathematical logic to
+provide Nodes and Links, which are general enough to represent almost
+any kind of relational structure. The base object then becomes a
+collection of graphs, or, more properly, hypergraphs. To be able to
+process, digest, reason and manipulate these, these are placed in a
+(hyper-)graph database, the AtomSpace.
+
+To layer on probability theory onto what is otherwise a purely symbolic
+representation of nature, the SimpleTruthValue is introduced. This is a
+pair of floating-point numbers, representing the probability, and the
+confidence of any given symbolic factual assertion. The goal is to
+support logical reasoning systems of any type, not only conventional
+Bayesian inference, but any collection of rule systems and axioms, as
+might be encountered in mathematical proof theory. This would include,
+for example, any of the rich varieties of modal logic, but also fuzzy
+logic, the so-called "non-axiomatic reasoning systems" and
+statistical-mechanical systems like Markov logic.
+
+The word-phrase TruthValue, and more generally Value, has its roots in
+mathematical logic, where any given assertion in first-order logic (or
+higher-order logic) can be assigned a "valuation", indicating it's
+binary truth/falsehood. Probability theory forces a replacement of crisp
+0/1 by a floating-point number. Probabilistic logic (along with neural
+nets) famously has issues with converging rapidly enough to a given
+solution. For this reason, an extra float is introduced, the
+"confidence". This helps, but is still not enough to capture the concept
+of an ensemble, e.g. a "Bell curve", a Gaussian, or more generally any
+kind of probability distribution: a "histogram" or more simply "a vector
+of numbers". This leads to the idea of a FloatValue, and then rapidly to
+a Value in general, which is a vector of anything at all, representing
+truths in any ensemble, hypothetical modal universe, a set of Bayesian
+priors, as the case may be. Of course, vectors of floats are the
+bread-n-butter of neural nets.
+
+Parallel universes, such as the hypothetical worlds of modal logic,
+thermodynamic canonical ensembles, the infinite collection of Bayesian
+priors, or, god forbid, quantum-mechanical decompositions, are often
+imagined to live "in parallel" or to somehow co-exist temporally. In
+physical reality, though, the changing network of relationships and
+likelihoods is time-varying, and usually accessible only through sensory
+devices, rather than through pure reason. This motivates the recasting
+of Values as streams that flow data. This relegates the AtomSpace to
+being a form of memory, a repository for world-models, while flowing
+streams encapsulate the process of, well, "processing information". This
+fits well with present-day software theory, which includes descriptions
+of generators, futures and promises as software primitive constructs for
+creating sensory agentic systems. The backends of large commercial
+websites use futures and promises as extremely low-level programming
+constructs to implement millisecond reaction times when customers click
+on their favorite TikTok influencer. The point of having streams in
+Atomese is not to be hopelessly abstract, but to capture an idea that is
+already widespread in the design and development of agentic software
+systems.
+
+This brings Atomese to it's present-day state: an infrastructure for
+symbolic AI, together with a (hyper-)graph database, offering dynamic
+sensori-motor processing primitives. The hope is that this is an
+appropriate toolset for agentic systems that can reify, transform and
+transmute their own content. It remains a research platform to figure
+out how this is possible, or, perhaps being more honest, if this is
+possible.
 
 ### Atoms and Values
 One of the primary conceptual distinctions in Atomese is between
