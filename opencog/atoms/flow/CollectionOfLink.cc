@@ -96,10 +96,23 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
 	{
+		if (base->is_node())
+		{
+			if (_out_is_link)
+				return as->add_link(_out_type, base);
+			else
+				return createLinkValue(_out_type, ValueSeq({base}));
+		}
 		if (_out_is_link)
-			return as->add_link(_out_type, base);
+			return as->add_link(_out_type,
+				HandleSeq( base->getOutgoingSet()));
 		else
-			return createLinkValue(_out_type, ValueSeq({base}));
+		{
+			ValueSeq vsq;
+			for (const Handle& ho : base->getOutgoingSet())
+				vsq.push_back(ho);
+			return createLinkValue(_out_type, std::move(vsq));
+		}
 	}
 
 	// If the given Atom is executable, then execute it.

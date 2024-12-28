@@ -12,6 +12,35 @@
 (Evaluation (Predicate "foo") (Concept "bar"))
 
 ; -------------------------------------------------------------
+; Base function: static non-executable stuff.
+
+(define set-abc
+	(CollectionOf
+		(List (Concept "a") (Concept "b") (Concept "c"))))
+
+(test-assert "set-abc"
+	(equal? (cog-execute! set-abc)
+		(Set (Concept "a") (Concept "b") (Concept "c"))))
+
+(define unordered-abc
+	(CollectionOf
+		(Type 'UnorderedLink)
+		(List (Concept "a") (Concept "b") (Concept "c"))))
+
+(test-assert "unordered-abc"
+	(equal? (cog-execute! unordered-abc)
+		(Unordered (Concept "a") (Concept "b") (Concept "c"))))
+
+(define link-value-abc
+	(CollectionOf
+		(Type 'LinkValue)
+		(List (Concept "a") (Concept "b") (Concept "c"))))
+
+(test-assert "link-value-abc"
+	(equal? (cog-execute! link-value-abc)
+		(LinkValue (Concept "a") (Concept "b") (Concept "c"))))
+
+; -------------------------------------------------------------
 ; Base function: convert to set.
 
 (define get-qry
@@ -60,6 +89,7 @@
 (test-assert "meet edge"
 	(equal? meet-edge (Edge (Concept "bar"))))
 
+; -------------------------------------------------------------
 (test-end tname)
 
 (opencog-test-end)
