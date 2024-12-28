@@ -86,67 +86,35 @@ void CollectionOfLink::check_typespec(void)
 
 // ---------------------------------------------------------------
 
-/// Return a SetLink vector.
-ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
+ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
-	int coff = 0;
-	if (_have_typespec) coff = 1;
-
-	// If the atom is not executable, then re-wrap it, as appropriate.
-	Handle base(_outgoing[coff]);
-	if (not base->is_executable())
-	{
-		if (base->is_node())
-		{
-			if (_out_is_link)
-				return as->add_link(_out_type, base);
-			else
-				return createLinkValue(_out_type, ValueSeq({base}));
-		}
-		if (_out_is_link)
-			return as->add_link(_out_type,
-				HandleSeq( base->getOutgoingSet()));
-		else
-		{
-			ValueSeq vsq;
-			for (const Handle& ho : base->getOutgoingSet())
-				vsq.push_back(ho);
-			return createLinkValue(_out_type, std::move(vsq));
-		}
-	}
-
-	// If the given Atom is executable, then execute it.
-	// In effectively all cases, we expect it to be executable!
-	// How we re-wrap it depends on the execution output.
-	ValuePtr vp = base->execute(as, silent);
-	if (vp->is_node())
+	if (base->is_node())
 	{
 		if (_out_is_link)
-			return as->add_link(_out_type, HandleCast(vp));
-		else
-			return createLinkValue(_out_type, ValueSeq({vp}));
+			return as->add_link(_out_type, base);
+		return createLinkValue(_out_type, ValueSeq({base}));
 	}
 
-	if (vp->is_link())
-	{
-		if (_out_is_link)
-			return as->add_link(_out_type,
-				HandleSeq(HandleCast(vp)->getOutgoingSet()));
-		else
-		{
-			ValueSeq vs;
-			for (const Handle& h : HandleCast(vp)->getOutgoingSet())
-				vs.push_back(h);
-			return createLinkValue(_out_type, std::move(vs));
-		}
-	}
+	if (_out_is_link)
+		return as->add_link(_out_type,
+			HandleSeq(base->getOutgoingSet()));
 
+	ValueSeq vsq;
+	for (const Handle& ho : base->getOutgoingSet())
+		vsq.push_back(ho);
+	return createLinkValue(_out_type, std::move(vsq));
+}
+
+// ---------------------------------------------------------------
+
+ValuePtr CollectionOfLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
+{
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
 			"CollectionOfLink expects a LinkValue, got %s",
 			vp->to_string().c_str());
 
-	LinkValuePtr lvp = LinkValueCast(vp);
+	LinkValuePtr lvp(LinkValueCast(vp));
 
 	if (_out_is_link)
 	{
@@ -158,6 +126,38 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 		return vp;
 
 	return createLinkValue(_out_type, lvp->value());
+}
+
+// ---------------------------------------------------------------
+
+/// Return a SetLink vector.
+ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
+{
+	int coff = 0;
+	if (_have_typespec) coff = 1;
+
+	// If the atom is not executable, then re-wrap it, as appropriate.
+	Handle base(_outgoing[coff]);
+	if (not base->is_executable())
+		return rewrap_h(as, base);
+
+	// If the given Atom is executable, then execute it, and
+	// branch over all the various possibilities.
+	ValuePtr vp = base->execute(as, silent);
+
+	// Hmmm. FilterLink returns null pointer when the filter
+	// is empty. Is this a bug in FilterLink? Not sure any more.
+	if (nullptr == vp)
+	{
+		if (_out_is_link)
+			return createLink(_out_type);
+		return createLinkValue(_out_type, ValueSeq({}));
+	}
+
+	if (vp->is_atom())
+		return rewrap_h(as, HandleCast(vp));
+
+	return rewrap_v(as, vp);
 }
 
 DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
