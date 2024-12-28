@@ -91,12 +91,14 @@ ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 	for (const std::string& name : svp->value())
 	{
 		size_t pos = 0;
-		do {
+		while (true) {
 			size_t prev = pos;
 			pos = name.find_first_of(_sep, pos);
-			const std::string& subby(name.substr(prev, pos));
+			const std::string& subby(name.substr(prev, pos-prev));
 			vsq.emplace_back(createStringValue(subby));
-		} while (pos != name.npos);
+			if (name.npos == pos) break;
+			pos++;
+		}
 	}
 
 	return createLinkValue(_out_type, std::move(vsq));

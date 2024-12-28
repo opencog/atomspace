@@ -19,8 +19,9 @@
 	(Split (ValueOf (Anchor "rock") (Predicate "blab"))))
 
 (define words (cog-execute! splitter))
+(format #t "Split into words: ~A" words)
 
-(test-assert "set-abc"
+(test-assert "word-list"
 	(equal? words
 		(LinkValue
 			(StringValue "this")
