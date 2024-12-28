@@ -107,8 +107,25 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 
 // ---------------------------------------------------------------
 
-ValuePtr CollectionOfLink::rewrap_v(const ValuePtr& base)
+ValuePtr CollectionOfLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 {
+	if (not vp->is_type(LINK_VALUE))
+		throw InvalidParamException(TRACE_INFO,
+			"CollectionOfLink expects a LinkValue, got %s",
+			vp->to_string().c_str());
+
+	LinkValuePtr lvp(LinkValueCast(vp));
+
+	if (_out_is_link)
+	{
+		HandleSeq hs = lvp->to_handle_seq();
+		return as->add_link(_out_type, std::move(hs));
+	}
+
+	if (vp->get_type() == _out_type)
+		return vp;
+
+	return createLinkValue(_out_type, lvp->value());
 }
 
 // ---------------------------------------------------------------
@@ -124,30 +141,23 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	if (not base->is_executable())
 		return rewrap_h(as, base);
 
-	// If the given Atom is executable, then execute it.
-	// In effectively all cases, we expect it to be executable!
-	// How we re-wrap it depends on the execution output.
+	// If the given Atom is executable, then execute it, and
+	// branch over all the various possibilities.
 	ValuePtr vp = base->execute(as, silent);
+
+	// Hmmm. FilterLink returns null pointer when the filter
+	// is empty. Is this a bug in FilterLink? Not sure any more.
+	if (nullptr == vp)
+	{
+		if (_out_is_link)
+			return createLink(_out_type);
+		return createLinkValue(_out_type, ValueSeq({}));
+	}
+
 	if (vp->is_atom())
 		return rewrap_h(as, HandleCast(vp));
 
-	if (not vp->is_type(LINK_VALUE))
-		throw InvalidParamException(TRACE_INFO,
-			"CollectionOfLink expects a LinkValue, got %s",
-			vp->to_string().c_str());
-
-	LinkValuePtr lvp = LinkValueCast(vp);
-
-	if (_out_is_link)
-	{
-		HandleSeq hs = lvp->to_handle_seq();
-		return as->add_link(_out_type, std::move(hs));
-	}
-
-	if (vp->get_type() == _out_type)
-		return vp;
-
-	return createLinkValue(_out_type, lvp->value());
+	return rewrap_v(as, vp);
 }
 
 DEFINE_LINK_FACTORY(CollectionOfLink, COLLECTION_OF_LINK)
