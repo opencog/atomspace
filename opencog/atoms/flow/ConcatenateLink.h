@@ -38,8 +38,8 @@ namespace opencog
 class ConcatenateLink : public CollectionOfLink
 {
 protected:
-	ValuePtr flatten(AtomSpace*, const Handle&);
-	ValuePtr vlatten(const ValuePtr&);
+	ValuePtr rewrap_h(AtomSpace*, const Handle&);
+	ValuePtr rewrap_v(AtomSpace*, const ValuePtr&);
 
 public:
 	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);

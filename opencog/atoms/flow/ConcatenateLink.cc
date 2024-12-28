@@ -48,7 +48,7 @@ ConcatenateLink::ConcatenateLink(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Return a concatenation of lists.
-ValuePtr ConcatenateLink::flatten(AtomSpace* as, const Handle& base)
+ValuePtr ConcatenateLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
 	// We expect a link. We can throw, or we can be silent!?
 	// I dunno. Flip a coin.
@@ -71,7 +71,7 @@ ValuePtr ConcatenateLink::flatten(AtomSpace* as, const Handle& base)
 // ---------------------------------------------------------------
 
 /// Return a concatenation of lists.
-ValuePtr ConcatenateLink::vlatten(const ValuePtr& vp)
+ValuePtr ConcatenateLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 {
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
@@ -93,37 +93,6 @@ ValuePtr ConcatenateLink::vlatten(const ValuePtr& vp)
 }
 
 // ---------------------------------------------------------------
-
-/// Return a concatenation of lists.
-ValuePtr ConcatenateLink::execute(AtomSpace* as, bool silent)
-{
-	int coff = 0;
-	if (_have_typespec) coff = 1;
-
-	// If the given Atom is not executable, we deal with a the
-	// simplest case of just collapsing a plain link.
-	Handle base(_outgoing[coff]);
-	if (not base->is_executable())
-		return flatten(as, base);
-
-	// Same as above, but this time, we execute, and branch
-	// over all the various possibilities.
-	ValuePtr vp = base->execute(as, silent);
-
-	// Hmmm. FilterLink returns null pointer when the filter
-	// is empty. Is this a bug in FilterLink? Not sure any more.
-	if (nullptr == vp)
-	{
-		if (_out_is_link)
-			return createLink(_out_type);
-		return createLinkValue(_out_type, ValueSeq({}));
-	}
-
-	if (vp->is_atom())
-		return flatten(as, HandleCast(vp));
-
-	return vlatten(vp);
-}
 
 DEFINE_LINK_FACTORY(ConcatenateLink, CONCATENATE_LINK)
 
