@@ -1,7 +1,7 @@
 /*
  * CollectionOfLink.cc
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -99,10 +99,7 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 		return as->add_link(_out_type,
 			HandleSeq(base->getOutgoingSet()));
 
-	ValueSeq vsq;
-	for (const Handle& ho : base->getOutgoingSet())
-		vsq.push_back(ho);
-	return createLinkValue(_out_type, std::move(vsq));
+	return createLinkValue(_out_type, base->getOutgoingSet());
 }
 
 // ---------------------------------------------------------------

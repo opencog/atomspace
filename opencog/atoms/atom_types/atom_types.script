@@ -1049,6 +1049,13 @@ SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 // It *cannot* be placed in the AtomSpace, so is not quite a "real" Atom.
 VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_LINK
 
+// --------------------
+// String functions
+
+// SplitLink will take a StringValue or Node, and split the value/name
+// into multiple strings, according to whitespace.
+SPLIT_LINK <- COLLECTION_OF_LINK
+
 // -----------
 // Similar to ValueOfLink, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either

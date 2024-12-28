@@ -1,7 +1,7 @@
 /*
  * ConcatenateLink.cc
  *
- * Copyright (C) 2015, 2022 Linas Vepstas
+ * Copyright (C) 2015, 2022, 2024 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
@@ -65,7 +65,9 @@ ValuePtr ConcatenateLink::rewrap_h(AtomSpace* as, const Handle& base)
 			oset.push_back(oli);
 	}
 	if (not _have_typespec) _out_type = base->get_type();
-	return as->add_link(_out_type, std::move(oset));
+	if (_out_is_link)
+		return as->add_link(_out_type, std::move(oset));
+	return createLinkValue(_out_type, oset);
 }
 
 // ---------------------------------------------------------------
