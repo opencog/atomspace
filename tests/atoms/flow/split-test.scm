@@ -38,7 +38,7 @@
 ; Eat excess whitespace.
 
 (cog-set-value! (Anchor "rock") (Predicate "blab")
-	(StringValue "  this  is  a  test  " " and so   is this  "))
+	(StringValue "  this  \t\t   is  a  test  " " and so  \r\n\t  is this  "))
 
 (define words (cog-execute! splitter))
 (format #t "Excess whitespace words: ~A" words)

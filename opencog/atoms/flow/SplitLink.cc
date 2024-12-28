@@ -63,12 +63,18 @@ ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 
 	const std::string& name = base->get_name();
 	size_t pos = 0;
-	do {
+	while (true) {
 		size_t prev = pos;
 		pos = name.find_first_of(_sep, pos);
-		const std::string& subby(name.substr(prev, pos));
-		hsq.emplace_back(as->add_node(ntype, std::string(subby)));
-	} while (pos != name.npos);
+		if (0 < pos-prev)
+		{
+			const std::string& subby(name.substr(prev, pos-prev));
+			if (0 < subby.length())
+				hsq.emplace_back(as->add_node(ntype, std::string(subby)));
+		}
+		if (name.npos == pos) break;
+		pos++;
+	}
 
 	if (_out_is_link)
 		return as->add_link(_out_type, std::move(hsq));
@@ -94,8 +100,12 @@ ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 		while (true) {
 			size_t prev = pos;
 			pos = name.find_first_of(_sep, pos);
-			const std::string& subby(name.substr(prev, pos-prev));
-			vsq.emplace_back(createStringValue(subby));
+			if (0 < pos-prev)
+			{
+				const std::string& subby(name.substr(prev, pos-prev));
+				if (0 < subby.length())
+					vsq.emplace_back(createStringValue(subby));
+			}
 			if (name.npos == pos) break;
 			pos++;
 		}
