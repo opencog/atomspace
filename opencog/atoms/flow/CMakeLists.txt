@@ -47,6 +47,7 @@ INSTALL (FILES
 	SetTVLink.h
 	SetValueLink.h
 	SizeOfLink.h
+	SplitLink.h
 	StreamValueOfLink.h
 	StringOfLink.h
 	TruthValueOfLink.h
