@@ -81,11 +81,18 @@ bool LinkValue::operator==(const Value& other) const
 	// We do content-compare, and only loose type compare.
 	// As long as other is a derviced type, we're good if
 	// the actual values compare
+printf("duuude enter linkval oper equal for %s to %s\n",
+to_string().c_str(), other.to_string().c_str());
+printf("duuude isa %d\n", other.is_type(LINK_VALUE));
 	if (not other.is_type(LINK_VALUE)) return false;
 
 	const LinkValue* lov = (const LinkValue*) &other;
 
-	if (_value.size() != lov->_value.size()) return false;
+	if (_value.size() != lov->_value.size()) 
+{
+printf("duudue size fail\n");
+return false;
+}
 
 	// Content-compare, NOT pointer-compare!
 	size_t len = _value.size();
@@ -101,7 +108,8 @@ std::string LinkValue::to_string(const std::string& indent) const
 	std::string more_indent = indent + "  "; // two spaces, same as Link
 	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 
-	SAFE_UPDATE(rv,
+	// SAFE_UPDATE(rv,
+(
 	{
 		for (const ValuePtr& v :_value)
 		{
@@ -128,7 +136,7 @@ std::string LinkValue::to_string(const std::string& indent) const
 /// sense.
 std::string LinkValue::to_short_string(const std::string& indent) const
 {
-	update();
+	// update();
 	std::string rv = "(" + nameserver().getTypeName(_type) + " ";
 	for (const ValuePtr& v :_value)
 		rv += v->to_short_string("");

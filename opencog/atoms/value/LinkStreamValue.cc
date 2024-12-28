@@ -31,7 +31,7 @@ bool LinkStreamValue::operator==(const Value& other) const
 {
 	// Since we're streaming, get the latest value before compare!
 	update();
-
+printf("duuude enter the link stream tor==()\n");
 	// Let the base class do the hard work.
 	return LinkValue::operator==(other);
 }

@@ -269,13 +269,22 @@ static bool equal(AtomSpace* as, const Handle& h, bool silent)
 	size_t nelts = oset.size();
 	if (2 > nelts) return true;
 
+printf("duude equ %s\n", h->to_string().c_str());
 	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
+printf("duude v0 %s\n", v0->to_string().c_str());
 
+printf("duude nelts=%d\n", nelts);
 	for (size_t j=1; j<nelts; j++)
 	{
 		ValuePtr v1(exec_or_eval(as, oset[j], as, silent));
-		if (v0 != v1 and *v0 != *v1) return false;
+printf("duude v1 %s\n", v1->to_string().c_str());
+		if (v0 != v1 and *v0 != *v1)
+{ printf("duude not equal\n");
+ return false;
+}
+printf("equal so far\n");
 	}
+printf("duuude equal equality\n");
 	return true;
 }
 
