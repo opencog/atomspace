@@ -64,11 +64,11 @@ ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 		size_t prev = pos;
 		pos = name.find_first_of(_sep, pos);
 		const std::string& subby(name.substr(prev, pos));
-		hsq.emplace_back(createNode(ntype, std::string(subby)));
-	} while (pos != name::npos);
+		hsq.emplace_back(as->add_node(ntype, std::string(subby)));
+	} while (pos != name.npos);
 
 	if (_out_is_link)
-		return createLink(_out_type, std::move(hsq));
+		return as->add_link(_out_type, std::move(hsq));
 	return createLinkValue(_out_type, std::move(hsq));
 }
 
