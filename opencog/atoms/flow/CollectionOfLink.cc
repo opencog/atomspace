@@ -97,7 +97,7 @@ ValuePtr CollectionOfLink::collect_h(AtomSpace* as, const Handle& base)
 
 	if (_out_is_link)
 		return as->add_link(_out_type,
-			HandleSeq( base->getOutgoingSet()));
+			HandleSeq(base->getOutgoingSet()));
 
 	ValueSeq vsq;
 	for (const Handle& ho : base->getOutgoingSet())
@@ -122,33 +122,14 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-		return collect_h(base);
+		return collect_h(as, base);
 
 	// If the given Atom is executable, then execute it.
 	// In effectively all cases, we expect it to be executable!
 	// How we re-wrap it depends on the execution output.
 	ValuePtr vp = base->execute(as, silent);
-	if (vp->is_node())
-	{
-		if (_out_is_link)
-			return as->add_link(_out_type, HandleCast(vp));
-		else
-			return createLinkValue(_out_type, ValueSeq({vp}));
-	}
-
-	if (vp->is_link())
-	{
-		if (_out_is_link)
-			return as->add_link(_out_type,
-				HandleSeq(HandleCast(vp)->getOutgoingSet()));
-		else
-		{
-			ValueSeq vs;
-			for (const Handle& h : HandleCast(vp)->getOutgoingSet())
-				vs.push_back(h);
-			return createLinkValue(_out_type, std::move(vs));
-		}
-	}
+	if (vp->is_atom())
+		return collect_h(as, HandleCast(vp));
 
 	if (not vp->is_type(LINK_VALUE))
 		throw InvalidParamException(TRACE_INFO,
