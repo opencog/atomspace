@@ -38,16 +38,13 @@ namespace opencog
 class ConcatenateLink : public CollectionOfLink
 {
 protected:
-	ValuePtr flatten(AtomSpace*, const Handle&);
-	ValuePtr vlatten(const ValuePtr&);
+	virtual ValuePtr rewrap_h(AtomSpace*, const Handle&);
+	virtual ValuePtr rewrap_v(AtomSpace*, const ValuePtr&);
 
 public:
 	ConcatenateLink(const HandleSeq&&, Type = CONCATENATE_LINK);
 	ConcatenateLink(const ConcatenateLink&) = delete;
 	ConcatenateLink& operator=(const ConcatenateLink&) = delete;
-
-	// Return a SetLink
-	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
