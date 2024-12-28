@@ -52,6 +52,24 @@ SplitLink::SplitLink(const HandleSeq&& oset, Type t)
 
 ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
+	if (base->is_link())
+		throw RuntimeException(TRACE_INFO, "Not implemeneted");
+
+	Type ntype = base->get_type();
+	HandleSeq hsq;
+
+	const std::string& name = base->get_name();
+	size_t pos = 0;
+	do {
+		size_t prev = pos;
+		pos = name.find_first_of(_sep, pos);
+		const std::string& subby(name.substr(prev, pos));
+		hsq.emplace_back(createNode(ntype, std::string(subby)));
+	} while (pos != name::npos);
+
+	if (_out_is_link)
+		return createLink(_out_type, std::move(hsq));
+	return createLinkValue(_out_type, std::move(hsq));
 }
 
 // ---------------------------------------------------------------
