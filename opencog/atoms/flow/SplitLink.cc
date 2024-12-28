@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 
 #include "SplitLink.h"
 
@@ -52,8 +53,10 @@ SplitLink::SplitLink(const HandleSeq&& oset, Type t)
 
 ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 {
-	if (base->is_link())
-		throw RuntimeException(TRACE_INFO, "Not implemeneted");
+	// We could flatten lists of Nodes, and then tokenize those,
+	// but right now, I'm feeling lazy.
+	if (not base->is_node())
+		throw RuntimeException(TRACE_INFO, "Not implemented!");
 
 	Type ntype = base->get_type();
 	HandleSeq hsq;
@@ -76,6 +79,27 @@ ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 
 ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 {
+	// We could flatten LinkValue sequences, and then tokenize those,
+	// but right now, I'm feeling lazy.
+	if (not vp->is_type(STRING_VALUE))
+		throw RuntimeException(TRACE_INFO, "Not implemented!");
+
+	ValueSeq vsq;
+
+	// StringValues hold vectors of strings.
+	StringValuePtr svp(StringValueCast(vp));
+	for (const std::string& name : svp->value())
+	{
+		size_t pos = 0;
+		do {
+			size_t prev = pos;
+			pos = name.find_first_of(_sep, pos);
+			const std::string& subby(name.substr(prev, pos));
+			vsq.emplace_back(createStringValue(subby));
+		} while (pos != name.npos);
+	}
+
+	return createLinkValue(_out_type, std::move(vsq));
 }
 
 // ---------------------------------------------------------------
