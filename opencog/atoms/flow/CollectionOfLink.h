@@ -50,6 +50,9 @@ protected:
 
 	void check_typespec(void);
 
+	virtual ValuePtr collect_h(AtomSpace*, const Handle&);
+	virtual ValuePtr collect_v(const ValuePtr&);
+
 public:
 	CollectionOfLink(const HandleSeq&&, Type = COLLECTION_OF_LINK);
 	CollectionOfLink(const CollectionOfLink&) = delete;

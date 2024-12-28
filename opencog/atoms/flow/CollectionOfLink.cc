@@ -86,6 +86,33 @@ void CollectionOfLink::check_typespec(void)
 
 // ---------------------------------------------------------------
 
+ValuePtr CollectionOfLink::collect_h(AtomSpace* as, const Handle& base)
+{
+	if (base->is_node())
+	{
+		if (_out_is_link)
+			return as->add_link(_out_type, base);
+		return createLinkValue(_out_type, ValueSeq({base}));
+	}
+
+	if (_out_is_link)
+		return as->add_link(_out_type,
+			HandleSeq( base->getOutgoingSet()));
+
+	ValueSeq vsq;
+	for (const Handle& ho : base->getOutgoingSet())
+		vsq.push_back(ho);
+	return createLinkValue(_out_type, std::move(vsq));
+}
+
+// ---------------------------------------------------------------
+
+ValuePtr CollectionOfLink::collect_v(const ValuePtr& base)
+{
+}
+
+// ---------------------------------------------------------------
+
 /// Return a SetLink vector.
 ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 {
@@ -95,25 +122,7 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 	// If the atom is not executable, then re-wrap it, as appropriate.
 	Handle base(_outgoing[coff]);
 	if (not base->is_executable())
-	{
-		if (base->is_node())
-		{
-			if (_out_is_link)
-				return as->add_link(_out_type, base);
-			else
-				return createLinkValue(_out_type, ValueSeq({base}));
-		}
-		if (_out_is_link)
-			return as->add_link(_out_type,
-				HandleSeq( base->getOutgoingSet()));
-		else
-		{
-			ValueSeq vsq;
-			for (const Handle& ho : base->getOutgoingSet())
-				vsq.push_back(ho);
-			return createLinkValue(_out_type, std::move(vsq));
-		}
-	}
+		return collect_h(base);
 
 	// If the given Atom is executable, then execute it.
 	// In effectively all cases, we expect it to be executable!
