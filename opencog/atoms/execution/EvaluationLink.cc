@@ -610,9 +610,7 @@ static bool crispy_maybe(AtomSpace* as,
 	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
 	    evelnk->is_evaluatable())
 	{
-		TruthValuePtr tv(evelnk->evaluate(scratch, silent));
-		if (0.5 < tv->get_mean()) return true;
-		return false;
+		return evelnk->bevaluate(scratch, silent);
 	}
 
 	// A handful of link types that should be auto-converted into
@@ -641,7 +639,7 @@ static bool crispy_eval_scratch(AtomSpace* as,
 		return tf;
 
 	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		"Either incorrect or not implemented yet (crisp). Cannot evaluate %s",
 		evelnk->to_string().c_str());
 
 	return false;
