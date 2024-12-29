@@ -161,3 +161,47 @@ distinct approaches. We'll have to invent some fanciful names for them.
   how million-mensional vectors should be updated. The graph is compiled
   down to code, and run on GPU's. The result maybe works and maybe
   doesn't -- you'll need an nvida card to find out.
+
+  The flow networks are represented in Atomese, and are modified and
+  updated in various unspecified ways, thanks to algorithmic control
+  over Atomese. Pie in the sky.  The things that "flow" are still truth
+  values; just that now they are called "representation vectors";
+  they live and are updated on GPU's, while Atomese is used to apply
+  some additional massaging to these vectors. An obvious example
+  might be to apply some form of old-school symbolic logic to push the
+  vectors of "king and queen" close to the vectors for "male and
+  female".
+
+  In this conception, networks in the atomspace not only represent flows
+  that update weights, but alsmo map a symbolic representational network
+  on top of the high-dimensional representation vectors, allowing a form
+  of classical inference that pure LLM's do not provide. Or something
+  like that. Again, there is approximately zero theoretical development
+  to support this application, and the idea is roundly ignored in all
+  quarters. The human anthill is not toiling at this particular
+  coal-face.
+
+TruthValue Redux
+----------------
+The above essay should make clear that almost everything in this
+directory could be junked. Or at least replaced by something much more
+futuristic and modern. Right now, it is being kept, because it is not
+hurting anyone.
+
+Mostly not hurting anyone. Large parts of Atomese work with evaluations,
+rather than executions, and the valuations pass around TruthValues.
+These are almost always `TruthValue::TRUE_TV()` and
+`TruthValue::FALSE_TV()` which then get cast, back and forth, to
+ordinary C++ booleans. This is a waste of CPU, and creates brain damage
+during code maintenance. For the most part, this nonsense needs to be
+removed.
+
+On the other hand, the structure learning code makes extensive use of
+CountTruthValue to maintain counts, log-counts and mutual information.
+There's a lot of that code, and it won't be updated any time soon, so
+the CountTV in this directory must stay, plus all of the TV-handling
+code in the scheme (and python) wrappers. But again, this code is not
+hurting anyone, so the infrastructure, while bloated, can stay.
+
+The only actual damage is related to the use of `TRUE_TV`, etc, but
+that stuff is not in this directory. So we're good, for now.
