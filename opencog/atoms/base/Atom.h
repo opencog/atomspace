@@ -390,8 +390,16 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
-    virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false) {
+    virtual bool bevaluate(AtomSpace*, bool silent=false) {
         throw RuntimeException(TRACE_INFO, "Not evaluatable!");
+    }
+
+    // Non-crisp evaluation is deprecated. This method will be removed,
+    //  someday.
+    virtual TruthValuePtr evaluate(AtomSpace* as, bool silent=false) {
+        if (bevaluate(as, silent))
+            return TruthValue::TRUE_TV();
+        return TruthValue::FALSE_TV();
     }
     virtual bool is_evaluatable() const { return false; }
 
