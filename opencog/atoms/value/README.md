@@ -64,8 +64,42 @@ The API for time-varying value streams is still experimental, but seems
 to be working OK. Besides plan-old `StreamValue` and `RandomStream`,
 assorted more complex Values, such as `FormulaStream`, `LinkStream`
 and `FormulaTruthValue` seem to work well. They're even used for
-computing the dot-products of two vectors, on the fly. So the
-"experimental" tag might be going away soon!?
+computing the dot-products of two vectors, on the fly.
+
+Streams do not currently have any kind of chunking, update or buffering
+policy. A stream can provide samples from a constantly-changing stream,
+or it can provide buffered I/O. Samples are appropriate for high
+data-rate streams, where a sample of a recent value is desired.
+Buffered I/O is appropriate for loss-less streams, which provide a
+guarantee that everything is delivered, in the order in which it
+occurred, and nothing is dropped. Buffered I/O can, of course,
+bottleneck if the consumer is slower than the producer.
+
+Sampling is appropriate for environmental sensors: e.g. is a door open
+or closed, **right now**? There is no need to buffer a million samples
+per second of some open/close sensor.
+
+Buffering is appropriate for reading texts. One wants each word, in
+order, and the book can wait, without overflowing, until the reader
+is ready.
+
+The `QueueValue` provides a FIFO that blocks the writer is the queue is
+full, and blocks the reader if the queue is empty.
+
+One can imagine a very rich architecture for streams. This is not being
+provided in this, the core AtomSpace repo. So far, only the simplest
+streaming primitives are provided, as seem appropriate for basic current
+apps. Richer concepts of streams would include (atomic-update) mailboxes,
+message-passing systems, etc. The
+[OpenCog Sensory](https://github.com/opencog/sensory) project examines
+some of these.
+
+The biggest design issue is that the usage of the `update()` method is a
+bit haphazard. It's OK for sampling streams, but abused for buffered
+streams.  For example, `update()` is called by the `to_string()` method,
+so if you call `to_string()` from some debugging code, buffered data
+will be lost.  Clearly, more careful design is required.
+
 
 Names
 -----
@@ -108,9 +142,10 @@ History and Bibliography
 ------------------------
 The first attempt at this was in the "WIRES" system, from December 2008.
 It was in the `opencog/scm/wires` directory, which is being removed in
-the same git commit as the one adding this remark.  That work was
-originally conceived as a constraint-type wiring system, inspired by
-SICP sections 3.3 (constraints) and 3.5 (streams).
+the same git commit as the one adding this remark. It can still be
+[viewed here](https://github.com/opencog/atomspace/tree/3f58a2cdd7891da074ee48bd517c7f656ff12b14/opencog/scm/wires).
+That work was originally conceived as a constraint-type wiring system,
+inspired by SICP sections 3.3 (constraints) and 3.5 (streams).
 
 * SICP is "Structure and Interpretation of Computer Programs",
   Abelson & Sussman. MIT Press
