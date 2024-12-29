@@ -125,11 +125,39 @@ instead of measuring performance and reducing the size, the software
 complexity of the URE grows without bounds, even as performance degrades
 boundlessly.  This is, of course, fatal.
 
+### A Defense of Symbolic AI in a Neural Net World.
+A PLN-inspired approach to high-dimensional spaces, competitive with the
+acheivements of neural nets, is still possible. There are a least two
+distinct approaches. We'll have to invent some fanciful names for them.
 
+* The ant colony. In this scenario, all "truth value" updates continue
+  to be made in a very high-dimensional space, but instead of working
+  directly with those vectors, only a small number of inputs are sampled
+  and combined. These produce an update, which is used to revise the
+  representation vector. The vector becomes a dynamical object, but
+  only a low-dimensional subspace is updated at any one time.  This
+  hews closely to the original conception of PLN.
 
-Most
-The original PLN, conceived of performing calculations on expectation
-values, was fine, I guess, for the 1980's in which it is conceived, back
-when
+  The differences require a change of mindset. The performance can't be
+  sloppy: updates must happen in microseconds, and must be distributed
+  onto GPU's. The theory can't be sloppy: one should never pretend that
+  one is updating expectation values, but rather that one is emulating
+  a microcanonical ensemble. In solids, liquids and gasses, interactions
+  are pair-wise; these give rise to the bulk properties. Similarly here:
+  interactions can be small, feeble, ant-like, but those interactions
+  factorize the probablitiy distribution the same way that perturbation
+  theory factorizes particle interactions.  Perhaps a different example:
+  the Ising model uses pairwise interactions. The Ising model doesn't
+  use a million-by-million dimensional interaction matrix. Yet its quite
+  rich in it's results. So too could an ant-colony of small-scale but
+  fast, frequent updates.
 
-Even as this becomes clear in the 
+  Or so thats the sketch. Of course, this is an idea that has almost no
+  theoretical development and is kind of completely passed over. So it
+  goes.
+
+* The flow network. This is already implemented in the mainstream, in
+  systems like TensorFlow. A graphical diagram is created, indicating
+  how million-mensional vectors should be updated. The graph is compiled
+  down to code, and run on GPU's. The result maybe works and maybe
+  doesn't -- you'll need an nvida card to find out.
