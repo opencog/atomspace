@@ -613,6 +613,31 @@ static bool crispy_maybe(AtomSpace* as,
 		return evelnk->bevaluate(scratch, silent);
 	}
 
+	// Special-case for CondLink, which normally is just executable,
+	// and not evaluatable. But if someone is trying to evaluate it,
+	// then we surmise that they really want to execute it, and then
+	// evaluate the clause that it selected. This is what is done here.
+	//
+	// The alternative design, of making the CondLink evaluatable,
+	// results in ambiguities, and breaks several unit tests, which
+	// do NOT want the cond results evaluated (even though they are
+	// evaluatable.) In particular, this is the case for knob-turning
+	// in as-moses.
+	if (COND_LINK == t)
+	{
+		ValuePtr vp = evelnk->execute(scratch, silent);
+		if (vp->is_type(TRUTH_VALUE))
+		{
+			TruthValuePtr tv(TruthValueCast(vp));
+			if (0.5 < tv->get_mean()) return true;
+			return false;
+		}
+		if (not vp->is_atom())
+			return false;
+
+		return crispy_eval_scratch(as, HandleCast(vp), scratch, silent);
+	}
+
 	// A handful of link types that should be auto-converted into
 	// crisp truth values.
 	if (EVALUATION_LINK == t or
