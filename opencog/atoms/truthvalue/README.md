@@ -48,13 +48,13 @@ Even as the PLN book is being written (in the 1990's) it is clear that
 fairly immediately wash out the confidence in any result, or drive the
 expectation value of truth to one-half. One work-around in the book is
 to propose upper and lower bounds, which act like error bars, modelling
-an asymmetric but still central-value-ish, Bell-curve-like peaks
+an asymmetric but still central-value-ish, Bell-curve-like peaked
 distribution. This drives TruthValues from two floats, to four.
 
 One can also be creative, and think about experimenting with fuzzy truth
 values. This was a thing in the 1970's and 1980's, and kind of made
 sense, given the speed of CPU's in that era, and the dawning realization
-that crisp true-valse can't do it all.  So Atomese sprouts a
+that crisp true-false can't do it all.  So Atomese sprouts a
 FuzzyTruthValue.
 
 Trouble with mapping Bayesian inference to TruthValues (which only
@@ -114,7 +114,7 @@ GPU's, allow the arithmetic operations to be distributed.
 
 The half-dozen or dozen update formulas of PLN are replaced by just one
 (or two, or three...) in neural nets: sum the inputs, run them through a
-sigmoid. The old PLN rules almost-kind-of soft-of-maybe did this, but
+sigmoid. The old PLN rules almost-kind-of sort-of-maybe did this, but
 without realizing that this is what they were doing. And without
 realizing that the doors could be opened to more than just two or
 three inputs.
@@ -157,11 +157,11 @@ distinct approaches. We'll have to invent some fanciful names for them.
   theoretical development and is kind of completely passed over. So it
   goes.
 
-* The flow network. This is already implemented in the mainstream, in
-  systems like TensorFlow. A graphical diagram is created, indicating
-  how million-dimensional vectors should be updated. The graph is compiled
-  down to code, and run on GPU's. The result maybe works and maybe
-  doesn't -- you'll need an nvida card to find out.
+* The flow network. A simplistic for of this is already implemented in
+  the mainstream, in systems like TensorFlow. A graphical diagram is
+  created, indicating how million-dimensional vectors should be updated.
+  The graph is compiled down to code, and run on GPU's. The result maybe
+  works and maybe doesn't -- you'll need an nvida card to find out.
 
   The flow networks are represented in Atomese, and are modified and
   updated in various unspecified ways, thanks to algorithmic control
