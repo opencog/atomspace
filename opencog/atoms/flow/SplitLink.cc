@@ -85,10 +85,23 @@ ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 
 ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 {
-	// We could flatten LinkValue sequences, and then tokenize those,
-	// but right now, I'm feeling lazy.
+	if (vp->is_type(LINK_VALUE))
+	{
+		LinkValuePtr lvp(LinkValueCast(vp));
+		const ValueSeq& lvsq(lvp->value());
+		if (lvsq.size() == 1)
+			return rewrap_v(as, lvsq[0]);
+
+		ValueSeq vsq;
+		for (const ValuePtr& lvo : lvsq)
+			vsq.push_back(rewrap_v(as, lvo));
+
+		return createLinkValue(_out_type, std::move(vsq));
+	}
+
 	if (not vp->is_type(STRING_VALUE))
-		throw RuntimeException(TRACE_INFO, "Not implemented!");
+		throw RuntimeException(TRACE_INFO,
+			"Expecting StringValue, got %s", vp->to_string().c_str());
 
 	ValueSeq vsq;
 
