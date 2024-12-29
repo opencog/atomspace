@@ -213,6 +213,10 @@ static ValuePtr exec_or_eval(AtomSpace* as,
                              AtomSpace* scratch,
                              bool silent)
 {
+	// If it's executable, do that first.
+	if (term->is_executable())
+		return term->execute(scratch, silent);
+
 	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
 	{
 		try
