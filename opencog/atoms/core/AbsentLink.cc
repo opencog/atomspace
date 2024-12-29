@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "AbsentLink.h"
 
@@ -72,17 +71,17 @@ AbsentLink::AbsentLink(const HandleSeq&& oset, Type t)
 /// Return true, if none of the outgoing set is present in the
 /// indicated AtomSpace. It only makes sense to call this if
 /// the current "this" pointer is not in any AtomSpace.
-TruthValuePtr AbsentLink::evaluate(AtomSpace* as, bool silent)
+bool AbsentLink::bevaluate(AtomSpace* as, bool silent)
 {
-	if (nullptr == as) return TruthValue::TRUE_TV();
+	if (nullptr == as) return true;
 
 	for (const Handle& h : _outgoing)
 	{
 		Handle maybe(as->get_atom(h));
-		if (maybe) return TruthValue::FALSE_TV();
+		if (maybe) return false;
 	}
 
-	return TruthValue::TRUE_TV();
+	return true;
 }
 
 // ---------------------------------------------------------------

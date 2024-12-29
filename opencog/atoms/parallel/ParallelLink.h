@@ -42,7 +42,7 @@ public:
 	ParallelLink& operator=(const ParallelLink&) = delete;
 
 	virtual bool is_evaluatable() const { return true; }
-	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+	virtual bool bevaluate(AtomSpace*, bool);
 	void evaluate(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);

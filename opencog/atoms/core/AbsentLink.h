@@ -68,7 +68,7 @@ public:
 	virtual bool is_evaluatable() const { return true; }
 	virtual bool is_executable() const { return true; }
 
-	virtual TruthValuePtr evaluate(AtomSpace*, bool silent=false);
+	virtual bool bevaluate(AtomSpace*, bool silent=false);
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
 		return ValueCast(evaluate(as, silent));
 	}

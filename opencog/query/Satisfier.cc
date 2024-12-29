@@ -36,7 +36,7 @@ bool Satisfier::propose_grounding(const GroundingMap &var_soln,
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
-	_result = TruthValue::TRUE_TV();
+	_result = true;
 
 	// XXX Temp hack alert. When Continuations finally terminate, they
 	// supply us with empty groundings. This probably needs to be fixed
@@ -98,7 +98,7 @@ bool Satisfier::search_finished(bool done)
 
 	// If there was a grounding, then don't re-run; we're here
 	// only to handle the no-groundings case.
-	if (TruthValue::TRUE_TV() == _result) return done;
+	if (_result) return done;
 
 	// _optionals_present will be set to true if some optional clause
 	// was grounded. Ergo, its not the no-grounding case.
@@ -119,7 +119,7 @@ bool Satisfier::search_finished(bool done)
 	GroundingMap empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
-		_result = TruthValue::TRUE_TV();
+		_result = true;
 
 	return rc;
 }

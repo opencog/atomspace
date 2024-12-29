@@ -26,7 +26,6 @@
 
 #include <vector>
 
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -41,8 +40,7 @@ namespace opencog {
  * pattern matcher calls the callback, it will do so with a particular
  * grounding of the search pattern.
  *
- * This will set the result TV to TRUE_TV if a grounding is found. More
- * sophisticated TV calculations can be obtained by overloading this class.
+ * This will set the _result to true if a grounding is found.
  */
 
 class Satisfier :
@@ -55,12 +53,12 @@ class Satisfier :
 	public:
 		Satisfier(AtomSpace* as) :
 			ContinuationMixin(as),
-			_result(TruthValue::FALSE_TV()) {}
+			_result(false) {}
 
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		Handle _ground;
-		TruthValuePtr _result;
+		bool _result;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
