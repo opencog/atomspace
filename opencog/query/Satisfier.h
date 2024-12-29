@@ -40,8 +40,7 @@ namespace opencog {
  * pattern matcher calls the callback, it will do so with a particular
  * grounding of the search pattern.
  *
- * This will set the result TV to TRUE_TV if a grounding is found. More
- * sophisticated TV calculations can be obtained by overloading this class.
+ * This will set the _result to true if a grounding is found.
  */
 
 class Satisfier :
