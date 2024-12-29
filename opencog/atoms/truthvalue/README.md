@@ -12,7 +12,7 @@ primary topics of any introductory textbook on predicate logic.
 The earliest design of Atomese realized that the crisp true-false
 of classical predicate logic needed to be generalized to floating
 point numbers, in part to allow calculations with "fuzzy logic",
-and in part to allow the application of concept from probability
+and in part to allow the application of concepts from probability
 theory.
 
 Rather than specifying truth values as a single float, two were
@@ -23,18 +23,19 @@ in that result.
 
 Ben Goertzel's book "Probabiistic Logic Networks" spells out exactly how
 this was to work: various types of inference, deduction, extrapolation
-and so one would be done, with specific, explicit formulas giving the
+and so on would be done, with specific, explicit formulas giving the
 truth value update. The original AtomSpace was designed to be the
 substrate for the ideas in this book, and so truth values became deeply
 embedded in the design.
 
-This was OK, given the era, and that style of thinking. But life moves
-on, and we grow older and wiser. The original conception for TruthValues
-doesn't quite work out. That's OK, but the injury comes from the C++
-implementation: carrying around TruthValues became problematic. The
-harsh reality is that most "real life" calculations to be done in the
-AtomSpace require crisp boolean true/false values. Using TruthValues
-just gets in the way, hurting performance and glopping up the API.
+This was OK, given the era, that style of thinking, and the available
+compute power. But life moves on, and we grow older and wiser. The
+original conception for TruthValues doesn't quite work out. That's OK,
+but the injury comes from the C++ implementation: carrying around
+TruthValues became problematic. The harsh reality is that most "real
+life" calculations to be done in the AtomSpace require crisp boolean
+true/false values. Using TruthValues just gets in the way, hurting
+performance and glopping up the API.
 
 ### Critique
 Two critiques of TruthValues can be given; one conceptual, and one from
@@ -114,7 +115,7 @@ GPU's, allow the arithmetic operations to be distributed.
 The half-dozen or dozen update formulas of PLN are replaced by just one
 (or two, or three...) in neural nets: sum the inputs, run them through a
 sigmoid. The old PLN rules almost-kind-of soft-of-maybe did this, but
-wthout realizing that this is what they were doing. And without
+without realizing that this is what they were doing. And without
 realizing that the doors could be opened to more than just two or
 three inputs.
 
@@ -145,7 +146,7 @@ distinct approaches. We'll have to invent some fanciful names for them.
   a microcanonical ensemble. In solids, liquids and gasses, interactions
   are pair-wise; these give rise to the bulk properties. Similarly here:
   interactions can be small, feeble, ant-like, but those interactions
-  factorize the probablitiy distribution the same way that perturbation
+  factorize the probability distribution the same way that perturbation
   theory factorizes particle interactions.  Perhaps a different example:
   the Ising model uses pairwise interactions. The Ising model doesn't
   use a million-by-million dimensional interaction matrix. Yet its quite
@@ -158,7 +159,7 @@ distinct approaches. We'll have to invent some fanciful names for them.
 
 * The flow network. This is already implemented in the mainstream, in
   systems like TensorFlow. A graphical diagram is created, indicating
-  how million-mensional vectors should be updated. The graph is compiled
+  how million-dimensional vectors should be updated. The graph is compiled
   down to code, and run on GPU's. The result maybe works and maybe
   doesn't -- you'll need an nvida card to find out.
 
