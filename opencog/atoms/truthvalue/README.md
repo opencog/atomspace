@@ -18,12 +18,12 @@ theory.
 Rather than specifying truth values as a single float, two were
 defined: the "strength" and the "confidence". This is the so-called
 `SimpleTruthValue`. The strength would represent how true (or untrue)
-some given inference is, and the confidence woud indicate the confidence
+some given inference is, and the confidence would indicate the confidence
 in that result.
 
 Ben Goertzel's book "Probabiistic Logic Networks" spells out exactly how
 this was to work: various types of inference, deduction, extrapolation
-and so one would be done, with specific, explict formulas giving the
+and so one would be done, with specific, explicit formulas giving the
 truth value update. The original AtomSpace was designed to be the
 substrate for the ideas in this book, and so truth values became deeply
 embedded in the design.
@@ -83,7 +83,7 @@ different ways.
 
 First, Bayesian inference performs an **integral** on the priors.
 Integrals are "infinite-dimensional" by definition, but can be
-approximated by historgrams with narrow bins: this is just the
+approximated by histograms with narrow bins: this is just the
 classic Newtonian integral. This can be managed with a vector of
 floats, at least in principle. In practice, a number of distinct
 issues arise.
@@ -127,7 +127,7 @@ boundlessly.  This is, of course, fatal.
 
 ### A Defense of Symbolic AI in a Neural Net World.
 A PLN-inspired approach to high-dimensional spaces, competitive with the
-acheivements of neural nets, is still possible. There are a least two
+achievements of neural nets, is still possible. There are a least two
 distinct approaches. We'll have to invent some fanciful names for them.
 
 * The ant colony. In this scenario, all "truth value" updates continue
@@ -152,7 +152,7 @@ distinct approaches. We'll have to invent some fanciful names for them.
   rich in it's results. So too could an ant-colony of small-scale but
   fast, frequent updates.
 
-  Or so thats the sketch. Of course, this is an idea that has almost no
+  Or so that's the sketch. Of course, this is an idea that has almost no
   theoretical development and is kind of completely passed over. So it
   goes.
 
