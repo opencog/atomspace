@@ -26,7 +26,6 @@
 
 #include <vector>
 
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -55,12 +54,12 @@ class Satisfier :
 	public:
 		Satisfier(AtomSpace* as) :
 			ContinuationMixin(as),
-			_result(TruthValue::FALSE_TV()) {}
+			_result(false) {}
 
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		Handle _ground;
-		TruthValuePtr _result;
+		bool _result;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)

@@ -40,7 +40,7 @@ public:
 	SatisfactionLink& operator=(const SatisfactionLink&) = delete;
 
 	virtual bool is_evaluatable() const { return true; }
-	virtual TruthValuePtr evaluate(AtomSpace*, bool);
+	virtual bool bevaluate(AtomSpace*, bool);
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
