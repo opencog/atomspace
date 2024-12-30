@@ -145,10 +145,12 @@ void CondLinkUTest::test_grounded_cond()
 void CondLinkUTest::test_knobs()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	Instantiator inst(as);
 
 	eval->eval("(load-from-path \"tests/atoms/core/condlink.scm\")");
 
 	Handle result = eval->eval_h("(cog-execute! put-00)");
+	result = HandleCast(inst.execute(result));
 
 	Handle baz = eval->eval_h("(Not (And (Predicate \"$a\") (Not (Predicate \"$b\"))))");
 	printf("p00 got %s\n", result->to_string().c_str());
@@ -157,6 +159,7 @@ void CondLinkUTest::test_knobs()
 	TS_ASSERT(result == baz);
 
 	result = eval->eval_h("(cog-execute! put-01)");
+	result = HandleCast(inst.execute(result));
 
 	baz = eval->eval_h("(Not (And (Predicate \"$a\") (Predicate \"$b\")))");
 	printf("p01 got %s\n", result->to_string().c_str());
@@ -165,6 +168,7 @@ void CondLinkUTest::test_knobs()
 	TS_ASSERT(result == baz);
 
 	result = eval->eval_h("(cog-execute! put-10)");
+	result = HandleCast(inst.execute(result));
 
 	baz = eval->eval_h("(And (Predicate \"$a\") (Not (Predicate \"$b\")))");
 	printf("p10 got %s\n", result->to_string().c_str());
@@ -173,6 +177,7 @@ void CondLinkUTest::test_knobs()
 	TS_ASSERT(result == baz);
 
 	result = eval->eval_h("(cog-execute! put-11)");
+	result = HandleCast(inst.execute(result));
 
 	baz = eval->eval_h("(And (Predicate \"$a\") (Predicate \"$b\"))");
 	printf("p11 got %s\n", result->to_string().c_str());
