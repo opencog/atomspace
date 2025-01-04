@@ -24,6 +24,7 @@
 #include <vector>
 
 #include <cstddef>
+#include <iconv.h>
 #include <libguile.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -78,6 +79,23 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 }
 
 /* ============================================================== */
+
+static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
+{
+	static iconv_t cd = iconv_open("UTF-8//IGNORE", "UTF-8");
+	char *inbuf = (char *) data;
+	size_t ilen = strlen(inbuf);
+	size_t olen = ilen+1;
+	char *wbuf = (char *) malloc(olen);
+	char *obuf = wbuf;
+	iconv(cd, &inbuf, &ilen, &obuf, &olen);
+	obuf[olen] = 0x0;
+	printf("duuude bad string %s\nconverted to %s\n", (char *) data, wbuf);
+	SCM str = scm_from_utf8_string(obuf);
+	free(wbuf);
+	return str;
+}
+
 /**
  * Return the string name of the atom
  */
@@ -86,7 +104,14 @@ SCM SchemeSmob::ss_name (SCM satom)
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
 	if (h->is_node()) name = h->get_name();
+
+#ifdef PLAIN_STRINGS
 	SCM str = scm_from_utf8_string(name.c_str());
+#else
+	SCM str = scm_c_catch(SCM_BOOL_T,
+		(scm_t_catch_body) scm_from_utf8_string, (void *) name.c_str(),
+		convert_to_utf8, (void *) name.c_str(), NULL, NULL);
+#endif
 	return str;
 }
 
