@@ -87,21 +87,37 @@ void SCMUtf8StringUTest::test_utf8(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Some microsoft-1252 codepage crap.
-	std::string name = "Bl";
-	name.push_back(0xc4);
-	name += "mchen";
-	Handle n1 = an(CONCEPT_NODE, std::string(name));
+	std::string name1 = "Bl";
+	name1.push_back(0xc4);
+	name1 += "mchen";
+	Handle n1 = an(CONCEPT_NODE, std::string(name1));
 
 	// Should not crash
 	evaluator->eval("(cog-prt-atomspace)");
 	CHKERR;
-	Handle h = evaluator->eval_h("(car (cog-get-atoms 'Concept))");
+	Handle cnh = evaluator->eval_h("(car (cog-get-atoms 'Concept))");
 	CHKERR;
-	std::string n1str = h->get_name();
-	printf("duude %s\n", n1str.c_str());
+	std::string n1str = cnh->get_name();
+	TSM_ASSERT("String miscompare", n1str != name1);
 
-	// TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
-	// TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->get_type());
+	// Also should not crash
+	std::string utf = evaluator->eval("(cog-name (car (cog-get-atoms 'Concept)))");
+	CHKERR;
+	printf("duuude its %s\n", utf.c_str());
+
+	evaluator->eval("(define foon (cog-name (car (cog-get-atoms 'Concept))))");
+	CHKERR;
+
+	// Test string copy
+	Handle pnh = evaluator->eval_h("(Predicate foon)");
+	CHKERR;
+	std::string p1str = pnh->get_name();
+	TSM_ASSERT("String miscompare", p1str != name1);
+
+	Handle pnh2 = evaluator->eval_h("(car (cog-get-atoms 'Predicate))");
+	CHKERR;
+	std::string p2str = pnh2->get_name();
+	TSM_ASSERT("String miscompare", p2str != name1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
