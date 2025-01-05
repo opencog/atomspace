@@ -346,7 +346,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 		// Decode exactly one byte in the range U+E000 to U+E0FF
 		if (0xee == cname[i] and
 		    0x80 <= cname[i+1] and cname[i+1] < 0x84 and
-		    0x80 <= cname[i+2] and cname[i+2] < 0x84)
+		    0x80 <= cname[i+2] and cname[i+2] < 0xd0)
 		{
 			unsigned char c = 0x40 * (cname[i+1] - 0x80) + (cname[i+2] - 0x80);
 			name.push_back(c);
