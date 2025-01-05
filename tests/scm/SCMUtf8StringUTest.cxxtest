@@ -1,0 +1,98 @@
+/*
+ * tests/scm/SCMUtf8StringUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014, 2025 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+
+#include "../query/test-types.h"
+
+using namespace opencog;
+
+class SCMUtf8StringUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpacePtr as;
+		SchemeEval* evaluator;
+
+	public:
+
+		SCMUtf8StringUTest(void)
+		{
+			logger().set_level(Logger::DEBUG);
+			logger().set_print_to_stdout_flag(true);
+#include "../query/test-types.cc"
+		}
+
+		~SCMUtf8StringUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_utf8(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->add_node
+#define al as->add_link
+void SCMUtf8StringUTest::setUp(void)
+{
+	as = createAtomSpace();
+	evaluator = new SchemeEval(as);
+	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	evaluator->eval("(add-to-load-path \"../../..\")");
+}
+
+void SCMUtf8StringUTest::tearDown(void)
+{
+	delete evaluator;
+	evaluator = NULL;
+}
+
+#define CHKERR \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == evaluator->eval_error()));
+/*
+ * Test UTF8 String handling.
+ */
+
+void SCMUtf8StringUTest::test_utf8(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test cog-inc-count! ---------------------------------
+	Handle counter = evaluator->eval_h("counter");
+	CHKERR;
+
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->get_type());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
