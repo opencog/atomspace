@@ -53,6 +53,7 @@ class SCMUtf8StringUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
+		void check_conv(std::string);
 		void test_utf8(void);
 };
 
@@ -85,17 +86,11 @@ void SCMUtf8StringUTest::tearDown(void)
 static void prtstr(std::string s)
 {
 	for (size_t i=0; i<s.length(); i++)
-		printf("It is %d %x %c\n", i, s[i], s[i]);
+		printf("It is %lu %x %c\n", i, s[i], s[i]);
 }
 
-void SCMUtf8StringUTest::test_utf8(void)
+void SCMUtf8StringUTest::check_conv(std::string name1)
 {
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	// Some microsoft-1252 codepage crap.
-	std::string name1 = "Bl";
-	name1.push_back(0xc4);
-	name1 += "mchen";
 	Handle n1 = an(CONCEPT_NODE, std::string(name1));
 
 	// Should not crash
@@ -127,6 +122,8 @@ void SCMUtf8StringUTest::test_utf8(void)
 	Handle pnh = evaluator->eval_h("(Predicate foon)");
 	CHKERR;
 	std::string p1str = pnh->get_name();
+	printf("Pred name %s\n", p1str.c_str());
+	prtstr(p1str);
 	TSM_ASSERT("String miscompare", p1str == name1);
 	TSM_ASSERT("String miscompare", 0 == name1.compare(p1str));
 
@@ -135,6 +132,18 @@ void SCMUtf8StringUTest::test_utf8(void)
 	std::string p2str = pnh2->get_name();
 	TSM_ASSERT("String miscompare", p2str == name1);
 	TSM_ASSERT("String miscompare", 0 == name1.compare(p2str));
+}
+
+void SCMUtf8StringUTest::test_utf8(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Some microsoft-1252 codepage crap.
+	std::string name1 = "Bl";
+	name1.push_back(0xc4);
+	name1 += "mchen";
+
+	check_conv(name1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
