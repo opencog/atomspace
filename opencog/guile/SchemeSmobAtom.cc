@@ -80,6 +80,56 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 
 /* ============================================================== */
 
+// XXX FIXME. Work around the despicable, horrible guile UTF8 handling.
+// I currantly am unable to do this without dataloss, because the guile
+// people could not have possibly picked a crappier design. Fuck me. See
+// https://stackoverflow.com/questions/79329532/c-c-encode-binary-into-utf8
+//
+// So here's the deal. Atom names in Atomese are byte strings. Often,
+// but not always UTF-8. The C++ API allows any byte string at all to be
+// used. Ditto for python. However, guile wants strings to be utf8, and
+// not bytevectors. So what should I do?
+//
+// Option 1)
+// If the string contains non-utf8 chars, then create and return a guile
+// bytevector. This has several problems.
+//   1a) Guile does not have an API for converting a C string to a bytevector.
+//   1b) Printing the result gives #vu8(102 111 111 98 97 114) instead of
+//       something reasonable. ("foobar" in this case).
+//
+// Option 2)
+// Escape the non-utf8 chars. But how? We could do what python does: turn
+// them into "surrogate code points", in the range U+DC80 to U+DCFF.
+// Problem:
+//   2a) Doing this causes scm_from_utf8_string() to throw an exception.
+//
+// Option 3)
+// Escape the non-utf8 chars in some other way, e.g. by using ASCII
+// shift-out and shift-in SO and SI 0xe and 0xf to demarcate begin and
+// end, while everything in between is printed in hex.
+// Problems:
+//   3a) Industry non-standard, idiosyncratic atomese.
+//   3b) If user passes this strings back as Atom names, then we must
+//       scan **all** input strings and convert them back into byte
+//       strings. This is a performance hit.
+//
+// Option 4)
+// Use iconv and discard the non-utf8 bytes.
+// Problems:
+//   4a) Dataloss.
+//
+// Option 5)
+// Do nothing. Let the user take the exception. This sucks, because
+// it forces the user to write some fairly complicated code to catch
+// and handle the exceptions. Which is mostly pointless, because the
+// user will almost never do anything with the string, anyway.
+// Even worse: the actual exception thrown is a "compound exception",
+// stunningly complicated to decode.
+//
+// Option 6)
+// Randomly guess alternative locales. Yuck.
+
+
 static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 {
 	static iconv_t cd = iconv_open("UTF-8//IGNORE", "UTF-8");
