@@ -171,8 +171,6 @@ SCM SchemeSmob::convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 			break;
 
 		// Unicode Private Use Area, U+E000 - U+F8FF
-#define START_AT_E000 1
-#ifdef START_AT_E000
 		// Use the range U+E000 to U+E0FF
 		out.push_back(0xee);
 		unsigned char c = inbuf[i];
@@ -180,7 +178,11 @@ SCM SchemeSmob::convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 		else if (c < 0x80) { out.push_back(0x81); out.push_back(0x40 + c); }
 		else if (c < 0xc0) { out.push_back(0x82); out.push_back(c); }
 		else { out.push_back(0x83); out.push_back(c - 0x40); }
-#else
+
+		// Note that Microsoft NTFS uses U+F000 plus ASCII codepoint for
+		// encoding invalid chars in NTFS filenames. So using this would
+		// lead to collisions and unexpected behavior.
+#if 0
 		// Use the range U+F800 to U+F8FF
 		out.push_back(0xef);
 		unsigned char c = inbuf[i];

@@ -54,7 +54,9 @@ class SCMUtf8StringUTest :  public CxxTest::TestSuite
 		void tearDown(void);
 
 		void check_conv(std::string);
-		void test_utf8(void);
+		void test_blumchen(void);
+		void test_elakelaiset(void);
+		void test_wutang(void);
 };
 
 /*
@@ -134,7 +136,7 @@ void SCMUtf8StringUTest::check_conv(std::string name1)
 	TSM_ASSERT("String miscompare", 0 == name1.compare(p2str));
 }
 
-void SCMUtf8StringUTest::test_utf8(void)
+void SCMUtf8StringUTest::test_blumchen(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -148,3 +150,32 @@ void SCMUtf8StringUTest::test_utf8(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void SCMUtf8StringUTest::test_elakelaiset(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Some microsoft-1252 codepage crap.
+	std::string name1 = "el";
+	name1.push_back(0xb4);
+	name1 += "kel";
+	name1.push_back(0xb4);
+	name1 += "iset";
+
+	check_conv(name1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SCMUtf8StringUTest::test_wutang(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Some microsoft-1252 codepage crap.
+	std::string name1 = "Die Meistersinger von N";
+	name1.push_back(0xfc);
+	name1 += "rnberg";
+
+	check_conv(name1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
