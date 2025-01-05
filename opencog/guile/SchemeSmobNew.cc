@@ -318,8 +318,48 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 	if (not scm_is_string(sname))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
-	char * cname = scm_to_utf8_string(sname);
-	std::string name(cname);
+	char* cname = scm_to_utf8_string(sname);
+
+#define MASK(x) (x & 0xff)
+	// Search for unicode U+E000 to undo guile brain damage. Pitty.
+	// Life sucks. See notes on ss_name() for gory details.
+	size_t i=0;
+	while (cname[i])
+	{
+		if (0xee != MASK(cname[i])) i++;
+		else if (0x80 <= MASK(cname[i+1]) and 0x80 <= MASK(cname[i+2])) break;
+	}
+
+	std::string name;
+	name.assign(cname, i);
+
+	// Perhaps we are done. Phew.
+	if (0 == cname[i])
+	{
+		free(cname);
+		return name;
+	}
+
+	// If we are here, there is conversion to be done, undoing what
+	// ss_name did. Alas.
+	while (cname[i])
+	{
+		// Decode exactly one byte in the range U+E000 to U+E0FF
+		if (0xee == MASK(cname[i]) and
+		    0x80 <= MASK(cname[i+1]) and MASK(cname[i+1]) < 0x84 and
+		    0x80 <= MASK(cname[i+2]) and MASK(cname[i+2]) < 0xd0)
+		{
+			unsigned char c = 0x40 * (MASK(cname[i+1]) - 0x80) + (MASK(cname[i+2]) - 0x80);
+			name.push_back(c);
+			i += 3;
+		}
+		else
+		{
+			name.push_back(cname[i]);
+			i ++;
+		}
+	}
+
 	free(cname);
 	return name;
 }

@@ -24,7 +24,9 @@
 #include <vector>
 
 #include <cstddef>
+// #include <iconv.h>
 #include <libguile.h>
+#include <wchar.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
@@ -78,6 +80,140 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 }
 
 /* ============================================================== */
+
+// XXX FIXME. Work around the despicable, horrible guile UTF8 handling.
+// I am flabbergasted. The guile people are smart, but they could not have
+// possibly picked a crappier string handling design. Fuck me. See
+// https://stackoverflow.com/questions/79329532/c-c-encode-binary-into-utf8
+//
+// So here's the deal. Atom names in Atomese are byte strings. Often,
+// but not always UTF-8. The C++ API allows any byte string at all to be
+// used. Ditto for python. However, guile wants strings to be utf8, and
+// not bytevectors. So what should I do?
+//
+// Option 1)
+// If the string contains non-utf8 chars, then create and return a guile
+// bytevector. This has several problems.
+//   1a) Guile does not have an API for converting a C string to a bytevector.
+//   1b) Printing the result gives #vu8(102 111 111 98 97 114) instead of
+//       something reasonable. ("foobar" in this case).
+//
+// Option 2)
+// Escape the non-utf8 chars. But how? We could do what python does: turn
+// them into "surrogate code points", in the range U+DC80 to U+DCFF.
+// This is how python handles it, and being compatible with python would
+// have been nice.
+// Problem:
+//   2a) Doing this causes scm_from_utf8_string() to throw an exception.
+//
+// Option 3)
+// Escape the non-utf8 chars to unicode-private range U+E000 to U+F8FF
+// Problems:
+//   3a) Industry non-standard, idiosyncratic Atomese.
+//   3b) If user passes this strings back as Atom names, then we must
+//       scan **all** input strings and convert them back into byte
+//       strings. This is a performance hit.
+//
+// Option 4)
+// Escape the non-utf8 chars in some other way, e.g. by using ASCII
+// shift-out and shift-in SO and SI 0xe and 0xf to demarcate begin and
+// end, while everything in between is printed in hex.
+// Problems:
+//    Same as in 3)
+//
+// Option 5)
+// Use iconv and discard the non-utf8 bytes.
+// Problems:
+//   5a) Dataloss.
+//
+// Option 6)
+// Do nothing. Let the user take the exception. This sucks, because
+// it forces the user to write some fairly complicated code to catch
+// and handle the exceptions. Which is mostly pointless, because the
+// user will almost never do anything with the string, anyway.
+// Even worse: the actual exception thrown is a "compound exception",
+// stunningly complicated to decode.
+//
+// Option 7)
+// Randomly guess alternative locales. Yuck.
+//
+// Now, guile could have just accepted naked byte strings as strings,
+// wasted zero CPU cycles in the process. If printing to some port
+// happened to require conversion to some locale, that's when the
+// conversion could have been done, and the exception thrown, if needed.
+// Instead, guile is wasting CPU doing a pointless conversion, and
+// forcing additional design complexity and performance hits on me.
+// That's just wrong.
+
+// Of all of above, pick option 3.
+SCM SchemeSmob::convert_to_utf8 (void *data, SCM tag, SCM throw_args)
+{
+	char *inbuf = (char *) data;
+	size_t ilen = strlen(inbuf);
+	std::string out;
+	mbstate_t ps;
+	memset(&ps, 0, sizeof(ps));
+
+	size_t i = 0;
+	while (i<ilen)
+	{
+		int step = (int) mbrtowc(NULL, &inbuf[i], ilen-i+1, &ps);
+		if (0 < step)
+		{
+			do
+			{
+				out.push_back(inbuf[i]); i++; step--;
+			}
+			while (0 < step);
+			continue;
+		}
+		else if (0 == step)
+			break;
+
+		// Unicode Private Use Area, U+E000 - U+F8FF
+		// Use the range U+E000 to U+E0FF
+		out.push_back(0xee);
+		unsigned char c = inbuf[i];
+		if (c < 0x40) { out.push_back(0x80); out.push_back(0x80 + c); }
+		else if (c < 0x80) { out.push_back(0x81); out.push_back(0x40 + c); }
+		else if (c < 0xc0) { out.push_back(0x82); out.push_back(c); }
+		else { out.push_back(0x83); out.push_back(c - 0x40); }
+
+		// Note that Microsoft NTFS uses U+F000 plus ASCII codepoint for
+		// encoding invalid chars in NTFS filenames. So using this would
+		// lead to collisions and unexpected behavior.
+#if 0
+		// Use the range U+F800 to U+F8FF
+		out.push_back(0xef);
+		unsigned char c = inbuf[i];
+		if (c < 0x40) { out.push_back(0xa0); out.push_back(0x80 + c); }
+		else if (c < 0x80) { out.push_back(0xa1); out.push_back(0x40 + c); }
+		else if (c < 0xc0) { out.push_back(0xa2); out.push_back(c); }
+		else { out.push_back(0xa3); out.push_back(c - 0x40); }
+#endif
+		i++;
+		memset(&ps, 0, sizeof(ps));
+	}
+
+	return scm_from_utf8_string(out.c_str());
+
+#if CLOBBER_WITH_ICONV
+	// Just clobber stuff. Ick.  This is option 5) above.
+	static iconv_t cd = iconv_open("UTF-8//IGNORE", "UTF-8");
+	char *inbuf = (char *) data;
+	size_t ilen = strlen(inbuf);
+	size_t olen = ilen+1;
+	char *wbuf = (char *) malloc(olen);
+	char *obuf = wbuf;
+	iconv(cd, &inbuf, &ilen, &obuf, &olen);
+	obuf[olen] = 0x0;
+	printf("XXX FIXME Bad string %s\nconverted to %s\n", (char *) data, wbuf);
+	SCM str = scm_from_utf8_string(obuf);
+	free(wbuf);
+	return str;
+#endif
+}
+
 /**
  * Return the string name of the atom
  */
@@ -86,7 +222,14 @@ SCM SchemeSmob::ss_name (SCM satom)
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
 	if (h->is_node()) name = h->get_name();
+
+#ifdef PLAIN_STRINGS
 	SCM str = scm_from_utf8_string(name.c_str());
+#else
+	SCM str = scm_c_catch(SCM_BOOL_T,
+		(scm_t_catch_body) scm_from_utf8_string, (void *) name.c_str(),
+		SchemeSmob::convert_to_utf8, (void *) name.c_str(), NULL, NULL);
+#endif
 	return str;
 }
 
