@@ -24,8 +24,9 @@
 #include <vector>
 
 #include <cstddef>
-#include <iconv.h>
+// #include <iconv.h>
 #include <libguile.h>
+#include <wchar.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
@@ -132,6 +133,58 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 
 static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 {
+	printf("duuude bad string %s\n", (char *) data);
+	char *inbuf = (char *) data;
+	size_t ilen = strlen(inbuf);
+	std::string out;
+	mbstate_t ps;
+	mbrtowc(NULL, NULL, 0, &ps);
+
+	size_t i = 0;
+	while (i<ilen)
+	{
+		size_t step = mbrtowc(NULL, &inbuf[i], ilen-i, &ps);
+		if (0 < step)
+		{
+			do
+			{
+				out += inbuf[i]; i++; step--;
+			}
+			while (0 < step);
+		}
+		else if (0 == step)
+		{
+			break;
+		}
+		else
+		{
+			// Unicode Private Use Area, U+E000 - U+F8FF
+#ifdef START_AT_E000
+			// Use the range U+E000 to U+E0FF
+			out += 0xee;
+			unsigned char c = inbuf[i];
+			if (c < 0x40) { out += 0x80; out += 0x80 + c; }
+			else if (c < 0x80) { out += 0x81; out += 0x40 + c; }
+			else if (c < 0xc0) { out += 0x82; out += c; }
+			else { out += 0x83; out += c - 0x40; }
+#else
+			// Use the range U+F800 to U+F8FF
+			out += 0xef;
+			unsigned char c = inbuf[i];
+			if (c < 0x40) { out += 0xa0; out += 0x80 + c; }
+			else if (c < 0x80) { out += 0xa1; out += 0x40 + c; }
+			else if (c < 0xc0) { out += 0xa2; out += c; }
+			else { out += 0xa3; out += c - 0x40; }
+#endif
+			i++;
+		}
+	}
+
+printf("conv to %s\n", out.c_str());
+	return scm_from_utf8_string(out.c_str());
+
+#if CLOBBER_WITH_ICONV
+	// Just clobber stuff. Ick.  This is option 4) above.
 	static iconv_t cd = iconv_open("UTF-8//IGNORE", "UTF-8");
 	char *inbuf = (char *) data;
 	size_t ilen = strlen(inbuf);
@@ -140,10 +193,11 @@ static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 	char *obuf = wbuf;
 	iconv(cd, &inbuf, &ilen, &obuf, &olen);
 	obuf[olen] = 0x0;
-	printf("duuude bad string %s\nconverted to %s\n", (char *) data, wbuf);
+	printf("XXX FIXME Bad string %s\nconverted to %s\n", (char *) data, wbuf);
 	SCM str = scm_from_utf8_string(obuf);
 	free(wbuf);
 	return str;
+#endif
 }
 
 /**
