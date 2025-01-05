@@ -196,6 +196,7 @@ private:
 	static SCM ss_is_closed(SCM);
 
 	// Misc utilities
+	static SCM convert_to_utf8(void *, SCM, SCM);
 	static std::string to_string(SCM);
 	static std::string protom_to_string(SCM);
 	static std::string protom_to_server_string(SCM);

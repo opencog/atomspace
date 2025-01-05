@@ -82,8 +82,8 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 /* ============================================================== */
 
 // XXX FIXME. Work around the despicable, horrible guile UTF8 handling.
-// I currantly am unable to do this without dataloss, because the guile
-// people could not have possibly picked a crappier design. Fuck me. See
+// I am flabbergasted. The guile people are smart, but they could not have
+// possibly picked a crappier string handling design. Fuck me. See
 // https://stackoverflow.com/questions/79329532/c-c-encode-binary-into-utf8
 //
 // So here's the deal. Atom names in Atomese are byte strings. Often,
@@ -101,6 +101,8 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 // Option 2)
 // Escape the non-utf8 chars. But how? We could do what python does: turn
 // them into "surrogate code points", in the range U+DC80 to U+DCFF.
+// This is how python handles it, and being compatible with python would
+// have been nice.
 // Problem:
 //   2a) Doing this causes scm_from_utf8_string() to throw an exception.
 //
@@ -134,9 +136,17 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 //
 // Option 7)
 // Randomly guess alternative locales. Yuck.
+//
+// Now, guile could have just accepted naked byte strings as strings,
+// wasted zero CPU cycles in the process. If printing to some port
+// happened to require conversion to some locale, that's when the
+// conversion could have been done, and the exception thrown, if needed.
+// Instead, guile is wasting CPU doing a pointless conversion, and
+// forcing additional design complexity and performance hits on me.
+// That's just wrong.
 
 // Of all of above, pick option 3.
-static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
+SCM SchemeSmob::convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 {
 	char *inbuf = (char *) data;
 	size_t ilen = strlen(inbuf);
@@ -216,7 +226,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 #else
 	SCM str = scm_c_catch(SCM_BOOL_T,
 		(scm_t_catch_body) scm_from_utf8_string, (void *) name.c_str(),
-		convert_to_utf8, (void *) name.c_str(), NULL, NULL);
+		SchemeSmob::convert_to_utf8, (void *) name.c_str(), NULL, NULL);
 #endif
 	return str;
 }

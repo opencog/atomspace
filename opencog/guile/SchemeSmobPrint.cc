@@ -133,7 +133,15 @@ int SchemeSmob::print_misc(SCM node, SCM port, scm_print_state * ps)
 
 	// Deal with a regression in guile-2.1.x See bug report
 	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25397
-	scm_display (scm_from_utf8_string (str.c_str()), port);
+	// Basically, scm_puts() stopped working, AND guile made
+	// a huge design flaw in string handling. What a cock-up.
+	// See nots on SchemeSmob::convert_to_utf8() for details.
+
+	SCM scmstr = scm_c_catch(SCM_BOOL_T,
+		(scm_t_catch_body) scm_from_utf8_string, (void *) str.c_str(),
+		SchemeSmob::convert_to_utf8, (void *) str.c_str(), NULL, NULL);
+
+	scm_display (scmstr, port);
 #else
 	scm_puts (str.c_str(), port);
 #endif // HAVE_GUILE_2_2
