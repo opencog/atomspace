@@ -86,12 +86,22 @@ void SCMUtf8StringUTest::test_utf8(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test cog-inc-count! ---------------------------------
-	Handle counter = evaluator->eval_h("counter");
-	CHKERR;
+	// Some microsoft-1252 codepage crap.
+	std::string name = "Bl";
+	name.push_back(0xc4);
+	name += "mchen";
+	Handle n1 = an(CONCEPT_NODE, std::string(name));
 
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->get_type());
+	// Should not crash
+	evaluator->eval("(cog-prt-atomspace)");
+	CHKERR;
+	Handle h = evaluator->eval_h("(car (cog-get-atoms 'Concept))");
+	CHKERR;
+	std::string n1str = h->get_name();
+	printf("duude %s\n", n1str.c_str());
+
+	// TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
+	// TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->get_type());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
