@@ -105,21 +105,26 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 //   2a) Doing this causes scm_from_utf8_string() to throw an exception.
 //
 // Option 3)
-// Escape the non-utf8 chars in some other way, e.g. by using ASCII
-// shift-out and shift-in SO and SI 0xe and 0xf to demarcate begin and
-// end, while everything in between is printed in hex.
+// Escape the non-utf8 chars to unicode-private range U+E000 to U+F8FF
 // Problems:
-//   3a) Industry non-standard, idiosyncratic atomese.
+//   3a) Industry non-standard, idiosyncratic Atomese.
 //   3b) If user passes this strings back as Atom names, then we must
 //       scan **all** input strings and convert them back into byte
 //       strings. This is a performance hit.
 //
 // Option 4)
-// Use iconv and discard the non-utf8 bytes.
+// Escape the non-utf8 chars in some other way, e.g. by using ASCII
+// shift-out and shift-in SO and SI 0xe and 0xf to demarcate begin and
+// end, while everything in between is printed in hex.
 // Problems:
-//   4a) Dataloss.
+//    Same as in 3)
 //
 // Option 5)
+// Use iconv and discard the non-utf8 bytes.
+// Problems:
+//   5a) Dataloss.
+//
+// Option 6)
 // Do nothing. Let the user take the exception. This sucks, because
 // it forces the user to write some fairly complicated code to catch
 // and handle the exceptions. Which is mostly pointless, because the
@@ -127,25 +132,22 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 // Even worse: the actual exception thrown is a "compound exception",
 // stunningly complicated to decode.
 //
-// Option 6)
+// Option 7)
 // Randomly guess alternative locales. Yuck.
 
-
+// Of all of above, pick option 3.
 static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 {
 	char *inbuf = (char *) data;
 	size_t ilen = strlen(inbuf);
-	printf("duuude bad string %lu %s\n", ilen, inbuf);
 	std::string out;
 	mbstate_t ps;
 	memset(&ps, 0, sizeof(ps));
-printf("go\n");
 
 	size_t i = 0;
 	while (i<ilen)
 	{
-		size_t step = mbrtowc(NULL, &inbuf[i], ilen-i+1, &ps);
-// printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
+		int step = (int) mbrtowc(NULL, &inbuf[i], ilen-i+1, &ps);
 		if (0 < step)
 		{
 			do
@@ -153,44 +155,38 @@ printf("go\n");
 				out.push_back(inbuf[i]); i++; step--;
 			}
 			while (0 < step);
+			continue;
 		}
 		else if (0 == step)
-		{
 			break;
-		}
-		else
-		{
-			// Unicode Private Use Area, U+E000 - U+F8FF
-printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
+
+		// Unicode Private Use Area, U+E000 - U+F8FF
+#define START_AT_E000 1
 #ifdef START_AT_E000
-			// Use the range U+E000 to U+E0FF
-			out.push_back(0xee);
-			unsigned char c = inbuf[i];
-			if (c < 0x40) { out.push_back(0x80); out.push_back(0x80 + c); }
-			else if (c < 0x80) { out.push_back(0x81); out.push_back(0x40 + c); }
-			else if (c < 0xc0) { out.push_back(0x82); out.push_back(c); }
-			else { out.push_back(0x83); out.push_back(c - 0x40); }
+		// Use the range U+E000 to U+E0FF
+		out.push_back(0xee);
+		unsigned char c = inbuf[i];
+		if (c < 0x40) { out.push_back(0x80); out.push_back(0x80 + c); }
+		else if (c < 0x80) { out.push_back(0x81); out.push_back(0x40 + c); }
+		else if (c < 0xc0) { out.push_back(0x82); out.push_back(c); }
+		else { out.push_back(0x83); out.push_back(c - 0x40); }
 #else
-			// Use the range U+F800 to U+F8FF
-			out.push_back(0xef);
-			unsigned char c = inbuf[i];
-			if (c < 0x40) { out.push_back(0xa0); out.push_back(0x80 + c); }
-			else if (c < 0x80) { out.push_back(0xa1); out.push_back(0x40 + c); }
-			else if (c < 0xc0) { out.push_back(0xa2); out.push_back(c); }
-			else { out.push_back(0xa3); out.push_back(c - 0x40); }
+		// Use the range U+F800 to U+F8FF
+		out.push_back(0xef);
+		unsigned char c = inbuf[i];
+		if (c < 0x40) { out.push_back(0xa0); out.push_back(0x80 + c); }
+		else if (c < 0x80) { out.push_back(0xa1); out.push_back(0x40 + c); }
+		else if (c < 0xc0) { out.push_back(0xa2); out.push_back(c); }
+		else { out.push_back(0xa3); out.push_back(c - 0x40); }
 #endif
-			i++;
-printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
-printf("yaaa %s\n", out.c_str());
-			memset(&ps, 0, sizeof(ps));
-		}
+		i++;
+		memset(&ps, 0, sizeof(ps));
 	}
 
-printf("conv to %s\n", out.c_str());
 	return scm_from_utf8_string(out.c_str());
 
 #if CLOBBER_WITH_ICONV
-	// Just clobber stuff. Ick.  This is option 4) above.
+	// Just clobber stuff. Ick.  This is option 5) above.
 	static iconv_t cd = iconv_open("UTF-8//IGNORE", "UTF-8");
 	char *inbuf = (char *) data;
 	size_t ilen = strlen(inbuf);
