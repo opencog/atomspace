@@ -82,6 +82,12 @@ void SCMUtf8StringUTest::tearDown(void)
  * Test UTF8 String handling.
  */
 
+static void prtstr(std::string s)
+{
+	for (size_t i=0; i<s.length(); i++)
+		printf("It is %d %x %c\n", i, s[i], s[i]);
+}
+
 void SCMUtf8StringUTest::test_utf8(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -98,26 +104,37 @@ void SCMUtf8StringUTest::test_utf8(void)
 	Handle cnh = evaluator->eval_h("(car (cog-get-atoms 'Concept))");
 	CHKERR;
 	std::string n1str = cnh->get_name();
-	TSM_ASSERT("String miscompare", n1str != name1);
+	printf("got %s vs %s\n", n1str.c_str(), name1.c_str());
+	TSM_ASSERT("String miscompare", name1 == n1str);
+	TSM_ASSERT("String miscompare", 0 == name1.compare(n1str));
 
 	// Also should not crash
 	std::string utf = evaluator->eval("(cog-name (car (cog-get-atoms 'Concept)))");
 	CHKERR;
-	printf("duuude its %s\n", utf.c_str());
+	printf("Got the name %s\n", utf.c_str());
+	prtstr(utf);
 
 	evaluator->eval("(define foon (cog-name (car (cog-get-atoms 'Concept))))");
 	CHKERR;
+
+	std::string utf2 = evaluator->eval("foon");
+	CHKERR;
+	printf("Still Got the name %s\n", utf2.c_str());
+	prtstr(utf2);
+	TSM_ASSERT("String miscompare", utf == utf2);
 
 	// Test string copy
 	Handle pnh = evaluator->eval_h("(Predicate foon)");
 	CHKERR;
 	std::string p1str = pnh->get_name();
-	TSM_ASSERT("String miscompare", p1str != name1);
+	TSM_ASSERT("String miscompare", p1str == name1);
+	TSM_ASSERT("String miscompare", 0 == name1.compare(p1str));
 
 	Handle pnh2 = evaluator->eval_h("(car (cog-get-atoms 'Predicate))");
 	CHKERR;
 	std::string p2str = pnh2->get_name();
-	TSM_ASSERT("String miscompare", p2str != name1);
+	TSM_ASSERT("String miscompare", p2str == name1);
+	TSM_ASSERT("String miscompare", 0 == name1.compare(p2str));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
