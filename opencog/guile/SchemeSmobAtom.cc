@@ -133,22 +133,24 @@ ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 
 static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 {
-	printf("duuude bad string %s\n", (char *) data);
 	char *inbuf = (char *) data;
 	size_t ilen = strlen(inbuf);
+	printf("duuude bad string %lu %s\n", ilen, inbuf);
 	std::string out;
 	mbstate_t ps;
-	mbrtowc(NULL, NULL, 0, &ps);
+	memset(&ps, 0, sizeof(ps));
+printf("go\n");
 
 	size_t i = 0;
 	while (i<ilen)
 	{
-		size_t step = mbrtowc(NULL, &inbuf[i], ilen-i, &ps);
+		size_t step = mbrtowc(NULL, &inbuf[i], ilen-i+1, &ps);
+// printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
 		if (0 < step)
 		{
 			do
 			{
-				out += inbuf[i]; i++; step--;
+				out.push_back(inbuf[i]); i++; step--;
 			}
 			while (0 < step);
 		}
@@ -159,24 +161,28 @@ static SCM convert_to_utf8 (void *data, SCM tag, SCM throw_args)
 		else
 		{
 			// Unicode Private Use Area, U+E000 - U+F8FF
+printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
 #ifdef START_AT_E000
 			// Use the range U+E000 to U+E0FF
-			out += 0xee;
+			out.push_back(0xee);
 			unsigned char c = inbuf[i];
-			if (c < 0x40) { out += 0x80; out += 0x80 + c; }
-			else if (c < 0x80) { out += 0x81; out += 0x40 + c; }
-			else if (c < 0xc0) { out += 0x82; out += c; }
-			else { out += 0x83; out += c - 0x40; }
+			if (c < 0x40) { out.push_back(0x80); out.push_back(0x80 + c); }
+			else if (c < 0x80) { out.push_back(0x81); out.push_back(0x40 + c); }
+			else if (c < 0xc0) { out.push_back(0x82); out.push_back(c); }
+			else { out.push_back(0x83); out.push_back(c - 0x40); }
 #else
 			// Use the range U+F800 to U+F8FF
-			out += 0xef;
+			out.push_back(0xef);
 			unsigned char c = inbuf[i];
-			if (c < 0x40) { out += 0xa0; out += 0x80 + c; }
-			else if (c < 0x80) { out += 0xa1; out += 0x40 + c; }
-			else if (c < 0xc0) { out += 0xa2; out += c; }
-			else { out += 0xa3; out += c - 0x40; }
+			if (c < 0x40) { out.push_back(0xa0); out.push_back(0x80 + c); }
+			else if (c < 0x80) { out.push_back(0xa1); out.push_back(0x40 + c); }
+			else if (c < 0xc0) { out.push_back(0xa2); out.push_back(c); }
+			else { out.push_back(0xa3); out.push_back(c - 0x40); }
 #endif
 			i++;
+printf("yo %d %d %x %c\n", i, step, inbuf[i], inbuf[i]);
+printf("yaaa %s\n", out.c_str());
+			memset(&ps, 0, sizeof(ps));
 		}
 	}
 
