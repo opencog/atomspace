@@ -33,7 +33,7 @@ PROJECT(atomspace)
 # Uncomment to build in release mode with debug information.
 # SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-# default build type
+# Default build type
 IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Release)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
@@ -149,13 +149,11 @@ ELSE (FOLLY_FOUND)
 ENDIF (FOLLY_FOUND)
 
 # ----------------------------------------------------------
-# Find Guile
+# Find Guile. Required.
 include(OpenCogFindGuile)
 
 # ----------------------------------------------------------
-# By default, this uses Python3.
-# To use Python2 only, run the following in the build directory:
-# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
+# Find Python3 (optional; needed for Python3 bindings.)
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
@@ -202,7 +200,7 @@ ENDIF (UnixODBC_FOUND)
 MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
 
 # ----------------------------------------------------------
-# Optional Postgres, needed for PostgresStorageNode
+# Postgres. Optional, needed for PostgresStorageNode
 
 FIND_PACKAGE(PGSQL 9.5)
 IF (PGSQL_FOUND)
