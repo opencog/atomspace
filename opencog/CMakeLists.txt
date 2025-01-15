@@ -14,16 +14,22 @@ ADD_SUBDIRECTORY (eval)
 ADD_SUBDIRECTORY (query)
 ADD_SUBDIRECTORY (persist)
 
-# Extension language support
+# Guile/scheme API bindings and utilities
 IF (HAVE_GUILE)
 	ADD_SUBDIRECTORY (guile)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (matrix)
 ENDIF (HAVE_GUILE)
 
+# Python3 API bindings.
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
+
+# OpenCL platform
+IF (HAVE_OPENCL)
+	ADD_SUBDIRECTORY (opencl)
+ENDIF (HAVE_OPENCL)
 
 # Haskell bindings.
 IF (HAVE_STACK)
