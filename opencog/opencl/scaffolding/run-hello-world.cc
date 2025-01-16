@@ -1,8 +1,7 @@
 /**
- * OpenCL scaffolding.
+ * OpenCL Hello-World demo.
  *
- * This provides minimalistic scaffolding to allow OpenCL experiments
- * to take place.
+ * Run a Hello-World kernel on OpenCL hardware.
  *
  * Copyright (c) 2025 Linas Vepstas
  */

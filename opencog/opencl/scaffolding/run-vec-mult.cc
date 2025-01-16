@@ -1,27 +1,43 @@
 /**
- * OpenCL scaffolding.
+ * OpenCL float-point math demo.
  *
- * This provides minimalistic scaffolding to allow OpenCL experiments
- * to take place.
+ * Simple demo of performing float point math on GPU hardware.
  *
  * Copyright (c) 2025 Linas Vepstas
  */
 
 #include "scaffolding.h"
 
-void run_hello(cl::Device ocldev, cl::Context context, cl::Program program)
+void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 {
-	// Set up I/O
-	char buf[256];
+	size_t vec_dim = 256;
+	std::vector<double> a(vec_dim);
+	std::vector<double> b(vec_dim);
+	std::vector<double> prod(vec_dim);
 
-	// CL_MEM_USE_HOST_PTR
-	cl::Buffer memBuf(context,
-		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
-		sizeof(buf));
+	for (size_t i=0; i<vec_dim; i++)
+	{
+		a[i] = 2.0;
+		b[i] = (double) i;
+		prod[i] = 0.0;
+	}
+
+	size_t vec_bytes = vec_dim * sizeof(double);
+
+	cl::Buffer veca(context,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vec_bytes, a.data());
+
+	cl::Buffer vecb(context,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vec_bytes, b.data());
+
+	cl::Buffer vecprod(context,
+		CL_MEM_READ_WRITE, vec_bytes);
 
 	int err;
-	cl::Kernel kernel(program, "HelloWorld", &err);
-	kernel.setArg(0, memBuf);
+	cl::Kernel kernel(program, "vec_mult", &err);
+	kernel.setArg(0, veca);
+	kernel.setArg(1, vecb);
+	kernel.setArg(2, vecprod);
 
 	// Launch
 	cl::CommandQueue queue(context, ocldev);
@@ -29,19 +45,23 @@ void run_hello(cl::Device ocldev, cl::Context context, cl::Program program)
 	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
-		cl::NDRange(sizeof(buf)),
+		cl::NDRange(vec_dim),
 		cl::NullRange,
 		nullptr, &event_handler);
 
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on exec\n");
 
-	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf,
+	queue.enqueueReadBuffer(vecprod, CL_TRUE, 0, vec_bytes, prod.data(),
 		nullptr, &event_handler);
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
 
-	printf("Get result >>%s<<\n", buf);
+	printf("Get result:\n");
+	for (size_t i=0; i<vec_dim; i++)
+	{
+		printf("vec[%ld] = %f\n", i, prod[i]);
+	}
 }
 
 int main(int argc, char* argv[])
@@ -52,6 +72,6 @@ int main(int argc, char* argv[])
 
 	cl::Context ctxt;
 	cl::Program prog;
-	build_kernel(ocldev, "hello-world.cl", ctxt, prog);
-	run_hello(ocldev, ctxt, prog);
+	build_kernel(ocldev, "vec-mult.cl", ctxt, prog);
+	run_vec_mult(ocldev, ctxt, prog);
 }

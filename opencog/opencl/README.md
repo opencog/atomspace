@@ -18,6 +18,10 @@ Directory layout:
 
 HOWTO
 -----
+Steps:
+* Get some OpenCL GPU hardware, such as a Radeon graphics card.
+* Install `clinfo` and `mesa-opencl-icd` and `opencl-headers`
+
 Make sure the software isn't insane, by running
 `opencog/opencl/scaffolding/show-ocl-hw` executable from the `build`
 directory. It will print a short-form hardware listing that should
