@@ -59,19 +59,16 @@ void build_kernel(cl::Device ocldev, const char* srcfile,
 	prog = program;
 }
 
-void run_prog(cl::Device ocldev, cl::Context context, cl::Program program)
+void run_hello(cl::Device ocldev, cl::Context context, cl::Program program)
 {
-#if 0
-	auto dimensions = ocldev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-	size_t global_dim = dimensions[0] * dimensions[1] * dimensions[2];
-#endif
-
 	// Set up I/O
 	char buf[256];
+
 	// CL_MEM_USE_HOST_PTR
 	cl::Buffer memBuf(context,
 		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
 		sizeof(buf));
+
 	int err;
 	cl::Kernel kernel(program, "HelloWorld", &err);
 	kernel.setArg(0, memBuf);
@@ -82,26 +79,21 @@ void run_prog(cl::Device ocldev, cl::Context context, cl::Program program)
 	cl::Event *event_handler = new cl::Event();
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
-		// cl::NDRange(global_dim, 1, 1),
-		cl::NDRange(16, 1, 1),
+		cl::NDRange(sizeof(buf)),
 		cl::NullRange,
 		nullptr, event_handler);
 
-	// this is deprecated API.
-	// queue.enqueueTask(kernel);
-
 	event_handler->wait();
-	printf("Done waiting on exec\n");
+	fprintf(stderr, "Done waiting on exec\n");
 
-	// queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf);
 	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf,
 		nullptr, event_handler);
 	event_handler->wait();
-	printf("Done waiting on read\n");
+	fprintf(stderr, "Done waiting on result read\n");
 
 	delete event_handler;
 
-	printf("pong >>%s<<\n", buf);
+	printf("Get result >>%s<<\n", buf);
 }
 
 /// Print rudimentary report of available OpenCL hardware.
@@ -187,5 +179,5 @@ int main(int argc, char* argv[])
 	cl::Context ctxt;
 	cl::Program prog;
 	build_kernel(ocldev, "hello.cl", ctxt, prog);
-	run_prog(ocldev, ctxt, prog);
+	run_hello(ocldev, ctxt, prog);
 }
