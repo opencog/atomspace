@@ -35,9 +35,9 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 
 	int err;
 	cl::Kernel kernel(program, "vec_mult", &err);
-	kernel.setArg(0, veca);
-	kernel.setArg(1, vecb);
-	kernel.setArg(2, vecprod);
+	kernel.setArg(0, vecprod);
+	kernel.setArg(1, veca);
+	kernel.setArg(2, vecb);
 
 	// Launch
 	cl::CommandQueue queue(context, ocldev);

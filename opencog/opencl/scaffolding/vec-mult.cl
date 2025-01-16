@@ -7,8 +7,8 @@
 #  error double precision is not supported
 #endif
 
-kernel void vec_mult(global const double *prod,
-                     global const double *a, global double *b)
+kernel void vec_mult(global double *prod,
+                     global const double *a, global const double *b)
 {
 	size_t gid = get_global_id(0);
 
