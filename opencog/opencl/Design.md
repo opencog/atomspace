@@ -75,3 +75,19 @@ have psuedocode like so:
       Using the selected recipient, wait on cl::Event
    }
 ```
+
+So this is more complex than open/close/read/write. There are three
+choices:
+* Codify the above as "sufficiently generic", claiming that e.g. CUDA
+  would also fit into this model.
+* Recognize the above as a cascade of opens(), each requiring the prior
+  so that it resembles the peeling back of an onion.
+* Recognize that the peeling-of-an-onion model is too 'linear', and that
+  there is a network of interactions between the various `cl::` classes.
+  That network is not a line, but a DAG. Encode the DAG as Atomese.
+  That is, create an Atom that is more-or-less in 1-1 correspondence
+  with the OpenCL classes. Comminication then requirs connecting the
+  Atomese DAG in the same way that the OpenCL API expects the
+  conections.
+
+I like this third option.
