@@ -52,6 +52,6 @@ int main(int argc, char* argv[])
 
 	cl::Context ctxt;
 	cl::Program prog;
-	build_kernel(ocldev, "hello.cl", ctxt, prog);
+	build_kernel(ocldev, "hello-world.cl", ctxt, prog);
 	run_hello(ocldev, ctxt, prog);
 }

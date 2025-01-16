@@ -1,4 +1,6 @@
 
+// Demo OpenCL kernel.
+// Each letter in string is initialized on a different GPU.
 __kernel void HelloWorld(__global char* data)
 {
     data[0] = 'T';

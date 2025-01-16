@@ -24,8 +24,11 @@ directory. It will print a short-form hardware listing that should
 match what the `clinfo` command lists. If it doesn't, something is
 wrong with the code here.
 
-Make sure that there is a copy of `hello.cl` in whatever directory
-you are running `scaffolding` from.
+Make sure you can talk to the hardware, by running the
+`opencog/opencl/scaffolding/run-hello-world` executable from the `build`
+directory. It should print `>>This is only a test<<` if the code ran
+on the GPUs.  It will work only if there is a copy of `hello.cl` in
+whatever directory that you are running `run-hello-world` from.
 
 
 General reading
