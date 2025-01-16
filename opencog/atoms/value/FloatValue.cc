@@ -68,7 +68,7 @@ ValuePtr FloatValue::incrementCount(size_t idx, double count) const
 
 bool FloatValue::operator==(const Value& other) const
 {
-	// Unlike Atoms, we are willing to compare othr types, as long
+	// Unlike Atoms, we are willing to compare other types, as long
 	// as the type hierarchy makes sense, and the values compare.
 	if (not other.is_type(FLOAT_VALUE)) return false;
 

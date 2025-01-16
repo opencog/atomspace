@@ -3,7 +3,18 @@ OpenCL Scaffolding
 ==================
 Experimental effort to target OpenCL
 
-Version 0.0.1.
+Version 0.0.2.
+
+Overview
+--------
+Directory layout:
+
+* The [scaffolding](scaffolding) directory contains some bring-up code.
+* The [opencl-types](opencl-types) directory contains defintions for
+  some OpenCL Atom types.
+* The [stream](stream) directory contains implementations for those
+  Atom types.
+
 
 HOWTO
 -----
