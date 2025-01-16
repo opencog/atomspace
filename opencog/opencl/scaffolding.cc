@@ -15,21 +15,20 @@
 #include <iostream>
 #include <fstream>
 
-void use_dev(cl::Device ocldev)
+void use_dev(cl::Device ocldev, const char* srcfile)
 {
-	std::string dname = ocldev.getInfo<CL_DEVICE_NAME>();
-	std::string dvers = ocldev.getInfo<CL_DEVICE_VERSION>();
-	printf("Using device %s\n", dname.c_str());
-	printf("\tVersion %s\n", dvers.c_str());
-
+#if 0
 	auto dimensions = ocldev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-	printf("\tMax dimensions: %ld x %ld x %ld\n",
-		dimensions[0], dimensions[1], dimensions[2]);
 	size_t global_dim = dimensions[0] * dimensions[1] * dimensions[2];
+#endif
 
-	// Copy in source code
-	std::ifstream helloWorldFile("hello.cl");
-	std::string src(std::istreambuf_iterator<char>(helloWorldFile), (std::istreambuf_iterator<char>()));
+	// Copy in source code. Must be a better way!?
+	printf("Reading sourcefile %s\n", srcfile);
+	std::ifstream srcfm(srcfile);
+	// std::stringstream buffer;
+	// buffer << srcfm.rdbuf();
+	std::string src(std::istreambuf_iterator<char>(srcfm),
+		(std::istreambuf_iterator<char>()));
 
 	cl::Program::Sources sources;
 	sources.push_back(src);
@@ -38,6 +37,7 @@ void use_dev(cl::Device ocldev)
 	cl::Program program(context, sources);
 
 	// Compile
+	printf("Compiling sourcefile %s\n", srcfile);
 	try
 	{
 		// Specifying flags causes exception.
@@ -46,9 +46,9 @@ void use_dev(cl::Device ocldev)
 	}
 	catch (const cl::Error& e)
 	{
-		printf("Aiiie build bonk! >>%s<< what %s\n",
-			program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ocldev).c_str(),
-			e.what());
+		printf("Compile failed! %s\n", e.what());
+		printf("Log >>%s<<\n",
+			program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ocldev).c_str());
 		exit(1);
 	}
 
@@ -157,6 +157,9 @@ cl::Device find_device(const char* platsubstr, const char* devsubstr)
 			return dev;
 		}
 	}
+
+	static const cl::Device nulldev;
+	return nulldev;
 }
 
 int main(int argc, char* argv[])
@@ -167,7 +170,5 @@ int main(int argc, char* argv[])
 	std::string dname = ocldev.getInfo<CL_DEVICE_NAME>();
 	printf("Will use: %s\n", dname.c_str());
 
-#if 0
-	use_dev(ocldev);
-#endif
+	use_dev(ocldev, "hello.cl");
 }
