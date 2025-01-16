@@ -23,12 +23,18 @@ void use_dev(cl::Device ocldev, const char* srcfile)
 #endif
 
 	// Copy in source code. Must be a better way!?
-	printf("Reading sourcefile %s\n", srcfile);
+	fprintf(stderr, "Reading sourcefile %s\n", srcfile);
 	std::ifstream srcfm(srcfile);
 	// std::stringstream buffer;
 	// buffer << srcfm.rdbuf();
 	std::string src(std::istreambuf_iterator<char>(srcfm),
 		(std::istreambuf_iterator<char>()));
+
+	if (0 == src.size())
+	{
+		fprintf(stderr, "Error: Could not find file %s\n", srcfile);
+		exit(1);
+	}
 
 	cl::Program::Sources sources;
 	sources.push_back(src);
