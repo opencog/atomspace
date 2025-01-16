@@ -15,13 +15,10 @@
 #include <iostream>
 #include <fstream>
 
-void use_dev(cl::Device ocldev, const char* srcfile)
+/// Build kernel froum source file, return context.
+void build_kernel(cl::Device ocldev, const char* srcfile,
+                  cl::Context& ctxt, cl::Program& prog)
 {
-#if 0
-	auto dimensions = ocldev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-	size_t global_dim = dimensions[0] * dimensions[1] * dimensions[2];
-#endif
-
 	// Copy in source code. Must be a better way!?
 	fprintf(stderr, "Reading sourcefile %s\n", srcfile);
 	std::ifstream srcfm(srcfile);
@@ -43,7 +40,7 @@ void use_dev(cl::Device ocldev, const char* srcfile)
 	cl::Program program(context, sources);
 
 	// Compile
-	printf("Compiling sourcefile %s\n", srcfile);
+	fprintf(stderr, "Compiling sourcefile %s\n", srcfile);
 	try
 	{
 		// Specifying flags causes exception.
@@ -57,6 +54,17 @@ void use_dev(cl::Device ocldev, const char* srcfile)
 			program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(ocldev).c_str());
 		exit(1);
 	}
+
+	ctxt = context;
+	prog = program;
+}
+
+void run_prog(cl::Device ocldev, cl::Context context, cl::Program program)
+{
+#if 0
+	auto dimensions = ocldev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
+	size_t global_dim = dimensions[0] * dimensions[1] * dimensions[2];
+#endif
 
 	// Set up I/O
 	char buf[256];
@@ -176,5 +184,8 @@ int main(int argc, char* argv[])
 	std::string dname = ocldev.getInfo<CL_DEVICE_NAME>();
 	printf("Will use: %s\n", dname.c_str());
 
-	use_dev(ocldev, "hello.cl");
+	cl::Context ctxt;
+	cl::Program prog;
+	build_kernel(ocldev, "hello.cl", ctxt, prog);
+	run_prog(ocldev, ctxt, prog);
 }
