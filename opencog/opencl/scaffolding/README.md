@@ -15,14 +15,17 @@ Hello-world examples from the inter-tubes:
 * Tutorial from 2010, still seems mostly correct
   https://www.codeproject.com/articles/92788/introductory-tutorial-to-opencl
 
-Resources:
+Overivew of OpenCL:
 * https://www.khronos.org/opencl/resources
+* https://en.wikipedia.org/wiki/OpenCL
 
 Languages:
-* The OpenCL kernel language is based on C99
-* SYCL is based on c++17 "single source" (SIMD ??)
-* Generic C++ for OpenCL:
+* The OpenCL kernel language is based on C99, compiled by clang.
+* Generic C++ for OpenCL, compiled by clang.
   https://github.com/KhronosGroup/OpenCL-Guide/blob/main/chapters/cpp_for_opencl.md
+* SYCL is based on c++17 "single source" can be compiled on various
+  different compilers, incl. Inten DPC++, triSYCL and Codeplay ComputCpp
+
 
 Non-obvious concepts:
 * The kernel can be executed on a 1D, 2D, or 3D domain of indexes that
