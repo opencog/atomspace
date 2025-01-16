@@ -26,6 +26,15 @@ Languages:
 * SYCL is based on c++17 "single source" can be compiled on various
   different compilers, incl. Inten DPC++, triSYCL and Codeplay ComputCpp
 
+CUDA:
+* Can run CUDA on OpenCL 1.2 using coriander
+  https://github.com/hughperkins/coriander
+
+* Can convert CUDA code to HIP code, which runs on amd and nvidia
+  https://github.com/GPUOpen-ProfessionalCompute-Tools/HIP
+  http://gpuopen.com/tag/hip/
+  But this is now called ROCm ??
+  https://rocmdocs.amd.com/en/latest/
 
 Non-obvious concepts:
 * The kernel can be executed on a 1D, 2D, or 3D domain of indexes that
