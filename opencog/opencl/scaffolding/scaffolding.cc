@@ -59,41 +59,6 @@ void build_kernel(cl::Device ocldev, const char* srcfile,
 	prog = program;
 }
 
-void run_hello(cl::Device ocldev, cl::Context context, cl::Program program)
-{
-	// Set up I/O
-	char buf[256];
-
-	// CL_MEM_USE_HOST_PTR
-	cl::Buffer memBuf(context,
-		CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
-		sizeof(buf));
-
-	int err;
-	cl::Kernel kernel(program, "HelloWorld", &err);
-	kernel.setArg(0, memBuf);
-
-	// Launch
-	cl::CommandQueue queue(context, ocldev);
-
-	cl::Event event_handler;
-	queue.enqueueNDRangeKernel(kernel,
-		cl::NullRange,
-		cl::NDRange(sizeof(buf)),
-		cl::NullRange,
-		nullptr, &event_handler);
-
-	event_handler.wait();
-	fprintf(stderr, "Done waiting on exec\n");
-
-	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf,
-		nullptr, &event_handler);
-	event_handler.wait();
-	fprintf(stderr, "Done waiting on result read\n");
-
-	printf("Get result >>%s<<\n", buf);
-}
-
 /// Print rudimentary report of available OpenCL hardware.
 void report_hardware(void)
 {
@@ -164,18 +129,4 @@ cl::Device find_device(const char* platsubstr, const char* devsubstr)
 
 	static const cl::Device nulldev;
 	return nulldev;
-}
-
-int main(int argc, char* argv[])
-{
-	report_hardware();
-
-	cl::Device ocldev = find_device("", "AMD");
-	std::string dname = ocldev.getInfo<CL_DEVICE_NAME>();
-	printf("Will use: %s\n", dname.c_str());
-
-	cl::Context ctxt;
-	cl::Program prog;
-	build_kernel(ocldev, "hello.cl", ctxt, prog);
-	run_hello(ocldev, ctxt, prog);
 }

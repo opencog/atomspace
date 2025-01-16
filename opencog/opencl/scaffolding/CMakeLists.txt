@@ -2,7 +2,7 @@
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIRS})
 
 # Build scaffolding tool
-ADD_EXECUTABLE(scaffolding scaffolding.cc)
+ADD_EXECUTABLE(show-ocl-hw show-ocl-hw.cc)
 
-# TARGET_LINK_LIBRARIES(scaffolding ${OPENCL_LIBRARIES})
-TARGET_LINK_LIBRARIES(scaffolding OpenCL::OpenCL)
+# TARGET_LINK_LIBRARIES(show-ocl-hw ${OPENCL_LIBRARIES})
+TARGET_LINK_LIBRARIES(show-ocl-hw OpenCL::OpenCL)
