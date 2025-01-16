@@ -20,4 +20,5 @@ __kernel void HelloWorld(__global char* data)
     data[16] = 'e';
     data[17] = 's';
     data[18] = 't';
+    data[19] = 0;
 }
