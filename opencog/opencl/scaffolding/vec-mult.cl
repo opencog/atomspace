@@ -8,10 +8,13 @@
 #endif
 
 kernel void vec_mult(global double *prod,
-                     global const double *a, global const double *b)
+                     global const double *a,
+                     global const double *b,
+                     const unsigned long sz)
 {
-	size_t gid = get_global_id(0);
+	size_t i = get_global_id(0);
 
 	// Scalar product of two vectors.
-	prod[gid] = a[gid] * b[gid];
+	if (i < sz)
+		prod[i] = a[i] * b[i];
 }

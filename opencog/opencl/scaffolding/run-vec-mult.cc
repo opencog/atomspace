@@ -10,7 +10,7 @@
 
 void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 {
-	size_t vec_dim = 256;
+	size_t vec_dim = 64;
 	std::vector<double> a(vec_dim);
 	std::vector<double> b(vec_dim);
 	std::vector<double> prod(vec_dim);
@@ -39,6 +39,7 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	kernel.setArg(0, vecprod);
 	kernel.setArg(1, veca);
 	kernel.setArg(2, vecb);
+	kernel.setArg(3, vec_dim);
 
 	// Launch
 	cl::CommandQueue queue(context, ocldev);

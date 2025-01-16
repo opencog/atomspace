@@ -21,6 +21,9 @@ HOWTO
 Steps:
 * Get some OpenCL GPU hardware, such as a Radeon graphics card.
 * Install `clinfo` and `mesa-opencl-icd` and `opencl-headers`
+  Maybe more, for your hardware.
+* Maybe also: `ocl-icd-opencl-dev` and `opencl-clhpp-headers` ?
+* `sudo usermod -a -G video <user_id>`
 
 Make sure the software isn't insane, by running
 `opencog/opencl/scaffolding/show-ocl-hw` executable from the `build`
