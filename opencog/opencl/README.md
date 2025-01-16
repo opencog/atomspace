@@ -1,4 +1,12 @@
 
 OpenCL Scaffolding
-------------------
-Experimental effort to target OpenCL. Nothing works yet. version 0.0.0.
+==================
+Experimental effort to target OpenCL
+
+Version 0.0.1.
+
+HOWTO
+-----
+Run the `opencog/opencl/scaffolding` executable from the build
+directory. It will print a short-form hardware listing that should
+match what the `clinfo` command lists.
