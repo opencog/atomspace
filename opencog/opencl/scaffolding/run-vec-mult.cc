@@ -25,6 +25,7 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 
 	size_t vec_bytes = vec_dim * sizeof(double);
 
+	// Buffers holding data that will go to the GPU's
 	cl::Buffer veca(context,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vec_bytes, a.data());
 
@@ -34,6 +35,7 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	cl::Buffer vecprod(context,
 		CL_MEM_READ_WRITE, vec_bytes);
 
+	// The program to run on the GPU, and the arguments it takes.
 	int err;
 	cl::Kernel kernel(program, "vec_mult", &err);
 	kernel.setArg(0, vecprod);
