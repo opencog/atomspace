@@ -87,9 +87,17 @@ void report_hardware(void)
 			std::string dvers = dev.getInfo<CL_DEVICE_VERSION>();
 			printf("\t\tDevice %s\n", dname.c_str());
 			printf("\t\tVersion %s\n", dvers.c_str());
+
+			unsigned int wdim = dev.getInfo<CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS>();
+			printf("\t\tWork item dimensions: %d\n", wdim);
+			size_t maxsz = dev.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>();
+			printf("\t\tMax work group size: %ld\n", maxsz);
 			auto dimensions = dev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
-			printf("\t\tMax dimensions: %ld x %ld x %ld\n",
-				dimensions[0], dimensions[1], dimensions[2]);
+			printf("\t\tMax dimensions: %ld", dimensions[0]);
+			for (unsigned int i=1; i<wdim; i++)
+				printf(" x %ld", dimensions[i]);
+			printf("\n");
+
 			printf("\n");
 		}
 		printf("\n");
