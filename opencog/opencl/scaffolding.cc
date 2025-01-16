@@ -76,22 +76,20 @@ void run_hello(cl::Device ocldev, cl::Context context, cl::Program program)
 	// Launch
 	cl::CommandQueue queue(context, ocldev);
 
-	cl::Event *event_handler = new cl::Event();
+	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
 		cl::NDRange(sizeof(buf)),
 		cl::NullRange,
-		nullptr, event_handler);
+		nullptr, &event_handler);
 
-	event_handler->wait();
+	event_handler.wait();
 	fprintf(stderr, "Done waiting on exec\n");
 
 	queue.enqueueReadBuffer(memBuf, CL_TRUE, 0, sizeof(buf), buf,
-		nullptr, event_handler);
-	event_handler->wait();
+		nullptr, &event_handler);
+	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
-
-	delete event_handler;
 
 	printf("Get result >>%s<<\n", buf);
 }
