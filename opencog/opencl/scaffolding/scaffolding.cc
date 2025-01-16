@@ -64,7 +64,7 @@ void report_hardware(void)
 	cl::Platform::get(&platforms);
 	printf("OpenCL Hardware report\n");
 	printf("Should match what the `clinfo` tool reports.\n");
-	printf("Found %ld plaforms:\n", platforms.size());
+	printf("Found %ld platforms:\n", platforms.size());
 
 	for (const auto& plat : platforms)
 	{
@@ -106,7 +106,7 @@ void report_hardware(void)
 }
 
 /// Return the first device that has platsubstr and devsubstr as
-/// subtrings in the platform and device name.
+/// substrings in the platform and device name.
 cl::Device find_device(const char* platsubstr, const char* devsubstr)
 {
 	std::vector<cl::Platform> platforms;

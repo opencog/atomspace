@@ -61,7 +61,7 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
 
-	printf("The trinagle numbers are:\n");
+	printf("The triangle numbers are:\n");
 	for (size_t i=0; i<vec_dim; i++)
 	{
 		printf("%ld * %ld / 2 = %f\n", i, i+1, prod[i]);

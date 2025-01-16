@@ -9,8 +9,9 @@ Overview
 --------
 Directory layout:
 
-* The [scaffolding](scaffolding) directory contains some bring-up code.
-* The [opencl-types](opencl-types) directory contains defintions for
+* The [scaffolding](scaffolding) directory contains some bring-up code
+  and hello-world examples.
+* The [opencl-types](opencl-types) directory contains definitions for
   some OpenCL Atom types.
 * The [stream](stream) directory contains implementations for those
   Atom types.
@@ -37,9 +38,5 @@ directory. It should print `>>This is only a test<<` if the code ran
 on the GPUs.  It will work only if there is a copy of `hello.cl` in
 whatever directory that you are running `run-hello-world` from.
 
-The `opencog/opencl/scaffolding/run-hello-world` executable is similar
+The `opencog/opencl/scaffolding/run-vec-mult` executable is similar
 to above; it performs a simple vector multiply.
-
-General reading
----------------
-...

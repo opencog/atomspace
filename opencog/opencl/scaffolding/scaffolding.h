@@ -22,5 +22,5 @@ void build_kernel(cl::Device ocldev, const char* srcfile,
 void report_hardware(void);
 
 /// Return the first device that has platsubstr and devsubstr as
-/// subtrings in the platform and device name.
+/// substrings in the platform and device name.
 cl::Device find_device(const char* platsubstr, const char* devsubstr);
