@@ -6,7 +6,7 @@
  * Copyright (c) 2025 Linas Vepstas
  */
 
-void report_hardware(void);
+#include "scaffolding.h"
 
 /// Print rudimentary report of available OpenCL hardware.
 int main(int argc, char* argv[])

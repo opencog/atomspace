@@ -18,9 +18,11 @@ Directory layout:
 
 HOWTO
 -----
-Run the `opencog/opencl/scaffolding/scaffolding` executable from the
-`build` directory. It will print a short-form hardware listing that
-should match what the `clinfo` command lists.
+Make sure the software isn't insane, by running
+`opencog/opencl/scaffolding/show-ocl-hw` executable from the `build`
+directory. It will print a short-form hardware listing that should
+match what the `clinfo` command lists. If it doesn't, something is
+wrong with the code here.
 
 Make sure that there is a copy of `hello.cl` in whatever directory
 you are running `scaffolding` from.
