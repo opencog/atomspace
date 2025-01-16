@@ -43,12 +43,11 @@ class OpenclFloatValue
 protected:
 	virtual void update() const {}
 
-	OpenclFloatValue(Type t) : Value(t) {}
+	OpenclFloatValue(Type t) : FloatValue(t) {}
 public:
-	OpenclFloatValue(double v) : Value(OPENCL_FLOAT_VALUE) { _value.push_back(v); }
 	OpenclFloatValue(const std::vector<double>& v)
-		: Value(OPENCL_FLOAT_VALUE), _value(v) {}
-	OpenclFloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
+		: FloatValue(OPENCL_FLOAT_VALUE, v) {}
+	OpenclFloatValue(Type t, const std::vector<double>& v) : FloatValue(t, v) {}
 
 	virtual ~OpenclFloatValue() {}
 

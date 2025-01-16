@@ -5,4 +5,4 @@
 //
 // Experimental.
 //
-OCL_FLOAT_VALUE <- FLOAT_VALUE
+OPENCL_FLOAT_VALUE <- FLOAT_VALUE
