@@ -34,6 +34,8 @@ directory. It should print `>>This is only a test<<` if the code ran
 on the GPUs.  It will work only if there is a copy of `hello.cl` in
 whatever directory that you are running `run-hello-world` from.
 
+The `opencog/opencl/scaffolding/run-hello-world` executable is similar
+to above; it performs a simple vector multiply.
 
 General reading
 ---------------

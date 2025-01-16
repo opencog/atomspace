@@ -15,10 +15,11 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	std::vector<double> b(vec_dim);
 	std::vector<double> prod(vec_dim);
 
+	// Product will be triangle numbers.
 	for (size_t i=0; i<vec_dim; i++)
 	{
-		a[i] = 2.0;
-		b[i] = (double) i;
+		a[i] = (double) i;
+		b[i] = 0.5 * (double) i+1;
 		prod[i] = 0.0;
 	}
 
@@ -57,10 +58,10 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
 
-	printf("Get result:\n");
+	printf("The trinagle numbers are:\n");
 	for (size_t i=0; i<vec_dim; i++)
 	{
-		printf("vec[%ld] = %f\n", i, prod[i]);
+		printf("%ld * %ld / 2 = %f\n", i, i+1, prod[i]);
 	}
 }
 
