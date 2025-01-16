@@ -90,12 +90,13 @@ void use_dev(cl::Device ocldev)
 	printf("pong >>%s<<\n", buf);
 }
 
+/// Print rudimentary report of available OpenCL hardware.
 void report_hardware(void)
 {
 	std::vector<cl::Platform> platforms;
 	cl::Platform::get(&platforms);
 	printf("OpenCL Hardware report\n");
-	printf("Should match what the `clinfo` tool reports.\n\n");
+	printf("Should match what the `clinfo` tool reports.\n");
 	printf("Found %ld plaforms:\n", platforms.size());
 
 	for (const auto& plat : platforms)
@@ -117,8 +118,11 @@ void report_hardware(void)
 		{
 			std::string dname = dev.getInfo<CL_DEVICE_NAME>();
 			std::string dvers = dev.getInfo<CL_DEVICE_VERSION>();
-			printf("\tDevice %s\n", dname.c_str());
-			printf("\t\tDevice version %s\n", dvers.c_str());
+			printf("\t\tDevice %s\n", dname.c_str());
+			printf("\t\tVersion %s\n", dvers.c_str());
+			auto dimensions = dev.getInfo<CL_DEVICE_MAX_WORK_ITEM_SIZES>();
+			printf("\t\tMax dimensions: %ld x %ld x %ld\n",
+				dimensions[0], dimensions[1], dimensions[2]);
 			printf("\n");
 		}
 		printf("\n");
@@ -126,12 +130,42 @@ void report_hardware(void)
 	printf("\n");
 }
 
+/// Return the first device that has platsubstr and devsubstr as
+/// subtrings in the platform and device name.
+cl::Device find_device(const char* platsubstr, const char* devsubstr)
+{
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+
+	for (const auto& plat : platforms)
+	{
+		std::string pname = plat.getInfo<CL_PLATFORM_NAME>();
+		if (pname.find(platsubstr) == std::string::npos)
+			continue;
+
+		std::vector<cl::Device> devices;
+		// plat.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+		plat.getDevices(CL_DEVICE_TYPE_GPU, &devices);
+
+		for (const cl::Device& dev: devices)
+		{
+			std::string dname = dev.getInfo<CL_DEVICE_NAME>();
+			if (dname.find(devsubstr) == std::string::npos)
+				continue;
+
+			// Return first matching device.
+			return dev;
+		}
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	report_hardware();
 
-	cl::Platform oclplat;
-	cl::Device ocldev;
+	cl::Device ocldev = find_device("", "AMD");
+	std::string dname = ocldev.getInfo<CL_DEVICE_NAME>();
+	printf("Will use: %s\n", dname.c_str());
 
 #if 0
 	use_dev(ocldev);
