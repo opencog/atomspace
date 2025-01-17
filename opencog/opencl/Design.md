@@ -2,7 +2,7 @@ Design Notes
 ------------
 Notes about OpenCL interfaces and how they impact Atomese design.
 
-* Vectors will need a corrsponding (private) `cl::Buffer` object
+* Vectors will need a corresponding (private) `cl::Buffer` object
   (per vector).  The `cl::Buffer()` ctor requires a `cl::Context`.
   Some `cl::Buffer` ctors don't require a context; these all use
   the default context instead (seems like a bad idea, for us...)
@@ -14,7 +14,7 @@ Notes about OpenCL interfaces and how they impact Atomese design.
   actual kernel code.
 
 * Kernels are executed by placing them onto a `cl::CommandQueue`.
-  This queue takes both a `cl::Context` and also a `cl::Device` 
+  This queue takes both a `cl::Context` and also a `cl::Device`
   in it ctor. Kernels are exec async.
 
 * Obtaining results from the exec needs a `cl::Event`, created when
@@ -27,7 +27,7 @@ Design alternatives:
   Its just a function call. Maps poorly onto stateful I/O.
 
 * Use `StorageNode`s to wrap kernels. This presents other issues.
-  First, traditional `StorageNodes` were meant to send/recieve atoms,
+  First, traditional `StorageNodes` were meant to send/receive atoms,
   while here, we need to send/receive vectors represented as
   `FloatValue`s.  Maybe other kinds of vectors, but for now,
   `FloatValue`s.  The other problem is that the `StorageNode`
@@ -44,10 +44,10 @@ Design alternatives:
   open/close/read/write 4-tuple provides an abstraction that works very
   well for many I/O tasks: open/close to manage the channel, and
   read/write to use it. But the OpenCL interfaces do not map cleanly
-  to open/close/read/write. They use a more compex structure.
+  to open/close/read/write. They use a more complex structure.
 
 The abstraction I'm getting is this: open near point, open far point,
-select far-point message receipient, send message. That mapping would
+select far-point message recipient, send message. That mapping would
 have psuedocode like so:
 ```
    open_near_point() {
@@ -67,7 +67,7 @@ have psuedocode like so:
 
    write() {
       Using the selected recipient, create a cl:Kernel.
-      Call cl::Kernel::setArgs() in th kernel to establish the connetion.
+      Call cl::Kernel::setArgs() in th kernel to establish the connection.
       Call cl::CommandQueue::enqueueNDRangeKernel() to perform send
    )
 
@@ -86,26 +86,29 @@ choices:
   there is a network of interactions between the various `cl::` classes.
   That network is not a line, but a DAG. Encode the DAG as Atomese.
   That is, create an Atom that is more-or-less in 1-1 correspondence
-  with the OpenCL classes. Comminication then requirs connecting the
+  with the OpenCL classes. Communication then requires connecting the
   Atomese DAG in the same way that the OpenCL API expects the
-  conections.
+  connections.
 
 I like this third option. But how would it work, in practice?
 
-Three choices for wiring diagrams:
-* `RuleLink`
-* `EvaluationLink`
-* `Section`
+Four choices for wiring diagrams:
+* `EvaluationLink` -- function-call-like
+* `RuleLink` -- inference-like
+* `FilterLink` -- electronics-circuit-like
+* `Section` -- grammatical/sheaf-like
 
 Pros and cons:
 
 ### EvaluationLink
 Olde-school. Uses  `PredicateNode` for the function name, and a list
 of inputs, but no defined outputs. Can be given a TV to indicate
-probability, but no clear-cut interpretation of teh function arguments.
+probability, but no clear-cut interpretation of the function arguments.
 Replaced by `EdgeLink` for performance/size.
 
 ### RuleLink
+Originally intended to be a base class for rewriting (for PLN).
+
 * Fairly compact.
 * Distinct "input" and "output" areas.
 * Rules are nameless (anonymous) with no built-in naming mechanism.
@@ -113,6 +116,39 @@ Replaced by `EdgeLink` for performance/size.
   an output, and must be one or the other.) This is problematic if
   inputs or outputs are to be multiplexed, or given non-directional
   (monosexual) conntions.
-* No explicit connection/gluing semantics.
+* No explicit connection/glueing semantics.
 
-The good news about `RuleLink` is that it's fairly compact. The bad news
+`RuleLink`s specify term rewrites. Ideal for forward-chained rewriting.
+With great difficulty, can be backwards-chained. That this was a diffculty
+was exposed by PLN development.
+
+### FilterLink
+The `FilterLink` is used to specify a filter that can be applied to a
+stream.  The stream can be Atoms or Values or both. (This distinguishes
+it from the `QueryLink`, for which the source and target must lay within
+the AtomSpace itself.)
+
+Wrapping a `RuleLink` with a `FilterLink` is an effective for specifying
+rewrite rules to be applied to the stream that the filter is filtering.
+
+Problem is that this notion is very fine-grained. The filter can accept
+one or more streams as input, apply a rewrite, and generate one or more
+outputs. The inputs and the outputs are streams, but to specify the
+"wiring diagram", in Atomese, those streams are necessarily anchored
+at well-known locations (typically, under some key on some
+`AnchorNode`.)
+
+This makes processing with FilterNodes resemble an electronics circuit
+diagram. Each "dot" in the cirucit is some Atom-with-Key location, that
+must be explicitly specified. Each circuit element, spanning two or more
+dots, is a `FilterLink` + `RuleLink` combo. The connection to a "dot"
+is done with a `ValueOfLink` that explicitly names the dot.
+
+Async elements, such as `QueueValue`s exist and work. This allows
+readers to stall and wait for input. mux and demux are not an issue:
+`QueueValue`s automatically demux, and a mux can be created with a
+RuleLink that simply copies one input to two (or more) places.
+
+Arbitrary processing DAG's can be built in this way. Running on the host
+CPU. The proximal question is: can this be converted into a system for
+wiring up flows on GPU's?
