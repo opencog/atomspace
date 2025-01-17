@@ -90,4 +90,29 @@ choices:
   Atomese DAG in the same way that the OpenCL API expects the
   conections.
 
-I like this third option.
+I like this third option. But how would it work, in practice?
+
+Three choices for wiring diagrams:
+* `RuleLink`
+* `EvaluationLink`
+* `Section`
+
+Pros and cons:
+
+### EvaluationLink
+Olde-school. Uses  `PredicateNode` for the function name, and a list
+of inputs, but no defined outputs. Can be given a TV to indicate
+probability, but no clear-cut interpretation of teh function arguments.
+Replaced by `EdgeLink` for performance/size.
+
+### RuleLink
+* Fairly compact.
+* Distinct "input" and "output" areas.
+* Rules are nameless (anonymous) with no built-in naming mechanism.
+* Rules are explicitly heterosexual (everything is either an input, or
+  an output, and must be one or the other.) This is problematic if
+  inputs or outputs are to be multiplexed, or given non-directional
+  (monosexual) conntions.
+* No explicit connection/gluing semantics.
+
+The good news about `RuleLink` is that it's fairly compact. The bad news
