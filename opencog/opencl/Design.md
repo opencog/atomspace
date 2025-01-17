@@ -152,3 +152,24 @@ RuleLink that simply copies one input to two (or more) places.
 Arbitrary processing DAG's can be built in this way. Running on the host
 CPU. The proximal question is: can this be converted into a system for
 wiring up flows on GPU's?
+
+### Sections
+Sections and connectors were originally invented to generalize the
+concept of tensors, by allowing the specification of arbitrary
+star-shaped patterns aka semi-assembled jigsaws. The types of the
+connectors are loosened: instead of having just two types, "input"
+or "output", there can be any number of types. The connection rules
+are loosened as well: instead of assuming "heterosexual" rules, where
+outputs must connect to inputs (only), one can have arbitrary mating
+rules. Thus, a connection is allowed, if the mating rules allow it:
+typically, the types must match, and the "sex" of the connectors must
+be compatible.
+
+As abstract mathermatics, this is a very powerful abstraction. As a
+programming API, it is verbose and hard to work with. In particular,
+a wiring engine is needed. Such a wiring engine has not yet been
+created.
+
+It is not particularly hard to specify a GPU kernel as a sheaf section,
+but perhaps verbose. But that just specifies (describes) it. It also
+needs to be wiried in place. How?
