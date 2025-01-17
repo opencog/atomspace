@@ -1,9 +1,13 @@
 
 OpenCL Scaffolding
 ==================
-Experimental effort to target OpenCL
+Experimental effort to target OpenCL.
 
-Version 0.0.2.
+Status
+-----
+*** Version 0.0.2. ***
+Some prototyping, some demos, some unfinished ideas for design &
+implementation. Nothing connects with Atomese, yet.
 
 Overview
 --------
