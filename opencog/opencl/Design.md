@@ -51,6 +51,7 @@ select far-point message recipient, send message. That mapping would
 have psuedocode like so:
 ```
    open_near_point() {
+      Using cl::Device
       Create cl::Context and retain pointer to it
    }
 
