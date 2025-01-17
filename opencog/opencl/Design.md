@@ -75,9 +75,14 @@ have psuedocode like so:
       Using the selected recipient, wait on cl::Event
    }
 ```
+Caveat: the above is already an oversimplification of the OpenCL
+interfaces, because a `cl::Conext` is not created out of thin air, but
+requires a vector of `cl::Device` in it's ctor. And devices need
+`cl::Platform`. Lets ignore these additional complexities, for the
+moment.
 
-So this is more complex than open/close/read/write. There are three
-choices:
+The above API is more complex than open/close/read/write. There are
+three choices:
 * Codify the above as "sufficiently generic", claiming that e.g. CUDA
   would also fit into this model.
 * Recognize the above as a cascade of opens(), each requiring the prior
