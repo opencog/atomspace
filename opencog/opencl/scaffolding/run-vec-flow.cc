@@ -8,26 +8,17 @@
 
 #include "scaffolding.h"
 
-cl::CommandQueue setup_vec_mult(cl::Device ocldev,
-                                cl::Context context,
-                                cl::Program program)
+// Wire user data into GPU
+cl::Kernel setup_vec_mult(cl::Program program,
+                          size_t vec_dim,
+                          std::vector<double>& a,
+                          std::vector<double>& b,
+                          std::vector<double>& prod)
 {
-	size_t vec_dim = 64;
-	std::vector<double> a(vec_dim);
-	std::vector<double> b(vec_dim);
-	std::vector<double> prod(vec_dim);
-
-	// Product will be triangle numbers.
-	for (size_t i=0; i<vec_dim; i++)
-	{
-		a[i] = (double) i;
-		b[i] = 0.5 * (double) i+1;
-		prod[i] = 0.0;
-	}
-
 	size_t vec_bytes = vec_dim * sizeof(double);
 
 	// Buffers holding data that will go to the GPU's
+	// Buffer size is static.
 	cl::Buffer veca(context,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vec_bytes, a.data());
 
@@ -45,14 +36,12 @@ cl::CommandQueue setup_vec_mult(cl::Device ocldev,
 	kernel.setArg(2, vecb);
 	kernel.setArg(3, vec_dim);
 
-	cl::CommandQueue queue(context, ocldev);
-	return queue;
+	return kernel;
 }
 
-void stream_data(cl::CommandQueue queue)
+// Launch
+void stream_data(cl::Kernel kernel, cl::CommandQueue queue)
 {
-	// Launch
-
 	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
@@ -67,6 +56,31 @@ void stream_data(cl::CommandQueue queue)
 		nullptr, &event_handler);
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
+}
+
+void run_flow (cl::Device ocldev,
+               cl::Context context,
+               cl::Program program)
+{
+	// Set up vectors
+	size_t vec_dim = 64;
+	std::vector<double> a(vec_dim);
+	std::vector<double> b(vec_dim);
+	std::vector<double> prod(vec_dim);
+
+	// Product will be triangle numbers.
+	for (size_t i=0; i<vec_dim; i++)
+	{
+		a[i] = (double) i;
+		b[i] = 0.5 * (double) i+1;
+		prod[i] = 0.0;
+	}
+
+	cl::Kernel kern = setup_vec_mult(program,
+	          vec_dim, a, b, prod);
+
+	cl::CommandQueue queue(context, ocldev);
+	stream_data(kern, queue);
 
 	printf("The triangle numbers are:\n");
 	for (size_t i=0; i<vec_dim; i++)
@@ -84,6 +98,5 @@ int main(int argc, char* argv[])
 	cl::Context ctxt;
 	cl::Program prog;
 	build_kernel(ocldev, "vec-mult.cl", ctxt, prog);
-	cl::CoammndQueue qu = setup_vec_mult(ocldev, ctxt, prog);
-	stream_data(qu);
+	run_flow(ocldev, ctxt, prog);
 }
