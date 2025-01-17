@@ -9,7 +9,8 @@
 #include "scaffolding.h"
 
 // Wire user data into GPU
-cl::Kernel setup_vec_mult(cl::Program program,
+cl::Kernel setup_vec_mult(cl::Context context,
+                          cl::Program program,
                           size_t vec_dim,
                           std::vector<double>& a,
                           std::vector<double>& b,
@@ -40,7 +41,8 @@ cl::Kernel setup_vec_mult(cl::Program program,
 }
 
 // Launch
-void stream_data(cl::Kernel kernel, cl::CommandQueue queue)
+void stream_data(cl::Kernel kernel, cl::CommandQueue queue,
+                 size_t vec_dim, size_t vec_bytes)
 {
 	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
@@ -52,10 +54,12 @@ void stream_data(cl::Kernel kernel, cl::CommandQueue queue)
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on exec\n");
 
+#if FOO
 	queue.enqueueReadBuffer(vecprod, CL_TRUE, 0, vec_bytes, prod.data(),
 		nullptr, &event_handler);
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
+#endif
 }
 
 void run_flow (cl::Device ocldev,
@@ -76,11 +80,13 @@ void run_flow (cl::Device ocldev,
 		prod[i] = 0.0;
 	}
 
-	cl::Kernel kern = setup_vec_mult(program,
+	cl::Kernel kern = setup_vec_mult(context, program,
 	          vec_dim, a, b, prod);
 
 	cl::CommandQueue queue(context, ocldev);
-	stream_data(kern, queue);
+
+	size_t vec_bytes = vec_dim * sizeof(double);
+	stream_data(kern, queue, vec_dim, vec_bytes);
 
 	printf("The triangle numbers are:\n");
 	for (size_t i=0; i<vec_dim; i++)
