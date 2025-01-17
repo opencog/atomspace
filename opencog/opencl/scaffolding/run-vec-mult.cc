@@ -8,6 +8,8 @@
 
 #include "scaffolding.h"
 
+// Declare two floating point vectors and multiply them together.
+// Wait for results, and print them.
 void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 {
 	size_t vec_dim = 64;
@@ -68,6 +70,7 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	}
 }
 
+// Run code on the GPU's.
 int main(int argc, char* argv[])
 {
 	cl::Device ocldev = find_device("", "AMD");

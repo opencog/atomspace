@@ -1,3 +1,12 @@
+Scaffolding and Examples
+========================
+This directory contains scaffolding and examples for running GPU code.
+
+The examples should run on most(?) OpenCL hardware. However, they do
+look for GPU's that have "AMD" in the name. Change as needed.
+
+Notes and Resources
+-------------------
 
 Command line tools:
 * `clinfo` to print OpenCL hardware

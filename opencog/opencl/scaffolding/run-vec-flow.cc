@@ -1,14 +1,16 @@
 /**
- * OpenCL float-point math demo.
+ * OpenCL data flow demo.
  *
- * Simple demo of performing float point math on GPU hardware.
+ * Simple demo of streaming float point data to/from GPU hardware.
  *
  * Copyright (c) 2025 Linas Vepstas
  */
 
 #include "scaffolding.h"
 
-void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
+cl::CommandQueue setup_vec_mult(cl::Device ocldev,
+                                cl::Context context,
+                                cl::Program program)
 {
 	size_t vec_dim = 64;
 	std::vector<double> a(vec_dim);
@@ -43,8 +45,13 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	kernel.setArg(2, vecb);
 	kernel.setArg(3, vec_dim);
 
-	// Launch
 	cl::CommandQueue queue(context, ocldev);
+	return queue;
+}
+
+void stream_data(cl::CommandQueue queue)
+{
+	// Launch
 
 	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
@@ -77,5 +84,6 @@ int main(int argc, char* argv[])
 	cl::Context ctxt;
 	cl::Program prog;
 	build_kernel(ocldev, "vec-mult.cl", ctxt, prog);
-	run_vec_mult(ocldev, ctxt, prog);
+	cl::CoammndQueue qu = setup_vec_mult(ocldev, ctxt, prog);
+	stream_data(qu);
 }
