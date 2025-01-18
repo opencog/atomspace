@@ -51,6 +51,7 @@ class StreamValue
 {
 protected:
 	StreamValue(Type t) : FloatValue(t) {}
+	StreamValue(Type t, const std::vector<double>& v) : FloatValue(t, v) {}
 
 public:
 	virtual ~StreamValue() {}
