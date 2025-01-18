@@ -1,5 +1,5 @@
 /*
- * atomspace/persist/storage/storage_types_init.cc
+ * opencog/persist/storage/storage_types_init.cc
  *
  * Copyright (C) 2014,2020 Linas Vepstas
  * All Rights Reserved
