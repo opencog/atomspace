@@ -1,33 +1,25 @@
 /**
- * OpenCL float-point math demo.
+ * OpenCL data flow demo.
  *
- * Simple demo of performing float point math on GPU hardware.
+ * Simple demo of streaming float point data to/from GPU hardware.
  *
  * Copyright (c) 2025 Linas Vepstas
  */
 
 #include "scaffolding.h"
 
-// Declare two floating point vectors and multiply them together.
-// Wait for results, and print them.
-void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
+// Wire user data into GPU
+cl::Kernel setup_vec_mult(cl::Context context,
+                          cl::Program program,
+                          size_t vec_dim,
+                          std::vector<double>& a,
+                          std::vector<double>& b,
+                          std::vector<double>& prod)
 {
-	size_t vec_dim = 64;
-	std::vector<double> a(vec_dim);
-	std::vector<double> b(vec_dim);
-	std::vector<double> prod(vec_dim);
-
-	// Product will be triangle numbers.
-	for (size_t i=0; i<vec_dim; i++)
-	{
-		a[i] = (double) i;
-		b[i] = 0.5 * (double) i+1;
-		prod[i] = 0.0;
-	}
-
 	size_t vec_bytes = vec_dim * sizeof(double);
 
 	// Buffers holding data that will go to the GPU's
+	// Buffer size is static.
 	cl::Buffer veca(context,
 		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, vec_bytes, a.data());
 
@@ -45,9 +37,13 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	kernel.setArg(2, vecb);
 	kernel.setArg(3, vec_dim);
 
-	// Launch
-	cl::CommandQueue queue(context, ocldev);
+	return kernel;
+}
 
+// Launch
+void stream_data(cl::Kernel kernel, cl::CommandQueue queue,
+                 size_t vec_dim, size_t vec_bytes)
+{
 	cl::Event event_handler;
 	queue.enqueueNDRangeKernel(kernel,
 		cl::NullRange,
@@ -58,10 +54,39 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on exec\n");
 
+#if FOO
 	queue.enqueueReadBuffer(vecprod, CL_TRUE, 0, vec_bytes, prod.data(),
 		nullptr, &event_handler);
 	event_handler.wait();
 	fprintf(stderr, "Done waiting on result read\n");
+#endif
+}
+
+void run_flow (cl::Device ocldev,
+               cl::Context context,
+               cl::Program program)
+{
+	// Set up vectors
+	size_t vec_dim = 64;
+	std::vector<double> a(vec_dim);
+	std::vector<double> b(vec_dim);
+	std::vector<double> prod(vec_dim);
+
+	// Product will be triangle numbers.
+	for (size_t i=0; i<vec_dim; i++)
+	{
+		a[i] = (double) i;
+		b[i] = 0.5 * (double) i+1;
+		prod[i] = 0.0;
+	}
+
+	cl::Kernel kern = setup_vec_mult(context, program,
+	          vec_dim, a, b, prod);
+
+	cl::CommandQueue queue(context, ocldev);
+
+	size_t vec_bytes = vec_dim * sizeof(double);
+	stream_data(kern, queue, vec_dim, vec_bytes);
 
 	printf("The triangle numbers are:\n");
 	for (size_t i=0; i<vec_dim; i++)
@@ -70,7 +95,6 @@ void run_vec_mult(cl::Device ocldev, cl::Context context, cl::Program program)
 	}
 }
 
-// Run code on the GPU's.
 int main(int argc, char* argv[])
 {
 	cl::Device ocldev = find_device("", "AMD");
@@ -80,5 +104,5 @@ int main(int argc, char* argv[])
 	cl::Context ctxt;
 	cl::Program prog;
 	build_kernel(ocldev, "vec-mult.cl", ctxt, prog);
-	run_vec_mult(ocldev, ctxt, prog);
+	run_flow(ocldev, ctxt, prog);
 }

@@ -1,5 +1,5 @@
 Design Notes
-------------
+============
 Notes about OpenCL interfaces and how they impact Atomese design.
 
 * Vectors will need a corresponding (private) `cl::Buffer` object
@@ -15,12 +15,15 @@ Notes about OpenCL interfaces and how they impact Atomese design.
 
 * Kernels are executed by placing them onto a `cl::CommandQueue`.
   This queue takes both a `cl::Context` and also a `cl::Device`
-  in it ctor. Kernels are exec async.
+  in it ctor. Kernels are executed async.
 
 * Obtaining results from the exec needs a `cl::Event`, created when
   the kernel is enqueued.
 
-Design alternatives:
+Design alternatives
+-------------------
+Different ideas for communicating with GPUs.
+
 * Use `GroundedProceedureNode`s to wrap kernels. Old-style, yucky.
   Why yucky? Because its stateless: besides the string name of the
   node, nothing is stored in the atom. There's no open/close phasing.
@@ -98,6 +101,8 @@ three choices:
 
 I like this third option. But how would it work, in practice?
 
+Wiring Diagrams
+---------------
 Four choices for wiring diagrams:
 * `EvaluationLink` -- function-call-like
 * `RuleLink` -- inference-like
@@ -178,4 +183,17 @@ created.
 
 It is not particularly hard to specify a GPU kernel as a sheaf section,
 but perhaps verbose. But that just specifies (describes) it. It also
-needs to be wiried in place. How?
+needs to be wired in place. How?
+
+Design Requirements
+-------------------
+For a prototype proof-of-concept demo, what's actually needed?
+
+* *Basic vector I/O to GPU's.*
+  Minimal function is to move data to GPU's, call kernel, get data back.
+
+* *Multi-step dataflow wiring.*
+  Define sophisticated data flow wiring. Similar to TensorFlow (???)
+
+### Basic vector I/O
+Ability to stream data data to GPU. Once-shot is a special case.
