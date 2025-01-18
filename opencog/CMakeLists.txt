@@ -26,11 +26,6 @@ IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-# OpenCL platform
-IF (HAVE_OPENCL)
-	ADD_SUBDIRECTORY (opencl)
-ENDIF (HAVE_OPENCL)
-
 # Haskell bindings.
 IF (HAVE_STACK)
 	ADD_SUBDIRECTORY (haskell)

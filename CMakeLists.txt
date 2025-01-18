@@ -157,25 +157,6 @@ include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
-# Find OpenCL (optional; for experimental prototyping.)
-FIND_PACKAGE(OpenCL)
-IF (OPENCL_FOUND)
-	MESSAGE(STATUS "OpenCL found.")
-	ADD_DEFINITIONS(-DHAVE_OPENCL)
-	SET(HAVE_OPENCL 1)
-ENDIF (OPENCL_FOUND)
-
-# ----------------------------------------------------------
-# Find CUDA (optional; for experimental prototyping.)
-INCLUDE(CheckLanguage)
-CHECK_LANGUAGE(CUDA)
-IF (CMAKE_CUDA_COMPILER)
-	MESSAGE(STATUS "CUDA found.")
-	ADD_DEFINITIONS(-DHAVE_CUDA)
-	SET(HAVE_CUDA 1)
-ENDIF (CMAKE_CUDA_COMPILER)
-
-# ----------------------------------------------------------
 # OCaml (optional; needed for the OCaml bindings.)
 
 # At this time, OCaml does not build, because the cmake scripts fail to
@@ -445,12 +426,10 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-# SUMMARY_ADD("CUDA platform" "CUDA platform" HAVE_CUDA)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 # SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
-SUMMARY_ADD("OpenCL platform" "OpenCL platform" HAVE_OPENCL)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)

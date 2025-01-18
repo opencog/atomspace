@@ -1,8 +1,0 @@
-//
-// Script for automatic "OpenCL atom type" generation. This defines
-// a collection of types suitable for interacting with vector streams
-// running on OpenCL kernels.
-//
-// Experimental.
-//
-OPENCL_FLOAT_VALUE <- FLOAT_VALUE
