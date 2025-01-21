@@ -6,7 +6,8 @@ This directory contains code for reading, writing, storing, sending
 AtomSpace contents to files, databases or network.  This repo provides
 the core API, a file backend, and am SQL backend; other git repos
 provide a RocksDB backend (`atomspace-rocks`) and a network backend
-(`atomspace-cog`).
+(`atomspace-cog`). The old Postgres backend has been moved to the
+`atomspace-pgres` git repo.
 
 Local subdirectories include:
 
@@ -64,13 +65,6 @@ Local subdirectories include:
 * sexcom   -- Respond to a very special set of 17 s-expression commands.
               These are used to provide high-speed network I/O for the
               CogServer to provide network-distributed AtomSpaces.
-
-* sql      -- Postgres backend. Deprecated for new uses. It works,
-              but is no longer supported.  It's slow, running 3x slower
-              than the RocksDB backend. It's missing support for Frames.
-              If you really, really need SQL or Postgres, then it would
-              be best to star with the RocksDB backend, and port it (to
-              Postgres or the SQL of your choice.)
 
 * tlb      -- Implements a table that issues a unique integer ID for an
               Atom. Useful, if you think your code needs to substitute
