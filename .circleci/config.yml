@@ -669,6 +669,9 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
+      - atomspace-pgres:
+          requires:
+            - atomspace
       - atomspace-rocks:
           requires:
             - atomspace
