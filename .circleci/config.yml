@@ -219,6 +219,56 @@ jobs:
             - cogserver
             - ccache
 
+  matrix:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          PGHOST: opencog-postgres
+          PGUSER: opencog_test
+          PGPASSWORD: cheese
+          CCACHE_DIR: /ws/ccache
+      - image: $CIRCLE_PROJECT_USERNAME/postgres
+        name: opencog-postgres
+    working_directory: /ws/matrix
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpacePgres
+          command: cd /ws/atomspace-pgres/build && make -j2 install && ldconfig
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install Matrix
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - matrix
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
+
   spacetime:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -678,6 +728,10 @@ workflows:
       - cogserver:
           requires:
             - atomspace
+      - matrix
+          requires:
+            - atomspace
+            - atomspace-pgres
       - spacetime:
           requires:
             - atomspace
