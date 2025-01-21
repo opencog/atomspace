@@ -24,7 +24,8 @@ ones include:
 * [Store AtomSpaces to disk](https://github.com/opencog/atomspace-rocks)
 * [Network-distributed AtomSpace storage](https://github.com/opencog/atomspace-cog)
 * [Network shell to AtomSpaces, including a WebSocket API](https://github.com/opencog/cogserver)
-* [Rule Engine for rule-driven inferencing and reasoning](https://github.com/opencog/ure)
+* [Sparse Vector/Matrix embeddings/access to graphs](https://github.com/opencog/matrix)
+* [Sensori-motor research](https://github.com/opencog/sensory)
 * [Language learning](https://github.com/opencog/learn)
 
 Data as MetaGraphs
