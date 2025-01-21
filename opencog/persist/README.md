@@ -4,7 +4,7 @@ AtomSpace I/O and Persistence
 
 This directory contains code for reading, writing, storing, sending
 AtomSpace contents to files, databases or network.  This repo provides
-the core API, a file backend, and am SQL backend; other git repos
+the core API, a file backend, and other bits & pieces. Other git repos
 provide a RocksDB backend (`atomspace-rocks`) and a network backend
 (`atomspace-cog`). The old Postgres backend has been moved to the
 `atomspace-pgres` git repo.
@@ -31,7 +31,7 @@ Local subdirectories include:
               to read files, and dump Atomspace contents to files or
               guile ports (without having to use `StorageNode`s.)
 
-* flow     -- Implement the FetchValueOfLink and the StoreCalueOfLink
+* flow     -- Implement the `FetchValueOfLink` and the `StoreValueOfLink`
               These allow specific Values to be obtained from storage,
               with Atomese. That is, it allows complex Atomese scripts
               to be written, that will work with Storage.
@@ -74,27 +74,27 @@ Local subdirectories include:
               really need this, well, here it is.
 
 
-Semantics
----------
-The correct semantics for the save and restore of values, including
-truth values, can be subtle: during recursive saves or loads of outgoing
-sets, should values be clobbered? Left untouched? Merged?  The various
-possibilities all have different performance implications, as well as
-usability implications. These are discussed in the `README.md` file for
-the SQL implementation, and semantics are explicitly tested in the SQL
-unit tests.
+Interesting Reading
+-------------------
+There are some interesting comments about (distributed) storage in the
+"Big Graph Anti-Pattern" blog post: https://blog.blazegraph.com/?p=628
 
-Right now, you are provided with mechanism, not policy. You have the
-tools, and you can implement whatever policy you want.
-
-Future directions
------------------
-To understand the future directions for the (distributed) atomspace
-and its relation to storage, read the "Big Graph Anti-Pattern" blog
-post: https://blog.blazegraph.com/?p=628
-
-OpenCog most closely resembles the fourth bullet in that post:
+Atomese query most closely resembles the fourth bullet in that post:
 "Graph query (aka graph pattern matching)"  Based on this, the
 most promising backend would seem to be "blazegraph":
 http://sourceforge.net/projects/bigdata/ (GPLv2)
 http://www.blazegraph.com/
+
+Future directions
+-----------------
+The `StorageNode` user API is implemented in about a dozen different
+scheme (and python) functions.  This is great, if you are a human
+writing ordinary code. Not so hot, if you're an algorithm trying to
+get things done.  Therefore, it is anticipated that an API based on
+the [sensori-motor system](https://github.com/opencog/sensory) will
+be provided at some point in the future (i.e. when it becomes urgent
+to do so.)
+
+In the sensori-motor system all things external to the AtomSpace are
+described by Atomese, and are accessible via pure Atomese. The goal is
+to open up the external world to algorithms.

@@ -12,31 +12,29 @@ knowledge. Atoms are designed to be so general that any kind of domain
 knowledge can be represented with them, including classical predicate
 logic, natural language, Bayesian probability networks, neural networks,
 and so on. The basic representation is that of "typed hypergraphs". Each
-atom has a "type" (in the sense of "type theory") -- there are currently
+Atom has a "type" (in the sense of "type theory") -- there are currently
 over one hundred pre-defined types, such as "and", "or", "not", but also
 "word", "sentence", as well as "implication" and "inheritance".  A
 hypergraph is a certain generalization of a graph that makes it simpler
-to represent knowledge.  Note that hypergraphs can be represented with
-ordinary graphs, and a specific representation, that of DAGs (directed
-acyclic graphs) is used throughout the code.
+to represent knowledge.  Hypergraphs can be represented with ordinary
+graphs, but are much easier to use (and are much faster.)
 
 Atoms come in two basic types: Nodes and Links.  Nodes correspond to the
-leafs of a tree, while Links correspond to vertexes internal to the
-tree (non-leaf vertexes).  Nodes can be given a name, Links cannot.
+leaves of a tree, while Links correspond to vertecies internal to the
+tree (non-leaf vertecies).  Nodes can be given a name, Links cannot.
 Nodes and Links have a type, but no further properties, except for
-values (valuations); these are key-value databases described in a
-section below.
+Values (valuations); these are key-value databases described below.
 
-Nodes and Links can be shared between different trees.  Nodes and Links
-are, by definition, immutable: once created, they cannot be changed;
-they can only be deleted.  Nodes and Links are, by definition, globally,
-universally unique: there can only ever be one Node of a given type and
-name. Likewise, there can only be one Link of a given type, holding the
-Atoms that it does.  The uniqueness constraint is used to avoid
-ambiguity and duplication in knowledge representation. The immutability
-constraint is used to avoid race conditions, to prevent different
-processes or users from accidentally seeing different versions of the
-"same" thing.
+Nodes and Links can be, and typically are shared by multiple different
+trees.  Nodes and Links are, by definition, immutable: once created,
+they cannot be changed; they can only be deleted.  Nodes and Links are,
+by definition, globally, universally unique: there can only ever be one
+Node of a given type and name. Likewise, there can only be one Link of
+a given type, holding the Atoms that it does.  The uniqueness constraint
+is used to avoid ambiguity and duplication in knowledge representation.
+The immutability constraint is used to avoid race conditions, to prevent
+different processes or users from accidentally seeing different versions
+of the "same" thing.
 
 By definition, Links contain (ordered) sets of Atoms: this is referred to
 as the "outgoing set" of the Link. Conversely, an Atom might be
@@ -64,31 +62,44 @@ the PutLink and the MapLink (which see, on the wiki).
 What is a Valuation?
 --------------------
 Although a typed hypergraph of Atoms can, in principle, represent any
-kind of data, it is inefficient for many practical uses: the demand for
-immutability and uniqueness implies a significant overhead for indexing
-Atoms, and for thread-safety of the index.  Thus, for rapidly-changing
-data, a different mechanism is provided: this associates one or more
-"values" to an atom; the values are indexed by a "key" (which is an
-Atom).  The values can be a vector of floats, a vector of strings, or a
-vector of values. They can also be dynamically time-varying, such as
-audio or video streams. Yet more kinds of values could be defined, if
-desired.
+kind of data, it can sometimes be inefficient for certain practical
+uses. The demand for immutability and uniqueness implies a significant
+overhead: uniqueness requires indexing, with thread-safety (locking) on
+index.  Thus, for rapidly-changing data, a different mechanism is
+provided: the 'Value' system. Values are not unique, and they are
+mutable. Arbitrary Values can be attached to Atoms; the attachment point
+is indicated with a 'key' (which is necessarily an Atom.) Thus, every
+Atom is (has, contains) a full-fledged key-value database.
+
+Basic Value types include vectors of floats, strings and other Values.
+Some Values hold references to external entities or data streams: think
+flowing, live dynamic audio or video steams. Touching ('updating') the
+value then just samples from that stream (depending on the
+implementation.)
 
 Values differ from Atoms in that they are not indexed in the AtomSpace,
-which means that they cannot be searched-for by content. Unlike Atoms,
-Values are also not globally unique: there may be two distinct Values
-holding exactly the same data.  Values have no "incoming set": given
-a Value, there is no way of finding out what Atoms might be using it.
+which means that they cannot be searched-for by content. Of course, you
+can brute-force traverse all of them, but that would be ... dumb.
+Unlike Atoms, Values are not globally unique: there may be two distinct
+Values holding exactly the same data.  Values have no "incoming set":
+given a Value, there is no way of finding out who else is pointing at
+it or using it. If you need to find all users/references, use an Atom.
+That's what they are for.
 
-Values, and in particular TruthValues, are immutable: once created,
-they cannot be changed (unless they are dynamic, streaming values,
-which, by definition, are ever-changing.)  What can be altered is the
-association of Values to Atoms.
+Some Values are immutable; others are not. For historical reasons,
+TruthValues are immutable; this was used to guaranteed a single view
+of a Truth value to multiple observrs looking at the same time. That
+is, TruthVales were designed tto be race-free.
 
-Why were values made immutable? Immutability seems to be a simpler,
-faster solution than using mutex locks to guarantee consistent data.
-Immutability does incur some performance costs (for managing/swapping
-the smart pointers, as well as forcing a malloc to change a value.).
+Why immutabilty? Immutabile objects provide a simple, fast guarantee
+of consistent data views, avoiding the overhead of using mutex locks.
+There is a price, though: smart pointers must be used, and changing a
+value does result in a malloc/free cycle. Note that C++ smart pointers
+are atomic, and thus necessarily use the lock primitives deep inside of
+CPU cache lines. Note that some low-end consumer grade CPUs don't have
+enough of these (while others do), and sometimes high-end server CPUs
+have a problem in this area as well. This is all highly proprietary,
+the CPU vendors do not disclose this info. Measure twice, cut once.
 
 The Valuation type is a C++ class that associates the (key,atom) pair
 with a value; thus a Valuation is the triple (key, atom, value). Thus,
@@ -103,53 +114,55 @@ truth values to each atom. Indeed, the TruthValue is a special case of a
 valuation. For historical reasons, the TruthValue is treated in a
 special way in the implementation.
 
-The ValuationSpace vaguely resembles the AtomSpace, and is used to solve
-the technical issues that arise in managing valuations.
-
-Most ordinary graph DB's have a concept very similar to Values: they
-typically allow the user to store arbitrary data associated with each
-vertex or edge of a graph.  That is, must graph DB's have a key-value
+Most ordinary graph DB's have a concept similar to Values: they
+typically allow the user to store arbitrary data on each vertex
+or edge of a graph.  That is, most graph DB's have a key-value
 DB for each vertex/edge. Same idea here.
 
 
 What is the AtomSpace?
 ----------------------
-The AtomSpace is a database that holds Atoms. In the default mode, the
-AtomSpace is purely an in-RAM database, although the "backend API"
-allows portions (or all) of an AtomSpace to be persisted to an SQL
-DB server, or (unimplemented) various different graph DB stores.
-Currently, only the PostgresSQL backend works. The Neo4j backend is
-borken.
+The AtomSpace is a database that holds Atoms. By default mode, the
+AtomSpace is an in-RAM database. Various different
+[StorageNodes](https://wiki.opencog.org/w/StorageNode) allow AtomSpace
+contents to be stored to disk, to databases, and passed around on the
+network. The [ProxyNodes](https://wiki.opencog.org/w/ProxyNode) provides
+more sophisticated ways of moving Atoms around from here to there.
 
-The AtomSpace is distributed, and can be shared by different
-network-connected machines. It relies on the backend (e.g. Postgres)
-to do the hard work of actually distributing the data.  The AtomSpace
-acts like an in-RAM local cache; holding only those parts of the
-dataset that you are currently operating on.
-
-All security, access-control-lists, etc. is managed by the backend DB.
-The AtomSpace itself does not provide any use or access models.
+The AtomSpace does not provide any security or authentication mechanisms.
+These must be supplied by external systems. It does provide a way of
+marking an AtomSpace as being 'read-only', but this is provided as a
+convenience, and not as a security mechanism.
 
 For some types of algorithms, it is convenient to have multiple
 AtomSpaces; for example, layering a smaller read-write atomspace
 on top of a much larger read-only atomspace. Nested/overlayed atomspaces
 behave somewhat like the concept of an "environment" in computer science.
-The current multi-atomspace/nesting implementation is "beta"; its used
-heavily by the pattern matcher, but remains a bit naive in some ways.
+The multi-atomspace concept is refered to as 'Frames' or sometimes
+'SpaceFrames'. Frames allow not just layering, but also the creation of
+unions of subspaces, as well as selective erasure, so that Atoms can be
+"erased" (hidden, actually) in higher layers, while being alive an
+healthy in lower layers.
 
 
-What is the Pattern Matcher?
-----------------------------
-The pattern-matcher is the query engine that allows the contents of the
-atomspace to be located and traversed. It implements a kind of graph
-query language. In essence, you can specify a graph with "holes" or
-"blanks" in it; the query engine will "fill in the blanks".  The query
-engine has many advanced capabilities, including automatically joining
-large, complex queries, enabling graph re-writing, and executing
-triggers.
+What is the Query Engine?
+-------------------------
+The query engine, sometimes called the 'pattern matcher', allows rapid
+search and discovery of AtomSpace contents that match a given template.
+It implements a (hyper-)graph query language. A graph template can be
+imagined as a graph with "holes" or "blanks" in it; the query engine
+will "fill in the blanks".  The query engine has many advanced
+capabilities, including automatically joining large, complex queries,
+enabling graph re-writing, and executing triggers.
+
+(The name 'pattern matcher' is often used, but is an unfortunate choice.
+Many functional programming languages have "pattern matchers", but these
+implement only a miniscule fragment of what the Atomese query engine can
+do. The Atomese query engine is more like SQL, but with stuff that SQL
+doesn't have/can't do.)
 
 The query language is itself expressed as Atoms, and so the queries
-themselves are stored in the atomspace. This enables things like a
+themselves are stored in the AtomSpace. This enables things like a
 "dual search": given a graph, find all queries that would match that
 graph. This allows the database to act as a rule engine, holding a large
 number of rules.
@@ -186,37 +199,6 @@ approaches, the weight vectors in neural nets are NOT sparse. By
 contrast, the AtomSpace provides a framework for performing neural-net
 type research with ultra-high-dimension, ultra-sparse connectivity
 diagrams.
-
-
-What is the Unified Rule Engine?
---------------------------------
-A single graph query (pattern-match query) can be thought of as a single
-graph re-write step: when a graph matches the query, the shape of the
-graph is altered (edited) as a result. Thus, each query can be thought
-of as a "rule", to be applied to the data. If the rule triggers, then
-it runs and transforms the data.  The Unified Rule Engine (URE) is the
-infrastructure that allows collections of rules to be specified, and
-manage their application.
-
-There are four different ways of managing rules. Two are the traditional
-forward-chaining and backward-chaining algorithms, full analogous to
-those chainers commonly seen in many kinds of logic engines and theorem
-proving systems (most rule engines provide only a forward chainer).
-Its not in this repo; it's in the
-[opencog/ure](https://github.com/opencog/ure) repo, and is at release
-level, and fully supported.
-
-A third type of rule engine is based on the idea of parsing. It is
-neither a forward nor backward chainer, but combines a bit of both,
-and behaves like a parser. The current implementation is
-super-experimental, pre-prototype, in the "sheaf" directory.
-
-A fourth type of rule engine is the so called "openpsi" system. It is
-goal-driven in its rule selection, and is modulated and prioritized
-by what is considered to be "important" at the moment. It resembles
-a kind-of planning system. Its not in this repo; it's in the
-[opencog/opencog](https://github.com/opencog/opencog) repo, and is
-in an experimental-prototype stage.
 
 
 Directory overview
@@ -275,14 +257,14 @@ Important Documentation
 Please refer to the following for specific questions:
 
 * Atom vs. Value Design tradeoffs/justification. See
- [atoms/proto/README.md](atoms/value/README.md)
+  [atoms/proto/README.md](atoms/value/README.md)
 
 * Atomspace design tradeoffs, including commentary about memory
   management, multi-threading, overlay atomspaces and more, are
   discussed in the [atomspace/README.md](atomspace/README.md) file.
 
 * How to add new atom or value types. See
- [README-Adding-New-Atom-Types.md](atoms/atom_types/README-Adding-New-Atom-Types.md)
+  [README-Adding-New-Atom-Types.md](atoms/atom_types/README-Adding-New-Atom-Types.md)
 
 * Performance benchmarks are no longer in this repo. See the
   [opencog/benchmark](https://github.com/opencog/benchmark) repo.
