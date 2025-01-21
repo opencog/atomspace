@@ -174,6 +174,9 @@ arbitrary graph structures.
 
 What is the Matrix API?
 -----------------------
+(The matrix API has been moved to its own repo. It is now at
+https://github.com/opencog/matrix)
+
 Binary relations between things, for example "A is-a B", can be thought
 of as defining a (sparse) matrix between things of type A and type B,
 where A and B are individually the row and column labels in that matrix.
@@ -231,19 +234,8 @@ important subdirectories:
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.
 
-<dt>matrix     <dd>Present a view of a subset of the atomspace as a
-                   (sparse) matrix, *e.g.* a covariance/correlation
-                   matrix, allowing statistical matrix analysis
-                   (PCA, SVD, etc.) to be performed on this subset.
-
-<dt>object-atomese  <dd>Proposal for object-oriention in Atomese.
-                    Goal is to allow porting of the matrix API to pure
-                    Atomese.
-
-<dt>sheaf      <dd>Infer the grammar of a (hidden) dynamic network, by
-                   means of sections of sheaves. Intended for generic
-                   time series, e.g. natural language.  Currently
-                   implements a Maximum Spanning Tree (MST) parser.
+<dt>sheaf      <dd>Papers and documentation describing a sheaf-theoretic
+                   approach to parsing, inference and theorem-proving.
 
 <dt>guile, scm <dd>Scheme language bindings.
 <dt>cython     <dd>Python language bindings.
