@@ -728,10 +728,10 @@ workflows:
       - cogserver:
           requires:
             - atomspace
-      - matrix
-          requires:
-            - atomspace
-            - atomspace-pgres
+#      - matrix
+#          requires:
+#            - atomspace
+#            - atomspace-pgres
       - spacetime:
           requires:
             - atomspace
