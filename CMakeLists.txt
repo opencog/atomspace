@@ -182,41 +182,6 @@ IF (STACK_FOUND)
 ENDIF (STACK_FOUND)
 
 # ----------------------------------------------------------
-# Optional/deprecated ODBC.
-
-FIND_PACKAGE(UnixODBC QUIET)
-IF (UnixODBC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-	SET(HAVE_SQL_STORAGE 1)
-	ADD_DEFINITIONS(-DHAVE_ODBC_STORAGE)
-	SET(ODBC_FOUND 1)
-	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
-	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-	SET(ODBC_DIR_MESSAGE "UnixODBC was found.")
-ELSE (UnixODBC_FOUND)
-	SET(ODBC_FOUND 0)
-	SET(ODBC_DIR_MESSAGE "UnixODBC was not found; ODBC persistence subsystem will not be built.\nTo over-ride, make sure UnixODBC_LIBRARIES and UnixODBC_INCLUDE_DIRS are set.")
-ENDIF (UnixODBC_FOUND)
-MESSAGE(STATUS "${ODBC_DIR_MESSAGE}")
-
-# ----------------------------------------------------------
-# Postgres. Optional, needed for PostgresStorageNode
-
-FIND_PACKAGE(PGSQL 9.5)
-IF (PGSQL_FOUND)
-	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-	SET(HAVE_SQL_STORAGE 1)
-	ADD_DEFINITIONS(-DHAVE_PGSQL_STORAGE)
-	SET(HAVE_PGSQL_STORAGE 1)
-	SET(PGSQL_FOUND 1)
-	SET(PGSQL_DIR_MESSAGE "PostgresSQL ${PGSQL_VERSION_STRING} was found.")
-ELSE (PGSQL_FOUND)
-	SET(PGSQL_FOUND 0)
-	SET(PGSQL_DIR_MESSAGE "PostgresSQL was not found; PGSQL persistence subsystem will not be built.\nTo over-ride, make sure PGSQL_LIBRARIES and PGSQL_INCLUDE_DIRS are set.")
-ENDIF (PGSQL_FOUND)
-MESSAGE(STATUS "${PGSQL_DIR_MESSAGE}")
-
-# ----------------------------------------------------------
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -433,7 +398,5 @@ SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
-SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
-SUMMARY_ADD("Postgres StorageNode" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
