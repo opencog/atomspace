@@ -61,7 +61,9 @@ set(ATOMSPACE_LIBRARIES
 	join
 	pattern
 	load_scm
+# hang on ??? these are storage not AtomSpace
 	persist
+	tlb
 	query-engine
 	execution
 	grounded
@@ -79,17 +81,6 @@ IF (HAVE_CYTHON)
 	    ${ATOMSPACE_PythonEval_LIBRARY}
 	)
 ENDIF (HAVE_CYTHON)
-
-# persist-sql is optional
-IF (persist-sql)
-	set(ATOMSPACE_persist-sql_LIBRARY persist-sql)
-	SET(ATOMSPACE_LIBRARIES
-	    ${ATOMSPACE_LIBRARIES}
-	    ${ATOMSPACE_persist-sql_LIBRARY}
-	)
-	SET(HAVE_PERSIST_SQL 1)
-	ADD_DEFINITIONS(-DHAVE_PERSIST_SQL)
-ENDIF (persist-sql)
 
 set(ATOMSPACE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
