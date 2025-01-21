@@ -244,6 +244,9 @@ jobs:
           name: Install AtomSpacePgres
           command: cd /ws/atomspace-pgres/build && make -j2 install && ldconfig
       - run:
+          name: Checkout Matrix system
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/matrix .
+      - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
       - run:
