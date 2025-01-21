@@ -25,10 +25,6 @@ IF (CXXTEST_FOUND)
 	# guile provides scheme bindings for the atomspace.
 	ADD_SUBDIRECTORY (scm)
 
-	IF(HAVE_SQL_STORAGE)
-		ADD_SUBDIRECTORY (matrix)
-	ENDIF(HAVE_SQL_STORAGE)
-
 	# Many of the query tests require a working guile, so run
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
