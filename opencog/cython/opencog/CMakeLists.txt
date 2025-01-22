@@ -121,12 +121,13 @@ CYTHON_ADD_MODULE_PYX(utilities
 ADD_LIBRARY(utilities_cython
 	Utilities.cc
 	utilities.cpp
+	type_constructors.cpp
 )
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
 	atomspace
-	type_constructors
+	# type_constructors
 	executioncontext
 	${PYTHON_LIBRARIES}
 )
@@ -134,6 +135,10 @@ TARGET_LINK_LIBRARIES(utilities_cython
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
+
+INSTALL (TARGETS utilities_cython EXPORT AtomSpaceTargets
+   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
 
 INSTALL (FILES
 	Utilities.h
