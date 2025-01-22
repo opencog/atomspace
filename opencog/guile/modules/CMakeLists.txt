@@ -63,24 +63,7 @@ ADD_GUILE_MODULE (FILES
 
 # --------------------------------
 
-ADD_LIBRARY (guile-uuid UuidSCM.cc)
-
-TARGET_LINK_LIBRARIES(guile-uuid
-	#tlb
-	smob
-	${COGUTIL_LIBRARY}
-)
-ADD_GUILE_EXTENSION(SCM_CONFIG guile-uuid "opencog-ext-path-uuid")
-
-ADD_GUILE_MODULE (FILES
-   opencog/uuid.scm
-   DEPENDS guile-uuid
-#  COMPILE
-)
-
-# --------------------------------
-
-INSTALL (TARGETS exec logger randgen type-utils guile-uuid
+INSTALL (TARGETS exec logger randgen type-utils
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
