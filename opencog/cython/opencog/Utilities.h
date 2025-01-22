@@ -1,5 +1,5 @@
 /*
- * opencog/cython/Utilities.h
+ * opencog/cython/opencog/Utilities.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved

@@ -3,7 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
-	DatalogAST.cc
+#	DatalogAST.cc
 	ForeignAST.cc
 	SexprAST.cc
 )
@@ -12,7 +12,7 @@ ADD_LIBRARY (foreign
 ADD_DEPENDENCIES(foreign opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(foreign
-	datalog
+	#datalog
 	atombase
 	${COGUTIL_LIBRARY}
 )
