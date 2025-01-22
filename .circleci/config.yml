@@ -712,6 +712,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make install && ldconfig
       - run:
+          name: Install AtomSpaceStorage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
+      - run:
           name: Install CogServer
           command: cd /ws/cogserver/build && make install && ldconfig
       - run:
