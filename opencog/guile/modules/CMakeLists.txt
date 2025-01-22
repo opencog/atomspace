@@ -66,7 +66,7 @@ ADD_GUILE_MODULE (FILES
 ADD_LIBRARY (guile-uuid UuidSCM.cc)
 
 TARGET_LINK_LIBRARIES(guile-uuid
-	tlb
+	#tlb
 	smob
 	${COGUTIL_LIBRARY}
 )

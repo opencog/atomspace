@@ -22,7 +22,6 @@ SET_TARGET_PROPERTIES(camlatoms PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(camlatoms
-	storage-types
 	atomspace
 )
 

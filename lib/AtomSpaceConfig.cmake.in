@@ -60,15 +60,9 @@ set(ATOMSPACE_LIBRARIES
 	clearbox
 	join
 	pattern
-	load_scm
-# hang on ??? these are storage not AtomSpace
-	persist
-	tlb
 	query-engine
 	execution
 	grounded
-	json
-	sexpr
 	smob
 	atomspace
 )
