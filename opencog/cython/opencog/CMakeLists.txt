@@ -135,6 +135,11 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME utilities)
 
+INSTALL (FILES
+	Utilities.h
+	DESTINATION "include/opencog/cython/opencog"
+)
+
 ############################## execute module #####################
 
 CYTHON_ADD_MODULE_PYX(execute
