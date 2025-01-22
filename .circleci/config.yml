@@ -273,6 +273,63 @@ jobs:
             - cogserver
             - ccache
 
+  atomspace-cog:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/atomspace-cog
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace Storage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
+      - run:
+          name: Install CogServer
+          command: cd /ws/cogserver/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpace Cog
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-cog .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+#
+# Disable, until https://github.com/opencog/cogserver/issues/5
+# is fixed. The inability to get the logger threads cleaned up
+# after the test has *succcessfully* passed makes circleci report
+# false negatives.
+#
+#      - run:
+#          name: Run tests
+#          command: cd build && make check
+#      - run:
+#          name: Print test log
+#          command: cat build/tests/Testing/Temporary/LastTest.log
+#          when: always
+      - run:
+          name: Install AtomSpace Cog
+          command: cd build && make -j2 install && ldconfig
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-cog
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
+
   matrix:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -794,6 +851,11 @@ workflows:
           requires:
             - atomspace
             - atomspace-storage
+      - atomspace-cog:
+          requires:
+            - atomspace
+            - atomspace-storage
+            - cogserver
       - matrix:
           requires:
             - atomspace
