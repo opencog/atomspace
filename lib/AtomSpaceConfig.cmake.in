@@ -62,6 +62,7 @@ set(ATOMSPACE_LIBRARIES
 	pattern
 	query-engine
 	execution
+	executioncontext
 	grounded
 	smob
 	atomspace
