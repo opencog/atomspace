@@ -73,6 +73,51 @@ jobs:
             - atomspace
             - ccache
 
+  atomspace-storage:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/atomspace-storage
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout AtomSpaceStorage
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-storage .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install AtomSpaceStorage
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - atomspace-storage
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
+
   atomspace-pgres:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -722,12 +767,17 @@ workflows:
   build-test-package:
     jobs:
       - atomspace
+      - atomspace-storage:
+          requires:
+            - atomspace
       - atomspace-pgres:
           requires:
             - atomspace
+            - atomspace-storage
       - atomspace-rocks:
           requires:
             - atomspace
+            - atomspace-storage
       - cogserver:
           requires:
             - atomspace
