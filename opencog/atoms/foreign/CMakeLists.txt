@@ -3,7 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (foreign
-	DatalogAST.cc
+#	DatalogAST.cc
 	ForeignAST.cc
 	SexprAST.cc
 )
