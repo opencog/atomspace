@@ -140,6 +140,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
+          name: Install AtomSpaceStorage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
+      - run:
           name: Checkout AtomSpacePgres
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-pgres .
       - run:
@@ -184,6 +187,9 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpaceStorage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
       - run:
           name: Checkout AtomSpaceRocks
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/atomspace-rocks .
@@ -285,6 +291,9 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpaceStorage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
       - run:
           name: Install AtomSpacePgres
           command: cd /ws/atomspace-pgres/build && make -j2 install && ldconfig
