@@ -41,7 +41,6 @@ TARGET_LINK_LIBRARIES(PythonEval
 	atombase
 	atomspace
 	executioncontext
-	# load_scm
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}

@@ -7,7 +7,6 @@ from opencog.atomspace cimport AtomSpace_factoid
 
 from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
-from opencog.utilities cimport c_load_file
 import warnings
 
 
@@ -130,11 +129,6 @@ def get_default_atomspace():
 
 def pop_default_atomspace():
     return AtomSpace_factoid(pop_context_atomspace())
-
-
-def load_file(path, AtomSpace atomspace):
-    cdef string p = path.encode('utf-8')
-    c_load_file(p, deref(atomspace.atomspace))
 
 
 def is_closed(Atom atom):
