@@ -239,6 +239,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make install && ldconfig
       - run:
+          name: Install AtomSpaceStorage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
+      - run:
           name: Checkout CogServer
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/cogserver .
       - run:
@@ -790,6 +793,7 @@ workflows:
       - cogserver:
           requires:
             - atomspace
+            - atomspace-storage
       - matrix:
           requires:
             - atomspace
