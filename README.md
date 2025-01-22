@@ -630,7 +630,6 @@ Current work is split between two locations: the "sheaf" subdirectory
 in this repo, and the [generate](https://github.com/opencog/generate)
 repo.
 
-
 Building and Installing
 =======================
 The Atomspace runs on more-or-less any flavor of GNU/Linux. It does not
@@ -781,3 +780,11 @@ TODO - Notes - Open Projects
 
 * Bug: Crashes on Arm v7a:
   [bug 2944](https://github.com/opencog/atomspace/issues/2944).
+
+Interesting Reading
+===================
+* Seems that the AtomSpace is no longer alone in the hypergraph world!
+  As of 2022, one can find a python library called
+  [HyperNetX](https://hypernetx.readthedocs.io/en/latest/).
+  Their documentation is even eerily similar to our own! Gee, how could
+  that happen?
