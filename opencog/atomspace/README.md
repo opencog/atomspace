@@ -74,14 +74,6 @@ complexity of atoms and the atomspace centers around trying to make
 the merge algorithm efficient.  It is the primary bottleneck of the
 current implementation.
 
-The AtomSpace is crudely "distributed", i.e. parts of it can reside on
-a networked collection of computers.  It is "crude" because the current
-architecture works, but is not very fast or efficient.  The AtomTable
-holds the local, in-RAM cache of atoms on this computer. The AtomSpace
-is a wrapper around the AtomTable, and provides a backing store
-(persistence) for the AtomTable.  Depending on which backend is used,
-atomtables on different machines can share a common database.
-
 Multiple AtomSpaces can be used simultaneously, and AtomSpaces can be
 created in a hierarchical fashion.  Thus, the AtomSpace can be thought
 of as an "environment" (kind-of like the environment in bash, but

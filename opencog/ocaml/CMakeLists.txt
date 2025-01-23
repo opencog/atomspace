@@ -7,8 +7,8 @@ OPENCOG_GEN_OCAML_ATOMTYPES(../atoms/atom_types/atom_types.script
 	atoms.ml mlwrappers.cc opencog/atoms/atom_types/atom_types.h)
 
 # Handle storage here, too. What the heck.
-OPENCOG_GEN_OCAML_ATOMTYPES(../persist/storage/storage_types.script
-	storage.ml storewrappers.cc opencog/persist/storage/storage_types.h)
+# OPENCOG_GEN_OCAML_ATOMTYPES(../persist/storage/storage_types.script
+#	storage.ml storewrappers.cc opencog/persist/storage/storage_types.h)
 
 ADD_LIBRARY (camlatoms
 	CamlWrap.cc

@@ -293,18 +293,6 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Pattern Container tests..."
 	)
-	ADD_CUSTOM_TARGET(test_matrix
-		DEPENDS tests
-		WORKING_DIRECTORY tests/matrix
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Sparse Matrix tests..."
-	)
-	ADD_CUSTOM_TARGET(test_persist
-		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Persistance tests..."
-	)
 	ADD_CUSTOM_TARGET(test_python
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)

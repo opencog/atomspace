@@ -227,9 +227,6 @@ important subdirectories:
                    atoms. It assures that only one version of any
                    given atom can ever be found in an AtomSpace.
 
-<dt>persist    <dd>Methods for communication between servers, also,
-                   saving/restoring the AtomSpace to disk/databases.
-
 <dt>query      <dd>Pattern matching for the atomspace. Allows for
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.

@@ -738,8 +738,6 @@ Specific subsets of the unit tests can be run:
     make test_atomspace
     make test_guile
     make test_join
-    make test_matrix
-    make test_persist_sql
     make test_python
     make test_query
 ```
