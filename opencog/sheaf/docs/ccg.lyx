@@ -1421,7 +1421,7 @@ status open
 \begin_layout Standard
 \noindent
 The link types are obviously more complex.
- Note also the present of a cycle (the triangle, whose edges are 
+ Note also the presence of a cycle (the triangle, whose edges are 
 \family typewriter
 WV
 \family default
@@ -1850,7 +1850,7 @@ But this will not work, because writing
 \begin_inset Formula $NP$
 \end_inset
 
-parts cannot be contracted – they are facing away from each other.
+ parts cannot be contracted – they are facing away from each other.
 \end_layout
 
 \begin_layout Standard

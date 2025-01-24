@@ -4,7 +4,17 @@
 #
 """
 A basic tutorial showing some of the basic concepts from the OpenCog
-AtomSpace.
+AtomSpace. This illustrates the basic concept of vertexes and edges;
+it also illustrates how to save and restore to disk.
+
+To run this demo, two other components need to be installed:
+   https://gitub.com/opencog/atomspace-storage
+and
+   https://gitub.com/opencog/atomspace-rocks
+
+The build and install steps are identical to those for the AtomSpace.
+The `atomspace-storage` component provides a generic network and file
+system API, while `atomspace-rocks` adapts it for the RocksDB database.
 """
 
 from opencog.atomspace import AtomSpace
