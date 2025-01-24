@@ -4,31 +4,44 @@
 ; The AtomSpace is an in-RAM database. You just might want to sometimes
 ; write some of it out to disk, and save it for later; or maybe you want
 ; to share AtomSpace contents with other AtomSpaces. This is accomplished
-; with "persistence" plug-in modules. As of this writing, there are
-; four stable, supported modules for doing this:
+; with "persistence" plug-in modules. These provide `StorageNodes` that
+; can be opened, closed, read from and written to. As of this writing,
+; there are four stable, supported modules for doing this:
 ;
+; (persist-rocks) - Stores the AtomSpace to disk, using RocksDB.
+;                   This is the easiest to use: no configuration is
+;                   required. Just start it and go. Also: its fast!
 ; (persist-sql)   - Stores the AtomSpace to a PostgreSQL database.
 ;                   This can be accessed/shared by multiple users,
 ;                   thus allowing a form of distributed processing.
-; (persist-rocks) - Stores the AtomSpace to disk, using RocksDB.
-;                   This is several times faster than the Postgres
-;                   backend, because it avoids assorted complexities.
+;                   Three problems:
+;                    * Postgres can be hard to configure for beginners
+;                    * It's slower than the RocksDB node
+;                    * The current implementation is stale and needs
+;                      a refresh.
 ; (persist-cog)   - Communicates with another AtomSpace via TCP/IP.
 ;                   This can be accessed/shared by multiple users,
 ;                   thus allowing a form of distributed processing.
-;                   This is several times faster than the Postgres
-;                   backend, because it avoids assorted complexities.
+;                   This requires configuring a CogServer to run on
+;                   a second network node, and so is not quite as
+;                   easy as using RocksDB.
 ; (persist-file)  - Load and store AtomSpace contents as scheme
 ;                   s-expressions. This is 10x faster than using the
-;                   scheme interpreter to load Atomese data.
+;                   scheme interpreter to load Atomese data. However,
+;                   this is just a flat file: once written out, there
+;                   is no way to automatically edit or update it.
+;                   (It's just ASCII text, you can text-edit it, of
+;                   course.)
 ;
 ; All of the above use exactly the same API, the `StorageNode` API.
-; This demo illustrates the Postgres `StorageNode`; the RocksDB and
-; the CogServer backend work exactly the same way. You can try them,
-; if you've got them installed. The `FileStorageNode` implements a
-; subset of the `StorageNode` API, just enough to read and write
-; plain-ASCII (plain-UTF8) flat files containing s-expressions.
-; It would be useful to review the `persist-store.scm` example before
+; This demo illustrates the RocksDB `StorageNode`; the Postgres and
+; the CogServer nodes work exactly the same way.
+;
+; The `FileStorageNode` implements a subset of the `StorageNode` API,
+; just enough to read and write plain-ASCII (plain-UTF8) flat files
+; containing s-expressions.
+;
+; It may be useful to review the `persist-store.scm` example before
 ; studying this one.
 ;
 ; -------------------------------------------------------------------
@@ -92,17 +105,23 @@
 ; ----------------------------------------
 ; This Demo.
 ;
-; This file demos using the generic API to the backend. It explores
-; database login, logout and atom loading and storage.  It assumes that
+; This file demos using the generic API to the backend. It shows some
+; basics: database login, logout and atom loading and storage. The
+; RocksDB node requires zero configuration to run, and thus is very easy.
+;
+; This demo can also run, almost unchanged, with the Posgres backend,
+; or the CogServer backend.
+;
+; The Postrges node is considerably more difficult: It assumes that
 ; PostgreSQL has been configured to run with the AtomSpace.
 ; Unfortunately, this can be quite challenging. Sorry!
-; [The instructions are here](../../opencog/persist/sql/README.md)
+; The instructions are here
+:   https://github.com/opencog/atomspace-pgres/blob/master/opencog/persist/sql/README.md
 ; Please make sure that the unit tests pass: if you misconfigured
 ; the database, the unit tests will fail! Caveat Emptor!
 ;
-; This demo can also run, almost unchanged, with the RocksDB backend,
-; or the CogServer backend. Some hints below on how to proceed.
-;
+; To run the CogServer, review the documentation on both the cogserver
+; and the atomspace-cog git repos.
 
 (use-modules (ice-9 readline))
 (activate-readline)
@@ -110,44 +129,51 @@
 (use-modules (opencog) (opencog persist))
 
 ; Lets hop right in. The below should throw an exception, since
-; no backend is open yet.
+; no StorageNode is open yet.
 (store-atom (Concept "asdf" (stv 0.42 0.24)))
 
-; For postgres, load the postgres module:
-(use-modules (opencog persist-sql))
-
-; For RocksDB, the rocks module. (Won't work, if not installed!)
+; To run the demo with RocksDB, load the rocks module. This will fail,
+; if the module is not installed.
 (use-modules (opencog persist-rocks))
 
-; For the CogServer... (this is also an external component)
-(use-modules (opencog persist-cog))
+; The same, for Postgres.  If you have not installed or configured,
+; then just skip this step.
+(use-modules (opencog persist-sql))
 
-; For postgres, use the test database credentials. These are the
-; credentials thatthe unit tests use. Next time the unit tests run,
-; they will wipe out this data, and so you should probably create
-; and use your own private login.
-(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
+; For the CogServer... skip this if you haven't set it up.
+(use-modules (opencog persist-cog))
 
 ; The RocksDB requires no configuration. Just use it.
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
 
-; The CogServer requires no configuration. Just use it.
+; For Postgres, use the test database credentials. These are the
+; in the form of "user:password@example.com". The below uses the
+; credentials that the unit tests use. The next time the unit tests
+; run, they will wipe out this data, so don't expect it to stay there.
+; For production systems, you need to create and use your own private
+; login.
+(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
+
+; The CogServer requires no configuration, other than starting the
+; Cogserver. Just use it. The URL here is for a cogserver running on
+; this host; change localhost to example.com for a remote machine.
+; The 17001 is the default CogServer port number.
 (define csn (CogStorageNode "cog://localhost:17001"))
 
-; Lets use postgres, for now.
-(cog-open psn)
+; Lets use Rocks, for now.
+(cog-open rsn)
 
 ; Try storing again.
 (store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
 
 ; Close the database.
-(cog-close psn)
+(cog-close rsn)
 
 ; Try fetching the atom. The database is closed -- this should fail!
 (fetch-atom (Concept "asdf"))
 
 ; Reopen the database.
-(cog-open psn)
+(cog-open rsn)
 
 ; Try fetching the atom. This time it should work.  Notice that
 ; it retrieved the correct TruthValue.
@@ -160,7 +186,7 @@
 	(StringValue "Humpty" "Dumpty"))
 
 (store-atom (Concept "asdf"))
-(cog-close psn)
+(cog-close rsn)
 
 ; The database is closed. Let's mess with the truth value.
 (cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
@@ -171,7 +197,7 @@
 	(Predicate "my key")
 	(StringValue "sat" "on" "a" "wall"))
 
-(cog-open psn)
+(cog-open rsn)
 
 (fetch-atom (Concept "asdf"))
 
@@ -184,16 +210,16 @@
 ; Other useful commands are:
 ;
 ; * `load-atomspace` and `store-atomspace` for bulk fetch and restore.
-;   For large datasets, these can be slow. Extremely large datasets might
-;   not fit in RAM, which is why `fetch-atom` is so handy!
+;   For large datasets, these can be slow. Extremely large datasets
+;   might not fit in RAM, which is why `fetch-atom` is so handy!
 ;
 ; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
 ;   useful for fetching all graphs that an atom belongs to. These
-;   two are possibly the single most-important persistence calls in
+;   two are possibly the single most-important storage calls in
 ;   the system. They really make the whole idea usable and easy-to-use.
 ;
 ; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
-;   performance data for the SQL backend.
+;   performance data for the SQL backend. Similar commands for Rocks.
 ;
 ; * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`,
 ;   except they take the URL directly. Unfortunately, this means that
