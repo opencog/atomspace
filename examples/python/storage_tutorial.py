@@ -4,7 +4,7 @@
 #
 """
 A basic tutorial showing some of the basic concepts from the OpenCog
-AtomSpace. This illustrates the basic concept of vertexes and edges;
+AtomSpace. This illustrates the basic concept of vertices and edges;
 it also illustrates how to save and restore to disk.
 
 To run this demo, two other components need to be installed:
@@ -123,24 +123,45 @@ print("Good bye!")
 #
 # Other useful commands are:
 #
-# * `load-atomspace` and `store-atomspace` for bulk fetch and restore.
+# * `load_atomspace` and `store_atomspace` for bulk fetch and restore.
 #   For large datasets, these can be slow. Extremely large datasets
 #   might not fit in RAM, which is why `fetch-atom` is so handy!
 #
-# * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
+# * `fetch_incoming-set` and `fetch_incoming_by_type` are extremely
 #   useful for fetching all graphs that an atom belongs to. These
 #   two are possibly the single most-important storage calls in
 #   the system. They really make the whole idea usable and easy-to-use.
 #
-# * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
-#   performance data for the SQL backend. Similar commands for Rocks.
+# * `fetch_query()` loads only those atoms corresponding to provided
+#   query. This can save a significant amount of time, when working
+#   with a distant server and limited bandwidth. Think of SQL select,
+#   if you are familiar with SQL. The actual query must be a QueryLink.
+#   See https://wiki.opencog.org/w/QueryLink for details.
 #
-# * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`,
-#   except they take the URL directly. Unfortunately, this means that
-#   one cannot work with more than one connection at a time this way.
-#   Examples:
-#   sql-open("postgres://opencog_tester:cheese@localhost/opencog_test")
-#   sql-close()
+# * `delete()` and `delete_recursive()` to delete atoms from storage.
+#
+# * `load_type()` Load all atoms of a given type.
+#
+# * `fetch_value()`, `store_value() and `update_value()` for working
+#   with values. The `update_value()` performs an atomic increment,
+#   and thus is safe for use in multiple threads (e.g. to increment
+#   a counter.)
+#
+# * `barrier()` is a multi-thread synchronization primitive, i.e.
+#   everything after the barrier will be executed after the barrier call.
+#   Without the barrier, execution is typically done in parallel,
+#   leading to surprising results if ordered execution was expected.
+#
+# * `cog_connected()` tof find out if a StorageNode is open or not.
+#   `curr_storage()` for the currently connected node.
+#
+# * `proxy_open()` and `proxy_close()`.
+#   See the wiki https://wiki.opencog.org/w/ProxyNode for detailed
+#   documentation.
+#
+# * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print
+#   performance data for the SQL backend. Similar commands for Rocks.
+#   Some nodes provide additional low-level debugging API's.
 #
 # ---------------------------------------------------------------------
 #

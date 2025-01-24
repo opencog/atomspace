@@ -9,7 +9,7 @@ Behavior trees can be thought of as long sequences of nested
 if-then-else statements; the branch that is taken results in
 a "behavior" being performed.
 
-Behavor trees are usually driven by dynamic data; however, to keep
+Behavior trees are usually driven by dynamic data; however, to keep
 the example simple, the below is static; it simply counts green and
 red lights, and halts at the first red light.
 
@@ -32,7 +32,7 @@ atomspace = AtomSpace()
 set_default_atomspace(atomspace)
 
 
-# The callback counts the number fo red and green lights.
+# The callback counts the number of red and green lights.
 # It returns a TruthValue of TRUE for green lights and FALSE for the
 # red lights.  FALSE is interpreted as a mismatch (failure to satisfy)
 # by the pattner matcher, and thus, the pattern matcher will backtrack

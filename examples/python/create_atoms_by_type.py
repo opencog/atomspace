@@ -22,7 +22,7 @@ A = a.add_node(concept_type, 'Apple', TV)
 B = a.add_node(concept_type, 'Berry', TruthValue(0.5, 0.75))
 C = a.add_node(concept_type, 'Comestible', TV)
 
-# Add three inhertance links, asserting that apples are berries
+# Add three inheritance links, asserting that apples are berries
 # and that berries are edible.
 inh_type = types.InheritanceLink
 AB = a.add_link(inh_type, [A, B], TV)
