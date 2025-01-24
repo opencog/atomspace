@@ -15,8 +15,8 @@
 ;                   This can be accessed/shared by multiple users,
 ;                   thus allowing a form of distributed processing.
 ;                   Three problems:
-;                    * Postgres can be hard to configure for beginners
-;                    * It's slower than the RocksDB node
+;                    * Postgres can be hard to configure for beginners.
+;                    * It's slower than the RocksDB node.
 ;                    * The current implementation is stale and needs
 ;                      a refresh.
 ; (persist-cog)   - Communicates with another AtomSpace via TCP/IP.

@@ -121,6 +121,29 @@ prt_atomspace_contents(space)
 
 print("Good bye!")
 #
+# Other useful commands are:
+#
+# * `load-atomspace` and `store-atomspace` for bulk fetch and restore.
+#   For large datasets, these can be slow. Extremely large datasets
+#   might not fit in RAM, which is why `fetch-atom` is so handy!
+#
+# * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
+#   useful for fetching all graphs that an atom belongs to. These
+#   two are possibly the single most-important storage calls in
+#   the system. They really make the whole idea usable and easy-to-use.
+#
+# * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
+#   performance data for the SQL backend. Similar commands for Rocks.
+#
+# * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`,
+#   except they take the URL directly. Unfortunately, this means that
+#   one cannot work with more than one connection at a time this way.
+#   Examples:
+#   sql-open("postgres://opencog_tester:cheese@localhost/opencog_test")
+#   sql-close()
+#
+# ---------------------------------------------------------------------
+#
 # The AtomSpace is an in-RAM database. You just might want to sometimes
 # write some of it out to disk, and save it for later; or maybe you want
 # to share AtomSpace contents with other AtomSpaces. This is accomplished
@@ -135,8 +158,8 @@ print("Good bye!")
 #                   This can be accessed/shared by multiple users,
 #                   thus allowing a form of distributed processing.
 #                   Three problems:
-#                    * Postgres can be hard to configure for beginners
-#                    * It's slower than the RocksDB node
+#                    * Postgres can be hard to configure for beginners.
+#                    * It's slower than the RocksDB node.
 #                    * The current implementation is stale and needs
 #                      a refresh.
 # storage_cog     - Communicates with another AtomSpace via TCP/IP.
