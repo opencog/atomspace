@@ -124,9 +124,9 @@ print("Good bye!")
 # The AtomSpace is an in-RAM database. You just might want to sometimes
 # write some of it out to disk, and save it for later; or maybe you want
 # to share AtomSpace contents with other AtomSpaces. This is accomplished
-# with "persistence" plug-in modules. These provide `StorageNodes` that
-# can be opened, closed, read from and written to. As of this writing,
-# there are four stable, supported modules for doing this:
+# with "storage" plug-in modules. These provide `StorageNodes` that can
+# be opened, closed, read from and written to. As of this writing, there
+# are four stable, supported modules for doing this:
 #
 # storage_rocks   - Stores the AtomSpace to disk, using RocksDB.
 #                   This is the easiest to use: no configuration is
