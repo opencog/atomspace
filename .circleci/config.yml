@@ -805,7 +805,7 @@ jobs:
           command: cd build && make -j2 tests
       - run:
           name: Run tests
-          command: cd build && make -j2 test ARGS=-j2
+          command: cd build && make -j2 check ARGS=-j2
       - run:
           name: Install OpenCog
           command: cd build && make -j2 install && ldconfig
