@@ -344,34 +344,6 @@ std::string oc_to_string(const HandlePairSeq& hps, const std::string& indent)
 	return ss.str();
 }
 
-std::string oc_to_string(const HandleCounter& hc, const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << hc.size();
-	size_t i = 0;
-	for (const auto& el : hc) {
-		ss << std::endl << indent << "atom[" << i << "]:" << std::endl
-		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
-		   << indent << "num[" << i << "]:" << el.second << std::endl;
-		i++;
-	}
-	return ss.str();
-}
-
-std::string oc_to_string(const HandleUCounter& huc, const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << huc.size();
-	size_t i = 0;
-	for (const auto& el : huc) {
-		ss << std::endl << indent << "atom[" << i << "]:" << std::endl
-		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
-		   << indent << "num[" << i << "]:" << el.second << std::endl;
-		i++;
-	}
-	return ss.str();
-}
-
 std::string oc_to_string(Type type, const std::string& indent)
 {
 	std::stringstream ss;

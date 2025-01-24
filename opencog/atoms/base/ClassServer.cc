@@ -29,6 +29,7 @@
 
 #include "ClassServer.h"
 
+#include <cassert>
 #include <exception>
 
 #include <opencog/atoms/atom_types/types.h>

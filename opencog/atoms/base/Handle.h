@@ -40,7 +40,6 @@
 #include <vector>
 
 #include <opencog/util/empty_string.h>
-#include <opencog/util/Counter.h>
 #include <opencog/atoms/atom_types/types.h>
 
 /** \addtogroup grp_atomspace
@@ -218,12 +217,6 @@ typedef std::set<HandleMap> HandleMapSet;
 //! a sequence of handle pairs
 typedef std::vector<HandlePair> HandlePairSeq;
 
-//! a map from handle to double
-typedef Counter<Handle, double> HandleCounter;
-
-//! a map from handle to unsigned
-typedef Counter<Handle, unsigned> HandleUCounter;
-
 // A map of variables to their groundings.  Everyone working with
 // groundings uses this type; changing the type here allows easy
 // comparisons of performance for these two mapping styles.
@@ -347,10 +340,6 @@ std::string oc_to_string(const HandleMapSeqSeq& hmss,
 std::string oc_to_string(const HandleMapSet& hms,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandlePairSeq& hps,
-                         const std::string& indent=empty_string);
-std::string oc_to_string(const HandleCounter& hc,
-                         const std::string& indent=empty_string);
-std::string oc_to_string(const HandleUCounter& huc,
                          const std::string& indent=empty_string);
 std::string oc_to_string(Type type,
                          const std::string& indent=empty_string);
