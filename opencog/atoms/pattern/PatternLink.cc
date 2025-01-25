@@ -29,6 +29,8 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "BindLink.h"
 #include "DualLink.h"
@@ -221,6 +223,10 @@ void PatternLink::init(void)
 	// I'm not convinced its a valid use of Quoting. It seems
 	// like a bug. But whatever. System crashes if the body is
 	// not set.
+	// The root cause is that Nil used PatternLink instead of
+	// RuleLink in URE, which made his code run slow and introduced
+	// crazy-making into the patterns. We should ditch this, given
+	// that teh URE is dead meat anyway.
 	if (nullptr == _body) return;
 
 	if (2 < _outgoing.size() or
@@ -237,6 +243,19 @@ void PatternLink::init(void)
 	debug_log("PatternLink::init()");
 	// logger().fine("Pattern: %s", to_long_string("").c_str());
 #endif
+}
+
+/* ================================================================= */
+
+void PatternLink::setAtomSpace(AtomSpace* as)
+{
+	RuleLink::setAtomSpace(as);
+
+	// All patterns will record results into queues. We attach
+	// queues now. User can over-ride later, if desired.
+	QueueValuePtr qvp = createQueueValue();
+	const Handle& self(get_handle());
+	as->set_value(self, self, qvp);
 }
 
 /* ================================================================= */

@@ -116,7 +116,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	 * get naive users into trouble, but there are legit uses, not just
 	 * in the URE, for doing disconnected searches.
 	 */
-	bool do_conn_check=false;
+	bool do_conn_check = false;
 	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 		                            "QueryLink consists of multiple "

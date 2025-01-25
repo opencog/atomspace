@@ -152,6 +152,8 @@ protected:
 	void disjointed_init(void);
 	void setup_components(void);
 
+	virtual void setAtomSpace(AtomSpace *);
+
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
