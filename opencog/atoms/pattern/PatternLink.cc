@@ -253,7 +253,10 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 
 	// All patterns will record results into queues. We attach
 	// queues now. User can over-ride later, if desired.
+	// Start queue in closed state, otherwise it will hang
+	// in update() when printing.
 	QueueValuePtr qvp = createQueueValue();
+	qvp->close();
 	const Handle& self(get_handle());
 	as->set_value(self, self, qvp);
 }
