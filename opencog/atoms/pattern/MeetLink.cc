@@ -62,7 +62,7 @@ QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 	{
 		SatisfyingSet sater(as, qvp);
 		sater.satisfy(PatternLinkCast(get_handle()));
-		return sater.get_result_queue();
+		return qvp;
 	}
 	catch(const StandardException& ex)
 	{
