@@ -107,9 +107,10 @@ class SatisfyingSet :
 		std::map<GroundingMap, ValueSet> _groups;
 
 	public:
-		SatisfyingSet(AtomSpace* as) :
+		SatisfyingSet(AtomSpace* as, const QueueValuePtr& qvp) :
 			ContinuationMixin(as),
-			_as(as), _num_results(0), max_results(SIZE_MAX) {}
+			_as(as), _result_queue(qvp),
+			_num_results(0), max_results(SIZE_MAX) {}
 
 		size_t max_results;
 
@@ -133,9 +134,6 @@ class SatisfyingSet :
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);
-
-		virtual QueueValuePtr get_result_queue()
-		{ return _result_queue; }
 };
 
 }; // namespace opencog

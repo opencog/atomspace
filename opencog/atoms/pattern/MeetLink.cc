@@ -51,11 +51,22 @@ QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
+	// Where shall we place results? Why, right here!
+	ValuePtr vp(getValue(get_handle()));
+	if (nullptr == vp)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting location for results!");
+	QueueValuePtr qvp(QueueValueCast(vp));
+	if (nullptr == qvp)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting QueueValue for results, got %s",
+			vp->to_string().c_str());
+
 	try
 	{
-		SatisfyingSet sater(as);
+		SatisfyingSet sater(as, qvp);
 		sater.satisfy(PatternLinkCast(get_handle()));
-		return sater.get_result_queue();
+		return qvp;
 	}
 	catch(const StandardException& ex)
 	{

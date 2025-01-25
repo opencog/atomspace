@@ -28,8 +28,9 @@
 
 using namespace opencog;
 
-RewriteMixin::RewriteMixin(AtomSpace* as)
-	: _as(as), _num_results(0), inst(as), max_results(SIZE_MAX)
+RewriteMixin::RewriteMixin(AtomSpace* as, QueueValuePtr& qvp)
+	: _as(as), _result_queue(qvp),
+	_num_results(0), inst(as), max_results(SIZE_MAX)
 {
 }
 
@@ -150,10 +151,11 @@ void RewriteMixin::insert_result(ValuePtr v)
 
 bool RewriteMixin::start_search(void)
 {
-	// *Every* search gets a brand new, fresh queue!
-	// This allows users to hang on to the old queue, holding
-	// previous results, if they need to.
-	_result_queue = createQueueValue();
+	if (_result_queue->is_closed())
+	{
+		_result_queue->clear();
+		_result_queue->open();
+	}
 	return false;
 }
 

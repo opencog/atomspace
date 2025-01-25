@@ -68,7 +68,7 @@ class RewriteMixin :
 		std::map<GroundingMap, size_t> _group_sizes;
 
 	public:
-		RewriteMixin(AtomSpace*);
+		RewriteMixin(AtomSpace*, QueueValuePtr&);
 		Instantiator inst;
 		HandleSeq implicand;
 		size_t max_results;
@@ -81,9 +81,6 @@ class RewriteMixin :
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);
-
-		virtual QueueValuePtr get_result_queue()
-		{ return _result_queue; }
 };
 
 }; // namespace opencog

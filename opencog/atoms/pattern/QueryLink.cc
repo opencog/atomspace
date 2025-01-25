@@ -116,13 +116,20 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	 * get naive users into trouble, but there are legit uses, not just
 	 * in the URE, for doing disconnected searches.
 	 */
-	bool do_conn_check=false;
+	bool do_conn_check = false;
 	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
 
-	Implicator impl(as);
+	// Where shall we place results? Why, right here!
+	ValuePtr vp(getValue(get_handle()));
+	QueueValuePtr qvp(QueueValueCast(vp));
+	if (nullptr == qvp)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting QueueValue for results!");
+
+	Implicator impl(as, qvp);
 	impl.implicand = this->get_implicand();
 
 	try
@@ -141,10 +148,9 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	}
 
 	// If we got a non-empty answer, just return it.
-	QueueValuePtr qv(impl.get_result_queue());
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	if (0 < qv->concurrent_queue<ValuePtr>::size())
-		return qv;
+	OC_ASSERT(qvp->is_closed(), "Unexpected queue state!");
+	if (0 < qvp->concurrent_queue<ValuePtr>::size())
+		return qvp;
 
 	// If we are here, then there were zero matches.
 	//
@@ -165,14 +171,14 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
-		qv->open();
+		qvp->open();
 		for (const Handle& himp: impl.implicand)
-			qv->push(std::move(impl.inst.execute(himp, true)));
-		qv->close();
-		return qv;
+			qvp->push(std::move(impl.inst.execute(himp, true)));
+		qvp->close();
+		return qvp;
 	}
 
-	return qv;
+	return qvp;
 }
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)

@@ -207,10 +207,11 @@ bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
 
 bool SatisfyingSet::start_search(void)
 {
-	// *Every* search gets a brand new, fresh queue!
-	// This allows users to hang on to the old queue, holding
-	// previous results, if they need to.
-	_result_queue = createQueueValue();
+	if (_result_queue->is_closed())
+	{
+		_result_queue->clear();
+		_result_queue->open();
+	}
 	return false;
 }
 

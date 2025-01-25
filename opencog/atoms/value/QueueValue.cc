@@ -88,6 +88,25 @@ void QueueValue::update() const
 
 // ==============================================================
 
+void QueueValue::clear()
+{
+	// Reset contents
+	_value.clear();
+
+	// Do nothing; we don't want to clobber the _value
+	if (is_closed())
+	{
+		wait_and_take_all();
+		return;
+	}
+
+	close();
+	wait_and_take_all();
+	open();
+}
+
+// ==============================================================
+
 bool QueueValue::operator==(const Value& other) const
 {
 	// Derived classes use this, so use get_type()
