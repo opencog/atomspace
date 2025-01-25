@@ -107,9 +107,10 @@ class SatisfyingSet :
 		std::map<GroundingMap, ValueSet> _groups;
 
 	public:
-		SatisfyingSet(AtomSpace* as) :
+		SatisfyingSet(AtomSpace* as, const QueueValuePtr& qvp) :
 			ContinuationMixin(as),
-			_as(as), _num_results(0), max_results(SIZE_MAX) {}
+			_as(as), _result_queue(qvp),
+			_num_results(0), max_results(SIZE_MAX) {}
 
 		size_t max_results;
 
