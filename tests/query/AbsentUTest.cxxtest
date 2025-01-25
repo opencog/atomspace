@@ -94,7 +94,7 @@ void AbsentUTest::test_single(void)
 	// Verify the initial state, room should be empty
 	Handle state = eval->eval_h("(show-room-state)");
 	printf("Expecting: %s\n", empty->to_string().c_str());
-	printf("Got: %s\n", state->to_string().c_str());
+	printf("Got: %s\n\n", state->to_string().c_str());
 	TS_ASSERT_EQUALS(state, empty);
 
 	// Make the golem come alive
@@ -104,7 +104,7 @@ void AbsentUTest::test_single(void)
 
 	state = eval->eval_h("(show-room-state)");
 	printf("Expecting: %s\n", full->to_string().c_str());
-	printf("Got: %s\n", state->to_string().c_str());
+	printf("Got: %s\n\n", state->to_string().c_str());
 	TS_ASSERT_EQUALS(state, full);
 
 	// Kill the golem
@@ -121,6 +121,8 @@ void AbsentUTest::test_single(void)
 	eval->eval_h("(cog-execute! is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
+	printf("Expecting: %s\n", full->to_string().c_str());
+	printf("Got: %s\n\n", state->to_string().c_str());
 	TS_ASSERT_EQUALS(state, full);
 
 	eval->eval_h("(cog-execute! destroy)");

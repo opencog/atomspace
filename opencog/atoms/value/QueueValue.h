@@ -50,6 +50,7 @@ public:
 	QueueValue(void) : LinkStreamValue(QUEUE_VALUE) {}
 	QueueValue(const ValueSeq&);
 	virtual ~QueueValue() {}
+	virtual void clear();
 	virtual bool operator==(const Value&) const;
 };
 

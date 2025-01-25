@@ -207,10 +207,9 @@ bool SatisfyingSet::propose_grouping(const GroundingMap &var_soln,
 
 bool SatisfyingSet::start_search(void)
 {
-	if (not _result_queue->is_closed())
-		_result_queue->close();
-	_result_queue->wait_and_take_all();
-	_result_queue->open();
+	_result_queue->clear();
+	if (_result_queue->is_closed())
+		_result_queue->open();
 	return false;
 }
 
