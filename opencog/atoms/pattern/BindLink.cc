@@ -65,9 +65,9 @@ BindLink::BindLink(const HandleSeq&& hseq, Type t)
 /** Wrap query results in a SetLink, place them in the AtomSpace. */
 ValuePtr BindLink::execute(AtomSpace* as, bool silent)
 {
-	QueueValuePtr qv(do_execute(as, silent));
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	HandleSeq rslt(qv->to_handle_seq());
+	ContainerValuePtr cv(do_execute(as, silent));
+	OC_ASSERT(cv->is_closed(), "Unexpected queue state!");
+	HandleSeq rslt(cv->to_handle_seq());
 
 	// The result_set contains a list of the grounded expressions.
 	// (The order of the list has no significance, so it's really a set.)

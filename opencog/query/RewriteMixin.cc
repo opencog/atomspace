@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-RewriteMixin::RewriteMixin(AtomSpace* as, QueueValuePtr& qvp)
+RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 	: _as(as), _result_queue(qvp),
 	_num_results(0), inst(as), max_results(SIZE_MAX)
 {

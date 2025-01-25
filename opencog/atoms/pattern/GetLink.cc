@@ -22,6 +22,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/query/Satisfier.h>
 
 #include "GetLink.h"
@@ -49,9 +50,9 @@ GetLink::GetLink(const HandleSeq&& hseq, Type t)
 
 ValuePtr GetLink::execute(AtomSpace* as, bool silent)
 {
-	QueueValuePtr qv(MeetLink::do_execute(as, silent));
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	HandleSet hs(qv->to_handle_set());
+	ContainerValuePtr cv(MeetLink::do_execute(as, silent));
+	OC_ASSERT(cv->is_closed(), "Unexpected queue state!");
+	HandleSet hs(cv->to_handle_set());
 
 	// Create the satisfying set, and cache it.
 	Handle satset(createUnorderedLink(std::move(hs), SET_LINK));

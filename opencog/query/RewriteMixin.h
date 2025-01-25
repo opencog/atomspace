@@ -29,7 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 
@@ -60,7 +60,7 @@ class RewriteMixin :
 
 		DECLARE_PE_MUTEX;
 		ValueSet _result_set;
-		QueueValuePtr _result_queue;
+		ContainerValuePtr _result_queue;
 		void insert_result(ValuePtr);
 
 		size_t _num_results;
@@ -68,7 +68,7 @@ class RewriteMixin :
 		std::map<GroundingMap, size_t> _group_sizes;
 
 	public:
-		RewriteMixin(AtomSpace*, QueueValuePtr&);
+		RewriteMixin(AtomSpace*, ContainerValuePtr&);
 		Instantiator inst;
 		HandleSeq implicand;
 		size_t max_results;

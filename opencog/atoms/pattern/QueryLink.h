@@ -23,7 +23,7 @@
 #define _OPENCOG_QUERY_LINK_H
 
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
 
 namespace opencog
 {
@@ -35,7 +35,7 @@ class QueryLink : public PatternLink
 protected:
 	void init(void);
 
-	virtual QueueValuePtr do_execute(AtomSpace*, bool silent);
+	virtual ContainerValuePtr do_execute(AtomSpace*, bool silent);
 
 public:
 	QueryLink(const HandleSeq&&, Type=QUERY_LINK);

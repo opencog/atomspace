@@ -103,7 +103,7 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  */
-QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
+ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
 
@@ -124,12 +124,12 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 
 	// Where shall we place results? Why, right here!
 	ValuePtr vp(getValue(get_handle()));
-	QueueValuePtr qvp(QueueValueCast(vp));
-	if (nullptr == qvp)
+	ContainerValuePtr cvp(ContainerValueCast(vp));
+	if (nullptr == cvp)
 		throw RuntimeException(TRACE_INFO,
 			"Expecting QueueValue for results!");
 
-	Implicator impl(as, qvp);
+	Implicator impl(as, cvp);
 	impl.implicand = this->get_implicand();
 
 	try
@@ -148,9 +148,9 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	}
 
 	// If we got a non-empty answer, just return it.
-	OC_ASSERT(qvp->is_closed(), "Unexpected queue state!");
-	if (0 < qvp->size())
-		return qvp;
+	OC_ASSERT(cvp->is_closed(), "Unexpected queue state!");
+	if (0 < cvp->size())
+		return cvp;
 
 	// If we are here, then there were zero matches.
 	//
@@ -171,14 +171,14 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
-		qvp->open();
+		cvp->open();
 		for (const Handle& himp: impl.implicand)
-			qvp->add(std::move(impl.inst.execute(himp, true)));
-		qvp->close();
-		return qvp;
+			cvp->add(std::move(impl.inst.execute(himp, true)));
+		cvp->close();
+		return cvp;
 	}
 
-	return qvp;
+	return cvp;
 }
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
