@@ -24,7 +24,7 @@
 #define _OPENCOG_QUEUE_VALUE_H
 
 #include <opencog/util/concurrent_queue.h>
-#include <opencog/atoms/value/LinkStreamValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -40,17 +40,26 @@ namespace opencog
  * values are to be handled in sequential order, in a different thread.
  */
 class QueueValue
-	: public LinkStreamValue, public concurrent_queue<ValuePtr>
+	: public ContainerValue, protected concurrent_queue<ValuePtr>
 {
 protected:
-	QueueValue(Type t) : LinkStreamValue(t) {}
+	QueueValue(Type t) : ContainerValue(t) {}
 	virtual void update() const;
 
 public:
-	QueueValue(void) : LinkStreamValue(QUEUE_VALUE) {}
+	QueueValue(void) : ContainerValue(QUEUE_VALUE) {}
 	QueueValue(const ValueSeq&);
 	virtual ~QueueValue() {}
-	virtual void clear();
+	virtual void open(void);
+	virtual void close(void);
+	virtual bool is_closed(void) const;
+
+	virtual void add(const ValuePtr&);
+	virtual void add(ValuePtr&&);
+	virtual ValuePtr remove(void);
+	virtual size_t size(void) const;
+	virtual void clear(void);
+
 	virtual bool operator==(const Value&) const;
 };
 

@@ -146,7 +146,7 @@ void RewriteMixin::insert_result(ValuePtr v)
 	if (_result_set.end() != _result_set.find(v)) return;
 
 	_result_set.insert(v);
-	_result_queue->push(std::move(v));
+	_result_queue->add(std::move(v));
 }
 
 bool RewriteMixin::start_search(void)
@@ -171,7 +171,7 @@ bool RewriteMixin::search_finished(bool done)
 		// size_t gsz = gset.second.size();
 		size_t gsz = _group_sizes[gset.first];
 		if (gmin <= gsz and gsz <= gmax)
-			_result_queue->push(createLinkValue(gset.second));
+			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
 
 	_result_queue->close();

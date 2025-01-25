@@ -176,7 +176,7 @@ bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
 	if (_num_results >= max_results)
 		return true;
 
-	_result_queue->push(wrap_result(var_soln));
+	_result_queue->add(std::move(wrap_result(var_soln)));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_num_results >= max_results);
@@ -226,7 +226,7 @@ bool SatisfyingSet::search_finished(bool done)
 	{
 		size_t gsz = gset.second.size();
 		if (gmin <= gsz and gsz <= gmax)
-			_result_queue->push(createLinkValue(gset.second));
+			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
 
 	_result_queue->close();

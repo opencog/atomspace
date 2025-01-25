@@ -28,7 +28,7 @@ using namespace opencog;
 // ==============================================================
 
 QueueValue::QueueValue(const ValueSeq& vseq)
-	: LinkStreamValue(QUEUE_VALUE)
+	: ContainerValue(QUEUE_VALUE)
 {
 	for (const ValuePtr& v: vseq)
 		push(v); // concurrent_queue<ValutePtr>::push(v);

@@ -722,7 +722,7 @@ QueueValuePtr JoinLink::do_execute(AtomSpace* as,
 	// copying things into it. Whatever. Fix this.
 	QueueValuePtr qvp(createQueueValue());
 	for (const Handle& h : hs)
-		qvp->push(as->add_atom(h));
+		qvp->add(as->add_atom(h));
 
 	qvp->close();
 	return qvp;

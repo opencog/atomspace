@@ -149,7 +149,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 
 	// If we got a non-empty answer, just return it.
 	OC_ASSERT(qvp->is_closed(), "Unexpected queue state!");
-	if (0 < qvp->concurrent_queue<ValuePtr>::size())
+	if (0 < qvp->size())
 		return qvp;
 
 	// If we are here, then there were zero matches.
@@ -173,7 +173,7 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	{
 		qvp->open();
 		for (const Handle& himp: impl.implicand)
-			qvp->push(std::move(impl.inst.execute(himp, true)));
+			qvp->add(std::move(impl.inst.execute(himp, true)));
 		qvp->close();
 		return qvp;
 	}

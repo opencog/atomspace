@@ -105,7 +105,7 @@ static void thread_exec(AtomSpace* as, bool silent,
 			ValuePtr pap(inst.execute(h));
 			if (pap and pap->is_atom())
 				pap = as->add_atom(HandleCast(pap));
-			qvp->push(std::move(pap));
+			qvp->add(std::move(pap));
 		}
 		catch (const std::exception& ex)
 		{
