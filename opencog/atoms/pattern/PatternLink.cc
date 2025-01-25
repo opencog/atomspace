@@ -251,6 +251,9 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 {
 	RuleLink::setAtomSpace(as);
 
+	// Can be called with null pointer during destruction.
+	if (nullptr == as) return;
+
 	// All patterns will record results into thread-safe queues or to
 	// thread-safe deduplicated sets. Use a set by default. User can
 	// over-ride later, as desired.
@@ -258,6 +261,7 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 	// when printing.
 	SetValuePtr svp = createSetValue();
 	svp->close();
+
 	const Handle& self(get_handle());
 	as->set_value(self, self, svp);
 }
