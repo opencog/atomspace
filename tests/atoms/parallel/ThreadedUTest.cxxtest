@@ -121,8 +121,10 @@ void ThreadedUTest::test_many(void)
 	{
 		HandleSeq hs = LinkValueCast(v)->to_handle_seq();
 		TS_ASSERT_EQUALS(1, hs.size());
-		if (flower == hs[0]) nflowers++;
-		if (rock == hs[0]) nrocks++;
+		TS_ASSERT_EQUALS(LIST_LINK, hs[0]->get_type());
+		TS_ASSERT_EQUALS(2, hs[0]->size());
+		if (flower == hs[0]->getOutgoingAtom(1)) nflowers++;
+		if (rock == hs[0]->getOutgoingAtom(1)) nrocks++;
 	}
 
 	printf("Got %zu flowers and %zu rocks\n", nflowers, nrocks);
