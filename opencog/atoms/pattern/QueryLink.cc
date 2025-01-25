@@ -122,7 +122,14 @@ QueueValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
 
-	Implicator impl(as);
+	// Where shall we place results? Why, right here!
+	ValuePtr vp(getValue(get_handle()));
+	QueueValuePtr qvp(QueueValueCast(vp));
+	if (nullptr == qvp)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting QueueValue for results!");
+
+	Implicator impl(as, qvp);
 	impl.implicand = this->get_implicand();
 
 	try
