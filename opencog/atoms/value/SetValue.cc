@@ -25,13 +25,15 @@
 
 using namespace opencog;
 
+typedef concurrent_set<ValuePtr> conset;
+
 // ==============================================================
 
 SetValue::SetValue(const ValueSeq& vseq)
 	: ContainerValue(SET_VALUE)
 {
 	for (const ValuePtr& v: vseq)
-		insert(v); // concurrent_set<ValutePtr>::insert(v);
+		conset::insert(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -56,7 +58,7 @@ SetValue::SetValue(const ValueSeq& vseq)
 void SetValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == concurrent_set<ValuePtr>::size()) return;
+	if (is_closed() and 0 == conset::size()) return;
 
 	// Reset, to start with.
 	_value.clear();
@@ -71,7 +73,7 @@ void SetValue::update() const
 			_value.emplace_back(val);
 		}
 	}
-	catch (typename concurrent_set<ValuePtr>::Canceled& e)
+	catch (typename conset::Canceled& e)
 	{}
 
 	// If we are here, the queue closed up. Reopen it
@@ -91,40 +93,40 @@ void SetValue::update() const
 void SetValue::open()
 {
 	if (not is_closed()) return;
-	const_cast<SetValue*>(this) -> open();
+	conset::open();
 }
 
 void SetValue::close()
 {
 	if (is_closed()) return;
-	const_cast<SetValue*>(this) -> close();
+	conset::close();
 }
 
 bool SetValue::is_closed() const
 {
-	return const_cast<SetValue*>(this) -> is_closed();
+	return conset::is_closed();
 }
 
 // ==============================================================
 
 void SetValue::add(const ValuePtr& vp)
 {
-	insert(vp);
+	conset::insert(vp);
 }
 
 void SetValue::add(ValuePtr&& vp)
 {
-	insert(vp);
+	conset::insert(vp);
 }
 
 ValuePtr SetValue::remove(void)
 {
-	return value_get();
+	return conset::value_get();
 }
 
 size_t SetValue::size(void) const
 {
-	return const_cast<SetValue*>(this) -> size();
+	return conset::size();
 }
 
 // ==============================================================
@@ -135,15 +137,15 @@ void SetValue::clear()
 	_value.clear();
 
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed())
+	if (conset::is_closed())
 	{
-		wait_and_take_all();
+		conset::wait_and_take_all();
 		return;
 	}
 
-	close();
-	wait_and_take_all();
-	open();
+	conset::close();
+	conset::wait_and_take_all();
+	conset::open();
 }
 
 // ==============================================================

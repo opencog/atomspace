@@ -25,13 +25,15 @@
 
 using namespace opencog;
 
+typedef concurrent_queue<ValuePtr> conq;
+
 // ==============================================================
 
 QueueValue::QueueValue(const ValueSeq& vseq)
 	: ContainerValue(QUEUE_VALUE)
 {
 	for (const ValuePtr& v: vseq)
-		push(v); // concurrent_queue<ValutePtr>::push(v);
+		push(v); // concurrent_queue<ValuePtr>::push(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -56,7 +58,7 @@ QueueValue::QueueValue(const ValueSeq& vseq)
 void QueueValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == concurrent_queue<ValuePtr>::size()) return;
+	if (is_closed() and 0 == conq::size()) return;
 
 	// Reset, to start with.
 	_value.clear();
@@ -71,7 +73,7 @@ void QueueValue::update() const
 			_value.emplace_back(val);
 		}
 	}
-	catch (typename concurrent_queue<ValuePtr>::Canceled& e)
+	catch (typename conq::Canceled& e)
 	{}
 
 	// If we are here, the queue closed up. Reopen it
@@ -90,41 +92,41 @@ void QueueValue::update() const
 
 void QueueValue::open()
 {
-	if (not is_closed()) return;
-	const_cast<QueueValue*>(this) -> open();
+	if (not conq::is_closed()) return;
+	conq::open();
 }
 
 void QueueValue::close()
 {
-	if (is_closed()) return;
-	const_cast<QueueValue*>(this) -> close();
+	if (conq::is_closed()) return;
+	conq::close();
 }
 
 bool QueueValue::is_closed() const
 {
-	return const_cast<QueueValue*>(this) -> is_closed();
+	return conq::is_closed();
 }
 
 // ==============================================================
 
 void QueueValue::add(const ValuePtr& vp)
 {
-	push(vp);
+	conq::push(vp);
 }
 
 void QueueValue::add(ValuePtr&& vp)
 {
-	push(vp);
+	conq::push(vp);
 }
 
 ValuePtr QueueValue::remove(void)
 {
-	return value_pop();
+	return conq::value_pop();
 }
 
 size_t QueueValue::size(void) const
 {
-	return const_cast<QueueValue*>(this) -> size();
+	return conq::size();
 }
 
 // ==============================================================
@@ -135,15 +137,15 @@ void QueueValue::clear()
 	_value.clear();
 
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed())
+	if (conq::is_closed())
 	{
-		wait_and_take_all();
+		conq::wait_and_take_all();
 		return;
 	}
 
-	close();
-	wait_and_take_all();
-	open();
+	conq::close();
+	conq::wait_and_take_all();
+	conq::open();
 }
 
 // ==============================================================
