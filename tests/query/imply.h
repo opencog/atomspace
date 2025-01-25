@@ -28,7 +28,9 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	BindLinkPtr bl(createBindLink(std::move(oset)));
 
 	// Now perform the search.
-	Implicator impl(as);
+	QueueValuePtr qvp(createQueueValue());
+	qvp->close();
+	Implicator impl(as, qvp);
 	impl.implicand.push_back(himplicand);
 
 	impl.satisfy(bl);
@@ -36,9 +38,8 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	// The result_set contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
 	HandleSeq hlist;
-	QueueValuePtr qv(impl.get_result_queue());
-	OC_ASSERT(qv->is_closed(), "Unexpected queue state!");
-	std::queue<ValuePtr> vals(qv->wait_and_take_all());
+	OC_ASSERT(qvp->is_closed(), "Unexpected queue state!");
+	std::queue<ValuePtr> vals(qvp->wait_and_take_all());
 	while (not vals.empty())
 	{
 		hlist.push_back(HandleCast(vals.front()));
