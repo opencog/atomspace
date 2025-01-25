@@ -53,10 +53,14 @@ QueueValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 
 	// Where shall we place results? Why, right here!
 	ValuePtr vp(getValue(get_handle()));
+	if (nullptr == vp)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting location for results!");
 	QueueValuePtr qvp(QueueValueCast(vp));
 	if (nullptr == qvp)
 		throw RuntimeException(TRACE_INFO,
-			"Expecting QueueValue for results!");
+			"Expecting QueueValue for results, got %s",
+			vp->to_string().c_str());
 
 	try
 	{
