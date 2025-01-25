@@ -90,11 +90,13 @@ void QueueValue::update() const
 
 void QueueValue::open()
 {
+	if (not is_closed()) return;
 	const_cast<QueueValue*>(this) -> open();
 }
 
 void QueueValue::close()
 {
+	if (is_closed()) return;
 	const_cast<QueueValue*>(this) -> close();
 }
 

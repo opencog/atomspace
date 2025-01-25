@@ -31,7 +31,7 @@ SetValue::SetValue(const ValueSeq& vseq)
 	: ContainerValue(SET_VALUE)
 {
 	for (const ValuePtr& v: vseq)
-		push(v); // concurrent_queue<ValutePtr>::push(v);
+		insert(v); // concurrent_set<ValutePtr>::insert(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -56,7 +56,7 @@ SetValue::SetValue(const ValueSeq& vseq)
 void SetValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == concurrent_queue<ValuePtr>::size()) return;
+	if (is_closed() and 0 == concurrent_set<ValuePtr>::size()) return;
 
 	// Reset, to start with.
 	_value.clear();
@@ -67,11 +67,11 @@ void SetValue::update() const
 		while (true)
 		{
 			ValuePtr val;
-			const_cast<SetValue*>(this) -> pop(val);
+			const_cast<SetValue*>(this) -> get(val);
 			_value.emplace_back(val);
 		}
 	}
-	catch (typename concurrent_queue<ValuePtr>::Canceled& e)
+	catch (typename concurrent_set<ValuePtr>::Canceled& e)
 	{}
 
 	// If we are here, the queue closed up. Reopen it
@@ -80,7 +80,7 @@ void SetValue::update() const
 	while (not is_empty())
 	{
 		ValuePtr val;
-		const_cast<SetValue*>(this) -> pop(val);
+		const_cast<SetValue*>(this) -> get(val);
 		_value.emplace_back(val);
 	}
 	const_cast<SetValue*>(this) -> cancel();
@@ -90,11 +90,13 @@ void SetValue::update() const
 
 void SetValue::open()
 {
+	if (not is_closed()) return;
 	const_cast<SetValue*>(this) -> open();
 }
 
 void SetValue::close()
 {
+	if (is_closed()) return;
 	const_cast<SetValue*>(this) -> close();
 }
 
@@ -107,17 +109,17 @@ bool SetValue::is_closed() const
 
 void SetValue::add(const ValuePtr& vp)
 {
-	push(vp);
+	insert(vp);
 }
 
 void SetValue::add(ValuePtr&& vp)
 {
-	push(vp);
+	insert(vp);
 }
 
 ValuePtr SetValue::remove(void)
 {
-	return value_pop();
+	return value_get();
 }
 
 size_t SetValue::size(void) const
