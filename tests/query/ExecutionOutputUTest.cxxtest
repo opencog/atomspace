@@ -247,29 +247,32 @@ void ExecutionOutputUTest::test_varsub(void)
 	BindLinkPtr predicament(BindLinkCast(pred));
 
 	// Now perform the search.
-	Implicator simpl(as.get());
+	QueueValuePtr qvp(createQueueValue());
+	qvp->close();
+	Implicator simpl(as.get(), qvp);
 	simpl.implicand = situation->get_implicand();
 	simpl.satisfy(situation);
 
 	// The result_list contains a list of the grounded expressions.
-	simpl.get_result_queue()->open();
+	qvp->open();
 
 	// If it's empty, it will hang ...
 	TSM_ASSERT_EQUALS("no results returned",
-		false, simpl.get_result_queue()->is_empty());
+		false, qvp->is_empty());
 
-	Handle res = HandleCast(simpl.get_result_queue()->value_pop());
+	Handle res = HandleCast(qvp->value_pop());
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
 	// Now perform the search.
-	Implicator pimpl(as.get());
+	qvp->close();
+	Implicator pimpl(as.get(), qvp);
 	pimpl.implicand = predicament->get_implicand();
 	pimpl.satisfy(predicament);
 
 	// The result_list contains a list of the grounded expressions.
-	pimpl.get_result_queue()->open();
-	Handle del = HandleCast(pimpl.get_result_queue()->value_pop());
+	qvp->open();
+	Handle del = HandleCast(qvp->value_pop());
 	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 
