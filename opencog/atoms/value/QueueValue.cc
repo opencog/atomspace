@@ -88,6 +88,45 @@ void QueueValue::update() const
 
 // ==============================================================
 
+void QueueValue::open()
+{
+	const_cast<QueueValue*>(this) -> open();
+}
+
+void QueueValue::close()
+{
+	const_cast<QueueValue*>(this) -> close();
+}
+
+bool QueueValue::is_closed() const
+{
+	return const_cast<QueueValue*>(this) -> is_closed();
+}
+
+// ==============================================================
+
+void QueueValue::add(const ValuePtr& vp)
+{
+	push(vp);
+}
+
+void QueueValue::add(ValuePtr&& vp)
+{
+	push(vp);
+}
+
+ValuePtr QueueValue::remove(void)
+{
+	return value_pop();
+}
+
+size_t QueueValue::size(void) const
+{
+	return const_cast<QueueValue*>(this) -> size();
+}
+
+// ==============================================================
+
 void QueueValue::clear()
 {
 	// Reset contents
