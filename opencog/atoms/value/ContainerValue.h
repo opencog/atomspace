@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/value/ContainerValue.h
  *
- * Copyright (C) 2020 Linas Vepstas
+ * Copyright (C) 2020, 2025 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,19 +56,17 @@ class ContainerValue
 {
 protected:
 	ContainerValue(Type t) : LinkStreamValue(t) {}
-	virtual void update() const;
 
 public:
 	ContainerValue(void) : LinkStreamValue(CONTAINER_VALUE) {}
-	ContainerValue(const ValueSeq&);
 	virtual ~ContainerValue() {}
 	virtual void open(void) = 0;
 	virtual void close(void) = 0;
-	virtual bool is_open(void) = 0;
+	virtual bool is_closed(void) const = 0;
 
 	virtual void add(const ValuePtr&) = 0;
 	virtual ValuePtr remove(void) = 0;
-	virtual size_t size(void) = 0;
+	virtual size_t size(void) const = 0;
 
 	virtual void clear(void) = 0;
 	virtual bool operator==(const Value&) const;
