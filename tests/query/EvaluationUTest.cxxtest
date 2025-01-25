@@ -307,7 +307,7 @@ void EvaluationUTest::test_lambda(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/eval-lambda\")");
+	eval->eval("(load-from-path \"tests/query/eval-lambda.scm\")");
 
 	TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
 	printf ("Red light TV: %s\n", tvp->to_string().c_str());
