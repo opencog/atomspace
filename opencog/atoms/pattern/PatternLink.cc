@@ -251,6 +251,9 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 {
 	RuleLink::setAtomSpace(as);
 
+	// Can be called with null pointer during destruction.
+	if (nullptr == as) return;
+
 	// All patterns will record results into queues. We attach
 	// queues now. User can over-ride later, if desired.
 	// Start queue in closed state, otherwise it will hang
