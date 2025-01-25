@@ -227,7 +227,8 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	}
 
 	Instantiator inst(as);
-	ValuePtr vp(inst.execute(term, silent));
+	Handle sterm(scratch->add_atom(term));
+	ValuePtr vp(inst.execute(sterm, silent));
 
 	// If the return value is a QueueValue, we assume that this
 	// is the result of executing a MeetLink or QueryLink.
