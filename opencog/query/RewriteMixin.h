@@ -81,9 +81,6 @@ class RewriteMixin :
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);
-
-		virtual QueueValuePtr get_result_queue()
-		{ return _result_queue; }
 };
 
 }; // namespace opencog
