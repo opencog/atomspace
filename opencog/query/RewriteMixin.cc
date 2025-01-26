@@ -34,6 +34,10 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 {
 }
 
+void RewriteMixin::setup_marginals(void)
+{
+}
+
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result

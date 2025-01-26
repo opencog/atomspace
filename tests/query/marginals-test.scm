@@ -1,6 +1,13 @@
+;
+; marginals-test.scm
+;
+; Unit test for storing results and marginals with the query itself.
+; This is the future replacement for the old matrix API. Much cleaner.
+
 
 (use-modules (opencog) (opencog exec))
 
+; Data to prime the pump.
 (Edge (Predicate "foo") (List (Item "left") (Item "right")))
 (Edge (Predicate "foo") (List (Item "lefter") (Item "right")))
 (Edge (Predicate "foo") (List (Item "leftest") (Item "right")))

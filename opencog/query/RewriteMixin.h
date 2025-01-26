@@ -63,6 +63,12 @@ class RewriteMixin :
 		ContainerValuePtr _result_queue;
 		void insert_result(ValuePtr);
 
+		PatternLinkPtr _plp;
+		std::map<Handle, ContainerValuePtr> _var_marginals;
+		std::map<Handle, ContainerValuePtr> _implicand_grnds;
+		void setup_marginals(void);
+		void set_plp(const PatternLinkPtr& plp) { _plp = plp; }
+
 		size_t _num_results;
 		std::map<GroundingMap, ValueSet> _groups;
 		std::map<GroundingMap, size_t> _group_sizes;
