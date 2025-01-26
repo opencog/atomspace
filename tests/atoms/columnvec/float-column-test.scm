@@ -79,7 +79,8 @@
 (cog-execute! mtxpr)
 
 ; -------
-; Stick some random numbers onto the raw data.
+; Stick some random numbers onto the raw data. These will be our
+; "weights"
 (cog-set-value!
 	(Anchor "heavy") (Predicate "randgen 1") (RandomStream 1))
 
@@ -94,7 +95,23 @@
 
 (cog-execute! tag-pairs-randomly)
 ; -------
+; Go grab numbers off the data, and convert it to a column
 
+(define datacol
+	(FloatColumn
+		(Filter
+			(Rule
+				(Variable "$edge")
+				(Variable "$edge")
+				(FloatValueOf (Variable "$edge") (Predicate "weight")))
+		(ValueOf mtxpr mtxpr))))
+
+(define datavec (cog-execute! datacol))
+(format #t "Data vect: ~A\n" datavec)
+
+; Twelve data items, so twelve numbers
+(test-assert "data list length" (equal? 12
+	 (length (cog-value->list datavec))))
 
 ; ------------------------------------------------------------
 (test-end tname)
