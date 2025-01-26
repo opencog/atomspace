@@ -73,5 +73,22 @@
 (test-assert "matrix size" (equal? 12 (length (cog-value->list mtxvec))))
 
 ; --------------------------------------------------------
+(define mtxpr
+	(Query (VariableList
+		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
+		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
+		(Present
+			(Edge (Predicate "word-pair")
+				(List (Variable "$left-word") (Variable "$right-word"))))
+		(Edge (Predicate "word-pair")
+			(List (Variable "$left-word") (Variable "$right-word")))))
+
+(cog-execute! mtxpr)
+(define smtxpr (SexprColumn (ValueOf mtxpr mtxpr)))
+(define prvec (cog-execute! smtxpr))
+(format #t "Pair vec ~A\n" prvec)
+(test-assert "Pair size" (equal? 12 (length (cog-value->list prvec))))
+
+; --------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
