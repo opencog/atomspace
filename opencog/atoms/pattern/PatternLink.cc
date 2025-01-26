@@ -296,6 +296,18 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 		as->set_value(self, tyvar.first, svp);
 		as->set_value(self, HandleCast(tyvar.second), svp);
 	}
+
+	// Some variables are untyped. Grab those, too.
+	for (const Handle& untyvar : _variables.varseq)
+	{
+		// Skip, if its typed already.
+		// if (_variables._typemap.contains(untyvar)) continue;
+		if (_variables._typemap.end() != _variables._typemap.find(untyvar))
+			continue;
+		UnisetValuePtr svp(createUnisetValue());
+		svp->close();
+		as->set_value(self, untyvar, svp);
+	}
 }
 
 /* ================================================================= */
