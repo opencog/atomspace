@@ -122,6 +122,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 		if (1 == _implicand.size())
 		{
 			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
+			auto it = _implicand_grnds.find(_implicand[0]);
+			if (_implicand_grnds.end() != it)
+				(*it).second->add(v);
 			insert_result(v);
 		}
 		else
@@ -130,6 +133,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 			for (const Handle& himp: _implicand)
 			{
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
+				auto it = _implicand_grnds.find(himp);
+				if (_implicand_grnds.end() != it)
+					(*it).second->add(v);
 				vs.emplace_back(v);
 			}
 			insert_result(createLinkValue(vs));
@@ -148,6 +154,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 /// to dribble in. Perhaps the engine search could be modified in some
 /// clever way to find groupings in a single batch; but for now, I don't
 /// see how this could be done.
+/// XXX FIXME now I see how it can be done. The groupings should
+/// be converted to marginals, and handled the same way. So this
+/// needs a rewrite. Good thing that almost no one uses this ...
 bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
                                     const GroundingMap &term_soln,
                                     const GroundingMap &grouping)
