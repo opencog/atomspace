@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 
@@ -81,16 +82,28 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 		return createFloatValue(std::move(nums));
 	}
 
-#if 0
-	// If we are here, then base is an link.
-	std::vector<std::string> svec;
-	svec.reserve(base->get_arity());
+	// If we are here, then base is an link. Expect
+	// it to contain things that evaluate to a double
+	std::vector<double> dvec;
+	dvec.reserve(base->get_arity());
 	for (const Handle& h : base->getOutgoingSet())
-		svec.push_back(h->to_short_string());
+	{
+		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
+		if (1 != vp->size())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting exactly one number per item, got %lu\n",
+				vp->size());
+		if (vp->is_type(FLOAT_VALUE))
+			dvec.push_back(FloatValueCast(vp)->value()[0]);
+		else if (vp->is_type(NUMBER_NODE))
+			dvec.push_back(NumberNodeCast(vp)->get_value());
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Expecting numeric value, got %s\n",
+				vp->to_string());
+	}
 
-	return createStringValue(std::move(svec));
-#endif
-	return createFloatValue(42.0);
+	return createFloatValue(std::move(dvec));
 }
 
 // ---------------------------------------------------------------

@@ -106,7 +106,7 @@ ValuePtr NumericFunctionLink::get_value(AtomSpace* as, bool silent, ValuePtr vpt
 /// if possible.  Return nullptr if not possible.
 const std::vector<double>*
 NumericFunctionLink::get_vector(AtomSpace* as, bool silent,
-                           ValuePtr vptr, Type& t)
+                                ValuePtr vptr, Type& t)
 {
 	t = vptr->get_type();
 
