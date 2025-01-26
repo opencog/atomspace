@@ -72,6 +72,7 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 				svec.push_back(v->to_short_string());
 			return createStringValue(std::move(svec));
 #endif
+			return createFloatValue(43.0);
 		}
 	}
 
@@ -89,10 +90,15 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 	for (const Handle& h : base->getOutgoingSet())
 	{
 		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
+
+		// Expecting exactly one float per item. That's because
+		// I don't know what it means if there is more than one,
+		// flattening seems like the wrong thing to do.
 		if (1 != vp->size())
 			throw RuntimeException(TRACE_INFO,
 				"Expecting exactly one number per item, got %lu\n",
 				vp->size());
+
 		if (vp->is_type(FLOAT_VALUE))
 			dvec.push_back(FloatValueCast(vp)->value()[0]);
 		else if (vp->is_type(NUMBER_NODE))
