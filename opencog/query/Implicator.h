@@ -48,7 +48,7 @@ class Implicator:
 			{
 				InitiateSearchMixin::set_pattern(vars, pat);
 				TermMatchMixin::set_pattern(vars, pat);
-				RewriteMixin::setup_marginals();
+				RewriteMixin::set_pattern(vars, pat);
 			}
 
 			virtual bool satisfy(const PatternLinkPtr& plp)

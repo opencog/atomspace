@@ -33,8 +33,6 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	ContainerValuePtr cvp(qvp);
 	qvp->close();
 	Implicator impl(as, cvp);
-	impl.implicand.push_back(himplicand);
-
 	impl.satisfy(bl);
 
 	// The result_set contains a list of the grounded expressions.

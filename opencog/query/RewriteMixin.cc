@@ -34,7 +34,7 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 {
 }
 
-void RewriteMixin::setup_marginals(void)
+void RewriteMixin::setup_marginals(const HandleSeq& varseq)
 {
 }
 
@@ -70,15 +70,15 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	// See issue #950 and pull req #962. XXX FIXME later.
 	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
 	try {
-		if (1 == implicand.size())
+		if (1 == _implicand.size())
 		{
-			ValuePtr v(inst.instantiate(implicand[0], var_soln, true));
+			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
 			insert_result(v);
 		}
 		else
 		{
 			ValueSeq vs;
-			for (const Handle& himp: implicand)
+			for (const Handle& himp: _implicand)
 			{
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
 				vs.emplace_back(v);
@@ -119,7 +119,7 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 	_group_sizes[grouping] ++;
 
 	try {
-		for (const Handle& himp: implicand)
+		for (const Handle& himp: _implicand)
 		{
 			ValuePtr v(inst.instantiate(himp, var_soln, true));
 
