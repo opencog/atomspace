@@ -64,6 +64,7 @@
 (Edge (Predicate "word-pair") (List (Item "a") (Item "lot")))
 (Edge (Predicate "word-pair") (List (Item "lot") (Item ".")))
 
+; -------
 ; Jam that data into one big LinkValue list.
 (define mtxpr
 	(Query (VariableList
@@ -77,7 +78,23 @@
 
 (cog-execute! mtxpr)
 
+; -------
 ; Stick some random numbers onto the raw data.
+(cog-set-value!
+	(Anchor "heavy") (Predicate "randgen 1") (RandomStream 1))
+
+(define tag-pairs-randomly
+	(Filter
+		(Rule
+			(Variable "$edge")
+			(Variable "$edge")
+			(SetValue (Variable "$edge") (Predicate "weight")
+				(StreamValueOf (Anchor "heavy") (Predicate "randgen 1"))))
+		(ValueOf mtxpr mtxpr)))
+
+(cog-execute! tag-pairs-randomly)
+; -------
+
 
 ; ------------------------------------------------------------
 (test-end tname)
