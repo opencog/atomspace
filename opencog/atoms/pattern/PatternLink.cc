@@ -29,7 +29,7 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/value/SetValue.h>
+#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "BindLink.h"
@@ -259,7 +259,7 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 	// over-ride later, as desired.
 	// Start in closed state, otherwise it will hang in update()
 	// when printing.
-	SetValuePtr svp = createSetValue();
+	UnisetValuePtr svp = createUnisetValue();
 	svp->close();
 
 	const Handle& self(get_handle());

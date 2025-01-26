@@ -11,9 +11,9 @@ ADD_LIBRARY (value
 	LinkValue.cc
 	QueueValue.cc
 	RandomStream.cc
-	SetValue.cc
 	StreamValue.cc
 	StringValue.cc
+	UnisetValue.cc
 	ValueFactory.cc
 	VoidValue.cc
 )
@@ -40,9 +40,9 @@ INSTALL (FILES
 	LinkValue.h
 	QueueValue.h
 	RandomStream.h
-	SetValue.h
 	StreamValue.h
 	StringValue.h
+	UnisetValue.h
 	Value.h
 	ValueFactory.h
 	VoidValue.h

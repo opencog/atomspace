@@ -61,7 +61,8 @@ CONTAINER_VALUE <- LINK_STREAM_VALUE
 QUEUE_VALUE <- CONTAINER_VALUE
 
 // A thread-safe set of Values (uniset; deduplicates multiple entries.)
-SET_VALUE <- CONTAINER_VALUE
+// Note that 'SET_VALUE' already taken by SET_VALUE_LINK
+UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.

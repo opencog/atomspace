@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/SetValue.cc
+ * opencog/atoms/value/UnisetValue.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/SetValue.h>
+#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
@@ -29,8 +29,8 @@ typedef concurrent_set<ValuePtr> conset;
 
 // ==============================================================
 
-SetValue::SetValue(const ValueSeq& vseq)
-	: ContainerValue(SET_VALUE)
+UnisetValue::UnisetValue(const ValueSeq& vseq)
+	: ContainerValue(UNISET_VALUE)
 {
 	for (const ValuePtr& v: vseq)
 		conset::insert(v);
@@ -55,7 +55,7 @@ SetValue::SetValue(const ValueSeq& vseq)
 //
 // Alternately, more clever users can work with the concurrent queue
 // API directly; they do not need to go through this API.
-void SetValue::update() const
+void UnisetValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
 	if (is_closed() and 0 == conset::size()) return;
@@ -69,7 +69,7 @@ void SetValue::update() const
 		while (true)
 		{
 			ValuePtr val;
-			const_cast<SetValue*>(this) -> get(val);
+			const_cast<UnisetValue*>(this) -> get(val);
 			_value.emplace_back(val);
 		}
 	}
@@ -78,60 +78,60 @@ void SetValue::update() const
 
 	// If we are here, the queue closed up. Reopen it
 	// just long enough to drain any remaining values.
-	const_cast<SetValue*>(this) -> cancel_reset();
+	const_cast<UnisetValue*>(this) -> cancel_reset();
 	while (not is_empty())
 	{
 		ValuePtr val;
-		const_cast<SetValue*>(this) -> get(val);
+		const_cast<UnisetValue*>(this) -> get(val);
 		_value.emplace_back(val);
 	}
-	const_cast<SetValue*>(this) -> cancel();
+	const_cast<UnisetValue*>(this) -> cancel();
 }
 
 // ==============================================================
 
-void SetValue::open()
+void UnisetValue::open()
 {
 	if (not is_closed()) return;
 	conset::open();
 }
 
-void SetValue::close()
+void UnisetValue::close()
 {
 	if (is_closed()) return;
 	conset::close();
 }
 
-bool SetValue::is_closed() const
+bool UnisetValue::is_closed() const
 {
 	return conset::is_closed();
 }
 
 // ==============================================================
 
-void SetValue::add(const ValuePtr& vp)
+void UnisetValue::add(const ValuePtr& vp)
 {
 	conset::insert(vp);
 }
 
-void SetValue::add(ValuePtr&& vp)
+void UnisetValue::add(ValuePtr&& vp)
 {
 	conset::insert(vp);
 }
 
-ValuePtr SetValue::remove(void)
+ValuePtr UnisetValue::remove(void)
 {
 	return conset::value_get();
 }
 
-size_t SetValue::size(void) const
+size_t UnisetValue::size(void) const
 {
 	return conset::size();
 }
 
 // ==============================================================
 
-void SetValue::clear()
+void UnisetValue::clear()
 {
 	// Reset contents
 	_value.clear();
@@ -150,7 +150,7 @@ void SetValue::clear()
 
 // ==============================================================
 
-bool SetValue::operator==(const Value& other) const
+bool UnisetValue::operator==(const Value& other) const
 {
 	// Derived classes use this, so use get_type()
 	if (get_type() != other.get_type()) return false;
@@ -158,7 +158,7 @@ bool SetValue::operator==(const Value& other) const
 	if (this == &other) return true;
 
 	if (not is_closed()) return false;
-	if (not ((const SetValue*) &other)->is_closed()) return false;
+	if (not ((const UnisetValue*) &other)->is_closed()) return false;
 
 	return LinkValue::operator==(other);
 }
@@ -166,5 +166,5 @@ bool SetValue::operator==(const Value& other) const
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(SET_VALUE,
-                     createSetValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(UNISET_VALUE,
+                     createUnisetValue, std::vector<ValuePtr>)
