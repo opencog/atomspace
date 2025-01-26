@@ -28,7 +28,7 @@
 using namespace opencog;
 
 SexprColumn::SexprColumn(const HandleSeq&& oset, Type t)
-	: FunctionLink(std::move(oset), t)
+	: Link(std::move(oset), t)
 {
 	if (not nameserver().isA(t, SEXPR_COLUMN))
 	{

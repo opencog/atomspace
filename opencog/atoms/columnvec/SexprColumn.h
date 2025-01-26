@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_SEXPR_COLUMN_H
 #define _OPENCOG_SEXPR_COLUMN_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
@@ -45,12 +45,17 @@ namespace opencog
 ///
 ///     (StringValue "(Concept \"foo\")" "(Concept \"bar\")")
 ///
-class SexprColumn : public FunctionLink
+class SexprColumn : public Link
 {
+protected:
+	ValuePtr do_execute(AtomSpace*, bool);
+
 public:
 	SexprColumn(const HandleSeq&&, Type = SEXPR_COLUMN);
 	SexprColumn(const SexprColumn&) = delete;
 	SexprColumn& operator=(const SexprColumn&) = delete;
+
+	virtual bool is_executable() const { return true; }
 
 	// Return a pointer to StringValue holding the s-expressions
 	virtual ValuePtr execute(AtomSpace*, bool);
