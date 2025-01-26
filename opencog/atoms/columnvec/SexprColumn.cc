@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 
 #include "SexprColumn.h"
@@ -58,7 +59,15 @@ ValuePtr SexprColumn::do_execute(AtomSpace* as, bool silent)
 			base = HandleCast(vp);
 		else
 		{
-			return createStringValue("foo");
+			if (not vp->is_type(LINK_VALUE))
+				return createStringValue(vp->to_string());
+
+			// If we are here, we've got a LinkValue
+			std::vector<std::string> svec;
+			svec.reserve(vp->size());
+			for (const ValuePtr& v : LinkValueCast(vp)->value())
+				svec.push_back(v->to_short_string());
+			return createStringValue(std::move(svec));
 		}
 	}
 
