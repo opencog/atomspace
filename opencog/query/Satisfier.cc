@@ -128,6 +128,13 @@ bool Satisfier::search_finished(bool done)
 
 bool SatisfyingSet::satisfy(const PatternLinkPtr& plp)
 {
+	for (const Handle& var: _varseq)
+	{
+		ValuePtr vp(plp->getValue(var));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		_var_marginals.insert({var, cvp});
+	}
 	return ContinuationMixin::satisfy(plp);
 }
 
