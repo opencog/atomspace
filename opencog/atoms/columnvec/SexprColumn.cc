@@ -66,7 +66,13 @@ ValuePtr SexprColumn::do_execute(AtomSpace* as, bool silent)
 	if (base->is_node())
 		return createStringValue(base->to_short_string());
 
-	return createStringValue("foo");
+	// If we are here, then base is an link.
+	std::vector<std::string> svec;
+	svec.reserve(base->get_arity());
+	for (const Handle& h : base->getOutgoingSet())
+		svec.push_back(h->to_short_string());
+
+	return createStringValue(std::move(svec));
 }
 
 // ---------------------------------------------------------------

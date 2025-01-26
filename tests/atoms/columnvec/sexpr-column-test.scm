@@ -11,4 +11,11 @@
 
 (format #t "foobar is ~A\n" svec)
 
+(define scolnode
+	(SexprColumn (Concept "foo")))
+
+(define snode (cog-execute! scolnode))
+
+(format #t "Single node is ~A\n" snode)
+
 ; --------------------------------------------------------
