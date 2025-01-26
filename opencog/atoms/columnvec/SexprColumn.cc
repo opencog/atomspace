@@ -61,6 +61,11 @@ ValuePtr SexprColumn::execute(AtomSpace* as, bool silent)
 			return createStringValue("foo");
 		}
 	}
+
+	// If we are here, then base is an atom.
+	if (base->is_node())
+		return createStringValue(base->to_short_string());
+
 	return createStringValue("foo");
 }
 
