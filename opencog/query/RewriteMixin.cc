@@ -122,10 +122,14 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 		if (1 == _implicand.size())
 		{
 			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
-			auto it = _implicand_grnds.find(_implicand[0]);
-			if (_implicand_grnds.end() != it)
-				(*it).second->add(v);
-			insert_result(v);
+			// AbsentLinks can result in nullptr v's
+			if (nullptr != v)
+			{
+				auto it = _implicand_grnds.find(_implicand[0]);
+				if (_implicand_grnds.end() != it)
+					(*it).second->add(v);
+				insert_result(v);
+			}
 		}
 		else
 		{
@@ -133,10 +137,13 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 			for (const Handle& himp: _implicand)
 			{
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
-				auto it = _implicand_grnds.find(himp);
-				if (_implicand_grnds.end() != it)
-					(*it).second->add(v);
-				vs.emplace_back(v);
+				if (nullptr != v)
+				{
+					auto it = _implicand_grnds.find(himp);
+					if (_implicand_grnds.end() != it)
+						(*it).second->add(v);
+					vs.emplace_back(v);
+				}
 			}
 			insert_result(createLinkValue(vs));
 		}
@@ -196,7 +203,6 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 
 void RewriteMixin::insert_result(ValuePtr v)
 {
-	if (nullptr == v) return;
 	if (_result_set.end() != _result_set.find(v)) return;
 
 	// Insert atom into the atomspace immediately. This avoids having

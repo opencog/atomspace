@@ -34,6 +34,8 @@
 
 (format #t "Query results ~A\n" (cog-value q q))
 (format #t "Query vars ~A\n" (cog-value q (Variable "$x")))
+(format #t "Query implicands ~A\n"
+	(cog-value q (Link (Item "fumble") (Variable "$x"))))
 
 (define m2 (Meet
 	(Present
