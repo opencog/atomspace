@@ -31,20 +31,22 @@ namespace opencog
  *  @{
  */
 
-/// The FloatColumn returns a StringValue vector of the s-expressions
-/// for Atoms/Values contiained in the given Link or LinkValue.
+/// The FloatColumn returns a FloatValue vector of the floating
+/// point values for Atoms/Values obtained from a Link or LinkValue.
 ///
 /// For example,
 ///
 ///     FloatColumn
 ///         Link
-///             Concept "foo"
-///             Concept "bar"
+///             Number 1
+///             Number 2
 ///
-/// will return a string vector of length two:
+/// will return a float vector of length two:
 ///
-///     (StringValue "(Concept \"foo\")" "(Concept \"bar\")")
+///     (FloatValue 1.0 2.0)
 ///
+/// The intended use case is that this will be used with pattern
+/// searches, to obtain float point data anchored to search results.
 class FloatColumn : public Link
 {
 protected:

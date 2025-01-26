@@ -47,10 +47,12 @@ protected:
 
 	FloatValue(Type t) : Value(t) {}
 public:
+	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
 	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
 	FloatValue(const std::vector<double>& v)
 		: Value(FLOAT_VALUE), _value(v) {}
-	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
+	FloatValue(std::vector<double>&& v)
+		: Value(FLOAT_VALUE), _value(std::move(v)) {}
 
 	virtual ~FloatValue() {}
 

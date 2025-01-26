@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The SexprColumn returns a StringValue vector of the s-expressions
-/// for Atoms/Values contiained in the given Link or LinkValue.
+/// for Atoms/Values contained in the given Link or LinkValue.
 ///
 /// For example,
 ///

@@ -21,8 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 #include "FloatColumn.h"
 
@@ -47,7 +48,7 @@ FloatColumn::FloatColumn(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Return a StringValue vector.
+/// Return a FloatValue vector.
 ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
@@ -59,6 +60,7 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			base = HandleCast(vp);
 		else
 		{
+#if 0
 			if (not vp->is_type(LINK_VALUE))
 				return createStringValue(vp->to_string());
 
@@ -68,13 +70,18 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			for (const ValuePtr& v : LinkValueCast(vp)->value())
 				svec.push_back(v->to_short_string());
 			return createStringValue(std::move(svec));
+#endif
 		}
 	}
 
 	// If we are here, then base is an atom.
-	if (base->is_node())
-		return createStringValue(base->to_short_string());
+	if (base->is_type(NUMBER_NODE))
+	{
+		std::vector<double> nums(NumberNodeCast(base)->value());
+		return createFloatValue(std::move(nums));
+	}
 
+#if 0
 	// If we are here, then base is an link.
 	std::vector<std::string> svec;
 	svec.reserve(base->get_arity());
@@ -82,11 +89,13 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 		svec.push_back(h->to_short_string());
 
 	return createStringValue(std::move(svec));
+#endif
+	return createFloatValue(42.0);
 }
 
 // ---------------------------------------------------------------
 
-/// Return a StringValue vector.
+/// Return a FloatValue vector.
 ValuePtr FloatColumn::execute(AtomSpace* as, bool silent)
 {
 	return do_execute(as, silent);
