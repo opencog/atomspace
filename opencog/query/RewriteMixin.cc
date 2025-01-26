@@ -67,7 +67,20 @@ void RewriteMixin::setup_marginals(void)
 
 void RewriteMixin::record_marginals(const GroundingMap& var_soln)
 {
-	//for (const Handle& hv : _varseq)
+	for (const Handle& hv : _varseq)
+	{
+		// Optional clauses (e.g. AbsentLink) may have variables
+		// in them that are not grounded. Those variables won't
+		// have a grounding; this will cause std::map::at to throw.
+		try
+		{
+			ValuePtr gvp(var_soln.at(hv));
+			auto it = _var_marginals.find(hv);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+		}
+		catch (...) {}
+	}
 }
 
 /**
@@ -213,6 +226,12 @@ bool RewriteMixin::search_finished(bool done)
 		if (gmin <= gsz and gsz <= gmax)
 			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
+
+	for (auto& mgs : _var_marginals)
+		mgs.second->close();
+
+	for (auto& igs : _implicand_grnds)
+		igs.second->close();
 
 	_result_queue->close();
 	return done;
