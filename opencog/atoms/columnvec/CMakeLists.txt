@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (columnvec
+	FloatColumn.cc
 	SexprColumn.cc
 )
 
@@ -20,6 +21,7 @@ INSTALL (TARGETS columnvec EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	FloatColumn.h
 	SexprColumn.h
 	DESTINATION "include/opencog/atoms/columnvec"
 )
