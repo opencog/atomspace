@@ -36,8 +36,8 @@
 
 (define qvalue (cog-execute! flow-pairs))
 
-(test-assert "Return value is a queue value"
-	(equal? (cog-type qvalue) 'QueueValue))
+(test-assert "Return value is a container value"
+	(cog-subtype? 'ContainerValue (cog-type qvalue)))
 
 (test-assert "Size of queue is ten"
 	(equal? 10 (length (cog-value->list qvalue))))

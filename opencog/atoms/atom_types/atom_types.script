@@ -54,8 +54,15 @@ FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
 
+// A base class for thread-safe concurrent containers.
+CONTAINER_VALUE <- LINK_STREAM_VALUE
+
 // A thread-safe FIFO queue of Value sequences.
-QUEUE_VALUE <- LINK_STREAM_VALUE
+QUEUE_VALUE <- CONTAINER_VALUE
+
+// A thread-safe set of Values (uniset; deduplicates multiple entries.)
+// Note that 'SET_VALUE' already taken by SET_VALUE_LINK
+UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.

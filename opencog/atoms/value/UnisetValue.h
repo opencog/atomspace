@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/QueueValue.h
+ * opencog/atoms/value/UnisetValue.h
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_QUEUE_VALUE_H
-#define _OPENCOG_QUEUE_VALUE_H
+#ifndef _OPENCOG_UNISET_VALUE_H
+#define _OPENCOG_UNISET_VALUE_H
 
-#include <opencog/util/concurrent_queue.h>
+#include <opencog/util/concurrent_set.h>
 #include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
@@ -35,21 +35,23 @@ namespace opencog
  */
 
 /**
- * QueueValues provide a thread-safe FIFO queue of Values. They are
+ * UnisetValues provide a thread-safe uniset of Values. They are
  * meant to be used for producer-consumer APIs, where the produced
- * values are to be handled in sequential order, in a different thread.
+ * values are added, possibly in different threads from which they
+ * are removed.  This is a uniset, in that elements are deduplicated
+ * so that the set contains only one copy of a given element.
  */
-class QueueValue
-	: public ContainerValue, protected concurrent_queue<ValuePtr>
+class UnisetValue
+	: public ContainerValue, protected concurrent_set<ValuePtr>
 {
 protected:
-	QueueValue(Type t) : ContainerValue(t) {}
+	UnisetValue(Type t) : ContainerValue(t) {}
 	virtual void update() const;
 
 public:
-	QueueValue(void) : ContainerValue(QUEUE_VALUE) {}
-	QueueValue(const ValueSeq&);
-	virtual ~QueueValue() {}
+	UnisetValue(void) : ContainerValue(UNISET_VALUE) {}
+	UnisetValue(const ValueSeq&);
+	virtual ~UnisetValue() {}
 	virtual void open(void);
 	virtual void close(void);
 	virtual bool is_closed(void) const;
@@ -63,16 +65,16 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<QueueValue> QueueValuePtr;
-static inline QueueValuePtr QueueValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<QueueValue>(a); }
+typedef std::shared_ptr<UnisetValue> UnisetValuePtr;
+static inline UnisetValuePtr UnisetValueCast(ValuePtr& a)
+	{ return std::dynamic_pointer_cast<UnisetValue>(a); }
 
 template<typename ... Type>
-static inline std::shared_ptr<QueueValue> createQueueValue(Type&&... args) {
-   return std::make_shared<QueueValue>(std::forward<Type>(args)...);
+static inline std::shared_ptr<UnisetValue> createUnisetValue(Type&&... args) {
+   return std::make_shared<UnisetValue>(std::forward<Type>(args)...);
 }
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_QUEUE_VALUE_H
+#endif // _OPENCOG_UNISET_VALUE_H

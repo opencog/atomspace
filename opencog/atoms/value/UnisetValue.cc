@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/QueueValue.cc
+ * opencog/atoms/value/UnisetValue.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  * All Rights Reserved
@@ -20,20 +20,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 
-typedef concurrent_queue<ValuePtr> conq;
+typedef concurrent_set<ValuePtr> conset;
 
 // ==============================================================
 
-QueueValue::QueueValue(const ValueSeq& vseq)
-	: ContainerValue(QUEUE_VALUE)
+UnisetValue::UnisetValue(const ValueSeq& vseq)
+	: ContainerValue(UNISET_VALUE)
 {
 	for (const ValuePtr& v: vseq)
-		push(v); // concurrent_queue<ValuePtr>::push(v);
+		conset::insert(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -55,10 +55,10 @@ QueueValue::QueueValue(const ValueSeq& vseq)
 //
 // Alternately, more clever users can work with the concurrent queue
 // API directly; they do not need to go through this API.
-void QueueValue::update() const
+void UnisetValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == conq::size()) return;
+	if (is_closed() and 0 == conset::size()) return;
 
 	// Reset, to start with.
 	_value.clear();
@@ -69,93 +69,93 @@ void QueueValue::update() const
 		while (true)
 		{
 			ValuePtr val;
-			const_cast<QueueValue*>(this) -> pop(val);
+			const_cast<UnisetValue*>(this) -> get(val);
 			_value.emplace_back(val);
 		}
 	}
-	catch (typename conq::Canceled& e)
+	catch (typename conset::Canceled& e)
 	{}
 
 	// If we are here, the queue closed up. Reopen it
 	// just long enough to drain any remaining values.
-	const_cast<QueueValue*>(this) -> cancel_reset();
+	const_cast<UnisetValue*>(this) -> cancel_reset();
 	while (not is_empty())
 	{
 		ValuePtr val;
-		const_cast<QueueValue*>(this) -> pop(val);
+		const_cast<UnisetValue*>(this) -> get(val);
 		_value.emplace_back(val);
 	}
-	const_cast<QueueValue*>(this) -> cancel();
+	const_cast<UnisetValue*>(this) -> cancel();
 }
 
 // ==============================================================
 
-void QueueValue::open()
+void UnisetValue::open()
 {
-	if (not conq::is_closed()) return;
-	conq::open();
+	if (not is_closed()) return;
+	conset::open();
 }
 
-void QueueValue::close()
+void UnisetValue::close()
 {
-	if (conq::is_closed()) return;
-	conq::close();
+	if (is_closed()) return;
+	conset::close();
 }
 
-bool QueueValue::is_closed() const
+bool UnisetValue::is_closed() const
 {
-	return conq::is_closed();
+	return conset::is_closed();
 }
 
 // ==============================================================
 
-void QueueValue::add(const ValuePtr& vp)
+void UnisetValue::add(const ValuePtr& vp)
 {
-	conq::push(vp);
+	conset::insert(vp);
 }
 
-void QueueValue::add(ValuePtr&& vp)
+void UnisetValue::add(ValuePtr&& vp)
 {
-	conq::push(vp);
+	conset::insert(vp);
 }
 
-ValuePtr QueueValue::remove(void)
+ValuePtr UnisetValue::remove(void)
 {
-	return conq::value_pop();
+	return conset::value_get();
 }
 
-size_t QueueValue::size(void) const
+size_t UnisetValue::size(void) const
 {
 	if (is_closed())
 	{
-		if (0 != conq::size()) update();
+		if (0 != conset::size()) update();
 		return _value.size();
 	}
-	return conq::size();
+	return conset::size();
 }
 
 // ==============================================================
 
-void QueueValue::clear()
+void UnisetValue::clear()
 {
 	// Reset contents
 	_value.clear();
 
 	// Do nothing; we don't want to clobber the _value
-	if (conq::is_closed())
+	if (conset::is_closed())
 	{
-		conq::wait_and_take_all();
+		conset::wait_and_take_all();
 		return;
 	}
 
-	conq::close();
-	conq::wait_and_take_all();
-	conq::open();
+	conset::close();
+	conset::wait_and_take_all();
+	conset::open();
 }
 
 // ==============================================================
 
-bool QueueValue::operator==(const Value& other) const
+bool UnisetValue::operator==(const Value& other) const
 {
 	// Derived classes use this, so use get_type()
 	if (get_type() != other.get_type()) return false;
@@ -163,7 +163,7 @@ bool QueueValue::operator==(const Value& other) const
 	if (this == &other) return true;
 
 	if (not is_closed()) return false;
-	if (not ((const QueueValue*) &other)->is_closed()) return false;
+	if (not ((const UnisetValue*) &other)->is_closed()) return false;
 
 	return LinkValue::operator==(other);
 }
@@ -171,5 +171,5 @@ bool QueueValue::operator==(const Value& other) const
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(QUEUE_VALUE,
-                     createQueueValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(UNISET_VALUE,
+                     createUnisetValue, std::vector<ValuePtr>)

@@ -38,9 +38,9 @@ class Implicator:
 	public SatisfyMixin
 {
 	public:
-		Implicator(AtomSpace* asp, QueueValuePtr& qvp) :
+		Implicator(AtomSpace* asp, ContainerValuePtr& cvp) :
 			InitiateSearchMixin(asp),
-			RewriteMixin(asp, qvp),
+			RewriteMixin(asp, cvp),
 			TermMatchMixin(asp) {}
 
 			virtual void set_pattern(const Variables& vars,

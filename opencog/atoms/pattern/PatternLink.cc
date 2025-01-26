@@ -29,7 +29,7 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "BindLink.h"
@@ -254,14 +254,16 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 	// Can be called with null pointer during destruction.
 	if (nullptr == as) return;
 
-	// All patterns will record results into queues. We attach
-	// queues now. User can over-ride later, if desired.
-	// Start queue in closed state, otherwise it will hang
-	// in update() when printing.
-	QueueValuePtr qvp = createQueueValue();
-	qvp->close();
+	// All patterns will record results into thread-safe queues or to
+	// thread-safe deduplicated sets. Use a set by default. User can
+	// over-ride later, as desired.
+	// Start in closed state, otherwise it will hang in update()
+	// when printing.
+	UnisetValuePtr svp = createUnisetValue();
+	svp->close();
+
 	const Handle& self(get_handle());
-	as->set_value(self, self, qvp);
+	as->set_value(self, self, svp);
 }
 
 /* ================================================================= */

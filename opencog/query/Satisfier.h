@@ -26,7 +26,7 @@
 
 #include <vector>
 
-#include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/ContinuationMixin.h>
@@ -46,7 +46,7 @@ namespace opencog {
 class Satisfier :
 	public ContinuationMixin
 {
-	public: // Arghhh. OpenPsi accesses these directly...
+	protected:
 		Handle _pattern_body;
 		bool _have_variables;
 
@@ -100,16 +100,16 @@ class SatisfyingSet :
 		AtomSpace* _as;
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
-		QueueValuePtr _result_queue;
+		ContainerValuePtr _result_queue;
 
 		ValuePtr wrap_result(const GroundingMap &var_soln);
 		size_t _num_results;
 		std::map<GroundingMap, ValueSet> _groups;
 
 	public:
-		SatisfyingSet(AtomSpace* as, const QueueValuePtr& qvp) :
+		SatisfyingSet(AtomSpace* as, const ContainerValuePtr& cvp) :
 			ContinuationMixin(as),
-			_as(as), _result_queue(qvp),
+			_as(as), _result_queue(cvp),
 			_num_results(0), max_results(SIZE_MAX) {}
 
 		size_t max_results;

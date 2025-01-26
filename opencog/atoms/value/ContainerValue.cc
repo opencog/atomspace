@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/pattern/MeetLink.h
+ * opencog/atoms/value/ContainerValue.cc
  *
- * Copyright (C) 2019 Linas Vepstas
+ * Copyright (C) 2020, 2025 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,39 +19,24 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_MEET_LINK_H
-#define _OPENCOG_MEET_LINK_H
 
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/value/ContainerValue.h>
 
-namespace opencog
+using namespace opencog;
+
+// ==============================================================
+
+bool ContainerValue::operator==(const Value& other) const
 {
-/** \addtogroup grp_atomspace
- *  @{
- */
-class MeetLink : public PatternLink
-{
-protected:
-	void init(void);
-	virtual ContainerValuePtr do_execute(AtomSpace*, bool silent);
+	// Derived classes use this, so use get_type()
+	if (get_type() != other.get_type()) return false;
 
-public:
-	MeetLink(const HandleSeq&&, Type=MEET_LINK);
+	if (this == &other) return true;
 
-	MeetLink(const MeetLink&) = delete;
-	MeetLink operator=(const MeetLink&) = delete;
+	if (not is_closed()) return false;
+	if (not ((const ContainerValue*) &other)->is_closed()) return false;
 
-	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace*, bool silent=false);
-
-	static Handle factory(const Handle&);
-};
-
-LINK_PTR_DECL(MeetLink)
-#define createMeetLink CREATE_DECL(MeetLink)
-
-/** @}*/
+	return LinkValue::operator==(other);
 }
 
-#endif // _OPENCOG_MEET_LINK_H
+// ==============================================================

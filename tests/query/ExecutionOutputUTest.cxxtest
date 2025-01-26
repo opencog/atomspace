@@ -248,8 +248,9 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	// Now perform the search.
 	QueueValuePtr qvp(createQueueValue());
+	ContainerValuePtr cvp(qvp);
 	qvp->close();
-	Implicator simpl(as.get(), qvp);
+	Implicator simpl(as.get(), cvp);
 	simpl.implicand = situation->get_implicand();
 	simpl.satisfy(situation);
 
@@ -257,22 +258,21 @@ void ExecutionOutputUTest::test_varsub(void)
 	qvp->open();
 
 	// If it's empty, it will hang ...
-	TSM_ASSERT_EQUALS("no results returned",
-		false, qvp->is_empty());
+	TSM_ASSERT("no results returned", 0 != qvp->size());
 
-	Handle res = HandleCast(qvp->value_pop());
+	Handle res = HandleCast(qvp->remove());
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
 	// Now perform the search.
 	qvp->close();
-	Implicator pimpl(as.get(), qvp);
+	Implicator pimpl(as.get(), cvp);
 	pimpl.implicand = predicament->get_implicand();
 	pimpl.satisfy(predicament);
 
 	// The result_list contains a list of the grounded expressions.
 	qvp->open();
-	Handle del = HandleCast(qvp->value_pop());
+	Handle del = HandleCast(qvp->remove());
 	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 

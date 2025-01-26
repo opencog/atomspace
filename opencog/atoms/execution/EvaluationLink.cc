@@ -230,11 +230,11 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	Handle sterm(scratch->add_atom(term));
 	ValuePtr vp(inst.execute(sterm, silent));
 
-	// If the return value is a QueueValue, we assume that this
+	// If the return value is a ContainerValue, we assume that this
 	// is the result of executing a MeetLink or QueryLink.
 	// In this case, unwrap it, to get the "actual value".
 	// This feels slightly hacky, but will do for just right now.
-	if (QUEUE_VALUE == vp->get_type())
+	if (vp->is_type(CONTAINER_VALUE))
 	{
 		HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
 		if (1 == hs.size())
