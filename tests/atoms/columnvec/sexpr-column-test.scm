@@ -41,5 +41,37 @@
 		"(Item \"zork\")")))
 
 ; --------------------------------------------------------
+; Complicated case
+(Edge (Predicate "word-pair") (List (Item "Paul") (Item "bit")))
+(Edge (Predicate "word-pair") (List (Item "bit") (Item "the")))
+(Edge (Predicate "word-pair") (List (Item "the") (Item "dog")))
+(Edge (Predicate "word-pair") (List (Item "dog") (Item "in")))
+(Edge (Predicate "word-pair") (List (Item "in") (Item "the")))
+(Edge (Predicate "word-pair") (List (Item "the") (Item "leg")))
+(Edge (Predicate "word-pair") (List (Item "leg") (Item "and")))
+(Edge (Predicate "word-pair") (List (Item "and") (Item "it")))
+(Edge (Predicate "word-pair") (List (Item "it") (Item "hurt")))
+(Edge (Predicate "word-pair") (List (Item "hurt") (Item "a")))
+(Edge (Predicate "word-pair") (List (Item "a") (Item "lot")))
+(Edge (Predicate "word-pair") (List (Item "lot") (Item ".")))
+
+(define mtx
+	(Meet (VariableList
+		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
+		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
+		(Present
+			(Edge (Predicate "word-pair")
+				(List (Variable "$left-word") (Variable "$right-word"))))))
+
+(cog-execute! mtx)
+(define mtxgnd (cog-execute! (ValueOf mtx mtx)))
+(format #t "Matrix ground ~A\n" mtxgnd)
+
+(define smtx (SexprColumn (ValueOf mtx mtx)))
+(define mtxvec (cog-execute! smtx))
+(format #t "Matrix vec ~A\n" mtxvec)
+(test-assert "matrix size" (equal? 12 (length (cog-value->list mtxvec))))
+
+; --------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
