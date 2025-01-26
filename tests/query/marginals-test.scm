@@ -95,15 +95,47 @@
 	(Present
 		(Edge (Predicate "foo") (List (Variable "$x")(Item "right"))))))
 
+(cog-execute! m2)
+
+(test-assert "m2 keynum" (equal? 2 (length (cog-keys m2))))
+(test-assert "m2 grnds" (equal? 3 (length (cog-value->list
+	(cog-value m2 m2 )))))
+(test-assert "m2 vars" (equal? 3 (length (cog-value->list
+	(cog-value m2 (Variable "$x"))))))
+
+; ----------------------------------------------------------
+
 (define m3 (Meet
 	(TypedVariable (Variable "$x") (Type "Item"))
 	(Present
 		(Edge (Predicate "foo") (List (Variable "$x")(Item "right"))))))
 
+(cog-execute! m3)
+(test-assert "m3 keynum" (equal? 3 (length (cog-keys m3))))
+(test-assert "m3 grnds" (equal? 3 (length (cog-value->list
+	(cog-value m3 m3 )))))
+(test-assert "m3 vars" (equal? 3 (length (cog-value->list
+	(cog-value m3 (Variable "$x"))))))
+(test-assert "m3 typed vars" (equal? 3 (length (cog-value->list
+	(cog-value m3 (TypedVariable (Variable "$x") (Type "Item")))))))
+
+; ----------------------------------------------------------
+
 (define m4 (Meet
 	(VariableList (TypedVariable (Variable "$x") (Type "Item")))
 	(Present
 		(Edge (Predicate "foo") (List (Variable "$x")(Item "right"))))))
+
+(cog-execute! m4)
+(test-assert "m4 keynum" (equal? 3 (length (cog-keys m4))))
+(test-assert "m4 grnds" (equal? 3 (length (cog-value->list
+	(cog-value m4 m4 )))))
+(test-assert "m4 vars" (equal? 3 (length (cog-value->list
+	(cog-value m4 (Variable "$x"))))))
+(test-assert "m4 typed vars" (equal? 3 (length (cog-value->list
+	(cog-value m4 (TypedVariable (Variable "$x") (Type "Item")))))))
+
+; ----------------------------------------------------------
 
 (define m5 (Meet
 	(VariableList
@@ -121,6 +153,18 @@
 (format #t "M5 right vars ~A\n" (cog-value m5 (Variable "$ro")))
 (format #t "M5 typed right vars ~A\n"
 	(cog-value m5 (TypedVariable (Variable "$ro") (Type "Item"))))
+
+(test-assert "m5 keynum" (equal? 4 (length (cog-keys m5))))
+(test-assert "m5 grnds" (equal? 5 (length (cog-value->list
+	(cog-value m5 m5 )))))
+(test-assert "m5 vars" (equal? 5 (length (cog-value->list
+	(cog-value m5 (Variable "$loo"))))))
+(test-assert "m5 right vars" (equal? 2 (length (cog-value->list
+	(cog-value m5 (Variable "$ro"))))))
+(test-assert "m5 typed right vars" (equal? 2 (length (cog-value->list
+	(cog-value m5 (TypedVariable (Variable "$ro") (Type "Item")))))))
+
+; ----------------------------------------------------------
 
 (test-end tname)
 (opencog-test-end)
