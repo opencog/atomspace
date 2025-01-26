@@ -56,23 +56,45 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 	Handle base(_outgoing[0]);
 	if (base->is_executable())
 	{
-		ValuePtr vp(base->execute(as, silent));
-		if (vp->is_atom())
-			base = HandleCast(vp);
+		ValuePtr vpe(base->execute(as, silent));
+		if (vpe->is_atom())
+			base = HandleCast(vpe);
 		else
 		{
-#if 0
-			if (not vp->is_type(LINK_VALUE))
-				return createStringValue(vp->to_string());
+			if (vpe->is_type(FLOAT_VALUE))
+				return vpe;
 
-			// If we are here, we've got a LinkValue
-			std::vector<std::string> svec;
-			svec.reserve(vp->size());
-			for (const ValuePtr& v : LinkValueCast(vp)->value())
-				svec.push_back(v->to_short_string());
-			return createStringValue(std::move(svec));
-#endif
-			return createFloatValue(43.0);
+			if (not vpe->is_type(LINK_VALUE))
+				throw RuntimeException(TRACE_INFO,
+					"Expecting LinkValue, got %s\n",
+					vpe->to_string());
+
+			// If we are here, we've got a LinkValue.
+			// Inside of loop is cut-n-paste of that below.
+			std::vector<double> dvec;
+			dvec.reserve(vpe->size());
+			for (const ValuePtr& v : LinkValueCast(vpe)->value())
+			{
+				ValuePtr vp(NumericFunctionLink::get_value(as, silent, v));
+
+				// Expecting exactly one float per item. That's because
+				// I don't know what it means if there is more than one,
+				// flattening seems like the wrong thing to do.
+				if (1 != vp->size())
+					throw RuntimeException(TRACE_INFO,
+						"Expecting exactly one number per item, got %lu\n",
+						vp->size());
+
+				if (vp->is_type(FLOAT_VALUE))
+					dvec.push_back(FloatValueCast(vp)->value()[0]);
+				else if (vp->is_type(NUMBER_NODE))
+					dvec.push_back(NumberNodeCast(vp)->get_value());
+				else
+					throw RuntimeException(TRACE_INFO,
+						"Expecting numeric value, got %s\n",
+						vp->to_string());
+			}
+			return createFloatValue(std::move(dvec));
 		}
 	}
 
