@@ -1199,6 +1199,20 @@ DEFINED_SCHEMA_NODE <- SCHEMA_NODE,DEFINED_PROCEDURE_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
+// Serializers, for GPU's
+// Convert collections of Atoms or Values into vectors,
+// e.g. StringValue or FloatValue vectors.
+
+// Base class
+COLUMN <- EXECUTABLE_LINK
+
+// Convert collection to StringValue of s-expressions.
+SEXPR_COLUMN <- COLUMN
+
+// Convert collection to FloatValue of numbers.
+FLOAT_COLUMN <- COLUMN
+
+// ==============================================================
 // Foreign abstrast syntax trees (AST's)
 
 // Base class for all foregin (non-Atomese) language abstract syntax
