@@ -259,11 +259,55 @@ void PatternLink::setAtomSpace(AtomSpace* as)
 	// over-ride later, as desired.
 	// Start in closed state, otherwise it will hang in update()
 	// when printing.
-	UnisetValuePtr svp = createUnisetValue();
+	UnisetValuePtr svp(createUnisetValue());
 	svp->close();
 
 	const Handle& self(get_handle());
 	as->set_value(self, self, svp);
+
+	// If there are multiple rewrites given, then create a distinct
+	// set for each. Otherwise, one is enough.
+	if (_implicand.size() == 1)
+	{
+		as->set_value(self, _implicand[0], svp);
+	}
+	else
+	{
+		for (const Handle& hi : _implicand)
+		{
+			UnisetValuePtr svp(createUnisetValue());
+			svp->close();
+			as->set_value(self, hi, svp);
+		}
+	}
+
+	// Marginals will likewise be sets. There will be one marginal for
+	// each variable, associated with the variable declaration. The
+	// marginals will contain all groundings seen for that particular
+	// variable. For ease of use, we'll put exactly the same marginal
+	// in *two* places: the raw variable name, and the type declaration
+	// for that variable. Some users will find one easier to use than
+	// the other, and it costs nothing in performance/efficiency to
+	// provide both.
+	for (const auto& tyvar : _variables._typemap)
+	{
+		UnisetValuePtr svp(createUnisetValue());
+		svp->close();
+		as->set_value(self, tyvar.first, svp);
+		as->set_value(self, HandleCast(tyvar.second), svp);
+	}
+
+	// Some variables are untyped. Grab those, too.
+	for (const Handle& untyvar : _variables.varseq)
+	{
+		// Skip, if its typed already.
+		// if (_variables._typemap.contains(untyvar)) continue;
+		if (_variables._typemap.end() != _variables._typemap.find(untyvar))
+			continue;
+		UnisetValuePtr svp(createUnisetValue());
+		svp->close();
+		as->set_value(self, untyvar, svp);
+	}
 }
 
 /* ================================================================= */

@@ -130,7 +130,6 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 			"Expecting QueueValue for results!");
 
 	Implicator impl(as, cvp);
-	impl.implicand = this->get_implicand();
 
 	try
 	{
@@ -171,9 +170,10 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
+		Instantiator inst(as);
 		cvp->open();
-		for (const Handle& himp: impl.implicand)
-			cvp->add(std::move(impl.inst.execute(himp, true)));
+		for (const Handle& himp: get_implicand())
+			cvp->add(std::move(inst.execute(himp, true)));
 		cvp->close();
 		return cvp;
 	}

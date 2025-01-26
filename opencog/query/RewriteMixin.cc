@@ -34,6 +34,55 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 {
 }
 
+void RewriteMixin::setup_marginals(void)
+{
+	// Grab the places where we'll record the marginals.
+	for (const Handle& var: _varseq)
+	{
+		ValuePtr vp(_plp->getValue(var));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
+		_var_marginals.insert({var, cvp});
+	}
+
+	// Record the implicands, too
+	for (const Handle& himp: _implicand)
+	{
+		ValuePtr vp(_plp->getValue(himp));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
+		_implicand_grnds.insert({himp, cvp});
+	}
+}
+
+void RewriteMixin::record_marginals(const GroundingMap& var_soln)
+{
+	for (const Handle& hv : _varseq)
+	{
+		// Optional clauses (e.g. AbsentLink) may have variables
+		// in them that are not grounded. Those variables won't
+		// have a grounding; this will cause std::map::at to throw.
+		try
+		{
+			ValuePtr gvp(var_soln.at(hv));
+			auto it = _var_marginals.find(hv);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+		}
+		catch (...) {}
+	}
+}
+
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
@@ -44,8 +93,8 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
-                                     const GroundingMap &term_soln)
+bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
+                                     const GroundingMap& term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
@@ -56,6 +105,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 
 	_num_results ++;
 
+	// Record marginals for variables.
+	record_marginals(var_soln);
+
 	// Catch and ignore SilentExceptions. This arises when
 	// running with the URE, which creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
@@ -65,19 +117,33 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	// meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
 	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
+	// Well, given that URE is dead meat, maybe we can remove this?
 	try {
-		if (1 == implicand.size())
+		if (1 == _implicand.size())
 		{
-			ValuePtr v(inst.instantiate(implicand[0], var_soln, true));
-			insert_result(v);
+			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
+			// AbsentLinks can result in nullptr v's
+			if (nullptr != v)
+			{
+				auto it = _implicand_grnds.find(_implicand[0]);
+				if (_implicand_grnds.end() != it)
+					(*it).second->add(v);
+				insert_result(v);
+			}
 		}
 		else
 		{
 			ValueSeq vs;
-			for (const Handle& himp: implicand)
+			for (const Handle& himp: _implicand)
 			{
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
-				vs.emplace_back(v);
+				if (nullptr != v)
+				{
+					auto it = _implicand_grnds.find(himp);
+					if (_implicand_grnds.end() != it)
+						(*it).second->add(v);
+					vs.emplace_back(v);
+				}
 			}
 			insert_result(createLinkValue(vs));
 		}
@@ -95,6 +161,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 /// to dribble in. Perhaps the engine search could be modified in some
 /// clever way to find groupings in a single batch; but for now, I don't
 /// see how this could be done.
+/// XXX FIXME now I see how it can be done. The groupings should
+/// be converted to marginals, and handled the same way. So this
+/// needs a rewrite. Good thing that almost no one uses this ...
 bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
                                     const GroundingMap &term_soln,
                                     const GroundingMap &grouping)
@@ -115,7 +184,7 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 	_group_sizes[grouping] ++;
 
 	try {
-		for (const Handle& himp: implicand)
+		for (const Handle& himp: _implicand)
 		{
 			ValuePtr v(inst.instantiate(himp, var_soln, true));
 
@@ -134,7 +203,6 @@ bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
 
 void RewriteMixin::insert_result(ValuePtr v)
 {
-	if (nullptr == v) return;
 	if (_result_set.end() != _result_set.find(v)) return;
 
 	// Insert atom into the atomspace immediately. This avoids having
@@ -173,6 +241,12 @@ bool RewriteMixin::search_finished(bool done)
 		if (gmin <= gsz and gsz <= gmax)
 			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
+
+	for (auto& mgs : _var_marginals)
+		mgs.second->close();
+
+	for (auto& igs : _implicand_grnds)
+		igs.second->close();
 
 	_result_queue->close();
 	return done;

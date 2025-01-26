@@ -99,8 +99,11 @@ class SatisfyingSet :
 	protected:
 		AtomSpace* _as;
 		DECLARE_PE_MUTEX;
+		PatternLinkPtr _plp;
 		HandleSeq _varseq;
 		ContainerValuePtr _result_queue;
+		std::map<Handle, ContainerValuePtr> _var_marginals;
+		void setup_marginals(void);
 
 		ValuePtr wrap_result(const GroundingMap &var_soln);
 		size_t _num_results;
@@ -119,6 +122,12 @@ class SatisfyingSet :
 		{
 			_varseq = vars.varseq;
 			ContinuationMixin::set_pattern(vars, pat);
+			setup_marginals();
+		}
+
+		virtual bool satisfy(const PatternLinkPtr& plp) {
+			_plp = plp;
+			return ContinuationMixin::satisfy(plp);
 		}
 
 		// Return true if a satisfactory grounding has been

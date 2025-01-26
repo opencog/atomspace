@@ -251,7 +251,6 @@ void ExecutionOutputUTest::test_varsub(void)
 	ContainerValuePtr cvp(qvp);
 	qvp->close();
 	Implicator simpl(as.get(), cvp);
-	simpl.implicand = situation->get_implicand();
 	simpl.satisfy(situation);
 
 	// The result_list contains a list of the grounded expressions.
@@ -267,7 +266,6 @@ void ExecutionOutputUTest::test_varsub(void)
 	// Now perform the search.
 	qvp->close();
 	Implicator pimpl(as.get(), cvp);
-	pimpl.implicand = predicament->get_implicand();
 	pimpl.satisfy(predicament);
 
 	// The result_list contains a list of the grounded expressions.

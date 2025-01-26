@@ -126,7 +126,24 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
+void SatisfyingSet::setup_marginals(void)
+{
+	// Grab the places where we'll record the marginals.
+	for (const Handle& var: _varseq)
+	{
+		ValuePtr vp(_plp->getValue(var));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
+		_var_marginals.insert({var, cvp});
+	}
+}
+
+ValuePtr SatisfyingSet::wrap_result(const GroundingMap& var_soln)
 {
 	_num_results ++;
 
@@ -135,7 +152,11 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			return var_soln.at(_varseq[0]);
+			ValuePtr gvp(var_soln.at(_varseq[0]));
+			auto it = _var_marginals.find(_varseq[0]);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+			return gvp;
 		}
 		catch (...)
 		{
@@ -155,7 +176,11 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 		// have a grounding; this will cause std::map::at to throw.
 		try
 		{
-			vargnds.push_back(var_soln.at(hv));
+			ValuePtr gvp(var_soln.at(hv));
+			auto it = _var_marginals.find(hv);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+			vargnds.push_back(gvp);
 		}
 		catch (...)
 		{
@@ -166,8 +191,8 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 }
 
 // MeetLink and GetLink groundings go through here.
-bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
-                                      const GroundingMap &term_soln)
+bool SatisfyingSet::propose_grounding(const GroundingMap& var_soln,
+                                      const GroundingMap& term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
@@ -228,6 +253,10 @@ bool SatisfyingSet::search_finished(bool done)
 		if (gmin <= gsz and gsz <= gmax)
 			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
+
+	// Close all queues
+	for (auto& mgs : _var_marginals)
+		mgs.second->close();
 
 	_result_queue->close();
 	return done;
