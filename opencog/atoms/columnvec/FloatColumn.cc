@@ -75,6 +75,10 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			dvec.reserve(vpe->size());
 			for (const ValuePtr& v : LinkValueCast(vpe)->value())
 			{
+				// NumericFunctionLink::get_value() tries to execute
+				// the value, if it's executable. Is that overkill,
+				// or is that needed? When would a vector of functions
+				// arise?
 				ValuePtr vp(NumericFunctionLink::get_value(as, silent, v));
 
 				// Expecting exactly one float per item. That's because
