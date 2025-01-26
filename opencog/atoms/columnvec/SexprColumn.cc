@@ -47,7 +47,7 @@ SexprColumn::SexprColumn(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Return a StringValue vector.
-ValuePtr SexprColumn::execute(AtomSpace* as, bool silent)
+ValuePtr SexprColumn::do_execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
 	Handle base(_outgoing[0]);
@@ -67,6 +67,14 @@ ValuePtr SexprColumn::execute(AtomSpace* as, bool silent)
 		return createStringValue(base->to_short_string());
 
 	return createStringValue("foo");
+}
+
+// ---------------------------------------------------------------
+
+/// Return a StringValue vector.
+ValuePtr SexprColumn::execute(AtomSpace* as, bool silent)
+{
+	return do_execute(as, silent);
 }
 
 DEFINE_LINK_FACTORY(SexprColumn, SEXPR_COLUMN)
