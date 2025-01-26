@@ -126,6 +126,11 @@ ValuePtr UnisetValue::remove(void)
 
 size_t UnisetValue::size(void) const
 {
+	if (is_closed())
+	{
+		if (0 != conset::size()) update();
+		return _value.size();
+	}
 	return conset::size();
 }
 

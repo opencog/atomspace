@@ -126,6 +126,11 @@ ValuePtr QueueValue::remove(void)
 
 size_t QueueValue::size(void) const
 {
+	if (is_closed())
+	{
+		if (0 != conq::size()) update();
+		return _value.size();
+	}
 	return conq::size();
 }
 
