@@ -21,8 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 
 #include "SexprColumn.h"
 
@@ -35,47 +34,34 @@ SexprColumn::SexprColumn(const HandleSeq&& oset, Type t)
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an SexprColumn, got %s", tname.c_str());
+			"Expecting a SexprColumn, got %s", tname.c_str());
 	}
 
 	size_t sz = _outgoing.size();
 
-	if (1 != sz and 2 != sz)
+	if (1 != sz)
 		throw InvalidParamException(TRACE_INFO,
-			"SexprColumn expects one or two args, got %lu", sz);
+			"SexprColumn expects one arg, got %lu", sz);
 }
 
 // ---------------------------------------------------------------
 
-/// Return a LinkValue vector.
+/// Return a StringValue vector.
 ValuePtr SexprColumn::execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
 	Handle base(_outgoing[0]);
 	if (base->is_executable())
 	{
-		base = HandleCast(base->execute(as, silent));
-		if (nullptr == base) return createLinkValue();
+		ValuePtr vp(base->execute(as, silent));
+		if (vp->is_atom())
+			base = HandleCast(vp);
+		else
+		{
+			return createStringValue("foo");
+		}
 	}
-
-	// Simple case. Get IncomingSet.
-	if (1 == _outgoing.size())
-		return createLinkValue(base->getIncomingSet());
-
-	// Get incoming set by type.
-	Handle tnode(_outgoing[1]);
-	if (tnode->is_executable())
-		tnode = HandleCast(tnode->execute(as, silent));
-
-	if (not tnode->is_type(TYPE_NODE))
-		throw RuntimeException(TRACE_INFO,
-			"SexprColumn expects a type; got %s",
-			tnode->to_string().c_str());
-
-	TypeNodePtr tnp = TypeNodeCast(tnode);
-	Type intype = tnp->get_kind();
-	HandleSeq iset(base->getIncomingSetByType(intype));
-	return createLinkValue(iset);
+	return createStringValue("foo");
 }
 
 DEFINE_LINK_FACTORY(SexprColumn, SEXPR_COLUMN)
