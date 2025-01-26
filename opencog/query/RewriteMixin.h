@@ -64,15 +64,17 @@ class RewriteMixin :
 		void insert_result(ValuePtr);
 
 		PatternLinkPtr _plp;
+		HandleSeq _varseq;
 		HandleSeq _implicand;
 		std::map<Handle, ContainerValuePtr> _var_marginals;
 		std::map<Handle, ContainerValuePtr> _implicand_grnds;
-		void setup_marginals(const HandleSeq&);
+		void setup_marginals(void);
 		void set_plp(const PatternLinkPtr& plp)
 		{
 			_plp = plp;
 			_implicand = _plp->get_implicand();
 		}
+		void record_marginals(const GroundingMap&);
 
 		size_t _num_results;
 		std::map<GroundingMap, ValueSet> _groups;
@@ -86,7 +88,8 @@ class RewriteMixin :
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
-			setup_marginals(vars.varseq);
+			_varseq = vars.varseq;
+			setup_marginals();
 		}
 
 		virtual bool propose_grounding(const GroundingMap &var_soln,

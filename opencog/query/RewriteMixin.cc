@@ -34,10 +34,10 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 {
 }
 
-void RewriteMixin::setup_marginals(const HandleSeq& varseq)
+void RewriteMixin::setup_marginals(void)
 {
 	// Grab the places where we'll record the marginals.
-	for (const Handle& var: varseq)
+	for (const Handle& var: _varseq)
 	{
 		ValuePtr vp(_plp->getValue(var));
 		ContainerValuePtr cvp(ContainerValueCast(vp));
@@ -65,6 +65,11 @@ void RewriteMixin::setup_marginals(const HandleSeq& varseq)
 	}
 }
 
+void RewriteMixin::record_marginals(const GroundingMap& var_soln)
+{
+	//for (const Handle& hv : _varseq)
+}
+
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
@@ -75,8 +80,8 @@ void RewriteMixin::setup_marginals(const HandleSeq& varseq)
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
-                                     const GroundingMap &term_soln)
+bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
+                                     const GroundingMap& term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
@@ -87,6 +92,9 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 
 	_num_results ++;
 
+	// Record marginals for variables.
+	record_marginals(var_soln);
+
 	// Catch and ignore SilentExceptions. This arises when
 	// running with the URE, which creates ill-formed links
 	// (due to rules producing nothing). Ideally this should
@@ -96,6 +104,7 @@ bool RewriteMixin::propose_grounding(const GroundingMap &var_soln,
 	// meanwhile this try-catch is used.
 	// See issue #950 and pull req #962. XXX FIXME later.
 	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
+	// Well, given that URE is dead meat, maybe we can remove this?
 	try {
 		if (1 == _implicand.size())
 		{

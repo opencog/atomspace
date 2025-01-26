@@ -143,7 +143,7 @@ void SatisfyingSet::setup_marginals(void)
 	}
 }
 
-ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
+ValuePtr SatisfyingSet::wrap_result(const GroundingMap& var_soln)
 {
 	_num_results ++;
 
@@ -191,8 +191,8 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 }
 
 // MeetLink and GetLink groundings go through here.
-bool SatisfyingSet::propose_grounding(const GroundingMap &var_soln,
-                                      const GroundingMap &term_soln)
+bool SatisfyingSet::propose_grounding(const GroundingMap& var_soln,
+                                      const GroundingMap& term_soln)
 {
 	LOCK_PE_MUTEX;
 	// PatternMatchEngine::log_solution(var_soln, term_soln);
