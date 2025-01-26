@@ -36,6 +36,25 @@ RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 
 void RewriteMixin::setup_marginals(const HandleSeq& varseq)
 {
+	// Grab the places where we'll record the marginals.
+	for (const Handle& var: varseq)
+	{
+		ValuePtr vp(_plp->getValue(var));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		cvp->open();
+		_var_marginals.insert({var, cvp});
+	}
+
+	// Record the implicands, too
+	for (const Handle& himp: _implicand)
+	{
+		ValuePtr vp(_plp->getValue(himp));
+		ContainerValuePtr cvp(ContainerValueCast(vp));
+		if (nullptr == cvp) continue;
+		cvp->open();
+		_implicand_grnds.insert({himp, cvp});
+	}
 }
 
 /**
