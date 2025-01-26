@@ -34,8 +34,28 @@
 
 (format #t "Query results ~A\n" (cog-value q q))
 (format #t "Query vars ~A\n" (cog-value q (Variable "$x")))
-(format #t "Query implicands ~A\n"
+(format #t "Query implicand ~A\n"
 	(cog-value q (Link (Item "fumble") (Variable "$x"))))
+
+(define q2 (Query
+	(Variable "$x")
+	(Present
+		(Edge (Predicate "foo") (List (Variable "$x")(Item "right"))))
+	(Link (Item "fumble") (Variable "$x"))
+	(Link (Concept "bramble") (Variable "$x"))
+	(Link (Item "borat") (Variable "$x") (Item "culture"))))
+
+(format #t "Query keys ~A\n" (cog-keys q2))
+(cog-execute! q2)
+
+(format #t "Query results ~A\n" (cog-value q2 q2))
+(format #t "Query vars ~A\n" (cog-value q2 (Variable "$x")))
+(format #t "Query implicand one ~A\n"
+	(cog-value q2 (Link (Item "fumble") (Variable "$x"))))
+(format #t "Query implicand two ~A\n"
+	(cog-value q2 (Link (Concept "bramble") (Variable "$x"))))
+(format #t "Query implicand three ~A\n"
+	(cog-value q2 (Link (Item "borat") (Variable "$x") (Item "culture"))))
 
 (define m2 (Meet
 	(Present
