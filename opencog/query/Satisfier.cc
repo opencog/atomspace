@@ -172,7 +172,11 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 		// have a grounding; this will cause std::map::at to throw.
 		try
 		{
-			vargnds.push_back(var_soln.at(hv));
+			ValuePtr gvp(var_soln.at(hv));
+			auto it = _var_marginals.find(hv);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+			vargnds.push_back(gvp);
 		}
 		catch (...)
 		{
