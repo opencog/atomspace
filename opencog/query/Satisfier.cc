@@ -126,17 +126,17 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-bool SatisfyingSet::satisfy(const PatternLinkPtr& plp)
+void SatisfyingSet::setup_marginals(void)
 {
 	// Grab the places where we'll record the marginals.
 	for (const Handle& var: _varseq)
 	{
-		ValuePtr vp(plp->getValue(var));
+		ValuePtr vp(_plp->getValue(var));
 		ContainerValuePtr cvp(ContainerValueCast(vp));
 		if (nullptr == cvp) continue;
+		cvp->open();
 		_var_marginals.insert({var, cvp});
 	}
-	return ContinuationMixin::satisfy(plp);
 }
 
 ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
@@ -245,6 +245,10 @@ bool SatisfyingSet::search_finished(bool done)
 		if (gmin <= gsz and gsz <= gmax)
 			_result_queue->add(std::move(createLinkValue(gset.second)));
 	}
+
+	// Close all queues
+	for (auto& mgs : _var_marginals)
+		mgs.second->close();
 
 	_result_queue->close();
 	return done;
