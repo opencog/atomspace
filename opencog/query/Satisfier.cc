@@ -128,6 +128,7 @@ bool Satisfier::search_finished(bool done)
 
 bool SatisfyingSet::satisfy(const PatternLinkPtr& plp)
 {
+	// Grab the places where we'll record the marginals.
 	for (const Handle& var: _varseq)
 	{
 		ValuePtr vp(plp->getValue(var));
@@ -147,7 +148,11 @@ ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 		// std::map::at() can throw. Rethrow for easier deubugging.
 		try
 		{
-			return var_soln.at(_varseq[0]);
+			ValuePtr gvp(var_soln.at(_varseq[0]));
+			auto it = _var_marginals.find(_varseq[0]);
+			if (_var_marginals.end() != it)
+				(*it).second->add(gvp);
+			return gvp;
 		}
 		catch (...)
 		{
