@@ -101,6 +101,8 @@ class SatisfyingSet :
 		DECLARE_PE_MUTEX;
 		HandleSeq _varseq;
 		ContainerValuePtr _result_queue;
+		std::map<Handle, ContainerValuePtr> _var_marginals;
+		std::map<Handle, ContainerValuePtr> _implicant_results;
 
 		ValuePtr wrap_result(const GroundingMap &var_soln);
 		size_t _num_results;
@@ -120,6 +122,8 @@ class SatisfyingSet :
 			_varseq = vars.varseq;
 			ContinuationMixin::set_pattern(vars, pat);
 		}
+
+		virtual bool satisfy(const PatternLinkPtr&);
 
 		// Return true if a satisfactory grounding has been
 		// found. Note that in case where you want all possible

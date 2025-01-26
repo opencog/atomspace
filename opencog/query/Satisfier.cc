@@ -126,6 +126,11 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
+bool SatisfyingSet::satisfy(const PatternLinkPtr& plp)
+{
+	return ContinuationMixin::satisfy(plp);
+}
+
 ValuePtr SatisfyingSet::wrap_result(const GroundingMap &var_soln)
 {
 	_num_results ++;
