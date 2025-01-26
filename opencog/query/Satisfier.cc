@@ -134,7 +134,11 @@ void SatisfyingSet::setup_marginals(void)
 		ValuePtr vp(_plp->getValue(var));
 		ContainerValuePtr cvp(ContainerValueCast(vp));
 		if (nullptr == cvp) continue;
-		cvp->open();
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
 		_var_marginals.insert({var, cvp});
 	}
 }

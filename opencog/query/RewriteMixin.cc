@@ -42,7 +42,11 @@ void RewriteMixin::setup_marginals(const HandleSeq& varseq)
 		ValuePtr vp(_plp->getValue(var));
 		ContainerValuePtr cvp(ContainerValueCast(vp));
 		if (nullptr == cvp) continue;
-		cvp->open();
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
 		_var_marginals.insert({var, cvp});
 	}
 
@@ -52,7 +56,11 @@ void RewriteMixin::setup_marginals(const HandleSeq& varseq)
 		ValuePtr vp(_plp->getValue(himp));
 		ContainerValuePtr cvp(ContainerValueCast(vp));
 		if (nullptr == cvp) continue;
-		cvp->open();
+		if (cvp->is_closed())
+		{
+			cvp->clear();
+			cvp->open();
+		}
 		_implicand_grnds.insert({himp, cvp});
 	}
 }
