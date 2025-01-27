@@ -138,22 +138,42 @@
 ; -------
 ; Go grab the third number from the stats vec, and convert it to a column
 
-(define cubecol
+(define (grab-col COLNO)
 	(FloatColumn
 		(Filter
 			(Rule
 				(Variable "$edge")
 				(Variable "$edge")
-				(ElementOf (Number 2)
+				(ElementOf (Number COLNO)
 					(FloatValueOf (Variable "$edge") (Predicate "stats"))))
 		(ValueOf mtxpr mtxpr))))
 
+(define cubecol (grab-col 2))
 (define cubevec (cog-execute! cubecol))
 (format #t "Cube vect: ~A\n" cubevec)
 
 ; Twelve data items, so twelve numbers
 (test-assert "cube list length" (equal? 12
 	 (length (cog-value->list cubevec))))
+
+(define squarecol (grab-col 1))
+(define squarevec (cog-execute! squarecol))
+(format #t "Square vect: ~A\n" squarevec)
+
+; Twelve data items, so twelve numbers
+(test-assert "square list length" (equal? 12
+	 (length (cog-value->list squarevec))))
+
+(define origcol (grab-col 0))
+(define origvec (cog-execute! origcol))
+(format #t "Orig vect: ~A\n" origvec)
+
+; Twelve data items, so twelve numbers
+(test-assert "orig list length" (equal? 12
+	 (length (cog-value->list origvec))))
+
+; The first col should be equal to the original weight data.
+(test-assert "orig and data equal" (equal? datavec origvec))
 
 ; ------------------------------------------------------------
 (test-end tname)
