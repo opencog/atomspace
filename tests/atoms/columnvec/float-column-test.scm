@@ -1,5 +1,7 @@
 ;
 ; float-column-test.scm -- Verify that FloatColumn works.
+; Also depends on both SexprColumn and ListColumn in the final
+; super-test.
 ;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
@@ -29,6 +31,19 @@
 (define nlivec (cog-execute! nlicol))
 (format #t "number list vect: ~A\n" nlivec)
 (test-assert "number list vect" (equal? nlivec (FloatValue 1 2 3 4)))
+
+; ------------------------------------------------------------
+; Serialize numbers, in direct form.
+
+(define numset (list
+	(NumberNode 1)
+	(NumberNode 2)
+	(NumberNode 3)
+	(NumberNode 4)))
+(define nsetcol (FloatColumn numset))
+(define nsetvec (cog-execute! nsetcol))
+(format #t "number set vect: ~A\n" nsetvec)
+(test-assert "number set vect" (equal? nlivec (FloatValue 1 2 3 4)))
 
 ; ------------------------------------------------------------
 ; Serialize LinkValue lists.
@@ -111,7 +126,92 @@
 
 ; Twelve data items, so twelve numbers
 (test-assert "data list length" (equal? 12
-	 (length (cog-value->list datavec))))
+	(length (cog-value->list datavec))))
+
+; ------------------------------------------------------------
+; Stick a vector of "statistical values" onto the raw data.
+; The square and cube of the weights, for this example.
+; Then rip these out one column at a time,
+
+(define edge-weight
+	(FloatValueOf (Variable "$edge") (Predicate "weight")))
+
+(define tag-pairs-w-stats
+	(Filter
+		(Rule
+			(Variable "$edge")
+			(Variable "$edge")
+			(SetValue (Variable "$edge") (Predicate "stats")
+				(FloatColumn
+					edge-weight
+					(Times edge-weight edge-weight)
+					(Times edge-weight edge-weight edge-weight))))
+		(ValueOf mtxpr mtxpr)))
+
+(cog-execute! tag-pairs-w-stats)
+
+; -------
+; Go grab the third number from the stats vec, and convert it to a column
+
+(define (grab-col COLNO)
+	(FloatColumn
+		(Filter
+			(Rule
+				(Variable "$edge")
+				(Variable "$edge")
+				(ElementOf (Number COLNO)
+					(FloatValueOf (Variable "$edge") (Predicate "stats"))))
+		(ValueOf mtxpr mtxpr))))
+
+(define cubecol (grab-col 2))
+(define cubevec (cog-execute! cubecol))
+(format #t "Cube vect: ~A\n" cubevec)
+
+; Twelve data items, so twelve numbers
+(test-assert "cube list length" (equal? 12
+	(length (cog-value->list cubevec))))
+
+(define squarecol (grab-col 1))
+(define squarevec (cog-execute! squarecol))
+(format #t "Square vect: ~A\n" squarevec)
+
+; Twelve data items, so twelve numbers
+(test-assert "square list length" (equal? 12
+	(length (cog-value->list squarevec))))
+
+(define origcol (grab-col 0))
+(define origvec (cog-execute! origcol))
+(format #t "Orig vect: ~A\n" origvec)
+
+; Twelve data items, so twelve numbers
+(test-assert "orig list length" (equal? 12
+	(length (cog-value->list origvec))))
+
+; The first col should be equal to the original weight data.
+(test-assert "orig and data equal" (equal? datavec origvec))
+
+; ------------------------------------------------------------
+; Super-mega-all-in-one
+
+(define four-col
+	(LinkColumn
+		(SexprColumn (ValueOf mtxpr mtxpr))
+		(grab-col 0) (grab-col 1) (grab-col 2)))
+
+(define four-vec (cog-execute! four-col))
+(format #t "Four vect: ~A\n" four-vec)
+
+(define four-list (cog-value->list four-vec))
+(test-assert "Four Columns" (equal? 4 (length four-list)))
+
+; First item should be the s-expressions
+(test-assert "s-expressions" (equal? (list-ref four-list 0)
+	(cog-execute! (SexprColumn (ValueOf mtxpr mtxpr)))))
+
+; The next three should be the earlier number columns
+(test-assert "orig col" (equal? (list-ref four-list 1) datavec))
+(test-assert "square col" (equal? (list-ref four-list 2) squarevec))
+(test-assert "cube col" (equal? (list-ref four-list 3) cubevec))
 
 ; ------------------------------------------------------------
 (test-end tname)

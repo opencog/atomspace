@@ -1222,11 +1222,14 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 // Base class
 COLUMN <- EXECUTABLE_LINK
 
-// Convert collection to StringValue of s-expressions.
+// Convert collection to a StringValue of s-expressions.
 SEXPR_COLUMN <- COLUMN
 
-// Convert collection to FloatValue of numbers.
+// Convert collection to a FloatValue of numbers.
 FLOAT_COLUMN <- COLUMN
+
+// Convert collection to a LinkValue of Values.
+LINK_COLUMN <- COLUMN
 
 // ==============================================================
 // Foreign abstrast syntax trees (AST's)

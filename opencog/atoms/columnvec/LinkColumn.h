@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/column/FloatColumn.h
+ * opencog/atoms/column/LinkColumn.h
  *
  * Copyright (C) 2015, 2022, 2025 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FLOAT_COLUMN_H
-#define _OPENCOG_FLOAT_COLUMN_H
+#ifndef _OPENCOG_LINK_COLUMN_H
+#define _OPENCOG_LINK_COLUMN_H
 
 #include <opencog/atoms/base/Link.h>
 
@@ -31,45 +31,44 @@ namespace opencog
  *  @{
  */
 
-/// The FloatColumn returns a FloatValue vector of the floating
-/// point values for Atoms/Values obtained from a Link or LinkValue.
+/// The LinkColumn returns a LinkValue vector of whatever it is
+/// wrapping.
 ///
 /// For example,
 ///
-///     FloatColumn
-///         Link
-///             Number 1
-///             Number 2
+///     LinkColumn
+///         Concept "a"
+///         Concept "b"
 ///
-/// will return a float vector of length two:
+/// will return a value vector of length two:
 ///
-///     (FloatValue 1.0 2.0)
+///     (LinkValue (Concept "a") (Concept "b"))
 ///
 /// The intended use case is that this will be used with pattern
-/// searches, to obtain float point data anchored to search results.
-class FloatColumn : public Link
+/// searches, to construct a list of columns.
+class LinkColumn : public Link
 {
 protected:
 	ValuePtr do_execute(AtomSpace*, bool);
 	ValuePtr do_handle_loop(AtomSpace*, bool, const HandleSeq&);
 
 public:
-	FloatColumn(const HandleSeq&&, Type = FLOAT_COLUMN);
-	FloatColumn(const FloatColumn&) = delete;
-	FloatColumn& operator=(const FloatColumn&) = delete;
+	LinkColumn(const HandleSeq&&, Type = LINK_COLUMN);
+	LinkColumn(const LinkColumn&) = delete;
+	LinkColumn& operator=(const LinkColumn&) = delete;
 
 	virtual bool is_executable() const { return true; }
 
-	// Return a pointer to FloatValue holding the vector of floats.
+	// Return a pointer to LinkValue holding a list of Values.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(FloatColumn)
-#define createFloatColumn CREATE_DECL(FloatColumn)
+LINK_PTR_DECL(LinkColumn)
+#define createLinkColumn CREATE_DECL(LinkColumn)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_FLOAT_COLUMN_H
+#endif // _OPENCOG_LINK_COLUMN_H
