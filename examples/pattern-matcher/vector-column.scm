@@ -80,9 +80,9 @@
 ; (a PredicateNode, here).
 (cog-set-value! (Anchor "heavy") (Predicate "weight") floli)
 
-; Define some Atomese, that, when executed, will retreive the LinkValue
+; Define some Atomese, that, when executed, will retrieve the LinkValue
 ; (using ValueOfLink) from the given well-known location (the anchor)
-; and using the well-known key (the Predicate). After retreival, the
+; and using the well-known key (the Predicate). After retrieval, the
 ; FloatColumn flattens it all out into a single vector.
 (define flocol
 	(FloatColumn (ValueOf (Anchor "heavy") (Predicate "weight"))))
@@ -185,7 +185,7 @@
 ; ------------------------------------------------------------
 ; ------------------------------------------------------------
 ; Now do the same as above, but for the edges, instead of the
-; vertexes. This uses exactly the same techniques; only the query
+; vertices. This uses exactly the same techniques; only the query
 ; is more complex.
 
 (define matrix-of-pairs
@@ -198,7 +198,7 @@
 			(Edge (Predicate "word-pair")
 				(List (Variable "$left-word") (Variable "$right-word"))))
 
-		; Repeat results. This is a r-write rule that rewrites to iself.
+		; Repeat results. This is a r-write rule that rewrites to itself.
 		(Edge (Predicate "word-pair")
 			(List (Variable "$left-word") (Variable "$right-word")))))
 
@@ -237,9 +237,9 @@
 (define edge-vec (cog-execute! edge-weights))
 (format #t "Vector of edge weights: ~A\n" edge-vec)
 
-; Pause for a moment to think about what was acheived here. Some random
+; Pause for a moment to think about what was achieved here. Some random
 ; graph with a bunch of randomg data was queried, and a vector of floats
-; was created out of it, ready for processing. No small acheivement.
+; was created out of it, ready for processing. No small achievement.
 ;
 ; ------------------------------------------------------------
 ; But we're not done. A single vector is boring. More interesting is the
@@ -306,7 +306,7 @@
 ; a 2D slice taken cout of it. This slice is a very sparse incidence
 ; matrix: left and right index values, and the non-zero matrix entries.
 ; We pulled some weights off the indexes, and a different set of weights
-; off the matrix entires, and created three nice, aligned columns holding
+; off the matrix entries, and created three nice, aligned columns holding
 ; that data. Not just any columns, but raw C++ vectors of doubles, ready
 ; to be shipped off to any compute unit. And, to keep things straight,
 ; there's a fourth column of UUID's, aligned with the other three
