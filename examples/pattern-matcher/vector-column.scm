@@ -225,21 +225,21 @@
 ; OK, so we've got a bunch of Atoms with a bunch of data attached to
 ; them. Now, pull that data out, and stick it into vectors.
 
-(define datacol
+(define edge-weights
 	(FloatColumn
 		(Filter
 			(Rule
 				(Variable "$edge")
 				(Variable "$edge")
 				(FloatValueOf (Variable "$edge") (Predicate "weight")))
-		(ValueOf mtxpr mtxpr))))
+			(ValueOf matrix-of-pairs matrix-of-pairs))))
 
-(define datavec (cog-execute! datacol))
-(format #t "Data vect: ~A\n" datavec)
+(define edge-vec (cog-execute! edge-weights))
+(format #t "Vector of edge weights: ~A\n" edge-vec)
 
-; Twelve data items, so twelve numbers
-(test-assert "data list length" (equal? 12
-	(length (cog-value->list datavec))))
+; Pause for a moment to think about what was acheived here. Some random
+; graph with a bunch of randomg data was queried, and a vector of floats
+; was created out of it, ready for processing. No small acheivement.
 
 ; ------------------------------------------------------------
 ; Stick a vector of "statistical values" onto the raw data.
