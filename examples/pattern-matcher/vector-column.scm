@@ -92,9 +92,14 @@
 (format #t "The float vector is: ~A\n" flovec)
 
 ; ------------------------------------------------------------
-; Complicated case, attempts to mode real world case.
+; Now we dive directly into the deep end.
+; This will get complicated, quick.
 
-; Data
+; Create some "real world" data. For this example, the data is
+; extremely uniform: it could just be a plain-old SQL table or
+; something. That misses the point, though: the AtomSpace is
+; designed to hold extremely irregular data that cannot be captured in
+; tables.  But, to aid understanding ... here's a table.
 (Edge (Predicate "word-pair") (List (Item "Paul") (Item "bit")))
 (Edge (Predicate "word-pair") (List (Item "bit") (Item "the")))
 (Edge (Predicate "word-pair") (List (Item "the") (Item "dog")))
@@ -107,6 +112,34 @@
 (Edge (Predicate "word-pair") (List (Item "hurt") (Item "a")))
 (Edge (Predicate "word-pair") (List (Item "a") (Item "lot")))
 (Edge (Predicate "word-pair") (List (Item "lot") (Item ".")))
+
+; -------
+; To make the demo realistic, we'll tag each item with some floating
+; point data, a "weight" of some sort. Well generate this randomly.
+;
+; Here's our random-number generator. Each tie it's accessed, it spits
+; out a new random number. Just one at a time, that's what the '1' is.
+(cog-set-value!
+	(Anchor "heavy") (Predicate "randgen") (RandomStream 1))
+
+; We need to get a list of all Items in the AtomSpace. A MeetLink
+; will do, for that purpose.
+(define item-query
+	(Meet
+		(TypedVariable (Variable "$word") (Type 'ItemNode))
+		(Present (Variable "$word"))))
+
+; Run it.
+(cog-execute! item-query)
+
+; The result is cached under the query itself, using the query as the
+; key. You can get it manually:
+(cog-value item-query item-query)
+
+; Or you can get it automatically:
+(cog-execute! (ValueOf item-query item-query))
+
+; Automatically is preferred.
 
 ; -------
 ; Jam that data into one big LinkValue list.
@@ -125,9 +158,6 @@
 ; -------
 ; Stick some random numbers onto the raw data. These will be our
 ; "weights"
-(cog-set-value!
-	(Anchor "heavy") (Predicate "randgen 1") (RandomStream 1))
-
 (define tag-pairs-randomly
 	(Filter
 		(Rule
