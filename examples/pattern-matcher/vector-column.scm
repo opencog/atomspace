@@ -278,9 +278,32 @@
 
 ; -------
 ; Vector of strings providing a UUID for each edge. So, in the
-; AtomSpace,
-	(cog-execute! (SexprColumn (ValueOf mtxpr mtxpr)))))
+; AtomSpace, each Atom is, by definition, unique. Thus, the string
+; representation for that Atom is, by definition, unique: it can
+; serve as the UUID for that Atom. What's more, it can be passed around
+; as a string, and, at any later time, that string can be converted
+; back to an Atom, which will be the one and only unique Atom in the
+; AtomSpace. So that's our UUID. Lets look at it.
+;
+; SexprColumn creates a StringValue of s-expressions for everything
+; given to it. Its just a printer. Note the escaped quotes.
+(cog-execute! (SexprColumn (ValueOf matrix-of-pairs matrix-of-pairs)))
 
+; -------
+; Now put it all together. A set of four aligned columns:
+
+(define four-column-set
+	(LinkColumn
+		(SexprColumn (ValueOf matrix-of-pairs matrix-of-pairs))
+		left-word-weights
+		edge-weights
+		right-word-weights))
+
+; Execute this monster.
+(cog-execute! four-column-set)
+
+; ------------------------------------------------------------
+; ------------------------------------------------------------
 ; ------------------------------------------------------------
 ; Stick a vector of "statistical values" onto the raw data.
 ; The square and cube of the weights, for this example.
