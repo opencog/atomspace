@@ -184,36 +184,46 @@
 ; ------------------------------------------------------------
 ; ------------------------------------------------------------
 ; ------------------------------------------------------------
+; Now do the same as above, but for the edges, instead of the
+; vertexes. This uses exactly the same techniques; only the query
+; is more complex.
 
-; -------
-; Jam that data into one big LinkValue list.
-(define mtxpr
+(define matrix-of-pairs
 	(Query (VariableList
 		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
 		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
+
+		; `Present` means it must be (Not (Absent ...)) in the AtomSpace
 		(Present
 			(Edge (Predicate "word-pair")
 				(List (Variable "$left-word") (Variable "$right-word"))))
+
+		; Repeat results. This is a r-write rule that rewrites to iself.
 		(Edge (Predicate "word-pair")
 			(List (Variable "$left-word") (Variable "$right-word")))))
 
-(cog-execute! mtxpr)
+(cog-execute! matrix-of-pairs)
+
+; As before, you can verify that the result is cached.
+(cog-execute! (ValueOf matrix-of-pairs matrix-of-pairs))
 
 ; -------
-; Stick some random numbers onto the raw data. These will be our
-; "weights"
+; Paste a bunch of random numbers onto the edges.
 (define tag-pairs-randomly
 	(Filter
 		(Rule
-			(Variable "$edge")
+			(Variable "$edge") ; We're not gonna bother with a vardecl.
 			(Variable "$edge")
 			(SetValue (Variable "$edge") (Predicate "weight")
-				(StreamValueOf (Anchor "heavy") (Predicate "randgen 1"))))
-		(ValueOf mtxpr mtxpr)))
+				(StreamValueOf (Anchor "heavy") (Predicate "randgen"))))
+		(ValueOf matrix-of-pairs matrix-of-pairs)))
 
 (cog-execute! tag-pairs-randomly)
-; -------
-; Go grab numbers off the data, and convert it to a column
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+; OK, so we've got a bunch of Atoms with a bunch of data attached to
+; them. Now, pull that data out, and stick it into vectors.
 
 (define datacol
 	(FloatColumn
