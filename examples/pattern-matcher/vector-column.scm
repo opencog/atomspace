@@ -31,39 +31,29 @@
 (use-modules (opencog) (opencog exec))
 
 ; ------------------------------------------------------------
-; Serialize numbers. Trivial case.
+; Begin with a trivial case: serialize a list of numbers.
 
-(define num (NumberNode 1 2 3 4))
-(define ncol (FloatColumn num))
-(define nvec (cog-execute! ncol))
-(format #t "number vect: ~A\n" nvec)
-(test-assert "number vect" (equal? nvec (FloatValue 1 2 3 4)))
-
-; ------------------------------------------------------------
-; Serialize numbers, in list form.
-
+; Here's the list.
 (define numli (List
 	(NumberNode 1)
 	(NumberNode 2)
 	(NumberNode 3)
 	(NumberNode 4)))
-(define nlicol (FloatColumn numli))
-(define nlivec (cog-execute! nlicol))
-(format #t "number list vect: ~A\n" nlivec)
-(test-assert "number list vect" (equal? nlivec (FloatValue 1 2 3 4)))
 
-; ------------------------------------------------------------
-; Serialize numbers, in direct form.
+; The FloatColumn can be used to convert this list into a vector
+(FloatColumn numli)
 
-(define numset (list
-	(NumberNode 1)
-	(NumberNode 2)
-	(NumberNode 3)
-	(NumberNode 4)))
-(define nsetcol (FloatColumn numset))
-(define nsetvec (cog-execute! nsetcol))
-(format #t "number set vect: ~A\n" nsetvec)
-(test-assert "number set vect" (equal? nlivec (FloatValue 1 2 3 4)))
+; It doesn't become a column until executed:
+(define numvec (cog-execute! (FloatColumn numli)))
+
+; Print it out:
+(format #t "A vector of floating point numbers: ~A\n" numvec)
+
+; Well, this is pretty boring, except for the fact that, under the
+; covers, the FloatValue class is implemented in C++, using
+; std::vector<double> to hold this numbers. The std::vector<T>::data()
+; method provide a pointer to a raw list of doubles, which can be
+; directly handed over to a compute platform for processing.
 
 ; ------------------------------------------------------------
 ; Serialize LinkValue lists.
