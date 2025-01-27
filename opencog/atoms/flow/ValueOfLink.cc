@@ -90,6 +90,14 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	// executed, as needed. So in the current apps, this all works
 	// fine. In the future... well, I'm not fiddling with this today.
 	// Worst case scenario, app can use a DontExecLink.
+
+	// Avoid null-pointer deref due to user error.
+	// This can happen with improperly built FilterLinks.
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting AtomSpace, got null pointer for %s\n",
+			to_string().c_str());
+
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 
