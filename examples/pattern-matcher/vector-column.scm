@@ -3,8 +3,6 @@
 ; Also depends on both SexprColumn and ListColumn in the final
 ; super-test.
 ;
-; Portions of this appear in the example `vector-column.scm`
-;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
 

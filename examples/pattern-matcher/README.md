@@ -262,6 +262,7 @@ a kind-of one-sided unification, and thus simpler than full-fledged
 * `filter.scm`         -- Extracting and re-writing with FilterLink.
 * `filter-value.scm`   -- Using FilterLink on data streams.
 * `filter-strings.scm` -- Matching specific StringValues in data streams.
+* `vector-column.scm`  -- Packing float point data into vectors (for GPU's).
 
 Unfinished examples
 -------------------
