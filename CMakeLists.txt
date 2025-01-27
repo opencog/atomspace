@@ -280,6 +280,13 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Atomspace tests..."
 	)
+	ADD_CUSTOM_TARGET(test_flow
+		DEPENDS tests
+		DEPENDS tests/atoms/flow
+		WORKING_DIRECTORY tests/atoms/flow
+		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
+		COMMENT "Running Flow/stream tests..."
+	)
 	ADD_CUSTOM_TARGET(test_guile
 		DEPENDS tests
 		WORKING_DIRECTORY tests/scm
