@@ -1,14 +1,34 @@
 ;
-; float-column-test.scm -- Verify that FloatColumn works.
-; Also depends on both SexprColumn and ListColumn in the final
-; super-test.
+; vector-column.scm -- Pack floating point data into vectors.
+;
+; The AtomSpace is designed to store arbitrary hypegraphs of any
+; shape. When storing data from natural sources, such as biological
+; (genomic, proteomic) data, natural language data, and web data,
+; such networks are commonly scale-free, and the corresponding
+; adjacency matrix is extremely sparse. (That is, the number of
+; non-zero elements in the rows (or columns) of the adjacency matrix
+; follow a Zipfian distribution. That is, 99.999% of them are zero.)
+;
+; However, modern theory and practice are oriented around non-sparse
+; vectors that can be delivered to a GPU for rapid processing. Thus,
+; a reasonable task is to perform a slice through the network graph,
+; and deliver that slice to a GPU for further processing. That slice
+; can be created using the QueryLink, illustrated in other examples.
+; This demo shows how the results of the query can be turned into
+; columns, suitable for numeric processing.
+;
+; Any query (QueryLink, MeetLink, etc.) can be thought of as defining
+; an N-tensor, when it has N variables in the query. Thus, a query with
+; one variable produces a vector of results. A query with two variables
+; produces ... a single list of results, but the distinct values for
+; each variable can be thought of as defining the indexes of a matrix.
+; For three variables, a 3-tensor is formed.
+;
+; Tha's all well and fine, but query results typically stay in the
+; AtomSpace. To be useful in compute applications, they need to be
+; packaged up as vectors. This demo illustrates how this can be done.
 ;
 (use-modules (opencog) (opencog exec))
-(use-modules (opencog test-runner))
-
-(opencog-test-runner)
-(define tname "float-column-test")
-(test-begin tname)
 
 ; ------------------------------------------------------------
 ; Serialize numbers. Trivial case.
@@ -214,5 +234,3 @@
 (test-assert "cube col" (equal? (list-ref four-list 3) cubevec))
 
 ; ------------------------------------------------------------
-(test-end tname)
-(opencog-test-end)
