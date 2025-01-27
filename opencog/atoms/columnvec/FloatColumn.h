@@ -51,6 +51,7 @@ class FloatColumn : public Link
 {
 protected:
 	ValuePtr do_execute(AtomSpace*, bool);
+	ValuePtr do_handle_loop(AtomSpace*, bool, const HandleSeq&);
 
 public:
 	FloatColumn(const HandleSeq&&, Type = FLOAT_COLUMN);

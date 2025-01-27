@@ -40,11 +40,39 @@ FloatColumn::FloatColumn(const HandleSeq&& oset, Type t)
 			"Expecting a FloatColumn, got %s", tname.c_str());
 	}
 
-	size_t sz = _outgoing.size();
+}
 
-	if (1 != sz)
-		throw InvalidParamException(TRACE_INFO,
-			"FloatColumn expects one arg, got %lu", sz);
+// ---------------------------------------------------------------
+
+/// Return a FloatValue vector.
+ValuePtr FloatColumn::do_handle_loop(AtomSpace* as, bool silent,
+                                     const HandleSeq& hseq)
+{
+	std::vector<double> dvec;
+	dvec.reserve(hseq.size());
+	for (const Handle& h : hseq)
+	{
+		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
+
+		// Expecting exactly one float per item. That's because
+		// I don't know what it means if there is more than one,
+		// flattening seems like the wrong thing to do.
+		if (1 != vp->size())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting exactly one number per item, got %lu\n",
+				vp->size());
+
+		if (vp->is_type(FLOAT_VALUE))
+			dvec.push_back(FloatValueCast(vp)->value()[0]);
+		else if (vp->is_type(NUMBER_NODE))
+			dvec.push_back(NumberNodeCast(vp)->get_value());
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Expecting numeric value, got %s\n",
+				vp->to_string());
+	}
+
+	return createFloatValue(std::move(dvec));
 }
 
 // ---------------------------------------------------------------
@@ -111,31 +139,7 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 
 	// If we are here, then base is an link. Expect
 	// it to contain things that evaluate to a double
-	std::vector<double> dvec;
-	dvec.reserve(base->get_arity());
-	for (const Handle& h : base->getOutgoingSet())
-	{
-		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
-
-		// Expecting exactly one float per item. That's because
-		// I don't know what it means if there is more than one,
-		// flattening seems like the wrong thing to do.
-		if (1 != vp->size())
-			throw RuntimeException(TRACE_INFO,
-				"Expecting exactly one number per item, got %lu\n",
-				vp->size());
-
-		if (vp->is_type(FLOAT_VALUE))
-			dvec.push_back(FloatValueCast(vp)->value()[0]);
-		else if (vp->is_type(NUMBER_NODE))
-			dvec.push_back(NumberNodeCast(vp)->get_value());
-		else
-			throw RuntimeException(TRACE_INFO,
-				"Expecting numeric value, got %s\n",
-				vp->to_string());
-	}
-
-	return createFloatValue(std::move(dvec));
+	return do_handle_loop(as, silent, base->getOutgoingSet());
 }
 
 // ---------------------------------------------------------------
@@ -143,7 +147,10 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 /// Return a FloatValue vector.
 ValuePtr FloatColumn::execute(AtomSpace* as, bool silent)
 {
-	return do_execute(as, silent);
+	if (1 == _outgoing.size())
+		return do_execute(as, silent);
+
+	return do_handle_loop(as, silent, _outgoing);
 }
 
 DEFINE_LINK_FACTORY(FloatColumn, FLOAT_COLUMN)
