@@ -21,10 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
-#include <opencog/atoms/value/FloatValue.h>
 
 #include "LinkColumn.h"
 
@@ -39,45 +36,33 @@ LinkColumn::LinkColumn(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a LinkColumn, got %s", tname.c_str());
 	}
-
 }
 
 // ---------------------------------------------------------------
 
-/// Return a FloatValue vector.
+/// Return a LinkValue vector.
 ValuePtr LinkColumn::do_handle_loop(AtomSpace* as, bool silent,
-                                     const HandleSeq& hseq)
+                                    const HandleSeq& hseq)
 {
-	std::vector<double> dvec;
-	dvec.reserve(hseq.size());
+	ValueSeq vseq;
+	vseq.reserve(hseq.size());
 	for (const Handle& h : hseq)
 	{
-		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
-
-		// Expecting exactly one float per item. That's because
-		// I don't know what it means if there is more than one,
-		// flattening seems like the wrong thing to do.
-		if (1 != vp->size())
-			throw RuntimeException(TRACE_INFO,
-				"Expecting exactly one number per item, got %lu\n",
-				vp->size());
-
-		if (vp->is_type(LINK_VALUE))
-			dvec.push_back(FloatValueCast(vp)->value()[0]);
-		else if (vp->is_type(NUMBER_NODE))
-			dvec.push_back(NumberNodeCast(vp)->get_value());
+		if (h->is_executable())
+		{
+			ValuePtr vp(h->execute(as, silent));
+			vseq.emplace_back(vp);
+		}
 		else
-			throw RuntimeException(TRACE_INFO,
-				"Expecting numeric value, got %s\n",
-				vp->to_string());
+			vseq.push_back(h);
 	}
 
-	return createFloatValue(std::move(dvec));
+	return createLinkValue(std::move(vseq));
 }
 
 // ---------------------------------------------------------------
 
-/// Return a FloatValue vector.
+/// Return a LinkValue vector.
 ValuePtr LinkColumn::do_execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
@@ -85,56 +70,12 @@ ValuePtr LinkColumn::do_execute(AtomSpace* as, bool silent)
 	if (base->is_executable())
 	{
 		ValuePtr vpe(base->execute(as, silent));
-		if (vpe->is_atom())
-			base = HandleCast(vpe);
-		else
-		{
-			if (vpe->is_type(LINK_VALUE))
-				return vpe;
+		if (vpe->is_type(LINK_VALUE))
+			return vpe;
+		if (not vpe->is_atom())
+			return createLinkValue(vpe);
 
-			if (not vpe->is_type(LINK_VALUE))
-				throw RuntimeException(TRACE_INFO,
-					"Expecting LinkValue, got %s\n",
-					vpe->to_string());
-
-			// If we are here, we've got a LinkValue.
-			// Inside of loop is cut-n-paste of that below.
-			std::vector<double> dvec;
-			dvec.reserve(vpe->size());
-			for (const ValuePtr& v : LinkValueCast(vpe)->value())
-			{
-				// NumericFunctionLink::get_value() tries to execute
-				// the value, if it's executable. Is that overkill,
-				// or is that needed? When would a vector of functions
-				// arise?
-				ValuePtr vp(NumericFunctionLink::get_value(as, silent, v));
-
-				// Expecting exactly one float per item. That's because
-				// I don't know what it means if there is more than one,
-				// flattening seems like the wrong thing to do.
-				if (1 != vp->size())
-					throw RuntimeException(TRACE_INFO,
-						"Expecting exactly one number per item, got %lu\n",
-						vp->size());
-
-				if (vp->is_type(LINK_VALUE))
-					dvec.push_back(FloatValueCast(vp)->value()[0]);
-				else if (vp->is_type(NUMBER_NODE))
-					dvec.push_back(NumberNodeCast(vp)->get_value());
-				else
-					throw RuntimeException(TRACE_INFO,
-						"Expecting numeric value, got %s\n",
-						vp->to_string());
-			}
-			return createFloatValue(std::move(dvec));
-		}
-	}
-
-	// If we are here, then base is an atom.
-	if (base->is_type(NUMBER_NODE))
-	{
-		std::vector<double> nums(NumberNodeCast(base)->value());
-		return createFloatValue(std::move(nums));
+		base = HandleCast(vpe);
 	}
 
 	// If we are here, then base is an link. Expect

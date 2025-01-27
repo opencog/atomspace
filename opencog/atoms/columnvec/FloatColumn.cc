@@ -39,7 +39,6 @@ FloatColumn::FloatColumn(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a FloatColumn, got %s", tname.c_str());
 	}
-
 }
 
 // ---------------------------------------------------------------
