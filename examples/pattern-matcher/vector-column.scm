@@ -240,6 +240,46 @@
 ; Pause for a moment to think about what was acheived here. Some random
 ; graph with a bunch of randomg data was queried, and a vector of floats
 ; was created out of it, ready for processing. No small acheivement.
+;
+; ------------------------------------------------------------
+; But we're not done. A single vector is boring. More interesting is the
+; tensor, itself. This will consist of four vectors: two, with the weight
+; on each item, one with the weight of the edges, and one with a unique
+; row ID. Lets at it.
+
+(define left-word-weights
+	(FloatColumn
+		(Filter
+			(Rule
+				(VariableList
+					(Variable "$left-word") (Variable "$right-word"))
+				(Edge (Predicate "word-pair")
+					(List (Variable "$left-word") (Variable "$right-word")))
+				(FloatValueOf (Variable "$left-word") (Predicate "i-weight")))
+			(ValueOf matrix-of-pairs matrix-of-pairs))))
+
+(define left-vec (cog-execute! left-word-weights))
+(format #t "Vector of left-word weights: ~A\n" left-vec)
+
+; -------
+(define right-word-weights
+	(FloatColumn
+		(Filter
+			(Rule
+				(VariableList
+					(Variable "$left-word") (Variable "$right-word"))
+				(Edge (Predicate "word-pair")
+					(List (Variable "$left-word") (Variable "$right-word")))
+				(FloatValueOf (Variable "$right-word") (Predicate "i-weight")))
+			(ValueOf matrix-of-pairs matrix-of-pairs))))
+
+(define right-vec (cog-execute! right-word-weights))
+(format #t "Vector of right-word weights: ~A\n" right-vec)
+
+; -------
+; Vector of strings providing a UUID for each edge. So, in the
+; AtomSpace,
+	(cog-execute! (SexprColumn (ValueOf mtxpr mtxpr)))))
 
 ; ------------------------------------------------------------
 ; Stick a vector of "statistical values" onto the raw data.
