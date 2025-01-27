@@ -9,4 +9,4 @@ Name: AtomSpace
 Description: The AtomSpace Hypergraph Database
 Version: @SEMANTIC_VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lstorage-types -lsexpr -Wl,--no-as-needed -lpersist-file -Wl,--as-needed -lpersist -latomspace
+Libs: -L${libdir} -latomspace

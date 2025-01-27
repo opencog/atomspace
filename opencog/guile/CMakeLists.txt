@@ -34,6 +34,7 @@ TARGET_LINK_LIBRARIES(smob
 	join
 	pattern
 	execution
+	columnvec
 	atomflow
 	atomcore
 	foreign

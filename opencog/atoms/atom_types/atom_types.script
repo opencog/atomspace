@@ -224,6 +224,8 @@ SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 // Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
 // These use probabilistic formulas to compute TruthValues.
 // See issue opencog/atomspace#2814 for a discussion.
+// XXX OBSOLETE -- These are unused, unimplemented, and are candidates
+// for removal.
 UNION_LINK <- UNORDERED_LINK,COLLECTION_LINK
 INTERSECTION_LINK <- UNORDERED_LINK,COLLECTION_LINK
 COMPLEMENT_LINK <- UNORDERED_LINK,COLLECTION_LINK
@@ -891,7 +893,7 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // Functions that do NOT bind variables.
 
 // A FunctionLink is a Link that can be executed, with the result of
-// execution being some Atom.  FunctionLink does NOT derive from
+// execution being some Value.  FunctionLink does NOT derive from
 // LambdaLink, which may seem counter-intuitive; here's why, so
 // listen up.  All of the explicitly-named functions (e.g. PlusLink)
 // do not need to explicitly name their arguments, and it would even
@@ -922,7 +924,21 @@ FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
 // and so does FormulaPredicateLink.cc. Altering the first is easy.
 // The second is easy to stub out, but then six unit tests fail. Sooo
 // leave as-is seems like the correct choice.
-
+//
+// XXX TODO-FIXME Many of link types below take a *single* argument, or
+// perhaps just two, and thus behave quite differently from the original
+// intent for the FunctionLink as a base class. The intent was for
+// FunctionLink to handle arbitrary-arity functions, like PlusLink.
+// That is, PlusLink works directly as
+//     (Plus (Number 1) (Number 1))
+// and not as
+//     (Plus (List (Number 1) (Number 1)))
+// whereas many of the link types below (in particular, the various
+// ValueOf link types) want the second form. Many of these also seem
+// not to need the FreeLink inheritance, either. There does not seem to
+// be any point in inventing a special FixedArityFunctionLink because
+// the ExecutableLink already covers this case. Currently, there is no
+// C++ class for ExecutableLink; perhaps there should be?
 // --------------------
 // Boolean-valued functions
 
@@ -1197,6 +1213,20 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE,PROCEDURE_NODE
 SCHEMA_NODE <- PROCEDURE_NODE
 DEFINED_SCHEMA_NODE <- SCHEMA_NODE,DEFINED_PROCEDURE_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
+
+// ==============================================================
+// Serializers, for GPU's
+// Convert collections of Atoms or Values into vectors,
+// e.g. StringValue or FloatValue vectors.
+
+// Base class
+COLUMN <- EXECUTABLE_LINK
+
+// Convert collection to StringValue of s-expressions.
+SEXPR_COLUMN <- COLUMN
+
+// Convert collection to FloatValue of numbers.
+FLOAT_COLUMN <- COLUMN
 
 // ==============================================================
 // Foreign abstrast syntax trees (AST's)

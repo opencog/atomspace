@@ -50,12 +50,15 @@ set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
 set(ATOMSPACE_value_LIBRARY value)
 
+# XXX why are these listed in reverse dependency order?
+# Doesn't the linker care about this?
 set(ATOMSPACE_LIBRARIES
 	atom_types
 	value
 	atombase
 	atomcore
 	atomflow
+	columnvec
 	truthvalue
 	clearbox
 	join
