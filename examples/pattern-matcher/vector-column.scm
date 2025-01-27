@@ -302,13 +302,37 @@
 ; Execute this monster.
 (cog-execute! four-column-set)
 
-; ------------------------------------------------------------
-; ------------------------------------------------------------
-; ------------------------------------------------------------
-; Stick a vector of "statistical values" onto the raw data.
-; The square and cube of the weights, for this example.
-; Then rip these out one column at a time,
+; Again: Pause to consider what was done. Some random graph of data got
+; a 2D slice taken cout of it. This slice is a very sparse incidence
+; matrix: left and right index values, and the non-zero matrix entries.
+; We pulled some weights off the indexes, and a different set of weights
+; off the matrix entires, and created three nice, aligned columns holding
+; that data. Not just any columns, but raw C++ vectors of doubles, ready
+; to be shipped off to any compute unit. And, to keep things straight,
+; there's a fourth column of UUID's, aligned with the other three
+; columns.
+;
+; Ta dah. So that's a basic matrix/vector demo.
+;
+; Presented below is a slight variant, that might be encountered in
+; real-world situations, so it's worth setting down as a demo.
 
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+; Suppose each Atom doesn't have just a single float on it, but some
+; vector of "statistical values". These might be conditional
+; probabilities, log probabilities, mutual information, jacquard
+; distances, cosine distances, all listed out in one vector per Atom
+; Out of this vector, we might want to sample just the third element,
+; because we know, a priori, that the third element holds the
+; conditional probability that we want. How do we get that? Its not
+; hard, but perhaps not obvious. The below shows how.
+
+; As before, we start by sticking some data onto the edges. In this
+; case, we'll take the square and the log.
+
+; Handy short-cut to avoid lots of typing.
 (define edge-weight
 	(FloatValueOf (Variable "$edge") (Predicate "weight")))
 
@@ -321,15 +345,26 @@
 				(FloatColumn
 					edge-weight
 					(Times edge-weight edge-weight)
-					(Times edge-weight edge-weight edge-weight))))
-		(ValueOf mtxpr mtxpr)))
+					; The entropy, for grins. Try it, if you want.
+					; (Minus (Times edge-weight (Log2 edge-weight)))
+					(Log2 edge-weight))))
+		(ValueOf matrix-of-pairs matrix-of-pairs)))
 
 (cog-execute! tag-pairs-w-stats)
 
 ; -------
-; Go grab the third number from the stats vec, and convert it to a column
+; The above populated the edges with some stats. Grab the third
+; stat (the log2 probability) and stick it in a vector.
 
-(define (grab-col COLNO)
+; Define a handy utility. It uses the ElementOfLink to pull one
+; value out of the vector. FYI It can also be used to pull out multiple
+; elements, thus shortening a vector, The DecimateLink can also do
+; this but with boolean vectors (bit-masks). So, for example,
+;    (Decimate (Number 0 0 1) (FloatValueOf ...))
+; does the same thing as
+;    (ElementOf (Number 2) (FloatValueOf ...))
+;
+(define (grab-column COLNO)
 	(FloatColumn
 		(Filter
 			(Rule
@@ -337,56 +372,12 @@
 				(Variable "$edge")
 				(ElementOf (Number COLNO)
 					(FloatValueOf (Variable "$edge") (Predicate "stats"))))
-		(ValueOf mtxpr mtxpr))))
+		(ValueOf matrix-of-pairs matrix-of-pairs))))
 
-(define cubecol (grab-col 2))
-(define cubevec (cog-execute! cubecol))
-(format #t "Cube vect: ~A\n" cubevec)
-
-; Twelve data items, so twelve numbers
-(test-assert "cube list length" (equal? 12
-	(length (cog-value->list cubevec))))
-
-(define squarecol (grab-col 1))
-(define squarevec (cog-execute! squarecol))
-(format #t "Square vect: ~A\n" squarevec)
-
-; Twelve data items, so twelve numbers
-(test-assert "square list length" (equal? 12
-	(length (cog-value->list squarevec))))
-
-(define origcol (grab-col 0))
-(define origvec (cog-execute! origcol))
-(format #t "Orig vect: ~A\n" origvec)
-
-; Twelve data items, so twelve numbers
-(test-assert "orig list length" (equal? 12
-	(length (cog-value->list origvec))))
-
-; The first col should be equal to the original weight data.
-(test-assert "orig and data equal" (equal? datavec origvec))
+(define log2-p (grab-column 2))
+(define log2-pvec (cog-execute! log2-p))
+(format #t "Log2 Probabilities: ~A\n" log2-pvec)
 
 ; ------------------------------------------------------------
-; Super-mega-all-in-one
-
-(define four-col
-	(LinkColumn
-		(SexprColumn (ValueOf mtxpr mtxpr))
-		(grab-col 0) (grab-col 1) (grab-col 2)))
-
-(define four-vec (cog-execute! four-col))
-(format #t "Four vect: ~A\n" four-vec)
-
-(define four-list (cog-value->list four-vec))
-(test-assert "Four Columns" (equal? 4 (length four-list)))
-
-; First item should be the s-expressions
-(test-assert "s-expressions" (equal? (list-ref four-list 0)
-	(cog-execute! (SexprColumn (ValueOf mtxpr mtxpr)))))
-
-; The next three should be the earlier number columns
-(test-assert "orig col" (equal? (list-ref four-list 1) datavec))
-(test-assert "square col" (equal? (list-ref four-list 2) squarevec))
-(test-assert "cube col" (equal? (list-ref four-list 3) cubevec))
-
+; THE END. That's All, Folks!
 ; ------------------------------------------------------------
