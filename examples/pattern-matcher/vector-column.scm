@@ -140,6 +140,50 @@
 (cog-execute! (ValueOf item-query item-query))
 
 ; Automatically is preferred.
+; -------
+; Now comes the first hard part. Well draw on the random number
+; generator, and tag each item with a random number. (The random number
+; generator is a stand-in for a "real compute process" generating
+; "real weights".)
+
+; The filter applies the rule to each item returned by the ValueOf
+; The rule only accepts ItemNodes, and discard anything else.
+; The StreamValueOf samples a single float from the random generator.
+; The SetValue attaches that number to each item.
+;
+; Yes, you cn think of this as a complicated for-loop. That misses the
+; point though: streams can be endless, they can be multi-threaded, so
+; that the producer is in a different thread than the consumer, and so
+; on. These are (in general) multi-threaded producer-consumer streams,
+; which is why this seems complicated.
+(define tag-items-randomly
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$item") (Type 'ItemNode))
+			(Variable "$item")
+			(SetValue (Variable "$item") (Predicate "i-weight")
+				(StreamValueOf (Anchor "heavy") (Predicate "randgen"))))
+		(ValueOf item-query item-query)))
+
+; Anyway, lets run it.
+(cog-execute! tag-items-randomly)
+
+; Verify, by hand, that items got tagged.
+; List all keys:
+(cog-keys (Item "leg"))
+
+; Get the value at that key:
+(cog-value (Item "leg") (Predicate "i-weight"))
+
+(format #t "The item ~A has a weight of ~A\n"
+	(Item "leg")
+	(cog-execute! (ValueOf (Item "leg") (Predicate "i-weight"))))
+
+; Looks random to me.
+
+; ------------------------------------------------------------
+; ------------------------------------------------------------
+; ------------------------------------------------------------
 
 ; -------
 ; Jam that data into one big LinkValue list.
