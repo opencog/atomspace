@@ -114,5 +114,47 @@
 	 (length (cog-value->list datavec))))
 
 ; ------------------------------------------------------------
+; Stick a vector of "statistical values" onto the raw data.
+; The square and cube of the weights, for this example.
+; Then rip these out one column at a time,
+
+(define edge-weight
+	(FloatValueOf (Variable "$edge") (Predicate "weight")))
+
+(define tag-pairs-w-stats
+	(Filter
+		(Rule
+			(Variable "$edge")
+			(Variable "$edge")
+			(SetValue (Variable "$edge") (Predicate "stats")
+				(FloatColumn
+					edge-weight
+					(Times edge-weight edge-weight)
+					(Times edge-weight edge-weight edge-weight))))
+		(ValueOf mtxpr mtxpr)))
+
+(cog-execute! tag-pairs-w-stats)
+
+; -------
+; Go grab the third number from the stats vec, and convert it to a column
+
+(define cubecol
+	(FloatColumn
+		(Filter
+			(Rule
+				(Variable "$edge")
+				(Variable "$edge")
+				(ElementOf (Number 2)
+					(FloatValueOf (Variable "$edge") (Predicate "stats"))))
+		(ValueOf mtxpr mtxpr))))
+
+(define cubevec (cog-execute! cubecol))
+(format #t "Cube vect: ~A\n" cubevec)
+
+; Twelve data items, so twelve numbers
+(test-assert "cube list length" (equal? 12
+	 (length (cog-value->list cubevec))))
+
+; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
