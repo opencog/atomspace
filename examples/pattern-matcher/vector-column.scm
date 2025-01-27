@@ -56,21 +56,40 @@
 ; directly handed over to a compute platform for processing.
 
 ; ------------------------------------------------------------
-; Serialize LinkValue lists.
+; Most AtomSpace processing works with data held int FloatValue's
+; and not NumberNodes.  This is as it should be: NumberNodes, since
+; they are Nodes, are held directly in the AtomSpace, chewing up RAM
+; in the process. Worse: almost all numbers are boring; it is utterly
+; pointless to store them as Nodes in the AtomSpace.
+;
+; To avoid the overhead, the FloatValue is provided. Its small and fast.
+; But, like all Values, it is also garbage-collected: once all references
+; to it are gone, it disappears. Thus Values must *always* be attached
+; to Atoms, if they are to stick around.  This means that working with
+; them is a bit trickier: they have to be accessed indirectly, as a
+; key->value lookup. The next part reviews how this is done.
 
+; A LinkValue of floats.
 (define floli (LinkValue
-	(FloatValue 1)
-	(FloatValue 2)
-	(FloatValue 3)
-	(FloatValue 4)))
+	(FloatValue 5)
+	(FloatValue 6)
+	(FloatValue 7)
+	(FloatValue 8)))
+
+; Attach that value to an Atom (an AnchorNode, here) using a key
+; (a PredicateNode, here).
 (cog-set-value! (Anchor "heavy") (Predicate "weight") floli)
 
+; Define some Atomese, that, when executed, will retreive the LinkValue
+; (using ValueOfLink) from the given well-known location (the anchor)
+; and using the well-known key (the Predicate). After retreival, the
+; FloatColumn flattens it all out into a single vector.
 (define flocol
 	(FloatColumn (ValueOf (Anchor "heavy") (Predicate "weight"))))
 
+; Execute the above, and print the result.
 (define flovec (cog-execute! flocol))
-(format #t "Float vect: ~A\n" flovec)
-(test-assert "float list vect" (equal? flovec (FloatValue 1 2 3 4)))
+(format #t "The float vector is: ~A\n" flovec)
 
 ; ------------------------------------------------------------
 ; Complicated case, attempts to mode real world case.
