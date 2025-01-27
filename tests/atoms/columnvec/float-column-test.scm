@@ -31,6 +31,19 @@
 (test-assert "number list vect" (equal? nlivec (FloatValue 1 2 3 4)))
 
 ; ------------------------------------------------------------
+; Serialize numbers, in direct form.
+
+(define numset (list
+	(NumberNode 1)
+	(NumberNode 2)
+	(NumberNode 3)
+	(NumberNode 4)))
+(define nsetcol (FloatColumn numset))
+(define nsetvec (cog-execute! nsetcol))
+(format #t "number set vect: ~A\n" nsetvec)
+(test-assert "number set vect" (equal? nlivec (FloatValue 1 2 3 4)))
+
+; ------------------------------------------------------------
 ; Serialize LinkValue lists.
 
 (define floli (LinkValue
