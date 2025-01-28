@@ -51,14 +51,27 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 /// first argument. The computed value is returned.
 ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 {
+	// Avoid null-pointer deref due to user error.
+	// This can happen with improperly built FilterLinks.
+	// See commentary in ValueOfLink::do_execute() about why
+	// we want an AtomSpace.
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting AtomSpace, got null pointer for %s\n",
+			to_string().c_str());
+
+	Handle ah(as->add_atom(_outgoing[0]));
+	Handle ak(as->add_atom(_outgoing[1]));
+
 	ValuePtr pap;
 	if (_outgoing[2]->is_executable())
 		pap = _outgoing[2]->execute(as, silent);
 	else
 		pap = _outgoing[2];
 
-	as->set_value(_outgoing[0], _outgoing[1], pap);
-	return pap;
+	std::vector<double> dvec;
+
+	return as->increment_count(ah, ak, dvec);
 }
 
 DEFINE_LINK_FACTORY(IncrementValueLink, INCREMENT_VALUE_LINK)
