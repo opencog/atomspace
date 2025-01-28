@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_INCREMENT_VALUE_LINK_H
 #define _OPENCOG_INCREMENT_VALUE_LINK_H
 
-#include <opencog/atoms/flow/SetValueLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -36,7 +36,7 @@ namespace opencog
 /// argument) by the FloatValue (or NumberNode) given in the third
 /// argument.
 ///
-class IncrementValueLink : public SetValueLink
+class IncrementValueLink : public FunctionLink
 {
 public:
 	IncrementValueLink(const HandleSeq&&, Type=INCREMENT_VALUE_LINK);

@@ -40,8 +40,8 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 	}
 
 	size_t ary = _outgoing.size();
-	if (INCREMENT_VALUE_LINK == t and 3 != ary and 4 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
+	if (INCREMENT_VALUE_LINK == t and 3 != ary)
+		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -51,39 +51,14 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 /// first argument. The computed value is returned.
 ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 {
-	// Simple case: just set the Value. Obtain it, as needed.
-	if (3 == _outgoing.size())
-	{
-		ValuePtr pap;
-		if (_outgoing[2]->is_executable())
-			pap = _outgoing[2]->execute(as, silent);
-		else
-			pap = _outgoing[2];
-
-		as->set_value(_outgoing[0], _outgoing[1], pap);
-		return pap;
-	}
-
-	// Complicated Case: There are four arguments. The first two are
-	// Atom and key, as before. Then comes a lambda or function in
-	// third place, and the arguments to the function in fourth place.
-	// Wrap these two in an ExecutionOutput, and then wrap that in a
-	// FormulaStream. The user could do this themselves; this is
-	// provided as a convenience function. Note that IncrementTV works the
-	// same way.
-
-	const Handle& args(_outgoing[3]);
-	Handle exo(createExecutionOutputLink(_outgoing[2], args));
-	exo = as->add_atom(exo);
-
-	ValuePtr fsp;
-	if (args->is_type(NUMERIC_OUTPUT_LINK))
-		fsp = createFormulaStream(exo);
+	ValuePtr pap;
+	if (_outgoing[2]->is_executable())
+		pap = _outgoing[2]->execute(as, silent);
 	else
-		fsp = createFutureStream(exo);
+		pap = _outgoing[2];
 
-	as->set_value(_outgoing[0], _outgoing[1], fsp);
-	return fsp;
+	as->set_value(_outgoing[0], _outgoing[1], pap);
+	return pap;
 }
 
 DEFINE_LINK_FACTORY(IncrementValueLink, INCREMENT_VALUE_LINK)
