@@ -676,12 +676,22 @@ Bibliography
 Readings and related projects.
 
 * [graph2sheaves](https://github.com/arquicanedo/graph2sheaves)
-  Sheaves library for graph abstractions based on NetworkX
-  From Arquimedes Canedo, circa 2019.
+  "Sheaves library for graph abstractions based on NetworkX."
+  A short, small sketch of a project, by Arquimedes Canedo, circa 2019.
 
 * Justin Michael Curry, "Sheaves, Cosheaves and Applications", (2014)
   PhD dissertation
   [https://arxiv.org/pdf/1303.3255.pdf](https://arxiv.org/pdf/1303.3255.pdf)
+  This is very abstract presentation entirely anchored in the standard
+  mathematical frameworks of category theory and cellular homology. It
+  does not speak to the AI problem of vector embeddings of grammatical
+  structures ... but for a curious "Chapter 10: Sheaves and Cosheaves
+  in Sensor Networks". This scratches the surface of a very important
+  (fundamental?) topic, of perception and action in sensori-motor systems.
+
+* By "standard mathematical frameworks of category theory", I mean this:
+  “Sheaves in Geometry and Logic”, Saunders Mac Lane and Ieke Moerdijk
+  (1992) Springer ISBN 0-387-97710-4)
 
 Lots of work from Michael Robinson:
 
