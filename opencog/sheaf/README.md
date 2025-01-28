@@ -6,10 +6,102 @@ apply to graph theory and how they are used to represent structure in
 Atomese. The `attic` directory also contains an early implementation of
 these concepts.  It worked (still works), but a superior implementation
 can be found in the [opencog/learn](https://github.com/opencog/learn)
-project.
+project. Alas, even that implementation has some serious issues' an even
+more general approach is being attempted in multiple opencog git repos.
 
-Sheafs - Quick Start
-====================
+Sheaves - Informal Overview
+===========================
+Sheaves provide a way for having both embedding vectors and also
+symbolic structural components, and thus provide a natural setting for
+neuro-symbolic computing.
+
+The starting point for creating and understanding sheaves is a graph,
+consisting of vertexes and edges. Take a graph, any graph, pick a vertex,
+any vertex, and cut all the edges joining to it. If you cut so that
+half-edges remain, with the cut endpoints marked with a type, then it
+can always be reconnected back.
+
+The half-cut-edges, when marked with a type, resemble a "jigsaw puzzle
+piece". This analogy can be seen explicitly in the 1991 Link Grammar
+papers (see below); diagrams showing actual jigsaw pieces appear in
+those texts. Jigsaw connectors are a generic concept that is often
+employed to create diagrams in tensor algebras, and to solve problems
+in tensor logic. (See Stay & Baez paper, below.)
+
+What makes all this a "sheaf" is that any collection of half-assembled
+jigsaws, with any collection of still-unattached half-edges
+("connectors") is ... just like a single piece -- just a "thing" with
+unconnected connectors. This behaves much like jigsaw puzzles in real
+life: a block of 2 or 3 connected jigsaw pieces behaves as it if was
+just one larger piece. You could glue them together, and never know
+that it wasn’t just one large piece.
+
+In math, "sheaf theory" defines 4 axioms for what it means to be a
+"sheaf", and it boils down to just "a collection of half-assembled
+things with connectors that you can continue to connect however they
+allow, as long as the tabs fit correctly". Unfortunately, the
+Wikipedia article for sheaves does not make this quite as easy and
+simple as the sketch above. But you can find the sheaf axioms there,
+and with some head-scratching and effort, you can see its the same thing.
+(Technically, the jigsaws result in a pre-sheaf, not a sheaf. The
+difference is a 5th axiom, which (as as of 2018-2024) does not seem
+relevant for AI and machine learning.
+
+Why is this idea useful for AI?
+
+Consider theorem proving (or any kind of 'reasoning': abductive, inductive,
+whatever). Here, one typically has some "inference axioms", which are
+used connect statements together to get the inference result.  For example,
+“No man is an island" and "Aristotle is a man" -> “Aristotle is not an island"
+makes clear that 'man' is the attachement (jigsaw connector). Hooking
+together 'man' across the two statements allows the inference to be
+made.
+
+Another example arises in natural language parsing. A transitive verb
+(V) takes a subject (S, a noun) and an object (O, another noun) and if
+one provides the S and the O, then one gets a valid sentence. For
+example, "to throw" is a transitive verb. "John threw the ball" has
+“John” as subject, “ball” as object and "throw" as the verb, Each word,
+on it’s own, is a jigsaw piece with unconnected connectors. (The 1991
+Link Grammar papers show this explicitly.)
+
+A vector embedding for the verb "to throw" is a list of all possible
+subjects, and all possible objects. This list forms a vector, and each
+item in the vector can be given an associated weight (or probability,
+or log probability, or information content... etc.) You can throw a
+ball (p=1.0), a cinder block (p=0.5), a book case (p=0.01), a car
+(p=0.0001) and the rest aren’t throwable (clouds, oceans, mountains,
+p=0.0) You’ll need a three-way information content if you want to talk
+about meteors throwing mountains into the air. Context matters.
+
+Vector embeddings of this type obey the old WordVec results of
+"King - Man + Woman = Queen". More careful work shows that they
+distribute onto a very high-dimensional Gaussian Orthogonal Ensemble
+(GOE) and so cosine-distance works well for clustering & similarity.
+
+Once you see jigsaw pieces and how they assemble, you can’t un-see them.
+
+In lambda calculus, beta reduction is just jigsaw assembly.  Beta
+reduction is just a formal description of function composition. For
+example, in C/C++/Java, if you declare a function `int f(int x)` then
+you can call it with `int x=42`, but not with `double pi=3.14159`. The
+int/double is the type of the connector (a la ‘type theory’); you can
+connect if the types match, else you cannot.
+
+In tensor calculus, tensor index contraction is just jigsaw assembly.
+In electronics, wiring together circuits is just jigsaw assembly.
+In describing biochemical reaction cycles, the reactions are jigsaw
+pieces. They are everywhere, and they are foundational.
+
+What makes sheaves interesting for AI research is their dual nature:
+they have both a syntactic aspect, of describing 'what connects to what'
+and a vector-embedding context, allowing the theory of statistical
+ensembles to be applied. Insofar as neural nets are statistical
+ensembles, and grammar is symbolic AI, then ensembles of jigsaw pieces
+sit smack-dab in the middle of neuro-symbolic AI.
+
+Sheafs - Slightly more formal
+=============================
 Sheafs provide a simple and convenient mechanism for working with
 graphs "locally", by making the nearest-neighbors of a vertex apparent.
 
@@ -50,6 +142,7 @@ seed, as will become clear below.
 Diagrammatic illustrations of jig-saw puzzle-pieces can be found here:
 
 * Sleator, Temperley, [Parsing English with a Link Grammar](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf)
+  See also [ArXiv cmp-lg/9508004](http://arxiv.org/pdf/cmp-lg/9508004).
 * Bob Coeke, [New Scientist: Quantum Links Let Computers Read](http://www.cs.ox.ac.uk/people/bob.coecke/NewScientist.pdf)
 
 A more formal technique for visualizing connected edges in a monoidal or
@@ -97,20 +190,20 @@ is represented by a `Connector` link. In the above example, the vertex
 the far-endpoint of that edge. The edge carries an optional label,
 shown as `LabelAtom`, above.
 
-The "foo-bar" edge can also be represented as an `EvaluationLink`,
+The "foo-bar" edge can also be represented as an `EdgeLink`,
 which is the structure used in many other parts of OpenCog.
 ```
-       EvaluationLink
+       EdgeLink
            LabelAtom "foo-to-bar label" ; can be a PredicateNode.
            ListLink
                Atom "foo"
                Atom "bar"
 ```
-This `EvaluationLink`, and the `Section...Connector` structure are meant
+This `EdgeLink`, and the `Section...Connector` structure are meant
 to be sort-of, more-or-less equivalent and interchangeable. (In many
 cases, they can be taken to be equivalent; however, the `Section...
 Connector` structure is more general and can describe more kinds of
-structures more simply than an EvaluationLink can.  This will be made
+structures more simply than an `EdgeLink` can.  This will be made
 clear below).
 
 Connectors
