@@ -1063,6 +1063,10 @@ STRING_OF_LINK <- FUNCTION_LINK
 SET_VALUE_LINK <- FUNCTION_LINK
 SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
+// Numeric increment. Combined (SetValue (Plus (FloatValueOf ...)))
+// Its atomic, so thread-safe.
+INCREMENT_VALUE_LINK <- FUNCTION_LINK
+
 // Internal-use-only wrapper for Values. Older code for function
 // application and beta reduction only works with Atoms, not Values.
 // Rewriting that code to flow Values is really hard: we don't have a
