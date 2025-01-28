@@ -46,6 +46,7 @@ private:
 public:
 	ValueShimLink(Type=VALUE_SHIM_LINK);
 	ValueShimLink(const HandleSeq&, Type=VALUE_SHIM_LINK);
+	ValueShimLink(const ValuePtr& v) : Link(VALUE_SHIM_LINK), val(v) {}
 
 	ValueShimLink(const ValueShimLink&) = delete;
 	ValueShimLink& operator=(const ValueShimLink&) = delete;
