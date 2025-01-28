@@ -27,6 +27,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/flow/ValueShimLink.h>
 
 #include "Instantiator.h"
 
@@ -414,7 +415,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		if (nameserver().isA(tbr, VALUE_OF_LINK) or
 		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
 
-		return HandleCast(flh->execute(_as, ist._silent));
+		ValuePtr vp(flh->execute(_as, ist._silent));
+		if (vp->is_atom())
+			return HandleCast(vp);
+
+		return HandleCast(createValueShimLink(vp));
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
@@ -576,6 +581,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
+	if (VALUE_SHIM_LINK == grounded->get_type())
+		return grounded->execute();
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
