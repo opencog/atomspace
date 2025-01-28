@@ -670,3 +670,42 @@ of the highest score, such that the graph remains planar (no
 intersecting edges.) The result is a graph with the largest possible
 number of edges, such that it is still flat, and such that the edges
 are scored the highest.
+
+Bibliography
+------------
+Readings and related projects.
+
+* [graph2sheaves](https://github.com/arquicanedo/graph2sheaves)
+  Sheaves library for graph abstractions based on NetworkX
+  From Arquimedes Canedo, circa 2019.
+
+* Justin Michael Curry, "Sheaves, Cosheaves and Applications", (2014)
+  PhD dissertation
+  [https://arxiv.org/pdf/1303.3255.pdf](https://arxiv.org/pdf/1303.3255.pdf)
+
+Lots of work from Michael Robinson:
+
+* [PySheaf: Sheaf-theoretic toolbox](https://github.com/kb1dds/pysheaf)
+  Python 3.6 libraries for manipulating cell complexes and sheaves of
+  sets or vector spaces on cell complexes. Includes links to youtube
+  videos on this topic.
+
+* Cliff Joslyn, Emilie Hogan, Michael Robinson, "Towards a topological
+  framework for integrating semantic information sources," Semantic
+  Technologies for Intelligence, Defense, and Security (STIDS), 2014.
+  [http://ceur-ws.org/Vol-1304/STIDS2014_P2_JoslynEtAl.pdf](http://ceur-ws.org/Vol-1304/STIDS2014_P2_JoslynEtAl.pdf)
+
+* Michael Robinson, "Sheaves are the canonical datastructure for
+  information integration," Information Fusion, 36 (2017), pp. 208-224.
+  [http://arxiv.org/abs/1603.01446](http://arxiv.org/abs/1603.01446)
+
+* Michael Robinson, "Sheaf and cosheaf methods for analyzing multi-model
+  systems,"
+  [http://arXiv.org/abs/1604.04647](http://arXiv.org/abs/1604.04647)
+
+* Michael Robinson, Topological Signal Processing, Springer, 2014.
+
+A self-cite, myself:
+
+* Linas Vepstas, "Sheaves: A Topological Approach to Big Data" (2019)
+  [https://arxiv.org/abs/1901.01341](https://arxiv.org/abs/1901.01341)
