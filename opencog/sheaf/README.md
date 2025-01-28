@@ -53,7 +53,7 @@ Consider theorem proving (or any kind of 'reasoning': abductive, inductive,
 whatever). Here, one typically has some "inference axioms", which are
 used connect statements together to get the inference result.  For example,
 “No man is an island" and "Aristotle is a man" -> “Aristotle is not an island"
-makes clear that 'man' is the attachement (jigsaw connector). Hooking
+makes clear that 'man' is the attachment (jigsaw connector). Hooking
 together 'man' across the two statements allows the inference to be
 made.
 
