@@ -45,8 +45,22 @@
 
 (cog-execute! mtxpr)
 
-; (test-assert "cube col" (equal? (list-ref four-list 3) cubevec))
+(test-assert "Paul" (equal? (FloatValue 1 0)
+	(cog-value (Item "Paul") (Predicate "counter"))))
 
+(test-assert "bit" (equal? (FloatValue 1 1)
+	(cog-value (Item "bit") (Predicate "counter"))))
+
+(test-assert "the" (equal? (FloatValue 2 2)
+	(cog-value (Item "the") (Predicate "counter"))))
+
+(test-assert "period" (equal? (FloatValue 0 1)
+	(cog-value (Item ".") (Predicate "counter"))))
+
+(test-assert "word-pair" (equal? (FloatValue 0 0 1)
+	(cog-value
+		(Edge (Predicate "word-pair") (List (Item "leg") (Item "and")))
+		(Predicate "counter"))))
 ; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
