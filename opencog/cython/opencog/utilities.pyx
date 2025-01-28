@@ -85,6 +85,12 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     """
     Add Node to the atomspace from the current context
     """
+
+    # NumberNodes can take lists of numbers.
+    # if isinstance(atom_name, list) :
+    if type(atom_name) is list :
+        atom_name = ' '.join(map(str,atom_name))
+
     # Valid strings include those coming from e.g. iso8859-NN
     # filenames, which break when shoved through UTF-8 because
     # they cotain bytes that cannot be converted to UTF-8 using
