@@ -131,6 +131,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         cpp_set[cHandle] getKeys()
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
+        cValuePtr execute()
 
         string to_string()
         string to_short_string()

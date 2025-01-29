@@ -79,9 +79,9 @@ cdef class Atom(Value):
 
     def get_keys(self):
         """
-        Returns the keys of values associated with this atom.
+        Returns the keys of Values associated with this Atom.
 
-        :returns: A list of atoms.
+        :returns: A list of Atoms.
         """
         cdef cpp_set[cHandle] keys = self.get_c_handle().get().getKeys()
         return convert_handle_set_to_python_list(keys)
@@ -132,6 +132,18 @@ cdef class Atom(Value):
     def truth_value(self, mean, count):
         self.tv = createTruthValue(mean, count)
         return self
+
+    def execute(self):
+        """
+        Execute the Atom, returning the result of execution.
+
+        :returns: A Value
+        """
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            raise RuntimeError("Null Atom!")
+        cdef cValuePtr c_value_ptr = atom_ptr.execute()
+        return create_python_value_from_c_value(c_value_ptr)
 
     def __richcmp__(self, other, int op):
         assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
