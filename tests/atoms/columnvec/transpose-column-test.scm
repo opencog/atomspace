@@ -77,22 +77,21 @@
 (Edge (Predicate "word-pair") (List (Item "a") (Item "lot")))
 (Edge (Predicate "word-pair") (List (Item "lot") (Item ".")))
 
+(define edge-pattern
+	(Edge (Predicate "word-pair")
+		(List (Variable "$left-word") (Variable "$right-word"))))
 ; -------
 ; Count occurances.
 (define mtxpr
 	(Query (VariableList
 		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
 		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
-		(Present
-			(Edge (Predicate "word-pair")
-				(List (Variable "$left-word") (Variable "$right-word"))))
+		(Present edge-pattern)
 		(IncrementValue (Variable "$left-word")
 			(Predicate "counter") (NumberNode 1 0 -0.3))
 		(IncrementValue (Variable "$right-word")
 			(Predicate "counter") (NumberNode 0 1 -0.3))
-		(IncrementValue
-			(Edge (Predicate "word-pair")
-				(List (Variable "$left-word") (Variable "$right-word")))
+		(IncrementValue edge-pattern
 			(Predicate "counter") (NumberNode 0 0 1))))
 
 (cog-execute! mtxpr)
@@ -118,19 +117,17 @@
 	(Query (VariableList
 		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
 		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
-		(Present
-			(Edge (Predicate "word-pair")
-				(List (Variable "$left-word") (Variable "$right-word"))))
+		(Present edge-pattern)
 		(SexprColumn (Variable "$left-word"))
 		(IncrementValue (Variable "$left-word")
 			(Predicate "counter") (NumberNode 1 0 -0.3))
 		(SexprColumn (Variable "$right-word"))
 		(IncrementValue (Variable "$right-word")
 			(Predicate "counter") (NumberNode 0 1 -0.3))
-		(IncrementValue
-			(Edge (Predicate "word-pair")
-				(List (Variable "$left-word") (Variable "$right-word")))
-			(Predicate "counter") (NumberNode 0 0 1))))
+		(IncrementValue edge-pattern
+			(Predicate "counter") (NumberNode 0 0 1))
+		(SexprColumn edge-pattern)
+	))
 
 (cog-execute! labels)
 
@@ -142,7 +139,7 @@
 (format #t "arrows are ~A\n" arrows)
 
 (define arco (cog-value->list arrows))
-(test-assert "expect five columns" (equal? 5 (length arco)))
+(test-assert "expect six columns" (equal? 6 (length arco)))
 
 (for-each
 	(lambda (col)
