@@ -16,10 +16,12 @@
 
 (define nutria (cog-execute! (TransposeColumn numat)))
 
+(format #t "Got nutria ~A\n" nutria)
+
 (test-assert "nutria" (equal? nutria
 	(LinkValue
 		(FloatValue 1 4)
-		(FloatValue 2 4)
+		(FloatValue 2 5)
 		(FloatValue 3 6))))
 
 ; ------------------------------------------------------------

@@ -64,14 +64,14 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			if (vp->is_type(FLOAT_VALUE))
 			{
 				const std::vector<double>& vals = FloatValueCast(vp)->value();
-				for (size_t i=0; i< ncols; i++)
-					vcols[i] = createFloatValue(vals[i]);
+				for (double d : vals)
+					vcols.push_back(createFloatValue(d));
 			}
 			else if (vp->is_type(NUMBER_NODE))
 			{
 				const std::vector<double>& vals = NumberNodeCast(vp)->value();
-				for (size_t i=0; i< ncols; i++)
-					vcols[i] = createFloatValue(vals[i]);
+				for (double d : vals)
+					vcols.push_back(createFloatValue(d));
 			}
 			else
 				throw RuntimeException(TRACE_INFO,
