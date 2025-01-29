@@ -76,9 +76,6 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	// ListValue or a Link, in which case, the columns show up packed
 	// individually in rows. These are two distinct cases; each gets
 	// different unpacking.
-	if (not vrows[0]->is_type(LINK_VALUE) and
-	    not vrows[0]->is_type(LINK))
-		return do_direct_loop(as, silent, vrows);
 	Type rtype = vrows[0]->get_type();
 	for (ValuePtr vp: vrows)
 	{
@@ -256,6 +253,14 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
 			for (size_t i=0; i< ncols; i++)
 				LinkValueCast(vcols[i]) -> _value.push_back(
 					createStringValue(vals[i]));
+		}
+		else if (vp->is_type(NUMBER_NODE))
+		{
+			const std::vector<double>& vals = NumberNodeCast(vp)->value();
+			CHKSZ(vals);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(
+					createFloatValue(vals[i]));
 		}
 	}
 	return createLinkValue(std::move(vcols));
