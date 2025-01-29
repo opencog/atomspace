@@ -113,7 +113,8 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 				// flattening seems like the wrong thing to do.
 				if (1 != vp->size())
 					throw RuntimeException(TRACE_INFO,
-						"Expecting exactly one number per item, got %lu\n",
+						"Expecting exactly one number per item, got %lu\n"
+						"\tMaybe you want TransposeColumn instead?\n",
 						vp->size());
 
 				if (vp->is_type(FLOAT_VALUE))
