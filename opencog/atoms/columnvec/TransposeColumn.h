@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/column/FloatColumn.h
+ * opencog/atoms/column/TransposeColumn.h
  *
  * Copyright (C) 2015, 2022, 2025 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FLOAT_COLUMN_H
-#define _OPENCOG_FLOAT_COLUMN_H
+#ifndef _OPENCOG_TRANSPOSE_COLUMN_H
+#define _OPENCOG_TRANSPOSE_COLUMN_H
 
 #include <opencog/atoms/base/Link.h>
 
@@ -31,45 +31,48 @@ namespace opencog
  *  @{
  */
 
-/// The FloatColumn returns a FloatValue vector of the floating
-/// point values for Atoms/Values obtained from a Link or LinkValue.
+/// The TransposeColumn returns the transpose of collection of rows.
 ///
 /// For example,
 ///
-///     FloatColumn
-///         Link
-///             Number 1
-///             Number 2
+///     TransposeColumn
+///         Number 1 2 3
+///         Number 4 5 6
 ///
-/// will return a float vector of length two:
+/// will return a LinkValue of length three:
 ///
-///     (FloatValue 1.0 2.0)
+///     (LinkValue
+///         (FloatValue 1.0 4.0)
+///         (FloatValue 2.0 5.0)
+///         (FloatValue 3.0 6.0))
 ///
 /// The intended use case is in combination with pattern searches,
-/// to obtain one float vector from a list of individual results.
-class FloatColumn : public Link
+/// to obtain column vectors from a list of individual results.
+class TransposeColumn : public Link
 {
 protected:
 	ValuePtr do_execute(AtomSpace*, bool);
 	ValuePtr do_handle_loop(AtomSpace*, bool, const HandleSeq&);
+	ValuePtr do_value_loop(AtomSpace*, bool, const ValueSeq&);
+	ValuePtr do_direct_loop(AtomSpace*, bool, const ValueSeq&);
 
 public:
-	FloatColumn(const HandleSeq&&, Type = FLOAT_COLUMN);
-	FloatColumn(const FloatColumn&) = delete;
-	FloatColumn& operator=(const FloatColumn&) = delete;
+	TransposeColumn(const HandleSeq&&, Type = TRANSPOSE_COLUMN);
+	TransposeColumn(const TransposeColumn&) = delete;
+	TransposeColumn& operator=(const TransposeColumn&) = delete;
 
 	virtual bool is_executable() const { return true; }
 
-	// Return a pointer to FloatValue holding the vector of floats.
+	// Return a pointer to LinkValue holding multiple columns.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(FloatColumn)
-#define createFloatColumn CREATE_DECL(FloatColumn)
+LINK_PTR_DECL(TransposeColumn)
+#define createTransposeColumn CREATE_DECL(TransposeColumn)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_FLOAT_COLUMN_H
+#endif // _OPENCOG_TRANSPOSE_COLUMN_H

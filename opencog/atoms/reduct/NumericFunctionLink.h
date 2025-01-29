@@ -57,7 +57,6 @@ public:
 
 	virtual ValuePtr execute(AtomSpace*, bool);
 
-	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 	static Handle factory(const Handle&);
 };
 

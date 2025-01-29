@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 
@@ -51,7 +51,7 @@ ValuePtr FloatColumn::do_handle_loop(AtomSpace* as, bool silent,
 	dvec.reserve(hseq.size());
 	for (const Handle& h : hseq)
 	{
-		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
+		ValuePtr vp(FunctionLink::get_value(as, silent, h));
 
 		// Expecting exactly one float per item. That's because
 		// I don't know what it means if there is more than one,
@@ -102,18 +102,18 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			dvec.reserve(vpe->size());
 			for (const ValuePtr& v : LinkValueCast(vpe)->value())
 			{
-				// NumericFunctionLink::get_value() tries to execute
-				// the value, if it's executable. Is that overkill,
-				// or is that needed? When would a vector of functions
-				// arise?
-				ValuePtr vp(NumericFunctionLink::get_value(as, silent, v));
+				// FunctionLink::get_value() tries to execute the value,
+				// if it's executable. Is that overkill, or is that
+				// needed? When would a vector of functions arise?
+				ValuePtr vp(FunctionLink::get_value(as, silent, v));
 
 				// Expecting exactly one float per item. That's because
 				// I don't know what it means if there is more than one,
 				// flattening seems like the wrong thing to do.
 				if (1 != vp->size())
 					throw RuntimeException(TRACE_INFO,
-						"Expecting exactly one number per item, got %lu\n",
+						"Expecting exactly one number per item, got %lu\n"
+						"\tMaybe you want TransposeColumn instead?\n",
 						vp->size());
 
 				if (vp->is_type(FLOAT_VALUE))

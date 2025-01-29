@@ -1235,6 +1235,11 @@ FLOAT_COLUMN <- COLUMN
 // Convert collection to a LinkValue of Values.
 LINK_COLUMN <- COLUMN
 
+// Combine LinkColumn and FloatColumn into one does-it-all matrix
+// transpose. (Q: are FloatColumn and LinkColumn needed, if we do it
+// all, here?)
+TRANSPOSE_COLUMN <- COLUMN
+
 // ==============================================================
 // Foreign abstrast syntax trees (AST's)
 
