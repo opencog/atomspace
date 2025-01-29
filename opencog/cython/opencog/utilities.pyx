@@ -87,9 +87,15 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     """
 
     # NumberNodes can take lists of numbers.
-    # if isinstance(atom_name, list) :
     if type(atom_name) is list :
-        atom_name = ' '.join(map(str,atom_name))
+        atom_name = ' '.join(map(str, atom_name))
+
+    # NumberNodes can be single numbers.
+    if type(atom_name) is int :
+        atom_name = map(str, atom_name)
+
+    if type(atom_name) is float :
+        atom_name = map(str, atom_name)
 
     # Valid strings include those coming from e.g. iso8859-NN
     # filenames, which break when shoved through UTF-8 because
