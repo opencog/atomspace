@@ -15,7 +15,8 @@ from opencog.atomspace import AtomSpace, types
 from opencog.execute import execute_atom
 from opencog.type_constructors import *
 
-set_default_atomspace(AtomSpace())
+atomspace = AtomSpace()
+set_default_atomspace(atomspace)
 
 # ------------------------------------------------------------------
 # Start by populating the AtomSpace with some data.
@@ -25,3 +26,40 @@ set_default_atomspace(AtomSpace())
 # here hides what the AtomSpace is actually good for. No matter.
 # Moving on ...)
 
+tag = PredicateNode("word-pair")
+
+# A standard dependency parse, showing word-pairs.
+EdgeLink(tag, ListLink(ItemNode("the"), ItemNode("dog")))
+EdgeLink(tag, ListLink(ItemNode("dog"), ItemNode("chased")))
+EdgeLink(tag, ListLink(ItemNode("the"), ItemNode("cat")))
+EdgeLink(tag, ListLink(ItemNode("chased"), ItemNode("cat")))
+EdgeLink(tag, ListLink(ItemNode("chased"), ItemNode("around")))
+EdgeLink(tag, ListLink(ItemNode("the"), ItemNode("house")))
+EdgeLink(tag, ListLink(ItemNode("around"), ItemNode("house")))
+EdgeLink(tag, ListLink(ItemNode("cat"), ItemNode("around")))
+EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("dog")))
+EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("chased")))
+
+# A pattern that will fid tagged word-pairs
+pair_pattern = EdgeLink(tag,
+    ListLink(VariableNode("$left-word"), VariableNode("$right-word")))
+
+# A query pattern, with typed variables
+basic_query = QueryLink(
+    VariableList(
+        TypedVariableLink(
+            VariableNode("$left-word"), TypeNode("ItemNode")),
+        TypedVariableLink(
+            VariableNode("$right-word"), TypeNode("ItemNode"))),
+
+    # Search for pairs that are present in the AtomSpace
+    PresentLink(pair_pattern),
+
+    # Output what was found
+    pair_pattern)
+
+# Perform the query.
+execute_atom(atomspace, basic_query)
+
+print("Basic query returned:",
+    execute_atom(atomspace, ValueOfLink(basic_query, basic_query)))
