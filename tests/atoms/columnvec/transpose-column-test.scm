@@ -223,6 +223,18 @@
 (test-assert "expect 4 col of FloatValue" (equal?
 	'FloatValue (cog-type (list-ref skinhead 4))))
 
+; -------
+(define getback (cog-execute!
+	(TransposeColumn (TransposeColumn (ValueOf trim-count trim-count)))))
+
+(format #t "got back ~A\n" getback)
+
+(cog-set-value! trim-count (Predicate "transpose") skinny)
+(define getback2 (cog-execute!
+	(TransposeColumn (ValueOf trim-count (Predicate "transpose")))))
+
+(format #t "got back2 ~A\n" getback2)
+
 ; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)

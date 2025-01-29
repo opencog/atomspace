@@ -120,6 +120,12 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 				for (double d : vals)
 					vcols.push_back(createFloatValue(d));
 			}
+			else if (vp->is_type(STRING_VALUE))
+			{
+				const std::vector<std::string>& vals = StringValueCast(vp)->value();
+				for (const std::string& s : vals)
+					vcols.push_back(createStringValue(s));
+			}
 			else if (vp->is_link())
 			{
 				const HandleSeq& hrow = HandleCast(vp)->getOutgoingSet();
@@ -174,6 +180,13 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
 				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
+		}
+		else if (vp->is_type(STRING_VALUE))
+		{
+			const std::vector<std::string>& vals = StringValueCast(vp)->value();
+			CHKSZ(vals);
+			for (size_t i=0; i< ncols; i++)
+				StringValueCast(vcols[i]) -> _value.push_back(vals[i]);
 		}
 		else if (vp->is_link())
 		{
