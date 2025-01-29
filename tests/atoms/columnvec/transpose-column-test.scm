@@ -151,13 +151,13 @@
 ; StringValue, FloatValue, StringValue, FloatValue, FloatValue
 
 (test-assert "expect 0 col of StringValue" (equal?
-	'StringValue (cog-type (cog-value-ref (list-ref arco 0) 0))))
+	'StringValue (cog-type (list-ref arco 0))))
 
 (test-assert "expect 1 col of FloatValue" (equal?
 	'FloatValue (cog-type (cog-value-ref (list-ref arco 1) 1))))
 
 (test-assert "expect 2 col of StringValue" (equal?
-	'StringValue (cog-type (cog-value-ref (list-ref arco 2) 2))))
+	'StringValue (cog-type (list-ref arco 2))))
 
 (test-assert "expect 3 col of FloatValue" (equal?
 	'FloatValue (cog-type (cog-value-ref (list-ref arco 3) 3))))
@@ -195,6 +195,33 @@
 	(TransposeColumn (ValueOf trim-count trim-count))))
 
 (format #t "skinny is ~A\n" skinny)
+
+(define skinhead (cog-value->list skinny))
+(test-assert "expect five columns" (equal? 5 (length skinhead)))
+
+(for-each
+	(lambda (col)
+		(test-assert "expect len=12"
+			(equal? 12 (length (cog-value->list col)))))
+	skinhead)
+
+; The five columns should contain:
+; StringValue, FloatValue, StringValue, FloatValue, FloatValue
+
+(test-assert "expect 0 col of StringValue" (equal?
+	'StringValue (cog-type (list-ref skinhead 0))))
+
+(test-assert "expect 1 col of FloatValue" (equal?
+	'FloatValue (cog-type (list-ref skinhead 1))))
+
+(test-assert "expect 2 col of StringValue" (equal?
+	'StringValue (cog-type (list-ref skinhead 2))))
+
+(test-assert "expect 3 col of FloatValue" (equal?
+	'FloatValue (cog-type (list-ref skinhead 3))))
+
+(test-assert "expect 4 col of FloatValue" (equal?
+	'FloatValue (cog-type (list-ref skinhead 4))))
 
 ; ------------------------------------------------------------
 (test-end tname)
