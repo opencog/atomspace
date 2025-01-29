@@ -495,7 +495,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	Type t = expr->get_type();
 	if (nameserver().isA(t, VALUE_OF_LINK) or
 	    nameserver().isA(t, SET_VALUE_LINK) or
-	    nameserver().isA(t, ARITHMETIC_LINK))
+	    nameserver().isA(t, ARITHMETIC_LINK) or
+	    nameserver().isA(t, COLUMN))
 	{
 		HandleSeq oset_results;
 		for (const Handle& h: expr->getOutgoingSet())
