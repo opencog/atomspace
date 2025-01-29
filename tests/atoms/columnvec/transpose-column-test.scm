@@ -224,10 +224,10 @@
 	'FloatValue (cog-type (list-ref skinhead 4))))
 
 ; -------
-(define getback (cog-execute!
-	(TransposeColumn (TransposeColumn (ValueOf trim-count trim-count)))))
-
-(format #t "got back ~A\n" getback)
+;(define getback (cog-execute!
+;	(TransposeColumn (TransposeColumn (ValueOf trim-count trim-count)))))
+;
+;(format #t "got back ~A\n" getback)
 
 (cog-set-value! trim-count (Predicate "transpose") skinny)
 (define getback2 (cog-execute!

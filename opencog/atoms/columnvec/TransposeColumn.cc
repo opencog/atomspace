@@ -53,7 +53,7 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 	for (const Handle& h : hrows)
 		vrows.push_back(h);
 
-	return do_handle_loop(as, silent, vrows);
+	return do_value_loop(as, silent, vrows);
 }
 
 #define CHKSZ(ROW) \
@@ -62,13 +62,42 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			"Short row! Got %lu want %lu\n", ROW.size(), ncols);
 
 /// Return a FloatValue vector.
-ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
-                                         const ValueSeq& vrows)
+ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
+                                        const ValueSeq& vrows)
 {
+	if (0 == vrows.size())
+		return createLinkValue();
+
+	// Convert rows to columns. The number of columns output will
+	// equal number of rows input. The type of the column will be
+	// the type of the row. If all rows have the same type, then
+	// the columns can be a primitive vector of that type.
+	//
+	// The case of rows contained in ListValues is "the same",
+	// except that the columns appear in the first row. So these
+	// two get slightly different handling.
+	size_t ncols = 0;
+	for (ValuePtr vp: vrows)
+	{
+		if (not vp->is_type(LIST_VALUE))
+		{
+			ncols = vrows.size();
+			break;
+		}
+	}
+
+	std::vector<Type> coltypes;
+	if (0 < ncols)
+	{
+		coltypes.reserve(ncols);
+		for (ValuePtr vp: vrows)
+	}
+
 	// Upon entry, we don't yet know how many columns we will need.
+	// We also don't know the column types. If all rows have the same
+	// type
 	// Assume that all rows will be the same length, so that the
 	// first row will provide the right size.
-	size_t ncols = 0;
 	ValueSeq vcols;
 	for (ValuePtr vp: vrows)
 	{
@@ -80,6 +109,7 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			ncols = vp->size();
 			vcols.reserve(ncols);
 
+printf("duude first row %lu %s\n", ncols, vp->to_string().c_str());
 			// The if-statemens below are ordered in the sequence
 			// of most-likely to least likely. I think transposing
 			// FloatValues will be the most common case, and then
@@ -145,7 +175,7 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 		{
 			const std::vector<double>& vals = FloatValueCast(vp)->value();
 			CHKSZ(vals);
-			for (size_t i=0; i< ncols; i++)
+			for (size_t i=0; i<ncols; i++)
 				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
 		}
 		else if (vp->is_type(LINK_VALUE))
