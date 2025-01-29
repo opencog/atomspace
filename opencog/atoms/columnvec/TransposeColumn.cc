@@ -88,7 +88,6 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	// the columns and column types.
 	size_t ncols = 0;
 	ValueSeq vcols;
-	std::vector<Type> coltypes;
 	for (ValuePtr vp: vrows)
 	{
 		if (vp->is_atom() and HandleCast(vp)->is_executable())
@@ -98,7 +97,6 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 		{
 			ncols = vp->size();
 			vcols.reserve(ncols);
-			coltypes.reserve(ncols);
 
 			// The if-statemens below are ordered in the sequence
 			// of most-likely to least likely. I think transposing
@@ -261,6 +259,13 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
 			for (size_t i=0; i< ncols; i++)
 				LinkValueCast(vcols[i]) -> _value.push_back(
 					createFloatValue(vals[i]));
+		}
+		else if (vp->is_link())
+		{
+			const HandleSeq& vals = HandleCast(vp)->getOutgoingSet();
+			CHKSZ(vals);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(vals[i]);
 		}
 	}
 	return createLinkValue(std::move(vcols));
