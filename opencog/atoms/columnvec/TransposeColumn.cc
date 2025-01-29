@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 
@@ -45,13 +45,23 @@ TransposeColumn::TransposeColumn(const HandleSeq&& oset, Type t)
 
 /// Return a FloatValue vector.
 ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
-                                     const HandleSeq& hseq)
+                                         const HandleSeq& hseq)
 {
-	std::vector<double> dvec;
-	dvec.reserve(hseq.size());
+	// Upon entry, we don't yet know how many columns we will need.
+	// Assume that all rows will be the same length, so that the
+	// first row will provide the right size.
+	bool not_inited = true;
+	std::vector<ValuePtr> vcols;
 	for (const Handle& h : hseq)
 	{
-		ValuePtr vp(NumericFunctionLink::get_value(as, silent, h));
+		ValuePtr vp(FunctionLink::get_value(as, silent, h));
+
+		if (not_inited)
+		{
+			// vcols.reserve(hseq.size());
+			not_inited = false;
+		}
+#if 0
 
 		// Expecting exactly one float per item. That's because
 		// I don't know what it means if there is more than one,
@@ -69,9 +79,10 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			throw RuntimeException(TRACE_INFO,
 				"Expecting numeric value, got %s\n",
 				vp->to_string());
+#endif
 	}
 
-	return createFloatValue(std::move(dvec));
+	return createLinkValue(std::move(vcols));
 }
 
 // ---------------------------------------------------------------
@@ -102,11 +113,11 @@ ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 			dvec.reserve(vpe->size());
 			for (const ValuePtr& v : LinkValueCast(vpe)->value())
 			{
-				// NumericFunctionLink::get_value() tries to execute
+				// FunctionLink::get_value() tries to execute
 				// the value, if it's executable. Is that overkill,
 				// or is that needed? When would a vector of functions
 				// arise?
-				ValuePtr vp(NumericFunctionLink::get_value(as, silent, v));
+				ValuePtr vp(FunctionLink::get_value(as, silent, v));
 
 				// Expecting exactly one float per item. That's because
 				// I don't know what it means if there is more than one,

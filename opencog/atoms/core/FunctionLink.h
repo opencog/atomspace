@@ -75,6 +75,8 @@ public:
 	virtual ~FunctionLink() {}
 
 	virtual bool is_executable(void) const { return true; }
+
+	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
 	static Handle factory(const Handle&);
 };
 
