@@ -95,25 +95,58 @@ print("Basic query returned:",
     ValueOfLink(basic_query, basic_query).execute())
 
 # ------------------------------------------------------------------
-# Design a more interesting query that will count the number of times
-# that words appear on the left, or the right side of a pair. The counts
-# will be stored with the words.
+# Design a more interesting query. This one will count the number of
+# times that words appear on the left or right side of a pair. The
+# resulting counts will be stored with the words (for later access).
 
 # Define a key where the counts will be placed. The key can be any
 # Atom at all, but by convetion, PredicateNodes are used. The naming
 # convention was inspired by first-order predicate logic.
 count_key = PredicateNode("counter")
 
+# Define the word-counting query. The variable declarations and search
+# pattern are same as before. The rewrite side of the query has two
+# parts, incrementing different counts on a very short vector.
+#
+# The IncrementValueLink Atom is a thread-safe, atomic increment. It can
+# be run from multiple threads at once, and will not race in reading,
+# incremementing and writing the count.
+#
+# Two counts are kept: one for the left-words, and one for the
+# right-words. These two counts could be kept under separate keys.
+# However, to make the demo more interesting, these two counts are
+# stored under just one key, but using a FloatValue vector to store
+# them. Thus, the increment is performed not a single number, but on
+# the whole vector, at once. The counts on the left-words are
+# incremented with [1,0], and those on the right with [0,1]. Since
+# increment is atomic, the counts will be accurate.
+#
+# In general, the increment vector can be of any length, holding
+# arbitrary floating-point values. Try it.
 counting_query = QueryLink(
     pair_vardecls,
     PresentLink(pair_pattern),
+
+    # When the above pattern is matched, the counts are incremented.
     IncrementValueLink(VariableNode("$left-word"),
        count_key, NumberNode([1,0])),
     IncrementValueLink(VariableNode("$right-word"),
        count_key, NumberNode([0,1])))
 
+# Perform the counting.
 counting_query.execute()
 
-print("Counting query returned:",
-    ValueOfLink(counting_query, counting_query).execute())
+# To view the count results, we'll have a bit more fun. Construct a
+# query that crawls over words, only. Just for grins, a MeetLink is
+# used, instead of a QueryLink. The MeetLink does NOT perform any
+# rewrites: it just returns the goundings of the variable(s), directly.
+# The name "Meet" come from the fact that this query peroforms a meet
+# on a poset. See Wikipedia:
+#    https://en.wikipedia.org/wiki/Join_and_meet
+# Yes, Atomese also has a JoinLink.
+#
+get_words = MeetLink (
+    TypedVariableLink( VariableNode("$word"), TypeNode("ItemNode")),
+    PresentLink(VariableNode("$word")))
 
+print("The words are:", get_words.execute())
