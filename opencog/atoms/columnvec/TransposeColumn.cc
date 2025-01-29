@@ -50,36 +50,47 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 	// Upon entry, we don't yet know how many columns we will need.
 	// Assume that all rows will be the same length, so that the
 	// first row will provide the right size.
-	bool not_inited = true;
+	size_t ncols = 0;
 	std::vector<ValuePtr> vcols;
 	for (const Handle& h : hseq)
 	{
 		ValuePtr vp(FunctionLink::get_value(as, silent, h));
 
-		if (not_inited)
+		if (0 == ncols)
 		{
-			// vcols.reserve(hseq.size());
-			not_inited = false;
+			ncols = vp->size();
+			vcols.reserve(ncols);
+
+			if (vp->is_type(FLOAT_VALUE))
+			{
+				const std::vector<double>& vals = FloatValueCast(vp)->value();
+				for (size_t i=0; i< ncols; i++)
+					vcols[i] = createFloatValue(vals[i]);
+			}
+			else if (vp->is_type(NUMBER_NODE))
+			{
+				const std::vector<double>& vals = NumberNodeCast(vp)->value();
+				for (size_t i=0; i< ncols; i++)
+					vcols[i] = createFloatValue(vals[i]);
+			}
+			else
+				throw RuntimeException(TRACE_INFO,
+					"I don't know what to do here\n");
+
+			continue;
 		}
-#if 0
-
-		// Expecting exactly one float per item. That's because
-		// I don't know what it means if there is more than one,
-		// flattening seems like the wrong thing to do.
-		if (1 != vp->size())
-			throw RuntimeException(TRACE_INFO,
-				"Expecting exactly one number per item, got %lu\n",
-				vp->size());
-
 		if (vp->is_type(FLOAT_VALUE))
-			dvec.push_back(FloatValueCast(vp)->value()[0]);
+		{
+			const std::vector<double>& vals = FloatValueCast(vp)->value();
+			for (size_t i=0; i< ncols; i++)
+				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
+		}
 		else if (vp->is_type(NUMBER_NODE))
-			dvec.push_back(NumberNodeCast(vp)->get_value());
-		else
-			throw RuntimeException(TRACE_INFO,
-				"Expecting numeric value, got %s\n",
-				vp->to_string());
-#endif
+		{
+			const std::vector<double>& vals = NumberNodeCast(vp)->value();
+			for (size_t i=0; i< ncols; i++)
+				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
+		}
 	}
 
 	return createLinkValue(std::move(vcols));

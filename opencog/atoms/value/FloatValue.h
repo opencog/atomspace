@@ -40,6 +40,8 @@ namespace opencog
 class FloatValue
 	: public Value
 {
+	friend class TransposeColumn;
+
 protected:
 	mutable std::vector<double> _value;
 
