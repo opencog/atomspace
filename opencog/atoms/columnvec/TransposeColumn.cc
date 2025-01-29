@@ -227,10 +227,10 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
                                          const ValueSeq& vrows)
 {
 	// Convert rows to columns. The number of columns output will
-	// equal number of rows input. The type of the column will be
-	// the type of the row. If all rows have the same type, then
-	// the columns can be a primitive vector of that type.
-	size_t ncols = vrows.size();
+	// equal the length of the first row (and all rows should have
+	// this same length.) The type of the column will be the type
+	// of the corresponding row.
+	size_t ncols = vrows[0]->size();
 	ValueSeq vcols;
 	vcols.reserve(ncols);
 	for (size_t i=0; i<ncols; i++)
