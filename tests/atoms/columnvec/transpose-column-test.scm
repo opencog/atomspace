@@ -96,6 +96,7 @@
 			(Predicate "counter") (NumberNode 0 0 1))))
 
 (cog-execute! mtxpr)
+(format #t "matrix is ~A\n" (cog-execute! (ValueOf mtxpr mtxpr)))
 
 (define trannie (cog-execute!
 	(TransposeColumn (ValueOf mtxpr mtxpr))))
@@ -133,10 +134,12 @@
 
 (cog-execute! labels)
 
+(format #t "labels are ~A\n" (cog-execute! (ValueOf labels labels)))
+
 (define arrows (cog-execute!
 	(TransposeColumn (ValueOf labels labels))))
 
-(format #t "trannie is ~A\n" arrows)
+(format #t "arrows are ~A\n" arrows)
 
 (define arco (cog-value->list arrows))
 (test-assert "expect five columns" (equal? 5 (length arco)))
