@@ -54,6 +54,7 @@ protected:
 	ValuePtr do_execute(AtomSpace*, bool);
 	ValuePtr do_handle_loop(AtomSpace*, bool, const HandleSeq&);
 	ValuePtr do_value_loop(AtomSpace*, bool, const ValueSeq&);
+	ValuePtr do_direct_loop(AtomSpace*, bool, const ValueSeq&);
 
 public:
 	TransposeColumn(const HandleSeq&&, Type = TRANSPOSE_COLUMN);

@@ -56,6 +56,8 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 	return do_value_loop(as, silent, vrows);
 }
 
+// ---------------------------------------------------------------
+
 #define CHKSZ(ROW) \
 	if (ROW.size() < ncols) \
 		throw RuntimeException(TRACE_INFO, \
@@ -65,9 +67,6 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
                                         const ValueSeq& vrows)
 {
-	if (0 == vrows.size())
-		return createLinkValue();
-
 	// Convert rows to columns. The number of columns output will
 	// equal number of rows input. The type of the column will be
 	// the type of the row. If all rows have the same type, then
@@ -76,29 +75,18 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	// The case of rows contained in ListValues is "the same",
 	// except that the columns appear in the first row. So these
 	// two get slightly different handling.
-	size_t ncols = 0;
 	for (ValuePtr vp: vrows)
 	{
 		if (not vp->is_type(LIST_VALUE))
-		{
-			ncols = vrows.size();
-			break;
-		}
+			return do_direct_loop(as, silent, vrows);
 	}
 
-	std::vector<Type> coltypes;
-	if (0 < ncols)
-	{
-		coltypes.reserve(ncols);
-		for (ValuePtr vp: vrows)
-	}
-
-	// Upon entry, we don't yet know how many columns we will need.
-	// We also don't know the column types. If all rows have the same
-	// type
-	// Assume that all rows will be the same length, so that the
-	// first row will provide the right size.
+	// If we are here, then the first ListValue row holds the columns
+	// that we will be extracting. That is, the first row provides all
+	// the columns and column types.
+	size_t ncols = 0;
 	ValueSeq vcols;
+	std::vector<Type> coltypes;
 	for (ValuePtr vp: vrows)
 	{
 		if (vp->is_atom() and HandleCast(vp)->is_executable())
@@ -108,8 +96,8 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 		{
 			ncols = vp->size();
 			vcols.reserve(ncols);
+			coltypes.reserve(ncols);
 
-printf("duude first row %lu %s\n", ncols, vp->to_string().c_str());
 			// The if-statemens below are ordered in the sequence
 			// of most-likely to least likely. I think transposing
 			// FloatValues will be the most common case, and then
@@ -233,6 +221,47 @@ printf("duude first row %lu %s\n", ncols, vp->to_string().c_str());
 // ---------------------------------------------------------------
 
 /// Return a FloatValue vector.
+ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
+                                         const ValueSeq& vrows)
+{
+	if (0 == vrows.size())
+		return createLinkValue();
+
+	// Convert rows to columns. The number of columns output will
+	// equal number of rows input. The type of the column will be
+	// the type of the row. If all rows have the same type, then
+	// the columns can be a primitive vector of that type.
+	size_t ncols = vrows.size();
+	ValueSeq vcols;
+	vcols.reserve(ncols);
+	for (size_t i=0; i<ncols; i++)
+		vcols.emplace_back(createLinkValue());
+
+	for (ValuePtr vp: vrows)
+	{
+		if (vp->is_type(FLOAT_VALUE))
+		{
+			const std::vector<double>& vals = FloatValueCast(vp)->value();
+			CHKSZ(vals);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(
+					createFloatValue(vals[i]));
+		}
+		else if (vp->is_type(STRING_VALUE))
+		{
+			const std::vector<std::string>& vals = StringValueCast(vp)->value();
+			CHKSZ(vals);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(
+					createStringValue(vals[i]));
+		}
+	}
+	return createLinkValue(std::move(vcols));
+}
+
+// ---------------------------------------------------------------
+
+/// Return a FloatValue vector.
 ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 {
 	// If the given Atom is executable, then execute it.
@@ -249,7 +278,7 @@ ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 					"Expecting LinkValue, got %s\n",
 					vpe->to_string());
 
-			return do_handle_loop(as, silent, LinkValueCast(vpe)->value());
+			return do_value_loop(as, silent, LinkValueCast(vpe)->value());
 		}
 	}
 
