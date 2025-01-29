@@ -132,6 +132,9 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 
 			continue;
 		}
+
+		// If we are here, this is not the first row, and we know how
+		// many columns there are, and what their types should be.
 		if (vp->is_type(FLOAT_VALUE))
 		{
 			const std::vector<double>& vals = FloatValueCast(vp)->value();
@@ -144,8 +147,8 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			const ValueSeq& vrow = LinkValueCast(vp)->value();
 			CHKSZ(vrow);
 			for (size_t i=0; i< ncols; i++)
-			for (const ValuePtr& v : vrow)
 			{
+				const ValuePtr& v(vrow[i]);
 				if (1 == v->size())
 				{
 					if (v->is_type(FLOAT_VALUE))
