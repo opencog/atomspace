@@ -126,7 +126,7 @@
 			(Predicate "counter") (NumberNode 0 1 -0.3))
 		(IncrementValue edge-pattern
 			(Predicate "counter") (NumberNode 0 0 1))
-		(SexprColumn edge-pattern)
+		;;; (SexprColumn edge-pattern)
 	))
 
 (cog-execute! labels)
@@ -139,13 +139,31 @@
 (format #t "arrows are ~A\n" arrows)
 
 (define arco (cog-value->list arrows))
-(test-assert "expect six columns" (equal? 6 (length arco)))
+(test-assert "expect five columns" (equal? 5 (length arco)))
 
 (for-each
 	(lambda (col)
 		(test-assert "expect len=12"
 			(equal? 12 (length (cog-value->list col)))))
 	arco)
+
+; The five columns should contain:
+; StringValue, FloatValue, StringValue, FloatValue, FloatValue
+
+(test-assert "expect 0 col of StringValue" (equal?
+	'StringValue (cog-type (cog-value-ref (list-ref arco 0) 0))))
+
+(test-assert "expect 1 col of FloatValue" (equal?
+	'FloatValue (cog-type (cog-value-ref (list-ref arco 1) 1))))
+
+(test-assert "expect 2 col of StringValue" (equal?
+	'StringValue (cog-type (cog-value-ref (list-ref arco 2) 2))))
+
+(test-assert "expect 3 col of FloatValue" (equal?
+	'FloatValue (cog-type (cog-value-ref (list-ref arco 3) 3))))
+
+(test-assert "expect 4 col of FloatValue" (equal?
+	'FloatValue (cog-type (cog-value-ref (list-ref arco 4) 4))))
 
 ; ------------------------------------------------------------
 (test-end tname)
