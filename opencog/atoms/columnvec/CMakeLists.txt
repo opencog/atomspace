@@ -6,6 +6,7 @@ ADD_LIBRARY (columnvec
 	FloatColumn.cc
 	LinkColumn.cc
 	SexprColumn.cc
+	TransposeColumn.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -25,5 +26,6 @@ INSTALL (FILES
 	FloatColumn.h
 	LinkColumn.h
 	SexprColumn.h
+	TransposeColumn.h
 	DESTINATION "include/opencog/atoms/columnvec"
 )
