@@ -111,6 +111,42 @@
 			(equal? 12 (length (cog-value->list col)))))
 	cols)
 
+; -------
+; Count and label.
+(define labels
+	(Query (VariableList
+		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
+		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
+		(Present
+			(Edge (Predicate "word-pair")
+				(List (Variable "$left-word") (Variable "$right-word"))))
+		(SexprColumn (Variable "$left-word"))
+		(IncrementValue (Variable "$left-word")
+			(Predicate "counter") (NumberNode 1 0 -0.3))
+		(SexprColumn (Variable "$right-word"))
+		(IncrementValue (Variable "$right-word")
+			(Predicate "counter") (NumberNode 0 1 -0.3))
+		(IncrementValue
+			(Edge (Predicate "word-pair")
+				(List (Variable "$left-word") (Variable "$right-word")))
+			(Predicate "counter") (NumberNode 0 0 1))))
+
+(cog-execute! labels)
+
+(define arrows (cog-execute!
+	(TransposeColumn (ValueOf labels labels))))
+
+(format #t "trannie is ~A\n" arrows)
+
+(define arco (cog-value->list arrows))
+(test-assert "expect five columns" (equal? 5 (length arco)))
+
+(for-each
+	(lambda (col)
+		(test-assert "expect len=12"
+			(equal? 12 (length (cog-value->list col)))))
+	arco)
+
 ; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
