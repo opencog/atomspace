@@ -34,6 +34,33 @@
 		(FloatValue 4 5 6))))
 
 ; ------------------------------------------------------------
+
+(define atomat
+	(List
+		(List (Item "a") (Item "b") (Item "c"))
+		(List (Item "d") (Item "e") (Item "f"))))
+
+(define atomatic (cog-execute! (TransposeColumn atomat)))
+
+(format #t "Got atomatic ~A\n" atomatic)
+
+(test-assert "atomatic" (equal? atomatic
+	(LinkValue
+		(LinkValue (Item "a") (Item "d"))
+		(LinkValue (Item "b") (Item "e"))
+		(LinkValue (Item "c") (Item "f")))))
+
+(define vatom (cog-execute! (TransposeColumn (TransposeColumn atomat))))
+
+(format #t "Got vatom ~A\n" vatom)
+
+(test-assert "vatom" (equal? vatom
+	(LinkValue
+		(LinkValue (Item "a") (Item "b") (Item "c"))
+		(LinkValue (Item "d") (Item "e") (Item "f")))))
+
+
+; ------------------------------------------------------------
 ; Populate AtomSpace with "real world" data.
 
 ; Data

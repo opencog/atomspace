@@ -55,6 +55,11 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 	return do_handle_loop(as, silent, vrows);
 }
 
+#define CHKSZ(ROW) \
+	if (ROW.size() < ncols) \
+		throw RuntimeException(TRACE_INFO, \
+			"Short row! Got %lu want %lu\n", ROW.size(), ncols);
+
 /// Return a FloatValue vector.
 ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
                                          const ValueSeq& vrows)
@@ -86,23 +91,38 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 				for (double d : vals)
 					vcols.push_back(createFloatValue(d));
 			}
+			else if (vp->is_link())
+			{
+				const HandleSeq& hrow = HandleCast(vp)->getOutgoingSet();
+				for (const Handle& h : hrow)
+					vcols.push_back(createLinkValue(h));
+			}
 			else
 				throw RuntimeException(TRACE_INFO,
-					"I don't know what to do here\n");
+					"I don't know what to do with %s\n", vp->to_string().c_str());
 
 			continue;
 		}
 		if (vp->is_type(FLOAT_VALUE))
 		{
 			const std::vector<double>& vals = FloatValueCast(vp)->value();
+			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
 				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
 		}
 		else if (vp->is_type(NUMBER_NODE))
 		{
 			const std::vector<double>& vals = NumberNodeCast(vp)->value();
+			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
 				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
+		}
+		else if (vp->is_link())
+		{
+			const HandleSeq& hrow = HandleCast(vp)->getOutgoingSet();
+			CHKSZ(hrow);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(hrow[i]);
 		}
 	}
 

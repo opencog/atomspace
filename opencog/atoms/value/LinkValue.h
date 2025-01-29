@@ -42,6 +42,8 @@ namespace opencog
 class LinkValue
 	: public Value
 {
+	friend class TransposeColumn;
+
 protected:
 	mutable std::vector<ValuePtr> _value;
 	virtual void update() const {}
