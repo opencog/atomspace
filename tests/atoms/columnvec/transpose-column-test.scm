@@ -87,9 +87,9 @@
 			(Edge (Predicate "word-pair")
 				(List (Variable "$left-word") (Variable "$right-word"))))
 		(IncrementValue (Variable "$left-word")
-			(Predicate "counter") (NumberNode 1 0))
+			(Predicate "counter") (NumberNode 1 0 -0.3))
 		(IncrementValue (Variable "$right-word")
-			(Predicate "counter") (NumberNode 0 1))
+			(Predicate "counter") (NumberNode 0 1 -0.3))
 		(IncrementValue
 			(Edge (Predicate "word-pair")
 				(List (Variable "$left-word") (Variable "$right-word")))
@@ -97,7 +97,19 @@
 
 (cog-execute! mtxpr)
 
-; (test-assert "Paul" (equal? (FloatValue 1 0)
+(define trannie (cog-execute!
+	(TransposeColumn (ValueOf mtxpr mtxpr))))
+
+(format #t "trannie is ~A\n" trannie)
+
+(define cols (cog-value->list trannie))
+(test-assert "expect three columns" (equal? 3 (length cols)))
+
+(for-each
+	(lambda (col)
+		(test-assert "expect len=12"
+			(equal? 12 (length (cog-value->list col)))))
+	cols)
 
 ; ------------------------------------------------------------
 (test-end tname)
