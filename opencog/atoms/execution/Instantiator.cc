@@ -581,6 +581,10 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
+
+	// Patterns with DeleteLink in them become nulls.
+	if (nullptr == grounded) return nullptr;
+
 	if (VALUE_SHIM_LINK == grounded->get_type())
 		return grounded->execute();
 
