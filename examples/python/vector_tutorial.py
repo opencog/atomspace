@@ -15,8 +15,7 @@ from opencog.atomspace import AtomSpace, types
 from opencog.execute import execute_atom
 from opencog.type_constructors import *
 
-atomspace = AtomSpace()
-set_default_atomspace(atomspace)
+set_default_atomspace(AtomSpace())
 
 # ------------------------------------------------------------------
 # Start by populating the AtomSpace with some data.
@@ -45,9 +44,19 @@ EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("chased")))
 # The pattern just defines the "shape" of the data. The query defines
 # the search itself, and what is to be done with the search results.
 #
-# A pattern that will fid tagged word-pairs
+# A pattern that will find tagged word-pairs
 pair_pattern = EdgeLink(tag,
     ListLink(VariableNode("$left-word"), VariableNode("$right-word")))
+
+# A variable declaration for the pattern above. This is not strictly
+# required, but is convenient to limit the scope of a query to variables
+# of a given type. The types here are simple -- just ItemNodes. In
+# general, typec can be arbitrarily complicated.
+pair_vardecls = VariableList(
+    TypedVariableLink(
+        VariableNode("$left-word"), TypeNode("ItemNode")),
+    TypedVariableLink(
+        VariableNode("$right-word"), TypeNode("ItemNode")))
 
 # Define a search for the above. It consists of the pattern, plus
 # variable declarations for the (free) variables in the pattern
@@ -56,24 +65,22 @@ pair_pattern = EdgeLink(tag,
 # define/create some new structure. For the demo below, a trivial
 # rewrite is done: the initial search pattern is just echoed back.
 basic_query = QueryLink(
-    VariableList(
-        TypedVariableLink(
-            VariableNode("$left-word"), TypeNode("ItemNode")),
-        TypedVariableLink(
-            VariableNode("$right-word"), TypeNode("ItemNode"))),
+    # The variable declarations that were constructed earlier.
+    pair_vardecls,
 
-    # Search for pairs that are present in the AtomSpace
+    # The PresentLink asks that the serch pattern is present in
+    # the AtomSpace. One or more search terms can be combined,
+    # inluding a spec to insist that some term be *absent*, for
+    # the query to match.
     PresentLink(pair_pattern),
 
-    # Output what was found
+    # Output what was found. This just repeats the pattern.
     pair_pattern)
 
 # Perform the actual query. This is where the CPU time gets soaked up.
 # For this simple demo, just milliseconds. For large datasets, maybe
 # 25K to 150K queries per second (single-threaded), depending on the
 # complexity of the search pattern and the actual dataset.
-execute_atom(atomspace, basic_query)
-
 basic_query.execute()
 
 # Verify the query results by printing them out. The query results are
@@ -85,4 +92,28 @@ basic_query.execute()
 # on `atom` located at `key`. Below, the basic_query is used as it's
 # own key: it's the "well-known location" that can always be found.
 print("Basic query returned:",
-    execute_atom(atomspace, ValueOfLink(basic_query, basic_query)))
+    ValueOfLink(basic_query, basic_query).execute())
+
+# ------------------------------------------------------------------
+# Design a more interesting query that will count the number of times
+# that words appear on the left, or the right side of a pair. The counts
+# will be stored with the words.
+
+# Define a key where the counts will be placed. The key can be any
+# Atom at all, but by convetion, PredicateNodes are used. The naming
+# convention was inspired by first-order predicate logic.
+count_key = PredicateNode("counter")
+
+counting_query = QueryLink(
+    pair_vardecls,
+    PresentLink(pair_pattern),
+    IncrementValueLink(VariableNode("$left-word"),
+       count_key, NumberNode([1,0])),
+    IncrementValueLink(VariableNode("$right-word"),
+       count_key, NumberNode([0,1])))
+
+counting_query.execute()
+
+print("Counting query returned:",
+    ValueOfLink(counting_query, counting_query).execute())
+
