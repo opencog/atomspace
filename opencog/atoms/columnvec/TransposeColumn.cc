@@ -79,11 +79,21 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			ncols = vp->size();
 			vcols.reserve(ncols);
 
+			// The if-statemens below are ordered in the sequence
+			// of most-likely to least likely. I think transposing
+			// FloatValues will be the most common case, and then
+			// the LinkValues...
 			if (vp->is_type(FLOAT_VALUE))
 			{
 				const std::vector<double>& vals = FloatValueCast(vp)->value();
 				for (double d : vals)
 					vcols.push_back(createFloatValue(d));
+			}
+			else if (vp->is_type(LINK_VALUE))
+			{
+				const ValueSeq& vrow = LinkValueCast(vp)->value();
+				for (const ValuePtr& v : vrow)
+					vcols.push_back(createLinkValue(v));
 			}
 			else if (vp->is_type(NUMBER_NODE))
 			{
@@ -109,6 +119,13 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
 				FloatValueCast(vcols[i]) -> _value.push_back(vals[i]);
+		}
+		else if (vp->is_type(LINK_VALUE))
+		{
+			const ValueSeq& vrow = LinkValueCast(vp)->value();
+			CHKSZ(vrow);
+			for (size_t i=0; i< ncols; i++)
+				LinkValueCast(vcols[i]) -> _value.push_back(vrow[i]);
 		}
 		else if (vp->is_type(NUMBER_NODE))
 		{
