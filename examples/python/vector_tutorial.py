@@ -40,11 +40,21 @@ EdgeLink(tag, ListLink(ItemNode("cat"), ItemNode("around")))
 EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("dog")))
 EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("chased")))
 
+# ------------------------------------------------------------------
+# Design a basic query pattern that can find the data above.
+# The pattern just defines the "shape" of the data. The query defines
+# the search itself, and what is to be done with the search results.
+#
 # A pattern that will fid tagged word-pairs
 pair_pattern = EdgeLink(tag,
     ListLink(VariableNode("$left-word"), VariableNode("$right-word")))
 
-# A query pattern, with typed variables
+# Define a search for the above. It consists of the pattern, plus
+# variable declarations for the (free) variables in the pattern
+# (thus binding the variables.) The query is in the form of a rewrite
+# rule: after matching the pattern, the variables can be used to
+# define/create some new structure. For the demo below, a trivial
+# rewrite is done: the initial search pattern is just echoed back.
 basic_query = QueryLink(
     VariableList(
         TypedVariableLink(
@@ -58,8 +68,21 @@ basic_query = QueryLink(
     # Output what was found
     pair_pattern)
 
-# Perform the query.
+# Perform the actual query. This is where the CPU time gets soaked up.
+# For this simple demo, just milliseconds. For large datasets, maybe
+# 25K to 150K queries per second (single-threaded), depending on the
+# complexity of the search pattern and the actual dataset.
 execute_atom(atomspace, basic_query)
 
+basic_query.execute()
+
+# Verify the query results by printing them out. The query results are
+# cached at a location given by using the query itself as the key. The
+# cached results can be accessed at any time. Rerunning the query will
+# update the cache.
+#
+# The ValueOfLink(atom, key), when executed, will return the Value
+# on `atom` located at `key`. Below, the basic_query is used as it's
+# own key: it's the "well-known location" that can always be found.
 print("Basic query returned:",
     execute_atom(atomspace, ValueOfLink(basic_query, basic_query)))
