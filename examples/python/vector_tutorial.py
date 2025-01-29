@@ -39,6 +39,21 @@ EdgeLink(tag, ListLink(ItemNode("cat"), ItemNode("around")))
 EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("dog")))
 EdgeLink(tag, ListLink(ItemNode("HEAD"), ItemNode("chased")))
 
+# In case you are wondering what that parse looks like "in read life",
+# here it is:
+#
+#     +--------->WV-------->+--------MVp--------+
+#     +---->Wd-----+        +-----Os-----+      +----Js----+
+#     |      +Ds**c+--Ss*s--+      +Ds**c+--Mp--+    +Ds**c+
+#     |      |     |        |      |     |      |    |     |
+# LEFT-WALL the  dog.n chased.v-d the  cat.n around the house.n
+#
+# The above table just collapses each of the link types to a single
+# PredicateNode("word-pair") The extra complexity would just make
+# this demo more confusing. ('S' is subject, 'O' is object, 'D' is
+# determiner. 'M' is a prepositional modifier, and 'J' is object of
+# the preposition.
+
 # ------------------------------------------------------------------
 # Design a basic query pattern that can find the data above.
 # The pattern just defines the "shape" of the data. The query defines
