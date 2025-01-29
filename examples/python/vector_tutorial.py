@@ -150,3 +150,19 @@ get_words = MeetLink (
     PresentLink(VariableNode("$word")))
 
 print("The words are:", get_words.execute())
+
+# The above will print a list of all of the words found by that query.
+# Notice that these are wrapped with a UniSetValue. The UniSet is a
+# thread-safe producer-consumer deduplicating set. That means that one
+# or more threads can write to it, while other threads remove content
+# from it.  In this case, the query is done in an eyeblink, so there is
+# no point in dealing with the complexity of multiple threads.
+#
+# The name UniSet comes from the fact that each entry in the set is
+# unique: adding the same Atom a second time does nothing. The set
+# contents are de-duplicated.
+#
+# There is also a QueueValue. This is a thread-safe producer-consumer
+# FIFO. Writers add to the tail, readers rea from the head. Both the
+# UniSet and the Queue block when empty, so that reader threads wait
+# until something shows up for them to work on.
