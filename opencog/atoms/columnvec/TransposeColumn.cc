@@ -67,17 +67,22 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
                                         const ValueSeq& vrows)
 {
-	// Convert rows to columns. The number of columns output will
-	// equal number of rows input. The type of the column will be
-	// the type of the row. If all rows have the same type, then
-	// the columns can be a primitive vector of that type.
-	//
-	// The case of rows contained in ListValues is "the same",
-	// except that the columns appear in the first row. So these
-	// two get slightly different handling.
+	if (0 == vrows.size())
+		return createLinkValue();
+
+	// On transposition, rows become columns. The number of rows becomes
+	// the number of columns, and the type of the row becomes the type of
+	// the column. ... except when the columns are packaged into either a
+	// ListValue or a Link, in which case, the columns show up packed
+	// individually in rows. These are two distinct cases; each gets
+	// different unpacking.
+	if (not vrows[0]->is_type(LINK_VALUE) and
+	    not vrows[0]->is_type(LINK))
+		return do_direct_loop(as, silent, vrows);
+	Type rtype = vrows[0]->get_type();
 	for (ValuePtr vp: vrows)
 	{
-		if (not vp->is_type(LIST_VALUE))
+		if (vp->get_type() != rtype)
 			return do_direct_loop(as, silent, vrows);
 	}
 
@@ -224,9 +229,6 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
                                          const ValueSeq& vrows)
 {
-	if (0 == vrows.size())
-		return createLinkValue();
-
 	// Convert rows to columns. The number of columns output will
 	// equal number of rows input. The type of the column will be
 	// the type of the row. If all rows have the same type, then
