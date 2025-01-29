@@ -24,6 +24,15 @@
 		(FloatValue 2 5)
 		(FloatValue 3 6))))
 
+(define possum (cog-execute! (TransposeColumn (TransposeColumn numat))))
+
+(format #t "Got possum ~A\n" possum)
+
+(test-assert "possum" (equal? possum
+	(LinkValue
+		(FloatValue 1 2 3)
+		(FloatValue 4 5 6))))
+
 ; ------------------------------------------------------------
 ; Populate AtomSpace with "real world" data.
 

@@ -53,6 +53,7 @@ class TransposeColumn : public Link
 protected:
 	ValuePtr do_execute(AtomSpace*, bool);
 	ValuePtr do_handle_loop(AtomSpace*, bool, const HandleSeq&);
+	ValuePtr do_handle_loop(AtomSpace*, bool, const ValueSeq&);
 
 public:
 	TransposeColumn(const HandleSeq&&, Type = TRANSPOSE_COLUMN);

@@ -45,16 +45,29 @@ TransposeColumn::TransposeColumn(const HandleSeq&& oset, Type t)
 
 /// Return a FloatValue vector.
 ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
-                                         const HandleSeq& hseq)
+                                         const HandleSeq& hrows)
+{
+	ValueSeq vrows;
+	vrows.reserve(hrows.size());
+	for (const Handle& h : hrows)
+		vrows.push_back(h);
+
+	return do_handle_loop(as, silent, vrows);
+}
+
+/// Return a FloatValue vector.
+ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
+                                         const ValueSeq& vrows)
 {
 	// Upon entry, we don't yet know how many columns we will need.
 	// Assume that all rows will be the same length, so that the
 	// first row will provide the right size.
 	size_t ncols = 0;
-	std::vector<ValuePtr> vcols;
-	for (const Handle& h : hseq)
+	ValueSeq vcols;
+	for (ValuePtr vp: vrows)
 	{
-		ValuePtr vp(FunctionLink::get_value(as, silent, h));
+		if (vp->is_atom() and HandleCast(vp)->is_executable())
+			vp = FunctionLink::get_value(as, silent, vp);
 
 		if (0 == ncols)
 		{
@@ -110,52 +123,13 @@ ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 			base = HandleCast(vpe);
 		else
 		{
-			if (vpe->is_type(FLOAT_VALUE))
-				return vpe;
-
 			if (not vpe->is_type(LINK_VALUE))
 				throw RuntimeException(TRACE_INFO,
 					"Expecting LinkValue, got %s\n",
 					vpe->to_string());
 
-			// If we are here, we've got a LinkValue.
-			// Inside of loop is cut-n-paste of that below.
-			std::vector<double> dvec;
-			dvec.reserve(vpe->size());
-			for (const ValuePtr& v : LinkValueCast(vpe)->value())
-			{
-				// FunctionLink::get_value() tries to execute
-				// the value, if it's executable. Is that overkill,
-				// or is that needed? When would a vector of functions
-				// arise?
-				ValuePtr vp(FunctionLink::get_value(as, silent, v));
-
-				// Expecting exactly one float per item. That's because
-				// I don't know what it means if there is more than one,
-				// flattening seems like the wrong thing to do.
-				if (1 != vp->size())
-					throw RuntimeException(TRACE_INFO,
-						"Expecting exactly one number per item, got %lu\n",
-						vp->size());
-
-				if (vp->is_type(FLOAT_VALUE))
-					dvec.push_back(FloatValueCast(vp)->value()[0]);
-				else if (vp->is_type(NUMBER_NODE))
-					dvec.push_back(NumberNodeCast(vp)->get_value());
-				else
-					throw RuntimeException(TRACE_INFO,
-						"Expecting numeric value, got %s\n",
-						vp->to_string());
-			}
-			return createFloatValue(std::move(dvec));
+			return do_handle_loop(as, silent, LinkValueCast(vpe)->value());
 		}
-	}
-
-	// If we are here, then base is an atom.
-	if (base->is_type(NUMBER_NODE))
-	{
-		std::vector<double> nums(NumberNodeCast(base)->value());
-		return createFloatValue(std::move(nums));
 	}
 
 	// If we are here, then base is an link. Expect
