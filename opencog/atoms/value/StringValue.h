@@ -41,8 +41,10 @@ namespace opencog
 class StringValue
 	: public Value
 {
+	friend class TransposeColumn;
+
 protected:
-	std::vector<std::string> _value;
+	mutable std::vector<std::string> _value;
 
 public:
 	StringValue(const std::string& v)

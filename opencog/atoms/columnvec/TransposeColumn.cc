@@ -23,8 +23,9 @@
 
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 
 #include "TransposeColumn.h"
 
@@ -93,7 +94,25 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			{
 				const ValueSeq& vrow = LinkValueCast(vp)->value();
 				for (const ValuePtr& v : vrow)
-					vcols.push_back(createLinkValue(v));
+				{
+					if (1 == v->size())
+					{
+						if (v->is_type(FLOAT_VALUE))
+						{
+							double d = FloatValueCast(v)->value()[0];
+							vcols.push_back(createFloatValue(d));
+						}
+						else if (v->is_type(STRING_VALUE))
+						{
+							const std::string& s = StringValueCast(v)->value()[0];
+							vcols.push_back(createStringValue(s));
+						}
+						else
+							vcols.push_back(createLinkValue(v));
+					}
+					else
+						vcols.push_back(createLinkValue(v));
+				}
 			}
 			else if (vp->is_type(NUMBER_NODE))
 			{
@@ -125,7 +144,26 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 			const ValueSeq& vrow = LinkValueCast(vp)->value();
 			CHKSZ(vrow);
 			for (size_t i=0; i< ncols; i++)
-				LinkValueCast(vcols[i]) -> _value.push_back(vrow[i]);
+			for (const ValuePtr& v : vrow)
+			{
+				if (1 == v->size())
+				{
+					if (v->is_type(FLOAT_VALUE))
+					{
+						double d = FloatValueCast(v)->value()[0];
+						FloatValueCast(vcols[i]) -> _value.push_back(d);
+					}
+					else if (v->is_type(STRING_VALUE))
+					{
+						const std::string& s = StringValueCast(v)->value()[0];
+						StringValueCast(vcols[i]) -> _value.push_back(s);
+					}
+					else
+						LinkValueCast(vcols[i]) -> _value.push_back(vrow[i]);
+				}
+				else
+					LinkValueCast(vcols[i]) -> _value.push_back(vrow[i]);
+			}
 		}
 		else if (vp->is_type(NUMBER_NODE))
 		{
