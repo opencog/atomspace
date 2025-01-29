@@ -165,6 +165,37 @@
 (test-assert "expect 4 col of FloatValue" (equal?
 	'FloatValue (cog-type (cog-value-ref (list-ref arco 4) 4))))
 
+; -------
+; Count, trim and label.
+(define trim-count
+	(Query (VariableList
+		(TypedVariable (Variable "$left-word") (Type 'ItemNode))
+		(TypedVariable (Variable "$right-word") (Type 'ItemNode)))
+		(Present edge-pattern)
+		(SexprColumn (Variable "$left-word"))
+		(ElementOf (Number 0)
+			(IncrementValue (Variable "$left-word")
+				(Predicate "counter") (NumberNode 1 0 -0.3)))
+		(SexprColumn (Variable "$right-word"))
+		(ElementOf (Number 1)
+			(IncrementValue (Variable "$right-word")
+				(Predicate "counter") (NumberNode 0 1 -0.3)))
+		(ElementOf (Number 2)
+			(IncrementValue edge-pattern
+				(Predicate "counter") (NumberNode 0 0 1)))
+		;;; (SexprColumn edge-pattern)
+	))
+
+(cog-execute! trim-count)
+
+(format #t "trim-count gives ~A\n"
+	(cog-execute! (ValueOf trim-count trim-count)))
+
+(define skinny (cog-execute!
+	(TransposeColumn (ValueOf trim-count trim-count))))
+
+(format #t "skinny is ~A\n" skinny)
+
 ; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
