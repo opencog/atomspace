@@ -224,16 +224,23 @@
 	'FloatValue (cog-type (list-ref skinhead 4))))
 
 ; -------
-;(define getback (cog-execute!
-;	(TransposeColumn (TransposeColumn (ValueOf trim-count trim-count)))))
+; Perform a doulbe-transpose, expect to get the same thing back.
+; The first test is the easier to debug.
 ;
-;(format #t "got back ~A\n" getback)
-
 (cog-set-value! trim-count (Predicate "transpose") skinny)
-(define getback2 (cog-execute!
+(define getback (cog-execute!
 	(TransposeColumn (ValueOf trim-count (Predicate "transpose")))))
 
-(format #t "got back2 ~A\n" getback2)
+(format #t "get back ~A\n" getback)
+(define once-belong (cog-value->list getback))
+(test-assert "expect 12 rows" (equal? 12 (length once-belong)))
+
+(define getback2 (cog-execute!
+	(TransposeColumn (TransposeColumn (ValueOf trim-count trim-count)))))
+
+(format #t "once belong ~A\n" getback2)
+(define to-where (cog-value->list getback2))
+(test-assert "expect 12 rows" (equal? 12 (length to-where)))
 
 ; ------------------------------------------------------------
 (test-end tname)
