@@ -32,7 +32,7 @@ ADD_LIBRARY(PythonEval
 	PythonEval.cc
 )
 
-ADD_DEPENDENCIES(PythonEval py_atomspace_header)
+ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython type_constructors)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	pattern
