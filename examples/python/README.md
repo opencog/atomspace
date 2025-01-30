@@ -36,7 +36,9 @@ words. Imagine instead attaching vectors of algos to words. Now imagine
 running them, all at the same time. Managing that, and adjusting
 execution priority based on weights. Using them to process a shifting
 stream of perceptual data. You can't do that with NetworkX. You can,
-with Atomese. This is the raison d'etre.
+with Atomese. This is the raison d'etre. (This paragraph describes
+the old MOSES idea from Moshe Looks, but in modern terms; MOSES helped
+inspire Atomese.)
 
 All that said: if you are debugging complex graph processing algorithms,
 you won't get far if you don't understand what the graph represents.
