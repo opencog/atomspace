@@ -151,6 +151,7 @@ counting_query = QueryLink(
 # Perform the counting.
 counting_query.execute()
 
+# ------------------------------------------------------------------
 # To view the count results, we'll have a bit more fun. Construct a
 # query that crawls over words, only. Just for grins, a MeetLink is
 # used, instead of a QueryLink. The MeetLink does NOT perform any
@@ -182,10 +183,24 @@ print("The set of words is:", get_words.execute())
 # UniSet and the Queue block when empty, so that reader threads wait
 # until something shows up for them to work on.
 
+# ------------------------------------------------------------------
+# Values are C++ vectors. Thus, FloatValue is just std::vector<double>
+# and StringValue is just std::vector<std::string>. LinkValue's are
+# vectors of pointers to Values or Atoms. These convert naturally to
+# python lists.
+
+# Get the cached UniSet from the earlier query:
 the_unique_set_object = ValueOfLink(get_words, get_words).execute()
 
-# Unwrap it, into a list of Atoms
-python_list_of_atoms = list(the_unique_set_object)
-print("The list of word-atoms is", python_list_of_atoms)
+# Unwrap it, into a python list of Atoms
+list_of_atoms = list(the_unique_set_object)
+print("The list of word-atoms is", list_of_atoms)
 
+# And a python list of strings:
+list_of_word_strings = map(lambda wrd: wrd.name, list_of_atoms)
+
+# ------------------------------------------------------------------
 # Anyway ... moving on. We want to see the counts on the words.
+# A purely pythonic way of vewing these:
+for wrd in list_of_atoms:
+	print(f"The word \'{wrd.name}\' has count {wrd.get_value(count_key) }")
