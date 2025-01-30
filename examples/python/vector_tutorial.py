@@ -129,6 +129,7 @@ basic_query.execute()
 # own key: it's the "well-known location" that can always be found.
 print("Basic query returned:",
     ValueOfLink(basic_query, basic_query).execute())
+print("")
 
 # ------------------------------------------------------------------
 # Design a more interesting query. This one will count the number of
@@ -187,6 +188,7 @@ get_words = MeetLink (
     PresentLink(VariableNode("$word")))
 
 print("The set of words is:", get_words.execute())
+print("")
 
 # The above will print a list of all of the words found by that query.
 # Notice that these are wrapped with a UniSetValue. The UniSet is a
@@ -216,6 +218,7 @@ the_unique_set_object = ValueOfLink(get_words, get_words).execute()
 # Unwrap it, into a python list of Atoms
 list_of_atoms = list(the_unique_set_object)
 print("The list of word-atoms is", list_of_atoms)
+print("")
 
 # And a python list of strings:
 list_of_word_strings = map(lambda wrd: wrd.name, list_of_atoms)
@@ -225,6 +228,7 @@ list_of_word_strings = map(lambda wrd: wrd.name, list_of_atoms)
 # A purely pythonic way of vewing these:
 for wrd in list_of_atoms:
 	print(f"The word \'{wrd.name}\' has count {wrd.get_value(count_key) }")
+print("")
 
 # We want to do the above, but this time, in a purely declarative,
 # non-procedural style:
@@ -235,10 +239,31 @@ word_counts = QueryLink (
     # The counts were stored at count_key. So look for them there.
     ValueOfLink(VariableNode("$word"), count_key))
 
-print("The counts on the words are:", word_counts.execute())
+print("The left and right counts on the words are:", word_counts.execute())
+print("")
 
-# The above is a vector of vectors.
+# The above is a vector of rows. For GPU/compute processing, it is
+# convenient to have two columns, instead of a bunch of rows. The
+# TransposeColumn Atom, when executed, accomplishes this.
+#
+# The FloatValue is stored as a C++ std::vector<double> and so these
+# numbers are stored in RAM, in a sequential array of 64-bit floats.
+# Because it is a linear array, it can be directly sent to GPU units
+# without any further copying or conversion.
+#
+# Here, we print this in python. In the real world, these would be
+# millions of elements long, and would blow out python memory. That
+# is, a 64-bit double in RAM is 8 bytes; a double in python is about
+# 120 bytes. The RAM savings is significant.
+
 two_columns = TransposeColumn(ValueOfLink(word_counts, word_counts))
 
-print("yo:", two_columns.execute())
+print("Here are the left and right counts, again:", two_columns.execute())
+print("")
 
+# ------------------------------------------------------------------
+# The above are just vectors. We've lost track of what words go with
+# what. This can be a serious problem for the GPU processing of long
+# vectors of weights. It would be best if each vector basis could be
+# tagged with a universally unique ID.
+# ------------------------------------------------------------------
