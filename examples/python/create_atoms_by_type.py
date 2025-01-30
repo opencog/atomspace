@@ -45,8 +45,10 @@ print("ello, there:", list(C.get_value(key)))
 # Add three InheritanceLinks, asserting that apples are berries
 # and that berries are edible.
 inh_type = types.InheritanceLink
-AB = a.add_link(inh_type, [A, B])
-BC = a.add_link(inh_type, [B, C])
-AC = a.add_link(inh_type, [A, C])
+a.add_link(inh_type, [A, B])
+a.add_link(inh_type, [B, C])
+a.add_link(inh_type, [A, C])
 
 print("The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom))
+
+# THE END. That's All, Folks!
