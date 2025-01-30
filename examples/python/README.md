@@ -28,8 +28,8 @@ if you are trying to create systems that automatically learn new
 algorithms and structures, you need to be able to express your algo,
 *as a graph*. And NetworkX cannot do that.
 
-Consider the problem of creating a million algorithms, gving each one
-of them a weight, or severalw weights. Maybe providing them with a vector
+Consider the problem of creating a million algorithms, giving each one
+of them a weight, or several weights. Maybe providing them with a vector
 embedding, or perhaps vice-versa: the algos provide a basis for a vector
 embedding of words. Word2Vec and GloVe attach vectors of numbers to
 words. Imagine instead attaching vectors of algos to words. Now imagine
