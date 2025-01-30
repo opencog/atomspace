@@ -29,12 +29,14 @@ algorithms and structures, you need to be able to express your algo,
 *as a graph*. And NetworkX cannot do that.
 
 Consider the problem of creating a million algorithms, gving each one
-of them a weight, or several. Maybe providig them with a vector
-embedding, or perhaps vice-versa: the million alogs are the vectors,
-themselves. Now imagine running them, all at the same time. Managing
-that, and adjusting execution priority based on weights. Using them
-to process a shifting stream of perceptual data. You can't do that
-with NetworkX. You can, with Atomese. This is the raison d'etre.
+of them a weight, or severalw weights. Maybe providing them with a vector
+embedding, or perhaps vice-versa: the algos provide a basis for a vector
+embedding of words. Word2Vec and GloVe attach vectors of numbers to
+words. Imagine instead attaching vectors of algos to words. Now imagine
+running them, all at the same time. Managing that, and adjusting
+execution priority based on weights. Using them to process a shifting
+stream of perceptual data. You can't do that with NetworkX. You can,
+with Atomese. This is the raison d'etre.
 
 All that said: if you are debugging complex graph processing algorithms,
 you won't get far if you don't understand what the graph represents.
