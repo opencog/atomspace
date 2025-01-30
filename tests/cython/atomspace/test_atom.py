@@ -56,7 +56,11 @@ class AtomTest(TestCase):
         getall = MeetLink(VariableNode('x'))
         self.assertEqual(True, getall.is_executable())
         lissy = list(getall.execute())
-        self.assertEqual(lissy, [atom, getall])
+        # No guarantee of the order in which Atoms are returned.
+        # self.assertEqual(lissy, [atom, getall])
+        # self.assertEqual(lissy, [getall, atom])
+        setty = set(getall.execute())
+        self.assertEqual(setty, set([atom, getall]))
 
     def test_get_out(self):
 
