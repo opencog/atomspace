@@ -29,6 +29,12 @@
 # are static, and do nothing. In either case, the intended structure is
 # directly visible and analyzable, as a (hyper-)graph.
 #
+# All of the non-python Atomese below is stored in the AtomSpace. It
+# might look like code, and it will do things when you execute it, but
+# it's also a graph. As a graph, it's storable, manipulable, embeddable.
+# Every Atom below can be given a weight: it feels like code (because
+# its executable) and it behaves like data - just another graph.
+#
 # ------------------------------------------------------------------
 # Python setup.
 
