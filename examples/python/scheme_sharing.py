@@ -10,7 +10,7 @@ from opencog.atomspace import *
 from opencog.type_constructors import *
 from opencog.scheme_wrapper import *
 
-# Create an AtomSpace, and let tthe python type constructors
+# Create an AtomSpace, and let the python type constructors
 # know about it.
 asp = AtomSpace()
 set_default_atomspace(asp)

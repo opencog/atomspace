@@ -16,7 +16,7 @@ Roughly speaking, programming in Atomese is like programming in
 assembly: it can be done, and many humans specialize in and enjoy
 assembly coding. However, most of the rest stick to high-level
 languages.  The analogy here, though, is flawed: Atomese is for
-machine manipulation; there isn't a high-level langauge built on
+machine manipulation; there isn't a high-level language built on
 top of it, nor should there be. Conventional programming languages
 already do an excellent job. Atomese provides graphs. Use it as
 a graph processing system.  That's what it's for,
@@ -91,7 +91,7 @@ An example of a "behavior tree".
 
 ## Mixing python, scheme and Atomese
 Atomese has both scheme and python bindings, and the two programming
-langauges and styles can be freely intermixed. That is, you can call
+languages and styles can be freely intermixed. That is, you can call
 scheme from python, and python from scheme, and everything "just works".
 
 Both python and scheme can be called from within Atomese, by using
