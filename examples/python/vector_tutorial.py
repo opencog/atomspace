@@ -265,5 +265,39 @@ print("")
 # The above are just vectors. We've lost track of what words go with
 # what. This can be a serious problem for the GPU processing of long
 # vectors of weights. It would be best if each vector basis could be
-# tagged with a universally unique ID.
+# tagged with a universally unique ID (UUID).
+#
+# There are three ways of doing UUID's. One common way is to just issue
+# an int. The problem with this is that there has to be a central
+# issuing authority, otherwise different Atoms on different machines
+# might get issued the same ID number. Even on the same machine, with
+# multiple threads, the ID dispenser would need to be atomically locked.
+# To add injury to insult, a table that associated ID numbers to Atoms
+# has to be maintained. This chews up RAM, and RAM is already a precious
+# commodity. So, in general, issuing UUID serial numbers is just a bad
+# idea.
+#
+# A second common way of doing UUID's is via decentralized crypto
+# techniques. The Atom can be hashed. That hash is univerally
+# computable: even someone on Pluto will get exactly the same hash.
+# This solves the centralization problem. The problem with crypto hashes
+# is the "birthday paradox" (see Wikipedia, if unclear). Hash collisions
+# will occur, if the hash is not big enough. 256-bit or 512 bit hashes
+# are effectively safe (although SHA-256 has been broken.) However,
+# 256 bits works out to 32 bytes, which is ... a lot. Another problem
+# is that a globally-distributed lookup table is needed. if you are
+# given a hash, there's no way of guessing what Atom it might be, based
+# on the hash: hashes are not invertable; they are one-way functions.
+# Thus, global distribution, and more RAM is needed.
+#
+# The third solution is to just use the string name of the Atom. It is
+# globally unique: there can only ever be one Atom of that name and
+# type. There's no confusion about what Atom it is: one can convert
+# Atoms to strings, and back again, trivially.  In most cases, strings
+# are short. So, '(Item "foobar")' is 15 bytes long. One can do even
+# better with compression; although a single string this long won't
+# compress, collections of string names for thousands or millions of
+# Atoms compress very very well; compression rates of about 7 bytes
+# per Atom are seen in real-world datasets.
+
 # ------------------------------------------------------------------
