@@ -96,7 +96,7 @@ satisfaction_handle = SatisfactionLink(
 )
 
 # Perform the actual satisfiability search.
-result = execute_atom(atomspace, satisfaction_handle)
+result = satisfaction_handle.execute()
 
 print("Satisfaction query result:", result)
 print("Number of green lights:",  green)

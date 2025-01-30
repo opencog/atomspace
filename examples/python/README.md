@@ -23,12 +23,18 @@ a graph processing system.  That's what it's for.
 
 Footnote: graph processing libraries, such as
 [NetworkX](https://networkx.org/) are ***ideal*** for doing graph
-processing, *if you are a human programmer*. Not so much, if you are
-an algorithm. If you are looking for a bread-n-butter tool which
-is fun to write code for, use NetworkX. Or whatever. There is a large
-variety of tools and libraries out there, designed for human programmers.
-The AtomSpace, and Atomese, is an automation platform. Use it for
-automation.
+processing, *if you are a human programmer*. And that's fine!  However,
+if you are trying to create systems that automatically learn new
+algorithms and structures, you need to be able to express your algo,
+*as a graph*. And NetworkX cannot do that.
+
+Consider the problem of creating a million algorithms, gving each one
+of them a weight, or several. Maybe providig them with a vector
+embedding, or perhaps vice-versa: the million alogs are the vectors,
+themselves. Now imagine running them, all at the same time. Managing
+that, and adjusting execution priority based on weights. Using them
+to process a shifting stream of perceptual data. You can't do that
+with NetworkX. You can, with Atomese. This is the raison d'etre.
 
 All that said: if you are debugging complex graph processing algorithms,
 you won't get far if you don't understand what the graph represents.
@@ -99,7 +105,9 @@ Atom Types to be directly accessed. This is an advanced demo; very
 few users will need to work with the nameserver.
 
 ### [stop_go.py](stop_go.py)
-An example of a "behavior tree".
+An example of a "behavior tree". Demos the use of the
+GroundedPredicateNode to call from Atomese back into python.
+
 
 ### Mixing python, scheme and Atomese
 Atomese has both scheme and python bindings, and the two programming
@@ -107,7 +115,7 @@ languages and styles can be freely intermixed. That is, you can call
 scheme from python, and python from scheme, and everything "just works".
 
 Both python and scheme can be called from within Atomese, by using
-the [GroundedSchemaNode](https://wiki.opencog.org/w/GroundedSchemaNode)
+the [GroundedSchemaNode](https://wiki.opencog.org/w/GroundedSchemaNode).
 All of these languages can be intermixed, they are all bi-directional.
 
 #### [scheme_sharing.py](scheme_sharing.py)
@@ -119,4 +127,5 @@ Simple measurement of the performance overhead of invoking the scheme
 
 #### ground
 The [ground](ground) directory contains an example of calling python
-from with Atomese.
+from with Atomese.  The `stop_go.py` demo above is more clearly written
+and simpler to understand.

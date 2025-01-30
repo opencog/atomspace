@@ -153,7 +153,7 @@ count_key = PredicateNode("counter")
 #
 # The IncrementValueLink Atom is a thread-safe, atomic increment. It can
 # be run from multiple threads at once, and will not race in reading,
-# incremementing and writing the count.
+# incrementing and writing the count.
 #
 # Two counts are kept: one for the left-words, and one for the
 # right-words. These two counts could be kept under separate keys.
@@ -184,7 +184,7 @@ counting_query.execute()
 # query that crawls over words, only. Just for grins, a MeetLink is
 # used, instead of a QueryLink. The MeetLink does NOT perform any
 # rewrites: it just returns the goundings of the variable(s), directly.
-# The name "Meet" come from the fact that this query peroforms a meet
+# The name "Meet" come from the fact that this query performs a meet
 # on a poset. See Wikipedia:
 #    https://en.wikipedia.org/wiki/Join_and_meet
 # Yes, Atomese also has a JoinLink.
@@ -208,7 +208,7 @@ print("")
 # contents are de-duplicated.
 #
 # There is also a QueueValue. This is a thread-safe producer-consumer
-# FIFO. Writers add to the tail, readers rea from the head. Both the
+# FIFO. Writers add to the tail, readers read from the head. Both the
 # UniSet and the Queue block when empty, so that reader threads wait
 # until something shows up for them to work on.
 
@@ -228,12 +228,15 @@ print("")
 
 # And a python list of strings:
 list_of_word_strings = map(lambda wrd: wrd.name, list_of_atoms)
+print("The list of word-strings is", list_of_word_strings)
+print("")
 
 # ------------------------------------------------------------------
 # Anyway ... moving on. We want to see the counts on the words.
 # A purely pythonic way of vewing these:
 for wrd in list_of_atoms:
-	print(f"The word \'{wrd.name}\' has count {wrd.get_value(count_key) }")
+    print(f"The word \'{wrd.name}\' has count {wrd.get_value(count_key) }")
+
 print("")
 
 # We want to do the above, but this time, in a purely declarative,
@@ -278,7 +281,7 @@ print("")
 # issuing authority, otherwise different Atoms on different machines
 # might get issued the same ID number. Even on the same machine, with
 # multiple threads, the ID dispenser would need to be atomically locked.
-# To add injury to insult, a table that associated ID numbers to Atoms
+# To add injury to insult, a table that associates ID numbers to Atoms
 # has to be maintained. This chews up RAM, and RAM is already a precious
 # commodity. So, in general, issuing UUID serial numbers is just a bad
 # idea.
@@ -291,7 +294,7 @@ print("")
 # will occur, if the hash is not big enough. 256-bit or 512 bit hashes
 # are effectively safe (although SHA-256 has been broken.) However,
 # 256 bits works out to 32 bytes, which is ... a lot. Another problem
-# is that a globally-distributed lookup table is needed. if you are
+# is that a globally-distributed lookup table is needed. If you are
 # given a hash, there's no way of guessing what Atom it might be, based
 # on the hash: hashes are not invertable; they are one-way functions.
 # Thus, global distribution, and more RAM is needed.

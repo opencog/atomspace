@@ -38,8 +38,8 @@ A.get_value(key)
 B.get_value(key)
 C.get_value(key)
 
-# Weights convert to ptyhon lists:
-print("ello, there:", list(C.get_value(key)))
+# Weights convert to python lists:
+print("Ello, there!", list(C.get_value(key)))
 
 # Add three InheritanceLinks, asserting that apples are berries
 # and that berries are edible.
@@ -48,6 +48,10 @@ a.add_link(inh_type, [A, B])
 a.add_link(inh_type, [B, C])
 a.add_link(inh_type, [A, C])
 
-print("The atomspace contains:\n\n", a.get_atoms_by_type(types.Atom))
+# A verbose way of writing M = MeetLink(VariableNode('x"))
+V = a.add_node(types.VariableNode, "x")
+M = a.add_link(types.MeetLink, [V])
+
+print("The atomspace contains:\n\n", M.execute())
 
 # THE END. That's All, Folks!

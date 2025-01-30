@@ -3,10 +3,14 @@
 # create_atoms.py
 #
 """
-If you plan to hand-write a bunch of Atomese, then there is a simpler
-and easier API for this: just use the Atom type-names directly.
-This is not quite as CPU-efficient as the low level API demoed in
-`create_atoms_lowlevel.py`, but is a lot easier to read.
+If you plan to hand-write a bunch of Atomese, then there is a
+fairly simple and easy python API for this: just use the Atom
+type-names directly in your python code.  This is not quite as
+CPU-efficient as the low level API demoed in
+`create_atoms_lowlevel.py`, but is a lot easier to read. It's
+also not that slow; maybe only 2x slower. On modern machines,
+this still works out to a ballpark of 100K Atoms/sec. Shouldn't
+be a big deal.
 """
 
 from opencog.atomspace import *
