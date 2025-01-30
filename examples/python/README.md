@@ -68,11 +68,9 @@ Atomese has both scheme and python bindings, and the two programming
 langauges and styles can be freely intermixed. That is, you can call
 scheme from python, and python from scheme, and everything "just works".
 
-The examples below show how this can be done.
+### scheme_sharing.py
+A basic example of sharing an AtomSpace between python and scheme.
 
-### scheme/atom_type_names.py
-Example of how to obtain atom type names and atom type IDs.
-
-### scheme/scheme_timer.py
+### scheme_timer.py
 Simple measurement of the performance of invoking the scheme (guile)
 interpreter.
