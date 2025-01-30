@@ -73,9 +73,6 @@ The examples below show how this can be done.
 ### scheme/atom_type_names.py
 Example of how to obtain atom type names and atom type IDs.
 
-### scheme/bindlink.py
-Example of how to use the pattern matcher BindLink functionality.
-
 ### scheme/scheme_timer.py
 Simple measurement of the performance of invoking the scheme (guile)
 interpreter.
