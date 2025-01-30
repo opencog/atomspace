@@ -65,6 +65,7 @@ Start a python3 shell in your favorite way.
   For example,
   ```
       import opencog.atomspace
+      import opencog.type_constructors
       print(dir(opencog.atomspace))
       print(dir(opencog.type_constructors))
   ```
