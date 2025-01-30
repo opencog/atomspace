@@ -164,7 +164,7 @@ get_words = MeetLink (
     TypedVariableLink( VariableNode("$word"), TypeNode("ItemNode")),
     PresentLink(VariableNode("$word")))
 
-print("The words are:", get_words.execute())
+print("The set of words is:", get_words.execute())
 
 # The above will print a list of all of the words found by that query.
 # Notice that these are wrapped with a UniSetValue. The UniSet is a
@@ -181,3 +181,11 @@ print("The words are:", get_words.execute())
 # FIFO. Writers add to the tail, readers rea from the head. Both the
 # UniSet and the Queue block when empty, so that reader threads wait
 # until something shows up for them to work on.
+
+the_unique_set_object = ValueOfLink(get_words, get_words).execute()
+
+# Unwrap it, into a list of Atoms
+python_list_of_atoms = list(the_unique_set_object)
+print("The list of word-atoms is", python_list_of_atoms)
+
+# Anyway ... moving on. We want to see the counts on the words.
