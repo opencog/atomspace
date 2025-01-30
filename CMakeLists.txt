@@ -96,10 +96,15 @@ include(Summary)
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-SET(MIN_BOOST 1.46)
 
-# Required boost packages
-FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED COMPONENTS system)
+# Cogutils aleady looks for min version 1.60
+SET(MIN_BOOST 1.60)
+
+# Boost is used for only two things:
+# lexical_cast.hpp to avoid locale-dependent printing of doubles
+# scope_exit.hpp for python RAII dtors
+# Both files are in core boost.
+FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
