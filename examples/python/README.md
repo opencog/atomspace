@@ -53,8 +53,10 @@ demonstrate two different ways in which the API can be used; one
 creates atoms according to their types, the other creates them
 directly.
 
-## get_outgoings.py
-Simple example to show how to access the outgoing set of a link.
+## nameserver_example.py
+The AtomSpace includes a nameserver and class factory. These allow
+Atom Types to be directly accessed. This is an advanced demo; very
+few users will need to work with the nameserver.
 
 ## stop_go.py
 A simple example of a "behavior tree" implemented in

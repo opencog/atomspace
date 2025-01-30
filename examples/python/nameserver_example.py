@@ -1,22 +1,20 @@
 #! /usr/bin/env python
 #
-# is_a.py
+# nameserver_example.py
 #
 """
-A simple example of how to use the nameserver.
+The AtomSpace contains a nameserver and a class factory. This
+provides an abbreviated demo of how to use the nameserver to
+walk the Type hierarchy.
 """
 
-from opencog.atomspace import AtomSpace
-from opencog.atomspace import get_type, is_a
-from opencog.atomspace import types
+from opencog.atomspace import *
 from opencog.type_constructors import *
 
-a = AtomSpace()
-
 # Tell the type constructors which atomspace to use.
-set_default_atomspace(a)
+set_default_atomspace(AtomSpace())
 
-# Is a set unordered
+# A SetLink is of the type UnorderedLink. This can be checked directly.
 set_is_unordered = is_a(get_type("SetLink"), get_type("UnorderedLink"))
 print("Is a set unordered?", set_is_unordered)
 
