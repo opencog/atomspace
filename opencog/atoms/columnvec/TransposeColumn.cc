@@ -285,12 +285,12 @@ ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 			base = HandleCast(vpe);
 		else
 		{
-			if (not vpe->is_type(LINK_VALUE))
-				throw RuntimeException(TRACE_INFO,
-					"Expecting LinkValue, got %s\n",
-					vpe->to_string());
+			if (vpe->is_type(LINK_VALUE))
+				return do_value_loop(as, silent, LinkValueCast(vpe)->value());
 
-			return do_value_loop(as, silent, LinkValueCast(vpe)->value());
+			ValueSeq vsq;
+			vsq.emplace_back(vpe);
+			return do_value_loop(as, silent, vsq);
 		}
 	}
 
