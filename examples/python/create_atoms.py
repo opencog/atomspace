@@ -1,12 +1,12 @@
 #! /usr/bin/env python3
 #
-# create_atoms_simple.py
+# create_atoms.py
 #
 """
 If you plan to hand-write a bunch of Atomese, then there is a simpler
 and easier API for this: just use the Atom type-names directly.
 This is not quite as CPU-efficient as the low level API demoed in
-`create_atoms_by_type.py`, but is a lot easier to read.
+`create_atoms_lowlevel.py`, but is a lot easier to read.
 """
 
 from opencog.atomspace import *

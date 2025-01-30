@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
 #
-# create_atoms_by_type.py
+# create_atoms_lowlevel.py
 #
 """
 Example of how to use the low-level interfaces into the AtomSpace.
 
 This provides the fastest python API for dumping raw data into the
 AtomSpace. However, it is a bit hard to use; the Atomese-style
-python is easier. See `create_atomspace_simple.py` for a simpler
-variant.
+python is easier. See `create_atoms.py` for a simpler variant.
 """
 
 from opencog.atomspace import AtomSpace, Atom
