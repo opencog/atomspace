@@ -29,6 +29,18 @@ of Atomese, using python as the embedding language.
 Review the wiki page for more:
 [Atomese](https://wiki.opencog.org/w/Atomese)
 
+Documentation: ***Every*** Atom in the core AtomSpace has a wiki page
+documenting it and how to use it. Some of the more important Atom and
+Value types are:
+* [Atom](https://wiki.opencog.org/w/Atom)
+* [Link](https://wiki.opencog.org/w/Link)
+* [Node](https://wiki.opencog.org/w/Node)
+* [Value](https://wiki.opencog.org/w/Value)
+* [FloatValue](https://wiki.opencog.org/w/FloatValue)
+* [EdgeLink](https://wiki.opencog.org/w/EdgeLink)
+* [VariableNode](https://wiki.opencog.org/w/VariableNode)
+* [QueryLink](https://wiki.opencog.org/w/QueryLink)
+
 ## Tutorial
 Start a python3 shell in your favorite way.
 
@@ -77,10 +89,14 @@ few users will need to work with the nameserver.
 ## stop_go.py
 An example of a "behavior tree".
 
-## Mixing python and scheme
+## Mixing python, scheme and Atomese
 Atomese has both scheme and python bindings, and the two programming
 langauges and styles can be freely intermixed. That is, you can call
 scheme from python, and python from scheme, and everything "just works".
+
+Both python and scheme can be called from within Atomese, by using
+the [GroundedSchemaNode](https://wiki.opencog.org/w/GroundedSchemaNode)
+All of these languages can be intermixed, they are all bi-directional.
 
 ### scheme_sharing.py
 A basic example of sharing an AtomSpace between python and scheme.
@@ -88,3 +104,7 @@ A basic example of sharing an AtomSpace between python and scheme.
 ### scheme_timer.py
 Simple measurement of the performance overhead of invoking the scheme
 (guile) evaluator.
+
+### ground
+The [ground](ground) directory contains an example of calling python
+from with Atomese.
