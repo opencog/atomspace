@@ -33,7 +33,7 @@ set_default_atomspace(AtomSpace())
 # It returns a TruthValue of TRUE for green lights and FALSE for the
 # red lights.  FALSE is interpreted as a mismatch (failure to satisfy)
 # by the pattner matcher, and thus, the pattern matcher will backtrack
-# and sarch for a different solution. Since the example below contains
+# and search for a different solution. Since the example below contains
 # no variables, it will just backtrack to the start, and then report
 # non-satisfiability (which is what we want, when we get a red light).
 green = 0
@@ -61,7 +61,7 @@ def stop_go(atom):
 
 # This is the pattern that the pattern matcher attempts to ground.
 # It consists of two green lights, which evaluate to true, followed
-# by a red light, which halts the satsifiability search. The last
+# by a red light, which halts the satisfiability search. The last
 # term is thus never encountered.  Which is a good thing.
 satisfaction_handle = SatisfactionLink(
     SequentialAndLink(
