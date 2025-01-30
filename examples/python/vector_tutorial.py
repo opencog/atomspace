@@ -300,15 +300,32 @@ print("")
 # Atoms compress very very well; compression rates of about 7 bytes
 # per Atom are seen in real-world datasets.
 #
-# Atoms can be converted to strings with the SexprColumn Link. Just add
-# it to the rewrite rule:
+# Atoms can be converted to strings with the SexprColumn Link. This
+# converts the Atom to an s-expression. We use s-expressions because
+# they are more compact than JSON or YAML, and don't require significant
+# whitespace the way python does. Also, s-expressions are very easy to
+# parse: the matching parens are always unambiguous, and there is no
+# need to track commas, semicolons or other punctuation.
+#
+# Just add it to the rewrite rule:
 
 counts_and_names = QueryLink (
     TypedVariableLink(VariableNode("$word"), TypeNode("ItemNode")),
     PresentLink(VariableNode("$word")),
 
-    # First, the counts.
-    TransposeColumn(ValueOfLink(VariableNode("$word"), count_key)),
+    # First, split out the left and right counts, each into their
+    # own row. The `ElementOfLink` is just an array accessor. It
+    # is just a very verbose way of subscripting an array.  That is,
+    #    ElementOf(Number(42), foobar)
+    # would just be
+    #    foobar[42]
+    # if it was written in python. Again, Atomese is not intended for
+    # humans. This extra verbosity makes things very easy for
+    # algorithms, results in easy parsing, and easy storage.
+    # Reminder: this query is just a bunch of Atoms, and it is stored
+    # in the AtomSpace, along with everything else.
+    ElementOfLink(NumberNode(0), ValueOfLink(VariableNode("$word"), count_key)),
+    ElementOfLink(NumberNode(1), ValueOfLink(VariableNode("$word"), count_key)),
 
     # Next, the names
     SexprColumn(VariableNode("$word")))
@@ -320,7 +337,7 @@ print("")
 # And again, in columnar form:
 three_columns = TransposeColumn(ValueOfLink(counts_and_names, counts_and_names))
 
-print("With columns:", three_columns.execute())
+print("And again, with columns:", three_columns.execute())
 print("")
 
 # ------------------------------------------------------------------
