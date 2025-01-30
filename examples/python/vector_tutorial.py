@@ -299,5 +299,30 @@ print("")
 # compress, collections of string names for thousands or millions of
 # Atoms compress very very well; compression rates of about 7 bytes
 # per Atom are seen in real-world datasets.
+#
+# Atoms can be converted to strings with the SexprColumn Link. Just add
+# it to the rewrite rule:
 
+counts_and_names = QueryLink (
+    TypedVariableLink(VariableNode("$word"), TypeNode("ItemNode")),
+    PresentLink(VariableNode("$word")),
+
+    # First, the counts.
+    TransposeColumn(ValueOfLink(VariableNode("$word"), count_key)),
+
+    # Next, the names
+    SexprColumn(VariableNode("$word")))
+
+# Here we go:
+print("Words and their counts:", counts_and_names.execute())
+print("")
+
+# And again, in columnar form:
+three_columns = TransposeColumn(ValueOfLink(counts_and_names, counts_and_names))
+
+print("With columns:", three_columns.execute())
+print("")
+
+# ------------------------------------------------------------------
+# THE END. That's All, Folks!
 # ------------------------------------------------------------------
