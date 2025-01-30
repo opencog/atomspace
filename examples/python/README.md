@@ -75,33 +75,33 @@ Start a python3 shell in your favorite way.
       python3 storage_tutorial.py
   ```
 
-## create_atoms.py
+### create_atoms.py
 The most basic example of creating Atoms in an AtomSpace, and attaching
 weights to them.
 
-## storage_tutorial.py
+### storage_tutorial.py
 A relatively simple all-in-one tutorial introducing basic concepts,
 a practical example, and the use of the store-to-disk StorageNode API.
 
-## vector_tutorial.py
+### vector_tutorial.py
 A more complex example, showing how to perform queries, how to use the
 query system to perform basic processng (counting, in this example) and
 how to vectorize the results (so that vector data an be fed to GPU's.)
 
-## create_atoms_lowlevel.py
+### create_atoms_lowlevel.py
 For the bulk loading of an AtomSpace from python, direct access
 to the AtomSpace is faster. The code is a little harder to read,
 and exhibits less of the 'natural' Atomese syntax,
 
-## nameserver_example.py
+### nameserver_example.py
 The AtomSpace includes a nameserver and class factory. These allow
 Atom Types to be directly accessed. This is an advanced demo; very
 few users will need to work with the nameserver.
 
-## stop_go.py
+### stop_go.py
 An example of a "behavior tree".
 
-## Mixing python, scheme and Atomese
+### Mixing python, scheme and Atomese
 Atomese has both scheme and python bindings, and the two programming
 languages and styles can be freely intermixed. That is, you can call
 scheme from python, and python from scheme, and everything "just works".
@@ -110,13 +110,13 @@ Both python and scheme can be called from within Atomese, by using
 the [GroundedSchemaNode](https://wiki.opencog.org/w/GroundedSchemaNode)
 All of these languages can be intermixed, they are all bi-directional.
 
-### scheme_sharing.py
+#### scheme_sharing.py
 A basic example of sharing an AtomSpace between python and scheme.
 
-### scheme_timer.py
+#### scheme_timer.py
 Simple measurement of the performance overhead of invoking the scheme
 (guile) evaluator.
 
-### ground
+#### ground
 The [ground](ground) directory contains an example of calling python
 from with Atomese.
