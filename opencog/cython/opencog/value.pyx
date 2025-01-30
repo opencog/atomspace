@@ -59,6 +59,9 @@ cdef class Value:
     def to_list(self):
         raise TypeError('Type {} is not supported'.format(self.type()))
 
+    def __iter__(self):
+        return self.to_list().__iter__()
+
     def long_string(self):
         return self.get_c_value_ptr().get().to_string().decode('UTF-8')
 
