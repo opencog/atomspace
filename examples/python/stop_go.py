@@ -18,8 +18,7 @@ matcher. When a match is seen, the matcher moves on to the next
 clause.
 """
 
-from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.exec import execute_atom
+from opencog.atomspace import *
 from opencog.type_constructors import *
 from opencog.logger import Logger, log
 
@@ -27,10 +26,8 @@ from opencog.logger import Logger, log
 log.set_level('DEBUG')
 log.info("Starting the stop-go demo")
 
-# The atomspace where everything will live.
-atomspace = AtomSpace()
-set_default_atomspace(atomspace)
-
+# Tell the python type constructors where to find the AtomSpace.
+set_default_atomspace(AtomSpace())
 
 # The callback counts the number of red and green lights.
 # It returns a TruthValue of TRUE for green lights and FALSE for the
