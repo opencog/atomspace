@@ -5,10 +5,10 @@ The examples below are written in python. At the philosophical level,
 this is just plain wrong. Atomese is not intended for human programmers,
 it is intended for automated algorithms. This means that the syntax for
 Atomese is was designed to make it easy for algorithms to create,
-process and run it. The syntax is very easy to parse, manipulate,
-process and rewrite: after all, Atomese is 'just; a (hyper-)graph.
+process and run it. The syntax is very easy to parse, manipulate
+and rewrite: after all, Atomese is 'just' a (hyper-)graph.
 
-This also means that its verbose, and often awkward for human
+This also means that it is verbose, and often awkward for human
 programmers. You can express anything in Atomese, but it is not
 a human-freindly programming language, and was never meant to be.
 
@@ -21,10 +21,19 @@ top of it, nor should there be. Conventional programming languages
 already do an excellent job. Atomese provides graphs. Use it as
 a graph processing system.  That's what it's for,
 
-That said: you can't debug a complex graph processing algorithm
-if you don't understand what the graph represents, and how it encodes
-structure. The demos in this directory walk through some of the basics
-of Atomese, using python as the embedding language.
+Footnote: graph processing libraries, such as
+[NetworkX](https://networkx.org/) are ***ideal*** for doing graph
+processing, *if you are a human programmer*. Not so much, if you are
+an algorithm. If you are looking for a bread-n-butter tool which
+is fun to write code for, use NetworkX. Or whatever. There is a large
+variety of tools and libraries out there, designed for human programmers.
+The AtomSpace, and Atomese, is an automation platform. Use it for
+automation.
+
+All that said: if you are debugging complex graph processing algorithms,
+you won't get far if you don't understand what the graph represents.
+The demos in this directory walk through some of the basics of Atomese,
+using python as the embedding language.
 
 Review the wiki page for more:
 [Atomese](https://wiki.opencog.org/w/Atomese)
@@ -40,6 +49,8 @@ Value types are:
 * [EdgeLink](https://wiki.opencog.org/w/EdgeLink)
 * [VariableNode](https://wiki.opencog.org/w/VariableNode)
 * [QueryLink](https://wiki.opencog.org/w/QueryLink)
+* [RuleLink](https://wiki.opencog.org/w/RuleLink)
+* [FilterLink](https://wiki.opencog.org/w/FilterLink)
 
 ## Tutorial
 Start a python3 shell in your favorite way.
