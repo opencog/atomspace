@@ -62,6 +62,7 @@ cdef class AtomSpace(Value):
             self.asp = as_cast(<cAtomSpace*> PyLong_AsVoidPtr(addr))
         self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
+        self.ptr_holder = PtrHolder.create(<shared_ptr[void]&>self.asp);
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):

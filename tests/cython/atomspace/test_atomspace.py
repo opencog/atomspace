@@ -19,6 +19,20 @@ class AtomSpaceTest(TestCase):
         finalize_opencog()
         del self.space
 
+    def test_bare(self):
+
+        # Test dereferencing self as Value
+        self.space
+        self.space.type
+        self.space.long_string()
+        self.space.short_string()
+        self.space.is_atom()
+        self.space.is_node()
+        self.space.is_link()
+        list(self.space)
+        str(self.space)
+        len(self.space)
+
     def test_add_node(self):
 
         # Test long form atomspace node addition.

@@ -48,6 +48,20 @@ class AtomTest(TestCase):
         self.assertEqual(2, len(keys))
         self.assertIn(key, keys)
 
+    def test_execute(self):
+        atom = ConceptNode('foo')
+        self.assertEqual(False, atom.is_executable())
+        self.assertEqual(atom, atom.execute())
+
+        getall = MeetLink(VariableNode('x'))
+        self.assertEqual(True, getall.is_executable())
+        lissy = list(getall.execute())
+        # No guarantee of the order in which Atoms are returned.
+        # self.assertEqual(lissy, [atom, getall])
+        # self.assertEqual(lissy, [getall, atom])
+        setty = set(getall.execute())
+        self.assertEqual(setty, set([atom, getall]))
+
     def test_get_out(self):
 
         with self.assertRaises(TypeError):

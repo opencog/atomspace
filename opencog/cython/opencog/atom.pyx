@@ -133,6 +133,12 @@ cdef class Atom(Value):
         self.tv = createTruthValue(mean, count)
         return self
 
+    def is_executable(self):
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            raise RuntimeError("Null Atom!")
+        return atom_ptr.is_executable()
+
     def execute(self):
         """
         Execute the Atom, returning the result of execution.
@@ -142,6 +148,9 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
+        if not atom_ptr.is_executable():
+            return self
+
         cdef cValuePtr c_value_ptr = atom_ptr.execute()
         return create_python_value_from_c_value(c_value_ptr)
 
