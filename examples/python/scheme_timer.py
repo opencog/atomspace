@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """
 Checks the execution time of repeated calls to the Scheme API from Python

@@ -1,3 +1,12 @@
+#! /usr/bin/env python3
+#
+# ground.py
+#
+"""
+Demo of calling python from Atomese.
+Both regular function calls, and class instance method calls are demoed.
+"""
+
 import sys
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
