@@ -21,6 +21,14 @@
 # write this stuff, or program this way. But, for a demo, this is
 # necessary.
 #
+# As will become clear below, Atomese is a declarative langauge. One
+# declares both data structures and code structures the same way: both
+# code and data are represented with hypergraphs. Both code and data
+# can be manipulated the same way: everything is a (hyper-)graph. Some
+# hypergraphs are executable, and "do something", when executed. Others
+# are static, and do nothing. In either case, the intended structure is
+# directly visible and analyzable, as a (hyper-)graph.
+#
 # ------------------------------------------------------------------
 # Python setup.
 
@@ -175,7 +183,7 @@ counting_query.execute()
 # Yes, Atomese also has a JoinLink.
 #
 get_words = MeetLink (
-    TypedVariableLink( VariableNode("$word"), TypeNode("ItemNode")),
+    TypedVariableLink(VariableNode("$word"), TypeNode("ItemNode")),
     PresentLink(VariableNode("$word")))
 
 print("The set of words is:", get_words.execute())
@@ -218,7 +226,19 @@ list_of_word_strings = map(lambda wrd: wrd.name, list_of_atoms)
 for wrd in list_of_atoms:
 	print(f"The word \'{wrd.name}\' has count {wrd.get_value(count_key) }")
 
-# However, the C++ will be more efficient:
-two_columns = TransposeColumn( ValueOfLink(get_words, get_words))
+# We want to do the above, but this time, in a purely declarative,
+# non-procedural style:
+word_counts = QueryLink (
+    TypedVariableLink(VariableNode("$word"), TypeNode("ItemNode")),
+    PresentLink(VariableNode("$word")),
 
-print("yp:", two_columns.execute())
+    # The counts were stored at count_key. So look for them there.
+    ValueOfLink(VariableNode("$word"), count_key))
+
+print("The counts on the words are:", word_counts.execute())
+
+# The above is a vector of vectors.
+two_columns = TransposeColumn(ValueOfLink(word_counts, word_counts))
+
+print("yo:", two_columns.execute())
+
