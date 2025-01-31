@@ -21,7 +21,7 @@ defined: the "strength" and the "confidence". This is the so-called
 some given inference is, and the confidence would indicate the confidence
 in that result.
 
-Ben Goertzel's book "Probabiistic Logic Networks" spells out exactly how
+Ben Goertzel's book "Probabilistic Logic Networks" spells out exactly how
 this was to work: various types of inference, deduction, extrapolation
 and so on would be done, with specific, explicit formulas giving the
 truth value update. The original AtomSpace was designed to be the

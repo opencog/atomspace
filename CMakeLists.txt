@@ -179,11 +179,15 @@ ENDIF (OCAML_FOUND)
 
 # ----------------------------------------------------------
 # Glasgow Haskell compiler (Optional; needed for the Haskell bindings)
+# The Haskell bindings are very old and unmaintained, and should not be
+# used in development. Stub them out until a maintainer shows up and
+# modernizes them.
 
 FIND_PACKAGE(Stack)
 IF (STACK_FOUND)
-	ADD_DEFINITIONS(-DHAVE_STACK)
-	SET(HAVE_STACK 1)
+	# ADD_DEFINITIONS(-DHAVE_STACK)
+	# SET(HAVE_STACK 1)
+	MESSAGE(STATUS "Haskell was found, but will not be built, due to bit-rot.")
 ENDIF (STACK_FOUND)
 
 # ----------------------------------------------------------
