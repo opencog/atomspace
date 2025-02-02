@@ -420,16 +420,6 @@ size_t AtomSpace::get_size() const
     return get_num_atoms_of_type(ATOM, true);
 }
 
-size_t AtomSpace::get_num_nodes() const
-{
-    return get_num_atoms_of_type(NODE, true);
-}
-
-size_t AtomSpace::get_num_links() const
-{
-    return get_num_atoms_of_type(LINK, true);
-}
-
 size_t AtomSpace::get_num_atoms_of_type(Type type, bool subclass) const
 {
     // If the flag is set, we need to deduplicate the atoms,
