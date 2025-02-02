@@ -69,25 +69,25 @@ UNISET_VALUE <- CONTAINER_VALUE
 FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE
 
 // ===========================================================
+// TruthValues are an older concept in Atomese. They are deprecated and
+// are in a slow process of being removed, in favor of the more flexible
+// and more general Value concept.
+//
 // TruthValues are the subobject classifiers for Atomese; they are used
 // to generalize the notion of a subset (in exactly the same way that
 // a subobject classifier does so in an arbitrary topos.) In some cases,
 // these will be probabilities; in other cases, these are probabilities
 // with additional evidence associated to them. In yet other cases,
 // these resemble the truth values of "fuzzy logic", and so on.
+// (FuzzyTruthValue, etc has been removed.)
 //
 // Many Atoms and operations on Atoms explicitly require TruthValues
 // -- for example, PredicateNodes and EvaluationLinks -- and so these
-// are vital and centrally important for getting things to work.
+// remain important for the core infrastructure.
 //
 TRUTH_VALUE                <- FLOAT_VALUE
 SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
 COUNT_TRUTH_VALUE          <- TRUTH_VALUE
-INDEFINITE_TRUTH_VALUE     <- TRUTH_VALUE
-FUZZY_TRUTH_VALUE          <- TRUTH_VALUE
-PROBABILISTIC_TRUTH_VALUE  <- TRUTH_VALUE
-EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
-
 FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
