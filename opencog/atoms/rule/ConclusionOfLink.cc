@@ -70,7 +70,7 @@ void ConclusionOfLink::init(void)
 
 ValuePtr ConclusionOfLink::execute(AtomSpace* as, bool silent)
 {
-	return as->add_link(LAMBDA_LINK, _vardecl, _conclusion);
+	return as->add_link(LAMBDA_LINK, {_vardecl, _conclusion});
 }
 
 DEFINE_LINK_FACTORY(ConclusionOfLink, CONCLUSION_OF_LINK)

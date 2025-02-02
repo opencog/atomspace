@@ -60,10 +60,10 @@ void MemberLinkUTest::test_membership()
 	Handle B = N(CONCEPT_NODE, "B");
 	Handle C = N(CONCEPT_NODE, "C");
 	Handle D = N(CONCEPT_NODE, "D");
-	Handle S = L(SET_LINK, A, B, C);
+	Handle S = L(SET_LINK, {A, B, C});
 
-	Handle AS = L(MEMBER_LINK, A, S);
-	Handle DS = L(MEMBER_LINK, D, S);
+	Handle AS = L(MEMBER_LINK, {A, S});
+	Handle DS = L(MEMBER_LINK, {D, S});
 
 	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AS);
 	printf("Got tvp=%s\n", tvp->to_string().c_str());
