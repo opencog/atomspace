@@ -429,6 +429,9 @@ public:
     inline Handle xget_handle(Type t, std::string str) const {
         return get_node(t, std::move(str));
     }
+    inline Handle get_handle(Type t, std::string str) const {
+        return get_node(t, std::move(str));
+    }
 
     /**
      * Get a link from the AtomSpace, if it's in there. If the atom
@@ -442,6 +445,9 @@ public:
      */
     Handle get_link(Type, HandleSeq&&) const;
     inline Handle xget_handle(Type t, HandleSeq outgoing) const {
+        return get_link(t, std::move(outgoing));
+    }
+    inline Handle get_handle(Type t, HandleSeq outgoing) const {
         return get_link(t, std::move(outgoing));
     }
 
