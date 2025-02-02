@@ -459,9 +459,9 @@ void ValueOfUTest::test_divide()
 	check();
 
 	// vector divide vector ----------------------------------------------
-	divide = al(DIVIDE_LINK,
-		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")),
-		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")));
+	divide = al(DIVIDE_LINK, {
+		al(PLUS_LINK, {valof, an(NUMBER_NODE, "7")}),
+		al(PLUS_LINK, {valof, an(NUMBER_NODE, "7")})});
 
 	result = FunctionLinkCast(divide)->execute();
 
@@ -490,7 +490,7 @@ void ValueOfUTest::test_number()
 	Handle valof = al(FLOAT_VALUE_OF_LINK, atom, key);
 
 	// 3/4 --------------------------------------------
-	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+	Handle divide = al(DIVIDE_LINK, {valof, an(NUMBER_NODE, "4")});
 
 	ValuePtr result = FunctionLinkCast(divide)->execute();
 

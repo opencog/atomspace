@@ -108,7 +108,7 @@ void PresentUTest::test_virtual(void)
 
 	Handle query = eval->eval_h("query");
 	Handle results = HandleCast(query->execute());
-	Handle expected = al(SET_LINK, an(CONCEPT_NODE, "OK"));
+	Handle expected = al(SET_LINK, {an(CONCEPT_NODE, "OK")});
 
 	printf("Expecting: %s\n", expected->to_string().c_str());
 	printf("Got: %s\n", results->to_string().c_str());
@@ -132,7 +132,7 @@ void PresentUTest::test_monotonicity(void)
 	Handle results = HandleCast(query->execute());
 	Handle P = an(PREDICATE_NODE, "P");
 	Handle Q = an(PREDICATE_NODE, "Q");
-	Handle expected = al(SET_LINK, al(LIST_LINK, P, Q));
+	Handle expected = al(SET_LINK, {al(LIST_LINK, {P, Q})});
 
 	printf("Expecting: %s\n", expected->to_string().c_str());
 	printf("Got: %s\n", results->to_string().c_str());

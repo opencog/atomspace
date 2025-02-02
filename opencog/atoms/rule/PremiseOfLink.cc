@@ -59,7 +59,7 @@ void PremiseOfLink::init(void)
 
 ValuePtr PremiseOfLink::execute(AtomSpace* as, bool silent)
 {
-	return as->add_link(LAMBDA_LINK, _vardecl, _premise);
+	return as->add_link(LAMBDA_LINK, {_vardecl, _premise});
 }
 
 DEFINE_LINK_FACTORY(PremiseOfLink, PREMISE_OF_LINK)
