@@ -52,16 +52,16 @@ void FactoryUTest::testFactory(void)
 {
 	AtomSpace* as = new AtomSpace();
 
-	Handle t_intvl = al(TIME_INTERVAL_LINK,
+	Handle t_intvl = al(TIME_INTERVAL_LINK, {
 	                    an(TIME_NODE, "1"),
-	                    an(TIME_NODE, "2"));
-	Handle pis = al(PREDICTIVE_IMPLICATION_SCOPE_LINK,
+	                    an(TIME_NODE, "2")});
+	Handle pis = al(PREDICTIVE_IMPLICATION_SCOPE_LINK, {
 	                an(VARIABLE_NODE, "$X"),
 	                t_intvl,
-	                al(EVALUATION_LINK,
+	                al(EVALUATION_LINK, {
 	                   an(PREDICATE_NODE, "P"),
-	                   an(VARIABLE_NODE, "$X")),
-	                   an(PREDICATE_NODE, "Q"));
+	                   an(VARIABLE_NODE, "$X")}),
+	                   an(PREDICATE_NODE, "Q")});
 
 	printf("pis=%s\n", pis->to_string().c_str());
 
