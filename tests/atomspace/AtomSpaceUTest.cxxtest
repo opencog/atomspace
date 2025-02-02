@@ -66,7 +66,7 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
-        result = as.get_handle(node->get_type(), node->get_name());
+        result = as.xget_handle(node->get_type(), node->get_name());
         if (result == Handle::UNDEFINED) {
             result = as.add_node(node->get_type(),
                                  std::move(std::string(node->get_name())));
@@ -75,7 +75,7 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
         }
     } else {
         LinkPtr link(LinkCast(atom));
-        result = as.get_handle(link->get_type(), link->getOutgoingSet());
+        result = as.xget_handle(link->get_type(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
             result = as.add_link(link->get_type(),
                                  std::move(HandleSeq(link->getOutgoingSet())));
@@ -289,7 +289,7 @@ get_handles_by_name(AtomSpace* as,
     }
 
     if (false == subclass) {
-        Handle h(as->get_handle(type, name));
+        Handle h(as->xget_handle(type, name));
         if (h) *(result++) = h;
         return result;
     }
@@ -298,7 +298,7 @@ get_handles_by_name(AtomSpace* as,
             // Avoid illegal gets.
             if (nameserver().isA(t, NUMBER_NODE)) return;
             if (nameserver().isA(t, TYPE_NODE)) return;
-            Handle h(as->get_handle(t, name));
+            Handle h(as->xget_handle(t, name));
             if (h) *(result++) = h; }, type);
 
     return result;
@@ -791,11 +791,11 @@ public:
     void testGetHandle_bugfix1()
     {
         HandleSeq emptyOutgoing;
-        Handle result = atomSpace->get_handle(LIST_LINK, emptyOutgoing);
+        Handle result = atomSpace->xget_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result == Handle::UNDEFINED);
         atomSpace->add_link(LIST_LINK,
                             std::move(HandleSeq(emptyOutgoing)));
-        result = atomSpace->get_handle(LIST_LINK, emptyOutgoing);
+        result = atomSpace->xget_handle(LIST_LINK, emptyOutgoing);
         TS_ASSERT(result != Handle::UNDEFINED);
     }
 

@@ -224,8 +224,8 @@ void DynamicUTest::test_formula_stream()
 		nameserver().getTypeName(result->get_type()).c_str());
 	TS_ASSERT_EQUALS(result->get_type(), FORMULA_STREAM);
 
-	Handle foo = _asp->get_handle(CONCEPT_NODE, "foo");
-	Handle akey = _asp->get_handle(PREDICATE_NODE, "some key");
+	Handle foo = _asp->xget_handle(CONCEPT_NODE, "foo");
+	Handle akey = _asp->xget_handle(PREDICATE_NODE, "some key");
 
 	for (int i=0; i<10; i++)
 	{
