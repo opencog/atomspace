@@ -91,7 +91,7 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 	if (base->is_node())
 	{
 		if (_out_is_link)
-			return as->add_link(_out_type, base);
+			return as->add_link(_out_type, {base});
 		return createLinkValue(_out_type, ValueSeq({base}));
 	}
 

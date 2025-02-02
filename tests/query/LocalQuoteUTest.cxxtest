@@ -112,13 +112,13 @@ void LocalQuoteUTest::test_put()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle
-		body = al(LOCAL_QUOTE_LINK, al(RULE_LINK, P_X, P_X)),
-		vardecl = al(TYPED_VARIABLE_LINK, X, CT),
-		put = al(PUT_LINK, al(LAMBDA_LINK, vardecl, body), A);
+		body = al(LOCAL_QUOTE_LINK, al(RULE_LINK, {P_X, P_X})),
+		vardecl = al(TYPED_VARIABLE_LINK, {X, CT}),
+		put = al(PUT_LINK, {al(LAMBDA_LINK, {vardecl, body}), A});
 
 	Instantiator inst(_as.get());
 	Handle putted = HandleCast(inst.execute(put));
-	Handle expected = al(RULE_LINK, P_A, P_A);
+	Handle expected = al(RULE_LINK, {P_A, P_A});
 
 	printf("Executing %s\n", put->to_string().c_str());
 	printf("Expecting %s\n", expected->to_string().c_str());
