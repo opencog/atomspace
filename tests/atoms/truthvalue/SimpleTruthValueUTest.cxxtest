@@ -24,7 +24,6 @@
 
 #include <math.h>
 
-#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
