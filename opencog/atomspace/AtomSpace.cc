@@ -171,7 +171,7 @@ bool AtomSpace::content_compare(const AtomSpace& space_first,
             if (keys_first != keys_second)
             {
                 if (emit_diagnostics)
-                    std::cout << "compare_atomspaces - key set mistmatch for "
+                    std::cout << "compare_atomspaces - key set mismatch for "
                               << atom_first->to_short_string() << std::endl;
                 return false;
             }

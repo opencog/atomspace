@@ -399,7 +399,7 @@ public:
     Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
-     * Increment the count on a CountTrutheValue, or increment the count
+     * Increment the count on a CountTruthValue, or increment the count
      * on a general Value. The increment is performed atomically, so that
      * there are no races in the update. Atomspaces that are read-only, COW,
      * or frames are handled as described above, for `set_value()`.
