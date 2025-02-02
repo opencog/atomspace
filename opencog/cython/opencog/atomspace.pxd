@@ -198,8 +198,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle xadd_link(Type t, vector[cHandle]) except +
         cHandle add_link(Type t, vector[cHandle], tv_ptr tvn) except +
 
-        cHandle get_handle(Type t, string s)
-        cHandle get_handle(Type t, vector[cHandle])
+        cHandle xget_handle(Type t, string s)
+        cHandle xget_handle(Type t, vector[cHandle])
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
         cHandle set_truthvalue(cHandle h, tv_ptr tvn)

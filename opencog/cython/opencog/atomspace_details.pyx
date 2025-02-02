@@ -253,12 +253,12 @@ cdef class AtomSpace(Value):
 
     def is_node_in_atomspace(self, Type t, s):
         cdef string name = s.encode('UTF-8', 'surrogateescape')
-        result = self.atomspace.get_handle(t, name)
+        result = self.atomspace.xget_handle(t, name)
         return result != result.UNDEFINED
 
     def is_link_in_atomspace(self, Type t, outgoing):
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
-        result = self.atomspace.get_handle(t, handle_vector)
+        result = self.atomspace.xget_handle(t, handle_vector)
         return result != result.UNDEFINED
 
 
