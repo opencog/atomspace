@@ -299,16 +299,16 @@ void MultiAtomSpace::test_nest(void)
 	Handle hl = lev->eval_h("(ListLink a b)");
 
 	// The atomspace sizes should be as expected ...
-	size_t main_sz = main_as->get_size();
-	size_t main_no = main_as->get_num_nodes();
-	size_t main_li = main_as->get_num_links();
+	size_t main_sz = main_as->get_num_atoms_of_type(ATOM, true);
+	size_t main_no = main_as->get_num_atoms_of_type(NODE, true);
+	size_t main_li = main_as->get_num_atoms_of_type(LINK, true);
 	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main_sz);
 	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main_no);
 	TSM_ASSERT("Expect zero links in main atomspace", 0 == main_li);
 
-	size_t locas_sz = locas->get_size() - main_sz;
-	size_t locas_no = locas->get_num_nodes() - main_no;
-	size_t locas_li = locas->get_num_links() - main_li;
+	size_t locas_sz = locas->get_num_atoms_of_type(ATOM, true) - main_sz;
+	size_t locas_no = locas->get_num_atoms_of_type(NODE, true) - main_no;
+	size_t locas_li = locas->get_num_atoms_of_type(LINK, true) - main_li;
 	TSM_ASSERT("Expect one atoms in local atomspace", 1 == locas_sz);
 	TSM_ASSERT("Expect zero nodes in local atomspace", 0 == locas_no);
 	TSM_ASSERT("Expect one link in local atomspace", 1 == locas_li);
@@ -320,9 +320,12 @@ void MultiAtomSpace::test_nest(void)
 	delete lev;
 
 	// Above deletion should not affect the main atomspace
-	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->get_size());
-	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->get_num_nodes());
-	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->get_num_links());
+	TSM_ASSERT("Still two atoms in main atomspace",
+		2 == main_as->get_num_atoms_of_type(ATOM, true));
+	TSM_ASSERT("Still two nodes in main atomspace",
+		2 == main_as->get_num_atoms_of_type(NODE, true));
+	TSM_ASSERT("Still zero links in main atomspace",
+		0 == main_as->get_num_atoms_of_type(LINK, true));
 
 	// The pointer hl should still be alive, even though the atomspace
 	// is gone.

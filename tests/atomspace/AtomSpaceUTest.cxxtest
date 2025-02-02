@@ -409,8 +409,8 @@ public:
         }
         logger().debug("TVS checked");
 
-        TS_ASSERT(atomSpace->get_num_nodes() == NUM_NODES);
-        TS_ASSERT(atomSpace->get_num_links() == 8);
+        TS_ASSERT(atomSpace->get_num_atoms_of_type(NODE, true) == NUM_NODES);
+        TS_ASSERT(atomSpace->get_num_atoms_of_type(LINK, true) == 8);
 
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {

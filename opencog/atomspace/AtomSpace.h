@@ -236,8 +236,6 @@ public:
      * Return the number of atoms contained in the space.
      */
     size_t get_size() const;
-    size_t get_num_nodes() const;
-    size_t get_num_links() const;
     size_t get_num_atoms_of_type(Type type, bool subclass=false) const;
 
     //! Clear the atomspace, extract all atoms.
