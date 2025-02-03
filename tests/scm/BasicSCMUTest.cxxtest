@@ -30,7 +30,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 
@@ -329,12 +328,6 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	else if (tvt == COUNT_TRUTH_VALUE)
 		ss << "cog-new-stv " << tv->get_mean() << " " << tv->get_confidence()
 		   << " " << tv->get_count();
-	else if (tvt == INDEFINITE_TRUTH_VALUE) {
-		const IndefiniteTruthValuePtr& itv =
-			dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
-		ss << "cog-new-itv " << itv->getL() << " " << itv->getU()
-		   << " " << itv->get_confidence();
-	}
 	else {
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);

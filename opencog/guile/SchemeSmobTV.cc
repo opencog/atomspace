@@ -25,12 +25,8 @@
 #include <memory>
 #include <libguile.h>
 
-#include <opencog/atoms/truthvalue/FuzzyTruthValue.h>
-#include <opencog/atoms/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/EvidenceCountTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
