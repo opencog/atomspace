@@ -133,3 +133,9 @@ Simple measurement of the performance overhead of invoking the scheme
 The [ground](ground) directory contains an example of calling python
 from with Atomese.  The `stop_go.py` demo above is more clearly written
 and simpler to understand.
+
+## Python Virtualenv issues
+Some users report unusual/unexpected issues when using Python VirtualEnv.
+If you are experiencing issues with undefined symbols, then try adding
+`/usr/local/lib/python3.11/dist-packages/` to your `PYTHON_PATH` and
+adding `/usr/local/lib/opencog/` to your `LD_LIBRARY_PATH`.
