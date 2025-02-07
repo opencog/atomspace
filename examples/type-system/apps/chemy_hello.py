@@ -9,7 +9,6 @@
 # Import the AtomSpace, and the basic AtomSpace types
 from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
-from opencog.execute import *
 
 # Import all of the chemical element types, and bond types too.
 from opencog.chempydemo import *
@@ -44,7 +43,7 @@ print(f'Methane is a molecule: {str(methane)}')
 c14 = Carbon14Node('found in wood')
 
 print(f'The carbon-14 atom is {str(c14)}')
-decay_products = execute_atom(spa, c14)
+decay_products = c14.execute()
 print(f'The carbon-14 decay products are {str(decay_products)}')
 
 # The end.

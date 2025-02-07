@@ -11,7 +11,6 @@ import sys
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
 from opencog.type_constructors import *
-from opencog.exec import execute_atom
 
 import mymodule as mm
 
@@ -35,39 +34,39 @@ class LocalClass:
 nn = LocalClass()
 
 # local function
-exlof = ExecutionOutputLink(
-    GroundedSchemaNode("py:local_func"),
-    ListLink(ConceptNode("aa"), ConceptNode("bb"), ConceptNode("cc")))
+exlof = ExecutionOutput(
+    GroundedSchema("py:local_func"),
+    ListLink(Concept("aa"), Concept("bb"), Concept("cc")))
 
-assert execute_atom(a, exlof) == ConceptNode("cc"), "Failed while calling local function"
+assert exlof.execute() == Concept("cc"), "Failed while calling local function"
 
 # local object
-exloc = ExecutionOutputLink(
-    GroundedSchemaNode("py:nn.forward"),
-    ListLink(ConceptNode("aa"), ConceptNode("bb")))
+exloc = ExecutionOutput(
+    GroundedSchema("py:nn.forward"),
+    List(Concept("aa"), Concept("bb")))
 
-assert execute_atom(a, exloc) == ConceptNode("aa"), "Failed while calling local object method"
+assert exloc.execute() == Concept("aa"), "Failed while calling local object method"
 
 # static method
-exst = ExecutionOutputLink(
-    GroundedSchemaNode("py:LocalClass.static_check"),
-    ListLink(ConceptNode("aa")))
+exst = ExecutionOutput(
+    GroundedSchema("py:LocalClass.static_check"),
+    ListLink(Concept("aa")))
 
-assert execute_atom(a, exst) == ConceptNode("aa"), "Failed while calling static class method"
+assert exst.execute() == Concept("aa"), "Failed while calling static class method"
 
 # external function
-exexf = ExecutionOutputLink(
-    GroundedSchemaNode("py:mm.mod_func"),
-    ListLink(ConceptNode("aa"), ConceptNode("bb"), ConceptNode("cc")))
+exexf = ExecutionOutput(
+    GroundedSchema("py:mm.mod_func"),
+    ListLink(Concept("aa"), Concept("bb"), Concept("cc")))
 
-assert execute_atom(a, exexf) == ConceptNode("aa"), "Failed while calling external function"
+assert exexf.execute() == Concept("aa"), "Failed while calling external function"
 
 # object in external module
 exext = ExecutionOutputLink(
     GroundedSchemaNode("py:mm.nn.submodule.forward"),
     ListLink(ConceptNode("aa"), ConceptNode("bb")))
 
-assert execute_atom(a, exext) == ConceptNode("bb"), "Failed while calling external object method"
+assert exext.execute() == Concept("bb"), "Failed while calling external object method"
 
 
 '''
@@ -77,11 +76,13 @@ class LocalClass:
         print("entering forward with args:")
         print(listArgs)
         return listArgs.out[0]
+
 def callObjMethod(conceptObject, conceptFunction, listArgs):
     o = getattr(sys.modules[__name__], conceptObject.name)
     return getattr(o, conceptFunction.name)(listArgs)
-ex = ExecutionOutputLink(
+
+ex = ExecutionOutput(
    GroundedSchemaNode("py:callObjMethod"),
-   ListLink(ConceptNode("nn"),
-            ListLink(ConceptNode("bb"))))
+   List(Concept("nn"),
+            List(Concept("bb"))))
 '''

@@ -39,7 +39,6 @@
 # Python setup.
 
 from opencog.atomspace import AtomSpace, types
-from opencog.execute import execute_atom
 from opencog.type_constructors import *
 
 set_default_atomspace(AtomSpace())
