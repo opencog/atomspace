@@ -39,12 +39,17 @@ cdef vector[cHandle] atom_list_to_vector(list lst):
     return handle_vector
 
 
+cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
+    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
+
+
 cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
+
 
 cdef class AtomSpace(Value):
     # these are defined in atomspace.pxd:

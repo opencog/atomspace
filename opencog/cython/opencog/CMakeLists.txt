@@ -82,7 +82,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME atomspace)
 
-# The cogserver needs the atomspace pxd file to get the Handle, Atom and
+# The cogserver needs the atomspace.pxd file to get the Handle, Atom and
 # AtomSpace definitions during compilation. So this must be installed.
 INSTALL (FILES
 	__init__.py
