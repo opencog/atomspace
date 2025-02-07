@@ -53,12 +53,24 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 				"def ${TYPE_NAME}(node_name, tv=None):\n"
 				"    return add_node(types.${TYPE_NAME}, node_name, tv)\n"
 			)
+			IF (NOT SHORT_NAME STREQUAL "")
+				FILE(APPEND "${PYTHON_FILE}"
+					"def ${SHORT_NAME}(node_name, tv=None):\n"
+					"    return add_node(types.${TYPE_NAME}, node_name, tv)\n"
+				)
+			ENDIF (NOT SHORT_NAME STREQUAL "")
 		ENDIF (ISNODE STREQUAL "NODE")
 		IF (ISLINK STREQUAL "LINK")
 			FILE(APPEND "${PYTHON_FILE}"
 				"def ${TYPE_NAME}(*args, tv=None):\n"
 				"    return add_link(types.${TYPE_NAME}, args, tv=tv)\n"
 			)
+			IF (NOT SHORT_NAME STREQUAL "")
+				FILE(APPEND "${PYTHON_FILE}"
+					"def ${SHORT_NAME}(*args, tv=None):\n"
+					"    return add_link(types.${TYPE_NAME}, args, tv=tv)\n"
+				)
+			ENDIF (NOT SHORT_NAME STREQUAL "")
 		ENDIF (ISLINK STREQUAL "LINK")
 	ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
