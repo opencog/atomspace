@@ -57,6 +57,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
+	BindlinkStub.cc
 	atomspace.cpp
 )
 
@@ -81,7 +82,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME atomspace)
 
-# The cogserver needs the atomspace pxd file to get the Handle, Atom and
+# The cogserver needs the atomspace.pxd file to get the Handle, Atom and
 # AtomSpace definitions during compilation. So this must be installed.
 INSTALL (FILES
 	__init__.py
@@ -153,7 +154,6 @@ CYTHON_ADD_MODULE_PYX(execute
 )
 
 ADD_LIBRARY(exec_cython
-	"BindlinkStub.cc"
 	"execute.cpp"
 )
 

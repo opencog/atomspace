@@ -7,15 +7,8 @@ from cython.operator cimport dereference as deref
 
 from opencog.type_constructors import TruthValue
 
-
 def execute_atom(AtomSpace atomspace, Atom atom):
-    if atom is None:
-        raise ValueError("execute_atom atom is: None")
-    cdef cValuePtr c_value_ptr = c_execute_atom(
-        atomspace.atomspace, deref(atom.handle)
-    )
-    return create_python_value_from_c_value(c_value_ptr)
-
+    return atomspace.execute(atom)
 
 def evaluate_atom(AtomSpace atomspace, Atom atom):
     if atom is None:
