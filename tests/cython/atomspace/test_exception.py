@@ -1,7 +1,7 @@
 import unittest
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
-from opencog.execute import evaluate_atom, execute_atom
+from opencog.execute import evaluate_atom
 
 import __main__
 
@@ -121,7 +121,7 @@ class TestExceptions(unittest.TestCase):
         atom1 = Concept("atom1")
         exec_link = ExecutionOutput(GroundedSchema("py:good_tv"),
                                         ListLink(atom1, atom1, atom1))
-        okay = execute_atom(self.space, exec_link)
+        okay = self.space.execute(exec_link)
 
         # Use `nosetests3 --nocapture` to see this print...
         print(f"The good TV is {str(okay)}")
@@ -135,7 +135,7 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:foobar"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -148,7 +148,8 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:no_ret"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            # exec_link.execute()
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -160,7 +161,8 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:ret_num"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            # exec_link.execute()
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -172,7 +174,8 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:ret_str"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            # exec_link.execute()
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -184,7 +187,8 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:ret_nil"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            # exec_link.execute()
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -196,7 +200,8 @@ class TestExceptions(unittest.TestCase):
         exec_link = ExecutionOutput(GroundedSchema("py:ret_lst"),
                                         ListLink(atom1, atom1, atom1))
         try:
-            execute_atom(self.space, exec_link)
+            # exec_link.execute()
+            self.space.execute(exec_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
