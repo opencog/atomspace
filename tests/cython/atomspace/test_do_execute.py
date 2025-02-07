@@ -3,7 +3,6 @@ import threading
 
 from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
-from opencog.execute import execute_atom
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.utilities import push_default_atomspace, get_default_atomspace
 
@@ -25,7 +24,7 @@ class DoExecuteTest(unittest.TestCase):
 
         value_of_link = ValueOfLink(atom, key)
 
-        value = execute_atom(self.atomspace, value_of_link)
+        value = value_of_link.execute()
         self.assertEqual(FloatValue([1, 2, 3]), value)
         self.assertEqual([1, 2, 3], value.to_list())
 
@@ -40,17 +39,16 @@ class DoExecuteTest(unittest.TestCase):
                     VariableNode('$X'),
                     VariableNode('$Y')))))
 
-        res = execute_atom(self.atomspace,
-                           ExecutionOutputLink(
-                               DefinedSchemaNode('add'),
-                               ListLink(
-                                   NumberNode("3"),
-                                   NumberNode("4"))))
+        res = ExecutionOutputLink(
+                 DefinedSchemaNode('add'),
+                 ListLink(
+                     NumberNode("3"),
+                     NumberNode("4"))).execute()
         self.assertEqual(NumberNode("7"), res)
 
     def test_add_atom_from_grounded_schema_node(self):
         test_as = create_child_atomspace(self.atomspace)
-        execute_atom(test_as,
+        test_as.execute(
                 ExecutionOutputLink(
                     GroundedSchemaNode("py:add_new_link"),
                     ListLink()
