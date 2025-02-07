@@ -786,3 +786,7 @@ Interesting Reading
   [HyperNetX](https://hypernetx.readthedocs.io/en/latest/).
   Their documentation is even eerily similar to our own! Gee, how could
   that happen?
+
+* Stop the presses! There's more! Extra! Extra! Read all about it!
+  [NetworkX](https://networkx.org/) is a python package for analyzing
+  complex networks.
