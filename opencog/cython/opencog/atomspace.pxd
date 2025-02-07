@@ -227,6 +227,10 @@ cdef class AtomSpace(Value):
     cdef object parent_atomspace
 
 
+cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
+    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
+
+
 cdef create_python_value_from_c_value(const cValuePtr& value)
 
 

@@ -57,6 +57,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
+	BindlinkStub.cc
 	atomspace.cpp
 )
 
@@ -153,7 +154,6 @@ CYTHON_ADD_MODULE_PYX(execute
 )
 
 ADD_LIBRARY(exec_cython
-	"BindlinkStub.cc"
 	"execute.cpp"
 )
 

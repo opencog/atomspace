@@ -235,6 +235,12 @@ cdef class AtomSpace(Value):
         result = self.atomspace.xget_handle(t, handle_vector)
         return result != result.UNDEFINED
 
+    def execute(self, Atom atom):
+        if atom is None:
+            raise ValueError("No atom provided!")
+        cdef cValuePtr c_value_ptr = c_do_execute_atom(
+            self.atomspace, deref(atom.handle))
+        return create_python_value_from_c_value(c_value_ptr)
 
 cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
