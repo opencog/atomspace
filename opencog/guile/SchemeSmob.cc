@@ -23,6 +23,7 @@
 
 #include <cstddef>
 #include <libguile.h>
+#include <unistd.h>
 
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
