@@ -54,9 +54,9 @@ static void thread_eval_tv(AtomSpace* as,
 	}
 }
 
-bool ThreadJoinLink::evaluate(AtomSpace* as,
-                              bool silent,
-                              AtomSpace* scratch)
+bool ThreadJoinLink::evaluate_scratch(AtomSpace* as,
+                                      bool silent,
+                                      AtomSpace* scratch)
 {
 	size_t arity = _outgoing.size();
 	std::vector<TruthValuePtr> tvp(arity);
@@ -85,7 +85,7 @@ bool ThreadJoinLink::evaluate(AtomSpace* as,
 
 bool ThreadJoinLink::bevaluate(AtomSpace* as, bool silent)
 {
-	return evaluate(as, silent, as);
+	return evaluate_scratch(as, silent, as);
 }
 
 DEFINE_LINK_FACTORY(ThreadJoinLink, THREAD_JOIN_LINK)

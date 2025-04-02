@@ -42,7 +42,7 @@ public:
 	ThreadJoinLink& operator=(const ThreadJoinLink&) = delete;
 
 	virtual bool bevaluate(AtomSpace*, bool);
-	bool evaluate(AtomSpace*, bool, AtomSpace*);
+	bool evaluate_scratch(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

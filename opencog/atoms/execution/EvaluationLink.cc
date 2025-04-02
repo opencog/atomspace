@@ -599,12 +599,12 @@ static bool crispy_maybe(AtomSpace* as,
 	if (THREAD_JOIN_LINK == t)
 	{
 		ThreadJoinLinkPtr tjlp = ThreadJoinLinkCast(evelnk);
-		return tjlp->evaluate(as, silent, scratch);
+		return tjlp->evaluate_scratch(as, silent, scratch);
 	}
 	else if (PARALLEL_LINK == t)
 	{
 		ParallelLinkPtr plp = ParallelLinkCast(evelnk);
-		plp->evaluate(as, silent, scratch);
+		plp->evaluate_scratch(as, silent, scratch);
 		return true;
 	}
 

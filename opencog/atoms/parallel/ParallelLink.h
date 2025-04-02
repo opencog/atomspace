@@ -43,7 +43,7 @@ public:
 
 	virtual bool is_evaluatable() const { return true; }
 	virtual bool bevaluate(AtomSpace*, bool);
-	void evaluate(AtomSpace*, bool, AtomSpace*);
+	void evaluate_scratch(AtomSpace*, bool, AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

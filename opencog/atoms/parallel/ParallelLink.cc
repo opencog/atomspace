@@ -51,9 +51,9 @@ static void thread_eval(AtomSpace* as,
 	}
 }
 
-void ParallelLink::evaluate(AtomSpace* as,
-                            bool silent,
-                            AtomSpace* scratch)
+void ParallelLink::evaluate_scratch(AtomSpace* as,
+                                    bool silent,
+                                    AtomSpace* scratch)
 {
 	// Create and detach threads; return immediately.
 	for (const Handle& h : _outgoing)
@@ -65,7 +65,7 @@ void ParallelLink::evaluate(AtomSpace* as,
 
 bool ParallelLink::bevaluate(AtomSpace* as, bool silent)
 {
-	evaluate(as, silent, as);
+	evaluate_scratch(as, silent, as);
 	return true;
 }
 
