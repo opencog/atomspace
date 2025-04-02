@@ -33,7 +33,7 @@ ADD_LIBRARY(logger_cython
 
 TARGET_LINK_LIBRARIES(logger_cython
 	${COGUTIL_LIBRARY}
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 # Python is expecting the shared object to be called `logger.so` and
@@ -75,7 +75,7 @@ TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	atomspace
 	smob
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
@@ -105,7 +105,7 @@ ADD_LIBRARY(type_constructors
 TARGET_LINK_LIBRARIES(type_constructors
 	${NO_AS_NEEDED}
 	atomspace
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(type_constructors PROPERTIES
@@ -130,7 +130,7 @@ TARGET_LINK_LIBRARIES(utilities_cython
 	atomspace
 	# type_constructors
 	executioncontext
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
@@ -160,7 +160,7 @@ ADD_LIBRARY(exec_cython
 TARGET_LINK_LIBRARIES(exec_cython
 	atomspace_cython
 	atomspace
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(exec_cython PROPERTIES
@@ -203,7 +203,7 @@ IF (HAVE_GUILE)
 		atomspace_cython
 		atomspace
 		smob
-		${PYTHON_LIBRARIES}
+		${Python3_LIBRARIES}
 	)
 
 	SET_TARGET_PROPERTIES(scheme PROPERTIES
