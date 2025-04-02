@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES(
-	${PYTHON_INCLUDE_PATH}
+	${Python3_INCLUDE_DIRS}
 	${PROJECT_SOURCE_DIR}/opencog/atomspace
 	${PROJECT_SOURCE_DIR}/opencog/guile
 	${PROJECT_SOURCE_DIR}/opencog/util
