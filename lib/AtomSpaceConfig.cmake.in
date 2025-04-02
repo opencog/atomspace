@@ -65,7 +65,6 @@ set(ATOMSPACE_LIBRARIES
 	pattern
 	query-engine
 	execution
-	executioncontext
 	grounded
 	smob
 	atomspace
@@ -77,6 +76,7 @@ IF (HAVE_CYTHON)
 	SET(ATOMSPACE_LIBRARIES
 	    ${ATOMSPACE_LIBRARIES}
 	    ${ATOMSPACE_PythonEval_LIBRARY}
+	    executioncontext
 	)
 ENDIF (HAVE_CYTHON)
 
