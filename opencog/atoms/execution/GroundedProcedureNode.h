@@ -44,7 +44,7 @@ public:
 	GroundedProcedureNode& operator=(const GroundedProcedureNode&) = delete;
 	virtual ~GroundedProcedureNode() {};
 
-	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool silent=false) = 0;
+	virtual ValuePtr execute_args(AtomSpace*, const ValuePtr&, bool silent=false) = 0;
 };
 
 NODE_PTR_DECL(GroundedProcedureNode)

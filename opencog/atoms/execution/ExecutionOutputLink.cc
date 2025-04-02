@@ -138,14 +138,14 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	return createLink(std::move(elts), SET_LINK);
 }
 
-/// execute_args -- execute a seq of arguments, return a seq of results.
+/// execute_argseq -- execute a seq of arguments, return a seq of results.
 ///
 /// Somewhat like force_execute(), but assumes that each atom knows
 /// how to behave itself correctly. Much like PutLink, this also tries
 /// to deal with multiple arguments that are sets (so that a SetLink
 /// has the semantics of "apply to all members of the set")
-static inline HandleSeq execute_args(AtomSpace* as, HandleSeq args,
-                                     bool silent, bool& have_set)
+static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
+                                       bool silent, bool& have_set)
 {
 	HandleSeq exargs;
 	for (const Handle& h: args)
@@ -191,7 +191,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 				"ExecutionOutputLink: Cannot use naked %s",
 				sn->to_string().c_str());
 
-		return gsn->execute(as, args, silent);
+		return gsn->execute_args(as, args, silent);
 	}
 
 	if (sn->is_type(DEFINED_PROCEDURE_NODE))
@@ -228,7 +228,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		// If there is more than one SetLink, then this won't work,
 		// and we need to make a Cartesian product of them, instead.
 		bool have_set = false;
-		HandleSeq xargs(execute_args(as, oset, silent, have_set));
+		HandleSeq xargs(execute_argseq(as, oset, silent, have_set));
 
 		if (not have_set)
 			return as->add_atom(vars.substitute_nocheck(body, xargs));

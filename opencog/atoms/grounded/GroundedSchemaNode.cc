@@ -105,14 +105,14 @@ GroundedSchemaNode::~GroundedSchemaNode()
 	if (_runner) delete _runner;
 }
 
-/// execute -- execute the SchemaNode of the ExecutionOutputLink
+/// execute_args -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "cargs" to be a ListLink unless there is only one argument
 /// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
-ValuePtr GroundedSchemaNode::execute(AtomSpace* as,
-                                     const ValuePtr& cargs,
-                                     bool silent)
+ValuePtr GroundedSchemaNode::execute_args(AtomSpace* as,
+                                          const ValuePtr& cargs,
+                                          bool silent)
 {
 	// Unknown procedure type
 	if (nullptr == _runner)

@@ -111,15 +111,15 @@ void GroundedPredicateNode::init()
 
 // ----------------------------------------------------------
 
-/// `execute()` -- evaluate a GroundedPredicateNode with arguments.
+/// `execute_args()` -- evaluate a GroundedPredicateNode with arguments.
 ///
 /// Expects "args" to be a ListLink. These arguments will be
 /// substituted into the predicate. Then the predicate as a whole
 /// will be evaluated.
 ///
-ValuePtr GroundedPredicateNode::execute(AtomSpace* as,
-                                        const ValuePtr& cargs,
-                                        bool silent)
+ValuePtr GroundedPredicateNode::execute_args(AtomSpace* as,
+                                             const ValuePtr& cargs,
+                                             bool silent)
 {
 	// Perform "eager evaluation" instead of "lazy evaluation".
 	if (_eager and _runner)

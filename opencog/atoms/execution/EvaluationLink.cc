@@ -741,7 +741,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	{
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
 		Handle args(createLink(std::move(cargs), LIST_LINK));
-		return TruthValueCast(gpn->execute(as, args, silent));
+		return TruthValueCast(gpn->execute_args(as, args, silent));
 	}
 
 	// If it's evaluatable, assume it has some free variables.

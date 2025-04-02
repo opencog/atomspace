@@ -49,7 +49,8 @@ public:
 	GroundedSchemaNode& operator=(const GroundedSchemaNode&) = delete;
 	virtual ~GroundedSchemaNode();
 
-	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool silent=false);
+	virtual ValuePtr execute_args(AtomSpace*, const ValuePtr&,
+	                              bool silent=false);
 
 	static Handle factory(const Handle&);
 };
