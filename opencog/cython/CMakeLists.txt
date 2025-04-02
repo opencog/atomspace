@@ -45,7 +45,12 @@ TARGET_LINK_LIBRARIES(PythonEval
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 )
-GET_FILENAME_COMPONENT(PYLIBNAME ${PYTHON_LIBRARY} NAME)
+
+# We need to get the name of the actual python library in order
+# to give it to dlopen() to open and load it. Right now,
+# Python3_LIBRARIES is set to just one library, grant total.
+# If there are ever more than one, this will break.
+GET_FILENAME_COMPONENT(PYLIBNAME ${Python3_LIBRARIES} NAME)
 TARGET_COMPILE_DEFINITIONS(PythonEval PRIVATE PYLIBNAME="${PYLIBNAME}")
 
 INSTALL (TARGETS PythonEval EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
