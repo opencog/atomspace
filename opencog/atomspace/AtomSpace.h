@@ -449,6 +449,12 @@ public:
         return get_link(t, std::move(outgoing));
     }
 
+    /* Currently used by link-grammar, and best leave this here
+     * until that gets revised. */
+    inline Handle get_link(Type t, const Handle& ha, const Handle& hb) const {
+        return get_link(t, {ha, hb});
+    }
+
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
