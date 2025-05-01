@@ -10,29 +10,47 @@ from opencog.atomspace cimport strength_t, confidence_t
 
 import warnings
 
-from opencog.atomspace import (createFloatValue, createLinkValue,
-                               createStringValue, createTruthValue)
+from opencog.atomspace import (# createBoolValue,
+                               createFloatValue,
+                               createLinkValue,
+                               createStringValue,
+                               createTruthValue,
+                               # createVoidValue,
+                               # createRandomStream
+                               )
 from opencog.atomspace import types, AtomSpace
 from opencog.utilities import add_node, add_link
 from opencog.utilities import get_default_atomspace, set_default_atomspace
 from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
 # -----------------------------------------------------------------
+# The core Atom types are taken from an auto-generated file
+# built in the build dir, installed into the filesystem.
 include "opencog/atoms/atom_types/core_types.pyx"
 
 # -----------------------------------------------------------------
+# The auto-gened types do not include the Values. So handle these
+# by hand, below. Someday, should fix OpenCogGenPythonTypes.cmake
+# so that these are auto-generated.
+
+# Argh. Need to hand-craft a pyx file for this. Argh.
+# def BoolValue(arg):
+#     return createBoolValue(arg)
 
 def FloatValue(arg):
     return createFloatValue(arg)
 
-
 def LinkValue(arg):
     return createLinkValue(arg)
-
 
 def StringValue(arg):
     return createStringValue(arg)
 
-
 def TruthValue(strength_t strength=1.0, confidence_t confidence=1.0):
     return createTruthValue(strength, confidence)
+
+# def VoidValue():
+#     return createVoidValue()
+#
+# def RandomStream(arg):
+#     return createRandomStream(arg)
