@@ -92,11 +92,55 @@
 	(lambda (n)
 		(define sn (cog-execute! (Heaviside (Sine (Number n)))))
 
-		; Ugh. round down. Even or od, then reverse.
+		; Ugh. round down. Even or odd, then reverse.
 		(define wv (Number (- 1 (modulo (floor (/ n pi)) 2))))
 		(test-assert "square-wave" (equal? sn wv))
 	)
 	(iota 70))
+
+; -----------------------------------------------
+; Test CosineLink
+
+(test-assert "cosine n pi"
+	(equal? (Number 1 -1 1 -1 1)
+		(cog-execute!  (Cosine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi))))))
+
+(define cero
+	(cog-execute! (Cosine (Number
+		(npih 1) (npih 3) (npih 5) (npih 7) (npih 9)))))
+
+(for-each
+	(lambda (x)
+		(test-approximate "cosine zero" 0.0 x 2e-14))
+	(cog-value->list cero))
+
+; -----------------------------------------------
+; Test TanLink
+
+(define tero
+	(cog-execute! (Tan (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))))
+
+(for-each
+	(lambda (x)
+		(test-approximate "tan zero" 0.0 x 2e-14))
+	(cog-value->list tero))
+
+; -----------------------------------------------
+; Test ExpLink
+
+(define euler 2.718281828459045235360287471352)
+
+; Meh
+;(test-assert "exp pow"
+;	(equal?
+;		(cog-execute! (Exp (Number 1 2 3 4)))
+;		(cog-execute! (Pow (Number euler) (Number 1 2 3 4)))))
+
+(for-each
+	(lambda (x y)
+		(test-approximate "exp pow" x y 2e-14))
+	(cog-value->list (cog-execute! (Exp (Number 1 2 3 4))))
+	(cog-value->list (cog-execute! (Pow (Number euler) (Number 1 2 3 4)))))
 
 ; -----------------------------------------------
 ; Test FloorLink

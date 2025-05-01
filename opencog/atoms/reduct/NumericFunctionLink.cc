@@ -61,6 +61,12 @@ void NumericFunctionLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "RandomNumberLink expects two arguments");
 	else if (SINE_LINK == t and 1 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO, "SineLink expects one argument");
+	else if (COSINE_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "CosineLink expects one argument");
+	else if (TAN_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "TanLink expects one argument");
+	else if (EXP_LINK == t and 1 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "ExpLink expects one argument");
 }
 
 // ===========================================================
@@ -247,6 +253,12 @@ ValuePtr NumericFunctionLink::execute_unary(AtomSpace* as, bool silent)
 		result = apply_func(as, silent, _outgoing[0], log2, reduction);
 	else if (SINE_LINK == t)
 		result = apply_func(as, silent, _outgoing[0], sin, reduction);
+	else if (COSINE_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], cos, reduction);
+	else if (TAN_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], tan, reduction);
+	else if (EXP_LINK == t)
+		result = apply_func(as, silent, _outgoing[0], exp, reduction);
 	else
 		throw InvalidParamException(TRACE_INFO,
 			"Internal Error: unhandled derived type!");
