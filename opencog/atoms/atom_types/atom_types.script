@@ -989,8 +989,11 @@ POW_LINK <- NUMERIC_FUNCTION_LINK
 // Return uniformly distributed random number between two limits.
 RANDOM_NUMBER_LINK <- NUMERIC_FUNCTION_LINK
 
-// Trigonometric Sine function
+// Trigonometric functions
 SINE_LINK <- NUMERIC_FUNCTION_LINK
+COSINE_LINK <- NUMERIC_FUNCTION_LINK
+TAN_LINK <- NUMERIC_FUNCTION_LINK
+EXP_LINK <- NUMERIC_FUNCTION_LINK
 
 // Return the sum of vector components of a NumberNode or FloatValue.
 ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
