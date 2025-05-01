@@ -92,11 +92,27 @@
 	(lambda (n)
 		(define sn (cog-execute! (Heaviside (Sine (Number n)))))
 
-		; Ugh. round down. Even or od, then reverse.
+		; Ugh. round down. Even or odd, then reverse.
 		(define wv (Number (- 1 (modulo (floor (/ n pi)) 2))))
 		(test-assert "square-wave" (equal? sn wv))
 	)
 	(iota 70))
+
+; -----------------------------------------------
+; Test CosineLink
+
+(test-assert "cosine n pi"
+	(equal? (Number 1 -1 1 -1 1)
+		(cog-execute!  (Cosine (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi))))))
+
+(define cero
+	(cog-execute! (Cosine (Number
+		(npih 1) (npih 3) (npih 5) (npih 7) (npih 9)))))
+
+(for-each
+	(lambda (x)
+		(test-approximate "cosine zero" 0.0 x 2e-14))
+	(cog-value->list cero))
 
 ; -----------------------------------------------
 ; Test FloorLink
