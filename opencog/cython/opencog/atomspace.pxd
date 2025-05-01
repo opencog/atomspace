@@ -133,7 +133,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
         bool is_executable()
-        cValuePtr execute()
+        cValuePtr execute() except +
 
         string to_string()
         string to_short_string()
