@@ -1,5 +1,5 @@
 /*
- * opencog/cython/BindlinkStub.h
+ * opencog/cython/opencog/ExecuteStub.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINKSTUB_H
-#define _OPENCOG_BINDLINKSTUB_H
+#ifndef _OPENCOG_EXECUTESTUB_H
+#define _OPENCOG_EXECUTESTUB_H
 
 
 namespace opencog {
@@ -31,4 +31,4 @@ ValuePtr do_execute(AtomSpace*, Handle);
 } // namespace opencog
 
 
-#endif // _OPENCOG_BINDLINKSTUB_H
+#endif // _OPENCOG_EXECUTESTUB_H
