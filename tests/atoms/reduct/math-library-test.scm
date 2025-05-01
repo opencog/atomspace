@@ -126,6 +126,23 @@
 	(cog-value->list tero))
 
 ; -----------------------------------------------
+; Test ExpLink
+
+(define euler 2.718281828459045235360287471352)
+
+; Meh
+;(test-assert "exp pow"
+;	(equal?
+;		(cog-execute! (Exp (Number 1 2 3 4)))
+;		(cog-execute! (Pow (Number euler) (Number 1 2 3 4)))))
+
+(for-each
+	(lambda (x y)
+		(test-approximate "exp pow" x y 2e-14))
+	(cog-value->list (cog-execute! (Exp (Number 1 2 3 4))))
+	(cog-value->list (cog-execute! (Pow (Number euler) (Number 1 2 3 4)))))
+
+; -----------------------------------------------
 ; Test FloorLink
 
 (for-each
