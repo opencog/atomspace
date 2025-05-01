@@ -4,7 +4,7 @@ def createBoolValue(arg):
     if (isinstance(arg, list)):
         c_ptr.reset(new cBoolValue(BoolValue.list_of_bool_to_vector(arg)))
     else:
-        c_ptr.reset(new cBoolValue(<double>arg))
+        c_ptr.reset(new cBoolValue(<bool>arg))
     return BoolValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
 
 cdef class BoolValue(Value):

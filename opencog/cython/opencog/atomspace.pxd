@@ -230,6 +230,14 @@ cdef class AtomSpace(Value):
 cdef create_python_value_from_c_value(const cValuePtr& value)
 
 
+# BoolValue
+cdef extern from "opencog/atoms/value/BoolValue.h" namespace "opencog":
+    cdef cppclass cBoolValue "opencog::BoolValue":
+        cBoolValue(bool value)
+        cBoolValue(const vector[bool]& values)
+        const vector[bool]& value() const
+
+
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
