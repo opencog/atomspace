@@ -10,7 +10,7 @@ from opencog.atomspace cimport strength_t, confidence_t
 
 import warnings
 
-from opencog.atomspace import (# createBoolValue,
+from opencog.atomspace import (createBoolValue,
                                createFloatValue,
                                createLinkValue,
                                createStringValue,
@@ -33,9 +33,8 @@ include "opencog/atoms/atom_types/core_types.pyx"
 # by hand, below. Someday, should fix OpenCogGenPythonTypes.cmake
 # so that these are auto-generated.
 
-# Argh. Need to hand-craft a pyx file for this. Argh.
-# def BoolValue(arg):
-#     return createBoolValue(arg)
+def BoolValue(arg):
+    return createBoolValue(arg)
 
 def FloatValue(arg):
     return createFloatValue(arg)
@@ -49,6 +48,7 @@ def StringValue(arg):
 def TruthValue(strength_t strength=1.0, confidence_t confidence=1.0):
     return createTruthValue(strength, confidence)
 
+# Argh. Need to hand-craft a pyx file for these. XXX FIXME
 # def VoidValue():
 #     return createVoidValue()
 #

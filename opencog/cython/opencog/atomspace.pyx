@@ -8,6 +8,7 @@
 include "value.pyx"
 include "atomspace_details.pyx"
 include "truth_value.pyx"
+include "bool_value.pyx"
 include "float_value.pyx"
 include "string_value.pyx"
 include "atom.pyx"
