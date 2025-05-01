@@ -17,21 +17,10 @@ from opencog.utilities import add_node, add_link
 from opencog.utilities import get_default_atomspace, set_default_atomspace
 from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
-
-def set_type_ctor_atomspace(new_atomspace):
-    warnings.warn('set_type_ctor_atomspace is deprecated, use push_default_atomspace instead',
-            DeprecationWarning)
-    return set_default_atomspace(new_atomspace)
-
-
-def get_type_ctor_atomspace():
-    warnings.warn('get_type_ctor_atomspace is deprecated, use get_default_atomspace instead',
-            DeprecationWarning)
-    return get_default_atomspace()
-
-
+# -----------------------------------------------------------------
 include "opencog/atoms/atom_types/core_types.pyx"
 
+# -----------------------------------------------------------------
 
 def FloatValue(arg):
     return createFloatValue(arg)
