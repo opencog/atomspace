@@ -167,20 +167,13 @@ SET_TARGET_PROPERTIES(exec_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME execute)
 
-### install the modules ###
+### Install the modules ###
 INSTALL(TARGETS
 	atomspace_cython
 	exec_cython
 	logger_cython
 	type_constructors
 	utilities_cython
-	DESTINATION "${PYTHON_DEST}")
-
-# install the legacy bindlink module
-INSTALL(FILES
-	"bindlink.py"
-	"exec.py"
-	"scheme_wrapper.py"
 	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)
