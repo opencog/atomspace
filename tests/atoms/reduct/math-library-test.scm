@@ -115,6 +115,17 @@
 	(cog-value->list cero))
 
 ; -----------------------------------------------
+; Test TanLink
+
+(define tero
+	(cog-execute! (Tan (Number 0 pi (* 2 pi) (* 3 pi) (* 4 pi)))))
+
+(for-each
+	(lambda (x)
+		(test-approximate "tan zero" 0.0 x 2e-14))
+	(cog-value->list tero))
+
+; -----------------------------------------------
 ; Test FloorLink
 
 (for-each
