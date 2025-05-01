@@ -39,7 +39,7 @@ cdef vector[cHandle] atom_list_to_vector(list lst):
     return handle_vector
 
 
-cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
+cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
     cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
 
 

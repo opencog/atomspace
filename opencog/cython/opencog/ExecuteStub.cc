@@ -4,7 +4,7 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/value/Value.h>
 
-#include "BindlinkStub.h"
+#include "ExecuteStub.h"
 
 using namespace opencog;
 

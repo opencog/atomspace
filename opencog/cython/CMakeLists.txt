@@ -25,9 +25,6 @@ INCLUDE_DIRECTORIES(
 FILE(MAKE_DIRECTORY opencog)
 FILE(COPY opencog/__init__.py DESTINATION opencog)
 
-# Legacy bindlink
-FILE(COPY opencog/bindlink.py DESTINATION opencog)
-
 ADD_LIBRARY(PythonEval
 	PythonEval.cc
 )
