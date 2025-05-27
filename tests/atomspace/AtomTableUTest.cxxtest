@@ -71,11 +71,6 @@ public:
     void setUp()
     {
         atomSpace->clear();
-        /* load scm files with all necessary nodes and links  */
-        SchemeEval* eval = SchemeEval::get_evaluator(atomSpace);
-        eval->eval("(add-to-load-path \"../..\")");
-        eval->eval("(load-from-path \"opencog/atoms/atom_types/core_types.scm\")");
-        eval->eval("(load-from-path \"tests/query/test_types.scm\")");
     }
 
     void tearDown() {

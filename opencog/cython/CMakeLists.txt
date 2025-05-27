@@ -62,25 +62,27 @@ INSTALL (FILES
 # The scheme wrapper for PythonEval. Allows python snippets to be
 # called from scheme.
 #
-ADD_DEFINITIONS(-DPYTHON_ROOT="${PYTHON_ROOT}")
-ADD_LIBRARY(PythonSCM
-	PythonSCM.cc
-)
-ADD_DEPENDENCIES(PythonSCM PythonEval)
+IF(HAVE_GUILE)
+	ADD_DEFINITIONS(-DPYTHON_ROOT="${PYTHON_ROOT}")
+	ADD_LIBRARY(PythonSCM
+		PythonSCM.cc
+	)
+	ADD_DEPENDENCIES(PythonSCM PythonEval)
 
-TARGET_LINK_LIBRARIES(PythonSCM
-	PythonEval
-	smob
-)
-ADD_GUILE_EXTENSION(SCM_CONFIG PythonSCM "opencog-ext-path-python-scm")
+	TARGET_LINK_LIBRARIES(PythonSCM
+		PythonEval
+		smob
+	)
+	ADD_GUILE_EXTENSION(SCM_CONFIG PythonSCM "opencog-ext-path-python-scm")
 
-ADD_GUILE_MODULE (FILES
-	opencog/python.scm
-	DEPENDS PythonSCM
-#	COMPILE
-)
+	ADD_GUILE_MODULE (FILES
+		opencog/python.scm
+		DEPENDS PythonSCM
+	#	COMPILE
+	)
 
-INSTALL (TARGETS PythonSCM
-	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+	INSTALL (TARGETS PythonSCM
+		EXPORT AtomSpaceTargets
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+ENDIF(HAVE_GUILE)
