@@ -1,10 +1,4 @@
 
-LINK_LIBRARIES(
-   smob
-   atombase
-   atomspace
-)
-
 ADD_SUBDIRECTORY (atom_types)
 ADD_SUBDIRECTORY (base)
 ADD_SUBDIRECTORY (core)
@@ -21,7 +15,16 @@ ADD_SUBDIRECTORY (columnvec)
 ADD_SUBDIRECTORY (pattern)
 ADD_SUBDIRECTORY (foreign)
 
-ADD_CXXTEST(HashUTest)
-ADD_CXXTEST(RandomUTest)
+LINK_LIBRARIES(
+   atombase
+   atomspace
+)
+
 ADD_CXXTEST(AlphaConvertUTest)
 ADD_CXXTEST(BetaReduceUTest)
+
+IF (HAVE_GUILE)
+	LINK_LIBRARIES(smob)
+	ADD_CXXTEST(HashUTest)
+	ADD_CXXTEST(RandomUTest)
+ENDIF (HAVE_GUILE)
