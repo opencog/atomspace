@@ -4,10 +4,6 @@ LINK_LIBRARIES(
 	atomspace
 )
 
-IF (HAVE_GUILE)
-	LINK_LIBRARIES(smob)
-ENDIF (HAVE_GUILE)
-
 ADD_CXXTEST(HashMixUTest)
 ADD_CXXTEST(AtomTableUTest)
 ADD_CXXTEST(AtomSpaceUTest)
