@@ -20,7 +20,9 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (atoms)
 
 	# guile provides scheme bindings for the atomspace.
-	ADD_SUBDIRECTORY (scm)
+	IF (HAVE_GUILE)
+		ADD_SUBDIRECTORY (scm)
+	ENDIF (HAVE_GUILE)
 
 	# Many of the query tests require a working guile, so run
 	# these only after guile has been tested.

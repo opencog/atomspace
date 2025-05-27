@@ -74,9 +74,12 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	atomspace
-	smob
 	${Python3_LIBRARIES}
 )
+
+IF(HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(atomspace_cython smob)
+ENDIF(HAVE_GUILE)
 
 SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	PREFIX ""

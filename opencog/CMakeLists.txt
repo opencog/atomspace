@@ -34,7 +34,9 @@ IF (HAVE_OCAML)
 	ADD_SUBDIRECTORY (ocaml)
 ENDIF (HAVE_OCAML)
 
-WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config.scm SCM_CONFIG TRUE)
+IF (HAVE_GUILE)
+	WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config.scm SCM_CONFIG TRUE)
 
-WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config-installable.scm SCM_CONFIG FALSE)
-INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
+	WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config-installable.scm SCM_CONFIG FALSE)
+	INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
+ENDIF (HAVE_GUILE)
