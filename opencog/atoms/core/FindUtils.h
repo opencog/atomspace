@@ -30,7 +30,6 @@
 #include <set>
 #include <vector>
 
-#include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+
 #include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/atoms/base/hash.h>
