@@ -35,19 +35,17 @@ namespace opencog {
 FindAtoms::FindAtoms(Type t, bool subclass)
 	: _target_types({t})
 {
-	if (subclass)
-	{
-		nameserver().getChildrenRecursive(t, inserter(_target_types));
-	}
+	if (not subclass) return;
+	nameserver().getChildrenRecursive(t,
+		std::inserter(_target_types, _target_types.end()));
 }
 
 FindAtoms::FindAtoms(Type ta, Type tb, bool subclass)
 	: FindAtoms(ta, subclass)
 {
-	if (subclass)
-	{
-		nameserver().getChildrenRecursive(tb, inserter(_target_types));
-	}
+	if (not subclass) return;
+	nameserver().getChildrenRecursive(tb,
+		std::inserter(_target_types, _target_types.end()));
 }
 
 FindAtoms::FindAtoms(const Handle& atom)
