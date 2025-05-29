@@ -93,39 +93,6 @@ include(Summary)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
 
 # ----------------------------------------------------------
-# Check for boost. We need dynamic-linked, threaded libs by default.
-SET(Boost_USE_STATIC_LIBS OFF)
-SET(Boost_USE_MULTITHREADED ON)
-
-# Cogutils aleady looks for min version 1.60
-SET(MIN_BOOST 1.60)
-
-# Boost is used for only two things:
-# lexical_cast.hpp to avoid locale-dependent printing of doubles
-# scope_exit.hpp for python RAII dtors
-# Both files are in core boost.
-FIND_PACKAGE(Boost ${MIN_BOOST} REQUIRED)
-
-IF(Boost_FOUND)
-	SET(Boost_FOUND_SAVE 1)
-ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
-ENDIF(Boost_FOUND)
-
-# Atomspace won't compile with Boost 1.51, some kind of conflict with
-# hash functions, see github bugs 1 and 36
-IF(105100 EQUAL ${Boost_VERSION})
-	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with AtomSpace.  Please use a different version.")
-ENDIF(105100 EQUAL ${Boost_VERSION})
-
-MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
-
-# Arghhh. Except cmake is treating above as required, not optional. #$%**&
-IF(Boost_FOUND_SAVE)
-	SET(Boost_FOUND 1)
-ENDIF(Boost_FOUND_SAVE)
-
-# ----------------------------------------------------------
 # Optional, but needed for unit tests.
 
 FIND_PACKAGE(Cxxtest)
@@ -225,7 +192,7 @@ SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # Set default include paths.
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	${Boost_INCLUDE_DIRS} ${COGUTIL_INCLUDE_DIR})
+	${COGUTIL_INCLUDE_DIR})
 
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogAtomTypes.cmake")
