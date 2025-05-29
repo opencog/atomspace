@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/algorithm.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/FindUtils.h>
@@ -40,6 +40,32 @@ using namespace opencog;
 #else
 #define DO_LOG(STUFF)
 #endif
+
+/**
+ * \return s1 - s2
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_difference(const Set& s1, const Set& s2)
+{
+	Set res;
+	std::set_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
+	                    std::inserter(res, res.end()));
+	return res;
+}
+
+/**
+ * \return s1 inter s2
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_intersection(const Set& s1, const Set& s2)
+{
+	Set res;
+	std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
+	                      std::inserter(res, res.end()));
+	return res;
+}
 
 /* ======================================================== */
 
@@ -315,14 +341,14 @@ bool TermMatchMixin::is_self_ground(const Handle& ptrn,
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
 		const Variables& slv = ScopeLinkCast(grnd)->get_variables();
-		HandleSet hidden = opencog::set_intersection(slv.varset, varset);
+		HandleSet hidden = set_intersection(slv.varset, varset);
 
 		// Step 2: If there are hidden variables, then remove them
 		// before recursing donwards.
 		if (0 < hidden.size())
 		{
 			// Make a copy with visible variables only
-			HandleSet vcopy = opencog::set_difference(varset, hidden);
+			HandleSet vcopy = set_difference(varset, hidden);
 
 			// Recurse using only the visible variables.
 			for (size_t i=0; i<pari; i++)
