@@ -649,10 +649,6 @@ it manually. If you can't do that, all hope is lost.
 To build the OpenCog AtomSpace, the packages listed below are required.
 Essentially all Linux distributions will provide these packages.
 
-###### boost
-* C++ utilities package.
-* https://www.boost.org/ | `apt install libboost-dev`
-
 ###### cmake
 * Build management tool; v3.0.2 or higher recommended.
 * https://www.cmake.org/ | `apt install cmake`
