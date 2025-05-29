@@ -11,11 +11,6 @@ make atomspace
 This page is a high level overview of the library; to dig into the details 
 read \ref grp_atomspace "the comprehensive overview".
 
-Dependencies:
-- boost signals
-- boost thread
-- zmq (if present)
-
 \section sect_atom The atom
 
 <a href="http://wiki.opencog.org/w/Atoms_for_Noobs">The atom</a>
@@ -192,20 +187,6 @@ See also:
 - documentation for AtomSpace class
 - documentation for AtomSpaceAsync class
 - documentation for AtomSpaceImpl class
-
-
-\section sect_zmq ZeroMQ support
-
-To support <a href="http://zeromq.org/">ZeroMQ</a> the library provides
-ZMQServer and ZMQClient, and uses ProtocolBufferSerializer together with 
-<a href="http://code.google.com/p/protobuf/">protocol buffers</a> to 
-serialize/deserialize.
-
-The class only supports one function - \b ZMQgetAtom - to request an atom from the 
-server; ZMQClient::getAtom() will use it and will block waiting for a response.
-
-See also:
-- <a href="http://wiki.opencog.org/w/ZeroMQ">wiki entry</a> on ZeroMQ
 
 
 \if MARKER_TREE_START

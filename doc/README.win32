@@ -16,8 +16,6 @@ Opencog depends on the following packages:
 
     cmake:             http://www.cmake.org
     stlport:           http://stlport.sourceforge.net/
-    pthreads:          http://sourceware.org/pthreads-win32/#download
-    boost:             http://www.boost.org/users/download/
     cxxtest:           http://sourceforge.net/project/showfiles.php?group_id=52834
 
 -------------------------------------------------------------------------------
