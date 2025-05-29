@@ -178,9 +178,6 @@ ENDIF (VALGRIND_FOUND)
 # NOTE: This is the official semantic-version, as it is derived from
 # a version-control independent means of declaring versioning.
 #
-# TODO: Once CMAKE_MINIMUM_REQUIRED >= 3.0.2 check use of policy
-# CMP0048.
-#
 FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
 STRING(REGEX MATCH
 	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
