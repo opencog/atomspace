@@ -1,24 +1,67 @@
 
 [build-system]
-requires = ["hatchling"]
+requires = [
+    "cython>=0.23",
+    "cmake>=3.0.2",
+]
 build-backend = "hatchling.build"
 
 [project]
 name = "atomspace"
-version = "5.1.0"
+version = "6.0.0"
+description = "The AtomSpace Hypergraph Database"
+readme = "README.md"
+license = "AGPL"
+license-files = ["LICEN[CS]E*"]
 authors = [
   { name="OpenCog Development", email="opencog@googlegroups.com" },
 ]
-description = "The AtomSpace Hypergraph Database"
-readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: Linux",
+maintainers = [
+  { name="OpenCog Development", email="opencog@googlegroups.com" },
 ]
-license = "AGPL"
-license-files = ["LICEN[CS]E*"]
+
+keywords = [
+    "knowledge-representation",
+    "graph-database",
+    "hypergraph",
+    "metagraph",
+    "pattern-matching",
+    "symbolic-ai",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+requires-python = ">=3.8"
+
+dependencies = [
+    "nose3",  # For testing
+]
+
+[project.optional-dependencies]
+dev = [
+    "cxxtest",
+    "nose3",
+    "build",
+]
 
 [project.urls]
 Homepage = "https://github.com/opencog/atomspace"
 Issues = "https://github.com/opencog/atomspace/issues"
+Documentation = "https://wiki.opencog.org/w/AtomSpace"
+Repository = "https://github.com/opencog/atomspace"
