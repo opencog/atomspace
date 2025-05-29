@@ -29,18 +29,6 @@
 #include <chrono>
 #include <filesystem>
 
-#ifdef USE_BOOST
-	#include <boost/scope_exit.hpp>
-	#define SCOPE_EXIT0 BOOST_SCOPE_EXIT(void)
-	#define SCOPE_EXIT BOOST_SCOPE_EXIT
-	#define SCOPE_EXIT4 BOOST_SCOPE_EXIT
-	#define SCOPE_EXIT_END BOOST_SCOPE_EXIT_END
-#elif USE_GCC_SCOPE
-	#include <experimental/scope>
-	#define SCOPE_EXIT(X) std::experimental::scope_exit{[X]
-	#define SCOPE_EXIT_END };
-#else
-
 // A simple callback wrapper to do RAII when coing out of scope,
 // capable of handling exceptions. Boost provides this, but we want
 // to avoid the overkill of boost. Some future C++ will provide this,
@@ -65,7 +53,6 @@ class scope_exit
 #define SCOPE_EXIT(X) scope_exit scope_guard([X]()
 #define SCOPE_EXIT4(A,B,C,D) scope_exit scope_guard([&]()
 #define SCOPE_EXIT_END );
-#endif
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
