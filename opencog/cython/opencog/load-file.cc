@@ -64,16 +64,27 @@ int load_scm_file (AtomSpace& as, const std::string& filename)
 /**
  * Load scheme file, with the filename specified as a relative path,
  * and the search paths prepended to the relative path.  If the search
- * paths are null, a list of defaults search paths are used.
+ * paths are null, a list of default search paths are used.
  */
 int load_scm_file_relative (AtomSpace& as, const std::string& filename,
                             std::vector<std::string> search_paths)
 {
+    static const std::vector<std::string> default_paths =
+    {
+        // Uh I think this is all wrong. It should be
+        // /usr/local/share/guile/site/3.0/ and similar.
+#if BOGUS_SEARCH_PATH
+        CMAKE_INSTALL_PREFIX "/share",
+        "/usr/local/share/",
+        "/usr/share/",
+#endif // BOGUS_SEARCH_PATH
+    };
+
     if (search_paths.empty()) {
         // Sometimes paths are given without the "opencog" part.
         // Also check the build directory for autogen'ed files.
         // XXX This is fairly tacky/broken, and needs a better fix.
-        for (auto p : DEFAULT_MODULE_PATHS) {
+        for (auto p : default_paths) {
             search_paths.push_back(p);
             search_paths.push_back(p + "/opencog");
             search_paths.push_back(p + "/build");

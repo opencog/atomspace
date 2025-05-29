@@ -23,7 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
@@ -404,6 +403,18 @@ void FreeVariables::find_variables(const HandleSeq& oset, bool ordered_link)
 	varseq = VarScraper()(oset, ordered_link);
 	varset = HandleSet(varseq.begin(), varseq.end());
 	init_index();
+}
+
+/**
+ * \return (s1 - s2) union (s2 - s1)
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_symmetric_difference(const Set& s1, const Set& s2) {
+	Set res;
+	std::set_symmetric_difference(s1.begin(), s1.end(), s2.begin(), s2.end(),
+	                              std::inserter(res, res.end()));
+	return res;
 }
 
 void FreeVariables::canonical_sort(const HandleSeq& hs)

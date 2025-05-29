@@ -9,7 +9,8 @@
 #ifndef _OPENCOG_NUMBER_NODE_H
 #define _OPENCOG_NUMBER_NODE_H
 
-#include <boost/lexical_cast.hpp>
+#include <charconv>
+#include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/value/FloatValue.h>
 
@@ -40,9 +41,19 @@ private:
 	// the natural-language pipeline in guile/scheme. Thus, printing
 	// the European comma as a decimal separator blows up the code.
 	// Using boost::lexical_cast<> avoids this issue.
+	//    #include <boost/lexical_cast.hpp>
+	//    return boost::lexical_cast<std::string>(x);
 	static std::string double_to_string(double x)
 	{
-		return boost::lexical_cast<std::string>(x);
+		const size_t buf_size = 30;
+		char buf[buf_size]{};
+		std::to_chars_result result = std::to_chars(buf, buf + buf_size,
+			x, std::chars_format::general, 18);
+		if (result.ec != std::errc())
+			throw RuntimeException(TRACE_INFO,
+				"Error: Failed double_to_string(%g): %s\n",
+				x, std::make_error_code(result.ec).message().c_str());
+		return std::string(buf);
 	}
 
 protected:

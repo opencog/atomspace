@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/atoms/core/DefineLink.h>
@@ -31,6 +30,19 @@
 #include "TypeIntersectionLink.h"
 
 using namespace opencog;
+
+/**
+ * \return s1 inter s2
+ * s1 and s2 must be sorted
+ */
+template<typename Set>
+Set set_intersection(const Set& s1, const Set& s2)
+{
+	Set res;
+	std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
+	                      std::inserter(res, res.end()));
+	return res;
+}
 
 void TypeIntersectionLink::init(bool glob)
 {

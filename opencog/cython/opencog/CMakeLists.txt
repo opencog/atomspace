@@ -15,6 +15,11 @@ SET(CMAKE_INSTALL_RPATH
    "${CMAKE_INSTALL_PREFIX}/lib/opencog"
    "${PYTHON_DEST}")
 
+# Search path for module load paths in load_scm_file_relative()
+ADD_DEFINITIONS(
+	-DCMAKE_INSTALL_PREFIX="\\"${CMAKE_INSTALL_PREFIX}\\""
+)
+
 INCLUDE_DIRECTORIES(
 	${Python3_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}

@@ -42,8 +42,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "makeVirtualAtom.h"
-
 using namespace opencog;
 using namespace std;
 
@@ -87,44 +85,6 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     TruthValuePtr mergedTV = currentTV->merge(newTV);
     result->setTruthValue(mergedTV);
     return result;
-}
-
-
-static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
-{
-    Handle* head_handle_ptr = boost::get<Handle>(&(*it));
-    Type* head_type_ptr = boost::get<Type>(&(*it));
-    OC_ASSERT((head_handle_ptr != nullptr) ^ (head_type_ptr != nullptr), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
-
-    HandleSeq handles;
-
-    if (head_handle_ptr != nullptr) {
-        OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
-        TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
-        TruthValuePtr mergedTV(currentTV->merge(tvn));
-        (*head_handle_ptr)->setTruthValue(mergedTV);
-
-        return *head_handle_ptr;
-    }
-
-    for (tree<Vertex>::sibling_iterator i = a.begin(it); i != a.end(it); i++) {
-        Handle *h_ptr = boost::get<Handle>(&*i);
-
-        if (h_ptr) {
-            handles.push_back(addRealAtom(as, *h_ptr));
-        } else {
-            handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
-        }
-    }
-
-    Handle hh = as.add_link(*head_type_ptr, std::move(handles));
-    hh->setTruthValue(tvn);
-    return hh;
-}
-
-static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
-{
-    return addAtomIter(as, a, a.begin(), tvn);
 }
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
@@ -526,69 +486,6 @@ public:
             TS_ASSERT(partOfLinks.size() == 4);
         }
         logger().info("\nEnd testMiscellaneous()");
-    }
-
-    /**
-     * Method tested:
-     *
-     * Add a new atom represented by a tree of Vertex to the Atom Table
-     * @param the tree of Vertex representation of the atom to be added
-     * @param the TruthValue object to be associated to the added atom
-     * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable.
-     *
-     * virtual Handle addAtom(tree<Vertex>& a, TruthValuePtr tvn, bool fresh=false);
-     */
-#define mva makeVirtualAtom
-    void testAddAtomVtreeTruthValueBool() {
-        Handle h1 = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        h1->setTruthValue(SimpleTruthValue::createTV(0.001, 0.00001));
-        Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setTruthValue(SimpleTruthValue::createTV(0.001, 0.00001));
-        Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
-        h3->setTruthValue(SimpleTruthValue::createTV(0.5, 0.99));
-
-
-        tree<Vertex>* tr = mva(EVALUATION_LINK,
-                               mva(h1, nullptr),
-                               mva(LIST_LINK,
-                                   mva(h2, nullptr),
-                                   mva(h3, nullptr),
-                                   nullptr
-                                  ) ,
-                               nullptr
-                              );
-
-        HandleSeq links;
-        atomSpace->get_handles_by_type(links, LINK, true);
-        logger().debug("links.size() = %d\n", (int) links.size());
-        TS_ASSERT(links.size() == 0);
-        Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
-        TS_ASSERT(evalLink != Handle::UNDEFINED);
-        links.clear();
-        atomSpace->get_handles_by_type(links, LINK, true);
-        logger().debug("links.size() = %d\n", (int) links.size());
-        TS_ASSERT(links.size() == 2);
-        delete tr;
-
-        Handle hn = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        tr = mva(hn, nullptr);
-        Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5, 0.5));
-        h1_->setTruthValue(SimpleTruthValue::createTV(0.5, 0.5));
-        TS_ASSERT(h1_ != Handle::UNDEFINED);
-        // In this case, the expected behavior is to perform a merge and return the
-        // handle was inserted previously.
-        TS_ASSERT(h1_ == h1);
-        TS_ASSERT(fabs(h1_->getTruthValue()->get_mean() - 0.5) < FLOAT_ACCEPTABLE_ERROR);
-        delete tr;
-
-        tr = mva(evalLink, nullptr);
-        Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5, 0.5));
-        TS_ASSERT(evalLink_ != Handle::UNDEFINED);
-        // In this case, the expected behavior is to perform a merge and return the
-        // handle was inserted previously.
-        TS_ASSERT(evalLink_ == evalLink);
-        TS_ASSERT(fabs(evalLink_->getTruthValue()->get_mean() - 0.5) < FLOAT_ACCEPTABLE_ERROR);
-        delete tr;
     }
 
     /**

@@ -39,8 +39,6 @@ TARGET_LINK_LIBRARIES(PythonEval
 	atomspace
 	executioncontext
 	${Python3_LIBRARIES}
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
 )
 
 # We need to get the name of the actual python library in order
