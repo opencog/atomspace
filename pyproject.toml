@@ -1,3 +1,29 @@
+# OpenCog AtomSpace pyproject.toml
+#
+# IMPORTANT PREREQUISITES:
+# Before building AtomSpace, you MUST first build and install cogutil:
+#
+# 1. Clone cogutil:
+#    git clone https://github.com/opencog/cogutil.git
+#    cd cogutil
+#
+# 2. Build and install cogutil:
+#    mkdir build && cd build
+#    cmake ..
+#    make -j
+#    sudo make install
+#    sudo ldconfig  # Update library cache
+#
+# 3. Verify cogutil installation:
+#    pkg-config --exists cogutil && echo "cogutil found" || echo "cogutil NOT found"
+#
+# 4. Then proceed with AtomSpace build:
+#    pip install . -v
+#
+# System dependencies (install before building cogutil and atomspace):
+# Ubuntu/Debian: apt install libboost-all-dev cmake guile-3.0-dev pkg-config cxxtest
+# CentOS/RHEL:   yum install boost-devel cmake3 guile30-devel pkgconfig cxxtest
+
 
 [build-system]
 requires = [
