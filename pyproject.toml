@@ -127,10 +127,9 @@ build_path = "{temp}/build"
 
 # The pip venv cannot find the cython executable. I don't know why.
 # So hack around this by force-setting it.
-# Also hack reasonable ${GUILE_SITE_DIR} to avoid "Permission denied"
 args = [
     "-DCYTHON_EXECUTABLE=/usr/bin/cython",
-    "-DGUILE_SITE_DIR={env:VIRTUAL_ENV}/share/guile/site/3.0/",
+    "-DCMAKE_INSTALL_PREFIX={env:VIRTUAL_ENV}",
 ]
 
 # Need to install everything, and not just the python bindings.
