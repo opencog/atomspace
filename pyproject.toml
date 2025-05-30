@@ -18,7 +18,7 @@
 #    pkg-config --exists cogutil && echo "cogutil found" || echo "cogutil NOT found"
 #
 # 4. Then proceed with AtomSpace build:
-#    pip install . -v
+#    pipx install . -v
 #
 # System dependencies (install before building cogutil and atomspace):
 # Ubuntu/Debian: apt install libboost-all-dev cmake guile-3.0-dev pkg-config cxxtest
@@ -37,7 +37,7 @@ build-backend = "py_build_cmake.build"
 
 [project]
 name = "atomspace"
-version = "6.0.0"
+version = "5.0.5"
 description = "The AtomSpace Hypergraph Database"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -96,7 +96,6 @@ Repository = "https://github.com/opencog/atomspace"
 
 [tool.py-build-cmake.module]
 name = "opencog"
-directory = "opencog"
 
 [tool.py-build-cmake.sdist]
 include = [
