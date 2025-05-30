@@ -18,7 +18,11 @@
 #    pkg-config --exists cogutil && echo "cogutil found" || echo "cogutil NOT found"
 #
 # 4. Then proceed with AtomSpace build:
-#    pipx install . -v
+#    pip install . -v
+#    or
+#    path/to/venv/pip install . -v
+#    for example:
+#    ../.local/share/pipx/shared/bin/pip install . -v
 #
 # System dependencies (install before building cogutil and atomspace):
 # Ubuntu/Debian: apt install libboost-all-dev cmake guile-3.0-dev pkg-config cxxtest
@@ -120,12 +124,12 @@ minimum_version = "3.0.2"
 build_type = "Release"
 source_path = "."
 build_path = "{temp}/build"
-build_tool_args = ["-j"]
 
 # The pip venv cannot find cython. I don't know why.
 # So hack around this by force-setting it.
 args = [
     "-DCYTHON_EXECUTABLE=/usr/bin/cython",
+    "-DCMAKE_BUILD_PARALLEL_LEVEL=0",  # Same as gcc -j
 ]
 
 # Install components - only install Python bindings
