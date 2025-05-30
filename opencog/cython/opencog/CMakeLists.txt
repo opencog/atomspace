@@ -184,6 +184,19 @@ INSTALL(TARGETS
 	utilities_cython
 	DESTINATION "${PYTHON_DEST}")
 
+# This custom target allows *only* the Python bindings to be installed;
+# this is intended for use when installing into a python virtual env.
+# Unfortunately, this is a crummy solution, and really install should
+# be fixed so that everything goes into the virtualenv, including guile.
+# But guile wants to go into ${GUILE_SITE_DIR} and not into
+# $ENV{VIRTUAL_ENV}, which is what python wants. Argh. Its a mess.
+ADD_CUSTOM_TARGET(PythonBindings DEPENDS
+	atomspace_cython
+	exec_cython
+	logger_cython
+	type_constructors
+	utilities_cython)
+
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 
