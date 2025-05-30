@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_FREE_VARIABLES_H
 #define _OPENCOG_FREE_VARIABLES_H
 
+#include <algorithm>
 #include <map>
 #include <set>
 
