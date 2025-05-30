@@ -650,7 +650,7 @@ To build the OpenCog AtomSpace, the packages listed below are required.
 Essentially all Linux distributions will provide these packages.
 
 ###### cmake
-* Build management tool; v3.0.2 or higher recommended.
+* Build management tool; v3.12 or higher recommended.
 * https://www.cmake.org/ | `apt install cmake`
 
 ###### cogutil
@@ -663,6 +663,7 @@ Essentially all Linux distributions will provide these packages.
 * Embedded scheme REPL; version 3.0 or newer required.
 * https://www.gnu.org/software/guile/guile.html
 * For Debian/Ubuntu,  `apt install guile-3.0-dev`
+* For Fedora/Redhat,  `yum install guile30-devel`
 
 ###### cxxtest
 * Unit test framework.
@@ -678,7 +679,9 @@ during the build, will be more precise as to which parts will not be built.
 ###### Cython
 * C bindings for Python. (Cython version 0.23 or newer)
 * Recommended, as many users enjoy using python.
-* https://cython.org | `apt install cython`
+* https://cython.org
+* For Debian/Ubuntu,  `apt install cython libpython3-dev`
+* For Fedora/Redhat,  `yum install cython python3-devel`
 
 ###### Haskell
 * Haskell bindings (experimental).
@@ -689,13 +692,6 @@ during the build, will be more precise as to which parts will not be built.
 * OCaml bindings (experimental).
 * Optional; almost no existing code makes use of OCaml.
 * https://www.ocaml.org/ | `apt install ocaml ocaml-findlib`
-
-###### Postgres
-* Distributed, multi-client networked storage.
-* Needed for "remembering" between shutdowns (and for distributed AtomSpace)
-* Optional; The RocksDB backend is recommended. Use the cogserver to get a
-  distributed atomspace.
-* https://postgres.org | `apt install postgresql postgresql-client libpq-dev`
 
 ### Building AtomSpace
 
@@ -721,12 +717,10 @@ To build and run the unit tests, from the `./build` directory enter
 ```
     make -j4 check
 ```
-Most tests (just not the database tests) can be run in parallel:
+Most tests can be run in parallel:
 ```
     make -j4 check ARGS=-j4
 ```
-The database tests *will* fail if run in parallel: they will step on
-one-another, since they all set and clear the same database tables.
 
 Specific subsets of the unit tests can be run:
 ```
