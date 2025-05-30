@@ -13,6 +13,11 @@
 # or newer, but Ubuntu Bionic 18.04 only has 3.10. Bummer about that.
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
+# Python venv seems to need this.
+IF(CMAKE_VERSION VERSION_GREATER 3.31)
+   CMAKE_POLICY(SET CMP0177 NEW)
+ENDIF(CMAKE_VERSION VERSION_GREATER 3.31)
+
 PROJECT(atomspace)
 
 # ----------------------------------------------------------
