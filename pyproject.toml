@@ -1,7 +1,12 @@
 # OpenCog AtomSpace pyproject.toml
+# Meant for use in pip python virtual envs.
 #
 # IMPORTANT PREREQUISITES:
-# Before building AtomSpace, you MUST first build and install cogutil:
+# First, install System dependencies (before building cogutil and atomspace):
+# Ubuntu/Debian: apt install libboost-all-dev cmake guile-3.0-dev pkg-config cxxtest
+# CentOS/RHEL:   yum install boost-devel cmake3 guile30-devel pkgconfig cxxtest
+#
+# Next, before building AtomSpace, you MUST first build and install cogutil:
 #
 # 1. Clone cogutil:
 #    git clone https://github.com/opencog/cogutil.git
@@ -17,17 +22,11 @@
 # 3. Verify cogutil installation:
 #    pkg-config --exists cogutil && echo "cogutil found" || echo "cogutil NOT found"
 #
-# 4. Then proceed with AtomSpace build:
+# 4. Then proceed with the AtomSpace build in the python venv:
+#    python3 -m venv as-test-venv
+#    source as-test-venv/bin/activate
 #    pip install . -v
-#    or
-#    path/to/venv/pip install . -v
-#    for example:
-#    ../.local/share/pipx/shared/bin/pip install . -v
 #
-# System dependencies (install before building cogutil and atomspace):
-# Ubuntu/Debian: apt install libboost-all-dev cmake guile-3.0-dev pkg-config cxxtest
-# CentOS/RHEL:   yum install boost-devel cmake3 guile30-devel pkgconfig cxxtest
-
 
 [build-system]
 requires = [
