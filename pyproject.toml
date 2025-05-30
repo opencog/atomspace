@@ -122,6 +122,12 @@ source_path = "."
 build_path = "{temp}/build"
 build_tool_args = ["-j"]
 
+# The pip venv cannot find cython. I don't know why.
+# So hack around this by force-setting it.
+args = [
+    "-DCYTHON_EXECUTABLE=/usr/bin/cython",
+]
+
 # Install components - only install Python bindings
 install_components = ["python"]
 
