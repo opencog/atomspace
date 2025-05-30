@@ -206,10 +206,6 @@ FUNCTION(ADD_GUILE_MODULE)
   # 'make install'. The tilde ~ occurs in package management (Debian).
   STRING(REGEX REPLACE "[/~]" "_" _TARGET_NAME_SUFFIX ${CMAKE_CURRENT_SOURCE_DIR})
   SET(COPY_TARGET_NAME "COPY_TO_LOAD_PATH_IN_BUILD_DIR_FROM_${_TARGET_NAME_SUFFIX}")
-  IF (NOT (TARGET ${COPY_TARGET_NAME}))
-    ADD_CUSTOM_TARGET(${COPY_TARGET_NAME} ALL)
-  ENDIF()
-
   IF(HAVE_GUILE)
     SET(PREFIX_DIR_PATH "${GUILE_SITE_DIR}")
     SET(options COMPILE)
@@ -217,6 +213,11 @@ FUNCTION(ADD_GUILE_MODULE)
     SET(multiValueArgs FILES DEPENDS)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
+
+    # Cannot copy any files until after they are generated!
+    IF (NOT (TARGET ${COPY_TARGET_NAME}))
+      ADD_CUSTOM_TARGET(${COPY_TARGET_NAME} ALL DEPENDS ${SCM_DEPENDS})
+    ENDIF()
 
     # The SCM module is given by the name of the first file
     # in the list.
