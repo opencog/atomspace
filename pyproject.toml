@@ -40,7 +40,7 @@ name = "atomspace"
 version = "6.0.0"
 description = "The AtomSpace Hypergraph Database"
 readme = "README.md"
-license = "AGPL"
+license = "AGPL-3.0-or-later"
 license-files = ["LICEN[CS]E*"]
 authors = [
   { name="OpenCog Development", email="opencog@googlegroups.com" },
@@ -62,7 +62,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: C++",
     "Programming Language :: Python :: 3",
@@ -122,39 +121,15 @@ minimum_version = "3.0.2"
 build_type = "Release"
 source_path = "."
 build_path = "{temp}/build"
-install_path = "{wheel}/opencog"
 build_tool_args = ["-j"]
 
-
-# CMake options
-options = {
-    "CMAKE_BUILD_TYPE" = "Release",
-    "PYTHON_EXECUTABLE" = "{env:PYTHON_EXECUTABLE}",
-    "BUILD_SHARED_LIBS" = "ON",
-    "CMAKE_POSITION_INDEPENDENT_CODE" = "ON",
-}
-
-# Build targets - only build Python components
-targets = ["opencog_atom_types", "PythonModuleAtomSpace"]
-
 # Install components - only install Python bindings
 install_components = ["python"]
 
-[tool.py-build-cmake.linux]
-# Linux-specific CMake options
-cmake.options = {
-    "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE" = "BOTH",
-}# Build targets - only build Python components
-targets = ["opencog_atom_types", "PythonModuleAtomSpace"]
-
-# Install components - only install Python bindings
-install_components = ["python"]
-
-[tool.py-build-cmake.linux]
-# Linux-specific CMake options
-cmake.options = {
-    "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE" = "BOTH",
-}
+# Build only for Linux
+[tool.cibuildwheel]
+build = "cp3*-linux_x86_64"
+skip = "cp35-* pp*"  # Skip Python 3.5 and PyPy
 
 # Install system dependencies for AtomSpace
 before-all = [
