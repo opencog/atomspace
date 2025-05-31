@@ -122,14 +122,18 @@ exclude = [
 minimum_version = "3.12"
 build_type = "Release"
 source_path = "."
-build_path = "{temp}/build"
+build_path = "build"
 build_tool_args = ["-j"]
 
 # The pip venv cannot find the cython executable. I don't know why.
 # So hack around this by force-setting it.
+# Failure to set ${CMAKE_INSTALL_PREFIX} results in assorted
+# `Permission denied.` errors.
+# Ditto for ${GUILE_SITE_DIR}
 args = [
     "-DCYTHON_EXECUTABLE=/usr/bin/cython",
-    "-DCMAKE_INSTALL_PREFIX={env:VIRTUAL_ENV}",
+    "-DCMAKE_INSTALL_PREFIX=${VIRTUAL_ENV}",
+    "-DGUILE_SITE_DIR=${VIRTUAL_ENV}/share/guile/site/3.0/",
 ]
 
 # Need to install everything, and not just the python bindings.
