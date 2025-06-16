@@ -68,7 +68,7 @@ ValuePtr FloatColumn::do_handle_loop(AtomSpace* as, bool silent,
 		else
 			throw RuntimeException(TRACE_INFO,
 				"Expecting numeric value, got %s\n",
-				vp->to_string());
+				vp->to_string().c_str());
 	}
 
 	return createFloatValue(std::move(dvec));
@@ -94,7 +94,7 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			if (not vpe->is_type(LINK_VALUE))
 				throw RuntimeException(TRACE_INFO,
 					"Expecting LinkValue, got %s\n",
-					vpe->to_string());
+					vpe->to_string().c_str());
 
 			// If we are here, we've got a LinkValue.
 			// Inside of loop is cut-n-paste of that below.
@@ -123,7 +123,7 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 				else
 					throw RuntimeException(TRACE_INFO,
 						"Expecting numeric value, got %s\n",
-						vp->to_string());
+						vp->to_string().c_str());
 			}
 			return createFloatValue(std::move(dvec));
 		}
