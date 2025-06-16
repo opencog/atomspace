@@ -86,7 +86,7 @@ ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 
 	throw RuntimeException(TRACE_INFO,
 		"Expecting numeric value, got %s\n",
-		vp->to_string());
+		vp->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(IncrementValueLink, INCREMENT_VALUE_LINK)

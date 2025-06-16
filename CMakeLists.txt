@@ -196,6 +196,14 @@ SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 	${COGUTIL_INCLUDE_DIR})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	message(STATUS "Configuring for macOS...")
+    
+    # Add macOS-specific include and library paths
+    include_directories(/opt/homebrew/include)
+    link_directories(/opt/homebrew/lib)
+endif()
+
 # Macros that define how atom types get declared.
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/OpenCogAtomTypes.cmake")
 
