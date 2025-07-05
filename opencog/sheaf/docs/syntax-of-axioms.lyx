@@ -204,7 +204,52 @@ The exploration performed in this text is the construction of a generic
  The hope is that a programming reference can arise from this work.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Standard
+The next section introduces the concept of a jigsaw, and explores how it
+ can be represented in a convenient computational fashion.
+ It is introductory in nature, providing a review.
+ After this follows actual examples of the representation of axioms, terms,
+ logical connectives, and so on, from various domains of mathematics.
+\end_layout
+
+\begin_layout Standard
+This text tries to strike a balance between 
+\begin_inset Quotes eld
+\end_inset
+
+hurry up and go
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+annoying precision
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Conceptually, the 
+\begin_inset Quotes eld
+\end_inset
+
+big picture
+\begin_inset Quotes erd
+\end_inset
+
+ here is not that complicated, and can be understood at a glance.
+ See, for example, references x,y,z.
+ But, as always, the devil is in the details, and the details can be frustrating
+, annoying and uncooperative.
+ Thus, much of this text is mired in pedantic, trivial, verbose, soporific
+ explanations.
+ Sorry about that.
+ I dislike writing it as much as you dislike reading it, but there seems
+ to be no other way.
+\end_layout
+
+\begin_layout Section
 Jigsaws
 \end_layout
 
@@ -531,7 +576,538 @@ sang: S– & O+ & I+;
 
 \begin_layout Standard
 Using colons and ampersands as type indicators is somewhat awkward, and
- a slightly more verbose representation is clearer:
+ a slightly more verbose representation is clearer: `
+\family sans
+(LexicalEntryType 
+\begin_inset Quotes eld
+\end_inset
+
+sang
+\begin_inset Quotes erd
+\end_inset
+
+ (ConnectorListType (S –) (O +) (I +
+\family default
+)))`.
+ Note that this s–expression always has a type name as the first element
+ of the list.
+ This is fine, because the connector types `
+\family sans
+S, O, I
+\family default
+` are to be understood as true type–theoretical types.
+ The connection rules state that the `
+\family sans
+S
+\family default
+` connector can mate only with another `
+\family sans
+S
+\family default
+` connector, and no other type.
+ The only awkwardness here is that the list of connector types is potentially
+ unbounded.
+ A different issue is that `+` and `–` are also types, except now the connection
+ rules are heterosexual: `+` can only mate to `–`, and homosexual connections
+ are not allowed.
+ Using such politically florid terms reminds us that other possibilities
+ may be desirable.
+ The construction of undirected graphs asks for a mono–sexual connector,
+ because the edges of an undirected graph are have no orientation.
+ The construction of parse graphs for natural languages such as Finnish,
+ Turkish and Lithuanian require not one but two directional indicators:
+ (head,dependent) and (left,right) This is because these languages are mostly
+ word–order independent, and allow almost arbitrary reorderings of words
+ in a sentence.
+ Meaning is derived from the structure of the suffixes, indicating possessive,
+ accusative, etc.
+ relationships.
+ At any rate, the point being made here is that `+` and `–` are also types,
+ and one might want to entertain an expanded universe of the kinds of types
+ that can be used to indicate mating, and one might want to have mating
+ rules more complex than heterosexuality.
+ It is not out of place to remark that, in nature, there are fungii with
+ far more than two sexes, and complex mating rules for which combinations
+ produce viable offspring.
+ The genomic, transcriptomic processes for mating need only produce working
+ individuals; there is no law of nature demanding heterosexuality.
+\end_layout
+
+\begin_layout Standard
+Armed with this understanding, the suggested s–expression encoding is then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+sang
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+S
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+–
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+O
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
++
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
++
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This has the property that the very first token after the open paren is
+ a type name.
+ The indentation is for convenience and readability, as s–expressions are
+ notoriously painful to read.
+ It is for this reason that python uses significant whitespace: it is to
+ force the programmer to indent properly, to work with the human visual
+ system to understand the tree structure.
+ The above can be trivially converted to python, merely by rearranging parenthes
+is, and inserting some strategic commas.
+ The indentation also indicates the tree form: the more the indentation,
+ the further down the abstract syntax tree (AST).
+\end_layout
+
+\begin_layout Standard
+The C/C++ example API declaration `
+\family sans
+int func(float x);
+\family default
+` becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+func
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+int
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+float
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is sadly quite verbose, but has several very desirable properties:
+ it encodes the structure of the API declaration in exactly the same form,
+ a jigsaw, as an LG entry for natural language, also a jigsaw.
+ It encodes as a typed tree, where the type of every vertex of the tree
+ is cleanly specified, leaving no ambiguity, and nothing implicit.
+ It is a string encoding; abstractly, it is a tree, but computationally,
+ it is a string of UTF-8 characters, readily stored in a file, or communicated
+ over a network socket.
+ As a tree, it is readily converted to structures made out of pointers;
+ each level in the tree is a list, and all programming languages have highly
+ optimized list representations.
+ Computationally, this seems to be an optimal structure.
+ It is not clear what might actually be better, at least to the author of
+ this text.
+ If you, the reader, have a better idea, please let me know.
+ This question has been a nagging one for quite a while, and it would be
+ nice to make forward progress on it.
+\end_layout
+
+\begin_layout Section
+Examples
 \end_layout
 
 \begin_layout Section*
