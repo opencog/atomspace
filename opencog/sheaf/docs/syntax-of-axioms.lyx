@@ -237,6 +237,7 @@ jigsaw
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Graphics
 	filename graphics/link-grammar.png
 	lyxscale 50
@@ -371,7 +372,170 @@ S
 
 \begin_layout Standard
 Note that a partially–completed parse still has the form of a jigsaw, that
- is, of ha
+ is, of having some shape, and having some unconnected connectors.
+ This compositionality means that the jigsaw pieces obey the sheaf axioms.
+ Sheaves are already a widely used concept in mathematics, but the relation
+ to jigsaws remains opaque.
+\end_layout
+
+\begin_layout Standard
+The string representation `
+\family sans
+sang: S– & O+ & I+;
+\family default
+` is fine, if one's goal is to store the LG lexis in a flat file.
+ Using it in computer code requires creating a parser that is capable of
+ reading this file format, and then converting it into some other format,
+ for example, some layout of C or C++ or Java structures, existing in RAM,
+ where binary executables composed of machine code can act on these RAM
+ structures.
+ This is a tangible example of the conversion of structural representations
+ from one form to another: from what is held in a text file, to what is
+ in RAM.
+ The conversion of structure is meant to be homomorphic, in some sense,
+ and injective: the in–RAM representation is supposed to be faithful to
+ the file representation.
+\end_layout
+
+\begin_layout Standard
+The string representation `
+\family sans
+sang: S– & O+ & I+;
+\family default
+` is fine, if one's goal is to limit oneself to working only with LG.
+ It is inadequate for representing typed connections in general.
+ Consider, for example, the C/C++ subroutine declaration `
+\family sans
+int func(float x);
+\family default
+`.
+ This is a forward declaration of an interface, an API, that takes a floating
+ point number as input, and returns an int.
+ This can be abstract represented as a jigsaw, having input and output connector
+s, those connectors having the types `
+\family sans
+int
+\family default
+` and `
+\family sans
+float
+\family default
+`.
+ With some belabored effort, the prototype can be represented in LG form
+ as `
+\family sans
+func: INT– & FLT+;
+\family default
+` indicated the two typed but unconnected connectors, and the lexical name
+ `
+\family sans
+func
+\family default
+`.
+ Compositionality requires that the lexis also include entries such as `
+\family sans
+3.14159: FLT–;
+\family default
+` thus allowing it to be composed with the function to give `
+\family sans
+func(3.14159);
+\family default
+` or, as a partially assembled jigsaw, `
+\family sans
+func(3.14159): INT–;
+\family default
+` indicating that there is still one unconnected connector: the integer
+ output, meant to be connected to something: say, to `
+\family sans
+printf
+\family default
+`, for example.
+\end_layout
+
+\begin_layout Standard
+This last example hopefully incites the idea that jigsaws might be widely
+ applicable across a broad domain of structural representation.
+ The specific LG lexical representation is problematic, though, so let us
+ look at it more carefully, to see what it really says.
+\end_layout
+
+\begin_layout Standard
+The connector `
+\family sans
+S–
+\family default
+` is actually a pair: the type `
+\family sans
+S
+\family default
+`, and the directional indicator `
+\family sans
+–
+\family default
+`.
+ Thus, a variety of different notations suggest themselves:
+\begin_inset Formula 
+\[
+\left(S,-\right)\qquad S\times-\qquad S\otimes-\qquad\left|S\right\rangle \otimes\left|-\right\rangle 
+\]
+
+\end_inset
+
+all of which are meant to indicate an ordered pair, and the last two notations
+ suggesting that there is something 
+\begin_inset Quotes eld
+\end_inset
+
+tensorial
+\begin_inset Quotes erd
+\end_inset
+
+ about it.
+ For the present, the Cartesian product suffices.
+\end_layout
+
+\begin_layout Standard
+The ampersand operator was meant to indicate that all of the connectors
+ are active, and must eventually be connected.
+ It is a list of connectors.
+ It is written in infix form, but a prefix form is preferable; this allows
+ a list to be specified.
+ Different programming languages specify lists in a variety of different
+ notations; for the present, s–expressions will be used.
+ S–expressions are foundational for lisp and scheme, and are readily convertible
+ to other syntactic forms, e.g.
+ python.
+ S–expressions also have the useful nature of being interpreted directly
+ as trees, and thus fit naturally with ideas of recursive computation.
+ Thus armed, the s–expression for `
+\family sans
+S– & O+ & I+
+\family default
+` is `
+\family sans
+(& (S –) (O +) (I +
+\family default
+))` where the leading ampersand is a type indicator: the list that follows
+ is of the type of being a connector list.
+ The full lexical entry `
+\family sans
+sang: S– & O+ & I+;
+\family default
+` becomes `
+\family sans
+(: sang (& (S –) (O +) (I +
+\family default
+)))` where the colon is again a type indicator: what follows the colon is
+ an lexical item, followed by a connector list.
+\end_layout
+
+\begin_layout Standard
+Using colons and ampersands as type indicators is somewhat awkward, and
+ a slightly more verbose representation is clearer:
+\end_layout
+
+\begin_layout Section*
+The End
 \end_layout
 
 \end_body
