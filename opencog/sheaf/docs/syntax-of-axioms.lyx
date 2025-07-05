@@ -2944,6 +2944,469 @@ This is a good point at which to stop, and examine some of the meta–issues
 \end_layout
 
 \begin_layout Standard
+A quick taste of semantics and the intended model is provided by binary
+ trees.
+ Consider the signature consisting of one binary function, one constant,
+ and zero relations.
+ It is (at the risk of inciting boredom)
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+binary function
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+const
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is presumably clear that this generated the language of all finite binary
+ trees, unbounded in size.
+ This is the intended, countable model.
+ Countable, because there are countably many such trees.
+ Turing machines are readily constructed that can enumerate all possible
+ finite trees, and as a language, one has Turing machines that can recognize
+ any given finite binary tree.
+ The finite binary trees are the sentences of this language.
+ All this is obvious.
+\end_layout
+
+\begin_layout Standard
+Slightly less obvious is that there is another model: the infinite binary
+ tree.
+ This model contains exactly one sentence: the one and only unique, infinite
+ binary tree.
+ This tree does not make use of the constant, and would be the only model
+ if the constant was omitted from the signature: it is 
+\begin_inset Quotes eld
+\end_inset
+
+trees all the way down
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This model is oracular.
+ As a string, this tree cannot be written down; it would be a string of
+ infinite length.
+ More than infinite; it is isomorphic to the Cantor set, and the number
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+leaves
+\begin_inset Quotes erd
+\end_inset
+
+ are uncountable.
+ It is oracular, in that there is no Turing machine that can generate the
+ infinite binary tree (it would have to run 
+\begin_inset Quotes eld
+\end_inset
+
+longer than forever
+\begin_inset Quotes erd
+\end_inset
+
+), nor recognize it (it would have to scan this longer–than–infinite string).
+\end_layout
+
+\begin_layout Standard
+As humans, we know that such infinite binary trees exist, because we can
+ imagine them.
+ The Ancient Greeks were already able to envision infinity; it took Cantor
+ to show that there's another infinity, the uncountable infinity, and to
+ demonstrate that it is strictly larger, using the diagonal argument, and
+ then to construct a specific instance through the recursive removal of
+ interior line segments from the real number unit interval.
+\end_layout
+
+\begin_layout Standard
+Exactly how are we to infer this magical, oracular existence of an overwhelming
+ large object? Well, it's not particularly hard: just employ infinite recursion.
+ Jumping the shark, this is most easily illustrated with a diagram.
+\end_layout
+
+\begin_layout Standard
 xxx
 \end_layout
 
