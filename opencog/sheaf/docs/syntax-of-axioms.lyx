@@ -1110,6 +1110,201 @@ This is sadly quite verbose, but has several very desirable properties:
 Examples
 \end_layout
 
+\begin_layout Standard
+Armed with the conception that 
+\begin_inset Quotes eld
+\end_inset
+
+everything in mathematics can be described in terms of jigsaws
+\begin_inset Quotes erd
+\end_inset
+
+, and even that 
+\begin_inset Quotes eld
+\end_inset
+
+everything in physical nature can be described as jigsaws
+\begin_inset Quotes erd
+\end_inset
+
+, it is appropriate to work through some examples.
+ The claim that 
+\begin_inset Quotes eld
+\end_inset
+
+all structure is representable with jigsaws
+\begin_inset Quotes erd
+\end_inset
+
+ is meant to be self–evident.
+ It is not meant to be intellectually deep; rather, it is closer to statements
+ such as 
+\begin_inset Quotes eld
+\end_inset
+
+all computable functions can be computed with a Turing machine
+\begin_inset Quotes erd
+\end_inset
+
+, or, invoking the Church–Turing thesis, 
+\begin_inset Quotes eld
+\end_inset
+
+all sayable expresssions can be written with Lambda Calculus
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This has many forms: Lambda Calculus is isomorphic to combinators, and
+ so 
+\begin_inset Quotes eld
+\end_inset
+
+all sayable sentences can be written with combinators
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Turing machines also have many equivalent forms, for example, the register
+ machines, and so 
+\begin_inset Quotes eld
+\end_inset
+
+all computable functions are computable with register machines
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are similar claims in mathematics: 
+\begin_inset Quotes eld
+\end_inset
+
+set theory can provide a foundation for all of mathematics
+\begin_inset Quotes erd
+\end_inset
+
+, or, more recently, that 
+\begin_inset Quotes eld
+\end_inset
+
+topoi can provide a foundation for all of mathematics
+\begin_inset Quotes erd
+\end_inset
+
+, with topoi being (roughly) a point–free (
+\begin_inset Quotes eld
+\end_inset
+
+pointless
+\begin_inset Quotes erd
+\end_inset
+
+) description of topology in terms of frames and locales, together with
+ the Boolean algebra required to express logic.
+ The claim that 
+\begin_inset Quotes eld
+\end_inset
+
+everything is a jigsaw
+\begin_inset Quotes erd
+\end_inset
+
+ is no deeper or stronger than this.
+ Worse, it is infinitely more naive; the theory of topoi, and the category
+ theory from which it is built, has been elucidated, developed, articulated
+ by hundreds of authors writing thousands of articles and books totalling
+ hundreds of thousands of pages.
+ The idea that 
+\begin_inset Quotes eld
+\end_inset
+
+everything is a jigsaw
+\begin_inset Quotes erd
+\end_inset
+
+ has attracted no such attention, and does not yet have deep, sophisticated,
+ arcane explorations.
+\end_layout
+
+\begin_layout Standard
+It does, however, touch fairly closely upon all these other representational
+ systems.
+ Much of what jigsaws do is reminiscent of category theory.
+ The fact that they obey the sheaf axioms touches with topoi, as topoi are,
+ roughly, founded on sheaf theory.
+ The fact that jigsaws have typed connectors touches on type theory, and
+ modern type theory is now generally understood, via Univalent Foundations,
+ to be intertwined with the 
+\begin_inset Quotes eld
+\end_inset
+
+internal languages
+\begin_inset Quotes erd
+\end_inset
+
+ of categories: The (syntax of the) internal language describes with can
+ be said in those categories.
+ The simplest example is that of Cartesian Closed Categories: the internal
+ language is precisely that of Lambda Calulus, effectively because currying
+ is a product-hom adjunction.
+ That is, 
+\begin_inset Formula $\left(A\times B\right)\to C=A\to\left(B\to C\right)$
+\end_inset
+
+; the Wikipedia article on currying gives a large number of examples of
+ currying as it appears in different fields of mathematics.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Disclosure of conflicts: I wrote almost all of the Wikipedia article on
+ currying.
+ It is one of my favorites.
+\end_layout
+
+\end_inset
+
+ The underlying structure is that of tensor–hom adjunction, which has many
+ fascinating applications.
+\end_layout
+
+\begin_layout Standard
+That is, jigsaws are not very far away from a broad assortment of mathematical
+ topics, and overlap in many ways.
+ However, it does not seem that they map cleanly and directly to any one,
+ and instead seem to straddle many.
+ Part of the project here in this text and elsewhere, in other texts, is
+ to articulate these straddles and maps.
+\end_layout
+
+\begin_layout Standard
+Proposed examples include:
+\end_layout
+
+\begin_layout Itemize
+Term algebra (because it is simple)
+\end_layout
+
+\begin_layout Itemize
+Boolean Logic
+\end_layout
+
+\begin_layout Itemize
+Tensor product
+\end_layout
+
+\begin_layout Itemize
+Monoids, associativity, commutativity
+\end_layout
+
+\begin_layout Itemize
+Proofs, inference, deduction
+\end_layout
+
+\begin_layout Itemize
+Non–free structures, quotients.
+\end_layout
+
 \begin_layout Section*
 The End
 \end_layout
