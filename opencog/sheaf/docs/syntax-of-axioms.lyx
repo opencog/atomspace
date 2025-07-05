@@ -351,6 +351,10 @@ her
 .
  This is a transitive verb with indirect object, and is represented in the
  lexis as
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -384,6 +388,9 @@ sang: S– & O+ & I+;
 \end_layout
 
 \begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
 The capital letters are the connector type; the plus and minus signs are
  directional indicators, indicating to the left, or to the right.
  Thus, the lexical entry for 
@@ -635,6 +642,10 @@ S
 
 \begin_layout Standard
 Armed with this understanding, the suggested s–expression encoding is then
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -880,6 +891,10 @@ I
 \end_inset
 
 
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -902,6 +917,13 @@ The C/C++ example API declaration `
 int func(float x);
 \family default
 ` becomes
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1081,6 +1103,10 @@ input
 ))))
 \end_layout
 
+\end_inset
+
+
+\begin_inset VSpace defskip
 \end_inset
 
 
@@ -1444,9 +1470,13 @@ A signature lists and describes the non–logical symbols of a formal language.
 Of course, the task at hand is not just to make these explicit, but overwhelming
 ly so.
  Quoting from Wikipedia, in full:
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Standard
 \begin_inset space \qquad{}
 \end_inset
 
@@ -1458,7 +1488,7 @@ has_inner_box 1
 inner_pos "t"
 use_parbox 0
 use_makebox 0
-width "90col%"
+width "87col%"
 special "none"
 height "1in"
 height_special "totalheight"
@@ -1630,6 +1660,10 @@ The
 \end_inset
 
 
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1693,7 +1727,14 @@ kind
 \end_inset
 
 .
- At present, no distinction is made between sorts, kinds and types.) 
+ At present, no distinction is made between sorts, kinds and types.)
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1875,6 +1916,14 @@ input
 
 \end_inset
 
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The plus and times symbols 
 \begin_inset Formula $+,\times$
 \end_inset
@@ -1895,6 +1944,10 @@ trivial lifting lemma
  The commutative or associative nature will not be taken for granted; the
  argument order matters.
  Thus, we write
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2139,6 +2192,14 @@ input
 
 \end_inset
 
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 This is arity–two, because it has two inputs.
  The output type is still explicitly specified, even though it is 
 \begin_inset Quotes eld
@@ -2162,7 +2223,142 @@ plus
  so as to avoid possible confusion as to the meaning of symbols, and to
  stick to a UTF–8 convention for strings, avoiding MathML in the actual
  Atomese expression.
- 
+\end_layout
+
+\begin_layout Standard
+The constant symbols are easy: they are unary terms having only an output.
+ For example,
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+zero
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Every constant will have this form.
 \end_layout
 
 \begin_layout Section*
