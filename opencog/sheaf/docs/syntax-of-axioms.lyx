@@ -100,7 +100,7 @@ This text examines some practical notational and representational issues
  languages.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Introduction
 \end_layout
 
@@ -202,6 +202,176 @@ The exploration performed in this text is the construction of a generic
  taken from different branches of mathematics, and examining how they get
  encoded.
  The hope is that a programming reference can arise from this work.
+\end_layout
+
+\begin_layout Subsection
+Jigsaws
+\end_layout
+
+\begin_layout Standard
+The jigsaw paradigm for representing structure is relatively well–known
+ and wide–spread through multiple branches of mathematics, but is not so
+ famous as to evade a short introduction.
+\end_layout
+
+\begin_layout Standard
+A reasonable starting point is the concept of a jigsaw in Link Grammar (LG).
+ This is a theory of natural language, and, as such, works quite well; full–feat
+ured lexicons have been created for English, Russian and Thai, with smaller
+ dictionaries for a dozen other languages.
+ The lexical entries in LG are jigsaws, and parsing proceeds by selecting
+ jigsaws, attaching them in a valid, until all words in a sentence have
+ been joined, and there are no unconnected connectors remaining.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+jigsaw
+\begin_inset Quotes erd
+\end_inset
+
+ is meant to be understood in a literal sense.
+ The figure below is from the original 1991 LG paper.
+ Hopefully, this diagram makes clear the intended process of parsing: one
+ works to connect up all the connectors.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename graphics/link-grammar.png
+	lyxscale 50
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The goal of the following paragraphs is not so much to explain how LG works,
+ or even why it works, but to review how the concept of jigsaws can be represent
+ed in a generic computational fashion.
+ This is important because this paper makes the fundamental claim that 
+\emph on
+all of mathematics
+\emph default
+ can be represented with jigsaws, and more: all of physical nature can be
+ likewise.
+ The main body of this text will provide many examples showing how this
+ can be done.
+\end_layout
+
+\begin_layout Standard
+Consider the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+He sang a song to her.
+\begin_inset Quotes erd
+\end_inset
+
+ The lexis will contain a jigsaw for the verb 
+\begin_inset Quotes eld
+\end_inset
+
+sang
+\begin_inset Quotes erd
+\end_inset
+
+, and it will have connectors to the subject 
+\begin_inset Quotes eld
+\end_inset
+
+he
+\begin_inset Quotes erd
+\end_inset
+
+, the object 
+\begin_inset Quotes eld
+\end_inset
+
+song
+\begin_inset Quotes erd
+\end_inset
+
+ and the indirect object 
+\begin_inset Quotes eld
+\end_inset
+
+her
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is a transitive verb with indirect object, and is represented in the
+ lexis as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+sang: S– & O+ & I+;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The capital letters are the connector type; the plus and minus signs are
+ directional indicators, indicating to the left, or to the right.
+ Thus, the lexical entry for 
+\begin_inset Quotes eld
+\end_inset
+
+he
+\begin_inset Quotes erd
+\end_inset
+
+ will contain a connector 
+\family sans
+S+
+\family default
+, indicating that it connects to the right.
+ During parsing, the 
+\family sans
+S+
+\family default
+ and 
+\family sans
+S
+\family default
+– will be joined up to form an 
+\family sans
+S
+\family default
+ link between the subject and the verb, completing the parse for these two
+ connectors.
+\end_layout
+
+\begin_layout Standard
+Note that a partially–completed parse still has the form of a jigsaw, that
+ is, of ha
 \end_layout
 
 \end_body
