@@ -1106,6 +1106,23 @@ This is sadly quite verbose, but has several very desirable properties:
  nice to make forward progress on it.
 \end_layout
 
+\begin_layout Standard
+These typed s–expressions will be called 
+\begin_inset Quotes eld
+\end_inset
+
+Atomese
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A software realization of Atomese is provided by the AtomSpace.
+ That software realization is much older than the topics discussed in this
+ text, and was developed, designed and informed from other principles.
+ And yet, it converged onto the present topic.
+ Again, if there is a better way, it is not yet clear what that might be.
+\end_layout
+
 \begin_layout Section
 Examples
 \end_layout
@@ -1150,7 +1167,7 @@ all computable functions can be computed with a Turing machine
 \begin_inset Quotes eld
 \end_inset
 
-all sayable expresssions can be written with Lambda Calculus
+all sayable expressions can be written with Lambda Calculus
 \begin_inset Quotes erd
 \end_inset
 
@@ -1212,7 +1229,7 @@ everything is a jigsaw
  is no deeper or stronger than this.
  Worse, it is infinitely more naive; the theory of topoi, and the category
  theory from which it is built, has been elucidated, developed, articulated
- by hundreds of authors writing thousands of articles and books totalling
+ by hundreds of authors writing thousands of articles and books totaling
  hundreds of thousands of pages.
  The idea that 
 \begin_inset Quotes eld
@@ -1245,8 +1262,8 @@ internal languages
  of categories: The (syntax of the) internal language describes with can
  be said in those categories.
  The simplest example is that of Cartesian Closed Categories: the internal
- language is precisely that of Lambda Calulus, effectively because currying
- is a product-hom adjunction.
+ language is precisely that of Lambda Calculus, effectively because currying
+ is a product–hom adjunction.
  That is, 
 \begin_inset Formula $\left(A\times B\right)\to C=A\to\left(B\to C\right)$
 \end_inset
@@ -1282,27 +1299,268 @@ Proposed examples include:
 \end_layout
 
 \begin_layout Itemize
-Term algebra (because it is simple)
+Term algebra (because it is simple and absolutely free)
 \end_layout
 
 \begin_layout Itemize
-Boolean Logic
+Boolean Logic (because predicates and relations will be needed.)
 \end_layout
 
 \begin_layout Itemize
-Tensor product
+Theory of equality (because the theory of equality is the simplest theory
+ in which freeness is constrained by relationships)
 \end_layout
 
 \begin_layout Itemize
-Monoids, associativity, commutativity
+Non–free structures, quotients (because quotienting seems to be the generic
+ way in which cosets are definable, with the cosets being the objects of
+ the non–free theory.)
 \end_layout
 
 \begin_layout Itemize
-Proofs, inference, deduction
+Chomsky–style production rules; Backus–Nauer Form (BNF); languages generated
+ from grammars.
+ (Because this is an older but valid way of articulating the relationship
+ between syntax and language.)
 \end_layout
 
 \begin_layout Itemize
-Non–free structures, quotients.
+Tensor product (because products are what allow lists, pairs to be specified.)
+\end_layout
+
+\begin_layout Itemize
+Tensor–Hom adjunction aka currying (because this is the basic construct
+ arising in almost all categories.) 
+\end_layout
+
+\begin_layout Itemize
+Monoids, associativity, commutativity (Because these are commonplace, enabling
+ both enriched categories, and abelian categories.)
+\end_layout
+
+\begin_layout Itemize
+Term rewriting, graph rewriting (Because rewriting is a cornerstone of generatin
+g proofs, equivalences, homotopic equivalences.)
+\end_layout
+
+\begin_layout Itemize
+Proofs, inference, deduction (as examples of confluent rewrites generating
+ morphisms)
+\end_layout
+
+\begin_layout Itemize
+Turing machines, register machines (Because this is where computing starts,
+ with register machines eventually leading to RAM and stored–program computers.)
+\end_layout
+
+\begin_layout Standard
+The goal of the above is to describe axioms as jigsaws.
+ But soon to follow must be homomorphisms and homeomorphisms and adjoint
+ relationships, since one of the goals is to enable the automatic exploration
+ and generation of equivalences and adjoint relationships.
+ n the last case, the adjoint mapping between Turning machines and register
+ machines.
+\end_layout
+
+\begin_layout Subsection
+Term algebra
+\end_layout
+
+\begin_layout Standard
+The goal here is to make contact between the conventional description, notation
+ and conventions of term algebras, and Atomese.
+ A reasonable place to start is the Wikipedia description of term algebras.
+ It is as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+A term algebra is a freely generated algebraic structure over a given signature.
+ For example, in a signature consisting of a single binary operation, the
+ term algebra over a set X of variables is exactly the free magma generated
+ by X.
+ Other synonyms for the notion include absolutely free algebra and anarchic
+ algebra.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fine.
+ Realigning the vocabulary, a term algebra is the 
+\begin_inset Quotes eld
+\end_inset
+
+language
+\begin_inset Quotes erd
+\end_inset
+
+ generated by the 
+\begin_inset Quotes eld
+\end_inset
+
+syntax
+\begin_inset Quotes erd
+\end_inset
+
+ given by the 
+\begin_inset Quotes eld
+\end_inset
+
+signature
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, we want to convert signatures to Atomese.
+ The Wikipedia article on signatures states:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+A signature lists and describes the non–logical symbols of a formal language.
+ They are rarely made explicit in more philosophical treatments of logic.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Of course, the task at hand is not just to make these explicit, but overwhelming
+ly so.
+ Quoting from Wikipedia, in full:
+\end_layout
+
+\begin_layout Subsubsection*
+Definition
+\end_layout
+
+\begin_layout Standard
+Formally, a (single-sorted) '''signature''' can be defined as a 4-tuple
+ <math>
+\backslash
+sigma = 
+\backslash
+left(S_{
+\backslash
+operatorname{func}}, S_{
+\backslash
+operatorname{rel}}, S_{
+\backslash
+operatorname{const}}, 
+\backslash
+operatorname{ar}
+\backslash
+right),</math> where <math>S_{
+\backslash
+operatorname{func}}</math> and <math>S_{
+\backslash
+operatorname{rel}}</math> are disjoint [[Set (mathematics)|sets]] not containing
+ any other basic logical symbols, called respectively * ''[[function symbol]]s''
+ (examples: <math>+, 
+\backslash
+times</math>), * ''{{visible anchor|relation symbol}}s'' or ''[[Predicate
+ (mathematical logic) |predicates]]'' (examples: <math>
+\backslash
+,
+\backslash
+leq, 
+\backslash
+, 
+\backslash
+in</math>), * ''[[constant symbol]]s'' (examples: <math>0, 1</math>), and
+ a function <math>
+\backslash
+operatorname{ar} : S_{
+\backslash
+operatorname{func}} 
+\backslash
+cup S_{
+\backslash
+operatorname{rel}} 
+\backslash
+to 
+\backslash
+N</math> which assigns a natural number called ''[[arity]]'' to every function
+ or relation symbol.
+ A function or relation symbol is called <math>n</math>-ary if its arity
+ is <math>n.</math> Some authors define a nullary (<math>0</math>-ary) function
+ symbol as ''constant symbol'', otherwise constant symbols are defined separatel
+y.
+\end_layout
+
+\begin_layout Standard
+A signature with no function symbols is called a '''{{visible anchor|relational
+ signature}}''', and a signature with no relation symbols is called an '''{{visi
+ble anchor|algebraic signature}}'''.<ref name="FastN-Gram-BasedStringSearch">{{ci
+te web |last1=Mokadem |first1=Riad |author2=Litwin, Witold |author3=Rigaux,
+ Philippe |author4=Schwarz, Thomas |title=Fast nGram-Based String Search
+ Over Data Encoded Using Algebraic Signatures |url=http://www.cse.scu.edu/~tschwarz
+/Papers/vldb07_final.pdf |website=33rd International Conference on Very Large
+ Data Bases (VLDB) |accessdate=27 February 2019 |format=PDF |date=September
+ 2007}}</ref> A ''{{visible anchor|finite signature}}'' is a signature such
+ that <math>S_{
+\backslash
+operatorname{func}}</math> and <math>S_{
+\backslash
+operatorname{rel}}</math> are [[Finite set|finite]].
+ More generally, the ''cardinality'' of a signature <math>
+\backslash
+sigma = 
+\backslash
+left(S_{
+\backslash
+operatorname{func}}, S_{
+\backslash
+operatorname{rel}}, S_{
+\backslash
+operatorname{const}}, 
+\backslash
+operatorname{ar}
+\backslash
+right)</math> is defined as <math>|
+\backslash
+sigma| = 
+\backslash
+left|S_{
+\backslash
+operatorname{func}}
+\backslash
+right| + 
+\backslash
+left|S_{
+\backslash
+operatorname{rel}}
+\backslash
+right| + 
+\backslash
+left|S_{
+\backslash
+operatorname{const}}
+\backslash
+right|.</math>
+\end_layout
+
+\begin_layout Standard
+The ''{{visible anchor|language of a signature}}'' is the set of all well
+ formed sentences built from the symbols in that signature together with
+ the symbols in the logical system.
+ 
 \end_layout
 
 \begin_layout Section*
