@@ -1447,120 +1447,181 @@ ly so.
 \end_layout
 
 \begin_layout Subsubsection*
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "90col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Subsubsection*
+
+\emph on
 Definition
 \end_layout
 
-\begin_layout Standard
-Formally, a (single-sorted) '''signature''' can be defined as a 4-tuple
- <math>
-\backslash
-sigma = 
-\backslash
-left(S_{
-\backslash
-operatorname{func}}, S_{
-\backslash
-operatorname{rel}}, S_{
-\backslash
-operatorname{const}}, 
-\backslash
-operatorname{ar}
-\backslash
-right),</math> where <math>S_{
-\backslash
-operatorname{func}}</math> and <math>S_{
-\backslash
-operatorname{rel}}</math> are disjoint [[Set (mathematics)|sets]] not containing
- any other basic logical symbols, called respectively * ''[[function symbol]]s''
- (examples: <math>+, 
-\backslash
-times</math>), * ''{{visible anchor|relation symbol}}s'' or ''[[Predicate
- (mathematical logic) |predicates]]'' (examples: <math>
-\backslash
-,
-\backslash
-leq, 
-\backslash
-, 
-\backslash
-in</math>), * ''[[constant symbol]]s'' (examples: <math>0, 1</math>), and
- a function <math>
-\backslash
-operatorname{ar} : S_{
-\backslash
-operatorname{func}} 
-\backslash
-cup S_{
-\backslash
-operatorname{rel}} 
-\backslash
-to 
-\backslash
-N</math> which assigns a natural number called ''[[arity]]'' to every function
- or relation symbol.
- A function or relation symbol is called <math>n</math>-ary if its arity
- is <math>n.</math> Some authors define a nullary (<math>0</math>-ary) function
- symbol as ''constant symbol'', otherwise constant symbols are defined separatel
-y.
+\begin_layout Plain Layout
+
+\emph on
+Formally, a (single-sorted) 
+\series bold
+signature
+\series default
+ can be defined as a 4–tuple 
+\begin_inset Formula $\sigma=\left(S_{\mathrm{func}},S_{\mathrm{rel}},S_{\mathrm{const}},\mathrm{ar}\right)$
+\end_inset
+
+, where 
+\begin_inset Formula $S_{\mathrm{func}}$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{\mathrm{rel}}$
+\end_inset
+
+ are disjoint sets not containing any other basic logical symbols, called
+ respectively
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+function symbols
+\series default
+ (examples:
+\begin_inset Formula $+,\times$
+\end_inset
+
+),
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+relation symbols
+\series default
+ or 
+\series bold
+predicates
+\series default
+ (examples:
+\begin_inset Formula $\,\leq,\,\in$
+\end_inset
+
+),
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+constant symbols
+\series default
+ (examples:
+\begin_inset Formula $0,1$
+\end_inset
+
+), 
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+and a function
+\begin_inset Formula $\mathrm{ar}:S_{\mathrm{func}}\cup S_{\mathrm{rel}}\to\mathbb{N}$
+\end_inset
+
+ which assigns a natural number called 
+\series bold
+arity
+\series default
+ to every function or relation symbol.
+ A function or relation symbol is called 
+\begin_inset Formula $n$
+\end_inset
+
+-ary if its arity is 
+\begin_inset Formula $n.$
+\end_inset
+
+ Some authors define a nullary (
+\begin_inset Formula $0$
+\end_inset
+
+-ary) function symbol as 
+\series bold
+constant symbol
+\series default
+, otherwise constant symbols are defined separately.
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+A signature with no function symbols is called a 
+\series bold
+relational signature
+\series default
+, and a signature with no relation symbols is called an 
+\series bold
+algebraic signature
+\series default
+.
+ A 
+\series bold
+finite signature
+\series default
+ is a signature such that 
+\begin_inset Formula $S_{\mathrm{func}}$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{\mathrm{rel}}$
+\end_inset
+
+ are finite.
+ More generally, the cardinality of a signature 
+\begin_inset Formula $\sigma=\left(S_{\mathrm{func}},S_{\mathrm{rel}},S_{\mathrm{const}},\mathrm{ar}\right)$
+\end_inset
+
+ is defined as 
+\begin_inset Formula $\left|\sigma\right|=\left|S_{\mathrm{func}}\right|+\left|S_{\mathrm{rel}}\right|+\left|S_{\mathrm{const}}\right|.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+The
+\series bold
+ language of a signature
+\series default
+ is the set of all well formed sentences built from the symbols in that
+ signature together with the symbols in the logical system.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-A signature with no function symbols is called a '''{{visible anchor|relational
- signature}}''', and a signature with no relation symbols is called an '''{{visi
-ble anchor|algebraic signature}}'''.<ref name="FastN-Gram-BasedStringSearch">{{ci
-te web |last1=Mokadem |first1=Riad |author2=Litwin, Witold |author3=Rigaux,
- Philippe |author4=Schwarz, Thomas |title=Fast nGram-Based String Search
- Over Data Encoded Using Algebraic Signatures |url=http://www.cse.scu.edu/~tschwarz
-/Papers/vldb07_final.pdf |website=33rd International Conference on Very Large
- Data Bases (VLDB) |accessdate=27 February 2019 |format=PDF |date=September
- 2007}}</ref> A ''{{visible anchor|finite signature}}'' is a signature such
- that <math>S_{
-\backslash
-operatorname{func}}</math> and <math>S_{
-\backslash
-operatorname{rel}}</math> are [[Finite set|finite]].
- More generally, the ''cardinality'' of a signature <math>
-\backslash
-sigma = 
-\backslash
-left(S_{
-\backslash
-operatorname{func}}, S_{
-\backslash
-operatorname{rel}}, S_{
-\backslash
-operatorname{const}}, 
-\backslash
-operatorname{ar}
-\backslash
-right)</math> is defined as <math>|
-\backslash
-sigma| = 
-\backslash
-left|S_{
-\backslash
-operatorname{func}}
-\backslash
-right| + 
-\backslash
-left|S_{
-\backslash
-operatorname{rel}}
-\backslash
-right| + 
-\backslash
-left|S_{
-\backslash
-operatorname{const}}
-\backslash
-right|.</math>
-\end_layout
-
-\begin_layout Standard
-The ''{{visible anchor|language of a signature}}'' is the set of all well
- formed sentences built from the symbols in that signature together with
- the symbols in the logical system.
- 
+This is 
 \end_layout
 
 \begin_layout Section*
