@@ -1447,6 +1447,10 @@ ly so.
 \end_layout
 
 \begin_layout Subsubsection*
+\begin_inset space \qquad{}
+\end_inset
+
+
 \begin_inset Box Frameless
 position "t"
 hor_pos "c"
@@ -1463,7 +1467,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Subsubsection*
 
@@ -1474,7 +1478,7 @@ Definition
 \begin_layout Plain Layout
 
 \emph on
-Formally, a (single-sorted) 
+Formally, a (single–sorted) 
 \series bold
 signature
 \series default
@@ -1501,7 +1505,7 @@ signature
 function symbols
 \series default
  (examples:
-\begin_inset Formula $+,\times$
+\begin_inset Formula $\,+,\times$
 \end_inset
 
 ),
@@ -1531,7 +1535,7 @@ predicates
 constant symbols
 \series default
  (examples:
-\begin_inset Formula $0,1$
+\begin_inset Formula $\,0,1$
 \end_inset
 
 ), 
@@ -1540,7 +1544,7 @@ constant symbols
 \begin_layout Plain Layout
 
 \emph on
-and a function
+and a function 
 \begin_inset Formula $\mathrm{ar}:S_{\mathrm{func}}\cup S_{\mathrm{rel}}\to\mathbb{N}$
 \end_inset
 
@@ -1553,7 +1557,7 @@ arity
 \begin_inset Formula $n$
 \end_inset
 
--ary if its arity is 
+–ary if its arity is 
 \begin_inset Formula $n.$
 \end_inset
 
@@ -1561,11 +1565,15 @@ arity
 \begin_inset Formula $0$
 \end_inset
 
--ary) function symbol as 
+–ary) function symbol as 
 \series bold
 constant symbol
 \series default
 , otherwise constant symbols are defined separately.
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -1602,6 +1610,10 @@ finite signature
 \end_inset
 
 
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -1621,7 +1633,536 @@ The
 \end_layout
 
 \begin_layout Standard
-This is 
+As always, such definitions are adapted for human readability and authorability,
+ and not for algorithmic simplicity.
+ Now, as we are living in modern times, I could always as an LLM to convert
+ the above description to something computable.
+ However, I have to give it some examples of what I mean, and so the following
+ is the example.
+ In fact, this entire text could be considered to be one giant prompt for
+ some LLM to digest and act upon.
+ My goal really is to automate the generation of languages, and Atomese
+ is my favored syntactical device for doing so.
+ If you are a human reader of this text, feel free to skim and let your
+ eyes glaze over.
+ I'm not sure you are missing much.
+\end_layout
+
+\begin_layout Standard
+The example of a unary function symbol was given earlier.
+ Lets adapt it for the above example.
+ The signature as defined by Wikipedia is 
+\begin_inset Quotes eld
+\end_inset
+
+single–sorted
+\begin_inset Quotes erd
+\end_inset
+
+, so we replace the ints and floats by a single type, 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+.
+ (A 
+\begin_inset Quotes eld
+\end_inset
+
+sort
+\begin_inset Quotes erd
+\end_inset
+
+ is a synonym for 
+\begin_inset Quotes eld
+\end_inset
+
+type
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+kind
+\begin_inset Quotes erd
+\end_inset
+
+.
+ At present, no distinction is made between sorts, kinds and types.) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+func
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+The plus and times symbols 
+\begin_inset Formula $+,\times$
+\end_inset
+
+ are conventionally written as infix symbols.
+ By human convention, these symbols have finite but unbounded arity, because
+ they commute, and no one wishes to dwell on the fact that they are actually
+ binary, and need to be lifted freely (by the 
+\begin_inset Quotes eld
+\end_inset
+
+trivial lifting lemma
+\begin_inset Quotes erd
+\end_inset
+
+) to entire expressions.
+ But Wikipedia wishes that we assign a fixed arity, and so we shall.
+ The commutative or associative nature will not be taken for granted; the
+ argument order matters.
+ Thus, we write
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+plus
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+This is arity–two, because it has two inputs.
+ The output type is still explicitly specified, even though it is 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The output connector must be present, as, without this connector, there
+ is no way to freelly generate the language by snapping together the jigsaws.
+ The function was renamed to 
+\begin_inset Quotes eld
+\end_inset
+
+plus
+\begin_inset Quotes erd
+\end_inset
+
+ so as to avoid possible confusion as to the meaning of symbols, and to
+ stick to a UTF–8 convention for strings, avoiding MathML in the actual
+ Atomese expression.
+ 
 \end_layout
 
 \begin_layout Section*
