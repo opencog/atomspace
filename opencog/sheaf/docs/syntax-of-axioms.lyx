@@ -2934,13 +2934,13 @@ exercise left up to the reader
 \end_layout
 
 \begin_layout Subsection
-Meta Navel–Gazing
+Binary Trees
 \end_layout
 
 \begin_layout Standard
 This is a good point at which to stop, and examine some of the meta–issues
  arising from the above.
- Lets start with the easy ones first.
+ The easiest ones can be illustrated with binary trees.
 \end_layout
 
 \begin_layout Standard
@@ -3473,7 +3473,7 @@ input
 \end_layout
 
 \begin_layout Standard
-It is presumably clear that this generated the language of all finite binary
+It is presumably clear that this generates the language of all finite binary
  trees, unbounded in size.
  This is the intended, countable model.
  Countable, because there are countably many such trees.
@@ -3485,7 +3485,61 @@ It is presumably clear that this generated the language of all finite binary
 \end_layout
 
 \begin_layout Standard
-So
+The above ever so slightly evades the boundaries of a signature, however.
+ Signatures do not talk of sources and sinks: signatures implicitly terminate
+ with a term as the root.
+ This is not said out loud, because if one has a term such as 
+\begin_inset Formula $f\left(a,b,g\left(c,d\right)\right)$
+\end_inset
+
+ the fact that the 
+\begin_inset Formula $f$
+\end_inset
+
+ is the root of the tree is 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+, and attention is drawn only to the constant terms 
+\begin_inset Formula $a,b,c,d$
+\end_inset
+
+.
+ Rewriting these terms are jigsaw pieces exposes the fact that there is
+ an unconnected connector at the root.
+ If we really want a complete jigsaw assembly, we want to sink that connector
+ in some way, instead of leaving it dangling.
+\end_layout
+
+\begin_layout Standard
+The other abuse above is that the roles of input and output have been reversed.
+ Normally, for an n–ary function symbol, there are n inputs, and only one
+ output: the term itself.
+ Here, the directionality has been reversed: two outputs and one input.
+ This seems egregious, as it can be solved simply by swapping in and out.
+ The swap was done for two reasons: first, so that binary trees can be drawn
+ with the conventional style, with arrows pointing away from the root, towards
+ the leaves, and not the other way around.
+ The second reason is to illustrate the fact that jigsaws impose no particular
+ constraint on arity or directionality.
+ Indeed, if the connectors were marked in some way other than heterosexual
+ connection, the notion of 
+\begin_inset Quotes eld
+\end_inset
+
+directionality
+\begin_inset Quotes erd
+\end_inset
+
+ would not even apply.
+\end_layout
+
+\begin_layout Paragraph
+The infinite tree
 \end_layout
 
 \begin_layout Standard
@@ -3565,7 +3619,90 @@ Nowhere does it say that terms must be combined only into a directed acyclic
 \begin_layout Standard
 There's a bit of slight–of–hand, here, though.
  In the middle figure, two outputs were connected to one input.
- In what sense is this legal? 
+ In what sense is this legal? In normal experience with functions, algebra
+ and programming, it is nonsense to have a function with only one input,
+ but somehow gets two.
+ There's no way to write 
+\begin_inset Formula $f\left(x\right)$
+\end_inset
+
+ with two terms 
+\begin_inset Formula $g\left(a\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $h\left(b\right)$
+\end_inset
+
+ and write down 
+\begin_inset Formula $f\left(g\left(a\right)\mbox{ and also }h\left(b\right)\right)$
+\end_inset
+
+: this is not a function, it makes no sense, its wildly insane.
+ Yet, in graph theory, there's nothing particularly wrong here, and in electroni
+cs and house wiring, one solders together wires in all sorts of crazy ways.
+\end_layout
+
+\begin_layout Standard
+The middle figure is valid as a graph, but it is not valid, at least not
+ naively valid, as a jigsaw assembly.
+ Implicit in the jigsaws is that the connectors are mated, one–to–one.
+ There are two ways to resolve this, to arrive at the middle figure: define
+ the input connector as a multi–connector, allowing one 
+\emph on
+or more
+\emph default
+ connections.
+ This is done as a matter of course in LG, where the 
+\family sans
+@MV
+\family default
+ connector type is famously a multi–connector.
+ This is done in LG only as a practical matter, to avoid excessively verbose
+ descriptions of verbs and adverbs.
+ The alternative is to define a second jigsaw, taking two inputs and generating
+ one output.
+ One then gets a clean, finite jigsaw assembly, with one–on–one mating and
+ no dangling connectors.
+\end_layout
+
+\begin_layout Standard
+This has a serious downfall: it destroys the Cantorian infinity.
+ Cantor demands that each sub–branch of the infinite binary tree to be distinct,
+ even if otherwise indistinguishable.
+ If distinctness is destroyed, the infinity goes away, and we are left only
+ with a finite directed graph containing a pair of loops.
+ The intended model is that uncountable infinities exist, and that uncountable
+ infinities really are distinct from diagrams with two loops, even though
+ such a diagram can provide an OK imaginative representation of infinity,
+ which, owing to it's finite size, can be written on a single piece of paper,
+ or, more to the point, can be constructed within a computer with only a
+ finite amount of RAM.
+\end_layout
+
+\begin_layout Standard
+I am belaboring this point in this text, as this is a recurring theme in
+ set theory and model theory: how is it that we can talk about infinities
+ in a coherent fashion? The set theorists and the model theorists have long
+ ago overcome these difficulties, able to mumble things even about 
+\begin_inset Quotes eld
+\end_inset
+
+ineffable cardinals
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+outer models
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That this could be an issue is exposed by assuming some naive, implicit,
+ as yet mostly unstated rules for mating jigsaw connectors.
 \end_layout
 
 \begin_layout Standard
