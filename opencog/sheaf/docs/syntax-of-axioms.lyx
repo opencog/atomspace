@@ -2226,7 +2226,7 @@ plus
 \end_layout
 
 \begin_layout Standard
-The constant symbols are easy: they are unary terms having only an output.
+The constant symbols are easy: they are zero–ary terms having only an output.
  For example,
 \begin_inset VSpace defskip
 \end_inset
@@ -2359,6 +2359,608 @@ output
 
 \begin_layout Standard
 Every constant will have this form.
+\end_layout
+
+\begin_layout Standard
+The Wikipedia articles played a bit fast and loose with the relations, mostly
+ because relations are implicitly obvious to any human reader.
+ To be precise, we need to write:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+greater than
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+bool
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the output type is 
+\begin_inset Quotes eld
+\end_inset
+
+bool
+\begin_inset Quotes erd
+\end_inset
+
+ and not 
+\begin_inset Quotes eld
+\end_inset
+
+any
+\begin_inset Quotes erd
+\end_inset
+
+.
+ So, strictly speaking, the claim of being single–sorted is off–by–one:
+ there is the sort of the terms, and the sort of boolean logic.
+ Left implicit were the logical connectives, so, for example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+(LexicalEntryType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ItemType 
+\begin_inset Quotes eld
+\end_inset
+
+boolean and
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorListType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+bool
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+output
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+bool
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(ConnectorType
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(LinkType 
+\begin_inset Quotes eld
+\end_inset
+
+bool
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+(SexType 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+))))
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows the relations to be combined with logical connectives, giving
+ the first–order language that is the term algebra.
+ It is first–order only because we've omitted any mention of variables,
+ or of the there–exists 
+\begin_inset Formula $\exists.x$
+\end_inset
+
+ and for–all 
+\begin_inset Formula $\forall.x$
+\end_inset
+
+ constructors needed for higher–order languages, and the walk up the Borel
+ hierarchy.
+ That's OK; the claim is that these two can be expressed in Atomese, with
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+exercise left up to the reader
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is, however, worth noting that Atomese provides a syntactic notation
+ for structure.
+ We have not yet broached to subject of the universe of discourse, and semantic
+ relations that arise therefrom.
+ In some sense, we want to do model theory, eventually; just not yet.
+\end_layout
+
+\begin_layout Subsection
+Meta Navel–Gazing
+\end_layout
+
+\begin_layout Standard
+This is a good point at which to stop, and examine some of the meta–issues
+ arising from the above.
+ Lets start with the easy ones first.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+many-sorted
+\end_layout
+
+\begin_layout Standard
+universe of discourse
+\end_layout
+
+\begin_layout Standard
+unbounded arity
+\end_layout
+
+\begin_layout Standard
+models
 \end_layout
 
 \begin_layout Section*
