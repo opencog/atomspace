@@ -3538,7 +3538,7 @@ directionality
  would not even apply.
 \end_layout
 
-\begin_layout Paragraph
+\begin_layout Subsubsection
 The infinite tree
 \end_layout
 
@@ -3737,6 +3737,38 @@ know
 \end_layout
 
 \begin_layout Subsection
+Naive Set Theory
+\end_layout
+
+\begin_layout Standard
+The above construction for binary trees extends easily to a naive conception
+ of set theory: merely add function jigsaws for arbitrary, unbounded, finite
+ input arity.
+ Creating sets of infinite cardinailty remains an issue, given the constructions
+ explored so far.
+ The resulting set theory is 
+\begin_inset Quotes eld
+\end_inset
+
+naive
+\begin_inset Quotes erd
+\end_inset
+
+ in that we don't discuss the assortment of axioms and axiom schemas normally
+ used to define set theory; the arbitrary–arity jigsaws capture only a naive
+ conception of set membership.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+membership, arrows, products, type constructors, commutativity.
+ 
+\end_layout
+
+\begin_layout Subsection
 Many–sorted Signatures
 \end_layout
 
@@ -3815,12 +3847,7 @@ Let
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Plain Layout
-
-\emph on
-The symbol types over 
+ The symbol types over 
 \begin_inset Formula $S$
 \end_inset
 
@@ -3895,7 +3922,7 @@ a set
 \begin_layout Itemize
 
 \emph on
-a map type 
+a map 
 \begin_inset Formula $\mathrm{type}$
 \end_inset
 
@@ -3920,11 +3947,111 @@ a map type
 \end_layout
 
 \begin_layout Standard
-xxx
+The above indicates a system that is very nearly identical to the jigsaw
+ representation of the prior section.
+ This time, an explicit output type is indicated for the function symbols.
+ The directionality is still implicit: the Cartesian product notation 
+\begin_inset Formula $s_{1}\times\cdots\times s_{n}$
+\end_inset
+
+
+\emph on
+ 
+\emph default
+is meant to be a list of inputs; the arrow 
+\begin_inset Formula $\to$
+\end_inset
+
+ splits the list between input and output types.
+ Of course, jigsaws could specify two outputs, so the map from sorted signatures
+ to jigsaws is into, not onto.
 \end_layout
 
 \begin_layout Standard
-many-sorted
+The output type for relations remains implicit; it should have been written
+ as 
+\begin_inset Formula $s_{1}\times\cdots\times s_{n}\to\left\{ T,F\right\} $
+\end_inset
+
+.
+ The first–order logical connectives remain elided in the Wikipedia definition.
+\end_layout
+
+\begin_layout Standard
+The third part of the Wikipedia definition can be ignored, under the presumption
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+we already did that
+\begin_inset Quotes erd
+\end_inset
+
+, or it can be made explicit.
+ The attempt on making it explicit immediately founders on multiple issues.
+ Explicit jigsaw representations need to be created for the following:
+\end_layout
+
+\begin_layout Itemize
+A representation of a set, with ur–elements that are sorts.
+\end_layout
+
+\begin_layout Itemize
+An ability to select (choose) a single element from a set.
+\end_layout
+
+\begin_layout Itemize
+The ability to select a single element from this specific set, viz.
+ naming or referring to this set of sorts.
+\end_layout
+
+\begin_layout Itemize
+The product type constructor, needed to create a list of sorts, which will
+ belong to the set of 
+\begin_inset Quotes eld
+\end_inset
+
+symbol types
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+The arrow type constructor, needed to create the function symbol types.
+\end_layout
+
+\begin_layout Itemize
+A map, which, given a 
+\begin_inset Quotes eld
+\end_inset
+
+symbol name
+\begin_inset Quotes erd
+\end_inset
+
+ (the lexical entry name of the jigsaw), returns the 
+\begin_inset Quotes eld
+\end_inset
+
+symbol type
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Since the full jigsaw consists of the name, and the connector list, this
+ is as simple as projecting out the two components.
+ Alternately, (via currying) the jigsaw is assembled from these two pieces.
+\end_layout
+
+\begin_layout Standard
+The full development of the explicit construction of jigsaws from small
+ pieces awaits the articulation of these mechanisms.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
@@ -3936,7 +4063,8 @@ unbounded arity
 \end_layout
 
 \begin_layout Standard
-chomsky production rules and signatures have assumed output type
+chomsky production rules and signatures have assumed output type (usually,
+ not always; depending on the author/text.)
 \end_layout
 
 \begin_layout Section*
