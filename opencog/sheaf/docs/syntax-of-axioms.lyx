@@ -3706,11 +3706,221 @@ outer models
 \end_layout
 
 \begin_layout Standard
-xxx
+The naive interpretation is that anything with a directed loop represents
+ an infinity.
+ The figure on the right, above, shows three directed loops.
+ It indicates a tiling of the infinite binary tree that would be different,
+ if the edges were colored.
+ However, they are not (everything is single–sorted), and so conceptually,
+ we 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ that it is the same infinite binary tree as represented in the middle,
+ because we 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ there is only one infinite tree.
+ But how do we prove this? The proof would need to involve the ability to
+ perform deductions on the re–arrangement of jigsaw pieces.
+ So far, we have not given any axioms explaining how jigsaw pieces connect!
+ Nor have we given axioms for how proofs are to be carried out!
+\end_layout
+
+\begin_layout Subsection
+Many–sorted Signatures
 \end_layout
 
 \begin_layout Standard
-proof of equiv
+The explicit indication of connector type would seem to leave no ambiguity
+ as to how typing is to be performed.
+ Nonetheless, a glance at the formal definition provided on Wikipedia is
+ revealing.
+ A verbatim copy follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "87col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Subsubsection*
+
+\emph on
+Many–sorted signatures
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+For many–sorted logic and for many–sorted structures, signatures must encode
+ information about the sorts.
+ The most straightforward way of doing this is via symbol types that play
+ the role of generalized arities.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\emph on
+Symbol types
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+Let 
+\begin_inset Formula $S$
+\end_inset
+
+ be a set (of sorts) not containing the symbols 
+\begin_inset Formula $\times$
+\end_inset
+
+ or 
+\begin_inset Formula $\to$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+The symbol types over 
+\begin_inset Formula $S$
+\end_inset
+
+ are certain words over the alphabet 
+\begin_inset Formula $S\cup\left\{ \times,\to\right\} $
+\end_inset
+
+: the relational symbol types 
+\begin_inset Formula $s_{1}\times\cdots\times s_{n}$
+\end_inset
+
+, and the functional symbol types 
+\begin_inset Formula $s_{1}\times\cdots\times s_{n}\to s^{\prime}$
+\end_inset
+
+, for non–negative integers 
+\begin_inset Formula $n$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{1},s_{2},\ldots,s_{n},s^{\prime}\in S$
+\end_inset
+
+.
+ (For 
+\begin_inset Formula $n=0$
+\end_inset
+
+, the expression 
+\begin_inset Formula $s_{1}\times\cdots\times s_{n}$
+\end_inset
+
+ denotes the empty word.) 
+\end_layout
+
+\begin_layout Subsubsection*
+
+\emph on
+Signature
+\end_layout
+
+\begin_layout Plain Layout
+
+\emph on
+A (many-sorted) signature is a triple 
+\begin_inset Formula $\left(S,P,\mathrm{type}\right)$
+\end_inset
+
+ consisting of 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+a set 
+\begin_inset Formula $S$
+\end_inset
+
+ of sorts, 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+a set 
+\begin_inset Formula $P$
+\end_inset
+
+ of symbols, and 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+a map type 
+\begin_inset Formula $\mathrm{type}$
+\end_inset
+
+ which associates to every symbol in 
+\begin_inset Formula $P$
+\end_inset
+
+ a symbol type over 
+\begin_inset Formula $S$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
@@ -3726,7 +3936,7 @@ unbounded arity
 \end_layout
 
 \begin_layout Standard
-models
+chomsky production rules and signatures have assumed output type
 \end_layout
 
 \begin_layout Section*
