@@ -1347,7 +1347,16 @@ Non–free structures, quotients (because quotienting seems to be the generic
 Chomsky–style production rules; Backus–Nauer Form (BNF); languages generated
  from grammars.
  (Because this is an older but valid way of articulating the relationship
- between syntax and language.)
+ between syntax and language.) (Note again a traditional lack of specification
+ of what the output type is.)
+\end_layout
+
+\begin_layout Itemize
+Unbounded arity
+\end_layout
+
+\begin_layout Itemize
+Universe of Discourse
 \end_layout
 
 \begin_layout Itemize
@@ -3737,38 +3746,6 @@ know
 \end_layout
 
 \begin_layout Subsection
-Naive Set Theory
-\end_layout
-
-\begin_layout Standard
-The above construction for binary trees extends easily to a naive conception
- of set theory: merely add function jigsaws for arbitrary, unbounded, finite
- input arity.
- Creating sets of infinite cardinailty remains an issue, given the constructions
- explored so far.
- The resulting set theory is 
-\begin_inset Quotes eld
-\end_inset
-
-naive
-\begin_inset Quotes erd
-\end_inset
-
- in that we don't discuss the assortment of axioms and axiom schemas normally
- used to define set theory; the arbitrary–arity jigsaws capture only a naive
- conception of set membership.
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-membership, arrows, products, type constructors, commutativity.
- 
-\end_layout
-
-\begin_layout Subsection
 Many–sorted Signatures
 \end_layout
 
@@ -4050,21 +4027,94 @@ The full development of the explicit construction of jigsaws from small
  pieces awaits the articulation of these mechanisms.
 \end_layout
 
+\begin_layout Subsection
+Boolean Logic; Disjoint Unions; Flows
+\end_layout
+
+\begin_layout Standard
+The specification of jigsaw pieces encounters many of the same conceptual
+ issues as categories.
+ Consider, for example, the logical connectives 
+\begin_inset Formula $\wedge,\vee,\lnot$
+\end_inset
+
+.
+ These can be rewritten as term symbols 
+\begin_inset Formula $\mathrm{and}\left(x,y\right),\mathrm{or}\left(x,y\right),\mathrm{not}\left(x\right)$
+\end_inset
+
+ or even 
+\begin_inset Formula $\mathrm{and}:B\times B\to B$
+\end_inset
+
+ with 
+\series bold
+
+\begin_inset Formula $B$
+\end_inset
+
+
+\series default
+ indicating the type of the domain.
+ As with all such cases, one can readily confuse the type with the set that
+ is the disjoint collection of all of it's possible values; that is, 
+\begin_inset Formula $B=\left\{ T,F\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Naive Set Theory
+\end_layout
+
+\begin_layout Standard
+The construction for binary trees extends easily to a naive conception of
+ set theory: merely add function jigsaws for arbitrary, unbounded, finite
+ input arity.
+ Creating sets of infinite cardinailty remains an issue, given the constructions
+ explored so far.
+ The resulting set theory is 
+\begin_inset Quotes eld
+\end_inset
+
+naive
+\begin_inset Quotes erd
+\end_inset
+
+ in that we don't discuss the assortment of axioms and axiom schemas normally
+ used to define set theory; the arbitrary–arity jigsaws capture only a naive
+ conception of set membership.
+\end_layout
+
 \begin_layout Standard
 xxx
 \end_layout
 
 \begin_layout Standard
-universe of discourse
+membership, arrows, products, type constructors, commutativity.
+ 
+\end_layout
+
+\begin_layout Section
+Open Issues
 \end_layout
 
 \begin_layout Standard
-unbounded arity
+In the course of writing the above, a number of issues arise.
+ They are tracked here.
+\end_layout
+
+\begin_layout Itemize
+Universe of Discourse – how is this to be managed and understood?
+\end_layout
+
+\begin_layout Itemize
+Disjoint Union
 \end_layout
 
 \begin_layout Standard
-chomsky production rules and signatures have assumed output type (usually,
- not always; depending on the author/text.)
+xxx
 \end_layout
 
 \begin_layout Section*
