@@ -2,13 +2,13 @@ import unittest
 import re
 
 from opencog.type_constructors import *
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import set_default_atomspace, finalize_opencog
 
 class LinkValueContainingAtomsTest(unittest.TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        initialize_opencog(self.space)
+        set_default_atomspace(self.space)
 
     def tearDown(self):
         finalize_opencog()

@@ -1,5 +1,5 @@
 import unittest
-from opencog.utilities import initialize_opencog, finalize_opencog
+from opencog.utilities import set_default_atomspace, finalize_opencog
 from opencog.type_constructors import *
 from opencog.execute import evaluate_atom
 
@@ -11,7 +11,7 @@ class TestExceptions(unittest.TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        initialize_opencog(self.space)
+        set_default_atomspace(self.space)
 
     def tearDown(self):
         finalize_opencog()
