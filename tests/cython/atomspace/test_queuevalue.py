@@ -127,9 +127,30 @@ class QueueValueTest(unittest.TestCase):
         # Close the queue first to prevent blocking
         value.close()
 
-        # Popping from closed empty queue should return None
+        # Popping from closed empty queue should raise RuntimeError
+        with self.assertRaises(RuntimeError) as cm:
+            value.pop()
+
+        self.assertIn("Cannot pop from closed empty queue", str(cm.exception))
+
+    def test_pop_until_empty_then_close(self):
+        value = QueueValue()
+        value.open()
+
+        # Add one value
+        value.push(FloatValue(42))
+
+        # Pop it
         popped = value.pop()
-        self.assertIsNone(popped)
+        self.assertEqual(FloatValue(42), popped)
+        self.assertEqual(0, len(value))
+
+        # Now close the empty queue
+        value.close()
+
+        # Trying to pop should raise RuntimeError
+        with self.assertRaises(RuntimeError):
+            value.pop()
 
     def test_str(self):
         value = QueueValue([FloatValue(42), StringValue('foo')])

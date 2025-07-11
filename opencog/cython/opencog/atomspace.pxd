@@ -262,6 +262,10 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
 
 
 # QueueValue
+cdef extern from "opencog/util/concurrent_queue.h" namespace "opencog::concurrent_queue":
+    cdef cppclass Canceled:
+        pass
+
 cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
     cdef cppclass cQueueValue "opencog::QueueValue":
         cQueueValue()
@@ -270,7 +274,7 @@ cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
         void close()
         bint is_closed() const
         void add(const cValuePtr&)
-        cValuePtr remove()
+        cValuePtr remove() except +
         size_t size() const
         void clear()
         const vector[cValuePtr]& value() const
