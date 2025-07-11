@@ -9,10 +9,6 @@ from cython.operator cimport dereference as deref, preincrement as inc
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
 
-cdef api string get_path_as_string() with gil:
-    import sys
-    return str(sys.path).encode('UTF-8')
-
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
     cdef cHandle handle
