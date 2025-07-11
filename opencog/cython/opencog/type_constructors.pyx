@@ -13,6 +13,7 @@ import warnings
 from opencog.atomspace import (createBoolValue,
                                createFloatValue,
                                createLinkValue,
+                               createQueueValue,
                                createStringValue,
                                createTruthValue,
                                # createVoidValue,
@@ -41,6 +42,9 @@ def FloatValue(arg):
 
 def LinkValue(arg):
     return createLinkValue(arg)
+
+def QueueValue(arg=None):
+    return createQueueValue(arg)
 
 def StringValue(arg):
     return createStringValue(arg)

@@ -143,6 +143,9 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     # For handling the children types of LinkValue.
     if is_a(value_type, types.LinkValue):
         return LinkValue(ptr_holder=ptr_holder)
+    # For handling the children types of QueueValue.
+    if is_a(value_type, types.QueueValue):
+        return QueueValue(ptr_holder=ptr_holder)
     # For handling the children types of Atom.
     if is_a(value_type, types.Atom):
         return Atom(ptr_holder=ptr_holder)

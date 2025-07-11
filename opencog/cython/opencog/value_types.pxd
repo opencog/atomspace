@@ -20,3 +20,11 @@ cdef class LinkValue(Value):
 
     @staticmethod
     cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector)
+
+
+cdef class QueueValue(Value):
+    @staticmethod
+    cdef vector[cValuePtr] list_of_values_to_vector(list python_list)
+
+    @staticmethod
+    cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector)
