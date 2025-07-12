@@ -78,14 +78,14 @@ class BindlinkTest(unittest.TestCase):
 
         # Check if the atom is a SetLink
         self.assertTrue(atom is not None)
-        self.assertEquals(atom.type, types.SetLink)
+        self.assertEqual(atom.type, types.SetLink)
 
         # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, self.starting_size + 1)
+        self.assertEqual(ending_size, self.starting_size + 1)
 
         # The SetLink should have expected_arity items in it.
-        self.assertEquals(atom.arity, expected_arity)
+        self.assertEqual(atom.arity, expected_arity)
 
     def test_bindlink(self):
         atom = self.bindlink_atom.execute()
@@ -129,8 +129,8 @@ class BindlinkTest(unittest.TestCase):
 
         tv = evaluate_atom(self.atomspace, satisfaction_atom)
         self.assertTrue(tv is not None and tv.mean <= 0.5)
-        self.assertEquals(green_count(), 2)
-        self.assertEquals(red_count(), 1)
+        self.assertEqual(green_count(), 2)
+        self.assertEqual(red_count(), 1)
 
     def test_execute_atom(self):
         result = ExecutionOutputLink(
@@ -144,7 +144,7 @@ class BindlinkTest(unittest.TestCase):
                 ConceptNode("one"),
                 ConceptNode("two")
             )
-        self.assertEquals(result, list_link)
+        self.assertEqual(result, list_link)
 
     def test_evaluate_atom(self):
         result = evaluate_atom(self.atomspace,
@@ -156,12 +156,12 @@ class BindlinkTest(unittest.TestCase):
                     )
                 )
             )
-        self.assertEquals(result, TruthValue(0.6, 0.234))
+        self.assertEqual(result, TruthValue(0.6, 0.234))
 
     def test_execute_atom_no_return_value(self):
         result = PutLink(DeleteLink(VariableNode("X")),
                         ConceptNode("deleteme")).execute()
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
 
     def test_tmp_atomspace(self):

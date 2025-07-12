@@ -36,7 +36,7 @@ class LoggerTest(TestCase):
             lvl = self.log.string_as_level(lvlname)
             self.log.log(lvl,"these messages should be muted")
             new_size = os.path.getsize(self.tempfn)
-            self.assertEquals(file_size, new_size)
+            self.assertEqual(file_size, new_size)
         for lvlname in lvls_displayed:
             lvl = self.log.string_as_level(lvlname)
             self.log.log(lvl,"this should appear")
@@ -49,6 +49,6 @@ class LoggerTest(TestCase):
     def test_get_set_log_level(self):
         for lvlname in self.log.level_order():
             self.log.set_level(lvlname)
-            self.assertEquals(self.log.get_level(),lvlname)
+            self.assertEqual(self.log.get_level(),lvlname)
 
 

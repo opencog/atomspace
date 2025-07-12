@@ -52,7 +52,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(a1)
         # duplicates resolve to same atom
         a2 = Node("test")
-        self.assertEquals(a1, a2)
+        self.assertEqual(a1, a2)
 
         # Should fail when intentionally adding bad type
         caught = False
@@ -60,15 +60,15 @@ class AtomSpaceTest(TestCase):
             self.space.add_node(types.Link, "test")
         except RuntimeError:
             caught = True
-        self.assertEquals(caught, True)
+        self.assertEqual(caught, True)
 
         # Test adding with a truthvalue
         a3 = Node("test_w_tv").truth_value(0.5, 0.8)
-        self.assertEquals(self.space.size(), 3)
+        self.assertEqual(self.space.size(), 3)
 
         # Test alternative way of adding with a truthvalue
         a4 = Node("test_w_tv_alt", tv=TruthValue(0.5, 0.8))
-        self.assertEquals(self.space.size(), 4)
+        self.assertEqual(self.space.size(), 4)
 
     def test_add_link(self):
         n1 = Node("test1")
@@ -93,7 +93,7 @@ class AtomSpaceTest(TestCase):
             l1 = self.space.add_link(types.Node, [n1, n3])
         except RuntimeError:
             caught = True
-        self.assertEquals(caught, True)
+        self.assertEqual(caught, True)
 
     def test_is_valid(self):
         a1 = Node("test1")
@@ -193,11 +193,11 @@ class AtomSpaceTest(TestCase):
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
         self.space.clear()
-        self.assertEquals(self.space.size(), 0)
-        self.assertEquals(len(self.space), 0)
+        self.assertEqual(self.space.size(), 0)
+        self.assertEqual(len(self.space), 0)
 
     def test_container_methods(self):
-        self.assertEquals(len(self.space), 0)
+        self.assertEqual(len(self.space), 0)
         a1 = Node("test1")
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
@@ -206,7 +206,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(a2 in self.space)
         self.assertTrue(a3 in self.space)
 
-        self.assertEquals(len(self.space), 3)
+        self.assertEqual(len(self.space), 3)
 
     def test_context_mgr_tmp(self):
         a = ConceptNode('a')

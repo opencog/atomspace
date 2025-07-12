@@ -47,7 +47,7 @@ class SchemeTest(TestCase):
         print("Added atom\n")
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
-        self.assertEquals(a1.tv, expected)
+        self.assertEqual(a1.tv, expected)
         print(f"Got={str(a1.tv)} expected={str(expected)}")
 
     # Create lots of large, random strings, try to trick guile gc
@@ -85,16 +85,16 @@ class SchemeTest(TestCase):
 
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
-        self.assertEquals(a1.tv, expected)
+        self.assertEqual(a1.tv, expected)
 
         # Actually, the atoms overall should compare.
-        self.assertEquals(a1, basic)
+        self.assertEqual(a1, basic)
 
         # Do it again, from a define in the scm file.
         again = scheme_eval_h(self.space, "wobbly")
         a2 = self.space.add_node(types.ConceptNode, "wobbly")
         self.assertTrue(a2)
-        self.assertEquals(a2, again)
+        self.assertEqual(a2, again)
 
 
     # Run the pattern-matcher/unifier/query-engine.
