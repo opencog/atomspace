@@ -274,7 +274,7 @@ cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
         void close() nogil
         bint is_closed() nogil
         void add(const cValuePtr&) nogil
-        cValuePtr remove() except + nogil
+        cValuePtr remove() nogil except +
         size_t size() nogil
         void clear() nogil
         const vector[cValuePtr]& value() nogil
@@ -289,7 +289,7 @@ cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
         void close() nogil
         bint is_closed() nogil
         void add(const cValuePtr&) nogil
-        cValuePtr remove() except + nogil
+        cValuePtr remove() nogil except +
         size_t size() nogil
         void clear() nogil
         const vector[cValuePtr]& value() nogil
