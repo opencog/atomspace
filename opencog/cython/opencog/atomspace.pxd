@@ -261,4 +261,23 @@ cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
         const vector[cValuePtr]& value() const
 
 
+# QueueValue
+cdef extern from "opencog/util/concurrent_queue.h" namespace "opencog::concurrent_queue":
+    cdef cppclass Canceled:
+        pass
+
+cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
+    cdef cppclass cQueueValue "opencog::QueueValue":
+        cQueueValue()
+        cQueueValue(const vector[cValuePtr]& values) nogil
+        void open() nogil
+        void close() nogil
+        bint is_closed() nogil
+        void add(const cValuePtr&) nogil
+        cValuePtr remove() nogil except +
+        size_t size() nogil
+        void clear() nogil
+        const vector[cValuePtr]& value() nogil
+
+
 include "value_types.pxd"
