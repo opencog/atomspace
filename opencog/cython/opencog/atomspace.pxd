@@ -280,4 +280,19 @@ cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
         const vector[cValuePtr]& value() nogil
 
 
+# UnisetValue
+cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
+    cdef cppclass cUnisetValue "opencog::UnisetValue":
+        cUnisetValue()
+        cUnisetValue(const vector[cValuePtr]& values) nogil
+        void open() nogil
+        void close() nogil
+        bint is_closed() nogil
+        void add(const cValuePtr&) nogil
+        cValuePtr remove() nogil except +
+        size_t size() nogil
+        void clear() nogil
+        const vector[cValuePtr]& value() nogil
+
+
 include "value_types.pxd"
