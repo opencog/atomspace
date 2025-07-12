@@ -16,6 +16,7 @@ from opencog.atomspace import (createBoolValue,
                                createQueueValue,
                                createStringValue,
                                createTruthValue,
+                               createUnisetValue,
                                # createVoidValue,
                                # createRandomStream
                                )
@@ -48,6 +49,9 @@ def QueueValue(arg=None):
 
 def StringValue(arg):
     return createStringValue(arg)
+
+def UnisetValue(arg=None):
+    return createUnisetValue(arg)
 
 def TruthValue(strength_t strength=1.0, confidence_t confidence=1.0):
     return createTruthValue(strength, confidence)
