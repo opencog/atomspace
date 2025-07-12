@@ -16,23 +16,38 @@ cdef class QueueValue(Value):
 
     def open(self):
         """Open the queue for adding/removing values."""
-        (<cQueueValue*>self.get_c_value_ptr().get()).open()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        with nogil:
+            queue_ptr.open()
 
     def close(self):
         """Close the queue. No more values can be added after closing."""
-        (<cQueueValue*>self.get_c_value_ptr().get()).close()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        with nogil:
+            queue_ptr.close()
 
     def is_closed(self):
         """Check if the queue is closed."""
-        return (<cQueueValue*>self.get_c_value_ptr().get()).is_closed()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef bool result
+        with nogil:
+            result = queue_ptr.is_closed()
+        return result
 
     def clear(self):
         """Remove all values from the queue."""
-        (<cQueueValue*>self.get_c_value_ptr().get()).clear()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        with nogil:
+            queue_ptr.clear()
 
     def push(self, Value value):
         """Add a value to the queue (same as add())."""
-        (<cQueueValue*>self.get_c_value_ptr().get()).add(value.get_c_value_ptr())
+        cdef cValuePtr val_ptr = value.get_c_value_ptr()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+
+        # Release the GIL since the C++ method is thread-safe
+        with nogil:
+            queue_ptr.add(val_ptr)
 
     def pop(self):
         """Remove and return a value from the queue (same as remove()).
@@ -41,15 +56,19 @@ cdef class QueueValue(Value):
             RuntimeError: If the queue is closed and empty.
         """
         cdef cValuePtr c_value
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+
+        # Release the GIL while waiting for values, so other Python threads can run
         try:
-            c_value = (<cQueueValue*>self.get_c_value_ptr().get()).remove()
-            if c_value.get() == NULL:
-                return None
-            return create_python_value_from_c_value(c_value)
+            with nogil:
+                c_value = queue_ptr.remove()
         except:
-            # Convert C++ concurrent_queue::Canceled exception to Python RuntimeError
-            # The C++ exception gets converted to a generic std::exception in Python
+            # Convert any exception from remove() to our RuntimeError
             raise RuntimeError("Cannot pop from closed empty queue")
+
+        if c_value.get() == NULL:
+            return None
+        return create_python_value_from_c_value(c_value)
 
     def append(self, Value value):
         """Add a value to the queue (Python list-like interface)."""
@@ -57,7 +76,11 @@ cdef class QueueValue(Value):
 
     def __len__(self):
         """Return the number of values in the queue."""
-        return (<cQueueValue*>self.get_c_value_ptr().get()).size()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef size_t result
+        with nogil:
+            result = queue_ptr.size()
+        return result
 
     def to_list(self):
         """Convert the queue contents to a Python list."""
