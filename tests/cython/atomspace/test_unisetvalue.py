@@ -50,7 +50,7 @@ class UnisetValueTest(unittest.TestCase):
         removed = []
         for _ in range(3):
             removed.append(value.remove())
-        
+
         self.assertEqual(3, len(removed))
         self.assertEqual(0, len(value))
 
@@ -78,7 +78,7 @@ class UnisetValueTest(unittest.TestCase):
         # Add different values
         value.add(FloatValue(43.0))
         value.add(StringValue('test'))
-        
+
         self.assertEqual(3, len(value))
 
         value.close()
@@ -193,13 +193,13 @@ class UnisetValueTest(unittest.TestCase):
         """Test that duplicates in the initial list are removed."""
         val1 = FloatValue(42.0)
         val2 = StringValue('test')
-        
+
         # Create with duplicates in the list
         value = UnisetValue([val1, val2, val1, val2, val1])
-        
+
         # Should only have 2 unique values
         self.assertEqual(2, len(value))
-        
+
         # Verify the values are correct
         items = value.to_list()
         item_types = sorted([v.type_name for v in items])
