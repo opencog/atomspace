@@ -41,7 +41,11 @@ cdef class QueueValue(Value):
             queue_ptr.clear()
 
     def push(self, Value value):
-        """Add a value to the queue (same as add())."""
+        """Add a value to the queue (same as add()).
+
+        Raises:
+            RuntimeError: If the queue is closed.
+        """
         cdef cValuePtr val_ptr = value.get_c_value_ptr()
         cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
 
