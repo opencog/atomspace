@@ -423,7 +423,7 @@ SECTION <- ORDERED_LINK             // Sheaf section, connector set
 //
 // The original germ "playing" is now the head of the shape. The word
 // "level" becomes the germ of the CrossSection. The wild-card indicates
-// which slot the the germ of the CrossSection came from. Thus, the
+// which slot the germ of the CrossSection came from. Thus, the
 // original Section can be obtained from the CrossSection by reinserting
 // the new germ into the wild-card.
 //
