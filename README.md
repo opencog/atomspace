@@ -554,7 +554,7 @@ read-thru and the write-thru proxies for the cogserver. These pass
 incoming data and results on to the next nodes in the network.
 
 ### Cross-system Bridges
-Because the AtomSpace can hold many different representatioinal
+Because the AtomSpace can hold many different representational
 styles, it is relatively easy to import data into the AtomSpace.
 The low-brow way to do this is to write a script file that imports
 the data. This is fine, but leads to data management issues: who's

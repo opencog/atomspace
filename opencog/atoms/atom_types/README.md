@@ -53,7 +53,7 @@ Where
    type's identifier using camel-casing patterns (for instance,
    `CUSTOM_NODE` would be named `CustomNode`).
 
-Above is a short snippet of valid script entries. For more examples,
+Below is a short snippet of valid script entries. For more examples,
 check the `atom_types.script` file in this directory.
 ```
 ATOM
