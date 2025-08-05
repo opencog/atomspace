@@ -30,10 +30,11 @@
 #include <filesystem>
 
 // A simple callback wrapper to do RAII when coing out of scope,
-// capable of handling exceptions. Boost provides this, but we want
-// to avoid the overkill of boost. Some future C++ will provide this,
-// but gcc does not, as of mid-2025. Anyway, this is so simple, it
-// seems best to avoid the dependencies. Just do it ourselves.
+// capable of handling exceptions. Boost provides this (in the form
+// of a SCOPE_EXIT macros), but we want to avoid the overkill of boost.
+// Some future C++ will provide this, but gcc does not, as of mid-2025.
+// Anyway, this is so simple, it seems best to avoid the dependencies.
+// Just do it ourselves.
 #include <iostream>
 #include <utility>
 
@@ -49,10 +50,10 @@ class scope_exit
 		~scope_exit() { _callback(); }
 };
 
-#define SCOPE_EXIT0 scope_exit scope_guard_void([]()
-#define SCOPE_EXIT(X) scope_exit scope_guard([X]()
-#define SCOPE_EXIT4(A,B,C,D) scope_exit scope_guard([&]()
-#define SCOPE_EXIT_END );
+#define SCOPE_GUARD0 scope_exit scope_guard_void([]()
+#define SCOPE_GUARD(X) scope_exit scope_guard([X]()
+#define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&]()
+#define SCOPE_GUARD_END )
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -985,14 +986,14 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // SCOPE_EXIT is a declaration for a scope-exit handler.
+    // SCOPE_GUARD is a declaration for a scope-exit handler.
     // It will call PyGILState_Release() when this function returns
     // (e.g. due to a throw).  The below is not a call; it's just a
     // declaration. Anyway, once the GIL is released, no more python
     // API calls are allowed.
-    SCOPE_EXIT(&gstate) {
+    SCOPE_GUARD(&gstate) {
         PyGILState_Release(gstate);
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
@@ -1015,9 +1016,9 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     push_context_atomspace(AtomSpaceCast(as));
-    SCOPE_EXIT0 {
+    SCOPE_GUARD0 {
         pop_context_atomspace();
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     // Get the python value object returned by this user function.
     PyObject *pyValue = call_user_function(func, varargs);
@@ -1031,9 +1032,9 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    SCOPE_EXIT(&gstate) {
+    SCOPE_GUARD(&gstate) {
         PyGILState_Release(gstate);
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     // Did we actually get a Value?
     // One way to do this would be to say
@@ -1087,14 +1088,14 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // SCOPE_EXIT is a declaration for a scope-exit handler.
+    // SCOPE_GUARD is a declaration for a scope-exit handler.
     // It will call PyGILState_Release() when this function returns
     // (e.g. due to a throw).  The below is not a call; it's just a
     // declaration. Anyway, once the GIL is released, no more python
     // API calls are allowed.
-    SCOPE_EXIT(&gstate) {
+    SCOPE_GUARD(&gstate) {
         PyGILState_Release(gstate);
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     // Create the Python tuple for the function call with python
     // atomspace.
@@ -1269,14 +1270,14 @@ std::string PythonEval::execute_script(const std::string& script)
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    // SCOPE_EXIT is a declaration for a scope-exit handler.
+    // SCOPE_GUARD is a declaration for a scope-exit handler.
     // It will call PyGILState_Release() when this function returns
     // (e.g. due to a throw).  The below is not a call; it's just a
     // declaration. Anyway, once the GIL is released, no more python
     // API calls are allowed.
-    SCOPE_EXIT(&gstate) {
+    SCOPE_GUARD(&gstate) {
         PyGILState_Release(gstate);
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     check_for_error();
 
@@ -1306,7 +1307,7 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
     rc = dup2(pipefd[1], fileno(stdout));
     OC_ASSERT(0 < rc, "pipe splice failure");
 
-    SCOPE_EXIT4(&pipefd, &rc, &stdout_backup, &_capture_stdout)
+    SCOPE_GUARD4(&pipefd, &rc, &stdout_backup, &_capture_stdout)
     {
         // Restore stdout
         fflush(stdout);
@@ -1329,7 +1330,7 @@ std::string PythonEval::exec_wrap_stdout(const std::string& expr)
 
         // Cleanup.
         close(pipefd[0]);
-    } SCOPE_EXIT_END
+    } SCOPE_GUARD_END;
 
     std::string res;
     try {
