@@ -115,8 +115,12 @@ std::string Node::to_short_string(const std::string& indent) const
     answer += '\"';
 
     // Print the TV only if its not the default.
-    if (getTruthValue() and not getTruthValue()->isDefaultTV())
-        answer += ' ' + getTruthValue()->to_string();
+    {
+        KVP_SHARED_LOCK;
+        auto pr = _values.find(truth_key());
+        if (_values.end() != pr)
+            answer += ' ' + pr->second->to_string();
+    }
 
     answer += ')';
     return answer;

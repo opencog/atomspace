@@ -67,7 +67,7 @@ Atom::~Atom()
 
 // ==============================================================
 
-static const Handle& truth_key(void)
+const Handle& truth_key(void)
 {
 	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
 	return tk;

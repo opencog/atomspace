@@ -613,6 +613,8 @@ static inline Handle HandleCast(const ValuePtr& pa)
 static inline ValuePtr ValueCast(const Handle& h)
     { return std::dynamic_pointer_cast<Value>(h); }
 
+const Handle& truth_key(void);
+
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 // The reason indent is not an optional argument with default is
