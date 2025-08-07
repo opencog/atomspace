@@ -4113,6 +4113,20 @@ Universe of Discourse – how is this to be managed and understood?
 Disjoint Union
 \end_layout
 
+\begin_layout Itemize
+Given any network with pretensions of being a term algebra with relations
+ and logical connectives, i.e.
+ a model–theoretic model, one can attach vectors, matrices and tensors to
+ the vertexes with one, two, three edges coming from them, and form a trainable
+ network.
+ But what should one train on?
+\end_layout
+
+\begin_layout Itemize
+The example prototype here is LTN, Logic Tensor Networks, from https://github.com
+/logictensornetworks/logictensornetworks 
+\end_layout
+
 \begin_layout Standard
 xxx
 \end_layout
