@@ -56,10 +56,12 @@
 ; View performance stats. (But these will be zero, because 42 seconds
 ; haven't passed by yet. The average rate is also rounded to the nearest
 ; integer, and so will round down to zero.)
-(display (monitor-storage (WriteBufferProxy "write buffer")))
+(define (show-stats STORG)
+	(display (cog-value-ref STORG (Predicate "*-monitor-*") 0)))
+(show-stats (WriteBufferProxy "write buffer"))
 
 ; There are also perf stats for the base server:
-(display (monitor-storage (RocksStorageNode "rocks:///tmp/foo.rdb")))
+(show-stats (RocksStorageNode "rocks:///tmp/foo.rdb"))
 
 ; Store the whole Atom, repeatedly.
 (for-each
@@ -116,7 +118,7 @@
 (store-atom (Concept "foo"))
 
 ; Look at the cache statistics:
-(display (monitor-storage (ReadWriteProxy "full cache")))
+(show-stats (ReadWriteProxy "full cache"))
 
 (cog-close (ReadWriteProxy "full cache"))
 
