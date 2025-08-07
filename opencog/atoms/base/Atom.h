@@ -526,7 +526,8 @@ public:
     // ---------------------------------------------------------
     // Deprecated calls, do not use these in new code!
     // Some day, these will be removed.
-    // At this time, they are only used in cython/opencog/atom.pyx
+    // The two getIncoming calls are only used in cython/opencog/atom.pyx
+    // The foreach_incoming call is used extensively in old OpenCog.
 
     //! Deprecated! Do not use in new code!
     //! Place incoming set into STL container of Handles.
@@ -547,23 +548,6 @@ public:
                 WEAKLY_DO(h, w, { *result = h; result ++; })
         }
         return result;
-    }
-
-    //! Deprecated! Do not use in new code!
-    //! Invoke the callback on each atom in the incoming set of
-    //! handle h, until one of them returns true, in which case
-    //! iteration stops, and true is returned. Otherwise the
-    //! callback is called on all incomings and false is returned.
-    template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
-    {
-        // We make a copy of the set, so that we don't call the
-        // callback with locks held.
-        IncomingSet vh(getIncomingSet());
-
-        for (const Handle& lp : vh)
-            if ((data->*cb)(lp)) return true;
-        return false;
     }
 
     /**
@@ -588,6 +572,24 @@ public:
             WEAKLY_DO(h, w, { *result = h; result ++; })
         return result;
     }
+
+    //! Deprecated! Do not use in new code!
+    //! Invoke the callback on each atom in the incoming set of
+    //! handle h, until one of them returns true, in which case
+    //! iteration stops, and true is returned. Otherwise the
+    //! callback is called on all incomings and false is returned.
+    template<class T>
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
+    {
+        // We make a copy of the set, so that we don't call the
+        // callback with locks held.
+        IncomingSet vh(getIncomingSet());
+
+        for (const Handle& lp : vh)
+            if ((data->*cb)(lp)) return true;
+        return false;
+    }
+
 };
 
 #define ATOM_PTR_DECL(CNAME)                                \
