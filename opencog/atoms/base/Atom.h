@@ -416,20 +416,15 @@ public:
              const_cast<Atom*>(this)->shared_from_this()));
     }
 
-    /** Returns the TruthValue object of the atom. */
-    TruthValuePtr getTruthValue() const;
-
-    //! Sets the TruthValue object of the atom.
-    void setTruthValue(const TruthValuePtr&);
-
-    /// Increment the CountTruthValue atomically.
-    /// Return the new TruthValue
-    TruthValuePtr incrementCountTV(double);
+    // ---------------------------------------------------
+    // The setValue() and getValue() methods are virtual, because
+    // ObjectNodes use them to intercept messages being sent to the
+    // object.
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, const ValuePtr& value);
+    virtual void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
-    ValuePtr getValue(const Handle& key) const;
+    virtual ValuePtr getValue(const Handle& key) const;
     /// Atomically increment a generic FloatValue.
     ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
     ValuePtr incrementCount(const Handle& key, size_t idx, double);
@@ -453,6 +448,19 @@ public:
     // storage backends, manipulating multi-AtomSpace bulk loads.
     void clearValues();
 
+    // ---------------------------------------------------
+    // Old TruthValue API. Deprcated; should be removed.
+    /** Returns the TruthValue object of the atom. */
+    TruthValuePtr getTruthValue() const;
+
+    //! Sets the TruthValue object of the atom.
+    void setTruthValue(const TruthValuePtr&);
+
+    /// Increment the CountTruthValue atomically.
+    /// Return the new TruthValue
+    TruthValuePtr incrementCountTV(double);
+
+    // ---------------------------------------------------
     //! Return true if the incoming set is empty.
     bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
 
@@ -476,6 +484,7 @@ public:
     /** Return the size of the incoming set, for the given type. */
     size_t getIncomingSetSizeByType(Type, const AtomSpace* = nullptr) const;
 
+    // ---------------------------------------------------
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
     virtual std::string to_short_string(const std::string& indent) const = 0;
@@ -517,6 +526,8 @@ public:
     // ---------------------------------------------------------
     // Deprecated calls, do not use these in new code!
     // Some day, these will be removed.
+    // The two getIncoming calls are only used in cython/opencog/atom.pyx
+    // The foreach_incoming call is used extensively in old OpenCog.
 
     //! Deprecated! Do not use in new code!
     //! Place incoming set into STL container of Handles.
@@ -537,23 +548,6 @@ public:
                 WEAKLY_DO(h, w, { *result = h; result ++; })
         }
         return result;
-    }
-
-    //! Deprecated! Do not use in new code!
-    //! Invoke the callback on each atom in the incoming set of
-    //! handle h, until one of them returns true, in which case
-    //! iteration stops, and true is returned. Otherwise the
-    //! callback is called on all incomings and false is returned.
-    template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
-    {
-        // We make a copy of the set, so that we don't call the
-        // callback with locks held.
-        IncomingSet vh(getIncomingSet());
-
-        for (const Handle& lp : vh)
-            if ((data->*cb)(lp)) return true;
-        return false;
     }
 
     /**
@@ -578,6 +572,24 @@ public:
             WEAKLY_DO(h, w, { *result = h; result ++; })
         return result;
     }
+
+    //! Deprecated! Do not use in new code!
+    //! Invoke the callback on each atom in the incoming set of
+    //! handle h, until one of them returns true, in which case
+    //! iteration stops, and true is returned. Otherwise the
+    //! callback is called on all incomings and false is returned.
+    template<class T>
+    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
+    {
+        // We make a copy of the set, so that we don't call the
+        // callback with locks held.
+        IncomingSet vh(getIncomingSet());
+
+        for (const Handle& lp : vh)
+            if ((data->*cb)(lp)) return true;
+        return false;
+    }
+
 };
 
 #define ATOM_PTR_DECL(CNAME)                                \
