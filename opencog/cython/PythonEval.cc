@@ -30,8 +30,8 @@
 #include <filesystem>
 
 // A simple callback wrapper to do RAII when coing out of scope,
-// capable of handling exceptions. Boost provides this (in the form
-// of a SCOPE_EXIT macros), but we want to avoid the overkill of boost.
+// capable of handling exceptions. Boost provides this (in the form of
+// BOOST_SCOPE_EXIT macros), but we want to avoid the overkill of boost.
 // Some future C++ will provide this, but gcc does not, as of mid-2025.
 // Anyway, this is so simple, it seems best to avoid the dependencies.
 // Just do it ourselves.
@@ -50,9 +50,9 @@ class scope_exit
 		~scope_exit() { _callback(); }
 };
 
-#define SCOPE_GUARD0 scope_exit scope_guard_void([]()
-#define SCOPE_GUARD(X) scope_exit scope_guard([X]()
-#define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&]()
+#define SCOPE_GUARD0 scope_exit scope_guard_void([](void)
+#define SCOPE_GUARD(X) scope_exit scope_guard([X](void)
+#define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&](void)
 #define SCOPE_GUARD_END )
 
 #include <opencog/util/exceptions.h>
