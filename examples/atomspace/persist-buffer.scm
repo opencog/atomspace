@@ -27,11 +27,17 @@
 (use-modules (opencog) (opencog persist))
 (use-modules (opencog persist-rocks))
 
+; Define the write buffer.
+(cog-set-value!
+	(WriteBufferProxy "write buffer")
+	(Predicate "*-proxy-parts-*")
+	(RocksStorageNode "rocks:///tmp/foo.rdb"))
+
 ; The default write buffer size is 60 seconds; change it to 42. This
 ; parameter is optional, and can be skipped.
-(ProxyParameters
+(cog-set-value!
 	(WriteBufferProxy "write buffer")
-	(RocksStorageNode "rocks:///tmp/foo.rdb")
+	(Predicate "*-decay-const-*")
 	(Number 42))
 
 (cog-open (WriteBufferProxy "write buffer"))
@@ -73,8 +79,9 @@
 ; for by using the ReadWriteProxy, to gang together one reader and
 ; one writer.
 
-(ProxyParameters
+(cog-set-value!
 	(ReadWriteProxy "read w/write buffer")
+	(Predicate "*-proxy-parts-*")
 	(List
 		(RocksStorageNode "rocks:///tmp/foo.rdb")   ;; target for reads
 		(WriteBufferProxy "write buffer")))         ;; target for writes
@@ -91,12 +98,14 @@
 ; AtomSpace. The can be ganged up with the write-buffer, to offer
 ; caching both ways.
 
-(ProxyParameters
+(cog-set-value!
 	(CachingProxy "read cache")
+	(Predicate "*-proxy-parts-*")
 	(RocksStorageNode "rocks:///tmp/foo.rdb"))
 
-(ProxyParameters
+(cog-set-value!
 	(ReadWriteProxy "full cache")
+	(Predicate "*-proxy-parts-*")
 	(List
 		(CachingProxy "read cache")           ;; target for reads
 		(WriteBufferProxy "write buffer")))   ;; target for writes
