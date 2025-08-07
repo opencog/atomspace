@@ -469,6 +469,7 @@ ITEM_CLASS_NODE <- LEXICAL_NODE
 // A TagNode is a name for a data stream that is generating Items.
 // Data streams are kind-of-like sets, except that they are constantly
 // popping out more Items, so they're not static or fixed.
+// TODO: should these be OBJECT_NODEs?
 TAG_NODE <- LEXICAL_NODE
 
 // A TagLink is a link between a TagNode and the Item being tagged.
@@ -1182,7 +1183,20 @@ EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
 PURE_EXEC_LINK <- EXECUTABLE_LINK
 
 // ==============================================================
-// Procedure and schema nodes.
+// Object, procedure and schema nodes.
+//
+// ObjectNodes represent external, "real", "physical" objects that
+// "exist" out there, in the "real world". Objects can be sent
+// "messages", and thus resemble object-oriented (OO) objects.
+// (The concept of "sending a message" dates back to older ideas about
+// OO programming. For languages like C++/Java, sending a message is the
+// same thing as calling a method on that object.)
+// ObjectNodes have per-instance state that is opaque to the AtomSpace,
+// and the opaque state cannot (in general) be saved (even though the
+// ObjectNode iself can be.) That state is in general associated with
+// some external object or device: a file, a library function, a socket,
+// a database, etc.
+OBJECT_NODE <- NODE
 //
 // These form the foundation for a different way of looking at
 // Values and Predicates: they generalize the notion of "predicate"
@@ -1191,7 +1205,7 @@ PURE_EXEC_LINK <- EXECUTABLE_LINK
 //
 // Procedures are generic terms; when they are executed, they can
 // return any Value, including Atoms, and not just TruthValues.
-PROCEDURE_NODE <- NODE
+PROCEDURE_NODE <- OBJECT_NODE
 
 // DefinedProcedureNodes are used to make human-written Atomese easier
 // to read by humans. They have no other fundamental usefulness...
