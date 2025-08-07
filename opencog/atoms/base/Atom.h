@@ -416,20 +416,15 @@ public:
              const_cast<Atom*>(this)->shared_from_this()));
     }
 
-    /** Returns the TruthValue object of the atom. */
-    TruthValuePtr getTruthValue() const;
-
-    //! Sets the TruthValue object of the atom.
-    void setTruthValue(const TruthValuePtr&);
-
-    /// Increment the CountTruthValue atomically.
-    /// Return the new TruthValue
-    TruthValuePtr incrementCountTV(double);
+    // ---------------------------------------------------
+    // The setValue() and getValue() methods are virtual, because
+    // ObjectNodes use them to intercept messages being sent to the
+    // object.
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, const ValuePtr& value);
+    virtual void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
-    ValuePtr getValue(const Handle& key) const;
+    virtual ValuePtr getValue(const Handle& key) const;
     /// Atomically increment a generic FloatValue.
     ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
     ValuePtr incrementCount(const Handle& key, size_t idx, double);
@@ -453,6 +448,19 @@ public:
     // storage backends, manipulating multi-AtomSpace bulk loads.
     void clearValues();
 
+    // ---------------------------------------------------
+    // Old TruthValue API. Deprcated; should be removed.
+    /** Returns the TruthValue object of the atom. */
+    TruthValuePtr getTruthValue() const;
+
+    //! Sets the TruthValue object of the atom.
+    void setTruthValue(const TruthValuePtr&);
+
+    /// Increment the CountTruthValue atomically.
+    /// Return the new TruthValue
+    TruthValuePtr incrementCountTV(double);
+
+    // ---------------------------------------------------
     //! Return true if the incoming set is empty.
     bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
 
@@ -476,6 +484,7 @@ public:
     /** Return the size of the incoming set, for the given type. */
     size_t getIncomingSetSizeByType(Type, const AtomSpace* = nullptr) const;
 
+    // ---------------------------------------------------
     /** Returns a string representation of the node. */
     virtual std::string to_string(const std::string& indent) const = 0;
     virtual std::string to_short_string(const std::string& indent) const = 0;
@@ -517,6 +526,7 @@ public:
     // ---------------------------------------------------------
     // Deprecated calls, do not use these in new code!
     // Some day, these will be removed.
+    // At this time, they are only used in cython/opencog/atom.pyx
 
     //! Deprecated! Do not use in new code!
     //! Place incoming set into STL container of Handles.
