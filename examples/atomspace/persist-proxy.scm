@@ -94,6 +94,7 @@ $ guile
 scheme@(guile-user)>
 
 (use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-rocks))
 (use-modules (opencog persist-cog))
 (define sto (CogStorageNode "cog://localhost:17001"))
 
@@ -105,12 +106,14 @@ scheme@(guile-user)>
 ; But really, one is enough. For this example, we use Rocks, but they
 ; can be anything: Postgres, another CogServer, or another Proxy. They
 ; can be mixed & matched as desired.
-(cog-set-proxy!
-	(ProxyParameters
-		(WriteThruProxy "wthru mirror")
-		(List
-			(RocksStorageNode "rocks:///tmp/foo.rdb")
-			(RocksStorageNode "rocks:///tmp/bar.rdb"))))
+(cog-set-value!
+	(WriteThruProxy "wthru mirror")
+	(Predicate "*-proxy-parts-*")
+	(List
+		(RocksStorageNode "rocks:///tmp/foo.rdb")
+		(RocksStorageNode "rocks:///tmp/bar.rdb")))
+
+(cog-set-proxy! (WriteThruProxy "wthru mirror"))
 
 ; The above tells the CogServer to store data into both of the RocksDB
 ; instances. The name on `WriteThruProxy` Node is arbitrary; it can be
@@ -140,7 +143,7 @@ scheme@(guile-user)>
 ; was written above. It will illustrate the ReadThruProxy.
 ;
 ; ---------------------------------------------------------------------
-; Start by killing and restarting the CogServer. This "guarantees" that
+; Start by killing and restarting the CogServer. This guarantees that
 ; we've got no lingering data in the AtomSpace that might confuse us.
 ;
 $ guile
@@ -157,6 +160,7 @@ $ guile
 scheme@(guile-user)>
 
 (use-modules (opencog) (opencog persist))
+(use-modules (opencog persist-rocks))
 (use-modules (opencog persist-cog))
 (define sto (CogStorageNode "cog://localhost:17001"))
 
@@ -170,12 +174,14 @@ scheme@(guile-user)>
 ; Rocks, the readers can be a mixture of anything, including other
 ; ProxyNodes.
 ;
-(cog-set-proxy!
-	(ProxyParameters
-		(ReadThruProxy "rthru balance")
-		(List
-			(RocksStorageNode "rocks:///tmp/foo.rdb")
-			(RocksStorageNode "rocks:///tmp/bar.rdb"))))
+(cog-set-value!
+	(ReadThruProxy "rthru balance")
+	(Predicate "*-proxy-parts-*")
+	(List
+		(RocksStorageNode "rocks:///tmp/foo.rdb")
+		(RocksStorageNode "rocks:///tmp/bar.rdb")))
+
+(cog-set-proxy! (ReadThruProxy "rthru balance"))
 
 ; Now, tell the Cogserver to start using this proxy.
 (cog-proxy-open)
