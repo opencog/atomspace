@@ -29,15 +29,13 @@
 
 ; Define the write buffer.
 (cog-set-value!
-	(WriteBufferProxy "write buffer")
-	(Predicate "*-proxy-parts-*")
+	(WriteBufferProxy "write buffer") (*-proxy-parts-*)
 	(RocksStorageNode "rocks:///tmp/foo.rdb"))
 
 ; The default write buffer size is 60 seconds; change it to 42. This
 ; parameter is optional, and can be skipped.
 (cog-set-value!
-	(WriteBufferProxy "write buffer")
-	(Predicate "*-decay-const-*")
+	(WriteBufferProxy "write buffer") (*-decay-const-*)
 	(Number 42))
 
 (cog-open (WriteBufferProxy "write buffer"))
@@ -57,7 +55,7 @@
 ; haven't passed by yet. The average rate is also rounded to the nearest
 ; integer, and so will round down to zero.)
 (define (show-stats STORG)
-	(display (cog-value-ref STORG (Predicate "*-monitor-*") 0)))
+	(display (cog-value-ref STORG (*-monitor-*) 0)))
 (show-stats (WriteBufferProxy "write buffer"))
 
 ; There are also perf stats for the base server:
@@ -83,7 +81,7 @@
 
 (cog-set-value!
 	(ReadWriteProxy "read w/write buffer")
-	(Predicate "*-proxy-parts-*")
+	(*-proxy-parts-*)
 	(List
 		(RocksStorageNode "rocks:///tmp/foo.rdb")   ;; target for reads
 		(WriteBufferProxy "write buffer")))         ;; target for writes
@@ -101,13 +99,11 @@
 ; caching both ways.
 
 (cog-set-value!
-	(CachingProxy "read cache")
-	(Predicate "*-proxy-parts-*")
+	(CachingProxy "read cache") (*-proxy-parts-*)
 	(RocksStorageNode "rocks:///tmp/foo.rdb"))
 
 (cog-set-value!
-	(ReadWriteProxy "full cache")
-	(Predicate "*-proxy-parts-*")
+	(ReadWriteProxy "full cache") (*-proxy-parts-*)
 	(List
 		(CachingProxy "read cache")           ;; target for reads
 		(WriteBufferProxy "write buffer")))   ;; target for writes

@@ -108,7 +108,7 @@ scheme@(guile-user)>
 ; can be mixed & matched as desired.
 (cog-set-value!
 	(WriteThruProxy "wthru mirror")
-	(Predicate "*-proxy-parts-*")
+	(*-proxy-parts-*)
 	(List
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
@@ -176,7 +176,7 @@ scheme@(guile-user)>
 ;
 (cog-set-value!
 	(ReadThruProxy "rthru balance")
-	(Predicate "*-proxy-parts-*")
+	(*-proxy-parts-*)
 	(List
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
