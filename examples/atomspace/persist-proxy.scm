@@ -113,14 +113,20 @@ scheme@(guile-user)>
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
 
-(cog-set-proxy! (WriteThruProxy "wthru mirror"))
+(cog-set-value!
+	sto
+	(Predicate "*-set-proxy-*")
+	(WriteThruProxy "wthru mirror"))
 
 ; The above tells the CogServer to store data into both of the RocksDB
 ; instances. The name on `WriteThruProxy` Node is arbitrary; it can be
 ; set to anything.
 ;
 ; Now, tell the Cogserver to start using this proxy.
-(cog-proxy-open)
+(cog-set-value!
+	sto
+	(Predicate "*-proxy-open-*")
+	(VoidValue))
 
 ; Now store some stuff. You might want to do a `(cog-prt-atomspace)`
 ; back at the CogServer, just to see what's going on there.
@@ -181,10 +187,16 @@ scheme@(guile-user)>
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
 
-(cog-set-proxy! (ReadThruProxy "rthru balance"))
+(cog-set-value!
+	sto
+	(Predicate "*-set-proxy-*")
+	(ReadThruProxy "rthru balance"))
 
 ; Now, tell the Cogserver to start using this proxy.
-(cog-proxy-open)
+(cog-set-value!
+	sto
+	(Predicate "*-proxy-open-*")
+	(VoidValue))
 
 ; Lets retrieve the Atom we wrote above.
 ;
