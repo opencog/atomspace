@@ -120,10 +120,7 @@ scheme@(guile-user)>
 ; set to anything.
 ;
 ; Now, tell the Cogserver to start using this proxy.
-(cog-set-value!
-	sto
-	(Predicate "*-proxy-open-*")
-	(VoidValue))
+(cog-set-value! sto (*-proxy-open-*) (VoidValue))
 
 ; Now store some stuff. You might want to do a `(cog-prt-atomspace)`
 ; back at the CogServer, just to see what's going on there.
@@ -187,10 +184,7 @@ scheme@(guile-user)>
 (cog-set-value! sto (*-set-proxy-*) (ReadThruProxy "rthru balance"))
 
 ; Now, tell the Cogserver to start using this proxy.
-(cog-set-value!
-	sto
-	(Predicate "*-proxy-open-*")
-	(VoidValue))
+(cog-set-value! sto (*-proxy-open-*) (VoidValue))
 
 ; Lets retrieve the Atom we wrote above.
 ;
