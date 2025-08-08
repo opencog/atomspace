@@ -113,10 +113,7 @@ scheme@(guile-user)>
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
 
-(cog-set-value!
-	sto
-	(Predicate "*-set-proxy-*")
-	(WriteThruProxy "wthru mirror"))
+(cog-set-value! sto (*-set-proxy-*) (WriteThruProxy "wthru mirror"))
 
 ; The above tells the CogServer to store data into both of the RocksDB
 ; instances. The name on `WriteThruProxy` Node is arbitrary; it can be
@@ -187,10 +184,7 @@ scheme@(guile-user)>
 		(RocksStorageNode "rocks:///tmp/foo.rdb")
 		(RocksStorageNode "rocks:///tmp/bar.rdb")))
 
-(cog-set-value!
-	sto
-	(Predicate "*-set-proxy-*")
-	(ReadThruProxy "rthru balance"))
+(cog-set-value! sto (*-set-proxy-*) (ReadThruProxy "rthru balance"))
 
 ; Now, tell the Cogserver to start using this proxy.
 (cog-set-value!
