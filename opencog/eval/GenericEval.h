@@ -50,6 +50,7 @@ class GenericEval
 			_pending_input(false),
 			_caught_error(false) {}
 		virtual ~GenericEval() {}
+		virtual std::string get_name(void) const { return "GenericEval"; }
 
 		/**
 		 * Return true if the expression was incomplete, and more is expected

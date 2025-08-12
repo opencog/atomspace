@@ -134,6 +134,7 @@ class PythonEval : public GenericEval
     public:
         PythonEval();
         ~PythonEval();
+        virtual std::string get_name(void) const { return "PythonEval"; }
 
         /**
          * Create the singleton instance with the supplied atomspace.
