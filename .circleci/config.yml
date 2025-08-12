@@ -313,13 +313,14 @@ jobs:
 # after the test has *succcessfully* passed makes circleci report
 # false negatives.
 #
-#      - run:
-#          name: Run tests
-#          command: cd build && make check
-#      - run:
-#          name: Print test log
-#          command: cat build/tests/Testing/Temporary/LastTest.log
-#          when: always
+# 12 Aug 2025: temp re-enable. Problem seems to have subsided??
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
       - run:
           name: Install AtomSpace Cog
           command: cd build && make -j2 install && ldconfig
