@@ -253,17 +253,13 @@ jobs:
       - run:
           name: Build tests
           command: cd build && make tests
-#
-# Disable, until https://github.com/opencog/cogserver/issues/5
-# is fixed. The failing ShellUTest makes circleci report false
-# negatives.
-#      - run:
-#          name: Run tests
-#          command: cd build && make check ARGS="$MAKEFLAGS"
-#      - run:
-#          name: Print test log
-#          command: cat build/tests/Testing/Temporary/LastTest.log
-#          when: always
+      - run:
+          name: Run tests
+          command: cd build && make check ARGS="$MAKEFLAGS"
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
       - run:
           name: Install CogServer
           command: cd build && make install && ldconfig
