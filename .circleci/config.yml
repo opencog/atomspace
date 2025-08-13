@@ -307,13 +307,6 @@ jobs:
       - run:
           name: Build tests
           command: cd build && make -j2 tests
-#
-# Disable, until https://github.com/opencog/cogserver/issues/5
-# is fixed. The inability to get the logger threads cleaned up
-# after the test has *succcessfully* passed makes circleci report
-# false negatives.
-#
-# 12 Aug 2025: temp re-enable. Problem seems to have subsided??
       - run:
           name: Run tests
           command: cd build && make check
