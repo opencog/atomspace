@@ -15,7 +15,12 @@ cdef class Atom(Value):
     
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
-        return Atom(PtrHolder.create(<shared_ptr[cValue]&>handle))
+        # Some versions of cython warn that the below does not use
+        # std::shared_ptr<opencog::Value>(const std::shared_ptr<opencog::Atom>)
+        # but when I try to fix this by saying
+        # PtrHolder.create(<shared_ptr[cValue]&>(handle, handle.get())
+        # then I get errors about casting away const. So ... beats me.
+        return Atom(PtrHolder.create(<shared_ptr[cValue]&>(handle)))
 
     cdef cHandle get_c_handle(Atom self):
         """Return C++ shared_ptr from PtrHolder instance"""
