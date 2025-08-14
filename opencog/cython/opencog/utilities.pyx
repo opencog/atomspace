@@ -75,7 +75,7 @@ def add_link(Type t, outgoing, TruthValue tv=None):
     cdef cHandle result
     result = c_add_link(t, handle_vector)
     if result == result.UNDEFINED: return None
-    atom = create_python_value_from_c_value(<cValuePtr&>result)
+    atom = create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
     if tv is not None:
         atom.tv = tv
     return atom
@@ -109,7 +109,7 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     cdef cHandle result = c_add_node(t, name)
 
     if result == result.UNDEFINED: return None
-    atom = create_python_value_from_c_value(<cValuePtr&>result)
+    atom = create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
     if tv is not None:
         atom.tv = tv
     return atom
@@ -155,4 +155,4 @@ def get_free_variables(Atom atom):
     Return the list of free variables in a given atom.
     """
     cdef cpp_set[cHandle] variables = c_get_free_variables(atom.get_c_handle())
-    return [create_python_value_from_c_value(<cValuePtr&> h) for h in variables]
+    return [create_python_value_from_c_value(<cValuePtr&>(h, h.get())) for h in variables]
