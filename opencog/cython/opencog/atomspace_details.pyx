@@ -16,13 +16,13 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        value = create_python_value_from_c_value(<cValuePtr&>handle)
+        value = create_python_value_from_c_value(<cValuePtr&>(handle, handle.get()))
         result.append(value)
         inc(handle_iter)
     return result
 
 cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
-    return [create_python_value_from_c_value(<cValuePtr&> h) for h in handles]
+    return [create_python_value_from_c_value(<cValuePtr&>(h, h.get())) for h in handles]
 
 
 cdef vector[cHandle] atom_list_to_vector(list lst):
