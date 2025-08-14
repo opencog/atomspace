@@ -15,12 +15,13 @@ cdef class Atom(Value):
     
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
-        # Some versions of cython warn that the below does not use
-        # std::shared_ptr<opencog::Value>(const std::shared_ptr<opencog::Atom>)
-        # but when I try to fix this by saying
-        # PtrHolder.create(<shared_ptr[cValue]&>(handle, handle.get())
-        # then I get errors about casting away const. So ... beats me.
-        return Atom(PtrHolder.create(<shared_ptr[cValue]&>(handle)))
+        # Create temporary Handle that is not const, so that we can then
+        # use it to create the desired ValuePtr. If we don't do this,
+        # then cython warns either of failing to use the correct
+        # C++ shared_ptr casting methods, or ir errors out with
+        # casting away constness.
+        cdef cHandle nch = handle
+        return Atom(PtrHolder.create(<shared_ptr[cValue]&>(nch, nch.get())))
 
     cdef cHandle get_c_handle(Atom self):
         """Return C++ shared_ptr from PtrHolder instance"""
