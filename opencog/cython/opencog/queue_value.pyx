@@ -10,7 +10,7 @@ def createQueueValue(arg=None):
         c_ptr.reset(new cQueueValue(QueueValue.list_of_values_to_vector(arg)))
     else:
         c_ptr.reset(new cQueueValue(QueueValue.list_of_values_to_vector([arg])))
-    return QueueValue(PtrHolder.create(<shared_ptr[cValue]&>c_ptr))
+    return QueueValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class QueueValue(Value):
 
