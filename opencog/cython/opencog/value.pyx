@@ -10,7 +10,7 @@ cdef class PtrHolder:
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
 
     @staticmethod
-    cdef PtrHolder create(shared_ptr[void]& ptr):
+    cdef PtrHolder create(shared_ptr[cValue]& ptr):
         """Factory method to construct PtrHolder from C++ shared_ptr"""
         cdef PtrHolder ptr_holder = PtrHolder.__new__(PtrHolder)
         ptr_holder.shared_ptr = ptr
@@ -22,7 +22,7 @@ cdef class Value:
     cdef Value create(cValuePtr& ptr):
         """Factory method to construct Value from C++ cValuePtr using
         PtrHolder instance."""
-        return Value(PtrHolder.create(<shared_ptr[void]&>ptr))
+        return Value(PtrHolder.create(<shared_ptr[cValue]&>ptr))
 
     def __init__(self, ptr_holder):
         if (<PtrHolder>ptr_holder).shared_ptr.get() == NULL:

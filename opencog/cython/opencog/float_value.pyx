@@ -5,7 +5,7 @@ def createFloatValue(arg):
         c_ptr.reset(new cFloatValue(FloatValue.list_of_doubles_to_vector(arg)))
     else:
         c_ptr.reset(new cFloatValue(<double>arg))
-    return FloatValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    return FloatValue(PtrHolder.create(<shared_ptr[cValue]&>c_ptr))
 
 cdef class FloatValue(Value):
 

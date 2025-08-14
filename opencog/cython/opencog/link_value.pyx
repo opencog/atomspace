@@ -5,7 +5,7 @@ def createLinkValue(arg):
         c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector(arg)))
     else:
         c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector([arg])))
-    return LinkValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    return LinkValue(PtrHolder.create(<shared_ptr[cValue]&>c_ptr))
 
 cdef class LinkValue(Value):
 

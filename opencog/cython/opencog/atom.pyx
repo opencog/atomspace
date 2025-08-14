@@ -15,7 +15,7 @@ cdef class Atom(Value):
     
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
-        return Atom(PtrHolder.create(<shared_ptr[void]&>handle))
+        return Atom(PtrHolder.create(<shared_ptr[cValue]&>handle))
 
     cdef cHandle get_c_handle(Atom self):
         """Return C++ shared_ptr from PtrHolder instance"""

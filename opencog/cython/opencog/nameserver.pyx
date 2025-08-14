@@ -129,7 +129,7 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
 
     value_type = value.get().get_type()
     type_name = get_type_name(value_type)
-    ptr_holder = PtrHolder.create(<shared_ptr[void]&>value)
+    ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
 
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)

@@ -10,7 +10,7 @@ def createUnisetValue(arg=None):
         c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector(arg)))
     else:
         c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector([arg])))
-    return UnisetValue(PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    return UnisetValue(PtrHolder.create(<shared_ptr[cValue]&>c_ptr))
 
 cdef class UnisetValue(Value):
 

@@ -5,15 +5,13 @@ from libcpp.memory cimport shared_ptr
 def createTruthValue(strength = 1.0, confidence = 1.0):
     cdef tv_ptr c_ptr
     c_ptr.reset(new cSimpleTruthValue(strength, confidence))
-    return TruthValue(ptr_holder=PtrHolder.create(<shared_ptr[void]&>c_ptr))
+    return TruthValue(ptr_holder=PtrHolder.create(<shared_ptr[cValue]&>c_ptr))
 
 cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
         a relationship or term. In OpenCog there are a number of TruthValue
         types, but as these involve additional complexity we focus primarily on
         the SimpleTruthValue type which allows strength and count
-
-        @todo Support IndefiniteTruthValue, DistributionalTV, NullTV etc
     """
     # Type constructors for all atoms and values are exported via
     # opencog.type_constructors module. Except TruthValue which is historically
