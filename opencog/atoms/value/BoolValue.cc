@@ -71,6 +71,8 @@ bool BoolValue::operator==(const Value& other) const
 
 // ==============================================================
 
+// XXX FIXME ... this is OK for short vectors, but should print
+// hexadecimal for anything longer tha 15 bits.
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(t);

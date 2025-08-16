@@ -36,6 +36,13 @@ namespace opencog
 
 /**
  * BoolValues hold an ordered vector of bools.
+ *
+ * This provides a reference interface for bools. It is NOT fast
+ * or optimized for heavy-duty hypervector processing. Most ops,
+ * such as boolean-and, boolean-or are implemented as bitwise-loops,
+ * when 64-bit ops would be much more efficient.
+ *
+ * XXX FIXME Convert the implementation to std::vector<uint64_t>
  */
 class BoolValue
 	: public Value
