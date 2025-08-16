@@ -124,10 +124,17 @@ std::vector<bool> opencog::bool_or(bool scalar, const std::vector<bool>& bv)
 /// Inversion
 std::vector<bool> opencog::bool_not(const std::vector<bool>& bv)
 {
+#ifdef BIT_LOOP
+	// A correct bbut maybe slow bit-by-bit implementation
 	size_t len = bv.size();
 	std::vector<bool> inv(len);
 	for (size_t i=0; i<len; i++)
 		inv[i] = not bv[i];
+#else
+	// This should be faster than the loop above;
+	std::vector<bool> inv(bv);
+	inv.flip();
+#endif
 
 	return inv;
 }
