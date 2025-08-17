@@ -28,6 +28,18 @@
 using namespace opencog;
 
 // Helper methods for bit manipulation
+static constexpr size_t BITS_PER_WORD = 64;
+static size_t word_index(size_t bit_index) {
+	return bit_index / BITS_PER_WORD;
+}
+static size_t bit_offset(size_t bit_index) {
+	return bit_index % BITS_PER_WORD;
+}
+static size_t words_needed(size_t bit_count) {
+	return (bit_count + BITS_PER_WORD - 1) / BITS_PER_WORD;
+}
+
+// Helper methods for bit manipulation
 void BoolValue::set_bit(size_t index, bool value) const
 {
 	if (index >= _bit_count) return;
@@ -162,7 +174,7 @@ static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
                             bool scalar, const std::vector<uint64_t>& packed, size_t bits)
 {
 	result_bits = bits;
-	size_t word_count = BoolValue::words_needed(bits);
+	size_t word_count = words_needed(bits);
 	result.resize(word_count);
 
 	if (scalar) {
@@ -179,7 +191,7 @@ static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
 
 	// Clean up unused bits in the last word
 	if (bits > 0 && word_count > 0) {
-		size_t last_bits = BoolValue::bit_offset(bits);
+		size_t last_bits = bit_offset(bits);
 		if (last_bits > 0) {
 			uint64_t mask = (uint64_t(1) << last_bits) - 1;
 			result[word_count - 1] &= mask;
@@ -191,7 +203,7 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
                            bool scalar, const std::vector<uint64_t>& packed, size_t bits)
 {
 	result_bits = bits;
-	size_t word_count = BoolValue::words_needed(bits);
+	size_t word_count = words_needed(bits);
 	result.resize(word_count);
 
 	if (scalar) {
@@ -201,7 +213,7 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 		}
 		// Clean up the last word
 		if (bits > 0 && word_count > 0) {
-			size_t last_bits = BoolValue::bit_offset(bits);
+			size_t last_bits = bit_offset(bits);
 			if (last_bits > 0) {
 				uint64_t mask = (uint64_t(1) << last_bits) - 1;
 				result[word_count - 1] &= mask;
@@ -219,7 +231,7 @@ static void bool_not_packed(std::vector<uint64_t>& result, size_t& result_bits,
                             const std::vector<uint64_t>& packed, size_t bits)
 {
 	result_bits = bits;
-	size_t word_count = BoolValue::words_needed(bits);
+	size_t word_count = words_needed(bits);
 	result.resize(word_count);
 
 	// Invert all words
@@ -229,7 +241,7 @@ static void bool_not_packed(std::vector<uint64_t>& result, size_t& result_bits,
 
 	// Clean up unused bits in the last word
 	if (bits > 0 && word_count > 0) {
-		size_t last_bits = BoolValue::bit_offset(bits);
+		size_t last_bits = bit_offset(bits);
 		if (last_bits > 0) {
 			uint64_t mask = (uint64_t(1) << last_bits) - 1;
 			result[word_count - 1] &= mask;
@@ -255,9 +267,9 @@ static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
 
 	// Vector AND
 	result_bits = std::max(bits_a, bits_b);
-	size_t word_count = BoolValue::words_needed(result_bits);
-	size_t word_count_a = BoolValue::words_needed(bits_a);
-	size_t word_count_b = BoolValue::words_needed(bits_b);
+	size_t word_count = words_needed(result_bits);
+	size_t word_count_a = words_needed(bits_a);
+	size_t word_count_b = words_needed(bits_b);
 	result.resize(word_count, 0);
 
 	size_t min_words = std::min(word_count_a, word_count_b);
@@ -288,9 +300,9 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 
 	// Vector OR
 	result_bits = std::max(bits_a, bits_b);
-	size_t word_count = BoolValue::words_needed(result_bits);
-	size_t word_count_a = BoolValue::words_needed(bits_a);
-	size_t word_count_b = BoolValue::words_needed(bits_b);
+	size_t word_count = words_needed(result_bits);
+	size_t word_count_a = words_needed(bits_a);
+	size_t word_count_b = words_needed(bits_b);
 	result.resize(word_count, 0);
 
 	size_t min_words = std::min(word_count_a, word_count_b);
@@ -313,7 +325,7 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 
 	// Clean up the last word if needed
 	if (result_bits > 0 && word_count > 0) {
-		size_t last_bits = BoolValue::bit_offset(result_bits);
+		size_t last_bits = bit_offset(result_bits);
 		if (last_bits > 0) {
 			uint64_t mask = (uint64_t(1) << last_bits) - 1;
 			result[word_count - 1] &= mask;

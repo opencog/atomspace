@@ -62,28 +62,12 @@ protected:
 	std::vector<bool> unpack_vector() const;
 
 public:
-	// Helper methods for bit manipulation
-	static constexpr size_t BITS_PER_WORD = 64;
-
-	static size_t word_index(size_t bit_index) {
-		return bit_index / BITS_PER_WORD;
-	}
-
-	static size_t bit_offset(size_t bit_index) {
-		return bit_index % BITS_PER_WORD;
-	}
-
-	static size_t words_needed(size_t bit_count) {
-		return (bit_count + BITS_PER_WORD - 1) / BITS_PER_WORD;
-	}
-
 	BoolValue(bool v);
 	BoolValue(const std::vector<bool>& v);
 	BoolValue(Type t, const std::vector<bool>& v);
-
 	virtual ~BoolValue() {}
 
-	std::vector<bool> value() const;  // Returns cached value for Python bindings
+	std::vector<bool> value() const;
 	size_t size() const { return _bit_count; }
 	ValuePtr value_at_index(size_t) const;
 
