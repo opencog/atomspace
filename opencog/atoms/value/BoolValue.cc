@@ -120,11 +120,10 @@ BoolValue::BoolValue(unsigned long mask)
 	}
 }
 
-const std::vector<bool>& BoolValue::value() const
+std::vector<bool> BoolValue::value() const
 {
 	update();
-	_value_cache = unpack_vector();
-	return _value_cache;
+	return unpack_vector();
 }
 
 std::string BoolValue::to_string(const std::string& indent) const

@@ -51,7 +51,6 @@ class BoolValue
 protected:
 	mutable std::vector<uint64_t> _packed_bits;
 	mutable size_t _bit_count;
-	mutable std::vector<bool> _value_cache;  // Cache for Python bindings compatibility
 
 	virtual void update() const {}
 
@@ -85,7 +84,7 @@ public:
 
 	virtual ~BoolValue() {}
 
-	const std::vector<bool>& value() const;  // Returns cached value for Python bindings
+	std::vector<bool> value() const;  // Returns cached value for Python bindings
 	size_t size() const { return _bit_count; }
 	ValuePtr value_at_index(size_t) const;
 
