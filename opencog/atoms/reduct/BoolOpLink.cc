@@ -46,34 +46,34 @@ ValuePtr BoolOpLink::execute(AtomSpace* as, bool silent)
 		throw InvalidParamException(TRACE_INFO, "Expecting a BoolBalue");
 
 	BoolValuePtr bvp = BoolValueCast(vp);
-	std::vector<bool> bv = bvp->value();
 
 	if (BOOL_NOT_LINK == get_type())
 	{
 		if (1 != sz)
 			throw InvalidParamException(TRACE_INFO, "BoolNotLink expects one argument");
-		bv = bool_not(bv);
-		return createBoolValue(bv);
+		return bool_not(bvp);
 	}
 
 	if (BOOL_AND_LINK == get_type())
 	{
+		ValuePtr result = vp;
 		for (size_t i=1; i<sz; i++)
 		{
 			BoolValuePtr av = BoolValueCast(_outgoing[i]->execute(as, silent));
-			bv = bool_and(av->value(), bv);
+			result = bool_and(BoolValueCast(result), av);
 		}
-		return createBoolValue(bv);
+		return result;
 	}
 
 	if (BOOL_OR_LINK == get_type())
 	{
+		ValuePtr result = vp;
 		for (size_t i=1; i<sz; i++)
 		{
 			BoolValuePtr av = BoolValueCast(_outgoing[i]->execute(as, silent));
-			bv = bool_or(av->value(), bv);
+			result = bool_or(BoolValueCast(result), av);
 		}
-		return createBoolValue(bv);
+		return result;
 	}
 	throw InvalidParamException(TRACE_INFO, "Unexpected BoolOpLink");
 }
