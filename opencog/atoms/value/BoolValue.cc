@@ -91,35 +91,6 @@ BoolValue::BoolValue(Type t, const std::vector<bool>& v) : Value(t)
 	pack_vector(v);
 }
 
-BoolValue::BoolValue(unsigned long mask)
-	: Value(BOOL_VALUE)
-{
-	// Avoid padding with zeroes.
-	unsigned long mcopy = mask;
-	size_t maxlen = 1;
-	for (size_t i=0; i<8*sizeof(unsigned long); i++)
-	{
-		if (mcopy & 0x1) maxlen = i;
-		mcopy >>= 1;
-	}
-
-	// We print vectors as little-endians but the integer
-	// itself is a big-endian, so we reverse the bit pattern.
-	_bit_count = maxlen + 1;
-	_packed_bits.resize(words_needed(_bit_count), 0);
-
-	for (size_t i=0; i<=maxlen; i++)
-	{
-		if (mask & 0x1) {
-			size_t bit_pos = maxlen - i;
-			size_t word_idx = word_index(bit_pos);
-			size_t bit_idx = bit_offset(bit_pos);
-			_packed_bits[word_idx] |= (uint64_t(1) << bit_idx);
-		}
-		mask >>= 1;
-	}
-}
-
 std::vector<bool> BoolValue::value() const
 {
 	update();
@@ -446,5 +417,3 @@ DEFINE_VALUE_FACTORY(BOOL_VALUE,
                      createBoolValue, std::vector<bool>)
 DEFINE_VALUE_FACTORY(BOOL_VALUE,
                      createBoolValue, bool)
-DEFINE_VALUE_FACTORY(BOOL_VALUE,
-                     createBoolValue, unsigned long)

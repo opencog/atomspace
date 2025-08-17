@@ -79,7 +79,6 @@ public:
 
 	BoolValue(bool v);
 	BoolValue(const std::vector<bool>& v);
-	BoolValue(unsigned long);
 	BoolValue(Type t, const std::vector<bool>& v);
 
 	virtual ~BoolValue() {}
