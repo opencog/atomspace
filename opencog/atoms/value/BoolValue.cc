@@ -229,7 +229,6 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		{
 			word >>= bit_align;
 			word = word | carry;
-			word >>= (64 - 2* bit_align);
 			snprintf(buf, sizeof(buf), "%lx", word);
 			rv += buf;
 		}
