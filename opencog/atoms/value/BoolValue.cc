@@ -216,7 +216,6 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 			uint64_t mask = (1ULL << (64 - bit_align)) - 1;
 			uint64_t rbits = (word & mask) << bit_align;
 			word >>= (64 - bit_align);
-			word >>= bit_align;
 			word = word | carry;
 			carry = rbits;
 			snprintf(buf, sizeof(buf), "%016lx", word);
