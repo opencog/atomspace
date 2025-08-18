@@ -248,6 +248,14 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 // ==============================================================
 // Optimized packed boolean operations (static/internal use only)
 
+#define CLEANUP { \
+	size_t deadbits = bits % BITS_PER_WORD; \
+	if (deadbits > 0) { \
+		uint64_t mask = ~((uint64_t(1) << (BITS_PER_WORD - deadbits)) - 1); \
+		result[word_count - 1] &= mask; \
+	} \
+}
+
 static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
                             bool scalar, const std::vector<uint64_t>& packed, size_t bits)
 {
@@ -268,13 +276,7 @@ static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up unused bits in the last word
-	if (bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	CLEANUP;
 }
 
 static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
@@ -290,13 +292,7 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 			result[i] = ~uint64_t(0);
 		}
 		// Clean up the last word
-		if (bits > 0 && word_count > 0) {
-			size_t last_bits = bit_offset(bits);
-			if (last_bits > 0) {
-				uint64_t mask = (uint64_t(1) << last_bits) - 1;
-				result[word_count - 1] &= mask;
-			}
-		}
+		CLEANUP;
 	} else {
 		// Copy all bits if scalar is false
 		for (size_t i = 0; i < word_count; i++) {
@@ -318,13 +314,7 @@ static void bool_not_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up unused bits in the last word
-	if (bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	CLEANUP;
 }
 
 static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
@@ -402,13 +392,8 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up the last word if needed
-	if (result_bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(result_bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	size_t bits = result_bits;
+	CLEANUP;
 }
 
 // Boolean operation implementations that work directly with BoolValuePtr
