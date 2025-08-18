@@ -195,11 +195,18 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		uint64_t word = _packed_bits[0];
 		uint64_t mask = (1ULL << bit_align) - 1;
 		uint64_t carry = (word & mask) << (64 - bit_align);
-		word >>= bit_align;
-		int width = (65 - bit_align) >> 2;
+		word >>= (64 - bit_align);
+		int width = bit_align >> 2;
 		char buf[17];
 		snprintf(buf, sizeof(buf), "%0*lx", width, word);
 		rv += buf;
+
+		// Are we done yet?
+		if (1 == word_count)
+		{
+			rv += ")";
+			return rv;
+		}
 
 		// Middle words are spliced from low bits of previous
 		// and high bits of current.
