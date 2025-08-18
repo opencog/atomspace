@@ -23,13 +23,100 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
+#include <cstring>
 
 using namespace opencog;
 
+// Helper methods for bit manipulation
+static constexpr size_t BITS_PER_WORD = 64;
+static size_t word_index(size_t bit_index) {
+	return bit_index / BITS_PER_WORD;
+}
+static size_t bit_offset(size_t bit_index) {
+	return bit_index % BITS_PER_WORD;
+}
+static size_t words_needed(size_t bit_count) {
+	return (bit_count + BITS_PER_WORD - 1) / BITS_PER_WORD;
+}
+
+// Helper methods for bit manipulation
+void BoolValue::set_bit(size_t index, bool value) const
+{
+	if (index >= _bit_count) return;
+	size_t word_idx = word_index(index);
+	size_t bit_idx = bit_offset(index);
+
+	if (value) {
+		_packed_bits[word_idx] |= (uint64_t(1) << bit_idx);
+	} else {
+		_packed_bits[word_idx] &= ~(uint64_t(1) << bit_idx);
+	}
+}
+
+bool BoolValue::get_bit(size_t index) const
+{
+	if (index >= _bit_count) return false;
+	size_t word_idx = word_index(index);
+	size_t bit_idx = bit_offset(index);
+	return (_packed_bits[word_idx] >> bit_idx) & 1;
+}
+
+void BoolValue::pack_vector(const std::vector<bool>& v)
+{
+	_bit_count = v.size();
+	_packed_bits.clear();
+	_packed_bits.resize(words_needed(_bit_count), 0);
+
+	for (size_t i = 0; i < _bit_count; i++) {
+		if (v[i]) {
+			size_t word_idx = word_index(i);
+			size_t bit_idx = bit_offset(i);
+			_packed_bits[word_idx] |= (uint64_t(1) << bit_idx);
+		}
+	}
+}
+
+std::vector<bool> BoolValue::unpack_vector() const
+{
+	update();
+	std::vector<bool> result(_bit_count);
+	for (size_t i = 0; i < _bit_count; i++) {
+		result[i] = get_bit(i);
+	}
+	return result;
+}
+
+// Constructors
+BoolValue::BoolValue(bool v) : Value(BOOL_VALUE), _bit_count(1)
+{
+	_packed_bits.resize(1, 0);
+	if (v) _packed_bits[0] = 1;
+}
+
+BoolValue::BoolValue(const std::vector<bool>& v) : Value(BOOL_VALUE)
+{
+	pack_vector(v);
+}
+
+BoolValue::BoolValue(Type t, const std::vector<bool>& v) : Value(t)
+{
+	pack_vector(v);
+}
+
+std::vector<bool> BoolValue::value() const
+{
+	update();
+	return unpack_vector();
+}
+
+std::string BoolValue::to_string(const std::string& indent) const
+{
+	return to_string(indent, _type);
+}
+
 ValuePtr BoolValue::value_at_index(size_t idx) const
 {
-	bool b = false;
-	if (_value.size() > idx) b = _value[idx];
+	bool b = get_bit(idx);
 	return createBoolValue(b);
 }
 
@@ -37,13 +124,26 @@ bool BoolValue::operator==(const Value& other) const
 {
 	if (BOOL_VALUE != other.get_type()) return false;
 
-   const BoolValue* bov = (const BoolValue*) &other;
+	const BoolValue* bov = (const BoolValue*) &other;
 
-	if (_value.size() != bov->_value.size()) return false;
-	size_t len = _value.size();
-	for (size_t i=0; i<len; i++)
-		if (_value[i] != bov->_value[i])
+	if (_bit_count != bov->_bit_count) return false;
+
+	// Compare packed bits
+	size_t word_count = words_needed(_bit_count);
+	for (size_t i = 0; i < word_count - 1; i++) {
+		if (_packed_bits[i] != bov->_packed_bits[i])
 			return false;
+	}
+
+	// For the last word, only compare the relevant bits
+	if (word_count > 0) {
+		size_t last_bits = bit_offset(_bit_count);
+		if (last_bits == 0) last_bits = BITS_PER_WORD;
+		uint64_t mask = (uint64_t(1) << last_bits) - 1;
+		if ((_packed_bits[word_count - 1] & mask) != (bov->_packed_bits[word_count - 1] & mask))
+			return false;
+	}
+
 	return true;
 }
 
@@ -56,9 +156,9 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
 	SAFE_UPDATE(rv,
 	{
-		for (bool v :_value)
+		for (size_t i = 0; i < _bit_count; i++)
 		{
-			if (v) rv += " 1";
+			if (get_bit(i)) rv += " 1";
 			else rv += " 0";
 		}
 	});
@@ -68,132 +168,260 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 }
 
 // ==============================================================
+// Optimized packed boolean operations (static/internal use only)
 
-/// Scalar multiplication
-std::vector<bool> opencog::bool_and(bool scalar, const std::vector<bool>& bv)
+static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
+                            bool scalar, const std::vector<uint64_t>& packed, size_t bits)
 {
-	if (scalar)
-	{
-		std::vector<bool> prod(bv);
-		return prod;
+	result_bits = bits;
+	size_t word_count = words_needed(bits);
+	result.resize(word_count);
+
+	if (scalar) {
+		// Copy all bits if scalar is true
+		for (size_t i = 0; i < word_count; i++) {
+			result[i] = packed[i];
+		}
+	} else {
+		// All bits are false if scalar is false
+		for (size_t i = 0; i < word_count; i++) {
+			result[i] = 0;
+		}
 	}
-	else
-	{
-		size_t len = bv.size();
-		std::vector<bool> prod(len, false);
-		return prod;
+
+	// Clean up unused bits in the last word
+	if (bits > 0 && word_count > 0) {
+		size_t last_bits = bit_offset(bits);
+		if (last_bits > 0) {
+			uint64_t mask = (uint64_t(1) << last_bits) - 1;
+			result[word_count - 1] &= mask;
+		}
 	}
 }
 
-/// Scalar addition
-std::vector<bool> opencog::bool_or(bool scalar, const std::vector<bool>& bv)
+static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
+                           bool scalar, const std::vector<uint64_t>& packed, size_t bits)
 {
-	if (scalar)
-	{
-		size_t len = bv.size();
-		std::vector<bool> sum(len, true);
-		return sum;
-	}
-	else
-	{
-		std::vector<bool> sum(bv);
-		return sum;
+	result_bits = bits;
+	size_t word_count = words_needed(bits);
+	result.resize(word_count);
+
+	if (scalar) {
+		// All bits are true if scalar is true
+		for (size_t i = 0; i < word_count; i++) {
+			result[i] = ~uint64_t(0);
+		}
+		// Clean up the last word
+		if (bits > 0 && word_count > 0) {
+			size_t last_bits = bit_offset(bits);
+			if (last_bits > 0) {
+				uint64_t mask = (uint64_t(1) << last_bits) - 1;
+				result[word_count - 1] &= mask;
+			}
+		}
+	} else {
+		// Copy all bits if scalar is false
+		for (size_t i = 0; i < word_count; i++) {
+			result[i] = packed[i];
+		}
 	}
 }
 
-/// Inversion
-std::vector<bool> opencog::bool_not(const std::vector<bool>& bv)
+static void bool_not_packed(std::vector<uint64_t>& result, size_t& result_bits,
+                            const std::vector<uint64_t>& packed, size_t bits)
 {
-#ifdef BIT_LOOP
-	// A correct bbut maybe slow bit-by-bit implementation
-	size_t len = bv.size();
-	std::vector<bool> inv(len);
-	for (size_t i=0; i<len; i++)
-		inv[i] = not bv[i];
-#else
-	// This should be faster than the loop above;
-	std::vector<bool> inv(bv);
-	inv.flip();
-#endif
+	result_bits = bits;
+	size_t word_count = words_needed(bits);
+	result.resize(word_count);
 
-	return inv;
+	// Invert all words
+	for (size_t i = 0; i < word_count; i++) {
+		result[i] = ~packed[i];
+	}
+
+	// Clean up unused bits in the last word
+	if (bits > 0 && word_count > 0) {
+		size_t last_bits = bit_offset(bits);
+		if (last_bits > 0) {
+			uint64_t mask = (uint64_t(1) << last_bits) - 1;
+			result[word_count - 1] &= mask;
+		}
+	}
 }
 
-/// Vector (point-wise) multiplication
-/// The shorter vector is assumed to be false-padded.
-std::vector<bool> opencog::bool_and(const std::vector<bool>& bva,
-                                  const std::vector<bool>& bvb)
+static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
+                            const std::vector<uint64_t>& packed_a, size_t bits_a,
+                            const std::vector<uint64_t>& packed_b, size_t bits_b)
 {
-	size_t lena = bva.size();
-	size_t lenb = bvb.size();
-
-	if (1 == lena)
-		return bool_and(bva[0], bvb);
-
-	if (1 == lenb)
-		return bool_and(bvb[0], bva);
-
-	std::vector<bool> prod(std::max(lena, lenb));
-	if (lena < lenb)
-	{
-		size_t i=0;
-		for (; i<lena; i++)
-			prod[i] = bva[i] and bvb[i];
-		for (; i<lenb; i++)
-			prod[i] = false;
+	// Handle scalar cases
+	if (bits_a == 1) {
+		bool scalar = packed_a[0] & 1;
+		bool_and_packed(result, result_bits, scalar, packed_b, bits_b);
+		return;
 	}
-	else
-	{
-		size_t i=0;
-		for (; i<lenb; i++)
-			prod[i] = bva[i] and bvb[i];
-		for (; i<lena; i++)
-			prod[i] = false;
+	if (bits_b == 1) {
+		bool scalar = packed_b[0] & 1;
+		bool_and_packed(result, result_bits, scalar, packed_a, bits_a);
+		return;
 	}
-	return prod;
+
+	// Vector AND
+	result_bits = std::max(bits_a, bits_b);
+	size_t word_count = words_needed(result_bits);
+	size_t word_count_a = words_needed(bits_a);
+	size_t word_count_b = words_needed(bits_b);
+	result.resize(word_count, 0);
+
+	size_t min_words = std::min(word_count_a, word_count_b);
+
+	// AND the common words
+	for (size_t i = 0; i < min_words; i++) {
+		result[i] = packed_a[i] & packed_b[i];
+	}
+
+	// The rest are implicitly false (already zeroed)
 }
 
-/// Vector (point-wise) addition
-/// The shorter vector is assumed to be true-padded.
-/// Unless the shorter vector is a scalar, in which case we do
-/// scalar addition. This is the "right thing to do", because that
-/// is the general user intent.  We could detect this case in all
-/// the callers to this routine, or we could just handle it here.
-/// This may seem messy to you, but this is the easiest solution.
-std::vector<bool> opencog::bool_or(const std::vector<bool>& bva,
-                                   const std::vector<bool>& bvb)
+static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
+                           const std::vector<uint64_t>& packed_a, size_t bits_a,
+                           const std::vector<uint64_t>& packed_b, size_t bits_b)
 {
-	size_t lena = bva.size();
-	size_t lenb = bvb.size();
+	// Handle scalar cases
+	if (bits_a == 1) {
+		bool scalar = packed_a[0] & 1;
+		bool_or_packed(result, result_bits, scalar, packed_b, bits_b);
+		return;
+	}
+	if (bits_b == 1) {
+		bool scalar = packed_b[0] & 1;
+		bool_or_packed(result, result_bits, scalar, packed_a, bits_a);
+		return;
+	}
 
-	std::vector<bool> sum(std::max(lena, lenb));
-	if (1 == lena)
-	{
-		return opencog::bool_or(bva[0], bvb);
+	// Vector OR
+	result_bits = std::max(bits_a, bits_b);
+	size_t word_count = words_needed(result_bits);
+	size_t word_count_a = words_needed(bits_a);
+	size_t word_count_b = words_needed(bits_b);
+	result.resize(word_count, 0);
+
+	size_t min_words = std::min(word_count_a, word_count_b);
+
+	// OR the common words
+	for (size_t i = 0; i < min_words; i++) {
+		result[i] = packed_a[i] | packed_b[i];
 	}
-	else
-	if (1 == lenb)
-	{
-		return opencog::bool_or(bvb[0], bva);
+
+	// Copy remaining words from the longer vector
+	if (word_count_a > word_count_b) {
+		for (size_t i = min_words; i < word_count_a; i++) {
+			result[i] = packed_a[i];
+		}
+	} else if (word_count_b > word_count_a) {
+		for (size_t i = min_words; i < word_count_b; i++) {
+			result[i] = packed_b[i];
+		}
 	}
-	else
-	if (lena < lenb)
-	{
-		size_t i=0;
-		for (; i<lena; i++)
-			sum[i] = bva[i] or bvb[i];
-		for (; i<lenb; i++)
-			sum[i] = bvb[i];
+
+	// Clean up the last word if needed
+	if (result_bits > 0 && word_count > 0) {
+		size_t last_bits = bit_offset(result_bits);
+		if (last_bits > 0) {
+			uint64_t mask = (uint64_t(1) << last_bits) - 1;
+			result[word_count - 1] &= mask;
+		}
 	}
-	else
-	{
-		size_t i=0;
-		for (; i<lenb; i++)
-			sum[i] = bva[i] or bvb[i];
-		for (; i<lena; i++)
-			sum[i] = bva[i];
+}
+
+// Boolean operation implementations that work directly with BoolValuePtr
+
+ValuePtr opencog::bool_and(bool scalar, const BoolValuePtr& fvp)
+{
+	std::vector<uint64_t> result;
+	size_t result_bits;
+	bool_and_packed(result, result_bits, scalar, fvp->get_packed_bits(), fvp->get_bit_count());
+
+	auto rv = createBoolValue(false);
+	rv->set_packed_data(std::move(result), result_bits);
+	return rv;
+}
+
+ValuePtr opencog::bool_or(bool scalar, const BoolValuePtr& fvp)
+{
+	std::vector<uint64_t> result;
+	size_t result_bits;
+	bool_or_packed(result, result_bits, scalar, fvp->get_packed_bits(), fvp->get_bit_count());
+
+	auto rv = createBoolValue(false);
+	rv->set_packed_data(std::move(result), result_bits);
+	return rv;
+}
+
+ValuePtr opencog::bool_not(const BoolValuePtr& fvp)
+{
+	std::vector<uint64_t> result;
+	size_t result_bits;
+	bool_not_packed(result, result_bits, fvp->get_packed_bits(), fvp->get_bit_count());
+
+	auto rv = createBoolValue(false);
+	rv->set_packed_data(std::move(result), result_bits);
+	return rv;
+}
+
+ValuePtr opencog::bool_and(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb)
+{
+	// Handle streaming values by taking a sample
+	if (fvpa == fvpb) {
+		// Sample the value first
+		auto sample = fvpa->value();
+		BoolValue temp_sample(sample);
+
+		std::vector<uint64_t> result;
+		size_t result_bits;
+		bool_and_packed(result, result_bits, temp_sample.get_packed_bits(), temp_sample.get_bit_count(),
+		                fvpb->get_packed_bits(), fvpb->get_bit_count());
+
+		auto rv = createBoolValue(false);
+		rv->set_packed_data(std::move(result), result_bits);
+		return rv;
 	}
-	return sum;
+
+	std::vector<uint64_t> result;
+	size_t result_bits;
+	bool_and_packed(result, result_bits, fvpa->get_packed_bits(), fvpa->get_bit_count(),
+	                fvpb->get_packed_bits(), fvpb->get_bit_count());
+
+	auto rv = createBoolValue(false);
+	rv->set_packed_data(std::move(result), result_bits);
+	return rv;
+}
+
+ValuePtr opencog::bool_or(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb)
+{
+	// Handle streaming values by taking a sample
+	if (fvpa == fvpb) {
+		// Sample the value first
+		auto sample = fvpa->value();
+		BoolValue temp_sample(sample);
+
+		std::vector<uint64_t> result;
+		size_t result_bits;
+		bool_or_packed(result, result_bits, temp_sample.get_packed_bits(), temp_sample.get_bit_count(),
+		               fvpb->get_packed_bits(), fvpb->get_bit_count());
+
+		auto rv = createBoolValue(false);
+		rv->set_packed_data(std::move(result), result_bits);
+		return rv;
+	}
+
+	std::vector<uint64_t> result;
+	size_t result_bits;
+	bool_or_packed(result, result_bits, fvpa->get_packed_bits(), fvpa->get_bit_count(),
+	               fvpb->get_packed_bits(), fvpb->get_bit_count());
+
+	auto rv = createBoolValue(false);
+	rv->set_packed_data(std::move(result), result_bits);
+	return rv;
 }
 
 // Adds factory when the library is loaded.

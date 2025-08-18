@@ -37,45 +37,56 @@ namespace opencog
 /**
  * BoolValues hold an ordered vector of bools.
  *
- * This provides a reference interface for bools. It is NOT fast
- * or optimized for heavy-duty hypervector processing. Most ops,
- * such as boolean-and, boolean-or are implemented as bitwise-loops,
- * when 64-bit ops would be much more efficient.
- *
- * XXX FIXME Convert the implementation to std::vector<uint64_t>
+ * This provides a reference interface for bools. Internally, bits
+ * are packed into uint64_t values for efficient boolean operations.
+ * Boolean-and, boolean-or, and boolean-not operate on 64-bit chunks
+ * for improved performance.
  */
+class BoolValue;
+typedef std::shared_ptr<const BoolValue> BoolValuePtr;
+
 class BoolValue
 	: public Value
 {
 protected:
-	mutable std::vector<bool> _value;
+	mutable std::vector<uint64_t> _packed_bits;
+	mutable size_t _bit_count;
 
 	virtual void update() const {}
 
-	BoolValue(Type t) : Value(t) {}
+	BoolValue(Type t) : Value(t), _bit_count(0) {}
+
+	void set_bit(size_t index, bool value) const;
+	bool get_bit(size_t index) const;
+	void pack_vector(const std::vector<bool>& v);
+	std::vector<bool> unpack_vector() const;
 
 public:
-	BoolValue(bool v) : Value(BOOL_VALUE) { _value.push_back(v); }
-	BoolValue(const std::vector<bool>& v)
-		: Value(BOOL_VALUE), _value(v) {}
-	BoolValue(Type t, const std::vector<bool>& v) : Value(t), _value(v) {}
-
+	BoolValue(bool v);
+	BoolValue(const std::vector<bool>& v);
+	BoolValue(Type t, const std::vector<bool>& v);
 	virtual ~BoolValue() {}
 
-	const std::vector<bool>& value() const { update(); return _value; }
-	size_t size() const { return _value.size(); }
+	std::vector<bool> value() const;
+	size_t size() const { return _bit_count; }
 	ValuePtr value_at_index(size_t) const;
 
 	/** Returns a string representation of the value. */
-	virtual std::string to_string(const std::string& indent = "") const
-	{ return to_string(indent, _type); }
+	virtual std::string to_string(const std::string& indent = "") const;
 	std::string to_string(const std::string& indent, Type) const;
 
 	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
+
+	// Public methods to get packed data (for bool operations)
+	const std::vector<uint64_t>& get_packed_bits() const { return _packed_bits; }
+	size_t get_bit_count() const { return _bit_count; }
+	void set_packed_data(std::vector<uint64_t>&& bits, size_t count) {
+		_packed_bits = std::move(bits);
+		_bit_count = count;
+	}
 };
 
-typedef std::shared_ptr<const BoolValue> BoolValuePtr;
 static inline BoolValuePtr BoolValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<const BoolValue>(a); }
 
@@ -89,45 +100,14 @@ static inline std::shared_ptr<BoolValue> createBoolValue(Type&&... args) {
 	return std::make_shared<BoolValue>(std::forward<Type>(args)...);
 }
 
-// Scalar boolean ops
-std::vector<bool> bool_and(bool, const std::vector<bool>&);
-std::vector<bool> bool_or(bool, const std::vector<bool>&);
-std::vector<bool> bool_not(const std::vector<bool>&);
+// Boolean operation functions that work directly with BoolValuePtr
+ValuePtr bool_and(bool f, const BoolValuePtr& fvp);
+ValuePtr bool_or(bool f, const BoolValuePtr& fvp);
+ValuePtr bool_not(const BoolValuePtr& fvp);
 
-inline
-ValuePtr bool_and(bool f, const BoolValuePtr& fvp) {
-	return createBoolValue(bool_and(f, fvp->value()));
-}
-inline
-ValuePtr bool_or(bool f, const BoolValuePtr& fvp) {
-	return createBoolValue(bool_or(f, fvp->value()));
-}
-inline
-ValuePtr bool_not(const BoolValuePtr& fvp) {
-	return createBoolValue(bool_not(fvp->value()));
-}
-
-std::vector<bool> bool_and(const std::vector<bool>&, const std::vector<bool>&);
-std::vector<bool> bool_or(const std::vector<bool>&, const std::vector<bool>&);
-
-/// Vector boolean ops. When operating on an object bool_op and itself,
-/// take a sample first; this is needed to correctly handle streaming
-/// values, as they issue new values every time they are called. Failing
-/// to sample results in violations...
-inline
-ValuePtr bool_and(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb) {
-	if (fvpa != fvpb)
-		return createBoolValue(bool_and(fvpa->value(), fvpb->value()));
-	auto sample = fvpa->value();
-	return createBoolValue(bool_and(sample, fvpb->value()));
-}
-inline
-ValuePtr bool_or(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb) {
-	if (fvpa != fvpb)
-		return createBoolValue(bool_or(fvpa->value(), fvpb->value()));
-	auto sample = fvpa->value();
-	return createBoolValue(bool_or(sample, fvpb->value()));
-}
+// Vector boolean operations
+ValuePtr bool_and(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb);
+ValuePtr bool_or(const BoolValuePtr& fvpa, const BoolValuePtr& fvpb);
 
 /** @}*/
 } // namespace opencog
