@@ -33,6 +33,30 @@
 (test-assert "p21"
 	(equal? p21 "(BoolValue 0x01ee63)\n"))
 
+(define b25 (BoolValue 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0))
+(define p25 (format #f "~A" b25))
+(format #t "p25 = >>~A<<\n" p25)
+(test-assert "p25"
+	(equal? p25 "(BoolValue 0x01ee630)\n"))
+
+(define b29 (BoolValue 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0))
+(define p29 (format #f "~A" b29))
+(format #t "p29 = >>~A<<\n" p29)
+(test-assert "p29"
+	(equal? p29 "(BoolValue 0x001ee630)\n"))
+
+(define b61 (BoolValue 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p61 (format #f "~A" b61))
+(format #t "p61 = >>~A<<\n" p61)
+(test-assert "p61"
+	(equal? p61 "(BoolValue 0x001ee63012345678)\n"))
+
+(define b63 (BoolValue 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p63 (format #f "~A" b63))
+(format #t "p63 = >>~A<<\n" p63)
+(test-assert "p63"
+	(equal? p63 "(BoolValue 0x601ee63012345678)\n"))
+
 (test-end tname)
 
 (opencog-test-end)
