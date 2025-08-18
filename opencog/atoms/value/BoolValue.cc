@@ -24,6 +24,7 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <cstring>
+#include <cstdio>
 
 using namespace opencog;
 
@@ -149,17 +150,47 @@ bool BoolValue::operator==(const Value& other) const
 
 // ==============================================================
 
-// XXX FIXME ... this is OK for short vectors, but should print
-// hexadecimal for anything longer tha 15 bits.
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
 	SAFE_UPDATE(rv,
 	{
-		for (size_t i = 0; i < _bit_count; i++)
+		if (_bit_count < 16)
 		{
-			if (get_bit(i)) rv += " 1";
-			else rv += " 0";
+			// For short bitstrings, print individual bits
+			for (size_t i = 0; i < _bit_count; i++)
+			{
+				if (get_bit(i)) rv += " 1";
+				else rv += " 0";
+			}
+			rv += ")";
+			return rv;
+		}
+
+		// For longer bitstrings, print in hexadecimal
+		rv += " 0x";
+
+		// Print from most significant word to least significant
+		size_t word_count = words_needed(_bit_count);
+
+		// For the first word, mask off unused bits
+		size_t bits_in_last = _bit_count % 64;
+		if (bits_in_last > 0)
+		{
+			uint64_t word = _packed_bits[word_count-1];
+			uint64_t mask = (uint64_t(1) << bits_in_last) - 1;
+			word &= mask;
+			char buf[17];
+			snprintf(buf, sizeof(buf), "%lx", word);
+			rv += buf;
+		}
+
+		// Print full 16 hex digits for remaining words
+		for (int w = word_count - 2; w >= 0; w--) {
+			uint64_t word = _packed_bits[w];
+			char buf[17];
+			snprintf(buf, sizeof(buf), "%016lx", word);
+			rv += buf;
 		}
 	});
 
