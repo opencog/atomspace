@@ -193,8 +193,8 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 
 		// First word to be padded by zeros, as needed.
 		uint64_t word = _packed_bits[0];
-		uint64_t mask = (1ULL << bit_align) - 1;
-		uint64_t carry = (word & mask) << (64 - bit_align);
+		uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+		uint64_t carry = (word & mask) << bit_align;
 		word >>= (64 - bit_align);
 		int width = (bit_align + 3) >> 2;
 		char buf[17];
