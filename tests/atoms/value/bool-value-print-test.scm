@@ -102,6 +102,15 @@
 (test-assert "p101"
 	(equal? p101 "(BoolValue 0x1fe01ee630123456789abcdef0)\n"))
 
+(define b117 (BoolValue 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1
+0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1
+0 0 1 1 1 1 0 0 0 1 0 0 1 1 0 1 0 1 0 1 1 1 1 0 0 1 1 0 1 1 1 1 0 1 1 1
+1 0 0 0 0 0 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0))
+(define p117 (format #f "~A" b117))
+(format #t "p117 = >>~A<<\n" p117)
+(test-assert "p117"
+	(equal? p117 "(BoolValue 0x1fe01ee630123456789abcdef03210)\n"))
+
 (test-end tname)
 
 (opencog-test-end)

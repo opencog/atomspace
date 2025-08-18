@@ -222,27 +222,12 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 			rv += buf;
 		}
 
-		// Last word handling depends on how many carry bits
-		// we have to make room for.
+		// Last word handling
 		word = _packed_bits[word_count - 1];
-		if (32 >= bit_align)
-		{
-			word >>= (64 - bit_align);
-			word = word | carry;
-			snprintf(buf, sizeof(buf), "%lx", word);
-			rv += buf;
-		}
-		else
-		{
-			mask = (1ULL << bit_align) - 1;
-			uint64_t rbits = (word & mask);
-			word >>= (64 - bit_align);
-			word = word | carry;
-			snprintf(buf, sizeof(buf), "%016lx", word);
-			rv += buf;
-			snprintf(buf, sizeof(buf), "%lx", rbits);
-			rv += buf;
-		}
+		word >>= (64 - bit_align);
+		word = word | carry;
+		snprintf(buf, sizeof(buf), "%lx", word);
+		rv += buf;
 	});
 
 	rv += ")";
