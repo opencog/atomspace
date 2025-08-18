@@ -87,6 +87,21 @@
 (test-assert "p68"
 	(equal? p68 "(BoolValue 0xfe01ee63012345678)\n"))
 
+(define b69 (BoolValue 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p69 (format #f "~A" b69))
+(format #t "p69 = >>~A<<\n" p69)
+(test-assert "p69"
+	(equal? p69 "(BoolValue 0x1fe01ee63012345678)\n"))
+
+(define b101 (BoolValue 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1
+0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1
+0 0 1 1 1 1 0 0 0 1 0 0 1 1 0 1 0 1 0 1 1 1 1 0 0 1 1 0 1 1 1 1 0 1 1 1
+1 0 0 0 0))
+(define p101 (format #f "~A" b101))
+(format #t "p101 = >>~A<<\n" p101)
+(test-assert "p101"
+	(equal? p101 "(BoolValue 0x1fe01ee630123456789abcdef0)\n"))
+
 (test-end tname)
 
 (opencog-test-end)

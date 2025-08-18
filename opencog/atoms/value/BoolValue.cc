@@ -213,8 +213,9 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		for (size_t w = 1; w < word_count - 1; w++)
 		{
 			uint64_t word = _packed_bits[w];
-			uint64_t mask = (1ULL << bit_align) - 1;
-			uint64_t rbits = (word & mask) << (64 - bit_align);
+			uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+			uint64_t rbits = (word & mask) << bit_align;
+			word >>= (64 - bit_align);
 			word >>= bit_align;
 			word = word | carry;
 			carry = rbits;
@@ -227,15 +228,16 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		word = _packed_bits[word_count - 1];
 		if (32 >= bit_align)
 		{
-			word >>= bit_align;
+			word >>= (64 - bit_align);
 			word = word | carry;
 			snprintf(buf, sizeof(buf), "%lx", word);
 			rv += buf;
 		}
 		else
 		{
+			mask = (1ULL << bit_align) - 1;
 			uint64_t rbits = (word & mask);
-			word >>= bit_align;
+			word >>= (64 - bit_align);
 			word = word | carry;
 			snprintf(buf, sizeof(buf), "%016lx", word);
 			rv += buf;
