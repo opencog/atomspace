@@ -196,7 +196,7 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		uint64_t mask = (1ULL << bit_align) - 1;
 		uint64_t carry = (word & mask) << (64 - bit_align);
 		word >>= (64 - bit_align);
-		int width = bit_align >> 2;
+		int width = (bit_align + 3) >> 2;
 		char buf[17];
 		snprintf(buf, sizeof(buf), "%0*lx", width, word);
 		rv += buf;

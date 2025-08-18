@@ -21,6 +21,18 @@
 (test-assert "p16"
 	(equal? p16 "(BoolValue 0xf731)\n"))
 
+(define b17 (BoolValue 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1))
+(define p17 (format #f "~A" b17))
+(format #t "p17 = >>~A<<\n" p17)
+(test-assert "p17"
+	(equal? p17 "(BoolValue 0x1ee63)\n"))
+
+(define b21 (BoolValue 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1))
+(define p21 (format #f "~A" b21))
+(format #t "p21 = >>~A<<\n" p21)
+(test-assert "p21"
+	(equal? p21 "(BoolValue 0x01ee63)\n"))
+
 (test-end tname)
 
 (opencog-test-end)
