@@ -69,6 +69,24 @@
 (test-assert "p65"
 	(equal? p65 "(BoolValue 0x1e01ee63012345678)\n"))
 
+(define b66 (BoolValue 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p66 (format #f "~A" b66))
+(format #t "p66 = >>~A<<\n" p66)
+(test-assert "p66"
+	(equal? p66 "(BoolValue 0x3e01ee63012345678)\n"))
+
+(define b67 (BoolValue 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p67 (format #f "~A" b67))
+(format #t "p67 = >>~A<<\n" p67)
+(test-assert "p67"
+	(equal? p67 "(BoolValue 0x7e01ee63012345678)\n"))
+
+(define b68 (BoolValue 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 0 1 1 0 1 0 0 0 1 0 1 0 1 1 0 0 1 1 1 1 0 0 0))
+(define p68 (format #f "~A" b68))
+(format #t "p68 = >>~A<<\n" p68)
+(test-assert "p68"
+	(equal? p68 "(BoolValue 0xfe01ee63012345678)\n"))
+
 (test-end tname)
 
 (opencog-test-end)
