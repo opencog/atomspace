@@ -173,32 +173,38 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 
 		// The native storage format used above is big endian, in that
 		// bit zero is the left-most bit, bit one is to the right of that,
-		// and so on. 
-		// at the left
-// Print from most significant word to least significant
+		// and so on. This is easier to print than little-endian (which
+		// would force us to bit swap) but still presents some challenge.
 		size_t word_count = words_needed(_bit_count);
 
-		// Print full 16 hex digits for for as long as we can.
-		for (size_t w = 0; w < word_count-1; w++) {
+		// Print full 16 hex digits if we're lucky.
+		size_t bit_align = _bit_count % 64;
+printf("duuude _bitcount %lu last= %lu wc=%lu\n", _bit_count, bit_align, word_count);
+		if (0 == bit_align)
+		{
+			for (size_t w = 0; w < word_count; w++) {
+				uint64_t word = _packed_bits[w];
+				char buf[17];
+				snprintf(buf, sizeof(buf), "%016lx", word);
+				rv += buf;
+			}
+			rv += ")";
+			return rv;
+		}
+
+		uint64_t carry = 0ULL;
+		for (size_t w = 0; w < word_count; w++)
+		{
 			uint64_t word = _packed_bits[w];
+			uint64_t mask = (1ULL << bit_align) - 1;
+			uint64_t rbits = (word & mask) << bit_align;
+			word >>= (64 - bit_align);
+			word = word | carry;
+			carry = rbits;
 			char buf[17];
 			snprintf(buf, sizeof(buf), "%016lx", word);
 			rv += buf;
 		}
-
-		// For the last word, mask off unused bits
-		size_t bits_in_last = _bit_count % 64;
-printf("duuude _bitcount %lu last= %lu wc=%lu\n", _bit_count, bits_in_last,
-word_count);
-		uint64_t word = _packed_bits[word_count-1];
-		if (bits_in_last < 64)
-		{
-			word >>= (64 - bits_in_last);
-		}
-		char buf[17];
-		snprintf(buf, sizeof(buf), "%lx", word);
-		rv += buf;
-
 	});
 
 	rv += ")";
