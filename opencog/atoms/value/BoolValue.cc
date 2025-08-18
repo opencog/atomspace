@@ -28,13 +28,14 @@
 
 using namespace opencog;
 
-// Helper methods for bit manipulation
+// Bits will be stored in big-endian format, from left to right.
+// That is, bit zero is the left-most bit.
 static constexpr size_t BITS_PER_WORD = 64;
 static size_t word_index(size_t bit_index) {
 	return bit_index / BITS_PER_WORD;
 }
 static size_t bit_offset(size_t bit_index) {
-	return bit_index % BITS_PER_WORD;
+	return BITS_PER_WORD - 1 - bit_index % BITS_PER_WORD;
 }
 static size_t words_needed(size_t bit_count) {
 	return (bit_count + BITS_PER_WORD - 1) / BITS_PER_WORD;
@@ -170,28 +171,34 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		// For longer bitstrings, print in hexadecimal
 		rv += " 0x";
 
-		// Print from most significant word to least significant
+		// The native storage format used above is big endian, in that
+		// bit zero is the left-most bit, bit one is to the right of that,
+		// and so on. 
+		// at the left
+// Print from most significant word to least significant
 		size_t word_count = words_needed(_bit_count);
 
-		// For the first word, mask off unused bits
-		size_t bits_in_last = _bit_count % 64;
-		if (bits_in_last > 0)
-		{
-			uint64_t word = _packed_bits[word_count-1];
-			uint64_t mask = (uint64_t(1) << bits_in_last) - 1;
-			word &= mask;
-			char buf[17];
-			snprintf(buf, sizeof(buf), "%lx", word);
-			rv += buf;
-		}
-
-		// Print full 16 hex digits for remaining words
-		for (int w = word_count - 2; w >= 0; w--) {
+		// Print full 16 hex digits for for as long as we can.
+		for (size_t w = 0; w < word_count-1; w++) {
 			uint64_t word = _packed_bits[w];
 			char buf[17];
 			snprintf(buf, sizeof(buf), "%016lx", word);
 			rv += buf;
 		}
+
+		// For the last word, mask off unused bits
+		size_t bits_in_last = _bit_count % 64;
+printf("duuude _bitcount %lu last= %lu wc=%lu\n", _bit_count, bits_in_last,
+word_count);
+		uint64_t word = _packed_bits[word_count-1];
+		if (bits_in_last < 64)
+		{
+			word >>= (64 - bits_in_last);
+		}
+		char buf[17];
+		snprintf(buf, sizeof(buf), "%lx", word);
+		rv += buf;
+
 	});
 
 	rv += ")";
