@@ -24,16 +24,18 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <cstring>
+#include <cstdio>
 
 using namespace opencog;
 
-// Helper methods for bit manipulation
+// Bits will be stored in big-endian format, from left to right.
+// That is, bit zero is the left-most bit.
 static constexpr size_t BITS_PER_WORD = 64;
 static size_t word_index(size_t bit_index) {
 	return bit_index / BITS_PER_WORD;
 }
 static size_t bit_offset(size_t bit_index) {
-	return bit_index % BITS_PER_WORD;
+	return BITS_PER_WORD - 1 - bit_index % BITS_PER_WORD;
 }
 static size_t words_needed(size_t bit_count) {
 	return (bit_count + BITS_PER_WORD - 1) / BITS_PER_WORD;
@@ -90,7 +92,7 @@ std::vector<bool> BoolValue::unpack_vector() const
 BoolValue::BoolValue(bool v) : Value(BOOL_VALUE), _bit_count(1)
 {
 	_packed_bits.resize(1, 0);
-	if (v) _packed_bits[0] = 1;
+	if (v) _packed_bits[0] = uint64_t(1) << (BITS_PER_WORD -1);
 }
 
 BoolValue::BoolValue(const std::vector<bool>& v) : Value(BOOL_VALUE)
@@ -137,9 +139,9 @@ bool BoolValue::operator==(const Value& other) const
 
 	// For the last word, only compare the relevant bits
 	if (word_count > 0) {
-		size_t last_bits = bit_offset(_bit_count);
-		if (last_bits == 0) last_bits = BITS_PER_WORD;
-		uint64_t mask = (uint64_t(1) << last_bits) - 1;
+		size_t deadbits = _bit_count % BITS_PER_WORD;
+		if (deadbits == 0) deadbits = BITS_PER_WORD;
+		uint64_t mask = ~((uint64_t(1) << (BITS_PER_WORD - deadbits)) - 1);
 		if ((_packed_bits[word_count - 1] & mask) != (bov->_packed_bits[word_count - 1] & mask))
 			return false;
 	}
@@ -149,18 +151,94 @@ bool BoolValue::operator==(const Value& other) const
 
 // ==============================================================
 
-// XXX FIXME ... this is OK for short vectors, but should print
-// hexadecimal for anything longer tha 15 bits.
+// XXX FIXME This prints long bitstring in hex, but does not
+// indicate the length, e.g. if there are leading zeros and
+// string is not of a lenght of a multiple of four.  There
+// are two fixes I can think of: somehow explicitly print the
+// length, or alternately use #b to indicate the leading sub-nibble
+// (of length 1 2 or 3) So for example #b000 #xffff indicates a
+// 19-bit bitstring, the first three bits of which are zero.
+// Punt for now; this only becomes interesting for RocksDB,
+// and even then, storing super-long bitstrings should probably
+// be done in some way that is more efficient. For now, this is
+// a stop-gap for experimentation. As always ...
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
 	SAFE_UPDATE(rv,
 	{
-		for (size_t i = 0; i < _bit_count; i++)
+		if (_bit_count < 16)
 		{
-			if (get_bit(i)) rv += " 1";
-			else rv += " 0";
+			// For short bitstrings, print individual bits
+			for (size_t i = 0; i < _bit_count; i++)
+			{
+				if (get_bit(i)) rv += " 1";
+				else rv += " 0";
+			}
+			rv += ")";
+			return rv;
 		}
+
+		// For longer bitstrings, print in hexadecimal
+		rv += " #x";
+
+		// The native storage format used above is big endian, in that
+		// bit zero is the left-most bit, bit one is to the right of that,
+		// and so on. This is easier to print than little-endian (which
+		// would force us to bit swap) but still presents some challenge.
+		size_t word_count = words_needed(_bit_count);
+
+		// Print full 16 hex digits if we're lucky.
+		int bit_align = _bit_count % 64;
+		if (0 == bit_align)
+		{
+			for (size_t w = 0; w < word_count; w++) {
+				uint64_t word = _packed_bits[w];
+				char buf[17];
+				snprintf(buf, sizeof(buf), "%016lx", word);
+				rv += buf;
+			}
+			rv += ")";
+			return rv;
+		}
+
+		// First word to be padded by zeros, as needed.
+		uint64_t word = _packed_bits[0];
+		uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+		uint64_t carry = (word & mask) << bit_align;
+		word >>= (64 - bit_align);
+		int width = (bit_align + 3) >> 2;
+		char buf[17];
+		snprintf(buf, sizeof(buf), "%0*lx", width, word);
+		rv += buf;
+
+		// Are we done yet?
+		if (1 == word_count)
+		{
+			rv += ")";
+			return rv;
+		}
+
+		// Middle words are spliced from low bits of previous
+		// and high bits of current.
+		for (size_t w = 1; w < word_count - 1; w++)
+		{
+			uint64_t word = _packed_bits[w];
+			uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+			uint64_t rbits = (word & mask) << bit_align;
+			word >>= (64 - bit_align);
+			word = word | carry;
+			carry = rbits;
+			snprintf(buf, sizeof(buf), "%016lx", word);
+			rv += buf;
+		}
+
+		// Last word handling
+		word = _packed_bits[word_count - 1];
+		word >>= (64 - bit_align);
+		word = word | carry;
+		snprintf(buf, sizeof(buf), "%lx", word);
+		rv += buf;
 	});
 
 	rv += ")";
@@ -169,6 +247,14 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 
 // ==============================================================
 // Optimized packed boolean operations (static/internal use only)
+
+#define CLEANUP { \
+	size_t deadbits = bits % BITS_PER_WORD; \
+	if (deadbits > 0) { \
+		uint64_t mask = ~((uint64_t(1) << (BITS_PER_WORD - deadbits)) - 1); \
+		result[word_count - 1] &= mask; \
+	} \
+}
 
 static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
                             bool scalar, const std::vector<uint64_t>& packed, size_t bits)
@@ -190,13 +276,7 @@ static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up unused bits in the last word
-	if (bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	CLEANUP;
 }
 
 static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
@@ -212,13 +292,7 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 			result[i] = ~uint64_t(0);
 		}
 		// Clean up the last word
-		if (bits > 0 && word_count > 0) {
-			size_t last_bits = bit_offset(bits);
-			if (last_bits > 0) {
-				uint64_t mask = (uint64_t(1) << last_bits) - 1;
-				result[word_count - 1] &= mask;
-			}
-		}
+		CLEANUP;
 	} else {
 		// Copy all bits if scalar is false
 		for (size_t i = 0; i < word_count; i++) {
@@ -240,13 +314,7 @@ static void bool_not_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up unused bits in the last word
-	if (bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	CLEANUP;
 }
 
 static void bool_and_packed(std::vector<uint64_t>& result, size_t& result_bits,
@@ -324,13 +392,8 @@ static void bool_or_packed(std::vector<uint64_t>& result, size_t& result_bits,
 	}
 
 	// Clean up the last word if needed
-	if (result_bits > 0 && word_count > 0) {
-		size_t last_bits = bit_offset(result_bits);
-		if (last_bits > 0) {
-			uint64_t mask = (uint64_t(1) << last_bits) - 1;
-			result[word_count - 1] &= mask;
-		}
-	}
+	size_t bits = result_bits;
+	CLEANUP;
 }
 
 // Boolean operation implementations that work directly with BoolValuePtr
