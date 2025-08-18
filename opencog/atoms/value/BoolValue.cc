@@ -178,8 +178,7 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		size_t word_count = words_needed(_bit_count);
 
 		// Print full 16 hex digits if we're lucky.
-		size_t bit_align = _bit_count % 64;
-printf("duuude _bitcount %lu last= %lu wc=%lu\n", _bit_count, bit_align, word_count);
+		int bit_align = _bit_count % 64;
 		if (0 == bit_align)
 		{
 			for (size_t w = 0; w < word_count; w++) {
@@ -192,17 +191,49 @@ printf("duuude _bitcount %lu last= %lu wc=%lu\n", _bit_count, bit_align, word_co
 			return rv;
 		}
 
-		uint64_t carry = 0ULL;
-		for (size_t w = 0; w < word_count; w++)
+		// First word to be padded by zeros, as needed.
+		uint64_t word = _packed_bits[0];
+		uint64_t mask = (1ULL << bit_align) - 1;
+		uint64_t carry = (word & mask) << (64 - bit_align);
+		word >>= bit_align;
+		int width = (65 - bit_align) >> 2;
+		char buf[17];
+		snprintf(buf, sizeof(buf), "%0*lx", width, word);
+		rv += buf;
+
+		// Middle words are spliced from low bits of previous
+		// and high bits of current.
+		for (size_t w = 1; w < word_count - 1; w++)
 		{
 			uint64_t word = _packed_bits[w];
 			uint64_t mask = (1ULL << bit_align) - 1;
-			uint64_t rbits = (word & mask) << bit_align;
-			word >>= (64 - bit_align);
+			uint64_t rbits = (word & mask) << (64 - bit_align);
+			word >>= bit_align;
 			word = word | carry;
 			carry = rbits;
-			char buf[17];
 			snprintf(buf, sizeof(buf), "%016lx", word);
+			rv += buf;
+		}
+
+		// Last word handling depends on how many carry bits
+		// we have to make room for.
+		word = _packed_bits[word_count - 1];
+		if (32 >= bit_align)
+		{
+			word >>= bit_align;
+			word = word | carry;
+			word >>= (64 - 2* bit_align);
+			snprintf(buf, sizeof(buf), "%lx", word);
+			rv += buf;
+		}
+		else
+		{
+			uint64_t rbits = (word & mask);
+			word >>= bit_align;
+			word = word | carry;
+			snprintf(buf, sizeof(buf), "%016lx", word);
+			rv += buf;
+			snprintf(buf, sizeof(buf), "%lx", rbits);
 			rv += buf;
 		}
 	});
