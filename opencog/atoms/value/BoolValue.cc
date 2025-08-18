@@ -169,7 +169,7 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 		}
 
 		// For longer bitstrings, print in hexadecimal
-		rv += " 0x";
+		rv += " #x";
 
 		// The native storage format used above is big endian, in that
 		// bit zero is the left-most bit, bit one is to the right of that,
