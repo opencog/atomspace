@@ -151,6 +151,17 @@ bool BoolValue::operator==(const Value& other) const
 
 // ==============================================================
 
+// XXX FIXME This prints long bitstring in hex, but does not
+// indicate the length, e.g. if there are leading zeros and
+// string is not of a lenght of a multiple of four.  There
+// are two fixes I can think of: somehow explicitly print the
+// length, or alternately use #b to indicate the leading sub-nibble
+// (of length 1 2 or 3) So for example #b000 #xffff indicates a
+// 19-bit bitstring, the first three bits of which are zero.
+// Punt for now; this only becomes interesting for RocksDB,
+// and even then, storing super-long bitstrings should probably
+// be done in some way that is more efficient. For now, this is
+// a stop-gap for experimentation. As always ...
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
