@@ -92,7 +92,7 @@ std::vector<bool> BoolValue::unpack_vector() const
 BoolValue::BoolValue(bool v) : Value(BOOL_VALUE), _bit_count(1)
 {
 	_packed_bits.resize(1, 0);
-	if (v) _packed_bits[0] = 1;
+	if (v) _packed_bits[0] = uint64_t(1) << (BITS_PER_WORD -1);
 }
 
 BoolValue::BoolValue(const std::vector<bool>& v) : Value(BOOL_VALUE)
@@ -139,9 +139,9 @@ bool BoolValue::operator==(const Value& other) const
 
 	// For the last word, only compare the relevant bits
 	if (word_count > 0) {
-		size_t last_bits = bit_offset(_bit_count);
-		if (last_bits == 0) last_bits = BITS_PER_WORD;
-		uint64_t mask = (uint64_t(1) << last_bits) - 1;
+		size_t deadbits = _bit_count % BITS_PER_WORD;
+		if (deadbits == 0) deadbits = BITS_PER_WORD;
+		uint64_t mask = ~((uint64_t(1) << (BITS_PER_WORD - deadbits)) - 1);
 		if ((_packed_bits[word_count - 1] & mask) != (bov->_packed_bits[word_count - 1] & mask))
 			return false;
 	}
