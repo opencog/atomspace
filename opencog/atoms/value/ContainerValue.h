@@ -72,9 +72,7 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<ContainerValue> ContainerValuePtr;
-static inline ContainerValuePtr ContainerValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<ContainerValue>(a); }
+VALUE_PTR_DECL(ContainerValue);
 
 /** @}*/
 } // namespace opencog

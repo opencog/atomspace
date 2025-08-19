@@ -63,16 +63,8 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<FormulaStream> FormulaStreamPtr;
-static inline FormulaStreamPtr FormulaStreamCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<FormulaStream>(a); }
-
-template<typename ... Type>
-static inline std::shared_ptr<FormulaStream> createFormulaStream(Type&&... args)
-{
-	return std::make_shared<FormulaStream>(std::forward<Type>(args)...);
-}
-
+VALUE_PTR_DECL(FormulaStream);
+CREATE_VALUE_DECL(FormulaStream);
 
 /** @}*/
 } // namespace opencog

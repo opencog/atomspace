@@ -176,10 +176,12 @@ createValue(Args&&... args) {
 
 #define VALUE_PTR_DECL(CNAME) \
 	typedef std::shared_ptr<CNAME> CNAME##Ptr; \
-	static inline CNAME##Ptr CNAME##Cast(ValuePtr& a) \
+	static inline CNAME##Ptr CNAME##Cast(const ValuePtr& a) \
 		{ return std::dynamic_pointer_cast<CNAME>(a); } \
 	static inline const ValuePtr ValueCast(const CNAME##Ptr& fv) \
-		{ return std::shared_ptr<Value>(fv, (Value*) fv.get()); } \
+		{ return std::shared_ptr<Value>(fv, (Value*) fv.get()); }
+
+#define CREATE_VALUE_DECL(CNAME) \
 	template<typename ... Type> \
 	static inline std::shared_ptr<CNAME> create##CNAME(Type&&... args) \
 		{ return std::make_shared<CNAME>(std::forward<Type>(args)...); }

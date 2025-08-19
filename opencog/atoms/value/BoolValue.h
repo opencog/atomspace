@@ -85,6 +85,7 @@ public:
 };
 
 VALUE_PTR_DECL(BoolValue);
+CREATE_VALUE_DECL(BoolValue);
 
 // Boolean operation functions that work directly with BoolValuePtr
 ValuePtr bool_and(bool f, const BoolValuePtr& fvp);

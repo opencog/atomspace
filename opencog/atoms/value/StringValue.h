@@ -67,17 +67,8 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<const StringValue> StringValuePtr;
-static inline StringValuePtr StringValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<const StringValue>(a); }
-static inline const ValuePtr ValueCast(const StringValuePtr& sv)
-	{ return std::shared_ptr<Value>(sv, (Value*) sv.get()); }
-
-template<typename ... Type>
-static inline std::shared_ptr<StringValue> createStringValue(Type&&... args) {
-	return std::make_shared<StringValue>(std::forward<Type>(args)...);
-}
-
+VALUE_PTR_DECL(StringValue);
+CREATE_VALUE_DECL(StringValue);
 
 /** @}*/
 } // namespace opencog

@@ -65,14 +65,8 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<UnisetValue> UnisetValuePtr;
-static inline UnisetValuePtr UnisetValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<UnisetValue>(a); }
-
-template<typename ... Type>
-static inline std::shared_ptr<UnisetValue> createUnisetValue(Type&&... args) {
-   return std::make_shared<UnisetValue>(std::forward<Type>(args)...);
-}
+VALUE_PTR_DECL(UnisetValue);
+CREATE_VALUE_DECL(UnisetValue);
 
 /** @}*/
 } // namespace opencog
