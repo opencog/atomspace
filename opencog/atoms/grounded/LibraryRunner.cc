@@ -126,5 +126,5 @@ ValuePtr LibraryRunner::evaluate(AtomSpace* as,
 		        _fname.c_str(),
 		        cargs->to_short_string().c_str());
 
-	return CastToValue(result);
+	return ValueCast(result);
 }

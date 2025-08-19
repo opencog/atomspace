@@ -128,7 +128,7 @@ TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
             auto mean_new = (get_mean() * count + other->get_mean() * count2)
                 / (count + count2);
             confidence_t confidence_new = (count_new / (count_new + DEFAULT_K));
-            return createTV(mean_new, confidence_new);
+            return createSimpleTruthValue(mean_new, confidence_new);
         }
         default:
             throw RuntimeException(TRACE_INFO,

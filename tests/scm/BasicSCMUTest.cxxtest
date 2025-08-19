@@ -369,8 +369,8 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 void BasicSCMUTest::test_truth_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	check_truth_value(SimpleTruthValue::createTV(0.5, 0.5));
-	check_truth_value(SimpleTruthValue::createTV(0.2, 0.7));
+	check_truth_value(createSimpleTruthValue(0.5, 0.5));
+	check_truth_value(createSimpleTruthValue(0.2, 0.7));
 	// @todo : add more
 }
 

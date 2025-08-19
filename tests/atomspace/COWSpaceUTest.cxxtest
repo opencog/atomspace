@@ -56,8 +56,8 @@ public:
 	void testSimple()
 	{
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
-		TruthValuePtr tv1(SimpleTruthValue::createTV(0.1, 0.1));
-		TruthValuePtr tv2(SimpleTruthValue::createTV(0.2, 0.2));
+		TruthValuePtr tv1(createSimpleTruthValue(0.1, 0.1));
+		TruthValuePtr tv2(createSimpleTruthValue(0.2, 0.2));
 
 		// Create two atoms in the base atomspace
 		Handle h1 = base->add_node(CONCEPT_NODE, "A1 beef");
@@ -75,7 +75,7 @@ public:
 		TS_ASSERT(h3 == nullptr);
 
 		// Setting truth value in overlay should trigger COW
-		TruthValuePtr tv3(SimpleTruthValue::createTV(0.3, 0.3));
+		TruthValuePtr tv3(createSimpleTruthValue(0.3, 0.3));
 		Handle h2o = ovly->set_truthvalue(h2, tv3);
 		TS_ASSERT(h2 != h2o);
 		TS_ASSERT(h2o->getTruthValue() == tv3);
@@ -86,7 +86,7 @@ public:
 		TS_ASSERT(h2b->getTruthValue() == tv2);
 
 		// Setting truth value a second time in overlay should NOT COW
-		TruthValuePtr tv4(SimpleTruthValue::createTV(0.4, 0.4));
+		TruthValuePtr tv4(createSimpleTruthValue(0.4, 0.4));
 		Handle h2v = ovly->set_truthvalue(h2, tv4);
 		TS_ASSERT(h2 != h2v);
 		TS_ASSERT(h2o == h2v);
@@ -103,11 +103,11 @@ public:
 	void testCOW()
 	{
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
-		TruthValuePtr tv1(SimpleTruthValue::createTV(0.1, 0.1));
-		TruthValuePtr tv2(SimpleTruthValue::createTV(0.2, 0.2));
-		TruthValuePtr tv3(SimpleTruthValue::createTV(0.3, 0.3));
-		TruthValuePtr tv4(SimpleTruthValue::createTV(0.4, 0.4));
-		TruthValuePtr tv5(SimpleTruthValue::createTV(0.5, 0.5));
+		TruthValuePtr tv1(createSimpleTruthValue(0.1, 0.1));
+		TruthValuePtr tv2(createSimpleTruthValue(0.2, 0.2));
+		TruthValuePtr tv3(createSimpleTruthValue(0.3, 0.3));
+		TruthValuePtr tv4(createSimpleTruthValue(0.4, 0.4));
+		TruthValuePtr tv5(createSimpleTruthValue(0.5, 0.5));
 
 		// Mark the overlay as a COW space.
 		ovly->set_copy_on_write();

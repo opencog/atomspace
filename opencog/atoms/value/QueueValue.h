@@ -63,14 +63,8 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<QueueValue> QueueValuePtr;
-static inline QueueValuePtr QueueValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<QueueValue>(a); }
-
-template<typename ... Type>
-static inline std::shared_ptr<QueueValue> createQueueValue(Type&&... args) {
-   return std::make_shared<QueueValue>(std::forward<Type>(args)...);
-}
+VALUE_PTR_DECL(QueueValue);
+CREATE_VALUE_DECL(QueueValue);
 
 /** @}*/
 } // namespace opencog

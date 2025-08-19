@@ -53,15 +53,8 @@ public:
 	virtual std::string to_string(const std::string& indent = "") const;
 };
 
-typedef std::shared_ptr<RandomStream> RandomStreamPtr;
-static inline RandomStreamPtr RandomStreamCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<RandomStream>(a); }
-
-template<typename ... Type>
-static inline std::shared_ptr<RandomStream> createRandomStream(Type&&... args) {
-	return std::make_shared<RandomStream>(std::forward<Type>(args)...);
-}
-
+VALUE_PTR_DECL(RandomStream);
+CREATE_VALUE_DECL(RandomStream);
 
 /** @}*/
 } // namespace opencog

@@ -42,9 +42,6 @@ namespace opencog
  * Boolean-and, boolean-or, and boolean-not operate on 64-bit chunks
  * for improved performance.
  */
-class BoolValue;
-typedef std::shared_ptr<const BoolValue> BoolValuePtr;
-
 class BoolValue
 	: public Value
 {
@@ -87,18 +84,8 @@ public:
 	}
 };
 
-static inline BoolValuePtr BoolValueCast(const ValuePtr& a)
-	{ return std::dynamic_pointer_cast<const BoolValue>(a); }
-
-static inline const ValuePtr ValueCast(const BoolValuePtr& fv)
-{
-	return std::shared_ptr<Value>(fv, (Value*) fv.get());
-}
-
-template<typename ... Type>
-static inline std::shared_ptr<BoolValue> createBoolValue(Type&&... args) {
-	return std::make_shared<BoolValue>(std::forward<Type>(args)...);
-}
+VALUE_PTR_DECL(BoolValue);
+CREATE_VALUE_DECL(BoolValue);
 
 // Boolean operation functions that work directly with BoolValuePtr
 ValuePtr bool_and(bool f, const BoolValuePtr& fvp);

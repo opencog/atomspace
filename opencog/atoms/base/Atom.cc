@@ -122,7 +122,7 @@ TruthValuePtr Atom::incrementCountTV(double cnt)
 		}
 	}
 
-	TruthValuePtr newTV = CountTruthValue::createTV(mean, conf, cnt);
+	TruthValuePtr newTV = createCountTruthValue(mean, conf, cnt);
 
 	_values[truth_key()] = ValueCast(newTV);
 	return newTV;

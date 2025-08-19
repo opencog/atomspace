@@ -148,7 +148,7 @@ bool CountTruthValue::operator==(const Value& rhs) const
 TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const
 {
-    CountTruthValuePtr oc(CountTruthValueCast(other));
+    CountTruthValuePtr oc(CountTruthValueCast(ValueCast(other)));
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
@@ -174,7 +174,7 @@ TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
     // Argh .. what to do?
     //    confidence = oc->confidence;
 
-    return createTV(meeny, get_confidence(), cnt);
+    return TruthValueCast(createCountTruthValue(meeny, get_confidence(), cnt));
 }
 
 DEFINE_VALUE_FACTORY(COUNT_TRUTH_VALUE,

@@ -60,9 +60,7 @@ public:
 	virtual bool operator==(const Value&) const;
 };
 
-typedef std::shared_ptr<StreamValue> StreamValuePtr;
-static inline StreamValuePtr StreamValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<StreamValue>(a); }
+VALUE_PTR_DECL(StreamValue);
 
 /** @}*/
 } // namespace opencog

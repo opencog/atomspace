@@ -57,15 +57,8 @@ public:
 	virtual strength_t get_mean() const;
 };
 
-typedef std::shared_ptr<const FormulaTruthValue> FormulaTruthValuePtr;
-static inline FormulaTruthValuePtr FormulaTruthValueCast(ValuePtr& a)
-	{ return std::dynamic_pointer_cast<FormulaTruthValue>(a); }
-
-template<typename ... Type>
-static inline std::shared_ptr<FormulaTruthValue> createFormulaTruthValue(Type&&... args)
-{
-   return std::make_shared<FormulaTruthValue>(std::forward<Type>(args)...);
-}
+VALUE_PTR_DECL(FormulaTruthValue);
+CREATE_VALUE_DECL(FormulaTruthValue);
 
 /** @}*/
 } // namespace opencog

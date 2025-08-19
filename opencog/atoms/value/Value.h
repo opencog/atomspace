@@ -134,30 +134,6 @@ std::string oc_to_string(const ValueSeq& vs,
 std::string oc_to_string(const ValueMap& vs,
                          const std::string& indent=empty_string);
 
-/**
- * Cast ValuePtr to the specific Value subclass. This function is defined only
- * for T which are subclasses of Value.
- */
-template<typename T>
-static inline
-typename std::enable_if< std::is_base_of<Value, T>::value, std::shared_ptr<T> >::type
-CastFromValue(const ValuePtr& value)
-{
-	return std::dynamic_pointer_cast<T>(value);
-}
-
-/**
- * Cast specific Value subclass to ValuePtr. This function is defined only
- * for T which are subclasses of Value.
- */
-template<typename T>
-static inline
-typename std::enable_if< std::is_base_of<Value, T>::value, ValuePtr >::type
-CastToValue(const std::shared_ptr<const T>& value)
-{
-	return std::dynamic_pointer_cast<Value>(std::const_pointer_cast<T>(value));
-}
-
 class Atom;
 
 /**
@@ -173,6 +149,18 @@ typename std::enable_if<
 createValue(Args&&... args) {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
+
+#define VALUE_PTR_DECL(CNAME) \
+	typedef std::shared_ptr<CNAME> CNAME##Ptr; \
+	static inline CNAME##Ptr CNAME##Cast(const ValuePtr& a) \
+		{ return std::dynamic_pointer_cast<CNAME>(a); } \
+	static inline const ValuePtr ValueCast(const CNAME##Ptr& fv) \
+		{ return std::shared_ptr<Value>(fv, (Value*) fv.get()); }
+
+#define CREATE_VALUE_DECL(CNAME) \
+	template<typename ... Type> \
+	static inline std::shared_ptr<CNAME> create##CNAME(Type&&... args) \
+		{ return std::make_shared<CNAME>(std::forward<Type>(args)...); }
 
 /** @}*/
 } // namespace opencog

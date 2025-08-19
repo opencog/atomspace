@@ -43,7 +43,7 @@ public:
 	{
 		ValuePtr value = createValue<FloatValue>(4.2);
 
-		FloatValuePtr float_value = CastFromValue<FloatValue>(value);
+		FloatValuePtr float_value = FloatValueCast(value);
 
 		TS_ASSERT_EQUALS(value.get(), float_value.get());
 	}
@@ -52,7 +52,7 @@ public:
 	{
 		FloatValuePtr float_value;
 
-		ValuePtr value = CastToValue(float_value = createFloatValue(4.2));
+		ValuePtr value = ValueCast(float_value = createFloatValue(4.2));
 
 		TS_ASSERT_EQUALS(value.get(), float_value.get());
 	}

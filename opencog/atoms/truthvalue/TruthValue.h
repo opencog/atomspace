@@ -169,16 +169,7 @@ static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const TruthValue>(pa); }
 
 static inline ValuePtr ValueCast(const TruthValuePtr& tv)
-{
-	// This should have worked!?
-	// return std::const_pointer_cast<Value>(tv);
-
-	// This, too, should have worked!?
-	// return std::shared_ptr<Value>(tv, const_cast<Value*>(tv.get()));
-
-	// This works...
-	return std::shared_ptr<Value>(tv, (Value*) tv.get());
-}
+	{ return std::shared_ptr<Value>(tv, (Value*) tv.get()); }
 
 typedef std::vector<TruthValuePtr> TruthValueSeq;
 
