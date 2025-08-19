@@ -14,6 +14,11 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/value/FloatValue.h>
 
+// Ubunutu 20.04 LTS does not yet have this c++17 feature. Bummer.
+#ifndef __cpp_lib_to_chars
+#include <boost/lexical_cast.hpp>
+#endif
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -45,6 +50,8 @@ private:
 	//    return boost::lexical_cast<std::string>(x);
 	static std::string double_to_string(double x)
 	{
+// Ubunutu 20.04 LTS does not yet have this c++17 feature. Bummer.
+#ifdef __cpp_lib_to_chars
 		const size_t buf_size = 30;
 		char buf[buf_size]{};
 		std::to_chars_result result = std::to_chars(buf, buf + buf_size,
@@ -54,6 +61,9 @@ private:
 				"Error: Failed double_to_string(%g): %s\n",
 				x, std::make_error_code(result.ec).message().c_str());
 		return std::string(buf);
+#else // __cpp_lib_to_chars
+		return boost::lexical_cast<std::string>(x);
+#endif // __cpp_lib_to_chars
 	}
 
 protected:
