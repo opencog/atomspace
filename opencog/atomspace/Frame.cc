@@ -69,7 +69,7 @@ void Frame::remove()
 /// Remove all dead frames in the incoming set.
 void Frame::scrub_incoming_set(void)
 {
-	if (not _use_iset) return;
+	if (not (_flags.load() & USE_ISET_FLAG)) return;
 	INCOMING_UNIQUE_LOCK;
 
 	// Iterate over all frame types

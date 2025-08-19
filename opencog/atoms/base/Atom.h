@@ -222,12 +222,14 @@ class Atom
     friend class StorageNode;     // Needs to call isAbsent()
 
 protected:
-    // Each atomic_flag chews up a byte.
-    // Place this first, so that these share a word with Type.
-    mutable std::atomic_bool _absent;
-    mutable std::atomic_bool _marked_for_removal;
-    mutable std::atomic_bool _checked;
-    mutable bool _use_iset;
+    // Packed flas. Single byte per atom.
+    enum AtomFlags : uint8_t {
+        ABSENT_FLAG     = 0x01,  // 0000 0001
+        MARKED_FLAG     = 0x02,  // 0000 0010
+        CHECKED_FLAG    = 0x04,  // 0000 0100
+        USE_ISET_FLAG   = 0x08   // 0000 1000
+    };
+    mutable std::atomic<uint8_t> _flags;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -256,10 +258,7 @@ protected:
      */
     Atom(Type t)
       : Value(t),
-        _absent(false),
-        _marked_for_removal(false),
-        _checked(false),
-        _use_iset(false),
+        _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
     {}
@@ -540,7 +539,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getIncomingIter(OutputIterator result) const
     {
-        if (not _use_iset) return result;
+        if (not (_flags.load() & USE_ISET_FLAG)) return result;
         INCOMING_SHARED_LOCK;
         for (const auto& bucket : _incoming_set._iset)
         {
@@ -562,7 +561,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result, Type type) const
     {
-        if (not _use_iset) return result;
+        if (not (_flags.load() & USE_ISET_FLAG)) return result;
         INCOMING_SHARED_LOCK;
 
         const auto bucket = _incoming_set._iset.find(type);
