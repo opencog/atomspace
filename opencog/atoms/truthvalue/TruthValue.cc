@@ -166,9 +166,9 @@ TruthValuePtr TruthValue::factory(const ValuePtr& pap)
 {
 	Type t = pap->get_type();
 	if (SIMPLE_TRUTH_VALUE == t)
-		return SimpleTruthValue::createTV(pap);
+		return createSimpleTruthValue(pap);
 	if (COUNT_TRUTH_VALUE == t)
-		return CountTruthValue::createTV(pap);
+		return createCountTruthValue(pap);
 
 	throw RuntimeException(TRACE_INFO,
 		"Unknown TruthValue type %d", t);

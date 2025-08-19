@@ -34,10 +34,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-class SimpleTruthValue;
-typedef std::shared_ptr<const SimpleTruthValue> SimpleTruthValuePtr;
-
 //! a TruthValue that stores a strength and confidence.
 class SimpleTruthValue : public TruthValue
 {
@@ -73,38 +69,10 @@ public:
      */
     TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
-
-    // XXX FIXME Are all of these really needed?
-    // Can we get rid of some of them?
-    static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
-    {
-        return std::make_shared<const SimpleTruthValue>(mean, conf);
-    }
-    static TruthValuePtr createTV(strength_t mean, confidence_t conf)
-    {
-        return std::static_pointer_cast<const TruthValue>(createSTV(mean, conf));
-    }
-    static TruthValuePtr createTV(const std::vector<double>& v)
-    {
-        return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<const SimpleTruthValue>(v));
-    }
-
-    static TruthValuePtr createTV(const ValuePtr& pap)
-    {
-        return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<const SimpleTruthValue>(pap));
-    }
 };
 
-static inline SimpleTruthValuePtr SimpleTruthValueCast(const ValuePtr& pa)
-    { return std::dynamic_pointer_cast<const SimpleTruthValue>(pa); }
-
-template<typename ... Type>
-static inline TruthValuePtr createSimpleTruthValue(Type&&...  args) {
-   return SimpleTruthValue::createTV(std::forward<Type>(args)...);
-}
-
+VALUE_PTR_DECL(SimpleTruthValue);
+CREATE_VALUE_DECL(SimpleTruthValue);
 
 /** @}*/
 } // namespace opencog
