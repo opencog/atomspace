@@ -341,37 +341,41 @@ std::string Atom::valuesToString() const
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
-    return _marked_for_removal.load();
+    return _flags.load() & MARKED_FLAG;
 }
 
 bool Atom::unsetRemovalFlag(void)
 {
-    return _marked_for_removal.exchange(false);
+    uint8_t old_flags = _flags.fetch_and(~MARKED_FLAG);
+    return old_flags & MARKED_FLAG;
 }
 
 bool Atom::markForRemoval(void)
 {
-    return _marked_for_removal.exchange(true);
+    uint8_t old_flags = _flags.fetch_or(MARKED_FLAG);
+    return old_flags & MARKED_FLAG;
 }
 
 bool Atom::isChecked() const
 {
-    return _checked.load();
+    return _flags.load() & CHECKED_FLAG;
 }
 
 bool Atom::setChecked(void)
 {
-    return _checked.exchange(true);
+    uint8_t old_flags = _flags.fetch_or(CHECKED_FLAG);
+    return old_flags & CHECKED_FLAG;
 }
 
 bool Atom::setUnchecked(void)
 {
-    return _checked.exchange(false);
+    uint8_t old_flags = _flags.fetch_and(~CHECKED_FLAG);
+    return old_flags & CHECKED_FLAG;
 }
 
 bool Atom::isAbsent() const
 {
-    return _absent.load();
+    return _flags.load() & ABSENT_FLAG;
 }
 
 /// Marking an Atom as being absent makes it invisible, as if it
@@ -382,12 +386,14 @@ bool Atom::setAbsent(void)
 {
     KVP_UNIQUE_LOCK;
     _values.clear();
-    return _absent.exchange(true);
+    uint8_t old_flags = _flags.fetch_or(ABSENT_FLAG);
+    return old_flags & ABSENT_FLAG;
 }
 
 bool Atom::setPresent(void)
 {
-    return _absent.exchange(false);
+    uint8_t old_flags = _flags.fetch_and(~ABSENT_FLAG);
+    return old_flags & ABSENT_FLAG;
 }
 
 // ==============================================================
@@ -432,7 +438,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 /// whatever. It's not hurting us much.
 void Atom::keep_incoming_set()
 {
-   _use_iset = true;
+   _flags.fetch_or(USE_ISET_FLAG);
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -440,16 +446,16 @@ void Atom::keep_incoming_set()
 /// be queried; it is erased.
 void Atom::drop_incoming_set()
 {
-    if (not _use_iset) return;
+    if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
-    _use_iset = false;
+    _flags.fetch_and(~USE_ISET_FLAG);
     _incoming_set._iset.clear();
 }
 
 /// Add an atom to the incoming set.
 void Atom::insert_atom(const Handle& a)
 {
-    if (not _use_iset) return;
+    if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
 
     Type at = a->get_type();
@@ -466,7 +472,7 @@ void Atom::insert_atom(const Handle& a)
 /// Remove an atom from the incoming set.
 void Atom::remove_atom(const Handle& a)
 {
-    if (not _use_iset) return;
+    if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
     Type at = a->get_type();
 
@@ -488,7 +494,7 @@ void Atom::remove_atom(const Handle& a)
 /// the incoming set. This is used to manage the StateLink.
 void Atom::swap_atom(const Handle& old, const Handle& neu)
 {
-    if (not _use_iset) return;
+    if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
 
     Type ot = old->get_type();
@@ -511,7 +517,7 @@ void Atom::remove() {}
 
 bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
-    if (not _use_iset) return true;
+    if (not (_flags.load() & USE_ISET_FLAG)) return true;
     INCOMING_SHARED_LOCK;
 
     for (const auto& bucket : _incoming_set._iset)
@@ -524,7 +530,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
-    if (not _use_iset) return 0;
+    if (not (_flags.load() & USE_ISET_FLAG)) return 0;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -619,7 +625,7 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
 IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (not _use_iset) return empty_set;
+    if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -665,7 +671,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (not _use_iset) return empty_set;
+    if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -707,7 +713,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
-    if (not _use_iset) return 0;
+    if (not (_flags.load() & USE_ISET_FLAG)) return 0;
 
     size_t cnt = 0;
 
