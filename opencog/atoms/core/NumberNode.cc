@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+#include <charconv>
 #include <sstream>
 
 #include <opencog/util/exceptions.h>
