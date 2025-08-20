@@ -22,9 +22,8 @@
  */
 
 #include <opencog/atoms/parallel/DefinedProcedureNode.h>
-#include <opencog/atoms/value/VoidValue.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 using namespace opencog;
 
@@ -52,10 +51,13 @@ DefinedProcedureNode::DefinedProcedureNode(Type t, const std::string&& str)
 ValuePtr DefinedProcedureNode::execute(AtomSpace* as,
                                        bool silent)
 {
-	ValuePtr result;
+	Handle defn(DefineLink::get_definition(get_handle()));
+	if (nullptr == defn)
+		throw RuntimeException(TRACE_INFO,
+			"DefinedProcedureNode \"%s\" is not defined", get_name().c_str());
 
-
-	return result;
+	if (not defn->is_executable()) return defn;
+	return defn->execute();
 }
 
 DEFINE_NODE_FACTORY(DefinedProcedureNode, DEFINED_PROCEDURE_NODE)
