@@ -28,7 +28,6 @@
 #include <vector>
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/value/QueueValue.h>
 
 namespace opencog
 {
@@ -45,7 +44,6 @@ protected:
 	size_t _setoff;
 	std::vector<std::thread> _thread_set;
 	std::thread _joiner;
-	QueueValuePtr _qvp;
 
 public:
 	ExecuteThreadedLink(const HandleSeq&&, Type=EXECUTE_THREADED_LINK);

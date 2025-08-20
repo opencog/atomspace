@@ -157,13 +157,13 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	if (_joiner.joinable())
 		_joiner.join();
 
-	_qvp = createQueueValue();
+	QueueValuePtr qvp(createQueueValue());
 
 	std::thread jnr(&thread_joiner,
-		as, silent, &_thread_set, _nthreads, &todo_list, _qvp);
+		as, silent, &_thread_set, _nthreads, &todo_list, qvp);
 	_joiner.swap(jnr);
 
-	return _qvp;
+	return qvp;
 }
 
 DEFINE_LINK_FACTORY(ExecuteThreadedLink, EXECUTE_THREADED_LINK)
