@@ -9,7 +9,6 @@ ADD_LIBRARY (atomcore
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
-	DontExecLink.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
@@ -25,7 +24,6 @@ ADD_LIBRARY (atomcore
 	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
-	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
 	TypeChoice.cc
@@ -59,7 +57,6 @@ INSTALL (FILES
 	Context.h
 	DefineLink.h
 	DeleteLink.h
-	DontExecLink.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h
@@ -75,7 +72,6 @@ INSTALL (FILES
 	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
-	SleepLink.h
 	StateLink.h
 	TimeLink.h
 	TypeChoice.h

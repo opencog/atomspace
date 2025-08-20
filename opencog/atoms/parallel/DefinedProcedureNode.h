@@ -1,7 +1,8 @@
 /*
- * opencog/atoms/core/SleepLink.h
+ * opencog/atoms/parallel/DefinedProcedureNode.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2020, 2024 Linas Vepstas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SLEEP_LINK_H
-#define _OPENCOG_SLEEP_LINK_H
+#ifndef _OPENCOG_DEFINED_PROCEDURE_NODE_H
+#define _OPENCOG_DEFINED_PROCEDURE_NODE_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {
@@ -31,27 +32,29 @@ namespace opencog
  *  @{
  */
 
-/// The SleepLink pauses execution for the given number of seconds.
-/// If interrupted, it returns the number of seconds remaining.
-/// At this time, there is no way to interrupt :-)
-///
-class SleepLink : public FunctionLink
-{
-public:
-	SleepLink(const HandleSeq&&, Type=SLEEP_LINK);
-	SleepLink(const SleepLink &) = delete;
-	SleepLink& operator=(const SleepLink &) = delete;
+class AtomSpace;
 
-	// Return number of seconds left to sleep.
+class DefinedProcedureNode : public Node
+{
+protected:
+
+public:
+	DefinedProcedureNode(Type, const std::string&&);
+public:
+	DefinedProcedureNode(const std::string&&);
+	DefinedProcedureNode(const DefinedProcedureNode&) = delete;
+	DefinedProcedureNode& operator=(const DefinedProcedureNode&) = delete;
+
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(SleepLink)
-#define createSleepLink CREATE_DECL(SleepLink)
+NODE_PTR_DECL(DefinedProcedureNode)
+#define createDefinedProcedureNode CREATE_DECL(DefinedProcedureNode)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_SLEEP_LINK_H
+#endif // _OPENCOG_DEFINED_PROCEDURE_NODE_H

@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/parallel/PureExecLink.cc
  *
- * Copyright (C) 2009, 2013-2015, 2020, 2024 Linas Vepstas
+ * Copyright (C) 2009, 2013-2015, 2020, 2024, 2025 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
  * All Rights Reserved
  *
@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/parallel/PureExecLink.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
 
@@ -33,12 +34,23 @@ using namespace opencog;
 /// The general structure of this link is
 ///
 ///        PureExecLink
-///            ExecutableAtom
 ///            AtomSpace (optional)
+///            ExecutableAtom
+///            AnotherExecutableAtom
+///            AnotherAtomSpace (optional)
+///            MoreExecutableAtom
 ///
-/// When this link is executed, the `ExecutableAtom` is executed in the
-/// specified AtomSpace, so that any Atoms created during execution end
-/// up there, instead of the current AtomSpace.
+/// When this link is executed, all of the various `ExecutableAtoms`
+/// are executed in the sequential order, in the most recent AtomSpace
+/// that preceeded them. Thus, if execution has side effects, such
+/// as creating new Atoms, they end up there, and not the current
+/// AtomSpace. That's what make's it "Pure" -- no side-effects in the
+/// current AtomSpace.
+///
+/// If no AtomSpace is given, a temporary transient is used.
+///
+/// Execution results are placed in a LinkValue; the LinkValue is
+/// returned.
 
 PureExecLink::PureExecLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t)
@@ -51,23 +63,43 @@ PureExecLink::PureExecLink(const HandleSeq&& oset, Type t)
 ValuePtr PureExecLink::execute(AtomSpace* as,
                                bool silent)
 {
-	if (not _outgoing[0]->is_executable()) return _outgoing[0];
-
-	// Is there an AtomSpace? If so, use that.
-	if (1 < _outgoing.size() and _outgoing[1]->get_type() == ATOM_SPACE)
+	ValueSeq vseq;
+	AtomSpace* ctxt = nullptr;
+	for (const Handle& h : _outgoing)
 	{
-		AtomSpace* tas = AtomSpaceCast(_outgoing[1]).get();
-		return _outgoing[0]->execute(tas, silent);
+		if (h->is_type(ATOM_SPACE))
+		{
+			ctxt = AtomSpaceCast(h).get();
+			continue;
+		}
+		if (not h->is_executable())
+		{
+			vseq.push_back(h);
+			continue;
+		}
+		if (ctxt)
+		{
+			vseq.push_back(execute(ctxt, silent));
+			continue;
+		}
+
+		// No AtomSpace provided. Use a temporary.
+		// Avoid transient memory space leak. Well, there's no actual
+		// leak, because the pool deals with it; it just prints a nasty
+		// warning message, and we want to hide that message.
+		AtomSpace* tas = grab_transient_atomspace(as);
+		std::exception_ptr eptr;
+		try {
+			vseq.push_back(h->execute(tas, silent));
+		}
+		catch(...) {
+			eptr = std::current_exception();
+		}
+		release_transient_atomspace(tas);
+		if (eptr) std::rethrow_exception(eptr);
 	}
 
-	// No AtomSpace provided. Use a temporary.
-	// XXX Note that this leaks, if the execute throws.
-	// The transient code will catch the leak, and complain.
-	// (There's no actual memleak; just a complaint about counting.)
-	AtomSpace* tas = grab_transient_atomspace(as);
-	ValuePtr evp(_outgoing[0]->execute(tas, silent));
-	release_transient_atomspace(tas);
-	return evp;
+	return createLinkValue(vseq);
 }
 
 DEFINE_LINK_FACTORY(PureExecLink, PURE_EXEC_LINK)
