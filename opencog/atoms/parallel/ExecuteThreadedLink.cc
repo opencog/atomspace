@@ -40,7 +40,7 @@ using namespace opencog;
 /// The general structure of this link is
 ///
 ///        ExecuteThreadedLink
-///            NumberNode nthr  ; optionl; if present, number of threads.
+///            NumberNode nthr  ; optional; if present, number of threads.
 ///            SetLink
 ///                ExecutableAtoms...
 ///

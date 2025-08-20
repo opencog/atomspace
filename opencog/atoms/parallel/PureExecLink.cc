@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/parallel/PureExecLink.h>
-#include <opencog/atoms/value/VoidValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
 
@@ -48,9 +48,9 @@ using namespace opencog;
 /// current AtomSpace.
 ///
 /// If no AtomSpace is given, a temporary transient is used.
-/// The value returned by execution is the result of executing
-/// the last Atom in the sequence. The result of executing a
-/// non-executable atom is that Atom itself.
+///
+/// Execution results are placed in a LinkValue; the LinkValue is
+/// returned.
 
 PureExecLink::PureExecLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t)
@@ -63,7 +63,7 @@ PureExecLink::PureExecLink(const HandleSeq&& oset, Type t)
 ValuePtr PureExecLink::execute(AtomSpace* as,
                                bool silent)
 {
-	ValuePtr result = createVoidValue();
+	ValueSeq vseq;
 	AtomSpace* ctxt = nullptr;
 	for (const Handle& h : _outgoing)
 	{
@@ -74,12 +74,12 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		}
 		if (not h->is_executable())
 		{
-			result = h;
+			vseq.push_back(h);
 			continue;
 		}
 		if (ctxt)
 		{
-			result = h->execute(ctxt, silent);
+			vseq.push_back(execute(ctxt, silent));
 			continue;
 		}
 
@@ -90,7 +90,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		AtomSpace* tas = grab_transient_atomspace(as);
 		std::exception_ptr eptr;
 		try {
-			result = h->execute(tas, silent);
+			vseq.push_back(h->execute(tas, silent));
 		}
 		catch(...) {
 			eptr = std::current_exception();
@@ -99,7 +99,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		if (eptr) std::rethrow_exception(eptr);
 	}
 
-	return result;
+	return createLinkValue(vseq);
 }
 
 DEFINE_LINK_FACTORY(PureExecLink, PURE_EXEC_LINK)
