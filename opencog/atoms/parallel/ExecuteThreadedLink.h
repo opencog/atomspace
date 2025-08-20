@@ -24,7 +24,11 @@
 #ifndef _OPENCOG_EXECUTE_THREADED_LINK_H
 #define _OPENCOG_EXECUTE_THREADED_LINK_H
 
+#include <thread>
+#include <vector>
+
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/value/QueueValue.h>
 
 namespace opencog
 {
@@ -39,6 +43,9 @@ class ExecuteThreadedLink : public Link
 protected:
 	size_t _nthreads;
 	size_t _setoff;
+	std::vector<std::thread> _thread_set;
+	std::thread _joiner;
+	QueueValuePtr _qvp;
 
 public:
 	ExecuteThreadedLink(const HandleSeq&&, Type=EXECUTE_THREADED_LINK);

@@ -113,6 +113,35 @@ static void thread_exec(AtomSpace* as, bool silent,
 	}
 }
 
+/*static*/ void thread_joiner(AtomSpace* as, bool silent,
+                          std::vector<std::thread>& thread_set,
+                          size_t nthreads,
+                          concurrent_queue<Handle>* todo,
+                          QueueValuePtr qvp,
+                          std::exception_ptr* returned_ex)
+{
+	// Launch the workers
+	for (size_t i=0; i<nthreads; i++)
+	{
+		thread_set.push_back(std::thread(&thread_exec,
+			as, silent, todo, qvp, returned_ex));
+	}
+
+	// Wait for all threads to come together.
+	for (std::thread& t : thread_set) t.join();
+
+	// Empty out the set.
+	thread_set.clear();
+
+#if 0
+	// Were there any exceptions? If so, rethrow.
+	if (ex) std::rethrow_exception(ex);
+
+#endif
+
+	qvp->close();
+}
+
 ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
                                       bool silent)
 {
@@ -123,29 +152,18 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 		todo_list.push(h);
 
 	// Where the results will be reported.
-	QueueValuePtr qvp(createQueueValue());
-
-	// Create a collection of joinable threads.
-	std::vector<std::thread> thread_set;
-	std::exception_ptr ex;
-
-	// Launch the workers
-	for (size_t i=0; i<_nthreads; i++)
+	if (_qvp)
 	{
-		thread_set.push_back(std::thread(&thread_exec,
-			as, silent, &todo_list, qvp, &ex));
+		// XXX if its open, stall...
+	}
+	_qvp = createQueueValue();
+
+	if (0 < _thread_set.size())
+	{
+		// XXX if none-mpty, do something
 	}
 
-#if 0
-	// Wait for it all to come together.
-	for (std::thread& t : thread_set) t.join();
-
-	// Were there any exceptions? If so, rethrow.
-	if (ex) std::rethrow_exception(ex);
-
-	qvp->close();
-#endif
-	return qvp;
+	return _qvp;
 }
 
 DEFINE_LINK_FACTORY(ExecuteThreadedLink, EXECUTE_THREADED_LINK)
