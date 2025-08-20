@@ -130,10 +130,6 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 
 	sn = beta_reduce(sn, ist._varmap);
 
-	// If its a DSN, obtain the correct body for it.
-	if (sn->is_type(DEFINED_PROCEDURE_NODE))
-		sn = DefineLink::get_definition(sn);
-
 	// If its an anonymous function link, execute it here.
 	if (LAMBDA_LINK == sn->get_type())
 	{

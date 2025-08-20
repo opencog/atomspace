@@ -55,10 +55,6 @@ FunctionLink::FunctionLink(const HandleSeq&& oset, Type t)
 /// of the execution.
 ValuePtr FunctionLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
 {
-	if (vptr->is_type(DEFINED_PROCEDURE_NODE))
-	{
-		vptr = DefineLink::get_definition(HandleCast(vptr));
-	}
 	while (vptr->is_atom())
 	{
 		Handle h(HandleCast(vptr));
