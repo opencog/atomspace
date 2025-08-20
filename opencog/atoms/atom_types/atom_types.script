@@ -1220,6 +1220,17 @@ DEFINED_PROCEDURE_NODE <- PROCEDURE_NODE
 // http://lambda-the-ultimate.org/node/5482 for discussion of jets.
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
+// SchemaNodes are similar to ProcedureNodes, except they must
+// necessarily return Atoms when executed.
+SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE,DEFINED_PROCEDURE_NODE
+GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
+
+// -----
+// Predicates are somewhat similar to Procedures, but have some
+// important differences. They are evaluated, not executed, and
+// thus necessarily return TruthValues.
+
 // GroundedPredicates wrap something that returns a TruthValue.
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
@@ -1228,12 +1239,6 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // They are meant to be wrappers for more complex Atomese that return
 // some TruthValue.
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE,PROCEDURE_NODE
-
-// SchemaNodes are similar to PredicateNodes, except they must
-// necessarily return Atoms when executed.
-SCHEMA_NODE <- PROCEDURE_NODE
-DEFINED_SCHEMA_NODE <- SCHEMA_NODE,DEFINED_PROCEDURE_NODE
-GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // ==============================================================
 // Serializers, for GPU's
