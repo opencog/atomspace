@@ -41,7 +41,6 @@ class ExecuteThreadedLink : public Link
 {
 protected:
 	size_t _nthreads;
-	size_t _setoff;
 	std::vector<std::thread> _thread_set;
 	std::thread _joiner;
 

@@ -44,6 +44,12 @@ using namespace opencog;
 ///            SetLink
 ///                ExecutableAtoms...
 ///
+/// or
+///
+///        ExecuteThreadedLink
+///            NumberNode nthr  ; optional; if present, number of threads.
+///            ExecutableAtoms...
+///
 /// When this link is executed, the `ExecutableAtoms...` are executed
 /// in parallel, in distinct threads, with the result of the execution
 /// appended to a thread-safe queue, the QueueValue.  The QueueValue is
@@ -54,34 +60,27 @@ using namespace opencog;
 /// Atoms in the set. If the NumberNode is present, then the number of
 /// threads is the smaller of the NumberNode and the size of the Set.
 ///
-/// XXX TODO: Should probably make the use of the SetLink optional.
+/// XXX TODO: If nthreads = 0, just execute directly here, in the
+/// current thread, and block till execution is done.
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t), _nthreads(-1), _setoff(0)
+    : Link(std::move(oset), t), _nthreads(-1)
 {
 	if (0 == _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting at least one argument!");
 
-	Type nt = _outgoing[0]->get_type();
-	Type st = nt;
-	if (NUMBER_NODE == nt)
+	size_t off = 0;
+	if (_outgoing[0]->is_type(NUMBER_NODE))
 	{
 		if (1 == _outgoing.size())
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting a set of executable links!");
 		_nthreads = std::floor(NumberNodeCast(_outgoing[0])->get_value());
-
-		// The set link.
-		_setoff = 1;
-		st = _outgoing[1]->get_type();
+		off = 1;
 	}
 
-	if (SET_LINK != st)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a set of executable links!");
-
-	_nthreads = std::min(_nthreads, _outgoing[_setoff]->get_arity());
+	_nthreads = std::min(_nthreads, _outgoing.size() - off);
 }
 
 static void thread_exec(AtomSpace* as, bool silent,
@@ -148,9 +147,25 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 {
 	// Place the work items onto a queue.
 	concurrent_queue<Handle> todo_list;
-	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
-	for (const Handle& h: exes)
-		todo_list.push(h);
+	bool chk = true;
+	for (const Handle& h: _outgoing)
+	{
+		if (chk and h->is_type(NUMBER_NODE)) continue;
+		chk = false;
+
+		if (not h->is_type(SET_LINK))
+		{
+			todo_list.push(h);
+			continue;
+		}
+
+		// Unwrap SetLinks. This kind of unwrapping is historical
+		// baggage, coming from the old BindLink implementation.
+		// I suspect that special-casing for SetLinks should be
+		// removed someday. Just not today.
+		for (const Handle& hs: h->getOutgoingSet())
+			todo_list.push(hs);
+	}
 
 	// If a previous invocation is still running, wait for it
 	// to finish. This avoids memory management issues.
