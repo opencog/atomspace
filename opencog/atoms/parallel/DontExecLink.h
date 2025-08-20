@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/DontExecLink.h
+ * opencog/atoms/parallel/DontExecLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

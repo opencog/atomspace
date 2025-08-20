@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (parallel
+	DontExecLink.cc
 	ExecuteThreadedLink.cc
 	ParallelLink.cc
 	PureExecLink.cc
@@ -22,6 +23,7 @@ INSTALL (TARGETS parallel
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	DontExecLink.h
 	ExecuteThreadedLink.h
 	ParallelLink.h
 	PureExecLink.h
