@@ -33,9 +33,20 @@ using namespace opencog;
 /// This enables direct calls, such as
 /// (cog-execute! (DefinedProcedure "foo"))
 
+DefinedProcedureNode::DefinedProcedureNode(const std::string&& str)
+    : Node(DEFINED_PROCEDURE_NODE, std::move(str))
+{
+}
+
 DefinedProcedureNode::DefinedProcedureNode(Type t, const std::string&& str)
     : Node(t, std::move(str))
 {
+	if (not is_type(DEFINED_PROCEDURE_NODE))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a DefinedProcedureNode, got %s", tname.c_str());
+	}
 }
 
 ValuePtr DefinedProcedureNode::execute(AtomSpace* as,

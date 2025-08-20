@@ -39,7 +39,9 @@ class DefinedProcedureNode : public Node
 protected:
 
 public:
-	DefinedProcedureNode(Type=DEFINED_PROCEDURE_NODE, const std::string&&);
+	DefinedProcedureNode(Type, const std::string&&);
+public:
+	DefinedProcedureNode(const std::string&&);
 	DefinedProcedureNode(const DefinedProcedureNode&) = delete;
 	DefinedProcedureNode& operator=(const DefinedProcedureNode&) = delete;
 
