@@ -24,7 +24,6 @@ ADD_LIBRARY (atomcore
 	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
-	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
 	TypeChoice.cc
@@ -73,7 +72,6 @@ INSTALL (FILES
 	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
-	SleepLink.h
 	StateLink.h
 	TimeLink.h
 	TypeChoice.h

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/SleepLink.h
+ * opencog/atoms/parallel/SleepLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

@@ -7,6 +7,7 @@ ADD_LIBRARY (parallel
 	ExecuteThreadedLink.cc
 	ParallelLink.cc
 	PureExecLink.cc
+	SleepLink.cc
 	ThreadJoinLink.cc
 )
 
@@ -27,6 +28,7 @@ INSTALL (FILES
 	ExecuteThreadedLink.h
 	ParallelLink.h
 	PureExecLink.h
+	SleepLink.h
 	ThreadJoinLink.h
 	DESTINATION "include/opencog/atoms/parallel"
 )
