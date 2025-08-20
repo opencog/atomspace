@@ -52,7 +52,9 @@ using namespace opencog;
 ///
 /// By default, the number of threads launched equals the number of
 /// Atoms in the set. If the NumberNode is present, then the number of
-/// threads is the smaller of the NumberNode and the seize of the Set.
+/// threads is the smaller of the NumberNode and the size of the Set.
+///
+/// XXX TODO: Should probably make the use of the SetLink optional.
 ///
 /// XXX TODO: We could have a non-blocking version of this atom. We
 /// could just return the QueueValue immediately; the user could check
