@@ -46,20 +46,15 @@ using namespace opencog;
 ///
 /// When this link is executed, the `ExecutableAtoms...` are executed
 /// in parallel, in distinct threads, with the result of the execution
-/// appended to a thread-safe queue, the QueueValue.  After all of the
-/// atoms have been executed, the QueueValue holding the results is
-/// returned. Execution blocks until all of the threads have finished.
+/// appended to a thread-safe queue, the QueueValue.  The QueueValue is
+/// returned immediately. The QueueValue remains open as long as threads
+/// are running; it is closed only after all threads terminate.
 ///
 /// By default, the number of threads launched equals the number of
 /// Atoms in the set. If the NumberNode is present, then the number of
 /// threads is the smaller of the NumberNode and the size of the Set.
 ///
 /// XXX TODO: Should probably make the use of the SetLink optional.
-///
-/// XXX TODO: We could have a non-blocking version of this atom. We
-/// could just return the QueueValue immediately; the user could check
-/// to see if the queue is closed, to find out if the threads have
-/// finished.
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1), _setoff(0)
@@ -100,7 +95,8 @@ static void thread_exec(AtomSpace* as, bool silent,
 		Handle h;
 		if (not todo->try_get(h)) return;
 
-		// This is "identical" to what cog-execute! would do...
+		// This is (supposed to be) identical to what cog-execute!
+		// would do...
 		Instantiator inst(as);
 		try
 		{
@@ -140,6 +136,7 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 			as, silent, &todo_list, qvp, &ex));
 	}
 
+#if 0
 	// Wait for it all to come together.
 	for (std::thread& t : thread_set) t.join();
 
@@ -147,6 +144,7 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	if (ex) std::rethrow_exception(ex);
 
 	qvp->close();
+#endif
 	return qvp;
 }
 
