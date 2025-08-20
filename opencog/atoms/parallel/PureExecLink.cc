@@ -33,12 +33,22 @@ using namespace opencog;
 /// The general structure of this link is
 ///
 ///        PureExecLink
-///            ExecutableAtom
 ///            AtomSpace (optional)
+///            ExecutableAtom
+///            AnotherExecutableAtom
+///            AnotherAtomSpace (optional)
+///            MoreExecutableAtom
 ///
-/// When this link is executed, the `ExecutableAtom` is executed in the
-/// specified AtomSpace, so that any Atoms created during execution end
-/// up there, instead of the current AtomSpace.
+/// When this link is executed, all of the various `ExecutableAtoms`
+/// are executed in the sequential order, in the most recent AtomSpace
+/// that preceeded them. Thus, if execution has side effects, such
+/// as creating new Atoms, they end up there, and not the current
+/// AtomSpace. That's what make's it "Pure" -- no side-effects in the
+/// current AtomSpace.
+///
+/// If no AtomSpace is given, a temporary transient is used.
+/// The value returned by execution is the result returned by executing
+/// the last executable in the sequence.
 
 PureExecLink::PureExecLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t)
