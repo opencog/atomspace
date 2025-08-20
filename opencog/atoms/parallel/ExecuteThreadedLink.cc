@@ -152,17 +152,12 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	for (const Handle& h: exes)
 		todo_list.push(h);
 
-	// Where the results will be reported.
-	if (_qvp)
-	{
-		// XXX if its open, stall...
-	}
-	_qvp = createQueueValue();
+	// If a previous invocation is still running, wait for it
+	// to finish. This avoids memory management issues.
+	if (_joiner.joinable())
+		_joiner.join();
 
-	if (0 < _thread_set.size())
-	{
-		// XXX if none-mpty, do something
-	}
+	_qvp = createQueueValue();
 
 	std::thread jnr(&thread_joiner,
 		as, silent, &_thread_set, _nthreads, &todo_list, _qvp);
