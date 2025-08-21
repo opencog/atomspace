@@ -243,6 +243,30 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
+	// First, loo to see if explicit argument types are given.
+	// If they are, and the scheme value matches the argument
+	// type, then run the constructor for that argument type.
+	if (nameserver().isA(t, STRING_ARG))
+	{
+		SCM sname = SCM_CAR(svalue_list);
+		if (scm_is_string(sname))
+		{
+			std::string name = verify_string(sname, "cog-new-value", 2);
+			return valueserver().create(t, std::move(name));
+		}
+	}
+
+	if (nameserver().isA(t, STRING_VEC_ARG))
+	{
+		SCM sname = SCM_CAR(svalue_list);
+		if (scm_is_string(sname))
+		{
+			std::vector<std::string> valist;
+			valist = verify_string_list(svalue_list, "cog-new-value", 2);
+			return valueserver().create(t, valist);
+		}
+	}
+
 	if (RANDOM_STREAM == t)
 	{
 		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
