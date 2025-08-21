@@ -60,6 +60,8 @@ public:
 	virtual size_t size(void) const;
 	virtual void clear(void);
 
+	virtual std::string to_string(const std::string& = "") const;
+
 	virtual bool operator==(const Value&) const;
 };
 
