@@ -37,6 +37,7 @@ class AtomSpace;
 class DefinedProcedureNode : public Node
 {
 protected:
+	bool _recursing;
 
 public:
 	DefinedProcedureNode(Type, const std::string&&);
