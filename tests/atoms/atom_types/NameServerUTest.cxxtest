@@ -52,8 +52,11 @@ public:
                           nameserver().isA(t, LINK) or
                           nameserver().isA(t, FRAME));
             }
-            else {
+            else if (t >= VALUE) {
                 TS_ASSERT(nameserver().isA(t, VALUE));
+            }
+            else {
+                TS_ASSERT(nameserver().isA(t, ARG));
             }
         }
 
