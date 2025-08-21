@@ -44,47 +44,50 @@ using namespace opencog;
 ///            SetLink
 ///                ExecutableAtoms...
 ///
+/// or
+///
+///        ExecuteThreadedLink
+///            NumberNode nthr  ; optional; if present, number of threads.
+///            ExecutableAtoms...
+///
 /// When this link is executed, the `ExecutableAtoms...` are executed
 /// in parallel, in distinct threads, with the result of the execution
-/// appended to a thread-safe queue, the QueueValue.  After all of the
-/// atoms have been executed, the QueueValue holding the results is
-/// returned. Execution blocks until all of the threads have finished.
+/// appended to a thread-safe queue, the QueueValue.  The QueueValue is
+/// returned immediately. The QueueValue remains open as long as threads
+/// are running; it is closed only after all threads terminate.
 ///
 /// By default, the number of threads launched equals the number of
 /// Atoms in the set. If the NumberNode is present, then the number of
-/// threads is the smaller of the NumberNode and the seize of the Set.
+/// threads is the smaller of the NumberNode and the size of the Set.
 ///
-/// XXX TODO: We could have a non-blocking version of this atom. We
-/// could just return the QueueValue immediately; the user could check
-/// to see if the queue is closed, to find out if the threads have
-/// finished.
+/// XXX TODO: If nthreads = 0, just execute directly here, in the
+/// current thread, and block till execution is done.
+///
+/// XXX TODO: Create some kind of thing that qaits to the QueueValue
+/// to close. This would have the effect of joining.  For example:
+///    (cog-execute! (WaitForCloseLink (ExecuteThreadedLink ...)))
+/// and the WaitForCloseLink just ... waits for the queue to close,
+/// and returns only then. This would be generic, for all QueueValue
+/// users... XXX should port BindLink etc. to that, too!?
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
-    : Link(std::move(oset), t), _nthreads(-1), _setoff(0)
+    : Link(std::move(oset), t), _nthreads(-1)
 {
 	if (0 == _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting at least one argument!");
 
-	Type nt = _outgoing[0]->get_type();
-	Type st = nt;
-	if (NUMBER_NODE == nt)
+	size_t off = 0;
+	if (_outgoing[0]->is_type(NUMBER_NODE))
 	{
 		if (1 == _outgoing.size())
 			throw InvalidParamException(TRACE_INFO,
 				"Expecting a set of executable links!");
 		_nthreads = std::floor(NumberNodeCast(_outgoing[0])->get_value());
-
-		// The set link.
-		_setoff = 1;
-		st = _outgoing[1]->get_type();
+		off = 1;
 	}
 
-	if (SET_LINK != st)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a set of executable links!");
-
-	_nthreads = std::min(_nthreads, _outgoing[_setoff]->get_arity());
+	_nthreads = std::min(_nthreads, _outgoing.size() - off);
 }
 
 static void thread_exec(AtomSpace* as, bool silent,
@@ -98,7 +101,8 @@ static void thread_exec(AtomSpace* as, bool silent,
 		Handle h;
 		if (not todo->try_get(h)) return;
 
-		// This is "identical" to what cog-execute! would do...
+		// This is (supposed to be) identical to what cog-execute!
+		// would do...
 		Instantiator inst(as);
 		try
 		{
@@ -115,36 +119,69 @@ static void thread_exec(AtomSpace* as, bool silent,
 	}
 }
 
-ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
-                                      bool silent)
+static void thread_joiner(AtomSpace* as, bool silent,
+                          Handle exlnk,
+                          size_t nthreads,
+                          QueueValuePtr qvp)
 {
 	// Place the work items onto a queue.
 	concurrent_queue<Handle> todo_list;
-	const HandleSeq& exes = _outgoing[_setoff]->getOutgoingSet();
-	for (const Handle& h: exes)
-		todo_list.push(h);
+	bool chk = true;
+	for (const Handle& h: exlnk->getOutgoingSet())
+	{
+		if (chk and h->is_type(NUMBER_NODE)) continue;
+		chk = false;
 
-	// Where the results will be reported.
-	QueueValuePtr qvp(createQueueValue());
+		if (not h->is_type(SET_LINK))
+		{
+			todo_list.push(h);
+			continue;
+		}
 
-	// Create a collection of joinable threads.
-	std::vector<std::thread> thread_set;
+		// Unwrap SetLinks. This kind of unwrapping is historical
+		// baggage, coming from the old BindLink implementation.
+		// I suspect that special-casing for SetLinks should be
+		// removed someday. Just not today.
+		for (const Handle& hs: h->getOutgoingSet())
+			todo_list.push(hs);
+	}
+
 	std::exception_ptr ex;
 
 	// Launch the workers
-	for (size_t i=0; i<_nthreads; i++)
+	std::vector<std::thread> thread_set;
+	for (size_t i=0; i<nthreads; i++)
 	{
 		thread_set.push_back(std::thread(&thread_exec,
 			as, silent, &todo_list, qvp, &ex));
 	}
 
-	// Wait for it all to come together.
+	// Wait for all threads to come together.
 	for (std::thread& t : thread_set) t.join();
 
+#if 0
 	// Were there any exceptions? If so, rethrow.
+	// XXX Wait, how ???
 	if (ex) std::rethrow_exception(ex);
+#endif
 
 	qvp->close();
+}
+
+ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
+                                      bool silent)
+{
+	// If a previous invocation is still running, wait for it
+	// to finish. This avoids memory management issues.
+	if (_joiner.joinable())
+		_joiner.join();
+
+	QueueValuePtr qvp(createQueueValue());
+
+	std::thread jnr(&thread_joiner,
+		as, silent, get_handle(), _nthreads, qvp);
+	_joiner.swap(jnr);
+
 	return qvp;
 }
 
