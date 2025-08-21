@@ -86,10 +86,16 @@ void ThreadedUTest::test_exec(void)
 
 	TS_ASSERT_EQUALS(vp->get_type(), QUEUE_VALUE);
 
+	// The eval is done async, and so the returned queue might
+	// still be open, and the threads still running. We must wait
+	// for the threads to finish, and the queue to close. Do this
+	// by asking for the values.
 	QueueValuePtr qvp = QueueValueCast(vp);
+	const std::vector<ValuePtr>& vals = qvp->value();
+
 	printf("Got %s\n", qvp->to_string().c_str());
 
-	TS_ASSERT_EQUALS(2, qvp->LinkValue::size());
+	TS_ASSERT_EQUALS(2, vals.size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
