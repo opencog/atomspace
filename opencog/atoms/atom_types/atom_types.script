@@ -20,6 +20,23 @@ NOTYPE
 // https://en.wikipedia.org/wiki/Top_type
 TOP_TYPE
 
+// Helper type, for type factories. These indicate the types of
+// arguments that can be passed to type constructors. The goal is
+// to simplify the structure of dynamic type factories, and
+// specifically the scheme/guile factory. Python does not currently
+// use this, but I guess it could!? C++ does not use this, because
+// it's factories are all static compile-time factories.
+ARG <- TOP_TYPE
+STRING_ARG <- ARG
+FLOAT_ARG <- ARG
+HANDLE_ARG <- ARG
+VALUE_ARG <- ARG
+
+STRING_VEC_ARG <-  ARG
+FLOAT_VEC_ARG <-  ARG
+HANDLE_VEC_ARG <-  ARG
+VALUE_VEC_ARG <-  ARG
+
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with Atoms.
 // Think of them as decorations that can be hung on an Atom.
