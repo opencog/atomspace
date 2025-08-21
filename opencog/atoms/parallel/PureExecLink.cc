@@ -79,7 +79,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		}
 		if (ctxt)
 		{
-			vseq.push_back(execute(ctxt, silent));
+			vseq.push_back(h->execute(ctxt, silent));
 			continue;
 		}
 
