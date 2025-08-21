@@ -113,42 +113,14 @@ static void thread_exec(AtomSpace* as, bool silent,
 }
 
 static void thread_joiner(AtomSpace* as, bool silent,
-                          std::vector<std::thread>* thread_set,
+                          Handle exlnk,
                           size_t nthreads,
-                          concurrent_queue<Handle>* todo,
                           QueueValuePtr qvp)
-{
-	std::exception_ptr ex;
-
-	// Launch the workers
-	for (size_t i=0; i<nthreads; i++)
-	{
-		thread_set->push_back(std::thread(&thread_exec,
-			as, silent, todo, qvp, &ex));
-	}
-
-	// Wait for all threads to come together.
-	for (std::thread& t : *thread_set) t.join();
-
-	// Empty out the set.
-	thread_set->clear();
-
-#if 0
-	// Were there any exceptions? If so, rethrow.
-	// XXX Wait, how ???
-	if (ex) std::rethrow_exception(ex);
-#endif
-
-	qvp->close();
-}
-
-ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
-                                      bool silent)
 {
 	// Place the work items onto a queue.
 	concurrent_queue<Handle> todo_list;
 	bool chk = true;
-	for (const Handle& h: _outgoing)
+	for (const Handle& h: exlnk->getOutgoingSet())
 	{
 		if (chk and h->is_type(NUMBER_NODE)) continue;
 		chk = false;
@@ -167,6 +139,31 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 			todo_list.push(hs);
 	}
 
+	std::exception_ptr ex;
+
+	// Launch the workers
+	std::vector<std::thread> thread_set;
+	for (size_t i=0; i<nthreads; i++)
+	{
+		thread_set.push_back(std::thread(&thread_exec,
+			as, silent, &todo_list, qvp, &ex));
+	}
+
+	// Wait for all threads to come together.
+	for (std::thread& t : thread_set) t.join();
+
+#if 0
+	// Were there any exceptions? If so, rethrow.
+	// XXX Wait, how ???
+	if (ex) std::rethrow_exception(ex);
+#endif
+
+	qvp->close();
+}
+
+ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
+                                      bool silent)
+{
 	// If a previous invocation is still running, wait for it
 	// to finish. This avoids memory management issues.
 	if (_joiner.joinable())
@@ -175,7 +172,7 @@ ValuePtr ExecuteThreadedLink::execute(AtomSpace* as,
 	QueueValuePtr qvp(createQueueValue());
 
 	std::thread jnr(&thread_joiner,
-		as, silent, &_thread_set, _nthreads, &todo_list, qvp);
+		as, silent, get_handle(), _nthreads, qvp);
 	_joiner.swap(jnr);
 
 	return qvp;

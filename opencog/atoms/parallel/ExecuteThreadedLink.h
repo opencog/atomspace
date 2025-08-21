@@ -25,7 +25,6 @@
 #define _OPENCOG_EXECUTE_THREADED_LINK_H
 
 #include <thread>
-#include <vector>
 
 #include <opencog/atoms/base/Link.h>
 
@@ -41,7 +40,6 @@ class ExecuteThreadedLink : public Link
 {
 protected:
 	size_t _nthreads;
-	std::vector<std::thread> _thread_set;
 	std::thread _joiner;
 
 public:
