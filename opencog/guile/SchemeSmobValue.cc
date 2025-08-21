@@ -248,9 +248,10 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	// type, then run the constructor for that argument type.
 	if (nameserver().isA(t, STRING_ARG))
 	{
-		SCM sname = SCM_CAR(svalue_list);
-		if (scm_is_string(sname))
+		if (scm_is_pair(svalue_list) and
+		    scm_is_string(SCM_CAR(svalue_list)))
 		{
+			SCM sname = SCM_CAR(svalue_list);
 			std::string name = verify_string(sname, "cog-new-value", 2);
 			return valueserver().create(t, std::move(name));
 		}
@@ -258,13 +259,19 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, STRING_VEC_ARG))
 	{
-		SCM sname = SCM_CAR(svalue_list);
-		if (scm_is_string(sname))
+		if (scm_is_pair(svalue_list) and
+		    scm_is_string(SCM_CAR(svalue_list)))
 		{
 			std::vector<std::string> valist;
 			valist = verify_string_list(svalue_list, "cog-new-value", 2);
 			return valueserver().create(t, valist);
 		}
+	}
+
+	if (nameserver().isA(t, VOID_ARG))
+	{
+		if (scm_is_null(svalue_list))
+			return valueserver().create(t);
 	}
 
 	if (RANDOM_STREAM == t)
@@ -325,11 +332,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);
-	}
-
-	if (nameserver().isA(t, VOID_VALUE))
-	{
-		return valueserver().create(t);
 	}
 
 	if (nameserver().isA(t, NODE))

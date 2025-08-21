@@ -45,11 +45,11 @@ VALUE_VEC_ARG <-  ARG
 // Think of them as decorations that can be hung on an Atom.
 VALUE <- TOP_TYPE
 
-VOID_VALUE <- VALUE     // singleton Value holding nothing at all.
-BOOL_VALUE <- VALUE     // vector of booleans
-FLOAT_VALUE <- VALUE    // vector of floats
-STRING_VALUE <- VALUE   // vector of strings
-LINK_VALUE <- VALUE     // vector of Values ("link" holding Values)
+VOID_VALUE <- VALUE,VOID_ARG          // singleton Value holding nothing at all.
+BOOL_VALUE <- VALUE,BOOL_VEC_ARG      // vector of booleans
+FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG    // vector of floats
+STRING_VALUE <- VALUE,STRING_VEC_ARG  // vector of strings
+LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values)
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
 LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
