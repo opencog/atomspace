@@ -62,6 +62,13 @@ using namespace opencog;
 ///
 /// XXX TODO: If nthreads = 0, just execute directly here, in the
 /// current thread, and block till execution is done.
+///
+/// XXX TODO: Create some kind of thing that qaits to the QueueValue
+/// to close. This would have the effect of joining.  For example:
+///    (cog-execute! (WaitForCloseLink (ExecuteThreadedLink ...)))
+/// and the WaitForCloseLink just ... waits for the queue to close,
+/// and returns only then. This would be generic, for all QueueValue
+/// users... XXX should port BindLink etc. to that, too!?
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1)
