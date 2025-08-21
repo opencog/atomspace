@@ -327,13 +327,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, valist);
 	}
 
-	if (nameserver().isA(t, STRING_VALUE))
-	{
-		std::vector<std::string> valist;
-		valist = verify_string_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
 	if (nameserver().isA(t, NODE))
 	{
 		// XXX FIXME... at this time, nodes have a single name.
