@@ -30,9 +30,14 @@ ENDMACRO(OPENCOG_SCM_SETUP SCM_FILE)
 
 # Print out the scheme definitions
 MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
-	FILE(APPEND "${SCM_FILE}"
-		"(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n"
-	)
+
+	# Args are not "real types"; they are helpers for the dynamic
+	# type constructors.
+	IF (NOT ISARG STREQUAL "ARG")
+		FILE(APPEND "${SCM_FILE}"
+			"(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n"
+		)
+	ENDIF (NOT ISARG STREQUAL "ARG")
 
 	IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
 		FILE(APPEND "${SCM_FILE}"
