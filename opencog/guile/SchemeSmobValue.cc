@@ -243,6 +243,21 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
+	if (RANDOM_STREAM == t)
+	{
+		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
+			scm_wrong_type_arg_msg("cog-new-value", 1,
+				svalue_list, "an optional dimension");
+		int dim = 1;
+
+		if (!scm_is_null(svalue_list))
+		{
+			SCM svalue = SCM_CAR(svalue_list);
+			dim = verify_int(svalue, "cog-new-value", 2);
+		}
+		return valueserver().create(t, dim);
+	}
+
 	// First, loo to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
@@ -268,25 +283,34 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		}
 	}
 
+	if (nameserver().isA(t, FLOAT_VEC_ARG))
+	{
+		if (scm_is_pair(svalue_list) and
+		    (scm_is_number(SCM_CAR(svalue_list)) or
+		    (scm_is_real(SCM_CAR(svalue_list)))))
+		{
+			std::vector<double> valist;
+			valist = verify_float_list(svalue_list, "cog-new-value", 2);
+			return valueserver().create(t, valist);
+		}
+	}
+
+	if (nameserver().isA(t, BOOL_VEC_ARG))
+	{
+		if (scm_is_pair(svalue_list) and
+		    (scm_is_bool(SCM_CAR(svalue_list)) or
+		    scm_is_integer(SCM_CAR(svalue_list))))
+		{
+			std::vector<bool> valist;
+			valist = verify_bool_list(svalue_list, "cog-new-value", 2);
+			return valueserver().create(t, valist);
+		}
+	}
+
 	if (nameserver().isA(t, VOID_ARG))
 	{
 		if (scm_is_null(svalue_list))
 			return valueserver().create(t);
-	}
-
-	if (RANDOM_STREAM == t)
-	{
-		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-			scm_wrong_type_arg_msg("cog-new-value", 1,
-				svalue_list, "an optional dimension");
-		int dim = 1;
-
-		if (!scm_is_null(svalue_list))
-		{
-			SCM svalue = SCM_CAR(svalue_list);
-			dim = verify_int(svalue, "cog-new-value", 2);
-		}
-		return valueserver().create(t, dim);
 	}
 
 	if (nameserver().isA(t, FUTURE_STREAM) or
@@ -296,18 +320,9 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, std::move(oset));
 	}
 
-	// Catch and handle generic FloatValues not named above.
-	if (nameserver().isA(t, FLOAT_VALUE))
-	{
-		std::vector<double> valist;
-		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
+	// Special case -- if it is a single integer, then its a mask.
 	if (nameserver().isA(t, BOOL_VALUE))
 	{
-		// Special case -- if it is a single integer, then its
-		// a mask.
 		SCM sval = SCM_CAR(svalue_list);
 		SCM srest = SCM_CDR(svalue_list);
 		if (scm_is_null(srest) and scm_is_integer(sval))
@@ -315,9 +330,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			size_t mask = verify_size_t(sval, "cog-new-value", 2);
 			return valueserver().create(t, mask);
 		}
-		std::vector<bool> valist;
-		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
