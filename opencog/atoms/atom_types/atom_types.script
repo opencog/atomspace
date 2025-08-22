@@ -29,6 +29,7 @@ TOP_TYPE
 ARG <- TOP_TYPE
 BOOL_ARG <- ARG
 FLOAT_ARG <- ARG
+INT_ARG <- ARG
 HANDLE_ARG <- ARG
 STRING_ARG <- ARG
 VALUE_ARG <- ARG
@@ -46,7 +47,7 @@ VALUE_VEC_ARG <-  ARG
 VALUE <- TOP_TYPE
 
 VOID_VALUE <- VALUE,VOID_ARG          // singleton Value holding nothing at all.
-BOOL_VALUE <- VALUE,BOOL_VEC_ARG      // vector of booleans
+BOOL_VALUE <- VALUE,BOOL_VEC_ARG,INT_ARG  // vector of booleans
 FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG    // vector of floats
 STRING_VALUE <- VALUE,STRING_VEC_ARG  // vector of strings
 LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values)
@@ -64,7 +65,7 @@ LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
 STREAM_VALUE <- FLOAT_VALUE
 
 // An example of a time-varying Value stream
-RANDOM_STREAM <- STREAM_VALUE
+RANDOM_STREAM <- STREAM_VALUE,INT_ARG
 
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
