@@ -259,64 +259,56 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (nameserver().isA(t, VOID_ARG))
-	{
-		if (scm_is_null(svalue_list) or
-			(scm_is_pair(svalue_list) and scm_is_null(svalue_list)))
-			return valueserver().create(t);
-	}
+	SCM first_arg = svalue_list;
+	if (not scm_is_null(first_arg))
+		first_arg = SCM_CAR(svalue_list);
 
-	// In guile, everything is a pair.
-	if (!scm_is_pair(svalue_list))
-	{
-		std::string msg = "argument for Value constructor ";
-		msg += nameserver().getTypeName(t);
-		scm_wrong_type_arg_msg("cog-new-value", 1,
-			svalue_list, msg.c_str());
-	}
+	bool zero_args = scm_is_null(first_arg);
 
-	// Grab the first value in the list. srest is null, if there
-	// is only one value.
-	SCM sl = SCM_CAR(svalue_list);
-	bool just_one_arg = scm_is_null(SCM_CDR(svalue_list));
+	if (nameserver().isA(t, VOID_ARG) and zero_args)
+		return valueserver().create(t);
+
+	// Grab the first value in the list.
+	bool just_one_arg = (not zero_args) and
+		scm_is_null(SCM_CDR(first_arg));
 
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
 	if (just_one_arg and
 	    nameserver().isA(t, STRING_ARG) and
-	    scm_is_string(sl))
+	    scm_is_string(first_arg))
 	{
-		std::string name = verify_string(sl, "cog-new-value", 2);
+		std::string name = verify_string(first_arg, "cog-new-value", 2);
 		return valueserver().create(t, std::move(name));
 	}
 
 	if (just_one_arg and
 	    nameserver().isA(t, HANDLE_ARG))
 	{
-		ValuePtr vp(scm_to_protom(sl));
+		ValuePtr vp(scm_to_protom(first_arg));
 		if (vp and vp->is_atom())
 		{
-			Handle h(verify_handle(sl, "cog-new-value", 2));
+			Handle h(verify_handle(first_arg, "cog-new-value", 2));
 			return valueserver().create(t, h);
 		}
 	}
 
 	if (just_one_arg and
 	    nameserver().isA(t, INT_ARG) and
-	    scm_is_integer(sl))
+	    scm_is_integer(first_arg))
 	{
-		int dim = verify_int(sl, "cog-new-value", 2);
+		int dim = verify_int(first_arg, "cog-new-value", 2);
 		return valueserver().create(t, dim);
 	}
 
 	// -------------------------
 	// Everything below expects one or more args.
 	// Flatten, if first arg is a scheme list...
-	if (scm_is_pair(sl)) sl = SCM_CAR(sl);
+	if (scm_is_pair(first_arg)) first_arg = SCM_CAR(first_arg);
 
 	if (nameserver().isA(t, STRING_VEC_ARG) and
-	    scm_is_string(sl))
+	    scm_is_string(first_arg))
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
@@ -324,7 +316,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, FLOAT_VEC_ARG) and
-	    scm_is_number(sl))
+	    scm_is_number(first_arg))
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
@@ -332,7 +324,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, VALUE_VEC_ARG) and
-	    scm_is_protom(sl))
+	    scm_is_protom(first_arg))
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
@@ -341,7 +333,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, HANDLE_VEC_ARG))
 	{
-		ValuePtr vp(scm_to_protom(sl));
+		ValuePtr vp(scm_to_protom(first_arg));
 		if (vp and vp->is_atom())
 		{
 			HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
@@ -350,7 +342,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, BOOL_VEC_ARG) and
-	    (scm_is_bool(sl) or scm_is_integer(sl)))
+	    (scm_is_bool(first_arg) or scm_is_integer(first_arg)))
 	{
 		std::vector<bool> valist;
 		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
