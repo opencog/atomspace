@@ -6,7 +6,7 @@
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
-(define tname "incoming-of-test")
+(define tname "bool-value-print-test")
 (test-begin tname)
 
 (define b15 (BoolValue 1 1 1 1 0 1 1 1 0 0 1 1 0 0 0))
