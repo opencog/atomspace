@@ -260,7 +260,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
 	SCM first_arg = svalue_list;
-	if (not scm_is_null(first_arg))
+	if (not scm_is_null(first_arg) and scm_is_pair(first_arg))
 		first_arg = SCM_CAR(svalue_list);
 
 	bool zero_args = scm_is_null(first_arg);
@@ -268,9 +268,8 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	if (nameserver().isA(t, VOID_ARG) and zero_args)
 		return valueserver().create(t);
 
-	// Grab the first value in the list.
-	bool just_one_arg = (not zero_args) and
-		scm_is_null(SCM_CDR(first_arg));
+	// Is there only one argument grand total?
+	bool just_one_arg = (not zero_args) and (not scm_is_pair(first_arg));
 
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
@@ -308,7 +307,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	if (scm_is_pair(first_arg)) first_arg = SCM_CAR(first_arg);
 
 	if (nameserver().isA(t, STRING_VEC_ARG) and
-	    scm_is_string(first_arg))
+	    (scm_is_string(first_arg) or zero_args))
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
@@ -316,7 +315,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, FLOAT_VEC_ARG) and
-	    scm_is_number(first_arg))
+	    (scm_is_number(first_arg) or zero_args))
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
@@ -324,7 +323,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, VALUE_VEC_ARG) and
-	    scm_is_protom(first_arg))
+	    (scm_is_protom(first_arg) or zero_args))
 	{
 		std::vector<ValuePtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
