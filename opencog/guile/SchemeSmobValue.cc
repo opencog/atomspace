@@ -273,10 +273,15 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		}
 	}
 
+	SCM sl = svalue_list;
+	// Flatten, if its a list...
+	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+		sl = SCM_CAR(sl);
+
 	if (nameserver().isA(t, STRING_VEC_ARG))
 	{
-		if (scm_is_pair(svalue_list) and
-		    scm_is_string(SCM_CAR(svalue_list)))
+		if (scm_is_pair(sl) and
+		    scm_is_string(SCM_CAR(sl)))
 		{
 			std::vector<std::string> valist;
 			valist = verify_string_list(svalue_list, "cog-new-value", 2);
@@ -286,9 +291,9 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, FLOAT_VEC_ARG))
 	{
-		if (scm_is_pair(svalue_list) and
-		    (scm_is_number(SCM_CAR(svalue_list)) or
-		    (scm_is_real(SCM_CAR(svalue_list)))))
+		if (scm_is_pair(sl) and
+		    (scm_is_number(SCM_CAR(sl)) or
+		    (scm_is_real(SCM_CAR(sl)))))
 		{
 			std::vector<double> valist;
 			valist = verify_float_list(svalue_list, "cog-new-value", 2);
@@ -298,11 +303,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, VALUE_VEC_ARG))
 	{
-		SCM sl = svalue_list;
-		// Flatten, if its a list...
-		if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
-			sl = SCM_CAR(sl);
-
 		if (scm_is_pair(sl) and
 		    scm_is_protom(SCM_CAR(sl)))
 		{
@@ -314,9 +314,9 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	if (nameserver().isA(t, BOOL_VEC_ARG))
 	{
-		if (scm_is_pair(svalue_list) and
-		    (scm_is_bool(SCM_CAR(svalue_list)) or
-		    scm_is_integer(SCM_CAR(svalue_list))))
+		if (scm_is_pair(sl) and
+		    (scm_is_bool(SCM_CAR(sl)) or
+		    scm_is_integer(SCM_CAR(sl))))
 		{
 			std::vector<bool> valist;
 			valist = verify_bool_list(svalue_list, "cog-new-value", 2);
