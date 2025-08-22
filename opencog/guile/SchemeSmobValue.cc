@@ -238,74 +238,119 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
 
 /* ============================================================== */
 /**
- * Create a new value, of named type stype, and value vector svect
- * XXX FIXME Clearly, a factory for values is called for.
+ * Construct a new value, of type t, and (type constructor) arguments
+ * given in svalue_list.
+ *
+ * There are two ways this could be implemented:
+ * Option A)
+ *    Create a factory for Values. Since we've got factories
+ *    implemented for the C++ types, this seems plausible. However,
+ *    actually writing code to do this, and making it run as a plug
+ *    in module for other scheme modules not in the git repo... ouch.
+ *    Seems complicated, and I could not thik of a good way of doing
+ *    this. So punt on the factory idea.
+ *
+ * Option B)
+ *    Dispatch based on argument type. The type definition file
+ *    indicates what kind of arguments the type constructors accept,
+ *    and so we look at those, and if they match up with what the
+ *    user passed in, then construct with those args. This is easy,
+ *    its what is implemented below, and it works.
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
-	if (RANDOM_STREAM == t)
+	if (nameserver().isA(t, VOID_ARG))
 	{
-		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-			scm_wrong_type_arg_msg("cog-new-value", 1,
-				svalue_list, "an optional dimension");
-		int dim = 1;
+		if (scm_is_null(svalue_list) or
+			(scm_is_pair(svalue_list) and scm_is_null(svalue_list)))
+			return valueserver().create(t);
+	}
 
-		if (!scm_is_null(svalue_list))
+	// In guile, evertything is a pair.
+	if (!scm_is_pair(svalue_list))
+		scm_wrong_type_arg_msg("cog-new-value", 1,
+			svalue_list, "Value constructor expects an argument");
+
+	// Grab the first value in the list. srest is null, if there
+	// is only one value.
+	SCM sl = SCM_CAR(svalue_list);
+	bool just_one_arg = scm_is_null(SCM_CDR(svalue_list));
+
+	// First, look to see if explicit argument types are given.
+	// If they are, and the scheme value matches the argument
+	// type, then run the constructor for that argument type.
+	if (just_one_arg and
+	    nameserver().isA(t, STRING_ARG) and
+	    scm_is_string(sl))
+	{
+		std::string name = verify_string(sl, "cog-new-value", 2);
+		return valueserver().create(t, std::move(name));
+	}
+
+	if (just_one_arg and
+	    nameserver().isA(t, HANDLE_ARG))
+	{
+		ValuePtr vp(scm_to_protom(sl));
+		if (vp and vp->is_atom())
 		{
-			SCM svalue = SCM_CAR(svalue_list);
-			dim = verify_int(svalue, "cog-new-value", 2);
+			Handle h(verify_handle(sl, "cog-new-value", 2));
+			return valueserver().create(t, h);
 		}
+	}
+
+	if (just_one_arg and
+	    nameserver().isA(t, INT_ARG) and
+	    scm_is_integer(sl))
+	{
+		int dim = verify_int(sl, "cog-new-value", 2);
 		return valueserver().create(t, dim);
 	}
 
-	if (nameserver().isA(t, FUTURE_STREAM) or
-	    nameserver().isA(t, FORMULA_STREAM))
-	{
-		HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
-		return valueserver().create(t, std::move(oset));
-	}
+	// -------------------------
+	// Everything below expects one or more args.
+	// Flatten, if first arg is a scheme list...
+	if (scm_is_pair(sl)) sl = SCM_CAR(sl);
 
-	// Catch and handle generic FloatValues not named above.
-	if (nameserver().isA(t, FLOAT_VALUE))
-	{
-		std::vector<double> valist;
-		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
-	if (nameserver().isA(t, BOOL_VALUE))
-	{
-		// Special case -- if it is a single integer, then its
-		// a mask.
-		SCM sval = SCM_CAR(svalue_list);
-		SCM srest = SCM_CDR(svalue_list);
-		if (scm_is_null(srest) and scm_is_integer(sval))
-		{
-			size_t mask = verify_size_t(sval, "cog-new-value", 2);
-			return valueserver().create(t, mask);
-		}
-		std::vector<bool> valist;
-		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
-	if (nameserver().isA(t, LINK_VALUE))
-	{
-		std::vector<ValuePtr> valist;
-		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
-	}
-
-	if (nameserver().isA(t, STRING_VALUE))
+	if (nameserver().isA(t, STRING_VEC_ARG) and
+	    scm_is_string(sl))
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
 		return valueserver().create(t, valist);
 	}
 
-	if (nameserver().isA(t, VOID_VALUE))
+	if (nameserver().isA(t, FLOAT_VEC_ARG) and
+	    scm_is_number(sl))
 	{
-		return valueserver().create(t);
+		std::vector<double> valist;
+		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
+	}
+
+	if (nameserver().isA(t, VALUE_VEC_ARG) and
+	    scm_is_protom(sl))
+	{
+		std::vector<ValuePtr> valist;
+		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
+	}
+
+	if (nameserver().isA(t, HANDLE_VEC_ARG))
+	{
+		ValuePtr vp(scm_to_protom(sl));
+		if (vp and vp->is_atom())
+		{
+			HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
+			return valueserver().create(t, std::move(oset));
+		}
+	}
+
+	if (nameserver().isA(t, BOOL_VEC_ARG) and
+	    (scm_is_bool(sl) or scm_is_integer(sl)))
+	{
+		std::vector<bool> valist;
+		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
 	if (nameserver().isA(t, NODE))

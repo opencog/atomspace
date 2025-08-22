@@ -20,16 +20,37 @@ NOTYPE
 // https://en.wikipedia.org/wiki/Top_type
 TOP_TYPE
 
+// Helper type, for type factories. These indicate the types of
+// arguments that can be passed to type constructors. The goal is
+// to simplify the structure of dynamic type factories, and
+// specifically the scheme/guile factory. Python does not currently
+// use this, but I guess it could!? C++ does not use this, because
+// it's factories are all static compile-time factories.
+ARG <- TOP_TYPE
+BOOL_ARG <- ARG
+FLOAT_ARG <- ARG
+INT_ARG <- ARG
+HANDLE_ARG <- ARG
+STRING_ARG <- ARG
+VALUE_ARG <- ARG
+VOID_ARG <- ARG
+
+BOOL_VEC_ARG <-  ARG
+FLOAT_VEC_ARG <-  ARG
+HANDLE_VEC_ARG <-  ARG
+STRING_VEC_ARG <-  ARG
+VALUE_VEC_ARG <-  ARG
+
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with Atoms.
 // Think of them as decorations that can be hung on an Atom.
 VALUE <- TOP_TYPE
 
-VOID_VALUE <- VALUE     // singleton Value holding nothing at all.
-BOOL_VALUE <- VALUE     // vector of booleans
-FLOAT_VALUE <- VALUE    // vector of floats
-STRING_VALUE <- VALUE   // vector of strings
-LINK_VALUE <- VALUE     // vector of Values ("link" holding Values)
+VOID_VALUE <- VALUE,VOID_ARG          // singleton Value holding nothing at all.
+BOOL_VALUE <- VALUE,BOOL_VEC_ARG,INT_ARG  // vector of booleans
+FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG    // vector of floats
+STRING_VALUE <- VALUE,STRING_VEC_ARG  // vector of strings
+LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values)
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
 LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
@@ -44,12 +65,12 @@ LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
 STREAM_VALUE <- FLOAT_VALUE
 
 // An example of a time-varying Value stream
-RANDOM_STREAM <- STREAM_VALUE
+RANDOM_STREAM <- STREAM_VALUE,INT_ARG
 
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
 // Typically computed by one of the FunctionLinks, below.
-FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE
+FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
@@ -66,7 +87,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE
+FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
 // TruthValues are an older concept in Atomese. They are deprecated and
