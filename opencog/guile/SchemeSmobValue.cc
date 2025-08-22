@@ -269,7 +269,10 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t);
 
 	// Is there only one argument grand total?
-	bool just_one_arg = (not zero_args) and (not scm_is_pair(first_arg));
+	bool just_one_arg =
+		(not zero_args) and
+		scm_is_pair(svalue_list) and
+		scm_is_null(SCM_CDR(svalue_list));
 
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
