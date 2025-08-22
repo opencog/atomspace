@@ -261,7 +261,12 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
 	SCM first_arg = svalue_list;
 	if (not scm_is_null(first_arg) and scm_is_pair(first_arg))
-		first_arg = SCM_CAR(svalue_list);
+		first_arg = SCM_CAR(first_arg);
+
+	// If first argument is again a list, flatten it. This arises
+	// as a side effect when people write cmplicated scheme algos.
+	if (not scm_is_null(first_arg) and scm_is_pair(first_arg))
+		first_arg = SCM_CAR(first_arg);
 
 	bool zero_args = scm_is_null(first_arg);
 
