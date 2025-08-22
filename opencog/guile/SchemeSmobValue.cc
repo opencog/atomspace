@@ -312,6 +312,19 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		}
 	}
 
+	if (nameserver().isA(t, HANDLE_VEC_ARG))
+	{
+		if (scm_is_pair(sl))
+		{
+			ValuePtr vp(scm_to_protom(SCM_CAR(sl)));
+			if (vp and vp->is_atom())
+			{
+				HandleSeq oset(verify_handle_list(sl, "cog-new-value", 2));
+				return valueserver().create(t, std::move(oset));
+			}
+		}
+	}
+
 	if (nameserver().isA(t, BOOL_VEC_ARG))
 	{
 		if (scm_is_pair(sl) and
@@ -328,13 +341,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	{
 		if (scm_is_null(svalue_list))
 			return valueserver().create(t);
-	}
-
-	if (nameserver().isA(t, FUTURE_STREAM) or
-	    nameserver().isA(t, FORMULA_STREAM))
-	{
-		HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
-		return valueserver().create(t, std::move(oset));
 	}
 
 	// Special case -- if it is a single integer, then its a mask.

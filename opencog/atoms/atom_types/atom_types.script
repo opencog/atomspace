@@ -69,7 +69,7 @@ RANDOM_STREAM <- STREAM_VALUE
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
 // Typically computed by one of the FunctionLinks, below.
-FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE
+FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // A base class for time-varying Value sequences.
 LINK_STREAM_VALUE <- LINK_VALUE
@@ -86,7 +86,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE
+FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
 // TruthValues are an older concept in Atomese. They are deprecated and
