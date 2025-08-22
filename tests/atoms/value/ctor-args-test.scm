@@ -8,6 +8,7 @@
 (define tname "empty-ctor-test")
 (test-begin tname)
 
+;; Zero-length vectors are allowed.
 (define nullb (BoolValue))
 (format #t "Empty bool is ~A\n" nullb)
 (test-assert "nullb" (equal? '() (cog-value->list nullb)))
@@ -23,6 +24,16 @@
 (define nulls (StringValue))
 (format #t "Empty string is ~A\n" nulls)
 (test-assert "nulls" (equal? '() (cog-value->list nulls)))
+
+(test-end tname)
+
+(define tname "list-ctor-test")
+(test-begin tname)
+
+;; list vectors are allowed.
+(define listf (FloatValue (list 1 2 3 4)))
+(format #t "List float is ~A\n" listf)
+(test-assert "list" (equal? 4 (length (cog-value->list listf))))
 
 (test-end tname)
 
