@@ -303,8 +303,9 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 
 	// -------------------------
 	// Everything below expects one or more args.
-	// Flatten, if first arg is a scheme list...
-	if (scm_is_pair(first_arg)) first_arg = SCM_CAR(first_arg);
+	// ... sort of. Anything that takes a vector argument also
+	// allows a zero-length vector. But ins scheme, we don't know
+	// the type of a zero-length vector ... so ... cross our fingers!?
 
 	if (nameserver().isA(t, STRING_VEC_ARG) and
 	    (scm_is_string(first_arg) or zero_args))
