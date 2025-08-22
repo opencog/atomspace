@@ -306,7 +306,7 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	}
 
 	if (nameserver().isA(t, FLOAT_VEC_ARG) and
-	    (scm_is_number(sl) or scm_is_real(sl)))
+	    scm_is_number(sl))
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
