@@ -338,10 +338,12 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
 			return valueserver().create(t, std::move(oset));
 		}
+		if (not vp and zero_args)
+			return valueserver().create(t, std::move(HandleSeq()));
 	}
 
 	if (nameserver().isA(t, BOOL_VEC_ARG) and
-	    (scm_is_bool(first_arg) or scm_is_integer(first_arg)))
+	    (scm_is_bool(first_arg) or scm_is_integer(first_arg) or zero_args))
 	{
 		std::vector<bool> valist;
 		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
