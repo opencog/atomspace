@@ -274,20 +274,21 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	// Grab the first value in the list. srest is null, if there
 	// is only one value.
 	SCM sl = SCM_CAR(svalue_list);
-	SCM srest = SCM_CDR(svalue_list);
+	bool just_one_arg = scm_is_null(SCM_CDR(svalue_list));
 
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
-	if (nameserver().isA(t, STRING_ARG) and
-	    scm_is_string(sl) and scm_is_null(srest))
+	if (just_one_arg and
+	    nameserver().isA(t, STRING_ARG) and
+	    scm_is_string(sl))
 	{
 		std::string name = verify_string(sl, "cog-new-value", 2);
 		return valueserver().create(t, std::move(name));
 	}
 
-	if (nameserver().isA(t, HANDLE_ARG) and
-	    scm_is_null(srest))
+	if (just_one_arg and
+	    nameserver().isA(t, HANDLE_ARG))
 	{
 		ValuePtr vp(scm_to_protom(sl));
 		if (vp and vp->is_atom())
@@ -297,14 +298,17 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		}
 	}
 
-	if (nameserver().isA(t, INT_ARG) and
-	    scm_is_integer(sl) and scm_is_null(srest))
+	if (just_one_arg and
+	    nameserver().isA(t, INT_ARG) and
+	    scm_is_integer(sl))
 	{
 		int dim = verify_int(sl, "cog-new-value", 2);
 		return valueserver().create(t, dim);
 	}
 
-	// Flatten, if its a list...
+	// -------------------------
+	// Everything below expects one or more args.
+	// Flatten, if first arg is a scheme list...
 	if (scm_is_pair(sl)) sl = SCM_CAR(sl);
 
 	if (nameserver().isA(t, STRING_VEC_ARG) and
