@@ -240,6 +240,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
 /**
  * Create a new value, of named type stype, and value vector svect
  * XXX FIXME Clearly, a factory for values is called for.
+ * Well, dispatching on argument types seems to be working, for now.
  */
 ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 {
@@ -295,6 +296,22 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		}
 	}
 
+	if (nameserver().isA(t, VALUE_VEC_ARG))
+	{
+		SCM sl = svalue_list;
+		// Flatten, if its a list...
+		if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
+			sl = SCM_CAR(sl);
+
+		if (scm_is_pair(sl) and
+		    scm_is_protom(SCM_CAR(sl)))
+		{
+			std::vector<ValuePtr> valist;
+			valist = verify_protom_list(svalue_list, "cog-new-value", 2);
+			return valueserver().create(t, valist);
+		}
+	}
+
 	if (nameserver().isA(t, BOOL_VEC_ARG))
 	{
 		if (scm_is_pair(svalue_list) and
@@ -330,13 +347,6 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			size_t mask = verify_size_t(sval, "cog-new-value", 2);
 			return valueserver().create(t, mask);
 		}
-	}
-
-	if (nameserver().isA(t, LINK_VALUE))
-	{
-		std::vector<ValuePtr> valist;
-		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		return valueserver().create(t, valist);
 	}
 
 	if (nameserver().isA(t, NODE))
