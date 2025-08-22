@@ -13,5 +13,6 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(StreamUTest smob)
 
 	ADD_GUILE_TEST(BoolValuePrintTest bool-value-print-test.scm)
+	ADD_GUILE_TEST(CtorArgsTest ctor-args-test.scm)
 ENDIF (HAVE_GUILE)
 
