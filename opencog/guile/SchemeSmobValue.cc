@@ -266,10 +266,14 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 			return valueserver().create(t);
 	}
 
-	// In guile, evertything is a pair.
+	// In guile, everything is a pair.
 	if (!scm_is_pair(svalue_list))
+	{
+		std::string msg = "argument for Value constructor ";
+		msg += nameserver().getTypeName(t);
 		scm_wrong_type_arg_msg("cog-new-value", 1,
-			svalue_list, "Value constructor expects an argument");
+			svalue_list, msg.c_str());
+	}
 
 	// Grab the first value in the list. srest is null, if there
 	// is only one value.
