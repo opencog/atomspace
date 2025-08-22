@@ -259,88 +259,84 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 		return valueserver().create(t, dim);
 	}
 
-	// First, loo to see if explicit argument types are given.
+	if (nameserver().isA(t, VOID_ARG))
+	{
+		if (scm_is_null(svalue_list) or
+			(scm_is_pair(svalue_list) and scm_is_null(svalue_list)))
+			return valueserver().create(t);
+	}
+
+	if (!scm_is_pair(svalue_list))
+		scm_wrong_type_arg_msg("cog-new-value", 1,
+			svalue_list, "Value constructor expects an argument");
+
+	SCM sl = SCM_CAR(svalue_list);
+
+	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
 	if (nameserver().isA(t, STRING_ARG))
 	{
-		if (scm_is_pair(svalue_list) and
-		    scm_is_string(SCM_CAR(svalue_list)))
+		if (scm_is_string(sl))
 		{
-			SCM sname = SCM_CAR(svalue_list);
-			std::string name = verify_string(sname, "cog-new-value", 2);
+			std::string name = verify_string(sl, "cog-new-value", 2);
 			return valueserver().create(t, std::move(name));
 		}
 	}
 
-	SCM sl = svalue_list;
+	if (nameserver().isA(t, HANDLE_ARG))
+	{
+		ValuePtr vp(scm_to_protom(sl));
+		if (vp and vp->is_atom())
+		{
+			Handle h(verify_handle(sl, "cog-new-value", 2));
+			return valueserver().create(t, h);
+		}
+	}
+
 	// Flatten, if its a list...
-	if (scm_is_pair(sl) and scm_is_pair(SCM_CAR(sl)))
-		sl = SCM_CAR(sl);
+	if (scm_is_pair(sl)) sl = SCM_CAR(sl);
 
-	if (nameserver().isA(t, STRING_VEC_ARG))
+	if (nameserver().isA(t, STRING_VEC_ARG) and
+	    scm_is_string(sl))
 	{
-		if (scm_is_pair(sl) and
-		    scm_is_string(SCM_CAR(sl)))
-		{
-			std::vector<std::string> valist;
-			valist = verify_string_list(svalue_list, "cog-new-value", 2);
-			return valueserver().create(t, valist);
-		}
+		std::vector<std::string> valist;
+		valist = verify_string_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
-	if (nameserver().isA(t, FLOAT_VEC_ARG))
+	if (nameserver().isA(t, FLOAT_VEC_ARG) and
+	    (scm_is_number(sl) or scm_is_real(sl)))
 	{
-		if (scm_is_pair(sl) and
-		    (scm_is_number(SCM_CAR(sl)) or
-		    (scm_is_real(SCM_CAR(sl)))))
-		{
-			std::vector<double> valist;
-			valist = verify_float_list(svalue_list, "cog-new-value", 2);
-			return valueserver().create(t, valist);
-		}
+		std::vector<double> valist;
+		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
-	if (nameserver().isA(t, VALUE_VEC_ARG))
+	if (nameserver().isA(t, VALUE_VEC_ARG) and
+	    scm_is_protom(sl))
 	{
-		if (scm_is_pair(sl) and
-		    scm_is_protom(SCM_CAR(sl)))
-		{
-			std::vector<ValuePtr> valist;
-			valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-			return valueserver().create(t, valist);
-		}
+		std::vector<ValuePtr> valist;
+		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
 	if (nameserver().isA(t, HANDLE_VEC_ARG))
 	{
-		if (scm_is_pair(sl))
+		ValuePtr vp(scm_to_protom(sl));
+		if (vp and vp->is_atom())
 		{
-			ValuePtr vp(scm_to_protom(SCM_CAR(sl)));
-			if (vp and vp->is_atom())
-			{
-				HandleSeq oset(verify_handle_list(sl, "cog-new-value", 2));
-				return valueserver().create(t, std::move(oset));
-			}
+			HandleSeq oset(verify_handle_list(svalue_list, "cog-new-value", 2));
+			return valueserver().create(t, std::move(oset));
 		}
 	}
 
-	if (nameserver().isA(t, BOOL_VEC_ARG))
+	if (nameserver().isA(t, BOOL_VEC_ARG) and
+	    (scm_is_bool(sl) or scm_is_integer(sl)))
 	{
-		if (scm_is_pair(sl) and
-		    (scm_is_bool(SCM_CAR(sl)) or
-		    scm_is_integer(SCM_CAR(sl))))
-		{
-			std::vector<bool> valist;
-			valist = verify_bool_list(svalue_list, "cog-new-value", 2);
-			return valueserver().create(t, valist);
-		}
-	}
-
-	if (nameserver().isA(t, VOID_ARG))
-	{
-		if (scm_is_null(svalue_list))
-			return valueserver().create(t);
+		std::vector<bool> valist;
+		valist = verify_bool_list(svalue_list, "cog-new-value", 2);
+		return valueserver().create(t, valist);
 	}
 
 	// Special case -- if it is a single integer, then its a mask.
