@@ -81,9 +81,7 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
             return result;
         }
     }
-    const TruthValuePtr currentTV = result->getTruthValue();
-    TruthValuePtr mergedTV = currentTV->merge(newTV);
-    result->setTruthValue(mergedTV);
+    result->setTruthValue(newTV);
     return result;
 }
 
@@ -512,12 +510,9 @@ public:
         Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
         h3->setTruthValue(tv3);
 
-        TruthValuePtr tv1_ = createSimpleTruthValue(0.002, 0.00002);
-        TruthValuePtr tv2_ = createSimpleTruthValue(0.1, 0.0);
-        TruthValuePtr tv3_ = createSimpleTruthValue(0.6, 0.90);
-        tv1->merge(tv1_);
-        tv2->merge(tv2_);
-        tv3->merge(tv3_);
+        tv1 = createSimpleTruthValue(0.002, 0.00002);
+        tv2 = createSimpleTruthValue(0.1, 0.0);
+        tv3 = createSimpleTruthValue(0.6, 0.90);
         h1->setTruthValue(tv1);
         h2->setTruthValue(tv2);
         h3->setTruthValue(tv3);
@@ -544,35 +539,6 @@ public:
         Handle h4 = atomSpace->add_node(CONCEPT_NODE, "wood");
         TS_ASSERT(h4 != Handle::UNDEFINED);
 
-#if 0
-// Currently disabled.
-//
-// Here's the core idea: there is this "philosophy" that is attempting
-// to support anonymous nodes (i.e. nodes with no name) and the idea that
-// any two nameless nodes are different (NOT the same).  This means that
-// any time anyone creates a nameless node, we create a new, unique node.
-//
-// The old design leaked memory in this scenario, so it was bad. The new
-// design (using std::shared_ptr) no longer leaks, and so this can work.
-//
-// Its still a somewhat questionable design, as the only way to access such
-// anonymous nodes is by knowning their Handle or uuid.  Should we support this?
-
-        // test adding a node with no name or truth value
-        Handle h5 = atomSpace->add_node(NODE);
-        TS_ASSERT(h5 != Handle::UNDEFINED);
-        Handle h6 = atomSpace->add_node(NODE);
-        TS_ASSERT(h6 != Handle::UNDEFINED);
-        TS_ASSERT(h5 != h6);
-
-        // test fetching all unnamed nodes
-        HandleSeq allUnnamed;
-        atomSpace->getHandlesByName(back_inserter(allUnnamed), "", NODE, true);
-        printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
-        TS_ASSERT(allUnnamed.size() == 2);
-        TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
-        TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h6) != allUnnamed.end());
-#endif
         logger().info("End testAddNode()");
     }
 
@@ -611,13 +577,11 @@ public:
                                         std::move(HandleSeq(outgoing2)));
         l2->setTruthValue(tv2);
 
-        TruthValuePtr tv1_ = createSimpleTruthValue(0.002, 0.00002);
-        tv1->merge(tv1_);
+        tv1 = createSimpleTruthValue(0.002, 0.00002);
         l1->setTruthValue(tv1);
         Handle l1_ = atomSpace->add_link(LIST_LINK,
                                          std::move(HandleSeq(outgoing1)));
-        TruthValuePtr tv2_ = createSimpleTruthValue(0.1, 0.0);
-        tv2->merge(tv2_);
+        tv2 = createSimpleTruthValue(0.1, 0.0);
         l2->setTruthValue(tv2);
         Handle l2_ = atomSpace->add_link(EVALUATION_LINK,
                                          std::move(HandleSeq(outgoing2)));

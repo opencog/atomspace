@@ -59,16 +59,6 @@ public:
     virtual strength_t get_mean() const;
     virtual count_t get_count() const;
     virtual confidence_t get_confidence() const;
-
-    /**
-     * Truth value merge formula, as specified by PLN.
-     *
-     * Currently tv1.merge(tv2) works as follows:
-     * the resulting TV is either tv1 or tv2, the result being the one
-     * with the highest confidence.
-     */
-    TruthValuePtr merge(const TruthValuePtr&,
-                        const MergeCtrl& mc=MergeCtrl()) const;
 };
 
 VALUE_PTR_DECL(SimpleTruthValue);

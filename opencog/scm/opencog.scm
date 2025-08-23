@@ -90,8 +90,6 @@ cog-tv
 cog-tv-confidence
 cog-tv-count
 cog-tv-mean
-cog-tv-merge
-cog-tv-merge-hi-conf
 cog-type
 cog-type->int
 cog-update-value!

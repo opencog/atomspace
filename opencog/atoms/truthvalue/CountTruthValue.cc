@@ -142,40 +142,5 @@ bool CountTruthValue::operator==(const Value& rhs) const
     return true;
 }
 
-// Note: this is NOT the merge formula used by PLN.  This is
-// because the CountTruthValue usually stores an integer count,
-// and a log-probability or entropy, instead of a confidence.
-TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
-                                     const MergeCtrl& mc) const
-{
-    CountTruthValuePtr oc(CountTruthValueCast(ValueCast(other)));
-
-    // If other is a simple truth value, *and* its not the default TV,
-    // then perhaps we should merge it in, as if it were a count truth
-    // value with a count of 1?  In which case, we should add a merge
-    // routine to SimpleTruthValue to do likewise... Anyway, for now,
-    // just ignore this possible complication to the semantics.
-    if (NULL == oc)
-        return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
-
-    // If both this and other are counts, then accumulate to get the
-    // total count, and average together the strengths, using the
-    // count as the relative weight.
-    count_t cnt =  get_count() + oc->get_count();
-    strength_t meeny = (get_mean() * get_count() +
-                   oc->get_mean() * oc->get_count()) / cnt;
-
-    // XXX This is not the correct way to handle confidence ...
-    // The confidence will typically hold the log probability,
-    // where the probability is the normalized count.  Thus
-    // the right thing to do is probably to add the probabilities!?
-    // However, this is not correct when the confidence is actually
-    // holding the mutual information ... which is additive ...
-    // Argh .. what to do?
-    //    confidence = oc->confidence;
-
-    return TruthValueCast(createCountTruthValue(meeny, get_confidence(), cnt));
-}
-
 DEFINE_VALUE_FACTORY(COUNT_TRUTH_VALUE,
 	createCountTruthValue, std::vector<double>)

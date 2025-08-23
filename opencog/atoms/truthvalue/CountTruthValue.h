@@ -62,9 +62,6 @@ public:
     strength_t get_mean() const;
     count_t get_count() const;
     confidence_t get_confidence() const;
-
-    virtual TruthValuePtr merge(const TruthValuePtr&,
-                                const MergeCtrl& mc=MergeCtrl()) const;
 };
 
 VALUE_PTR_DECL(CountTruthValue);
