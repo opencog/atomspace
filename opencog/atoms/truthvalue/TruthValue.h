@@ -49,7 +49,7 @@ typedef double confidence_t;
 typedef double count_t;
 
 class TruthValue;
-typedef std::shared_ptr<const TruthValue> TruthValuePtr;
+typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
 	: public FloatValue
@@ -120,10 +120,14 @@ public:
 };
 
 static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
-    { return std::dynamic_pointer_cast<const TruthValue>(pa); }
+    { return std::dynamic_pointer_cast<TruthValue>(pa); }
 
 static inline ValuePtr ValueCast(const TruthValuePtr& tv)
 	{ return std::shared_ptr<Value>(tv, (Value*) tv.get()); }
+
+#define CAST_TV_DECL(CNAME) \
+	static inline CNAME##Ptr CNAME##Cast(const TruthValuePtr& a) \
+	{ return std::dynamic_pointer_cast<CNAME>(a); }
 
 typedef std::vector<TruthValuePtr> TruthValueSeq;
 
