@@ -147,15 +147,6 @@ bool TruthValue::nearly_equal(double a, double b)
 	return diff / fmin (absa+absb, DBL_MAX) < ACCEPTABLE_ERROR;
 }
 
-TruthValuePtr
-TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
-{
-	if (other->get_confidence() > get_confidence()) {
-		return other;
-	}
-	return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
-}
-
 TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)
 {
 	ValuePtr pap = createFloatValue(t,v);

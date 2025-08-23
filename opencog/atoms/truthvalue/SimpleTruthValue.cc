@@ -101,42 +101,6 @@ confidence_t SimpleTruthValue::get_confidence() const
     return _value[CONFIDENCE];
 }
 
-// This is the merge formula appropriate for PLN.
-TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
-                                      const MergeCtrl& mc) const
-{
-    switch (mc.tv_formula)
-    {
-        case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
-            return higher_confidence_merge(other);
-
-        case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
-        {
-            // Based on Section 5.10.2(A heuristic revision rule for STV)
-            // of the PLN book
-            if (other->get_type() != SIMPLE_TRUTH_VALUE)
-                throw RuntimeException(TRACE_INFO,
-                                   "Don't know how to merge %s into a "
-                                   "SimpleTruthValue using the default style",
-                                   typeid(*other).name());
-
-            confidence_t cf = std::min(get_confidence(), 0.9999998);
-            auto count = DEFAULT_K * cf / (1.0 - cf);
-            auto count2 = other->get_count();
-#define CVAL  0.2f
-            auto count_new = count + count2 - std::min(count, count2) * CVAL;
-            auto mean_new = (get_mean() * count + other->get_mean() * count2)
-                / (count + count2);
-            confidence_t confidence_new = (count_new / (count_new + DEFAULT_K));
-            return createSimpleTruthValue(mean_new, confidence_new);
-        }
-        default:
-            throw RuntimeException(TRACE_INFO,
-                                   "SimpleTruthValue::merge: case not implemented");
-            return nullptr;
-       }
-}
-
 std::string SimpleTruthValue::to_string(const std::string& indent) const
 {
 #define BUFSZ 100

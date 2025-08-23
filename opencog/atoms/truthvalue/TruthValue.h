@@ -48,39 +48,6 @@ typedef double strength_t;
 typedef double confidence_t;
 typedef double count_t;
 
-/// Class to control the TV merging strategy
-struct MergeCtrl
-{
-	/// Styles for controlling merging two different truth value types
-	/// as described in https://github.com/opencog/opencog/issues/1295
-	///
-	/// Stronger means TV type with higher resolution. The weakest TV type
-	/// would be simple TV, and the strongest would be distributional TV
-	/// (to be (re)implemented).
-	enum class TVType
-	{
-		OLDER,
-		NEWER,
-		STRONGER,
-		WEAKER
-	};
-
-	/// Styles for controlling the formula while merging two different
-	/// truth values.
-	enum class TVFormula
-	{
-		HIGHER_CONFIDENCE,  // TV with higher confidence overwrite the other
-		PLN_BOOK_REVISION   // PLN book Section 5.10.2 revision rule
-	};
-
-	TVFormula tv_formula;
-	TVType tv_type;
-
-	MergeCtrl(TVFormula tvf=TVFormula::PLN_BOOK_REVISION,
-	          TVType tvt=TVType::OLDER)
-		: tv_formula(tvf), tv_type(tvt) {}
-};
-
 class TruthValue;
 typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
@@ -100,9 +67,6 @@ class TruthValue
 
 protected:
 	TruthValue(Type t) : FloatValue(t) {}
-
-	// Merge helper method
-	TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;
 
 	static bool nearly_equal(double, double);
 
@@ -146,16 +110,6 @@ public:
 	virtual strength_t get_mean()  const = 0;
 	virtual confidence_t get_confidence()  const = 0;
 	virtual count_t get_count()  const = 0;
-
-	/**
-	 * Merge this TV object with the given TV object argument.
-	 * It always returns a new TV object with the result of the merge,
-	 * even if it is equal to one of the merged TV objects.
-	 * @param ms the merge style as described in
-	 *        https://github.com/opencog/opencog/issues/1295
-	 */
-	virtual TruthValuePtr merge(const TruthValuePtr&,
-	                            const MergeCtrl& = MergeCtrl()) const = 0;
 
 	/**
 	 * Check if this TV is equal to the default TV.
