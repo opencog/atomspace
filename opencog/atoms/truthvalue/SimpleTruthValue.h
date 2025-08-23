@@ -62,7 +62,9 @@ public:
 };
 
 VALUE_PTR_DECL(SimpleTruthValue);
+CAST_TV_DECL(SimpleTruthValue);
 CREATE_VALUE_DECL(SimpleTruthValue);
+
 
 /** @}*/
 } // namespace opencog

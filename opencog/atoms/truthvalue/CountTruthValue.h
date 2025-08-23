@@ -65,6 +65,7 @@ public:
 };
 
 VALUE_PTR_DECL(CountTruthValue);
+CAST_TV_DECL(CountTruthValue);
 CREATE_VALUE_DECL(CountTruthValue);
 
 /** @}*/

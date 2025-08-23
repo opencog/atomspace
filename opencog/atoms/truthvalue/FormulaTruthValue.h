@@ -58,6 +58,7 @@ public:
 };
 
 VALUE_PTR_DECL(FormulaTruthValue);
+CAST_TV_DECL(FormulaTruthValue);
 CREATE_VALUE_DECL(FormulaTruthValue);
 
 /** @}*/
