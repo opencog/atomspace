@@ -47,6 +47,11 @@
 
 namespace opencog {
 
+#if HAVE_SPARSEHASH
+template <>
+std::weak_ptr<Atom> hashable_weak_ptr<Atom>::_dummy = std::weak_ptr<Atom>();
+#endif
+
 Atom::~Atom()
 {
     _atom_space = nullptr;
@@ -465,6 +470,9 @@ void Atom::insert_atom(const Handle& a)
         auto pr = _incoming_set._iset.emplace(
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
+#if HAVE_SPARSEHASH
+        bucket->second.set_deleted_key(Handle());
+#endif
     }
     bucket->second.insert(GET_PTR(a));
 }
