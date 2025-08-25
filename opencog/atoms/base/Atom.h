@@ -48,8 +48,6 @@
 
 #endif // HAVE_SPARSEHASH
 
-#include <opencog/util/empty_string.h>
-#include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>

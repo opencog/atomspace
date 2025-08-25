@@ -37,6 +37,8 @@
 #include "PatternLink.h"
 #include "PatternUtils.h"
 
+#include <cmath>
+
 using namespace opencog;
 
 void PatternLink::common_init(void)

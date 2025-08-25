@@ -46,6 +46,8 @@
 #include "Force.h"
 #include "EvaluationLink.h"
 
+#include <cmath>
+
 using namespace opencog;
 
 EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)

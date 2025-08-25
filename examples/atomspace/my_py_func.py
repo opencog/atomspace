@@ -7,6 +7,7 @@
 #
 from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
+from opencog.type_constructors import *
 
 asp = AtomSpace()
 
