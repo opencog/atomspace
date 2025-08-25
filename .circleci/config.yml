@@ -821,11 +821,6 @@ workflows:
           requires:
             - atomspace
             - ure
-      - pln:
-          requires:
-            - atomspace
-            - ure
-            - spacetime
       - attention:
           requires:
             - atomspace
