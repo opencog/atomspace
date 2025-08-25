@@ -391,6 +391,28 @@ struct hash<opencog::Handle>
     { return hash_value(h); }
 };
 
+#if HAVE_SPARSEHASH
+// SparseHash want to have a void ctor. So provide that.
+// This is kind of weird, so we don't provide it by default.
+template<>
+struct __hash_enum<const opencog::Handle>
+{
+    __hash_enum(void) {}
+};
+
+template<>
+struct hash<const opencog::Handle>
+{
+    typedef std::size_t result_type;
+    typedef const opencog::Handle argument_type;
+    std::size_t operator()(const opencog::Handle& h) const noexcept
+    { return hash_value(h); }
+
+    std::size_t operator()(void) const noexcept
+    { return 0; }
+};
+#endif // HAVE_SPARSEHASH
+
 // content-based equality
 template<>
 struct equal_to<opencog::Handle>
