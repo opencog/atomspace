@@ -208,7 +208,7 @@ typedef std::map<Type, WincomingSet> InSetMap;
 
 #define USE_SPARSE_KVP 1
 #if USE_SPARSE_KVP
-typedef google::sparse_hash_map<const Handle, ValuePtr> KVPMap;
+typedef google::sparse_hash_map<Handle, ValuePtr> KVPMap;
 #else
 typedef std::map<const Handle, ValuePtr> KVPMap;
 #endif
