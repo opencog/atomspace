@@ -70,7 +70,7 @@ void Frame::remove()
 void Frame::scrub_incoming_set(void)
 {
 	if (not (_flags.load() & USE_ISET_FLAG)) return;
-#if USE_BARE_BACKPOINTER
+#if USE_BARE_BACKPOINTER || HAVE_SPARSEHASH
 	// This won't work with bare pointers. Which means we have a
 	// problem with the validity of the incoming set for Frames:
 	// it will include Frames that have been deleted, and thus
