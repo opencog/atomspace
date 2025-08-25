@@ -206,7 +206,10 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 // Other maps.
 typedef std::map<Type, WincomingSet> InSetMap;
 
+#if HAVE_SPARSEHASH
 #define USE_SPARSE_KVP 1
+#endif
+
 #if USE_SPARSE_KVP
 typedef google::sparse_hash_map<Handle, ValuePtr> KVPMap;
 #else
