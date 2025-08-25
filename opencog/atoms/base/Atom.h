@@ -34,10 +34,18 @@
 #include <string>
 #include <unordered_set>
 
+#if HAVE_SPARSEHASH
+// #undef HAVE_FOLLY
+#include <sparsehash/sparse_hash_set>
+#define USE_HASHABLE_WEAK_PTR 1
+#else // HAVE_SPARSEHASH
+
 #if HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
+
+#endif // HAVE_SPARSEHASH
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
@@ -168,6 +176,10 @@ typedef std::size_t Arity;
 //! millions of atoms.
 typedef HandleSeq IncomingSet;
 
+#if HAVE_SPARSEHASH
+typedef google::sparse_hash_set<WinkPtr> WincomingSet;
+#else // HAVE_SPARSEHASH
+
 #if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
@@ -175,6 +187,7 @@ typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
+#endif // HAVE_SPARSEHASH
 
 /**
  * Atoms are the basic implementational unit in the system that
