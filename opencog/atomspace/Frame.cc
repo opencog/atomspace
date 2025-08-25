@@ -70,7 +70,7 @@ void Frame::remove()
 void Frame::scrub_incoming_set(void)
 {
 	if (not (_flags.load() & USE_ISET_FLAG)) return;
-#if USE_BARE_BACKPOINTER || HAVE_SPARSEHASH
+#if USE_BARE_BACKPOINTER
 	// This won't work with bare pointers. Which means we have a
 	// problem with the validity of the incoming set for Frames:
 	// it will include Frames that have been deleted, and thus
@@ -90,7 +90,12 @@ void Frame::scrub_incoming_set(void)
 		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
 		{
 			if (0 == bi->use_count())
+#if HAVE_SPARSEHASH
+            // sparsehash erase does not invalidate iterators.
+				bucket->second.erase(bi);
+#else
 				bi = bucket->second.erase(bi);
+#endif
 			else bi++;
 		}
 	}
