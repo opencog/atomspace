@@ -27,9 +27,6 @@
 
 #include <opencog/util/async_method_caller.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/oc_omp.h>
-#include <opencog/util/RandGen.h>
-#include <opencog/util/sigslot.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Atom.h>

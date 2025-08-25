@@ -29,7 +29,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/util/sigslot.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
