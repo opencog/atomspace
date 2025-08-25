@@ -188,8 +188,8 @@ typedef std::size_t Arity;
 //! millions of atoms.
 typedef HandleSeq IncomingSet;
 
-// ----------------------------------------------------------
-// Games with the sturctures used for the Incoming set.
+// ----------------------------------------------------
+// Games with the structures used for the Incoming set.
 // The size of Atoms, and performance depends on these.
 #if HAVE_SPARSEHASH
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
@@ -204,12 +204,14 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
 #endif // HAVE_SPARSEHASH
 
-// ----------------------------------------------------------
-// Like above, but for other maps.
-#if HAVE_SPARSEHASH
-// typedef google::sparse_hash_map<const Handle, ValuePtr> KVPMap;
-typedef std::map<const Handle, ValuePtr> KVPMap;
-#else // HAVE_SPARSEHASH
+// ----------------------------------------------------
+// Other maps.
+typedef std::map<Type, WincomingSet> InSetMap;
+
+#define USE_SPARSE_KVP 1
+#if USE_SPARSE_KVP
+typedef google::sparse_hash_map<const Handle, ValuePtr> KVPMap;
+#else
 typedef std::map<const Handle, ValuePtr> KVPMap;
 #endif
 
@@ -339,7 +341,8 @@ protected:
         // contain a hundred-million atoms, so the solution has to be
         // small. This rules out using a vector to store the
         // buckets (I tried).
-        std::map<Type, WincomingSet> _iset;
+        // std::map<Type, WincomingSet> _iset;
+        InSetMap _iset;
     };
     InSet _incoming_set;
     void keep_incoming_set();
