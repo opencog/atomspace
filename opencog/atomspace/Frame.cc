@@ -93,10 +93,11 @@ void Frame::scrub_incoming_set(void)
 #if HAVE_SPARSEHASH
 				// sparsehash erase does not invalidate iterators.
 				bucket->second.erase(bi);
+			bi++;
 #else
 				bi = bucket->second.erase(bi);
-#endif
 			else bi++;
+#endif
 		}
 	}
 #endif
