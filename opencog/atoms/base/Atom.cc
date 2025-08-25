@@ -47,6 +47,11 @@
 
 namespace opencog {
 
+#if HAVE_SPARSEHASH
+template <>
+std::weak_ptr<Atom> hashable_weak_ptr<Atom>::_dummy = std::weak_ptr<Atom>();
+#endif
+
 Atom::~Atom()
 {
     _atom_space = nullptr;
