@@ -470,6 +470,9 @@ void Atom::insert_atom(const Handle& a)
         auto pr = _incoming_set._iset.emplace(
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
+#if HAVE_SPARSEHASH
+        bucket->second.set_deleted_key(Handle());
+#endif
     }
     bucket->second.insert(GET_PTR(a));
 }
