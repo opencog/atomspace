@@ -306,7 +306,11 @@ protected:
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
-    {}
+    {
+#if USE_SPARSE_KVP
+        _values.set_deleted_key(Handle());
+#endif
+    }
 
     Atom& operator=(const Atom& other) // copy assignment operator
         { return *this; }
