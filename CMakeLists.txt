@@ -125,6 +125,15 @@ ELSE (FOLLY_FOUND)
 	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
 ENDIF (FOLLY_FOUND)
 
+FIND_PACKAGE(SparseHash)
+IF (SPARSEHASH_FOUND)
+	MESSAGE(STATUS "SparseHash found.")
+	SET(HAVE_SPARSEHASH 1)
+	ADD_DEFINITIONS(-DHAVE_SPARSEHASH)
+ELSE (SPARSEHASH_FOUND)
+	MESSAGE(STATUS "SparseHash missing: provides more efficient std::set replacement.")
+ENDIF (SPARSEHASH_FOUND)
+
 # ----------------------------------------------------------
 # Find Guile. Required.
 include(OpenCogFindGuile)
@@ -373,7 +382,8 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-# SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
+SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
+SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
