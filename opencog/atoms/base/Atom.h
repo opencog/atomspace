@@ -37,6 +37,7 @@
 #if HAVE_SPARSEHASH
 // #undef HAVE_FOLLY
 #include <sparsehash/sparse_hash_set>
+#include <sparsehash/sparse_hash_map>
 #define USE_HASHABLE_WEAK_PTR 1
 #else // HAVE_SPARSEHASH
 
@@ -187,6 +188,9 @@ typedef std::size_t Arity;
 //! millions of atoms.
 typedef HandleSeq IncomingSet;
 
+// ----------------------------------------------------------
+// Games with the sturctures used for the Incoming set.
+// The size of Atoms, and performance depends on these.
 #if HAVE_SPARSEHASH
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
 #else // HAVE_SPARSEHASH
@@ -199,6 +203,15 @@ typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
 #endif // HAVE_SPARSEHASH
+
+// ----------------------------------------------------------
+// Like above, but for other maps.
+#if HAVE_SPARSEHASH
+// typedef google::sparse_hash_map<const Handle, ValuePtr> KVPMap;
+typedef std::map<const Handle, ValuePtr> KVPMap;
+#else // HAVE_SPARSEHASH
+typedef std::map<const Handle, ValuePtr> KVPMap;
+#endif
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -234,6 +247,14 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
  * A "typical" Link of size 2, held in one other Link, in AtomSpace, holding
  *   a CountTV in it: 496 Bytes.  This is indeed what is measured in real-life
  *   large datasets.
+ *
+ * How to use less memory:
+ * Measured on a dataset w/ 5.5 million Atoms (the sfia pairs dataset)
+ * -- std::set<Atom*> vs std::set<WinkPtr> saves 31 bytes/atom.
+ *    enable USE_BARE_BACKPOINTER to get this.
+ * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
+ * -- sparse_hash_set<Atom*> is same size as WinkPtr so it is
+ *    actually larger than std::set<Atom*>
  */
 class Atom
     : public Value
@@ -265,7 +286,7 @@ protected:
     AtomSpace *_atom_space;
 
     /// All of the values on the atom, including the TV.
-    mutable std::map<const Handle, ValuePtr> _values;
+    mutable KVPMap _values;
 
     // Lock, used to serialize changes.
     // This costs 56 bytes per atom.  Tried using a single, global lock,
