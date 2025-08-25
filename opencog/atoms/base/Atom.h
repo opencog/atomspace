@@ -71,6 +71,15 @@ struct hashable_weak_ptr : public std::weak_ptr<T>
 		_hash = std::hash<T*>{}(sp.get());
 	}
 
+	// google::sparse_hash_set uses a zero-sized ctor to indicate
+	// the deleted key. So provide that, setting it to zero.
+	static std::weak_ptr<T> _dummy;
+	hashable_weak_ptr(void) :
+		std::weak_ptr<T>(_dummy)
+	{
+		_hash = 0;
+	}
+
 	std::size_t get_hash() const noexcept { return _hash; }
 
 	// Define operator<() in order to construct operator==()
