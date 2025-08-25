@@ -187,6 +187,9 @@ typedef std::size_t Arity;
 //! millions of atoms.
 typedef HandleSeq IncomingSet;
 
+// ----------------------------------------------------
+// Games with the structures used for the Incoming set.
+// The size of Atoms, and performance depends on these.
 #if HAVE_SPARSEHASH
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
 #else // HAVE_SPARSEHASH
@@ -199,6 +202,11 @@ typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
 #endif // HAVE_SPARSEHASH
+
+// ----------------------------------------------------
+// Other maps.
+typedef std::map<const Handle, ValuePtr> KVPMap;
+typedef std::map<Type, WincomingSet> InSetMap;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -234,6 +242,14 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
  * A "typical" Link of size 2, held in one other Link, in AtomSpace, holding
  *   a CountTV in it: 496 Bytes.  This is indeed what is measured in real-life
  *   large datasets.
+ *
+ * How to use less memory:
+ * Measured on a dataset w/ 5.5 million Atoms (the sfia pairs dataset)
+ * -- std::set<Atom*> vs std::set<WinkPtr> saves 31 bytes/atom.
+ *    enable USE_BARE_BACKPOINTER to get this.
+ * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
+ * -- sparse_hash_set<Atom*> is same size as WinkPtr so it is
+ *    actually larger than std::set<Atom*>
  */
 class Atom
     : public Value
@@ -265,7 +281,7 @@ protected:
     AtomSpace *_atom_space;
 
     /// All of the values on the atom, including the TV.
-    mutable std::map<const Handle, ValuePtr> _values;
+    mutable KVPMap _values;
 
     // Lock, used to serialize changes.
     // This costs 56 bytes per atom.  Tried using a single, global lock,
@@ -318,7 +334,8 @@ protected:
         // contain a hundred-million atoms, so the solution has to be
         // small. This rules out using a vector to store the
         // buckets (I tried).
-        std::map<Type, WincomingSet> _iset;
+        // std::map<Type, WincomingSet> _iset;
+        InSetMap _iset;
     };
     InSet _incoming_set;
     void keep_incoming_set();
