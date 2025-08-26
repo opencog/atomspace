@@ -125,7 +125,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	Type tstar = max(type+1, _offset_to_atom);
+	Type tstar = std::max(type+1, _offset_to_atom);
 	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
@@ -162,7 +162,7 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	Type tstar = max(type+1, _offset_to_atom);
+	Type tstar = std::max(type+1, _offset_to_atom);
 	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
@@ -215,7 +215,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	Type tstar = max(type+1, _offset_to_atom);
+	Type tstar = std::max(type+1, _offset_to_atom);
 	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
