@@ -51,14 +51,20 @@ namespace opencog
 //    sometimes reports the same result twice. Why? I dunno. This
 //    one failure is enough to say "not recommended." I don't need
 //    to be chasing obscure bugs.
-#if HAVE_FOLLY_XXX
-typedef folly::F14ValueSet<Handle> AtomSet;
-#else
-typedef std::unordered_set<Handle> AtomSet;
-#endif
 
-#define TYPE_INDEX_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define TYPE_INDEX_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+struct AtomSet :
+#if HAVE_FOLLY_XXX
+	public folly::F14ValueSet<Handle>
+#else
+	public std::unordered_set<Handle>
+#endif
+{
+	mutable std::shared_mutex _mtx;
+
+};
+
+#define TYPE_INDEX_SHARED_LOCK(s) std::shared_lock<std::shared_mutex> lck(s._mtx);
+#define TYPE_INDEX_UNIQUE_LOCK(s) std::unique_lock<std::shared_mutex> lck(s._mtx);
 
 /**
  * Implements a vector of AtomSets; each AtomSet is a hash table of
@@ -80,9 +86,6 @@ class TypeIndex
 		std::vector<AtomSet> _idx;
 		size_t _num_types;
 		NameServer& _nameserver;
-
-		// Single, global mutex for locking the index.
-		mutable std::shared_mutex _mtx;
 	public:
 		TypeIndex(void);
 		void resize(void);
@@ -92,7 +95,7 @@ class TypeIndex
 		Handle insertAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			TYPE_INDEX_UNIQUE_LOCK;
+			TYPE_INDEX_UNIQUE_LOCK(s);
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
 			s.insert(h);
@@ -102,14 +105,14 @@ class TypeIndex
 		bool removeAtom(const Handle& h)
 		{
 			AtomSet& s(_idx.at(h->get_type()));
-			TYPE_INDEX_UNIQUE_LOCK;
+			TYPE_INDEX_UNIQUE_LOCK(s);
 			return 1 == s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
 			const AtomSet& s(_idx.at(h->get_type()));
-			TYPE_INDEX_SHARED_LOCK;
+			TYPE_INDEX_SHARED_LOCK(s);
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
 			return *iter;
@@ -119,7 +122,7 @@ class TypeIndex
 		size_t size(Type t) const
 		{
 			const AtomSet& s(_idx.at(t));
-			TYPE_INDEX_SHARED_LOCK;
+			TYPE_INDEX_SHARED_LOCK(s);
 			return s.size();
 		}
 
@@ -127,9 +130,11 @@ class TypeIndex
 		size_t size(void) const
 		{
 			size_t cnt = 0;
-			TYPE_INDEX_SHARED_LOCK;
 			for (const auto& s : _idx)
+			{
+				TYPE_INDEX_SHARED_LOCK(s);
 				cnt += s.size();
+			}
 			return cnt;
 		}
 

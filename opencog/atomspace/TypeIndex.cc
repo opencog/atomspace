@@ -83,8 +83,8 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
+	TYPE_INDEX_SHARED_LOCK(s);
 	for (const Handle& h : s)
 		hseq.push_back(h);
 
@@ -106,8 +106,8 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
                                     Type type,
                                     bool subclass) const
 {
-	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
+	TYPE_INDEX_SHARED_LOCK(s);
 	hset.insert(s.begin(), s.end());
 
 	// Not subclassing? We are done!
@@ -140,12 +140,14 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	TYPE_INDEX_SHARED_LOCK;
 	const AtomSet& s(_idx.at(type));
-	for (const Handle& h : s)
 	{
-		if (h->isIncomingSetEmpty(cas))
-			hseq.push_back(h);
+		TYPE_INDEX_SHARED_LOCK(s);
+		for (const Handle& h : s)
+		{
+			if (h->isIncomingSetEmpty(cas))
+				hseq.push_back(h);
+		}
 	}
 
 	// Not subclassing? We are done!
@@ -156,6 +158,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 		if (not _nameserver.isA(t, type)) continue;
 
 		const AtomSet& s(_idx.at(t));
+		TYPE_INDEX_SHARED_LOCK(s);
 		for (const Handle& h : s)
 			if (h->isIncomingSetEmpty(cas))
 				hseq.push_back(h);
