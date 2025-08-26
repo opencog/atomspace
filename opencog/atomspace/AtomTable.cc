@@ -594,11 +594,11 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
-    // This should never happen!
-    if (type < ATOM)
-        throw RuntimeException(TRACE_INFO,
-             "There will never be handles of type %d %s!",
-             type, nameserver().getTypeName(type).c_str());
+    // Its a user error to ask for the handles of any type
+    // that is not an Atom. We could throw an error and irritate
+    // the user, or we could just silently ignore a plausible
+    // request. Lets just silently ignore.
+    if (type < ATOM) return;
 
     if (nullptr == cas) cas = this;
 
