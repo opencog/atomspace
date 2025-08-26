@@ -37,6 +37,7 @@
 #if HAVE_SPARSEHASH
 // #undef HAVE_FOLLY
 #include <sparsehash/sparse_hash_set>
+#include <sparsehash/sparse_hash_map>
 #define USE_HASHABLE_WEAK_PTR 1
 #else // HAVE_SPARSEHASH
 
@@ -187,9 +188,9 @@ typedef HandleSeq IncomingSet;
 // ----------------------------------------------------
 // Games with the structures used for the Incoming set.
 // The size of Atoms, and performance depends on these.
-#if HAVE_SPARSEHASH
+#if USE_SPARSE_INCOMING
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
-#else // HAVE_SPARSEHASH
+#else // HAVE_SPARSE_INCOMING
 
 #if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
@@ -198,12 +199,23 @@ typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
-#endif // HAVE_SPARSEHASH
+#endif // USE_SPARSE_INCOMING
 
 // ----------------------------------------------------
 // Other maps.
-typedef std::map<const Handle, ValuePtr> KVPMap;
 typedef std::map<Type, WincomingSet> InSetMap;
+
+#if USE_SPARSE_KVP
+typedef google::sparse_hash_map<Handle, ValuePtr> KVPMap;
+
+// USE_SPARSE_KVP works fine. However, for typical datasets, it uses
+// more memory. Why? Because almost all Atoms will have zero or one
+// Values on them. See immediately below for a detailed report.
+// Anyway, we disable, to avoid screw-ups.
+#error "USE_SPARSE_KVP is enabled! It works, but you probably did this by accident. If you meant to do this, edit the header file and try again."
+#else
+typedef std::map<const Handle, ValuePtr> KVPMap;
+#endif
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -247,6 +259,11 @@ typedef std::map<Type, WincomingSet> InSetMap;
  * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
  * -- sparse_hash_set<Atom*> is same size as WinkPtr so it is
  *    actually larger than std::set<Atom*>
+ * -- Enabling USE_SPARSE_KVP makes things worse for the sfia dataset.
+ *    Why? Because half the Atoms have zero Values on them, and the
+ *    other half have only one. It's hard/impossible to improve on this.
+ *    BTW, it also runs 10% slower just to load the dataset. This is
+ *    due to a more complex init than what std::map has to do.
  */
 class Atom
     : public Value
@@ -298,7 +315,11 @@ protected:
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
-    {}
+    {
+#if USE_SPARSE_KVP
+        _values.set_deleted_key(Handle());
+#endif
+    }
 
     Atom& operator=(const Atom& other) // copy assignment operator
         { return *this; }

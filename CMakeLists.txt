@@ -130,6 +130,11 @@ IF (SPARSEHASH_FOUND)
 	MESSAGE(STATUS "SparseHash found.")
 	SET(HAVE_SPARSEHASH 1)
 	ADD_DEFINITIONS(-DHAVE_SPARSEHASH)
+	ADD_DEFINITIONS(-DUSE_SPARSE_INCOMING)
+	# Disable USE_SPARSE_KVP; see Atom.h for explanation.
+	# ADD_DEFINITIONS(-DUSE_SPARSE_KVP)
+	# The below is used in atomspace.pc for pkg-config
+	SET(ATOMSPACE_CFLAGS "-DHAVE_SPARSEHASH -DUSE_SPARSE_INCOMING")
 ELSE (SPARSEHASH_FOUND)
 	MESSAGE(STATUS "SparseHash missing: provides more efficient std::set replacement.")
 ENDIF (SPARSEHASH_FOUND)
