@@ -250,6 +250,8 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *
  * How to use less memory:
  * Measured on a dataset w/ 5.5 million Atoms (the sfia pairs dataset)
+ * -- Using the MutexPool shrinks Atom size by 63 bytes/atom.
+ *    It also runs slightly faster, probably a cache effect.
  * -- std::set<Atom*> vs std::set<WinkPtr> saves 31 bytes/atom.
  *    enable USE_BARE_BACKPOINTER to get this.
  * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
@@ -281,6 +283,8 @@ protected:
     // of collision will be very small: mutexes won't be shared.
     // and also, if they are, chances of contention are small.
     //
+    // CPU usage improves 3% to 6%, probably because the shrinkage
+    // fits into the cache better.
     struct MutexPool
     {
         static constexpr size_t POOL_SIZE = 256;
