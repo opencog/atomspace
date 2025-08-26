@@ -29,6 +29,7 @@ TypeIndex::TypeIndex(void) :
 	_nameserver(nameserver()),
 	_idx(VEC_SIZE)
 {
+	_offset_to_atom = ATOM;
 	resize();
 }
 

@@ -83,7 +83,8 @@ struct AtomSet :
 class TypeIndex
 {
 	private:
-		size_t _num_types;
+		int _num_types;
+		int _offset_to_atom;
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
 
@@ -92,12 +93,12 @@ class TypeIndex
 		static constexpr int VEC_SIZE = TYPE_RESERVE_SIZE * POOL_SIZE;
 		int get_bucket_start(Type t) const
 		{
-			return POOL_SIZE * t;
+			return POOL_SIZE * (t - _offset_to_atom);
 		}
 		int get_bucket(const Handle& h) const
 		{
 			int ibu = h->get_hash() % POOL_SIZE;
-			ibu += POOL_SIZE * h->get_type();
+			ibu += POOL_SIZE * (h->get_type() - _offset_to_atom);
 			return ibu;
 		}
 		AtomSet& get_atom_set(const Handle& h)
