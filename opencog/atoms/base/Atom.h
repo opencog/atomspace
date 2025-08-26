@@ -208,6 +208,12 @@ typedef std::map<Type, WincomingSet> InSetMap;
 
 #if USE_SPARSE_KVP
 typedef google::sparse_hash_map<Handle, ValuePtr> KVPMap;
+
+// USE_SPARSE_KVP works fine. However, for typical datasets, it uses
+// more memory. Why? Because almost all Atoms will have zero or one
+// Values on them. See immediately below for a detailed report.
+// Anyway, we disable, to avoid screw-ups.
+#error "USE_SPARSE_KVP is enabled! It works, but you probably did this by accident. If you meant to do this, edit the header file and try again."
 #else
 typedef std::map<const Handle, ValuePtr> KVPMap;
 #endif
@@ -254,6 +260,9 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
  * -- sparse_hash_set<Atom*> is same size as WinkPtr so it is
  *    actually larger than std::set<Atom*>
+ * -- Enabling USE_SPARSE_KVP makes tthings worse for the sfia dataset.
+ *    Why? Because half the Atoms have zero Values on them, and the
+ *    other half have only one. It's hard/impossible to improve on this.
  */
 class Atom
     : public Value
