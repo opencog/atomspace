@@ -34,14 +34,14 @@ TypeIndex::TypeIndex(void) :
 	resize();
 }
 
-#define GET_BFL(resz) \
-	for (int ibu = 0; ibu < resz * POOL_SIZE; ibu++) { \
-		const AtomSet& s(_idx[ibu]); \
+#define GET_BFL(vec) \
+	for (int ibu = 0; ibu < (int) vec.size(); ibu++) { \
+		const AtomSet& s(vec[ibu]); \
 		s._mtx.lock(); }
 
-#define DROP_BFL(resz) \
-	for (int ibu = 0; ibu < resz * POOL_SIZE; ibu++) { \
-		const AtomSet& s(_idx[ibu]); \
+#define DROP_BFL(vec) \
+	for (int ibu = 0; ibu < (int) vec.size(); ibu++) { \
+		const AtomSet& s(vec[ibu]); \
 		s._mtx.unlock(); }
 
 void TypeIndex::resize(void)
@@ -51,19 +51,19 @@ void TypeIndex::resize(void)
 
 	// If we are here, we need to resize. Get the BFL.
 
-	int cursz = _reserved;
-	GET_BFL(cursz)
 	while (_reserved + _offset_to_atom < newsz)
 		_reserved *= 2;
-	size_t vecsz = _reserved * POOL_SIZE;
-	_idx.resize(vecsz);
-	DROP_BFL(cursz)
+
+	std::vector<AtomSet> newvec(_reserved * POOL_SIZE);
+	GET_BFL(_idx)
+	newvec.swap(_idx);
+	DROP_BFL(newvec)
 }
 
 void TypeIndex::clear(void)
 {
 	std::vector<AtomSet> dead(_reserved * POOL_SIZE);
-	GET_BFL(_reserved)
+	GET_BFL(_idx)
 	dead.swap(_idx);
 
 	// Clear the AtomSpace before releasing the lock.
@@ -73,7 +73,7 @@ void TypeIndex::clear(void)
 			h->_atom_space = nullptr;
 	}
 
-	DROP_BFL(_reserved)
+	DROP_BFL(dead)
 
 	// Do the final cleanup after releasing the lock. This enables
 	// the very unlikely situation of having other threads start
