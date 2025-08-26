@@ -87,9 +87,9 @@ class TypeIndex
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
 
-		static constexpr int MAX_SUPPORTED_TYPES = 1024;
+		static constexpr int TYPE_RESERVE_SIZE = 1024;
 		static constexpr int POOL_SIZE = 8;
-		static constexpr int VEC_SIZE = MAX_SUPPORTED_TYPES * POOL_SIZE;
+		static constexpr int VEC_SIZE = TYPE_RESERVE_SIZE * POOL_SIZE;
 		int get_bucket_start(Type t) const
 		{
 			return POOL_SIZE * t;
@@ -172,7 +172,8 @@ class TypeIndex
 			size_t result = size(type);
 			if (not subclass) return result;
 
-			for (Type t = ATOM; t<_num_types; t++)
+			// All subclassed types have a larger type.
+			for (Type t = type+1; t<_num_types; t++)
 			{
 				if (t != type and _nameserver.isA(t, type))
 					result += size(t);

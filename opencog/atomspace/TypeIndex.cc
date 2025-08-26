@@ -25,7 +25,7 @@
 using namespace opencog;
 
 TypeIndex::TypeIndex(void) :
-	_num_types(MAX_SUPPORTED_TYPES),
+	_num_types(TYPE_RESERVE_SIZE),
 	_nameserver(nameserver()),
 	_idx(VEC_SIZE)
 {
