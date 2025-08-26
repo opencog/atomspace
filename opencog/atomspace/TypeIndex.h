@@ -87,13 +87,23 @@ class TypeIndex
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
 
+		static constexpr int POOL_SIZE = 1;
+		static constexpr int POOL_MASK = POOL_SIZE-1;
+		int get_bucket_start(Type t) const
+		{
+			return POOL_SIZE * t;
+		}
+		int get_bucket(const Handle& h) const
+		{
+			return h->get_type();
+		}
 		AtomSet& get_atom_set(const Handle& h)
 		{
-			return _idx.at(h->get_type());
+			return _idx.at(get_bucket(h));
 		}
 		const AtomSet& get_atom_set_const(const Handle& h) const
 		{
-			return _idx.at(h->get_type());
+			return _idx.at(get_bucket(h));
 		}
 	public:
 		TypeIndex(void);
@@ -130,9 +140,15 @@ class TypeIndex
 		// How many atoms are there of type t?
 		size_t size(Type t) const
 		{
-			const AtomSet& s(_idx.at(t));
-			TYPE_INDEX_SHARED_LOCK(s);
-			return s.size();
+			size_t cnt = 0;
+			int start = get_bucket_start(t);
+			for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+			{
+				const AtomSet& s(_idx.at(ibu));
+				TYPE_INDEX_SHARED_LOCK(s);
+				cnt += s.size();
+			}
+			return cnt;
 		}
 
 		// How many atoms, grand total?
