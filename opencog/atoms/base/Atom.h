@@ -260,9 +260,11 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
  * -- sparse_hash_set<Atom*> is same size as WinkPtr so it is
  *    actually larger than std::set<Atom*>
- * -- Enabling USE_SPARSE_KVP makes tthings worse for the sfia dataset.
+ * -- Enabling USE_SPARSE_KVP makes things worse for the sfia dataset.
  *    Why? Because half the Atoms have zero Values on them, and the
  *    other half have only one. It's hard/impossible to improve on this.
+ *    BTW, it also runs 10% slower just to load the dataset. This is
+ *    due to a more complex init than what std::map has to do.
  */
 class Atom
     : public Value
