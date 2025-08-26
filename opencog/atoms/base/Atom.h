@@ -275,11 +275,16 @@ protected:
 
 #define USE_MUTEX_POOL 1
 #if USE_MUTEX_POOL
+    // The goal of the MutexPool is to save 64 bytes per Atom,
+    // by just using a bunch from a pool. As long as the pool
+    // is maybe 4x the number of CPU's on the machine, the chances
+    // of collision will be very small: mutexes won't be shared.
+    // and also, if they are, chances of contention are small.
     struct MutexPool
     {
         static constexpr size_t POOL_SIZE = 256;
         mutable std::shared_mutex mutexes[POOL_SIZE];
-        std::shared_mutex& get_mutex(const Handle& h) {
+        inline std::shared_mutex& get_mutex(const Handle& h) {
             return mutexes[h->get_hash() % POOL_SIZE];
         }
     };
