@@ -50,7 +50,6 @@ void TypeIndex::clear(void)
 		// Clear the AtomSpace before releasing the lock.
 		for (auto& s : dead)
 		{
-			TYPE_INDEX_UNIQUE_LOCK(s);
 			for (auto& h : s)
 				h->_atom_space = nullptr;
 		}
@@ -65,7 +64,6 @@ void TypeIndex::clear(void)
 	// that would result in lock inversion.
 	for (auto& s : dead)
 	{
-		TYPE_INDEX_UNIQUE_LOCK(s);
 		for (auto& h : s)
 			h->remove();
 		s.clear();
