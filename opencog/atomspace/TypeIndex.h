@@ -102,11 +102,11 @@ class TypeIndex
 		}
 		AtomSet& get_atom_set(const Handle& h)
 		{
-			return _idx.at(get_bucket(h));
+			return _idx[get_bucket(h)];
 		}
 		const AtomSet& get_atom_set_const(const Handle& h) const
 		{
-			return _idx.at(get_bucket(h));
+			return _idx[get_bucket(h)];
 		}
 	public:
 		TypeIndex(void);
@@ -147,7 +147,7 @@ class TypeIndex
 			int start = get_bucket_start(t);
 			for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 			{
-				const AtomSet& s(_idx.at(ibu));
+				const AtomSet& s(_idx[ibu]);
 				TYPE_INDEX_SHARED_LOCK(s);
 				cnt += s.size();
 			}

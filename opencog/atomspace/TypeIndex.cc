@@ -90,7 +90,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	int start = get_bucket_start(type);
 	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 	{
-		const AtomSet& s(_idx.at(ibu));
+		const AtomSet& s(_idx[ibu]);
 		TYPE_INDEX_SHARED_LOCK(s);
 		for (const Handle& h : s)
 			hseq.push_back(h);
@@ -106,7 +106,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 		int start = get_bucket_start(t);
 		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
-			const AtomSet& s(_idx.at(ibu));
+			const AtomSet& s(_idx[ibu]);
 			TYPE_INDEX_SHARED_LOCK(s);
 			for (const Handle& h : s)
 				hseq.push_back(h);
@@ -122,7 +122,7 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
 	int start = get_bucket_start(type);
 	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 	{
-		const AtomSet& s(_idx.at(ibu));
+		const AtomSet& s(_idx[ibu]);
 		TYPE_INDEX_SHARED_LOCK(s);
 		hset.insert(s.begin(), s.end());
 	}
@@ -137,7 +137,7 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
 		int start = get_bucket_start(t);
 		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
-			const AtomSet& s(_idx.at(ibu));
+			const AtomSet& s(_idx[ibu]);
 			TYPE_INDEX_SHARED_LOCK(s);
 			hset.insert(s.begin(), s.end());
 		}
@@ -165,7 +165,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	int start = get_bucket_start(type);
 	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 	{
-		const AtomSet& s(_idx.at(ibu));
+		const AtomSet& s(_idx[ibu]);
 		TYPE_INDEX_SHARED_LOCK(s);
 		for (const Handle& h : s)
 		{
@@ -184,7 +184,7 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 		int start = get_bucket_start(t);
 		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
-			const AtomSet& s(_idx.at(ibu));
+			const AtomSet& s(_idx[ibu]);
 			TYPE_INDEX_SHARED_LOCK(s);
 			for (const Handle& h : s)
 				if (h->isIncomingSetEmpty(cas))
