@@ -51,18 +51,20 @@ namespace opencog
 //    sometimes reports the same result twice. Why? I dunno. This
 //    one failure is enough to say "not recommended." I don't need
 //    to be chasing obscure bugs.
+#if HAVE_FOLLY_XXX
+	typedef folly::F14ValueSet<Handle> AtomHanSet;
+#else
+	typedef std::unordered_set<Handle> AtomHanSet;
+#endif
 
 // The AtomSet is just a set, plus a lock on that set.
-struct AtomSet :
-#if HAVE_FOLLY_XXX
-	public folly::F14ValueSet<Handle>
-#else
-	public std::unordered_set<Handle>
-#endif
+struct AtomSet : AtomHanSet
 {
 	mutable std::shared_mutex _mtx;
 	AtomSet() = default;
-	AtomSet(AtomSet&& other) noexcept {}
+	AtomSet(AtomSet&& other) noexcept :
+		AtomHanSet(std::move(other))
+	{}
 };
 
 #define TYPE_INDEX_SHARED_LOCK(s) std::shared_lock<std::shared_mutex> lck(s._mtx);
