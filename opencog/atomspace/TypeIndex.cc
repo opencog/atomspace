@@ -25,30 +25,35 @@
 using namespace opencog;
 
 TypeIndex::TypeIndex(void) :
-	_nameserver(nameserver())
+	_num_types(1023),
+	_nameserver(nameserver()),
+	_idx(_num_types + 1)
 {
 	resize();
 }
 
 void TypeIndex::resize(void)
 {
-	_num_types = nameserver().getNumberOfClasses();
-	TYPE_INDEX_UNIQUE_LOCK;
-	_idx.resize(_num_types + 1);
+	size_t newsz = nameserver().getNumberOfClasses();
+	if (_num_types <= newsz)
+		throw RuntimeException(TRACE_INFO,
+			"Ran out of space for new types!");
 }
 
 void TypeIndex::clear(void)
 {
 	std::vector<AtomSet> dead;
 	{
-		TYPE_INDEX_UNIQUE_LOCK;
-		dead.resize(_num_types + 1);
+		// std::shared_lock<std::shared_mutex> lck(_idxmtx);
 		dead.swap(_idx);
 
 		// Clear the AtomSpace before releasing the lock.
 		for (auto& s : dead)
+		{
+			TYPE_INDEX_UNIQUE_LOCK(s);
 			for (auto& h : s)
 				h->_atom_space = nullptr;
+		}
 	}
 
 	// Do the final cleanup after releasing the lock. This enables
@@ -60,6 +65,7 @@ void TypeIndex::clear(void)
 	// that would result in lock inversion.
 	for (auto& s : dead)
 	{
+		TYPE_INDEX_UNIQUE_LOCK(s);
 		for (auto& h : s)
 			h->remove();
 		s.clear();

@@ -83,9 +83,9 @@ struct AtomSet :
 class TypeIndex
 {
 	private:
-		std::vector<AtomSet> _idx;
 		size_t _num_types;
 		NameServer& _nameserver;
+		std::vector<AtomSet> _idx;
 	public:
 		TypeIndex(void);
 		void resize(void);
