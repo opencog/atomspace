@@ -103,7 +103,7 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
-		int start = get_bucket_start(type);
+		int start = get_bucket_start(t);
 		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
 			const AtomSet& s(_idx.at(ibu));
@@ -134,7 +134,7 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
-		int start = get_bucket_start(type);
+		int start = get_bucket_start(t);
 		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
 			const AtomSet& s(_idx.at(ibu));
@@ -162,8 +162,10 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	const AtomSet& s(_idx.at(type));
+	int start = get_bucket_start(type);
+	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 	{
+		const AtomSet& s(_idx.at(ibu));
 		TYPE_INDEX_SHARED_LOCK(s);
 		for (const Handle& h : s)
 		{
@@ -179,11 +181,15 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
-		const AtomSet& s(_idx.at(t));
-		TYPE_INDEX_SHARED_LOCK(s);
-		for (const Handle& h : s)
-			if (h->isIncomingSetEmpty(cas))
-				hseq.push_back(h);
+		int start = get_bucket_start(t);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+		{
+			const AtomSet& s(_idx.at(ibu));
+			TYPE_INDEX_SHARED_LOCK(s);
+			for (const Handle& h : s)
+				if (h->isIncomingSetEmpty(cas))
+					hseq.push_back(h);
+		}
 	}
 }
 
