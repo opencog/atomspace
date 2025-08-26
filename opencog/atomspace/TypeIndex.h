@@ -52,6 +52,7 @@ namespace opencog
 //    one failure is enough to say "not recommended." I don't need
 //    to be chasing obscure bugs.
 
+// The AtomSet is just a set, plus a lock on that set.
 struct AtomSet :
 #if HAVE_FOLLY_XXX
 	public folly::F14ValueSet<Handle>
@@ -60,7 +61,8 @@ struct AtomSet :
 #endif
 {
 	mutable std::shared_mutex _mtx;
-
+	AtomSet() = default;
+	AtomSet(AtomSet&& other) noexcept {}
 };
 
 #define TYPE_INDEX_SHARED_LOCK(s) std::shared_lock<std::shared_mutex> lck(s._mtx);
