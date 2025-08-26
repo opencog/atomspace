@@ -52,11 +52,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-#define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-#define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-
 namespace opencog
 {
 #if USE_HASHABLE_WEAK_PTR
@@ -254,6 +249,8 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *
  * How to use less memory:
  * Measured on a dataset w/ 5.5 million Atoms (the sfia pairs dataset)
+ * -- Using the MutexPool shrinks Atom size by 63 bytes/atom.
+ *    It also runs slightly faster, probably a cache effect.
  * -- std::set<Atom*> vs std::set<WinkPtr> saves 31 bytes/atom.
  *    enable USE_BARE_BACKPOINTER to get this.
  * -- sparse_hash_set<WinkPtr> saves 25 bytes/atom.
@@ -264,6 +261,26 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *    other half have only one. It's hard/impossible to improve on this.
  *    BTW, it also runs 10% slower just to load the dataset. This is
  *    due to a more complex init than what std::map has to do.
+ *
+ * The design here has a space/time tradeoff: it trades fat Atoms for
+ * fast access to the incoming set, and fast access to Values.
+ * So, for example, we could move the Incoming set lookup to the
+ * AtomSpace TypeIndex table. We could also put the KVPMap there.
+ * This would shrink the soze of Atoms a lot, especially given that
+ * many Atoms don't have incoming sets, and maybe half don't have
+ * Values. What we lose by this is speed of access. I think. Maybe.
+ * If we have the Atom already in-hand, the lookup of the incoming
+ * set or the Values can be done right here. So it should be "faster".
+ * As I write this, it occurs to me that a lookup from the TypeIndex
+ * could also be done in O(1) time. That is, thanks to hashing, there
+ * is no loss of performance. Huh. So perhaps ... FLATTEN EVERYTHING!
+ * Move it all into the TypeIndex.
+ *
+ * Going further in this direct gets more radical: Atoms start to
+ * look like a tuple-store, say, a triple-store, the tripe being
+ * (Handle, IncomingSet, KVP). But this may be counter-productive:
+ * The Atoms most likely to have counts are the once least likely to
+ * have Incoming sets. Hmmm.
  */
 class Atom
     : public Value
@@ -276,6 +293,42 @@ class Atom
     friend class StorageNode;     // Needs to call isAbsent()
 
 protected:
+
+#define USE_MUTEX_POOL 1
+#if USE_MUTEX_POOL
+    // The goal of the MutexPool is to save 64 bytes per Atom,
+    // by just using a mutex from a pool. As long as the pool
+    // is 1x to 4x larger than the number of CPU's on the machine,
+    // the chances of collision will be small, and contention smaller
+    // still. The biggest stumbling block to high parallelizsm
+    // is not this, but the std::shared_ptr<>, which uses atomics
+    // that run CPU-dependent cache-line voodoo, with different CPU's
+    // having radically different cache microarches. I digress...
+    //
+    // CPU usage improves 3% to 6%, probably because the shrinkage
+    // fits into the cache better.
+    struct MutexPool
+    {
+        static constexpr size_t POOL_SIZE = 64;
+        mutable std::shared_mutex mutexes[POOL_SIZE];
+        inline std::shared_mutex& get_mutex(ContentHash hsh) {
+            return mutexes[hsh % POOL_SIZE];
+        }
+    };
+    static MutexPool _mutex_pool;
+
+    #define _MTX (_mutex_pool.get_mutex(_content_hash))
+    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
+    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
+#else
+    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#endif
+
     // Packed flas. Single byte per atom.
     enum AtomFlags : uint8_t {
         ABSENT_FLAG     = 0x01,  // 0000 0001
@@ -297,12 +350,14 @@ protected:
     /// All of the values on the atom, including the TV.
     mutable KVPMap _values;
 
+#if not defined(USE_MUTEX_POOL) or (0 == USE_MUTEX_POOL)
     // Lock, used to serialize changes.
     // This costs 56 bytes per atom.  Tried using a single, global lock,
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // fatter.
     mutable std::shared_mutex _mtx;
+#endif // NOT USE_MUEX_POOL
 
     /**
      * Constructor for this class. Protected; no user should call this
