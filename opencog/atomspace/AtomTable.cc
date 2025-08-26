@@ -594,6 +594,12 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
+    // This should never happen!
+    if (type < ATOM)
+        throw RuntimeException(TRACE_INFO,
+             "There will never be handles of type %d %s!",
+             type, nameserver().getTypeName(type).c_str());
+
     if (nullptr == cas) cas = this;
 
     // If this is a copy-on-write space, then deduplicate the Atoms,
