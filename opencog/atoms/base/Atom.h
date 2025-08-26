@@ -280,12 +280,18 @@ protected:
     // is maybe 4x the number of CPU's on the machine, the chances
     // of collision will be very small: mutexes won't be shared.
     // and also, if they are, chances of contention are small.
+    //
+    // The problem is that this will be slower, in part because
+    // of the std::hash<Handle>() computation. We would have liked
+    // to use the existing ContentHash, but this is not available
+    // at the time that we need to be locking :-(
     struct MutexPool
     {
         static constexpr size_t POOL_SIZE = 256;
         mutable std::shared_mutex mutexes[POOL_SIZE];
         inline std::shared_mutex& get_mutex(const Handle& h) {
-            return mutexes[h->get_hash() % POOL_SIZE];
+            // return mutexes[h->get_hash() % POOL_SIZE];
+            return mutexes[std::hash<Handle>()(h) % POOL_SIZE];
         }
     };
     static MutexPool _mutex_pool;
