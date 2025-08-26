@@ -52,6 +52,10 @@ template <>
 std::weak_ptr<Atom> hashable_weak_ptr<Atom>::_dummy = std::weak_ptr<Atom>();
 #endif
 
+#if USE_MUTEX_POOL
+Atom::MutexPool Atom::_mutex_pool;
+#endif
+
 Atom::~Atom()
 {
     _atom_space = nullptr;
