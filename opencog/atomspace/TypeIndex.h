@@ -86,6 +86,15 @@ class TypeIndex
 		size_t _num_types;
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
+
+		AtomSet& get_atom_set(const Handle& h)
+		{
+			return _idx.at(h->get_type());
+		}
+		const AtomSet& get_atom_set_const(const Handle& h) const
+		{
+			return _idx.at(h->get_type());
+		}
 	public:
 		TypeIndex(void);
 		void resize(void);
@@ -94,7 +103,7 @@ class TypeIndex
 		// Else, return nullptr
 		Handle insertAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(h->get_type()));
+			AtomSet& s(get_atom_set(h));
 			TYPE_INDEX_UNIQUE_LOCK(s);
 			auto iter = s.find(h);
 			if (s.end() != iter) return *iter;
@@ -104,14 +113,14 @@ class TypeIndex
 
 		bool removeAtom(const Handle& h)
 		{
-			AtomSet& s(_idx.at(h->get_type()));
+			AtomSet& s(get_atom_set(h));
 			TYPE_INDEX_UNIQUE_LOCK(s);
 			return 1 == s.erase(h);
 		}
 
 		Handle findAtom(const Handle& h) const
 		{
-			const AtomSet& s(_idx.at(h->get_type()));
+			const AtomSet& s(get_atom_set_const(h));
 			TYPE_INDEX_SHARED_LOCK(s);
 			auto iter = s.find(h);
 			if (s.end() == iter) return Handle::UNDEFINED;
