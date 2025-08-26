@@ -281,22 +281,17 @@ protected:
     // of collision will be very small: mutexes won't be shared.
     // and also, if they are, chances of contention are small.
     //
-    // The problem is that this will be slower, in part because
-    // of the std::hash<Handle>() computation. We would have liked
-    // to use the existing ContentHash, but this is not available
-    // at the time that we need to be locking :-(
     struct MutexPool
     {
         static constexpr size_t POOL_SIZE = 256;
         mutable std::shared_mutex mutexes[POOL_SIZE];
-        inline std::shared_mutex& get_mutex(const Handle& h) {
-            // return mutexes[h->get_hash() % POOL_SIZE];
-            return mutexes[std::hash<Handle>()(h) % POOL_SIZE];
+        inline std::shared_mutex& get_mutex(ContentHash hsh) {
+            return mutexes[hsh % POOL_SIZE];
         }
     };
     static MutexPool _mutex_pool;
 
-    #define _MTX (_mutex_pool.get_mutex(get_handle()))
+    #define _MTX (_mutex_pool.get_mutex(_content_hash))
     #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
     #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
