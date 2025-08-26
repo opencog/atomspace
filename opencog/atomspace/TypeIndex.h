@@ -31,6 +31,7 @@
 #include <set>
 #endif
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
@@ -87,23 +88,27 @@ struct AtomSet : AtomHanSet
 class TypeIndex
 {
 	private:
-		int _num_types;
-		int _reserved;
+		mutable int _num_types;
+		mutable int _reserved;
 		int _offset_to_atom;
 		NameServer& _nameserver;
-		std::vector<AtomSet> _idx;
+		mutable std::vector<AtomSet> _idx;
 
 		static constexpr int TYPE_RESERVE_SIZE = 1024;
 		static constexpr int POOL_SIZE = 8;
 		static constexpr int VEC_SIZE = TYPE_RESERVE_SIZE * POOL_SIZE;
 		int get_bucket_start(Type t) const
 		{
+			OC_ASSERT(_offset_to_atom <= t, "BUG with type buckets!");
+			if (_reserved + _offset_to_atom <= t) resize();
 			return POOL_SIZE * (t - _offset_to_atom);
 		}
 		int get_bucket(const Handle& h) const
 		{
 			int ibu = h->get_hash() % POOL_SIZE;
-			ibu += POOL_SIZE * (h->get_type() - _offset_to_atom);
+			Type hty = h->get_type();
+			if (_reserved + _offset_to_atom <= hty) resize();
+			ibu += POOL_SIZE * (hty - _offset_to_atom);
 			return ibu;
 		}
 		AtomSet& get_atom_set(const Handle& h)
@@ -116,7 +121,7 @@ class TypeIndex
 		}
 	public:
 		TypeIndex(void);
-		void resize(void);
+		void resize(void) const;
 
 		// Return a Handle, if it's already in the set.
 		// Else, return nullptr
@@ -149,6 +154,7 @@ class TypeIndex
 		// How many atoms are there of type t?
 		size_t size(Type t) const
 		{
+			if (t < _offset_to_atom) return 0;
 			size_t cnt = 0;
 			int start = get_bucket_start(t);
 			for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
@@ -175,7 +181,9 @@ class TypeIndex
 		// How many atoms, of type t, and subclasses also?
 		size_t size(Type type, bool subclass) const
 		{
-			size_t result = size(type);
+			size_t result = 0;
+			if (_offset_to_atom <= type)
+				result = size(type);
 			if (not subclass) return result;
 
 			// All subclassed types have a larger type.

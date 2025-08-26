@@ -36,15 +36,15 @@ TypeIndex::TypeIndex(void) :
 
 #define GET_BFL(vec) \
 	for (int ibu = 0; ibu < (int) vec.size(); ibu++) { \
-		const AtomSet& s(vec[ibu]); \
+		AtomSet& s(vec[ibu]); \
 		s._mtx.lock(); }
 
 #define DROP_BFL(vec) \
 	for (int ibu = 0; ibu < (int) vec.size(); ibu++) { \
-		const AtomSet& s(vec[ibu]); \
+		AtomSet& s(vec[ibu]); \
 		s._mtx.unlock(); }
 
-void TypeIndex::resize(void)
+void TypeIndex::resize(void) const
 {
 	int newsz = nameserver().getNumberOfClasses();
 	if (newsz < _reserved + _offset_to_atom) return;
@@ -57,6 +57,7 @@ void TypeIndex::resize(void)
 	std::vector<AtomSet> newvec(_reserved * POOL_SIZE);
 	GET_BFL(_idx)
 	newvec.swap(_idx);
+	_num_types = newsz;
 	DROP_BFL(newvec)
 }
 
@@ -96,6 +97,8 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
                                     Type type,
                                     bool subclass) const
 {
+	if (not subclass and type < _offset_to_atom) return;
+
 	// Get the initial size of the handles vector.
 	size_t initial_size = hseq.size();
 
@@ -107,19 +110,23 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	int start = get_bucket_start(type);
-	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+	if (type >= _offset_to_atom)
 	{
-		const AtomSet& s(_idx[ibu]);
-		TYPE_INDEX_SHARED_LOCK(s);
-		for (const Handle& h : s)
-			hseq.push_back(h);
+		int start = get_bucket_start(type);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+		{
+			const AtomSet& s(_idx[ibu]);
+			TYPE_INDEX_SHARED_LOCK(s);
+			for (const Handle& h : s)
+				hseq.push_back(h);
+		}
 	}
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = type+1; t<_num_types; t++)
+	Type tstar = max(type+1, _offset_to_atom);
+	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
@@ -139,18 +146,24 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
                                     Type type,
                                     bool subclass) const
 {
-	int start = get_bucket_start(type);
-	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+	if (not subclass and type < _offset_to_atom) return;
+
+	if (type >= _offset_to_atom)
 	{
-		const AtomSet& s(_idx[ibu]);
-		TYPE_INDEX_SHARED_LOCK(s);
-		hset.insert(s.begin(), s.end());
+		int start = get_bucket_start(type);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+		{
+			const AtomSet& s(_idx[ibu]);
+			TYPE_INDEX_SHARED_LOCK(s);
+			hset.insert(s.begin(), s.end());
+		}
 	}
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = type+1; t<_num_types; t++)
+	Type tstar = max(type+1, _offset_to_atom);
+	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
@@ -171,6 +184,8 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
                                     bool subclass,
                                     const AtomSpace* cas) const
 {
+	if (not subclass and type < _offset_to_atom) return;
+
 	// Get the initial size of the handles vector.
 	size_t initial_size = hseq.size();
 
@@ -182,22 +197,26 @@ void TypeIndex::get_rootset_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	int start = get_bucket_start(type);
-	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+	if (type >= _offset_to_atom)
 	{
-		const AtomSet& s(_idx[ibu]);
-		TYPE_INDEX_SHARED_LOCK(s);
-		for (const Handle& h : s)
+		int start = get_bucket_start(type);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
 		{
-			if (h->isIncomingSetEmpty(cas))
-				hseq.push_back(h);
+			const AtomSet& s(_idx[ibu]);
+			TYPE_INDEX_SHARED_LOCK(s);
+			for (const Handle& h : s)
+			{
+				if (h->isIncomingSetEmpty(cas))
+					hseq.push_back(h);
+			}
 		}
 	}
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
 
-	for (Type t = type+1; t<_num_types; t++)
+	Type tstar = max(type+1, _offset_to_atom);
+	for (Type t = tstar; t<_num_types; t++)
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
