@@ -34,6 +34,16 @@ TypeIndex::TypeIndex(void) :
 	resize();
 }
 
+#define GET_BFL(resz) \
+	for (int ibu = 0; ibu < resz * POOL_SIZE; ibu++) { \
+		const AtomSet& s(_idx[ibu]); \
+		s._mtx.lock(); }
+
+#define DROP_BFL(resz) \
+	for (int ibu = 0; ibu < resz * POOL_SIZE; ibu++) { \
+		const AtomSet& s(_idx[ibu]); \
+		s._mtx.unlock(); }
+
 void TypeIndex::resize(void)
 {
 	int newsz = nameserver().getNumberOfClasses();
@@ -41,24 +51,29 @@ void TypeIndex::resize(void)
 
 	// If we are here, we need to resize. Get the BFL.
 
-		throw RuntimeException(TRACE_INFO,
-			"Ran out of space for new types!");
+	int cursz = _reserved;
+	GET_BFL(cursz)
+	while (_reserved + _offset_to_atom < newsz)
+		_reserved *= 2;
+	size_t vecsz = _reserved * POOL_SIZE;
+	_idx.resize(vecsz);
+	DROP_BFL(cursz)
 }
 
 void TypeIndex::clear(void)
 {
-	std::vector<AtomSet> dead(_reserved);
-	{
-		// std::shared_lock<std::shared_mutex> lck(_idxmtx);
-		dead.swap(_idx);
+	std::vector<AtomSet> dead(_reserved * POOL_SIZE);
+	GET_BFL(_reserved)
+	dead.swap(_idx);
 
-		// Clear the AtomSpace before releasing the lock.
-		for (auto& s : dead)
-		{
-			for (auto& h : s)
-				h->_atom_space = nullptr;
-		}
+	// Clear the AtomSpace before releasing the lock.
+	for (auto& s : dead)
+	{
+		for (auto& h : s)
+			h->_atom_space = nullptr;
 	}
+
+	DROP_BFL(_reserved)
 
 	// Do the final cleanup after releasing the lock. This enables
 	// the very unlikely situation of having other threads start
