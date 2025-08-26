@@ -189,9 +189,9 @@ typedef HandleSeq IncomingSet;
 // ----------------------------------------------------
 // Games with the structures used for the Incoming set.
 // The size of Atoms, and performance depends on these.
-#if HAVE_SPARSEHASH
+#if USE_SPARSE_INCOMING
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
-#else // HAVE_SPARSEHASH
+#else // HAVE_SPARSE_INCOMING
 
 #if HAVE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
@@ -200,15 +200,11 @@ typedef folly::F14ValueSet<WinkPtr> WincomingSet;
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
-#endif // HAVE_SPARSEHASH
+#endif // USE_SPARSE_INCOMING
 
 // ----------------------------------------------------
 // Other maps.
 typedef std::map<Type, WincomingSet> InSetMap;
-
-#if HAVE_SPARSEHASH
-#define USE_SPARSE_KVP 1
-#endif
 
 #if USE_SPARSE_KVP
 typedef google::sparse_hash_map<Handle, ValuePtr> KVPMap;
