@@ -25,9 +25,9 @@
 using namespace opencog;
 
 TypeIndex::TypeIndex(void) :
-	_num_types(1023),
+	_num_types(MAX_SUPPORTED_TYPES),
 	_nameserver(nameserver()),
-	_idx(_num_types + 1)
+	_idx(POOL_SIZE * _num_types + 1)
 {
 	resize();
 }
@@ -89,10 +89,14 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	// allocations and copies whenever the allocated size is exceeded.
 	hseq.reserve(initial_size + size_of_append);
 
-	const AtomSet& s(_idx.at(type));
-	TYPE_INDEX_SHARED_LOCK(s);
-	for (const Handle& h : s)
-		hseq.push_back(h);
+	int start = get_bucket_start(type);
+	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+	{
+		const AtomSet& s(_idx.at(ibu));
+		TYPE_INDEX_SHARED_LOCK(s);
+		for (const Handle& h : s)
+			hseq.push_back(h);
+	}
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
@@ -101,9 +105,14 @@ void TypeIndex::get_handles_by_type(HandleSeq& hseq,
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
-		const AtomSet& s(_idx.at(t));
-		for (const Handle& h : s)
-			hseq.push_back(h);
+		int start = get_bucket_start(type);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+		{
+			const AtomSet& s(_idx.at(ibu));
+			TYPE_INDEX_SHARED_LOCK(s);
+			for (const Handle& h : s)
+				hseq.push_back(h);
+		}
 	}
 }
 
@@ -112,9 +121,13 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
                                     Type type,
                                     bool subclass) const
 {
-	const AtomSet& s(_idx.at(type));
-	TYPE_INDEX_SHARED_LOCK(s);
-	hset.insert(s.begin(), s.end());
+	int start = get_bucket_start(type);
+	for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+	{
+		const AtomSet& s(_idx.at(ibu));
+		TYPE_INDEX_SHARED_LOCK(s);
+		hset.insert(s.begin(), s.end());
+	}
 
 	// Not subclassing? We are done!
 	if (not subclass) return;
@@ -123,8 +136,13 @@ void TypeIndex::get_handles_by_type(UnorderedHandleSet& hset,
 	{
 		if (not _nameserver.isA(t, type)) continue;
 
-		const AtomSet& s(_idx.at(t));
-	   hset.insert(s.begin(), s.end());
+		int start = get_bucket_start(type);
+		for (int ibu = start; ibu < start + POOL_SIZE; ibu++)
+		{
+			const AtomSet& s(_idx.at(ibu));
+			TYPE_INDEX_SHARED_LOCK(s);
+			hset.insert(s.begin(), s.end());
+		}
 	}
 }
 

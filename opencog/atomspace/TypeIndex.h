@@ -87,15 +87,15 @@ class TypeIndex
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
 
-		static constexpr int POOL_SIZE = 1;
-		static constexpr int POOL_MASK = POOL_SIZE-1;
+		static constexpr int MAX_SUPPORTED_TYPES = 1024;
+		static constexpr int POOL_SIZE = 8;
 		int get_bucket_start(Type t) const
 		{
 			return POOL_SIZE * t;
 		}
 		int get_bucket(const Handle& h) const
 		{
-			return h->get_type();
+			return POOL_SIZE * h->get_type() + h->get_hash() % POOL_SIZE;
 		}
 		AtomSet& get_atom_set(const Handle& h)
 		{
