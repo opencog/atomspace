@@ -52,11 +52,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
-#define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-#define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-#define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-
 namespace opencog
 {
 #if USE_HASHABLE_WEAK_PTR
@@ -277,6 +272,31 @@ class Atom
     friend class StorageNode;     // Needs to call isAbsent()
 
 protected:
+
+#define USE_MUTEX_POOL 1
+#if USE_MUTEX_POOL
+    struct MutexPool
+    {
+        static constexpr size_t POOL_SIZE = 256;
+        mutable std::shared_mutex mutexes[POOL_SIZE];
+        std::shared_mutex& get_mutex(const Handle& h) {
+            return mutexes[h->get_hash() % POOL_SIZE];
+        }
+    };
+    static MutexPool _mutex_pool;
+
+    #define _MTX (_mutex_pool.get_mutex(get_handle()))
+    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
+    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
+#else
+    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
+    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+#endif
+
     // Packed flas. Single byte per atom.
     enum AtomFlags : uint8_t {
         ABSENT_FLAG     = 0x01,  // 0000 0001
@@ -298,12 +318,14 @@ protected:
     /// All of the values on the atom, including the TV.
     mutable KVPMap _values;
 
+#if not defined(USE_MUTEX_POOL) or (0 == USE_MUTEX_POOL)
     // Lock, used to serialize changes.
     // This costs 56 bytes per atom.  Tried using a single, global lock,
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // fatter.
     mutable std::shared_mutex _mtx;
+#endif // NOT USE_MUEX_POOL
 
     /**
      * Constructor for this class. Protected; no user should call this
