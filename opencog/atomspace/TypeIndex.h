@@ -89,13 +89,16 @@ class TypeIndex
 
 		static constexpr int MAX_SUPPORTED_TYPES = 1024;
 		static constexpr int POOL_SIZE = 8;
+		static constexpr int VEC_SIZE = MAX_SUPPORTED_TYPES * POOL_SIZE;
 		int get_bucket_start(Type t) const
 		{
 			return POOL_SIZE * t;
 		}
 		int get_bucket(const Handle& h) const
 		{
-			return POOL_SIZE * h->get_type() + h->get_hash() % POOL_SIZE;
+			int ibu = h->get_hash() % POOL_SIZE;
+			ibu += POOL_SIZE * h->get_type();
+			return ibu;
 		}
 		AtomSet& get_atom_set(const Handle& h)
 		{

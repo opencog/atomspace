@@ -27,7 +27,7 @@ using namespace opencog;
 TypeIndex::TypeIndex(void) :
 	_num_types(MAX_SUPPORTED_TYPES),
 	_nameserver(nameserver()),
-	_idx(POOL_SIZE * _num_types + 1)
+	_idx(VEC_SIZE)
 {
 	resize();
 }
@@ -42,7 +42,7 @@ void TypeIndex::resize(void)
 
 void TypeIndex::clear(void)
 {
-	std::vector<AtomSet> dead;
+	std::vector<AtomSet> dead(VEC_SIZE);
 	{
 		// std::shared_lock<std::shared_mutex> lck(_idxmtx);
 		dead.swap(_idx);
