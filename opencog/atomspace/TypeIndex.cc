@@ -25,25 +25,29 @@
 using namespace opencog;
 
 TypeIndex::TypeIndex(void) :
-	_num_types(TYPE_RESERVE_SIZE),
+	_reserved(TYPE_RESERVE_SIZE),
 	_nameserver(nameserver()),
 	_idx(VEC_SIZE)
 {
+	_num_types = nameserver().getNumberOfClasses();
 	_offset_to_atom = ATOM;
 	resize();
 }
 
 void TypeIndex::resize(void)
 {
-	size_t newsz = nameserver().getNumberOfClasses();
-	if (_num_types <= newsz)
+	int newsz = nameserver().getNumberOfClasses();
+	if (newsz < _reserved + _offset_to_atom) return;
+
+	// If we are here, we need to resize. Get the BFL.
+
 		throw RuntimeException(TRACE_INFO,
 			"Ran out of space for new types!");
 }
 
 void TypeIndex::clear(void)
 {
-	std::vector<AtomSet> dead(VEC_SIZE);
+	std::vector<AtomSet> dead(_reserved);
 	{
 		// std::shared_lock<std::shared_mutex> lck(_idxmtx);
 		dead.swap(_idx);

@@ -84,6 +84,7 @@ class TypeIndex
 {
 	private:
 		int _num_types;
+		int _reserved;
 		int _offset_to_atom;
 		NameServer& _nameserver;
 		std::vector<AtomSet> _idx;
