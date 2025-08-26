@@ -262,6 +262,26 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *    other half have only one. It's hard/impossible to improve on this.
  *    BTW, it also runs 10% slower just to load the dataset. This is
  *    due to a more complex init than what std::map has to do.
+ *
+ * The design here has a space/time tradeoff: it trades fat Atoms for
+ * fast access to the incoming set, and fast access to Values.
+ * So, for example, we could move the Incoming set lookup to the
+ * AtomSpace TypeIndex table. We could also put the KVPMap there.
+ * This would shrink the soze of Atoms a lot, especially given that
+ * many Atoms don't have incoming sets, and maybe half don't have
+ * Values. What we lose by this is speed of access. I think. Maybe.
+ * If we have the Atom already in-hand, the lookup of the incoming
+ * set or the Values can be done right here. So it should be "faster".
+ * As I write this, it occurs to me that a lookup from the TypeIndex
+ * could also be done in O(1) time. That is, thanks to hashing, there
+ * is no loss of performance. Huh. So perhaps ... FLATTEN EVERYTHING!
+ * Move it all into the TypeIndex.
+ *
+ * Going further in this direct gets more radical: Atoms start to
+ * look like a tuple-store, say, a triple-store, the tripe being
+ * (Handle, IncomingSet, KVP). But this may be counter-productive:
+ * The Atoms most likely to have counts are the once least likely to
+ * have Incoming sets. Hmmm.
  */
 class Atom
     : public Value
