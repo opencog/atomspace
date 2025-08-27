@@ -23,13 +23,12 @@ TARGET_LINK_LIBRARIES(atombase
 
 # This sets the compiler flags for the users of the AtomSpace.
 # Without these, when they include Atom.h, it will be configured
-# al wrong and the resulting code will core dump.
-# The definitions must match those in ../../../CMakeLists.txt
-IF (HAVE_SPARSEHASH)
+# all wrong and the resulting code will core dump.
+IF (USE_SPARSE_INCOMING)
 	SET_TARGET_PROPERTIES(atombase PROPERTIES
 		INTERFACE_COMPILE_DEFINITIONS
 			"HAVE_SPARSEHASH;USE_SPARSE_INCOMING=1")
-ENDIF (HAVE_SPARSEHASH)
+ENDIF (USE_SPARSE_INCOMING)
 
 INSTALL (TARGETS atombase EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
