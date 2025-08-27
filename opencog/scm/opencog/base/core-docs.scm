@@ -1052,7 +1052,8 @@
         guile> (cog-get-types)
 
     See also:
-        cog-get-subtypes TYPE -- Return list of subtypes of TYPE.
+        cog-get-subtypes TYPE -- Return list of immediate subtypes of TYPE.
+        cog-get-all-subtypes TYPE -- Return list of all subtypes of TYPE.
 ")
 
 (set-procedure-property! cog-type->int 'documentation
@@ -1076,6 +1077,10 @@
     Example:
         guile> (cog-get-subtypes 'Atom)
         (Link Node)
+
+    See also:
+        cog-get-all-subtypes TYPE -- Return list of all subtypes of TYPE.
+        cog-get-types -- Return list of all types.
 ")
 
 (set-procedure-property! cog-subtype? 'documentation

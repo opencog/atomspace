@@ -594,6 +594,12 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
+    // Its a user error to ask for the handles of any type
+    // that is not an Atom. We could throw an error and irritate
+    // the user, or we could just silently ignore a plausible
+    // request. Lets just silently ignore.
+    if (not subclass and type < ATOM) return;
+
     if (nullptr == cas) cas = this;
 
     // If this is a copy-on-write space, then deduplicate the Atoms,
@@ -671,6 +677,8 @@ void AtomSpace::shadow_by_type(UnorderedHandleSet& hset,
                                bool parent,
                                const AtomSpace* cas) const
 {
+    if (not subclass and type < ATOM) return;
+
     // See the vector version of this code for documentation.
     if (STATE_LINK == type)
     {
@@ -712,6 +720,8 @@ void AtomSpace::get_handles_by_type(UnorderedHandleSet& hset,
                                     bool parent,
                                     const AtomSpace* cas) const
 {
+    if (not subclass and type < ATOM) return;
+
     // If this is a copy-on-write space, then deduplicate the Atoms,
     // returning the shallowest version of each Atom.
     if (_copy_on_write)
@@ -742,6 +752,8 @@ void AtomSpace::get_root_set_by_type(HandleSeq& hseq,
                                      bool parent,
                                      const AtomSpace* cas) const
 {
+    if (not subclass and type < ATOM) return;
+
     // cut-n-paste of above.
     if (nullptr == cas) cas = this;
 
@@ -804,3 +816,5 @@ void AtomSpace::get_atoms_in_frame(HandleSeq& hseq) const
 {
     typeIndex.get_handles_by_type(hseq, ATOM, true);
 }
+
+// ======================= END OF FILE =================

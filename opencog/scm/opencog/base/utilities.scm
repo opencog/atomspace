@@ -289,7 +289,7 @@
 
 	(for-each
 		(lambda (ty) (cog-map-type prt-atom ty ATOMSPACE))
-		(cog-get-types))
+		(cog-get-all-subtypes 'Atom))
 )
 
 ; -----------------------------------------------------------------------
