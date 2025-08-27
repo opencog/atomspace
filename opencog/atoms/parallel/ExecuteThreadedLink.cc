@@ -64,12 +64,12 @@ using namespace opencog;
 /// XXX TODO: If nthreads = 0, just execute directly here, in the
 /// current thread, and block till execution is done.
 ///
-/// XXX TODO: Create some kind of thing that qaits to the QueueValue
+/// XXX TODO: Create some kind of thing that waits for the QueueValue
 /// to close. This would have the effect of joining.  For example:
 ///    (cog-execute! (WaitForCloseLink (ExecuteThreadedLink ...)))
 /// and the WaitForCloseLink just ... waits for the queue to close,
 /// and returns only then. This would be generic, for all QueueValue
-/// users... XXX should port BindLink etc. to that, too!?
+/// users... XXX should port BindLink etc. to this, too!?
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1)
@@ -88,7 +88,13 @@ ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
 		off = 1;
 	}
 
-	_nthreads = std::min(_nthreads, _outgoing.size() - off);
+	size_t nitems = 0;
+	for (const Handle& h: _outgoing)
+		if (SET_LINK == h->get_type()) nitems += h->get_arity();
+
+	if (0 == nitems) nitems = _outgoing.size() - off;
+
+	_nthreads = std::min(_nthreads, nitems);
 }
 
 static void thread_exec(AtomSpace* as, bool silent,
@@ -133,7 +139,7 @@ static void thread_joiner(AtomSpace* as, bool silent,
 		if (chk and h->is_type(NUMBER_NODE)) continue;
 		chk = false;
 
-		if (not h->is_type(SET_LINK))
+		if (not (SET_LINK == h->get_type()))
 		{
 			todo_list.push(h);
 			continue;
