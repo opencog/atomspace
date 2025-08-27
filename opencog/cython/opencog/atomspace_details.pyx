@@ -209,7 +209,7 @@ cdef class AtomSpace(Value):
         """ Support iterating across all atoms in the atomspace """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        return iter(self.get_atoms_by_type(0))
+        return iter(self.get_atoms_by_type(types.Atom))
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
