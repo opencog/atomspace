@@ -56,11 +56,12 @@ Frame::~Frame()
 void Frame::install()
 {
 	Handle llc(get_handle());
+	OC_ASSERT(llc->is_type(ATOM_SPACE), "Can't deal with anything else right now");
+	AtomSpace* self = AtomSpaceCast(llc).get();
 	for (Handle& h : _outgoing)
 	{
-		if (nullptr == h->getAtomSpace() and h->is_type(ATOM_SPACE))
+		if (nullptr == h->getAtomSpace())
 		{
-			AtomSpace* self = AtomSpaceCast(h).get();
 			h->setAtomSpace(self);
 			h->insert_atom(llc);
 			h->setAtomSpace(nullptr);
