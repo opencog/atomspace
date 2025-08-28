@@ -407,7 +407,7 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     if (oldh)
     {
 #if USE_INCOME_INDEX
-        incomeIndex.insertAtom(oldh);
+        incomeIndex.swapInset(atom, oldh);
 #endif
 
         // If it was already in the index, then undo the install above.
@@ -415,9 +415,6 @@ Handle AtomSpace::add(const Handle& orig, bool force,
         atom->remove();
         return oldh;
     }
-#if USE_INCOME_INDEX
-        incomeIndex.insertAtom(atom);
-#endif
     return atom;
 }
 
@@ -581,10 +578,6 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Remove handle from other incoming sets.
     handle->remove();
     handle->setAtomSpace(nullptr);
-#if USE_INCOME_INDEX
-    incomeIndex.removeAtom(handle);
-#endif
-
     return true;
 }
 

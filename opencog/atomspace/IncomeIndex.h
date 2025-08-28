@@ -95,6 +95,23 @@ class IncomeIndex
 			return iter->second;
 		}
 
+		// Swap the handle to which the incoming set belonws.
+		void swapInset(const Handle& oldh, const Handle& newh)
+		{
+			// Both the old and the new will have exactly the same hash.
+			InSet& s(get_inset(oldh));
+			INCOME_INDEX_UNIQUE_LOCK(s);
+			InSetMap iset;
+
+			auto iter = s.find(oldh);
+			if (s.end() == iter)
+			{
+				s.insert({newh, InSetMap()});
+				return;
+			}
+			s.erase(oldh);
+			s.insert({newh, iter->second});
+		}
 
 		// How many entries are there, anyway?
 		size_t size(void) const
