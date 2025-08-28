@@ -105,10 +105,8 @@ class IncomeIndex
 
 			auto iter = s.find(oldh);
 			if (s.end() == iter)
-			{
-				s.insert({newh, InSetMap()});
 				return;
-			}
+
 			s.erase(oldh);
 			s.insert({newh, iter->second});
 		}

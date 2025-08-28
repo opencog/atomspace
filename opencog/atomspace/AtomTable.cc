@@ -407,6 +407,11 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     if (oldh)
     {
 #if USE_INCOME_INDEX
+        // Due to racing with other threads, this Atom might not
+        // only be in the AtomSpace already, but it might even have
+        // a non-trivial incoming set. In this case, we need to
+        // transfer the inset from `atom` to `oldh`. (NB from swap
+        // point of view, oldh is the newh.)
         incomeIndex.swapInset(atom, oldh);
 #endif
 
