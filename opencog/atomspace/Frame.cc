@@ -80,6 +80,7 @@ void Frame::scrub_incoming_set(void)
 	#warning "Using AtomSpace frames with bare pointers is asking for trouble!"
 #else
 	INCOMING_UNIQUE_LOCK;
+	if (not have_inset_map()) return;
 
 	// Iterate over all frame types
 	std::vector<Type> framet;
