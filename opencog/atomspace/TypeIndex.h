@@ -52,7 +52,7 @@ namespace opencog
 //    sometimes reports the same result twice. Why? I dunno. This
 //    one failure is enough to say "not recommended." I don't need
 //    to be chasing obscure bugs.
-#if HAVE_FOLLY_XXX
+#if USE_FOLLY
 	typedef folly::F14ValueSet<Handle> AtomHanSet;
 #else
 	typedef std::unordered_set<Handle> AtomHanSet;

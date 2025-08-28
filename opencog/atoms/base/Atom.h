@@ -35,18 +35,15 @@
 #include <unordered_set>
 
 #if HAVE_SPARSEHASH
-// #undef HAVE_FOLLY
 #include <sparsehash/sparse_hash_set>
 #include <sparsehash/sparse_hash_map>
 #define USE_HASHABLE_WEAK_PTR 1
-#else // HAVE_SPARSEHASH
+#endif
 
 #if HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
-
-#endif // HAVE_SPARSEHASH
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
@@ -185,16 +182,17 @@ typedef HandleSeq IncomingSet;
 // The size of Atoms, and performance depends on these.
 #if USE_SPARSE_INCOMING
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
-#else // HAVE_SPARSE_INCOMING
+#endif
 
-#if HAVE_FOLLY
+#if USE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
-#else
+#endif
+
+#if not (USE_SPARSE_INCOMING || USE_FOLLY)
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
-#endif // USE_SPARSE_INCOMING
 
 // ----------------------------------------------------
 // Other maps.

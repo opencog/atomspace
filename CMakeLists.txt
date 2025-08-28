@@ -121,6 +121,8 @@ IF (FOLLY_FOUND)
 	MESSAGE(STATUS "Folly found.")
 	SET(HAVE_FOLLY 1)
 	ADD_DEFINITIONS(-DHAVE_FOLLY)
+	# Disable. Hard to install, shows no improvments
+	# ADD_DEFINITIONS(-DUSE_FOLLY)
 ELSE (FOLLY_FOUND)
 	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
 ENDIF (FOLLY_FOUND)
@@ -387,7 +389,8 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
+# Don't print, it's never used.
+# SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
