@@ -91,7 +91,7 @@ class IncomeIndex
 			{
 				s.insert({h, InSetMap()});
 				iter = s.find(h);
-			{
+			}
 			return iter->second;
 		}
 
