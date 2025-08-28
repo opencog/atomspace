@@ -60,8 +60,8 @@ Atom::~Atom()
 {
     _atom_space = nullptr;
 
-    // Disable for now. This assert has never tripped; there
-    // seems to be no point to checking it.
+    // Disable. This assert has never tripped;
+    // there seems to be no point to checking it.
 #if 0
     // This can't ever possibly happen. If it does, then there is
     // some very sick bug with the reference counting that the
@@ -71,7 +71,6 @@ Atom::~Atom()
          "Atom deletion failure; incoming set not empty for %s h=%x",
          nameserver().getTypeName(_type).c_str(), get_hash());
 #endif
-    drop_incoming_set();
 }
 
 // ==============================================================
