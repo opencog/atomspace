@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 
+#include "AtomSpace.h"
 #include "Frame.h"
 
 using namespace opencog;
@@ -56,7 +57,17 @@ void Frame::install()
 {
 	Handle llc(get_handle());
 	for (Handle& h : _outgoing)
-		h->insert_atom(llc);
+	{
+		if (nullptr == h->getAtomSpace() and h->is_type(ATOM_SPACE))
+		{
+			AtomSpace* self = AtomSpaceCast(h).get();
+			h->setAtomSpace(self);
+			h->insert_atom(llc);
+			h->setAtomSpace(nullptr);
+		}
+		else
+			h->insert_atom(llc);
+	}
 }
 
 void Frame::remove()
