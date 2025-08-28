@@ -430,6 +430,19 @@ void Atom::setAtomSpace(AtomSpace *tb)
 	#define GET_PTR(a) a
 #endif // USE_BARE_BACKPOINTER
 
+bool Atom::have_inset_map(void) const
+{
+    return _atom_space->have_inset_map(get_handle());
+}
+InSetMap& Atom::get_inset_map(void)
+{
+    return _atom_space->get_inset_map(get_handle());
+}
+const InSetMap& Atom::get_inset_map_const(void) const
+{
+    return _atom_space->get_inset_map(get_handle());
+}
+
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
 /// is called.  If this atom is added to any links before this call
@@ -528,6 +541,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
     bucket->second.insert(GET_PTR(neu));
 }
 
+// Virtual. Derived classes want to know about incoming set add/remove.
 void Atom::install() {}
 void Atom::remove() {}
 

@@ -379,6 +379,7 @@ protected:
     Atom& operator=(Atom&& other) // move assignment operator
         { return *this; }
 
+#ifndef USE_INCOME_INDEX
 private:
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.
@@ -415,6 +416,11 @@ protected:
     bool have_inset_map(void) const { return true; }
     InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
     const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
+#else
+    bool have_inset_map(void) const;
+    InSetMap& get_inset_map(void);
+    const InSetMap& get_inset_map_const(void) const;
+#endif
 
     void keep_incoming_set();
     void drop_incoming_set();
