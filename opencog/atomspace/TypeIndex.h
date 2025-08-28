@@ -59,6 +59,16 @@ namespace opencog
 	typedef folly::F14ValueSet<Handle> AtomHanSet;
 #endif
 
+// sparsehash
+// Behaves exactly as advertised:
+// -- Size of Atom shrinks by 24 Bytes; this is the size of the
+//    std::shared_ptr<> in Handle. Empty buckets would normally have
+//    one of these; here, there are zero.
+// -- Insert performance degraded by 10%, so AtomSpace insertions
+//    are slower. This is also as advertized.
+// Is the tradeoff worth it? For now, I'm going with "yes"; it is
+// enabled by default in the base CMakefile.txt.
+//
 #if USE_SPARSE_TYPESET
 	typedef google::sparse_hash_set<Handle> AtomHanSet;
 #endif
