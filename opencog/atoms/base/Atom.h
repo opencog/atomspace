@@ -379,6 +379,7 @@ protected:
     Atom& operator=(Atom&& other) // move assignment operator
         { return *this; }
 
+private:
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.
     // That is, we use weak pointers here, not strong ones.
@@ -408,7 +409,13 @@ protected:
         // std::map<Type, WincomingSet> _iset;
         InSetMap _iset;
     };
-    InSet _incoming_set;
+    InSet _local_incoming_set;
+
+protected:
+    bool have_inset_map(void) const { return true; }
+    InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
+    const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
+
     void keep_incoming_set();
     void drop_incoming_set();
 
