@@ -33,6 +33,7 @@
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/Frame.h>
+#include <opencog/atomspace/IncomeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
@@ -71,6 +72,10 @@ class AtomSpace : public Frame
     // --------------------------------------------------
     //! Index of atoms.
     TypeIndex typeIndex;
+
+#if USE_INCOME_INDEX
+    IncomeIndex incomeIndex;
+#endif
 
     UUID _uuid;
     bool _read_only;

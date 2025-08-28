@@ -156,6 +156,9 @@ void AtomSpace::clear_transient()
 void AtomSpace::clear_all_atoms()
 {
     typeIndex.clear();
+#if USE_INCOME_INDEX
+    incomeIndex.clear();
+#endif
 }
 
 void AtomSpace::clear()
@@ -403,11 +406,18 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     const Handle& oldh(typeIndex.insertAtom(atom));
     if (oldh)
     {
+#if USE_INCOME_INDEX
+        incomeIndex.insertAtom(oldh);
+#endif
+
         // If it was already in the index, then undo the install above.
         atom->setAtomSpace(nullptr);
         atom->remove();
         return oldh;
     }
+#if USE_INCOME_INDEX
+        incomeIndex.insertAtom(atom);
+#endif
     return atom;
 }
 
@@ -571,6 +581,9 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Remove handle from other incoming sets.
     handle->remove();
     handle->setAtomSpace(nullptr);
+#if USE_INCOME_INDEX
+    incomeIndex.removeAtom(handle);
+#endif
 
     return true;
 }
