@@ -414,7 +414,7 @@ private:
 protected:
     bool have_inset_map(void) const { return true; }
     InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
-    const InSetMap& get_inset_map_const(void) { return _local_incoming_set._iset; }
+    const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
 
     void keep_incoming_set();
     void drop_incoming_set();
