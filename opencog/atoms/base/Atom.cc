@@ -510,9 +510,15 @@ void Atom::remove_atom(const Handle& a)
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
-    Type at = a->get_type();
+
+    // Normally, there should be an incoming set, unless threads
+    // are racing to extract Atoms. From what I can tell, the
+    // extract code should be redesigned to avoid multiple accidental
+    // extracts.
+    if (not have_inset_map()) return;
 
     InSetMap& iset = get_inset_map();
+    Type at = a->get_type();
     const auto bucket = iset.find(at);
 
     OC_ASSERT(bucket != iset.end(), "No bucket!");
