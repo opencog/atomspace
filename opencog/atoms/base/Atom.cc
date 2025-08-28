@@ -432,6 +432,9 @@ void Atom::setAtomSpace(AtomSpace *tb)
 #if USE_INCOME_INDEX
 bool Atom::have_inset_map(void) const
 {
+    // During extraction, the atomspace will get set to nullptr.
+    // Normally, this doesn't amtter, unless threads are racing.
+    if (nullptr == _atom_space) return false;
     return _atom_space->have_inset_map(get_handle());
 }
 InSetMap& Atom::get_inset_map(void)
