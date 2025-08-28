@@ -71,7 +71,11 @@ namespace opencog
 struct AtomSet : AtomHanSet
 {
 	mutable std::shared_mutex _mtx;
+#if USE_SPARSE_TYPESET
+	AtomSet() { set_deleted_key(Handle()); }
+#else
 	AtomSet() = default;
+#endif
 	AtomSet(AtomSet&& other) noexcept :
 		AtomHanSet(std::move(other))
 	{}
