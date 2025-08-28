@@ -23,12 +23,15 @@
 #define _OPENCOG_TYPEINDEX_H
 
 #include <mutex>
+#include <set>
 #include <vector>
 
 #if HAVE_FOLLY
 #include <folly/container/F14Set.h>
-#else
-#include <set>
+#endif
+
+#if HAVE_SPARSEHASH
+#include <sparsehash/sparse_hash_set>
 #endif
 
 #include <opencog/util/oc_assert.h>
@@ -54,7 +57,13 @@ namespace opencog
 //    to be chasing obscure bugs.
 #if USE_FOLLY
 	typedef folly::F14ValueSet<Handle> AtomHanSet;
-#else
+#endif
+
+#if USE_SPARSE_TYPESET
+	typedef google::sparse_hash_set<Handle> AtomHanSet;
+#endif
+
+#if not (USE_SPARSE_TYPESET || USE_FOLLY)
 	typedef std::unordered_set<Handle> AtomHanSet;
 #endif
 
@@ -62,7 +71,11 @@ namespace opencog
 struct AtomSet : AtomHanSet
 {
 	mutable std::shared_mutex _mtx;
+#if USE_SPARSE_TYPESET
+	AtomSet() { set_deleted_key(Handle()); }
+#else
 	AtomSet() = default;
+#endif
 	AtomSet(AtomSet&& other) noexcept :
 		AtomHanSet(std::move(other))
 	{}
