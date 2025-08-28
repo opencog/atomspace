@@ -549,6 +549,10 @@ AtomSpacePtr createAtomSpace( Args&&... args )
 	// Unfortunately, Frame::install() cannot be called in the ctor
 	// because shared_from_this() cannot be called in the ctor.
 	// So we do this after the ctor has finished.
+
+	// XXX FIXME. I think this is installing into the wrong AtomSpace.
+	// But no unit test seems to fail as a result of this, so I dunno.
+	// But this can't be right, as written.
 	asp->setAtomSpace(asp.get());
 	asp->install();
 	asp->setAtomSpace(nullptr);
