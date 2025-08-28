@@ -84,9 +84,10 @@ void Frame::scrub_incoming_set(void)
 	// Iterate over all frame types
 	std::vector<Type> framet;
 	nameserver().getChildrenRecursive(FRAME, back_inserter(framet));
+	InSetMap& iset = get_inset_map();
 	for (Type t : framet)
 	{
-		auto bucket = _incoming_set._iset.find(t);
+		auto bucket = iset.find(t);
 		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
 		{
 			if (0 == bi->use_count())
