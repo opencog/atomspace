@@ -123,6 +123,8 @@ IF (FOLLY_FOUND)
 	MESSAGE(STATUS "Folly found.")
 	SET(HAVE_FOLLY 1)
 	ADD_DEFINITIONS(-DHAVE_FOLLY)
+	# Disable. Hard to install, shows no improvments
+	# ADD_DEFINITIONS(-DUSE_FOLLY)
 ELSE (FOLLY_FOUND)
 	MESSAGE(STATUS "Folly missing: provides more efficient std::set replacement.")
 ENDIF (FOLLY_FOUND)
@@ -133,6 +135,7 @@ IF (SPARSEHASH_FOUND)
 	SET(HAVE_SPARSEHASH 1)
 	ADD_DEFINITIONS(-DHAVE_SPARSEHASH)
 	ADD_DEFINITIONS(-DUSE_SPARSE_INCOMING)
+	ADD_DEFINITIONS(-DUSE_SPARSE_TYPESET)
 	# Disable USE_SPARSE_KVP; see Atom.h for explanation.
 	# ADD_DEFINITIONS(-DUSE_SPARSE_KVP)
 	# The below is used in atomspace.pc for pkg-config
@@ -389,12 +392,13 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 # Show a summary of what we found, what we will do.
 
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
-SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
+# Don't print, it's never used.
+# SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
+SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

@@ -122,15 +122,14 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
-        output_iterator getIncomingIter(output_iterator)
-
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
         void setValue(const cHandle& key, const cValuePtr& value)
         cValuePtr getValue(const cHandle& key) const
         cpp_set[cHandle] getKeys()
 
-        output_iterator getIncomingSetByType(output_iterator, Type type)
+        vector[cHandle] getIncomingSet()
+        vector[cHandle] getIncomingSetByType(Type type)
 
         bool is_executable()
         cValuePtr execute() except +

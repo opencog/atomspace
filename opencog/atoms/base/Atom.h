@@ -35,18 +35,15 @@
 #include <unordered_set>
 
 #if HAVE_SPARSEHASH
-// #undef HAVE_FOLLY
 #include <sparsehash/sparse_hash_set>
 #include <sparsehash/sparse_hash_map>
 #define USE_HASHABLE_WEAK_PTR 1
-#else // HAVE_SPARSEHASH
+#endif
 
 #if HAVE_FOLLY
 #include <folly/container/F14Set.h>
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
-
-#endif // HAVE_SPARSEHASH
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
@@ -185,16 +182,17 @@ typedef HandleSeq IncomingSet;
 // The size of Atoms, and performance depends on these.
 #if USE_SPARSE_INCOMING
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
-#else // HAVE_SPARSE_INCOMING
+#endif
 
-#if HAVE_FOLLY
+#if USE_FOLLY
 // typedef folly::F14ValueSet<WinkPtr, std::owner_hash<WinkPtr> > WincomingSet;
 typedef folly::F14ValueSet<WinkPtr> WincomingSet;
-#else
+#endif
+
+#if not (USE_SPARSE_INCOMING || USE_FOLLY)
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 #endif
-#endif // USE_SPARSE_INCOMING
 
 // ----------------------------------------------------
 // Other maps.
@@ -381,6 +379,7 @@ protected:
     Atom& operator=(Atom&& other) // move assignment operator
         { return *this; }
 
+private:
     // The incoming set is not tracked by the garbage collector;
     // this is required, in order to avoid cyclic references.
     // That is, we use weak pointers here, not strong ones.
@@ -410,7 +409,13 @@ protected:
         // std::map<Type, WincomingSet> _iset;
         InSetMap _iset;
     };
-    InSet _incoming_set;
+    InSet _local_incoming_set;
+
+protected:
+    bool have_inset_map(void) const { return true; }
+    InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
+    const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
+
     void keep_incoming_set();
     void drop_incoming_set();
 
@@ -635,74 +640,6 @@ public:
 
     /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
-
-    // ---------------------------------------------------------
-    // Deprecated calls, do not use these in new code!
-    // Some day, these will be removed.
-    // The two getIncoming calls are only used in cython/opencog/atom.pyx
-    // The foreach_incoming call is used extensively in old OpenCog.
-
-    //! Deprecated! Do not use in new code!
-    //! Place incoming set into STL container of Handles.
-    //! Example usage:
-    //!     HandleSeq hvect;
-    //!     atom->getIncomingSet(back_inserter(hvect));
-    //! The resulting vector hvect will contain only valid handles
-    //! that were actually part of the incoming set at the time of
-    //! the call to this function.
-    template <typename OutputIterator> OutputIterator
-    getIncomingIter(OutputIterator result) const
-    {
-        if (not (_flags.load() & USE_ISET_FLAG)) return result;
-        INCOMING_SHARED_LOCK;
-        for (const auto& bucket : _incoming_set._iset)
-        {
-            for (const WinkPtr& w : bucket.second)
-                WEAKLY_DO(h, w, { *result = h; result ++; })
-        }
-        return result;
-    }
-
-    /**
-     * Deprecated! Do not use in new code!
-     * Return all atoms of type `type` that contain this atom.
-     * That is, return all atoms that contain this atom, and are
-     * also of the given type.
-     *
-     * @param The iterator where the set of atoms will be returned.
-     * @param The type of the parent atom.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result, Type type) const
-    {
-        if (not (_flags.load() & USE_ISET_FLAG)) return result;
-        INCOMING_SHARED_LOCK;
-
-        const auto bucket = _incoming_set._iset.find(type);
-        if (bucket == _incoming_set._iset.cend()) return result;
-
-        for (const WinkPtr& w : bucket->second)
-            WEAKLY_DO(h, w, { *result = h; result ++; })
-        return result;
-    }
-
-    //! Deprecated! Do not use in new code!
-    //! Invoke the callback on each atom in the incoming set of
-    //! handle h, until one of them returns true, in which case
-    //! iteration stops, and true is returned. Otherwise the
-    //! callback is called on all incomings and false is returned.
-    template<class T>
-    inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data) const
-    {
-        // We make a copy of the set, so that we don't call the
-        // callback with locks held.
-        IncomingSet vh(getIncomingSet());
-
-        for (const Handle& lp : vh)
-            if ((data->*cb)(lp)) return true;
-        return false;
-    }
-
 };
 
 #define ATOM_PTR_DECL(CNAME)                                \

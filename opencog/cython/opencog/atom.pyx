@@ -124,7 +124,7 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        atom_ptr.getIncomingIter(back_inserter(handle_vector))
+        handle_vector = atom_ptr.getIncomingSet()
         return convert_handle_seq_to_python_list(handle_vector)
 
     def incoming_by_type(self, Type type):
@@ -132,7 +132,7 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type)
+        handle_vector = atom_ptr.getIncomingSetByType(type)
         return convert_handle_seq_to_python_list(handle_vector)
 
     def truth_value(self, mean, count):
