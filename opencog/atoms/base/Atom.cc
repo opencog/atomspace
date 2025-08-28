@@ -578,7 +578,6 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
-    if (not have_inset_map()) return 0;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -593,6 +592,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
         size_t cnt = 0;
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return 0;
         const InSetMap& iset = get_inset_map_const();
         for (const auto& bucket : iset)
         {
@@ -604,6 +604,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
     size_t cnt = 0;
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return 0;
     const InSetMap& iset = get_inset_map_const();
     for (const auto& pr : iset)
         cnt += pr.second.size();
@@ -680,7 +681,6 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
-    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -703,6 +703,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
         // Prevent update of set while a copy is being made.
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return empty_set;
         IncomingSet retset;
         const InSetMap& iset = get_inset_map_const();
         for (const auto& bucket : iset)
@@ -715,6 +716,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
     // Prevent update of set while a copy is being made.
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return empty_set;
     IncomingSet retset;
     const InSetMap& iset = get_inset_map_const();
     for (const auto& bucket : iset)
@@ -729,7 +731,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
-    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -749,6 +750,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
         // Lock to prevent updates of the set of atoms.
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return empty_set;
         const InSetMap& iset = get_inset_map_const();
         const auto bucket = iset.find(type);
         if (bucket == iset.cend()) return empty_set;
@@ -761,6 +763,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
     // Lock to prevent updates of the set of atoms.
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return empty_set;
     const InSetMap& iset = get_inset_map_const();
     const auto bucket = iset.find(type);
     if (bucket == iset.cend()) return empty_set;
@@ -774,7 +777,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
-    if (not have_inset_map()) return 0;
 
     size_t cnt = 0;
 
@@ -790,6 +792,7 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         }
 
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return 0;
         const InSetMap& iset = get_inset_map_const();
         const auto bucket = iset.find(type);
         if (bucket == iset.cend()) return 0;
@@ -800,6 +803,7 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     }
 
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return 0;
     const InSetMap& iset = get_inset_map_const();
     const auto bucket = iset.find(type);
     if (bucket == iset.cend()) return 0;
