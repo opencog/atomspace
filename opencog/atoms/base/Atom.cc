@@ -430,6 +430,7 @@ void Atom::setAtomSpace(AtomSpace *tb)
 	#define GET_PTR(a) a
 #endif // USE_BARE_BACKPOINTER
 
+#if USE_INCOME_INDEX
 bool Atom::have_inset_map(void) const
 {
     return _atom_space->have_inset_map(get_handle());
@@ -442,6 +443,11 @@ const InSetMap& Atom::get_inset_map_const(void) const
 {
     return _atom_space->get_inset_map(get_handle());
 }
+void Atom::drop_inset_map(void)
+{
+    return _atom_space->drop_inset_map(get_handle());
+}
+#endif
 
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
@@ -471,8 +477,7 @@ void Atom::drop_incoming_set()
     if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
     _flags.fetch_and(~USE_ISET_FLAG);
-    InSetMap& iset = get_inset_map();
-    iset.clear();
+    drop_inset_map();
 }
 
 /// Add an atom to the incoming set.

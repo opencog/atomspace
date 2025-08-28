@@ -411,10 +411,12 @@ public:
     Handle increment_countTV(const Handle&, double = 1.0);
 
 #if USE_INCOME_INDEX
-    InSetMap& get_inset_map(const Handle& h) {
-        return incomeIndex.getInset(h); }
     bool have_inset_map(const Handle& h) const {
         return incomeIndex.haveInset(h); }
+    InSetMap& get_inset_map(const Handle& h) {
+        return incomeIndex.getInset(h); }
+    void drop_inset_map(const Handle& h) {
+        return incomeIndex.removeInset(h); }
 #endif
     /**
      * Find an equivalent Atom that is exactly the same as the arg.

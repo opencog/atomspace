@@ -416,10 +416,12 @@ protected:
     bool have_inset_map(void) const { return true; }
     InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
     const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
+    void drop_inset_map(void) { _local_incoming_set._iset.clear(); }
 #else
     bool have_inset_map(void) const;
     InSetMap& get_inset_map(void);
     const InSetMap& get_inset_map_const(void) const;
+    void drop_inset_map(void);
 #endif
 
     void keep_incoming_set();
