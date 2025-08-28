@@ -46,7 +46,7 @@ struct InSet : std::map<Handle, InSetMap>
 #define INCOME_INDEX_UNIQUE_LOCK(s) std::unique_lock<std::shared_mutex> lck(s._mtx);
 
 /**
- * Implements a pool hholding Incoming sets for those Atoms that have
+ * Implements a pool holding Incoming sets for those Atoms that have
  * incoming sets. The goal of the pool is to avoid lock contention;
  * this is possible, because each Handle has a deterministic hash,
  * which can be used to identify the pool.
@@ -64,35 +64,37 @@ class IncomeIndex
 	public:
 		IncomeIndex(void) {}
 
-		void insertAtom(const Handle& h)
-		{
-			InSet& s(get_inset(h));
-			INCOME_INDEX_UNIQUE_LOCK(s);
-#define SANITY_CHECK
-#ifdef SANITY_CHECK
-			auto iter = s.find(h);
-			OC_ASSERT(s.end() == iter, "Double insertion of Incming Set!");
-#endif
-			s.insert({h,InSetMap()});
-		}
-
-		void removeAtom(const Handle& h)
+		void removeInset(const Handle& h)
 		{
 			InSet& s(get_inset(h));
 			INCOME_INDEX_UNIQUE_LOCK(s);
 			s.erase(h);
 		}
 
-		const InSetMap& findInset(const Handle& h) const
+		bool haveInset(const Handle& h) const
 		{
 			InSet& s(get_inset(h));
 			INCOME_INDEX_SHARED_LOCK(s);
 			const auto inset = s.find(h);
-
-			static const InSetMap empty_map;
-			if (s.end() == inset) return empty_map;
-			return inset->second;
+			return s.end() != inset;
 		}
+
+		// Get the inset, or create a new one.
+		InSetMap& getInset(const Handle& h)
+		{
+			InSet& s(get_inset(h));
+			INCOME_INDEX_UNIQUE_LOCK(s);
+			InSetMap iset;
+
+			auto iter = s.find(h);
+			if (s.end() == iter)
+			{
+				s.insert({h, InSetMap()});
+				iter = s.find(h);
+			{
+			return iter->second;
+		}
+
 
 		// How many entries are there, anyway?
 		size_t size(void) const
