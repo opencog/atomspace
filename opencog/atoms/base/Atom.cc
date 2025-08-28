@@ -458,7 +458,8 @@ void Atom::drop_incoming_set()
     if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
     _flags.fetch_and(~USE_ISET_FLAG);
-    _incoming_set._iset.clear();
+    InSetMap& iset = get_inset_map();
+    iset.clear();
 }
 
 /// Add an atom to the incoming set.
@@ -468,10 +469,11 @@ void Atom::insert_atom(const Handle& a)
     INCOMING_UNIQUE_LOCK;
 
     Type at = a->get_type();
-    auto bucket = _incoming_set._iset.find(at);
-    if (bucket == _incoming_set._iset.end())
+    InSetMap& iset = get_inset_map();
+    auto bucket = iset.find(at);
+    if (bucket == iset.end())
     {
-        auto pr = _incoming_set._iset.emplace(
+        auto pr = iset.emplace(
                    std::make_pair(at, WincomingSet()));
         bucket = pr.first;
 #if USE_SPARSE_INCOMING
@@ -488,9 +490,10 @@ void Atom::remove_atom(const Handle& a)
     INCOMING_UNIQUE_LOCK;
     Type at = a->get_type();
 
-    const auto bucket = _incoming_set._iset.find(at);
+    InSetMap& iset = get_inset_map();
+    const auto bucket = iset.find(at);
 
-    OC_ASSERT(bucket != _incoming_set._iset.end(), "No bucket!");
+    OC_ASSERT(bucket != iset.end(), "No bucket!");
     size_t erc = bucket->second.erase(GET_PTR(a));
 
     // std::set is a "true set", in that it either contains something,
@@ -510,14 +513,15 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
     INCOMING_UNIQUE_LOCK;
 
     Type ot = old->get_type();
-    auto bucket = _incoming_set._iset.find(ot);
+    InSetMap& iset = get_inset_map();
+    auto bucket = iset.find(ot);
     bucket->second.erase(GET_PTR(old));
 
     Type nt = neu->get_type();
-    bucket = _incoming_set._iset.find(nt);
-    if (bucket == _incoming_set._iset.end())
+    bucket = iset.find(nt);
+    if (bucket == iset.end())
     {
-        auto pr = _incoming_set._iset.emplace(
+        auto pr = iset.emplace(
                    std::make_pair(nt, WincomingSet()));
         bucket = pr.first;
     }
@@ -531,8 +535,10 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return true;
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return false;
 
-    for (const auto& bucket : _incoming_set._iset)
+    const InSetMap& iset = get_inset_map_const();
+    for (const auto& bucket : iset)
     {
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, { if (not as or as->in_environ(l) or nameserver().isA(_type, FRAME)) return false; })
@@ -543,6 +549,7 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
+    if (not have_inset_map()) return 0;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -557,7 +564,8 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
         size_t cnt = 0;
         INCOMING_SHARED_LOCK;
-        for (const auto& bucket : _incoming_set._iset)
+        const InSetMap& iset = get_inset_map_const();
+        for (const auto& bucket : iset)
         {
             for (const WinkPtr& w : bucket.second)
                 WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
@@ -567,7 +575,8 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
     size_t cnt = 0;
     INCOMING_SHARED_LOCK;
-    for (const auto& pr : _incoming_set._iset)
+    const InSetMap& iset = get_inset_map_const();
+    for (const auto& pr : iset)
         cnt += pr.second.size();
     return cnt;
 }
@@ -576,10 +585,13 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs, Type t) const
 {
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return;
+
     if (NOTYPE != t)
     {
-        const auto bucket = _incoming_set._iset.find(t);
-        if (bucket == _incoming_set._iset.cend()) return;
+        const InSetMap& iset = get_inset_map_const();
+        const auto bucket = iset.find(t);
+        if (bucket == iset.cend()) return;
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, {
                 const Handle& local(as->lookupHandle(l));
@@ -589,7 +601,8 @@ void Atom::getLocalInc(const AtomSpace* as, HandleSet& hs, Type t) const
     }
 
     // If NOTYPE was given, then loop over all possibilities.
-    for (const auto& bucket : _incoming_set._iset)
+    const InSetMap& iset = get_inset_map_const();
+    for (const auto& bucket : iset)
     {
         for (const WinkPtr& w : bucket.second)
             WEAKLY_DO(l, w, {
@@ -638,6 +651,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
+    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -660,30 +674,33 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
         // Prevent update of set while a copy is being made.
         INCOMING_SHARED_LOCK;
-        IncomingSet iset;
-        for (const auto& bucket : _incoming_set._iset)
+        IncomingSet retset;
+        const InSetMap& iset = get_inset_map_const();
+        for (const auto& bucket : iset)
         {
             for (const WinkPtr& w : bucket.second)
-                WEAKLY_DO(l, w, { if (as->in_environ(l)) iset.emplace_back(l); })
+                WEAKLY_DO(l, w, { if (as->in_environ(l)) retset.emplace_back(l); })
         }
-        return iset;
+        return retset;
     }
 
     // Prevent update of set while a copy is being made.
     INCOMING_SHARED_LOCK;
-    IncomingSet iset;
-    for (const auto& bucket : _incoming_set._iset)
+    IncomingSet retset;
+    const InSetMap& iset = get_inset_map_const();
+    for (const auto& bucket : iset)
     {
         for (const WinkPtr& w : bucket.second)
-            WEAKLY_DO(l, w, { iset.emplace_back(l); });
+            WEAKLY_DO(l, w, { retset.emplace_back(l); });
     }
-    return iset;
+    return retset;
 }
 
 IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
+    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -695,16 +712,17 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
             getCoveredInc(as, hs, type);
 
 				// Copy from set to vector.
-            IncomingSet iset;
+            IncomingSet retset;
             for (const Handle& h: hs)
-                iset.emplace_back(h);
-            return iset;
+                retset.emplace_back(h);
+            return retset;
         }
 
         // Lock to prevent updates of the set of atoms.
         INCOMING_SHARED_LOCK;
-        const auto bucket = _incoming_set._iset.find(type);
-        if (bucket == _incoming_set._iset.cend()) return empty_set;
+        const InSetMap& iset = get_inset_map_const();
+        const auto bucket = iset.find(type);
+        if (bucket == iset.cend()) return empty_set;
 
         IncomingSet result;
         for (const WinkPtr& w : bucket->second)
@@ -714,8 +732,9 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
     // Lock to prevent updates of the set of atoms.
     INCOMING_SHARED_LOCK;
-    const auto bucket = _incoming_set._iset.find(type);
-    if (bucket == _incoming_set._iset.cend()) return empty_set;
+    const InSetMap& iset = get_inset_map_const();
+    const auto bucket = iset.find(type);
+    if (bucket == iset.cend()) return empty_set;
 
     IncomingSet result;
     for (const WinkPtr& w : bucket->second)
@@ -726,6 +745,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
+    if (not have_inset_map()) return 0;
 
     size_t cnt = 0;
 
@@ -741,8 +761,9 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         }
 
         INCOMING_SHARED_LOCK;
-        const auto bucket = _incoming_set._iset.find(type);
-        if (bucket == _incoming_set._iset.cend()) return 0;
+        const InSetMap& iset = get_inset_map_const();
+        const auto bucket = iset.find(type);
+        if (bucket == iset.cend()) return 0;
 
         for (const WinkPtr& w : bucket->second)
             WEAKLY_DO(l, w, { if (as->in_environ(l)) cnt++; })
@@ -750,8 +771,9 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     }
 
     INCOMING_SHARED_LOCK;
-    const auto bucket = _incoming_set._iset.find(type);
-    if (bucket == _incoming_set._iset.cend()) return 0;
+    const InSetMap& iset = get_inset_map_const();
+    const auto bucket = iset.find(type);
+    if (bucket == iset.cend()) return 0;
 
     for (const WinkPtr& w : bucket->second)
         WEAKLY_DO(l, w, { cnt++; })
