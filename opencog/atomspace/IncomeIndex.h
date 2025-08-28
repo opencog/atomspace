@@ -37,10 +37,9 @@ namespace opencog
  *  @{
  */
 // The InSet is the IncomingSet map, plus a lock on that set.
-struct InSet
+struct InSet : std::map<Handle, InSetMap>
 {
 	mutable std::shared_mutex _mtx;
-	mutable std::map<Handle, InSetMap> _isetmap;
 };
 
 #define INCOME_INDEX_SHARED_LOCK(s) std::shared_lock<std::shared_mutex> lck(s._mtx);
@@ -58,7 +57,7 @@ class IncomeIndex
 		mutable std::vector<InSet> _idx;
 
 		static constexpr int POOL_SIZE = 32;
-		Inset& get_inset(const Handle& h)
+		InSet& get_inset(const Handle& h) const
 		{
 			return _idx[h->get_hash() % POOL_SIZE];
 		}
@@ -74,26 +73,25 @@ class IncomeIndex
 			auto iter = s.find(h);
 			OC_ASSERT(s.end() == iter, "Double insertion of Incming Set!");
 #endif
-			s.insert(h);
+			s.insert({h,InSetMap()});
 		}
 
 		void removeAtom(const Handle& h)
 		{
 			InSet& s(get_inset(h));
-			AtomSet& s(get_inset(h));
 			INCOME_INDEX_UNIQUE_LOCK(s);
 			s.erase(h);
 		}
 
-		InSetMap& findInset(const Handle& h) const
+		const InSetMap& findInset(const Handle& h) const
 		{
 			InSet& s(get_inset(h));
 			INCOME_INDEX_SHARED_LOCK(s);
-			auto inset = s._isetmap.find(h);
+			const auto inset = s.find(h);
 
 			static const InSetMap empty_map;
 			if (s.end() == inset) return empty_map;
-			return inset;
+			return inset->second;
 		}
 
 		// How many entries are there, anyway?
