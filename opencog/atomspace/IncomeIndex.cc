@@ -29,10 +29,10 @@ IncomeIndex::IncomeIndex(void) :
 }
 
 #define GET_BFL(vec) \
-	for (const InSet& s : _idx) s._mtx.lock();
+	for (const InSet& s : vec) s._mtx.lock();
 
 #define DROP_BFL(vec) \
-	for (const InSet& s : _idx) s._mtx.unlock();
+	for (const InSet& s : vec) s._mtx.unlock();
 
 void IncomeIndex::clear(void)
 {
