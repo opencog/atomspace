@@ -444,7 +444,8 @@ const InSetMap& Atom::get_inset_map_const(void) const
 }
 void Atom::drop_inset_map(void)
 {
-    return _atom_space->drop_inset_map(get_handle());
+    OC_ASSERT( nullptr != _atom_space, "ooo noooo");
+    _atom_space->drop_inset_map(get_handle());
 }
 #endif
 
@@ -477,6 +478,7 @@ void Atom::drop_incoming_set()
     INCOMING_UNIQUE_LOCK;
     _flags.fetch_and(~USE_ISET_FLAG);
     drop_inset_map();
+    _atom_space = nullptr;
 }
 
 /// Add an atom to the incoming set.

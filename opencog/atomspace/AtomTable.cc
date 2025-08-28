@@ -155,10 +155,10 @@ void AtomSpace::clear_transient()
 
 void AtomSpace::clear_all_atoms()
 {
-    typeIndex.clear();
 #if USE_INCOME_INDEX
     incomeIndex.clear();
 #endif
+    typeIndex.clear();
 }
 
 void AtomSpace::clear()
@@ -582,7 +582,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 
     // Remove handle from other incoming sets.
     handle->remove();
-    handle->setAtomSpace(nullptr);
+    handle->drop_incoming_set();
     return true;
 }
 
