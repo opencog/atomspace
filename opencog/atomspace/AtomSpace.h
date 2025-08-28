@@ -551,6 +551,7 @@ AtomSpacePtr createAtomSpace( Args&&... args )
 	// So we do this after the ctor has finished.
 	asp->setAtomSpace(asp.get());
 	asp->install();
+	asp->setAtomSpace(nullptr);
 	return asp;
 }
 
