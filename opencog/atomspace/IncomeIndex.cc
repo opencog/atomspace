@@ -23,6 +23,11 @@
 
 using namespace opencog;
 
+IncomeIndex::IncomeIndex(void) :
+	_idx(POOL_SIZE)
+{
+}
+
 #define GET_BFL(vec) \
 	for (const InSet& s : _idx) s._mtx.lock();
 

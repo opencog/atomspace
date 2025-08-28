@@ -62,7 +62,7 @@ class IncomeIndex
 			return _idx[h->get_hash() % POOL_SIZE];
 		}
 	public:
-		IncomeIndex(void) {}
+		IncomeIndex(void);
 
 		void removeInset(const Handle& h)
 		{
