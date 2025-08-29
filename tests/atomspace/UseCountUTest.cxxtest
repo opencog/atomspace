@@ -199,7 +199,13 @@ public:
         TS_ASSERT_EQUALS(fsize, 1);
 
         // Initial and final use counts for the anchor should be identical.
+        // The USE_INCOME_INDEX burns one more use-count in the
+        // IncomingIndex. See Atom::remove_atom() for details.
+#if USE_INCOME_INDEX
+        TS_ASSERT_EQUALS(initial_use_count+1, final_use_count);
+#else
         TS_ASSERT_EQUALS(initial_use_count, final_use_count);
+#endif
 
         // The incoming set for the anchor should be zero...
         TS_ASSERT_EQUALS(anchor->getIncomingSetSize(), 0);

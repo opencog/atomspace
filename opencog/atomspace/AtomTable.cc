@@ -155,6 +155,9 @@ void AtomSpace::clear_transient()
 
 void AtomSpace::clear_all_atoms()
 {
+#if USE_INCOME_INDEX
+    incomeIndex.clear();
+#endif
     typeIndex.clear();
 }
 
@@ -403,6 +406,15 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     const Handle& oldh(typeIndex.insertAtom(atom));
     if (oldh)
     {
+#if USE_INCOME_INDEX
+        // Due to racing with other threads, this Atom might not
+        // only be in the AtomSpace already, but it might even have
+        // a non-trivial incoming set. In this case, we need to
+        // transfer the inset from `atom` to `oldh`. (NB from swap
+        // point of view, oldh is the newh.)
+        incomeIndex.swapInset(atom, oldh);
+#endif
+
         // If it was already in the index, then undo the install above.
         atom->setAtomSpace(nullptr);
         atom->remove();
@@ -570,8 +582,7 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
 
     // Remove handle from other incoming sets.
     handle->remove();
-    handle->setAtomSpace(nullptr);
-
+    handle->drop_incoming_set();
     return true;
 }
 

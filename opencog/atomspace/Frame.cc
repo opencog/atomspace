@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 
+#include "AtomSpace.h"
 #include "Frame.h"
 
 using namespace opencog;
@@ -55,8 +56,18 @@ Frame::~Frame()
 void Frame::install()
 {
 	Handle llc(get_handle());
+	OC_ASSERT(llc->is_type(ATOM_SPACE), "Can't deal with anything else right now");
+	AtomSpace* self = AtomSpaceCast(llc).get();
 	for (Handle& h : _outgoing)
-		h->insert_atom(llc);
+	{
+		if (nullptr == h->getAtomSpace())
+		{
+			h->setAtomSpace(self);
+			h->insert_atom(llc);
+		}
+		else
+			h->insert_atom(llc);
+	}
 }
 
 void Frame::remove()
@@ -80,6 +91,7 @@ void Frame::scrub_incoming_set(void)
 	#warning "Using AtomSpace frames with bare pointers is asking for trouble!"
 #else
 	INCOMING_UNIQUE_LOCK;
+	if (not have_inset_map()) return;
 
 	// Iterate over all frame types
 	std::vector<Type> framet;

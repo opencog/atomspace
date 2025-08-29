@@ -72,6 +72,21 @@ class AtomSpace : public Frame
     //! Index of atoms.
     TypeIndex typeIndex;
 
+#if USE_INCOME_INDEX
+    // This is never used, and remains here for historical reference.
+    // See IncomeIndex.h for an explanation.
+    IncomeIndex incomeIndex;
+
+public:
+    bool have_inset_map(const Handle& h) const {
+        return incomeIndex.haveInset(h); }
+    InSetMap& get_inset_map(const Handle& h) {
+        return incomeIndex.getInset(h); }
+    void drop_inset_map(const Handle& h) {
+        return incomeIndex.removeInset(h); }
+private:
+#endif
+
     UUID _uuid;
     bool _read_only;
     bool _copy_on_write;
@@ -536,7 +551,13 @@ AtomSpacePtr createAtomSpace( Args&&... args )
 	// Unfortunately, Frame::install() cannot be called in the ctor
 	// because shared_from_this() cannot be called in the ctor.
 	// So we do this after the ctor has finished.
+
+	// XXX FIXME. I think this is installing into the wrong AtomSpace.
+	// But no unit test seems to fail as a result of this, so I dunno.
+	// But this can't be right, as written.
+	asp->setAtomSpace(asp.get());
 	asp->install();
+	asp->setAtomSpace(nullptr);
 	return asp;
 }
 

@@ -429,6 +429,29 @@ void Atom::setAtomSpace(AtomSpace *tb)
 	#define GET_PTR(a) a
 #endif // USE_BARE_BACKPOINTER
 
+#if USE_INCOME_INDEX
+bool Atom::have_inset_map(void) const
+{
+    // During extraction, the atomspace will get set to nullptr.
+    // Normally, this doesn't amtter, unless threads are racing.
+    if (nullptr == _atom_space) return false;
+    return _atom_space->have_inset_map(get_handle());
+}
+InSetMap& Atom::get_inset_map(void)
+{
+    return _atom_space->get_inset_map(get_handle());
+}
+const InSetMap& Atom::get_inset_map_const(void) const
+{
+    return _atom_space->get_inset_map(get_handle());
+}
+void Atom::drop_inset_map(void)
+{
+    OC_ASSERT( nullptr != _atom_space, "ooo noooo");
+    _atom_space->drop_inset_map(get_handle());
+}
+#endif
+
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
 /// is called.  If this atom is added to any links before this call
@@ -457,8 +480,8 @@ void Atom::drop_incoming_set()
     if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
     _flags.fetch_and(~USE_ISET_FLAG);
-    InSetMap& iset = get_inset_map();
-    iset.clear();
+    drop_inset_map();
+    _atom_space = nullptr;
 }
 
 /// Add an atom to the incoming set.
@@ -487,20 +510,47 @@ void Atom::remove_atom(const Handle& a)
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return;
     INCOMING_UNIQUE_LOCK;
-    Type at = a->get_type();
+
+    // Normally, there should be an incoming set, unless threads
+    // are racing to extract Atoms. From what I can tell, the
+    // extract code should be redesigned to avoid multiple accidental
+    // extracts.
+    if (not have_inset_map()) return;
 
     InSetMap& iset = get_inset_map();
+    Type at = a->get_type();
     const auto bucket = iset.find(at);
 
     OC_ASSERT(bucket != iset.end(), "No bucket!");
-    size_t erc = bucket->second.erase(GET_PTR(a));
+    bucket->second.erase(GET_PTR(a));
 
+    // Don't bother. Unit test takes this into account.
+#if 0
+    // This does a bit of eager garbage collection, when the incoming
+    // set drops to zero size. There is really no reason to actually
+    // do this, except that the UseCountUTest checks for this. The
+    // empty incoming set still heelps a handle warm in the inset map.
+    // This handle is counted in UseCountUTest and is flagged as an
+    // error. The right answer is to just change the unit test.
+    if (0 == bucket->second.size())
+    {
+        iset.erase(at);
+        if (0 == iset.size())
+            drop_inset_map();
+    }
+#endif
+
+    // Don't bother. This never triggers.
+#if 0
+    size_t erc = bucket->second.erase(GET_PTR(a));
     // std::set is a "true set", in that it either contains something,
     // or it does not.  Therefore, the erase count is either 1 (the
     // atom was found and erased) or 0 (the atom was not found, that's
-    // because it was erased earlier, e.g. it had more than once in the
-    // outgoing set. All other erase counts are ... unexpected.
+    // because it was erased earlier, e.g. it had been inserted more
+    // than once into the outgoing set. All other erase counts are ...
+    // unexpected.
     OC_ASSERT(2 > erc, "Unexpected erase count!");
+#endif
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -527,6 +577,7 @@ void Atom::swap_atom(const Handle& old, const Handle& neu)
     bucket->second.insert(GET_PTR(neu));
 }
 
+// Virtual. Derived classes want to know about incoming set add/remove.
 void Atom::install() {}
 void Atom::remove() {}
 
@@ -548,7 +599,6 @@ bool Atom::isIncomingSetEmpty(const AtomSpace* as) const
 size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
-    if (not have_inset_map()) return 0;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -563,6 +613,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
         size_t cnt = 0;
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return 0;
         const InSetMap& iset = get_inset_map_const();
         for (const auto& bucket : iset)
         {
@@ -574,6 +625,7 @@ size_t Atom::getIncomingSetSize(const AtomSpace* as) const
 
     size_t cnt = 0;
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return 0;
     const InSetMap& iset = get_inset_map_const();
     for (const auto& pr : iset)
         cnt += pr.second.size();
@@ -648,9 +700,8 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
 // strong in order to hand it out.
 IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
-    static IncomingSet empty_set;
+    static const IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
-    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -673,6 +724,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
         // Prevent update of set while a copy is being made.
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return empty_set;
         IncomingSet retset;
         const InSetMap& iset = get_inset_map_const();
         for (const auto& bucket : iset)
@@ -685,6 +737,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
     // Prevent update of set while a copy is being made.
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return empty_set;
     IncomingSet retset;
     const InSetMap& iset = get_inset_map_const();
     for (const auto& bucket : iset)
@@ -697,9 +750,8 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
 IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
-    static IncomingSet empty_set;
+    static const IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
-    if (not have_inset_map()) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
     {
@@ -719,6 +771,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
         // Lock to prevent updates of the set of atoms.
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return empty_set;
         const InSetMap& iset = get_inset_map_const();
         const auto bucket = iset.find(type);
         if (bucket == iset.cend()) return empty_set;
@@ -731,6 +784,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 
     // Lock to prevent updates of the set of atoms.
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return empty_set;
     const InSetMap& iset = get_inset_map_const();
     const auto bucket = iset.find(type);
     if (bucket == iset.cend()) return empty_set;
@@ -744,7 +798,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
 {
     if (not (_flags.load() & USE_ISET_FLAG)) return 0;
-    if (not have_inset_map()) return 0;
 
     size_t cnt = 0;
 
@@ -760,6 +813,7 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
         }
 
         INCOMING_SHARED_LOCK;
+        if (not have_inset_map()) return 0;
         const InSetMap& iset = get_inset_map_const();
         const auto bucket = iset.find(type);
         if (bucket == iset.cend()) return 0;
@@ -770,6 +824,7 @@ size_t Atom::getIncomingSetSizeByType(Type type, const AtomSpace* as) const
     }
 
     INCOMING_SHARED_LOCK;
+    if (not have_inset_map()) return 0;
     const InSetMap& iset = get_inset_map_const();
     const auto bucket = iset.find(type);
     if (bucket == iset.cend()) return 0;
