@@ -522,14 +522,25 @@ void Atom::remove_atom(const Handle& a)
     const auto bucket = iset.find(at);
 
     OC_ASSERT(bucket != iset.end(), "No bucket!");
-    size_t erc = bucket->second.erase(GET_PTR(a));
+    bucket->second.erase(GET_PTR(a));
 
+    // Optionally remove the entire map, if it is empty.
+    // Optional, because this should not change any behavior.
+    // In short, we're probably wasing CPU time here. Whatever.
+    if (0 == iset.size())
+        drop_inset_map();
+
+    // Don't bother. This never triggers.
+#if 0
+    size_t erc = bucket->second.erase(GET_PTR(a));
     // std::set is a "true set", in that it either contains something,
     // or it does not.  Therefore, the erase count is either 1 (the
     // atom was found and erased) or 0 (the atom was not found, that's
-    // because it was erased earlier, e.g. it had more than once in the
-    // outgoing set. All other erase counts are ... unexpected.
+    // because it was erased earlier, e.g. it had been inserted more
+    // than once into the outgoing set. All other erase counts are ...
+    // unexpected.
     OC_ASSERT(2 > erc, "Unexpected erase count!");
+#endif
 }
 
 /// Remove old, and add new, atomically, so that every user
