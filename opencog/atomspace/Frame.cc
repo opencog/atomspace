@@ -64,7 +64,6 @@ void Frame::install()
 		{
 			h->setAtomSpace(self);
 			h->insert_atom(llc);
-			h->setAtomSpace(nullptr);
 		}
 		else
 			h->insert_atom(llc);
