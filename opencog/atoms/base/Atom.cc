@@ -524,11 +524,21 @@ void Atom::remove_atom(const Handle& a)
     OC_ASSERT(bucket != iset.end(), "No bucket!");
     bucket->second.erase(GET_PTR(a));
 
-    // Optionally remove the entire map, if it is empty.
-    // Optional, because this should not change any behavior.
-    // In short, we're probably wasing CPU time here. Whatever.
-    if (0 == iset.size())
-        drop_inset_map();
+    // Don't bother. Unit test takes this into account.
+#if 0
+    // This does a bit of eager garbage collection, when the incoming
+    // set drops to zero size. There is really no reason to actually
+    // do this, except that the UseCountUTest checks for this. The
+    // empty incoming set still heelps a handle warm in the inset map.
+    // This handle is counted in UseCountUTest and is flagged as an
+    // error. The right answer is to just change the unit test.
+    if (0 == bucket->second.size())
+    {
+        iset.erase(at);
+        if (0 == iset.size())
+            drop_inset_map();
+    }
+#endif
 
     // Don't bother. This never triggers.
 #if 0
