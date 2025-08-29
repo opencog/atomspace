@@ -690,7 +690,7 @@ void Atom::getCoveredInc(const AtomSpace* as, HandleSet& hs, Type t) const
 // strong in order to hand it out.
 IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 {
-    static IncomingSet empty_set;
+    static const IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
@@ -740,7 +740,7 @@ IncomingSet Atom::getIncomingSet(const AtomSpace* as) const
 
 IncomingSet Atom::getIncomingSetByType(Type type, const AtomSpace* as) const
 {
-    static IncomingSet empty_set;
+    static const IncomingSet empty_set;
     if (not (_flags.load() & USE_ISET_FLAG)) return empty_set;
 
     if (as and not nameserver().isA(_type, FRAME))
