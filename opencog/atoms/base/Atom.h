@@ -180,6 +180,13 @@ typedef HandleSeq IncomingSet;
 // ----------------------------------------------------
 // Games with the structures used for the Incoming set.
 // The size of Atoms, and performance depends on these.
+
+// Hard-code the flag here. This is less flexible than doing it with
+// CMakefiles, but its also less complicated and less error-prone.
+#if HAVE_SPARSEHASH
+	#define USE_SPARSE_INCOMING 1
+#endif
+
 #if USE_SPARSE_INCOMING
 typedef google::sparse_hash_set<WinkPtr> WincomingSet;
 #endif

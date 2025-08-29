@@ -36,10 +36,20 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+// #define USE_SPARSE_IIDX 1
+#if USE_SPARSE_IIDX
+	typedef google::sparse_hash_map<Handle, InSetMap> InSetIdx;
+#else
+	typedef std::map<Handle, InSetMap> InSetIdx;
+#endif
+
 // The InSet is the IncomingSet map, plus a lock on that set.
-struct InSet : std::map<Handle, InSetMap>
+struct InSet : InSetIdx
 {
 	mutable std::shared_mutex _mtx;
+#if USE_SPARSE_IIDX
+	InSet(void) { set_deleted_key(Handle()); }
+#endif
 };
 
 #define INCOME_INDEX_SHARED_LOCK(s) std::shared_lock<std::shared_mutex> lck(s._mtx);

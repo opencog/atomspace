@@ -59,6 +59,11 @@ namespace opencog
 	typedef folly::F14ValueSet<Handle> AtomHanSet;
 #endif
 
+// Enable sparshash. Hard-code here, instead of CMakefiles.
+// Its less flexible, but also less complicated and error-prone.
+#if HAVE_SPARSEHASH
+	#define USE_SPARSE_TYPESET 1
+#endif
 // sparsehash
 // Behaves exactly as advertised:
 // -- Size of Atom shrinks by 24 Bytes; this is the size of the
