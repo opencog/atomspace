@@ -216,20 +216,23 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  * Links are specializations of Atoms, that is, they inherit all
  * properties from Atoms.
  *
- * A "typical" atom is about 500 Bytes in size. The RAM usage breakdown is as
- * follows:
+ * A "typical" atom in a small AtomSpace is about 500 Bytes in size.
+ * Large AtomSpaces (with millions of Atoms) have sizes of 750 Bytes
+ * up to 2KBytes, with about 1.3KB being "typical". The vairance is due
+ * incoming sets and attached Values.
+ *
+ * The RAM usage breakdown is as follows:
  * -- 24 Bytes std::enable_shared_from_this<Value>
- * --  8 Bytes Type _type plus 4 bool flags.
+ * --  4 Bytes Type _type plus 4 bool flags.
  * --  8 Bytes ContentHash _content_hash;
  * --  8 Bytes AtomSpace *_atom_space;
  * -- 48 Bytes std::map<const Handle, ValuePtr> _values;
- * -- 56 Bytes std::shared_mutex _mtx;
  * -- 48 Bytes std::map<Type, WincomingSet> _incoming_set;
- * Total: 200 Bytes for a base naked Atom.
+ * Total: 144 Bytes for a base naked Atom.
  *
  * Node: Additional 32 Bytes for std::string _name + sizeof(chars of string)
  * Link: Additional 24 Bytes for std::vector _outgoing + 16*(_outgoing.size());
- *       A "typical" Link of size 2 is 256 Bytes, outside of AtomSpace
+ *       A "typical" Link of size 2 is 200 Bytes, outside of AtomSpace
  *
  * Inserted into the AtomSpace: ?? per hash bucket. I guess 24 or 32
  * Per addition to incoming set: 64 per std::_Rb_tree node
@@ -241,9 +244,10 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  * -- 64 std::_Rb_tree node in the Atom holding the TV
  * Total: 144 Bytes per CountTV (ouch).
  *
- * A "typical" Link of size 2, held in one other Link, in AtomSpace, holding
- *   a CountTV in it: 496 Bytes.  This is indeed what is measured in real-life
- *   large datasets.
+ * A "typical" Link of size 2, held in one other Link, in AtomSpace,
+ *   holding a CountTV in it: 344 Bytes. With a large incomnig set,
+ *   this expands to 750 Byte to 2KByte range. This is indeed what is
+ *   measured in real-life large datasets.
  *
  * How to use less memory:
  * Measured on a dataset w/ 5.5 million Atoms (the sfia pairs dataset)
@@ -259,26 +263,16 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *    other half have only one. It's hard/impossible to improve on this.
  *    BTW, it also runs 10% slower just to load the dataset. This is
  *    due to a more complex init than what std::map has to do.
- *
- * The design here has a space/time tradeoff: it trades fat Atoms for
- * fast access to the incoming set, and fast access to Values.
- * So, for example, we could move the Incoming set lookup to the
- * AtomSpace TypeIndex table. We could also put the KVPMap there.
- * This would shrink the soze of Atoms a lot, especially given that
- * many Atoms don't have incoming sets, and maybe half don't have
- * Values. What we lose by this is speed of access. I think. Maybe.
- * If we have the Atom already in-hand, the lookup of the incoming
- * set or the Values can be done right here. So it should be "faster".
- * As I write this, it occurs to me that a lookup from the TypeIndex
- * could also be done in O(1) time. That is, thanks to hashing, there
- * is no loss of performance. Huh. So perhaps ... FLATTEN EVERYTHING!
- * Move it all into the TypeIndex.
- *
- * Going further in this direct gets more radical: Atoms start to
- * look like a tuple-store, say, a triple-store, the tripe being
- * (Handle, IncomingSet, KVP). But this may be counter-productive:
- * The Atoms most likely to have counts are the once least likely to
- * have Incoming sets. Hmmm.
+ * -- Enabling USE_INCOME_INDEX provides no savings at all, and runs
+ *    slower. The original ideas was this: about half of all Atoms do
+ *    not have an incoming set. Since sizeof(InSetMap) = 48, we can
+ *    save 48 bytes by moving it out of the Atom, and to a hashtable.
+ *    The problem is that each hashtable entry takes up 24+24=48 bytes;
+ *    24 for the Handle used in the lookup, and 24 for the std::pair<>
+ *    So, half as many entries, but twice the size per entry.
+ * -- For the same reason, moving Values out-of-line won't work: the
+ *    decrease in the size of the Atom is outweighed by the increase
+ *    in the references to the out-of-line storage.
  */
 class Atom
     : public Value
@@ -294,14 +288,15 @@ protected:
 
 #define USE_MUTEX_POOL 1
 #if USE_MUTEX_POOL
-    // The goal of the MutexPool is to save 64 bytes per Atom,
-    // by just using a mutex from a pool. As long as the pool
-    // is 1x to 4x larger than the number of CPU's on the machine,
-    // the chances of collision will be small, and contention smaller
-    // still. The biggest stumbling block to high parallelizsm
-    // is not this, but the std::shared_ptr<>, which uses atomics
-    // that run CPU-dependent cache-line voodoo, with different CPU's
-    // having radically different cache microarches. I digress...
+    // The MutexPool saves 64 bytes per Atom, by avoiding having a
+    // a mutex in-line in the Atom. As long as the pool is 1x to 4x
+    // larger than the number of CPU's on the machine, the chances
+    // of collision will be small, and contention smaller still.
+    // The biggest stumbling block to high parallelism is not this,
+    // but the std::shared_ptr<>, which uses atomics that use
+    // CPU-dependent cache-line proprietary unpublished voodoo,
+    // with different CPU's, even from the same family, having
+    // radically different cache microarches. But I digress...
     //
     // CPU usage improves 3% to 6%, probably because the shrinkage
     // fits into the cache better.
@@ -379,11 +374,13 @@ protected:
     Atom& operator=(Atom&& other) // move assignment operator
         { return *this; }
 
+// If USE_INCOME_INDEX is set to true, then the incoming set is moved
+// out of line. Turns out the inline version here is smaller, better,
+// faster than the out-of-line version.
 #ifndef USE_INCOME_INDEX
 private:
-    // The incoming set is not tracked by the garbage collector;
-    // this is required, in order to avoid cyclic references.
-    // That is, we use weak pointers here, not strong ones.
+    // The incoming set cannot be tracked with smart pointers; this is
+    // to avoid cyclic references. Instead, weak pointers are used.
     // std::set<ptr> uses 48 bytes (per atom).  See the README file
     // in this directory for a slightly longer explanation for why
     // weak pointers are needed, and why bdwgc cannot be used.
@@ -394,9 +391,8 @@ private:
         // b) excellent insert performance.
         // c) very fast lookup by type.
         // d) good remove performance.
-        // e) uniqueness, because atomspace operations can sometimes
-        //    cause an atom to get inserted multiple times.  This is
-        //    arguably a bug, though.
+        // e) uniqueness, because user code can insert and remove the
+        //    same atom, repeatedly, in different threads.
         //
         // In order to get b), we have to store atoms in buckets, each
         // bucket holding only one type.  To satisfy d), the buckets
@@ -413,10 +409,10 @@ private:
     InSet _local_incoming_set;
 
 protected:
-    bool have_inset_map(void) const { return true; }
-    InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
-    const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
-    void drop_inset_map(void) {}
+    inline bool have_inset_map(void) const { return true; }
+    inline InSetMap& get_inset_map(void) { return _local_incoming_set._iset; }
+    inline const InSetMap& get_inset_map_const(void) const { return _local_incoming_set._iset; }
+    inline void drop_inset_map(void) {}
 #else
     bool have_inset_map(void) const;
     InSetMap& get_inset_map(void);
