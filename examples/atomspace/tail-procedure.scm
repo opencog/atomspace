@@ -45,21 +45,51 @@
 	(sleep 1)
 	(VoidValue))
 
-(define printer
+(define print-stuff
 	(ExecutionOutput
 		(GroundedSchema "scm:my-print-func")
 		(List
 			(ValueOf (Anchor "some place") (Predicate "number key")))))
 
 ; Run the printer, and verify that it works.
-(cog-execute! printer)
+(cog-execute! print-stuff)
 
+; Define an infinite loop tail call. This will run forever, or, at
+; least, until you ctrl-C the terminal.
 (Define
 	(DefinedProcedure "simple-tail")
 	(PureExec (cog-atomspace)
 		increment
-		printer
+		print-stuff
 		(DefinedProcedure "simple-tail")))
 
-; This should print six times or so, maybe less, maybe more.
+; Try it! This will run forever, until you kill it.
 (cog-execute! (DefinedProcedure "simple-tail"))
+
+; -----------------------------------------------------------
+; The loop can be limited to run for a shorter time. In this example,
+; a random stopping condition is added.
+
+; Create a stream of random-number values, between 0 and 1.
+; See `stream.scm` for an extended demonstration of streams.
+(cog-set-value!
+	(Anchor "some place")
+	(Predicate "randgen")
+	(RandomStream 1))
+
+; Define a predicate that tests to see if a random number is
+; less than 0.8. If it is, true is returned; else false.
+(Define (DefinedPredicate "keep going?")
+   (GreaterThan (Number 0.8)
+		(FloatValueOfLink (Anchor "some place") (Predicate "randgen"))))
+
+(Define
+	(DefinedProcedure "stop-randomly")
+	(PureExec (cog-atomspace)
+		increment
+		print-stuff
+		(CondLink
+			(DefinedPredicate "keep going?")
+			(DefinedProcedure "simple-tail"))))
+
+; the end
