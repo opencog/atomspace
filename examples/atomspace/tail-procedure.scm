@@ -112,6 +112,15 @@
 ; Calls can be chained. In this demo, procedure A calls B calls C,
 ; which calls A again. This continues, until the (random) termination
 ; condition is met.
+;
+; One notable aspect of this demo is that DefinedProcedure is
+; implemented in such a way as to not blow out the C++ stack,
+; even when doing long nested recursive loops such as this.
+; In the following, the C++ stack will grow for A, B and C, but
+; when A is called again, there will be a return (in the C++ code)
+; from C to B and back to A, whereupon the procedure for A is
+; run again. This can continue forever, without risk of blowing up
+; the C++ stack.
 
 (define (print-A) (display "I am procedure A!\n") (VoidValue))
 (define (print-B) (display "I am procedure B!\n") (VoidValue))
