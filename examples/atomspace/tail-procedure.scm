@@ -36,18 +36,30 @@
 (cog-execute! increment)
 
 ;; -------------------------------------
+; Define a printer, to monitor the recursive call.
+
+; This includes a sleep call, to slow things down.
+; The reason for this will become apparent, shortly.
+(define (my-print-func arg)
+	(format #t "hi there! ~A\n" (cog-execute! arg))
+	(sleep 1)
+	(VoidValue))
+
+(define printer
+	(ExecutionOutput
+		(GroundedSchema "scm:my-print-func")
+		(List
+			(ValueOf (Anchor "some place") (Predicate "number key")))))
+
+; Run the printer, and verify that it works.
+(cog-execute! printer)
 
 (Define
 	(DefinedProcedure "simple-tail")
 	(PureExec (cog-atomspace)
 		increment
-		(print)
+		printer
 		(DefinedProcedure "simple-tail")))
-
-; Print something.
-(define (print-stuff) (display "hi there!\n") (stv 1 1))
-
-      (Evaluation (GroundedPredicate "scm: print-stuff") (List))
 
 ; This should print six times or so, maybe less, maybe more.
 (cog-execute! (DefinedProcedure "simple-tail"))
