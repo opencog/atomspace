@@ -41,7 +41,7 @@
 ; This includes a sleep call, to slow things down.
 ; The reason for this will become apparent, shortly.
 (define (my-print-func arg)
-	(format #t "hi there! ~A\n" (cog-execute! arg))
+	(format #t "hi there! ~A" (cog-execute! arg))
 	(sleep 1)
 	(VoidValue))
 
@@ -78,18 +78,29 @@
 	(RandomStream 1))
 
 ; Define a predicate that tests to see if a random number is
-; less than 0.8. If it is, true is returned; else false.
+; less than 0.9. If it is, true is returned; else false.
 (Define (DefinedPredicate "keep going?")
-   (GreaterThan (Number 0.8)
+   (GreaterThan (Number 0.9)
 		(FloatValueOfLink (Anchor "some place") (Predicate "randgen"))))
 
+; Define another debug printer
+(define (print-done)
+	(display "We are done now!\n")
+	(VoidValue))
+
+; Use a CondLink to determine whether to keep looping, or not.
 (Define
 	(DefinedProcedure "stop-randomly")
 	(PureExec (cog-atomspace)
 		increment
 		print-stuff
-		(CondLink
+		(CondLink   ; if-then-else
 			(DefinedPredicate "keep going?")
-			(DefinedProcedure "simple-tail"))))
+			(DefinedProcedure "stop-randomly")
+			(ExecutionOutput (GroundedSchema "scm:print-done") (List)))))
 
-; the end
+; This will typically print about 3 or 4 times, but sometimes much
+; longer.
+(cog-execute! (DefinedProcedure "stop-randomly"))
+
+; ----------------- That's all, Folks! The End! -----------------
