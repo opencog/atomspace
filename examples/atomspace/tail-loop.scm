@@ -1,5 +1,5 @@
 ;
-; recursive-loop.scm - Writing tail-recursive loops.
+; tail-loop.scm - Writing tail-recursive loops.
 ;
 ; This demonstrates how to write a tail-recursive loop in Atomese.
 ;
@@ -11,7 +11,11 @@
 ; It then samples the random number three times, adds it together,
 ; and then tests to see if it is less than 2.5. If it is (and this
 ; will usually be the case) then the tail-recursion happens: the
-; defined predicate calls itself.
+; DefinedPredicate calls itself.
+;
+; This demo uses the DefinedPredicate, which return TruthValues when
+; executed. The more general case is to work with Values of any kind,
+; using DefinedProcedure. See `tail-procedure.scm` for that demo.
 
 (use-modules (opencog) (opencog exec))
 
@@ -40,4 +44,4 @@
    ))
 
 ; This should print six times or so, maybe less, maybe more.
-(cog-evaluate! (DefinedPredicate "My tail-recursive loop"))
+(cog-execute! (DefinedPredicate "My tail-recursive loop"))
