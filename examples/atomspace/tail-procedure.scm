@@ -103,4 +103,51 @@
 ; longer.
 (cog-execute! (DefinedProcedure "stop-randomly"))
 
+; Try it again.
+(cog-execute! (DefinedProcedure "stop-randomly"))
+(cog-execute! (DefinedProcedure "stop-randomly"))
+(cog-execute! (DefinedProcedure "stop-randomly"))
+
+; -----------------------------------------------------------
+; Calls can be chained. In this demo, procedure A calls B calls C,
+; which calls A again. This continues, until the (random) termination
+; condition is met.
+
+(define (print-A) (display "I am procedure A!\n") (VoidValue))
+(define (print-B) (display "I am procedure B!\n") (VoidValue))
+(define (print-C) (display "I am procedure C!\n") (VoidValue))
+
+(Define
+	(DefinedProcedure "procedure A")
+	(PureExec (cog-atomspace)
+		increment
+		(ExecutionOutput (GroundedSchema "scm:print-A") (List))
+		(DefinedProcedure "procedure B")))
+
+(Define
+	(DefinedProcedure "procedure B")
+	(PureExec (cog-atomspace)
+		increment
+		(ExecutionOutput (GroundedSchema "scm:print-B") (List))
+		(DefinedProcedure "procedure C")))
+
+(Define
+	(DefinedProcedure "procedure C")
+	(PureExec (cog-atomspace)
+		increment
+		(ExecutionOutput (GroundedSchema "scm:print-C") (List))
+		(CondLink
+			(DefinedPredicate "keep going?")
+			(DefinedProcedure "procedure A")
+			(ExecutionOutput (GroundedSchema "scm:print-done") (List)))))
+
+; Try it!
+(cog-execute! (DefinedProcedure "procedure A"))
+
+; Try it again! It will randomly run for longer or shorter, each time.
+(cog-execute! (DefinedProcedure "procedure A"))
+(cog-execute! (DefinedProcedure "procedure A"))
+(cog-execute! (DefinedProcedure "procedure A"))
+(cog-execute! (DefinedProcedure "procedure A"))
+
 ; ----------------- That's all, Folks! The End! -----------------
