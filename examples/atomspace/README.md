@@ -69,7 +69,8 @@ Advanced Demos
 System programmers will need to know the following examples in order to
 be effective.
 
-* [`recursive-loop.scm`](recursive-loop.scm)  -- Writing tail-recursive loops.
+* [`tail-loop.scm`](tail-loop.scm)            -- Writing tail-recursive loops.
+* [`tail-procedure.scm`](tail-procedure.scm)  -- General tail-call loop.
 * [`random-choice.scm`](random-choice.scm)    -- Numerical programming, including loops.
 * [`factorial.scm`](factorial.scm)            -- Recursive numerical programming.
 * [`logging.scm`](logging.scm)                -- Using the cogutils logger.
