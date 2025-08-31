@@ -53,7 +53,7 @@ void FilterLink::init(void)
 		termpat = DefineLink::get_definition(termpat);
 		if (nullptr == termpat)
 			throw SyntaxException(TRACE_INFO,
-				"FilterLink cannot find defnition for %s",
+				"FilterLink cannot find definition for %s",
 				_outgoing[0]->to_string().c_str());
 
 		tscope = termpat->get_type();
