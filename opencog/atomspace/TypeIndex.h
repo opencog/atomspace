@@ -59,20 +59,18 @@ namespace opencog
 	typedef folly::F14ValueSet<Handle> AtomHanSet;
 #endif
 
-// Enable sparshash. Hard-code here, instead of CMakefiles.
-// Its less flexible, but also less complicated and error-prone.
-#if HAVE_SPARSEHASH
-	#define USE_SPARSE_TYPESET 1
-#endif
+// DO NOT ENABLE sparshash for the TypeSet!!
+// #define USE_SPARSE_TYPESET 1
+//
 // sparsehash
-// Behaves exactly as advertised:
 // -- Size of Atom shrinks by 24 Bytes; this is the size of the
 //    std::shared_ptr<> in Handle. Empty buckets would normally have
 //    one of these; here, there are zero.
-// -- Insert performance degraded by 10%, so AtomSpace insertions
-//    are slower. This is also as advertized.
-// Is the tradeoff worth it? For now, I'm going with "yes"; it is
-// enabled by default in the base CMakefile.txt.
+// -- addNode performce is 4x slower.
+// -- addLink performance is 3x slower.
+// Above are measured using `atomspace_bm` from
+// https://github.com/opencog/benchmark.git
+// This total collapse in performance screams: NO!!!
 //
 #if USE_SPARSE_TYPESET
 	typedef google::sparse_hash_set<Handle> AtomHanSet;
