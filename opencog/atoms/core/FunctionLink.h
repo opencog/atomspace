@@ -81,9 +81,6 @@ public:
 };
 
 LINK_PTR_DECL(FunctionLink)
-static inline FunctionLinkPtr FunctionLinkCast(const ValuePtr& a)
-   { return std::dynamic_pointer_cast<FunctionLink>(a); }
-
 #define createFunctionLink CREATE_DECL(FunctionLink)
 
 /** @}*/

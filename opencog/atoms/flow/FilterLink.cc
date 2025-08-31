@@ -80,7 +80,7 @@ void FilterLink::init(void)
 	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	if (nameserver().isA(tscope, RULE_LINK))
-		_rewrite = RuleLinkCast(_pattern)->get_implicand();
+		_rewrite = RuleLinkCast(HandleCast(_pattern))->get_implicand();
 
 	// Locate all GlobNodes in the pattern
 	FindAtoms fgn(GLOB_NODE, true);

@@ -107,9 +107,6 @@ public:
 NODE_PTR_DECL(NumberNode)
 #define createNumberNode CREATE_DECL(NumberNode)
 
-static inline NumberNodePtr NumberNodeCast(const ValuePtr& vp)
-    { return std::dynamic_pointer_cast<NumberNode>(vp); }
-
 // --------------------
 // Scalar multiplication and addition
 inline
