@@ -1,5 +1,9 @@
 ;
-; filter-irc-equal-test.scm -- Failiing FilterLink.
+; filter-irc-eltof-test.scm -- Failiing FilterLink.
+;
+; Root cause of failue was a nested ValueShimLink inside the
+; ElementOfLink, and the original code was not checking for
+; deeply nested ValueShims.
 ;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
@@ -112,7 +116,20 @@
 
 (test-assert "callout test"
    (equal? reply
-      (LinkValue)))
+      (LinkValue
+			(LinkValue
+				(Item "PRIVMSG")
+				(StringValue "linas")
+				(Item "Message to ")
+				(StringValue "echobot")
+				(Item " is a ")
+				(Item "private message")
+				(Item " from ")
+				(StringValue "linas")
+				(Item "that ")
+				(Item "is just a message")
+				(Item ": ")
+				(StringValue "bing bang boom bomb")))))
 
 (test-end tname)
 (opencog-test-end)
