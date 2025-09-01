@@ -53,6 +53,8 @@
 ; Verify expected contents
 (define (progressive-check N)
 
+	(format #t "Check depth ~A\n" N)
+
 	; In the top space, foo should be present, but bar and link absent.
 	(define x (cog-node 'Concept "foo"))
 	(define y (cog-node 'Concept "bar"))
