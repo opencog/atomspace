@@ -81,6 +81,7 @@
 		(ValueOf (Anchor "IRC Bot") (Predicate "echo"))))
 
 (define is-pub (cog-execute! is-pub?))
+(format #t "Private reply was ~A\n" is-pub)
 (test-assert "private test"
 	(equal? is-pub
 		(LinkValue (LinkValue (Item "private message")))))
