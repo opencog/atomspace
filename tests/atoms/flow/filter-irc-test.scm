@@ -1,8 +1,13 @@
 ;
-; filter-fail.scm
+; filter-irc-test.scm -- Test filter with executable terms in LinkValues
+; 
 ;
 (use-modules (opencog) (opencog exec))
+(use-modules (opencog test-runner))
 
+(opencog-test-runner)
+(define tname "filter-irc-test")
+(test-begin tname)
 
 ; Private messages have the form:
 ;    (LinkValue
@@ -47,7 +52,15 @@
 
 
 ; Try it, once
-(cog-execute! make-private-reply)
+(define priv-rep (cog-execute! make-private-reply))
+(test-assert "response test"
+	(equal? priv-rep
+		(LinkValue
+			(LinkValue
+				(Item "PRIVMSG")
+				(StringValue "linas")
+				(Item "you said: ")
+				(StringValue "bunch o text")))))
 
 (cog-set-value!
 	(Anchor "IRC Bot") (Predicate "bot-name") (StringValue "echobot"))
@@ -67,8 +80,13 @@
 					(Item "public message"))))
 		(ValueOf (Anchor "IRC Bot") (Predicate "echo"))))
 
-(cog-execute! is-pub?)
+(define is-pub (cog-execute! is-pub?))
+(test-assert "private test"
+	(equal? is-pub
+		(LinkValue (LinkValue (Item "private message")))))
 
+(test-end tname)
+(opencog-test-end)
 
 ; The End. That's all, folks!
 ; -------------------------------------------------------
