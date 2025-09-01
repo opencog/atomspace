@@ -153,7 +153,8 @@ Handle Replacement::substitute_scoped(Handle term,
 				// non-executable Atom, and nothing more.
 				if (do_exec and
 				    not term->is_executable() and
-				    sub->is_executable())
+				    sub->is_executable() and
+				    VALUE_SHIM_LINK != sub->get_type())
 				{
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
