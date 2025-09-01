@@ -26,6 +26,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include "FindUtils.h"
 #include "ScopeLink.h"
 
 namespace opencog {
@@ -154,7 +155,7 @@ Handle Replacement::substitute_scoped(Handle term,
 				if (do_exec and
 				    not term->is_executable() and
 				    sub->is_executable() and
-				    VALUE_SHIM_LINK != sub->get_type())
+				    not contains_atomtype(sub, VALUE_SHIM_LINK))
 				{
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
