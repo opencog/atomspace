@@ -1,7 +1,12 @@
 ;
-; filer-irc-equal.scm -- Failiing FilterLink.
+; filter-irc-equal-test.scm -- Failiing FilterLink.
 ;
-(use-modules (opencog) (opencog exec) (opencog sensory))
+(use-modules (opencog) (opencog exec))
+(use-modules (opencog test-runner))
+
+(opencog-test-runner)
+(define tname "filter-irc-equal-test")
+(test-begin tname)
 
 ; Messages have the form:
 ;    (LinkValue
@@ -104,6 +109,14 @@
 (define reply (cog-execute! do-callout))
 
 (format #t "Reply is ~A\n" reply)
+
+(test-assert "callout test"
+   (equal? reply
+      (LinkValue)))
+
+(test-end tname)
+(opencog-test-end)
+
 
 ; The End. That's all, folks!
 ; -------------------------------------------------------
