@@ -378,6 +378,27 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
 	return false;
 }
 
+bool contains_exposed_atomtype(const Handle& clause, Type atom_type,
+                               Quotation quotation)
+{
+	if (clause->is_executable()) return false;
+
+	Type clause_type = clause->get_type();
+	if (quotation.is_unquoted() and nameserver().isA(clause_type, atom_type))
+		return true;
+
+	quotation.update(clause_type);
+
+	if (not clause->is_link()) return false;
+
+	for (const Handle& subclause: clause->getOutgoingSet())
+	{
+		if (contains_exposed_atomtype(subclause, atom_type, quotation)) return true;
+	}
+	return false;
+}
+
+
 size_t contains_atomtype_count(const Handle& clause, Type atom_type,
                                Quotation quotation)
 {

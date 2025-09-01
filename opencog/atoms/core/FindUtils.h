@@ -328,6 +328,16 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
                        Quotation quotation=Quotation());
 
 /**
+ * Returns true if the `clause` contains an unquoted atom of type (or
+ * subtype of) `atom_type`.  Quoted terms are constants (literals).
+ * Executable terms are not searched; the point being that execution
+ * generally alters the tree structure, and we're not interested in
+ * what is happening "down there". We only want the exposed types.
+ */
+bool contains_exposed_atomtype(const Handle& clause, Type atom_type,
+                               Quotation quotation=Quotation());
+
+/**
  * Returns a count of the number of times that an unquoted atom of
  * type (or subtype of) `atom_type` appears in `clause`.  Quoted terms
  * are constants (literals).

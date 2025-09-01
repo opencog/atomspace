@@ -155,7 +155,7 @@ Handle Replacement::substitute_scoped(Handle term,
 				if (do_exec and
 				    not term->is_executable() and
 				    sub->is_executable() and
-				    not contains_atomtype(sub, VALUE_SHIM_LINK))
+				    not contains_exposed_atomtype(sub, VALUE_SHIM_LINK))
 				{
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
