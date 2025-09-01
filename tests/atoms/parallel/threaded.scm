@@ -24,11 +24,16 @@
 ; (cog-execute! pexec)
 
 ; One-hundred things to do in two threads.
-; This is set up so that each Query differs from all the others.
+;
+; This is set up so that each Query differs from all the others,
+; and so each Query uses a different UnisetValue to report results.
 ; This avoids issues when the same Query/Meet is run in parallel:
-; both instances place results on the same result queue; if one
-; instance closes the queue while the other is still adding to it,
-; an exception gets thrown and everything goes haywire.
+; if several identical Queries run in different threads, they will
+; both be using the same result ContainerValue. When one instance
+; closes the container while the other is still adding to it, an
+; exception will be thrown and everything will go haywire.
+; Thus, we want each thread to run it's own unique Query.
+;
 (define pmany
 	(ExecuteThreaded
 		(Number 2)
