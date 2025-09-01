@@ -89,8 +89,14 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 
 	if (stream->is_type(CONTAINER_VALUE))
 	{
+		// If the container is open for insertion, then
+		// just return a single value out of it. This will
+		// block if it is empty. If it is closed, just treat
+		// it like a normal LinkValue (thus the fall-thru).
 		ContainerValuePtr cvp = ContainerValueCast(stream);
-		return createLinkValue(cvp->remove());
+		if (not cvp->is_closed())
+			return createLinkValue(cvp->remove());
+		// else fall through
 	}
 
 	if (stream->is_type(LINK_VALUE))
