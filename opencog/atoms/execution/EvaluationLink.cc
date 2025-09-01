@@ -228,6 +228,10 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 		}
 	}
 
+	// Nothing to do, here.
+	if (VALUE_SHIM_LINK == term->get_type())
+		return term->execute();
+
 	Instantiator inst(as);
 	Handle sterm(scratch->add_atom(term));
 	ValuePtr vp(inst.execute(sterm, silent));
