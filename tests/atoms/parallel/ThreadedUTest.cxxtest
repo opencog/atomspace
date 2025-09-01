@@ -116,6 +116,10 @@ void ThreadedUTest::test_many(void)
 	QueueValuePtr qvp = QueueValueCast(vp);
 	const std::vector<ValuePtr>& vals = qvp->value();
 
+	// The qvp->value() above should have blocked, until the
+	// queue is closed. Check that to be sure.
+	TS_ASSERT(qvp->is_closed());
+
 	printf("Got %zu results\n", vals.size());
 	TS_ASSERT_EQUALS(100, vals.size());
 

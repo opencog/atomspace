@@ -97,6 +97,18 @@ ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
 	_nthreads = std::min(_nthreads, nitems);
 }
 
+ExecuteThreadedLink::~ExecuteThreadedLink()
+{
+	// Must make sure the memory for the thread status outlives
+	// the thread it's tracking; otherwise we risk freeing the
+	// RAM for _joiner, after which the joiner thread will write
+	// to it. As long as this Atom is in an AtomSpace, this dtor
+	// will never run, but if the AtomSpace is being destroyed,
+	// then bad things happen without this. e.g. ThreadedUTest.
+	if (_joiner.joinable())
+		_joiner.join();
+}
+
 static void thread_exec(AtomSpace* as, bool silent,
                         concurrent_queue<Handle>* todo,
                         QueueValuePtr qvp,
