@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ContainerValue.h>
 
 #include "FilterLink.h"
 #include "LinkSignatureLink.h"
@@ -601,9 +602,20 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 	{
 		vex = _outgoing[1]->execute(as, silent);
 
-		// XXX TODO FIXME -- if vex is a stream, e.g. a QueueValue,
-		// then we should construct another Queue as the return value,
-		// and perform filtering on-demand.
+		// If it's a container, and its not closed, then pull
+		// one value out, and process it. Else if its closed,
+		// fall through, and let the next stage handle it.
+		if (vex->is_type(CONTAINER_VALUE))
+		{
+			ContainerValuePtr cvp = ContainerValueCast(vex);
+			if (not cvp->is_closed())
+			{
+				ValuePtr mone = rewrite_one(cvp->remove(), as, silent);
+				return createLinkValue(mone);
+			}
+			// If it is closed, fall through.
+		}
+
 		if (vex->is_type(LINK_VALUE))
 		{
 			ValueSeq remap;
