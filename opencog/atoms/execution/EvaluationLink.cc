@@ -232,8 +232,22 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	if (VALUE_SHIM_LINK == term->get_type())
 		return term->execute();
 
+	// Argh. The ValueShimLink might be buried deeper in the expression.
+	// In this case, ValueShimLink::setAtomSpace() will throw a
+	// RuntimeException. Catch that. Perhaps it should be changed to
+	// a SilentException? Except that SilentExceptions are hard to
+	// debug, because they don't set a message,
+	Handle sterm;
+	try
+	{
+		sterm = scratch->add_atom(term);
+	}
+	catch (const RuntimeException& ex)
+	{
+		return term->execute();
+	}
+
 	Instantiator inst(as);
-	Handle sterm(scratch->add_atom(term));
 	ValuePtr vp(inst.execute(sterm, silent));
 
 	// If the return value is a ContainerValue, we assume that this

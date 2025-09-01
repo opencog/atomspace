@@ -151,18 +151,22 @@ Handle Replacement::substitute_scoped(Handle term,
 				// executable, then run those streams, terminating them.
 				// The final result is then just a plain-old ordinary
 				// non-executable Atom, and nothing more.
+				//
+				// Well, sort-of. Execution could return something that
+				// is not an Atom. In that case, we redord the original
+				// form. This original form might be executted again,
+				// later on, and if this execution has side-effects,
+				// then, well, things get ugly.  But there's no obvious
+				// way of avoiding this; we'd need some method that
+				// tells us if execution returns only Atoms and never
+				// Values. And we don't have such a function...
 				if (do_exec and
 				    not term->is_executable() and
-				    sub->is_executable() and
-				    VALUE_SHIM_LINK != sub->get_type())
+				    sub->is_executable())
 				{
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
 						sub = HandleCast(evp);
-					else
-						throw InvalidParamException(TRACE_INFO,
-							"Wanted Atom as result of execution, got %s!",
-							evp->to_string().c_str());
 				}
 			}
 			oset.emplace_back(sub);
