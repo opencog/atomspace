@@ -9,7 +9,7 @@
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
-(define tname "filter-irc-equal-test")
+(define tname "filter-irc-eltof-test")
 (test-begin tname)
 
 ; Messages have the form:
