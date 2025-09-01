@@ -42,8 +42,7 @@ void ValueShimLink::setAtomSpace(AtomSpace *)
 	throw RuntimeException(TRACE_INFO,
 		"Internal Error: "
 		"ValueShims cannot be placed into AtomSpace!"
-		"\nCaller should be fixed to unwrap me!\nI am:\n %s",
-		to_string().c_str());
+		"\nCaller should be fixed to unwrap me!");
 }
 
 std::string ValueShimLink::to_string(const std::string& indent) const
