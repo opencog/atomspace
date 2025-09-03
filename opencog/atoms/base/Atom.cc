@@ -27,7 +27,6 @@
 #include <set>
 #include <sstream>
 
-#include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 

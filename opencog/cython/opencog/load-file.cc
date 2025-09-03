@@ -30,7 +30,6 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc.h>
 
 namespace opencog {
 
