@@ -29,7 +29,6 @@
 #include <filesystem>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/files.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
 
