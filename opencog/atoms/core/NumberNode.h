@@ -52,7 +52,7 @@ private:
 	{
 // Ubunutu 20.04 LTS does not yet have this c++17 feature. Bummer.
 #ifdef __cpp_lib_to_chars
-		const size_t buf_size = 30;
+		static const size_t buf_size = 30;
 		char buf[buf_size]{};
 		std::to_chars_result result = std::to_chars(buf, buf + buf_size,
 			x, std::chars_format::general, 18);
