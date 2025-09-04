@@ -295,6 +295,3 @@ cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
         size_t size() nogil
         void clear() nogil
         const vector[cValuePtr]& value() nogil
-
-
-include "value_types.pxd"

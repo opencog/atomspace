@@ -1,3 +1,11 @@
+cdef class BoolValue(Value):
+    @staticmethod
+    cdef vector[bool] list_of_bool_to_vector(list python_list)
+
+    @staticmethod
+    cdef list vector_of_bool_to_list(const vector[bool]* cpp_vector)
+
+
 cdef class FloatValue(Value):
     @staticmethod
     cdef vector[double] list_of_doubles_to_vector(list python_list)
@@ -23,6 +31,14 @@ cdef class LinkValue(Value):
 
 
 cdef class QueueValue(Value):
+    @staticmethod
+    cdef vector[cValuePtr] list_of_values_to_vector(list python_list)
+
+    @staticmethod
+    cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector)
+
+
+cdef class UnisetValue(Value):
     @staticmethod
     cdef vector[cValuePtr] list_of_values_to_vector(list python_list)
 
