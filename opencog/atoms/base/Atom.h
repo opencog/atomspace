@@ -657,8 +657,6 @@ public:
     typedef std::shared_ptr<CNAME> CNAME##Ptr;              \
     static inline CNAME##Ptr CNAME##Cast(const Handle& h)   \
         { return std::dynamic_pointer_cast<CNAME>(h); }     \
-    static inline CNAME##Ptr CNAME##Cast(const AtomPtr& a)  \
-        { return std::dynamic_pointer_cast<CNAME>(a); }     \
     static inline CNAME##Ptr CNAME##Cast(const ValuePtr& v) \
         { return std::dynamic_pointer_cast<CNAME>(v); }
 
