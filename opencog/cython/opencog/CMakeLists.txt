@@ -133,13 +133,11 @@ CYTHON_ADD_MODULE_PYX(utilities
 ADD_LIBRARY(utilities_cython
 	Utilities.cc
 	utilities.cpp
-	type_constructors.cpp
 )
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
 	atomspace
-	# type_constructors
 	executioncontext
 	${Python3_LIBRARIES}
 )
