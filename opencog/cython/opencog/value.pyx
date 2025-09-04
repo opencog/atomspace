@@ -1,5 +1,5 @@
 from cpython.object cimport Py_EQ, Py_NE
-from cython.operator cimport dereference as deref
+from cython.operator cimport dereference as deref, preincrement as inc
 
 
 cdef class PtrHolder:

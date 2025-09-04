@@ -22,6 +22,10 @@ from opencog.atomspace import (createBoolValue,
                                )
 from opencog.atomspace import types, AtomSpace
 from opencog.utilities import add_node, add_link
+
+# The code below never uses these imports, but users do, when they say
+#    from opencog.type_constructors import *
+# and expect to get the four functions below.
 from opencog.utilities import get_default_atomspace, set_default_atomspace
 from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
