@@ -79,7 +79,7 @@ ctypedef double confidence_t
 ctypedef double strength_t
 
 cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
-    ctypedef shared_ptr[const cTruthValue] tv_ptr "opencog::TruthValuePtr"
+    ctypedef shared_ptr[cTruthValue] tv_ptr "opencog::TruthValuePtr"
 
     cdef cppclass cTruthValue "const opencog::TruthValue"(cValue):
         strength_t get_mean()
@@ -89,6 +89,9 @@ cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
         tv_ptr DEFAULT_TV()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
+
+    cdef tv_ptr tv_cast "TruthValueCast" (cValuePtr) except +
+    cdef cValuePtr tv_uncast "ValueCast" (tv_ptr) except +
 
 cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue"(cTruthValue):
