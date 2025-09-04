@@ -26,6 +26,7 @@
 
 #include <dlfcn.h>
 #include <unistd.h>
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
 
