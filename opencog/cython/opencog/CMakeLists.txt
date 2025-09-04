@@ -101,6 +101,9 @@ INSTALL (FILES
 )
 
 ############################## type constructors #####################
+# FYI The second and remaining args to CYTHON_ADD_MODULE_PYX are
+# dependencies, telling cmake what order to build things in,
+# and when a rebuild is needed.
 
 CYTHON_ADD_MODULE_PYX(type_constructors
 	"atomspace.pxd" opencog_atom_types
@@ -124,7 +127,7 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 ############################## utilities #####################
 
 CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" opencog_atom_types
+	"atomspace.pxd" "utilities.pxd" opencog_atom_types
 )
 
 ADD_LIBRARY(utilities_cython
