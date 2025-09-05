@@ -83,13 +83,6 @@ bool LinkValue::operator==(const Value& other) const
 	// the actual values compare
 	if (not other.is_type(LINK_VALUE)) return false;
 
-	// Streaming values might change. Get a ecent sample.
-	// Q: Is this wise? Maybe user wanted to compare some frozen value?
-	// Calling update() for "no good reason" could throw off a lot
-	// of stuff. But then, calling operator==() is kind of useless,
-	// so I dunno ... See also FloatValue::operator==()
-	update();
-
 	const LinkValue* lov = (const LinkValue*) &other;
 
 	if (_value.size() != lov->_value.size()) return false;
