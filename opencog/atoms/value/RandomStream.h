@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_RANDOM_STREAM_H
 #define _OPENCOG_RANDOM_STREAM_H
 
-#include <opencog/atoms/value/StreamValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 namespace opencog
 {
@@ -36,10 +36,10 @@ namespace opencog
  * RandomStreams provide an example of streaming data.
  */
 class RandomStream
-	: public StreamValue
+	: public FloatValue
 {
 protected:
-	RandomStream(Type t) : StreamValue(t) {}
+	RandomStream(Type t) : FloatValue(t) {}
 	int _len;
 
 	virtual void update() const;
