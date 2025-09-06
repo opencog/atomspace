@@ -24,7 +24,7 @@
 #define _OPENCOG_FORMULA_STREAM_H
 
 #include <vector>
-#include <opencog/atoms/value/StreamValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -40,10 +40,10 @@ namespace opencog
  * FloatValue, every time it is queried for data.
  */
 class FormulaStream
-	: public StreamValue
+	: public FloatValue
 {
 protected:
-	FormulaStream(Type t) : StreamValue(t) {}
+	FormulaStream(Type t) : FloatValue(t) {}
 
 	void init(void);
 	virtual void update() const;

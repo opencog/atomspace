@@ -31,13 +31,13 @@ using namespace opencog;
 // ==============================================================
 
 FutureStream::FutureStream(const Handle& h) :
-	LinkStreamValue(FUTURE_STREAM), _formula({h}), _as(h->getAtomSpace())
+	LinkValue(FUTURE_STREAM), _formula({h}), _as(h->getAtomSpace())
 {
 	init();
 }
 
 FutureStream::FutureStream(const HandleSeq&& oset) :
-	LinkStreamValue(FUTURE_STREAM), _formula(std::move(oset))
+	LinkValue(FUTURE_STREAM), _formula(std::move(oset))
 {
 	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
@@ -51,7 +51,7 @@ FutureStream::FutureStream(const HandleSeq&& oset) :
 // Same as above, but Handles as a ValueSeq. The Sexper decoder
 // will create these when it deserializes FutureStreams.
 FutureStream::FutureStream(const ValueSeq& voset) :
-	LinkStreamValue(FUTURE_STREAM)
+	LinkValue(FUTURE_STREAM)
 {
 	for (const ValuePtr& v : voset)
 	{

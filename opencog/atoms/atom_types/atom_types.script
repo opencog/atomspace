@@ -61,22 +61,16 @@ LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
 // over time, we call them "streams".  They provide wrappers for
 // any kind of time-varying data.
 
-// A base class for time-varying floating-point Values.
-STREAM_VALUE <- FLOAT_VALUE
-
 // An example of a time-varying Value stream
-RANDOM_STREAM <- STREAM_VALUE,INT_ARG
+RANDOM_STREAM <- FLOAT_VALUE,INT_ARG
 
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
 // Typically computed by one of the FunctionLinks, below.
-FORMULA_STREAM <- STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
-
-// A base class for time-varying Value sequences.
-LINK_STREAM_VALUE <- LINK_VALUE
+FORMULA_STREAM <- FLOAT_VALUE,HANDLE_VEC_ARG
 
 // A base class for thread-safe concurrent containers.
-CONTAINER_VALUE <- LINK_STREAM_VALUE
+CONTAINER_VALUE <- LINK_VALUE
 
 // A thread-safe FIFO queue of Value sequences.
 QUEUE_VALUE <- CONTAINER_VALUE
@@ -87,7 +81,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- LINK_STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
+FUTURE_STREAM <- LINK_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
 // TruthValues are an older concept in Atomese. They are deprecated and

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_CONTAINER_VALUE_H
 #define _OPENCOG_CONTAINER_VALUE_H
 
-#include <opencog/atoms/value/LinkStreamValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
@@ -52,13 +52,13 @@ namespace opencog
  * LinkStreamValue base class ??)
  */
 class ContainerValue
-	: public LinkStreamValue
+	: public LinkValue
 {
 protected:
-	ContainerValue(Type t) : LinkStreamValue(t) {}
+	ContainerValue(Type t) : LinkValue(t) {}
 
 public:
-	ContainerValue(void) : LinkStreamValue(CONTAINER_VALUE) {}
+	ContainerValue(void) : LinkValue(CONTAINER_VALUE) {}
 	virtual ~ContainerValue() {}
 	virtual void open(void) = 0;
 	virtual void close(void) = 0;

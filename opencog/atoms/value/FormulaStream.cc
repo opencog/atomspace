@@ -31,13 +31,13 @@ using namespace opencog;
 // ==============================================================
 
 FormulaStream::FormulaStream(const Handle& h) :
-	StreamValue(FORMULA_STREAM), _formula({h}), _as(h->getAtomSpace())
+	FloatValue(FORMULA_STREAM), _formula({h}), _as(h->getAtomSpace())
 {
 	init();
 }
 
 FormulaStream::FormulaStream(const HandleSeq&& oset) :
-	StreamValue(FORMULA_STREAM), _formula(std::move(oset))
+	FloatValue(FORMULA_STREAM), _formula(std::move(oset))
 {
 	if (0 == _formula.size())
 		throw SyntaxException(TRACE_INFO,
@@ -51,7 +51,7 @@ FormulaStream::FormulaStream(const HandleSeq&& oset) :
 // Same as above, but Handles as a ValueSeq. The Sexper decoder
 // will create these when it deserializes FormulaStreams.
 FormulaStream::FormulaStream(const ValueSeq& voset) :
-	StreamValue(FORMULA_STREAM)
+	FloatValue(FORMULA_STREAM)
 {
 	for (const ValuePtr& v : voset)
 	{

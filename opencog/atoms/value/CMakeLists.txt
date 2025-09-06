@@ -7,11 +7,9 @@ ADD_LIBRARY (value
 	FloatValue.cc
 	FormulaStream.cc
 	FutureStream.cc
-	LinkStreamValue.cc
 	LinkValue.cc
 	QueueValue.cc
 	RandomStream.cc
-	StreamValue.cc
 	StringValue.cc
 	UnisetValue.cc
 	ValueFactory.cc
@@ -36,11 +34,9 @@ INSTALL (FILES
 	FloatValue.h
 	FormulaStream.h
 	FutureStream.h
-	LinkStreamValue.h
 	LinkValue.h
 	QueueValue.h
 	RandomStream.h
-	StreamValue.h
 	StringValue.h
 	UnisetValue.h
 	Value.h

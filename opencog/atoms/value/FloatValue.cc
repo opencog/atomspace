@@ -72,8 +72,7 @@ bool FloatValue::operator==(const Value& other) const
 	// as the type hierarchy makes sense, and the values compare.
 	if (not other.is_type(FLOAT_VALUE)) return false;
 
-   const FloatValue* fov = (const FloatValue*) &other;
-
+	const FloatValue* fov = (const FloatValue*) &other;
 	if (_value.size() != fov->_value.size()) return false;
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
