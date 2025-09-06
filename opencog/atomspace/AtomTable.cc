@@ -57,7 +57,7 @@ void AtomSpace::init(void)
     // Connect signal to find out about type additions
     addedTypeConnection =
         _nameserver.typeAddedSignal().connect(
-            std::bind(&AtomSpace::typeAdded, this, std::placeholders::_1));
+            &AtomSpace::typeAdded, this);
 }
 
 /**
