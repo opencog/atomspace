@@ -100,6 +100,7 @@ void Frame::scrub_incoming_set(void)
 	for (Type t : framet)
 	{
 		auto bucket = iset.find(t);
+		if (bucket == iset.end()) continue;
 		for (auto bi = bucket->second.begin(); bi != bucket->second.end();)
 		{
 			if (0 == bi->use_count())
