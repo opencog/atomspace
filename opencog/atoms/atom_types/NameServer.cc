@@ -283,6 +283,15 @@ const std::string& NameServer::getTypeShortName(Type type) const
 
 NameServer& opencog::nameserver()
 {
-    static std::unique_ptr<NameServer> instance(new NameServer());
+    // Heh. std::unique_ptr<NameServer> will run the dtor for this
+    // single static instance when the shared lib dtor runs.
+    // Unfortunately, this might happen before the AtomSpace dtors
+    // have run (yes, they're running in the same shared lib dtor)
+    // The result is a mystery crash during shutdown. This is
+    // occasionally seen in unit tests, e.g. in the
+    // frame-progressive-test.scm in atomspace-rocks.
+    // The solution is to keep the nameserver alive ... forever.
+    // static std::unique_ptr<NameServer> instance(new NameServer());
+    static NameServer* instance = new NameServer();
     return *instance;
 }
