@@ -69,7 +69,8 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _read_only(false),
     _copy_on_write(transient),
     _transient(transient),
-    _nameserver(nameserver())
+    _nameserver(nameserver()),
+    addedTypeConnection(0)
 {
     if (parent) {
         // Set the COW flag by default, for any Atomspace that sits on
@@ -87,7 +88,8 @@ AtomSpace::AtomSpace(AtomSpacePtr& parent) :
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
-    _nameserver(nameserver())
+    _nameserver(nameserver()),
+    addedTypeConnection(0)
 {
     if (nullptr != parent) {
         // Set the COW flag by default; it seems like a simpler
@@ -105,7 +107,8 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _read_only(false),
     _copy_on_write(false),
     _transient(false),
-    _nameserver(nameserver())
+    _nameserver(nameserver()),
+    addedTypeConnection(0)
 {
     for (const Handle& base : bases)
     {
