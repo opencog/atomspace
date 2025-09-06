@@ -51,6 +51,13 @@ BOOL_VALUE <- VALUE,BOOL_VEC_ARG,INT_ARG  // vector of booleans
 FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG    // vector of floats
 STRING_VALUE <- VALUE,STRING_VEC_ARG  // vector of strings
 LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values)
+
+// StreamValue is used in Sensory and other projects to distinguish
+// between LinkValues that are static and serve to package together
+// a bunch of other things (i.e. function like a "struct") and
+// LinkValues that represent time-varying streams of Values.
+// (.. and items in that stream are typically static LinkValues.)
+STREAM_VALUE <- LINK_VALUE            // volatile steam of Values
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
 LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
@@ -70,7 +77,7 @@ RANDOM_STREAM <- FLOAT_VALUE,INT_ARG
 FORMULA_STREAM <- FLOAT_VALUE,HANDLE_VEC_ARG
 
 // A base class for thread-safe concurrent containers.
-CONTAINER_VALUE <- LINK_VALUE
+CONTAINER_VALUE <- STREAM_VALUE
 
 // A thread-safe FIFO queue of Value sequences.
 QUEUE_VALUE <- CONTAINER_VALUE
@@ -81,7 +88,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- LINK_VALUE,LIST_VALUE,HANDLE_VEC_ARG
+FUTURE_STREAM <- STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
 // TruthValues are an older concept in Atomese. They are deprecated and
