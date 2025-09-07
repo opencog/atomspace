@@ -58,8 +58,15 @@ LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values
 // LinkValues that represent time-varying streams of Values.
 // (.. and items in that stream are typically static LinkValues.)
 STREAM_VALUE <- LINK_VALUE            // volatile steam of Values
+
+// Same thing as Section, but the Value variant thereof.
+// Currently used experimentally in atomese-simd to specify GPU kernels.
+SECTION_VALUE <- LINK_VALUE
+
+// VALUATION is prehistoric, and I think it plays no role, and can be removed.
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
+// XXX FIXME LIST_VALUE seems to be unused. I think it can be removed.
 LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
 
 // ===========================================================
@@ -792,12 +799,8 @@ TYPE_INTERSECTION_LINK <- TYPE_CHOICE
 // connectors (the input, and the output).
 ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
 
-// Type constructor.
-// The SignatureLink implements "deep types", a way for specifying
-// the type of an entire graph, and not just some node or link.
-// The type specification is "precise", in contrast to the fuzzy
-// type specification, below. It is a Connector, as it specifies
-// only one connectable thing at a time.
+// Type constructor compound structured types.
+// It is a Connector, as it specifies only one connectable thing at a time.
 SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 
 // Short-hand for above: (SignNode 'BlahLink) is shorthand for
@@ -807,9 +810,9 @@ SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
 // a variable without a name binding.
 SIGN_NODE <- TYPE_NODE
 
-// Signature for a typed link. This is needed for encoding signatures
+// Signature for a typed LinkValue. This is needed for encoding signatures
 // involving LinkValue and similar. It also simplifies polymorphsm.
-// Thus, for example, the siggnature of
+// Thus, for example, the signature of
 // (LinkValue (FloatValue...) (Concept ...)) cannot be encoded with
 // a regular SignatureLink, because the LinkValue blocks this. However,
 // it can be encoded as
