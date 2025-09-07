@@ -107,6 +107,12 @@ NumberNode::NumberNode(const std::vector<double>& vec)
 	_name = vector_to_plain(_value);
 }
 
+NumberNode::NumberNode(std::vector<double>&& vec)
+	: Node(NUMBER_NODE, ""), _value(std::move(vec))
+{
+	_name = vector_to_plain(_value);
+}
+
 NumberNode::NumberNode(const FloatValuePtr& fv)
 	: Node(NUMBER_NODE, "")
 {
