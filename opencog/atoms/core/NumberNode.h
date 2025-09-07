@@ -109,16 +109,16 @@ NODE_PTR_DECL(NumberNode)
 // Scalar multiplication and addition
 inline
 ValuePtr plus(double f, const NumberNodePtr& fvp) {
-	return createFloatValue(plus(f, fvp->value())); }
+	return createFloatValue(std::move(plus(f, fvp->value()))); }
 inline
 ValuePtr minus(double f, const NumberNodePtr& fvp) {
-	return createFloatValue(minus(f, fvp->value())); }
+	return createFloatValue(std::move(minus(f, fvp->value()))); }
 inline
 ValuePtr times(double f, const NumberNodePtr& fvp) {
-	return createFloatValue(times(f, fvp->value())); }
+	return createFloatValue(std::move(times(f, fvp->value()))); }
 inline
 ValuePtr divide(double f, const NumberNodePtr& fvp) {
-	return createFloatValue(divide(f, fvp->value())); }
+	return createFloatValue(std::move(divide(f, fvp->value()))); }
 
 ValuePtr plus(double, const ValuePtr&, bool silent=false);
 ValuePtr minus(double, const ValuePtr&, bool silent=false);
@@ -128,42 +128,42 @@ ValuePtr divide(double, const ValuePtr&, bool silent=false);
 // Vector multiplication and addition
 inline
 ValuePtr plus(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(plus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr minus(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(minus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(minus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr times(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(times(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr divide(const NumberNodePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(divide(fvpa->value(), fvpb->value()))); }
 
 inline
 ValuePtr plus(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(plus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr minus(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(minus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(minus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr times(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(times(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr divide(const FloatValuePtr& fvpa, const NumberNodePtr& fvpb) {
-	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(divide(fvpa->value(), fvpb->value()))); }
 
 inline
 ValuePtr plus(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(plus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(plus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr minus(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(minus(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(minus(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr times(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(times(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(times(fvpa->value(), fvpb->value()))); }
 inline
 ValuePtr divide(const NumberNodePtr& fvpa, const FloatValuePtr& fvpb) {
-	return createFloatValue(divide(fvpa->value(), fvpb->value())); }
+	return createFloatValue(std::move(divide(fvpa->value(), fvpb->value()))); }
 
 ValuePtr plus(const ValuePtr&, const ValuePtr&, bool silent=false);
 ValuePtr minus(const ValuePtr&, const ValuePtr&, bool silent=false);
