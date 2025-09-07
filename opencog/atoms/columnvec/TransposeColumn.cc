@@ -73,7 +73,7 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	// On transposition, rows become columns. The number of rows becomes
 	// the number of columns, and the type of the row becomes the type of
 	// the column. ... except when the columns are packaged into either a
-	// ListValue or a Link, in which case, the columns show up packed
+	// LinkValue or a Link, in which case, the columns show up packed
 	// individually in rows. These are two distinct cases; each gets
 	// different unpacking.
 	Type rtype = vrows[0]->get_type();
@@ -83,7 +83,7 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 			return do_direct_loop(as, silent, vrows);
 	}
 
-	// If we are here, then the first ListValue row holds the columns
+	// If we are here, then the first LinkValue row holds the columns
 	// that we will be extracting. That is, the first row provides all
 	// the columns and column types.
 	size_t ncols = 0;

@@ -66,9 +66,6 @@ SECTION_VALUE <- LINK_VALUE
 // VALUATION is prehistoric, and I think it plays no role, and can be removed.
 VALUATION <- VALUE      // (Atom,key,Value) triple
 
-// XXX FIXME LIST_VALUE seems to be unused. I think it can be removed.
-LIST_VALUE <- VALUE     // Deserialization helper Can be combined with above.
-
 // ===========================================================
 // Streams aka Futures. Futures deliver a Value when asked.
 // Since they can deliver more than one, and it typically changes
@@ -95,7 +92,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
-FUTURE_STREAM <- STREAM_VALUE,LIST_VALUE,HANDLE_VEC_ARG
+FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
 // TruthValues are an older concept in Atomese. They are deprecated and
