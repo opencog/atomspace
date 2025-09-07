@@ -64,7 +64,6 @@ public:
 	virtual bool is_link() const { return false; }
 	virtual bool is_unordered_link() const { return false; }
 	virtual size_t size() const { return 0; }
-	virtual ValuePtr value_at_index(size_t) const = 0;
 
 	/** Basic predicate */
 	bool is_type(Type t, bool subclass = true) const

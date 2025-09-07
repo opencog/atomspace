@@ -116,12 +116,6 @@ std::string BoolValue::to_string(const std::string& indent) const
 	return to_string(indent, _type);
 }
 
-ValuePtr BoolValue::value_at_index(size_t idx) const
-{
-	bool b = get_bit(idx);
-	return createBoolValue(b);
-}
-
 bool BoolValue::operator==(const Value& other) const
 {
 	if (BOOL_VALUE != other.get_type()) return false;

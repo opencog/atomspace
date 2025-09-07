@@ -15,13 +15,6 @@
 
 using namespace opencog;
 
-ValuePtr NumberNode::value_at_index(size_t idx) const
-{
-	double d = 0.0;
-	if (_value.size() > idx) d = _value[idx];
-	return createNumberNode(d);
-}
-
 /// Convert vector to json-format string
 /// Why json? I dunno.
 std::string NumberNode::vector_to_json(const std::vector<double>& vec)

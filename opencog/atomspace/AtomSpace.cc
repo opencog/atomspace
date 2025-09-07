@@ -255,11 +255,6 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 	return _outgoing[n];
 }
 
-ValuePtr AtomSpace::value_at_index(size_t idx) const
-{
-	return ValueCast(getOutgoingAtom(idx));
-}
-
 void AtomSpace::setAtomSpace(AtomSpace* as)
 {
 	if (as == _atom_space) return;

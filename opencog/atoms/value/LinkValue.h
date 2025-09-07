@@ -98,7 +98,6 @@ public:
 	HandleSeq to_handle_seq(void) const;
 	HandleSet to_handle_set(void) const;
 	size_t size() const { return _value.size(); }
-	ValuePtr value_at_index(size_t) const;
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;

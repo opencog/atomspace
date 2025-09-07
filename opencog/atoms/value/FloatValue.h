@@ -59,8 +59,8 @@ public:
 	virtual ~FloatValue() {}
 
 	const std::vector<double>& value() const { update(); return _value; }
+	std::vector<double>& data() const { return _value; }
 	size_t size() const { return _value.size(); }
-	virtual ValuePtr value_at_index(size_t) const;
 	virtual ValuePtr incrementCount(const std::vector<double>&) const;
 	virtual ValuePtr incrementCount(size_t, double) const;
 

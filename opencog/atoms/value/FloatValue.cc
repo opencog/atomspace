@@ -26,13 +26,6 @@
 
 using namespace opencog;
 
-ValuePtr FloatValue::value_at_index(size_t idx) const
-{
-	double d = 0.0;
-	if (_value.size() > idx) d = _value[idx];
-	return createFloatValue(d);
-}
-
 ValuePtr FloatValue::incrementCount(const std::vector<double>& v) const
 {
 	// Make a copy
@@ -47,7 +40,7 @@ ValuePtr FloatValue::incrementCount(const std::vector<double>& v) const
 		new_vect[idx] += v[idx];
 
 	// Return a brand new value of the same type.
-	return createFloatValue(_type, new_vect);
+	return createFloatValue(_type, std::move(new_vect));
 }
 
 ValuePtr FloatValue::incrementCount(size_t idx, double count) const
@@ -63,7 +56,7 @@ ValuePtr FloatValue::incrementCount(size_t idx, double count) const
 	new_vect[idx] += count;
 
 	// Return a brand new value of the same type.
-	return createFloatValue(_type, new_vect);
+	return createFloatValue(_type, std::move(new_vect));
 }
 
 bool FloatValue::operator==(const Value& other) const
