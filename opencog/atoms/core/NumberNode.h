@@ -76,6 +76,7 @@ public:
 public:
 	NumberNode(const std::string&&);
 	NumberNode(const std::vector<double>&);
+	NumberNode(std::vector<double>&&);
 	NumberNode(const FloatValuePtr&);
 	NumberNode(const ValuePtr&);
 

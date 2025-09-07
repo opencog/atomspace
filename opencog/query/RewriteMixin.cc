@@ -145,7 +145,7 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 					vs.emplace_back(v);
 				}
 			}
-			insert_result(createLinkValue(vs));
+			insert_result(createLinkValue(std::move(vs)));
 		}
 	} catch (const SilentException& ex) {}
 

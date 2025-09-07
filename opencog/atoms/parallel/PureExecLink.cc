@@ -99,7 +99,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		if (eptr) std::rethrow_exception(eptr);
 	}
 
-	return createLinkValue(vseq);
+	return createLinkValue(std::move(vseq));
 }
 
 DEFINE_LINK_FACTORY(PureExecLink, PURE_EXEC_LINK)

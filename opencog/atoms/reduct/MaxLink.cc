@@ -71,14 +71,14 @@ ValuePtr MaxLink::execute(AtomSpace* as, bool silent)
 	// reduction that we did get.
 	if (0 < nan.size())
 	{
-		nan.push_back(HandleCast(createNumberNode(result)));
+		nan.emplace_back(HandleCast(createNumberNode(std::move(result))));
 		return createMaxLink(std::move(nan));
 	}
 
 	if (FLOAT_VALUE == result_type)
-		return createFloatValue(result);
+		return createFloatValue(std::move(result));
 
-	return createNumberNode(result);
+	return createNumberNode(std::move(result));
 }
 
 DEFINE_LINK_FACTORY(MaxLink, MAX_LINK);

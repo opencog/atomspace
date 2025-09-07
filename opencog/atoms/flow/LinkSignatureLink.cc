@@ -56,7 +56,7 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 {
 	if (LINK_VALUE == _kind)
-		return createLinkValue(newset);
+		return createLinkValue(std::move(newset));
 
 	// Yuck. User should have called the other constructor.
 	// But this is rare, so we'll allow.
@@ -68,7 +68,7 @@ ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 			const Handle& h(HandleCast(vp));
 			if (h) oset.push_back(h);
 		}
-		return createLink(oset, _kind);
+		return createLink(std::move(oset), _kind);
 	}
 
 	// Should support other kinds too.
@@ -86,7 +86,7 @@ ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
 		return createLinkValue(noset);
 
 	if (nameserver().isA(_kind, LINK))
-		return createLink(noset, _kind);
+		return createLink(std::move(noset), _kind);
 
 	// Should support other kinds too.
 	const std::string& tname = nameserver().getTypeName(_kind);

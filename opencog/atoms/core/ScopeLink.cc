@@ -198,7 +198,7 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
 	HandleSeq new_vars;
 	for (const Handle& h : vars)
-		new_vars.push_back(append_rand_str(h));
+		new_vars.emplace_back(append_rand_str(h));
 	return new_vars;
 }
 
@@ -216,7 +216,7 @@ inline HandleSeq wrap_glob_with_list(const HandleSeq& vars)
 	HandleSeq new_vars;
 	for (const Handle& var : vars) {
 		if (GLOB_NODE == var->get_type())
-			new_vars.push_back(createLink(HandleSeq{var}, LIST_LINK));
+			new_vars.emplace_back(createLink(HandleSeq{var}, LIST_LINK));
 		else new_vars.push_back(var);
 	}
 	return new_vars;
@@ -234,7 +234,7 @@ Handle ScopeLink::alpha_convert(const HandleSeq& vars) const
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped));
+		hs.emplace_back(_variables.substitute_nocheck(getOutgoingAtom(i), wrapped));
 
 	// Create the alpha converted scope link
 	return createLink(std::move(hs), get_type());
@@ -430,7 +430,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	std::vector<ContentHash> hash_vec;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hash_vec.push_back(term_hash(ho, index, quotation));
+		hash_vec.emplace_back(term_hash(ho, index, quotation));
 	}
 
 	// hash_vec should be sorted only for unordered links

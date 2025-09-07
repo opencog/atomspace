@@ -107,7 +107,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<double> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(dvec[i]);
-		return createFloatValue(chopped);
+		return createFloatValue(std::move(chopped));
 	}
 
 	// A vector of bools.
@@ -117,7 +117,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<bool> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(bvec[i]);
-		return createBoolValue(chopped);
+		return createBoolValue(std::move(chopped));
 	}
 
 	// If its a plain number, assume it's a vector.
@@ -127,7 +127,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<double> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(dvec[i]);
-		return createNumberNode(chopped);
+		return createNumberNode(std::move(chopped));
 	}
 
 	// A vector of other things.
@@ -137,7 +137,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<ValuePtr> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(lvec[i]);
-		return createLinkValue(chopped);
+		return createLinkValue(std::move(chopped));
 	}
 
 	// A vector of strings
@@ -147,7 +147,7 @@ ValuePtr DecimateLink::do_execute(const std::vector<bool>& vmask,
 		std::vector<std::string> chopped;
 		for (size_t i=0; i<len; i++)
 			if (vmask[i]) chopped.push_back(svec[i]);
-		return createStringValue(chopped);
+		return createStringValue(std::move(chopped));
 	}
 
 	// A Link.

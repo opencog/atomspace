@@ -122,9 +122,9 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 		funvec.push_back(fun(xvec->operator[](i)));
 
 	if (NUMBER_NODE == vxtype)
-		return createNumberNode(funvec);
+		return createNumberNode(std::move(funvec));
 
-	return createFloatValue(funvec);
+	return createFloatValue(std::move(funvec));
 }
 
 // ============================================================
@@ -181,9 +181,9 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
 	}
 
 	if (NUMBER_NODE == vxtype and NUMBER_NODE == vytype)
-		return createNumberNode(funvec);
+		return createNumberNode(std::move(funvec));
 
-	return createFloatValue(funvec);
+	return createFloatValue(std::move(funvec));
 }
 
 // ============================================================

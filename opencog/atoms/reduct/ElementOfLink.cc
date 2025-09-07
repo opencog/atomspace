@@ -97,7 +97,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<ValuePtr> chopped;
 		for (double d : vindex)
 			chopped.push_back(lvec.at((int)(d+0.5)));
-		return createLinkValue(chopped);
+		return createLinkValue(std::move(chopped));
 	}
 
 	// If its a float value, it's a vector.
@@ -107,7 +107,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<double> chopped;
 		for (double d : vindex)
 			chopped.push_back(dvec.at((int)(d+0.5)));
-		return createFloatValue(chopped);
+		return createFloatValue(std::move(chopped));
 	}
 
 	// If its a plain number, assume it's a vector.
@@ -117,7 +117,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<double> chopped;
 		for (double d : vindex)
 			chopped.push_back(dvec.at((int)(d+0.5)));
-		return createNumberNode(chopped);
+		return createNumberNode(std::move(chopped));
 	}
 
 	// A vector of strings
@@ -127,7 +127,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<std::string> chopped;
 		for (double d : vindex)
 			chopped.push_back(svec.at((int)(d+0.5)));
-		return createStringValue(chopped);
+		return createStringValue(std::move(chopped));
 	}
 
 	// A vector of bools.
@@ -137,7 +137,7 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<bool> chopped;
 		for (double d : vindex)
 			chopped.push_back(bvec.at((int)(d+0.5)));
-		return createBoolValue(chopped);
+		return createBoolValue(std::move(chopped));
 	}
 
 	// WTF. Should never be reached.

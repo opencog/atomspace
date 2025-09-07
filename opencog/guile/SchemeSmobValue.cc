@@ -463,7 +463,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		{
 			verify_protom(sitem, "cog-set-value!", 3);
 			std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
-			pa = createLinkValue(fl);
+			pa = createLinkValue(std::move(fl));
 		}
 		else
 		{
@@ -529,7 +529,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = createLinkValue(t, v);
+		nvp = createLinkValue(t, std::move(v));
 	}
 
 	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");

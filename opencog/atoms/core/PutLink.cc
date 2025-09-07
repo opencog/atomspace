@@ -266,7 +266,7 @@ static inline Handle expand(const Handle& arg, bool silent)
 	{
 		ValuePtr vp = arg->execute();
 		if (LINK_VALUE == vp->get_type())
-			result = createLink(LinkValueCast(vp)->to_handle_seq(), SET_LINK);
+			result = createLink(std::move(LinkValueCast(vp)->to_handle_seq()), SET_LINK);
 		else if (vp->is_atom())
 			result = HandleCast(vp);
 	}

@@ -75,7 +75,7 @@ ValuePtr IncomingOfLink::execute(AtomSpace* as, bool silent)
 	TypeNodePtr tnp = TypeNodeCast(tnode);
 	Type intype = tnp->get_kind();
 	HandleSeq iset(base->getIncomingSetByType(intype));
-	return createLinkValue(iset);
+	return createLinkValue(std::move(iset));
 }
 
 DEFINE_LINK_FACTORY(IncomingOfLink, INCOMING_OF_LINK)

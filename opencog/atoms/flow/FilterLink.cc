@@ -585,7 +585,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	{
 		// Type kind = LinkSignatureLinkCast(body)->get_kind();
 		// if (LINK_VALUE == kind) ...
-		return createLinkValue(rew);
+		return createLinkValue(std::move(rew));
 	}
 
 	// A list of Handles.
@@ -624,7 +624,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 				ValuePtr mone = rewrite_one(vp, as, silent);
 				if (nullptr != mone) remap.emplace_back(mone);
 			}
-			return createLinkValue(remap);
+			return createLinkValue(std::move(remap));
 		}
 	}
 
@@ -660,7 +660,7 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 			remap.emplace_back(rewrite_one(v, as, silent));
 
 		if (1 == remap.size()) return remap[0];
-		return createLinkValue(remap);
+		return createLinkValue(std::move(remap));
 	}
 
 	// Its a singleton. Just remap that.
