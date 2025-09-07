@@ -8,7 +8,6 @@ ADD_LIBRARY (atombase
 	Handle.cc
 	Link.cc
 	Node.cc
-	Valuation.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -38,6 +37,5 @@ INSTALL (FILES
 	Handle.h
 	Link.h
 	Node.h
-	Valuation.h
 	DESTINATION "include/opencog/atoms/base"
 )

@@ -63,9 +63,6 @@ STREAM_VALUE <- LINK_VALUE            // volatile steam of Values
 // Currently used experimentally in atomese-simd to specify GPU kernels.
 SECTION_VALUE <- LINK_VALUE
 
-// VALUATION is prehistoric, and I think it plays no role, and can be removed.
-VALUATION <- VALUE      // (Atom,key,Value) triple
-
 // ===========================================================
 // Streams aka Futures. Futures deliver a Value when asked.
 // Since they can deliver more than one, and it typically changes
