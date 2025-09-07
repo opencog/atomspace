@@ -106,7 +106,7 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 			{
 				const std::vector<double>& vals = FloatValueCast(vp)->value();
 				for (double d : vals)
-					vcols.push_back(createFloatValue(d));
+					vcols.emplace_back(createFloatValue(d));
 			}
 			else if (vp->is_type(LINK_VALUE))
 			{
@@ -118,37 +118,37 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 						if (v->is_type(FLOAT_VALUE))
 						{
 							double d = FloatValueCast(v)->value()[0];
-							vcols.push_back(createFloatValue(d));
+							vcols.emplace_back(createFloatValue(d));
 						}
 						else if (v->is_type(STRING_VALUE))
 						{
 							const std::string& s = StringValueCast(v)->value()[0];
-							vcols.push_back(createStringValue(s));
+							vcols.emplace_back(createStringValue(s));
 						}
 						else
-							vcols.push_back(createLinkValue(v));
+							vcols.emplace_back(createLinkValue(v));
 					}
 					else
-						vcols.push_back(createLinkValue(v));
+						vcols.emplace_back(createLinkValue(v));
 				}
 			}
 			else if (vp->is_type(NUMBER_NODE))
 			{
 				const std::vector<double>& vals = NumberNodeCast(vp)->value();
 				for (double d : vals)
-					vcols.push_back(createFloatValue(d));
+					vcols.emplace_back(createFloatValue(d));
 			}
 			else if (vp->is_type(STRING_VALUE))
 			{
 				const std::vector<std::string>& vals = StringValueCast(vp)->value();
 				for (const std::string& s : vals)
-					vcols.push_back(createStringValue(s));
+					vcols.emplace_back(createStringValue(s));
 			}
 			else if (vp->is_link())
 			{
 				const HandleSeq& hrow = HandleCast(vp)->getOutgoingSet();
 				for (const Handle& h : hrow)
-					vcols.push_back(createLinkValue(h));
+					vcols.emplace_back(createLinkValue(h));
 			}
 			else
 				throw RuntimeException(TRACE_INFO,
@@ -178,12 +178,12 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 					if (v->is_type(FLOAT_VALUE))
 					{
 						double d = FloatValueCast(v)->value()[0];
-						FloatValueCast(vcols[i]) -> _value.push_back(d);
+						FloatValueCast(vcols[i]) -> _value.emplace_back(d);
 					}
 					else if (v->is_type(STRING_VALUE))
 					{
 						const std::string& s = StringValueCast(v)->value()[0];
-						StringValueCast(vcols[i]) -> _value.push_back(s);
+						StringValueCast(vcols[i]) -> _value.emplace_back(s);
 					}
 					else
 						LinkValueCast(vcols[i]) -> _value.push_back(vrow[i]);
@@ -241,7 +241,7 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
 			const std::vector<double>& vals = FloatValueCast(vp)->value();
 			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
-				LinkValueCast(vcols[i]) -> _value.push_back(
+				LinkValueCast(vcols[i]) -> _value.emplace_back(
 					createFloatValue(vals[i]));
 		}
 		else if (vp->is_type(STRING_VALUE))
@@ -249,7 +249,7 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
 			const std::vector<std::string>& vals = StringValueCast(vp)->value();
 			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
-				LinkValueCast(vcols[i]) -> _value.push_back(
+				LinkValueCast(vcols[i]) -> _value.emplace_back(
 					createStringValue(vals[i]));
 		}
 		else if (vp->is_type(NUMBER_NODE))
@@ -257,7 +257,7 @@ ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
 			const std::vector<double>& vals = NumberNodeCast(vp)->value();
 			CHKSZ(vals);
 			for (size_t i=0; i< ncols; i++)
-				LinkValueCast(vcols[i]) -> _value.push_back(
+				LinkValueCast(vcols[i]) -> _value.emplace_back(
 					createFloatValue(vals[i]));
 		}
 		else if (vp->is_link())
