@@ -493,6 +493,8 @@ ITEM_CLASS_NODE <- LEXICAL_NODE
 // Data streams are kind-of-like sets, except that they are constantly
 // popping out more Items, so they're not static or fixed.
 // TODO: should these be OBJECT_NODEs?
+// Defacto, at least one of these is a STREAM_NODE (the OpenclNode
+// in the atomese-simd repo.) Some in the sensory repo might be also.
 TAG_NODE <- LEXICAL_NODE
 
 // A TagLink is a link between a TagNode and the Item being tagged.
