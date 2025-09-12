@@ -31,7 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The SplitLink splits SringValues (or Node names) according
+/// The SplitLink splits StringValues (or Node names) according
 /// to whitespace, returning a LinkValue of the split name(s).
 ///
 class SplitLink : public CollectionOfLink
