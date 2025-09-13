@@ -69,13 +69,59 @@ bool FloatValue::operator==(const Value& other) const
 	if (_value.size() != fov->_value.size()) return false;
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
+	{
+		// Sort-of-OK-ish equality compare. Not very good. The ULPS
+		// compare below is much better.
+		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
+
 		// Compare floats with ULPS, because they are lexicographically
 		// ordered. For technical explanation, see
 		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
-		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
-#define MAX_ULPS 24
-		if (MAX_ULPS < llabs(*(int64_t*) &(_value[i]) - *(int64_t*)&(fov->_value[i])))
-			return false;
+
+		// Aliasing issues for doubles are crazy-making.
+		//
+		// This does not work:
+		// int64_t self = *(int64_t*) &(_value[i])
+		// int64_t other= *(int64_t*) &(fov->_value[i])
+		// int64_t lili = llabs(self - other);
+		//
+		// This also doesn't work; it would need -fno-strict-aliasing
+		// union { double d; int64_t i; } self;
+		// self.d = _value[i];
+		// union { double d; int64_t i; } other;
+		// other.d = fov->_value[i];
+		// int64_t lili = llabs(self.i - other.i);
+		//
+		// Use std:set_bit except this is only in c++20 and newer.
+		//
+		// ... What does work is avoiding llabs entirely.
+		// The meta-issue is this (and its a bit delicate):
+		// if _value[i] is +999 and fov->_value[i] is -999
+		// then lili becomes 0x8000000000000000
+		// since these two only differ by the sign bit.
+		// So lili is not just negative, but max negative.
+		// Note also that minus 0x8000000000000000 is still 0x8000000000000000
+		// Strange but true.
+		//
+		// Casting it to uint64_t nails that sign bit in place.
+		//
+		int64_t self = *(int64_t*) &(_value[i]);
+		int64_t other= *(int64_t*) &(fov->_value[i]);
+		int64_t lili = self - other;
+		if (0LL > lili) lili = -lili;
+		uint64_t lulu = (uint64_t) lili;
+
+		// Where is the ULPS?
+		// The 15th decimal place differs by five ULPS:
+		//     -1.0e-55
+		//        123456789012345
+		//     -1.000000000000001e-55
+		// So the above two will pass for being equal.
+		// A diff of 24 ULPS is about one part in 1e-14
+
+#define MAX_ULPS 24ULL
+		if (MAX_ULPS < lulu) return false;
+	}
 	return true;
 }
 
