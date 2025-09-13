@@ -24,7 +24,8 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "FoldLink.h"
 
 using namespace opencog;
@@ -62,7 +63,20 @@ ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 	// This is right to left.
 	size_t osz = _outgoing.size();
 	for (int i = osz-1; 0 <= i; i--)
-		expr = kons(as, silent, _outgoing[i], expr);
+	{
+		ValuePtr vi(FunctionLink::get_value(as, silent,  _outgoing[i]));
+		if (not vi->is_type(LINK_VALUE))
+		{
+			expr = kons(as, silent, vi, expr);
+			continue;
+		}
+
+		// One more loop.
+		const ValueSeq& vseq = LinkValueCast(vi)->value();
+		size_t vlen = vseq.size();
+		for (int j = vlen-1; 0 <= j; j--)
+			expr = kons(as, silent, vseq[j], expr);
+	}
 
 	return expr;
 }
