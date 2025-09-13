@@ -1,5 +1,5 @@
 ;
-; math-library-test.scm -- Test assorted elementary arithmetic functions
+; math-library-test.scm -- Test assorted elementary numerical functions
 ;
 ; To run by hand, just say `guile -s math-library-test.scm`.
 ;
