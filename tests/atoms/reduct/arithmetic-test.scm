@@ -14,6 +14,19 @@
 (test-begin tname)
 
 ; -----------------------------------------------
+; Make sure numeric equality actually works.
+
+(test-assert "equality"
+	(equal?
+		(FloatValue 0 1 2 2 3)
+		(FloatValue 0 1 2 2 3)))
+
+(test-assert "non-equality"
+	(not (equal?
+		(FloatValue 0 1 2 2 3)
+		(FloatValue 0 -1 -2 2 3))))
+
+; -----------------------------------------------
 ; Test fetching pairs of vectors from location
 
 (cog-set-value! (Anchor "location") (Predicate "vector-pairs")
@@ -34,9 +47,10 @@
 			(ElementOf (Number 0) pair-location)
 			(ElementOf (Number 1) pair-location)))))
 
+(define (wtf x) (format #t "Minus: ~A\n" x) x)
 (test-assert "pair diff"
-	(equal? (FloatValue 0 1 2 2 3)
-		(cog-execute! (Minus pair-location))))
+	(equal? (FloatValue 0 -1 -2 2 3)
+		(wtf (cog-execute! (Minus pair-location)))))
 
 (test-assert "pair element diff"
 	(equal? (FloatValue 0 1 2 2 3)
