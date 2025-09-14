@@ -40,7 +40,7 @@ namespace opencog
 class FoldLink : public FunctionLink
 {
 protected:
-	ValuePtr knil;
+	Handle knil;
 	virtual ValuePtr kons(AtomSpace*, bool,
 	                      const ValuePtr&, const ValuePtr&) const = 0;
 

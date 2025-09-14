@@ -24,7 +24,8 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include "FoldLink.h"
 
 using namespace opencog;
@@ -54,15 +55,44 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
+/// This performs a fold-right, so that (for example)
+/// (Plus A B C) is expanded into (Plus A (Plus B (Plus C 0)))
+/// Note that srfi-1 default fold is fold-left.
+/// Note that the PlusLink, TimesLink etc. depend delciately
+/// on this being fold-right; otherwise, they break.
 ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
+	bool unpack = false;
 
 	// Loop over the outgoing set, kons'ing away.
-	// This is right to left.
+	// This is right to left; so this is fold-right as explained above.
 	size_t osz = _outgoing.size();
 	for (int i = osz-1; 0 <= i; i--)
-		expr = kons(as, silent, _outgoing[i], expr);
+	{
+		// Some extra crazy-making for unary Minus.
+		// The issue here is (Minus (ListValue ...)) is mis-understood
+		// to be a unary Minus, which the MinusLink ctor turns into
+		// (Minus (Number 0) (ListValue ...)) which then comes out wrong.
+		// So we undo that with this if-statement.
+		if (unpack and (0 == i) and content_eq(_outgoing[0], knil)) break;
+
+		ValuePtr vi(FunctionLink::get_value(as, silent,  _outgoing[i]));
+		if (not vi->is_type(LINK_VALUE))
+		{
+			expr = kons(as, silent, vi, expr);
+			continue;
+		}
+
+		// One more loop.
+		const ValueSeq& vseq = LinkValueCast(vi)->value();
+		size_t vlen = vseq.size();
+		for (int j = vlen-1; 0 <= j; j--)
+		{
+			expr = kons(as, silent, vseq[j], expr);
+			unpack = true;
+		}
+	}
 
 	return expr;
 }
