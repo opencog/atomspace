@@ -55,6 +55,11 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
+/// This performs a fold-right, so that (for example)
+/// (Plus A B C) is expanded into (Plus A (Plus B (Plus C 0)))
+/// Note that srfi-1 default fold is fold-left.
+/// Note that the PlusLink, TimesLink etc. depend delciately
+/// on this being fold-right; otherwise, they break.
 ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
