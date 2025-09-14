@@ -18,13 +18,56 @@
 
 (test-assert "equality"
 	(equal?
-		(FloatValue 0 1 2 2 3)
-		(FloatValue 0 1 2 2 3)))
+		(FloatValue 0 1 2 2 3 9999)
+		(FloatValue 0 1 2 2 3 9999)))
+
+(test-assert "cog equality"
+	(cog-equal?
+		(FloatValue 0 1 2 2 3 6666)
+		(FloatValue 0 1 2 2 3 6666)))
 
 (test-assert "non-equality"
 	(not (equal?
-		(FloatValue 0 1 2 2 3)
-		(FloatValue 0 -1 -2 2 3))))
+		(FloatValue 0  1  2 2 3  123456)
+		(FloatValue 0 -1 -2 2 3 -123456))))
+
+(test-assert "cog non-equality"
+	(not (cog-equal?
+		(FloatValue 0  1  2 2 3  123456)
+		(FloatValue 0 -1 -2 2 3 -123456))))
+
+(test-assert "near-not-equality"
+	(not (equal?
+		(FloatValue 1.0e-12)
+		(FloatValue 1.0e-13))))
+
+(test-assert "small-near-not-equality"
+	(not (equal?
+		(FloatValue 1.0e-30)
+		(FloatValue -1.0e-30))))
+
+(test-assert "very-near-not-equality"
+	(not (equal?
+		(FloatValue 1.0e-130)
+		(FloatValue -1.0e-130))))
+
+(test-assert "very-offset-not-equality"
+	(not (equal?
+		(FloatValue 1.0e-130)
+		(FloatValue -1.0000000001e-130))))
+
+(test-assert "very-near-still-no-equality"
+	(not (equal?
+		(FloatValue -1.0e-130)
+		(FloatValue -1.0000000001e-130))))
+
+; These two differ by five ULPS. Current code asks
+; for equality to 24 ULP or better, so these cound as equal.
+(test-assert "very-near-equality"
+	(equal?
+		(FloatValue -1.0e-130)
+		;              123456789012345
+		(FloatValue -1.000000000000001e-130)))
 
 ; -----------------------------------------------
 ; Test fetching pairs of vectors from location
@@ -34,7 +77,7 @@
 		(FloatValue 1 2 3 4 5)
 		(FloatValue 1 1 1 2 2)))
 
-(define pair-location 
+(define pair-location
 	(FloatValueOf (Anchor "location") (Predicate "vector-pairs")))
 
 (test-assert "pair sum"
@@ -49,7 +92,7 @@
 
 (define (wtf x) (format #t "Minus: ~A\n" x) x)
 (test-assert "pair diff"
-	(equal? (FloatValue 0 -1 -2 2 3)
+	(equal? (FloatValue 0 1 2 2 3)
 		(wtf (cog-execute! (Minus pair-location)))))
 
 (test-assert "pair element diff"
