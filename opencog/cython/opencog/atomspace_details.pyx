@@ -1,6 +1,7 @@
 from libcpp cimport bool
 from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
+from libcpp.memory cimport static_pointer_cast
 from cython.operator cimport dereference as deref, preincrement as inc
 
 # from atomspace cimport *
@@ -64,6 +65,10 @@ cdef class AtomSpace(Value):
         self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
         self.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>self.asp);
+
+    cdef cAtomSpacePtr get_atomspace_ptr(self):
+        # Cast the ValuePtr to AtomSpacePtr
+        return static_pointer_cast[cAtomSpace, cValue](self.asp)
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):

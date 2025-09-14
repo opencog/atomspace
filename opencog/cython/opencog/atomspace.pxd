@@ -230,6 +230,9 @@ cdef class AtomSpace(Value):
     cdef cAtomSpace *atomspace
     cdef object parent_atomspace
 
+    # Method to get the AtomSpacePtr
+    cdef cAtomSpacePtr get_atomspace_ptr(self)
+
 
 cdef create_python_value_from_c_value(const cValuePtr& value)
 
