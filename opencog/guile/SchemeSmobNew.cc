@@ -79,7 +79,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 
 SCM SchemeSmob::handle_to_scm (const Handle& h)
 {
-	return protom_to_scm(AtomCast(h));
+	return protom_to_scm(h);
 }
 
 SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)

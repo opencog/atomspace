@@ -662,14 +662,8 @@ public:
 
 #define CREATE_DECL(CNAME)  std::make_shared<CNAME>
 
-static inline AtomPtr AtomCast(const ValuePtr& pa)
-    { return std::dynamic_pointer_cast<Atom>(pa); }
-
-static inline AtomPtr AtomCast(const Handle& h)
-    { return AtomPtr(h); }
-
 static inline Handle HandleCast(const ValuePtr& pa)
-    { return Handle(AtomCast(pa)); }
+    { return Handle(std::dynamic_pointer_cast<Atom>(pa)); }
 
 static inline ValuePtr ValueCast(const Handle& h)
     { return std::dynamic_pointer_cast<Value>(h); }
