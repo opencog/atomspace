@@ -124,7 +124,7 @@ bool Link::operator==(const Atom& other) const
     const HandleSeq& rhs = other.getOutgoingSet();
     for (Arity i = 0; i < sz; i++)
     {
-        if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)rhs[i]))
+        if (*(_outgoing[i]) != *(rhs[i]))
             return false;
     }
     return true;
@@ -161,7 +161,7 @@ bool Link::operator<(const Atom& other) const
     for (Arity i=0; i < arity; i++)
     {
         const Handle& ll(outgoing[i]);
-        const AtomPtr& rl(other_outgoing[i]);
+        const Handle& rl(other_outgoing[i]);
         if (ll->operator!=(*rl))
             return ll->operator<(*rl);
     }

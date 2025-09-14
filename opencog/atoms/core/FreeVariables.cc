@@ -382,7 +382,7 @@ bool FreeVariables::is_identical(const FreeVariables& other) const
 	if (ary != other.varseq.size()) return false;
 	for (Arity i=0; i< ary; i++)
 	{
-		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i]))
+		if (*(varseq[i]) != *(other.varseq[i]))
 			return false;
 	}
 	return true;

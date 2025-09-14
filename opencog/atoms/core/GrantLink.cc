@@ -72,7 +72,7 @@ bool GrantLink::operator==(const Atom& other) const
 
 	// Perform a content-compare on the first Atom in the outgoing set.
 	const Handle& rhs = other.getOutgoingAtom(0);
-	if (*((AtomPtr)_outgoing[0]) != *((AtomPtr)rhs))
+	if (*(_outgoing[0]) != *(rhs))
 		return false;
 
 	return true;
