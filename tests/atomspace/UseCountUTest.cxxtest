@@ -149,7 +149,7 @@ public:
         anchor = atomSpace->add_node(ANCHOR_NODE, "*** The Anchor ***");
         __totalAdded++;
 
-        long int initial_use_count = AtomPtr(anchor).use_count();
+        long int initial_use_count = Handle(anchor).use_count();
         std::cout << std::endl;
         std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
         size_t isize = atomSpace->get_size();
@@ -172,7 +172,7 @@ public:
         // The removal threads are joined last.
         for (std::thread& t : thread_pool) t.join();
 
-        long int final_use_count = AtomPtr(anchor).use_count();
+        long int final_use_count = Handle(anchor).use_count();
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
         size_t fsize = atomSpace->get_size();
         std::cout << "Final atomspace size: " << fsize << std::endl;
