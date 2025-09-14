@@ -701,7 +701,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 
 	if (nameserver().isA(t, LINK))
 	{
-		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		CPPL_TO_SCML(v, handle_to_scm)
 	}
 
@@ -712,7 +712,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 			const std::vector<double>& v = NumberNodeCast(pa)->value();
 			CPPL_TO_SCML(v, scm_from_double)
 		}
-		const std::string& name = AtomCast(pa)->get_name();
+		const std::string& name = HandleCast(pa)->get_name();
 		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
 	}
 
@@ -782,7 +782,7 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 
 	if (nameserver().isA(t, LINK))
 	{
-		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		if (index < v.size()) return handle_to_scm(v[index]);
 	}
 
@@ -795,7 +795,7 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		}
 		else
 		{
-			const std::string& name = AtomCast(pa)->get_name();
+			const std::string& name = HandleCast(pa)->get_name();
 			if (0 == index) return scm_from_string(name);
 		}
 	}

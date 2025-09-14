@@ -52,7 +52,7 @@ using namespace std;
 #define NUM_VHS 4
 #define NUM_VH_NODES 3
 
-Handle addRealAtom(AtomSpace& as, AtomPtr atom,
+Handle addRealAtom(AtomSpace& as, Handle atom,
                    TruthValuePtr tvn = TruthValuePtr())
 {
     TruthValuePtr newTV = tvn ? tvn: atom->getTruthValue();
@@ -133,9 +133,9 @@ public:
 
 class AtomComparator {
 public:
-    inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
+    inline bool operator()(const Handle& a, const Handle& b) const
         { return this->test(a,b); }
-    virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
+    virtual bool test(const Handle&, const Handle&) const = 0;
 };
 
 /**

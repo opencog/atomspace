@@ -32,7 +32,6 @@
 namespace opencog {
 
 const Handle Handle::UNDEFINED;
-const AtomPtr Handle::NULL_POINTER;
 
 ContentHash Handle::value(void) const
 {
@@ -362,11 +361,6 @@ std::string oc_to_string(const TypeSet& types, const std::string& indent)
 		}
 	}
 	return ss.str();
-}
-
-std::string oc_to_string(const AtomPtr& aptr, const std::string& indent)
-{
-	return oc_to_string(aptr->get_handle(), indent);
 }
 
 std::string oc_to_string(const LinkPtr& lptr, const std::string& indent)

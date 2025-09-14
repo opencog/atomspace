@@ -264,7 +264,7 @@ public:
      * then that is returned.
      */
     Handle add_atom(const Handle&);
-    Handle add_atom(const AtomPtr& a)
+    inline Handle add_atom(const AtomPtr& a)
         { return add_atom(a->get_handle()); }
 
     /**

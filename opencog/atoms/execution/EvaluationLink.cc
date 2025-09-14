@@ -333,7 +333,7 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 
 	// Actually alpha-convert, and compare.
 	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
-	return (*((AtomPtr)h0) == *((AtomPtr)h1a));
+	return (*h0 == *h1a);
 }
 
 /// Check for set membership

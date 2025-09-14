@@ -125,7 +125,7 @@ bool AtomSpace::content_compare(const AtomSpace& space_first,
 
         // If the atoms don't match... Compare the atoms not the pointers
         // which is the default if we just use Handle operator ==.
-        if (*((AtomPtr) atom_first) != *((AtomPtr) atom_second))
+        if (*atom_first != *atom_second)
         {
             if (emit_diagnostics)
                 std::cout << "compare_atomspaces - first atom " <<
