@@ -217,6 +217,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void clear()
         bint extract_atom(cHandle h, bint recursive)
 
+    ctypedef shared_ptr[cAtomSpace] cAtomSpacePtr "opencog::AtomSpacePtr"
+
     cdef cValuePtr createAtomSpace(cAtomSpace *parent)
     cdef cValuePtr as_cast "AtomSpaceCast"(cAtomSpace *) except +
 
