@@ -101,6 +101,24 @@
 			(ElementOf (Number 0) pair-location)
 			(ElementOf (Number 1) pair-location)))))
 
+(test-assert "pair times"
+	(equal? (FloatValue 1 2 3 8 10)
+		(cog-execute! (Times pair-location))))
+
+(test-assert "pair divide"
+	(equal? (FloatValue 1 2 3 2 2.5)
+		(cog-execute! (Divide pair-location))))
+
+; Slightly more complex division
+(cog-set-value! (Anchor "location") (Predicate "vector-pairs")
+	(LinkValue
+		(FloatValue 1 1 1 2 2)
+		(FloatValue 1 2 3 4 5)))
+
+(test-assert "pair fraction"
+	(equal? (FloatValue 1 0.5 (/ 1.0 3.0) 0.5 0.4)
+		(cog-execute! (Divide pair-location))))
+
 ; -----------------------------------------------
 (test-end tname)
 (opencog-test-end)
