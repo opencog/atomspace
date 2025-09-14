@@ -63,12 +63,20 @@ void FoldLink::init(void)
 ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 {
 	ValuePtr expr = knil;
+	bool unpack = false;
 
 	// Loop over the outgoing set, kons'ing away.
-	// This is right to left.
+	// This is right to left; so this is fold-right as explained above.
 	size_t osz = _outgoing.size();
 	for (int i = osz-1; 0 <= i; i--)
 	{
+		// Some extra crazy-making for unary Minus.
+		// The issue here is (Minus (ListValue ...)) is mis-understood
+		// to be a unary Minus, which the MinusLink ctor turns into
+		// (Minus (Number 0) (ListValue ...)) which then comes out wrong.
+		// So we undo that with this if-statement.
+		if (unpack and (0 == i) and content_eq(_outgoing[0], knil)) break;
+
 		ValuePtr vi(FunctionLink::get_value(as, silent,  _outgoing[i]));
 		if (not vi->is_type(LINK_VALUE))
 		{
@@ -80,7 +88,10 @@ ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 		const ValueSeq& vseq = LinkValueCast(vi)->value();
 		size_t vlen = vseq.size();
 		for (int j = vlen-1; 0 <= j; j--)
+		{
 			expr = kons(as, silent, vseq[j], expr);
+			unpack = true;
+		}
 	}
 
 	return expr;
