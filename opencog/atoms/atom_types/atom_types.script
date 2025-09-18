@@ -29,6 +29,7 @@ TOP_TYPE
 ARG <- TOP_TYPE
 BOOL_ARG <- ARG
 FLOAT_ARG <- ARG
+FLOAT32_ARG <- ARG
 INT_ARG <- ARG
 HANDLE_ARG <- ARG
 STRING_ARG <- ARG
@@ -37,6 +38,7 @@ VOID_ARG <- ARG
 
 BOOL_VEC_ARG <-  ARG
 FLOAT_VEC_ARG <-  ARG
+FLOAT32_VEC_ARG <-  ARG
 HANDLE_VEC_ARG <-  ARG
 STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
@@ -46,11 +48,12 @@ VALUE_VEC_ARG <-  ARG
 // Think of them as decorations that can be hung on an Atom.
 VALUE <- TOP_TYPE
 
-VOID_VALUE <- VALUE,VOID_ARG          // singleton Value holding nothing at all.
+VOID_VALUE <- VALUE,VOID_ARG              // singleton Value holding nothing.
 BOOL_VALUE <- VALUE,BOOL_VEC_ARG,INT_ARG  // vector of booleans
-FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG    // vector of floats
-STRING_VALUE <- VALUE,STRING_VEC_ARG  // vector of strings
-LINK_VALUE <- VALUE,VALUE_VEC_ARG     // vector of Values ("link" holding Values)
+FLOAT_VALUE <- VALUE,FLOAT_VEC_ARG        // vector of double-precision floats
+FLOAT32_VALUE <- VALUE,FLOAT32_VEC_ARG    // vector of single-precision floats
+STRING_VALUE <- VALUE,STRING_VEC_ARG      // vector of strings
+LINK_VALUE <- VALUE,VALUE_VEC_ARG         // vector of Values ("Link")
 
 // StreamValue is used in Sensory and other projects to distinguish
 // between LinkValues that are static and serve to package together
