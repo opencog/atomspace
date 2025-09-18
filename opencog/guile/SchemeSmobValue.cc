@@ -776,37 +776,37 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 
-	if (nameserver().isA(t, FLOAT_VALUE))
+	else if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);
 	}
 
-	if (nameserver().isA(t, BOOL_VALUE))
+	else if (nameserver().isA(t, BOOL_VALUE))
 	{
 		const std::vector<bool>& v = BoolValueCast(pa)->value();
 		if (index < v.size()) return scm_from_bool(v[index]);
 	}
 
-	if (nameserver().isA(t, STRING_VALUE))
+	else if (nameserver().isA(t, STRING_VALUE))
 	{
 		const std::vector<std::string>& v = StringValueCast(pa)->value();
 		if (index < v.size()) return scm_from_string(v[index]);
 	}
 
-	if (nameserver().isA(t, LINK_VALUE))
+	else if (nameserver().isA(t, LINK_VALUE))
 	{
 		const std::vector<ValuePtr>& v = LinkValueCast(pa)->value();
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 
-	if (nameserver().isA(t, LINK))
+	else if (nameserver().isA(t, LINK))
 	{
 		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		if (index < v.size()) return handle_to_scm(v[index]);
 	}
 
-	if (nameserver().isA(t, NODE))
+	else if (nameserver().isA(t, NODE))
 	{
 		if (nameserver().isA(t, NUMBER_NODE))
 		{
