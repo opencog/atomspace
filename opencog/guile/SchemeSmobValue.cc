@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atoms/value/Float32Value.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -495,7 +496,14 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 	ValuePtr nvp;
 
 	// OK. What we do next depends on the actual type of the value.
-	if (nameserver().isA(t, FLOAT_VALUE))
+	if (nameserver().isA(t, FLOAT32_VALUE))
+	{
+		std::vector<float> v = Float32ValueCast(pa)->value();
+		if (v.size() <= index) v.resize(index+1);
+		v[index] = (float) verify_real(svalue, "cog-set-value-ref!", 3);
+		nvp = createFloat32Value(t, v);
+	}
+	else if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		std::vector<double> v = FloatValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
@@ -675,6 +683,12 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	ValuePtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
+	if (nameserver().isA(t, FLOAT32_VALUE))
+	{
+		const std::vector<float>& v = Float32ValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_double)
+	}
+
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
@@ -755,6 +769,12 @@ SCM SchemeSmob::ss_value_ref (SCM s1, SCM s2, SCM s3)
 SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 {
 	Type t = pa->get_type();
+
+	if (nameserver().isA(t, FLOAT32_VALUE))
+	{
+		const std::vector<float>& v = Float32ValueCast(pa)->value();
+		if (index < v.size()) return scm_from_double(v[index]);
+	}
 
 	if (nameserver().isA(t, FLOAT_VALUE))
 	{
