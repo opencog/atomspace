@@ -73,9 +73,9 @@ void BetaReduceUTest::test_unquote()
 	TS_ASSERT(scox != nullptr);
 
 	// Create a value to plug in;
-	Handle concept = N(CONCEPT_NODE, "hippy chick");
+	Handle smothers_brothers = N(CONCEPT_NODE, "hippy chick");
 	HandleSeq vals;
-	vals.push_back(concept);
+	vals.push_back(smothers_brothers);
 
 	// Perform beta reduction
 	const Variables& vars = scox->get_variables();
@@ -88,12 +88,12 @@ void BetaReduceUTest::test_unquote()
 	// This is the answer we expect to get:
 	Handle oxy =
 		L(SET_LINK,
-			concept,
+			smothers_brothers,
 			L(QUOTE_LINK, N(VARIABLE_NODE, "$X")),
 			L(QUOTE_LINK,
 				L(SET_LINK,
 					N(VARIABLE_NODE, "$X"),
-					L(UNQUOTE_LINK, concept))));
+					L(UNQUOTE_LINK, smothers_brothers))));
 
 	printf("expected set=%s\n", oxy->to_string().c_str());
 
