@@ -139,11 +139,19 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 // Execute h. It its a lambda, unwrap it.
 static Handle maybe_exec(const Handle& h, Variables& redvars)
 {
-	Handle hred;
+	Handle hred(h);
+
+	// XXX FIXME: this is a weird hack that I do not understand.
+	// ExecutableLinks can return anything, and not just Atoms.
+	// So, here we execute it, and if a non-Atom Value is returned,
+	// then pretend the execution never happened. Is this actually
+	// correct? Won't there be weird side-effects? WTF??
 	if (h->is_type(EXECUTABLE_LINK))
-		hred = HandleCast(h->execute());
-	else
-		hred = h;
+	{
+		ValuePtr vp = h->execute();
+		if (vp->is_atom())
+			hred = HandleCast(vp);
+	}
 
 	if (hred->is_type(LAMBDA_LINK))
 	{
