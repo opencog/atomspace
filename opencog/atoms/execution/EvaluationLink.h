@@ -38,6 +38,11 @@ public:
 	EvaluationLink(const EvaluationLink&) = delete;
 	EvaluationLink& operator=(const EvaluationLink&) = delete;
 
+	virtual bool is_executale() const { return true; }
+	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
+		return evaluate(as, silent);
+	}
+
 	virtual bool is_evaluatable() const { return true; }
 	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
 		return do_evaluate(as, get_handle(), silent);
