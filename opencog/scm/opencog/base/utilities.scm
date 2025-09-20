@@ -18,7 +18,6 @@
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
-; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- max-element-by-key -- Get maximum element in a list
@@ -330,49 +329,6 @@
 	(if (cog-node? LINK)
 		(list LINK)
 		(append-map recursive-helper (cog-outgoing-set LINK)))
-)
-
-; ---------------------------------------------------------------------
-(define-public (filter-hypergraph pred? atom-list)
-"
-  filter-hypergraph -- recursively traverse outgoing links of graph.
-
-  filter-hypergraph pred? atom-list
-
-  Given a list of atoms, and a scheme-predicate pred?, return a
-  list of atoms that satisfy the scheme-predicate.  This is not
-  a simple srfi-1 'filter', rather, it traverses the hypergraph,
-  applying the predicate to the subgraphs.
-
-  In the current implementation, the scheme-predicate is assumed to
-  select only for Nodes.
-"
-	(define (fv atoms lst)
-		(cond
-			; If its a query word, append it to the list
-			((cog-node? atoms)
-				(if (pred? atoms)
-					(cons atoms lst)
-					lst
-				)
-			)
-
-			; If its a link, scan its outgoing set
-			((cog-link? atoms)
-				(fv (cog-outgoing-set atoms) lst)
-			)
-
-			; If its a list then scan the list
-			((pair? atoms)
-				(append!
-					(append-map!
-						(lambda (x) (filter-hypergraph pred? x)) atoms)
-					lst
-				)
-			)
-		)
-	)
-	(fv atom-list '())
 )
 
 ; --------------------------------------------------------------------
