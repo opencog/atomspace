@@ -127,12 +127,10 @@ private:
 	static SCM value_ref(const ValuePtr&, size_t);
 
 	// Property setters on atoms
-	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM set_value(const Handle&, const Handle&,
 	                     const ValuePtr&, SCM, const char*);
 	static SCM ss_set_values(SCM, SCM);
-	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
 	static SCM ss_set_value_ref(SCM, SCM, SCM, SCM);
@@ -143,7 +141,6 @@ private:
 	static SCM from_type(const ValuePtr&);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
-	static SCM ss_tv(SCM);
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
@@ -163,11 +160,6 @@ private:
 	static SCM ss_get_subtypes(SCM);
 	static SCM ss_subtype_p(SCM, SCM);
 	static SCM ss_count(SCM, SCM);
-
-	// Truth values
-	static SCM ss_tv_get_mean(SCM);
-	static SCM ss_tv_get_confidence(SCM);
-	static SCM ss_tv_get_count(SCM);
 
 	// Atom Spaces
 	static SCM ss_new_as(SCM);

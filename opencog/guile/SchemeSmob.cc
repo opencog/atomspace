@@ -346,8 +346,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-set-value-ref!",    4, 0, 0, C(ss_set_value_ref));
 
 	// Value property setters on atoms
-	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 	register_proc("cog-inc-value!",        4, 0, 0, C(ss_inc_value));
 	register_proc("cog-update-value!",     3, 0, 0, C(ss_update_value));
 
@@ -367,14 +365,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys->alist",       1, 0, 0, C(ss_keys_alist));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-value-type",        2, 0, 0, C(ss_value_type));
-	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));
 	register_proc("cog-as",                0, 1, 0, C(ss_as));
-
-	// Truth-values
-	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
-	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
-	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 0, 1, C(ss_new_as));

@@ -297,8 +297,9 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	CHKEV(eval);
 
 	// Now, the atomspace has three atoms (Inheritance julian king)
+	// Plus also (Predicate "*-TruthValueKey-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 3);
+	TS_ASSERT_EQUALS(size, 4);
 
 	// Start out with Anneliese a newborn princess.
 	eval->eval(
@@ -306,7 +307,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 4);
+	TS_ASSERT_EQUALS(size, 5);
 
 	eval->eval(
 		"(exe-royalize anne)"
@@ -317,8 +318,9 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// 3:  (Inheritance julian king)
 	// 3:  (Inheritance anne queen)
 	// 3:  (ExecutionLink (GroundedSchemaNode) (ListLink anne))
+	// Plus also (Predicate "*-TruthValueKey-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 9);
+	TS_ASSERT_EQUALS(size, 10);
 
 	size = as->get_size();
 

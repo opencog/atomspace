@@ -592,29 +592,6 @@
        #t
 ")
 
-(set-procedure-property! cog-inc-count! 'documentation
-"
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
-
-  Atomically increment the count on a CountTruthValue by CNT. The mean
-  and confidence values are left untouched.  CNT may be any floating
-  point number (positive or negative).
-
-  If the current truth value on the ATOM is not a CountTruthValue,
-  then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.
-
-  The increment is atomic; that is, it is safe against racing threads.
-
-  Example usage:
-     (cog-inc-count! (Concept \"Answer\") 42.0)
-
-  See also:
-      cog-count -- Fetch the current count.
-      cog-inc-value! -- Increment an arbitrary FloatValue.
-      cog-update-value! -- A generic atomic read-modify-write.
-")
-
 (set-procedure-property! cog-inc-value! 'documentation
 "
   cog-inc-value! ATOM KEY CNT REF -- Increment value on ATOM by CNT.
@@ -646,69 +623,6 @@
 ")
 
 ; ===================================================================
-
-(set-procedure-property! cog-tv 'documentation
-"
- cog-tv ATOM
-    Return the truth-value of ATOM.
-
-    Example:
-       ; Define a node
-       guile> (define x
-                 (Concept \"abc\" (SimpleTruthValue 0.2 0.5)))
-       guile> (cog-tv x)
-       (stv 0.2 0.5)
-       guile> (cog-tv? (cog-tv x))
-       #t
-
-    See also: cog-set-tv!
-")
-
-(set-procedure-property! cog-set-tv! 'documentation
-"
- cog-set-tv! ATOM TV
-    Set the truth-value of ATOM to TV.
-
-    Example:
-       ; Define a node
-       guile> (define x (Concept \"def\"))
-       guile> (cog-tv x)
-       (stv 1 0)
-       guile> (cog-set-tv! x (SimpleTruthValue 0.9 0.8))
-       (ConceptNode \"def\" (stv 0.9 0.8))
-       guile> (cog-tv x)
-       (stv 0.9 0.8)
-")
-
-(set-procedure-property! cog-tv-mean 'documentation
-"
- cog-tv-mean TV
-    Return the `mean` of the TruthValue TV. This is a single
-    floating point-number.
-
-    See also: cog-mean
-")
-
-(set-procedure-property! cog-tv-confidence 'documentation
-"
- cog-tv-confidence TV
-    Return the `confidence` of the TruthValue TV. This is a single
-    floating point-number.
-
-    See also: cog-confidence
-")
-
-(set-procedure-property! cog-tv-count 'documentation
-"
- cog-tv-count TV
-    Return the `count` of the TruthValue TV. This is a single
-    floating point-number.
-
-    See also: cog-count
-")
-
-; ===================================================================
-;
 
 (set-procedure-property! cog-new-value 'documentation
 "

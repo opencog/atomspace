@@ -255,51 +255,7 @@ SCM SchemeSmob::ss_arity (SCM svalue)
 }
 
 /* ============================================================== */
-/* Truth value setters/getters */
-
-SCM SchemeSmob::ss_tv (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-tv");
-	return protom_to_scm(ValueCast(h->getTruthValue()));
-}
-
-SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
-{
-	Handle h = verify_handle(satom, "cog-set-tv!");
-	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
-	scm_remember_upto_here_1(stv);
-
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-tv!");
-	try
-	{
-		Handle newh = asp->set_truthvalue(h, tv);
-
-		if (h == newh) return satom;
-		return handle_to_scm(newh);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-set-tv!", satom);
-	}
-}
-
-/// Atomic increment the count, keeping mean and confidence as-is.
-/// Converts existing truth value to a CountTruthValue.
-SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
-{
-	Handle h = verify_handle(satom, "cog-inc-count!");
-	double cnt = verify_real(scnt, "cog-inc-count!", 2);
-
-	const AtomSpacePtr& asp = ss_get_env_as("cog-inc-count!");
-	Handle ha(asp->increment_countTV(h, cnt));
-	if (ha == h)
-		return satom;
-	return handle_to_scm(ha);
-}
-
-/* ============================================================== */
 /// Atomic increment the count of some generic FloatValue.
-/// Just like ss_inc_count but generic.
 /// key == key for value
 /// cnt == how much to increment
 /// ref == list-ref, which location to increment.

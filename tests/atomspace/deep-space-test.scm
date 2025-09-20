@@ -80,8 +80,9 @@
 		(test-equal "count-tv" cnt
 			(inexact->exact (cog-tv-count (cog-tv (cog-node 'Concept "hello")))))
 
-		; Each atomspace should contain just one atom.
-		(test-equal "atomspace-size" 1 (count-all))
+		; Each atomspace should contain just two atoms.
+		; One, plus (Predicate "*-TruthValueKey-*")
+		(test-equal "atomspace-size" 2 (count-all))
 		(set! cnt (+ 1 cnt)))
 	space-list)
 
@@ -104,7 +105,8 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
-		(test-equal "atomspace-size" 2 (count-all))
+		; Two atoms, plus (Predicate "*-TruthValueKey-*")
+		(test-equal "atomspace-size" 3 (count-all))
 	)
 	space-list)
 
@@ -203,8 +205,9 @@
 		(test-equal "count-tv" cnt
 			(inexact->exact (cog-tv-count (cog-tv (Concept "hello")))))
 
-		; Each atomspace should contain just three atoms.
-		(test-equal "atomspace-size" 3 (count-all))
+		; Each atomspace should contain just four atoms.
+		; Three, plus (Predicate "*-TruthValueKey-*")
+		(test-equal "atomspace-size" 4 (count-all))
 
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))

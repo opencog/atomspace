@@ -63,66 +63,10 @@ TruthValuePtr TruthValue::FALSE_TV()
 	return instance;
 }
 
-TruthValuePtr TruthValue::TRIVIAL_TV()
-{
-	// False, with no confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
-	return instance;
-}
-
 bool TruthValue::isDefaultTV() const
 {
 	static TruthValuePtr dtv(DEFAULT_TV());
 	if (dtv.get() == this) return true;
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-	return false;
-}
-
-/**
- * Return true if the TV value is one of the pre-defined TV values.
- */
-bool TruthValue::isDefinedTV() const
-{
-	TruthValuePtr dtv = DEFAULT_TV();
-	if (dtv.get() == this) return true;
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = TRUE_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = FALSE_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = TRIVIAL_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = TRUE_TV();
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = FALSE_TV();
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = TRIVIAL_TV();
 	if (get_type() == dtv->get_type() and
 	    get_mean() == dtv->get_mean() and
 	    get_confidence() == dtv->get_confidence())
