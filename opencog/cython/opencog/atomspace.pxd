@@ -74,7 +74,6 @@ cdef class Value:
 
 
 # TruthValue
-ctypedef double count_t
 ctypedef double confidence_t
 ctypedef double strength_t
 
@@ -84,7 +83,6 @@ cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
     cdef cppclass cTruthValue "const opencog::TruthValue"(cValue):
         strength_t get_mean()
         confidence_t get_confidence()
-        count_t get_count()
         @staticmethod
         tv_ptr DEFAULT_TV()
         bint operator==(cTruthValue h)
@@ -98,7 +96,6 @@ cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "openco
         cSimpleTruthValue(double, double)
         strength_t get_mean()
         confidence_t get_confidence()
-        count_t get_count()
         string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
@@ -106,7 +103,6 @@ cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "openco
 cdef class TruthValue(Value):
     cdef strength_t _mean(self)
     cdef confidence_t _confidence(self)
-    cdef count_t _count(self)
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
 
