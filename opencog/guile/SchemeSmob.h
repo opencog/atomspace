@@ -186,10 +186,6 @@ private:
 	static SCM make_as(const AtomSpacePtr&);
 	static const AtomSpacePtr& ss_to_atomspace(SCM);
 
-	// Free variables
-	static SCM ss_get_free_variables(SCM);
-	static SCM ss_is_closed(SCM);
-
 	// Misc utilities
 	static SCM convert_to_utf8(void *, SCM, SCM);
 	static std::string to_string(SCM);
