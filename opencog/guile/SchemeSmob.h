@@ -144,9 +144,6 @@ private:
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_tv(SCM);
-	static SCM ss_get_mean(SCM);
-	static SCM ss_get_confidence(SCM);
-	static SCM ss_get_count(SCM);
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);

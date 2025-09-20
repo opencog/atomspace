@@ -651,33 +651,6 @@
       cog-set-value-ref! - Set one location in a vector.
 ")
 
-(set-procedure-property! cog-mean 'documentation
-"
- cog-mean ATOM
-    Return the `mean` of the TruthValue on ATOM. This is a single
-    floating point-number.
-
-    See also: cog-confidence, cog-count, cog-tv
-")
-
-(set-procedure-property! cog-confidence 'documentation
-"
- cog-confidence ATOM
-    Return the `confidence` of the TruthValue on ATOM. This is a single
-    floating point-number.
-
-    See also: cog-mean, cog-count, cog-tv
-")
-
-(set-procedure-property! cog-count 'documentation
-"
- cog-count ATOM
-    Return the `count` of the TruthValue on ATOM. This is a single
-    floating point-number.
-
-    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
-")
-
 ; ===================================================================
 
 (set-procedure-property! cog-tv 'documentation
