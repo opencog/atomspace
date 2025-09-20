@@ -49,17 +49,28 @@
 	))
 
 ; So create the thread, and run it.
-(cog-evaluate! pllel)
+(cog-execute! pllel)
 
 ; And again, just for good luck!
-(cog-evaluate! pllel)
+(cog-execute! pllel)
 
-; This is almost identical to the above, except that the ThreadJoinLink
-; will not return control to the evaluator until all of the threads
-; have finished. The longest running thread takes five seconds, so
-; sit back and relax and watch the pretty messages appear.
+; This is almost identical to the above, except that the
+; ExecuteThreadedLink places the results of execution onto a
+; QueueValue. The QueueValue is a thread-safe queue that is
+; created open-for-writing by the writer, and remains open
+; until the writer is done. Readers can read elements off the
+; queue, one by one, or in a batch. If the queue is empty,
+; readers will block until the writer places something on
+; the queue, or until the writer closes the queue. When the
+; queue is closed, readers will unblock (and get whatever is
+; left, i.e. whatever they haven't dequeued already.)
+;
+; The `cog-value->list` tried to get the entire queue contents,
+; in one big gulp. It blocks until the queue closes. Thus,
+; running the below will block for five seconds.
+;
 (define wait
-	(ThreadJoin
+	(ExecuteThreaded
 		(SequentialAnd
 			(True (Sleep (Number 1)))
 			(Evaluation
@@ -75,6 +86,6 @@
 	))
 
 ; Wait for the threads to finish.
-(cog-evaluate! wait)
-(cog-evaluate! wait)
-(cog-evaluate! wait)
+(cog-value->list (cog-execute! wait))
+(cog-value->list (cog-execute! wait))
+(cog-value->list (cog-execute! wait))
