@@ -100,12 +100,6 @@ public:
 	 * false with absolute confidence.
 	 */
 	static TruthValuePtr FALSE_TV();
-	/**
-	 * The shared reference to a special TRIVIAL (Simple) TruthValue
-	 * object with 0 mean and 0 count. That is, its false, but with
-	 * no confidence.
-	 */
-	static TruthValuePtr TRIVIAL_TV();
 
 	virtual strength_t get_mean()  const = 0;
 	virtual confidence_t get_confidence()  const = 0;

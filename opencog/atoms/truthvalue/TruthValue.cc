@@ -63,13 +63,6 @@ TruthValuePtr TruthValue::FALSE_TV()
 	return instance;
 }
 
-TruthValuePtr TruthValue::TRIVIAL_TV()
-{
-	// False, with no confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
-	return instance;
-}
-
 bool TruthValue::isDefaultTV() const
 {
 	static TruthValuePtr dtv(DEFAULT_TV());
