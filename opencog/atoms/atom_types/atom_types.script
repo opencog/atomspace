@@ -1089,7 +1089,6 @@ STRING_OF_LINK <- FUNCTION_LINK
 // Opposite of the ValueOfLink; attach a Value to an Atom.
 // Verb: "to set", and not noun "a set (collection)"
 SET_VALUE_LINK <- FUNCTION_LINK
-SET_TV_LINK <- SET_VALUE_LINK,EVALUATABLE_LINK "SetTVLink"
 
 // Numeric increment. Combined (SetValue (Plus (FloatValueOf ...)))
 // Its atomic, so thread-safe.

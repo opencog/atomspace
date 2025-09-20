@@ -44,8 +44,9 @@
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
 
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Implication (Concept "A") (Concept "B"))
+		(Predicate "*-TruthValueKey-*")
 		(PromisePredicate
 			(FormulaPredicate
 				(Minus
@@ -73,8 +74,9 @@
 ; For DynamicUTest::test_defined_dynamic()
 (define p-implies-q (Implication (Concept "P") (Concept "Q")))
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Implication (Concept "P") (Concept "Q"))
+		(Predicate "*-TruthValueKey-*")
 		(DefinedPredicate "dynamic example")
 		(Concept "A") (Concept "B")))
 

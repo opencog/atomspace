@@ -13,7 +13,6 @@ IF (HAVE_GUILE)
 
 	LINK_LIBRARIES(execution smob)
 	ADD_CXXTEST(FormulaUTest)
-	ADD_CXXTEST(SetTVUTest)
 	ADD_CXXTEST(SetValueUTest)
 	ADD_CXXTEST(DynamicUTest)
 	ADD_CXXTEST(FilterLinkUTest)
