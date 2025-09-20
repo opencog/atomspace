@@ -585,10 +585,6 @@ public:
     //! Sets the TruthValue object of the atom.
     void setTruthValue(const TruthValuePtr&);
 
-    /// Increment the CountTruthValue atomically.
-    /// Return the new TruthValue
-    TruthValuePtr incrementCountTV(double);
-
     // ---------------------------------------------------
     //! Return true if the incoming set is empty.
     bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;

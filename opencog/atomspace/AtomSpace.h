@@ -417,7 +417,6 @@ public:
      */
     Handle increment_count(const Handle&, const Handle&, const std::vector<double>&);
     Handle increment_count(const Handle&, const Handle&, size_t, double);
-    Handle increment_countTV(const Handle&, double = 1.0);
 
     /**
      * Find an equivalent Atom that is exactly the same as the arg.

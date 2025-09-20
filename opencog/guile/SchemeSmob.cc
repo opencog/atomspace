@@ -347,7 +347,6 @@ void SchemeSmob::register_procs()
 
 	// Value property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 	register_proc("cog-inc-value!",        4, 0, 0, C(ss_inc_value));
 	register_proc("cog-update-value!",     3, 0, 0, C(ss_update_value));
 

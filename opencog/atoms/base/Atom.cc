@@ -105,36 +105,6 @@ TruthValuePtr Atom::getTruthValue() const
     return TruthValueCast(pap);
 }
 
-TruthValuePtr Atom::incrementCountTV(double cnt)
-{
-	double mean = 1.0;
-	double conf = 0.0;
-
-	// Lock so that count updates are atomic!
-	KVP_UNIQUE_LOCK;
-
-	auto pr = _values.find(truth_key());
-	if (_values.end() != pr)
-	{
-		const TruthValuePtr& tvp = TruthValueCast(pr->second);
-		// tvp might be nullptr, if someone set the TV to something
-		// that is not a truth value. This can happen if the truth
-		// predicate is used directly with setValue().
-		if (tvp)
-		{
-			if (COUNT_TRUTH_VALUE == tvp->get_type())
-				cnt += tvp->get_count();
-			mean = tvp->get_mean();
-			conf = tvp->get_confidence();
-		}
-	}
-
-	TruthValuePtr newTV = createCountTruthValue(mean, conf, cnt);
-
-	_values[truth_key()] = ValueCast(newTV);
-	return newTV;
-}
-
 // ==============================================================
 /// Setting values associated with this atom.
 /// If the value is a null pointer, then the key is removed.
