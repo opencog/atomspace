@@ -24,9 +24,7 @@
 ; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
-; -- cog-par-chase-link -- call proc on atom connected via type. (parallel)
 ; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
-; -- cog-par-chase-links -- call proc on atoms connected via type. (parallel)
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -456,24 +454,6 @@
 	)
 )
 
-(define-public (cog-par-chase-link link-type endpoint-type proc anchor)
-"
-  cog-par-chase-link -- call proc on atom connected via type. (parallel)
-
-  Same as cog-map-chase-link, but a multi-threaded version: the work is
-  distributed over the available CPU's.
-"
-	(define (get-endpoint w)
-		(map proc (cog-outgoing-by-type w endpoint-type))
-	)
-
-	; We assume that anchor is a single atom, or empty list...
-	(if (null? anchor)
-		'()
-		(par-map get-endpoint (cog-incoming-by-type anchor link-type))
-	)
-)
-
 ; -----------------------------------------------------------------------
 (define-public (cog-map-chase-links link-type endpoint-type proc anchor)
 "
@@ -489,26 +469,6 @@
 			)
 		anchor)
 		(cog-map-chase-link link-type endpoint-type proc anchor)
-	)
-)
-
-(define-public (cog-par-chase-links link-type endpoint-type proc anchor)
-"
-  cog-par-chase-links -- call proc on atoms connected via type. (parallel)
-
-  Same as cog-map-chase-links, but a multi-threaded version: the work
-  is distributed over the available CPU's.  If anchor is a list, its
-  still walked serially; the parallelism is in the incoming set of the
-  anchor.  (which makes sense, since the incoming set is most likely to
-  be manifold).
-"
-	(if (list? anchor)
-		(map
-			(lambda (one-of)
-				(cog-par-chase-links link-type endpoint-type proc one-of)
-			)
-		anchor)
-		(cog-par-chase-link link-type endpoint-type proc anchor)
 	)
 )
 
