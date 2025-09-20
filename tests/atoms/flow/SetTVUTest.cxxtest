@@ -59,15 +59,20 @@ void SetTVUTest::test_copy()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	TruthValuePtr tvp = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
-	TS_ASSERT_EQUALS(tvp, TruthValue::DEFAULT_TV());
+	TruthValuePtr result = TruthValue::DEFAULT_TV();
+
+	printf("expect: %s\n", tvp->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+	TS_ASSERT(*tvp == *result);
 
 	tvp = _eval.eval_tv("(cog-tv (Concept \"foo\"))");
 
-	TruthValuePtr result = _eval.eval_tv("(cog-execute! copy-tv)");
+	result = _eval.eval_tv("(cog-execute! copy-tv)");
 	printf("expect: %s\n", tvp->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
+	// TS_ASSERT(*tvp == *result);
 
 	result = _eval.eval_tv("(cog-tv (Concept \"bar\"))");
 	printf("expect: %s\n", tvp->to_string().c_str());
