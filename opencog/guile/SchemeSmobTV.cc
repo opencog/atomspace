@@ -76,34 +76,4 @@ TruthValuePtr SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 	return tv;
 }
 
-/**
- * Return the truth value mean.
- * This is meant to be the fastest-possible of getting the mean.
- */
-SCM SchemeSmob::ss_tv_get_mean(SCM s)
-{
-	TruthValuePtr tv = verify_tv(s, "cog-tv-mean");
-	return scm_from_double(tv->get_mean());
-}
-
-/**
- * Return the truth value confidence
- * This is meant to be the fastest-possible of getting the confidence.
- */
-SCM SchemeSmob::ss_tv_get_confidence(SCM s)
-{
-	TruthValuePtr tv = verify_tv(s, "cog-tv-confidence");
-	return scm_from_double(tv->get_confidence());
-}
-
-/**
- * Return the truth value count
- * This is meant to be the fastest-possible of getting the count.
- */
-SCM SchemeSmob::ss_tv_get_count(SCM s)
-{
-	TruthValuePtr tv = verify_tv(s, "cog-tv-count");
-	return scm_from_double(tv->get_count());
-}
-
 /* ===================== END OF FILE ============================ */

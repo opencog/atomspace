@@ -371,11 +371,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));
 	register_proc("cog-as",                0, 1, 0, C(ss_as));
 
-	// Truth-values
-	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
-	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
-	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
-
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 0, 1, C(ss_new_as));
 	register_proc("cog-add-atomspace",     1, 0, 0, C(ss_add_as));
