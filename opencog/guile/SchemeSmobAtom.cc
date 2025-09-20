@@ -686,13 +686,4 @@ SCM SchemeSmob::ss_get_free_variables(SCM satom)
 	return list;
 }
 
-/**
- * Return true if the atom is closed (has no variable)
- */
-SCM SchemeSmob::ss_is_closed(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-closed?");
-	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
-}
-
 /* ===================== END OF FILE ============================ */
