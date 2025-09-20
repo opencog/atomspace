@@ -63,19 +63,6 @@ TruthValuePtr TruthValue::FALSE_TV()
 	return instance;
 }
 
-bool TruthValue::isDefaultTV() const
-{
-	static TruthValuePtr dtv(DEFAULT_TV());
-	if (dtv.get() == this) return true;
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-	return false;
-}
-
 bool TruthValue::nearly_equal(double a, double b)
 {
 	if (a == b) return true;

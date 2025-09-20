@@ -104,12 +104,6 @@ public:
 	virtual strength_t get_mean()  const = 0;
 	virtual confidence_t get_confidence()  const = 0;
 	virtual count_t get_count()  const = 0;
-
-	/**
-	 * Check if this TV is equal to the default TV.
-	 * operator!= only compares pointers.
-	 */
-	virtual bool isDefaultTV() const;
 };
 
 static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
