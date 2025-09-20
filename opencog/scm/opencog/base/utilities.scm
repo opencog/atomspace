@@ -5,8 +5,7 @@
 ;
 ; Miscellaneous handy utilities for working with atoms.
 ; The most useful utilities in here are probably 'cog-chase-link'
-; for finding atoms connected by a given link type, and 'cog-get-pred'
-; which is useful for working with EvaluationLink's.
+; for finding atoms connected by a given link type
 ;
 ; Utilities include:
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
@@ -33,8 +32,6 @@
 ; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
-; -- cog-get-link -- Get list of links connecting atom to atom type.
-; -- cog-get-pred -- Find all EvaluationLinks of given form.
 ; -- cog-get-reference -- Return the referenced list entries.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
@@ -638,65 +635,6 @@
 		(for-each apply-link (cog-outgoing-by-type l endpoint-type))
 	)
 	(for-each get-link (cog-incoming-by-type anchor link-type))
-)
-
-(define-public (cog-get-link link-type endpoint-type anchor)
-"
-  cog-get-link link-type endpoint-type anchor
-
-  Return a list of links, of type 'link-type', which contain some
-  atom of type 'endpoint-type', and also specifically contain the
-  atom 'anchor'.
-
-  Thus, for example, suppose the atom-space contains a link of the
-  form
-        (ReferenceLink
-            (ConceptNode \"asdf\")
-            (WordNode \"pqrs\")
-        )
-  Then, the call
-     (cog-get-link 'ReferenceLink 'ConceptNode (WordNode \"pqrs\"))
-  will return a list containing that link. Note that \"endpoint-type\"
-  need not occur in the first position in the link; it can appear
-  anywhere.
-"
-	(let ((lst '()))
-		(define (mklist inst)
-			(set! lst (cons inst lst))
-			#f
-		)
-		(cog-map-apply-link link-type endpoint-type mklist anchor)
-		lst
-	)
-)
-
-; ---------------------------------------------------------------------
-(define-public (cog-get-pred inst pred-type)
-"
-  cog-get-pred -- Find all EvaluationLinks of given form.
-
-  Return a list of predicates, of the given type, that an instance
-  participates in.  'inst' must be an atom, and 'pred-type' must be
-  an atom type.  That is, given a \"predicate\" of the form:
-
-     EvaluationLink
-        SomeAtom
-        ListLink
-            AnotherAtom \"abc\"
-            GivenAtom \"def\"
-
-  then, given the instance 'inst' (in this example, GivenAtom \"def\")
-  and predicate type 'pred-type' 'SomeAtom, then this routine returns
-  a list of all of the EvalutaionLink's in which 'inst' appears.
-"
-	(concatenate!
-		(append!
-			(map
-				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
-				(cog-incoming-by-type inst 'ListLink)
-			)
-		)
-	)
 )
 
 ; -----------------------------------------------------------------------
