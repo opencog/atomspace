@@ -675,15 +675,4 @@ SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 	return scm_from_size_t(cnt);
 }
 
-SCM SchemeSmob::ss_get_free_variables(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-free-variables");
-
-	SCM list = SCM_EOL;
-	for (const Handle& fv : get_free_variables(h))
-		list = scm_cons(handle_to_scm(fv), list);
-
-	return list;
-}
-
 /* ===================== END OF FILE ============================ */
