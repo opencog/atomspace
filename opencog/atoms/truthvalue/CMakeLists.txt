@@ -1,6 +1,5 @@
 ADD_LIBRARY (truthvalue
 	CountTruthValue.cc
-	FormulaTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
 )
@@ -19,7 +18,6 @@ INSTALL (TARGETS truthvalue EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	CountTruthValue.h
-	FormulaTruthValue.h
 	SimpleTruthValue.h
 	TruthValue.h
 	DESTINATION "include/opencog/atoms/truthvalue"

@@ -62,9 +62,9 @@ Streams
 -------
 The API for time-varying value streams is still experimental, but seems
 to be working OK. Besides plan-old `StreamValue` and `RandomStream`,
-assorted more complex Values, such as `FormulaStream`, `LinkStream`
-and `FormulaTruthValue` seem to work well. They're even used for
-computing the dot-products of two vectors, on the fly.
+assorted more complex Values, such as `FormulaStream` and `LinkStream`
+seem to work well. They're even used for computing the dot-products of
+two vectors, on the fly.
 
 Streams do not currently have any kind of chunking, update or buffering
 policy. A stream can provide samples from a constantly-changing stream,

@@ -114,7 +114,6 @@ FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 TRUTH_VALUE                <- FLOAT_VALUE
 SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
 COUNT_TRUTH_VALUE          <- TRUTH_VALUE
-FORMULA_TRUTH_VALUE        <- SIMPLE_TRUTH_VALUE, FORMULA_STREAM
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
@@ -1117,12 +1116,6 @@ SPLIT_LINK <- COLLECTION_OF_LINK
 // then cough up the actual Value later on, when interrogated. Used to
 // create dynamically executable computation chains.
 PROMISE_LINK <- VALUABLE_LINK,EXECUTABLE_LINK
-
-// Return a FormulaTruthValue when evaluated. Same as above, but for
-// TruthValues only.  This can be used to wrap any Atom that returns a
-// TruthValue. The effect is to defer to the future the evaluation of
-// that predicate. Used to create dynamically evaluatable formulas.
-PROMISE_PREDICATE_LINK <- EVALUATABLE_LINK, PROMISE_LINK
 
 // Return a SimpleTruthValue when evaluated.
 // This is used to wrap any Atom that returns a FloatValue; all this
