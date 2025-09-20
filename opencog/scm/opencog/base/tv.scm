@@ -133,7 +133,8 @@
     See also: cog-set-tv!
 "
 	(define tvkey (Predicate "*-TruthValueKey-*"))
-	(cog-value ATOM tvkey)
+	(define tv (cog-value ATOM tvkey))
+	(if tv tv (stv 1 0))
 )
 
 ; ===================================================================
