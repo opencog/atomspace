@@ -24,8 +24,9 @@
 #include <thread>
 
 #include <opencog/util/platform.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
+#include <opencog/atoms/value/VoidValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -37,13 +38,19 @@ ParallelLink::ParallelLink(const HandleSeq&& oset, Type t)
 }
 
 static void thread_eval(AtomSpace* as,
-                        const Handle& evelnk, AtomSpace* scratch,
+                        const Handle& evelnk,
                         bool silent)
 {
 	set_thread_name("atoms:parallel");
+
+	// This is (supposed to be) identical to what cog-execute!
+	// would do...
+	Instantiator inst(as);
 	try
 	{
-		EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+		ValuePtr pap(inst.execute(evelnk));
+		if (pap and pap->is_atom())
+			as->add_atom(HandleCast(pap));
 	}
 	catch (const std::exception& ex)
 	{
@@ -51,22 +58,17 @@ static void thread_eval(AtomSpace* as,
 	}
 }
 
-void ParallelLink::evaluate_scratch(AtomSpace* as,
-                                    bool silent,
-                                    AtomSpace* scratch)
+ValuePtr ParallelLink::execute(AtomSpace* as,
+                               bool silent)
 {
 	// Create and detach threads; return immediately.
 	for (const Handle& h : _outgoing)
 	{
-		std::thread thr(&thread_eval, as, h, scratch, silent);
+		std::thread thr(&thread_eval, as, h, silent);
 		thr.detach();
 	}
-}
 
-bool ParallelLink::bevaluate(AtomSpace* as, bool silent)
-{
-	evaluate_scratch(as, silent, as);
-	return true;
+	return createVoidValue();
 }
 
 DEFINE_LINK_FACTORY(ParallelLink, PARALLEL_LINK)

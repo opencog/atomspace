@@ -9,7 +9,6 @@ ADD_LIBRARY (parallel
 	ParallelLink.cc
 	PureExecLink.cc
 	SleepLink.cc
-	ThreadJoinLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -31,6 +30,5 @@ INSTALL (FILES
 	ParallelLink.h
 	PureExecLink.h
 	SleepLink.h
-	ThreadJoinLink.h
 	DESTINATION "include/opencog/atoms/parallel"
 )

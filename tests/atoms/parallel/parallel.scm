@@ -1,7 +1,7 @@
 ;
 ; parallel.scm
 ;
-; Part of the unit test for ParallelLink and ThreadJoinLink.
+; Part of the unit test for ParallelLink and ExecuteThreadedLink.
 ;
 (use-modules (opencog) (opencog exec))
 
@@ -25,7 +25,7 @@
 	))
 
 (define wait
-	(ThreadJoin
+	(ExecuteThreaded
 		(SequentialAnd
 			(True (Sleep (Number 1)))
 			(EvaluationLink
@@ -47,5 +47,5 @@
 
 ; throw exception
 (define wait-bad
-	(ThreadJoin (SequentialAnd
+	(ExecuteThreaded (SequentialAnd
 		(EvaluationLink (GroundedPredicate "scm:insdfasdfascr") (List)))))
