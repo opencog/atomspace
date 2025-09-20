@@ -32,7 +32,6 @@
 #include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/FormulaPredicateLink.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
-#include <opencog/atoms/parallel/ThreadJoinLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
@@ -616,12 +615,7 @@ static bool crispy_maybe(AtomSpace* as,
 
 	// -------------------------
 	// Multi-threading primitives
-	if (THREAD_JOIN_LINK == t)
-	{
-		ThreadJoinLinkPtr tjlp = ThreadJoinLinkCast(evelnk);
-		return tjlp->evaluate_scratch(as, silent, scratch);
-	}
-	else if (PARALLEL_LINK == t)
+	if (PARALLEL_LINK == t)
 	{
 		ParallelLinkPtr plp = ParallelLinkCast(evelnk);
 		plp->evaluate_scratch(as, silent, scratch);

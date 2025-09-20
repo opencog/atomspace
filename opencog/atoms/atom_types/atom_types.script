@@ -1190,15 +1190,11 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 // ====================================================================
 // Performance scripting links.
 //
-// ParallelLink launches multiple threads, but does not wait for any of
-// them to return.  ThreadJoinLink launches multiple threads, and waits
-// for all of them to return, and then returns the boolean And of their
-// TruthValues.
+// ParallelLink launches multiple threads, but does not wait for any
+// of them to return. Return values are entirely ignored.
 PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-THREAD_JOIN_LINK <- PARALLEL_LINK
 
-// Somewhat like ThreadJoinLink, except that this works with executable,
-// not evaluatable links.
+// Like above, but collects return values into a QueueValue.
 EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
 
 // Everything under a PureExecLink is executed in a different AtomSpace.
