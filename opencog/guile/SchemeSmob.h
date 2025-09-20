@@ -144,9 +144,6 @@ private:
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_tv(SCM);
-	static SCM ss_get_mean(SCM);
-	static SCM ss_get_confidence(SCM);
-	static SCM ss_get_count(SCM);
 	static SCM ss_keys(SCM);
 	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
@@ -188,10 +185,6 @@ private:
 	static SCM ss_as_cow_p(SCM);
 	static SCM make_as(const AtomSpacePtr&);
 	static const AtomSpacePtr& ss_to_atomspace(SCM);
-
-	// Free variables
-	static SCM ss_get_free_variables(SCM);
-	static SCM ss_is_closed(SCM);
 
 	// Misc utilities
 	static SCM convert_to_utf8(void *, SCM, SCM);

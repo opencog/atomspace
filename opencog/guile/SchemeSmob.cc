@@ -370,9 +370,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));
 	register_proc("cog-as",                0, 1, 0, C(ss_as));
-	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
-	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
-	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
@@ -402,10 +399,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));
 	register_proc("cog-subtype?",          2, 0, 0, C(ss_subtype_p));
-
-	// Free variables
-	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));
-	register_proc("cog-closed?",           1, 0, 0, C(ss_is_closed));
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)

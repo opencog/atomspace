@@ -263,36 +263,6 @@ SCM SchemeSmob::ss_tv (SCM satom)
 	return protom_to_scm(ValueCast(h->getTruthValue()));
 }
 
-/**
- * Return the truth value mean on the atom.
- * This is meant to be the fastest possible way of accessing the mean.
- */
-SCM SchemeSmob::ss_get_mean(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-mean");
-	return scm_from_double(h->getTruthValue()->get_mean());
-}
-
-/**
- * Return the truth value confidence on the atom.
- * This is meant to be the fastest possible way of accessing the confidence.
- */
-SCM SchemeSmob::ss_get_confidence(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-confidence");
-	return scm_from_double(h->getTruthValue()->get_confidence());
-}
-
-/**
- * Return the truth value count on the atom.
- * This is meant to be the fastest possible way of accessing the count.
- */
-SCM SchemeSmob::ss_get_count(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-count");
-	return scm_from_double(h->getTruthValue()->get_count());
-}
-
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-set-tv!");
@@ -673,26 +643,6 @@ SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 
 	size_t cnt = asp->get_num_atoms_of_type(t);
 	return scm_from_size_t(cnt);
-}
-
-SCM SchemeSmob::ss_get_free_variables(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-free-variables");
-
-	SCM list = SCM_EOL;
-	for (const Handle& fv : get_free_variables(h))
-		list = scm_cons(handle_to_scm(fv), list);
-
-	return list;
-}
-
-/**
- * Return true if the atom is closed (has no variable)
- */
-SCM SchemeSmob::ss_is_closed(SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-closed?");
-	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
 }
 
 /* ===================== END OF FILE ============================ */

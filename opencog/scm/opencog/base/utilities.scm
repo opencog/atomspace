@@ -1195,3 +1195,35 @@
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
 ; ---------------------------------------------------------------------
+
+(define-public (cog-mean ATOM)
+"
+ cog-mean ATOM
+    Return the `mean` of the TruthValue on ATOM. This is a single
+    floating point-number.
+
+    See also: cog-confidence, cog-count, cog-tv
+"
+	(cog-tv-mean (cog-tv ATOM)))
+
+(define-public (cog-confidence ATOM)
+"
+ cog-confidence ATOM
+    Return the `confidence` of the TruthValue on ATOM. This is a single
+    floating point-number.
+
+    See also: cog-mean, cog-count, cog-tv
+"
+	(cog-tv-confidence (cog-tv ATOM)))
+
+(define-public (cog-count ATOM)
+"
+ cog-count ATOM
+    Return the `count` of the TruthValue on ATOM. This is a single
+    floating point-number.
+
+    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
+"
+	(cog-tv-count (cog-tv ATOM)))
+
+; ---------------------------------------------------------------------
