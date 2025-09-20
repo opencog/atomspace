@@ -61,7 +61,7 @@ public:
 	void test_nondefault_exp(void);
 	void test_wrapped_exp();
 	void test_grounded_cond();
-	void test_knobs();
+	void xxxtest_knobs();
 };
 
 void CondLinkUTest::tearDown(void)
@@ -142,7 +142,20 @@ void CondLinkUTest::test_grounded_cond()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void CondLinkUTest::test_knobs()
+// XXX FIXME Disable this unit test. It uses CondLink with a
+// beguiling but ultimately poor syntax: it tries to assemble
+// boolean trees containing elements that are not actually
+// executable. The idea is pretty: Assemble arbitrary trees
+// of some sort, by indicating variabl regions with "knobs".
+// and then generate the final tree based on knob settings.
+// But, to do this in generality, we probably need to invent
+// an explicit KnobLink, instead of overloading CondLink with
+// this special meaning. So: disable this unit test. It breaks
+// asmoses, but no one is using asmoses, so I don't care. If
+// someone needs as-moses again, well, we will have to invent a
+// KnobLink. Or possibly do the same thing with a FilterLink ???
+// There's always the butt-ugly solution of using QuoteLink...
+void CondLinkUTest::xxxtest_knobs()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Instantiator inst(as);
