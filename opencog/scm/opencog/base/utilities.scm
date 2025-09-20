@@ -31,7 +31,6 @@
 ; -- cog-map-chase-links-chk -- Invoke proc on atom connected through type.
 ; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
-; -- cog-map-apply-link -- call proc on link between atom and atom type.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -618,22 +617,6 @@
 		'()
 		(for-each get-endpoint (cog-incoming-by-type anchor link-type))
 	)
-)
-
-; -----------------------------------------------------------------------
-;
-(define-public (cog-map-apply-link link-type endpoint-type proc anchor)
-"
-  cog-map-apply-link link-type endpoint-type proc anchor
-
-  Similar to cog-map-chase-link, except that the proc is not called
-  on the endpoint, but rather on the link leading to the endpoint.
-"
-	(define (get-link l)
-		(define (apply-link e) (proc l))
-		(for-each apply-link (cog-outgoing-by-type l endpoint-type))
-	)
-	(for-each get-link (cog-incoming-by-type anchor link-type))
 )
 
 ; ---------------------------------------------------------------------
