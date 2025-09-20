@@ -31,7 +31,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/FormulaPredicateLink.h>
-#include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
@@ -614,14 +613,6 @@ static bool crispy_maybe(AtomSpace* as,
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
 
 	// -------------------------
-	// Multi-threading primitives
-	if (PARALLEL_LINK == t)
-	{
-		ParallelLinkPtr plp = ParallelLinkCast(evelnk);
-		plp->evaluate_scratch(as, silent, scratch);
-		return true;
-	}
-
 	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
 	    evelnk->is_evaluatable())
 	{

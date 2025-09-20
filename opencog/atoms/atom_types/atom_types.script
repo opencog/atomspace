@@ -1192,7 +1192,7 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
 //
 // ParallelLink launches multiple threads, but does not wait for any
 // of them to return. Return values are entirely ignored.
-PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+PARALLEL_LINK <- UNORDERED_LINK,EXECUTABLE_LINK
 
 // Like above, but collects return values into a QueueValue.
 EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
