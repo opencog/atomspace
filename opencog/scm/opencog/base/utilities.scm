@@ -17,7 +17,6 @@
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
-; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
@@ -277,9 +276,6 @@
   Return all links that contain ATOM and are also roots. A root
   is any atom that has a null incoming set.
 
-  The opposite of this function is `cog-get-all-nodes`, which
-  returns the leaves under ATOM.
-
   See also: cog-get-all-roots, cog-get-trunk
 "
 	(define iset (cog-incoming-set ATOM))
@@ -301,28 +297,6 @@
 		'()
 		(concatenate (list iset
 			(append-map cog-get-trunk iset))))
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-get-all-nodes LINK)
-"
-  cog-get-all-nodes ATOM -- Get all the nodes (leaves) under `ATOM`.
-
-  Get all the nodes (leaves) within a hypergraph, and return as
-  a list.
-
-  See also: cog-get-root, cog-get-trunk
-"
-	(define (recursive-helper ATOM)
-		(if (cog-link? ATOM)
-			(cog-get-all-nodes ATOM)
-			(list ATOM)
-		)
-	)
-
-	(if (cog-node? LINK)
-		(list LINK)
-		(append-map recursive-helper (cog-outgoing-set LINK)))
 )
 
 ; ---------------------------------------------------------------------
