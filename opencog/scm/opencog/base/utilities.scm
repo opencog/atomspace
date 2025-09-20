@@ -25,8 +25,6 @@
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
 ; -- random-node  -- Generate a random node of given type.
-; -- cog-cp -- Copy list of atoms from one atomspace to another
-; -- cog-cp-all -- Copy all atoms from one atomspace to another
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
 ;;; Code:
@@ -515,25 +513,6 @@
   (ConceptNode \"texts-218951126396-as737yFW\")
 "
 	(cog-new-node node-type (random-node-name node-type random-length prefix)))
-
-; -----------------------------------------------------------------------
-
-(define-public (cog-cp ATOMSPACE ATOM-LIST)
-"
-  cog-cp ATOMSPACE ATOM-LIST - Copy the atoms in ATOM-LIST to ATOMSPACE.
-  Returns the list of copied atoms.
-"
-	(map (lambda (AT) (cog-new-atom AT ATOMSPACE)) ATOM-LIST)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-cp-all ATOMSPACE)
-"
-  cog-cp-all AS - Copy all atoms in the current atomspace for this
-     thread to ATOMSPACE.  Return the list of copied atoms.
-"
-  (cog-cp ATOMSPACE (cog-get-all-roots))
-)
 
 ; -----------------------------------------------------------------------
 (define-public (cog-get-all-subtypes atom-type)
