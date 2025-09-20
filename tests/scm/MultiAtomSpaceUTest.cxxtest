@@ -474,6 +474,7 @@ void MultiAtomSpace::test_readonly_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	evaluator->eval("(define A (Concept \"A\"))");
+	evaluator->eval("(cog-tv A)");
 	evaluator->eval("(cog-atomspace-ro!)");
 	evaluator->eval("(define tv (stv 0.1 0.1))");
 
@@ -482,7 +483,7 @@ void MultiAtomSpace::test_readonly_scm(void)
 
 	// Verify that the TV never changed.
 	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
-	TS_ASSERT (TruthValue::DEFAULT_TV() == tvp);
+	TS_ASSERT (*tvp == *TruthValue::DEFAULT_TV());
 
 	logger().debug("END TEST: %s", __FUNCTION__);	
 }
