@@ -23,14 +23,10 @@
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
-; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
 ; -- cog-par-chase-link -- call proc on atom connected via type. (parallel)
 ; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
 ; -- cog-par-chase-links -- call proc on atoms connected via type. (parallel)
-; -- cog-map-chase-links-chk -- Invoke proc on atom connected through type.
-; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
-; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -421,26 +417,6 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-chase-link-chk link-type endpoint-type anchor anchor-type)
-"
-  cog-chase-link-chk -- chase a link with checking
-
-  cog-chase-link link-type endpoint-type anchor anchor-type
-
-  Same as above, but throws an error if anchor is not an atom of
-  'anchor-type'.
-"
-	(let ((lst '()))
-		(define (mklist inst)
-			(set! lst (cons inst lst))
-			#f
-		)
-		(cog-map-chase-links-chk link-type endpoint-type mklist anchor anchor-type)
-		lst
-	)
-)
-
-; -----------------------------------------------------------------------
 (define-public (cog-map-chase-link link-type endpoint-type proc anchor)
 "
   cog-map-chase-link -- Invoke proc on atom connected through type.
@@ -533,89 +509,6 @@
 			)
 		anchor)
 		(cog-par-chase-link link-type endpoint-type proc anchor)
-	)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-map-chase-links-chk link-type endpoint-type proc anchor anchor-type)
-"
-  cog-map-chase-links-chk -- Invoke proc on atom connected through type.
-
-  Same as cog-chase-links, except that the type of the anchor is
-  checked, and an exception thrown if its the wrong type.
-"
-	(if (list? anchor)
-		; If we are here, then anchor is a list. Recurse.
-		(map
-			(lambda (one-of)
-				(cog-map-chase-links-chk link-type endpoint-type proc one-of anchor-type)
-			)
-		anchor)
-		; If we are here, then its a singleton. Verify type.
-		(if (eq? (cog-type anchor) anchor-type)
-			(cog-map-chase-link link-type endpoint-type proc anchor)
-			(throw 'wrong-atom-type 'cog-map-chase-links
-				"Error: expecting atom:" anchor)
-		)
-	)
-)
-
-(define-public (cog-par-chase-links-chk link-type endpoint-type proc anchor anchor-type)
-"
-  cog-par-chase-links-chk -- call proc on atoms connected via type. (parallel)
-
-  Same as cog-map-chase-links-chk, but a multi-threaded version: the work
-  is distributed over the available CPU's.
-"
-	(if (list? anchor)
-		; If we are here, then anchor is a list. Recurse.
-		(map
-			(lambda (one-of)
-				(cog-par-chase-links-chk link-type endpoint-type proc one-of anchor-type)
-			)
-		anchor)
-		; If we are here, then its a singleton. Verify type.
-		(if (eq? (cog-type anchor) anchor-type)
-			(cog-par-chase-link link-type endpoint-type proc anchor)
-			(throw 'wrong-atom-type 'cog-map-chase-links
-				"Error: expecting atom:" anchor)
-		)
-	)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
-"
-  cog-map-chase-link-dbg -- debugging version of cog-map-chase-link
-
-  cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
-
-  Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.
-
-  It is presumed that 'anchor' points to some atom (typically a node),
-  and that it has many links in its incoming set. So, loop over all of
-  the links of 'link-type' in this set. They presumably link to all
-  sorts of things. Find all of the things that are of 'endpoint-type'
-  and then call 'proc' on each of these endpoints. Optionally, print
-  some debugging msgs.
-
-  The link-chasing halts if proc returns any value other than #f.
-  Returns the last value returned by proc, i.e. #f, or the value that
-  halted the iteration.
-
-  Example usage:
-  (cog-map-chase-link-dbg 'ReferenceLink 'WordNode '() '() proc word-inst)
-  Given a 'word-inst', this will chase all ReferenceLink's to all
-  WordNode's, and then will call 'proc' on these WordNodes.
-"
-	(define (get-endpoint w)
-		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
-		(for-each proc (cog-outgoing-by-type w endpoint-type))
-	)
-	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
-	(if (null? anchor)
-		'()
-		(for-each get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
