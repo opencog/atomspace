@@ -24,9 +24,7 @@
 ; -- cog-pop-atomspace -- Delete a temporary atomspace.
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
-; -- choose-var-name -- Generate a random variable name.
 ; -- random-node  -- Generate a random node of given type.
-; -- random-variable -- Generate a random variable.
 ; -- cog-cp -- Copy list of atoms from one atomspace to another
 ; -- cog-cp-all -- Copy all atoms from one atomspace to another
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
@@ -493,21 +491,12 @@
 	node-name
 )
 
-(define-public (choose-var-name)
-"
- DEPRECATED - use uniquely-named-variable instead.
-"
-    (random-node-name 'VariableNode 24 "$")
-)
-
 (define-public (uniquely-named-variable)
 "
  uniquely-named-variable -- Creates a new uniquely-named VariableNode.
 "
     (Variable (random-node-name 'VariableNode 24 "$"))
 )
-
-
 
 ; -----------------------------------------------------------------------
 
@@ -526,15 +515,6 @@
   (ConceptNode \"texts-218951126396-as737yFW\")
 "
 	(cog-new-node node-type (random-node-name node-type random-length prefix)))
-
-; -----------------------------------------------------------------------
-
-(define-public (random-variable)
-"
- Creates a new random VariableNode.
-"
-    (random-node 'VariableNode 36 "$")
-)
 
 ; -----------------------------------------------------------------------
 
