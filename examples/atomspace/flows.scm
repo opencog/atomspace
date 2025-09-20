@@ -88,8 +88,7 @@
 ; then it will be executed to obtain the TV.
 (cog-execute!
 	(SetValue
-		(Concept "bar")
-		(Predicate "*-TruthValueKey-*")
+		(Concept "bar") tvkey
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
@@ -100,8 +99,7 @@
 (Concept "A" (stv 0.8 0.9))
 (cog-execute!
 	(SetValue
-		(Concept "bar")
-		(Predicate "*-TruthValueKey-*")
+		(Concept "bar") tvkey
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
@@ -114,8 +112,7 @@
 ; the equivalent form, below.
 (cog-execute!
 	(SetValue
-		(Concept "bar")
-		(Predicate "*-TruthValueKey-*")
+		(Concept "bar") tvkey
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
