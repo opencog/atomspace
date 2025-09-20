@@ -645,4 +645,24 @@ SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 	return scm_from_size_t(cnt);
 }
 
+SCM SchemeSmob::ss_get_free_variables(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-free-variables");
+
+	SCM list = SCM_EOL;
+	for (const Handle& fv : get_free_variables(h))
+		list = scm_cons(handle_to_scm(fv), list);
+
+	return list;
+}
+
+/**
+ * Return true if the atom is closed (has no variable)
+ */
+SCM SchemeSmob::ss_is_closed(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-closed?");
+	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
+}
+
 /* ===================== END OF FILE ============================ */
