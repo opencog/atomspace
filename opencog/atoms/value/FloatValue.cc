@@ -104,12 +104,16 @@ bool FloatValue::operator==(const Value& other) const
 		// Strange but true.
 		//
 		// Casting it to uint64_t nails that sign bit in place.
+		// Shift converts 0x8000000000000000 to 0x4000000000000000
+		// so as for force (0x4000000000000000 > ULPS)
+		// because compiler plays trixie if we don't shift.
 		//
 		int64_t self = *(int64_t*) &(_value[i]);
 		int64_t other= *(int64_t*) &(fov->_value[i]);
 		int64_t lili = self - other;
 		if (0LL > lili) lili = -lili;
 		uint64_t lulu = (uint64_t) lili;
+		lulu >>= 1;
 
 		// Where is the ULPS?
 		// The 15th decimal place differs by five ULPS:
