@@ -116,6 +116,28 @@
 
 ; ===================================================================
 
+(define-public (cog-tv ATOM)
+"
+ cog-tv ATOM
+    Return the truth-value of ATOM.
+
+    Example:
+       ; Define a node
+       guile> (define x
+                 (Concept \"abc\" (SimpleTruthValue 0.2 0.5)))
+       guile> (cog-tv x)
+       (stv 0.2 0.5)
+       guile> (cog-tv? (cog-tv x))
+       #t
+
+    See also: cog-set-tv!
+"
+	(define tvkey (Predicate "*-TruthValueKey-*"))
+	(cog-value ATOM tvkey)
+)
+
+; ===================================================================
+
 (define-public (cog-set-tv! ATOM TV)
 "
  cog-set-tv! ATOM TV

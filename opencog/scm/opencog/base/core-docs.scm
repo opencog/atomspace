@@ -630,25 +630,6 @@
 
 ; ===================================================================
 
-(set-procedure-property! cog-tv 'documentation
-"
- cog-tv ATOM
-    Return the truth-value of ATOM.
-
-    Example:
-       ; Define a node
-       guile> (define x
-                 (Concept \"abc\" (SimpleTruthValue 0.2 0.5)))
-       guile> (cog-tv x)
-       (stv 0.2 0.5)
-       guile> (cog-tv? (cog-tv x))
-       #t
-
-    See also: cog-set-tv!
-")
-
-; ===================================================================
-
 (set-procedure-property! cog-new-value 'documentation
 "
  cog-new-value TYPE ARGS
