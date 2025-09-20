@@ -32,7 +32,6 @@
 ; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
-; -- cog-get-reference -- Return the referenced list entries.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -635,37 +634,6 @@
 		(for-each apply-link (cog-outgoing-by-type l endpoint-type))
 	)
 	(for-each get-link (cog-incoming-by-type anchor link-type))
-)
-
-; -----------------------------------------------------------------------
-;
-; XXX This should probably be made obsolete.
-(define-public (cog-get-reference refptr)
-"
-  Given a reference structure, return the referenced list entries.
-  That is, given a structure of the form
-
-     ReferenceLink
-         SomeAtom
-         ListLink
-            AnotherAtom
-            AnotherAtom
-            ...
-
-  Then, given, as input, \"SomeAtom\", this returns a list of the \"OtherAtom\"
-
-  XXX! Caution/error! This implicitly assumes that there is only one
-  such ReferenceLink in the system, total. This is wrong !!!
-
-  XXX! You probably want to be using either StateLink or DefineLink
-  for this.
-"
-	(let ((lst (cog-chase-link 'ReferenceLink 'ListLink refptr)))
-		(if (null? lst)
-			'()
-			(cog-outgoing-set (car lst))
-		)
-	)
 )
 
 ; ---------------------------------------------------------------------
