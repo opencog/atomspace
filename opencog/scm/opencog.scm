@@ -45,8 +45,6 @@ cog-atomspace-readonly?
 cog-atomspace-ro!
 cog-atomspace-rw!
 cog-atomspace-uuid
-cog-confidence
-cog-count
 cog-count-atoms
 cog-equal?
 cog-extract!
@@ -65,7 +63,6 @@ cog-keys->alist
 cog-link
 cog-link?
 cog-map-type
-cog-mean
 cog-name
 cog-new-ast
 cog-new-atom
