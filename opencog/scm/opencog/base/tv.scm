@@ -76,3 +76,42 @@
 )
 
 ; ===================================================================
+
+(define-public (cog-tv-mean TV)
+"
+ cog-tv-mean TV
+    Return the `mean` of the TruthValue TV. This is a single
+    floating point-number.
+
+    See also: cog-mean
+"
+	(cog-value-ref TV 0)
+)
+
+(define-public (cog-tv-confidence TV)
+"
+ cog-tv-confidence TV
+    Return the `confidence` of the TruthValue TV. This is a single
+    floating point-number.
+
+    See also: cog-confidence
+"
+	(cog-value-ref TV 1)
+)
+
+(define-public (cog-tv-count TV)
+"
+ cog-tv-count TV
+    Return the `count` of the TruthValue TV. This is a single
+    floating point-number.
+
+    See also: cog-count
+"
+	(define DEFAULT_K 800.0)
+	(if (cog-ctv? TV)
+		(cog-value-ref TV 2)
+		(let ((conf (cog-tv-confidence TV)))
+			(/ (* DEFAULT_K conf) (- 1.00000001 conf))))
+)
+
+; ===================================================================
