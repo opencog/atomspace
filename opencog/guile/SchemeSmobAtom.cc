@@ -263,26 +263,6 @@ SCM SchemeSmob::ss_tv (SCM satom)
 	return protom_to_scm(ValueCast(h->getTruthValue()));
 }
 
-SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
-{
-	Handle h = verify_handle(satom, "cog-set-tv!");
-	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
-	scm_remember_upto_here_1(stv);
-
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-tv!");
-	try
-	{
-		Handle newh = asp->set_truthvalue(h, tv);
-
-		if (h == newh) return satom;
-		return handle_to_scm(newh);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-set-tv!", satom);
-	}
-}
-
 /* ============================================================== */
 /// Atomic increment the count of some generic FloatValue.
 /// Just like ss_inc_count but generic.
