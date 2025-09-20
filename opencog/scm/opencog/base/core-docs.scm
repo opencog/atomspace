@@ -598,29 +598,6 @@
        #t
 ")
 
-(set-procedure-property! cog-inc-count! 'documentation
-"
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
-
-  Atomically increment the count on a CountTruthValue by CNT. The mean
-  and confidence values are left untouched.  CNT may be any floating
-  point number (positive or negative).
-
-  If the current truth value on the ATOM is not a CountTruthValue,
-  then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.
-
-  The increment is atomic; that is, it is safe against racing threads.
-
-  Example usage:
-     (cog-inc-count! (Concept \"Answer\") 42.0)
-
-  See also:
-      cog-count -- Fetch the current count.
-      cog-inc-value! -- Increment an arbitrary FloatValue.
-      cog-update-value! -- A generic atomic read-modify-write.
-")
-
 (set-procedure-property! cog-inc-value! 'documentation
 "
   cog-inc-value! ATOM KEY CNT REF -- Increment value on ATOM by CNT.
