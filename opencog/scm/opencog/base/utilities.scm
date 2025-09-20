@@ -7,7 +7,6 @@
 ;
 ; Utilities include:
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
-; -- for-each-except loop.
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
 ; -- clear -- extract all atoms in the atomspace.
@@ -82,27 +81,6 @@
 ; A more aggressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
 ; But this would probably lead to various painful debugging situations.
-
-; -----------------------------------------------------------------------
-; for-each-except
-(define-public (for-each-except exclude proc lst)
-"
-  Standard for-each loop, except that anything matching 'except' is skipped
-"
-	(define (loop items)
-		(cond
-			((null? items) #f)
-			((eq? exclude (car items))
-				(loop (cdr items))
-			)
-			(else
-				(proc (car items))
-				(loop (cdr items))
-			)
-		)
-	)
-	(loop lst)
-)
 
 ; --------------------------------------------------------------------
 (define-public (extract-hypergraph atom)
