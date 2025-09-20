@@ -19,7 +19,6 @@
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
-; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -353,16 +352,6 @@
 	(if (cog-node? LINK)
 		(list LINK)
 		(append-map recursive-helper (cog-outgoing-set LINK)))
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-filter ATOM-TYPE ATOM-LIST)
-"
-  cog-filter ATOM-TYPE ATOM-LIST -- filter the scheme list
-  ATOM-LIST, keeping only the atoms of ATOM-TYPE.
-"
-	(define (is-type? atom) (eq? ATOM-TYPE (cog-type atom)))
-	(filter is-type? ATOM-LIST)
 )
 
 ; ---------------------------------------------------------------------
