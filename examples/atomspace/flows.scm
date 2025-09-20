@@ -33,35 +33,35 @@
 ; TruthValues directly, using NumberNodes.
 (Concept "foo" (stv 0.3 0.7))
 
-; The TruthValue can be fetched in either of two ways.
-(cog-evaluate! (TruthValueOf (Concept "foo")))
-(cog-execute!  (TruthValueOf (Concept "foo")))
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
+; The TruthValue is located at key (Predicate "*-TruthValueKey-*")
+(cog-execute! (ValueOf (Concept "foo") tvkey))
 
 ; Transfer the TruthValue from "foo" to "bar" ... copy it.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
-		(TruthValueOf (Concept "foo"))))
+	(SetValue (Concept "bar") tvkey
+		(ValueOf (Concept "foo") tvkey)))
 
 ; Verify that the TV on "bar" has changed.
 (cog-tv (Concept "bar"))
 
 ; The DefinedFormulaLink can be used to create SimpleTruthValues out
 ; of a pair of numbers. For example:
-(cog-execute! (SetTV (Concept "bar")
+(cog-execute! (SetValue (Concept "bar") tvkey
 	(FormulaPredicate (Number 0.2718) (Number 0.314))))
 
 ; Explicitly look at it.
 (cog-tv (Concept "bar"))
 
-; SetTV is interesting because it allows complex arithmetic expressions
+; SetValue is interesting because it allows complex arithmetic expressions
 ; to be specified in Atomese. Below, simply take the square of the TV.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
+	(SetValue
+		(Concept "bar") tvkey
 		(Times
-			(TruthValueOf (Concept "foo"))
-			(TruthValueOf (Concept "foo")))))
+			(FloatValueOf (Concept "foo") tvkey)
+			(FloatValueOf (Concept "foo") tvkey))))
 
 ; Formulas can be used to compute TV's, as shown in the `formula.scm`
 ; example. Consider a named formula, with variables.
@@ -84,11 +84,12 @@
 ; Use the formula to compute a new TV, and attach that TV to some Atom.
 ; This is little more than the copy above, except that the Evaluation
 ; is actually performed, so that the new TV is computed, before being
-; copied. In general, if the second Atom passed to SetTV is evaluatable,
-; then it will be evaluated to obtain the TV.
+; copied. In general, if the third Atom passed to SetValue is executable,
+; then it will be executed to obtain the TV.
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Concept "bar")
+		(Predicate "*-TruthValueKey-*")
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
@@ -98,21 +99,23 @@
 ; and recompute...
 (Concept "A" (stv 0.8 0.9))
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Concept "bar")
+		(Predicate "*-TruthValueKey-*")
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
-; In many ways, the SetTVLink behaves a lot like a generalized
+; In many ways, the SetValueLink behaves a lot like a generalized
 ; EvaluationLink. So: normally, an EvaluationLink consists of a
 ; predicate, and the list of arguments that it applies to. The
 ; SetTVLink is similar, except that it couples the predicate to
 ; the target Atom that it should apply to.  This can be seen in
 ; the equivalent form, below.
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Concept "bar")
+		(Predicate "*-TruthValueKey-*")
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
