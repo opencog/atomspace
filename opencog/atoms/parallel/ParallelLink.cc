@@ -24,6 +24,7 @@
 #include <thread>
 
 #include <opencog/util/platform.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/value/VoidValue.h>
 
@@ -41,9 +42,15 @@ static void thread_eval(AtomSpace* as,
                         bool silent)
 {
 	set_thread_name("atoms:parallel");
+
+	// This is (supposed to be) identical to what cog-execute!
+	// would do...
+	Instantiator inst(as);
 	try
 	{
-		evelnk->execute(as, silent);
+		ValuePtr pap(inst.execute(evelnk));
+		if (pap and pap->is_atom())
+			as->add_atom(HandleCast(pap));
 	}
 	catch (const std::exception& ex)
 	{

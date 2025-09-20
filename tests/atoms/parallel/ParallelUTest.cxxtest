@@ -125,7 +125,7 @@ void ParallelUTest::test_parallel(void)
     // eye for the measurement.  Note that, on a busy system, these
     // timing windows can fail, if the OS muffs the sleeps.  Which does
     // seem to happen; see bug #517 on github.
-    eval->eval_tv("(cog-execute! pllel)");
+    eval->eval_v("(cog-execute! pllel)");
 
     struct timeval tv;
     gettimeofday(&tv, nullptr);
