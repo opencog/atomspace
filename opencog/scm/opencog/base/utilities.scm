@@ -22,8 +22,6 @@
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
-; -- cog-get-partner -- Return other atom of a link connecting two atoms.
-; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
 ; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
@@ -371,49 +369,6 @@
 	(if (cog-node? LINK)
 		(list LINK)
 		(append-map recursive-helper (cog-outgoing-set LINK)))
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-get-partner pare atom)
-"
-  cog-get-partner -- Return other atom of a link connecting two atoms
-  cog-get-partner pair atom
-
-  If 'pare' is a link containing two atoms, and 'atom' is one of the
-  two atoms, then this returns the other atom in the link.
-
-  See also cog-chase-link which does not require the link to be
-  explicitly specified; instead, only the pare type is needed.
-"
-	(let ((plist (cog-outgoing-set pare)))
-		(if (equal? atom (car plist))
-			(cadr plist)
-			(car plist)))
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-pred-get-partner rel atom)
-"
-  cog-pred-get-partner -- Get the partner in an EvaluationLink
-
-  cog-pred-get-partner pred atom
-
-  Get the partner to the atom 'atom' in the opencog predicate 'pred'.
-  An opencog predicate is assumed to be structured as follows:
-
-     EvaluationLink
-         SomeAtom  \"relation-name\"
-         ListLink
-             AnotherAtom  \"some atom\"
-             AnotherAtom  \"some other atom\"
-
-  Assuming this structure, then, given the top-level link, and one
-  of the two atoms in the ListLink, this routine returns the other
-  atom in the listLink.
-"
-	; The 'car' appears here because 'cog-outgoing-by-type' is returning
-	; a list, and we want just one atom (the only one in the list)
-	(cog-get-partner (car (cog-outgoing-by-type rel 'ListLink)) atom)
 )
 
 ; -----------------------------------------------------------------------
