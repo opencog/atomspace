@@ -116,6 +116,27 @@
 
 ; ===================================================================
 
+(define-public (cog-set-tv! ATOM TV)
+"
+ cog-set-tv! ATOM TV
+    Set the truth-value of ATOM to TV.
+
+    Example:
+       ; Define a node
+       guile> (define x (Concept \"def\"))
+       guile> (cog-tv x)
+       (stv 1 0)
+       guile> (cog-set-tv! x (SimpleTruthValue 0.9 0.8))
+       (ConceptNode \"def\" (stv 0.9 0.8))
+       guile> (cog-tv x)
+       (stv 0.9 0.8)
+"
+	(define tvkey (Predicate "*-TruthValueKey-*"))
+	(cog-set-value! ATOM tvkey TV)
+)
+
+; ===================================================================
+
 (define-public (cog-inc-count! ATOM CNT)
 "
   cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
