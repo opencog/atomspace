@@ -127,24 +127,6 @@ void SCMUtilsUTest::test_utils(void)
 	double cnt = fv->value()[3];
 	TSM_ASSERT("wrong value found", fabs(cnt-1.5) < 0.00001);
 
-	// Test cog-get-partner ------------------------------
-	Handle recount = evaluator->eval_h("recount");
-	CHKERR;
-	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
-
-	// Test cog-pred-get-partner ------------------------------
-	Handle rrcnt = evaluator->eval_h("rrcnt");
-	CHKERR;
-	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
-
-	// Test cog-get-link ------------------------------
-	Handle ref = evaluator->eval_h("ref");
-	CHKERR;
-	Handle wref = evaluator->eval_h("wref");
-	CHKERR;
-	TSM_ASSERT("Error setting up for cog-get-link", Handle::UNDEFINED != ref);
-	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);
-
 	// Test cog-get-atoms -----------------------------
 	Handle cpts = evaluator->eval_h("cpts");
 	CHKERR;

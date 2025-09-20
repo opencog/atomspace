@@ -62,6 +62,13 @@
 		(PutLink (StateLink room-state (VariableNode "$x")) room-empty)
 	))
 
+; Chase key->StateLink->ConceptNode
+(define (get-state STATE)
+	(filter
+		(lambda (CURSTA) (eq? 'ConceptNode (cog-type CURSTA)))
+		(map
+			(lambda (STALNK) (cog-outgoing-atom STALNK 1))
+			(cog-incoming-by-type STATE 'StateLink))))
+
 ;; Display the current room state
-(define (show-room-state)
-   (car (cog-chase-link 'StateLink 'ConceptNode room-state)))
+(define (show-room-state) (car (get-state room-state)))
