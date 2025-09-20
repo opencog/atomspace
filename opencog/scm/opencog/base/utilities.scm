@@ -4,8 +4,6 @@
 ;;; Commentary:
 ;
 ; Miscellaneous handy utilities for working with atoms.
-; The most useful utilities in here are probably 'cog-chase-link'
-; for finding atoms connected by a given link type
 ;
 ; Utilities include:
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
@@ -22,8 +20,6 @@
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-filter -- filter a list of atoms, keeping the given type.
-; -- cog-chase-link -- Return other atom of a link connecting two atoms.
-; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -367,90 +363,6 @@
 "
 	(define (is-type? atom) (eq? ATOM-TYPE (cog-type atom)))
 	(filter is-type? ATOM-LIST)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-chase-link link-type endpoint-type anchor)
-"
-  cog-chase-link -- Return other atom of a link connecting two atoms.
-
-  cog-chase-link link-type endpoint-type anchor
-
-  Starting at the atom 'anchor', chase its incoming links of
-  'link-type', and return a list of all of the atoms of type
-  'endpoint-type' in those links. For example, if 'anchor' is the
-  node 'GivenNode \"a\"', and the atomspace contains
-
-     SomeLink
-         GivenNode \"a\"
-         WantedNode  \"p\"
-
-     SomeLink
-         GivenNode \"a\"
-         WantedNode  \"q\"
-
-  then this method will return the two WantedNodes's, given the
-  GivenNode as anchor, and the link-type 'SomeLink.
-
-  viz: (cog-chase-link 'SomeLink 'WantedNode (GivenNode \"a\")) will
-  return ((WantedNode \"p\") (WantedNode \"q\"))
-
-  It is presumed that 'anchor' points to some atom (typically a node),
-  and that it has many links in its incoming set. So, loop over all of
-  the links of 'link-type' in this set. They presumably link to all
-  sorts of things. Find all of the things that are of 'endpoint-type'.
-  Return a list of all of these.
-
-  See also: cgw-follow-link, which does the same thing, but for wires.
-"
-	(let ((lst '()))
-		(define (mklist inst)
-			(set! lst (cons inst lst))
-			#f
-		)
-		(cog-map-chase-link link-type endpoint-type mklist anchor)
-		lst
-	)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-map-chase-link link-type endpoint-type proc anchor)
-"
-  cog-map-chase-link -- Invoke proc on atom connected through type.
-
-  Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
-  Starting at the atom 'anchor', chase its incoming links of
-  'link-type', and call procedure 'proc' on all of the atoms of
-  type 'endpoint-type' in those links. For example, if 'anchor' is the
-  node 'GivenNode \"a\"', and the atomspace contains
-
-     SomeLink
-         GivenNode \"a\"
-         WantedNode  \"p\"
-
-     SomeLink
-         GivenNode \"a\"
-         WantedNode  \"q\"
-
-  then 'proc' will be called twice, with each of the WantedNodes's
-  as the argument. These wanted nodes were found by following the
-  link type 'SomeLink, starting at the anchor GivenNode \"a\".
-
-  It is presumed that 'anchor' points to some atom (typically a node),
-  and that it has many links in its incoming set. So, loop over all of
-  the links of 'link-type' in this set. They presumably link to all
-  sorts of things. Find all of the things that are of 'endpoint-type'.
-  Apply proc to each of these.
-"
-	(define (get-endpoint w)
-		(map proc (cog-outgoing-by-type w endpoint-type))
-	)
-
-	; We assume that anchor is a single atom, or empty list...
-	(if (null? anchor)
-		'()
-		(map get-endpoint (cog-incoming-by-type anchor link-type))
-	)
 )
 
 ; ---------------------------------------------------------------------
