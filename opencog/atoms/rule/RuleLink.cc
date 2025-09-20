@@ -146,7 +146,13 @@ static Handle maybe_exec(const Handle& h, Variables& redvars)
 	// So, here we execute it, and if a non-Atom Value is returned,
 	// then pretend the execution never happened. Is this actually
 	// correct? Won't there be weird side-effects? WTF??
-	if (h->is_executable())
+	//
+	// Also XXX FIXME: testing h->is_executable() instead of
+	// h->is_type(EXECUTABLE_LINK) breaks unifier-tree-test.scm
+	// because the SequentialAnd fails to run. So this is a sad
+	// situation, involving the execution of the evaluatable links.
+	// if (h->is_executable())
+	if (h->is_type(EXECUTABLE_LINK))
 	{
 		ValuePtr vp = h->execute();
 		if (vp->is_atom())
