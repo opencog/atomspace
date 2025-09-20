@@ -116,7 +116,6 @@ public:
 	 * operator!= only compares pointers.
 	 */
 	virtual bool isDefaultTV() const;
-	virtual bool isDefinedTV() const;
 };
 
 static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)

@@ -83,55 +83,6 @@ bool TruthValue::isDefaultTV() const
 	return false;
 }
 
-/**
- * Return true if the TV value is one of the pre-defined TV values.
- */
-bool TruthValue::isDefinedTV() const
-{
-	TruthValuePtr dtv = DEFAULT_TV();
-	if (dtv.get() == this) return true;
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = TRUE_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = FALSE_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = TRIVIAL_TV();
-	if (dtv.get() == this) return true;
-
-	dtv = TRUE_TV();
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = FALSE_TV();
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-
-	dtv = TRIVIAL_TV();
-	if (get_type() == dtv->get_type() and
-	    get_mean() == dtv->get_mean() and
-	    get_confidence() == dtv->get_confidence())
-	{
-		return true;
-	}
-	return false;
-}
-
 bool TruthValue::nearly_equal(double a, double b)
 {
 	if (a == b) return true;
