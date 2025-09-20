@@ -24,7 +24,6 @@
 ; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
-; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -451,24 +450,6 @@
 	(if (null? anchor)
 		'()
 		(map get-endpoint (cog-incoming-by-type anchor link-type))
-	)
-)
-
-; -----------------------------------------------------------------------
-(define-public (cog-map-chase-links link-type endpoint-type proc anchor)
-"
-  cog-map-chase-links -- Invoke proc on atom connected through type.
-
-  Same as cog-chase-link, except that the anchor may be a single atom,
-  or it may be a list.
-"
-	(if (list? anchor)
-		(map
-			(lambda (one-of)
-				(cog-map-chase-links link-type endpoint-type proc one-of)
-			)
-		anchor)
-		(cog-map-chase-link link-type endpoint-type proc anchor)
 	)
 )
 
