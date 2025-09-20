@@ -255,17 +255,7 @@ SCM SchemeSmob::ss_arity (SCM svalue)
 }
 
 /* ============================================================== */
-/* Truth value setters/getters */
-
-SCM SchemeSmob::ss_tv (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-tv");
-	return protom_to_scm(ValueCast(h->getTruthValue()));
-}
-
-/* ============================================================== */
 /// Atomic increment the count of some generic FloatValue.
-/// Just like ss_inc_count but generic.
 /// key == key for value
 /// cnt == how much to increment
 /// ref == list-ref, which location to increment.

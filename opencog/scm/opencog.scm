@@ -52,7 +52,6 @@ cog-extract-recursive!
 cog-get-subtypes
 cog-get-types
 cog-handle
-cog-inc-count!
 cog-incoming-by-type
 cog-incoming-set
 cog-incoming-size
@@ -78,15 +77,10 @@ cog-outgoing-by-type
 cog-outgoing-set
 cog-set-atomspace!
 cog-set-server-mode!
-cog-set-tv!
 cog-set-value!
 cog-set-value-ref!
 cog-set-values!
 cog-subtype?
-cog-tv
-cog-tv-confidence
-cog-tv-count
-cog-tv-mean
 cog-type
 cog-type->int
 cog-update-value!
