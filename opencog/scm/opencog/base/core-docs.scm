@@ -468,9 +468,6 @@
     Return the incoming set of ATOM that consists only of atoms of
     type TYPE.  This set is returned as an ordinary scheme list.
 
-    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM)), but
-    should be faster, performance-wise.
-
     If the optional argument ATOMSPACE is given, then the lookup is
     performed in that AtomSpace. This is useful when the Atom appears
     in more than one AtomSpace, and it's incoming set differs in each
@@ -546,9 +543,6 @@
  cog-outgoing-by-type ATOM TYPE
     Return those atoms in the outgoing set of ATOM that are of type TYPE.
     This set is returned as an ordinary scheme list.
-
-    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM)), but
-    should be faster, performance-wise.
 ")
 
 (set-procedure-property! cog-handle 'documentation

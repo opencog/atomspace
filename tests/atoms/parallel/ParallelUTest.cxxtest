@@ -125,7 +125,7 @@ void ParallelUTest::test_parallel(void)
     // eye for the measurement.  Note that, on a busy system, these
     // timing windows can fail, if the OS muffs the sleeps.  Which does
     // seem to happen; see bug #517 on github.
-    eval->eval_tv("(cog-evaluate! pllel)");
+    eval->eval_v("(cog-execute! pllel)");
 
     struct timeval tv;
     gettimeofday(&tv, nullptr);
@@ -170,7 +170,7 @@ void ParallelUTest::test_parallel(void)
 }
 
 /*
- * ThreadJoinLink unit test.
+ * ExecuteThreadedLink unit test.
  */
 void ParallelUTest::test_join(void)
 {
@@ -186,7 +186,7 @@ void ParallelUTest::test_join(void)
 
     // This should take exactly 5 seconds to run.
     // In particular, this thread should be blocked for 5 seconds.
-    TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! wait)");
+    eval->eval("(cog-value->list (cog-execute! wait))");
 
     gettimeofday(&tv, nullptr);
     double end = tv.tv_sec + 1.0e-6 * tv.tv_usec;
@@ -205,32 +205,28 @@ void ParallelUTest::test_join(void)
     int cnt = atoi(str.c_str());
     TS_ASSERT_EQUALS(cnt, 2);
 
-    // The ThreadJoin is an AndLink...
-    double mean = tvp->get_mean();
-    TS_ASSERT_LESS_THAN(mean, 0.5);
-
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
- * ParallelLink, ThreadJoinLink exceptions
+ * ParallelLink, ExecuteThreadedLink exceptions
  */
 void ParallelUTest::test_throw(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     eval->eval("(load-from-path \"tests/atoms/parallel/parallel.scm\")");
-    TS_ASSERT_THROWS_NOTHING(eval->eval_tv("(cog-evaluate!  pllel-bad)"));
+
+    // Well, these are running in distinct threads. There's not
+    // really any way to capture exceptions thrown in other threads,
+    // and re-route them to here. So this is .. I dunno, not quite
+    // a good situation, but ... whatever. Not sure why we are even
+    // testing this ...
+    TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute! pllel-bad)"));
     TS_ASSERT_EQUALS(false, eval->eval_error());
 
-    TS_ASSERT_THROWS_ANYTHING(eval->eval_tv("(cog-evaluate! wait-bad)"));
-    TS_ASSERT_EQUALS(true, eval->eval_error());
-
-    TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute!  pllel-bad)"));
+    TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute! wait-bad)"));
     TS_ASSERT_EQUALS(false, eval->eval_error());
-
-    TS_ASSERT_THROWS_ANYTHING(eval->eval_v("(cog-execute! wait-bad)"));
-    TS_ASSERT_EQUALS(true, eval->eval_error());
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

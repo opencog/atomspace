@@ -78,6 +78,13 @@
 	)
 )
 
+; Chase key->StateLink->ConceptNode
+(define (get-state STATE)
+	(filter
+		(lambda (CURSTA) (eq? 'ConceptNode (cog-type CURSTA)))
+		(map
+			(lambda (STALNK) (cog-outgoing-atom STALNK 1))
+			(cog-incoming-by-type STATE 'StateLink))))
+
 ;; Display the current UFO state
-(define (show-ufo-state)
-   (car (cog-chase-link 'StateLink 'ConceptNode ufo-state)))
+(define (show-ufo-state) (car (get-state ufo-state)))
