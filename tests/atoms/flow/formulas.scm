@@ -8,8 +8,8 @@
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
-(define atom-a (Concept "A")
-(define atom-b (Concept "B")
+(define atom-a (Concept "A"))
+(define atom-b (Concept "B"))
 (cog-set-value! atom-a tvkey (SimpleTruthValue  0.8 1.0))
 (cog-set-value! atom-b tvkey (SimpleTruthValue  0.6 0.9))
 
