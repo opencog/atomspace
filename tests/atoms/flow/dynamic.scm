@@ -9,14 +9,18 @@
 (define A (Concept "A"))
 (define B (Concept "B"))
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
 ; Was FormulaTruthValue
 (define fututv
 	(FormulaStream
 		(FormulaPredicate
 			(Minus
 				(Number 1)
-				(Times (StrengthOf A) (StrengthOf B)))
-			(Times (ConfidenceOf A) (ConfidenceOf B)))))
+				(Times (strength-of A) (strength-of B)))
+			(Times (confidence-of A) (confidence-of B)))))
 
 ; ----------
 ; For DynamicUTest::test_formula_define()
@@ -26,11 +30,11 @@
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 (define evlnk
 	(Evaluation
@@ -54,11 +58,11 @@
 				(Minus
 					(Number 1)
 					(Times
-						(StrengthOf (Concept "A"))
-						(StrengthOf (Concept "B"))))
+						(strength-of (Concept "A"))
+						(strength-of (Concept "B"))))
 				(Times
-					(ConfidenceOf (Concept "A"))
-					(ConfidenceOf (Concept "B")))))))
+					(confidence-of (Concept "A"))
+					(confidence-of (Concept "B")))))))
 
 (DefineLink
    (DefinedPredicate "dynamic example")
@@ -66,11 +70,11 @@
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 ; -----------
 ; For DynamicUTest::test_defined_dynamic()
