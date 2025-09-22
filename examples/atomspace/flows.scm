@@ -29,13 +29,13 @@
 
 (use-modules (opencog) (opencog exec))
 
-; An atom with a TruthValue on it...  See below for a way of setting
-; TruthValues directly, using NumberNodes.
-(Concept "foo" (stv 0.3 0.7))
-
+; The TruthValue is located at key (Predicate "*-TruthValueKey-*")
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
-; The TruthValue is located at key (Predicate "*-TruthValueKey-*")
+; An atom with a TruthValue on it...
+(cog-set-value! (Concept "foo") tvkey (SimpleTruthValue 0.3 0.7))
+
+; This is how we get it's Value ...
 (cog-execute! (ValueOf (Concept "foo") tvkey))
 
 ; Transfer the TruthValue from "foo" to "bar" ... copy it.
@@ -78,8 +78,8 @@
          (ConfidenceOf (Variable "$Y")))))
 
 ; Some data...
-(Concept "A" (stv 0.9 0.98))
-(Concept "B" (stv 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; Use the formula to compute a new TV, and attach that TV to some Atom.
 ; This is little more than the copy above, except that the Evaluation
@@ -96,7 +96,7 @@
 ; That the above really does flow the TV from one place to another can
 ; be seen by looking at dynamic changes. So -- change the TV on A,
 ; and recompute...
-(Concept "A" (stv 0.8 0.9))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 0.9))
 (cog-execute!
 	(SetValue
 		(Concept "bar") tvkey
