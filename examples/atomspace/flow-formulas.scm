@@ -35,8 +35,8 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
-(cog-set-tv! (Concept "A") (SimpleTruthValue 1 0))
-(cog-set-tv! (Concept "B") (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 1 0))
 
 ; The FormulaStream is a kind of FloatValue that is recomputed, every
 ; time it is accessed. Thus, it is a kind of dynamically-changing Value.
@@ -63,14 +63,14 @@
 (cog-value->list tv-stream)
 
 ; When the inputs change, the value will track:
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.9 0.2))
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.4 0.7))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.7))
 (cog-value->list tv-stream)
 
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
 (cog-value->list tv-stream)
 
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
 (cog-value->list tv-stream)
 
 ; ----------
@@ -104,8 +104,8 @@
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.3 0.7))
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.4 0.6))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.7))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.6))
 (cog-evaluate! evlnk)
 (cog-tv evlnk)
 
@@ -118,13 +118,13 @@
 (display ev-stream) (newline)
 
 ; Change one of the inputs, and notice the output tracks:
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.9 0.2))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
 (cog-value->list ev-stream)
 
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
 (cog-value->list ev-stream)
 
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
 (cog-value->list ev-stream)
 
 ; ----------
@@ -136,7 +136,7 @@
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
 
 ; ... and then attach this auto-updating TV to it.
-(cog-set-tv! a-implies-b tv-stream)
+(cog-set-value! a-implies-b tvkey tv-stream)
 
 ; Take a look at it, make sure that it is actually there.
 (cog-tv a-implies-b)
@@ -148,8 +148,8 @@
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
 ; Change the TV on A and B ...
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.4 0.2))
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.7 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.4 0.2))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.7 0.8))
 
 ; ... and the TV on the implication stays current.
 ; Note that a different API is demoed below.
@@ -218,8 +218,8 @@
 (cog-tv a-implies-b)
 
 ; Change the TV on A and B ...
-(cog-set-tv! (Concept "A") (SimpleTruthValue 0.1 0.9))
-(cog-set-tv! (Concept "B") (SimpleTruthValue 0.1 0.9))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.9))
 
 ; And take another look.
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
