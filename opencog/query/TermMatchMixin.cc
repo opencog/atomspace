@@ -561,7 +561,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	    _nameserver.isA(vty, FUNCTION_LINK))
 	{
 		gvirt = _as->add_atom(gvirt);
-		TruthValuePtr tvp = gvirt->getTruthValue();
+		ValuePtr tvp = gvirt->getValue(truth_key());
 
 		// Avoid null-pointer dereference if user specified a bogus evaluation.
 		// i.e. an evaluation that failed to return a TV.
@@ -573,7 +573,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
 		                      << tvp->to_string() << std::endl;})
 
-		return crisp_truth_from_tv(tvp);
+		return crisp_truth_from_tv(TruthValueCast(tvp));
 	}
 
 	_temp_aspace->clear();
@@ -724,10 +724,10 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 	const auto& g = gnds.find(top);
 	if (gnds.end() != g)
 	{
-		TruthValuePtr tvp(g->second->getTruthValue());
+		ValuePtr tvp(g->second->getValue(truth_key()));
 		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->to_string() << std::endl;})
-		return crisp_truth_from_tv(tvp);
+		return crisp_truth_from_tv(TruthValueCast(tvp));
 	}
 
 	// If it's not grounded, then perhaps its executable.
