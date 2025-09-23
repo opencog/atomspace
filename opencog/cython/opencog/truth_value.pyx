@@ -18,7 +18,7 @@ cdef class TruthValue(Value):
     # exported in opencog.atomspace. To keep it work before proper fix
     # TruthValue constructor is modified to accept both old parameters
     # (strength and confidence) and new ptr_holder parameter.
-    # def __init__(self, strength_t strength=1.0, confidence_t confidence=1.0, PtrHolder ptr_holder=None):
+    # def __init__(self, double strength=1.0, double confidence=1.0, PtrHolder ptr_holder=None):
     #     cdef tv_ptr c_ptr
     #     if ptr_holder is not None:
     #         super().__init__(ptr_holder)
@@ -34,10 +34,10 @@ cdef class TruthValue(Value):
     def confidence(self):
         return self._confidence()
 
-    cdef strength_t _mean(self):
+    cdef double _mean(self):
         return self._ptr().get_mean()
 
-    cdef confidence_t _confidence(self):
+    cdef double _confidence(self):
         return self._ptr().get_confidence()
 
     cdef cTruthValue* _ptr(self):
