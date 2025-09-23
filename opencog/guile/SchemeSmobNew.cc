@@ -96,15 +96,7 @@ SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
-#ifdef RAINY_DAY_PROJECT
-	{
-		if (scm_is_false(sh))
-			return ValueCast(TruthValue::FALSE_TV());
-		return ValueCast(TruthValue::TRUE_TV());
-	}
-#else
 		return nullptr;
-#endif
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
 	if (COG_PROTOM != misctype) // Should this be a wrong-type-arg?
