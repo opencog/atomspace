@@ -207,6 +207,11 @@
 ; ImplicationLink). From thenceforth, any calls to get the TV
 ; on the ImplicatioLink get the FormulaStream, which recomputes
 ; the TV value each time it's accessed.
+;
+; XXX FIXME This is currently broken. The old SetTVLink did
+; automatically apply defined preds to extra arguments, but
+; the current SetValue does not do this.  This needs to be
+; redone, can't use PutLink, can't use Filter, Need Apply ... !?
 (cog-execute!
 	(SetValue
 		(Implication (Concept "A") (Concept "B"))

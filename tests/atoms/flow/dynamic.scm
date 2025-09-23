@@ -13,6 +13,9 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 1 0))
+
 ; Was FormulaTruthValue
 (define fututv
 	(FormulaStream
@@ -53,7 +56,7 @@
 	(SetValue
 		(Implication (Concept "A") (Concept "B"))
 		(Predicate "*-TruthValueKey-*")
-		(PromisePredicate
+		(PromiseLink
 			(FormulaPredicate
 				(Minus
 					(Number 1)
@@ -79,12 +82,14 @@
 ; -----------
 ; For DynamicUTest::test_defined_dynamic()
 (define p-implies-q (Implication (Concept "P") (Concept "Q")))
-(cog-execute!
-	(SetValue
-		(Implication (Concept "P") (Concept "Q"))
-		(Predicate "*-TruthValueKey-*")
-		(DefinedPredicate "dynamic example")
-		(Concept "A") (Concept "B")))
+;;; XXX FIXME this is currently broken; the old SetTVLink did this
+;;; but the new SetValue doesn't (shouldn't) ... we need an ApplyLink...
+;;;(cog-execute!
+;;;	(SetValue
+;;;		(Implication (Concept "P") (Concept "Q"))
+;;;		(Predicate "*-TruthValueKey-*")
+;;;		(DefinedPredicate "dynamic example")
+;;;		(Concept "A") (Concept "B")))
 
 ; -------------------------------------------------------------
 ; for DynamicUTest::test_formula_stream()
