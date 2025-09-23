@@ -9,14 +9,21 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
-(Member
-	(Evaluation
-		(Predicate "has_name")
-		(List (Concept "node1") (Concept "name1")))
-	(Concept "node2"))
+(define larg (List (Concept "node1") (Concept "name1")))
+(define evna (Evaluation (Predicate "has_name") larg))
+(define mema (Member evna (Concept "node2")))
 
 ; The answer we always expect to get:
 (define ans (List (Concept "node1") (Concept "name1")))
+
+; Get whack errors if we do not set the truth values.
+(define mytv FloatValue)
+(cog-set-value! (Concept "node1") tvkey (mytv 1 0))
+(cog-set-value! (Concept "name1") tvkey (mytv 1 0))
+(cog-set-value! (Concept "node2") tvkey (mytv 1 0))
+(cog-set-value! larg tvkey (mytv 1 0))
+(cog-set-value! evna tvkey (mytv 1 0))
+(cog-set-value! mema tvkey (mytv 1 0))
 
 ; Make sure this passes, before we get fancy
 (define q-basic (Query

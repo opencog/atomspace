@@ -166,8 +166,8 @@ void FormulaPredicateUTest::test_accept(void)
 	eval->eval("(load-from-path \"tests/query/formula-predicate.scm\")");
 
 	// Set TV's from which computations will happen.
-	eval->eval_h("(Concept \"node1\" (stv 0.5 0.6))");
-	eval->eval_h("(Concept \"name1\" (stv 0.5 0.6))");
+	eval->eval("(cog-set-value! (Concept \"node1\") tvkey (stv 0.5 0.6))");
+	eval->eval("(cog-set-value! (Concept \"name1\") tvkey (stv 0.5 0.6))");
 
 	// We expect all tests to return this.
 	Handle ans = eval->eval_h("ans");
@@ -205,9 +205,9 @@ void FormulaPredicateUTest::test_reject(void)
 	eval->eval("(load-from-path \"tests/query/formula-predicate.scm\")");
 
 	// Set TV's from which computations will happen.
-	eval->eval_h("(Concept \"node1\" (stv 0.9 0.3))");
-	eval->eval_h("(Concept \"name1\" (stv 0.9 0.3))");
-	eval->eval_h("(List (Concept \"node1\") (Concept \"name1\") (stv 0.4 0.3))");
+	eval->eval("(cog-set-value! (Concept \"node1\") tvkey (stv 0.9 0.3))");
+	eval->eval("(cog-set-value! (Concept \"name1\") tvkey (stv 0.9 0.3))");
+	eval->eval_h("(cog-set-value! (List (Concept \"node1\") (Concept \"name1\")) tvkey (stv 0.4 0.3))");
 
 	// We expect all tests to return the empty set.
 	do_predicate_test({});
