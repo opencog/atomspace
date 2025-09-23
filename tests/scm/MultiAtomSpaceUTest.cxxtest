@@ -483,7 +483,8 @@ void MultiAtomSpace::test_readonly_scm(void)
 
 	// Verify that the TV never changed.
 	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
-	TS_ASSERT (*tvp == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(tvp->get_mean() == 1.0);
+	TS_ASSERT(tvp->get_confidence() == 0.0);
 
 	logger().debug("END TEST: %s", __FUNCTION__);	
 }
