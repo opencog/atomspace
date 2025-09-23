@@ -48,11 +48,11 @@
 
 ; Create a SimpleTruthValue with a non-trivial formula:
 ; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
-; and cA, cB are confidence values. The FormulaPredicateLink assembles
-; two floating-point values, and creates a SimpleTruthValue out of them.
+; and cA, cB are confidence values. The FloatColumn assembles two
+; floating-point values, and creates a FloatValue out of them.
 ;
 (cog-execute!
-	(FormulaPredicate
+	(FloatColumn
 		(Minus
 			(Number 1)
 			(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
@@ -60,34 +60,20 @@
 
 ; The values do not need to be formulas; they can be hard-coded numbers.
 (cog-execute!
-	(FormulaPredicate (Number 0.7) (Number 0.314)))
+	(FloatColumn (Number 0.7) (Number 0.314)))
 
-; The below computes a truth value, and attaches it to the
-; EvaluationLink. Let's demo this in three parts: first define it,
-; then evaluate it, then look at it.
-;
-(define my-ev-link
-	(Evaluation
-		(FormulaPredicate (Number 0.7) (Number 0.314))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+; Typically, one wishes to have a formula with variables in it, so that
+; one can apply it anywhere. The standard way of doing this is to use
+; a LambdaLink to declare variable bindings. The below defines a forumla
+; using LambdaLink, and then applies it to the given arguments.
 
-; Evaluate ...
-(cog-execute! my-ev-link)
+(define my-formula
+	(Lambda
+		(VariableList (Variable "$X") (Variable "$Y"))
 
-; Print.
-(display my-ev-link)
-
-; More typically, one wishes to have a formula in the abstract,
-; with variables in it, so that one can apply it in any one of
-; a number of different situations. In the below, the variables
-; are automatically reduced with the Atoms in the ListLink, and
-; then the formula is evaluated to obtain a TruthValue.
-(cog-execute!
-	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
+		; This is the prototypical PLN TruthValue formula.
+		(FloatColumn
 			(Minus
 				(Number 1)
 				(Times
@@ -95,35 +81,18 @@
 					(strength-of (Variable "$Y"))))
 			(Times
 				(confidence-of (Variable "$X"))
-				(confidence-of (Variable "$Y"))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+				(confidence-of (Variable "$Y"))))))
 
-; Optionally, you can wrap formulas with LambdaLinks. This doesn't
-; really change anything; formulas work fine without LambdaLinks.
 (cog-execute!
-	(Evaluation
-		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
-			(Lambda (Minus
-				(Number 1)
-				(Times
-					(strength-of (Variable "$X"))
-					(strength-of (Variable "$Y")))))
-			(Lambda (Times
-				(confidence-of (Variable "$X"))
-				(confidence-of (Variable "$Y")))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+	(ExecutionOutput
+		my-formula
+		(List (Concept "A") (Concept "B"))))
 
-
-; The FormulaPredicateLink behaves just like any other algebraic
-; expression with VariableNodes in it. When executed, it might
-; reduce a bit, but that is all.
+; The FloatColumn behaves just like any other algebraic expression with
+; VariableNodes in it. When executed, it might reduce a bit, but that
+; is all.
 (cog-execute!
-	(FormulaPredicate
+	(FloatColumn
 		(Plus (Number 41)
 			(Minus
 				(Number 1)
