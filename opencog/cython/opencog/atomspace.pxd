@@ -116,8 +116,6 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
-        tv_ptr getTruthValue()
-        void setTruthValue(tv_ptr tvp)
         void setValue(const cHandle& key, const cValuePtr& value)
         cValuePtr getValue(const cHandle& key) const
         cpp_set[cHandle] getKeys()
