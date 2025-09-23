@@ -64,9 +64,9 @@
 
 ; Typically, one wishes to have a formula with variables in it, so that
 ; one can apply it anywhere. The standard way of doing this is to use
-; a LambdaLink to declare variable bindings. The below defines a forumla
-; using LambdaLink, and then applies it to the given arguments.
+; a LambdaLink to declare variable bindings.
 
+; First, define a formula.
 (define my-formula
 	(Lambda
 		(VariableList (Variable "$X") (Variable "$Y"))
@@ -83,75 +83,36 @@
 				(confidence-of (Variable "$X"))
 				(confidence-of (Variable "$Y"))))))
 
+; Now run the formula, by applying it to some arguments.
 (cog-execute!
-	(ExecutionOutput
-		my-formula
-		(List (Concept "A") (Concept "B"))))
-
-; Beta-reduction works as normal. The below will create an
-; EvaluationLink with ConceptNode A and B in it, and will set the
-; truth value according to the formula.
-(define the-put-result
-	(cog-execute!
-		(PutLink
-			(VariableList (Variable "$VA") (Variable "$VB"))
-			(Evaluation
-				; Compute TV = (1-sA*sB, cA*cB)
-				(FormulaPredicate
-					(Minus
-						(Number 1)
-						(Times
-							(strength-of (Variable "$VA"))
-							(strength-of (Variable "$VB"))))
-					(Times
-						(confidence-of (Variable "$VA"))
-						(confidence-of (Variable "$VB"))))
-				(List
-					(Variable "$VA") (Variable "$VB")))
-		(Set (List (Concept "A") (Concept "B"))))))
-
-; The scheme variable `the-put-result` contains a SetLink with the
-; result in it. Lets unwrap it, so that `evelnk` is just the
-; EvaluationLink. And then we play a little trick.
-(define evelnk (cog-outgoing-atom the-put-result 0))
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Change the truth value on the two concept nodes ...
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.5))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.5))
 
-; Re-evaluate the EvaluationLink. Note the TV has been updated!
-(cog-execute! evelnk)
+; Rerun the formula... The computed value changes...
+(cog-execute!
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Do it again, for good luck!
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.99))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.99))
 
-; Re-evaluate the EvaluationLink. The TV is again recomputed!
-(cog-execute! evelnk)
+(cog-execute!
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
-; One can also use DefinedPredicates, to give the formula a name.
-(DefineLink
-	(DefinedPredicate "has a reddish color")
-	(FormulaPredicate
-		(Minus
-			(Number 1)
-			(Times
-				(strength-of (Variable "$X"))
-				(strength-of (Variable "$Y"))))
-		(Times
-			(confidence-of (Variable "$X"))
-			(confidence-of (Variable "$Y")))))
+; One can also use DefinedSchema, to give the formula a name.
+(DefineLink (DefinedSchema "has a reddish color") my-formula)
 
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (cog-execute!
-	(Evaluation
-		(DefinedPredicate "has a reddish color")
-		(List
-			(Concept "A")
-			(Concept "B"))))
+	(ExecutionOutput
+		(DefinedSchema "has a reddish color")
+		(List (Concept "A") (Concept "B"))))
 
 ; The End. That's All, Folks!
 ; -------------------------------------------------------------------
