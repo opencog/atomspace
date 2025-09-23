@@ -221,6 +221,34 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 // ---------------------------------------------------------------
 
 /// Return a FloatValue vector.
+//
+// XXX FIXME. This is not correct, in two different ways. First,
+// consider the `formulas.scm` example, of having one formula per
+// row, and then executing that formula to get a FloatValue of
+// length one. We want to concatenate all these floats for make
+// just one vector. This doesn't do it ...
+//   a) It fails to even ttry to execute each (singleton) row
+//   b) It doesn't realize they are *all* Floats.
+//      (And thus should return a FloatValue, not a LinkValue)
+//
+// Same complaint as above, but the formulas contain variables
+// and thus might be "delta reducible" (constant terms combined)
+// without being fully executable. In this case, we probably don't
+// want a LinkValue, but a TransposeColumn as before, with the
+// reductions in it. For example, the 41 and the 1 can be added:
+//
+//     (cog-execute!
+//        (TransposeColumn
+//           (Plus (Number 41)
+//              (Minus
+//                 (Number 1)
+//                 (Times
+//                    (strength-of (Variable "$VA"))
+//                    (strength-of (Variable "$VB")))))
+//              (Times
+//                 (confidence-of (Variable "$VA"))
+//                 (confidence-of (Variable "$VB")))))
+//
 ValuePtr TransposeColumn::do_direct_loop(AtomSpace* as, bool silent,
                                          const ValueSeq& vrows)
 {
@@ -294,7 +322,7 @@ ValuePtr TransposeColumn::do_execute(AtomSpace* as, bool silent)
 		}
 	}
 
-	// If we are here, then base is an link. Expect
+	// If we are here, then base is a link. Expect
 	// it to contain things that evaluate to a double
 	return do_handle_loop(as, silent, base->getOutgoingSet());
 }

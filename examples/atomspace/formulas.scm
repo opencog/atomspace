@@ -88,21 +88,6 @@
 		my-formula
 		(List (Concept "A") (Concept "B"))))
 
-; The FloatColumn behaves just like any other algebraic expression with
-; VariableNodes in it. When executed, it might reduce a bit, but that
-; is all.
-(cog-execute!
-	(FloatColumn
-		(Plus (Number 41)
-			(Minus
-				(Number 1)
-				(Times
-					(strength-of (Variable "$VA"))
-					(strength-of (Variable "$VB")))))
-			(Times
-				(confidence-of (Variable "$VA"))
-				(confidence-of (Variable "$VB")))))
-
 ; Beta-reduction works as normal. The below will create an
 ; EvaluationLink with ConceptNode A and B in it, and will set the
 ; truth value according to the formula.
