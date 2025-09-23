@@ -29,7 +29,6 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/flow/TruthValueOfLink.h>
 #include <opencog/atoms/flow/FormulaPredicateLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
