@@ -108,7 +108,7 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(tv.mean, 0.5)
         self.assertAlmostEqual(tv.confidence, 0.8, places=4)
         # test string representation
-        self.assertEqual(str(tv), "(stv 0.5 0.8)")
+        self.assertEqual(str(tv), "(SimpleTruthValue 0.5 0.8)")
 
         # check equality
         tv2 = TruthValue(0.5, 0.8)
