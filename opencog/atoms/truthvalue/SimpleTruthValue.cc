@@ -105,7 +105,7 @@ std::string SimpleTruthValue::to_string(const std::string& indent) const
 {
 #define BUFSZ 100
     char buf[BUFSZ];
-    snprintf(buf, BUFSZ, "(stv %g %g)",
+    snprintf(buf, BUFSZ, "(SimpleTruthValue %g %g)",
              static_cast<float>(get_mean()),
              static_cast<float>(get_confidence()));
     return indent + buf;
