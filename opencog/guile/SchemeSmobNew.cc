@@ -480,7 +480,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 		// Look for "stv" and so on.
 		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-		if (tv) h = asp->set_truthvalue(h, tv);
+		if (tv) h = asp->set_value(h, truth_key(), tv);
 
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
@@ -531,7 +531,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h = asp->set_truthvalue(h, tv);
+	if (tv) h = asp->set_value(h, truth_key(), tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -737,7 +737,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 		// Look for "stv" and so on.
 		const TruthValuePtr tv(get_tv_from_list(satom_list));
-		if (tv) h = atomspace->set_truthvalue(h, tv);
+		if (tv) h = atomspace->set_value(h, truth_key(), tv);
 
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
@@ -786,7 +786,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) h = atomspace->set_truthvalue(h, tv);
+	if (tv) h = atomspace->set_value(h, truth_key(), tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
