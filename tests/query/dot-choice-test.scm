@@ -10,6 +10,9 @@
 (define tname "dot-choice-test")
 (test-begin tname)
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (coount-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+
 (Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
 (Evaluation (Predicate "has nose") (Concept "dog") (CountTruthValue 1 0 2))
 (Evaluation (Predicate "has tail") (Concept "dog") (CountTruthValue 1 0 3))
@@ -50,8 +53,8 @@
 
 		; Multiply the counts on the search results.
 		(Times
-			(CountOf (Variable "$dog"))
-			(CountOf (Variable "$cat")))))
+			(count-of (Variable "$dog"))
+			(count-of (Variable "$cat")))))
 
 ; Accumulate the numeric values: this should return 2+6+12+20+30 = 70.
 (define seventy (cog-execute! (Accumulate qdot-math)))

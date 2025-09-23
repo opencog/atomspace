@@ -11,6 +11,9 @@
 (define tname "dot-mashup-test")
 (test-begin tname)
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (coount-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+
 (Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
 (Evaluation (Predicate "has nose") (Concept "dog") (CountTruthValue 1 0 2))
 (Evaluation (Predicate "has tail") (Concept "dog") (CountTruthValue 1 0 3))
@@ -54,8 +57,8 @@
 			(Lambda
 				(VariableList (Variable "$x") (Variable "$y"))
 				(Times
-					(CountOf (Variable "$x"))
-					(CountOf (Variable "$y"))))
+					(count-of (Variable "$x"))
+					(count-of (Variable "$y"))))
 			(List
 				(Variable "$dog")
 				(Variable "$cat")))))
