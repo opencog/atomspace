@@ -65,17 +65,20 @@
 
 ; Formulas can be used to compute TV's, as shown in the `formula.scm`
 ; example. Consider a named formula, with variables.
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
 (DefineLink
    (DefinedPredicate "has a reddish color")
    (FormulaPredicate
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 ; Some data...
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
