@@ -184,7 +184,7 @@ void FormulaUTest::test_putlink()
 	Handle hset = _eval.eval_h("(cog-execute! put-link)");
 	Handle hevo = hset->getOutgoingAtom(0);
 
-	TruthValuePtr tvp = hevo->getTruthValue();
+	TruthValuePtr tvp = TruthValueCast(hevo->getValue(truth_key()));
 	printf("Putter result=%s\n", tvp->to_string().c_str());
 	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
 	FloatValuePtr fvp = FloatValueCast(ValueCast(tvp));
