@@ -35,6 +35,9 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
+(cog-set-tv! (Concept "A") (SimpleTruthValue 1 0))
+(cog-set-tv! (Concept "B") (SimpleTruthValue 1 0))
+
 ; The FormulaStream is a kind of FloatValue that is recomputed, every
 ; time it is accessed. Thus, it is a kind of dynamically-changing Value.
 ; It is used here to define a dynamically-changing TruthValue.
@@ -167,7 +170,8 @@
 (cog-execute!
 	(SetValue
 		(Implication (Concept "A") (Concept "B"))
-		(PromisePredicate
+		tvkey
+		(PromiseLink
 			(FormulaPredicate
 				(Minus
 					(Number 1)
@@ -206,6 +210,7 @@
 (cog-execute!
 	(SetValue
 		(Implication (Concept "A") (Concept "B"))
+		tvkey
 		(DefinedPredicate "dynamic example")
 		(Concept "A") (Concept "B")))
 
