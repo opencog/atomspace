@@ -1,6 +1,6 @@
 from opencog.atomspace cimport Atom, AtomSpace
 from opencog.atomspace cimport cAtomSpace, cTruthValue
-from opencog.atomspace cimport tv_ptr, strength_t, confidence_t, count_t
+from opencog.atomspace cimport tv_ptr, strength_t, confidence_t
 from opencog.atomspace cimport create_python_value_from_c_value
 
 from cython.operator cimport dereference as deref

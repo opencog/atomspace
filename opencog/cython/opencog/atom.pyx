@@ -135,8 +135,8 @@ cdef class Atom(Value):
         handle_vector = atom_ptr.getIncomingSetByType(type)
         return convert_handle_seq_to_python_list(handle_vector)
 
-    def truth_value(self, mean, count):
-        self.tv = createTruthValue(mean, count)
+    def truth_value(self, mean, conf):
+        self.tv = createTruthValue(mean, conf)
         return self
 
     def is_executable(self):

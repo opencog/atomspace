@@ -12,7 +12,6 @@ ADD_LIBRARY (atomflow
 	LinkSignatureLink.cc
 	NumberOfLink.cc
 	PromiseLink.cc
-	SetTVLink.cc
 	SetValueLink.cc
 	SizeOfLink.cc
 	SplitLink.cc
@@ -47,7 +46,6 @@ INSTALL (FILES
 	LinkSignatureLink.h
 	NumberOfLink.h
 	PromiseLink.h
-	SetTVLink.h
 	SetValueLink.h
 	SizeOfLink.h
 	SplitLink.h

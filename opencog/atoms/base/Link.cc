@@ -91,13 +91,8 @@ std::string Link::to_string(const std::string& indent) const
     std::string answer = indent;
     std::string more_indent = indent + "  "; // two spaces
 
-    answer += "(" + nameserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type) + "\n";
 
-    // Print the TV only if its not the default.
-    if (getTruthValue() and not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->to_string();
-
-    answer += "\n";
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)

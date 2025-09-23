@@ -28,20 +28,30 @@
 
 (use-modules (opencog) (opencog exec))
 
-; The FormulaTruthValue is a kind of TruthValue that is recomputed,
-; every time it is accessed. Thus, it is a kind of dynamically-changing
-; TruthValue. The value to be computed can be defined in Atomese. Thus,
-; in the following, the SimpleTV of (1-sA*sB, cA*cB) is computed.
+; Atomese is verbose, and this demo is easier to understand if some
+; of that is hidden a bit. So, define two scheme functions that get
+; the strength and confidence of a SimpleTruthValue.
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 1 0))
+
+; The FormulaStream is a kind of FloatValue that is recomputed, every
+; time it is accessed. Thus, it is a kind of dynamically-changing Value.
+; It is used here to define a dynamically-changing TruthValue.
+; In the following, the pair of number (1-sA*sB, cA*cB) is computed.
 (define tv-stream
-	(FormulaTruthValue
+	(FormulaStream
 		(Minus
 			(Number 1)
 			(Times
-				(StrengthOf (Concept "A"))
-				(StrengthOf (Concept "B"))))
+				(strength-of (Concept "A"))
+				(strength-of (Concept "B"))))
 		(Times
-			(ConfidenceOf (Concept "A"))
-			(ConfidenceOf (Concept "B")))))
+			(confidence-of (Concept "A"))
+			(confidence-of (Concept "B")))))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom. Of course, at this point Concept A and B only have the
@@ -53,14 +63,14 @@
 (cog-value->list tv-stream)
 
 ; When the inputs change, the value will track:
-(cog-set-tv! (Concept "A") (stv 0.9 0.2))
-(cog-set-tv! (Concept "B") (stv 0.4 0.7))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.7))
 (cog-value->list tv-stream)
 
-(cog-set-tv! (Concept "A") (stv 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
 (cog-value->list tv-stream)
 
-(cog-set-tv! (Concept "B") (stv 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
 (cog-value->list tv-stream)
 
 ; ----------
@@ -75,14 +85,14 @@
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 ; Note that FormulaPredicate is a link type; it computes the same
-; things as FormulaTruthValue, except that ... it is not a Value!
+; things as FormulaStream, except that ... it is not a Value!
 ; It's a link.
 
 ; Create an EvaluationLink that will apply the formula above to a pair
@@ -94,27 +104,27 @@
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
-(cog-set-tv! (Concept "A") (stv 0.3 0.7))
-(cog-set-tv! (Concept "B") (stv 0.4 0.6))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.7))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.6))
 (cog-evaluate! evlnk)
 (cog-tv evlnk)
 
 ; Now that we've verified that the EvaluationLink works as expected,
 ; it can be deployed in the stream.
-(define ev-stream (FormulaTruthValue evlnk))
+(define ev-stream (FormulaStream evlnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:
 (display ev-stream) (newline)
 
 ; Change one of the inputs, and notice the output tracks:
-(cog-set-tv! (Concept "A") (stv 0.9 0.2))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
 (cog-value->list ev-stream)
 
-(cog-set-tv! (Concept "A") (stv 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
 (cog-value->list ev-stream)
 
-(cog-set-tv! (Concept "B") (stv 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
 (cog-value->list ev-stream)
 
 ; ----------
@@ -126,7 +136,7 @@
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
 
 ; ... and then attach this auto-updating TV to it.
-(cog-set-tv! a-implies-b tv-stream)
+(cog-set-value! a-implies-b tvkey tv-stream)
 
 ; Take a look at it, make sure that it is actually there.
 (cog-tv a-implies-b)
@@ -138,8 +148,8 @@
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
 ; Change the TV on A and B ...
-(cog-set-tv! (Concept "A") (stv 0.4 0.2))
-(cog-set-tv! (Concept "B") (stv 0.7 0.8))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.4 0.2))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.7 0.8))
 
 ; ... and the TV on the implication stays current.
 ; Note that a different API is demoed below.
@@ -150,29 +160,30 @@
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values. Can we do the same, without using scheme?
-; Yes, we can. Just use the PromisePredicateLink.  This can wrap any
-; evaluatable Atom, anything that can produce a TruthValue, and provides
-; a promiste that it can be evaluated in the future. The when the SetTV
-; is executed, then whatever was wrapped is unwrapped and placed into
-; a FormulaTruthValue, which will then update every time it is accessed.
+; Yes, we can. Just use the PromiseLink.  This can wrap any executable
+; Atom, anything that can produce a Value, and provides a promise that
+; it can be evaluated in the future. Then, when the SetValueLink is
+; executed, whatever was wrapped is unwrapped and placed into a
+; FormulaStream, which will then update every time it is accessed.
 
 ; For example:
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Implication (Concept "A") (Concept "B"))
-		(PromisePredicate
+		tvkey
+		(PromiseLink
 			(FormulaPredicate
 				(Minus
 					(Number 1)
 					(Times
-						(StrengthOf (Concept "A"))
-						(StrengthOf (Concept "B"))))
+						(strength-of (Concept "A"))
+						(strength-of (Concept "B"))))
 				(Times
-					(ConfidenceOf (Concept "A"))
-					(ConfidenceOf (Concept "B")))))))
+					(confidence-of (Concept "A"))
+					(confidence-of (Concept "B")))))))
 
 ; The above can be tedious, as it requires manually creating a new
-; formula for each SetTV.  Some of this tedium can be avoided by
+; formula for each SetValue.  Some of this tedium can be avoided by
 ; using formulas with variables in them. Using the same formula as
 ; before, we get a dynamic example:
 (DefineLink
@@ -181,24 +192,30 @@
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
 ; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue. More precisely, a FormulaTruthValue
-; is created, that wraps the 2nd and later args to the SetTV.
-; This FormulaTruthValue is installed onto the first arg (the
+; they provide a TruthValue. More precisely, a FormulaStream is
+; created. This wraps the 2nd and later args to the SetValue.
+; This FormulaStream is installed onto the first arg (the
 ; ImplicationLink). From thenceforth, any calls to get the TV
-; on the ImplicatioLink get the FormulaTruthValue, which recomputes
+; on the ImplicatioLink get the FormulaStream, which recomputes
 ; the TV value each time it's accessed.
+;
+; XXX FIXME This is currently broken. The old SetTVLink did
+; automatically apply defined preds to extra arguments, but
+; the current SetValue does not do this.  This needs to be
+; redone, can't use PutLink, can't use Filter, Need Apply ... !?
 (cog-execute!
-	(SetTV
+	(SetValue
 		(Implication (Concept "A") (Concept "B"))
+		tvkey
 		(DefinedPredicate "dynamic example")
 		(Concept "A") (Concept "B")))
 
@@ -206,8 +223,8 @@
 (cog-tv a-implies-b)
 
 ; Change the TV on A and B ...
-(cog-set-tv! (Concept "A") (stv 0.1 0.9))
-(cog-set-tv! (Concept "B") (stv 0.1 0.9))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.9))
 
 ; And take another look.
 (format #t "A implies B has strength ~6F and confidence ~6F\n"

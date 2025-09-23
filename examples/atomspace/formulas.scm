@@ -21,32 +21,45 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-; The StrengthOfLink returns a single floating-point number,
-; the strength of a TruthValue.
-(Concept "A" (stv 0.8 1.0))
-(cog-execute! (StrengthOf (Concept "A")))
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
+; The two component of a SimpleTruthValue can be accessed with
+; the ElementOfLink:
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 1.0))
+(cog-execute! (ElementOf (Number 0) (ValueOf (Concept "A") tvkey)))
+(cog-execute! (ElementOf (Number 1) (ValueOf (Concept "A") tvkey)))
+
+; The above Atomese is verbose. That's just how Atomese is. To make
+; the demo easier, its handy to write a bit of scheme to keep focus
+; on what we want to show, rather than how verbose Atomese is...
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
+; Double-check that this works:
+(cog-execute! (strength-of (Concept "A")))
+(cog-execute! (confidence-of (Concept "A")))
 
 ; The demo needs at least one more Atom.
-(Concept "B" (stv 0.6 0.9))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.6 0.9))
 
 ; Multiply the strength of the TV's of two atoms.
 (cog-execute!
-	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
+	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
 ; Create a SimpleTruthValue with a non-trivial formula:
 ; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
 ; and cA, cB are confidence values. The FormulaPredicateLink assembles
 ; two floating-point values, and creates a SimpleTruthValue out of them.
 ;
-(cog-evaluate!
+(cog-execute!
 	(FormulaPredicate
 		(Minus
 			(Number 1)
-			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
-		(Times (ConfidenceOf (Concept "A")) (ConfidenceOf (Concept "B")))))
+			(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
+		(Times (confidence-of (Concept "A")) (confidence-of (Concept "B")))))
 
 ; The values do not need to be formulas; they can be hard-coded numbers.
-(cog-evaluate!
+(cog-execute!
 	(FormulaPredicate (Number 0.7) (Number 0.314)))
 
 ; The below computes a truth value, and attaches it to the
@@ -61,7 +74,7 @@
 			(Concept "B"))))
 
 ; Evaluate ...
-(cog-evaluate! my-ev-link)
+(cog-execute! my-ev-link)
 
 ; Print.
 (display my-ev-link)
@@ -71,36 +84,36 @@
 ; a number of different situations. In the below, the variables
 ; are automatically reduced with the Atoms in the ListLink, and
 ; then the formula is evaluated to obtain a TruthValue.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
 		(FormulaPredicate
 			(Minus
 				(Number 1)
 				(Times
-					(StrengthOf (Variable "$X"))
-					(StrengthOf (Variable "$Y"))))
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y"))))
 			(Times
-				(ConfidenceOf (Variable "$X"))
-				(ConfidenceOf (Variable "$Y"))))
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y"))))
 		(List
 			(Concept "A")
 			(Concept "B"))))
 
 ; Optionally, you can wrap formulas with LambdaLinks. This doesn't
 ; really change anything; formulas work fine without LambdaLinks.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
 		(FormulaPredicate
 			(Lambda (Minus
 				(Number 1)
 				(Times
-					(StrengthOf (Variable "$X"))
-					(StrengthOf (Variable "$Y")))))
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y")))))
 			(Lambda (Times
-				(ConfidenceOf (Variable "$X"))
-				(ConfidenceOf (Variable "$Y")))))
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y")))))
 		(List
 			(Concept "A")
 			(Concept "B"))))
@@ -115,11 +128,11 @@
 			(Minus
 				(Number 1)
 				(Times
-					(StrengthOf (Variable "$VA"))
-					(StrengthOf (Variable "$VB")))))
+					(strength-of (Variable "$VA"))
+					(strength-of (Variable "$VB")))))
 			(Times
-				(ConfidenceOf (Variable "$VA"))
-				(ConfidenceOf (Variable "$VB")))))
+				(confidence-of (Variable "$VA"))
+				(confidence-of (Variable "$VB")))))
 
 ; Beta-reduction works as normal. The below will create an
 ; EvaluationLink with ConceptNode A and B in it, and will set the
@@ -134,11 +147,11 @@
 					(Minus
 						(Number 1)
 						(Times
-							(StrengthOf (Variable "$VA"))
-							(StrengthOf (Variable "$VB"))))
+							(strength-of (Variable "$VA"))
+							(strength-of (Variable "$VB"))))
 					(Times
-						(ConfidenceOf (Variable "$VA"))
-						(ConfidenceOf (Variable "$VB"))))
+						(confidence-of (Variable "$VA"))
+						(confidence-of (Variable "$VB"))))
 				(List
 					(Variable "$VA") (Variable "$VB")))
 		(Set (List (Concept "A") (Concept "B"))))))
@@ -149,18 +162,18 @@
 (define evelnk (cog-outgoing-atom the-put-result 0))
 
 ; Change the truth value on the two concept nodes ...
-(Concept "A" (stv 0.3 0.5))
-(Concept "B" (stv 0.4 0.5))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.5))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.5))
 
 ; Re-evaluate the EvaluationLink. Note the TV has been updated!
-(cog-evaluate! evelnk)
+(cog-execute! evelnk)
 
 ; Do it again, for good luck!
-(Concept "A" (stv 0.1 0.99))
-(Concept "B" (stv 0.1 0.99))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.99))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.99))
 
 ; Re-evaluate the EvaluationLink. The TV is again recomputed!
-(cog-evaluate! evelnk)
+(cog-execute! evelnk)
 
 ; One can also use DefinedPredicates, to give the formula a name.
 (DefineLink
@@ -169,19 +182,22 @@
 		(Minus
 			(Number 1)
 			(Times
-				(StrengthOf (Variable "$X"))
-				(StrengthOf (Variable "$Y"))))
+				(strength-of (Variable "$X"))
+				(strength-of (Variable "$Y"))))
 		(Times
-			(ConfidenceOf (Variable "$X"))
-			(ConfidenceOf (Variable "$Y")))))
+			(confidence-of (Variable "$X"))
+			(confidence-of (Variable "$Y")))))
 
-(Concept "A" (stv 0.9 0.98))
-(Concept "B" (stv 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "has a reddish color")
 		(List
 			(Concept "A")
 			(Concept "B"))))
+
+; The End. That's All, Folks!
+; -------------------------------------------------------------------

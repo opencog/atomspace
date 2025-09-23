@@ -29,66 +29,69 @@
 
 (use-modules (opencog) (opencog exec))
 
-; An atom with a TruthValue on it...  See below for a way of setting
-; TruthValues directly, using NumberNodes.
-(Concept "foo" (stv 0.3 0.7))
+; The TruthValue is located at key (Predicate "*-TruthValueKey-*")
+(define tvkey (Predicate "*-TruthValueKey-*"))
 
-; The TruthValue can be fetched in either of two ways.
-(cog-evaluate! (TruthValueOf (Concept "foo")))
-(cog-execute!  (TruthValueOf (Concept "foo")))
+; An atom with a TruthValue on it...
+(cog-set-value! (Concept "foo") tvkey (SimpleTruthValue 0.3 0.7))
+
+; This is how we get it's Value ...
+(cog-execute! (ValueOf (Concept "foo") tvkey))
 
 ; Transfer the TruthValue from "foo" to "bar" ... copy it.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
-		(TruthValueOf (Concept "foo"))))
+	(SetValue (Concept "bar") tvkey
+		(ValueOf (Concept "foo") tvkey)))
 
 ; Verify that the TV on "bar" has changed.
 (cog-tv (Concept "bar"))
 
 ; The DefinedFormulaLink can be used to create SimpleTruthValues out
 ; of a pair of numbers. For example:
-(cog-execute! (SetTV (Concept "bar")
+(cog-execute! (SetValue (Concept "bar") tvkey
 	(FormulaPredicate (Number 0.2718) (Number 0.314))))
 
 ; Explicitly look at it.
 (cog-tv (Concept "bar"))
 
-; SetTV is interesting because it allows complex arithmetic expressions
+; SetValue is interesting because it allows complex arithmetic expressions
 ; to be specified in Atomese. Below, simply take the square of the TV.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
+	(SetValue
+		(Concept "bar") tvkey
 		(Times
-			(TruthValueOf (Concept "foo"))
-			(TruthValueOf (Concept "foo")))))
+			(FloatValueOf (Concept "foo") tvkey)
+			(FloatValueOf (Concept "foo") tvkey))))
 
 ; Formulas can be used to compute TV's, as shown in the `formula.scm`
 ; example. Consider a named formula, with variables.
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
 (DefineLink
    (DefinedPredicate "has a reddish color")
    (FormulaPredicate
       (Minus
          (Number 1)
          (Times
-            (StrengthOf (Variable "$X"))
-            (StrengthOf (Variable "$Y"))))
+            (strength-of (Variable "$X"))
+            (strength-of (Variable "$Y"))))
       (Times
-         (ConfidenceOf (Variable "$X"))
-         (ConfidenceOf (Variable "$Y")))))
+         (confidence-of (Variable "$X"))
+         (confidence-of (Variable "$Y")))))
 
 ; Some data...
-(Concept "A" (stv 0.9 0.98))
-(Concept "B" (stv 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; Use the formula to compute a new TV, and attach that TV to some Atom.
 ; This is little more than the copy above, except that the Evaluation
 ; is actually performed, so that the new TV is computed, before being
-; copied. In general, if the second Atom passed to SetTV is evaluatable,
-; then it will be evaluated to obtain the TV.
+; copied. In general, if the third Atom passed to SetValue is executable,
+; then it will be executed to obtain the TV.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
+	(SetValue
+		(Concept "bar") tvkey
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
@@ -96,23 +99,23 @@
 ; That the above really does flow the TV from one place to another can
 ; be seen by looking at dynamic changes. So -- change the TV on A,
 ; and recompute...
-(Concept "A" (stv 0.8 0.9))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 0.9))
 (cog-execute!
-	(SetTV
-		(Concept "bar")
+	(SetValue
+		(Concept "bar") tvkey
 		(Evaluation
 			(DefinedPredicate "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
-; In many ways, the SetTVLink behaves a lot like a generalized
+; In many ways, the SetValueLink behaves a lot like a generalized
 ; EvaluationLink. So: normally, an EvaluationLink consists of a
 ; predicate, and the list of arguments that it applies to. The
 ; SetTVLink is similar, except that it couples the predicate to
 ; the target Atom that it should apply to.  This can be seen in
 ; the equivalent form, below.
 (cog-execute!
-	(SetTV
-		(Concept "bar")
+	(SetValue
+		(Concept "bar") tvkey
 		(DefinedPredicate "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 

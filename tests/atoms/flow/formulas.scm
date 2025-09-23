@@ -6,12 +6,19 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-(define atom-a (Concept "A" (stv 0.8 1.0)))
-(define atom-b (Concept "B" (stv 0.6 0.9)))
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
+(define atom-a (Concept "A"))
+(define atom-b (Concept "B"))
+(cog-set-value! atom-a tvkey (SimpleTruthValue  0.8 1.0))
+(cog-set-value! atom-b tvkey (SimpleTruthValue  0.6 0.9))
+
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
 ; Multiply the strength of the TV's of two atoms.
 (define prod
-	(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
+	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
 (define stv-const (FormulaPredicate (Number 0.7) (Number 0.314)))
 
@@ -19,8 +26,8 @@
 	(FormulaPredicate
 		(Minus
 			(Number 1)
-			(Times (StrengthOf (Concept "A")) (StrengthOf (Concept "B"))))
-		(Times (ConfidenceOf (Concept "A")) (ConfidenceOf (Concept "B")))))
+			(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
+		(Times (confidence-of (Concept "A")) (confidence-of (Concept "B")))))
 
 ; The below computes a truth value, and attaches it to the
 ; EvaluationLink.
@@ -39,11 +46,11 @@
 			(Minus
 				(Number 1)
 				(Times
-					(StrengthOf (Variable "$X"))
-					(StrengthOf (Variable "$Y"))))
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y"))))
 			(Times
-				(ConfidenceOf (Variable "$X"))
-				(ConfidenceOf (Variable "$Y"))))
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y"))))
 		(List
 			(Concept "A")
 			(Concept "B"))))
@@ -60,13 +67,13 @@
 				(Minus
 					(Number 1)
 					(Times
-						(StrengthOf (Variable "$X"))
-						(StrengthOf (Variable "$Y")))))
+						(strength-of (Variable "$X"))
+						(strength-of (Variable "$Y")))))
 			(Lambda
 				(VariableList (Variable "$X") (Variable "$Y"))
 				(Times
-					(ConfidenceOf (Variable "$X"))
-					(ConfidenceOf (Variable "$Y")))))
+					(confidence-of (Variable "$X"))
+					(confidence-of (Variable "$Y")))))
 		(List
 			(Concept "A")
 			(Concept "B"))))
@@ -84,11 +91,11 @@
 					(Minus
 						(Number 1)
 						(Times
-							(StrengthOf (Variable "$VA"))
-							(StrengthOf (Variable "$VB"))))
+							(strength-of (Variable "$VA"))
+							(strength-of (Variable "$VB"))))
 					(Times
-						(ConfidenceOf (Variable "$VA"))
-						(ConfidenceOf (Variable "$VB"))))
+						(confidence-of (Variable "$VA"))
+						(confidence-of (Variable "$VB"))))
 				(List
 					(Variable "$VA") (Variable "$VB")))
 		(Set (List (Concept "A") (Concept "B")))))
@@ -101,14 +108,14 @@
 		(Minus
 			(Number 1)
 			(Times
-				(StrengthOf (Variable "$X"))
-				(StrengthOf (Variable "$Y"))))
+				(strength-of (Variable "$X"))
+				(strength-of (Variable "$Y"))))
 		(Times
-			(ConfidenceOf (Variable "$X"))
-			(ConfidenceOf (Variable "$Y")))))
+			(confidence-of (Variable "$X"))
+			(confidence-of (Variable "$Y")))))
 
-(Concept "A" (stv 0.9 0.98))
-(Concept "B" (stv 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (define red-form
@@ -120,14 +127,17 @@
 
 ; --------------------------------------------------
 
-(define atom-a (Concept "A" (stv 0.8 1.0)))
-(define atom-b (Concept "B" (stv 0.6 0.9)))
+(cog-set-value! atom-a tvkey (SimpleTruthValue 0.8 1.0))
+(cog-set-value! atom-b tvkey (SimpleTruthValue 0.6 0.9))
 (define atom-c (Concept "C"))
+
 
 (define key (Predicate "key"))
 
-(define iab (Inheritance atom-a atom-b (stv 0.8 0.8)))
-(define ibc (Inheritance atom-b atom-c (stv 0.3 0.3)))
+(define iab (Inheritance atom-a atom-b))
+(define ibc (Inheritance atom-b atom-c))
+(cog-set-value! iab tvkey (SimpleTruthValue  0.8 0.8))
+(cog-set-value! ibc tvkey (SimpleTruthValue  0.3 0.3))
 
 (cog-set-value! iab key (FloatValue 1 2 3))
 (cog-set-value! ibc key (FloatValue 4 5 6))
@@ -157,11 +167,11 @@
 		(VariableList (Variable "$x") (Variable "$y"))
 		(SequentialAnd
 			(GreaterThan
-				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y")))
+				(confidence-of (Inheritance (Variable "$x") (Variable "$y")))
 				(Number 0.75))
 			(GreaterThan
 				(Number 0.85)
-				(ConfidenceOf (Inheritance (Variable "$x") (Variable "$y"))))
+				(confidence-of (Inheritance (Variable "$x") (Variable "$y"))))
 		)))
 
 ; Expect (its-conf atom-a atom-b) to be true,
@@ -208,8 +218,8 @@
     (Times
       (Number 1)
       (Number 0.5)
-      (StrengthOf apple-is-green)
-      (ConfidenceOf apple-is-red)
+      (strength-of apple-is-green)
+      (confidence-of apple-is-red)
     )
   )
 )
@@ -285,8 +295,8 @@
     (Times
       (Number 1)
       (Number 0.5)
-      (StrengthOf apple-is-green)
-      (ConfidenceOf apple-is-red)
+      (strength-of apple-is-green)
+      (confidence-of apple-is-red)
     )
   )
 )
@@ -301,8 +311,8 @@
     (Times
       (Number 1)
       (Number 0.5)
-      (StrengthOf apple-is-green)
-      (ConfidenceOf apple-is-red)
+      (strength-of apple-is-green)
+      (confidence-of apple-is-red)
     )
   )
 )

@@ -11,7 +11,7 @@ cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
         a relationship or term. In OpenCog there are a number of TruthValue
         types, but as these involve additional complexity we focus primarily on
-        the SimpleTruthValue type which allows strength and count
+        the SimpleTruthValue type which allows strength and confidence
     """
     # Type constructors for all atoms and values are exported via
     # opencog.type_constructors module. Except TruthValue which is historically
@@ -34,18 +34,11 @@ cdef class TruthValue(Value):
     def confidence(self):
         return self._confidence()
 
-    @property
-    def count(self):
-        return self._count()
-
     cdef strength_t _mean(self):
         return self._ptr().get_mean()
 
     cdef confidence_t _confidence(self):
         return self._ptr().get_confidence()
-
-    cdef count_t _count(self):
-        return self._ptr().get_count()
 
     cdef cTruthValue* _ptr(self):
         return <cTruthValue*>(self.get_c_value_ptr().get())
