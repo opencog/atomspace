@@ -128,7 +128,9 @@ void FormulaStream::update() const
 
 		if (not vp->is_type(FLOAT_VALUE))
 			throw SyntaxException(TRACE_INFO,
-				"Expecting formula to return a FloatValue, got %s",
+				"Expecting formula to return a FloatValue; instead %s\n"
+				"returned %s",
+				h->to_string().c_str(),
 				vp->to_string().c_str());
 
 		newval.push_back(FloatValueCast(vp)->value()[0]);
