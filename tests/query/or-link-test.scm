@@ -64,14 +64,17 @@
 	(equal? (cog-execute! qr6) (Set (Concept "you") (Concept "me"))))
 
 ; ------------
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+
 (define qr7
 	(Get (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
-			(GreaterThan (StrengthOf
+			(GreaterThan (strength-of
 					(Evaluation (Predicate "cold") (Variable "someone")))
 				(Number 0.5))
-			(GreaterThan (StrengthOf
+			(GreaterThan (strength-of
 					(Evaluation (Predicate "tired") (Variable "someone")))
 				(Number 0.5)))))
 
@@ -83,9 +86,9 @@
 	(Get (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
-			(Not (GreaterThan (Number 0.5) (StrengthOf
+			(Not (GreaterThan (Number 0.5) (strength-of
 				(Evaluation (Predicate "cold") (Variable "someone")))))
-			(Not (GreaterThan (Number 0.5) (StrengthOf
+			(Not (GreaterThan (Number 0.5) (strength-of
 				(Evaluation (Predicate "tired") (Variable "someone"))))))))
 
 (test-assert "not strong tired no confidence"

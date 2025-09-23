@@ -5,6 +5,10 @@
 ;
 (use-modules (opencog) (opencog exec))
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
+(define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
+
 (Member
 	(Evaluation
 		(Predicate "has_name")
@@ -45,11 +49,11 @@
 			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
-						(StrengthOf (Variable "$X"))
-						(StrengthOf (Variable "$Y"))))
+						(strength-of (Variable "$X"))
+						(strength-of (Variable "$Y"))))
 				(Times
-					(ConfidenceOf (Variable "$X"))
-					(ConfidenceOf (Variable "$Y"))))
+					(confidence-of (Variable "$X"))
+					(confidence-of (Variable "$Y"))))
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -67,11 +71,11 @@
 			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
-						(StrengthOf (Variable "$X"))
-						(StrengthOf (Variable "$Y"))))
+						(strength-of (Variable "$X"))
+						(strength-of (Variable "$Y"))))
 				(Times
-					(ConfidenceOf (Variable "$X"))
-					(ConfidenceOf (Variable "$Y"))))
+					(confidence-of (Variable "$X"))
+					(confidence-of (Variable "$Y"))))
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -89,11 +93,11 @@
 			(FormulaPredicate
 				(Minus (Number 1)
 					(Times
-						(StrengthOf (Variable "$X"))
-						(StrengthOf (Variable "$Y"))))
+						(strength-of (Variable "$X"))
+						(strength-of (Variable "$Y"))))
 				(Times
-					(ConfidenceOf (Variable "$X"))
-					(ConfidenceOf (Variable "$Y"))))
+					(confidence-of (Variable "$X"))
+					(confidence-of (Variable "$Y"))))
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -130,11 +134,11 @@
 	(FormulaPredicate
 		(Minus (Number 1)
 			(Times
-				(StrengthOf (Variable "$X"))
-				(StrengthOf (Variable "$Y"))))
+				(strength-of (Variable "$X"))
+				(strength-of (Variable "$Y"))))
 		(Times
-			(ConfidenceOf (Variable "$X"))
-			(ConfidenceOf (Variable "$Y")))))
+			(confidence-of (Variable "$X"))
+			(confidence-of (Variable "$Y")))))
 
 ; (cog-execute! qe3)
 
@@ -163,7 +167,7 @@
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(GreaterThan
-			(StrengthOf (Variable "Y")) (Number 0.5)))
+			(strength-of (Variable "Y")) (Number 0.5)))
   (Variable "Y")))
 
 ; (cog-execute! qe5)
@@ -177,7 +181,7 @@
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(GreaterThan
-			(StrengthOf
+			(strength-of
 				(Evaluation
 					(DefinedPredicate "pred1")
 					(Variable "Y")))
@@ -195,16 +199,16 @@
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(GreaterThan
-			(StrengthOf
+			(strength-of
 				(Evaluation
 					(FormulaPredicate
 						(Minus (Number 1)
 							(Times
-								(StrengthOf (Variable "$X"))
-								(StrengthOf (Variable "$Y"))))
+								(strength-of (Variable "$X"))
+								(strength-of (Variable "$Y"))))
 						(Times
-							(ConfidenceOf (Variable "$X"))
-							(ConfidenceOf (Variable "$Y"))))
+							(confidence-of (Variable "$X"))
+							(confidence-of (Variable "$Y"))))
 					(Variable "Y")))
 			(Number 0.5)))
   (Variable "Y")))
