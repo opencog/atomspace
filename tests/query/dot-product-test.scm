@@ -16,7 +16,7 @@
 (test-begin tname)
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
-(define (coount-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+(define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
 
 ; Define a pair of vectors. One vector is called "dog", the other is
 ; called "cat". The basis elements of both vectors are "has legs",
