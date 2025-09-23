@@ -9,6 +9,9 @@
 
 (use-modules (opencog) (opencog exec))
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+
 ; Define a pair of vectors. One vector is called "dog", the other is
 ; called "cat". The basis elements of both vectors are "has legs",
 ; "has nose" and so on. The numeric value for that basis element is
@@ -41,8 +44,8 @@
 
 		; Multiply the counts on the search results.
 		(Times
-			(CountOf (Evaluation (Variable "$prop") (Concept "dog")))
-			(CountOf (Evaluation (Variable "$prop") (Concept "cat"))))))
+			(count-of (Evaluation (Variable "$prop") (Concept "dog")))
+			(count-of (Evaluation (Variable "$prop") (Concept "cat"))))))
 
 ; Dry run -- this should return a list of numbers 1,4,9,16,25
 (cog-execute! qdot-math)

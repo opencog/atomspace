@@ -10,6 +10,9 @@
 (define tname "dot-identical-test")
 (test-begin tname)
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+
 (Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
 (Evaluation (Predicate "has nose") (Concept "dog") (CountTruthValue 1 0 2))
 (Evaluation (Predicate "has tail") (Concept "dog") (CountTruthValue 1 0 3))
@@ -48,8 +51,8 @@
 
 		; Multiply the counts on the search results.
 		(Times
-			(CountOf (Variable "$dog"))
-			(CountOf (Variable "$cat")))))
+			(count-of (Variable "$dog"))
+			(count-of (Variable "$cat")))))
 
 ; Accumulate the numeric values: this should return 1+4+9+16+25 = 55.
 (define five-five (cog-execute! (Accumulate qdot-math)))

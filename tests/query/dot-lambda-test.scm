@@ -9,6 +9,9 @@
 (define tname "dot-lambda-test")
 (test-begin tname)
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
+
 (Evaluation (Predicate "has legs") (Concept "dog") (CountTruthValue 1 0 1))
 (Evaluation (Predicate "has nose") (Concept "dog") (CountTruthValue 1 0 2))
 (Evaluation (Predicate "has tail") (Concept "dog") (CountTruthValue 1 0 3))
@@ -38,8 +41,8 @@
 		(Put
 			(Lambda (Variable "$foo")
 				(Times
-					(CountOf (Evaluation (Variable "$foo") (Concept "dog")))
-					(CountOf (Evaluation (Variable "$foo") (Concept "cat")))))
+					(count-of (Evaluation (Variable "$foo") (Concept "dog")))
+					(count-of (Evaluation (Variable "$foo") (Concept "cat")))))
 			(Variable "$prop"))))
 
 ; Dry run -- this should return a list of numbers 1,4,9,16,25

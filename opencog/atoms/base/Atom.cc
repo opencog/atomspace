@@ -815,18 +815,6 @@ std::string Atom::id_to_string() const
     return ss.str();
 }
 
-#if 0
-std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
-{
-	std::stringstream ss;
-	ss << indent << "size = " << iset.size();
-	for (unsigned i = 0; i < iset.size(); i++)
-		ss << std::endl << indent << "link[" << i << "]:" << std::endl
-		   << iset[i]->to_string(indent + OC_TO_STRING_INDENT);
-	return ss.str();
-}
-#endif
-
 std::string oc_to_string(const Atom& atom, const std::string& indent)
 {
 	return atom.to_string(indent);

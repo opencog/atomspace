@@ -123,7 +123,7 @@ std::string CountTruthValue::to_string(const std::string& indent) const
 {
 #define BUFSZ 102
     char buf[BUFSZ];
-    snprintf(buf, BUFSZ, "(ctv %g %g %g)",
+    snprintf(buf, BUFSZ, "(CountTruthValue %g %g %g)",
              static_cast<float>(get_mean()),
              static_cast<double>(get_confidence()),
              static_cast<float>(get_count()));

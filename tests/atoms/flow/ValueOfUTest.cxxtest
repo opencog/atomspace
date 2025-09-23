@@ -39,8 +39,6 @@ public:
 
 	void test_basic();
 	void test_basic_value();
-	void test_truth_value();
-	// void test_cached_tv(); disable, see below.
 	void test_times();
 	void test_plus();
 	void test_times_plus();
@@ -112,97 +110,6 @@ void ValueOfUTest::test_basic_value()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
-// ====================================================================
-// Make sure TruthValues work.
-void ValueOfUTest::test_truth_value()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle tvof = al(TRUTH_VALUE_OF_LINK, al(FALSE_LINK));
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, tvof);
-
-	printf("expect: %s\n", TruthValue::FALSE_TV()->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *TruthValue::FALSE_TV());
-
-	// -----------
-
-	tvof = al(TRUTH_VALUE_OF_LINK, al(TRUE_LINK));
-	tvp = EvaluationLink::do_evaluate(&_as, tvof);
-
-	printf("expect: %s\n", TruthValue::TRUE_TV()->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *TruthValue::TRUE_TV());
-
-	// -----------
-
-	TruthValuePtr expect = createSimpleTruthValue(0.4, 0.7);
-	Handle foo = an(CONCEPT_NODE, "foo");
-	foo->setTruthValue(expect);
-	tvof = al(TRUTH_VALUE_OF_LINK, foo);
-	tvp = EvaluationLink::do_evaluate(&_as, tvof);
-
-	printf("expect: %s\n", expect->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *expect);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// ====================================================================
-
-#ifdef DONT_DO_THIS_TEST
-// Make sure caching works
-
-// I'm disabling this test, because although caching seems like a cool
-// idea, there does not seem to be an practical way for anyone to actually
-// make use of it through any non-C++ API's. Thus, caching is mostly just
-// a CPU-waster. So I disabled caching.
-
-void ValueOfUTest::test_cached_tv()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle tvof = al(TRUTH_VALUE_OF_LINK, al(FALSE_LINK));
-	EvaluationLink::do_evaluate(&_as, tvof);
-	TruthValuePtr tvp = tvof->getTruthValue();
-
-	printf("expect: %s\n", TruthValue::FALSE_TV()->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *TruthValue::FALSE_TV());
-
-	// -----------
-
-	tvof = al(TRUTH_VALUE_OF_LINK, al(TRUE_LINK));
-	EvaluationLink::do_evaluate(&_as, tvof);
-	tvp = tvof->getTruthValue();
-
-	printf("expect: %s\n", TruthValue::TRUE_TV()->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *TruthValue::TRUE_TV());
-
-	// -----------
-	TruthValuePtr expect = createSimpleTruthValue(0.4, 0.7);
-	Handle foo = an(CONCEPT_NODE, "foo");
-	foo->setTruthValue(expect);
-	tvof = al(TRUTH_VALUE_OF_LINK, foo);
-	EvaluationLink::do_evaluate(&_as, tvof);
-	tvp = tvof->getTruthValue();
-
-	printf("expect: %s\n", expect->to_string().c_str());
-	printf("result: %s\n\n", tvp->to_string().c_str());
-
-	TS_ASSERT(*tvp == *expect);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-#endif
 
 // ====================================================================
 // Make sure TimesLink works

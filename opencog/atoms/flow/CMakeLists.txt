@@ -17,7 +17,6 @@ ADD_LIBRARY (atomflow
 	SplitLink.cc
 	StreamValueOfLink.cc
 	StringOfLink.cc
-	TruthValueOfLink.cc
 	TypeOfLink.cc
 	ValueOfLink.cc
 	ValueShimLink.cc
@@ -51,7 +50,6 @@ INSTALL (FILES
 	SplitLink.h
 	StreamValueOfLink.h
 	StringOfLink.h
-	TruthValueOfLink.h
 	TypeOfLink.h
 	ValueOfLink.h
 	ValueShimLink.h

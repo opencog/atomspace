@@ -105,6 +105,8 @@ std::string SimpleTruthValue::to_string(const std::string& indent) const
 {
 #define BUFSZ 100
     char buf[BUFSZ];
+    // Stick to the old, historic short name, for backwards-compat.
+    // snprintf(buf, BUFSZ, "(SimpleTruthValue %g %g)",
     snprintf(buf, BUFSZ, "(stv %g %g)",
              static_cast<float>(get_mean()),
              static_cast<float>(get_confidence()));
