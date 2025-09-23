@@ -405,7 +405,6 @@ public:
      * If the atom is copied, then the copy is returned.
      */
     Handle set_value(const Handle&, const Handle& key, const ValuePtr& value);
-    Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
      * Increment the count on a CountTruthValue, or increment the count

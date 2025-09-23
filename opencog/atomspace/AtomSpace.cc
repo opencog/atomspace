@@ -488,13 +488,6 @@ Handle AtomSpace::set_value(const Handle& h,
 	COWBOY_CODE(SETV);
 }
 
-// Copy-on-write for setting truth values.
-Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
-{
-   #define SET_TV(atm) atm->setTruthValue(tvp);
-	COWBOY_CODE(SET_TV);
-}
-
 // The increment is atomic i.e. thread-safe.
 Handle AtomSpace::increment_count(const Handle& h, const Handle& key,
                                   const std::vector<double>& count)
