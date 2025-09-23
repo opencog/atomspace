@@ -807,9 +807,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 				tvp = scratch->add_atom(evelnk)->getValue(truth_key());
 			else
 				tvp = evelnk->getValue(truth_key());
-			if (tvp)
-				return TruthValueCast(tvp);
-			return TruthValue::DEFAULT_TV(); // what if we just return nullptr ??
+			return TruthValueCast(tvp);
 		}
 
 		HandleSeq args;

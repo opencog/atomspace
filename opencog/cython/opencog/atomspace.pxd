@@ -81,7 +81,6 @@ cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
         double get_mean()
         double get_confidence()
         @staticmethod
-        tv_ptr DEFAULT_TV()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 

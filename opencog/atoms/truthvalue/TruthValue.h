@@ -81,19 +81,12 @@ public:
 	virtual std::string to_short_string(const std::string&) const;
 
 	// Special TVs
-
 	/**
 	 * The shared reference to a special TRUE (Simple) TruthValue
 	 * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count. That is,
 	 * its true with absolute confidence.
 	 */
 	static TruthValuePtr TRUE_TV();
-	/**
-	 * The shared reference to a special default (Simple) TruthValue
-	 * object with MAX_TRUTH mean and 0 count.  That is, its true,
-	 * but with no confidence.
-	 */
-	static TruthValuePtr DEFAULT_TV();
 	/**
 	 * The shared reference to a special FALSE (Simple) TruthValue
 	 * object with 0 mean and MAX_TV_CONFIDENCE count. That is, its
