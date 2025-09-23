@@ -54,8 +54,7 @@ void ValueOfLink::init(void)
 #if 0
 	// Nothing to do, here.
 	if (1 == ary and
-		 (nameserver().isA(_type, COUNT_OF_LINK) or
-		  nameserver().isA(_type, FLOAT_VALUE_OF_LINK)))
+		 (nameserver().isA(_type, FLOAT_VALUE_OF_LINK)))
 	{
 		return;
 	}
