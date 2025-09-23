@@ -160,11 +160,11 @@
 ; ----------
 ; So far, the above is using a lot of scheme scaffolding to accomplish
 ; the setting of truth values. Can we do the same, without using scheme?
-; Yes, we can. Just use the PromisePredicateLink.  This can wrap any
-; evaluatable Atom, anything that can produce a TruthValue, and provides
-; a promiste that it can be evaluated in the future. The when the SetTV
-; is executed, then whatever was wrapped is unwrapped and placed into
-; a FormulaTruthValue, which will then update every time it is accessed.
+; Yes, we can. Just use the PromiseLink.  This can wrap any executable
+; Atom, anything that can produce a Value, and provides a promise that
+; it can be evaluated in the future. Then, when the SetValueLink is
+; executed, whatever was wrapped is unwrapped and placed into a
+; FormulaStream, which will then update every time it is accessed.
 
 ; For example:
 (cog-execute!
@@ -183,7 +183,7 @@
 					(confidence-of (Concept "B")))))))
 
 ; The above can be tedious, as it requires manually creating a new
-; formula for each SetTV.  Some of this tedium can be avoided by
+; formula for each SetValue.  Some of this tedium can be avoided by
 ; using formulas with variables in them. Using the same formula as
 ; before, we get a dynamic example:
 (DefineLink
@@ -201,11 +201,11 @@
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
 ; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue. More precisely, a FormulaTruthValue
-; is created, that wraps the 2nd and later args to the SetTV.
-; This FormulaTruthValue is installed onto the first arg (the
+; they provide a TruthValue. More precisely, a FormulaStream is
+; created. This wraps the 2nd and later args to the SetValue.
+; This FormulaStream is installed onto the first arg (the
 ; ImplicationLink). From thenceforth, any calls to get the TV
-; on the ImplicatioLink get the FormulaTruthValue, which recomputes
+; on the ImplicatioLink get the FormulaStream, which recomputes
 ; the TV value each time it's accessed.
 (cog-execute!
 	(SetValue
