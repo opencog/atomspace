@@ -189,7 +189,7 @@ cdef class AtomSpace(Value):
         """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        self.atomspace.set_truthvalue(deref(atom.handle), deref(tv._tvptr()))
+        self.atomspace.set_value(deref(atom.handle), truth_key(), tv._vptr())
 
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):

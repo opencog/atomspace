@@ -104,6 +104,7 @@ cdef class TruthValue(Value):
     cdef strength_t _mean(self)
     cdef confidence_t _confidence(self)
     cdef cTruthValue* _ptr(self)
+    cdef cValuePtr _vptr(self)
     cdef tv_ptr* _tvptr(self)
 
 # ContentHash
@@ -146,6 +147,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
+    cdef cHandle truth_key()
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
@@ -197,7 +199,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle xget_handle(Type t, vector[cHandle])
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
-        cHandle set_truthvalue(cHandle h, tv_ptr tvn)
         cHandle get_atom(cHandle & h)
         bint is_valid_handle(cHandle h)
         int get_size()
