@@ -184,13 +184,6 @@ cdef class AtomSpace(Value):
         self.atomspace.set_value(deref(atom.handle), deref(key.handle),
                                  value.get_c_value_ptr())
 
-    def set_truthvalue(self, Atom atom, TruthValue tv):
-        """ Set the truth value on atom
-        """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-        self.atomspace.set_value(deref(atom.handle), truth_key(), tv._vptr())
-
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
