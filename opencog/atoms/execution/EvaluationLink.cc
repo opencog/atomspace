@@ -651,6 +651,10 @@ static bool crispy_maybe(AtomSpace* as,
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
 		                 evelnk, scratch, silent));
+		// tv_eval_scratch nelow circa line 814 used to return
+		// (stv 1 0) for DEFAULT_TV. Not it returns nullptr.
+		// Since get_mean was 1.0, we return true for this case.
+		if (nullptr == tv) return true;
 		if (0.5 < tv->get_mean()) return true;
 		return false;
 	}
