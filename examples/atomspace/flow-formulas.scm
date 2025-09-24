@@ -93,8 +93,8 @@
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.7))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.6))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.3 0.7))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.6))
 (cog-execute! exolnk)
 
 ; Now that we've verified that the ExecutionOutputLink works as expected,
@@ -106,85 +106,26 @@
 (display ex-stream) (newline)
 
 ; Change one of the inputs, and notice the output tracks:
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.2))
 (cog-value->list ex-stream)
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.5 0.8))
 (cog-value->list ex-stream)
 
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.314159 0.9))
 (cog-value->list ex-stream)
 
 ; ----------
-; This new kind of TV becomes interesting when it is used to
+; This dynamic Value becomes interesting when it is used to
 ; automatically maintain the TV of some relationship. Suppose
 ; that A implied B, and the truth-probability of this is given
-; by the formula above. So, first we write the implication:
+; by the formula above.
 
-(define a-implies-b (Implication (Concept "A") (Concept "B")))
-
-; ... and then attach this auto-updating TV to it.
-(cog-set-value! a-implies-b tvkey tv-stream)
-
-; Take a look at it, make sure that it is actually there.
-(cog-tv a-implies-b)
-
-; The above printed the "actual" TV, as it sits on the Atom.
-; However, typically, we want the numeric values, and not the formula.
-; These can be gotten simply by asking for them, directly, by name.
-(format #t "A implies B has strength ~6F and confidence ~6F\n"
-	(cog-mean a-implies-b) (cog-confidence a-implies-b))
-
-; Change the TV on A and B ...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.4 0.2))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.7 0.8))
-
-; ... and the TV on the implication stays current.
-; Note that a different API is demoed below.
-(format #t "A implies B has strength ~6F and confidence ~6F\n"
-	(cog-tv-mean (cog-tv a-implies-b))
-	(cog-tv-confidence (cog-tv a-implies-b)))
-
-; ----------
-; So far, the above is using a lot of scheme scaffolding to accomplish
-; the setting of truth values. Can we do the same, without using scheme?
 ; Yes, we can. Just use the PromiseLink.  This can wrap any executable
 ; Atom, anything that can produce a Value, and provides a promise that
 ; it can be evaluated in the future. Then, when the SetValueLink is
 ; executed, whatever was wrapped is unwrapped and placed into a
 ; FormulaStream, which will then update every time it is accessed.
-
-; For example:
-(cog-execute!
-	(SetValue
-		(Implication (Concept "A") (Concept "B"))
-		tvkey
-		(PromiseLink
-			(FormulaPredicate
-				(Minus
-					(Number 1)
-					(Times
-						(strength-of (Concept "A"))
-						(strength-of (Concept "B"))))
-				(Times
-					(confidence-of (Concept "A"))
-					(confidence-of (Concept "B")))))))
-
-; The above can be tedious, as it requires manually creating a new
-; formula for each SetValue.  Some of this tedium can be avoided by
-; using formulas with variables in them. Using the same formula as
-; before, we get a dynamic example:
-(DefineLink
-   (DefinedPredicate "dynamic example")
-   (FormulaPredicate
-      (Minus
-         (Number 1)
-         (Times
-            (strength-of (Variable "$X"))
-            (strength-of (Variable "$Y"))))
-      (Times
-         (confidence-of (Variable "$X"))
-         (confidence-of (Variable "$Y")))))
 
 ; This can be used as anywhere any other predicate can be used;
 ; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
@@ -196,23 +137,21 @@
 ; on the ImplicatioLink get the FormulaStream, which recomputes
 ; the TV value each time it's accessed.
 ;
-; XXX FIXME This is currently broken. The old SetTVLink did
-; automatically apply defined preds to extra arguments, but
-; the current SetValue does not do this.  This needs to be
-; redone, can't use PutLink, can't use Filter, Need Apply ... !?
+(define a-implies-b (Implication (Concept "A") (Concept "B")))
 (cog-execute!
 	(SetValue
-		(Implication (Concept "A") (Concept "B"))
+		a-implies-b
 		tvkey
-		(DefinedPredicate "dynamic example")
-		(Concept "A") (Concept "B")))
+		(ExecutionOutput
+			(DefinedSchema "has a reddish color")
+			(List (Concept "A") (Concept "B")))))
 
 ; Double-check, as before:
 (cog-tv a-implies-b)
 
 ; Change the TV on A and B ...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.9))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.9))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.1 0.9))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.1 0.9))
 
 ; And take another look.
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
