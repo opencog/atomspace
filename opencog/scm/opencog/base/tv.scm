@@ -119,7 +119,8 @@
 (define-public (cog-tv ATOM)
 "
  cog-tv ATOM
-    Return the truth-value of ATOM.
+    Return the truth-value of ATOM. If there is no truth value,
+    set on this ATOM, #f is returned.
 
     Example:
        ; Define a node
@@ -133,8 +134,7 @@
     See also: cog-set-tv!
 "
 	(define tvkey (Predicate "*-TruthValueKey-*"))
-	(define tv (cog-value ATOM tvkey))
-	(if tv tv (stv 1 0))
+	(cog-value ATOM tvkey)
 )
 
 ; ===================================================================

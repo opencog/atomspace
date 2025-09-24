@@ -74,17 +74,13 @@ cdef class Value:
 
 
 # TruthValue
-ctypedef double confidence_t
-ctypedef double strength_t
-
 cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
     ctypedef shared_ptr[cTruthValue] tv_ptr "opencog::TruthValuePtr"
 
     cdef cppclass cTruthValue "const opencog::TruthValue"(cValue):
-        strength_t get_mean()
-        confidence_t get_confidence()
+        double get_mean()
+        double get_confidence()
         @staticmethod
-        tv_ptr DEFAULT_TV()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
@@ -94,16 +90,17 @@ cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
 cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue"(cTruthValue):
         cSimpleTruthValue(double, double)
-        strength_t get_mean()
-        confidence_t get_confidence()
+        double get_mean()
+        double get_confidence()
         string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
 cdef class TruthValue(Value):
-    cdef strength_t _mean(self)
-    cdef confidence_t _confidence(self)
+    cdef double _mean(self)
+    cdef double _confidence(self)
     cdef cTruthValue* _ptr(self)
+    cdef cValuePtr _vptr(self)
     cdef tv_ptr* _tvptr(self)
 
 # ContentHash
@@ -118,8 +115,6 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
 
-        tv_ptr getTruthValue()
-        void setTruthValue(tv_ptr tvp)
         void setValue(const cHandle& key, const cValuePtr& value)
         cValuePtr getValue(const cHandle& key) const
         cpp_set[cHandle] getKeys()
@@ -146,6 +141,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) except +
+    cdef cHandle truth_key()
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
@@ -197,7 +193,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle xget_handle(Type t, vector[cHandle])
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value)
-        cHandle set_truthvalue(cHandle h, tv_ptr tvn)
         cHandle get_atom(cHandle & h)
         bint is_valid_handle(cHandle h)
         int get_size()

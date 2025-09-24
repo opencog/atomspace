@@ -122,7 +122,6 @@ std::string Node::to_short_string(const std::string& indent) const
         KVP_SHARED_LOCK;
         auto pr = _values.find(truth_key());
         if (_values.end() != pr and
-            *(pr->second) != *TruthValue::DEFAULT_TV() and
             SIMPLE_TRUTH_VALUE == pr->second->get_type())
         {
             answer += ' ' + pr->second->to_string();

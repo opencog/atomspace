@@ -22,10 +22,10 @@ Handle ss_print(const Handle& h)
 	return h;
 }
 
-TruthValuePtr ss_printmore(const Handle& h)
+ValuePtr ss_printmore(const Handle& h)
 {
 	printf("This is the atom: %s\n", h->to_string().c_str());
-	return h->getTruthValue();
+	return h->getValue(truth_key());
 }
 
 // ========================================================

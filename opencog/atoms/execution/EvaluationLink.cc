@@ -190,8 +190,9 @@ static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
 	Handle hs(scratch->add_atom(h));
 	const HandleSeq& oset = hs->getOutgoingSet();
 	return std::all_of(oset.begin(), oset.end(),
-		[](const Handle& o)
-			{ return *o->getTruthValue() == *TruthValue::TRUE_TV(); });
+		[](const Handle& o) {
+			ValuePtr tvp(o->getValue(truth_key()));
+			return tvp != nullptr and *tvp == *TruthValue::TRUE_TV(); });
 }
 
 /// Perform the IsFalseLink check
@@ -202,8 +203,9 @@ static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
 	Handle hs(scratch->add_atom(h));
 	const HandleSeq& oset = hs->getOutgoingSet();
 	return std::all_of(oset.begin(), oset.end(),
-		[](const Handle& o)
-			{ return *o->getTruthValue() == *TruthValue::FALSE_TV(); });
+		[](const Handle& o) {
+			ValuePtr tvp(o->getValue(truth_key()));
+			return tvp != nullptr and *tvp == *TruthValue::FALSE_TV(); });
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,
@@ -649,6 +651,10 @@ static bool crispy_maybe(AtomSpace* as,
 	{
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
 		                 evelnk, scratch, silent));
+		// tv_eval_scratch nelow circa line 814 used to return
+		// (stv 1 0) for DEFAULT_TV. Not it returns nullptr.
+		// Since get_mean was 1.0, we return true for this case.
+		if (nullptr == tv) return true;
 		if (0.5 < tv->get_mean()) return true;
 		return false;
 	}
@@ -800,9 +806,12 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 			// If its not in any atomspace, well, we need to have
 			// it somewhere, to get an accurate TV value. We add
 			// it to scratch, just in case it's not in the base as.
+			ValuePtr tvp;
 			if (as and as != evelnk->getAtomSpace())
-				return scratch->add_atom(evelnk)->getTruthValue();
-			return evelnk->getTruthValue();
+				tvp = scratch->add_atom(evelnk)->getValue(truth_key());
+			else
+				tvp = evelnk->getValue(truth_key());
+			return TruthValueCast(tvp);
 		}
 
 		HandleSeq args;
@@ -826,7 +835,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
 		                                    sna.at(0), args, silent));
-		evelnk->setTruthValue(tvp);
+		evelnk->setValue(truth_key(), tvp);
 		return tvp;
 	}
 	else if (SATISFACTION_LINK == t)
@@ -898,7 +907,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	else if ( // Links that evaluate to themselves
 		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
 	{
-		return evelnk->getTruthValue();
+		return TruthValueCast(evelnk->getValue(truth_key()));
 	}
 
 	try_crispy = true;

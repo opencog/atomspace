@@ -45,15 +45,16 @@ cdef class Atom(Value):
                 self._name = ""
         return self._name
 
+    # XXX TODO REMOVE THESE SOON
     @property
     def tv(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         cdef tv_ptr tvp
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        tvp = atom_ptr.getTruthValue()
+        tvp = tv_cast(atom_ptr.getValue(truth_key()))
         if (not tvp.get()):
-            raise AttributeError('cAtom returned NULL TruthValue pointer')
+            return createTruthValue(1.0, 0.0)
         return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
 
     @tv.setter
@@ -65,7 +66,7 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
+        atom_ptr.setValue(truth_key(), (<TruthValue>truth_value)._vptr())
 
     def id_string(self):
         return self.get_c_handle().get().id_to_string().decode('UTF-8')

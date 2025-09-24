@@ -35,24 +35,15 @@
 
 namespace opencog {
 
-const strength_t MAX_TRUTH  = 1.0;
-
 std::string TruthValue::to_short_string(const std::string& indent) const
 {
 	return to_string(indent);
 }
 
-TruthValuePtr TruthValue::DEFAULT_TV()
-{
-	// True, but no confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
-	return instance;
-}
-
 TruthValuePtr TruthValue::TRUE_TV()
 {
 	// True, with maximum confidence.
-	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0));
+	static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(1.0, 1.0));
 	return instance;
 }
 
