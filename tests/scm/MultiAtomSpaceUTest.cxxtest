@@ -236,7 +236,7 @@ void MultiAtomSpace::test_load(void)
 	CHKEV(ev1);
 	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-	TruthValuePtr tv1 = counter1->getTruthValue();
+	TruthValuePtr tv1 = TruthValueCast(counter1->getValue(truth_key()));
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->get_count()));
@@ -255,7 +255,7 @@ void MultiAtomSpace::test_load(void)
 	ev2->eval("(test-incr-cnt)");
 	CHKEV(ev2);
 
-	TruthValuePtr tv2 = counter2->getTruthValue();
+	TruthValuePtr tv2 = TruthValueCast(counter2->getValue(truth_key()));
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->get_count()));
@@ -271,7 +271,7 @@ void MultiAtomSpace::test_load(void)
 
 	TSM_ASSERT("Atoms should be same", counter1 == counter3);
 
-	TruthValuePtr tv3 = counter3->getTruthValue();
+	TruthValuePtr tv3 = TruthValueCast(counter3->getValue(truth_key()));
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->get_count()));
@@ -483,7 +483,7 @@ void MultiAtomSpace::test_readonly_scm(void)
 
 	// Verify that the TV never changed.
 	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
-	TS_ASSERT (*tvp == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(tvp == nullptr);
 
 	logger().debug("END TEST: %s", __FUNCTION__);	
 }

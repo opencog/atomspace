@@ -158,7 +158,7 @@ void BasicSCMUTest::test_utf8(void)
 
 void BasicSCMUTest::check_tv(const Handle& h, double mean, double conf)
 {
-	TruthValuePtr tv = h->getTruthValue();
+	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
 	double m = tv->get_mean();
 	double c = tv->get_confidence();
 
@@ -345,7 +345,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	TSM_ASSERT("Failed to get the correct handle", h == hadd);
 	// hack to avoid floating error
-	bool tv_eq = tv->to_string() == h->getTruthValue()->to_string();
+	bool tv_eq = tv->to_string() == h->getValue(truth_key())->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// Check the fast-path API, too
@@ -644,12 +644,6 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create parse link", !eval_err);
-
-	HandleSeq links;
-	as->get_handles_by_type(links, type, true);
-	//printf("Number of links found: %d\n",links.size());
-	for (const Handle& h: links)
-		check_tv(h, 1.0, 0.0); // DEFAULT_TV is true with no confidence
 
 	Type t1 = nameserver().getType(nodename1);
 	Handle h1 = as->xget_handle(t1, value1);

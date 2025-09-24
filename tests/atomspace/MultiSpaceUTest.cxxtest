@@ -72,11 +72,11 @@ public:
 
 		// Create three atoms in three different atomspaces
 		Handle h1 = as1.add_node(CONCEPT_NODE, "1");
-		h1->setTruthValue(tv1);
+		h1->setValue(truth_key(), tv1);
 		Handle h2 = as2.add_node(NUMBER_NODE, "2");
-		h2->setTruthValue(tv2);
+		h2->setValue(truth_key(), tv2);
 		Handle h3 = as3.add_node(VARIABLE_NODE, "3");
-		h3->setTruthValue(tv3);
+		h3->setValue(truth_key(), tv3);
 
 		// Fetch three atoms in three different atomspaces
 		Handle hn1 = as1.add_node(CONCEPT_NODE, "1");
@@ -95,9 +95,9 @@ public:
 
 		// The truth value *pointers* should be identical, as they
 		// should point to the same exact truth value instance.
-		TS_ASSERT(hn1->getTruthValue() == h1->getTruthValue());
-		TS_ASSERT(hn2->getTruthValue() == h2->getTruthValue());
-		TS_ASSERT(hn3->getTruthValue() == h3->getTruthValue());
+		TS_ASSERT(hn1->getValue(truth_key()) == h1->getValue(truth_key()));
+		TS_ASSERT(hn2->getValue(truth_key()) == h2->getValue(truth_key()));
+		TS_ASSERT(hn3->getValue(truth_key()) == h3->getValue(truth_key()));
 	}
 
 	// Test multiple independent atomspaces.  Make sure they do not
@@ -111,25 +111,25 @@ public:
 
 		// Create three nodes
 		Handle n1(createNode(CONCEPT_NODE, "uni-1"));
-		n1->setTruthValue(tv1);
+		n1->setValue(truth_key(), tv1);
 		Handle n2(createNode(NUMBER_NODE, "2.2222"));
-		n2->setTruthValue(tv2);
+		n2->setValue(truth_key(), tv2);
 		Handle n3(createNode(VARIABLE_NODE, "uni-3"));
-		n3->setTruthValue(tv3);
+		n3->setValue(truth_key(), tv3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(createSimpleTruthValue(0.33, 1.0/3.0));
 
 		// Create three copies of this link in three atomspaces
 		Handle h1 = as1.add_link(LIST_LINK, n1, n2, n3);
-		h1->setTruthValue(tv);
+		h1->setValue(truth_key(), tv);
 		Handle h2 = as2.add_atom(h1);
 		Handle h3 = as3.add_atom(h2);
 
 		// The truth values themselves should be equal, as values.
-		TS_ASSERT(*h1->getTruthValue() == *tv);
-		TS_ASSERT(*h2->getTruthValue() == *tv);
-		TS_ASSERT(*h3->getTruthValue() == *tv);
+		TS_ASSERT(*h1->getValue(truth_key()) == *tv);
+		TS_ASSERT(*h2->getValue(truth_key()) == *tv);
+		TS_ASSERT(*h3->getValue(truth_key()) == *tv);
 
 		// Fetch three atoms in three different atomspaces
 		Handle h1n1 = as1.get_node(CONCEPT_NODE, "uni-1");
@@ -159,17 +159,17 @@ public:
 		TS_ASSERT(h2n3 != h3n3);
 
 		// The truth values themselves should be equal, as values.
-		TS_ASSERT(*h1n1->getTruthValue() == *tv1);
-		TS_ASSERT(*h2n1->getTruthValue() == *tv1);
-		TS_ASSERT(*h3n1->getTruthValue() == *tv1);
+		TS_ASSERT(*h1n1->getValue(truth_key()) == *tv1);
+		TS_ASSERT(*h2n1->getValue(truth_key()) == *tv1);
+		TS_ASSERT(*h3n1->getValue(truth_key()) == *tv1);
 
-		TS_ASSERT(*h1n2->getTruthValue() == *tv2);
-		TS_ASSERT(*h2n2->getTruthValue() == *tv2);
-		TS_ASSERT(*h3n2->getTruthValue() == *tv2);
+		TS_ASSERT(*h1n2->getValue(truth_key()) == *tv2);
+		TS_ASSERT(*h2n2->getValue(truth_key()) == *tv2);
+		TS_ASSERT(*h3n2->getValue(truth_key()) == *tv2);
 
-		TS_ASSERT(*h1n3->getTruthValue() == *tv3);
-		TS_ASSERT(*h2n3->getTruthValue() == *tv3);
-		TS_ASSERT(*h3n3->getTruthValue() == *tv3);
+		TS_ASSERT(*h1n3->getValue(truth_key()) == *tv3);
+		TS_ASSERT(*h2n3->getValue(truth_key()) == *tv3);
+		TS_ASSERT(*h3n3->getValue(truth_key()) == *tv3);
 	}
 
 	// Test copying back and forth.
@@ -329,22 +329,22 @@ public:
 
 		// Create three nodes in the base atomspace
 		Handle hnd1 = nas1->add_node(CONCEPT_NODE, "nest-1");
-		hnd1->setTruthValue(tv1);
+		hnd1->setValue(truth_key(), tv1);
 		Handle hnd2 = nas1->add_node(NUMBER_NODE, "2.34");
-		hnd2->setTruthValue(tv2);
+		hnd2->setValue(truth_key(), tv2);
 		Handle hnd3 = nas1->add_node(VARIABLE_NODE, "nest-3");
-		hnd3->setTruthValue(tv3);
+		hnd3->setValue(truth_key(), tv3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(createSimpleTruthValue(0.33, 1.0/3.0));
 
 		// Create a link in the middle atomspace
 		Handle h2 = nas2->add_link(LIST_LINK, hnd1, hnd2, hnd3);
-		h2->setTruthValue(tv);
+		h2->setValue(truth_key(), tv);
 
 		// Try to create a link in the grandchild atomspace
 		Handle h3 = nas3->add_link(LIST_LINK, hnd1, hnd2, hnd3);
-		h3->setTruthValue(tv);
+		h3->setValue(truth_key(), tv);
 
 		// The middle and grand-child links should be one and the same.
 		TS_ASSERT(h2 == h3);
@@ -378,17 +378,17 @@ public:
 
 		// The truth value *pointers* should be identical, of course,
 		// since they are the very same atoms.
-		TS_ASSERT(hnd1->getTruthValue() == h1n1->getTruthValue());
-		TS_ASSERT(hnd2->getTruthValue() == h1n2->getTruthValue());
-		TS_ASSERT(hnd3->getTruthValue() == h1n3->getTruthValue());
+		TS_ASSERT(hnd1->getValue(truth_key()) == h1n1->getValue(truth_key()));
+		TS_ASSERT(hnd2->getValue(truth_key()) == h1n2->getValue(truth_key()));
+		TS_ASSERT(hnd3->getValue(truth_key()) == h1n3->getValue(truth_key()));
 
-		TS_ASSERT(hnd1->getTruthValue() == h2n1->getTruthValue());
-		TS_ASSERT(hnd2->getTruthValue() == h2n2->getTruthValue());
-		TS_ASSERT(hnd3->getTruthValue() == h2n3->getTruthValue());
+		TS_ASSERT(hnd1->getValue(truth_key()) == h2n1->getValue(truth_key()));
+		TS_ASSERT(hnd2->getValue(truth_key()) == h2n2->getValue(truth_key()));
+		TS_ASSERT(hnd3->getValue(truth_key()) == h2n3->getValue(truth_key()));
 
-		TS_ASSERT(hnd1->getTruthValue() == h3n1->getTruthValue());
-		TS_ASSERT(hnd2->getTruthValue() == h3n2->getTruthValue());
-		TS_ASSERT(hnd3->getTruthValue() == h3n3->getTruthValue());
+		TS_ASSERT(hnd1->getValue(truth_key()) == h3n1->getValue(truth_key()));
+		TS_ASSERT(hnd2->getValue(truth_key()) == h3n2->getValue(truth_key()));
+		TS_ASSERT(hnd3->getValue(truth_key()) == h3n3->getValue(truth_key()));
 	}
 
 	// This tests bug report #9

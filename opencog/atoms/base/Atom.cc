@@ -73,36 +73,12 @@ Atom::~Atom()
 }
 
 // ==============================================================
+// Singleton key for backwards compat with TruthValues
 
 const Handle& truth_key(void)
 {
 	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
 	return tk;
-}
-
-void Atom::setTruthValue(const TruthValuePtr& newTV)
-{
-    if (nullptr == newTV) return;
-
-    // Another setter could be changing this, even as we are.
-    // So make a copy, first.
-    TruthValuePtr oldTV(getTruthValue());
-
-    // If both old and new are e.g. DEFAULT_TV, then do nothing.
-    if (oldTV.get() == newTV.get()) return;
-
-    // ... and we still need to make sure that only one thread is
-    // writing this at a time. std:shared_ptr is NOT thread-safe against
-    // multiple writers: see "Example 5" in
-    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    setValue (truth_key(), ValueCast(newTV));
-}
-
-TruthValuePtr Atom::getTruthValue() const
-{
-    ValuePtr pap(getValue(truth_key()));
-    if (nullptr == pap) return TruthValue::DEFAULT_TV();
-    return TruthValueCast(pap);
 }
 
 // ==============================================================

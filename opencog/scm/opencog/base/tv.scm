@@ -63,7 +63,7 @@
        guile> (cog-tv? y)
        #f
 "
-	(cog-subtype? 'TruthValue (cog-type EXP))
+	(if EXP (cog-subtype? 'TruthValue (cog-type EXP)) #f)
 )
 
 (define-public (cog-ctv? EXP)
@@ -72,7 +72,7 @@
     Return #t if EXP is a CountTruthValue, else return #f.
     Equivalent to (equal? 'CountTruthValue (cog-type EXP))
 "
-	(equal? 'CountTruthValue (cog-type EXP))
+	(if EXP (equal? 'CountTruthValue (cog-type EXP)) #f)
 )
 
 ; ===================================================================
@@ -85,7 +85,7 @@
 
     See also: cog-mean
 "
-	(cog-value-ref TV 0)
+	(if TV (cog-value-ref TV 0) #f)
 )
 
 (define-public (cog-tv-confidence TV)
@@ -96,7 +96,7 @@
 
     See also: cog-confidence
 "
-	(cog-value-ref TV 1)
+	(if TV (cog-value-ref TV 1) #f)
 )
 
 (define-public (cog-tv-count TV)
@@ -119,7 +119,8 @@
 (define-public (cog-tv ATOM)
 "
  cog-tv ATOM
-    Return the truth-value of ATOM.
+    Return the truth-value of ATOM. If there is no truth value,
+    set on this ATOM, #f is returned.
 
     Example:
        ; Define a node
@@ -133,8 +134,7 @@
     See also: cog-set-tv!
 "
 	(define tvkey (Predicate "*-TruthValueKey-*"))
-	(define tv (cog-value ATOM tvkey))
-	(if tv tv (stv 1 0))
+	(cog-value ATOM tvkey)
 )
 
 ; ===================================================================

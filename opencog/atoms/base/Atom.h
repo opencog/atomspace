@@ -578,14 +578,6 @@ public:
     void clearValues();
 
     // ---------------------------------------------------
-    // Old TruthValue API. Deprcated; should be removed.
-    /** Returns the TruthValue object of the atom. */
-    TruthValuePtr getTruthValue() const;
-
-    //! Sets the TruthValue object of the atom.
-    void setTruthValue(const TruthValuePtr&);
-
-    // ---------------------------------------------------
     //! Return true if the incoming set is empty.
     bool isIncomingSetEmpty(const AtomSpace* = nullptr) const;
 

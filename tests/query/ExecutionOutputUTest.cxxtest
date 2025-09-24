@@ -144,7 +144,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "be"),
 			hcapital = an(CONCEPT_NODE, "capital")
 		)
-	)->setTruthValue(TruthValue::TRUE_TV());
+	)->setValue(truth_key(), TruthValue::TRUE_TV());
 
 	Handle hprep;
 	al(EVALUATION_LINK,
@@ -153,7 +153,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
 		)
-	)->setTruthValue(TruthValue::TRUE_TV());
+	)->setValue(truth_key(), TruthValue::TRUE_TV());
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
