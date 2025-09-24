@@ -46,7 +46,7 @@
 	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; One can also use DefinedPredicates, to give the formula a name.
-(DefineLink (DefinedSchema "has a reddish color") my-formula)
+(DefineLink (DefinedProcedure "has a reddish color") my-formula)
 
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
@@ -54,7 +54,7 @@
 ; The will cause the formula to evaluate.
 (define red-form
 	(ExecutionOutput
-		(DefinedSchema "has a reddish color")
+		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; --------------------------------------------------

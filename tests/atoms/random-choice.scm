@@ -2,7 +2,7 @@
 ; Unit test for several different things, that are not really
 ; tested anywhere else (or are poorly tested):
 ; -- RandomChoiceLink with weights
-; -- DefinedPredicate and DefinedSchema
+; -- DefinedPredicate and DefinedProcedure
 ; -- DivideLink
 ; -- Tail recursion optimization in the SequentialAndLink
 ; -- Lazy/Eager execution of FunctionLink arguments.
@@ -10,13 +10,13 @@
 (use-modules (opencog) (opencog exec))
 
 ; Pick A with 70% probability, pick B with 30% probability.
-(Define (DefinedSchema "rand-transpose")
+(Define (DefinedProcedure "rand-transpose")
    (RandomChoice
       (List (Number 0.7) (Number 0.3))
       (List (Concept "A") (Concept "B"))))
 
 ; Pick A with 70% probability, pick B with 30% probability.
-(Define (DefinedSchema "rand-set-choice")
+(Define (DefinedProcedure "rand-set-choice")
    (RandomChoice
       (SetLink
          (List (Number 0.7) (Concept "A"))
@@ -27,7 +27,7 @@
 ; hard-coding them, as above. This forces the lazy/eager
 ; evaluation subsystem to "do the right thing" -- to evaluate
 ; the GetLink before running the RandomChoice.
-(Define (DefinedSchema "randy")
+(Define (DefinedProcedure "randy")
    (RandomChoice
       (GetLink
          (VariableList (VariableNode "$prob") (VariableNode "$expr"))
@@ -59,7 +59,7 @@
 (Define (DefinedPredicate "counter")
    (SequentialOr
       (SequentialAnd
-         (Equal (DefinedSchema "randy") (Concept "A"))
+         (Equal (DefinedProcedure "randy") (Concept "A"))
          (True (Put
             (State (Anchor "sum-A") (Variable "$x"))
             (Plus (Number 1)
@@ -84,7 +84,7 @@
       (DefinedPredicate "loop a lot of times")))
 
 ; Print the ratio
-(Define (DefinedSchema "ratio")
+(Define (DefinedProcedure "ratio")
    (Divide
       (Get (State (Anchor "sum-A") (Variable "$x")))
       (Get (State (Anchor "sum-B") (Variable "$x")))))
@@ -92,7 +92,7 @@
 ; Expectation value is 0.7/0.3 = 2.33333
 (Define (DefinedPredicate "test")
    (SequentialAnd
-      (GreaterThan (Number 2.5) (DefinedSchema "ratio"))
-      (GreaterThan (DefinedSchema "ratio") (Number 2.2))))
+      (GreaterThan (Number 2.5) (DefinedProcedure "ratio"))
+      (GreaterThan (DefinedProcedure "ratio") (Number 2.2))))
 
 *unspecified*

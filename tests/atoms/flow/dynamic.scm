@@ -27,7 +27,7 @@
 ; ----------
 ; For DynamicUTest::test_formula_define()
 (DefineLink
-	(DefinedSchema "has a reddish color")
+	(DefinedProcedure "has a reddish color")
 	(Lambda
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(FloatColumn
@@ -42,7 +42,7 @@
 
 (define exolnk
 	(ExecutionOutput
-		(DefinedSchema "has a reddish color")
+		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; Was FormulaTruthValue
@@ -57,7 +57,7 @@
 	(SetValue a-implies-b tvkey
 		(PromiseLink
 			(ExecutionOutput
-				(DefinedSchema "has a reddish color")
+				(DefinedProcedure "has a reddish color")
 				(List (Concept "A") (Concept "B"))))))
 
 ; -----------
@@ -70,7 +70,7 @@
 		tvkey
 		(PromiseLink
 			(ExecutionOutput
-				(DefinedSchema "has a reddish color")
+				(DefinedProcedure "has a reddish color")
 				(List (Concept "A") (Concept "B"))))))
 
 ; -------------------------------------------------------------

@@ -30,7 +30,7 @@
 ; recursive algorithm.
 ;
 (Define
-	(DefinedSchema "factorial")
+	(DefinedProcedure "factorial")
 	(Lambda
 		; A single argument; it must be a number
 		(TypedVariable (Variable "$n") (Type "NumberNode"))
@@ -47,7 +47,7 @@
 			(Times
 				(Variable "$n")
 				(ExecutionOutput
-					(DefinedSchema "factorial")
+					(DefinedProcedure "factorial")
 					(Minus (Variable "$n") (Number 1))))
 
 			; The alternative: `f(1) = 1`
@@ -56,7 +56,7 @@
 
 ; Call the above-defined factorial function, computing the
 ; factorial of five. Should return 120.
-; (cog-execute! (ExecutionOutput (DefinedSchema "factorial") (Number 5)))
+; (cog-execute! (ExecutionOutput (DefinedProcedure "factorial") (Number 5)))
 ;
 #! ----------
 How fast is this? Well, its slowwwww, but still, you can find out:
@@ -67,7 +67,7 @@ Intel Celeron laptop.
 (define start (get-internal-real-time))
 (for-each
 	(lambda (x)
-		(cog-execute! (ExecutionOutput (DefinedSchema "factorial") (Number 100))))
+		(cog-execute! (ExecutionOutput (DefinedProcedure "factorial") (Number 100))))
 	(iota nrep))
 (define end (get-internal-real-time))
 

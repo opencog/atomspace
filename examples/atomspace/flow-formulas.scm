@@ -67,7 +67,7 @@
 ; example and create a formula for computing a FloatValue, based on the
 ; input Atoms.
 (DefineLink
-	(DefinedSchema "has a reddish color")
+	(DefinedProcedure "has a reddish color")
 	(Lambda
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(FloatColumn
@@ -88,7 +88,7 @@
 ; for details.
 (define exolnk
 	(ExecutionOutput
-		(DefinedSchema "has a reddish color")
+		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
@@ -136,7 +136,7 @@
 	(SetValue a-implies-b tvkey
 		(Promise
 			(ExecutionOutput
-				(DefinedSchema "has a reddish color")
+				(DefinedProcedure "has a reddish color")
 				(List (Concept "A") (Concept "B"))))))
 
 ; Lets take a look at the TV, now.

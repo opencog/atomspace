@@ -67,7 +67,7 @@
 ; The column names are hard-coded in the function.
 
 (DefineLink
-	(DefinedSchema "col diffs")
+	(DefinedProcedure "col diffs")
    (Lambda
       (Variable "$tbl-name")
 		(SetValue
@@ -77,7 +77,7 @@
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
 
 ; Apply the function to the table.
-(cog-execute! (Put (DefinedSchema "col diffs") tab))
+(cog-execute! (Put (DefinedProcedure "col diffs") tab))
 
 ; Verify that the new column showed up.
 (cog-keys tab)
@@ -95,7 +95,7 @@
 ; it is a single number that can be used as a utility function in
 ; conventional machine-learning algos.
 (DefineLink
-	(DefinedSchema "compute score")
+	(DefinedProcedure "compute score")
    (Lambda
       (Variable "$tbl-name")
 		(Accumulate
@@ -104,7 +104,7 @@
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
 
 ; Apply the function to the table.
-(cog-execute! (Put (DefinedSchema "compute score") tab))
+(cog-execute! (Put (DefinedProcedure "compute score") tab))
 
 ; That's all, folks.
 ; -------------------------------------------------------------------

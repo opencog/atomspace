@@ -8,7 +8,7 @@
 (use-modules (opencog) (opencog exec))
 
 ; Pick A with 70% probability, pick B with 30% probability.
-(Define (DefinedSchema "randy")
+(Define (DefinedProcedure "randy")
 	(RandomChoice
 		(List (Number 0.7) (Number 0.3))
 		(List (Concept "A") (Concept "B"))))
@@ -22,7 +22,7 @@
 	(SequentialOr
 		(SequentialAnd
 			; If A was picked...
-			(Equal (DefinedSchema "randy") (Concept "A"))
+			(Equal (DefinedProcedure "randy") (Concept "A"))
 			; ... then increment the count of A ...
 			(True (Put
 				(State (Anchor "sum-A") (Variable "$x"))
@@ -74,12 +74,12 @@
 (cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
 
 ; Print the ratio.
-(Define (DefinedSchema "ratio")
+(Define (DefinedProcedure "ratio")
 	(Divide
 		(Get (State (Anchor "sum-A") (Variable "$x")))
 		(Get (State (Anchor "sum-B") (Variable "$x")))))
 
-(cog-execute! (DefinedSchema "ratio"))
+(cog-execute! (DefinedProcedure "ratio"))
 
 ; Test that the actual ratio is close to the expectation value.
 ; The expectation value is 0.7 / 0.3 = 2.33333 ...
@@ -87,7 +87,7 @@
 ; that is greater than 2.1 and less than 2.5.
 (Define (DefinedPredicate "test expectation")
    (SequentialAnd
-      (GreaterThan (Number 2.5) (DefinedSchema "ratio"))
-      (GreaterThan (DefinedSchema "ratio") (NumberNode 2.1))))
+      (GreaterThan (Number 2.5) (DefinedProcedure "ratio"))
+      (GreaterThan (DefinedProcedure "ratio") (NumberNode 2.1))))
 
 (cog-evaluate! (DefinedPredicate "test expectation"))

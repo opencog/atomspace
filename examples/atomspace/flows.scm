@@ -61,7 +61,7 @@
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
 (DefineLink
-   (DefinedSchema "has a reddish color")
+   (DefinedProcedure "has a reddish color")
 	(Lambda
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(FloatColumn
@@ -87,7 +87,7 @@
 	(SetValue
 		(Concept "bar") tvkey
 		(ExecutionOutput
-			(DefinedSchema "has a reddish color")
+			(DefinedProcedure "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
 ; That the above really does flow the TV from one place to another can
@@ -98,7 +98,7 @@
 	(SetValue
 		(Concept "bar") tvkey
 		(ExecutionOutput
-			(DefinedSchema "has a reddish color")
+			(DefinedProcedure "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
 ; In many ways, the SetValueLink behaves a lot like a generalized
@@ -110,7 +110,7 @@
 (cog-execute!
 	(SetValue
 		(Concept "bar") tvkey
-		(DefinedSchema "has a reddish color")
+		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; -----------------------------------------------------------
@@ -147,7 +147,7 @@
 ; DefinedPredicates should be limited to TruthValues, whereas this
 ; can be applied to arbitrary (numeric) expressions.
 (DefineLink
-   (DefinedSchema "triangle numbers")
+   (DefinedProcedure "triangle numbers")
 	(Lambda
 		(Variable "$X")
 		(Divide
@@ -158,7 +158,7 @@
 ; the bar Atom, much as before.
 (cog-execute!
 	(SetValue bar kee
-		(DefinedSchema "triangle numbers")
+		(DefinedProcedure "triangle numbers")
 		(FloatValueOf foo key)))
 ;
 ; -------- THE END -----------

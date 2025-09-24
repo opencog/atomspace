@@ -94,10 +94,10 @@
 			(Concept "2"))))
 
 ; -------------------------------------------------------------
-; Another example, using a DefineLink to define a SchemaNode
+; Another example, using a DefineLink to define a ProcedureNode
 
 (DefineLink
-	(DefinedSchema "x+y*10")
+	(DefinedProcedure "x+y*10")
 	(Lambda
 		(VariableList
 			(Variable "$X")
@@ -110,7 +110,7 @@
 
 (cog-execute!
 	(ExecutionOutput
-		(DefinedSchema "x+y*10")
+		(DefinedProcedure "x+y*10")
 		(List
 			(Number "2")
 			(Number "4"))))
@@ -121,7 +121,7 @@
 
 (cog-execute!
    (Put
-      (DefinedSchema "x+y*10")
+      (DefinedProcedure "x+y*10")
       (List
          (Number "2")
          (Number "4"))))

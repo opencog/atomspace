@@ -24,7 +24,7 @@
 	(Times (FloatValueOf foo key) (FloatValueOf foo key))))
 
 (DefineLink
-   (DefinedSchema "triangle numbers")
+   (DefinedProcedure "triangle numbers")
 	(Lambda
 		(Variable "$X")
 		(Divide
@@ -33,7 +33,7 @@
 
 (define triangle
 	(SetValue bar kee
-		(DefinedSchema "triangle numbers")
+		(DefinedProcedure "triangle numbers")
 		(FloatValueOf foo key)))
 ;
 ; -------- THE END -----------
