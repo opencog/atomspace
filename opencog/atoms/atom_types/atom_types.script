@@ -1113,19 +1113,6 @@ SPLIT_LINK <- COLLECTION_OF_LINK
 // create dynamically executable computation chains.
 PROMISE_LINK <- VALUABLE_LINK,EXECUTABLE_LINK
 
-// Return a SimpleTruthValue when evaluated.
-// This is used to wrap any Atom that returns a FloatValue; all this
-// does is to provide some formatting.  It is not strictly needed,
-// because any LambdaLink returning FloatValue is enough. But this is
-// handy to have while a transition is made to a more general setting.
-// Its handy because it looks a lot like a GROUNDED_PREDICATE_NODE,
-// except that the formula is in the Atomese, not scheme/python.
-//
-// Its a ScopeLink, because in general it will contain variables that
-// are scoped, bound. The Lambda provides the mechanism to access/shield
-// the variables.
-FORMULA_PREDICATE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
-
 // FilterLink was called MapLink (but this name was wrong) or
 // FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
 // reduction, by extracting Values for a given set of variables.
