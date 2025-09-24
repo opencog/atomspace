@@ -33,7 +33,7 @@
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
 ; An atom with a TruthValue on it...
-(cog-set-value! (Concept "foo") tvkey (SimpleTruthValue 0.3 0.7))
+(cog-set-value! (Concept "foo") tvkey (FloatValue 0.3 0.7))
 
 ; This is how we get it's Value ...
 (cog-execute! (ValueOf (Concept "foo") tvkey))
@@ -44,14 +44,6 @@
 		(ValueOf (Concept "foo") tvkey)))
 
 ; Verify that the TV on "bar" has changed.
-(cog-tv (Concept "bar"))
-
-; The DefinedFormulaLink can be used to create SimpleTruthValues out
-; of a pair of numbers. For example:
-(cog-execute! (SetValue (Concept "bar") tvkey
-	(FormulaPredicate (Number 0.2718) (Number 0.314))))
-
-; Explicitly look at it.
 (cog-tv (Concept "bar"))
 
 ; SetValue is interesting because it allows complex arithmetic expressions
@@ -69,20 +61,22 @@
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
 (DefineLink
-   (DefinedPredicate "has a reddish color")
-   (FormulaPredicate
-      (Minus
-         (Number 1)
-         (Times
-            (strength-of (Variable "$X"))
-            (strength-of (Variable "$Y"))))
-      (Times
-         (confidence-of (Variable "$X"))
-         (confidence-of (Variable "$Y")))))
+   (DefinedSchema "has a reddish color")
+	(Lambda
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(FloatColumn
+			(Minus
+				(Number 1)
+				(Times
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y"))))
+			(Times
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y"))))))
 
 ; Some data...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.9 0.98))
 
 ; Use the formula to compute a new TV, and attach that TV to some Atom.
 ; This is little more than the copy above, except that the Evaluation
@@ -92,19 +86,19 @@
 (cog-execute!
 	(SetValue
 		(Concept "bar") tvkey
-		(Evaluation
-			(DefinedPredicate "has a reddish color")
+		(ExecutionOutput
+			(DefinedSchema "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
 ; That the above really does flow the TV from one place to another can
 ; be seen by looking at dynamic changes. So -- change the TV on A,
 ; and recompute...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 0.9))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.8 0.9))
 (cog-execute!
 	(SetValue
 		(Concept "bar") tvkey
-		(Evaluation
-			(DefinedPredicate "has a reddish color")
+		(ExecutionOutput
+			(DefinedSchema "has a reddish color")
 			(List (Concept "A") (Concept "B")))))
 
 ; In many ways, the SetValueLink behaves a lot like a generalized
@@ -116,7 +110,7 @@
 (cog-execute!
 	(SetValue
 		(Concept "bar") tvkey
-		(DefinedPredicate "has a reddish color")
+		(DefinedSchema "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; -----------------------------------------------------------
