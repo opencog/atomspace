@@ -1,6 +1,7 @@
 ;
-; formula-predicate.scm
-; Make sure that FormulaPredicateLink works in search patterns.
+; formulas-in-query.scm
+;
+; Make sure that formulas work in search patterns.
 ; This tests the second bug reported in opencog/atomspace#2650
 ;
 (use-modules (opencog) (opencog exec))
@@ -43,7 +44,44 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1"))))
-  (Variable "Y")))
+	(Variable "Y")))
+
+(define fumbula
+   (Lambda
+      (VariableList (Variable "$X") (Variable "$Y"))
+      (FloatColumn
+         (Minus
+            (Number 1)
+            (Times
+               (strength-of (Variable "$X"))
+               (strength-of (Variable "$Y"))))
+         (Times
+            (confidence-of (Variable "$X"))
+            (confidence-of (Variable "$Y"))))))
+
+#! ---
+ ; These are the accept values
+ (cog-set-value! (Concept "node1") tvkey (stv 0.5 0.6))
+ (cog-set-value! (Concept "name1") tvkey (stv 0.5 0.6))
+ (cog-execute! (ExecutionOutput fumbula
+    (List (Concept "node1") (Concept "name1"))))
+
+ ; Returns (FloatValue 0.75 0.36)
+
+ ; The reject values
+ (cog-set-value! (Concept "node1") tvkey (stv 0.9 0.3))
+ (cog-set-value! (Concept "name1") tvkey (stv 0.9 0.3))
+ ; return (FloatValue 0.19 0.09)
+
+-- !#
+
+
+; evol needs to be evaluatable ... and must evaluate to true,
+(define evol
+	(GreaterThan
+		(ElementOf (Number 0)
+			(ExecutionOutput fumbula (Variable "Y")))
+		(Number 0.5)))
 
 (define qe1 (Query
 	(And
@@ -52,16 +90,7 @@
 			(Concept "node2"))
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
-			(Variable "Y")))
+		evol)
   (Variable "Y")))
 
 ; (cog-execute! qe1)
@@ -74,16 +103,7 @@
 			(Concept "node2"))
 		(Equal (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
-			(Variable "Y")))
+		evol)
   (Variable "Y")))
 
 ; (cog-execute! qe2)
@@ -96,19 +116,16 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
-			(Variable "Y")))
+		evol)
   (Variable "Y")))
 
 ; (cog-execute! qe2i)
+
+(define evodef
+	(GreaterThan
+		(ElementOf (Number 0)
+			(ExecutionOutput (DefinedSchema "reddish") (Variable "Y")))
+	(Number 0.5)))
 
 (define qe3 (Query
 	(And
@@ -117,9 +134,7 @@
 			(Concept "node2"))
 		(Equal (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(DefinedPredicate "pred1")
-			(Variable "Y")))
+		evodef)
   (Variable "Y")))
 
 ; Same as above, but with Identical
@@ -130,22 +145,11 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(DefinedPredicate "pred1")
-			(Variable "Y")))
+		evodef)
   (Variable "Y")))
 
 ; The definition needed for the above.
-(DefineLink
-	(DefinedPredicate "pred1")
-	(FormulaPredicate
-		(Minus (Number 1)
-			(Times
-				(strength-of (Variable "$X"))
-				(strength-of (Variable "$Y"))))
-		(Times
-			(confidence-of (Variable "$X"))
-			(confidence-of (Variable "$Y")))))
+(DefineLink (DefinedSchema "reddish") fumbula)
 
 ; (cog-execute! qe3)
 
@@ -157,9 +161,7 @@
 			(Concept "node2"))
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(Evaluation
-			(DefinedPredicate "pred1")
-			(Variable "Y")))
+		evodef)
   (Variable "Y")))
 
 ; (cog-execute! qe4)
@@ -178,46 +180,3 @@
   (Variable "Y")))
 
 ; (cog-execute! qe5)
-
-; A convoluted version of above.
-(define qe6 (Query
-	(And
-		(Member
-			(Evaluation (Predicate "has_name") (Variable "Y"))
-			(Concept "node2"))
-		(TypedVariable (Variable "Y")
-			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(GreaterThan
-			(strength-of
-				(Evaluation
-					(DefinedPredicate "pred1")
-					(Variable "Y")))
-			(Number 0.5)))
-  (Variable "Y")))
-
-; (cog-execute! qe6)
-
-; Finally, verbose and convoluted
-(define qe7 (Query
-	(And
-		(Member
-			(Evaluation (Predicate "has_name") (Variable "Y"))
-			(Concept "node2"))
-		(TypedVariable (Variable "Y")
-			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(GreaterThan
-			(strength-of
-				(Evaluation
-					(FormulaPredicate
-						(Minus (Number 1)
-							(Times
-								(strength-of (Variable "$X"))
-								(strength-of (Variable "$Y"))))
-						(Times
-							(confidence-of (Variable "$X"))
-							(confidence-of (Variable "$Y"))))
-					(Variable "Y")))
-			(Number 0.5)))
-  (Variable "Y")))
-
-; (cog-execute! qe7)

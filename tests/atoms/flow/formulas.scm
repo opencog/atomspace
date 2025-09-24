@@ -20,29 +20,19 @@
 (define prod
 	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
-(define stv-const (FormulaPredicate (Number 0.7) (Number 0.314)))
-
 (define formula-stv
-	(FormulaPredicate
+	(FloatColumn
 		(Minus
 			(Number 1)
 			(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 		(Times (confidence-of (Concept "A")) (confidence-of (Concept "B")))))
 
-; The below computes a truth value, and attaches it to the
-; EvaluationLink.
-(define my-ev-link
-	(Evaluation
-		(FormulaPredicate (Number 0.75) (Number 0.628))
-		(List
-			(Concept "A")
-			(Concept "B"))))
-
 ; Formula with variables
-(define eval-formula
-	(Evaluation
+(define my-formula
+   (Lambda
+      (VariableList (Variable "$X") (Variable "$Y"))
 		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
+		(FloatColumn
 			(Minus
 				(Number 1)
 				(Times
@@ -50,87 +40,28 @@
 					(strength-of (Variable "$Y"))))
 			(Times
 				(confidence-of (Variable "$X"))
-				(confidence-of (Variable "$Y"))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+				(confidence-of (Variable "$Y"))))))
 
-; Optionally, you can wrap formulas with LambdaLinks. This doesn't
-; really change anything; formulas work fine without LambdaLinks.
-(define eval-lambda
-	(Evaluation
-		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
-			(Lambda
-				; Lambda without a decl, intentionally so.
-				; (NopeVariableList (Variable "$X") (Variable "$Y"))
-				(Minus
-					(Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y")))))
-			(Lambda
-				(VariableList (Variable "$X") (Variable "$Y"))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y")))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
-
-
-; Beta-reducation works as normal. The below will create an
-; EvaluationLink with ConceptNode A and B in it, and will set the
-; truth value according to the formula.
-(define put-link
-		(PutLink
-			(VariableList (Variable "$VA") (Variable "$VB"))
-			(Evaluation
-				; Compute TV = (1-sA*sB, cA*cB)
-				(FormulaPredicate
-					(Minus
-						(Number 1)
-						(Times
-							(strength-of (Variable "$VA"))
-							(strength-of (Variable "$VB"))))
-					(Times
-						(confidence-of (Variable "$VA"))
-						(confidence-of (Variable "$VB"))))
-				(List
-					(Variable "$VA") (Variable "$VB")))
-		(Set (List (Concept "A") (Concept "B")))))
-
+(define eval-formula
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; One can also use DefinedPredicates, to give the formula a name.
-(DefineLink
-	(DefinedPredicate "has a reddish color")
-	(FormulaPredicate
-		(Minus
-			(Number 1)
-			(Times
-				(strength-of (Variable "$X"))
-				(strength-of (Variable "$Y"))))
-		(Times
-			(confidence-of (Variable "$X"))
-			(confidence-of (Variable "$Y")))))
+(DefineLink (DefinedSchema "has a reddish color") my-formula)
 
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (define red-form
-	(Evaluation
-		(DefinedPredicate "has a reddish color")
-		(List
-			(Concept "A")
-			(Concept "B"))))
+	(ExecutionOutput
+		(DefinedSchema "has a reddish color")
+		(List (Concept "A") (Concept "B"))))
 
 ; --------------------------------------------------
 
 (cog-set-value! atom-a tvkey (SimpleTruthValue 0.8 1.0))
 (cog-set-value! atom-b tvkey (SimpleTruthValue 0.6 0.9))
 (define atom-c (Concept "C"))
-
 
 (define key (Predicate "key"))
 
@@ -178,159 +109,6 @@
 ; and (its-conf atom-b atom-c) to be false.
 (define (its-conf a b)
 	(Evaluation (DefinedPredicate "mostly-confident") (List a b)))
-
-; --------------------------------------------------
-; Testing naked predicate formulas (issue #2218).
-
-(define naked-pred1
-  (FormulaPredicate
-    (Number 1)
-    (Number 1)
-  )
-)
-
-(define naked-pred2
-  (FormulaPredicate
-    (Times
-      (Number 0.5)
-      (Number 1)
-    )
-    (Number 1)
-  )
-)
-
-(define naked-pred3
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 0.5)
-      (Number 1)
-    )
-  )
-)
-
-(define apple-is-green (Concept "apple-is-green" (stv 1 0.5)))
-(define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
-
-(define naked-pred4
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(define (times x y)
-  (cog-execute! (Times x y))
-)
-
-(define naked-pred5
-  (FormulaPredicate
-    (Number 1)
-    (ExecutionOutput
-      (GroundedSchema "scm:times")
-      (List (Number 0.9) (Number 0.5))
-    )
-  )
-)
-
-(define naked-pred-crash1
-  (FormulaPredicate
-    (Concept "blabla")
-    (Number 1)
-  )
-)
-
-(define naked-pred-crash2
-  (FormulaPredicate
-    (Number 1)
-    (ExecutionOutput
-      (Lambda (Concept "blabla"))
-      (List)
-    )
-  )
-)
-
-; -------------------------------------------------
-; Testing defined predicate formulas (issue #2218).
-
-(Define
-  (DefinedPredicate "defined-pred1")
-  (FormulaPredicate
-    (Number 1)
-    (Number 1)
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred2")
-  (FormulaPredicate
-    (Times
-      (Number 1)
-      (Number 0.5)
-    )
-    (Number 1)
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred3")
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred4")
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred-crash1")
-  (FormulaPredicate
-    (ExecutionOutput
-      (Lambda (Concept "ahaha"))
-      (List)
-    )
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred-crash2")
-  (FormulaPredicate
-    (Number 1)
-    (Concept "saboteur")
-  )
-)
-
-(define (eval-nullary name)
-  (Evaluation
-    (DefinedPredicate name)
-    (List)
-  )
-)
 
 ; -------------------------------------------------
 ; Testing defined predicate execution (issue #2312).

@@ -6,7 +6,6 @@ ADD_LIBRARY (atomflow
 	CollectionOfLink.cc
 	ConcatenateLink.cc
 	FilterLink.cc
-	FormulaPredicateLink.cc
 	IncomingOfLink.cc
 	IncrementValueLink.cc
 	LinkSignatureLink.cc
@@ -39,7 +38,6 @@ INSTALL (FILES
 	CollectionOfLink.h
 	ConcatenateLink.h
 	FilterLink.h
-	FormulaPredicateLink.h
 	IncomingOfLink.h
 	IncrementValueLink.h
 	LinkSignatureLink.h

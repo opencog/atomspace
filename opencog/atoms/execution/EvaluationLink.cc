@@ -29,7 +29,6 @@
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/flow/FormulaPredicateLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
@@ -715,9 +714,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 			dtype = defn->get_type();
 		}
 
-		if (FORMULA_PREDICATE_LINK == dtype)
-			return FormulaPredicateLinkCast(defn)->apply(as, cargs, silent);
-
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
 			throw SyntaxException(TRACE_INFO,
@@ -730,11 +726,6 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		Handle reduct(lam->beta_reduce(cargs));
 		return EvaluationLink::do_evaluate(as, reduct, silent);
 	}
-
-	// Like a GPN, but the entire function is declared in the
-	// AtomSpace.
-	if (FORMULA_PREDICATE_LINK == pntype)
-		return FormulaPredicateLinkCast(pn)->apply(as, cargs, silent);
 
 	// Treat LambdaLink as if it were a PutLink -- perform
 	// the beta-reduction, and evaluate the result.

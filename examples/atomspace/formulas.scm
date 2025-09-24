@@ -23,9 +23,9 @@
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
-; The two component of a SimpleTruthValue can be accessed with
+; The two component of a FloatValue can be accessed with
 ; the ElementOfLink:
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 1.0))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.8 1.0))
 (cog-execute! (ElementOf (Number 0) (ValueOf (Concept "A") tvkey)))
 (cog-execute! (ElementOf (Number 1) (ValueOf (Concept "A") tvkey)))
 
@@ -40,19 +40,19 @@
 (cog-execute! (confidence-of (Concept "A")))
 
 ; The demo needs at least one more Atom.
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.6 0.9))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.6 0.9))
 
 ; Multiply the strength of the TV's of two atoms.
 (cog-execute!
 	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
-; Create a SimpleTruthValue with a non-trivial formula:
+; Create a FloatValue with a non-trivial formula:
 ; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
-; and cA, cB are confidence values. The FormulaPredicateLink assembles
-; two floating-point values, and creates a SimpleTruthValue out of them.
+; and cA, cB are confidence values. The FloatColumn assembles two
+; floating-point values, and creates a FloatValue out of them.
 ;
 (cog-execute!
-	(FormulaPredicate
+	(FloatColumn
 		(Minus
 			(Number 1)
 			(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
@@ -60,34 +60,20 @@
 
 ; The values do not need to be formulas; they can be hard-coded numbers.
 (cog-execute!
-	(FormulaPredicate (Number 0.7) (Number 0.314)))
+	(FloatColumn (Number 0.7) (Number 0.314)))
 
-; The below computes a truth value, and attaches it to the
-; EvaluationLink. Let's demo this in three parts: first define it,
-; then evaluate it, then look at it.
-;
-(define my-ev-link
-	(Evaluation
-		(FormulaPredicate (Number 0.7) (Number 0.314))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+; Typically, one wishes to have a formula with variables in it, so that
+; one can apply it anywhere. The standard way of doing this is to use
+; a LambdaLink to declare variable bindings.
 
-; Evaluate ...
-(cog-execute! my-ev-link)
+; First, define a formula.
+(define my-formula
+	(Lambda
+		(VariableList (Variable "$X") (Variable "$Y"))
 
-; Print.
-(display my-ev-link)
-
-; More typically, one wishes to have a formula in the abstract,
-; with variables in it, so that one can apply it in any one of
-; a number of different situations. In the below, the variables
-; are automatically reduced with the Atoms in the ListLink, and
-; then the formula is evaluated to obtain a TruthValue.
-(cog-execute!
-	(Evaluation
 		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
+		; This is the prototypical PLN TruthValue formula.
+		(FloatColumn
 			(Minus
 				(Number 1)
 				(Times
@@ -95,109 +81,38 @@
 					(strength-of (Variable "$Y"))))
 			(Times
 				(confidence-of (Variable "$X"))
-				(confidence-of (Variable "$Y"))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
+				(confidence-of (Variable "$Y"))))))
 
-; Optionally, you can wrap formulas with LambdaLinks. This doesn't
-; really change anything; formulas work fine without LambdaLinks.
+; Now run the formula, by applying it to some arguments.
 (cog-execute!
-	(Evaluation
-		; Compute TV = (1-sA*sB, cA*cB)
-		(FormulaPredicate
-			(Lambda (Minus
-				(Number 1)
-				(Times
-					(strength-of (Variable "$X"))
-					(strength-of (Variable "$Y")))))
-			(Lambda (Times
-				(confidence-of (Variable "$X"))
-				(confidence-of (Variable "$Y")))))
-		(List
-			(Concept "A")
-			(Concept "B"))))
-
-
-; The FormulaPredicateLink behaves just like any other algebraic
-; expression with VariableNodes in it. When executed, it might
-; reduce a bit, but that is all.
-(cog-execute!
-	(FormulaPredicate
-		(Plus (Number 41)
-			(Minus
-				(Number 1)
-				(Times
-					(strength-of (Variable "$VA"))
-					(strength-of (Variable "$VB")))))
-			(Times
-				(confidence-of (Variable "$VA"))
-				(confidence-of (Variable "$VB")))))
-
-; Beta-reduction works as normal. The below will create an
-; EvaluationLink with ConceptNode A and B in it, and will set the
-; truth value according to the formula.
-(define the-put-result
-	(cog-execute!
-		(PutLink
-			(VariableList (Variable "$VA") (Variable "$VB"))
-			(Evaluation
-				; Compute TV = (1-sA*sB, cA*cB)
-				(FormulaPredicate
-					(Minus
-						(Number 1)
-						(Times
-							(strength-of (Variable "$VA"))
-							(strength-of (Variable "$VB"))))
-					(Times
-						(confidence-of (Variable "$VA"))
-						(confidence-of (Variable "$VB"))))
-				(List
-					(Variable "$VA") (Variable "$VB")))
-		(Set (List (Concept "A") (Concept "B"))))))
-
-; The scheme variable `the-put-result` contains a SetLink with the
-; result in it. Lets unwrap it, so that `evelnk` is just the
-; EvaluationLink. And then we play a little trick.
-(define evelnk (cog-outgoing-atom the-put-result 0))
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Change the truth value on the two concept nodes ...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.5))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.5))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.3 0.5))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.5))
 
-; Re-evaluate the EvaluationLink. Note the TV has been updated!
-(cog-execute! evelnk)
+; Rerun the formula... The computed value changes...
+(cog-execute!
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Do it again, for good luck!
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.99))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.99))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.1 0.99))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.1 0.99))
 
-; Re-evaluate the EvaluationLink. The TV is again recomputed!
-(cog-execute! evelnk)
+(cog-execute!
+	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
-; One can also use DefinedPredicates, to give the formula a name.
-(DefineLink
-	(DefinedPredicate "has a reddish color")
-	(FormulaPredicate
-		(Minus
-			(Number 1)
-			(Times
-				(strength-of (Variable "$X"))
-				(strength-of (Variable "$Y"))))
-		(Times
-			(confidence-of (Variable "$X"))
-			(confidence-of (Variable "$Y")))))
+; One can also use DefinedSchema, to give the formula a name.
+(DefineLink (DefinedSchema "has a reddish color") my-formula)
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (cog-execute!
-	(Evaluation
-		(DefinedPredicate "has a reddish color")
-		(List
-			(Concept "A")
-			(Concept "B"))))
+	(ExecutionOutput
+		(DefinedSchema "has a reddish color")
+		(List (Concept "A") (Concept "B"))))
 
 ; The End. That's All, Folks!
 ; -------------------------------------------------------------------

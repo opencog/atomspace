@@ -13,39 +13,40 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 1 0))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.1))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.8 0.2))
 
 ; Was FormulaTruthValue
 (define fututv
 	(FormulaStream
-		(FormulaPredicate
-			(Minus
-				(Number 1)
-				(Times (strength-of A) (strength-of B)))
-			(Times (confidence-of A) (confidence-of B)))))
+		(Minus
+			(Number 1)
+			(Times (strength-of A) (strength-of B)))
+		(Times (confidence-of A) (confidence-of B))))
 
 ; ----------
 ; For DynamicUTest::test_formula_define()
 (DefineLink
-   (DefinedPredicate "has a reddish color")
-   (FormulaPredicate
-      (Minus
-         (Number 1)
-         (Times
-            (strength-of (Variable "$X"))
-            (strength-of (Variable "$Y"))))
-      (Times
-         (confidence-of (Variable "$X"))
-         (confidence-of (Variable "$Y")))))
+	(DefinedSchema "has a reddish color")
+	(Lambda
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(FloatColumn
+			(Minus
+				(Number 1)
+				(Times
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y"))))
+			(Times
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y"))))))
 
-(define evlnk
-	(Evaluation
-		(DefinedPredicate "has a reddish color")
+(define exolnk
+	(ExecutionOutput
+		(DefinedSchema "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; Was FormulaTruthValue
-(define tv-stream (FormulaStream evlnk))
+(define tv-stream (FormulaStream exolnk))
 
 ; ----------
 ; for DynamicUTest::test_dynamic_formula()
@@ -53,43 +54,24 @@
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
 
 (cog-execute!
-	(SetValue
-		(Implication (Concept "A") (Concept "B"))
-		(Predicate "*-TruthValueKey-*")
+	(SetValue a-implies-b tvkey
 		(PromiseLink
-			(FormulaPredicate
-				(Minus
-					(Number 1)
-					(Times
-						(strength-of (Concept "A"))
-						(strength-of (Concept "B"))))
-				(Times
-					(confidence-of (Concept "A"))
-					(confidence-of (Concept "B")))))))
-
-(DefineLink
-   (DefinedPredicate "dynamic example")
-   (FormulaPredicate
-      (Minus
-         (Number 1)
-         (Times
-            (strength-of (Variable "$X"))
-            (strength-of (Variable "$Y"))))
-      (Times
-         (confidence-of (Variable "$X"))
-         (confidence-of (Variable "$Y")))))
+			(ExecutionOutput
+				(DefinedSchema "has a reddish color")
+				(List (Concept "A") (Concept "B"))))))
 
 ; -----------
 ; For DynamicUTest::test_defined_dynamic()
 (define p-implies-q (Implication (Concept "P") (Concept "Q")))
-;;; XXX FIXME this is currently broken; the old SetTVLink did this
-;;; but the new SetValue doesn't (shouldn't) ... we need an ApplyLink...
-;;;(cog-execute!
-;;;	(SetValue
-;;;		(Implication (Concept "P") (Concept "Q"))
-;;;		(Predicate "*-TruthValueKey-*")
-;;;		(DefinedPredicate "dynamic example")
-;;;		(Concept "A") (Concept "B")))
+
+(cog-execute!
+	(SetValue
+		(Implication (Concept "P") (Concept "Q"))
+		tvkey
+		(PromiseLink
+			(ExecutionOutput
+				(DefinedSchema "has a reddish color")
+				(List (Concept "A") (Concept "B"))))))
 
 ; -------------------------------------------------------------
 ; for DynamicUTest::test_formula_stream()
