@@ -64,8 +64,8 @@
 ; The above example hard-codes the Atoms to be used in the formula.
 ; It is often convenient to use variables, so that a formula definition
 ; can be reused.  Thus, lets recycle a portion of the `formulas.scm`
-; example and create a formula for computing a SimpleTruthValue, based
-; on two input Atoms.
+; example and create a formula for computing a FloatValue, based on the
+; input Atoms.
 (DefineLink
 	(DefinedSchema "has a reddish color")
 	(Lambda

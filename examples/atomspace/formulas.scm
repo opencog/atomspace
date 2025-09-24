@@ -23,9 +23,9 @@
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
-; The two component of a SimpleTruthValue can be accessed with
+; The two component of a FloatValue can be accessed with
 ; the ElementOfLink:
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.8 1.0))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.8 1.0))
 (cog-execute! (ElementOf (Number 0) (ValueOf (Concept "A") tvkey)))
 (cog-execute! (ElementOf (Number 1) (ValueOf (Concept "A") tvkey)))
 
@@ -40,13 +40,13 @@
 (cog-execute! (confidence-of (Concept "A")))
 
 ; The demo needs at least one more Atom.
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.6 0.9))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.6 0.9))
 
 ; Multiply the strength of the TV's of two atoms.
 (cog-execute!
 	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
-; Create a SimpleTruthValue with a non-trivial formula:
+; Create a FloatValue with a non-trivial formula:
 ; It will be the TV := (1-sA*sB, cA*cB) where sA and sB are strengths
 ; and cA, cB are confidence values. The FloatColumn assembles two
 ; floating-point values, and creates a FloatValue out of them.
@@ -88,16 +88,16 @@
 	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Change the truth value on the two concept nodes ...
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.5))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.5))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.3 0.5))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.5))
 
 ; Rerun the formula... The computed value changes...
 (cog-execute!
 	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; Do it again, for good luck!
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.1 0.99))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.1 0.99))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.1 0.99))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.1 0.99))
 
 (cog-execute!
 	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
@@ -105,8 +105,8 @@
 ; One can also use DefinedSchema, to give the formula a name.
 (DefineLink (DefinedSchema "has a reddish color") my-formula)
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (cog-execute!
