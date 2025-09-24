@@ -118,35 +118,28 @@
 ; ----------
 ; This dynamic Value becomes interesting when it is used to
 ; automatically maintain the TV of some relationship. Suppose
-; that A implied B, and the truth-probability of this is given
-; by the formula above.
-
-; Yes, we can. Just use the PromiseLink.  This can wrap any executable
-; Atom, anything that can produce a Value, and provides a promise that
-; it can be evaluated in the future. Then, when the SetValueLink is
-; executed, whatever was wrapped is unwrapped and placed into a
-; FormulaStream, which will then update every time it is accessed.
-
-; This can be used as anywhere any other predicate can be used;
-; anywhere a PredicateNode, GroundedPredicateNode, DefinedPredicate,
-; or FormulaPredicate can be used. They all provide the same utility:
-; they provide a TruthValue. More precisely, a FormulaStream is
-; created. This wraps the 2nd and later args to the SetValue.
-; This FormulaStream is installed onto the first arg (the
-; ImplicationLink). From thenceforth, any calls to get the TV
-; on the ImplicatioLink get the FormulaStream, which recomputes
-; the TV value each time it's accessed.
+; that A implied B, and the formula above models the truth of
+; this implication.
+;
+; An automatic update can be accomplished with the PromiseLink.
+; The PromiseLink can wrap any executable Atom, anything that can
+;  produce a Value, and provides a promise that it will be executed
+; in the future.
+;
+; In this example, when the SetValueLink is executed, whatever was
+; wrapped is unwrapped and placed into a FormulaStream, which will
+; then update every time it is accessed.
 ;
 (define a-implies-b (Implication (Concept "A") (Concept "B")))
-(cog-execute!
-	(SetValue
-		a-implies-b
-		tvkey
-		(ExecutionOutput
-			(DefinedSchema "has a reddish color")
-			(List (Concept "A") (Concept "B")))))
 
-; Double-check, as before:
+(cog-execute!
+	(SetValue a-implies-b tvkey
+		(Promise
+			(ExecutionOutput
+				(DefinedSchema "has a reddish color")
+				(List (Concept "A") (Concept "B"))))))
+
+; Lets take a look at the TV, now.
 (cog-tv a-implies-b)
 
 ; Change the TV on A and B ...
@@ -157,12 +150,15 @@
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
 	(cog-mean a-implies-b) (cog-confidence a-implies-b))
 
+; And again, for good luck.
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.2 0.8))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.3 0.7))
+(cog-tv a-implies-b)
+
 ; -------------------------------------------------------------
-; The FormulaStream is the generalization of FormulaTruthValue, suitable
-; for streaming a FloatValue of arbitrary length. As before, whenever it
-; is accessed, the current vector value is recomputed. The recomputation
-; forced by calling `execute()` on the Atom that the stream is created
-; with.
+; The presentation above was very TV-centric; but the concept works
+; generically, for any kind of Values located at any location.
+; The below is a slightly generalized variant of the above.
 ;
 ; Create an Atom, a key, and a random stream of five numbers.
 ; The random stream is a FloatValue vector, of length 5; each of
