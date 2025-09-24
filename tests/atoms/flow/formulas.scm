@@ -20,8 +20,6 @@
 (define prod
 	(Times (strength-of (Concept "A")) (strength-of (Concept "B"))))
 
-(define stv-const (FormulaPredicate (Number 0.7) (Number 0.314)))
-
 (define formula-stv
 	(FloatColumn
 		(Minus
@@ -48,7 +46,7 @@
 	(ExecutionOutput my-formula (List (Concept "A") (Concept "B"))))
 
 ; One can also use DefinedPredicates, to give the formula a name.
-(DefineLink (DefinedPredicate "has a reddish color") my-formula)
+(DefineLink (DefinedSchema "has a reddish color") my-formula)
 
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
@@ -56,7 +54,7 @@
 ; The will cause the formula to evaluate.
 (define red-form
 	(ExecutionOutput
-		(DefinedPredicate "has a reddish color")
+		(DefinedSchema "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; --------------------------------------------------
@@ -111,159 +109,6 @@
 ; and (its-conf atom-b atom-c) to be false.
 (define (its-conf a b)
 	(Evaluation (DefinedPredicate "mostly-confident") (List a b)))
-
-; --------------------------------------------------
-; Testing naked predicate formulas (issue #2218).
-
-(define naked-pred1
-  (FormulaPredicate
-    (Number 1)
-    (Number 1)
-  )
-)
-
-(define naked-pred2
-  (FormulaPredicate
-    (Times
-      (Number 0.5)
-      (Number 1)
-    )
-    (Number 1)
-  )
-)
-
-(define naked-pred3
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 0.5)
-      (Number 1)
-    )
-  )
-)
-
-(define apple-is-green (Concept "apple-is-green" (stv 1 0.5)))
-(define apple-is-red (Concept "apple-is-red" (stv 0.9 0.6)))
-
-(define naked-pred4
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(define (times x y)
-  (cog-execute! (Times x y))
-)
-
-(define naked-pred5
-  (FormulaPredicate
-    (Number 1)
-    (ExecutionOutput
-      (GroundedSchema "scm:times")
-      (List (Number 0.9) (Number 0.5))
-    )
-  )
-)
-
-(define naked-pred-crash1
-  (FormulaPredicate
-    (Concept "blabla")
-    (Number 1)
-  )
-)
-
-(define naked-pred-crash2
-  (FormulaPredicate
-    (Number 1)
-    (ExecutionOutput
-      (Lambda (Concept "blabla"))
-      (List)
-    )
-  )
-)
-
-; -------------------------------------------------
-; Testing defined predicate formulas (issue #2218).
-
-(Define
-  (DefinedPredicate "defined-pred1")
-  (FormulaPredicate
-    (Number 1)
-    (Number 1)
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred2")
-  (FormulaPredicate
-    (Times
-      (Number 1)
-      (Number 0.5)
-    )
-    (Number 1)
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred3")
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred4")
-  (FormulaPredicate
-    (Number 1)
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred-crash1")
-  (FormulaPredicate
-    (ExecutionOutput
-      (Lambda (Concept "ahaha"))
-      (List)
-    )
-    (Times
-      (Number 1)
-      (Number 0.5)
-      (strength-of apple-is-green)
-      (confidence-of apple-is-red)
-    )
-  )
-)
-
-(Define
-  (DefinedPredicate "defined-pred-crash2")
-  (FormulaPredicate
-    (Number 1)
-    (Concept "saboteur")
-  )
-)
-
-(define (eval-nullary name)
-  (Evaluation
-    (DefinedPredicate name)
-    (List)
-  )
-)
 
 ; -------------------------------------------------
 ; Testing defined predicate execution (issue #2312).
