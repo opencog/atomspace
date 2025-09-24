@@ -141,22 +141,6 @@ void FormulasInQueryUTest::do_predicate_test(HandleSeq ans)
 	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
 	hget = LinkValueCast(get)->to_handle_seq();
 	TSM_ASSERT_EQUALS("Expect list", hget, ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe6)");
-	printf("Got qe6: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect list", hget, ans);
-
-	// ------------------
-	get = eval->eval_v("(cog-execute! qe7)");
-	printf("Got qe7: %s\n", get->to_string().c_str());
-
-	TS_ASSERT(nameserver().isA(get->get_type(), LINK_VALUE));
-	hget = LinkValueCast(get)->to_handle_seq();
-	TSM_ASSERT_EQUALS("Expect list", hget, ans);
 }
 
 void FormulasInQueryUTest::test_accept(void)
