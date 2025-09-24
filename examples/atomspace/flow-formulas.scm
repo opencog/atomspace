@@ -6,25 +6,12 @@
 ; Examples of such formulas are provided below, together with the
 ; code for wiring them into Atoms.
 ;
-; The core implementation is in two parts: the FormulaTruthValue,
-; which implements a dynamically-variable TruthValue, and the
-; FormulaPredicateLink, which specifies the formula used to compute
-; the TruthValue.
+; The FormulaStream is a kind of FloatValue, such that, every time that
+; it is accessed, the current value -- that is, the current vector of
+; floating point numbers -- is recomputed.  The recomputation occurs
+; every time the numeric value is accessed.
 ;
-; The FormulaTruthValue is a kind of SimpleTruthValue, such that, every
-; time that it is accessed, the current value -- that is, the current
-; pair of floating point numbers -- is recomputed.  The recomputation
-; occurs every time the numeric value is accessed (i.e. when the
-; strength and confidence of the TV are accessed).
-;
-; Note that SimpleTV's are just vectors of length two - the strength
-; and confidence. These are generalized by FloatValue, which can hold
-; a vector of arbitrary length.
-;
-; The FormulaStream generalizes the FormulaTruthValue, so that it can
-; work with any FloatValue, not just TruthValues. An introductory demo
-; is provided at the bottom of this file. A more complex demo is in the
-; `flow-futures.scm` file.
+; A more complex demo is in the `flow-futures.scm` file.
 
 (use-modules (opencog) (opencog exec))
 
@@ -35,8 +22,8 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 1 0))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 1 0))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.1))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.8 0.2))
 
 ; The FormulaStream is a kind of FloatValue that is recomputed, every
 ; time it is accessed. Thus, it is a kind of dynamically-changing Value.
@@ -63,14 +50,14 @@
 (cog-value->list tv-stream)
 
 ; When the inputs change, the value will track:
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.7))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.2))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.7))
 (cog-value->list tv-stream)
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.5 0.8))
 (cog-value->list tv-stream)
 
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.314159 0.9))
 (cog-value->list tv-stream)
 
 ; ----------
@@ -80,52 +67,53 @@
 ; example and create a formula for computing a SimpleTruthValue, based
 ; on two input Atoms.
 (DefineLink
-   (DefinedPredicate "has a reddish color")
-   (FormulaPredicate
-      (Minus
-         (Number 1)
-         (Times
-            (strength-of (Variable "$X"))
-            (strength-of (Variable "$Y"))))
-      (Times
-         (confidence-of (Variable "$X"))
-         (confidence-of (Variable "$Y")))))
+	(DefinedSchema "has a reddish color")
+	(Lambda
+		(VariableList (Variable "$X") (Variable "$Y"))
+		(FloatColumn
+			(Minus
+				(Number 1)
+				(Times
+					(strength-of (Variable "$X"))
+					(strength-of (Variable "$Y"))))
+			(Times
+				(confidence-of (Variable "$X"))
+				(confidence-of (Variable "$Y"))))))
 
-; Note that FormulaPredicate is a link type; it computes the same
-; things as FormulaStream, except that ... it is not a Value!
-; It's a link.
+; Note that LambdaLink is a link type; it computes the same things as
+; the FormulaStream, except that ... it is not a Value! It's a Link.
 
-; Create an EvaluationLink that will apply the formula above to a pair
-; of Atoms. This is as before; see the `formulas.scm` example for details.
-(define evlnk
-	(Evaluation
-		(DefinedPredicate "has a reddish color")
+; Create an EexecutionOutputLink that will apply the formula above to
+; a pair of Atoms. This is as before; see the `formulas.scm` example
+; for details.
+(define exolnk
+	(ExecutionOutput
+		(DefinedSchema "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
 ; As in earlier examples, the TV on the EvaluationLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.3 0.7))
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.4 0.6))
-(cog-evaluate! evlnk)
-(cog-tv evlnk)
+(cog-execute! exolnk)
 
-; Now that we've verified that the EvaluationLink works as expected,
+; Now that we've verified that the ExecutionOutputLink works as expected,
 ; it can be deployed in the stream.
-(define ev-stream (FormulaStream evlnk))
+(define ex-stream (FormulaStream exolnk))
 
 ; Print it out. Notice a sampling of the current numeric value, printed
 ; at the bottom:
-(display ev-stream) (newline)
+(display ex-stream) (newline)
 
 ; Change one of the inputs, and notice the output tracks:
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.2))
-(cog-value->list ev-stream)
+(cog-value->list ex-stream)
 
 (cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.5 0.8))
-(cog-value->list ev-stream)
+(cog-value->list ex-stream)
 
 (cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.314159 0.9))
-(cog-value->list ev-stream)
+(cog-value->list ex-stream)
 
 ; ----------
 ; This new kind of TV becomes interesting when it is used to
