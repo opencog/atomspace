@@ -1,6 +1,7 @@
 ;
-; formula-predicate.scm
-; Make sure that FormulaPredicateLink works in search patterns.
+; formulas-in-query.scm
+;
+; Make sure that formulas work in search patterns.
 ; This tests the second bug reported in opencog/atomspace#2650
 ;
 (use-modules (opencog) (opencog exec))
@@ -43,7 +44,21 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1"))))
-  (Variable "Y")))
+	(Variable "Y")))
+
+(define fumbula
+   (Lambda
+      (VariableList (Variable "$X") (Variable "$Y"))
+      (FloatColumn
+         (Minus
+            (Number 1)
+            (Times
+               (strength-of (Variable "$X"))
+               (strength-of (Variable "$Y"))))
+         (Times
+            (confidence-of (Variable "$X"))
+            (confidence-of (Variable "$Y"))))))
+
 
 (define qe1 (Query
 	(And
@@ -52,15 +67,8 @@
 			(Concept "node2"))
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
+		(ExecutionOutput
+			fumbula
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -74,15 +82,8 @@
 			(Concept "node2"))
 		(Equal (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
+		(ExecutionOutput
+			fumbula
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -96,15 +97,8 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(FormulaPredicate
-				(Minus (Number 1)
-					(Times
-						(strength-of (Variable "$X"))
-						(strength-of (Variable "$Y"))))
-				(Times
-					(confidence-of (Variable "$X"))
-					(confidence-of (Variable "$Y"))))
+		(ExecutionOutput
+			fumbula
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -117,8 +111,8 @@
 			(Concept "node2"))
 		(Equal (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(DefinedPredicate "pred1")
+		(ExecutionOutput
+			(DefinedSchema "reddish")
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -130,22 +124,13 @@
 			(Concept "node2"))
 		(Identical (Variable "Y")
 			(List (Variable "N") (Concept "name1")))
-		(Evaluation
-			(DefinedPredicate "pred1")
+		(ExecutionOutput
+			(DefinedSchema "reddish")
 			(Variable "Y")))
   (Variable "Y")))
 
 ; The definition needed for the above.
-(DefineLink
-	(DefinedPredicate "pred1")
-	(FormulaPredicate
-		(Minus (Number 1)
-			(Times
-				(strength-of (Variable "$X"))
-				(strength-of (Variable "$Y"))))
-		(Times
-			(confidence-of (Variable "$X"))
-			(confidence-of (Variable "$Y")))))
+(DefineLink (DefinedSchema "reddish") fumbula)
 
 ; (cog-execute! qe3)
 
@@ -157,8 +142,8 @@
 			(Concept "node2"))
 		(TypedVariable (Variable "Y")
 			(Signature (List (Type 'Concept) (Concept "name1"))))
-		(Evaluation
-			(DefinedPredicate "pred1")
+		(ExecutionOutput
+			(DefinedSchema "reddish")
 			(Variable "Y")))
   (Variable "Y")))
 
@@ -189,8 +174,8 @@
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(GreaterThan
 			(strength-of
-				(Evaluation
-					(DefinedPredicate "pred1")
+				(ExecutionOutput
+					(DefinedSchema "reddish")
 					(Variable "Y")))
 			(Number 0.5)))
   (Variable "Y")))
@@ -207,15 +192,8 @@
 			(Signature (List (Type 'Concept) (Concept "name1"))))
 		(GreaterThan
 			(strength-of
-				(Evaluation
-					(FormulaPredicate
-						(Minus (Number 1)
-							(Times
-								(strength-of (Variable "$X"))
-								(strength-of (Variable "$Y"))))
-						(Times
-							(confidence-of (Variable "$X"))
-							(confidence-of (Variable "$Y"))))
+				(ExecutionOutput
+					fumbula
 					(Variable "Y")))
 			(Number 0.5)))
   (Variable "Y")))
