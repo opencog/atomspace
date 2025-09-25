@@ -58,7 +58,7 @@ cdef class Atom(Value):
         cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))
         if value.get() == NULL:
-            raise RuntimeError("Null Atom!")
+            return None
         return create_python_value_from_c_value(value)
 
     def get_keys(self):
