@@ -87,14 +87,14 @@ cdef class AtomSpace(Value):
         elif op == 3: # !=
             return not is_equal
 
-    def add(self, Type t, name=None, out=None, TruthValue tv=None):
+    def add(self, Type t, name=None, out=None):
         """ add method that determines exact method to call from type """
         if is_a(t, types.Node):
             assert out is None, "Nodes can't have outgoing sets"
-            atom = self.add_node(t, name, tv)
+            atom = self.add_node(t, name)
         else:
             assert name is None, "Links can't have names"
-            atom = self.add_link(t, out, tv)
+            atom = self.add_link(t, out)
         return atom
 
     def add_atom(self, Atom atom):
@@ -103,9 +103,8 @@ cdef class AtomSpace(Value):
             return None
         return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
 
-    def add_node(self, Type t, atom_name, TruthValue tv=None):
+    def add_node(self, Type t, atom_name):
         """ Add Node to AtomSpace
-        @todo support [0.5,0.5] format for TruthValue.
         @todo support type name for type.
         @returns the newly created Atom
         """
@@ -118,14 +117,10 @@ cdef class AtomSpace(Value):
         cdef cHandle result = self.atomspace.xadd_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom.createAtom(result);
-        if tv :
-            atom.tv = tv
-        return atom
+        return Atom.createAtom(result);
 
-    def add_link(self, Type t, outgoing, TruthValue tv=None):
+    def add_link(self, Type t, outgoing):
         """ Add Link to AtomSpace
-        @todo support [0.5,0.5] format for TruthValue.
         @todo support type name for type.
         @returns handle referencing the newly created Atom
         """
@@ -136,10 +131,7 @@ cdef class AtomSpace(Value):
         cdef cHandle result
         result = self.atomspace.xadd_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom.createAtom(result);
-        if tv :
-            atom.tv = tv
-        return atom
+        return Atom.createAtom(result);
 
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
