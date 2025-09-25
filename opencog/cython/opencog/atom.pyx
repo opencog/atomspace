@@ -45,29 +45,6 @@ cdef class Atom(Value):
                 self._name = ""
         return self._name
 
-    # XXX TODO REMOVE THESE SOON
-    @property
-    def tv(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        cdef tv_ptr tvp
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
-        tvp = tv_cast(atom_ptr.getValue(truth_key()))
-        if (not tvp.get()):
-            return createTruthValue(1.0, 0.0)
-        return createTruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
-
-    @tv.setter
-    def tv(self, truth_value):
-        try:
-            assert isinstance(truth_value, TruthValue)
-        except AssertionError:
-            raise TypeError("atom.tv property needs a TruthValue object")
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
-        atom_ptr.setValue(truth_key(), (<TruthValue>truth_value)._vptr())
-
     def id_string(self):
         return self.get_c_handle().get().id_to_string().decode('UTF-8')
 
@@ -135,10 +112,6 @@ cdef class Atom(Value):
             raise RuntimeError("Null Atom!")
         handle_vector = atom_ptr.getIncomingSetByType(type)
         return convert_handle_seq_to_python_list(handle_vector)
-
-    def truth_value(self, mean, conf):
-        self.tv = createTruthValue(mean, conf)
-        return self
 
     def is_executable(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
