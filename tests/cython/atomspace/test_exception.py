@@ -50,7 +50,7 @@ class TestExceptions(unittest.TestCase):
             evaluate_atom(self.space, eval_link)
             self.assertFalse("call should fail")
         except RuntimeError as e:
-                   # Use `nosetests3 --nocapture` to see this print...
+            # Use `nosetests3 --nocapture` to see this print...
             print(f"The exception message is {str(e)}")
             self.assertTrue("not found in module" in str(e))
 

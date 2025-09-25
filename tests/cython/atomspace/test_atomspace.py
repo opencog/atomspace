@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 import opencog.atomspace
-from opencog.atomspace import Atom
+from opencog.atomspace import Atom, tvkey
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
@@ -234,8 +234,9 @@ class AtomTest(TestCase):
         self.assertEqual(a.tv, TruthValue(1.0, 0.0)) # default is true, no confidence
 
     def test_w_truthvalue(self):
+        a = Node("test2")
         tv = TruthValue(0.5, 100)
-        a = Node("test2", tv)
+        a.set_value(tvkey, tv)
         self.assertEqual(a.tv, tv)
 
         # test set tv
@@ -248,8 +249,9 @@ class AtomTest(TestCase):
 
         self.assertEqual(a1.out, [])
 
+        a2 = Node("test3")
         tv = TruthValue(0.5, 100)
-        a2 = Node("test3", tv)
+        a2.set_value(tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.out, [a1, a2])
@@ -262,8 +264,9 @@ class AtomTest(TestCase):
 
         self.assertEqual(a1.arity, 0)
 
+        a2 = Node("test3")
         tv = TruthValue(0.5, 100)
-        a2 = Node("test3", tv)
+        a2.set_value(tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.arity, 2)
@@ -294,8 +297,9 @@ class AtomTest(TestCase):
 
     def test_strings(self):
         # set up a link and atoms
+        a1 = Node("test1")
         tv = TruthValue(0.5, 0.8)
-        a1 = Node("test1", tv)
+        a1.set_value(tvkey, tv)
 
         a2 = Node("test2")
         a2.tv = TruthValue(0.1, 0.3)
