@@ -1,7 +1,7 @@
 import unittest
 from unittest import TestCase
 
-from opencog.atomspace import Atom
+from opencog.atomspace import Atom, tvkey
 
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
@@ -33,7 +33,7 @@ class AtomTest(TestCase):
         self.assertEqual(0, len(keys))
 
         tv = TruthValue(0.7, 0.7)
-        atom.tv = tv
+        atom.set_value(tvkey, tv)
         keys = atom.get_keys()
         self.assertEqual(1, len(keys))
         # Since the type or name of the TruthValue key may change, check that

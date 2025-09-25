@@ -19,7 +19,8 @@ def initialize_opencog(AtomSpace atomspace=None):
     Set default atomspace(deprecated feature) and
     create python evaluator singleton object.
 
-    Calling this function should not be needed. Use set_default_atomspace to set default atomspace.
+    Calling this function should not be needed.
+    Use set_default_atomspace to set default atomspace.
     Python evaluator will be created on first evaluation.
     """
     if atomspace is not None:
@@ -58,7 +59,7 @@ def tmp_atomspace():
         set_default_atomspace(parent_atomspace)
 
 
-def add_link(Type t, outgoing, TruthValue tv=None):
+def add_link(Type t, outgoing):
 
     # Unwrap double-wrapped lists. The type constructors create these.
     if 1 == len(outgoing) and isinstance(outgoing[0], list):
@@ -75,13 +76,10 @@ def add_link(Type t, outgoing, TruthValue tv=None):
     cdef cHandle result
     result = c_add_link(t, handle_vector)
     if result == result.UNDEFINED: return None
-    atom = create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
-    if tv is not None:
-        atom.tv = tv
-    return atom
+    return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
 
 
-def add_node(Type t, atom_name, TruthValue tv=None):
+def add_node(Type t, atom_name):
     """
     Add Node to the atomspace from the current context
     """
@@ -109,11 +107,7 @@ def add_node(Type t, atom_name, TruthValue tv=None):
     cdef cHandle result = c_add_node(t, name)
 
     if result == result.UNDEFINED: return None
-    atom = create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
-    if tv is not None:
-        atom.tv = tv
-    return atom
-
+    return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
 
 def set_default_atomspace(AtomSpace atomspace):
     """
@@ -141,18 +135,3 @@ def get_default_atomspace():
 
 def pop_default_atomspace():
     return AtomSpace_factoid(pop_context_atomspace())
-
-
-def is_closed(Atom atom):
-    """
-    Return True iff the atom is closed, that is does not contain free variables.
-    """
-    return c_is_closed(atom.get_c_handle())
-
-
-def get_free_variables(Atom atom):
-    """
-    Return the list of free variables in a given atom.
-    """
-    cdef cpp_set[cHandle] variables = c_get_free_variables(atom.get_c_handle())
-    return [create_python_value_from_c_value(<cValuePtr&>(h, h.get())) for h in variables]

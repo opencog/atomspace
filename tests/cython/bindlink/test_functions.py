@@ -1,7 +1,7 @@
 #
 # Test Functions
 
-from opencog.atomspace import types, Atom
+from opencog.atomspace import types, Atom, tvkey
 from opencog.type_constructors import *
 
 
@@ -65,9 +65,12 @@ func_one_result = TruthValue (0,1) # false
 def func_one(v):
     thing = ConceptNode("barleycorn")
     thang = ListLink(thing, v)
-    thang.tv = func_one_result
-    return thang.tv
+    thang.set_value(tvkey, func_one_result)
+    return func_one_result
 
 
 def func_two(v):
-    return ListLink(ConceptNode("barleycorn"), v).tv
+    tv = ListLink(ConceptNode("barleycorn"), v).get_value(tvkey)
+    if (tv is None):
+        return TruthValue(1, 0)
+    return tv
