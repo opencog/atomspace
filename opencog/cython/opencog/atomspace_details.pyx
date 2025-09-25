@@ -6,6 +6,9 @@ from cython.operator cimport dereference as deref, preincrement as inc
 
 # from atomspace cimport *
 
+# tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*") which
+# is the key under which all TruthValues are stored.
+tvkey = create_python_value_from_c_value(<cValuePtr>(truth_key()))
 
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
