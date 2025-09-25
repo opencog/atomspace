@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, Atom
+from opencog.atomspace import AtomSpace, Atom, tvkey
 from opencog.type_constructors import TruthValue
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme import scheme_eval, scheme_eval_h
@@ -47,8 +47,8 @@ class SchemeTest(TestCase):
         print("Added atom\n")
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
-        self.assertEqual(a1.tv, expected)
-        print(f"Got={str(a1.tv)} expected={str(expected)}")
+        self.assertEqual(a1.get_value(tvkey), expected)
+        print(f"Got={str(a1.get_value(tvkey))} expected={str(expected)}")
 
     # Create lots of large, random strings, try to trick guile gc
     # into running, while in the python context. We want to make
@@ -85,7 +85,7 @@ class SchemeTest(TestCase):
 
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 0.5)
-        self.assertEqual(a1.tv, expected)
+        self.assertEqual(a1.get_value(tvkey), expected)
 
         # Actually, the atoms overall should compare.
         self.assertEqual(a1, basic)

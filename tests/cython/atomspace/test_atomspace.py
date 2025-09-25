@@ -76,8 +76,9 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(l2 == l1)
 
         n3 = Node("test3")
-        l3 = Link(n1, n3).set_value(tvkey, TruthValue(0.5, 0.8))
+        l3 = Link(n1, n3)
         self.assertTrue(l3 is not None)
+        l3.set_value(tvkey, TruthValue(0.5, 0.8))
 
         # Should fail when adding an intentionally bad type
         caught = False
@@ -231,7 +232,7 @@ class AtomTest(TestCase):
     def test_creation(self):
         a = Node("test1")
         self.assertEqual(a.name, "test1")
-        self.assertEqual(a.get_value(tvkey), null)
+        self.assertEqual(a.get_value(tvkey), None)
 
     def test_w_truthvalue(self):
         a = Node("test2")
