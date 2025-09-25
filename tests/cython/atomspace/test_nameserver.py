@@ -10,11 +10,11 @@ with type_decl_context(__name__):
     decl_type(types.Node, 'SomeNode')
     decl_type(types.Link, 'SomeLink')
 
-def SomeNode(name, tv=None):
-    return add_node(types.SomeNode, name, tv)
+def SomeNode(name):
+    return add_node(types.SomeNode, name)
 
-def SomeLink(*args, tv=None):
-    return add_link(types.SomeLink, args, tv)
+def SomeLink(*args):
+    return add_link(types.SomeLink, args)
 
 class NameserverTest(unittest.TestCase):
 
