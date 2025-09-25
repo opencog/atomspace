@@ -9,15 +9,15 @@ def createTruthValue(strength = 1.0, confidence = 1.0):
 
 cdef class TruthValue(Value):
     """ The truth value represents the strength and confidence of
-        a relationship or term. In OpenCog there are a number of TruthValue
-        types, but as these involve additional complexity we focus primarily on
-        the SimpleTruthValue type which allows strength and confidence
+        a relationship or term.
     """
     # Type constructors for all atoms and values are exported via
-    # opencog.type_constructors module. Except TruthValue which is historically
-    # exported in opencog.atomspace. To keep it work before proper fix
-    # TruthValue constructor is modified to accept both old parameters
-    # (strength and confidence) and new ptr_holder parameter.
+    # opencog.type_constructors module. Except TruthValue which is
+    # historically exported in opencog.atomspace. To keep it working
+    # before a proper fix, the TruthValue constructor is modified to
+    # accept both the old parameters (strength and confidence) and
+    # the new ptr_holder parameter.
+    #
     # def __init__(self, double strength=1.0, double confidence=1.0, PtrHolder ptr_holder=None):
     #     cdef tv_ptr c_ptr
     #     if ptr_holder is not None:
