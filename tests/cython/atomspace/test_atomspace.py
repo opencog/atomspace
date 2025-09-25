@@ -63,7 +63,7 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(caught, True)
 
         # Test adding with a truthvalue
-        a3 = Node("test_w_tv").truth_value(0.5, 0.8)
+        a3 = Node("test_w_tv").set_value(tvkey, TruthValue(0.5, 0.8))
         self.assertEqual(self.space.size(), 3)
 
     def test_add_link(self):
@@ -76,7 +76,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(l2 == l1)
 
         n3 = Node("test3")
-        l3 = Link(n1, n3).truth_value(0.5, 0.8)
+        l3 = Link(n1, n3).set_value(tvkey, TruthValue(0.5, 0.8))
         self.assertTrue(l3 is not None)
 
         # Should fail when adding an intentionally bad type
@@ -108,9 +108,9 @@ class AtomSpaceTest(TestCase):
 
         # check truth_value function of atom
         atom = Node("atom with tv")
-        default_tv = atom.tv
-        atom.truth_value(0.75, 0.9)
-        new_tv = atom.tv
+        default_tv = atom.get_value(tvkey)
+        atom.set_value(tvkey, TruthValue(0.75, 0.9))
+        new_tv = atom.get_value(tvkey)
         self.assertFalse(new_tv == default_tv)
         self.assertEqual(new_tv.mean, 0.75)
         self.assertAlmostEqual(new_tv.confidence, 0.9, places=4)
@@ -231,17 +231,13 @@ class AtomTest(TestCase):
     def test_creation(self):
         a = Node("test1")
         self.assertEqual(a.name, "test1")
-        self.assertEqual(a.tv, TruthValue(1.0, 0.0)) # default is true, no confidence
+        self.assertEqual(a.get_value(tvkey), null)
 
     def test_w_truthvalue(self):
         a = Node("test2")
         tv = TruthValue(0.5, 100)
         a.set_value(tvkey, tv)
-        self.assertEqual(a.tv, tv)
-
-        # test set tv
-        a.tv = TruthValue(0.1, 10)
-        self.assertEqual(a.tv, TruthValue(0.1, 10))
+        self.assertEqual(a.get_value(tvkey), tv)
 
     def test_out(self):
         # test get out
@@ -302,7 +298,7 @@ class AtomTest(TestCase):
         a1.set_value(tvkey, tv)
 
         a2 = Node("test2")
-        a2.tv = TruthValue(0.1, 0.3)
+        a2.set_value(tvkey, TruthValue(0.1, 0.3))
 
         l = Link(a1, a2)
 
