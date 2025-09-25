@@ -135,7 +135,12 @@ cdef class Atom(Value):
         return create_python_value_from_c_value(c_value_ptr)
 
     def __richcmp__(self, other, int op):
-        assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
+        if op == Py_NE:
+            if not isinstance(other, Atom):
+                return True
+            return not self.__eq(other)
+        if not isinstance(other, Atom):
+            return False
         if op == Py_LT:
             return self.__lt(other)
         if op == Py_EQ:
@@ -144,8 +149,6 @@ cdef class Atom(Value):
             return other.__lt(self)
         if op == Py_LE:
             return not other.__lt(self)
-        if op == Py_NE:
-            return not self.__eq(other)
         if op == Py_GE:
             return not self.__lt(other)
         raise RuntimeError("unexpected comparison kind: {0}".format(op))
