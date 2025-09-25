@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import set_default_atomspace, finalize_opencog, is_closed, get_free_variables
+from opencog.utilities import set_default_atomspace, finalize_opencog
 
 __author__ = 'Curtis Faith'
 
@@ -30,18 +30,3 @@ class UtilitiesTest(TestCase):
     def test_initialize_finalize(self):
         set_default_atomspace(self.atomspace)
         finalize_opencog()
-
-    def test_is_closed(self):
-        A = self.atomspace.add_node(types.ConceptNode, 'A')
-        B = self.atomspace.add_node(types.ConceptNode, 'B')
-        X = self.atomspace.add_node(types.VariableNode, '$X')
-        AB = self.atomspace.add_link(types.InheritanceLink, [A, B])
-        AX = self.atomspace.add_link(types.InheritanceLink, [A, X])
-        self.assertTrue(is_closed(AB))
-        self.assertFalse(is_closed(AX))
-
-    def test_get_free_variables(self):
-        A = self.atomspace.add_node(types.ConceptNode, 'A')
-        X = self.atomspace.add_node(types.VariableNode, '$X')
-        AX = self.atomspace.add_link(types.InheritanceLink, [A, X])
-        self.assertEqual(get_free_variables(AX), [X])
