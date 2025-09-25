@@ -58,26 +58,26 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 
 		IF (ISNODE STREQUAL "NODE")
 			FILE(APPEND "${PYTHON_FILE}"
-				"def ${TYPE_NAME}(node_name, tv=None):\n"
-				"    return add_node(types.${TYPE_NAME}, node_name, tv)\n"
+				"def ${TYPE_NAME}(node_name):\n"
+				"    return add_node(types.${TYPE_NAME}, node_name)\n"
 			)
 			IF (NOT SHORT_NAME STREQUAL "")
 				FILE(APPEND "${PYTHON_FILE}"
-					"def ${SHORT_NAME}(node_name, tv=None):\n"
-					"    return add_node(types.${TYPE_NAME}, node_name, tv)\n"
+					"def ${SHORT_NAME}(node_name):\n"
+					"    return add_node(types.${TYPE_NAME}, node_name)\n"
 				)
 			ENDIF (NOT SHORT_NAME STREQUAL "")
 		ENDIF (ISNODE STREQUAL "NODE")
 
 		IF (ISLINK STREQUAL "LINK")
 			FILE(APPEND "${PYTHON_FILE}"
-				"def ${TYPE_NAME}(*args, tv=None):\n"
-				"    return add_link(types.${TYPE_NAME}, args, tv=tv)\n"
+				"def ${TYPE_NAME}(*args):\n"
+				"    return add_link(types.${TYPE_NAME}, args)\n"
 			)
 			IF (NOT SHORT_NAME STREQUAL "")
 				FILE(APPEND "${PYTHON_FILE}"
-					"def ${SHORT_NAME}(*args, tv=None):\n"
-					"    return add_link(types.${TYPE_NAME}, args, tv=tv)\n"
+					"def ${SHORT_NAME}(*args):\n"
+					"    return add_link(types.${TYPE_NAME}, args)\n"
 				)
 			ENDIF (NOT SHORT_NAME STREQUAL "")
 		ENDIF (ISLINK STREQUAL "LINK")
