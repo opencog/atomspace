@@ -42,9 +42,3 @@ cdef class TruthValue(Value):
 
     cdef cTruthValue* _ptr(self):
         return <cTruthValue*>(self.get_c_value_ptr().get())
-
-    cdef cValuePtr _vptr(self):
-        return <cValuePtr>(self.get_c_value_ptr())
-
-    cdef tv_ptr* _tvptr(self):
-        return <tv_ptr*>&((<PtrHolder>self.ptr_holder).shared_ptr)

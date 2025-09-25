@@ -100,8 +100,6 @@ cdef class TruthValue(Value):
     cdef double _mean(self)
     cdef double _confidence(self)
     cdef cTruthValue* _ptr(self)
-    cdef cValuePtr _vptr(self)
-    cdef tv_ptr* _tvptr(self)
 
 # ContentHash
 
