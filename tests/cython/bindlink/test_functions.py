@@ -70,4 +70,7 @@ def func_one(v):
 
 
 def func_two(v):
-    return ListLink(ConceptNode("barleycorn"), v).get_value(tvkey)
+    tv = ListLink(ConceptNode("barleycorn"), v).get_value(tvkey)
+    if (tv is None):
+        return TruthValue(1, 0)
+    return tv
