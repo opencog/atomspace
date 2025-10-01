@@ -1,5 +1,3 @@
-# No CMakeLists.txt in dir:
-#ADD_SUBDIRECTORY (wires)
 
 # About the COMPILE flag in the macros below:
 # It causes the guild compiler to run and build a compiled version of
