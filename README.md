@@ -682,15 +682,16 @@ during the build, will be more precise as to which parts will not be built.
 * https://cython.org
 * For Debian/Ubuntu,  `apt install cython libpython3-dev`
 * For Fedora/Redhat,  `yum install cython python3-devel`
+* For unit tests: `python3-nose2`
 
 ###### Haskell
-* Haskell bindings (experimental).
-* Optional; almost no existing code makes use of Haskell.
+* Haskell bindings (obsolete; Haskell bindings no longer build.)
 * https://www.haskell.org/
 
 ###### OCaml
-* OCaml bindings (experimental).
-* Optional; almost no existing code makes use of OCaml.
+* OCaml bindings (obsolete.)
+* The OCaml static compile-time types cannot be reconciled with the
+  Atomese dynamic run-time type system.
 * https://www.ocaml.org/ | `apt install ocaml ocaml-findlib`
 
 ### Building AtomSpace
