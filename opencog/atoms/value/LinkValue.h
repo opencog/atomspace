@@ -69,28 +69,22 @@ public:
 		: Value(t), _value(std::move(vlist)) {}
 
 	LinkValue(Type t, const ValueSet& vset)
-		: Value(t)
-	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
+		: Value(t), _value(vset.begin(), vset.end()) {}
 
 	LinkValue(Type t, const HandleSeq& hseq)
-		: Value(t)
-	{ for (const Handle& h: hseq) _value.emplace_back(h); }
+		: Value(t), _value(hseq.begin(), hseq.end()) {}
 
 	LinkValue(Type t, const HandleSet& hset)
-		: Value(t)
-	{ for (const Handle& h: hset) _value.emplace_back(h); }
+		: Value(t), _value(hset.begin(), hset.end()) {}
 
 	LinkValue(const ValueSet& vset)
-		: Value(LINK_VALUE)
-	{ for (const ValuePtr& v: vset) _value.emplace_back(v); }
+		: Value(LINK_VALUE), _value(vset.begin(), vset.end()) {}
 
 	LinkValue(const HandleSeq& hseq)
-		: Value(LINK_VALUE)
-	{ for (const Handle& h: hseq) _value.emplace_back(h); }
+		: Value(LINK_VALUE), _value(hseq.begin(), hseq.end()) {}
 
 	LinkValue(const HandleSet& hset)
-		: Value(LINK_VALUE)
-	{ for (const Handle& h: hset) _value.emplace_back(h); }
+		: Value(LINK_VALUE), _value(hset.begin(), hset.end()) {}
 
 	virtual ~LinkValue() {}
 

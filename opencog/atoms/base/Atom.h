@@ -334,7 +334,8 @@ protected:
         ABSENT_FLAG     = 0x01,  // 0000 0001
         MARKED_FLAG     = 0x02,  // 0000 0010
         CHECKED_FLAG    = 0x04,  // 0000 0100
-        USE_ISET_FLAG   = 0x08   // 0000 1000
+        USE_ISET_FLAG   = 0x08,  // 0000 1000
+        IS_KEY_FLAG     = 0x10   // 0001 0000
     };
     mutable std::atomic<uint8_t> _flags;
 
@@ -459,6 +460,9 @@ private:
     bool setAbsent();
     bool setPresent();
 
+    /** Indicate this Atom is used as a key */
+    void markIsKey();
+
     void getLocalInc(const AtomSpace*, HandleSet&, Type) const;
     void getCoveredInc(const AtomSpace*, HandleSet&, Type) const;
 
@@ -557,6 +561,9 @@ public:
     /// Atomically increment a generic FloatValue.
     ValuePtr incrementCount(const Handle& key, const std::vector<double>&);
     ValuePtr incrementCount(const Handle& key, size_t idx, double);
+
+    /// Return true if this Atom is used as a key, somewhere, anywhere.
+    bool isKey() const { return _flags.load() & IS_KEY_FLAG; }
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;

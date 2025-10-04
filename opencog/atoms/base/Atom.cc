@@ -86,6 +86,9 @@ const Handle& truth_key(void)
 /// If the value is a null pointer, then the key is removed.
 void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
+	// We want to know if the key is .. being used as a key.
+	key->markIsKey();
+
 	// This is rather irritating, but we fake it for the
 	// PredicateNode "*-TruthValueKey-*" because if we don't
 	// then load-from-file and load-from-network breaks.
@@ -347,6 +350,11 @@ bool Atom::setPresent(void)
 {
     uint8_t old_flags = _flags.fetch_and(~ABSENT_FLAG);
     return old_flags & ABSENT_FLAG;
+}
+
+void Atom::markIsKey(void)
+{
+    _flags.fetch_or(IS_KEY_FLAG);
 }
 
 // ==============================================================

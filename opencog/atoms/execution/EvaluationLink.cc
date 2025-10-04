@@ -261,6 +261,17 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	return vp;
 }
 
+/// Return true, if any Atom in the outgoing set is being used as
+/// a key somewhere. Usually, the outgoing set will be just one Atom,
+/// but we are prepared for anything, here.
+static bool is_key(const Handle& h)
+{
+	for (const Handle& ho : h->getOutgoingSet())
+		if (ho->isKey()) return true;
+
+	return false;
+}
+
 /// Check for syntactic equality. Specifically, when comparing
 /// atoms, the handles MUST be the same handle.
 /// If there are two or more elements, they must ALL be equal.
@@ -610,6 +621,7 @@ static bool crispy_maybe(AtomSpace* as,
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
+	if (IS_KEY_LINK == t) return is_key(evelnk);
 
 	// -------------------------
 	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and

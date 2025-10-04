@@ -1068,6 +1068,16 @@ TYPE_OF_LINK <- VALUE_OF_LINK
 // Grab an IncomingSet of an Atom, and return it as a LinkValue.
 INCOMING_OF_LINK <- VALUE_OF_LINK
 
+// Return all of the keys that are in use on the given Atom.
+// All of these are placed into a LinkValue, and returned as that.
+KEYS_OF_LINK <- VALUE_OF_LINK
+
+// Return crisp true/false, whether this Atom is used anywhere
+// as a key. We do not track, at this time, where it is used as
+// a key; this would eat up a lot of RAM and we don't want to do
+// that, if we can avoid it.
+IS_KEY_LINK <- VIRTUAL_LINK
+
 // Convert between Link/LinkValue types. If no type is specified,
 // then convert to SetLink. Primarily intended to convert a LinkValue
 // to a SetLink, but can go other ways. The argument is presumed to
