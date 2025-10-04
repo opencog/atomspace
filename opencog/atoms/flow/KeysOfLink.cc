@@ -43,27 +43,37 @@ KeysOfLink::KeysOfLink(const HandleSeq&& oset, Type t)
 /// Return a LinkValue containing all keys from all atoms in the outgoing set.
 ValuePtr KeysOfLink::execute(AtomSpace* as, bool silent)
 {
+	// The most common case will be just one Atom in the oset.
+	if (1 == _outgoing.size())
+	{
+		const Handle& h(_outgoing[0]);
+
+		if (h->is_executable())
+		{
+			ValuePtr vp(h->execute(as, silent));
+			if (vp->is_atom())
+				return createLinkValue(HandleCast(vp)->getKeys());
+		}
+		return createLinkValue(h->getKeys());
+	}
+
 	// Collect all keys from all atoms in the outgoing set
 	HandleSet all_keys;
-
-	for (const Handle& h : _outgoing)
+	for (Handle h : _outgoing)
 	{
 		// If the given Atom is executable, then execute it.
-		Handle atom(h);
-		if (atom->is_executable())
+		if (h->is_executable())
 		{
-			atom = HandleCast(atom->execute(as, silent));
-			if (nullptr == atom) continue;
+			ValuePtr vp(h->execute(as, silent));
+			if (vp and vp->is_atom())
+				h = HandleCast(vp);
 		}
 
-		// Get the keys for this atom and merge them into the master set
-		HandleSet keys = atom->getKeys();
+		HandleSet keys = h->getKeys();
 		all_keys.insert(keys.begin(), keys.end());
 	}
 
-	// Convert the set to a sequence and return as LinkValue
-	HandleSeq key_seq(all_keys.begin(), all_keys.end());
-	return createLinkValue(std::move(key_seq));
+	return createLinkValue(all_keys);
 }
 
 DEFINE_LINK_FACTORY(KeysOfLink, KEYS_OF_LINK)
