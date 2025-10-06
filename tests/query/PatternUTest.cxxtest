@@ -159,7 +159,19 @@ static inline void match(PatternMatchCallback& pmcb,
                          const HandleSet &vars,
                          const HandleSeq &clauses)
 {
-	PatternLinkPtr slp(createPatternLink(vars, clauses));
+	// Convert HandleSet vars to HandleSeq for VariableList
+	HandleSeq varseq(vars.begin(), vars.end());
+	Handle hvars = createLink(std::move(varseq), VARIABLE_LIST);
+
+	// Convert HandleSeq clauses to body Handle
+	Handle hbody;
+	if (clauses.size() == 1) {
+		hbody = clauses[0];
+	} else {
+		hbody = createLink(clauses, AND_LINK);
+	}
+
+	PatternLinkPtr slp(createPatternLink(hvars, hbody));
 	pmcb.satisfy(slp);
 }
 
