@@ -177,10 +177,6 @@ public:
 	            const HandleSeq& component,
 	            const PatternTermSeq& absents);
 
-	// A backwards-compatibility constructor. Do not use.
-	PatternLink(const HandleSet&,
-	            const HandleSeq&);
-
 	// Runtime just-in-time analysis
 	PatternLinkPtr jit_analyze(void);
 

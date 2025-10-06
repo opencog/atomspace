@@ -402,28 +402,6 @@ PatternLink::PatternLink(const HandleSet& vars,
 
 /* ================================================================= */
 
-/// Constructor that takes a pre-determined set of variables, and
-/// a list of clauses to solve.  This is currently kind-of crippled,
-/// since no variable type restricions are possible, and no optionals,
-/// either.  This is used only for backwards-compatibility API's.
-/// XXX No one, except unit tests, use these deprecated API's. These
-/// old unit tests should be removed.
-PatternLink::PatternLink(const HandleSet& vars,
-                         const HandleSeq& clauses)
-	: RuleLink(HandleSeq(), PATTERN_LINK)
-{
-	_variables.varset = vars;
-	for (const Handle& clause : clauses)
-	{
-		PatternTermPtr root_term(make_term_tree(clause));
-		_pat.pmandatory.push_back(root_term);
-	}
-	common_init();
-	setup_components();
-}
-
-/* ================================================================= */
-
 PatternLink::PatternLink(const Handle& body)
 	: RuleLink(HandleSeq({body}), PATTERN_LINK)
 {

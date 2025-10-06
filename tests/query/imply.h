@@ -47,18 +47,6 @@ static inline Handle imply(AtomSpacePtr as, Handle hclauses, Handle himplicand)
 	return imply(as.get(), hclauses, himplicand);
 }
 
-/**
- * Pattern Matcher. Just run the matcher against the indicated
- * variables and clauses, using the indicated callback.
- */
-static inline void match(PatternMatchCallback& pmcb,
-                         const HandleSet &vars,
-                         const HandleSeq &clauses)
-{
-	PatternLinkPtr slp(createPatternLink(vars, clauses));
-	pmcb.satisfy(slp);
-}
-
 static inline Handle bindlink(AtomSpace* as,
                           const Handle& hlink, size_t foo=0)
 {
