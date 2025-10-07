@@ -111,8 +111,8 @@ protected:
 	HandleSeq _component_patterns;
 
 	PatternTermPtr make_term_tree(const Handle&);
-	void make_term_tree_recursive(const PatternTermPtr&,
-	                              PatternTermPtr&);
+	void make_ttree_recursive(const PatternTermPtr&,
+	                          PatternTermPtr&);
 
 	void pin_term(const PatternTermPtr&);
 	void pin_term_recursive(const PatternTermPtr&,

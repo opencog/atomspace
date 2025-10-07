@@ -1126,7 +1126,7 @@ PatternTermPtr PatternLink::make_term_tree(const Handle& term)
 {
 	PatternTermPtr top_term(createPatternTerm());
 	PatternTermPtr root_term(top_term->addOutgoingTerm(term));
-	make_term_tree_recursive(root_term, root_term);
+	make_ttree_recursive(root_term, root_term);
 	return root_term;
 }
 
@@ -1150,8 +1150,8 @@ void PatternLink::pin_term_recursive(const PatternTermPtr& ptm,
 		pin_term_recursive(stm, root);
 }
 
-void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
-                                           PatternTermPtr& ptm)
+void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
+                                       PatternTermPtr& ptm)
 {
 	// `h` is usually the same as `term`, unless there's quotation.
 	const Handle& h(ptm->getHandle());
@@ -1270,7 +1270,7 @@ void PatternLink::make_term_tree_recursive(const PatternTermPtr& root,
 		{
 			if (chk_const and is_constant(_variables.varset, ho)) continue;
 			PatternTermPtr po(ptm->addOutgoingTerm(ho));
-			make_term_tree_recursive(root, po);
+			make_ttree_recursive(root, po);
 		}
 	}
 
