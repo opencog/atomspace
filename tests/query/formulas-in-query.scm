@@ -17,14 +17,9 @@
 ; The answer we always expect to get:
 (define ans (List (Concept "node1") (Concept "name1")))
 
-; Get whack errors if we do not set the truth values.
+; Set the truth value so that the GreaterThanLink doesn't fail.
 (define mytv FloatValue)
-(cog-set-value! (Concept "node1") tvkey (mytv 1 0))
-(cog-set-value! (Concept "name1") tvkey (mytv 1 0))
-(cog-set-value! (Concept "node2") tvkey (mytv 1 0))
 (cog-set-value! larg tvkey (mytv 1 0))
-(cog-set-value! evna tvkey (mytv 1 0))
-(cog-set-value! mema tvkey (mytv 1 0))
 
 ; Make sure this passes, before we get fancy
 (define q-basic (Query
