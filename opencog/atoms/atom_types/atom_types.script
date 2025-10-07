@@ -1078,6 +1078,14 @@ KEYS_OF_LINK <- VALUE_OF_LINK
 // that, if we can avoid it.
 IS_KEY_LINK <- VIRTUAL_LINK
 
+// Return all of the messages supported by the given ObjectNode.
+// All of these are placed into a LinkValue, and returned as that.
+MESSAGES_OF_LINK <- VALUE_OF_LINK
+
+// Return crisp true/false, whether this Atom is used anywhere
+// as a message. The providers of the message are not tracked.
+IS_MESSAGE_LINK <- VIRTUAL_LINK
+
 // Convert between Link/LinkValue types. If no type is specified,
 // then convert to SetLink. Primarily intended to convert a LinkValue
 // to a SetLink, but can go other ways. The argument is presumed to
