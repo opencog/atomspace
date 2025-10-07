@@ -10,6 +10,7 @@ ADD_LIBRARY (atomflow
 	IncrementValueLink.cc
 	KeysOfLink.cc
 	LinkSignatureLink.cc
+	MessagesOfLink.cc
 	NumberOfLink.cc
 	PromiseLink.cc
 	SetValueLink.cc
@@ -43,6 +44,7 @@ INSTALL (FILES
 	IncrementValueLink.h
 	KeysOfLink.h
 	LinkSignatureLink.h
+	MessagesOfLink.h
 	NumberOfLink.h
 	PromiseLink.h
 	SetValueLink.h
