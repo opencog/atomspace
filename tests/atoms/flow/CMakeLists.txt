@@ -11,6 +11,7 @@ IF (HAVE_GUILE)
 	ADD_GUILE_TEST(CollectionOfTest collection-of-test.scm)
 	ADD_GUILE_TEST(IncomingOfTest incoming-of-test.scm)
 	ADD_GUILE_TEST(KeysOfTest keys-of-test.scm)
+	ADD_GUILE_TEST(MessagesOfTest messages-of-test.scm)
 
 	LINK_LIBRARIES(execution smob)
 	ADD_CXXTEST(FormulaUTest)
