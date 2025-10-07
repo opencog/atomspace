@@ -568,6 +568,9 @@ public:
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
 
+    /// Get the set of all object messages supported by this Atom.
+    virtual HandleSeq getMessages() const { return HandleSeq(); }
+
     /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);
 
