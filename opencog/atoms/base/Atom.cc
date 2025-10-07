@@ -357,6 +357,11 @@ void Atom::markIsKey(void)
     _flags.fetch_or(IS_KEY_FLAG);
 }
 
+void Atom::markIsMessage(void)
+{
+    _flags.fetch_or(IS_MESSAGE_FLAG);
+}
+
 // ==============================================================
 
 void Atom::setAtomSpace(AtomSpace *tb)
