@@ -672,7 +672,18 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		for (const Handle& ho : oset)
 			dedupe.insert(ho);
 
+		// Process non-evaluatable clauses before evaluatable ones.
+		// This ensures evaluatables find non-evaluatables in pmandatory
+		// when need_dummies() checks, avoiding order-dependency.
+		HandleSeq sorted_clauses;
 		for (const Handle& ho : dedupe)
+			if (not can_evaluate(ho))
+				sorted_clauses.push_back(ho);
+		for (const Handle& ho : dedupe)
+			if (can_evaluate(ho))
+				sorted_clauses.push_back(ho);
+
+		for (const Handle& ho : sorted_clauses)
 		{
 			PatternTermPtr clause(make_term_tree(ho));
 			if (not clause->contained_in(_pat.pmandatory) and
