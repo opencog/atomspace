@@ -111,8 +111,8 @@ protected:
 	HandleSeq _component_patterns;
 
 	PatternTermPtr make_term_tree(const Handle&);
-	void make_term_tree_recursive(const PatternTermPtr&,
-	                              PatternTermPtr&);
+	void make_ttree_recursive(const PatternTermPtr&,
+	                          PatternTermPtr&);
 
 	void pin_term(const PatternTermPtr&);
 	void pin_term_recursive(const PatternTermPtr&,
@@ -176,10 +176,6 @@ public:
 	            const Variables& varspec,
 	            const HandleSeq& component,
 	            const PatternTermSeq& absents);
-
-	// A backwards-compatibility constructor. Do not use.
-	PatternLink(const HandleSet&,
-	            const HandleSeq&);
 
 	// Runtime just-in-time analysis
 	PatternLinkPtr jit_analyze(void);
