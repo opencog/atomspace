@@ -335,7 +335,8 @@ protected:
         MARKED_FLAG     = 0x02,  // 0000 0010
         CHECKED_FLAG    = 0x04,  // 0000 0100
         USE_ISET_FLAG   = 0x08,  // 0000 1000
-        IS_KEY_FLAG     = 0x10   // 0001 0000
+        IS_KEY_FLAG     = 0x10,  // 0001 0000
+        IS_MESSAGE_FLAG = 0x20   // 0010 0000
     };
     mutable std::atomic<uint8_t> _flags;
 
@@ -463,6 +464,9 @@ private:
     /** Indicate this Atom is used as a key */
     void markIsKey();
 
+    /** Indicate this Atom is used as a message */
+    void markIsMessage();
+
     void getLocalInc(const AtomSpace*, HandleSet&, Type) const;
     void getCoveredInc(const AtomSpace*, HandleSet&, Type) const;
 
@@ -564,6 +568,9 @@ public:
 
     /// Return true if this Atom is used as a key, somewhere, anywhere.
     bool isKey() const { return _flags.load() & IS_KEY_FLAG; }
+
+    /// Return true if this Atom is used as a message, somewhere, anywhere.
+    bool isMessage() const { return _flags.load() & IS_MESSAGE_FLAG; }
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
