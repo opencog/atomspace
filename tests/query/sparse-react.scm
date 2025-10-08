@@ -11,7 +11,7 @@
 
 ; This defines an broken esterification pattern.
 (define bad-ester
-	(BindLink
+	(QueryLink
 		; Variable declaration
 		(VariableList
 
@@ -82,7 +82,7 @@
 
 ; This defines a good working esterification reaction.
 (define esterification
-	(BindLink
+	(QueryLink
 		; Variable declaration
 		(VariableList
 

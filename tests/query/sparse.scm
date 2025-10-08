@@ -13,7 +13,7 @@
 (use-modules (opencog exec))
 
 (define est
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (Variable "$vA") (Type 'Concept))
 			(TypedVariable (Variable "$vB") (Type 'Predicate))
@@ -30,7 +30,7 @@
 	))
 
 (define est-uni
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (Variable "$vA") (Type 'Concept))
 			(TypedVariable (Variable "$vB") (Type 'Predicate))
@@ -65,7 +65,7 @@
 ; Note that the variable tags differ from the above, and so the
 ; query below will not match the data above.
 (define palin
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (Variable "$vA") (Type 'Predicate))
 			(TypedVariable (Variable "$vB") (Type 'Concept))
@@ -83,7 +83,7 @@
 		)))
 
 (define palin-disambig
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (Variable "$vA") (Type 'Predicate))
 			(TypedVariable (Variable "$vB") (Type 'Concept))
