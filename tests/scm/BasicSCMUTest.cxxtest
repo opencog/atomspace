@@ -28,8 +28,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 
@@ -93,7 +92,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_value_list(void);
 
 	// TVs
-	void check_truth_value(const TruthValuePtr& tv);
+	void check_truth_value(const ValuePtr& tv);
 	void test_truth_value(void);
 
 	// Relex links
@@ -158,9 +157,10 @@ void BasicSCMUTest::test_utf8(void)
 
 void BasicSCMUTest::check_tv(const Handle& h, double mean, double conf)
 {
-	TruthValuePtr tv = TruthValueCast(h->getValue(truth_key()));
-	double m = tv->get_mean();
-	double c = tv->get_confidence();
+	ValuePtr tv = h->getValue(truth_key());
+	FloatValuePtr fvp = FloatValueCast(tv);
+	double m = fvp->value()[0];
+	double c = fvp->value()[1];
 
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m-mean), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
@@ -170,7 +170,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, double 
 {
 	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
-	snprintf(buff, 500, "(%s \"%s\" (stv %f %f))", tipo, nodename, truth, conf);
+	snprintf(buff, 500, "(cog-set-value! (%s \"%s\") (Predicate \"*-TruthValueKey-*\") (FloatValue %f %f))", tipo, nodename, truth, conf);
 	eval->eval(buff);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
@@ -306,7 +306,7 @@ void BasicSCMUTest::test_extract_hypergraph(void)
 
 // ============================================================
 
-void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
+void BasicSCMUTest::check_truth_value(const ValuePtr& tv)
 {
 	// logger().debug() << "check_node_truth_value(" << tv << ")";
 
@@ -320,18 +320,12 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	TSM_ASSERT("Failed to create atom!", !eval_err);
 
 	// set its truth value
+	FloatValuePtr fvp = FloatValueCast(tv);
 	stringstream ss;
-	ss << "(cog-set-tv! " << add_node_str << "(";
-	Type tvt = tv->get_type();
-	if (tvt == SIMPLE_TRUTH_VALUE)
-		ss << "cog-new-stv " << tv->get_mean() << " " << tv->get_confidence();
-	else if (tvt == COUNT_TRUTH_VALUE)
-		ss << "cog-new-stv " << tv->get_mean() << " " << tv->get_confidence()
-		   << " " << tv->get_count();
-	else {
-		ss << "Wrong Truth Value Type (" << tvt << ")";
-		TSM_ASSERT(ss.str().c_str(), false);
-	}
+	ss << "(cog-set-value! " << add_node_str << "(Predicate \"*-TruthValueKey-*\") ";
+	ss << "(FloatValue " << fvp->value()[0] << " " << fvp->value()[1];
+	if (fvp->value().size() > 2)
+		ss << " " << fvp->value()[2];
 	ss << "))";
 
 	// eval
@@ -356,9 +350,9 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	check_tv(h, mfast, cfast);
 
 	// Check the slow-path API, too
-	string strmslow = "(cog-tv-mean (cog-tv " + add_node_str + "))";
+	string strmslow = "(cog-value-ref (cog-value " + add_node_str + "(Predicate \"*-TruthValueKey-*\")) 0)";
 	double mslow = atof(eval->eval(strmslow.c_str()).c_str());
-	string strcslow = "(cog-tv-confidence (cog-tv " + add_node_str + "))";
+	string strcslow = "(cog-value-ref (cog-value " + add_node_str + "(Predicate \"*-TruthValueKey-*\")) 1)";
 	double cslow = atof(eval->eval(strcslow.c_str()).c_str());
 	check_tv(h, mslow, cslow);
 
@@ -369,8 +363,8 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 void BasicSCMUTest::test_truth_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	check_truth_value(createSimpleTruthValue(0.5, 0.5));
-	check_truth_value(createSimpleTruthValue(0.2, 0.7));
+	check_truth_value(createFloatValue(std::vector<double>({0.5, 0.5})));
+	check_truth_value(createFloatValue(std::vector<double>({0.2, 0.7})));
 	// @todo : add more
 }
 
