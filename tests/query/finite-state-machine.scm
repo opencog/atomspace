@@ -55,7 +55,7 @@
 ;;; the transition rules for one machine would not get used accidentally
 ;;; for another machine.
 (define take-one-step
-	(BindLink
+	(QueryLink
 		;; We will need to find the current and the next state
 		(VariableList
 			(VariableNode "$curr-state")
