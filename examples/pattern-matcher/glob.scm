@@ -41,7 +41,7 @@
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
-	(BindLink
+	(QueryLink
 		(ListLink
 			(Concept "I") (Glob "$star") (Concept "you"))
 		(ListLink
@@ -49,7 +49,7 @@
 
 ;; This one implements "I love *" -> "Hey! I love * too"
 (define love-glob
-	(BindLink
+	(QueryLink
 		(ListLink
 			(Concept "I")
 			(Concept "love")
@@ -69,7 +69,7 @@
 ; Globs can be typed, just like variables:
 
 (define love-type-glob
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star") (Type "NumberNode"))
 		(ListLink
 			(Concept "I")
@@ -93,7 +93,7 @@
 ; Globs can have interval restriction
 
 (define love-interval-glob
-    (BindLink
+    (QueryLink
         (TypedVariable (Glob "$star") (IntervalLink (Number 0) (Number 1)))
         (ListLink
             (Concept "I")
@@ -114,7 +114,7 @@
 ; Globs can have both type and interval restrictions by using TypeSetLink
 
 (define love-typeset-glob
-    (BindLink
+    (QueryLink
         (TypedVariable (Glob "$star")
             (TypeSetLink (IntervalLink (Number 0) (Number -1)) (Type "ConceptNode")))
         (ListLink
@@ -155,7 +155,7 @@
 ; $y has to be grounded to one and only one ConceptNode
 ; $z can be grounded to nothing or as many as possible
 (define love-three-globs
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
             (TypedVariable (Glob "$y")

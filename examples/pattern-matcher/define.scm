@@ -47,7 +47,7 @@
 ;; Define a pattern to find the electrical parts of things.
 ;; Variables are automatically extracted from the definition.
 (define get-elect
-	(Get (DefinedPredicate "Electrical Part Of")))
+	(Meet (DefinedPredicate "Electrical Part Of")))
 
 ;; Search the AtomSpace for electrical things.
 (cog-execute! get-elect)
@@ -87,7 +87,7 @@
 ;; Assemble a pattern out of the parts above. Notice that the variables
 ;; in each of the different defines are joined together.
 (define get-electrical-parts
-	(Get
+	(Meet
 		(And
 			(DefinedPredicate "Electrical Thing")
 			(DefinedPredicate "Part-whole Relation")

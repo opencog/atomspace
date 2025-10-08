@@ -32,7 +32,7 @@
 ; another, it is marked as a copy-on-write space. This flag can be
 ; cleared: in this case, the overlay becomes a write-through AtomSpace.
 ; Newly-created Atoms will still be created in the overlay, but changes
-; to Values and TruthValues of Atoms in the base space will pass through,
+; to Values attached to Atoms in the base space will pass through,
 ; to the base space. This demo does not show the write-through ability;
 ; the user is encourage to explore this themselves.
 ;

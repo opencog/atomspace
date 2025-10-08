@@ -5,7 +5,7 @@
 ; function commonly found in functional programming languages, such as
 ; the scheme srfi-1 `filter-map`, or `map` in haskell.
 ;
-; In many ways, FilterLink is similar to BindLink, except that FilterLink
+; In many ways, FilterLink is similar to QueryLink, except that FilterLink
 ; does not search the entire AtomSpace for matching patterns; rather,
 ; it only examines the given input list/set, and applies the map to
 ; that.

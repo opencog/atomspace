@@ -45,7 +45,7 @@
 	)
 )
 
-; The BindLink will reject this ContextLink.
+; The QueryLink will reject this ContextLink.
 (ContextLink
 	(Concept "predicament")
 	(Evaluation
@@ -61,7 +61,7 @@
 ; This pattern will accept one of the two ContextLinks above, and
 ; reject the other.
 (define do-things
-	(Bind
+	(Query
 		(VariableList
 			(Variable "$cxt")
 			(Variable "$condition")

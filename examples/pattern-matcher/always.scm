@@ -58,7 +58,7 @@
 ; The query below will search for those baskets that have
 ; only red balls in them.
 (define get-baskets-with-only-red-balls
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Variable "basket") (Type 'ConceptNode))
 			(TypedVariable (Variable "ball")   (Type 'ConceptNode))
@@ -92,7 +92,7 @@
 ; then the basket is reported.
 
 (define baskets-with-same-color
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Variable "basket")      (Type 'ConceptNode))
 			(TypedVariable (Variable "some ball")   (Type 'ConceptNode))
@@ -128,7 +128,7 @@
 
 (define not-baskets-with-not-red
 	; Return those things that ....
-	(Get (Variable "basket")
+	(Meet (Variable "basket")
 		(And
 			; ... things that are baskets ...
 			(Inheritance (Variable "basket") (Concept "basket"))

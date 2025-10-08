@@ -11,8 +11,7 @@
 ; be searched!).
 ;
 ; But how does the "fluid" flow in the "pipes"? The example below walks
-; through ways in which TruthValues (in the first part of the example)
-; and general Values can be pulled out of specific Atoms, then
+; through ways in which Values can be pulled out of specific Atoms, then
 ; transformed or mutated in some specific way, and then re-injected.
 ; In these examples, the mutations are arithmetic formulas that are
 ; applied to the Values. The formulas themselves are expressed as
@@ -29,16 +28,16 @@
 
 (use-modules (opencog) (opencog exec))
 
-; The TruthValue is located at key (Predicate "*-TruthValueKey-*")
+; The Value is located at key (Predicate "*-TruthValueKey-*")
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
-; An atom with a TruthValue on it...
+; An atom with a FloatValue on it...
 (cog-set-value! (Concept "foo") tvkey (FloatValue 0.3 0.7))
 
 ; This is how we get it's Value ...
 (cog-execute! (ValueOf (Concept "foo") tvkey))
 
-; Transfer the TruthValue from "foo" to "bar" ... copy it.
+; Transfer the FloatValue from "foo" to "bar" ... copy it.
 (cog-execute!
 	(SetValue (Concept "bar") tvkey
 		(ValueOf (Concept "foo") tvkey)))

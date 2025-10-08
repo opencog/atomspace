@@ -27,12 +27,14 @@
 ; whitespace indentation is used to define a multi-line block of python
 ; code.
 (python-eval "
-from opencog.atomspace import AtomSpace, createTruthValue
+from opencog.atomspace import AtomSpace, createFloatValue
 from opencog.atomspace import types
 
 def foo(atspace):
-    TV = createTruthValue(0.42, 0.69)
-    atspace.add_node(types.ConceptNode, 'Apple', TV)
+    FV = createFloatValue([0.42, 0.69])
+    apple = atspace.add_node(types.ConceptNode, 'Apple')
+    tvkey = atspace.add_node(types.PredicateNode, 'My Key')
+    apple.set_value(tvkey, FV)
 ")
 
 ; The (cog-atomspace) function returns the current atomspace being used
@@ -40,8 +42,11 @@ def foo(atspace):
 (python-call-with-as "foo" (cog-atomspace))
 
 ; Verify that a ConceptNode called "Apple" was created, and that it has
-; the correct truth value, as set in the python code:
-(cog-node 'ConceptNode "Apple")
+; the correct float value, as set in the python code:
+(define apple (cog-node 'ConceptNode "Apple"))
+(define tvkey (Predicate "My Key"))
+(define fv (cog-value apple tvkey))
+(display "Apple FloatValue: ") (display fv) (newline)
 
 ; -------------------------------------------------------------------
 ; The other way is to have python ask scheme to tell it about some
@@ -50,18 +55,22 @@ def foo(atspace):
 ; using (in the current thread).
 (python-eval "
 from opencog.scheme_wrapper import scheme_eval_as
-from opencog.atomspace import createTruthValue
+from opencog.atomspace import createFloatValue
 from opencog.atomspace import types
 
 # Get the atomspace...
 asp = scheme_eval_as('(cog-atomspace)')
-TV = createTruthValue(0.444, 0.777)
+FV = createFloatValue([0.444, 0.777])
 
 # Do something with it ...
-asp.add_node(types.ConceptNode, 'Banana', TV)
+banana = asp.add_node(types.ConceptNode, 'Banana')
+tvkey = asp.add_node(types.PredicateNode, 'My Key')
+banana.set_value(tvkey, FV)
 ")
 
 ; As before, verify that an atom was created, as expected.
-(cog-node 'ConceptNode "Banana")
+(define banana (cog-node 'ConceptNode "Banana"))
+(define banana-fv (cog-value banana tvkey))
+(display "Banana FloatValue: ") (display banana-fv) (newline)
 
 ; -------------------------------------------------------------------

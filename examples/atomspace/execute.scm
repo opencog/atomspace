@@ -67,15 +67,6 @@
 			(Concept "1")
 			(Concept "2"))))
 
-; Similar to the above, but, in this case, a TruthValue is returned.
-; Notice that cog-evaluate! is used instead of cog-execute!
-(cog-evaluate!
-	(Evaluation
-		(GroundedPredicate "py:my_py_predicate")
-		(List
-			(Concept "3")
-			(Concept "4"))))
-
 ; -------------------------------------------------------------
 ; Equivalent example, invokes scheme code.
 ;

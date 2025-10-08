@@ -57,22 +57,17 @@
 ; written, just like the above.
 
 ; ------------------
-; The `cog-execute!` function always returns atoms. The `cog-evaluate!`
-; function always returns TruthValues. Very roughly speaking,
-; "execution" is like running a program, "evaluation" is like evaluating
-; an expression. Very similar, but not the same in Atomese.
-;
-; So, evaluate, to see if the current state is really is "apple": this
+; Evaluate, to see if the current state is really is "apple": this
 ; should return a truth value corresponding to "true". Here, EqualLink
-; is a link that, when evaluated, returns a TruthValue.
+; is a link that, when executed, returns a TruthValue.
 
-(cog-evaluate!
+(cog-execute!
 	(EqualLink
 		(Set (Concept "apple"))
 		(Get (State (Anchor "fruit") (Variable "$x")))))
 
 ; Same as above, but should be false:
-(cog-evaluate!
+(cog-execute!
 	(EqualLink
 		(Set (Concept "banana"))
 		(Get (State (Anchor "fruit") (Variable "$x")))))

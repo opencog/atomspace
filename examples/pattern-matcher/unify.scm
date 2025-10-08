@@ -14,10 +14,10 @@
 (Inheritance (Concept "A") (Concept "C"))
 (Inheritance (Concept "B") (Concept "C"))
 
-; Define a basic unifier. It uses the conventional GetLink to
+; Define a basic unifier. It uses the conventional MeetLink to
 ; do the work.
 (define unifier
-	(Get
+	(Meet
 		(VariableList (Variable "$X") (Variable "$Y"))
 		(Identical
 			(Inheritance (Concept "A") (Variable "$Y"))
@@ -31,7 +31,7 @@
 ; Caution: this reverses the variable order from the above! So $Y
 ; comes first, so the results will be reversed.
 (define implicit-vars
-	(Get
+	(Meet
 		(Identical
 			(Inheritance (Concept "A") (Variable "$Y"))
 			(Inheritance (Variable "$X") (Concept "B")))))
@@ -43,7 +43,7 @@
 ; We'll declare the variables explicitly, to avoid confusion.
 
 (define three-way
-	(Get
+	(Meet
 		(VariableList (Variable "$X") (Variable "$Y") (Variable "$Z"))
 		(And
 			(Identical

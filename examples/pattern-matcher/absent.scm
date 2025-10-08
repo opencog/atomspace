@@ -63,12 +63,12 @@
 
 ; If an item is visible, delete it, kill it.
 (define destroy
-	(Bind query (DeleteLink query))
+	(Query query (DeleteLink query))
 )
 
 ; If nothing is visible, then hallucinate the golem into existence.
 (define create
-	(Bind (Absent query) golem)
+	(Query (Absent query) golem)
 )
 
 ; The state variable, and it's two states.
@@ -81,7 +81,7 @@
 
 ; Set the current state if an item is visible.
 (define is-visible
-	(Bind
+	(Query
 		query
 		(Put (State room-state (Variable "$x")) room-nonempty)
 	)
@@ -90,7 +90,7 @@
 ; This has an absent link in it; the link is assigned only when
 ; the AtomSpace does not have a visible item.
 (define is-invisible
-	(Bind
+	(Query
 		(Absent query)
 		(Put (State room-state (Variable "$x")) room-empty)
 	)

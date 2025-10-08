@@ -9,7 +9,7 @@
 
 (use-modules (opencog) (opencog exec))
 
-(define tvkey (Predicate "*-TruthValueKey-*"))
+(define tvkey (Predicate "counting key"))
 (define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
 
 ; Define a pair of vectors. One vector is called "dog", the other is

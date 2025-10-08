@@ -3,7 +3,7 @@
 ;
 ; This defines a very simple four-state finite state machine: an initial
 ; state, and a cycle of three state: green, yellow, red. It then uses a
-; BindLink to take one step at a time.  The BindLink is more or less
+; QueryLink to take one step at a time.  The QueryLink is more or less
 ; "universal", in that it can run any FSM, not  just this one. However,
 ; here it has been a bit simplified, to keep the demo as simple as
 ; possible. See the file `fsm-full.scm` for the correct way to define a
@@ -65,7 +65,7 @@
 ;;; the transition rules for one machine would not get used accidentally
 ;;; for another machine.
 (define take-one-step
-	(Bind
+	(Query
 		;; We will need to find the current and the next state
 		(VariableList
 			(Variable "$curr-state")

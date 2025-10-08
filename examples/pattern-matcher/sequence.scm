@@ -25,7 +25,7 @@
 ; evaluation.
 ;
 ; This demo also demonstrates the use of a SatisfactionLink: there is no
-; output, and no graph-rewriting occurs, thus a BindLink is not needed,
+; output, and no graph-rewriting occurs, thus a QueryLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
 ;

@@ -14,13 +14,13 @@
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
 ; Some data.
-(cog-set-value! (Concept "is mostly true") tvkey (SimpleTruthValue 0.9 0.9))
-(cog-set-value! (Concept "is mostly false") tvkey (SimpleTruthValue 0.234 0.9))
+(cog-set-value! (Concept "is mostly true") tvkey (FloatValue 0.9 0.9))
+(cog-set-value! (Concept "is mostly false") tvkey (FloatValue 0.234 0.9))
 
 ; Define a pattern that will only find ConceptNodes that have
 ; a low truth value.
 (define find-false
-	(Bind
+	(Query
 		; Search only for ConceptNodes.
 		(TypedVariable (Variable "$X") (Type 'ConceptNode))
 		(And
@@ -40,7 +40,7 @@
 (cog-set-value! (Concept "thing-b") key (FloatValue 35))
 
 (define find-answer
-	(Bind
+	(Query
 		; Search only for ConceptNodes.
 		(TypedVariable (Variable "$X") (Type 'ConceptNode))
 		(And

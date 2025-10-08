@@ -274,10 +274,9 @@
 ; takes two arguments; we have to plug the search variable into the
 ; right place, using PutLink to do the plugging-in.
 ;
-; (Earlier demos explain MeetLink; it is a variant of GetLink, QueryLink
-; and BindLink. The name refers to a 'lattice meet'. It returns the set
-; of all things that satisfy a list of predicates. Here, we have only
-; one predicate.)
+; (Earlier demos explain MeetLink; it is a variant of QueryLink. The
+; name refers to a 'lattice meet'. It returns the set of all things
+; that satisfy a list of predicates. Here, we have only one predicate.)
 (cog-execute!
 	(Meet (TypedVariable (Variable "?inh") (Type 'Concept))
 		(Put
