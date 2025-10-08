@@ -102,7 +102,7 @@
 		(cog-name NODE-A) (cog-name NODE-B)
 		(strftime "%c" (localtime (current-time)))
 	)
-	(SimpleTruthValue 1 1))
+	(VoidValue))
 
 (define output
 	(Query
@@ -123,7 +123,7 @@
 
 		; After matching the above, print a report.
 		(ExecutionOutput
-			(GroundedSchema "scm:report-stuff")
+			(GroundedProcedure "scm:report-stuff")
 			(ListLink (Variable "$x") (Variable "$y")))
 	))
 
