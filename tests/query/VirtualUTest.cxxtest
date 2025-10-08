@@ -78,7 +78,7 @@ void VirtualUTest::test_satisfaction(void)
 
 	eval->eval("(load-from-path \"tests/query/virtual.scm\")");
 
-	Handle mouse_set = eval->eval_h("(cog-execute! get-mouse)");
+	Handle mouse_set = eval->eval_h("(cog-execute! (CollectionOf get-mouse))");
 	printf("Expecting mouse, got %s", mouse_set->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(mouse_set));
@@ -87,7 +87,7 @@ void VirtualUTest::test_satisfaction(void)
 	TS_ASSERT_EQUALS(mouse, mouse_set->getOutgoingAtom(0));
 
 	// -----------------------
-	Handle snail_set = eval->eval_h("(cog-execute! get-snail)");
+	Handle snail_set = eval->eval_h("(cog-execute! (CollectionOf get-snail))");
 	printf("Expecting snail, got %s", snail_set->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(snail_set));
@@ -96,7 +96,7 @@ void VirtualUTest::test_satisfaction(void)
 	TS_ASSERT_EQUALS(snail, snail_set->getOutgoingAtom(0));
 
 	// -----------------------
-	Handle two_set = eval->eval_h("(cog-execute! get-mouse-pair)");
+	Handle two_set = eval->eval_h("(cog-execute! (CollectionOf get-mouse-pair))");
 	printf("Expecting two mouse pairs, got %s", two_set->to_string().c_str());
 
 	TS_ASSERT_EQUALS(2, getarity(two_set));

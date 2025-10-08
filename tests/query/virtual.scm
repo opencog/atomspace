@@ -5,7 +5,7 @@
 (Inheritance (Concept "mouse") (Concept "mammal"))
 
 (define get-mouse
-	(GetLink (Variable "x")
+	(MeetLink (Variable "x")
 		(And
 			(Present (Inheritance (Variable "x") (Concept "animal")))
 
@@ -26,7 +26,7 @@
 (Inheritance (Concept "snail") (Concept "gastropod"))
 
 (define get-snail
-	(GetLink (TypedVariable (Variable "x") (Type 'ConceptNode))
+	(MeetLink (TypedVariable (Variable "x") (Type 'ConceptNode))
 		(And
 			(Present (Inheritance (Variable "x") (Concept "animal")))
 
@@ -49,7 +49,7 @@
 ; can perform. This should go down the same code as any
 ; other multi-component search.
 (define get-mouse-pair
-	(GetLink (VariableList
+	(MeetLink (VariableList
 			(TypedVariable (Variable "x") (Type 'ConceptNode))
 			(TypedVariable (Variable "y") (Type 'ConceptNode)))
 		(And
