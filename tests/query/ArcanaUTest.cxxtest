@@ -223,16 +223,18 @@ void ArcanaUTest::test_numeric(void)
 	                         "   (NumberOf (TimeLink)))");
 	Instantiator(as.get()).execute(sl);
   
-	TruthValuePtr too_soon = eval->eval_tv(
+	ValuePtr too_soon = eval->eval_v(
 		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
+	FloatValuePtr fvp_soon = FloatValueCast(too_soon);
 
-	TS_ASSERT_LESS_THAN_EQUALS(too_soon->get_mean(), 0.5);
+	TS_ASSERT_LESS_THAN_EQUALS(fvp_soon->value()[0], 0.5);
 
 	// The TV needs to change after 2 seconds.... sleep 4 to be safe.
 	sleep(4);
-	TruthValuePtr too_late = eval->eval_tv(
+	ValuePtr too_late = eval->eval_v(
 		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, too_late->get_mean());
+	FloatValuePtr fvp_late = FloatValueCast(too_late);
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, fvp_late->value()[0]);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
