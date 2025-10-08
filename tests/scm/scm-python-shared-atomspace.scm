@@ -14,27 +14,27 @@
 (define tname "python-guile-shared-atomspace-test")
 (test-begin tname)
 
-; Define a python func returning a TV
+; Define a python func returning a FloatValue
 (python-eval "
-from opencog.atomspace import AtomSpace, types, tvkey
-from opencog.type_constructors import get_default_atomspace, TruthValue
+from opencog.atomspace import AtomSpace, types, tvkey, createFloatValue
+from opencog.type_constructors import get_default_atomspace
 
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b):
     atomspace = get_default_atomspace()
     apple = atomspace.add_node(types.ConceptNode, 'Apple')
-    TV = TruthValue(0.2, 0.69)
+    TV = createFloatValue([0.2, 0.69])
     apple.set_value(tvkey, TV)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
-    return TruthValue(0.42, 0.24)
+    return createFloatValue([0.42, 0.24])
 ")
 
 
 ; Call the python func defined above.
-(cog-evaluate!
-	(Evaluation
-		(GroundedPredicate "py:foo")
+(cog-execute!
+	(ExecutionOutput
+		(GroundedSchema "py:foo")
 		(List (Concept "fruit") (Concept "banana"))))
 
 ; Make sure that Apple was created.
@@ -43,8 +43,9 @@ def foo(atom_a, atom_b):
 
 ; Make sure the scheme version of Apple has the same TV on it that
 ; the python code placed on it.
+(define tvkey (Predicate "*-TruthValueKey-*"))
 (test-assert "TV on Apple is wrong"
-	(< (abs (- 0.2 (cog-mean (Concept "Apple")))) 0.00001))
+	(< (abs (- 0.2 (cog-value-ref (cog-value (Concept "Apple") tvkey) 0))) 0.00001))
 
 (test-end tname)
 
