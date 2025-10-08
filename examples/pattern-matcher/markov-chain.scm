@@ -13,7 +13,7 @@
 ; corresponds to one matrix multiplication.
 ;
 ; In either viewpoint, the numbers, which are probabilities, are
-; stored in the "strength" portion of a SimpleTruthValue.
+; stored in a FloatValue (holding a single number).
 ;
 ; The easiest way to run this is to load this file:
 ; (add-to-load-path ".")
@@ -24,6 +24,9 @@
 
 (use-modules (opencog) (opencog exec))
 
+;; Define the key used to store probability values
+(define prob-key (Predicate "*-ProbabilityKey-*"))
+
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state
 ;; transition matrix.
@@ -31,14 +34,21 @@
 (define my-state (Anchor "My Chain's Current State"))
 (define my-nexts (Anchor "My Chain's Next State"))
 
+;; Helper function to create a state with a given probability
+(define (make-state prob state-name)
+	(define state-link (List my-state state-name))
+	(cog-set-value! state-link prob-key (FloatValue prob))
+	state-link
+)
+
 ;; Define a function to set the initial state of the Markov chain.
 ;; It starts with 100% probability in this state.
 
 (define (reset-state)
-	(List (stv 1 1) my-state (Concept "initial state"))
-	(List (stv 0 1) my-state (Concept "green"))
-	(List (stv 0 1) my-state (Concept "yellow"))
-	(List (stv 0 1) my-state (Concept "red"))
+	(make-state 1.0 (Concept "initial state"))
+	(make-state 0.0 (Concept "green"))
+	(make-state 0.0 (Concept "yellow"))
+	(make-state 0.0 (Concept "red"))
 )
 
 ;; Call the function to initialize the state
@@ -66,49 +76,67 @@
 ;;
 
 ; Transition from initial to green with 90% probability.
-(ContextLink (stv 0.9 1)
-	(Concept "initial state")
-	(List my-trans (Concept "green")))
+(cog-set-value!
+	(ContextLink
+		(Concept "initial state")
+		(List my-trans (Concept "green")))
+	prob-key (FloatValue 0.9))
 
 ; Transition from initial state to yellow with 10% probability.
-(ContextLink (stv 0.1 1)
-	(Concept "initial state")
-	(List my-trans (Concept "yellow")))
+(cog-set-value!
+	(ContextLink
+		(Concept "initial state")
+		(List my-trans (Concept "yellow")))
+	prob-key (FloatValue 0.1))
 
 ; Stay in the initial state with probability zero
-(ContextLink (stv 0.0 1)
-	(Concept "initial state")
-	(List my-trans (Concept "initial state")))
+(cog-set-value!
+	(ContextLink
+		(Concept "initial state")
+		(List my-trans (Concept "initial state")))
+	prob-key (FloatValue 0.0))
 
 ; Transition from green to yellow with 90% probability
-(ContextLink (stv 0.9 1)
-	(Concept "green")
-	(List my-trans (Concept "yellow")))
+(cog-set-value!
+	(ContextLink
+		(Concept "green")
+		(List my-trans (Concept "yellow")))
+	prob-key (FloatValue 0.9))
 
 ; Transition from green to red with 10% probability
-(ContextLink (stv 0.1 1)
-	(Concept "green")
-	(List my-trans (Concept "red")))
+(cog-set-value!
+	(ContextLink
+		(Concept "green")
+		(List my-trans (Concept "red")))
+	prob-key (FloatValue 0.1))
 
 ; Transition from yellow to red with 90% probability
-(ContextLink (stv 0.9 1)
-	(Concept "yellow")
-	(List my-trans (Concept "red")))
+(cog-set-value!
+	(ContextLink
+		(Concept "yellow")
+		(List my-trans (Concept "red")))
+	prob-key (FloatValue 0.9))
 
 ; Transition from yellow to green with 10% probability
-(ContextLink (stv 0.1 1)
-	(Concept "yellow")
-	(List my-trans (Concept "green")))
+(cog-set-value!
+	(ContextLink
+		(Concept "yellow")
+		(List my-trans (Concept "green")))
+	prob-key (FloatValue 0.1))
 
 ; Transition from red to green with 90% probability
-(ContextLink (stv 0.9 1)
-	(Concept "red")
-	(List my-trans (Concept "green")))
+(cog-set-value!
+	(ContextLink
+		(Concept "red")
+		(List my-trans (Concept "green")))
+	prob-key (FloatValue 0.9))
 
 ; Stay in the red state with 10% probability
-(ContextLink (stv 0.1 1)
-	(Concept "red")
-	(List my-trans (Concept "red")))
+(cog-set-value!
+	(ContextLink
+		(Concept "red")
+		(List my-trans (Concept "red")))
+	prob-key (FloatValue 0.1))
 
 ;; --------------------------------------------------------------------
 ;;; Create a QueryLink that can take a Markov Chain with the name
@@ -171,19 +199,20 @@
 ;; the other functions here are helpers, to extract the probability
 ;; from a truth value, and to set it.
 
-;;; Get the probability on atom. The probability is assumed to be stored
-;;; in the "mean" component of a SimpleTruthValue.
-(define (get-prob atom) (cog-mean atom))
+;;; Get the probability on atom. The probability is stored in a FloatValue.
+(define (get-prob atom)
+	(define fv (cog-value atom prob-key))
+	(if fv
+		(cog-value-ref fv 0)
+		0.0))
 
-;;; Return true if the TV on the atom is the default TV.
-;;; For our purposes, we treat it as the default if the confidence is
-;;; below 0.5 (since we later set confidence to 1.0)
+;;; Return true if the FloatValue on the atom doesn't exist yet.
 (define (is-default-tv? atom)
-	(not (< 0.5 (cog-confidence atom))))
+	(not (cog-value atom prob-key)))
 
 ;;; Set a probability value on the atom.
 (define (set-prob atom value)
-	(cog-set-tv! atom (cog-new-stv value 1.0)))
+	(cog-set-value! atom prob-key (FloatValue value)))
 
 ;;; Accumulate probability (add it to the existing value)
 (define (accum-prob atom value)
@@ -224,11 +253,14 @@
 
 ;; --------------------------------------------------------------------
 ;; Copy a state vector from chain-from to chain-to
-;; Since the TV's carry the probabilities, they must be copied.
+;; Since the FloatValues carry the probabilities, they must be copied.
 
-;; Copy TV from second atom to first
+;; Copy FloatValue from second atom to first
 (define (copy-tv b a)
-	(begin (cog-set-tv! b (cog-tv a)) b))
+	(define fv (cog-value a prob-key))
+	(if fv
+		(cog-set-value! b prob-key fv))
+	b)
 
 (define (create-chain-copier chain-to chain-from)
 	(Query
@@ -292,7 +324,7 @@
 ;; Create a utility to show the state probabilities
 
 (define (show-state state-vect)
-	(define (get-tv atom) (cog-mean (List state-vect atom)))
+	(define (get-tv atom) (get-prob (List state-vect atom)))
 
 	(format #t "State vector for \"~A\"\n" (cog-name state-vect))
 	(format #t "Initial state: ~A\n" (get-tv (Concept "initial state")))
