@@ -12,6 +12,7 @@ ADD_SUBDIRECTORY (atoms)
 ADD_SUBDIRECTORY (atomspace)
 ADD_SUBDIRECTORY (eval)
 ADD_SUBDIRECTORY (query)
+ADD_SUBDIRECTORY (persist)
 
 # Guile/scheme API bindings and utilities
 ADD_SUBDIRECTORY (guile)
