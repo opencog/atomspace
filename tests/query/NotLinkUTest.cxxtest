@@ -92,12 +92,12 @@ void NotLinkUTest::test_sheltered_strict_type(void)
 	eval->eval("(Not evel)");
 
 	eval->eval(
-		"(define n4 (BindLink"
+		"(define n4 (QueryLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(Present (Not (Variable \"$A\")))"
 		"	(Variable \"$A\")))");
 
-	Handle hgnd = eval->eval_h("(cog-execute! n4)");
+	Handle hgnd = eval->eval_h("(cog-execute! (CollectionOf n4))");
 
 	Handle hans = eval->eval_h("(SetLink evel)");
 
@@ -109,12 +109,12 @@ void NotLinkUTest::test_sheltered_strict_type(void)
 	// ---------------------------------------------------
 	// Getting wrapped up in AndLink is a common style
 	eval->eval(
-		"(define n5 (BindLink"
+		"(define n5 (QueryLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(AndLink (Present (Not (Variable \"$A\"))))"
 		"	(Variable \"$A\")))");
 
-	hgnd = eval->eval_h("(cog-execute! n5)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf n5))");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
@@ -141,12 +141,12 @@ void NotLinkUTest::test_bare_strict_type(void)
 	eval->eval("(Not evel)");
 
 	eval->eval(
-		"(define n3 (BindLink"
+		"(define n3 (QueryLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(Not (Variable \"$A\"))"
 		"	(Variable \"$A\")))");
 
-	Handle hgnd = eval->eval_h("(cog-execute! n3)");
+	Handle hgnd = eval->eval_h("(cog-execute! (CollectionOf n3))");
 
 	Handle hans = eval->eval_h("(SetLink)");
 
@@ -158,12 +158,12 @@ void NotLinkUTest::test_bare_strict_type(void)
 	// ---------------------------------------------------
 	// Getting wrapped up in AndLink is a common style
 	eval->eval(
-		"(define n3a (BindLink"
+		"(define n3a (QueryLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(AndLink (Not (Variable \"$A\")))"
 		"	(Variable \"$A\")))");
 
-	hgnd = eval->eval_h("(cog-execute! n3a)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf n3a))");
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
@@ -173,7 +173,7 @@ void NotLinkUTest::test_bare_strict_type(void)
 	// Set the evaluation link to false, so the Not version of it
 	// will be true.
 	eval->eval("(cog-set-tv! evel (stv 0 1))");
-	hgnd = eval->eval_h("(cog-execute! n3)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf n3))");
 	hans = eval->eval_h("(SetLink evel)");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
@@ -183,7 +183,7 @@ void NotLinkUTest::test_bare_strict_type(void)
 
 	// ----------------------------------------------------
 	// Just like the above, but with the AndLink.
-	hgnd = eval->eval_h("(cog-execute! n3a)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf n3a))");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
@@ -205,11 +205,11 @@ void NotLinkUTest::test_get_strict_type(void)
 	eval->eval("(Not evel)");
 
 	eval->eval(
-		"(define g4 (GetLink"
+		"(define g4 (MeetLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(Present (Not (Variable \"$A\")))))");
 
-	Handle hgnd = eval->eval_h("(cog-execute! g4)");
+	Handle hgnd = eval->eval_h("(cog-execute! (CollectionOf g4))");
 
 	Handle hans = eval->eval_h("(SetLink evel)");
 
@@ -221,11 +221,11 @@ void NotLinkUTest::test_get_strict_type(void)
 	// ---------------------------------------------------
 	// Getting wrapped up in AndLink is a common style
 	eval->eval(
-		"(define g5 (GetLink"
+		"(define g5 (MeetLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
 		"	(AndLink (Present (Not (Variable \"$A\"))))))");
 
-	hgnd = eval->eval_h("(cog-execute! g5)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf g5))");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
