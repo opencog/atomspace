@@ -21,7 +21,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
@@ -236,10 +236,11 @@ void MultiAtomSpace::test_load(void)
 	CHKEV(ev1);
 	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
-	TruthValuePtr tv1 = TruthValueCast(counter1->getValue(truth_key()));
+	ValuePtr tv1 = counter1->getValue(truth_key());
+	FloatValuePtr fvp1 = FloatValueCast(tv1);
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->get_count()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", FLOAT_VALUE, tv1->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(fvp1->value()[2]));
 
 	// Count tv in atomspace2 should be unscathed. ----------------------------
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -255,10 +256,11 @@ void MultiAtomSpace::test_load(void)
 	ev2->eval("(test-incr-cnt)");
 	CHKEV(ev2);
 
-	TruthValuePtr tv2 = TruthValueCast(counter2->getValue(truth_key()));
+	ValuePtr tv2 = counter2->getValue(truth_key());
+	FloatValuePtr fvp2 = FloatValueCast(tv2);
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->get_count()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", FLOAT_VALUE, tv2->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(fvp2->value()[2]));
 
 	// Count tv in atomspace1 should be unscathed. ----------------------------
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -271,10 +273,11 @@ void MultiAtomSpace::test_load(void)
 
 	TSM_ASSERT("Atoms should be same", counter1 == counter3);
 
-	TruthValuePtr tv3 = TruthValueCast(counter3->getValue(truth_key()));
+	ValuePtr tv3 = counter3->getValue(truth_key());
+	FloatValuePtr fvp3 = FloatValueCast(tv3);
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->get_count()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", FLOAT_VALUE, tv3->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(fvp3->value()[2]));
 
 	delete ev1;
 	delete ev2;
@@ -474,15 +477,16 @@ void MultiAtomSpace::test_readonly_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	evaluator->eval("(define A (Concept \"A\"))");
-	evaluator->eval("(cog-tv A)");
+	evaluator->eval("(define tvkey (Predicate \"*-TruthValueKey-*\"))");
+	evaluator->eval("(cog-value A tvkey)");
 	evaluator->eval("(cog-atomspace-ro!)");
-	evaluator->eval("(define tv (stv 0.1 0.1))");
+	evaluator->eval("(define tv (FloatValue 0.1 0.1))");
 
-	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(cog-set-tv! A tv)"));
+	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(cog-set-value! A tvkey tv)"));
 	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(Concept \"A\" tv)"));
 
 	// Verify that the TV never changed.
-	TruthValuePtr tvp = evaluator->eval_tv("(cog-tv (Concept \"A\"))");
+	ValuePtr tvp = evaluator->eval_v("(cog-value (Concept \"A\") tvkey)");
 	TS_ASSERT(tvp == nullptr);
 
 	logger().debug("END TEST: %s", __FUNCTION__);	
