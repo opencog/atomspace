@@ -27,7 +27,7 @@
 ; This won't work; although it looks nice, the ChoiceLink cannot
 ; be used in this way. Sorry.
 (define find-fruit
-	(Get
+	(Meet
 		(Evaluation
 			(Predicate "has-color")
 			(List
@@ -39,7 +39,7 @@
 
 ; This will work; the ChoiceLink appears at the top.
 (define find-fruit
-	(Get
+	(Meet
 		(Choice
 			(Evaluation
 				(Predicate "has-color")

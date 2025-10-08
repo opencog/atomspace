@@ -72,7 +72,7 @@
 
 ; A query that looks for cities where there are more phones than people.
 (define phone-inversion
-(Get (And
+(Meet (And
 	(Evaluation (Predicate "phone")
 		 (List (Variable "$city") (Variable "#phone")))
 	(Evaluation (Predicate "pop")
@@ -97,7 +97,7 @@ cnt
 
 ; A query that looks for cities that are larger than countries.
 (define pop-inversion
-(Get (And
+(Meet (And
 	(Evaluation (Predicate "org")
 		 (List (Variable "$city") (Concept "city")))
 	(Evaluation (Predicate "pop")

@@ -128,7 +128,7 @@
 
 (define not-baskets-with-not-red
 	; Return those things that ....
-	(Get (Variable "basket")
+	(Meet (Variable "basket")
 		(And
 			; ... things that are baskets ...
 			(Inheritance (Variable "basket") (Concept "basket"))

@@ -85,7 +85,7 @@
 (cog-incoming-by-type anchr 'Member)
 
 (define gnd2-get
-	(Get
+	(Meet
 		(VariableList
 			(Variable "$p")
 			(Variable "$x"))

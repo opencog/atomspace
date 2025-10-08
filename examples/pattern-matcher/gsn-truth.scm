@@ -8,7 +8,7 @@
 
 ; A query to find all humans
 (define human
-	(Get
+	(Meet
 		; This is a pattern that will be matched ...
 		; The result of grounding this will be all things
 		; that could ever possibly be $H
