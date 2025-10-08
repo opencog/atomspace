@@ -107,7 +107,7 @@ void SCMUtilsUTest::test_utils(void)
 
 	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, v->get_type());
 	FloatValuePtr fv(FloatValueCast(v));
-	double cnt = fv->value()[3];
+	double cnt = fv->value()[2];
 	TSM_ASSERT("wrong value found", fabs(cnt-1.5) < 0.00001);
 
 	// Test cog-get-atoms -----------------------------
