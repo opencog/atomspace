@@ -33,7 +33,7 @@ from opencog.atomspace import types
 def foo(atspace):
     FV = createFloatValue([0.42, 0.69])
     apple = atspace.add_node(types.ConceptNode, 'Apple')
-    tvkey = atspace.add_node(types.PredicateNode, '*-TruthValueKey-*')
+    tvkey = atspace.add_node(types.PredicateNode, 'My Key')
     apple.set_value(tvkey, FV)
 ")
 
@@ -44,7 +44,7 @@ def foo(atspace):
 ; Verify that a ConceptNode called "Apple" was created, and that it has
 ; the correct float value, as set in the python code:
 (define apple (cog-node 'ConceptNode "Apple"))
-(define tvkey (Predicate "*-TruthValueKey-*"))
+(define tvkey (Predicate "My Key"))
 (define fv (cog-value apple tvkey))
 (display "Apple FloatValue: ") (display fv) (newline)
 
@@ -64,7 +64,7 @@ FV = createFloatValue([0.444, 0.777])
 
 # Do something with it ...
 banana = asp.add_node(types.ConceptNode, 'Banana')
-tvkey = asp.add_node(types.PredicateNode, '*-TruthValueKey-*')
+tvkey = asp.add_node(types.PredicateNode, 'My Key')
 banana.set_value(tvkey, FV)
 ")
 
