@@ -4,7 +4,9 @@
 ; test value incrementation
 (define counter (ConceptNode "asdf"))
 (define key (PredicateNode "key"))
-(define (test-incr-value) (cog-inc-value! counter key 0.5 3))
+
+; Format: cog-inc-value! ATOM KEY CNT REF
+(define (test-incr-value) (cog-inc-value! counter key 0.5 2))
 
 (define pare (ListLink (ConceptNode "partner") counter))
 (EvaluationLink (WordNode "asdf") pare)
