@@ -18,7 +18,7 @@
 	(stv 1 1))
 
 (define nestand
-	(Get
+	(Meet
 		(TypedVariable (Variable "$component") (Type 'Concept))
 		(And
 			(And

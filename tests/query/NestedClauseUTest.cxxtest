@@ -79,7 +79,7 @@ void NestedClauseUTest::test_nested_and()
 	logger().debug() << "Start: " << boo;
 	TS_ASSERT_EQUALS(boo, "#f\n");
 
-	Handle results = _eval.eval_h("(cog-execute! nestand)");
+	Handle results = _eval.eval_h("(cog-execute! (CollectionOf nestand))");
 	Handle expected = _eval.eval_h("(Set (Concept \"battery\"))");
 
 	logger().debug() << "results = " << oc_to_string(results);
