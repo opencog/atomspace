@@ -92,7 +92,6 @@ void SCMUtilsUTest::test_utils(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Test cog-inc-value! ---------------------------------
-
 	evaluator->eval("(test-incr-value)");
 	CHKERR;
 	evaluator->eval("(test-incr-value)");
@@ -100,6 +99,8 @@ void SCMUtilsUTest::test_utils(void)
 	evaluator->eval("(test-incr-value)");
 	CHKERR;
 
+	Handle counter = evaluator->eval_h("counter");
+	CHKERR;
 	Handle key = evaluator->eval_h("key");
 	CHKERR;
 	ValuePtr v = counter->getValue(key);
