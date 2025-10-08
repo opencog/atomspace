@@ -228,13 +228,13 @@ void MultiAtomSpace::test_load(void)
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
 
-	ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-value)");
 	CHKEV(ev1);
-	ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-value)");
 	CHKEV(ev1);
-	ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-value)");
 	CHKEV(ev1);
-	ev1->eval("(test-incr-cnt)");
+	ev1->eval("(test-incr-value)");
 	CHKEV(ev1);
 	ValuePtr tv1 = counter1->getValue(truth_key());
 	FloatValuePtr fvp1 = FloatValueCast(tv1);
@@ -253,7 +253,7 @@ void MultiAtomSpace::test_load(void)
 
 	TSM_ASSERT("Atoms fail to differ", counter1 != counter2);
 
-	ev2->eval("(test-incr-cnt)");
+	ev2->eval("(test-incr-value)");
 	CHKEV(ev2);
 
 	ValuePtr tv2 = counter2->getValue(truth_key());
