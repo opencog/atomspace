@@ -39,7 +39,7 @@ ADD_GUILE_TEST(InlineValuesTest inline-values-test.scm)
 
 # Guile-python bridge requires python
 IF (HAVE_CYTHON)
-	ADD_GUILE_TEST(SCMPython scm-python.scm)
-	ADD_GUILE_TEST(SCMPythonSharedAtomspace scm-python-shared-atomspace.scm)
-	ADD_GUILE_TEST(SCMPythonArity scm-python-arity.scm)
+	ADD_GUILE_TEST(ScmPythonTest scm-python-test.scm)
+	ADD_GUILE_TEST(ScmPythonSharedAtomspaceTest scm-python-shared-atomspace.scm)
+	ADD_GUILE_TEST(ScmPythonArityTest scm-python-arity-test.scm)
 ENDIF (HAVE_CYTHON)
