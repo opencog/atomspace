@@ -6,11 +6,33 @@
 ; to share AtomSpace contents with other AtomSpaces. This is accomplished
 ; with "persistence" plug-in modules. These provide `StorageNodes` that
 ; can be opened, closed, read from and written to. As of this writing,
-; there are four stable, supported modules for doing this:
+; there are a variety of modules for doing this. The two primary ones
+; store to disk, and to the network:
 ;
 ; (persist-rocks) - Stores the AtomSpace to disk, using RocksDB.
 ;                   This is the easiest to use: no configuration is
 ;                   required. Just start it and go. Also: its fast!
+; (persist-cog)   - Communicates with another AtomSpace via TCP/IP.
+;                   This can be accessed/shared by multiple users,
+;                   thus allowing a form of distributed processing.
+;                   This requires configuring a CogServer to run on
+;                   a second network node, and so is not quite as
+;                   easy as using RocksDB.
+;
+; The above can be combined in a variety of ways with the ProxyNodes,
+; to provide caching, mirroring and load-balancing. This is an advanced
+; usage and is demoed later.
+;
+; Not recommended but possible, if you really really want this:
+; (persist-file)  - Load and store AtomSpace contents as scheme
+;                   s-expressions. This is 10x faster than using the
+;                   scheme interpreter to load Atomese data. However,
+;                   this is just a flat file: once written out, there
+;                   is no way to automatically edit or update it.
+;                   (It's just ASCII text, you can text-edit it, of
+;                   course.)
+;
+; Works, but it's old, slow, creaky and needs an overhaul/refresh:
 ; (persist-sql)   - Stores the AtomSpace to a PostgreSQL database.
 ;                   This can be accessed/shared by multiple users,
 ;                   thus allowing a form of distributed processing.
@@ -19,19 +41,6 @@
 ;                    * It's slower than the RocksDB node.
 ;                    * The current implementation is stale and needs
 ;                      a refresh.
-; (persist-cog)   - Communicates with another AtomSpace via TCP/IP.
-;                   This can be accessed/shared by multiple users,
-;                   thus allowing a form of distributed processing.
-;                   This requires configuring a CogServer to run on
-;                   a second network node, and so is not quite as
-;                   easy as using RocksDB.
-; (persist-file)  - Load and store AtomSpace contents as scheme
-;                   s-expressions. This is 10x faster than using the
-;                   scheme interpreter to load Atomese data. However,
-;                   this is just a flat file: once written out, there
-;                   is no way to automatically edit or update it.
-;                   (It's just ASCII text, you can text-edit it, of
-;                   course.)
 ;
 ; All of the above use exactly the same API, the `StorageNode` API.
 ; This demo illustrates the RocksDB `StorageNode`; the Postgres and
@@ -128,9 +137,11 @@
 
 (use-modules (opencog) (opencog persist))
 
-; Lets hop right in. The below should throw an exception, since
-; no StorageNode is open yet.
-(store-atom (Concept "asdf" (stv 0.42 0.24)))
+; Lets hop right in. Create an Atom, and put a Value on it:
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 1 2 3 4))
+
+; The below should throw an exception, since no StorageNode is open yet.
+(store-atom (Concept "asdf"))
 
 ; To run the demo with RocksDB, load the rocks module. This will fail,
 ; if the module is not installed.
@@ -164,7 +175,7 @@
 (cog-open rsn)
 
 ; Try storing again.
-(store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
+(store-atom (Concept "asdf"))
 
 ; Close the database.
 (cog-close rsn)
@@ -172,29 +183,33 @@
 ; Try fetching the atom. The database is closed -- this should fail!
 (fetch-atom (Concept "asdf"))
 
+; Let's clobber the value; we do this so that we can prove that the
+; pervious value, stored to disk, is retreived.
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue -1 0 -2 0))
+
 ; Reopen the database.
 (cog-open rsn)
 
-; Try fetching the atom. This time it should work.  Notice that
-; it retrieved the correct TruthValue.
+; Try fetching the atom. This time it should work.
 (fetch-atom (Concept "asdf"))
+(cog-value (Concept "asdf") (Predicate "my key"))
 
 ; One can save generic Values, as well.
 (cog-set-value!
 	(Concept "asdf")
-	(Predicate "my key")
+	(Predicate "my other key")
 	(StringValue "Humpty" "Dumpty"))
 
 (store-atom (Concept "asdf"))
 (cog-close rsn)
 
-; The database is closed. Let's mess with the truth value.
-(cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
+; The database is closed. Let's mess with the values.
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 6 9))
 
 ; Let's wipe out the value as well.
 (cog-set-value!
 	(Concept "asdf")
-	(Predicate "my key")
+	(Predicate "my other key")
 	(StringValue "sat" "on" "a" "wall"))
 
 (cog-open rsn)
@@ -205,7 +220,7 @@
 (cog-keys (Concept "asdf"))
 
 ; Make sure the the current values are those restored from the database:
-(cog-value (Concept "asdf") (Predicate "my key"))
+(cog-value (Concept "asdf") (Predicate "my other key"))
 
 ; Other useful commands are:
 ;
@@ -217,15 +232,5 @@
 ;   useful for fetching all graphs that an atom belongs to. These
 ;   two are possibly the single most-important storage calls in
 ;   the system. They really make the whole idea usable and easy-to-use.
-;
-; * `sql-stats` `sql-clear-stats` and `sql-clear-cache` print cryptic
-;   performance data for the SQL backend. Similar commands for Rocks.
-;
-; * `sql-open` and `sql-close` are similar to `cog-open` and `cog-close`,
-;   except they take the URL directly. Unfortunately, this means that
-;   one cannot work with more than one connection at a time this way.
-;   Examples:
-;   (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
-;   (sql-close)
 ;
 ; That's all for now.

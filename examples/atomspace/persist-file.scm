@@ -26,7 +26,7 @@
 (use-modules (opencog))
 
 ; Place some atoms into the AtomSpace
-(Concept "asdf" (stv 0.42 0.24))
+(cot-set-value (Concept "asdf") (Predicate "my key") (FloatValue 0.42 0.24))
 (List (Concept "cat") (Concept "dog"))
 
 ; Take a look at what is in the AtomSpace

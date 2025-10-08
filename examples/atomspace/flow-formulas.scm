@@ -140,7 +140,7 @@
 				(List (Concept "A") (Concept "B"))))))
 
 ; Lets take a look at the TV, now.
-(cog-tv a-implies-b)
+(cog-value a-implies-b tvkey)
 
 ; Change the TV on A and B ...
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.1 0.9))
@@ -153,7 +153,7 @@
 ; And again, for good luck.
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.2 0.8))
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.3 0.7))
-(cog-tv a-implies-b)
+(cog-value a-implies-b tvkey)
 
 ; -------------------------------------------------------------
 ; The presentation above was very TV-centric; but the concept works

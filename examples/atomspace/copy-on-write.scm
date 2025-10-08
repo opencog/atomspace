@@ -41,8 +41,9 @@
 ; Create atoms in the base AtomSpace.
 (define a (Concept "a"))
 (define b (Concept "b"))
+(define k (Predicate "key"))
 
-(cog-set-tv! a (cog-new-stv 0.1 0.1))
+(cog-set-value! a k (FloatValue 0.1 0.1))
 
 ; --- First, the read-only part of the demo.
 ; Mark the current AtomSpace as read-only.
@@ -52,8 +53,9 @@
 (define c (Concept "c"))
 (cog-prt-atomspace)
 
-; Truth values can no longer be changed.
-(cog-set-tv! a (cog-new-stv 0.2 0.2))
+; Values can no longer be changed.
+(cog-set-value! a k (FloatValue 0.2 0.2))
+(cog-value a k)
 (cog-prt-atomspace)
 
 ; Create an overlay (that will be read-write)
@@ -63,18 +65,18 @@
 
 ; Alter the TV on atom `a` -- this causes a copy-on-write (COW)
 ; of atom a into the overlay atomspace.
-(cog-set-tv! a (cog-new-stv 0.3 0.3))
-(cog-prt-atomspace)
-(cog-set-tv! a (cog-new-stv 0.4 0.4))
-(cog-prt-atomspace)
+(cog-set-value! a k (FloatValue 0.3 0.3))
+(cog-value a k)
+(cog-set-value! a k (FloatValue 0.4 0.4))
+(cog-value a k)
 
 ; The base atomspace still holds the original, unmodified atom.
 (cog-set-atomspace! base)
-(cog-prt-atomspace)
+(cog-value a k)
 
 ; The overlay contains only the modified atom.
 (cog-set-atomspace! ovly)
-(cog-prt-atomspace)
+(cog-value a k)
 
 ; Create a Link, and verify that it sits in the overlay.
 ; Pay attention to where the atoms in the Link sit: some will be
@@ -95,7 +97,7 @@
 
 ; Verify that atoms in the base space can now be modified.
 (cog-set-atomspace! base)
-(cog-set-tv! a (cog-new-stv 0.222 0.222))
+(cog-set-value! a k (FloatValue 0.222 0.222))
 (cog-prt-atomspace)
 
 ; Go back to the overlay, and verify that it has not been affected.
@@ -103,28 +105,34 @@
 (cog-prt-atomspace)
 
 ; Change the TV of `a` in the overlay.
-(cog-set-tv! a (cog-new-stv 0.5 0.5))
-(cog-prt-atomspace)
+(cog-set-value! a k (FloatValue 0.5 0.5))
+(cog-value a k)
 
 ; And a grand finale: change the TV of `b`. This will result in a
 ; new `b` being created in the overlay, with the new TV, while the
 ; original `b` remains in the base, as it was, unchanged.
-(cog-set-tv! b (cog-new-stv 0.6 0.6))
-(cog-prt-atomspace)
+(cog-set-value! b k (FloatValue 0.6 0.6))
+(cog-value b k)
 
 ; Verify that the COW-ed' `b` is not in the base.
 (cog-set-atomspace! base)
-(cog-prt-atomspace)
+(cog-value b k)
 
-; Create a ListLink in the base, with a non-default TV.
-; While we're at it, change the TV on `b` as well.
-(ListLink a b (stv 0.7 0.7))
-(cog-set-tv! b (cog-new-stv 0.8 0.8))
-(cog-prt-atomspace)
+; Create a ListLink in the base.
+; While we're at it, stick a Value on it.
+(cog-set-value! (ListLink a b) k (StringValue "foo" "bar"))
+(cog-set-value! b k (FloatValue 0.8 0.8))
+(cog-value b k)
+(cog-value (ListLink a b) k)
 
-; Verify that the ListLink in the overlay has the default TV.
+; Verify that the ListLink in the overlay has no values.
 ; Notice that the ListLink in the overlay was composed with the
-; version of `b` that was in the base, and so the TV on that has
+; version of `b` that was in the base, and so the Value on that has
 ; changed.
 (cog-set-atomspace! ovly)
-(cog-prt-atomspace)
+(cog-value a k)
+(cog-value b k)
+(cog-value (ListLink a b) k)
+
+; The End! That's All, Folks!
+; --------------------------------------------------------------------

@@ -44,7 +44,7 @@
 		(ValueOf (Concept "foo") tvkey)))
 
 ; Verify that the TV on "bar" has changed.
-(cog-tv (Concept "bar"))
+(cog-value (Concept "bar") tvkey)
 
 ; SetValue is interesting because it allows complex arithmetic expressions
 ; to be specified in Atomese. Below, simply take the square of the TV.
@@ -142,10 +142,10 @@
 ; Verify
 (cog-execute! (ValueOf bar kee))
 
-; Define a schema that computes N(N+1)/2 aka a "triangle number".
-; A Schema is used, instead of a DefinedPredicate, since, in principle,
-; DefinedPredicates should be limited to TruthValues, whereas this
-; can be applied to arbitrary (numeric) expressions.
+; Define a procedure that computes N(N+1)/2 aka a "triangle number".
+; A Procedure is used, instead of a DefinedSchema, since, in principle,
+; DefinedSchema should be limited to returning only Atoms, and not
+; Values in general.
 (DefineLink
    (DefinedProcedure "triangle numbers")
 	(Lambda

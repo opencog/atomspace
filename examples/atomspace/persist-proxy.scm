@@ -126,7 +126,8 @@ scheme@(guile-user)>
 ; back at the CogServer, just to see what's going on there.
 ;
 ; Store the whole Atom
-(store-atom (Concept "foo" (stv 0.3 0.6)))
+(cog-set-value! (Concept "foo") (Predicate "my key") (FloatValue 0.3 0.6))
+(store-atom (Concept "foo"))
 
 ; Store a single Value.
 (cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 3))

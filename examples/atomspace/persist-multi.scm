@@ -45,7 +45,8 @@
 ; Open postgres, store one atom, and close it.
 ; Since only one backend is open, it will be used as the default
 (cog-open psn)
-(store-atom (Concept "asdf" (stv 0.318309886 0.36787944)))
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.318 0.367))
+(store-atom (Concept "asdf"))
 (cog-close psn)
 
 ; Delete this atom.
@@ -82,8 +83,9 @@
 (cog-close rsn)
 (cog-prt-atomspace)
 
-; And now for some fun. Put "asdf" into rocks, but with a different TV.
-(cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
+; And now for some fun. Put "asdf" into rocks, but with a different
+; Value attached to it.
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.25 0.75))
 (cog-open rsn)
 (store-atom (Concept "asdf"))
 (cog-close rsn)
@@ -106,7 +108,7 @@
 ; Just like the above, all fetch/store directives can take an optional
 ; StorageNode argument, to indicate where they should be applied.
 
-(cog-set-tv! (Concept "asdf") (stv 0.1 0.8))
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.1 0.8))
 (store-atom (Concept "asdf") psn)
 
 (fetch-atom (Concept "asdf") rsn)

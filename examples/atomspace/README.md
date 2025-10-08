@@ -6,7 +6,7 @@ underlying the AtomSpace. This includes:
 
 * The AtomSpace as a knowledgebase - a graph database.
 * Basic querying (pattern-matching) and inference on knowledge.
-* Assigning degrees of truth to various facts and inferences.
+* Associating numerical values to various facts and inferences.
 * Complex knowledge-representation tasks, including:
     - Setting unique state
     - Designing properties
@@ -47,13 +47,13 @@ first).
 * [`assert-retract.scm`](assert-retract.scm) -- Asserting facts in the AtomSpace.
 * [`state.scm`](state.scm)                   -- Maintaining unique state.
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.
-* [`truthvalues.scm`](truthvalues.scm)       -- Declaring the truth of a proposition.
+* [`floatvalues.scm`](floatvalues.scm)       -- Associating numeric values with a proposition.
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
 * [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
 * [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
 * [`flows.scm`](flows.scm)                   -- Flowing Values around.
-* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically updating TruthValues.
-* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating FloatValues.
+* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically computing FloatValues.
+* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
 * [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
@@ -191,17 +191,26 @@ To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
-Here's a list of modules provided by the AtomSpace, listed in
-alphabetical order. In general, you will use `(opencog exec)`
-the most frequently: this contains core functions that almost
-everything else depends on.
+Three modules are provided by the AtomSpace. The main module is just
+called `opencog`. The `opencog exec` module remains as a historical
+artifact, and probably should be merged into the main `opencog` module.
+For now, it is distinct. The Logger modules is here, because it is
+otherwise an orphan with no home.
 ```
 (use-modules (opencog))
-(use-modules (opencog atom-types))
-(use-modules (opencog csv-table))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+```
+There are many other modules provided in other projects and repos.
+Here is a list of some of the key, important (supported and active)
+modules in other git repos:
+```
+(use-modules (opencog cogserver))
+(use-modules (opencog learn))
 (use-modules (opencog matrix))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
 (use-modules (opencog persist))
 (use-modules (opencog persist-cog))
 (use-modules (opencog persist-file))
@@ -209,21 +218,8 @@ everything else depends on.
 (use-modules (opencog persist-sql))
 (use-modules (opencog python))
 (use-modules (opencog randgen))
-(use-modules (opencog sheaf))
 (use-modules (opencog test-runner))
-(use-modules (opencog type-utils))
 (use-modules (opencog uuid))
-```
-
-There are other modules provided in other projects and repos. Here is
-a list of some of the key, important (supported and active) modules
-in other git repos:
-```
-(use-modules (opencog cogserver))
-(use-modules (opencog learn))
-(use-modules (opencog nlp))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp lg-export))
 ```
 
 A list of important modules that are taking a break, waiting to spring

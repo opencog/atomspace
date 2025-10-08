@@ -80,8 +80,8 @@
 ; interpreted as the degree of membership in a fuzzy set. Or it
 ; could be something else. It doesn't have to be a number.
 ;
-; The TruthValue is a much better way of representing truth in the
-; Atomspace. This is covered in the next example.
+; Values are a much better way of representing frequently changing
+; contents in the Atomspace. This is covered in the next example.
 ;
 ; NumberNodes are a terribly inefficient way of representing numbers
 ; in the Atomspace.  A much, much better way are the Values, in the
