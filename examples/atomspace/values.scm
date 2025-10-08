@@ -1,7 +1,7 @@
 ;
 ; values.scm -- Attaching generic values on Atoms.
 ;
-; The previous example, `truthvalues.scm`, showed how to assign
+; The previous example, `floatvalues.scm`, showed how to assign
 ; sequences of floating-point numbers to Atoms. There is no need
 ; to limit oneself only to floats; there is a generic facility
 ; for attaching Values to Atoms.
@@ -89,46 +89,6 @@
 
 ; List all of the keys on the atom.
 (cog-keys a)
-
-; Add a truth value to the atom
-(cog-set-tv! a (stv 0.9 0.8))
-
-; List all of the keys on the atom.
-; Note that the tv is stored with a key, so that truth values
-; behave like other values.
-(cog-keys a)
-
-; Lets play with truth values. First, define the truth value key:
-(define ktv (PredicateNode "*-TruthValueKey-*"))
-
-; Verify that it works as expected; that is, this should return
-; exactly the same thing as (cog-tv a)
-(cog-value a ktv)
-(cog-tv a)
-(equal? (cog-value a ktv) (cog-tv a))
-
-; ----------------------------------------------------------------
-; If you have the Attention module built and installed, you can
-; use AttentionValues.  If you don't, then the rest of this demo
-; won't work.  That's OK; AttentionValues ar optional.
-(use-modules (opencog attention-bank))
-
-; Truth Values are values, just like the rest. So are Attention Values:
-(define l2 (LinkValue
-  (stv 0.1 0.2) (stv 0.3 0.4) (Concept "foobar") (av 3 2 1) (av 4 5 0)))
-
-(cog-set-value! a k2 l2)
-(cog-value a k2)
-
-; Attention values are stored under a special key as well:
-(cog-set-av! a (av 3 2 1))
-(cog-keys a)
-
-; ... and can also be accessed as values:
-(define kav (PredicateNode "*-AttentionValueKey-*"))
-(cog-value a kav)
-(cog-av a)
-(equal? (cog-value a kav) (cog-av a))
 
 ; That's all for this demo. Thanks for paying attention!
 ; ----------------------------------------------------------------
