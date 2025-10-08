@@ -24,8 +24,6 @@ wiki.
                   for, and execute that code. (Experimental, incomplete)
 
 * python        - Python usage examples.
-* ocaml         - OCaml usage examples.
-* haskell       - Haskell usage examples.
 
 * c++           - Example CMakefile and demos for C++ code.
 * c++-guile     - Creating guile wrappers for C++ code.

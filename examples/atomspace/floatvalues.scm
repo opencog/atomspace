@@ -30,7 +30,7 @@
 (use-modules (opencog))
 
 ; FloatValues are vectors of double-precision floating point numbers.
-(define tv (FloatTruthValue 0.1 0.2))
+(define tv (FloatValue 0.1 0.2))
 
 ; A float value can be converted to a scheme list
 (cog-value->list tv)

@@ -78,30 +78,30 @@ void EqualLinkUTest::test_equality()
 	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
 
 	// -------
-	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, ident_aa);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	bool result = EvaluationLink::crisp_evaluate(&_as, ident_aa);
+	TS_ASSERT(result);  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_asa);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, ident_asa);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_ab);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, ident_ab);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, ident_asb);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, ident_asb);
+	TS_ASSERT(!result); // false
 
 	// -------
-	tv = EvaluationLink::do_evaluate(&_as, equal_aa);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	result = EvaluationLink::crisp_evaluate(&_as, equal_aa);
+	TS_ASSERT(result);  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_asa);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	result = EvaluationLink::crisp_evaluate(&_as, equal_asa);
+	TS_ASSERT(result);  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_ab);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, equal_ab);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, equal_asb);
+	TS_ASSERT(!result); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -128,23 +128,23 @@ void EqualLinkUTest::test_alpha()
 	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
 
 	// -------
-	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_23);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	bool result = EvaluationLink::crisp_evaluate(&_as, equal_23);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, alpha_23);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, alpha_23);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_xx);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	result = EvaluationLink::crisp_evaluate(&_as, equal_xx);
+	TS_ASSERT(result);  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, alpha_xx);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	result = EvaluationLink::crisp_evaluate(&_as, alpha_xx);
+	TS_ASSERT(result);  // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_xy);
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
+	result = EvaluationLink::crisp_evaluate(&_as, equal_xy);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, alpha_xy);
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
+	result = EvaluationLink::crisp_evaluate(&_as, alpha_xy);
+	TS_ASSERT(result);  // true
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -164,17 +164,17 @@ void EqualLinkUTest::test_nway()
 	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
 
 	// -------
-	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, equal_aaa);
-	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+	bool result = EvaluationLink::crisp_evaluate(&_as, equal_aaa);
+	TS_ASSERT(result); // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_aaaa);
-	TS_ASSERT_EQUALS(tv, TruthValue::TRUE_TV());
+	result = EvaluationLink::crisp_evaluate(&_as, equal_aaaa);
+	TS_ASSERT(result); // true
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_aba);
-	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_evaluate(&_as, equal_aba);
+	TS_ASSERT(!result); // false
 
-	tv = EvaluationLink::do_evaluate(&_as, equal_abaa);
-	TS_ASSERT_EQUALS(tv, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_evaluate(&_as, equal_abaa);
+	TS_ASSERT(!result); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

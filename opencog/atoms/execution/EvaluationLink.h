@@ -44,8 +44,12 @@ public:
 	}
 
 	virtual bool is_evaluatable() const { return true; }
-	TruthValuePtr evaluate(AtomSpace* as, bool silent) {
-		return do_evaluate(as, get_handle(), silent);
+	TruthValuePtr evaluate(AtomSpace* scratch, bool silent) {
+		return do_eval_scratch(_atom_space, get_handle(), scratch, silent);
+	}
+
+	virtual bool bevaluate(AtomSpace* scratch, bool silent=false) {
+		return crisp_eval_scratch(_atom_space, get_handle(), scratch, silent);
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
