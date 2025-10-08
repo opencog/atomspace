@@ -230,14 +230,14 @@ void AbsentUTest::test_connect_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-conn1.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-execute! test-absent)");
+	Handle rtn = eval->eval_h("(cog-execute! (CollectionOf test-absent))");
 
 	Handle soln = eval->eval_h("soln");
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 0);
 	TS_ASSERT_EQUALS(rtn, soln);
 
-	Handle npr = eval->eval_h("(cog-execute! test-not-present)");
+	Handle npr = eval->eval_h("(cog-execute! (CollectionOf test-not-present))");
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(npr), 0);
 	TS_ASSERT_EQUALS(npr, soln);
@@ -251,14 +251,14 @@ void AbsentUTest::test_connect_not_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-conn2.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-execute! test-absent)");
+	Handle rtn = eval->eval_h("(cog-execute! (CollectionOf test-absent))");
 
 	Handle soln = eval->eval_h("soln");
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 1);
 	TS_ASSERT_EQUALS(rtn, soln);
 
-	Handle npr = eval->eval_h("(cog-execute! test-not-present)");
+	Handle npr = eval->eval_h("(cog-execute! (CollectionOf test-not-present))");
 
 	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(npr), 1);
 	TS_ASSERT_EQUALS(npr, soln);
@@ -272,7 +272,7 @@ void AbsentUTest::test_discon_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-disconn1.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-execute! test)");
+	Handle rtn = eval->eval_h("(cog-execute! (CollectionOf test))");
 
 	Handle soln = eval->eval_h("soln");
 
@@ -288,7 +288,7 @@ void AbsentUTest::test_discon_not_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-disconn2.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-execute! test)");
+	Handle rtn = eval->eval_h("(cog-execute! (CollectionOf test))");
 
 	Handle soln = eval->eval_h("soln");
 
@@ -306,7 +306,7 @@ void AbsentUTest::test_bridges(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-pets.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-execute! pet-keepers)");
+	Handle rtn = eval->eval_h("(cog-execute! (CollectionOf pet-keepers))");
 
 	Handle soln = eval->eval_h("expected-result");
 

@@ -18,7 +18,7 @@
        (vA (Variable "$A"))        
        (vX (Variable "$X")) )
 
-  (BindLink
+  (QueryLink
      (VariableList
         (TypedVariable vA (Type "ConceptNode"))
         (TypedVariable vX (Type "ConceptNode")) )

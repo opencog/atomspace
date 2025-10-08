@@ -7,7 +7,7 @@
 (ListLink (ConceptNode "Y") (ConceptNode "X"))
 
 (define test
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink (VariableNode "$var1") (TypeNode "ConceptNode"))
             (TypedVariableLink (VariableNode "$var2") (TypeNode "ConceptNode"))
