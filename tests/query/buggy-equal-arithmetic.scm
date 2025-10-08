@@ -14,7 +14,7 @@
 
 ;; Exepcted result of running below is (Number 6)
 (define arithmetic-search
-	(GetLink
+	(MeetLink
 		(TypedVariable (Variable "$X1") (Type 'NumberNode)) 
 		(Equal (Plus (Variable "$X1") (Number 5)) (Number 11))))
 

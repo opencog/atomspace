@@ -84,7 +84,7 @@ void BuggyEqual::test_bugeq(void)
 
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
-	Handle pln = eval->eval_h("(cog-execute! pln-rule-deduction)");
+	Handle pln = eval->eval_h("(cog-execute! (CollectionOf pln-rule-deduction))");
 	printf("Deduction results:\n%s\n", pln->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(pln));
 
@@ -100,7 +100,7 @@ void BuggyEqual::test_bugalt(void)
 
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
-	Handle alt = eval->eval_h("(cog-execute! pln-alt)");
+	Handle alt = eval->eval_h("(cog-execute! (CollectionOf pln-alt))");
 	printf("Alt results:\n%s\n", alt->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(alt));
 
@@ -116,7 +116,7 @@ void BuggyEqual::test_arithmetic(void)
 
 	eval->eval("(load-from-path \"tests/query/buggy-equal-arithmetic.scm\")");
 
-	Handle sixset = eval->eval_h("(cog-execute! arithmetic-search)");
+	Handle sixset = eval->eval_h("(cog-execute! (CollectionOf arithmetic-search))");
 	printf("Arithmetic results:\n%s\n", sixset->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions", 1, getarity(sixset));
 
