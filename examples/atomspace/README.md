@@ -191,17 +191,26 @@ To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
-Here's a list of modules provided by the AtomSpace, listed in
-alphabetical order. In general, you will use `(opencog exec)`
-the most frequently: this contains core functions that almost
-everything else depends on.
+Three modules are provided by the AtomSpace. The main module is just
+called `opencog`. The `opencog exec` module remains as a historical
+artifact, and probably should be merged into the main `opencog` module.
+For now, it is distinct. The Logger modules is here, because it is
+otherwise an orphan with no home.
 ```
 (use-modules (opencog))
-(use-modules (opencog atom-types))
-(use-modules (opencog csv-table))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
+```
+There are many other modules provided in other projects and repos.
+Here is a list of some of the key, important (supported and active)
+modules in other git repos:
+```
+(use-modules (opencog cogserver))
+(use-modules (opencog learn))
 (use-modules (opencog matrix))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp lg-export))
 (use-modules (opencog persist))
 (use-modules (opencog persist-cog))
 (use-modules (opencog persist-file))
@@ -209,21 +218,8 @@ everything else depends on.
 (use-modules (opencog persist-sql))
 (use-modules (opencog python))
 (use-modules (opencog randgen))
-(use-modules (opencog sheaf))
 (use-modules (opencog test-runner))
-(use-modules (opencog type-utils))
 (use-modules (opencog uuid))
-```
-
-There are other modules provided in other projects and repos. Here is
-a list of some of the key, important (supported and active) modules
-in other git repos:
-```
-(use-modules (opencog cogserver))
-(use-modules (opencog learn))
-(use-modules (opencog nlp))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp lg-export))
 ```
 
 A list of important modules that are taking a break, waiting to spring
