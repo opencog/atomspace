@@ -6,7 +6,7 @@ underlying the AtomSpace. This includes:
 
 * The AtomSpace as a knowledgebase - a graph database.
 * Basic querying (pattern-matching) and inference on knowledge.
-* Assigning degrees of truth to various facts and inferences.
+* Associating numerical values to various facts and inferences.
 * Complex knowledge-representation tasks, including:
     - Setting unique state
     - Designing properties
@@ -47,7 +47,7 @@ first).
 * [`assert-retract.scm`](assert-retract.scm) -- Asserting facts in the AtomSpace.
 * [`state.scm`](state.scm)                   -- Maintaining unique state.
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.
-* [`truthvalues.scm`](truthvalues.scm)       -- Declaring the truth of a proposition.
+* [`floatvalues.scm`](floatvalues.scm)       -- Associating numeric values with a proposition.
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
 * [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
 * [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
