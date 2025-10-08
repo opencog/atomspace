@@ -208,10 +208,6 @@ public:
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
             "    print ('add_link(',atom1,',',atom2,') = ', link)\n"
             "    return link\n\n"
-
-            "def return_truth(atom1, atom2):\n"
-            "    print ('return_truth TruthValue(0.75, 100.0)')\n"
-            "    return TruthValue(0.75, 100.0)\n\n"
             );
         std::cout << "eval_res:" << std::endl << eval_res << std::endl;
 
@@ -237,22 +233,6 @@ public:
         bool error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-execute!", !error);
-
-        // Test cog-evaluate -> PythonEval::apply_tv
-        scheme->eval_tv(
-                "(cog-evaluate! "
-                "   (EvaluationLink"
-                "       (GroundedPredicateNode \"py: return_truth\")"
-                "       (ListLink"
-                "           (ConceptNode \"one\")"
-                "           (ConceptNode \"two\")"
-                "       )"
-                "   )"
-                ")"
-                );
-        error = scheme->eval_error();
-        scheme->clear_pending();
-        TSM_ASSERT("Failed cog-evaluate!", !error);
 #endif // HAVE_GUILE
     }
 
