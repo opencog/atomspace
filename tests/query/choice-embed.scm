@@ -45,7 +45,7 @@
 
 ;;; Two clauses; they are both connected with a common variable.
 (define (embed)
-	(BindLink
+	(QueryLink
 		(AndLink
 			(MemberLink
 				(VariableNode "$x")

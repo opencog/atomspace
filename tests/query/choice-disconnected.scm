@@ -32,7 +32,7 @@
 ;;; A pattern with two disconnected groundings.  Two search passes must
 ;;; be made.  Should find two of the three trees given above.
 (define (top-disco)
-	(BindLink
+	(QueryLink
 		(ChoiceLink
 			(EvaluationLink
 				(PredicateNode "this way")
@@ -55,7 +55,7 @@
 
 ;;; Same as above, but the top-level ChoiceLink is wrapped.
 (define (wrapped-disco)
-	(BindLink
+	(QueryLink
 		(AndLink
 			(ChoiceLink
 				(EvaluationLink
