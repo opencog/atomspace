@@ -19,12 +19,12 @@
 ; slow. If you do NOT need searchability, and you are concerned about
 ; performance, Values are for you!
 ;
-; Values (such as TruthValues) live in a per-Atom key-value database.
+; Values are held in a per-Atom key-value database.
 ; Given any Atom, and a Key, you can get the Value attached there.
 ; Given any Atom, Key and Value, you can quickly swap the new value for
 ; the old. Here's what you cannot do (see, however, footnote at bottom):
 ;
-; 1) Use GetLink or BindLink to search for Values
+; 1) Use MeetLink or QueryLink to search for Values
 ; 2) Use PutLink to create new Values
 ; 3) Store them in the Atomspace for later retrieval. (But you do
 ;    store the Atom that serves as the anchor for the Value; the Value
