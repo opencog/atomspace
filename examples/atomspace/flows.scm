@@ -44,7 +44,7 @@
 		(ValueOf (Concept "foo") tvkey)))
 
 ; Verify that the TV on "bar" has changed.
-(cog-tv (Concept "bar"))
+(cog-value (Concept "bar") tvkey)
 
 ; SetValue is interesting because it allows complex arithmetic expressions
 ; to be specified in Atomese. Below, simply take the square of the TV.
