@@ -78,7 +78,7 @@
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
-	(BindLink
+	(QueryLink
 		(ListLink
 			(Concept "I") (Glob "$star") (Concept "you"))
 		(ListLink
@@ -86,7 +86,7 @@
 
 ;; This one implements "I love *" -> "Hey! I love * too"
 (define love-glob
-	(BindLink
+	(QueryLink
 		(ListLink
 			(Concept "I")
 			(Concept "love")
@@ -106,7 +106,7 @@
 ; Globs can be typed, just like variables:
 
 (define love-type-glob
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star") (Type "NumberNode"))
 		(ListLink
 			(Concept "I")
@@ -123,7 +123,7 @@
 ; Globs can have interval restriction
 
 (define love-interval-glob
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star") (IntervalLink (Number 0) (Number 1)))
 		(ListLink
 			(Concept "I")
@@ -141,7 +141,7 @@
 ; type == ConceptNode and interval == zero to infinity
 
 (define love-typeset-glob
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star")
 			(TypeIntersectionLink (IntervalLink (Number 0) (Number -1)) (Type "ConceptNode")))
 		(ListLink
@@ -159,7 +159,7 @@
 ; Glob with intersection of interval with empty interval
 
 (define love-interval-glob-empty-intersection
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star")
 			(TypeIntersectionLink
 				(IntervalLink (Number 0) (Number -1))
@@ -180,7 +180,7 @@
 ; Glob with union of interval with empty interval
 
 (define love-interval-glob-empty-union
-	(BindLink
+	(QueryLink
 		(TypedVariable (Glob "$star")
 			(TypeChoice
 				(IntervalLink (Number 1) (Number 1))
@@ -202,7 +202,7 @@
 ; Slightly more complicated
 
 (define love-three-globs
-	(BindLink
+	(QueryLink
 		(VariableList
 			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
 			(TypedVariable (Glob "$y")
@@ -224,7 +224,7 @@
 ; Two globs in a row
 ; Should match to "hi Sophia" but not "hi" as we need to ground $y
 (define greet
-	(BindLink
+	(QueryLink
 		(VariableList
 			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
 			(TypedVariable (Glob "$y")
@@ -245,7 +245,7 @@
 ; Should match "they really want it" but not "they want it" due to the
 ; interval restriction
 (define exact
-	(Bind
+	(Query
 		(TypedVariable (Glob "$x") (IntervalLink (Number 3) (Number 3)))
 		(ListLink
 			(Concept "they")
@@ -258,7 +258,7 @@
 ; Match as many as possible, should not stop when it gets to
 ; the first "saw"
 (define greedy
-	(Bind
+	(Query
 		(TypedVariable (Glob "$x")
 			(TypeIntersection (Type "ConceptNode")
 				(IntervalLink (Number 1) (Number -1))))
@@ -272,7 +272,7 @@
 
 ; Match in any order
 (define unorder
-	(Bind
+	(Query
 		(TypedVariable (Glob "$x") (Type "ConceptNode"))
 		(SetLink
 			(Glob "$x")
@@ -314,7 +314,7 @@
 ; accepts only one of them, so make sure we can backtrack
 ; until we find a match for the whole pattern.
 (define backtrack
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Glob "$x")
 				(TypeIntersection (Type "ConceptNode")
@@ -334,7 +334,7 @@
 			(List (Glob "$z")))))
 
 (define backtoo
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Glob "$x")
 				(TypeIntersection (Type "ConceptNode")
@@ -355,7 +355,7 @@
 			(List (Glob "$z")))))
 
 (define backmore
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Glob "$x")
 				(TypeIntersection (Type "ConceptNode")
@@ -415,7 +415,7 @@
 	(ConceptNode "k"))
 
 (define get-ma
-	(GetLink
+	(MeetLink
 		(GlobNode "star")
 		(ListLink
 			(ConceptNode "a")

@@ -7,7 +7,7 @@
 
 (define partition
 
-(BindLink
+(QueryLink
 	(VariableList
 		(TypedVariableLink
 			(GlobNode "$begin")
@@ -34,7 +34,7 @@
 ; ----------------------------------------------------
 (define part-deeper
 
-(BindLink
+(QueryLink
 	(VariableList
 		(TypedVariableLink
 			(GlobNode "$begin")

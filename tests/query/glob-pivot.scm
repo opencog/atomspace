@@ -19,7 +19,7 @@
 )
 
 (define glob-pivot
-	(GetLink
+	(MeetLink
 		(TypedVariableLink
 			(GlobNode "$G")
 			(TypeIntersectionLink
