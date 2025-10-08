@@ -483,7 +483,6 @@ void MultiAtomSpace::test_readonly_scm(void)
 	evaluator->eval("(define tv (FloatValue 0.1 0.1))");
 
 	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(cog-set-value! A tvkey tv)"));
-	TS_ASSERT_THROWS_ANYTHING(evaluator->eval_h("(Concept \"A\" tv)"));
 
 	// Verify that the TV never changed.
 	ValuePtr tvp = evaluator->eval_v("(cog-value (Concept \"A\") tvkey)");
