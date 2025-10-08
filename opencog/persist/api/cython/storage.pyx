@@ -19,11 +19,4 @@ regenerate_types()
 
 include "opencog/persist/storage/storage_types.pyx"
 
-from opencog.atomspace cimport AtomSpace
-# from opencog.storage cimport c_load_file
-
-def load_file(path, AtomSpace atomspace):
-	cdef string p = path.encode('utf-8')
-	c_load_file(p, deref(atomspace.atomspace))
-
 # -----------------------------------------
