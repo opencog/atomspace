@@ -9,7 +9,7 @@
 (List (Concept "A") (Set (Predicate "P") (Predicate "Q")))
 
 (define embedded-set
-	(Bind
+	(Query
 		(Present (List (Variable "$C") (Set (Variable "$X") (Variable "$Y"))))
 		(Implication (Variable "$X") (Variable "$Y"))))
 
@@ -29,7 +29,7 @@
    (Set (Predicate "R") (Predicate "S")))
 
 (define two-x-two
-	(Bind
+	(Query
 		(Present (List (Variable "$C")
 			(Set (Variable "$X") (Variable "$Y"))
 			(Set (Variable "$Z") (Variable "$W"))))
@@ -64,7 +64,7 @@
 	(Set (Predicate "T") (Predicate "U")))
 
 (define cube
-	(Bind
+	(Query
 		(Present (List (Variable "$C")
 			(Set (Variable "$U") (Variable "$V"))
 			(Set (Variable "$X") (Variable "$Y"))
@@ -122,7 +122,7 @@
 	(Set (Predicate "V") (Predicate "W")))
 
 (define tesseract
-	(Bind
+	(Query
 		(Present (List (Variable "$C")
 			(Set (Variable "$A") (Variable "$B"))
 			(Set (Variable "$U") (Variable "$V"))

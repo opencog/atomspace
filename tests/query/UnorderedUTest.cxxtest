@@ -185,14 +185,14 @@ void UnorderedUTest::test_jswiergo(void)
 	Handle result, expected;
 
 	// --------------------
-	result = eval->eval_h("(cog-execute! tree-query1)");
+	result = eval->eval_h("(cog-execute! (CollectionOf tree-query1))");
 	expected = eval->eval_h("expect-q1");
 
 	logger().debug("jsw first result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
 
 	// --------------------
-	result = eval->eval_h("(cog-execute! tree-query2)");
+	result = eval->eval_h("(cog-execute! (CollectionOf tree-query2))");
 	expected = eval->eval_h("expect-q2");
 
 	logger().debug("jsw second result is %s\n", result->to_string().c_str());
@@ -214,7 +214,7 @@ void UnorderedUTest::test_big_jswiergo(void)
 	Handle result, expected;
 
 	// --------------------
-	result = eval->eval_h("(cog-execute! big-tree-q1)");
+	result = eval->eval_h("(cog-execute! (CollectionOf big-tree-q1))");
 	expected = eval->eval_h("big-expect1");
 
 	logger().debug("jsw big first result is %s\n", result->to_string().c_str());
@@ -222,7 +222,7 @@ void UnorderedUTest::test_big_jswiergo(void)
 	TSM_ASSERT_EQUALS("Incorrect result", result, expected);
 
 	// --------------------
-	result = eval->eval_h("(cog-execute! big-tree-q2)");
+	result = eval->eval_h("(cog-execute! (CollectionOf big-tree-q2))");
 	expected = eval->eval_h("big-expect2");
 
 	logger().debug("jsw big second result is %s\n", result->to_string().c_str());
@@ -311,7 +311,7 @@ void UnorderedUTest::test_embed(void)
 	TSM_ASSERT("Failed to load test data", expected);
 
 	// Result should be a SetLink w/ two solutions
-	Handle result = eval->eval_h("(cog-execute! embedded-set)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf embedded-set))");
 
 	logger().debug("embedded result is %s\n", result->to_string().c_str());
 	if (2 != getarity(result))
@@ -335,7 +335,7 @@ void UnorderedUTest::test_cube(void)
 	TSM_ASSERT("Failed to load test data", expected);
 
 	// Result should be a SetLink w/ four solutions
-	Handle result = eval->eval_h("(cog-execute! two-x-two)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf two-x-two))");
 
 	logger().debug("square result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -349,7 +349,7 @@ void UnorderedUTest::test_cube(void)
 	TSM_ASSERT("Failed to load test data", expected);
 
 	// Result should be a SetLink w/ eight solutions
-	result = eval->eval_h("(cog-execute! cube)");
+	result = eval->eval_h("(cog-execute! (CollectionOf cube))");
 
 	logger().debug("cube result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
@@ -359,7 +359,7 @@ void UnorderedUTest::test_cube(void)
 	// Again, but four-dimensional.
 
 	// Result should be a SetLink w/ sixteen solutions
-	result = eval->eval_h("(cog-execute! tesseract)");
+	result = eval->eval_h("(cog-execute! (CollectionOf tesseract))");
 
 	// logger().debug("tesseract result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 16, getarity(result));
@@ -378,7 +378,7 @@ void UnorderedUTest::test_quote(void)
 	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
 
 	// Result should be a SetLink w/ one solutions
-	Handle result = eval->eval_h("(cog-execute! query)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf query))");
 
 	logger().debug("embedded result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
@@ -396,7 +396,7 @@ void UnorderedUTest::test_odometer(void)
 	eval->eval("(load-from-path \"tests/query/unordered-odometer.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
-	Handle result = eval->eval_h("(cog-execute! odo-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf odo-dim-one))");
 
 	logger().debug("D=1 odo arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
@@ -404,21 +404,21 @@ void UnorderedUTest::test_odometer(void)
 	// --------------------------------------------
 	// Again, but squared
 	// Result should be a SetLink w/ 6*6=36 solutions
-	result = eval->eval_h("(cog-execute! odo-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf odo-dim-two))");
 
 	logger().debug("D=2 odo arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6=216 solutions
-	result = eval->eval_h("(cog-execute! odo-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf odo-dim-three))");
 
 	logger().debug("D=3 odo arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
-	result = eval->eval_h("(cog-execute! odo-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf odo-dim-four))");
 
 	logger().debug("D=4 odo arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
@@ -436,7 +436,7 @@ void UnorderedUTest::test_odo_below(void)
 	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
-	Handle result = eval->eval_h("(cog-execute! below-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf below-dim-one))");
 
 	logger().debug("D=1 below arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
@@ -444,21 +444,21 @@ void UnorderedUTest::test_odo_below(void)
 	// --------------------------------------------
 	// Again, but squared
 	// Result should be a SetLink w/ 6*6=36 solutions
-	result = eval->eval_h("(cog-execute! below-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf below-dim-two))");
 
 	logger().debug("D=2 below arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6=216 solutions
-	result = eval->eval_h("(cog-execute! below-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf below-dim-three))");
 
 	logger().debug("D=3 below arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
-	result = eval->eval_h("(cog-execute! below-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf below-dim-four))");
 
 	logger().debug("D=4 below arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
@@ -476,7 +476,7 @@ void UnorderedUTest::test_odo_distinct(void)
 	eval->eval("(load-from-path \"tests/query/unordered-odo-distinct.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
-	Handle result = eval->eval_h("(cog-execute! distinct-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf distinct-dim-one))");
 
 	logger().debug("D=1 distinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
@@ -484,21 +484,21 @@ void UnorderedUTest::test_odo_distinct(void)
 	// --------------------------------------------
 	// Again, but squared
 	// Result should be a SetLink w/ 6*6=36 solutions
-	result = eval->eval_h("(cog-execute! distinct-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf distinct-dim-two))");
 
 	logger().debug("D=2 distinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 36, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6=216 solutions
-	result = eval->eval_h("(cog-execute! distinct-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf distinct-dim-three))");
 
 	logger().debug("D=3 distinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 216, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
-	result = eval->eval_h("(cog-execute! distinct-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf distinct-dim-four))");
 
 	logger().debug("D=4 distinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
@@ -516,7 +516,7 @@ void UnorderedUTest::test_odo_indistinct(void)
 	eval->eval("(load-from-path \"tests/query/unordered-odo-indistinct.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
-	Handle result = eval->eval_h("(cog-execute! indistinct-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf indistinct-dim-one))");
 
 	logger().debug("D=1 indistinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
@@ -524,21 +524,21 @@ void UnorderedUTest::test_odo_indistinct(void)
 	// --------------------------------------------
 	// Again, but squared
 	// Result should be a SetLink w/ 2*6*6=72 solutions
-	result = eval->eval_h("(cog-execute! indistinct-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf indistinct-dim-two))");
 
 	logger().debug("D=2 indistinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6=1296 solutions
-	result = eval->eval_h("(cog-execute! indistinct-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf indistinct-dim-three))");
 
 	logger().debug("D=3 indistinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 6*6*6*6 *4! = 31104 solutions
-	result = eval->eval_h("(cog-execute! indistinct-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf indistinct-dim-four))");
 
 	logger().debug("D=4 indistinct arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 31104, getarity(result));
@@ -559,28 +559,28 @@ void UnorderedUTest::test_odo_layer(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 3!=6 solutions
-	Handle result = eval->eval_h("(cog-execute! layer-dim-one)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf layer-dim-one))");
 
 	logger().debug("D=1 layer arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2!*(3!* 3!) = 72 solutions
-	result = eval->eval_h("(cog-execute! layer-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf layer-dim-two))");
 
 	logger().debug("D=2 layer arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 3!*(3!* 3! *3!) = 1296 solutions
-	result = eval->eval_h("(cog-execute! layer-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf layer-dim-three))");
 
 	logger().debug("D=3 layer arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1296, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 4!*(3! * 3!* 3! *3!) = 31104 solutions
-	result = eval->eval_h("(cog-execute! layer-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf layer-dim-four))");
 
 	logger().debug("D=4 odo arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 31104, getarity(result));
@@ -601,21 +601,21 @@ void UnorderedUTest::test_odo_couple(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*2=4 solutions
-	result = eval->eval_h("(cog-execute! couple-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf couple-dim-two))");
 
 	logger().debug("D=2 couple arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! couple-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf couple-dim-three))");
 
 	logger().debug("D=3 couple arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! couple-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf couple-dim-four))");
 
 	logger().debug("D=4 couple arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -636,21 +636,21 @@ void UnorderedUTest::test_odo_equ_pred(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*2=4 solutions
-	result = eval->eval_h("(cog-execute! epr-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf epr-dim-two))");
 
 	logger().debug("D=2 epr arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! epr-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf epr-dim-three))");
 
 	logger().debug("D=3 epr arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! epr-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf epr-dim-four))");
 
 	logger().debug("D=4 epr arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -671,21 +671,21 @@ void UnorderedUTest::test_odo_equal(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*2=4 solutions
-	result = eval->eval_h("(cog-execute! equ-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf equ-dim-two))");
 
 	logger().debug("D=2 equ arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! equ-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf equ-dim-three))");
 
 	logger().debug("D=3 equ arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*1*1*2=4 solutions
-	result = eval->eval_h("(cog-execute! equ-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf equ-dim-four))");
 
 	logger().debug("D=4 equ arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -706,21 +706,21 @@ void UnorderedUTest::test_odo_couplayer(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*(2*2)=8 solutions
-	result = eval->eval_h("(cog-execute! play-dim-two)");
+	result = eval->eval_h("(cog-execute! (CollectionOf play-dim-two))");
 
 	logger().debug("D=2 play arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*(2*1*2)=8 solutions
-	result = eval->eval_h("(cog-execute! play-dim-three)");
+	result = eval->eval_h("(cog-execute! (CollectionOf play-dim-three))");
 
 	logger().debug("D=3 play arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2*(2*1*1*2)=8 solutions
-	result = eval->eval_h("(cog-execute! play-dim-four)");
+	result = eval->eval_h("(cog-execute! (CollectionOf play-dim-four))");
 
 	logger().debug("D=4 play arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 8, getarity(result));

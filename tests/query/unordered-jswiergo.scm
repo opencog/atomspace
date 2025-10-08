@@ -13,7 +13,7 @@
 (define query2 (Variable "$a"))
 
 (define (tree-query input-query)
-	(Bind
+	(Query
 		(VariableList (Variable "$a") (Variable "$b"))
 		(Present
 			(List input-query (List input-query (Variable "$b"))))
@@ -48,7 +48,7 @@
 
 
 (define (big-tree-query input-query)
-	(Bind
+	(Query
 		(VariableList (Variable "$a") (Variable "$b") (Variable "$c"))
 		(Present
 			(List
