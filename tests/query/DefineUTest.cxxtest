@@ -82,13 +82,13 @@ void DefineLinkUTest::test_basic(void)
 
 	eval->eval("(load-from-path \"tests/query/define.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! get-elect)");
+	Handle items = eval->eval_h("(cog-execute! (CollectionOf get-elect))");
 	TS_ASSERT_EQUALS(2, getarity(items));
 
-	items = eval->eval_h("(cog-execute! get-elect-bound)");
+	items = eval->eval_h("(cog-execute! (CollectionOf get-elect-bound))");
 	TS_ASSERT_EQUALS(2, getarity(items));
 
-	items = eval->eval_h("(cog-execute! get-parts)");
+	items = eval->eval_h("(cog-execute! (CollectionOf get-parts))");
 	TS_ASSERT_EQUALS(2, getarity(items));
 }
 
