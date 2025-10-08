@@ -204,7 +204,6 @@
 (cog-close rsn)
 
 ; The database is closed. Let's mess with the values.
-(cog-set-tv! (Concept "asdf") (stv 0.25 0.75))
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 6 9))
 
 ; Let's wipe out the value as well.
