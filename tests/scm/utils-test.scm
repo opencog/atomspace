@@ -2,6 +2,7 @@
 ; Test utilities
 
 ; test value incrementation
+(define counter (ConceptNode "asdf"))
 (define key (PredicateNode "key"))
 (define (test-incr-value) (cog-inc-value! counter key 0.5 3))
 
