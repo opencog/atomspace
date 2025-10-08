@@ -470,7 +470,7 @@ void DeepTypeUTest::test_get_signature(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! get-foo)");
+	Handle hgnd = eval->eval_h("(cog-execute! (CollectionOf get-foo))");
 	Handle hans = eval->eval_h(
 		"(SetLink "
 		"    (InheritanceLink "
@@ -482,7 +482,7 @@ void DeepTypeUTest::test_get_signature(void)
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
 	// --------------------------------------------------------
-	hgnd = eval->eval_h("(cog-execute! get-foobar)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf get-foobar))");
 	hans = eval->eval_h(
 		"(SetLink "
 		"    (InheritanceLink "
@@ -496,7 +496,7 @@ void DeepTypeUTest::test_get_signature(void)
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
 	// --------------------------------------------------------
-	hgnd = eval->eval_h("(cog-execute! predicate-search)");
+	hgnd = eval->eval_h("(cog-execute! (CollectionOf predicate-search))");
 	hans = eval->eval_h(
 		"(SetLink "
 		"   (EvaluationLink"
@@ -528,7 +528,7 @@ void DeepTypeUTest::test_unbundle_defined_type_node(void)
 
 	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
 
-	Handle result = eval->eval_h("(cog-execute! predicate-search-typed)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf predicate-search-typed))");
 	Handle result_expected = eval->eval_h(
 		"(SetLink "
 		"   (EvaluationLink"
@@ -555,11 +555,11 @@ void DeepTypeUTest::test_aybe_sea(void)
 
 	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
 
-	Handle result = eval->eval_h("(cog-execute! constant-a)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf constant-a))");
 	Handle expected = eval->eval_h("(SetLink (Concept \"A\"))");
 	TSM_ASSERT_EQUALS("Bad simple constant", result, expected);
 
-	result = eval->eval_h("(cog-execute! constant-zappa)");
+	result = eval->eval_h("(cog-execute! (CollectionOf constant-zappa))");
 	TSM_ASSERT_EQUALS("Bad constant abc", result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -574,7 +574,7 @@ void DeepTypeUTest::test_deep_disconnect(void)
 
 	eval->eval("(load-from-path \"tests/query/deep-types.scm\")");
 
-	Handle result = eval->eval_h("(cog-execute! deep-disconnect)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf deep-disconnect))");
 	Handle expected = eval->eval_h(
 		"(SetLink (List (Concept \"A\") (Concept \"B\")))");
 	TSM_ASSERT_EQUALS("Bad disconnect", result, expected);
