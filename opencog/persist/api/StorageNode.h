@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/api/BackingStore.h>
-#include <opencog/persist/storage/storage_types.h>
+#include <opencog/atoms/atom_types/atom_types.h>
 
 namespace opencog
 {

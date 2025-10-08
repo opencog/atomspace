@@ -23,12 +23,12 @@
 
 #include <string>
 
+#include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/storage/storage_types.h>
 #include "StorageNode.h"
 #include "DispatchHash.h"
 
