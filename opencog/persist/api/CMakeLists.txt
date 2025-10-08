@@ -10,10 +10,12 @@ TARGET_LINK_LIBRARIES(backing
 	smob
 )
 
-INSTALL (TARGETS persist EXPORT AtomSpaceTargets
+INSTALL (TARGETS backing EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
+# Historically, this wa named "persist", and, to avoid compat
+# issues, install into the historical directory.
 INSTALL (FILES
 	BackingStore.h
 	StorageNode.h
