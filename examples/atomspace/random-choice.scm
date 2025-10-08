@@ -35,16 +35,16 @@
 				(Get (State (Anchor "sum-B") (Variable "$y"))))))))
 
 ; Run this several times.
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
-(cog-evaluate! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
+(cog-execute! (DefinedPredicate "counter"))
 
 ; Print the counts.
 (cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
@@ -67,7 +67,7 @@
 		(DefinedPredicate "loop a lot of times")))
 
 ; Actually execute the loop.
-(cog-evaluate! (DefinedPredicate "loop a lot of times"))
+(cog-execute! (DefinedPredicate "loop a lot of times"))
 
 ; Print the counts again.
 (cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
@@ -90,4 +90,4 @@
       (GreaterThan (Number 2.5) (DefinedProcedure "ratio"))
       (GreaterThan (DefinedProcedure "ratio") (NumberNode 2.1))))
 
-(cog-evaluate! (DefinedPredicate "test expectation"))
+(cog-execute! (DefinedPredicate "test expectation"))
