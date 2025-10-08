@@ -52,8 +52,8 @@ first).
 * [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
 * [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
 * [`flows.scm`](flows.scm)                   -- Flowing Values around.
-* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically updating TruthValues.
-* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating FloatValues.
+* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically computing FloatValues.
+* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
 * [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
