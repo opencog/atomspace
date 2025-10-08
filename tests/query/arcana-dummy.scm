@@ -10,6 +10,6 @@
 
 ; Query. Should return only "42"
 (define dummy
-	(GetLink
+	(MeetLink
 		(TypedVariable (Variable "$x") (Type "NumberNode"))
 		(GreaterThan (Number 88) (Variable "$x"))))

@@ -143,7 +143,7 @@
 ;;; Note that the evaluationLink is repeated twice, inside of
 ;;; a ListLink, each time.
 (define (repeat-same)
-	(BindLink
+	(QueryLink
 		(VariableNode "$x")
 		(ListLink
 			(ListLink
@@ -172,7 +172,7 @@
 ;;; Note that the evaluationLink is repeated twice, inside of
 ;;; two different links
 (define (repeat-different)
-	(BindLink
+	(QueryLink
 		(VariableNode "$x")
 		(ListLink
 			(ListLink
@@ -201,7 +201,7 @@
 ;;; Note that the evaluationLink is repeated three times, inside of
 ;;; three different links
 (define (repeat-diff-thrice)
-	(BindLink
+	(QueryLink
 		(VariableNode "$x")
 		(ListLink
 			(ListLink
@@ -239,7 +239,7 @@
 ;;; Note that the evaluationLink is repeated three times, inside of
 ;;; a ListLink, each time.
 (define (repeat-thrice)
-	(BindLink
+	(QueryLink
 		(VariableNode "$x")
 		(ListLink
 			(ListLink
@@ -277,7 +277,7 @@
 ;;; Note that the evaluationLink is repeated three times, inside of
 ;;; just one ListLink, total.
 (define (repeat-once)
-	(BindLink
+	(QueryLink
 		(VariableNode "$x")
 		(ListLink
 			(ListLink

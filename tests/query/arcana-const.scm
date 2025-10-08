@@ -15,7 +15,7 @@
 
 ; A query with no variables in it.
 (define who
-	(BindLink
+	(QueryLink
 		(ListLink
 			(ConceptNode "WHO")
 			(ConceptNode "INVENTED")
@@ -26,7 +26,7 @@
 
 ; Same query as above, but with the answer wrapped up in a define.
 (define whodfn
-	(BindLink
+	(QueryLink
 		(ListLink
 			(ConceptNode "WHO")
 			(ConceptNode "INVENTED")

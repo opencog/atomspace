@@ -19,7 +19,7 @@
 ; Query. Should return the above.
 ; Note that the query has only a single evaluatable within it.
 (define bigger-dummy
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (VariableNode "$whole") (Type "ImplicationLink"))
 			(VariableNode "$impl"))
