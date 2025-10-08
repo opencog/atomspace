@@ -3,7 +3,7 @@
 
 (use-modules (opencog) (opencog exec))
 
-(define get-something (Bind (True) (Concept "it's true")))
-(define get-nothing   (Bind (False) (Concept "it's false")))
-(define get-not-true  (Bind (Not (True)) (Concept "it's not true")))
-(define get-not-false (Bind (Not (False)) (Concept "it's not false")))
+(define get-something (Query (True) (Concept "it's true")))
+(define get-nothing   (Query (False) (Concept "it's false")))
+(define get-not-true  (Query (Not (True)) (Concept "it's not true")))
+(define get-not-false (Query (Not (False)) (Concept "it's not false")))
