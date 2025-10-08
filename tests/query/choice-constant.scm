@@ -13,7 +13,7 @@
 
 ;;; Two clauses; they both connected with a common variable.
 (define query
-	(GetLink
+	(MeetLink
 		(TypedVariableLink (VariableNode "$x") (TypeNode "ConceptNode"))
 		(ListLink
 			(ChoiceLink

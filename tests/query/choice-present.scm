@@ -10,7 +10,7 @@
 (State (Concept "alice") (Concept "at home"))
 
 (define who-is-hungry?
-	(Get
+	(Meet
 		(VariableList
 			(TypedVariable (Variable "x") (Type "ConceptNode"))
 			(TypedVariable (Variable "y") (Type "ConceptNode")))
