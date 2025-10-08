@@ -20,7 +20,7 @@
 ; Define a pattern that will only find ConceptNodes that have
 ; a low truth value.
 (define find-false
-	(Bind
+	(Query
 		; Search only for ConceptNodes.
 		(TypedVariable (Variable "$X") (Type 'ConceptNode))
 		(And
@@ -40,7 +40,7 @@
 (cog-set-value! (Concept "thing-b") key (FloatValue 35))
 
 (define find-answer
-	(Bind
+	(Query
 		; Search only for ConceptNodes.
 		(TypedVariable (Variable "$X") (Type 'ConceptNode))
 		(And

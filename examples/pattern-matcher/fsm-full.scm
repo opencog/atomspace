@@ -86,12 +86,12 @@
 ;;; transition any arbitrary deterministic FSM from state to state,
 ;;; given only its name, and the name given to the transition rules.
 ;;;
-;;; Create a BindLink that can take an FSM with the name `fsm-name`
-;;; and stores it's state in `fsm-state`.  After the BindLink is
+;;; Create a QueryLink that can take an FSM with the name `fsm-name`
+;;; and stores it's state in `fsm-state`.  After the QueryLink is
 ;;; created, each invocation of it will advance the FSM but one step.
 ;;;
 (define (create-fsm fsm-name fsm-state)
-	(Bind
+	(Query
 		;; We will need to find the current and the next state
 		(VariableList
 			(Variable "$curr-state")

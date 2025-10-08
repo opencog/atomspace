@@ -55,7 +55,7 @@
 ;; time. The proposed grounding, made in the first clause of the
 ;; pattern, is randomly approved of or rejected by the second clause.
 (define find-logicians
-	(Bind
+	(Query
 		; Define the variable to be grounded
 		(Variable "$person")
 

@@ -57,7 +57,7 @@
 ;; Define a pattern that searches for everyone who is a human, and then
 ;; invokes the say-hello function on each match.
 (define find-humans
-	(Bind
+	(Query
 		;; Declare the variable to be grounded.
 		(Variable "$person")
 		;; The pattern to be searched for.

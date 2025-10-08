@@ -111,9 +111,9 @@
 	(List my-trans (Concept "red")))
 
 ;; --------------------------------------------------------------------
-;;; Create a BindLink that can take a Markov Chain with the name
+;;; Create a QueryLink that can take a Markov Chain with the name
 ;;; `chain-name` and two state vectors: `chain-state` and `chain-next`
-;;; Each invocation of the BindLink will take the current state vector,
+;;; Each invocation of the QueryLink will take the current state vector,
 ;;; multiply it by the transition matrix, and store the result in the
 ;;; `chain-next` vector.
 ;;;
@@ -139,7 +139,7 @@
 			(Variable "$next-state")
 		)
 	)
-	(Bind
+	(Query
 		;; We will need to find the current and the next state
 		(VariableList
 			(Variable "$curr-state")
@@ -203,7 +203,7 @@
 )
 
 ;; --------------------------------------------------------------------
-;;; Create a BindLink that will find a state vector, and delete it.
+;;; Create a QueryLink that will find a state vector, and delete it.
 ;;; After the next chain state is computed, it must be made into the
 ;;; current chain state.  This is done in a three-step process:
 ;;; 1) delete the current state vector
@@ -211,7 +211,7 @@
 ;;; 3) delete the next state-vector.
 ;;; The below implements steps 1 and 3
 (define (create-chain-deleter chain-state)
-	(Bind
+	(Query
 		(Variable "$state")
 		;; Find the state vector...
 		(List chain-state (Variable "$state"))
@@ -231,7 +231,7 @@
 	(begin (cog-set-tv! b (cog-tv a)) b))
 
 (define (create-chain-copier chain-to chain-from)
-	(Bind
+	(Query
 		(Variable "$state")
 		;; Find the copy-from state vector...
 		(List
@@ -256,7 +256,7 @@
 ;; This combines the copy and delete operation into one.
 ;; It should be a bit faster.
 (define (create-chain-move chain-to chain-from)
-	(Bind
+	(Query
 		; Constrain the allowed types on the variable;
 		; we only want to copy the actual state, and not
 		; (for example) the subgraphs of this link.

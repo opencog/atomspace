@@ -18,7 +18,7 @@
 ; A re-write rule that, when it finds one graph, it creates another.
 ; Here, for each $H that is human, asserts that $H is an animal.
 (define human-implies-animal
-	(Bind
+	(Query
 		; This is the pattern that will be matched ...
 		(Inheritance (Variable "$H") (Concept "human"))
 
@@ -29,7 +29,7 @@
 ; A re-write rule, like the above, except that, when it triggers,
 ; it also computes a custom truth value.
 (define human-implies-animal-stv
-	(Bind
+	(Query
 		; This is the pattern that will be matched ...
 		(Inheritance (Variable "$H") (Concept "human"))
 
