@@ -29,7 +29,7 @@
 )
 
 (define query
-(GetLink
+(CollectionOf (Meet
   (TypedVariableLink
     (VariableNode "$f")
     (TypeNode "LambdaLink")
@@ -48,7 +48,7 @@
       )
     )
   )
-)
+))
 )
 
 (define expected

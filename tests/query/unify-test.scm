@@ -49,11 +49,11 @@
 (test-begin "UnifyUTest::test_unify_basic_4")
 (define tub4
 	(cog-execute!
-		(Get
+		(CollectionOf (Meet
 			(VariableList (Variable "$X") (Variable "$Y"))
 			(Identical
 				(Inheritance (Variable "$X") (Concept "B"))
-				(Inheritance (Concept "A") (Variable "$Y"))))))
+				(Inheritance (Concept "A") (Variable "$Y")))))))
 
 (format #t "Got ~A\n" tub4)
 (test-assert "UnifyUTest::test_unify_basic_4"
@@ -66,11 +66,11 @@
 (test-begin "UnifyUTest::test_unify_basic_5")
 (define tub5
 	(cog-execute!
-		(Get
+		(CollectionOf (Meet
 			(Variable "$X")
 			(Identical
 				(Inheritance (Variable "$X") (Variable "$Y"))
-				(Inheritance (Concept "A") (Variable "$Y"))))))
+				(Inheritance (Concept "A") (Variable "$Y")))))))
 
 (format #t "Got ~A\n" tub5)
 (test-assert "UnifyUTest::test_unify_basic_5"
@@ -86,11 +86,11 @@
 (test-begin "UnifyUTest::test_unify_basic_8")
 (define tub8
 	(cog-execute!
-		(Get
+		(CollectionOf (Meet
 			(VariableList (Variable "$X") (Variable "$Y"))
 			(Identical
 				(Inheritance (Variable "$X") (Variable "$Y"))
-				(Inheritance (Concept "A") (Variable "$Z"))))))
+				(Inheritance (Concept "A") (Variable "$Z")))))))
 
 (format #t "Got ~A\n" tub8)
 (test-assert "UnifyUTest::test_unify_basic_8"
@@ -181,11 +181,11 @@
 (test-begin "UnifyUTest::test_unify_unordered_2")
 (define tun2
 	(cog-execute!
-		(Get
+		(CollectionOf (Meet
 			(Variable "$Y")
 			(Identical
 				(And (Concept "A") (Concept "B"))
-				(And (Concept "A") (Variable "$Y"))))))
+				(And (Concept "A") (Variable "$Y")))))))
 
 (format #t "Got ~A\n" tun2)
 (test-assert "UnifyUTest::test_unify_unordered_2"
@@ -200,11 +200,11 @@
 (test-begin "UnifyUTest::test_unify_unordered_5")
 (define tun5
 	(cog-execute!
-		(Get
+		(CollectionOf (Meet
 			(VariableList (Variable "$X") (Variable "$Y"))
 			(Identical
 				(And (Concept "A") (Concept "A") (Concept "B") (Concept "B"))
-				(And (Concept "A") (Concept "B") (Variable "$X") (Variable "$Y"))))))
+				(And (Concept "A") (Concept "B") (Variable "$X") (Variable "$Y")))))))
 
 (define tune5
 	(Set
