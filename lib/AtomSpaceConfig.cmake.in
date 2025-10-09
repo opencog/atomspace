@@ -41,11 +41,7 @@ set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_grounded_LIBRARY grounded)
 set(ATOMSPACE_join_LIBRARY join)
-set(ATOMSPACE_json_LIBRARY json)
 set(ATOMSPACE_pattern_LIBRARY pattern)
-set(ATOMSPACE_load_scm_LIBRARY load_scm)
-set(ATOMSPACE_persist_LIBRARY persist)
-set(ATOMSPACE_sexpr_LIBRARY sexpr)
 set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
 set(ATOMSPACE_value_LIBRARY value)
@@ -67,6 +63,7 @@ set(ATOMSPACE_LIBRARIES
 	execution
 	grounded
 	smob
+	backing
 	atomspace
 )
 

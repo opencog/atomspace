@@ -156,35 +156,6 @@ include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
 # ----------------------------------------------------------
-# OCaml (optional; needed for the OCaml bindings.)
-
-# At this time, OCaml does not build, because the cmake scripts fail to
-# set up the include directory correctly. The work-around is to stub
-# things out, below. Since the OCaml bindings are deprecated, anyway,
-# this seems like an appropriate thing to do. A proper fix would be
-# to tweak cogutils/cmake/FindOCaml.cmake so that it sets the include
-# directory.
-FIND_PACKAGE(OCaml)
-IF (OCAML_FOUND)
-	# ADD_DEFINITIONS(-DHAVE_OCAML)
-	# SET(HAVE_OCAML 1)
-	MESSAGE(STATUS "OCaml was found, but will not be built, due to bit-rot.")
-ENDIF (OCAML_FOUND)
-
-# ----------------------------------------------------------
-# Glasgow Haskell compiler (Optional; needed for the Haskell bindings)
-# The Haskell bindings are very old and unmaintained, and should not be
-# used in development. Stub them out until a maintainer shows up and
-# modernizes them.
-
-FIND_PACKAGE(Stack)
-IF (STACK_FOUND)
-	# ADD_DEFINITIONS(-DHAVE_STACK)
-	# SET(HAVE_STACK 1)
-	MESSAGE(STATUS "Haskell was found, but will not be built, due to bit-rot.")
-ENDIF (STACK_FOUND)
-
-# ----------------------------------------------------------
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -397,8 +368,6 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 # Don't print, it's never used.
 # SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
-# SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
-# SUMMARY_ADD("OCaml bindings" "OCaML bindings" HAVE_OCAML)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose2 tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)

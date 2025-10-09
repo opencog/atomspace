@@ -12,31 +12,18 @@ ADD_SUBDIRECTORY (atoms)
 ADD_SUBDIRECTORY (atomspace)
 ADD_SUBDIRECTORY (eval)
 ADD_SUBDIRECTORY (query)
+ADD_SUBDIRECTORY (persist)
 
 # Guile/scheme API bindings and utilities
-IF (HAVE_GUILE)
-	ADD_SUBDIRECTORY (guile)
-	ADD_SUBDIRECTORY (scm)
-ENDIF (HAVE_GUILE)
+ADD_SUBDIRECTORY (guile)
+ADD_SUBDIRECTORY (scm)
 
 # Python3 API bindings.
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
 ENDIF (HAVE_CYTHON)
 
-# Haskell bindings.
-IF (HAVE_STACK)
-	ADD_SUBDIRECTORY (haskell)
-ENDIF (HAVE_STACK)
+WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config.scm SCM_CONFIG TRUE)
 
-# OCaml bindings.
-IF (HAVE_OCAML)
-	ADD_SUBDIRECTORY (ocaml)
-ENDIF (HAVE_OCAML)
-
-IF (HAVE_GUILE)
-	WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config.scm SCM_CONFIG TRUE)
-
-	WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config-installable.scm SCM_CONFIG FALSE)
-	INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
-ENDIF (HAVE_GUILE)
+WRITE_GUILE_CONFIG(${GUILE_BIN_DIR}/opencog/as-config-installable.scm SCM_CONFIG FALSE)
+INSTALL(FILES ${GUILE_BIN_DIR}/opencog/as-config-installable.scm DESTINATION ${GUILE_SITE_DIR}/opencog RENAME as-config.scm)
