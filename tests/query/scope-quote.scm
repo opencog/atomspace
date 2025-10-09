@@ -60,7 +60,8 @@
 
 ; The pattern matcher, looks for the List variant
 (define blist
-  (BindLink
+  (CollectionOf
+  (QueryLink
     (VariableList
       (TypedVariableLink
         (VariableNode "$TyVs-one")
@@ -85,12 +86,14 @@
     (OrderedLink
       A1-lamb
       A2-lamb))
+  )
 )
 
 ; The pattern matcher, looks for the And variant. Notice that
 ; the quoting is different from the above.
 (define bland
-  (BindLink
+  (CollectionOf
+  (QueryLink
     ; Variable declaration
     (VariableList
       (TypedVariableLink
@@ -125,4 +128,5 @@
     (UnorderedLink
       A1-lamb
       A2-lamb))
+  )
 )

@@ -270,8 +270,8 @@ void ScopeUTest::test_hide_2()
 
 	std::string eval_result = eval->eval("(load-from-path \"tests/query/scope-hide.scm\")");
 	Handle rule = eval->eval_h("rule");
-	Handle result = bindlink(as, rule);
-	Handle expected = al(SET_LINK, rule->getOutgoingAtom(2));
+	Handle result = HandleCast(rule->execute(as.get()));
+	Handle expected = al(SET_LINK, rule->getOutgoingAtom(0)->getOutgoingAtom(2));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);

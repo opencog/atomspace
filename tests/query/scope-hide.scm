@@ -54,7 +54,8 @@
 )
 
 (define rule
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (TypedVariableLink
          (VariableNode "?C")
          (TypeChoice
@@ -88,5 +89,6 @@
             )
          )
       )
+   )
    )
 )

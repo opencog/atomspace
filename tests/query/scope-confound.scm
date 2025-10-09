@@ -8,7 +8,8 @@
 ; -------------------------------------------------------------
 ; From "opencog/pln/rules/evaluation-to-member-rule.scm"
 (define (evaluation-to-member-2-rule-loose)
-    (BindLink
+    (CollectionOf
+    (QueryLink
         ; var decls
         (VariableList
             (VariableNode "$A")
@@ -51,11 +52,14 @@
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")
-                            (VariableNode "$B")))))))
+                            (VariableNode "$B")))))
+    )
+    ))
 
 
 (define (evaluation-to-member-2-rule)
-    (BindLink
+    (CollectionOf
+    (QueryLink
         ; var decls
         (VariableList
             (TypedVariableLink
@@ -102,7 +106,9 @@
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")
-                            (VariableNode "$B")))))))
+                            (VariableNode "$B")))))
+    )
+    ))
 
 
 (define (evaluation-to-member-2-formula MAXDXB MBXDAX DAB) MAXDXB)
