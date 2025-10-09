@@ -86,7 +86,8 @@
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
 (define (is-same-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "PredicateNode" "$predicate")
@@ -109,7 +110,7 @@
 		;; implicand -- then the following is true too
 		(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Transitive deduction rule.
@@ -117,7 +118,8 @@
 ;; If attribute X holds for person A, and person A is same as person B
 ;; then attribute X also holds for person B.
 (define (transitive-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "PredicateNode" "$predicate")
@@ -138,7 +140,7 @@
 		;; implicand -- then the following is true too
 		(clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Transitive-not deduction rule.
@@ -148,7 +150,8 @@
 ;;
 ;; Very similar to above
 (define (transitive-not-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "PredicateNode" "$predicate")
@@ -169,13 +172,14 @@
 		;; implicand -- then the following is true too
 		(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; elimination
 
 (define (by-elimination-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person")
@@ -222,7 +226,7 @@
 		;; Then by elimination, person must have attribute e.
 		(clause VN "$predicate" VN "$person" VN "$attr_e")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; distinct-attr rule.
@@ -231,7 +235,8 @@
 ;; attributes they have must also be exclusive.
 
 (define (distinct-attr-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person_a")
@@ -258,7 +263,7 @@
 		;; implicand -- then the following is true too
 		(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; neighbor-not-attr rule.
@@ -266,7 +271,8 @@
 ;; person's neighbor.
 
 (define (neighbor-not-attr-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person_a")
@@ -288,7 +294,7 @@
 		;; implicand -- then the following is true too
 		(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Houses at the end of the street can only have one neighbor, ever.
@@ -297,7 +303,8 @@
 ;; This is used to combine rules 9 and 14.
 ;; There should be a symmetric rule for the last address too ...
 (define (first-addr-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person_a")
@@ -322,7 +329,7 @@
 		;; implicand -- then the B lives one house over.
 		(clause PN "Address" VN "$person_b" VN "$addr_b")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Neighbor deduction rule.
@@ -330,7 +337,8 @@
 ;; If Address X is left of address Y, then person who lives in X is
 ;; a neighbor of person who lives in Y
 (define (neighbor-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person_a")
@@ -351,14 +359,15 @@
 		;; implicand -- then the following is true too
 		(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Neighbor relation is symmetric
 ;;
 ;; If A is a neighbor of B then B is a neighbor of A
 (define (neighbor-symmetry-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person_a")
@@ -375,14 +384,15 @@
 		;; implicand -- then the following is true too
 		(clause PN "Neighbor" VN "$person_b" VN "$person_a")
 	)
-)
+))
 
 ;; ---------------------------------------------------------------------
 ;; Deduce if a solution has been found ... this simply tries to see
 ;; if all attributes have been deduced, and if so, just clumps them
 ;; together.
 (define (found-solution-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(decl-var "FeatureNode" "$person")
@@ -425,4 +435,4 @@
 			(VN "$addr")
 		)
 	)
-)
+))
