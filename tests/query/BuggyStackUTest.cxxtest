@@ -78,7 +78,7 @@ void BuggyStackUTest::test_exec(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != restrict);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = bindlink(as, restrict);
+	Handle result = HandleCast(restrict->execute(as.get()));
 	logger().debug("result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 

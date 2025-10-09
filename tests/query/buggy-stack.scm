@@ -3,49 +3,47 @@
 ;
 ; Test data for a stack-handling bug found by Samir
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ; Input data
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (PredicateNode "grab@123_Manipulation")
    (WordSenseNode "#Manipulation")
 )
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (PredicateNode "grab@123_Manipulation_Agent")
    (SemeNode "#Manipulation:Agent")
 )
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (PredicateNode "grab@123_Manipulation_Depictive")
    (SemeNode "#Manipulation:Depictive")
 )
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (PredicateNode "grab@123_Manipulation_Entity")
    (SemeNode "#Manipulation:Entity")
 )
 
-(FeatureLink (stv 1.0 1.0)
+(FeatureLink
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Agent")
 )
-(FeatureLink (stv 1.0 1.0)
+(FeatureLink
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Depictive")
 )
-(FeatureLink (stv 1.0 1.0)
+(FeatureLink
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Entity")
 )
 
 
-(EvaluationLink (stv 1.0 1.0)
+(EvaluationLink
    (PredicateNode "grab@123_Manipulation_Agent")
    (ConceptNode "#you")
 )
-(EvaluationLink (stv 1.0 1.0)
+(EvaluationLink
    (PredicateNode "grab@123_Manipulation_Depictive")
    (ConceptNode "#grab")
 )
-(EvaluationLink (stv 1.0 1.0)
+(EvaluationLink
    (PredicateNode "grab@123_Manipulation_Entity")
    (WordInstanceNode "ball@456")
 )
@@ -53,7 +51,8 @@
 
 ; The implication to be run
 (define (impy)
-  (Bind
+  (CollectionOf
+  (Query
    (VariableList
     (TypedVariable
       (Variable "$agent")
@@ -81,6 +80,7 @@
    (Evaluation
     (Predicate "grab")
     (List (Variable "$targetEntity") (Variable "$frameDepictive")))
+  )
   )
 )
 
