@@ -130,7 +130,7 @@ void UnorderedUTest::test_un1(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disordered);
 
 	// Result should be a ListLink w/ two solutions
-	Handle result = bindlink(as, pair);
+	Handle result = HandleCast(pair->execute(as.get()));
 
 	logger().debug("pair result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
@@ -140,14 +140,14 @@ void UnorderedUTest::test_un1(void)
 	// the other should bind to VariableNodes appearing elsewhere in the
 	// atomspace.  We could avoid this by using TypedVariableLinks, but this
 	// potentially confused the test case even more ... so we don't
-	result = bindlink(as, disorder);
+	result = HandleCast(disorder->execute(as.get()));
 	logger().debug() << "Disorder Result is this:\n" << result->to_string();
 
 	logger().debug("first result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ one solution. Well, actually, two as above.
-	result = bindlink(as, disordered);
+	result = HandleCast(disordered->execute(as.get()));
 	logger().debug() << "DisorderED Result is this:\n" << result->to_string();
 
 	logger().debug("next result is %s\n", result->to_string().c_str());
@@ -165,7 +165,7 @@ void UnorderedUTest::test_un2(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disor_more);
 
 	// Result should be a ListLink w/ one solution
-	Handle result = bindlink(as, disor_more);
+	Handle result = HandleCast(disor_more->execute(as.get()));
 
 	logger().debug("second result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -248,49 +248,49 @@ void UnorderedUTest::test_exhaust(void)
 
 	// --------------------
 	// Result should be a ListLink w/ 60 solutions.
-	Handle result = bindlink(as, exhaust);
+	Handle result = HandleCast(exhaust->execute(as.get()));
 
 	// logger().debug("exhaustive result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 60, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 72 solutions
-	result = bindlink(as, exhaust2);
+	result = HandleCast(exhaust2->execute(as.get()));
 
 	// logger().debug("exhaust-2 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 72, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 12 solutions
-	result = bindlink(as, exhaust3);
+	result = HandleCast(exhaust3->execute(as.get()));
 
 	logger().debug("exhaust-3 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
-	result = bindlink(as, exhaust4);
+	result = HandleCast(exhaust4->execute(as.get()));
 
 	logger().debug("exhaust-4 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
-	result = bindlink(as, exhaust5);
+	result = HandleCast(exhaust5->execute(as.get()));
 
 	logger().debug("exhaust-5 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 12 solutions
-	result = bindlink(as, exhaust_eq_12);
+	result = HandleCast(exhaust_eq_12->execute(as.get()));
 
 	logger().debug("exhaust-eq-12 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(result));
 
 	// --------------------
 	// Result should be a ListLink w/ 6 solutions
-	result = bindlink(as, exhaust_eq_6);
+	result = HandleCast(exhaust_eq_6->execute(as.get()));
 
 	logger().debug("exhaust-eq-6 result is %s\n", result->to_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(result));

@@ -38,7 +38,8 @@
 ; the OrderedLink was a LambdaLink. OK, I put it back to Lambda.
 ; If testing w/o the quotes, use Ordered...
 (define query
-	(GetLink (PresentLink
+	(CollectionOf
+	(MeetLink (PresentLink
 
 		; Matches the target graph
 		(ListLink (QuoteLink
@@ -55,6 +56,7 @@
 					(UnquoteLink (VariableNode "$cnj-bodies-1"))
 					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-1")))))
+	))
 
 ; Run the query.
 ; (cog-execute! query)

@@ -64,7 +64,8 @@
 
 ;; Note that the SimilarityLink is unordered ... 
 (define (blank)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink
@@ -84,6 +85,7 @@
 		(ListLink
 			(VariableNode "$var_number_node_type")
 		)
+	)
 	)
 )
 

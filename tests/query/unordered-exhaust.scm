@@ -37,7 +37,8 @@
 ;; with 4! for the xyzw permutations, and (6+6+6)=18 for the pqr-set
 ;; permutations, and another (6+6+6)=18 for the abc-set.
 (define (exhaust)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -60,6 +61,7 @@
 			(VariableNode "$d")
 		)
 	)
+	)
 )
 
 ;; This should match in 3! * 3! = 36 different ways, viz a combinatorial
@@ -73,7 +75,8 @@
 ;; unordered link inside another, so that proper state preservation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-2)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -102,6 +105,7 @@
 			(VariableNode "$e")
 			(VariableNode "$f"))
 	)
+	)
 )
 
 ;; This should match in (3! * 3!) / 3 = 12 different ways, viz a
@@ -114,7 +118,8 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-3)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -142,6 +147,7 @@
 			(VariableNode "$e")
 		)
 	)
+	)
 )
 
 ;; This should match in (3! * 3!) / 6 = 6 different ways, viz a
@@ -155,7 +161,8 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-4)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -181,6 +188,7 @@
 			(VariableNode "$d")
 		)
 	)
+	)
 )
 
 ;; This should match in (3! * 3!) / 6 = 6 different ways, viz a
@@ -194,7 +202,8 @@
 ;; unordered link inside another, so that proper state presevation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-5)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -217,6 +226,7 @@
 			(VariableNode "$b")
 			(VariableNode "$c")
 		)
+	)
 	)
 )
 
@@ -255,7 +265,8 @@
 )
 
 (define (exhaust-eq-12)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -295,10 +306,12 @@
 			(VariableNode "$f")
 		)
 	)
+	)
 )
 
 (define (exhaust-eq-6)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(TypedVariableLink (VariableNode "$a") (TypeNode "ConceptNode"))
@@ -344,5 +357,6 @@
 			(VariableNode "$c2")
 			(VariableNode "$f")
 		)
+	)
 	)
 )
