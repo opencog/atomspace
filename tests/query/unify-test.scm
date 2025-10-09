@@ -7,7 +7,7 @@
 ;
 ; So, here's the deal:
 ; (Unify A B) is more or less the same thing as
-; (Get (Identical A B)) and because this is "more or less" the case,
+; (Meet (Identical A B)) and because this is "more or less" the case,
 ; that is what this unit test tests. However... There are some
 ; conceptual differences. Unify allows the form:
 ;
@@ -18,17 +18,17 @@
 ;      right-expr)
 ;
 ; where left-vars... are the things to be taken as variables in left-expr.
-; There's nothing like this for IdenticalLink or GetLink. We can almost
+; There's nothing like this for IdenticalLink or MeetLink. We can almost
 ; get the same thing by writing
 ;
-;   (Get
+;   (Meet
 ;      (VariableList left-vars... right-vars..)
 ;      (Identical left-expr right-expr))
 ;
 ; except that this can fail if (Variable "$X") apprears in left-vars,
 ; and also appears in right-expr, but not in right-vars. There is no
 ; way to handle this case in any kind of easy or natural way using
-; GetLink. And that is how Unify is different from (Get (Identical ..))
+; MeetLink. And that is how Unify is different from (Meet (Identical ..))
 ;
 ; Ignroing this critical difference, this is a port of UnifyUTest.cxxtest
 ; that "does the same thing", ignoring the subtleties above.
@@ -105,7 +105,7 @@
 ;;;(test-begin "UnifyUTest::test_unify_undeclared_var_1")
 ;;;(define tuuv1
 ;;;	(cog-execute!
-;;;		(Get
+;;;		(Meet
 ;;;			(Variable "$Y")
 ;;;			(Identical
 ;;;				(Variable "$X")
@@ -129,7 +129,7 @@
 ;;;(test-begin "UnifyUTest::test_unify_undeclared_var_2")
 ;;;(define tuuv2
 ;;;	(cog-execute!
-;;;		(Get
+;;;		(Meet
 ;;;			(Variable "$Y")
 ;;;			(Identical
 ;;;				(Variable "$X")
@@ -167,7 +167,7 @@
 ;      (Clause (VariableList right-vars..) right-expr))
 ; which is not a natural form that is supported. One "easy" fix would
 ; be to rewrite the above as
-;   (Get
+;   (Meet
 ;      (VariableList left-vars... right-vars..)
 ;      (Identical left-expr right-expr))
 ; but I think that violates the "spirit" of the idea, which is to
