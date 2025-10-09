@@ -4,10 +4,8 @@
 ;; Crazy NotLink bug
 ;;
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ;; Person1 lives in the red house.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person1") ; AvatarNode
@@ -16,7 +14,7 @@
 )
 
 ;; Person2 lives the red house.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person2")
