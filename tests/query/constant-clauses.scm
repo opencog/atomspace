@@ -40,7 +40,8 @@
 
 ;; Rule
 (define mixed-clauses
- (BindLink
+ (CollectionOf
+ (QueryLink
   (VariableList
    (TypedVariableLink
     (VariableNode "$who")
@@ -60,10 +61,11 @@
      (VariableNode "$Y")
      (VariableNode "$who")))
 
-   (EvaluationLink (stv 1.000000 1.000000)
+   (EvaluationLink
     (PredicateNode "is-musician")
     (ConceptNode "John"))
   )
 
   (VariableNode "$who")
+ )
  ))
