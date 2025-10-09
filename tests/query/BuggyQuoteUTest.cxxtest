@@ -117,7 +117,7 @@ void BuggyQuoteUTest::test_good_form(void)
     Handle qrule = eval->eval_h("query_rule_good");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
 
-    Handle rslt = bindlink(as, qrule);
+    Handle rslt = HandleCast(qrule->execute(as.get()));
     logger().debug() << "Result is this:\n" << rslt->to_string();
 
     // See buggy-crime.scm for explanation for why this is 1 not 2
