@@ -79,7 +79,7 @@ void AlwaysUTest::test_basic(void)
 
 	eval->eval("(load-from-path \"tests/query/always.scm\")");
 
-	Handle red_set = eval->eval_h("(cog-execute! baskets-with-red-balls-only)");
+	Handle red_set = eval->eval_h("(cog-execute! (CollectionOf baskets-with-red-balls-only))");
 	printf("Expecting red basket, got %s", red_set->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(red_set));
@@ -88,7 +88,7 @@ void AlwaysUTest::test_basic(void)
 	TS_ASSERT_EQUALS(redbask, red_set->getOutgoingAtom(0));
 
 	// ----------------
-	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
+	Handle red_n_yell = eval->eval_h("(cog-execute! (CollectionOf baskets-with-same-color))");
 	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
 
 	TS_ASSERT_EQUALS(2, getarity(red_n_yell));
@@ -112,7 +112,7 @@ void AlwaysUTest::test_more(void)
 
 	eval->eval("(load-from-path \"tests/query/always-more.scm\")");
 
-	Handle red_set = eval->eval_h("(cog-execute! baskets-with-red-balls-only)");
+	Handle red_set = eval->eval_h("(cog-execute! (CollectionOf baskets-with-red-balls-only))");
 	printf("Expecting two red baskets, got %s", red_set->to_string().c_str());
 
 	TS_ASSERT_EQUALS(2, getarity(red_set));
@@ -124,7 +124,7 @@ void AlwaysUTest::test_more(void)
 	TS_ASSERT_EQUALS(both, red_set);
 
 	// ----------------
-	Handle red_n_yell = eval->eval_h("(cog-execute! baskets-with-same-color)");
+	Handle red_n_yell = eval->eval_h("(cog-execute! (CollectionOf baskets-with-same-color))");
 	printf("Expecting red and yellow, got %s", red_n_yell->to_string().c_str());
 
 	TS_ASSERT_EQUALS(3, getarity(red_n_yell));

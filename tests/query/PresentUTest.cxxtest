@@ -87,7 +87,7 @@ void PresentUTest::test_literal(void)
 
 	eval->eval("(load-from-path \"tests/query/present.scm\")");
 
-	Handle get5 = eval->eval_h("(cog-execute! get5)");
+	Handle get5 = eval->eval_h("(cog-execute! (CollectionOf get5))");
 	Handle ans5 = eval->eval_h("ans5");
 
 	printf("Expecting: %s\n", ans5->to_string().c_str());

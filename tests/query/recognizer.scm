@@ -13,7 +13,7 @@
 		(GlobNode "$star")
 		(ConceptNode "you")))
 
-(BindLink
+(QueryLink
 	star-you
 	(ListLink
 		(ConceptNode "I")
@@ -27,7 +27,7 @@
 		(ConceptNode "love")
 		(GlobNode "$star")))
 
-(BindLink
+(QueryLink
 	love-star
 	(ListLink
 		(ConceptNode "I")
@@ -67,7 +67,7 @@
 		(ConceptNode "hates")
 		(GlobNode "$B")))
 
-(BindLink
+(QueryLink
 	a-hate-b
 	(ListLink
 		(ConceptNode "I'm")

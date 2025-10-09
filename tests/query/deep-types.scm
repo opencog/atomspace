@@ -50,7 +50,7 @@
 
 ; Define a search that should return only the first inheritance link.
 (define get-foo
-	(GetLink
+	(MeetLink
 		(TypedVariable (Variable "$x")
 			(Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
 
@@ -64,7 +64,7 @@
 
 ; Define a search that should return the first two inheritance links.
 (define get-foobar
-	(GetLink
+	(MeetLink
 		(TypedVariable (Variable "$x")
 			(TypeChoice
 				(Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
@@ -96,7 +96,7 @@
 
 ; A search pattern that looks for predicates or grounded predicates.
 (define predicate-search
-	(GetLink
+	(MeetLink
 		(TypedVariable
 			(Variable "$x")
 			(Signature
@@ -119,7 +119,7 @@
 				(Type "ConceptNode") (Type "ConceptNode")))))
 
 (define predicate-search-typed
-	(GetLink
+	(MeetLink
 		(TypedVariable
 			(Variable "$x")
 			(DefinedType "predicate-type"))
@@ -130,13 +130,13 @@
 ; A somewhat silly special case involving a constant
 
 (define constant-a
-	(Get
+	(Meet
 		(TypedVariable (Variable "X") (Signature (Concept "A")))
 		(Present (Variable "X"))))
 
 ; After Holiday in Berlin ...
 (define constant-zappa
-	(Get
+	(Meet
 		(TypedVariable (Variable "X") (Signature (Concept "A")))
 		(Present
 			(Evaluation (Predicate "Aybe Sea")
@@ -153,7 +153,7 @@
 ; Disconennted components with deep types.
 
 (define deep-disconnect
-   (Get
+   (Meet
       (VariableList
          (TypedVariable (Variable "X") (Signature (Concept "A")))
          (TypedVariable (Variable "Y") (Signature (Concept "B"))))

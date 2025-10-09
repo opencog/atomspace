@@ -3,7 +3,7 @@
 (define soln (SetLink (ListLink (ConceptNode "A") (ConceptNode "B"))))
 
 (define test-absent
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink (VariableNode "$var1") (TypeNode "ConceptNode"))
             (TypedVariableLink (VariableNode "$var2") (TypeNode "ConceptNode"))
@@ -28,7 +28,7 @@
 )
 
 (define test-not-present
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink (VariableNode "$var1") (TypeNode "ConceptNode"))
             (TypedVariableLink (VariableNode "$var2") (TypeNode "ConceptNode"))

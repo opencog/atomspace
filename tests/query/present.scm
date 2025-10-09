@@ -1,7 +1,7 @@
 
 (use-modules (opencog) (opencog exec))
 
-(define get5 (GetLink
+(define get5 (MeetLink
   (VariableList
    (TypedVariable (Variable "$num1") (Type 'NumberNode))
    (TypedVariable (Variable "$num2") (Type 'NumberNode)))

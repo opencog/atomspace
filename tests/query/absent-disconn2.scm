@@ -1,7 +1,7 @@
 (define soln (SetLink (ListLink (ConceptNode "A") (ConceptNode "B"))))
 
 (define test
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink (VariableNode "$var1") (TypeNode "ConceptNode"))
             (TypedVariableLink (VariableNode "$var2") (TypeNode "ConceptNode"))

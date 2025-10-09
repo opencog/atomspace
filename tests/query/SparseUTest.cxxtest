@@ -87,7 +87,7 @@ void SparseUTest::test_glob(void)
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2 solutions
 	// In the buggy case, this hits an infinite loop.
-	result = eval->eval_h("(cog-execute! est)");
+	result = eval->eval_h("(cog-execute! (CollectionOf est))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
@@ -95,7 +95,7 @@ void SparseUTest::test_glob(void)
 	// --------------------------------------------
 	// Result should be a SetLink w/ 1 solution
 	// In the buggy case, this hits an infinite loop.
-	result = eval->eval_h("(cog-execute! est-uni)");
+	result = eval->eval_h("(cog-execute! (CollectionOf est-uni))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -116,7 +116,7 @@ void SparseUTest::test_palin(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 4 solutions
-	result = eval->eval_h("(cog-execute! palin)");
+	result = eval->eval_h("(cog-execute! (CollectionOf palin))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -137,7 +137,7 @@ void SparseUTest::test_palin_dab(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2 solutions
-	result = eval->eval_h("(cog-execute! palin-disambig)");
+	result = eval->eval_h("(cog-execute! (CollectionOf palin-disambig))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
@@ -158,7 +158,7 @@ void SparseUTest::test_glob_ord(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 1 solution
-	result = eval->eval_h("(cog-execute! est)");
+	result = eval->eval_h("(cog-execute! (CollectionOf est))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -179,7 +179,7 @@ void SparseUTest::test_palin_ord(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 2 solutions
-	result = eval->eval_h("(cog-execute! palin)");
+	result = eval->eval_h("(cog-execute! (CollectionOf palin))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
@@ -201,7 +201,7 @@ void SparseUTest::test_chem_bad(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 4 solutions
-	result = eval->eval_h("(cog-execute! bad-ester)");
+	result = eval->eval_h("(cog-execute! (CollectionOf bad-ester))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(result));
@@ -223,7 +223,7 @@ void SparseUTest::test_chem_good(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 1 solutions
-	result = eval->eval_h("(cog-execute! esterification)");
+	result = eval->eval_h("(cog-execute! (CollectionOf esterification))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
@@ -245,7 +245,7 @@ void SparseUTest::test_chem_inf(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ no solutions
-	result = eval->eval_h("(cog-execute! ester)");
+	result = eval->eval_h("(cog-execute! (CollectionOf ester))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result));
@@ -267,7 +267,7 @@ void SparseUTest::test_chem_order(void)
 
 	// --------------------------------------------
 	// Result should be a SetLink w/ 1 solutions
-	result = eval->eval_h("(cog-execute! estero)");
+	result = eval->eval_h("(cog-execute! (CollectionOf estero))");
 
 	logger().debug("glob arity is %d\n", getarity(result));
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));

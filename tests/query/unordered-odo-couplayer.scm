@@ -22,7 +22,7 @@
 	(Set (Predicate "R") (Predicate "S") (Predicate "T")))
 
 (define play-dim-two
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$W") (Variable "$X") (Variable "$Y"))))
@@ -43,7 +43,7 @@
 	(Set (Predicate "T") (Predicate "U") (Predicate "V")))
 
 (define play-dim-three
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$C") (Variable "$D") (Variable "$E"))
@@ -67,7 +67,7 @@
 	(Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define play-dim-four
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$C") (Variable "$D") (Variable "$E"))

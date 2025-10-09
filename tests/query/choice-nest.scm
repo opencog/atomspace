@@ -131,7 +131,7 @@
 
 ;;; Nested clauses; all connected with a common variable.
 (define (nest)
-	(BindLink
+	(QueryLink
 		(AndLink
 			(MemberLink
 				(VariableNode "$x")
@@ -173,7 +173,7 @@
 
 ;; Simple nesting -- Or within Or 
 (define (nest-bad)
-	(BindLink
+	(QueryLink
 		(AndLink
 			(MemberLink
 				(VariableNode "$x")

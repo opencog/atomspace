@@ -38,7 +38,7 @@
 
 ;;; Two clauses; they both connected with a common variable.
 (define (basic)
-	(BindLink
+	(QueryLink
 		(AndLink
 			(MemberLink
 				(VariableNode "$x")

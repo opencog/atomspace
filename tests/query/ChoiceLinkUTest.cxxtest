@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -82,7 +83,11 @@ void ChoiceLinkUTest::setUp(void)
 	as->clear();
 }
 
-#define getarity(hand) hand->get_arity()
+static size_t getarity(const ValuePtr& v)
+{
+	LinkValuePtr lv = LinkValueCast(v);
+	return lv->size();
+}
 
 /*
  * ChoiceLink most basic unit test.
@@ -93,7 +98,7 @@ void ChoiceLinkUTest::test_basic_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-link.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (basic))");
+	ValuePtr items = eval->eval_v("(cog-execute! (basic))");
 
 	TS_ASSERT_EQUALS(2, getarity(items));
 
@@ -109,7 +114,7 @@ void ChoiceLinkUTest::test_embed_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-embed.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (embed))");
+	ValuePtr items = eval->eval_v("(cog-execute! (embed))");
 
 	TS_ASSERT_EQUALS(2, getarity(items));
 
@@ -125,7 +130,7 @@ void ChoiceLinkUTest::test_nest_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (nest))");
+	ValuePtr items = eval->eval_v("(cog-execute! (nest))");
 
 	printf ("Nest found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(items));
@@ -142,7 +147,7 @@ void ChoiceLinkUTest::test_top_nest_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (top-nest))");
+	ValuePtr items = eval->eval_v("(cog-execute! (top-nest))");
 
 	printf ("Top-nest found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(items));
@@ -159,7 +164,7 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (nest-bad))");
+	ValuePtr items = eval->eval_v("(cog-execute! (nest-bad))");
 
 	printf ("Nest-bad found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(items));
@@ -176,7 +181,7 @@ void ChoiceLinkUTest::test_top_nest_bad_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (top-nest-bad))");
+	ValuePtr items = eval->eval_v("(cog-execute! (top-nest-bad))");
 
 	printf ("Top-nest-bad found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(items));
@@ -193,12 +198,12 @@ void ChoiceLinkUTest::test_top_disco(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-disconnected.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (top-disco))");
+	ValuePtr items = eval->eval_v("(cog-execute! (top-disco))");
 
 	printf ("Top-disco found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(items));
 
-	Handle wrap = eval->eval_h("(cog-execute! (wrapped-disco))");
+	ValuePtr wrap = eval->eval_v("(cog-execute! (wrapped-disco))");
 
 	printf ("Top-wrapped-disco found:\n%s\n", wrap->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(wrap));
@@ -216,7 +221,7 @@ void ChoiceLinkUTest::test_embed_disco(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-embed-disco.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! (embed-disco))");
+	ValuePtr items = eval->eval_v("(cog-execute! (embed-disco))");
 
 	printf ("Embed pseudo-disco found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(items));
@@ -236,7 +241,7 @@ void ChoiceLinkUTest::xxxtest_double_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-double.scm\")");
 
-	Handle items = eval->eval_h("(cog-execute! double)");
+	ValuePtr items = eval->eval_v("(cog-execute! double)");
 	logger().debug("double-or found %s", items->to_short_string().c_str());
 
 	TS_ASSERT_EQUALS(3, getarity(items));
@@ -253,12 +258,12 @@ void ChoiceLinkUTest::test_unary(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-unary.scm\")");
 
-	Handle doors = eval->eval_h("(cog-execute! (get-a))");
+	ValuePtr doors = eval->eval_v("(cog-execute! (get-a))");
 
 	printf("unary door-a found:\n%s\n", doors->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(doors));
 
-	doors = eval->eval_h("(cog-execute! (get-bc))");
+	doors = eval->eval_v("(cog-execute! (get-bc))");
 
 	printf("unary door-bc found:\n%s\n", doors->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(doors));
@@ -274,7 +279,7 @@ void ChoiceLinkUTest::test_typed(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/choice-typed.scm\")");
-	Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
+	ValuePtr rules = eval->eval_v("(cog-execute! get-nodes1)");
 
 	printf("typed get-nodes found:\n%s\n", rules->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(rules));
@@ -290,7 +295,7 @@ void ChoiceLinkUTest::test_constant(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/choice-constant.scm\")");
-	Handle result = eval->eval_h("(cog-execute! query)");
+	ValuePtr result = eval->eval_v("(cog-execute! query)");
 
 	printf("constant found:\n%s\n", result->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(result));
@@ -306,11 +311,11 @@ void ChoiceLinkUTest::test_present(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/choice-present.scm\")");
-	Handle result = eval->eval_h("(cog-execute! who-is-hungry?)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf who-is-hungry?))");
 	Handle answer = eval->eval_h("expected");
 
-	printf("compound found:\n%s\n", result->to_short_string().c_str());
-	TS_ASSERT_EQUALS(1, getarity(result));
+	printf("present found:\n%s\n", result->to_short_string().c_str());
+	TS_ASSERT_EQUALS(1, result->get_arity());
 	TS_ASSERT_EQUALS(result, answer);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -324,11 +329,11 @@ void ChoiceLinkUTest::test_compound(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/choice-compound.scm\")");
-	Handle result = eval->eval_h("(cog-execute! who-needs-help?)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf who-needs-help?))");
 	Handle answer = eval->eval_h("answer");
 
 	printf("compound found:\n%s\n", result->to_short_string().c_str());
-	TS_ASSERT_EQUALS(3, getarity(result));
+	TS_ASSERT_EQUALS(3, result->get_arity());
 	TS_ASSERT_EQUALS(result, answer);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

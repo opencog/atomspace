@@ -271,16 +271,16 @@ void SequenceUTest::test_trivial(void)
 
 	eval->eval("(load-from-path \"tests/query/seq-trivial.scm\")");
 
-	Handle result = eval->eval_h("(cog-execute! get-something)");
+	Handle result = eval->eval_h("(cog-execute! (CollectionOf get-something))");
 	TS_ASSERT_EQUALS(result->get_arity(), 1);
 
-	result = eval->eval_h("(cog-execute! get-nothing)");
+	result = eval->eval_h("(cog-execute! (CollectionOf get-nothing))");
 	TS_ASSERT_EQUALS(result->get_arity(), 0);
 
-	result = eval->eval_h("(cog-execute! get-not-true)");
+	result = eval->eval_h("(cog-execute! (CollectionOf get-not-true))");
 	TS_ASSERT_EQUALS(result->get_arity(), 0);
 
-	result = eval->eval_h("(cog-execute! get-not-false)");
+	result = eval->eval_h("(cog-execute! (CollectionOf get-not-false))");
 	TS_ASSERT_EQUALS(result->get_arity(), 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

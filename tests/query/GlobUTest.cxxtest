@@ -101,7 +101,7 @@ void GlobUTest::test_glob_middle(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! glob-you)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf glob-you))");
 	printf("glob-you %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->get_arity());
 
@@ -135,7 +135,7 @@ void GlobUTest::test_glob_final(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-glob)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-glob))");
 	printf("love-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(3, love->get_arity());
 
@@ -178,7 +178,7 @@ void GlobUTest::test_glob_type(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-type-glob)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-type-glob))");
 	printf("love-type-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(1, love->get_arity());
 
@@ -206,7 +206,7 @@ void GlobUTest::test_glob_interval(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-interval-glob)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-interval-glob))");
 	printf("love-interval-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->get_arity());
 
@@ -240,7 +240,7 @@ void GlobUTest::test_glob_typeset(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-typeset-glob)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-typeset-glob))");
 	printf("love-typeset-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->get_arity());
 
@@ -277,7 +277,7 @@ void GlobUTest::test_glob_empty_intersection(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-interval-glob-empty-intersection)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-interval-glob-empty-intersection))");
 	printf("love-interval-glob-empty-intersection %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(0, love->get_arity());
 
@@ -299,7 +299,7 @@ void GlobUTest::test_glob_empty_union(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-interval-glob-empty-union)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-interval-glob-empty-union))");
 	printf("love-interval-glob-empty-union %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->get_arity());
 
@@ -333,7 +333,7 @@ void GlobUTest::test_glob_three_globs(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-execute! love-three-globs)");
+	Handle love = eval->eval_h("(cog-execute! (CollectionOf love-three-globs))");
 	printf("love-three-globs %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(3, love->get_arity());
 
@@ -370,7 +370,7 @@ void GlobUTest::test_glob_two_in_a_row(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle greet = eval->eval_h("(cog-execute! greet)");
+	Handle greet = eval->eval_h("(cog-execute! (CollectionOf greet))");
 	printf("greet %s\n", greet->to_string().c_str());
 	TS_ASSERT_EQUALS(1, greet->get_arity());
 
@@ -394,7 +394,7 @@ void GlobUTest::test_glob_exact(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle exact = eval->eval_h("(cog-execute! exact)");
+	Handle exact = eval->eval_h("(cog-execute! (CollectionOf exact))");
 	printf("exact %s\n", exact->to_string().c_str());
 	TS_ASSERT_EQUALS(1, exact->get_arity());
 
@@ -419,7 +419,7 @@ void GlobUTest::test_glob_greedy(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle greedy = eval->eval_h("(cog-execute! greedy)");
+	Handle greedy = eval->eval_h("(cog-execute! (CollectionOf greedy))");
 	printf("greedy %s\n", greedy->to_string().c_str());
 	TS_ASSERT_EQUALS(1, greedy->get_arity());
 
@@ -447,7 +447,7 @@ void GlobUTest::test_glob_unorder(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle unorder = eval->eval_h("(cog-execute! unorder)");
+	Handle unorder = eval->eval_h("(cog-execute! (CollectionOf unorder))");
 	printf("unorder %s\n", unorder->to_string().c_str());
 	TS_ASSERT_EQUALS(1, unorder->get_arity());
 
@@ -479,7 +479,7 @@ void GlobUTest::test_glob_backtrack(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle backtrack = eval->eval_h("(cog-execute! backtrack)");
+	Handle backtrack = eval->eval_h("(cog-execute! (CollectionOf backtrack))");
 	printf("backtrack %s\n", backtrack->to_string().c_str());
 	TS_ASSERT_EQUALS(1, backtrack->get_arity());
 
@@ -511,7 +511,7 @@ void GlobUTest::test_glob_backtoo(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle backtoo = eval->eval_h("(cog-execute! backtoo)");
+	Handle backtoo = eval->eval_h("(cog-execute! (CollectionOf backtoo))");
 	printf("backtoo %s\n", backtoo->to_string().c_str());
 	TS_ASSERT_EQUALS(1, backtoo->get_arity());
 
@@ -543,7 +543,7 @@ void GlobUTest::test_glob_backmore(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle backmore = eval->eval_h("(cog-execute! backmore)");
+	Handle backmore = eval->eval_h("(cog-execute! (CollectionOf backmore))");
 	printf("backmore %s\n", backmore->to_string().c_str());
 	TS_ASSERT_EQUALS(1, backmore->get_arity());
 
@@ -575,7 +575,7 @@ void GlobUTest::test_glob_multiple(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle ma = eval->eval_h("(cog-execute! get-ma)");
+	Handle ma = eval->eval_h("(cog-execute! (CollectionOf get-ma))");
 	printf("ma %s\n", ma->to_string().c_str());
 	TS_ASSERT_EQUALS(1, ma->get_arity());
 
@@ -599,7 +599,7 @@ void GlobUTest::test_nest(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-nest.scm\")");
 
-	Handle five = eval->eval_h("(cog-execute! get-five)");
+	Handle five = eval->eval_h("(cog-execute! (CollectionOf get-five))");
 	printf("nested %s\n", five->to_string().c_str());
 	TS_ASSERT_EQUALS(5, five->get_arity());
 
@@ -621,7 +621,7 @@ void GlobUTest::test_gnest(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-nest.scm\")");
 
-	Handle four = eval->eval_h("(cog-execute! get-four)");
+	Handle four = eval->eval_h("(cog-execute! (CollectionOf get-four))");
 	printf("g-nested got %s\n", four->to_string().c_str());
 	TS_ASSERT_EQUALS(4, four->get_arity());
 
@@ -645,7 +645,7 @@ void GlobUTest::test_partition(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-partition.scm\")");
 
-	Handle parts = eval->eval_h("(cog-execute! partition)");
+	Handle parts = eval->eval_h("(cog-execute! (CollectionOf partition))");
 	printf("party got %s\n", parts->to_string().c_str());
 	TS_ASSERT_EQUALS(4, parts->get_arity());
 
@@ -679,7 +679,7 @@ void GlobUTest::test_partition(void)
 	TS_ASSERT_EQUALS(parts, response);
 
 	// -----------
-	parts = eval->eval_h("(cog-execute! part-deeper)");
+	parts = eval->eval_h("(cog-execute! (CollectionOf part-deeper))");
 	printf("party got %s\n", parts->to_string().c_str());
 	TS_ASSERT_EQUALS(4, parts->get_arity());
 
@@ -725,7 +725,7 @@ void GlobUTest::test_pivot(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-pivot.scm\")");
 
-	Handle pivot = eval->eval_h("(cog-execute! glob-pivot)");
+	Handle pivot = eval->eval_h("(cog-execute! (CollectionOf glob-pivot))");
 	printf("pivot got %s\n", pivot->to_string().c_str());
 	TS_ASSERT_EQUALS(1, pivot->get_arity());
 
@@ -763,27 +763,27 @@ void GlobUTest::test_multi_pivot(void)
 		"			(ConceptNode \"blah\"))))"
 	);
 
-	Handle plain = eval->eval_h("(cog-execute! glob-unify-plain)");
+	Handle plain = eval->eval_h("(cog-execute! (CollectionOf glob-unify-plain))");
 	printf("unify-plain got %s\n", plain->to_string().c_str());
 	TS_ASSERT_EQUALS(1, plain->get_arity());
 	TS_ASSERT_EQUALS(plain, response);
 
-	Handle tall = eval->eval_h("(cog-execute! glob-unify-tall)");
+	Handle tall = eval->eval_h("(cog-execute! (CollectionOf glob-unify-tall))");
 	printf("unify-tall got %s\n", tall->to_string().c_str());
 	TS_ASSERT_EQUALS(1, tall->get_arity());
 	TS_ASSERT_EQUALS(tall, response);
 
-	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
+	Handle pivot = eval->eval_h("(cog-execute! (CollectionOf glob-multi-pivot))");
 	printf("multi-pivot got %s\n", pivot->to_string().c_str());
 	TS_ASSERT_EQUALS(1, pivot->get_arity());
 	TS_ASSERT_EQUALS(pivot, response);
 
-	Handle chase = eval->eval_h("(cog-execute! glob-chase-pivot)");
+	Handle chase = eval->eval_h("(cog-execute! (CollectionOf glob-chase-pivot))");
 	printf("chase-pivot got %s\n", chase->to_string().c_str());
 	TS_ASSERT_EQUALS(1, chase->get_arity());
 	TS_ASSERT_EQUALS(chase, chesponse);
 
-	Handle mhase = eval->eval_h("(cog-execute! glob-chase-multi-pivot)");
+	Handle mhase = eval->eval_h("(cog-execute! (CollectionOf glob-chase-multi-pivot))");
 	printf("multi-chase got %s\n", mhase->to_string().c_str());
 	TS_ASSERT_EQUALS(1, mhase->get_arity());
 	TS_ASSERT_EQUALS(mhase, chesponse);
@@ -802,7 +802,7 @@ void GlobUTest::test_number(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-number.scm\")");
 
-	Handle fifteen = eval->eval_h("(cog-execute! glob-for-plus)");
+	Handle fifteen = eval->eval_h("(cog-execute! (CollectionOf glob-for-plus))");
 	printf("Number expect 15: %s\n", fifteen->to_string().c_str());
 	TS_ASSERT_EQUALS(1, fifteen->get_arity());
 
@@ -810,7 +810,7 @@ void GlobUTest::test_number(void)
 	TS_ASSERT_EQUALS(fifteen, response);
 
 	// ----
-	Handle big = eval->eval_h("(cog-execute! glob-for-ten)");
+	Handle big = eval->eval_h("(cog-execute! (CollectionOf glob-for-ten))");
 	printf("Number expect 390: %s\n", big->to_string().c_str());
 	TS_ASSERT_EQUALS(1, big->get_arity());
 

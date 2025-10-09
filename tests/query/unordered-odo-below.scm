@@ -15,7 +15,7 @@
 
 ; Expect 3!=6 solutions
 (define below-dim-one
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Concept "A") (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
@@ -31,7 +31,7 @@
 	(Set (Concept "B") (Predicate "S") (Predicate "T") (Predicate "U")))
 
 (define below-dim-two
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Concept "B") (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Concept "B") (Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -49,7 +49,7 @@
 	(Set (Concept "C") (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define below-dim-three
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Concept "C") (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Concept "C") (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -70,7 +70,7 @@
 	(Set (Concept "D") (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define below-dim-four
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Concept "D") (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Concept "D") (Variable "$D") (Variable "$E") (Variable "$F"))

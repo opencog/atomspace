@@ -14,7 +14,7 @@
 (EvaluationLink (PredicateNode "door C") (ConceptNode "open"))
 
 ; Should find only door A
-(define (get-a) (GetLink
+(define (get-a) (MeetLink
     (AndLink
        (ChoiceLink
           (EvaluationLink (VariableNode "$door") (ConceptNode "locked")))
@@ -23,7 +23,7 @@
       )))
 
 ; Should find doors B and C
-(define (get-bc) (GetLink
+(define (get-bc) (MeetLink
     (AndLink
        (ChoiceLink
           (EvaluationLink (VariableNode "$door") (ConceptNode "unlocked")))

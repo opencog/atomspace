@@ -45,7 +45,7 @@
 ;;; One clause, with an ChoiceLink nested in it. Note that the two
 ;;; parts are entirely disconnected from each-other.
 (define (embed-disco)
-	(BindLink
+	(QueryLink
 		(MemberLink
 			(ConceptNode "ways and means")
 			(ChoiceLink

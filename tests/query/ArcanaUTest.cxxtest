@@ -87,11 +87,11 @@ void ArcanaUTest::test_repeats(void)
 
 	eval->eval("(load-from-path \"tests/query/arcana-repeat.scm\")");
 
-	Handle same = eval->eval_h("(cog-execute! (repeat-same))");
+	Handle same = eval->eval_h("(cog-execute! (CollectionOf (repeat-same)))");
 	printf("same, num solutions=%zu\n", getarity(same));
 	TS_ASSERT_EQUALS(1, getarity(same));
 
-	Handle diff = eval->eval_h("(cog-execute! (repeat-different))");
+	Handle diff = eval->eval_h("(cog-execute! (CollectionOf (repeat-different)))");
 
 	// Either one or two solutions are acceptable, as long as the
 	// two are identical. One solution is preferred, but seems
@@ -108,16 +108,16 @@ void ArcanaUTest::test_repeats(void)
 		printf("Solution 2:\n%s\n", oset[0]->to_short_string().c_str());
 	TS_ASSERT_EQUALS(true, pass);
 
-	Handle d3d = eval->eval_h("(cog-execute! (repeat-diff-thrice))");
+	Handle d3d = eval->eval_h("(cog-execute! (CollectionOf (repeat-diff-thrice)))");
 	printf("d3d, num solutions=%zu\n", getarity(d3d));
 	TS_ASSERT(1 <= getarity(d3d));
 	TS_ASSERT(getarity(d3d) <= 3);
 
-	Handle thrice = eval->eval_h("(cog-execute! (repeat-thrice))");
+	Handle thrice = eval->eval_h("(cog-execute! (CollectionOf (repeat-thrice)))");
 	printf("thrice, num solutions=%zu\n", getarity(thrice));
 	TS_ASSERT_EQUALS(1, getarity(thrice));
 
-	Handle once = eval->eval_h("(cog-execute! (repeat-once))");
+	Handle once = eval->eval_h("(cog-execute! (CollectionOf (repeat-once)))");
 	printf("once, num solutions=%zu\n", getarity(once));
 	TS_ASSERT_EQUALS(1, getarity(once));
 
@@ -138,7 +138,7 @@ void ArcanaUTest::test_const(void)
 	// ----
 	Handle marconi = eval->eval_h("marconi");
 
-	Handle answer = eval->eval_h("(cog-execute! who)");
+	Handle answer = eval->eval_h("(cog-execute! (CollectionOf who))");
 	printf("radio=%s\n", answer->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(answer));
@@ -148,7 +148,7 @@ void ArcanaUTest::test_const(void)
 
 	// ----
 	// Test DefinedSchemaNode as an answer.
-	Handle defans = eval->eval_h("(cog-execute! whodfn)");
+	Handle defans = eval->eval_h("(cog-execute! (CollectionOf whodfn))");
 	printf("defined radio=%s\n", defans->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(defans));
@@ -169,7 +169,7 @@ void ArcanaUTest::test_dummy(void)
 	eval->eval("(load-from-path \"tests/query/arcana-dummy.scm\")");
 
 	// ----
-	Handle answer = eval->eval_h("(cog-execute! dummy)");
+	Handle answer = eval->eval_h("(cog-execute! (CollectionOf dummy))");
 	printf("dummy=%s\n", answer->to_string().c_str());
 
 	TS_ASSERT_EQUALS(SET_LINK, answer->get_type());
@@ -194,7 +194,7 @@ void ArcanaUTest::test_bigger_dummy(void)
 	eval->eval("(load-from-path \"tests/query/arcana-bigger-dummy.scm\")");
 
 	// ----
-	Handle answer = eval->eval_h("(cog-execute! bigger-dummy)");
+	Handle answer = eval->eval_h("(cog-execute! (CollectionOf bigger-dummy))");
 	printf("dummy=%s\n", answer->to_string().c_str());
 
 	TS_ASSERT_EQUALS(SET_LINK, answer->get_type());

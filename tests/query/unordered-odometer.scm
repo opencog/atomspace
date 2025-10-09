@@ -12,7 +12,7 @@
 
 ; Expect 3!=6 solutions
 (define odo-dim-one
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
@@ -28,7 +28,7 @@
 	(Set (Predicate "S") (Predicate "T") (Predicate "U")))
 
 (define odo-dim-two
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -46,7 +46,7 @@
 	(Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define odo-dim-three
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -67,7 +67,7 @@
 	(Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define odo-dim-four
-	(Bind
+	(Query
 		(Present (List (Variable "$CPT")
 			(Set (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Variable "$D") (Variable "$E") (Variable "$F"))

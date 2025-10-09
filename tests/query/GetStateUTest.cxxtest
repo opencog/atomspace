@@ -95,12 +95,12 @@ void GetStateUTest::Getter(void)
 {
 	SchemeEval* eval = SchemeEval::get_evaluator(as);
 	eval->eval(
-			"(define getter (Get (State anch (Variable \"foovar\"))))");
+			"(define getter (Meet (State anch (Variable \"foovar\"))))");
 
 	int fail_count = 0;
 	for (int lc=0; lc<LOOP_CNT; lc++)
 	{
-		Handle got = eval->eval_h("(cog-execute! getter)");
+		Handle got = eval->eval_h("(cog-execute! (CollectionOf getter))");
 
 		TSM_ASSERT("Expected a valid handle", nullptr != got);
 		TSM_ASSERT("Expected a StateLink", got->get_type() == SET_LINK);

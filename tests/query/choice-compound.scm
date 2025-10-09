@@ -35,7 +35,7 @@
 ; This poses question: who wants or needs the robot?
 ; This should return only Andrew, Betty, Cathy
 (define who-needs-help?
-	(Get
+	(Meet
 		(TypedVariable (Variable "picker") (Type "Concept"))
 		(And
 			;;; Not needed any more ...

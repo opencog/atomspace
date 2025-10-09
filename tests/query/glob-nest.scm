@@ -16,7 +16,7 @@
 			(Glob "$end"))))
 
 (define (locate WORD)
-	(Bind (VariableList
+	(Query (VariableList
 		(TypedVariable (Variable "$point") (Type 'ConceptNode))
 		(TypedVariable (Variable "$set") (Type 'ConceptNode))
 		(TypedVariable (Glob "$begin") (Interval (Number 0) (Number -1)))
@@ -35,7 +35,7 @@
 			(Glob "$end"))))
 
 (define (glocate WORD)
-	(Bind (VariableList
+	(Query (VariableList
 		(TypedVariable (Variable "$point") (Type 'ConceptNode))
 		(TypedVariable (Glob "$set")
 			(TypeIntersection (Type 'ConceptNode)

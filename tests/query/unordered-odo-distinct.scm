@@ -13,7 +13,7 @@
 
 ; Expect 3!=6 solutions
 (define distinct-dim-one
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Concept "A") (Variable "$X") (Variable "$Y") (Variable "$Z"))))
 		(Associative
@@ -29,7 +29,7 @@
 	(Set (Concept "B2") (Predicate "S") (Predicate "T") (Predicate "U")))
 
 (define distinct-dim-two
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Concept "B1") (Variable "$U") (Variable "$V") (Variable "$W"))
 			(Set (Concept "B2") (Variable "$X") (Variable "$Y") (Variable "$Z"))))
@@ -47,7 +47,7 @@
 	(Set (Concept "C3") (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define distinct-dim-three
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Concept "C1") (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Concept "C2") (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -68,7 +68,7 @@
 	(Set (Concept "D4") (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define distinct-dim-four
-	(Bind
+	(Query
 		(Present (Set (Variable "$CPT")
 			(Set (Concept "D1") (Variable "$A") (Variable "$B") (Variable "$C"))
 			(Set (Concept "D2") (Variable "$D") (Variable "$E") (Variable "$F"))

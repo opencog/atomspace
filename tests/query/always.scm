@@ -36,7 +36,7 @@
 (Evaluation (Predicate "is yellow") (Concept "ochre ball"))
 
 (define baskets-with-red-balls-only
-	(Bind
+	(Query
 		(VariableList
 			(TypedVariable (Variable "basket") (Type 'ConceptNode))
 			(TypedVariable (Variable "ball") (Type 'ConceptNode))
@@ -58,7 +58,7 @@
 ;;; (cog-execute! baskets-with-red-balls-only)
 
 (define baskets-with-same-color
-(Bind
+(Query
 	(VariableList
 		(TypedVariable (Variable "basket")      (Type 'ConceptNode))
 		(TypedVariable (Variable "some ball")   (Type 'ConceptNode))

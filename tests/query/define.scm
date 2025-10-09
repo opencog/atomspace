@@ -80,13 +80,13 @@
 ;; At this time, an explicit variable declaration has to be done;
 ;; this needs to be fixed...
 (define get-elect
-	(GetLink (DefinedPredicateNode "Electrical Part Of")))
+	(MeetLink (DefinedPredicateNode "Electrical Part Of")))
 
 (define get-elect-bound
-	(GetLink (DefinedPredicateNode "Elect-Part bound")))
+	(MeetLink (DefinedPredicateNode "Elect-Part bound")))
 
 (define get-parts
-	(GetLink
+	(MeetLink
 		(AndLink
 			(DefinedPredicateNode "Electrical Thing")
 			(DefinedPredicateNode "Part-whole Relation"))))

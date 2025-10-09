@@ -33,7 +33,7 @@
 	(Set (Concept "R") (Concept "S") (Concept "T")))
 
 (define epr-dim-two
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -55,7 +55,7 @@
 	(Set (Concept "T") (Concept "U") (Concept "V")))
 
 (define epr-dim-three
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$A") (Variable "$B") (Variable "$C"))
@@ -82,7 +82,7 @@
    (Set (Concept "V") (Concept "W") (Concept "X")))
 
 (define epr-dim-four
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$A") (Variable "$B") (Variable "$C"))

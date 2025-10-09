@@ -20,7 +20,7 @@
       (ConceptNode "OpenPsi:Energy")))
 
 (define get-nodes1
-    (GetLink
+    (MeetLink
        (TypedVariableLink
           (VariableNode "x")
           (TypeNode "Node"))

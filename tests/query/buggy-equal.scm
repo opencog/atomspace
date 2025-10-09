@@ -32,7 +32,7 @@
 ;; use EqualLink instead of the GPN.
 
 (define pln-rule-deduction
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink
                 (VariableNode "$A")
@@ -109,7 +109,7 @@
 ; Same as above, but using the built-in EqualLink for atom equality.
 
 (define pln-alt
-    (BindLink
+    (QueryLink
         (VariableList
             (TypedVariableLink
                 (VariableNode "$A")

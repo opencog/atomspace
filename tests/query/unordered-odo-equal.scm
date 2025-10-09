@@ -18,7 +18,7 @@
 	(Set (Concept "R") (Concept "S") (Concept "T")))
 
 (define equ-dim-two
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$U") (Variable "$V") (Variable "$W"))
@@ -39,7 +39,7 @@
 	(Set (Concept "T") (Concept "U") (Concept "V")))
 
 (define equ-dim-three
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$A") (Variable "$B") (Variable "$C"))
@@ -64,7 +64,7 @@
    (Set (Predicate "V") (Predicate "W") (Predicate "X")))
 
 (define equ-dim-four
-	(Bind
+	(Query
 		(And
 			(Present (List (Variable "$CPT")
 				(Set (Variable "$A") (Variable "$B") (Variable "$C"))
