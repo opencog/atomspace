@@ -1,7 +1,8 @@
 (define (dummy x) x)
 
 (define bl
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (VariableList
          (TypedVariableLink
             (VariableNode "$V")
@@ -31,6 +32,7 @@
             )
          )
       )
+   )
    )
 )
 
