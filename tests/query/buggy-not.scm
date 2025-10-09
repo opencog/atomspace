@@ -28,7 +28,8 @@
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
 (define (is-same-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -86,10 +87,12 @@
 			)
 		)
 	)
+	)
 )
 
 (define (transitive-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -116,5 +119,6 @@
 			(VariableNode "$person_a")
 			(VariableNode "$person_b")
 		)
+	)
 	)
 )
