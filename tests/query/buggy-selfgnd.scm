@@ -20,7 +20,8 @@
 ;
 ; To avoid infinite regress, use IdenticalLink instead of EqualLink.
 (define bnd
-    (BindLink
+    (CollectionOf
+    (QueryLink
         (AndLink
             (VariableNode "$lnk")
             (EvaluationLink
@@ -35,5 +36,6 @@
                 )
             ))
         (VariableNode "$lnk")
+    )
     )
 )
