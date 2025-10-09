@@ -13,9 +13,6 @@
 
 (use-modules (srfi srfi-1))
 
-;; Define simple truth value
-(define (stv mean conf) (cog-new-stv mean conf))
-
 (define (not-same atom-a atom-b)
 	(define ne (not (equal? atom-a atom-b)))
 	(if ne (stv 1 1) (stv 0 1)))
