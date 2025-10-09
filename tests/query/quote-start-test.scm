@@ -12,10 +12,10 @@
 (Evaluation (Predicate "foo") (Concept "bar"))
 
 (define qry
-	(Get (TypedVariable (Variable "X") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "X") (Type 'Concept))
 	(Quote (Evaluation
 		(Unquote (Predicate "foo"))
-		(Unquote (Variable "X"))))))
+		(Unquote (Variable "X")))))))
 
 (test-assert "query for both"
 	(equal? (cog-execute! qry) (Set (Concept "bar"))))

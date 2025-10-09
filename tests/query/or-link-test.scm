@@ -18,10 +18,10 @@
 (Evaluation (stv 0.6 0.1) (Predicate "tired") (Concept "her"))
 
 (define qr2
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "hungry")))
-			(Present (State (Variable "someone") (Concept "thirsty"))))))
+			(Present (State (Variable "someone") (Concept "thirsty")))))))
 
 (test-assert "hungry or thirsty"
 	(equal? (cog-execute! qr2) (Set (Concept "you") (Concept "me"))))
@@ -29,12 +29,12 @@
 ; ------------
 ; As above, but with EvaulationLink
 (define qr4
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
 				(Present (Evaluation (Predicate "cold") (Variable "someone")))
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))))))
+				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
 
 
 (test-assert "thirsty or cold"
@@ -43,22 +43,22 @@
 ; ------------
 ; Same as above, but with implicit PresentLink
 (define qr5
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))))))
+				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
 
 (test-assert "thirsty or cold"
 	(equal? (cog-execute! qr5) (Set (Concept "you") (Concept "me"))))
 
 ; ------------
 (define qr6
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))
-			(IsTrue (Evaluation (Predicate "tired") (Variable "someone"))))))
+			(IsTrue (Evaluation (Predicate "tired") (Variable "someone")))))))
 
 (test-assert "thirsty or cold but not tired"
 	(equal? (cog-execute! qr6) (Set (Concept "you") (Concept "me"))))
@@ -68,7 +68,7 @@
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 
 (define qr7
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(GreaterThan (strength-of
@@ -76,20 +76,20 @@
 				(Number 0.5))
 			(GreaterThan (strength-of
 					(Evaluation (Predicate "tired") (Variable "someone")))
-				(Number 0.5)))))
+				(Number 0.5))))))
 
 (test-assert "strong tired no confidence"
 	(equal? (cog-execute! qr7)
 		(Set (Concept "you") (Concept "me") (Concept "her"))))
 
 (define qr8
-	(Get (TypedVariable (Variable "someone") (Type 'Concept))
+	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(Not (GreaterThan (Number 0.5) (strength-of
 				(Evaluation (Predicate "cold") (Variable "someone")))))
 			(Not (GreaterThan (Number 0.5) (strength-of
-				(Evaluation (Predicate "tired") (Variable "someone"))))))))
+				(Evaluation (Predicate "tired") (Variable "someone"))))))))))
 
 (test-assert "not strong tired no confidence"
 	(equal? (cog-execute! qr8)

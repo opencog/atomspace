@@ -19,11 +19,11 @@
 ;; Query
 
 (define exec-query
-  (Get (ExecutionOutput (Variable "$schema") (Variable "$arg"))))
+  (CollectionOf (Meet (ExecutionOutput (Variable "$schema") (Variable "$arg")))))
 
 (define quote-exec-query
-  (Get
+  (CollectionOf (Meet
     (Quote
       (ExecutionOutput
         (Unquote (Variable "$schema"))
-        (Unquote (Variable "$arg"))))))
+        (Unquote (Variable "$arg")))))))
