@@ -368,26 +368,6 @@ Handle AtomSpace::add_atom(const Handle& h)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::add_node(Type t, std::string&& name)
-{
-    return add_atom(createNode(t, std::move(name)));
-}
-
-Handle AtomSpace::get_node(Type t, std::string&& name) const
-{
-    return lookupHandle(createNode(t, std::move(name)));
-}
-
-Handle AtomSpace::add_link(Type t, HandleSeq&& outgoing)
-{
-    return add_atom(createLink(std::move(outgoing), t));
-}
-
-Handle AtomSpace::get_link(Type t, HandleSeq&& outgoing) const
-{
-    return lookupHandle(createLink(std::move(outgoing), t));
-}
-
 ValuePtr AtomSpace::add_atoms(const ValuePtr& vptr)
 {
     if (nullptr == vptr) return vptr;

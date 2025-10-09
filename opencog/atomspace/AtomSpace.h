@@ -30,7 +30,8 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 
 #include <opencog/atomspace/Frame.h>
 #include <opencog/atomspace/TypeIndex.h>
@@ -184,9 +185,9 @@ public:
     /// otherwise its a no-op.
     ///
     /// When an atomspace is marked COW, it behaves as if the base is
-    /// read-only, so that any changes to TruthValues and other Values
-    /// affect this atomspace only. This is convenient for creating
-    /// temporary atomspaces, wherein updates will not trash the base.
+    /// read-only, so that changes to any Values affect this atomspace
+    /// only. This is used heavily in temporary atomspaces, wherein
+    /// updates will not trash the base.
     /// Transient atomspaces are always COW.
     void set_copy_on_write(void) { _copy_on_write = true; }
     void clear_copy_on_write(void) { _copy_on_write = false; }
@@ -274,7 +275,9 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type, std::string&&);
+    inline Handle add_node(Type t, std::string&& name) {
+        return add_atom(createNode(t, std::move(name)));
+    }
     Handle xadd_node(Type t, std::string str) {
         return add_node(t, std::move(str));
     }
@@ -287,8 +290,10 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type, HandleSeq&&);
-    Handle xadd_link(Type t, HandleSeq seq) {
+    inline Handle add_link(Type t, HandleSeq&& outgoing) {
+        return add_atom(createLink(std::move(outgoing), t));
+    }
+    inline Handle xadd_link(Type t, HandleSeq seq) {
         return add_link(t, std::move(seq));
     }
 
@@ -407,10 +412,10 @@ public:
     Handle set_value(const Handle&, const Handle& key, const ValuePtr& value);
 
     /**
-     * Increment the count on a CountTruthValue, or increment the count
-     * on a general Value. The increment is performed atomically, so that
-     * there are no races in the update. Atomspaces that are read-only, COW,
-     * or frames are handled as described above, for `set_value()`.
+     * Increment the count on a FloatValue. The increment is performed
+     * atomically, so that there are no races in the update. Atomspaces
+     * that are read-only, COW, or those that are frames, are handled as
+     * described above, for `set_value()`.
      *
      * If the atom is copied, then the copy is returned.
      */
@@ -432,7 +437,9 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
      */
-    Handle get_node(Type, std::string&&) const;
+    inline Handle get_node(Type t, std::string&& name) const {
+        return lookupHandle(createNode(t, std::move(name)));
+    }
     inline Handle xget_handle(Type t, std::string str) const {
         return get_node(t, std::move(str));
     }
@@ -450,7 +457,9 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
      */
-    Handle get_link(Type, HandleSeq&&) const;
+    inline Handle get_link(Type t, HandleSeq&& outgoing) const {
+        return lookupHandle(createLink(std::move(outgoing), t));
+    }
     inline Handle xget_handle(Type t, HandleSeq outgoing) const {
         return get_link(t, std::move(outgoing));
     }
