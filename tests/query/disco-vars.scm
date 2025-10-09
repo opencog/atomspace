@@ -13,20 +13,20 @@
 (use-modules (opencog))
 
 (define (B)
-(GetLink
+(MeetLink
    (VariableList (VariableNode "$A") (VariableNode "$B"))
    (AndLink
       (EqualLink (VariableNode "$A") (VariableNode "$B")))))
 
 (define (Ba)
-(GetLink
+(MeetLink
    (VariableList (VariableNode "$A") (VariableNode "$B"))
    (AndLink
       (PresentLink (VariableNode "$A"))
       (EqualLink (VariableNode "$A") (VariableNode "$B")))))
 
 (define (Bu)
-(GetLink
+(MeetLink
    (VariableList (VariableNode "$A") (VariableNode "$B") (VariableNode "$C"))
    (AndLink
       (InheritanceLink (VariableNode "$A") (VariableNode "$B"))
