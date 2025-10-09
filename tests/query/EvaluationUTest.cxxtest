@@ -151,7 +151,7 @@ void EvaluationUTest::do_test_varval(void)
 {
 	Handle do_things = eval->eval_h("(do-things)");
 	printf ("do-pattern: \n%s\n", do_things->to_short_string().c_str());
-	Handle do_things_results = bindlink(as, do_things);
+	Handle do_things_results = HandleCast(do_things->execute(as.get()));
 	printf ("do-things: \n%s\n", do_things_results->to_short_string().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
