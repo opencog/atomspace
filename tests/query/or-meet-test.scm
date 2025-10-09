@@ -1,5 +1,5 @@
 ;
-; or-bind.scm -- Verify that OrLink works in BindLink, too.
+; or-meet-test.scm -- Verify that OrLink works in MeetLink, QueryLink too.
 ; Fixes Bug opencog/atomspace#2918
 ;
 
@@ -38,7 +38,7 @@
 	(equal?  (cog-execute! get-student) (Set (Concept "John"))))
 
 (define rewrite-student
-	(Bind
+	(CollectionOf (Query
 		; If X attends school or X attends college
 		(Or
 			(Evaluation
@@ -55,7 +55,7 @@
 		(Evaluation
 			(Predicate "Is student")
 			(List
-				(Variable "$X")))))
+				(Variable "$X"))))))
 
 (test-assert "John is student"
 	(equal?  (cog-execute! rewrite-student) (Set
