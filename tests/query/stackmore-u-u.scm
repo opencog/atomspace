@@ -178,17 +178,18 @@
 )
 
 (define (bind_uu)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
 		;; body
-		(SimilarityLink (stv 1.0 1.0)
+		(SimilarityLink
 			(VariableNode "$var_schema")
 			(VariableNode "$var_number")
-			(SetLink (stv 1.0 1.0)
+			(SetLink
 				(VariableNode "$var_schema")
 				(ListLink
 					(LemmaNode "thing1")
@@ -202,6 +203,7 @@
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
+	)
 	)
 )
 
