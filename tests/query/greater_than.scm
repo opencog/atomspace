@@ -39,7 +39,8 @@
 )
 
 (define (richer-than-person-x-cmp person-x comp-link)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$who")
 			(TypedVariableLink
@@ -73,6 +74,7 @@
 
 		;; output result: just the concept node of who it is.
 		(VariableNode "$who")
+	)
 	)
 )
 
