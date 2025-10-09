@@ -28,7 +28,7 @@
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/Implicator.h>
@@ -147,7 +147,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "be"),
 			hcapital = an(CONCEPT_NODE, "capital")
 		)
-	)->setValue(truth_key(), TruthValue::TRUE_TV());
+	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
 
 	Handle hprep;
 	al(EVALUATION_LINK,
@@ -156,7 +156,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
 		)
-	)->setValue(truth_key(), TruthValue::TRUE_TV());
+	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
@@ -392,16 +392,18 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_EQUALS(va->get_type(), STRING_VALUE);
 
 	//------------
-	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
+	result = eval.eval_v("(cog-execute! exec-query-float-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
 	{
-		TS_ASSERT_EQUALS(va->get_type(), SIMPLE_TRUTH_VALUE);
-		TruthValuePtr stv = TruthValueCast(va);
-		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
-		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
+		TS_ASSERT_EQUALS(va->get_type(), FLOAT_VALUE);
+		FloatValuePtr fvp = FloatValueCast(va);
+		const std::vector<double>& fvals = fvp->value();
+		TS_ASSERT_EQUALS(fvals.size(), 2);
+		TS_ASSERT_DELTA(fvals[0], 0.6, 1.0e-8);
+		TS_ASSERT_DELTA(fvals[1], 0.3, 1.0e-8);
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
