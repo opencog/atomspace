@@ -56,16 +56,16 @@
 
 #! ---
  ; These are the accept values
- (cog-set-value! (Concept "node1") tvkey (stv 0.5 0.6))
- (cog-set-value! (Concept "name1") tvkey (stv 0.5 0.6))
+ (cog-set-value! (Concept "node1") tvkey (FloatValue 0.5 0.6))
+ (cog-set-value! (Concept "name1") tvkey (FloatValue 0.5 0.6))
  (cog-execute! (ExecutionOutput fumbula
     (List (Concept "node1") (Concept "name1"))))
 
  ; Returns (FloatValue 0.75 0.36)
 
  ; The reject values
- (cog-set-value! (Concept "node1") tvkey (stv 0.9 0.3))
- (cog-set-value! (Concept "name1") tvkey (stv 0.9 0.3))
+ (cog-set-value! (Concept "node1") tvkey (FloatValue 0.9 0.3))
+ (cog-set-value! (Concept "name1") tvkey (FloatValue 0.9 0.3))
  ; return (FloatValue 0.19 0.09)
 
 -- !#
