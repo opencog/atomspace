@@ -25,7 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -90,7 +89,7 @@ void UnquoteUTest::test_list(void)
 	                       al(UNQUOTE_LINK, Y))));
 	Handle pat = al(GET_LINK, var_decl, body);
 
-	Handle result = satisfying_set(as, pat);
+	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_list);
 
 	logger().fine() << "result = " << result->to_string();

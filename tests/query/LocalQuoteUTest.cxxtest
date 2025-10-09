@@ -25,7 +25,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -93,7 +92,7 @@ void LocalQuoteUTest::test_get()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(_as, forall_get),
+	Handle result = HandleCast(forall_get->execute(_as.get())),
 	    expected = al(SET_LINK, al(LIST_LINK, X, P_X));
 
 	logger().debug() << "result = " << oc_to_string(result);

@@ -26,7 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -220,7 +219,7 @@ void GetLinkUTest::test_disconnected_binary_get(void)
 	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
 	Handle g_take_contain = eval->eval_h("g-take-contain");
-	Handle hgnd = satisfying_set(as, g_take_contain);
+	Handle hgnd = HandleCast(g_take_contain->execute(as.get()));
 	Handle hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
@@ -255,7 +254,7 @@ void GetLinkUTest::test_disconnected_empty(void) {
 		            an(VARIABLE_NODE, "$Y")),
 		pat = al(AND_LINK, comp_1, comp_2),
 		gl = al(GET_LINK, pat),
-		result = satisfying_set(as, gl),
+		result = HandleCast(gl->execute(as.get())),
 		expect = al(SET_LINK, HandleSeq());
 
 	printf("Expected this: %s\n", expect->to_string().c_str());
@@ -290,7 +289,7 @@ void GetLinkUTest::test_not_equal(void)
 	                 al(PRESENT_LINK, Qvar));
 	Handle gl = al(GET_LINK, vardecl, body);
 
-	Handle result = satisfying_set(as, gl);
+	Handle result = HandleCast(gl->execute(as.get()));
 	Handle expect = al(SET_LINK, Q);
 
 	printf("Expected this: %s\n", expect->to_string().c_str());
@@ -332,7 +331,7 @@ void GetLinkUTest::test_disconnected_const_eval(void)
 	Handle getlink_neg = al(GET_LINK, pattern_neg);
 
 	// Evaluatable constant clause is satisfied
-	Handle result = satisfying_set(as, getlink_pos);
+	Handle result = HandleCast(getlink_pos->execute(as.get()));
 	Handle expect = al(SET_LINK,
 	                   al(LIST_LINK,
 	                      an(CONCEPT_NODE, "A"),
@@ -342,7 +341,7 @@ void GetLinkUTest::test_disconnected_const_eval(void)
 	TS_ASSERT_EQUALS(result, expect);
 
 	// Evaluatable constant clause is not satisfied
-	result = satisfying_set(as, getlink_neg);
+	result = HandleCast(getlink_neg->execute(as.get()));
 	expect = al(SET_LINK, HandleSeq());
 	printf("Expected this: %s\n", expect->to_string().c_str());
 	printf("Found this answer: %s\n", result->to_string().c_str());
@@ -363,7 +362,7 @@ void GetLinkUTest::test_quote_equal(void)
 	eval->eval("(load-from-path \"tests/query/get-link-equal.scm\")");
 
 	Handle gl = eval->eval_h("gl");
-	Handle result = satisfying_set(as, gl);
+	Handle result = HandleCast(gl->execute(as.get()));
 	Handle expect = eval->eval_h("expect");
 
 	printf("Expected this: %s\n", expect->to_string().c_str());

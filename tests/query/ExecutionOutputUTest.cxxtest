@@ -24,11 +24,14 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/Implicator.h>
 
 #include "imply.h"
 
@@ -287,11 +290,11 @@ void ExecutionOutputUTest::test_query_exec(void)
 	eval.eval("(load-from-path \"tests/query/exec.scm\")");
 
 	Handle exec_query = eval.eval_h("exec-query");
-	Handle results = satisfying_set(as, exec_query);
+	Handle results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 4);
 
 	exec_query = eval.eval_h("quote-exec-query");
-	results = satisfying_set(as, exec_query);
+	results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

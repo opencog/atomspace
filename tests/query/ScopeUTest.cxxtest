@@ -23,7 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -306,7 +305,7 @@ void ScopeUTest::test_rule()
 		"    (DontExecLink (VariableNode \"$A\"))))"
 		);
 
-	Handle result = satisfying_set(as, query);
+	Handle result = HandleCast(query->execute(as.get()));
 	Handle expected =
 		al(SET_LINK,
 		   eval->eval_h("(DefinedSchemaNode \"deduction-inheritance-rule\")"));

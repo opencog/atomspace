@@ -46,14 +46,3 @@ static inline Handle imply(AtomSpacePtr as, Handle hclauses, Handle himplicand)
 {
 	return imply(as.get(), hclauses, himplicand);
 }
-
-static inline Handle satisfying_set(AtomSpace* as,
-                          const Handle& hlink, size_t foo=0)
-{
-	return HandleCast(hlink->execute(as));
-}
-static inline Handle satisfying_set(AtomSpacePtr as,
-                          const Handle& hlink, size_t foo=0)
-{
-	return satisfying_set(as.get(), hlink, foo);
-}

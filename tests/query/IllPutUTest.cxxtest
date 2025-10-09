@@ -23,7 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -84,7 +83,7 @@ void IllPutUTest::test_ill_put()
 	bool caught = false;
 	try
 	{
-		Handle results = satisfying_set(_as, get_put);
+		Handle results = HandleCast(get_put->execute(_as.get()));
 	}
 	catch (const RuntimeException& ex)
 	{

@@ -25,8 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
-
 
 using namespace opencog;
 
@@ -120,7 +118,7 @@ void TypeChoiceUTest::test_connected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(as, connected_pattern);
+	Handle result = HandleCast(connected_pattern->execute(as.get()));
 	Handle expected = al(SET_LINK, al(LIST_LINK, predicate, lambda));
 
 	logger().debug() << "result = " << result->to_string();
@@ -136,7 +134,7 @@ void TypeChoiceUTest::test_disconnected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(as, disconnected_pattern);
+	Handle result = HandleCast(disconnected_pattern->execute(as.get()));
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK, lambda, predicate),
 	                     al(LIST_LINK, predicate, predicate),
@@ -237,7 +235,7 @@ void TypeChoiceUTest::test_forall()
 		                      forall_candidate_vardecl,
 		                      forall_candidate_body);
 
-	Handle result = satisfying_set(as, forall_instantiation_get);
+	Handle result = HandleCast(forall_instantiation_get->execute(as.get()));
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK,
 	                        forall_candidate_vardecl,

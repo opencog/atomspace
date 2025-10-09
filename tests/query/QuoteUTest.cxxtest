@@ -27,8 +27,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
-
 
 using namespace opencog;
 
@@ -217,7 +215,7 @@ void QuoteUTest::test_gpn_get_times_link(void)
 
     Handle get_times_link = eval->eval_h("get-times-link");
 
-    Handle result = satisfying_set(as, get_times_link);
+    Handle result = HandleCast(get_times_link->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(result));
 
     Handle times_link = getlink(result, 0);
