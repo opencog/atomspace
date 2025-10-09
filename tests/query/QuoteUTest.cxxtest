@@ -102,7 +102,7 @@ void QuoteUTest::test_quoted_variable(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle banana = bindlink(as, bindy);
+    Handle banana = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
@@ -113,7 +113,7 @@ void QuoteUTest::test_quoted_variable(void)
     logger().debug("BEGIN subtest bother: %s", __FUNCTION__);
     bindy = eval->eval_h("bother");
 
-    banana = bindlink(as, bindy);
+    banana = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
@@ -124,7 +124,7 @@ void QuoteUTest::test_quoted_variable(void)
     logger().debug("BEGIN subtest bunbound: %s", __FUNCTION__);
     bindy = eval->eval_h("bunbound");
 
-    banana = bindlink(as, bindy);
+    banana = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
@@ -145,7 +145,7 @@ void QuoteUTest::test_nest(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle allstar = bindlink(as, bindy);
+    Handle allstar = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = getlink(allstar, 0);
@@ -196,7 +196,7 @@ void QuoteUTest::test_gpn_bindy(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle allstar = bindlink(as, bindy);
+    Handle allstar = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = getlink(allstar, 0);
@@ -238,7 +238,7 @@ void QuoteUTest::test_double_quote(void)
 
     Handle bindy = eval->eval_h("bindy");
 
-    Handle banana = bindlink(as, bindy);
+    Handle banana = HandleCast(bindy->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
@@ -283,10 +283,10 @@ void QuoteUTest::test_numeric_greater(void)
     Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
     Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
 
-    Handle people_richer_than_george = bindlink(as, richer_than_george);
-    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+    Handle people_richer_than_george = HandleCast(richer_than_george->execute(as.get()));
+    Handle people_richer_than_susan = HandleCast(richer_than_susan->execute(as.get()));
+    Handle people_richer_than_obama = HandleCast(richer_than_obama->execute(as.get()));
+    Handle people_richer_than_gates = HandleCast(richer_than_gates->execute(as.get()));
 
     TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
     TS_ASSERT_EQUALS(0, getarity(people_richer_than_obama));
@@ -311,7 +311,7 @@ void QuoteUTest::test_crash(void)
     Handle infloop = eval->eval_h("infloop");
     bool did_throw = false;
     try {
-        Handle inf = bindlink(as, infloop);
+        Handle inf = HandleCast(infloop->execute(as.get()));
         printf("infloop is %s\n", inf->to_short_string().c_str());
     }
     catch (const RuntimeException&)

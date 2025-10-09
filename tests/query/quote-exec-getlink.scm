@@ -17,7 +17,8 @@
 )
 
 (define z-get
-    (GetLink
+    (CollectionOf
+    (MeetLink
        (TypedVariableLink
           (VariableNode "$effect")
           (TypeNode "ConceptNode")
@@ -29,6 +30,7 @@
              (VariableNode "$effect")
           )
        )
+    )
     )
 )
 

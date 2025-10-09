@@ -62,7 +62,8 @@
 )
 
 (define bindy
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$var-a")
 		(EvaluationLink
 			(PredicateNode "similar")
@@ -72,6 +73,7 @@
 			)
 		)
 		(VariableNode "$var-a")
+	)
 	)
 )
 

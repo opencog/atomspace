@@ -54,7 +54,8 @@
 ; way that "bother" below does: the quoted and unquoted forms
 ; are distinct from one-another.
 (define bindy
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(TypedVariableLink
 			(VariableNode "$var-a")
 			(TypeNode "ConceptNode")
@@ -68,12 +69,14 @@
 		)
 		(VariableNode "$var-a")
 	)
+	)
 )
 
 ; Same as above, but explicitly made non-confusing. This is
 ; what the above form must actually behave like ...
 (define bother
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(TypedVariableLink
 			(VariableNode "$other")
 			(TypeNode "ConceptNode")
@@ -87,10 +90,12 @@
 		)
 		(VariableNode "$other")
 	)
+	)
 )
 
 (define bunbound
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$other")
 		(EvaluationLink
 			(PredicateNode "similar")
@@ -100,5 +105,6 @@
 			)
 		)
 		(VariableNode "$other")
+	)
 	)
 )
