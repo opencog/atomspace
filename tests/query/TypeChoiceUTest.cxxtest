@@ -166,7 +166,7 @@ void TypeChoiceUTest::test_disconnected()
  *         (UnquoteLink (VariableNode "$B"))))
  *
  * (define forall-instantiation-get
- *   (Get
+ *   (Meet
  *      forall-instantiation-vardecl
  *      forall-instantiation-body))
  *
