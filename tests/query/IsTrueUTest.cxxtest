@@ -86,14 +86,14 @@ void IsTrueUTest::test_basic_is_true(void)
 	Handle query = eval->eval_h("query");
 	Handle true_query = eval->eval_h("true-query");
 
-	Handle results = HandleCast(query->execute());
-	Handle true_results = HandleCast(true_query->execute());
+	ValuePtr results = query->execute();
+	ValuePtr true_results = true_query->execute();
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "true_results = " << oc_to_string(true_results);
 
-	TS_ASSERT_EQUALS(2, results->get_arity());
-	TS_ASSERT_EQUALS(1, true_results->get_arity());
+	TS_ASSERT_EQUALS(2, results->size());
+	TS_ASSERT_EQUALS(1, true_results->size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

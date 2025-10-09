@@ -86,14 +86,14 @@ void IsClosedUTest::test_basic_is_closed(void)
 	Handle query = eval->eval_h("query");
 	Handle closed_query = eval->eval_h("closed-query");
 
-	Handle results = HandleCast(query->execute());
-	Handle closed_results = HandleCast(closed_query->execute());
+	ValuePtr results = query->execute();
+	ValuePtr closed_results = closed_query->execute();
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "closed_results = " << oc_to_string(closed_results);
 
-	TS_ASSERT_EQUALS(2, results->get_arity());
-	TS_ASSERT_EQUALS(1, closed_results->get_arity());
+	TS_ASSERT_EQUALS(2, results->size());
+	TS_ASSERT_EQUALS(1, closed_results->size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

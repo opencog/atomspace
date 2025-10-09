@@ -17,9 +17,9 @@
               Q∧A
               R)))
     ;; Query
-    (Get
+    (CollectionOf (Meet
       (VariableSet P Q)
-      (Present P→Q Q∧A→R))))
+      (Present P→Q Q∧A→R)))))
 
 ;; KB
 

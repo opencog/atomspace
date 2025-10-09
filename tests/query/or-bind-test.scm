@@ -21,7 +21,7 @@
 		(Concept "John")))
 
 (define get-student
-	(Get
+	(CollectionOf (Meet
 		; If X attends school or X attends college
 		(Or
 			(Evaluation
@@ -32,7 +32,7 @@
 			(Evaluation
 				(Predicate "Attends college")
 				(List
-					(Variable "$X"))))))
+					(Variable "$X")))))))
 
 (test-assert "get John"
 	(equal?  (cog-execute! get-student) (Set (Concept "John"))))

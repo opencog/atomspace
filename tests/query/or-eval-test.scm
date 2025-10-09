@@ -16,7 +16,7 @@
 
 ;; Query
 (define query-plain
-(Get
+(CollectionOf (Meet
   (TypedVariable (Variable "$A") (Type "ConceptNode"))
   (And
     (Or
@@ -32,11 +32,11 @@
         (List)))
     (Inheritance
       (Variable "$A")
-      (Concept "person"))))
+      (Concept "person")))))
 )
 
 (define query-present
-(Get
+(CollectionOf (Meet
   (TypedVariable (Variable "$A") (Type "ConceptNode"))
   (And
     (Or
@@ -53,7 +53,7 @@
     (Present
       (Inheritance
         (Variable "$A")
-        (Concept "person")))))
+        (Concept "person"))))))
 )
 
 (opencog-test-runner)
