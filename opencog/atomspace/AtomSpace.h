@@ -365,7 +365,10 @@ public:
      * Get an atom from the AtomSpace. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle&) const;
+    inline Handle get_atom(const Handle& a) const {
+        if (nullptr == a) return Handle::UNDEFINED;
+        return lookupHandle(a);
+    }
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom
