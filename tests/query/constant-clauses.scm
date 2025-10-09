@@ -2,39 +2,39 @@
 (use-modules (opencog exec))
 
 ;; Facts
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "are-friends")
  (List
   (Concept "John")
   (Concept "Mary")))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "are-friends")
  (List
   (Concept "Mary")
   (Concept "Edward")))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "are-friends")
  (List
   (Concept "Michel")
   (Concept "Edward")))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "are-friends")
  (List
   (Concept "Cyril")
   (Concept "John")))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "is-musician")
  (Concept "John"))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "is-musician")
  (Concept "Mary"))
 
-(Evaluation (stv 1 1)
+(Evaluation
  (Predicate "is-musician")
  (Concept "Edward"))
 

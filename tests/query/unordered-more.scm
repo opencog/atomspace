@@ -4,30 +4,28 @@
 ;; A slightly more complicated unordered-link test case; 
 ;; has some confounding graphs that should not be found ...
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ;; should match to this.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(SemeNode "We are legion; we are Anonymous")
 		(ListLink)
 	)
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(ConceptNode "ring a ling a ding")
@@ -36,27 +34,27 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(NumberNode "0.24")
-	(AtTimeLink (stv 1.0 1.0)
+	(AtTimeLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
 )
 
 ;; this should not match.
-(UnorderedLink (stv 1.0 1.0)
+(UnorderedLink
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(WordNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)

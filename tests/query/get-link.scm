@@ -71,13 +71,13 @@
    )
 )
 
-(EvaluationLink (stv 1 1)
+(EvaluationLink
    (PredicateNode "take")
    (ListLink
       (ConceptNode "John")
       (ConceptNode "treatment-1")))
 
-(EvaluationLink (stv 1 1)
+(EvaluationLink
    (PredicateNode "contain")
    (ListLink
       (ConceptNode "treatment-1")

@@ -7,12 +7,10 @@
 ;; and looks for a match for it.  This being the simplest test, and
 ;; should be easy to pass.
 ;; 
-(define (stv mean conf) (cog-new-stv mean conf))
-
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
