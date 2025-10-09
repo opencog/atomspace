@@ -241,17 +241,17 @@ void PatternCrashUTest::test_one_thing(void)
 	            )");
 
 	Handle htarget = _eval->eval_h(R"(
-	                               (AndLink (stv 1.000000 0.000000)
-	                                (InheritanceLink (stv 1.000000 0.000000)
+	                               (AndLink
+	                                (InheritanceLink
 	                                 (VariableNode "$Z")
 	                                 (ConceptNode "Frog")
 	                                 )
-	                                (ImplicationLink (stv 1.000000 0.000000)
-	                                 (InheritanceLink (stv 1.000000 0.000000)
+	                                (ImplicationLink
+	                                 (InheritanceLink
 	                                  (VariableNode "$Z")
 	                                  (ConceptNode "Frog")
 	                                  )
-	                                 (InheritanceLink (stv 1.000000 0.000000)
+	                                 (InheritanceLink
 	                                  (VariableNode "$Z")
 	                                  (ConceptNode "green")
 	                                  )
