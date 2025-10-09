@@ -41,7 +41,8 @@
 )
 
 (define bindy
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$var_1")
 			(VariableNode "$var_2")
@@ -75,6 +76,7 @@
 			(VariableNode "$var_1")
 			(VariableNode "$var_2")
 		)
+	)
 	)
 )
 
