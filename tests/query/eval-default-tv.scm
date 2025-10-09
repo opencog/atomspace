@@ -10,9 +10,9 @@
 (define red-thing (ConceptNode "RedItem"))
 (define tr-thing (ConceptNode "TransparentItem"))
 
-(Inheritance (stv 1.0 0.999) red-thing (ConceptNode "colored"))
-(Inheritance (stv 1.0 0.999) tr-thing (ConceptNode "colored"))
-(Inheritance (stv 1.0 0.999) (ConceptNode "Red") (ConceptNode "Color"))
+(Inheritance red-thing (ConceptNode "colored"))
+(Inheritance tr-thing (ConceptNode "colored"))
+(Inheritance (ConceptNode "Red") (ConceptNode "Color"))
 
 (define has-color
         (EvaluationLink
@@ -24,11 +24,13 @@
 
 
 (define query
-    (BindLink
+    (CollectionOf
+    (QueryLink
         (AndLink
           (InheritanceLink (VariableNode "$X") (ConceptNode "colored"))
           (InheritanceLink (VariableNode "$C") (ConceptNode "Color"))
           has-color
         )
     has-color)
+    )
 )
