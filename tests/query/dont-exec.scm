@@ -1,17 +1,18 @@
 (define simple-bl
-  (BindLink
+  (QueryLink
     (AndLink)
     (Concept "Hello World")))
 
-(EvaluationLink (stv 1 1)
+(EvaluationLink
   (PredicateNode "URE:BC:and-BIT")
   simple-bl)
 
 (define bl
-  (BindLink
+  (CollectionOf
+  (QueryLink
     (TypedVariableLink
       (VariableNode "$A")
-      (TypeNode "BindLink")
+      (TypeNode "QueryLink")
     )
     (EvaluationLink
       (PredicateNode "URE:BC:and-BIT")
@@ -20,5 +21,5 @@
     (DontExecLink
       (VariableNode "$A")
     )
-  )
+  ))
 )
