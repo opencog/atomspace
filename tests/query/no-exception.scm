@@ -6,7 +6,8 @@
 
 ;; Failing (before fixing) bind link
 (define bl
-(BindLink
+(CollectionOf
+(QueryLink
   (VariableList
     (TypedVariableLink
       (VariableNode "$A-648d8b51") ; [56][45]
@@ -66,6 +67,7 @@
     ) ; [65][45]
   ) ; [66][45]
 ) ; [67][45]
+)
 )
 
 (define (get-mean ATOM)
