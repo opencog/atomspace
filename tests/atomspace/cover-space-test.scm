@@ -20,13 +20,13 @@
 
 ; Splatter some atoms into the various spaces.
 (cog-set-atomspace! base-space)
-(Concept "foo" (ctv 1 0 3))
+(Concept "foo" (FloatValue 1 0 3))
 
 (cog-set-atomspace! mid1-space)
-(Concept "bar" (ctv 1 0 4))
+(Concept "bar" (FloatValue 1 0 4))
 
 (cog-set-atomspace! mid2-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 5))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 5))
 
 (cog-set-atomspace! surface-space)
 (List (Concept "foo") (Concept "x"))
@@ -57,7 +57,7 @@
 
 ; Alter counts in the outgoing set.
 ; The new ListLink should pick up the counts on the deeper one.
-(Concept "foo" (ctv 1 0 9))
+(Concept "foo" (FloatValue 1 0 9))
 (define lifnd (cog-link 'ListLink (Concept "foo") (Concept "bar")))
 (define litop (ListLink (Concept "foo") (Concept "bar")))
 

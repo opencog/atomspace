@@ -25,19 +25,19 @@
 
 ; Repeatedly add and remove the same atom
 (cog-set-atomspace! base-space)
-(Concept "foo" (ctv 1 0 3))
+(Concept "foo" (FloatValue 1 0 3))
 
 (cog-set-atomspace! mid1-space)
 (cog-extract! (Concept "foo"))
 
 (cog-set-atomspace! mid2-space)
-(Concept "foo" (ctv 1 0 5))
+(Concept "foo" (FloatValue 1 0 5))
 
 (cog-set-atomspace! mid3-space)
 (cog-extract! (Concept "foo"))
 
 (cog-set-atomspace! surface-space)
-(Concept "foo" (ctv 1 0 7))
+(Concept "foo" (FloatValue 1 0 7))
 
 ; -----------------------------------
 ; Should be present in the base space.
@@ -70,13 +70,13 @@
 
 ; Repeatedly add and remove the same atom
 (cog-set-atomspace! base-space)
-(cog-set-tv! (Concept "foo") (ctv 1 0 2))
+(cog-set-tv! (Concept "foo") (FloatValue 1 0 2))
 
 (cog-set-atomspace! mid2-space)
-(cog-set-tv! (Concept "foo") (ctv 1 0 4))
+(cog-set-tv! (Concept "foo") (FloatValue 1 0 4))
 
 (cog-set-atomspace! surface-space)
-(cog-set-tv! (Concept "foo") (ctv 1 0 6))
+(cog-set-tv! (Concept "foo") (FloatValue 1 0 6))
 
 ; -----------------------------------
 ; Should be present in the base space.
@@ -110,19 +110,19 @@
 ; Repeatedly add and remove the same atom
 (cog-set-atomspace! base-space)
 (Concept "bar")
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 10))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 10))
 
 (cog-set-atomspace! mid1-space)
 (cog-extract-recursive! (Concept "foo"))
 
 (cog-set-atomspace! mid2-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 20))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 20))
 
 (cog-set-atomspace! mid3-space)
 (cog-extract-recursive! (Concept "foo"))
 
 (cog-set-atomspace! surface-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 30))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 30))
 
 ; -----------------------------------
 ; Should be present in the base space.

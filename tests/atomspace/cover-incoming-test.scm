@@ -24,28 +24,28 @@
 
 ; Splatter some atoms into the various spaces.
 (cog-set-atomspace! base-space)
-(Concept "foo" (ctv 1 0 3))
-(Concept "bar" (ctv 1 0 4))
+(Concept "foo" (FloatValue 1 0 3))
+(Concept "bar" (FloatValue 1 0 4))
 
 (cog-set-atomspace! mid1-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 5))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 5))
 
 (cog-set-atomspace! mid2-space)
 (cog-extract-recursive! (Concept "foo"))
 
 (cog-set-atomspace! mid3-space)
-(Concept "foo" (ctv 1 0 6))
+(Concept "foo" (FloatValue 1 0 6))
 (List (Concept "foo") (Concept "x"))
 (Set (Concept "foo") (Concept "s"))
 
 (cog-set-atomspace! mid4-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 7))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 7))
 
 (cog-set-atomspace! mid5-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 8))
+(ListLink (Concept "foo") (Concept "bar") (FloatValue 1 0 8))
 
 (cog-set-atomspace! mid6-space)
-(Concept "foo" (ctv 1 0 9))
+(Concept "foo" (FloatValue 1 0 9))
 
 (cog-set-atomspace! top-space)
 
