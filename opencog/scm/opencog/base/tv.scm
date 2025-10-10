@@ -71,21 +71,6 @@
 	(if TV (cog-value-ref TV 1) #f)
 )
 
-(define-public (cog-tv-count TV)
-"
- cog-tv-count TV
-    Return the `count` of the TruthValue TV. This is a single
-    floating point-number.
-
-    See also: cog-count
-"
-	(define DEFAULT_K 800.0)
-	(if (cog-ctv? TV)
-		(cog-value-ref TV 2)
-		(let ((conf (cog-tv-confidence TV)))
-			(/ (* DEFAULT_K conf) (- 1.00000001 conf))))
-)
-
 ; ===================================================================
 
 (define-public (cog-tv ATOM)
@@ -131,6 +116,13 @@
 )
 
 ; ===================================================================
+; They not like us.
+;
+; This is not like the other truth values.
+; Keep cog-count and cog-inc-count! for a little while.
+; They are still used in the learning code. They now increment a generic
+; FloatValue located at the TV predicate. This should be sufficiently
+; backwards compatbile that I think things will still work, over there.
 
 (define-public (cog-inc-count! ATOM CNT)
 "
@@ -159,6 +151,16 @@
 		(lambda (key . args) (cog-set-value! ATOM tvkey (ctv 1 0 CNT))))
 )
 
+(define-public (cog-count ATOM)
+"
+ cog-count ATOM
+    Return the `count` of the FloatValue on ATOM. This is a single
+    floating point-number.
+
+    See also: cog-tv, cog-inc-count!
+"
+	(cog-value-ref (cog-tv ATOM) 2))
+
 ; ===================================================================
 
 (define-public (cog-mean ATOM)
@@ -167,7 +169,7 @@
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
 
-    See also: cog-confidence, cog-count, cog-tv
+    See also: cog-confidence, cog-tv
 "
 	(cog-tv-mean (cog-tv ATOM)))
 
@@ -178,18 +180,8 @@
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
 
-    See also: cog-mean, cog-count, cog-tv
+    See also: cog-mean, cog-tv
 "
 	(cog-tv-confidence (cog-tv ATOM)))
-
-(define-public (cog-count ATOM)
-"
- cog-count ATOM
-    Return the `count` of the TruthValue on ATOM. This is a single
-    floating point-number.
-
-    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
-"
-	(cog-tv-count (cog-tv ATOM)))
 
 ; ===================================================================
