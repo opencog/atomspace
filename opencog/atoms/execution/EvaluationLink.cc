@@ -706,19 +706,12 @@ static bool crispy_eval_scratch(AtomSpace* as,
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the FormulaPredicateLink.
+///     Currently, this includes the GroundedPredicateNode and
+///     the DefinedPredicateNode.
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-/// For the special case of GroundedPredicateNode, the arguments are
-/// "eager-evaluated", because it is assumed that the GPN is unaware
-/// of the concept of lazy evaluation, and can't do it itself.  In
-/// all other cases, lazy evaluation is done (i.e. no evaluation is
-/// done, if it is not needed.)
-///
-/// The arguments are then inserted into the predicate, and the
-/// predicate as a whole is then evaluated.
+/// The predicate as a whole is then evaluated.
 ///
 TruthValuePtr do_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
@@ -800,7 +793,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 ///             OtherAtom
 ///
 /// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for haskell.  This method will then invoke `func_name`
+/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
 /// on the provided ListLink of arguments.
 ///
 static TruthValuePtr tv_eval_scratch(AtomSpace* as,
