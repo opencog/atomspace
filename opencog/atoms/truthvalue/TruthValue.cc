@@ -29,7 +29,6 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
@@ -80,8 +79,6 @@ TruthValuePtr TruthValue::factory(const ValuePtr& pap)
 	Type t = pap->get_type();
 	if (SIMPLE_TRUTH_VALUE == t)
 		return createSimpleTruthValue(pap);
-	if (COUNT_TRUTH_VALUE == t)
-		return createCountTruthValue(pap);
 
 	throw RuntimeException(TRACE_INFO,
 		"Unknown TruthValue type %d", t);

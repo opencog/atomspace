@@ -617,7 +617,6 @@
          42.0  0)
 
   See also:
-      cog-inc-count! -- Increment the CountTruthValue.
       cog-update-value! -- A generic atomic read-modify-write.
       cog-set-value-ref! - Set one location in a vector.
 ")
@@ -789,7 +788,6 @@
      (cog-value (Concept \"Question\") (Predicate \"Answer\"))
 
   See also:
-      cog-inc-count! -- Increment the CountTruthValue.
       cog-update-value! -- A generic atomic read-modify-write.
       cog-set-value-ref! - Set one location in a vector.
 ")
@@ -813,7 +811,6 @@
     The update is atomic; that is, it is safe against racing threads.
 
     See also:
-       cog-inc-count! -- Increment a CountTruthValue
        cog-inc-value! -- Increment one location in a generic FloatValue
        cog-set-value! -- Set a single value.
        cog-set-values! -- Set multiple values.

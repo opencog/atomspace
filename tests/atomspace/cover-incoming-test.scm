@@ -8,7 +8,9 @@
 
 (opencog-test-runner)
 
-(define (get-cnt ATOM) (inexact->exact (cog-count ATOM)))
+(define pk (Predicate "foobar"))
+(define (set-cnt! ATOM FV) (cog-set-value! ATOM pk FV))
+(define (get-cnt ATOM) (inexact->exact (cog-value-ref (cog-value ATOM pk) 2)))
 
 ; -------------------------------------------------------------------
 ; Common setup, used by all tests.
@@ -24,28 +26,28 @@
 
 ; Splatter some atoms into the various spaces.
 (cog-set-atomspace! base-space)
-(Concept "foo" (ctv 1 0 3))
-(Concept "bar" (ctv 1 0 4))
+(set-cnt! (Concept "foo") (FloatValue 1 0 3))
+(set-cnt! (Concept "bar") (FloatValue 1 0 4))
 
 (cog-set-atomspace! mid1-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 5))
+(set-cnt! (ListLink (Concept "foo") (Concept "bar")) (FloatValue 1 0 5))
 
 (cog-set-atomspace! mid2-space)
 (cog-extract-recursive! (Concept "foo"))
 
 (cog-set-atomspace! mid3-space)
-(Concept "foo" (ctv 1 0 6))
+(set-cnt! (Concept "foo") (FloatValue 1 0 6))
 (List (Concept "foo") (Concept "x"))
 (Set (Concept "foo") (Concept "s"))
 
 (cog-set-atomspace! mid4-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 7))
+(set-cnt! (ListLink (Concept "foo") (Concept "bar")) (FloatValue 1 0 7))
 
 (cog-set-atomspace! mid5-space)
-(ListLink (Concept "foo") (Concept "bar") (ctv 1 0 8))
+(set-cnt! (ListLink (Concept "foo") (Concept "bar")) (FloatValue 1 0 8))
 
 (cog-set-atomspace! mid6-space)
-(Concept "foo" (ctv 1 0 9))
+(set-cnt! (Concept "foo") (FloatValue 1 0 9))
 
 (cog-set-atomspace! top-space)
 

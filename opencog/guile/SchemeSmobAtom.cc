@@ -32,8 +32,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;

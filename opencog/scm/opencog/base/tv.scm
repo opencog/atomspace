@@ -25,26 +25,7 @@
 	(cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
 )
 
-(define-public (cog-new-ctv MEAN CONFIDENCE COUNT)
-"
- cog-new-ctv MEAN CONFIDENCE COUNT
-    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Equivalent to
-    (cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
-
-    Unlike Atoms, Values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws error if MEAN, CONFIDENCE and COUNT are not numeric values.
-    Example:
-        ; Create a new count truth value:
-        guile> (cog-new-ctv 0.7 0.9 44.0)
-"
-	(cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
-)
-
 (define-public (stv mean conf) (cog-new-stv mean conf))
-(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
 
 ; ===================================================================
 
@@ -64,15 +45,6 @@
        #f
 "
 	(if EXP (cog-subtype? 'TruthValue (cog-type EXP)) #f)
-)
-
-(define-public (cog-ctv? EXP)
-"
- cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f.
-    Equivalent to (equal? 'CountTruthValue (cog-type EXP))
-"
-	(if EXP (equal? 'CountTruthValue (cog-type EXP)) #f)
 )
 
 ; ===================================================================
@@ -97,21 +69,6 @@
     See also: cog-confidence
 "
 	(if TV (cog-value-ref TV 1) #f)
-)
-
-(define-public (cog-tv-count TV)
-"
- cog-tv-count TV
-    Return the `count` of the TruthValue TV. This is a single
-    floating point-number.
-
-    See also: cog-count
-"
-	(define DEFAULT_K 800.0)
-	(if (cog-ctv? TV)
-		(cog-value-ref TV 2)
-		(let ((conf (cog-tv-confidence TV)))
-			(/ (* DEFAULT_K conf) (- 1.00000001 conf))))
 )
 
 ; ===================================================================
@@ -159,18 +116,24 @@
 )
 
 ; ===================================================================
+; They not like us.
+;
+; This is not like the other truth values.
+; Keep cog-count and cog-inc-count! for a little while.
+; They are still used in the learning code. They now increment a generic
+; FloatValue located at the TV predicate. This should be sufficiently
+; backwards compatbile that I think things will still work, over there.
 
 (define-public (cog-inc-count! ATOM CNT)
 "
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
+  cog-inc-count! ATOM CNT -- Increment truth value on ATOM by CNT.
 
-  Atomically increment the count on a CountTruthValue by CNT. The mean
+  Atomically increment the count on a FloatValue by CNT. The mean
   and confidence values are left untouched.  CNT may be any floating
   point number (positive or negative).
 
-  If the current truth value on the ATOM is not a CountTruthValue,
-  then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.
+  If the current truth value on the ATOM is not a FloatValue, then
+  the value is replaced by a FloatValue, with the count set to CNT.
 
   The increment is atomic; that is, it is safe against racing threads.
 
@@ -185,8 +148,18 @@
 	(define tvkey (Predicate "*-TruthValueKey-*"))
 	(catch #t
 		(lambda () (cog-inc-value! ATOM tvkey CNT 2))
-		(lambda (key . args) (cog-set-value! ATOM tvkey (ctv 1 0 CNT))))
+		(lambda (key . args) (cog-set-value! ATOM tvkey (FloatValue 1 0 CNT))))
 )
+
+(define-public (cog-count ATOM)
+"
+ cog-count ATOM
+    Return the `count` of the FloatValue on ATOM. This is a single
+    floating point-number.
+
+    See also: cog-tv, cog-inc-count!
+"
+	(cog-value-ref (cog-tv ATOM) 2))
 
 ; ===================================================================
 
@@ -196,7 +169,7 @@
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
 
-    See also: cog-confidence, cog-count, cog-tv
+    See also: cog-confidence, cog-tv
 "
 	(cog-tv-mean (cog-tv ATOM)))
 
@@ -207,18 +180,8 @@
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
 
-    See also: cog-mean, cog-count, cog-tv
+    See also: cog-mean, cog-tv
 "
 	(cog-tv-confidence (cog-tv ATOM)))
-
-(define-public (cog-count ATOM)
-"
- cog-count ATOM
-    Return the `count` of the TruthValue on ATOM. This is a single
-    floating point-number.
-
-    See also: cog-mean, cog-confidence, cog-tv, cog-inc-count!
-"
-	(cog-tv-count (cog-tv ATOM)))
 
 ; ===================================================================

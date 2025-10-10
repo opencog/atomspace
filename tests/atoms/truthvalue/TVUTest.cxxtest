@@ -72,11 +72,5 @@ void TVUTest::test_guile()
 	printf("expected SimpleTruthValue\n");
 	TS_ASSERT(tva->get_type() == SIMPLE_TRUTH_VALUE);
 
-	TruthValuePtr tvb = eval.eval_tv("(cog-tv (Concept \"bbb\"))");
-	TS_ASSERT(tvb != nullptr);
-	printf("     got: %s ", tvb->to_string().c_str());
-	printf("expected CountTruthValue\n");
-	TS_ASSERT(tvb->get_type() == COUNT_TRUTH_VALUE);
-
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

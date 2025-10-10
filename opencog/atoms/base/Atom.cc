@@ -34,7 +34,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -156,17 +155,6 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 		if (not pap->is_type(FLOAT_VALUE))
 			return pap;
 
-		// Backwards compatibility: If we're incrementing the count
-		// location on a SimpleTruthValue, then automatically promote
-		// it to a CountTruthValue.
-		if (*key == *truth_key() and
-			 not pap->is_type(COUNT_TRUTH_VALUE))
-		{
-			FloatValuePtr fv(FloatValueCast(pap));
-			std::vector<double> vect = fv->value();
-			pap = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, vect));
-		}
-
 		// Its a float. Let it increment itself.
 		FloatValuePtr fv(FloatValueCast(pap));
 		ValuePtr nv = fv->incrementCount(count);
@@ -176,16 +164,8 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 	}
 
 	// If we are here, an existing value was not found.
-	// Backwards compatibility: If there's no prior value *and*
-	// the key is the default TruthValue key, then automatically
-	// create a CountTruthValue.
-
 	// Create a brand new float.
-	ValuePtr nv;
-	if (*truth_key() == *key)
-		nv = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, count));
-	else
-		nv = createFloatValue(FLOAT_VALUE, count);
+	ValuePtr nv = createFloatValue(FLOAT_VALUE, count);
 
 	_values[key] = nv;
 	return nv;
@@ -206,17 +186,6 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 		if (not pap->is_type(FLOAT_VALUE))
 			return pap;
 
-		// Backwards compatibility: If we're incrementing the count
-		// location on a SimpleTruthValue, then automatically promote
-		// it to a CountTruthValue.
-		if (2 == idx and *key == *truth_key() and
-			 not pap->is_type(COUNT_TRUTH_VALUE))
-		{
-			FloatValuePtr fv(FloatValueCast(pap));
-			std::vector<double> vect = fv->value();
-			pap = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, vect));
-		}
-
 		// Its a float. Let it increment itself.
 		FloatValuePtr fv(FloatValueCast(pap));
 		ValuePtr nv = fv->incrementCount(idx, count);
@@ -226,20 +195,13 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	}
 
 	// If we are here, an existing value was not found.
-	// Backwards compatibility: If there's no prior value *and*
-	// the key is the default TruthValue key, then automatically
-	// create a CountTruthValue.
 
 	// Create a brand new float.
 	std::vector<double> new_vect;
 	new_vect.resize(idx+1, 0.0);
 	new_vect[idx] += count;
 
-	ValuePtr nv;
-	if (2 == idx and *truth_key() == *key)
-		nv = ValueCast(TruthValue::factory(COUNT_TRUTH_VALUE, new_vect));
-	else
-		nv = createFloatValue(FLOAT_VALUE, new_vect);
+	ValuePtr nv = createFloatValue(FLOAT_VALUE, new_vect);
 
 	_values[key] = nv;
 	return nv;

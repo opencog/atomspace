@@ -417,8 +417,6 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	// Perform the actual checks
 	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
 	CHKEV(eval);
-	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
-	CHKEV(eval);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -458,8 +456,6 @@ void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 
 	// Perform the actual checks
 	eval->eval("(chk-copied-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
-	CHKEV(eval);
-	eval->eval("(chk-copied-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -669,8 +665,6 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 
 	// Perform the actual checks
 	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
-	CHKEV(eval);
-	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

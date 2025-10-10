@@ -243,16 +243,16 @@ typedef std::map<const Handle, ValuePtr> KVPMap;
  *
  * Inserted into the AtomSpace: ?? per hash bucket. I guess 24 or 32
  * Per addition to incoming set: 64 per std::_Rb_tree node
- * Per non-default truth value, e.g. CountTruthValue:
+ * With a value of three doubles, e.g. FloatValue:
  * -- 24 Bytes std::enable_shared_from_this<Value>
  * --  8 Bytes Type _type plus padding
  * -- 24 Bytes std::vector<double> _value
  * -- 24 Bytes 3*sizeof(double)
  * -- 64 std::_Rb_tree node in the Atom holding the TV
- * Total: 144 Bytes per CountTV (ouch).
+ * Total: 144 Bytes per FloatValue (ouch).
  *
  * A "typical" Link of size 2, held in one other Link, in AtomSpace,
- *   holding a CountTV in it: 344 Bytes. With a large incomnig set,
+ *   holding a FloatValue in it: 344 Bytes. With a large incomnig set,
  *   this expands to 750 Byte to 2KByte range. This is indeed what is
  *   measured in real-life large datasets.
  *
