@@ -262,7 +262,7 @@ void SequenceUTest::test_pass_presence(void)
 
 /*
  * Trivial SequenceLink unit test.
- * Actually, this is testing BindLink, as a surrogate for a trivial
+ * Actually, this is testing QueryLink, as a surrogate for a trivial
  * SequenceLink. This trivial case was failing yesterday... :-/
  */
 void SequenceUTest::test_trivial(void)
