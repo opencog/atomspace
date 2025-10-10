@@ -2,11 +2,14 @@
 ; is_false.scm for IsFalseUTest.cxxtest
 ;
 
-;; False atom
-(Concept "A" (stv 0 1))
+;; False atom with BoolValue
+(cog-set-value! (Concept "A") (Predicate "*-TruthValueKey-*") (BoolValue #f))
 
-;; Non-false atom
-(Concept "B")
+;; True atom with BoolValue
+(cog-set-value! (Concept "B") (Predicate "*-TruthValueKey-*") (BoolValue #t))
+
+;; Empty atom
+(Concept "C")
 
 ;; Query all concepts
 (define query

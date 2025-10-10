@@ -192,7 +192,14 @@ static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
 	return std::all_of(oset.begin(), oset.end(),
 		[](const Handle& o) {
 			ValuePtr tvp(o->getValue(truth_key()));
-			return tvp != nullptr and *tvp == *TruthValue::TRUE_TV(); });
+			if (nullptr == tvp) return false;
+
+			// Check for BoolValue first
+			if (tvp->is_type(BOOL_VALUE))
+				return BoolValueCast(tvp)->get_bit(0);
+
+			// Fall back to TruthValue check
+			return *tvp == *TruthValue::TRUE_TV(); });
 }
 
 /// Perform the IsFalseLink check
@@ -205,7 +212,14 @@ static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
 	return std::all_of(oset.begin(), oset.end(),
 		[](const Handle& o) {
 			ValuePtr tvp(o->getValue(truth_key()));
-			return tvp != nullptr and *tvp == *TruthValue::FALSE_TV(); });
+			if (nullptr == tvp) return false;
+
+			// Check for BoolValue first
+			if (tvp->is_type(BOOL_VALUE))
+				return not BoolValueCast(tvp)->get_bit(0);
+
+			// Fall back to TruthValue check
+			return *tvp == *TruthValue::FALSE_TV(); });
 }
 
 static ValuePtr exec_or_eval(AtomSpace* as,

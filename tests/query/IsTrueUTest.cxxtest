@@ -92,7 +92,7 @@ void IsTrueUTest::test_basic_is_true(void)
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "true_results = " << oc_to_string(true_results);
 
-	TS_ASSERT_EQUALS(2, results->size());
+	TS_ASSERT_EQUALS(3, results->size());
 	TS_ASSERT_EQUALS(1, true_results->size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
