@@ -89,7 +89,7 @@
 			(Not (GreaterThan (Number 0.5) (strength-of
 				(Evaluation (Predicate "cold") (Variable "someone")))))
 			(Not (GreaterThan (Number 0.5) (strength-of
-				(Evaluation (Predicate "tired") (Variable "someone"))))))))))
+				(Evaluation (Predicate "tired") (Variable "someone")))))))))
 
 (test-assert "not strong tired no confidence"
 	(equal? (cog-execute! qr8)
