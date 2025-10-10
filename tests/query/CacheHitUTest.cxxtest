@@ -126,7 +126,7 @@ void CacheHitUTest::test_hit(void)
 		"      (ConceptNode \"b\")"
 		"      (VariableNode \"$api-right-star\")))"
 		""
-		"  (define b (Bind (TypedVariable var (Type \"Evaluation\")) term term))"
+		"  (define b (CollectionOf (Query (TypedVariable var (Type \"Evaluation\")) term term)))"
 		);
 
 		for (char j='0'; j<c; j++)
