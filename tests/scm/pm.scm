@@ -15,7 +15,7 @@
 (cog-set-atomspace! bug-as) ;; <--- bug
 
 (define (my-precondition X)
-  (stv 1 1))
+  #t)
 
 (define query
 (Bind

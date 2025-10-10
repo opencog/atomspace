@@ -8,10 +8,6 @@
 ; the "opencog/scm/type_constructors.scm" which is guaranteed to have the 
 ; correct content.
 ;
-(define (stv mean conf) (cog-new-stv mean conf))
-(define (itv lower upper conf) (cog-new-itv lower upper conf))
-(define (ctv mean conf count) (cog-new-ctv mean conf count))
-
 (define (Node . x)
 	(apply cog-new-node (append (list 'Node) x)))
 (define (Link . x)
