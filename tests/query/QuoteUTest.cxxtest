@@ -164,12 +164,12 @@ void QuoteUTest::test_throw(void)
 #define an as->add_node
         Handle var_a = an(VARIABLE_NODE, "$var-a");
         Handle var_b = an(VARIABLE_NODE, "$var-b");
-        Handle bindy = al(BIND_LINK,
+        Handle bindy = al(COLLECTION_OF_LINK, {al(QUERY_LINK,
                           var_a,
                           al(EVALUATION_LINK,
                              var_a,
                              al(QUOTE_LINK, var_a, var_b)),
-                          var_a);
+                          var_a)});
 #undef al
 #undef an
     }

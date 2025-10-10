@@ -87,7 +87,7 @@ void UnquoteUTest::test_list(void)
 	                    al(LIST_LINK,
 	                       al(UNQUOTE_LINK, X),
 	                       al(UNQUOTE_LINK, Y))));
-	Handle pat = al(GET_LINK, var_decl, body);
+	Handle pat = al(COLLECTION_OF_LINK, {al(MEET_LINK, var_decl, body)});
 
 	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_list);
@@ -115,7 +115,7 @@ void UnquoteUTest::test_and_1(void)
 	                       al(UNQUOTE_LINK, X),
 	                       al(UNQUOTE_LINK, Y))));
 	Handle rewrite = al(AND_LINK, X, Y);
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
 	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_and);
@@ -144,7 +144,7 @@ void UnquoteUTest::test_and_2(void)
 	                    al(UNQUOTE_LINK, X),
 	                    al(UNQUOTE_LINK, Y)));
 	Handle rewrite = body;
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
 	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_and);
@@ -173,7 +173,7 @@ void UnquoteUTest::test_rewrite(void)
 	                       an(GROUNDED_SCHEMA_NODE, "hs: foo"),
 	                       al(UNQUOTE_LINK,
 	                          al(LIST_LINK, X, Y))));
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
 	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK,
