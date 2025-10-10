@@ -54,7 +54,6 @@ protected:
 	BoolValue(Type t) : Value(t), _bit_count(0) {}
 
 	void set_bit(size_t index, bool value) const;
-	bool get_bit(size_t index) const;
 	void pack_vector(const std::vector<bool>& v);
 	std::vector<bool> unpack_vector() const;
 
@@ -64,6 +63,7 @@ public:
 	BoolValue(Type t, const std::vector<bool>& v);
 	virtual ~BoolValue() {}
 
+	bool get_bit(size_t index) const;
 	std::vector<bool> value() const;
 	size_t size() const { return _bit_count; }
 
