@@ -77,7 +77,8 @@
 "
  cog-tv ATOM
     Return the truth-value of ATOM. If there is no truth value,
-    set on this ATOM, #f is returned.
+    set on this ATOM, #t is returned. (This emulates the old behavior,
+    where the default tv was true with zero confidence.)
 
     Example:
        ; Define a node
@@ -91,7 +92,8 @@
     See also: cog-set-tv!
 "
 	(define tvkey (Predicate "*-TruthValueKey-*"))
-	(cog-value ATOM tvkey)
+	(let ((tv (cog-value ATOM tvkey)))
+		(if tv tv #t))
 )
 
 ; ===================================================================
