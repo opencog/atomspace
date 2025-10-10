@@ -148,7 +148,7 @@
 	(define tvkey (Predicate "*-TruthValueKey-*"))
 	(catch #t
 		(lambda () (cog-inc-value! ATOM tvkey CNT 2))
-		(lambda (key . args) (cog-set-value! ATOM tvkey (ctv 1 0 CNT))))
+		(lambda (key . args) (cog-set-value! ATOM tvkey (FloatValue 1 0 CNT))))
 )
 
 (define-public (cog-count ATOM)
