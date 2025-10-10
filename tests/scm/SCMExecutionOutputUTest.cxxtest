@@ -64,7 +64,6 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void threadedAdd(int thread_id, int N);
 
 	void test_recursive(void);
-	void test_nested(void);
 
 	void test_boolean(void);
 	void test_numeric(void);
@@ -327,67 +326,6 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test nested execution links. github issue #1340
-//
-// The following should work:
-//   ExecutionOutputLink
-//       "scm-eager: *"
-//       ListLink
-//            ExecutionOutputLink
-//                 "scm: +"
-//                 ListLink
-//                     NumberNode 1
-//                     NumberNode 2
-//            NumberNode 3
-//
-// is a representation of (1 + 2) * 3
-//
-void SCMExecutionOutputUTest::test_nested(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	// Empty out the atomspace
-	as->clear();
-	size_t size = as->get_size();
-	TS_ASSERT_EQUALS(size, 0);
-
-	// Define various generic utilities
-	eval->eval(
-		"(define (oc-plus x y)"
-		"   (NumberNode (+ (cog-number x) (cog-number y))))"
-		"(define (oc-times x y)"
-		"   (NumberNode (* (cog-number x) (cog-number y))))"
-	);
-	CHKEV(eval);
-
-	eval->eval(
-		"(define nestor"
-		"   (ExecutionOutputLink "
-		"      (GroundedSchemaNode \"scm-eager: oc-times\")"
-		"      (ListLink "
-		"         (ExecutionOutputLink "
-		"            (GroundedSchemaNode \"scm: oc-plus\")"
-		"            (ListLink "
-		"               (NumberNode 1)"
-		"               (NumberNode 2)))"
-		"         (NumberNode 3))))"
-	);
-	CHKEV(eval);
-
-	Handle enine = eval->eval_h("(cog-execute! nestor)");
-	Handle nine = eval->eval_h("(NumberNode \"9\")");
-	TS_ASSERT_EQUALS(nine, enine);
-
-	NumberNodePtr ne(NumberNodeCast(enine));
-	NumberNodePtr ni(NumberNodeCast(nine));
-	double dne = ne->get_value();
-	double dni = ni->get_value();
-	TS_ASSERT_LESS_THAN(fabs(dne - dni), 0.000001);
-	TS_ASSERT_LESS_THAN(fabs(9.0 - dne), 0.000001);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
 void SCMExecutionOutputUTest::test_evaluate(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -614,26 +552,6 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 
-	// Test scheme execution function taking a single argument that
-	// itself requires to be executed (eagerly by default).
-
-	result = eval->eval_h(
-	   "(cog-execute!"
-	   "   (ExecutionOutputLink"
-	   "      (GroundedSchema \"scm-eager: single-arg-fun\")"
-	   "      (ExecutionOutputLink"
-	   "         (GroundedSchema \"scm: single-arg-fun\")"
-	   "         (Concept \"B\"))))"
-	);
-	CHKEV(eval);
-
-	expect =
-		eval->eval_h("(And (Concept \"A\")"
-		             "     (And (Concept \"A\") (Concept \"B\")))");
-	std::cout << "Expression is " << result->to_string() << std::endl;
-	std::cout << "Expected " << expect->to_string() << std::endl;
-	TS_ASSERT_EQUALS(result, expect);
-
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -729,33 +647,6 @@ void SCMExecutionOutputUTest::test_bad_gpn(void)
 	   "         (Concept \"A\"))))"
 	);
 	CHKEV(eval);
-
-#if 0
-	// No longer tested. The API has been changed to run the function,
-	// but return VoidValue for all of these cases. This seems much more
-	// user freindly. A future rainy-day project is to convert the scheme
-	// return values to some mostly-appropriate Atomese of some kind.
-
-	eval->eval("(define (no-ret x) *unspecified*)");
-	CHKEV(eval);
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: no-ret\")"));
-
-	eval->eval("(define (ret-num x) 42)");
-	CHKEV(eval);
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: ret-num\")"));
-
-	eval->eval("(define (ret-str x) \"oh noooo!\")");
-	CHKEV(eval);
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: ret-str\")"));
-
-	eval->eval("(define (ret-nil x) '())");
-	CHKEV(eval);
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: ret-nil\")"));
-
-	eval->eval("(define (ret-lst x) (list 'a 'b 'c))");
-	CHKEV(eval);
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(call-gpn \"scm: ret-lst\")"));
-#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

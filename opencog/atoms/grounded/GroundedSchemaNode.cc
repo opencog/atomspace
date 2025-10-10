@@ -53,7 +53,6 @@ GroundedSchemaNode::GroundedSchemaNode(Type t, std::string s)
 void GroundedSchemaNode::init()
 {
 	_runner = nullptr;
-	_eager = false;
 
 	// Get the schema name.
 	const std::string& schema = get_name();
@@ -64,22 +63,6 @@ void GroundedSchemaNode::init()
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-		_runner = new SCMRunner(schema.substr(pos));
-#else
-		throw RuntimeException(TRACE_INFO,
-		        "This binary does not have guile support in it; "
-		        "Cannot evaluate scheme GroundedSchemaNode!");
-#endif /* HAVE_GUILE */
-		return;
-	}
-
-	if (0 == schema.compare(0, 10, "scm-eager:", 10))
-	{
-#ifdef HAVE_GUILE
-		_eager = true;
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 10;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
 #else
@@ -136,13 +119,6 @@ ValuePtr GroundedSchemaNode::execute_args(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << to_short_string()
 	              << " with arguments: " << oc_to_string(cargs)
 	              << std::endl;
-
-	// Perform "eager evaluation" instead of "lazy evaluation".
-	if (_eager)
-	{
-		Handle exargs(force_execute(as, HandleCast(cargs), silent));
-		return _runner->execute(as, exargs, silent);
-	}
 
 	return _runner->execute(as, cargs, silent);
 }

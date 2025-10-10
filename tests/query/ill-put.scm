@@ -1,4 +1,5 @@
 (use-modules (opencog logger))
+(use-modules (opencog exec))
 
 ;; Well formed PutLink
 (define put-1
@@ -29,10 +30,13 @@
   (And
     (Variable "$P")
     (Evaluation
-      (GroundedPredicate "scm-eager: well-formed?")
+      (GroundedPredicate "scm: well-formed?")
       (Variable "$P")))))
 )
 
 (define (well-formed? P)
   (cog-logger-debug "well-formed? P = ~a" P)
+  ; Execute the PutLink to check if it's well-formed
+  ; Ill-formed PutLinks will throw an exception during execution
+  (cog-execute! P)
   (stv 1 1))

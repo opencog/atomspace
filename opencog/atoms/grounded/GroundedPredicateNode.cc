@@ -61,7 +61,6 @@ GroundedPredicateNode::~GroundedPredicateNode()
 
 void GroundedPredicateNode::init()
 {
-	_eager = false;
 	_runner = nullptr;
 
 	// Get the schema name.
@@ -73,22 +72,6 @@ void GroundedPredicateNode::init()
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-		_runner = new SCMRunner(schema.substr(pos));
-#else
-		throw RuntimeException(TRACE_INFO,
-			"This binary does not have guile support in it; "
-			"Cannot evaluate scheme GroundedPredicateNode!");
-#endif /* HAVE_GUILE */
-		return;
-	}
-
-	if (0 == schema.compare(0, 10, "scm-eager:", 10))
-	{
-#ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 10;
-		_eager = true;
 		while (' ' == schema[pos]) pos++;
 		_runner = new SCMRunner(schema.substr(pos));
 #else
@@ -133,13 +116,6 @@ ValuePtr GroundedPredicateNode::execute_args(AtomSpace* as,
                                              const ValuePtr& cargs,
                                              bool silent)
 {
-	// Perform "eager evaluation" instead of "lazy evaluation".
-	if (_eager and _runner)
-	{
-		Handle exargs(force_execute(as, HandleCast(cargs), silent));
-		return _runner->evaluate(as, exargs, silent);
-	}
-
 	if (_runner) return _runner->evaluate(as, cargs, silent);
 
 	// Unknown procedure type.
