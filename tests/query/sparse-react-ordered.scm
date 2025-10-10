@@ -10,7 +10,7 @@
 
 ; This defines an esterification reaction.
 (define estero
-	(BindLink
+	(CollectionOf (Query
 		; Variable declaration
 		(VariableList
 
@@ -82,7 +82,7 @@
 				(SBo (Variable "$hydroxO1") (Variable "$hydroxH1"))
 			)
 		)
-	)
+	))
 )
 
 ; ------------------------------------------------

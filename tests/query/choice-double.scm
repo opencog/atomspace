@@ -23,7 +23,7 @@
 
 ;;; Two clauses; they are both connected with a common variable.
 (define double
-	(Bind
+	(CollectionOf (Query
 		(And
 			(Choice
 				(Member (Variable "$x") (Concept "ways and means"))
@@ -32,4 +32,4 @@
 				(Choice
 					(Member (Variable "$x") (Concept "Senator"))
 					(Member (Variable "$x") (Concept "Representative")))))
-		(Variable "$x")))
+		(Variable "$x"))))

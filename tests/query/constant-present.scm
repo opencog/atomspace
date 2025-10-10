@@ -10,7 +10,7 @@
 (Inheritance (Concept "B") (Concept "foo"))
 
 (define query
-	(Bind
+	(CollectionOf (Query
 		(TypedVariable (Variable "$C-7a4842c1") (Type "Concept"))
 		(And
 			(Present
@@ -22,7 +22,7 @@
 			(List
 				(Inheritance (Concept "A") (Variable "$C-7a4842c1"))
 				(Inheritance (Concept "A") (Concept "B"))
-				(Inheritance (Concept "B") (Variable "$C-7a4842c1"))))))
+				(Inheritance (Concept "B") (Variable "$C-7a4842c1")))))))
 
 ; (cog-execute! query)
 
