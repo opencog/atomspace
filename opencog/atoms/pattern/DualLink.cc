@@ -79,7 +79,7 @@ ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 	if (nullptr == as) as = _atom_space;
 	Recognizer reco(as);
 	reco.satisfy(PatternLinkCast(get_handle()));
-	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
+	return as->add_atom(Handle(createUnorderedLink(reco._rules, SET_LINK)));
 }
 
 DEFINE_LINK_FACTORY(DualLink, DUAL_LINK)

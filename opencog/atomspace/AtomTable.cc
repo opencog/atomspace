@@ -237,13 +237,6 @@ Handle AtomSpace::lookupHide(const Handle& a, bool hide) const
     return Handle::UNDEFINED;
 }
 
-/// Search for an equivalent atom that we might be holding.
-Handle AtomSpace::get_atom(const Handle& a) const
-{
-    if (nullptr == a) return Handle::UNDEFINED;
-    return lookupHandle(a);
-}
-
 /// Helper utility for adding atoms to the atomspace. Checks to see
 /// if the indicated atom already is in the atomspace. If it is, it
 /// returns that atom. Copies over values in the process.
