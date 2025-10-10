@@ -17,13 +17,13 @@
 (define (min-like-pie ATOM)
 	(define label (cog-name ATOM))
 	(format #t "I was minimally told ~A" ATOM)
-	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+	(if (string-contains label "pie") #t #f))
 
 (define (max-like-pie ATOM)
 	(define pred (cog-outgoing-atom ATOM 0))
 	(define label (cog-name pred))
 	(format #t "I was maximally told ~A" ATOM)
-	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+	(if (string-contains label "pie") #t #f))
 
 (define (like-both-pie PRED EVAL)
 	(define pred (cog-outgoing-atom EVAL 0))
@@ -31,7 +31,7 @@
 	(format #t "I was told both ~A and ~A" PRED EVAL)
 	(if (not (equal? PRED pred))
 		(throw 'test-failure "like-both-pie" "You blew it!"))
-	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+	(if (string-contains label "pie") #t #f))
 
 (define (like-triple-pie PRED ARG EVAL)
 	(define pred (cog-outgoing-atom EVAL 0))
@@ -47,7 +47,7 @@
 	(if (string-contains label "pie")
 		(format #t "Yes its pie!\n\n")
 		(format #t "No its not!\n\n"))
-	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+	(if (string-contains label "pie") #t #f))
 
 (define min-gpn
 	(MinimalJoin
