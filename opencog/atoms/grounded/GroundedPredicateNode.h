@@ -40,7 +40,6 @@ class GroundedPredicateNode : public GroundedProcedureNode
 {
 	void init();
 	Runner* _runner;
-	bool _eager;
 
 public:
 	GroundedPredicateNode(Type, const std::string);

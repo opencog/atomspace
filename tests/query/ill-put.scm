@@ -29,7 +29,7 @@
   (And
     (Variable "$P")
     (Evaluation
-      (GroundedPredicate "scm-eager: well-formed?")
+      (GroundedPredicate "scm: well-formed?")
       (Variable "$P")))))
 )
 
