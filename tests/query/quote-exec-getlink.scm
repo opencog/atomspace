@@ -1,7 +1,7 @@
 (use-modules (opencog) (opencog exec))
 
 (define (foo arg)
-    (stv 1 1)
+    #t
 )
 
 (define z-eval

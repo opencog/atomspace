@@ -20,9 +20,9 @@
 ;; Assume room empty at first
 (ListLink room-state room-empty)
 
-; Print an atom, return a TV value
+; Print an atom, return a boolean value
 (define (tv-print-atom atom)
-	(format #t "Hello, I got this atom: ~a\n" atom) (stv 1 1))
+	(format #t "Hello, I got this atom: ~a\n" atom) #t)
 
 ; ------------------------------------------------------
 ; ------------------------------------------------------
