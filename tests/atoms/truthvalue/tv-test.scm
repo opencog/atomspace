@@ -22,5 +22,3 @@
 
 ; The attached truth value can be fetched.
 (cog-tv a)
-
-(cog-set-tv! (Concept "bbb") (CountTruthValue 1.0e-6 -19.9316 55))

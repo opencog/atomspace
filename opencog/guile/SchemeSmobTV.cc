@@ -25,8 +25,7 @@
 #include <memory>
 #include <libguile.h>
 
-#include <opencog/atoms/truthvalue/CountTruthValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
