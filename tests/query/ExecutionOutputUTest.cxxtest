@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atoms/value/StringValue.h>
@@ -230,24 +230,24 @@ void ExecutionOutputUTest::test_varsub(void)
 	);
 
 	Handle situ =
-	al(BIND_LINK,
+	al(QUERY_LINK,
 	   al(CONTEXT_LINK,
 	      an(CONCEPT_NODE, "situation"),
 	      an(VARIABLE_NODE, "$action")
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr situation(BindLinkCast(situ));
+	QueryLinkPtr situation(QueryLinkCast(situ));
 
 	Handle pred =
-	al(BIND_LINK,
+	al(QUERY_LINK,
 	   al(CONTEXT_LINK,
 	      an(CONCEPT_NODE, "predicament"),
 	      an(VARIABLE_NODE, "$action")
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr predicament(BindLinkCast(pred));
+	QueryLinkPtr predicament(QueryLinkCast(pred));
 
 	// Now perform the search.
 	QueueValuePtr qvp(createQueueValue());
@@ -542,7 +542,8 @@ void ExecutionOutputUTest::test_variable_schema(void)
 
 
 	Handle get_link =
-	al(BIND_LINK, {
+	al(COLLECTION_OF_LINK, {
+	al(QUERY_LINK, {
 		al(TYPED_VARIABLE_LINK, {
 			an(VARIABLE_NODE, "$SCHEMA"), an(TYPE_NODE, "DefinedSchemaNode")}),
 		al(AND_LINK, {
@@ -555,7 +556,7 @@ void ExecutionOutputUTest::test_variable_schema(void)
 			an(VARIABLE_NODE, "$SCHEMA"),
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
-	});
+	})});
 	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(get_link);
@@ -575,7 +576,8 @@ void ExecutionOutputUTest::test_exec_variable(void)
 				an(VARIABLE_NODE, "y")})
 		})});
 	Handle bind_link =
-	al(BIND_LINK, {
+	al(COLLECTION_OF_LINK, {
+	al(QUERY_LINK, {
 		al(TYPED_VARIABLE_LINK, {
 			an(VARIABLE_NODE, "x"), an(TYPE_NODE, "DefinedSchemaNode")}),
 		al(AND_LINK, {al(PRESENT_LINK, {an(VARIABLE_NODE, "x")})}),
@@ -583,7 +585,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 			an(VARIABLE_NODE, "x"),
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
-	});
+	})});
 	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(bind_link);
