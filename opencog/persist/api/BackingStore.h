@@ -183,9 +183,8 @@ class BackingStore
 		 * use.
 		 *
 		 * At this time, the only workable/working updates are the atomic
-		 * increment of FloatValues (usually, of CountTruthValues). The
-		 * API here is generic, though, so can be used to provide other
-		 * kinds of atomic delta-changes.
+		 * increment of FloatValues. The  API here is generic, though, so
+		 * can be used to provide other kinds of atomic delta-changes.
 		 */
 		virtual void updateValue(const Handle& atom, const Handle& key,
 		                         const ValuePtr& delta)

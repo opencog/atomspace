@@ -25,26 +25,7 @@
 	(cog-new-value 'SimpleTruthValue MEAN CONFIDENCE)
 )
 
-(define-public (cog-new-ctv MEAN CONFIDENCE COUNT)
-"
- cog-new-ctv MEAN CONFIDENCE COUNT
-    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
-    Equivalent to
-    (cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
-
-    Unlike Atoms, Values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
-
-    Throws error if MEAN, CONFIDENCE and COUNT are not numeric values.
-    Example:
-        ; Create a new count truth value:
-        guile> (cog-new-ctv 0.7 0.9 44.0)
-"
-	(cog-new-value 'CountTruthValue MEAN CONFIDENCE COUNT)
-)
-
 (define-public (stv mean conf) (cog-new-stv mean conf))
-(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
 
 ; ===================================================================
 
@@ -64,15 +45,6 @@
        #f
 "
 	(if EXP (cog-subtype? 'TruthValue (cog-type EXP)) #f)
-)
-
-(define-public (cog-ctv? EXP)
-"
- cog-ctv? EXP
-    Return #t if EXP is a CountTruthValue, else return #f.
-    Equivalent to (equal? 'CountTruthValue (cog-type EXP))
-"
-	(if EXP (equal? 'CountTruthValue (cog-type EXP)) #f)
 )
 
 ; ===================================================================
@@ -162,15 +134,14 @@
 
 (define-public (cog-inc-count! ATOM CNT)
 "
-  cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT.
+  cog-inc-count! ATOM CNT -- Increment truth value on ATOM by CNT.
 
-  Atomically increment the count on a CountTruthValue by CNT. The mean
+  Atomically increment the count on a FloatValue by CNT. The mean
   and confidence values are left untouched.  CNT may be any floating
   point number (positive or negative).
 
-  If the current truth value on the ATOM is not a CountTruthValue,
-  then the truth value is replaced by a CountTruthValue, with the
-  count set to CNT.
+  If the current truth value on the ATOM is not a FloatValue, then
+  the value is replaced by a FloatValue, with the count set to CNT.
 
   The increment is atomic; that is, it is safe against racing threads.
 

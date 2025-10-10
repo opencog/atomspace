@@ -197,12 +197,5 @@ ordinary C++ booleans. This is a waste of CPU, and creates brain damage
 during code maintenance. For the most part, this nonsense needs to be
 removed.
 
-On the other hand, the structure learning code makes extensive use of
-CountTruthValue to maintain counts, log-counts and mutual information.
-There's a lot of that code, and it won't be updated any time soon, so
-the CountTV in this directory must stay, plus all of the TV-handling
-code in the scheme (and python) wrappers. But again, this code is not
-hurting anyone, so the infrastructure, while bloated, can stay.
-
 The only actual damage is related to the use of `TRUE_TV`, etc, but
 that stuff is not in this directory. So we're good, for now.
