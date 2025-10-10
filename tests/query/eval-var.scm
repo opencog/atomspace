@@ -6,8 +6,8 @@
 
 (define (truf x)
 	(cond
-		((equal? x (ConceptNode "good")) (cog-new-stv 1 1))
-		((equal? x (ConceptNode "bad")) (cog-new-stv 0 1))
+		((equal? x (ConceptNode "good")) #t)
+		((equal? x (ConceptNode "bad")) #f)
 		(else (throw 'whats-up-jack "you done it wrong"))
 	)
 )

@@ -14,11 +14,10 @@
 (use-modules (srfi srfi-1))
 
 (define (not-same atom-a atom-b)
-	(define ne (not (equal? atom-a atom-b)))
-	(if ne (stv 1 1) (stv 0 1)))
+	(not (equal? atom-a atom-b)))
 
 (define (none-same atom-a atom-b atom-c atom-d atom-e)
-	(define ne (and
+	(and
 		(not (equal? atom-a atom-b))
 		(not (equal? atom-a atom-c))
 		(not (equal? atom-a atom-d))
@@ -29,7 +28,6 @@
 		(not (equal? atom-c atom-d))
 		(not (equal? atom-c atom-e))
 		(not (equal? atom-d atom-e))))
-	(if ne (stv 1 1) (stv 0 1)))
 
 ;; Shorthand for the node types
 (define VN VariableNode)

@@ -5,8 +5,8 @@
 ;; blair-witch is here to emphasize the weirdness of the bug.
 
 ;; Grounded Predicate
-(define (truth X) (cog-new-stv 1 1))
-(define (alternative-fact X) (cog-new-stv 0 1))
+(define (truth X) #t)
+(define (alternative-fact X) #f)
 
 ;; Query
 (define find-something

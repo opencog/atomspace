@@ -14,13 +14,13 @@
 (define num-green 0)
 (define num-red 0)
 
-; Return SimpleTV of true if green light, false if red light, and
+; Return true if green light, false if red light, and
 ; throw an exception if neither.  Increment counters so that we
 ; can verify that this was invoked.
 (define (stop-go atom)
 	(cond
-		((equal? atom green-light) (begin (set! num-green (+ 1 num-green)) (stv 1 1)))
-		((equal? atom red-light) (begin (set! num-red (+ 1 num-red)) (stv 0 1)))
+		((equal? atom green-light) (begin (set! num-green (+ 1 num-green)) #t))
+		((equal? atom red-light) (begin (set! num-red (+ 1 num-red)) #f))
 		(else (throw 'not-a-stoplight "stop-go" "you're busted"))
 	)
 )

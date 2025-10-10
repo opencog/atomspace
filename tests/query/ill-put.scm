@@ -39,4 +39,4 @@
   ; Execute the PutLink to check if it's well-formed
   ; Ill-formed PutLinks will throw an exception during execution
   (cog-execute! P)
-  (stv 1 1))
+  #t)
