@@ -242,9 +242,11 @@ void ScopeUTest::test_hide_1()
 	Handle forall = eval->eval_h("forall");
 	Handle varx = forall->getOutgoingAtom(0);
 
-	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0);
+	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0)->getOutgoingAtom(0);
 	Handle patvar = forpat->getOutgoingAtom(0);
 
+	printf("varx = %s\n", varx->to_string().c_str());
+	printf("patvar = %s\n", patvar->to_string().c_str());
 	// This unit test doesn't test anything critical if the pattern
 	// and the ground don't happen to have the same variable.
 	TS_ASSERT_EQUALS(varx, patvar);
@@ -293,7 +295,7 @@ void ScopeUTest::test_rule()
 		"  (DontExecLink (VariableNode \"$A\")))"
 		);
 	Handle query = eval->eval_h(
-		"(GetLink"
+		"(CollectionOf (Meet"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$Rule\")"
 		"    (TypeNode \"DefinedSchemaNode\"))"
@@ -302,7 +304,7 @@ void ScopeUTest::test_rule()
 		"      (VariableNode \"$A\")"
 		"      (TypeNode \"BindLink\"))"
 		"    (DontExecLink (VariableNode \"$Rule\"))"
-		"    (DontExecLink (VariableNode \"$A\"))))"
+		"    (DontExecLink (VariableNode \"$A\")))))"
 		);
 
 	Handle result = HandleCast(query->execute(as.get()));
