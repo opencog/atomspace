@@ -34,11 +34,12 @@
 (test-assert "copy is in correct atomspace"
 	(equal? spacex (cog-atomspace xca)))
 
-(cog-set-tv! ca (SimpleTruthValue 0.4 0.4))
-(cog-set-tv! xca (SimpleTruthValue 0.7 0.7))
+(define pk (Predicate "my key"))
+(cog-set-value! ca pk (FloatValue 0.4 0.4))
+(cog-set-value! xca pk (FloatValue 0.7 0.7))
 
 (test-assert "original and copy hold different things"
-	(not (equal? (cog-tv ca) (cog-tv xca))))
+	(not (equal? (cog-value ca pk) (cog-value xca pk))))
 
 ; -------------------------------------------------------
 ; Now test copying of orphaned atoms (Atoms not in any Atomspace)
