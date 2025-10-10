@@ -290,7 +290,7 @@ void ScopeUTest::test_rule()
 		"(RuleLink"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$A\")"
-		"    (TypeNode \"BindLink\"))"
+		"    (TypeNode \"MeetLink\"))"
 		"  (DontExecLink (DefinedSchemaNode \"deduction-inheritance-rule\"))"
 		"  (DontExecLink (VariableNode \"$A\")))"
 		);
@@ -302,7 +302,7 @@ void ScopeUTest::test_rule()
 		"  (RuleLink"
 		"    (TypedVariableLink"
 		"      (VariableNode \"$A\")"
-		"      (TypeNode \"BindLink\"))"
+		"      (TypeNode \"MeetLink\"))"
 		"    (DontExecLink (VariableNode \"$Rule\"))"
 		"    (DontExecLink (VariableNode \"$A\")))))"
 		);
