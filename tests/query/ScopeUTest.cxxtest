@@ -67,7 +67,7 @@ public:
 	void test_hide_1();
 	void test_hide_2();
 	void test_rule();
-	void test_ill_bind();
+	void test_ill_query();
 	void test_trivial_scope();
 };
 
@@ -320,11 +320,11 @@ void ScopeUTest::test_rule()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void ScopeUTest::test_ill_bind()
+void ScopeUTest::test_ill_query()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(Bind (Variable \"$X\"))"));
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_v("(Query (Variable \"$X\"))"));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
