@@ -125,7 +125,7 @@ void PatternCrashUTest::test_one_thing(void)
 	             (ConceptNode "Tweety")
 	             (ConceptNode "Yello")
 	             )
-	            (BindLink
+	            (Query
 	             (VariableList
 	              (VariableNode "$A")
 	              (VariableNode "$B")
@@ -144,10 +144,7 @@ void PatternCrashUTest::test_one_thing(void)
 	               (ImplicationLink
 	                (VariableNode "$A")
 	                (VariableNode "$B")
-	                )
-	               )
-	              )
-	             )
+	                ))))
 	            (ListLink
 	             (InheritanceLink
 	              (ConceptNode "Fritz")
