@@ -22,7 +22,6 @@
 
 #include <thread>
 
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
