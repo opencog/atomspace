@@ -1,7 +1,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/Implicator.h>
@@ -26,7 +26,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 
 	HandleSeq oset = {hvars, hclauses, himplicand};
 
-	BindLinkPtr bl(createBindLink(std::move(oset)));
+	QueryLinkPtr bl(createQueryLink(std::move(oset)));
 
 	// Now perform the search.
 	QueueValuePtr qvp(createQueueValue());
