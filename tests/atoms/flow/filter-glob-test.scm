@@ -77,7 +77,7 @@
 (cog-set-value! (Concept "a") (Predicate "b")
 	(LinkValue (LinkValue (StringValue "d" "e" "f"))))
 
-(define (print-atom x) (format #t "Printer function got ~A" x))
+(define (print-atom x) (format #t "Printer function got ~A" x) #f)
 (define (debug-prt x)
 	(ExecutionOutput (GroundedSchema "scm: print-atom") x))
 
@@ -93,9 +93,9 @@
 (define prt-result (cog-execute! glob-print))
 
 ; The "scm: print-atom" returns #f which the guile code converts
-; into VoidValue.
+; into BoolValue.
 (test-assert "bad printing glob"
-	(equal? prt-result (LinkValue (VoidValue))))
+	(equal? prt-result (LinkValue (BoolValue #f))))
 
 ; -----------
 
